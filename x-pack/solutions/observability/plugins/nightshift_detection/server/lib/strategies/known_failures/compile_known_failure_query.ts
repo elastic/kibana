@@ -16,6 +16,8 @@ const FILTER_COMMANDS = new Set(['from', 'where']);
 const OUTPUT_ONLY_COMMANDS = new Set(['keep', 'drop', 'sort']);
 /** The `CHANGE_POINT` types that move the level for longer than a minute. */
 const IS_LEVEL_CHANGE = 'change_point_type IN ("step_change", "trend_change")';
+/** Lines an evidence query returns, enough to read what failed without flooding the judge. */
+const EVIDENCE_LINES = 100;
 /** Puts each column of a long `EVAL` or `STATS` on its own line. */
 const COLUMN_BREAK = '\n    ';
 
@@ -27,6 +29,14 @@ const COLUMN_BREAK = '\n    ';
  * bound of the query's own. A query that does not parse cannot be counted (fail closed).
  */
 function getFilterCommands(esql: string): string[] | undefined {
+  return sliceCommands(esql)?.filters;
+}
+
+/**
+ * The commands of a countable knowledge indicator, as written: its filters, which decide what
+ * matches, and its `KEEP` and `DROP`, which only choose the fields shown. See `getFilterCommands`.
+ */
+function sliceCommands(esql: string): { filters: string[]; fieldChoice: string[] } | undefined {
   const source = esql.trim();
   if (!source) {
     return undefined;
@@ -57,9 +67,11 @@ function getFilterCommands(esql: string): string[] | undefined {
   // so the source is split into code points first: sliced as UTF-16, an emoji in a quoted message
   // would shift the cut and drop the end of the condition.
   const codePoints = Array.from(source);
-  return root.commands
-    .filter((command) => FILTER_COMMANDS.has(command.name.toLowerCase()))
-    .map(({ location }) => codePoints.slice(location.min, location.max + 1).join(''));
+  const slice = (kept: string[]) =>
+    root.commands
+      .filter((command) => kept.includes(command.name.toLowerCase()))
+      .map(({ location }) => codePoints.slice(location.min, location.max + 1).join(''));
+  return { filters: slice([...FILTER_COMMANDS]), fieldChoice: slice(['keep', 'drop']) };
 }
 
 /**
@@ -187,37 +199,101 @@ export function compileKnownFailureQuery({
   return withProjectRouting({ query, cpsEnabled });
 }
 
-/**
- * The knowledge indicator's filters over `[from, to)`, with literal timestamps, so the judge can
- * run it later and see the documents that made the count rise. Built from the same `FROM` and
- * `WHERE` commands the rule counts, so a `KEEP` or `DROP` that removes `@timestamp` cannot break it.
- *
- * @throws Error when the indicator cannot be counted, as {@link compileKnownFailureQuery} does.
- */
-export function compileEvidenceQuery({
-  esql,
-  from,
-  to,
-  cpsEnabled,
-}: {
+/** What every evidence query reads: the knowledge indicator's filters over `[from, to)`. */
+interface EvidenceRange {
   esql: string;
   /** Epoch milliseconds. */
   from: number;
   /** Epoch milliseconds. */
   to: number;
   cpsEnabled: boolean;
-}): string {
-  const filterCommands = getFilterCommands(esql);
-  if (!filterCommands) {
+}
+
+/**
+ * The newest lines the knowledge indicator matched over `[from, to)`, with literal timestamps, so
+ * the judge can run it later and read what failed. Its `KEEP` and `DROP` come after the cap, so the
+ * lines show the fields the indicator chose, and a `KEEP` without `@timestamp` cannot break the sort.
+ *
+ * @throws Error when the indicator cannot be counted, as {@link compileKnownFailureQuery} does.
+ */
+export function compileEvidenceQuery({ esql, from, to, cpsEnabled }: EvidenceRange): string {
+  const { filters, fieldChoice } = getCountableCommands(esql);
+  return withProjectRouting({
+    query: [
+      ...filters,
+      toTimeRange({ from, to }),
+      'SORT @timestamp DESC',
+      `LIMIT ${EVIDENCE_LINES}`,
+      ...fieldChoice,
+    ].join('\n| '),
+    cpsEnabled,
+  });
+}
+
+/**
+ * The knowledge indicator's matches per `bucketMinutes` over `[from, to)`, with literal timestamps,
+ * so the judge sees how far a rise stands above the level before it without reading every line.
+ *
+ * @throws Error when the indicator cannot be counted, as {@link compileKnownFailureQuery} does.
+ */
+export function compileCountEvidenceQuery({
+  bucketMinutes,
+  ...range
+}: EvidenceRange & { bucketMinutes: number }): string {
+  const { filters } = getCountableCommands(range.esql);
+  return withProjectRouting({
+    query: [
+      ...filters,
+      toTimeRange(range),
+      // Empty periods as 0, so the quiet before a rise shows.
+      `STATS matches = COUNT(*) BY period = BUCKET(@timestamp, ${bucketMinutes} minutes, "${toIso(
+        range.from
+      )}", "${toIso(range.to)}", {"include_empty_buckets": true})`,
+      'SORT period',
+    ].join('\n| '),
+    cpsEnabled: range.cpsEnabled,
+  });
+}
+
+/**
+ * The first line of the knowledge indicator's index from `from` on, whatever it matches, to tell
+ * when the source's data begins. Sorted and capped at one line, so Elasticsearch reads one
+ * document, not the window.
+ *
+ * @throws Error when the indicator cannot be counted, as {@link compileKnownFailureQuery} does.
+ */
+export function compileDataStartQuery({
+  esql,
+  from,
+  cpsEnabled,
+}: Omit<EvidenceRange, 'to'>): string {
+  const [fromCommand] = getCountableCommands(esql).filters;
+  return withProjectRouting({
+    query: [
+      fromCommand,
+      `WHERE @timestamp >= "${toIso(from)}"`,
+      'SORT @timestamp',
+      'LIMIT 1',
+      'KEEP @timestamp',
+    ].join('\n| '),
+    cpsEnabled,
+  });
+}
+
+function getCountableCommands(esql: string) {
+  const commands = sliceCommands(esql);
+  if (!commands) {
     throw new Error('Known failures counts FROM … | WHERE … queries only');
   }
-  const query = [
-    ...filterCommands,
-    `WHERE @timestamp >= "${new Date(from).toISOString()}" AND @timestamp < "${new Date(
-      to
-    ).toISOString()}"`,
-  ].join('\n| ');
-  return withProjectRouting({ query, cpsEnabled });
+  return commands;
+}
+
+function toTimeRange({ from, to }: { from: number; to: number }): string {
+  return `WHERE @timestamp >= "${toIso(from)}" AND @timestamp < "${toIso(to)}"`;
+}
+
+function toIso(epochMs: number): string {
+  return new Date(epochMs).toISOString();
 }
 
 // Elasticsearch rejects the setting when cross-project search is off, so it goes in only when on.

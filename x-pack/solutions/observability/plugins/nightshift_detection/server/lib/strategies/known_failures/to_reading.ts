@@ -7,12 +7,15 @@
 
 import type { QueryLink } from '@kbn/significant-events-schema';
 import type { DetectionSignalReading } from '../types';
-import { compileEvidenceQuery } from './compile_known_failure_query';
+import { compileCountEvidenceQuery, compileEvidenceQuery } from './compile_known_failure_query';
 import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants';
-import type { LastingRise, UnusualMinute } from './judge_known_failure';
-import type { KnownFailureChange } from './known_failure_row';
+import type { KnownFailureRise, UnusualMinute } from './judge_known_failure';
 
 const MINUTE_MS = 60_000;
+/** How much of the level before a lasting rise its evidence shows. */
+const EVIDENCE_BEFORE_RISE_MINUTES = 60;
+/** The bucket of a slow rise's evidence: six hours read per minute would be 360 rows. */
+const SLOW_RISE_EVIDENCE_BUCKET_MINUTES = 10;
 
 /** What a Known failures reading says about its knowledge indicator, beside its own check. */
 interface ReadingContext {
@@ -20,6 +23,8 @@ interface ReadingContext {
   /** The rule that measured it. */
   ruleId: string;
   entity: DetectionSignalReading['entity'];
+  /** The title of the knowledge indicator's source, for whoever reads the signal. */
+  sourceTitle?: string;
   cpsEnabled: boolean;
 }
 
@@ -30,7 +35,7 @@ export function getKnownFailureFingerprint(knowledgeIndicator: QueryLink): strin
   return `${KNOWN_FAILURES_STRATEGY_ID}:${knowledgeIndicator.query.id}`;
 }
 
-/** The breached reading of an unusual minute. */
+/** The breached reading of an unusual minute, with the newest lines of that minute as evidence. */
 export function toUnusualMinuteReading({
   unusual,
   ...context
@@ -38,50 +43,66 @@ export function toUnusualMinuteReading({
   const { minute, count, threshold, baseline } = unusual;
   return toReading({
     ...context,
-    from: minute,
-    to: minute + MINUTE_MS,
-    evidenceFrom: minute,
+    minute,
     value: count,
-    // `check` and `threshold` are read back from history: an open event is judged against the
-    // threshold saved when it opened.
-    details: { check: 'unusual_minute', threshold, normal_level: baseline.median, baseline },
+    evidence: compileEvidenceQuery({
+      esql: context.knowledgeIndicator.query.esql.query,
+      from: minute,
+      to: minute + MINUTE_MS,
+      cpsEnabled: context.cpsEnabled,
+    }),
+    details: {
+      check: 'unusual_minute',
+      value_is: 'matches in the minute',
+      minute: toIso(minute),
+      // `check` and `threshold` are read back from history: an open event is judged against the
+      // threshold saved when it opened.
+      threshold,
+      normal_level: baseline.median,
+      baseline,
+    },
   });
 }
 
 /**
  * The breached reading of a rise that still holds, on the newest minute the rule counted, with the
- * median of the recent minutes as its value. The newest minute because the store keeps one reading
- * per series and minute: an earlier minute may already hold an unusual minute's reading.
+ * level of the last minutes as its value and the matches per minute around the rise as evidence.
+ * The newest minute because the store keeps one reading per series and minute: an earlier minute may
+ * already hold an unusual minute's reading.
  */
-export function toLastingRiseReading({
-  change,
+export function toRiseReading({
   rise,
   lastMinute,
   ...context
 }: ReadingContext & {
-  change: KnownFailureChange;
-  rise: LastingRise;
+  rise: KnownFailureRise;
   /** Start of the newest minute the rule counted, in epoch milliseconds. */
   lastMinute: number;
 }): DetectionSignalReading {
+  const { check, since, level_before: levelBefore, level_now: levelNow, change } = rise;
+  const evidenceFrom =
+    check === 'lasting_rise'
+      ? since - EVIDENCE_BEFORE_RISE_MINUTES * MINUTE_MS
+      : lastMinute + MINUTE_MS - KNOWN_FAILURES_SETTINGS.window_minutes * MINUTE_MS;
   return toReading({
     ...context,
-    from: lastMinute,
-    to: lastMinute + MINUTE_MS,
-    evidenceFrom: change.at,
-    value: change.recent_median,
+    minute: lastMinute,
+    value: levelNow,
+    evidence: compileCountEvidenceQuery({
+      esql: context.knowledgeIndicator.query.esql.query,
+      from: evidenceFrom,
+      to: lastMinute + MINUTE_MS,
+      bucketMinutes: check === 'lasting_rise' ? 1 : SLOW_RISE_EVIDENCE_BUCKET_MINUTES,
+      cpsEnabled: context.cpsEnabled,
+    }),
     details: {
-      check: 'lasting_rise',
-      // The rise had to clear `threshold`, and the recent minutes half of it, over the level before.
-      threshold: rise.floor,
-      normal_level: change.before_median,
+      check,
+      value_is: `median matches per minute over the last ${KNOWN_FAILURES_SETTINGS.recent_minutes} minutes`,
+      since: toIso(since),
+      normal_level: levelBefore,
       rise: rise.rise,
-      change_type: change.type,
-      p_value: change.pvalue,
-      change_at: new Date(change.at).toISOString(),
-      before_change_minutes: change.before_minutes,
-      after_change_median: change.after_median,
-      recent_minutes: KNOWN_FAILURES_SETTINGS.recent_minutes,
+      min_rise: rise.min_rise,
+      ...(change ? { change_type: change.type, p_value: change.pvalue } : {}),
     },
   });
 }
@@ -90,17 +111,15 @@ function toReading({
   knowledgeIndicator,
   ruleId,
   entity,
-  cpsEnabled,
-  from,
-  to,
-  evidenceFrom,
+  sourceTitle,
+  minute,
   value,
+  evidence,
   details,
 }: ReadingContext & {
-  from: number;
-  to: number;
-  evidenceFrom: number;
+  minute: number;
   value: number;
+  evidence: string;
   details: Record<string, unknown>;
 }): DetectionSignalReading {
   const { query } = knowledgeIndicator;
@@ -110,8 +129,8 @@ function toReading({
     rule_id: ruleId,
     source_id: knowledgeIndicator.source_id,
     entity,
-    bucket_start: from,
-    bucket_end: to,
+    bucket_start: minute,
+    bucket_end: minute + MINUTE_MS,
     value,
     unit: 'count',
     title: query.title,
@@ -119,12 +138,7 @@ function toReading({
     // Unscored knowledge indicators sit in the middle, neither raised nor buried. The knowledge
     // indicator write path stores any score, while the signal format only accepts 0 to 100.
     importance: Math.min(100, Math.max(0, query.severity_score ?? 50)),
-    evidence_esql: compileEvidenceQuery({
-      esql: query.esql.query,
-      from: evidenceFrom,
-      to,
-      cpsEnabled,
-    }),
+    evidence_esql: evidence,
     role: 'primary',
     // The strategy compared the count with the indicator's normal level itself.
     compare_with_normal: false,
@@ -132,7 +146,12 @@ function toReading({
     details: {
       ...details,
       ki_id: query.id,
+      ...(sourceTitle ? { source_title: sourceTitle } : {}),
       linked_feature_ids: (query.features ?? []).map(({ id }) => id),
     },
   };
+}
+
+function toIso(epochMs: number): string {
+  return new Date(epochMs).toISOString();
 }

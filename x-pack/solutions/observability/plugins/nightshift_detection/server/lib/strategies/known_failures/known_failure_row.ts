@@ -10,23 +10,24 @@ import type { RuleRow } from '../../rules/managed_rule_reader';
 
 /**
  * The columns the rule query returns, as `.rule-events` stores them: dates as epoch milliseconds, a
- * one-value `VALUES` as a plain string, and the change point columns empty when the window held no
+ * one-value `VALUES` as a plain string, and the change point columns missing when the window held no
  * step or trend change.
  */
 const knownFailureRowSchema = lazySchema(() =>
   z.object({
-    newest_counts: z.union([z.string(), z.array(z.string())]),
+    newest_minute_counts: z.union([z.string(), z.array(z.string())]),
     baseline_median: z.number(),
     baseline_mad: z.number(),
     baseline_mean: z.number(),
     baseline_std_dev: z.number(),
-    change_at: z.number().int().nullish(),
-    change_type: z.string().nullish(),
-    change_pvalue: z.number().nullish(),
-    before_change_median: z.number().nullish(),
-    before_change_minutes: z.number().int().nullish(),
-    after_change_median: z.number().nullish(),
-    recent_median: z.number().nullish(),
+    change_point_at: z.number().int().nullish(),
+    change_point_type: z.string().nullish(),
+    change_point_pvalue: z.number().nullish(),
+    change_point_median_before: z.number().nullish(),
+    change_point_minutes_before: z.number().int().nullish(),
+    change_point_median_after: z.number().nullish(),
+    recent_median: z.number(),
+    earlier_median: z.number(),
   })
 );
 
@@ -44,10 +45,10 @@ export interface KnownFailureChange {
   at: number;
   type: string;
   pvalue: number;
+  /** Median from the change before this one, or the window start, up to this one. */
   before_median: number;
   before_minutes: number;
   after_median: number;
-  recent_median: number;
 }
 
 /** One run of a Known failures rule, decoded. */
@@ -57,6 +58,10 @@ export interface KnownFailureMeasurement {
   minutes: Array<{ minute: number; count: number }>;
   baseline: KnownFailureBaseline;
   change?: KnownFailureChange;
+  /** Median of the last `recent_minutes`. */
+  recent_median: number;
+  /** Median of the window's oldest `earlier_minutes`. */
+  earlier_median: number;
 }
 
 /**
@@ -70,8 +75,8 @@ export function decodeKnownFailureRow(row: RuleRow): KnownFailureMeasurement | u
   }
   const { data } = parsed;
 
-  const minutes = [data.newest_counts].flat().map(parseMinuteCount);
-  if (minutes.some((minute) => minute === undefined)) {
+  const minutes = [data.newest_minute_counts].flat().map(parseMinuteCount);
+  if (minutes.length === 0 || minutes.some((minute) => minute === undefined)) {
     return undefined;
   }
 
@@ -87,6 +92,8 @@ export function decodeKnownFailureRow(row: RuleRow): KnownFailureMeasurement | u
       std_dev: data.baseline_std_dev,
     },
     change: toChange(data),
+    recent_median: data.recent_median,
+    earlier_median: data.earlier_median,
   };
 }
 
@@ -102,13 +109,12 @@ function parseMinuteCount(packed: string): { minute: number; count: number } | u
 
 function toChange(data: z.infer<typeof knownFailureRowSchema>): KnownFailureChange | undefined {
   const {
-    change_at: at,
-    change_type: type,
-    change_pvalue: pvalue,
-    before_change_median: beforeMedian,
-    before_change_minutes: beforeMinutes,
-    after_change_median: afterMedian,
-    recent_median: recentMedian,
+    change_point_at: at,
+    change_point_type: type,
+    change_point_pvalue: pvalue,
+    change_point_median_before: beforeMedian,
+    change_point_minutes_before: beforeMinutes,
+    change_point_median_after: afterMedian,
   } = data;
   // All set or none: the rule fills them together from the same change point.
   if (
@@ -117,8 +123,7 @@ function toChange(data: z.infer<typeof knownFailureRowSchema>): KnownFailureChan
     pvalue == null ||
     beforeMedian == null ||
     beforeMinutes == null ||
-    afterMedian == null ||
-    recentMedian == null
+    afterMedian == null
   ) {
     return undefined;
   }
@@ -129,6 +134,5 @@ function toChange(data: z.infer<typeof knownFailureRowSchema>): KnownFailureChan
     before_median: beforeMedian,
     before_minutes: beforeMinutes,
     after_median: afterMedian,
-    recent_median: recentMedian,
   };
 }

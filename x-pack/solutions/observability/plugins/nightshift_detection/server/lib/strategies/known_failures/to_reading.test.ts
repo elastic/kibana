@@ -6,15 +6,18 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
+import { Parser } from '@elastic/esql';
 import { wrapReading } from '../../signals/wrap_reading';
-import { toLastingRiseReading, toUnusualMinuteReading } from './to_reading';
+import { compileDataStartQuery } from './compile_known_failure_query';
+import type { KnownFailureRise } from './judge_known_failure';
+import { toRiseReading, toUnusualMinuteReading } from './to_reading';
 
 const KNOWLEDGE_INDICATOR: QueryLink = {
   query: {
     id: 'ki-timeouts',
     title: 'Checkout timeouts',
     description: 'Checkout calls time out',
-    esql: { query: 'FROM logs | WHERE message : "timeout"' },
+    esql: { query: 'FROM logs | WHERE message : "timeout" | KEEP message' },
     severity_score: 70,
     type: 'match',
     features: [{ id: 'checkout' }],
@@ -28,6 +31,7 @@ const CONTEXT = {
   knowledgeIndicator: KNOWLEDGE_INDICATOR,
   ruleId: 'rule-1',
   entity: { type: 'service', name: 'checkout' } as const,
+  sourceTitle: 'Checkout logs',
   cpsEnabled: false,
 };
 const BASELINE = { median: 2, mad: 1, mean: 2, std_dev: 0.8 };
@@ -37,24 +41,26 @@ const UNUSUAL = {
   threshold: 8,
   baseline: BASELINE,
 };
-const CHANGE = {
-  at: Date.UTC(2026, 10, 20, 9, 50),
-  type: 'step_change',
-  pvalue: 1e-20,
-  before_median: 5,
-  before_minutes: 300,
-  after_median: 10,
-  recent_median: 11,
+const LASTING_RISE: KnownFailureRise = {
+  check: 'lasting_rise',
+  since: Date.UTC(2026, 10, 20, 9, 50),
+  level_before: 5,
+  level_now: 11,
+  rise: 5,
+  min_rise: 3,
+  change: {
+    at: Date.UTC(2026, 10, 20, 9, 50),
+    type: 'step_change',
+    pvalue: 1e-20,
+    before_median: 5,
+    before_minutes: 300,
+    after_median: 10,
+  },
 };
-const RISE = {
-  ...CONTEXT,
-  change: CHANGE,
-  rise: { rise: 5, floor: 3 },
-  lastMinute: Date.UTC(2026, 10, 20, 10, 30),
-};
+const RISE = { ...CONTEXT, rise: LASTING_RISE, lastMinute: Date.UTC(2026, 10, 20, 10, 30) };
 
 describe('toUnusualMinuteReading', () => {
-  it('reports the minute with the threshold it was judged against', () => {
+  it('reports the minute with the threshold it was judged against and its newest lines', () => {
     expect(toUnusualMinuteReading({ ...CONTEXT, unusual: UNUSUAL })).toEqual({
       status: 'breached',
       fingerprint: 'known_failures:ki-timeouts',
@@ -68,17 +74,21 @@ describe('toUnusualMinuteReading', () => {
       title: 'Checkout timeouts',
       description: 'Checkout calls time out',
       importance: 70,
+      // Capped before the indicator's KEEP, so a KEEP without @timestamp cannot break the sort.
       evidence_esql:
-        'FROM logs\n| WHERE message : "timeout"\n| WHERE @timestamp >= "2026-11-20T10:27:00.000Z" AND @timestamp < "2026-11-20T10:28:00.000Z"',
+        'FROM logs\n| WHERE message : "timeout"\n| WHERE @timestamp >= "2026-11-20T10:27:00.000Z" AND @timestamp < "2026-11-20T10:28:00.000Z"\n| SORT @timestamp DESC\n| LIMIT 100\n| KEEP message',
       role: 'primary',
       compare_with_normal: false,
       quiet_period_minutes: 10,
       details: {
         check: 'unusual_minute',
+        value_is: 'matches in the minute',
+        minute: '2026-11-20T10:27:00.000Z',
         threshold: 8,
         normal_level: 2,
         baseline: BASELINE,
         ki_id: 'ki-timeouts',
+        source_title: 'Checkout logs',
         linked_feature_ids: ['checkout'],
       },
     });
@@ -97,23 +107,6 @@ describe('toUnusualMinuteReading', () => {
     });
 
     expect(edited.fingerprint).toBe('known_failures:ki-timeouts');
-  });
-
-  // A KEEP without `@timestamp` would make the time filter after it fail.
-  it('leaves the output-only commands out of the evidence query', () => {
-    const reading = toUnusualMinuteReading({
-      ...CONTEXT,
-      knowledgeIndicator: {
-        ...KNOWLEDGE_INDICATOR,
-        query: {
-          ...KNOWLEDGE_INDICATOR.query,
-          esql: { query: 'FROM logs | WHERE message : "timeout" | KEEP message' },
-        },
-      },
-      unusual: UNUSUAL,
-    });
-
-    expect(reading.evidence_esql).not.toMatch(/KEEP/);
   });
 
   it('routes the evidence query across projects when cross-project search is on', () => {
@@ -140,28 +133,61 @@ describe('toUnusualMinuteReading', () => {
   });
 });
 
-describe('toLastingRiseReading', () => {
+describe('toRiseReading', () => {
   // The newest minute, so the reading cannot land on a minute an unusual-minute reading holds.
-  it('reports the rise on the newest minute, with evidence from the change', () => {
-    expect(toLastingRiseReading(RISE)).toEqual(
+  it('reports a lasting rise on the newest minute, with the matches per minute around it', () => {
+    expect(toRiseReading(RISE)).toEqual(
       expect.objectContaining({
         bucket_start: Date.UTC(2026, 10, 20, 10, 30),
         bucket_end: Date.UTC(2026, 10, 20, 10, 31),
         value: 11,
-        evidence_esql: expect.stringContaining(
-          '@timestamp >= "2026-11-20T09:50:00.000Z" AND @timestamp < "2026-11-20T10:31:00.000Z"'
-        ),
+        // An hour of the level before, so the rise shows against it; counts, not every line.
+        evidence_esql:
+          'FROM logs\n| WHERE message : "timeout"\n| WHERE @timestamp >= "2026-11-20T08:50:00.000Z" AND @timestamp < "2026-11-20T10:31:00.000Z"\n| STATS matches = COUNT(*) BY period = BUCKET(@timestamp, 1 minutes, "2026-11-20T08:50:00.000Z", "2026-11-20T10:31:00.000Z", {"include_empty_buckets": true})\n| SORT period',
         details: expect.objectContaining({
           check: 'lasting_rise',
-          threshold: 3,
+          value_is: 'median matches per minute over the last 15 minutes',
+          since: '2026-11-20T09:50:00.000Z',
           normal_level: 5,
-          change_type: 'step_change',
-          change_at: '2026-11-20T09:50:00.000Z',
-          after_change_median: 10,
           rise: 5,
+          min_rise: 3,
+          change_type: 'step_change',
         }),
       })
     );
+  });
+
+  it('reports a slow rise with the matches per ten minutes over the whole window', () => {
+    const reading = toRiseReading({
+      ...RISE,
+      rise: { ...LASTING_RISE, check: 'slow_rise', change: undefined },
+    });
+
+    expect(reading.evidence_esql).toContain(
+      '@timestamp >= "2026-11-20T04:31:00.000Z" AND @timestamp < "2026-11-20T10:31:00.000Z"\n| STATS matches = COUNT(*) BY period = BUCKET(@timestamp, 10 minutes, '
+    );
+    expect(reading.details).not.toHaveProperty('change_type');
+  });
+});
+
+// A query that does not parse ships broken evidence, or a data-start lookup that fails every tick.
+describe('Known failures queries', () => {
+  it.each([
+    [
+      'an unusual minute’s lines',
+      toUnusualMinuteReading({ ...CONTEXT, unusual: UNUSUAL }).evidence_esql,
+    ],
+    ['a rise’s counts', toRiseReading(RISE).evidence_esql],
+    [
+      'the data start',
+      compileDataStartQuery({
+        esql: KNOWLEDGE_INDICATOR.query.esql.query,
+        from: UNUSUAL.minute,
+        cpsEnabled: false,
+      }),
+    ],
+  ])('builds %s as ES|QL that parses', (_label, query) => {
+    expect(Parser.parse(query).errors).toEqual([]);
   });
 });
 
@@ -169,7 +195,7 @@ describe('toLastingRiseReading', () => {
 describe('Known failures readings', () => {
   it.each([
     ['an unusual minute', toUnusualMinuteReading({ ...CONTEXT, unusual: UNUSUAL })],
-    ['a lasting rise', toLastingRiseReading(RISE)],
+    ['a lasting rise', toRiseReading(RISE)],
   ])('give %s the signal format accepts', (_label, reading) => {
     expect(
       wrapReading({

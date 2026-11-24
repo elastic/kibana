@@ -9,8 +9,9 @@
 export const KNOWN_FAILURES_STRATEGY_ID = 'known_failures';
 
 /**
- * Every tunable of Known failures, in one place for the learning loop. These are compiled into the
- * rule query and schedule, so a tuned value gives the rules new ids and the reconciler replaces them.
+ * Every tunable of Known failures, in one place for the learning loop. The minutes and the schedule
+ * are compiled into the rule, so tuning one gives the rules new ids and the reconciler replaces
+ * them. The judgement settings, from `quiet_period_minutes` on, are only read by the generator.
  */
 export const KNOWN_FAILURES_SETTINGS = {
   /**
@@ -74,5 +75,13 @@ export const KNOWN_FAILURES_SETTINGS = {
     min_before_minutes: 10,
     /** Fewest extra matches a minute the rise must add, whatever the level before it. */
     min_rise: 3,
+  },
+  /** When the last minutes stand above the window's oldest hours without a change point. */
+  slow_rise: {
+    /**
+     * Times the lasting rise's smallest rise the climb must reach. Higher, because a median of 15
+     * minutes against one of four hours is noisier than the levels around a change point.
+     */
+    factor: 2,
   },
 } as const;

@@ -43,7 +43,7 @@ const createRow = (
   rule_id: RULE_ID,
   scheduled_timestamp: WINDOW.from + (firstMinute + counts.length + 1) * MINUTE_MS,
   data: {
-    newest_counts: counts.map(
+    newest_minute_counts: counts.map(
       (count, index) =>
         `${new Date(WINDOW.from + (firstMinute + index) * MINUTE_MS).toISOString()}=${count}`
     ),
@@ -51,23 +51,32 @@ const createRow = (
     baseline_mad: 1,
     baseline_mean: 2,
     baseline_std_dev: 0.8,
+    recent_median: 2,
+    earlier_median: 2,
     ...change,
   },
 });
 
+/** The source's data has begun long before the window unless a test says otherwise. */
+const LONG_AGO = new Date(WINDOW.from - 24 * 60 * MINUTE_MS).toISOString();
+
 const createContext = ({
   rows,
   history = [],
+  readDataStart = async () => ({ values: [[LONG_AGO]] }),
 }: {
   rows: RuleRow[];
   history?: DetectionSignalReading[];
+  /** Answers the query for the first line of the indicator's index. */
+  readDataStart?: () => Promise<{ values: unknown[][] }>;
 }): GeneratorContext =>
   ({
     spaceId: 'default',
     window: WINDOW,
-    sources: [{ id: 'source-1', enabled: true }],
+    sources: [{ id: 'source-1', title: 'Checkout logs', enabled: true }],
     cpsEnabled: false,
     abortSignal: new AbortController().signal,
+    esClient: { esql: { query: readDataStart } },
     knowledge: {
       listQueries: async () => [WATCHED],
       listFeatures: async () => [
@@ -123,12 +132,28 @@ describe('KnownFailuresGenerator', () => {
     expect(readRows).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'default', ruleIds: [getId(WATCHED)], ...WINDOW })
     );
-    // A rule that wrote nothing did not run: silence must not read as a quiet indicator.
+    // A rule that wrote nothing did not run, and a disabled rule watches nothing: silence must not
+    // read as a quiet indicator.
     expect(result).toEqual({
       readings: [],
-      notes: [expect.stringMatching(/wrote no row in the window/)],
+      notes: [
+        expect.stringMatching(/\[off\] has a disabled Known failures rule/),
+        expect.stringMatching(/wrote no row in the window/),
+      ],
       truncated: false,
     });
+  });
+
+  // The rule may have failed to be created, as it did live for lack of an API key grant.
+  it('notes a countable knowledge indicator that has no rule', async () => {
+    const result = await new KnownFailuresGenerator().generate({
+      ...createContext({ rows: [] }),
+      rules: { listManaged: async () => [], readRows: async () => [] },
+    } as unknown as GeneratorContext);
+
+    expect(result.notes).toEqual([
+      expect.stringMatching(/\[watched\] has no Known failures rule, so it is not watched/),
+    ]);
   });
 
   it('reports a spike and a lasting rise once each, about the service the indicator watches', async () => {
@@ -137,12 +162,12 @@ describe('KnownFailuresGenerator', () => {
         rows: [
           // Newest first, as the reader sorts them; the two runs share minutes 3 and 4.
           createRow(3, [2, 40, 2, 2, 2, 2, 2], {
-            change_at: WINDOW.from - 60 * MINUTE_MS,
-            change_type: 'step_change',
-            change_pvalue: 1e-20,
-            before_change_median: 5,
-            before_change_minutes: 300,
-            after_change_median: 10,
+            change_point_at: WINDOW.from - 60 * MINUTE_MS,
+            change_point_type: 'step_change',
+            change_point_pvalue: 1e-20,
+            change_point_median_before: 5,
+            change_point_minutes_before: 300,
+            change_point_median_after: 10,
             recent_median: 10,
           }),
           createRow(-2, [2, 2, 2, 2, 2, 2, 2]),
@@ -161,10 +186,105 @@ describe('KnownFailuresGenerator', () => {
       }),
       expect.objectContaining({
         value: 10,
-        details: expect.objectContaining({ check: 'lasting_rise', rise: 5 }),
+        details: expect.objectContaining({
+          check: 'lasting_rise',
+          rise: 5,
+          source_title: 'Checkout logs',
+        }),
       }),
     ]);
     expect(result.notes).toEqual([]);
+  });
+
+  // Minutes before the source's data count as zero matches: its first data would read as a failure.
+  it('reports nothing measured against minutes from before the source’s data', async () => {
+    const readDataStart = jest
+      .fn()
+      .mockResolvedValue({ values: [[new Date(WINDOW.from - 30 * MINUTE_MS).toISOString()]] });
+
+    const result = await new KnownFailuresGenerator().generate(
+      createContext({ rows: [createRow(0, [2, 2, 40, 2, 2, 2, 2])], readDataStart })
+    );
+
+    expect(result.readings).toEqual([]);
+    expect(readDataStart).toHaveBeenCalledWith(
+      {
+        query: expect.stringMatching(
+          /^FROM logs\n\| WHERE @timestamp >= ".+"\n\| SORT @timestamp\n\| LIMIT 1/
+        ),
+      },
+      expect.anything()
+    );
+  });
+
+  // Fail open: a missed failure costs more than a source warming up reported once.
+  it('reports what it found, with a note, when it cannot tell when the source’s data begins', async () => {
+    const result = await new KnownFailuresGenerator().generate(
+      createContext({
+        rows: [createRow(0, [2, 2, 40, 2, 2, 2, 2])],
+        readDataStart: async () => {
+          throw new Error('index_not_found_exception');
+        },
+      })
+    );
+
+    expect(result.readings).toEqual([expect.objectContaining({ value: 40 })]);
+    expect(result.notes).toEqual([expect.stringMatching(/could not tell when the data .* begins/)]);
+  });
+
+  it('reports what it found, with a note, when the data start lookup finds no data', async () => {
+    const result = await new KnownFailuresGenerator().generate(
+      createContext({
+        rows: [createRow(0, [2, 2, 40, 2, 2, 2, 2])],
+        readDataStart: async () => ({ values: [] }),
+      })
+    );
+
+    expect(result.readings).toEqual([expect.objectContaining({ value: 40 })]);
+    expect(result.notes).toEqual([expect.stringMatching(/found no data/)]);
+  });
+
+  // Live, one reported spike of 48 against a normal of 2 hid a burst of 11 for the hour after it.
+  // The spike sits on the first minute of the run's hour, as far back as the history read must go.
+  it('leaves a spike the same rule reported out of the normal level of the hour after it', async () => {
+    const mean = (59 * 2 + 48) / 60;
+    const row = createRow(-2, [2, 2, 2, 11, 11, 2, 2], {
+      baseline_median: 2,
+      baseline_mad: 0,
+      baseline_mean: mean,
+      baseline_std_dev: Math.sqrt((59 * 4 + 48 ** 2) / 60 - mean ** 2),
+    });
+    const reportedSpike = {
+      status: 'breached',
+      rule_id: RULE_ID,
+      bucket_start: WINDOW.from - 62 * MINUTE_MS,
+      value: 48,
+      details: { check: 'unusual_minute', threshold: 7 },
+    } as unknown as DetectionSignalReading;
+
+    const sameRule = await new KnownFailuresGenerator().generate(
+      createContext({ rows: [row], history: [reportedSpike] })
+    );
+    // An edited query's old rule counted other lines.
+    const oldRule = await new KnownFailuresGenerator().generate(
+      createContext({ rows: [row], history: [{ ...reportedSpike, rule_id: 'old-rule' }] })
+    );
+
+    expect(sameRule.readings).toEqual([
+      expect.objectContaining({ value: 11, bucket_start: WINDOW.from + MINUTE_MS }),
+      expect.objectContaining({ value: 11, bucket_start: WINDOW.from + 2 * MINUTE_MS }),
+    ]);
+    expect(oldRule.readings).toEqual([]);
+  });
+
+  it('reads when the source’s data begins only when a check found something', async () => {
+    const readDataStart = jest.fn();
+
+    await new KnownFailuresGenerator().generate(
+      createContext({ rows: [createRow(0, [2, 2, 2, 2, 2, 2, 2])], readDataStart })
+    );
+
+    expect(readDataStart).not.toHaveBeenCalled();
   });
 
   // A rule reconciled during the window has had no chance to run.
