@@ -23,6 +23,7 @@ export interface Connector {
   isConnectorTypeDeprecated: ConnectorSchemaType['isConnectorTypeDeprecated'];
   authMode?: ConnectorSchemaType['authMode'];
   isInboundEventsEnabled?: boolean;
+  specVersion?: ConnectorSchemaType['specVersion'];
 }
 
 export interface ConnectorWithExtraFindData extends Connector {

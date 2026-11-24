@@ -44,7 +44,9 @@ export const CUSTOMER0_SANDBOX_ALLOWLIST: readonly string[] = [
  */
 export const getDatasetSandboxAllowlist = (dataset: DatasetIdentity): readonly string[] => {
   switch (getDatasetEnvironment(dataset)) {
+    // Recovery runs share the Customer-0 context, so they clone the same repositories.
     case 'customer0':
+    case 'customer0-recovery':
       return CUSTOMER0_SANDBOX_ALLOWLIST;
     case 'orca':
       return ORCA_SANDBOX_ALLOWLIST;

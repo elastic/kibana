@@ -36,14 +36,19 @@ export const useDestinationCreationForm = ({
     defaultValues: EMPTY_DESTINATION_CREATION_FORM,
   });
   const formData = methods.watch();
-  const { touchedFields, isSubmitted } = useFormState({ control: methods.control });
+  const { touchedFields, dirtyFields, isSubmitted } = useFormState({ control: methods.control });
 
   const errors = getDestinationCreationFormErrors({ formData, unitDefinition });
 
   return {
     methods,
     formData,
-    formErrors: getVisibleDestinationFormErrors({ errors, touchedFields, isSubmitted }),
+    formErrors: getVisibleDestinationFormErrors({
+      errors,
+      touchedFields,
+      dirtyFields,
+      isSubmitted,
+    }),
     canSubmit: canSubmitDestinationForm({ formData, unitDefinition }),
   };
 };

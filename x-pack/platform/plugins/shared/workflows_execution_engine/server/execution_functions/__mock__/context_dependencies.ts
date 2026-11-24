@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { coreMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+
+export const mockContextDependencies = () => ({
+  cloudSetup: cloudMock.createSetup(),
+  coreStart: coreMock.createStart(),
+  actions: actionsMock.createStart(),
+  taskManager: taskManagerMock.createStart(),
+  workflowsExtensions: workflowsExtensionsMock.createStart(),
+  config: {
+    enabled: true,
+    storage: { source: 'plain_index' as const, dataRetention: '90d' },
+    eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+    maxWorkflowDepth: 10,
+    logging: { console: false },
+    maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb
+    eviction: {
+      minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb
+    },
+    collectQueueMetrics: false,
+    hitlExternalResume: { enabled: true },
+  },
+});

@@ -332,6 +332,7 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  private isCatalogFeatureFlagEnabled = false;
   private connectorCatalogFeatureFlagSubscription?: Subscription;
 
   constructor(initContext: PluginInitializerContext) {
@@ -638,9 +639,8 @@ export class ActionsPlugin
 
     this.connectorCatalogFeatureFlagSubscription = core.featureFlags
       .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
-      .subscribe((isConnectorCatalogEnabled: boolean) => {
-        return isConnectorCatalogEnabled;
-        // TODO: implement the connector catalog logic
+      .subscribe((isCatalogEnabled: boolean) => {
+        this.isCatalogFeatureFlagEnabled = isCatalogEnabled;
       });
 
     const {
@@ -1124,6 +1124,7 @@ export class ActionsPlugin
       actionsConfig,
     } = this;
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
+    const isCatalogFeatureFlagEnabled = () => this.isCatalogFeatureFlagEnabled;
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
@@ -1198,6 +1199,7 @@ export class ActionsPlugin
           return actionTypeRegistry!.list({ featureId });
         },
         getSkippedPreconfiguredConnectorIds: getSkippedPreconfiguredIds,
+        isCatalogFeatureFlagEnabled,
       };
     };
   };
@@ -1274,6 +1276,7 @@ export class ActionsPlugin
   public stop() {
     this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
     this.connectorCatalogFeatureFlagSubscription = undefined;
+    this.isCatalogFeatureFlagEnabled = false;
     if (this.licenseState) {
       this.licenseState.clean();
     }

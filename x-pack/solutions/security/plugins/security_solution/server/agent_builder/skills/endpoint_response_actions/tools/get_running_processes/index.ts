@@ -23,7 +23,7 @@ import {
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
-import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
+import { prepareDispatch } from '../services/dispatch_action';
 
 const getRunningProcessesSchema = z
   .object({
@@ -40,7 +40,7 @@ const getRunningProcessesSchema = z
 /**
  * Inspection action: retrieves the list of running processes from an enrolled
  * Elastic Defend host. It enqueues a real `running-processes` response action
- * on the endpoint, so every dispatch is gated by an analyst confirmation.
+ * on the endpoint. It only reads from the host, so it runs without a confirmation.
  */
 export const getRunningProcessesTool = (
   endpointAppContextService: EndpointAppContextService
@@ -48,35 +48,9 @@ export const getRunningProcessesTool = (
   return {
     id: RUNNING_PROCESSES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves the list of running processes from a host by its hostname or agent ID (pass the agent ID, from an ambiguous_hostname result, when several endpoints share the hostname). Dispatches a running-processes response action through the Elastic Defend Response Actions service. The action enqueues on the endpoint and returns the process list once the host checks in.`,
+    description: `Retrieves the list of running processes from a host by its hostname, exact IP address, or agent ID (pass the selected agent ID after an ambiguous_hostname or ambiguous_ip result). Dispatches a running-processes response action through the Elastic Defend Response Actions service. The action enqueues on the endpoint and returns the process list once the host checks in. Call it only when the analyst explicitly asks for the process list, not for open-ended questions about a host.`,
     schema: getRunningProcessesSchema,
     maxResultTokens: RUNNING_PROCESSES_MAX_RESULT_TOKENS,
-    // HITL gate enforced by the framework, not skill prose: the runner prompts
-    // the analyst for confirmation before every dispatch.
-    confirmation: {
-      askUser: 'always',
-      getConfirmation: async ({ toolParams, context }) =>
-        buildDispatchConfirmation(
-          {
-            action: 'running-processes',
-            params: {
-              hostName: toolParams.hostName as string | undefined,
-              agentId: toolParams.agentId as string | undefined,
-            },
-            args: { comment: toolParams.comment as string | undefined },
-            context,
-            endpointAppContextService,
-            requiredPrivilege: 'canGetRunningProcesses',
-          },
-          {
-            title: 'List running processes?',
-            color: 'primary',
-            confirmText: 'List processes',
-            comment: toolParams.comment as string | undefined,
-            describe: (host) => `This will request the list of running processes from ${host}.`,
-          }
-        ),
-    },
     handler: async (params, context) => {
       const { logger, request, runContext, spaceId } = context;
       // Set just before the client call: from there on a throw does not mean
@@ -85,11 +59,12 @@ export const getRunningProcessesTool = (
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
+        const requestedIp = params.ip as string | undefined;
         const comment = params.comment as string | undefined;
 
         const prepared = await prepareDispatch({
           action: 'running-processes',
-          params: { hostName: requestedHostName, agentId: requestedAgentId },
+          params: { hostName: requestedHostName, ip: requestedIp, agentId: requestedAgentId },
           args: { comment },
           context,
           endpointAppContextService,
@@ -111,7 +86,8 @@ export const getRunningProcessesTool = (
           // Analyst-initiated via chat, not a system/rule-triggered action —
           // RESPONSE_ACTIONS_SUPPORT_MAP gates `running-processes` per agent
           // type/action-type combination (see is_response_action_supported.ts);
-          // `manual` is what a human confirming in chat maps to.
+          // `manual` is what an analyst-requested chat action maps to, even
+          // though this read runs without a confirmation prompt.
           isAutomated: false,
         });
 
@@ -132,13 +108,18 @@ export const getRunningProcessesTool = (
         // (almost always `pending` — the endpoint agent hasn't checked in
         // yet). Poll until Elastic Defend reports completion so the chat
         // response reflects the actual process list, not just "dispatched".
-        const actionDetails = await waitForActionCompletion(
-          endpointAppContextService,
-          spaceId,
-          dispatchedAction.id,
-          logger,
-          dispatchedAction
-        );
+        // An offline endpoint cannot answer within the poll window, so return
+        // the queued action at once, as isolate and scan do.
+        const isOffline = target.endpoint.status === 'offline';
+        const actionDetails = isOffline
+          ? dispatchedAction
+          : await waitForActionCompletion(
+              endpointAppContextService,
+              spaceId,
+              dispatchedAction.id,
+              logger,
+              dispatchedAction
+            );
 
         return {
           results: [
@@ -153,9 +134,15 @@ export const getRunningProcessesTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
-                // Why a failed action failed (bounded); without it the model
-                // sees only `status: failed`.
-                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
+                ...(isOffline
+                  ? {
+                      queued: true,
+                      message:
+                        'The action is queued and will execute if the endpoint reconnects before the action expires (two weeks); after that it will not run.',
+                    }
+                  : // Why a failed action failed (bounded); without it the model
+                    // sees only `status: failed`.
+                    summarizeActionErrors(actionDetails.errors) ?? {}),
                 // Bounded: `outputs` carries one entry per running process, each
                 // with its full command line, so a busy host would otherwise blow
                 // the result budget and have generic truncation discard process

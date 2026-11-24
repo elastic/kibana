@@ -41,6 +41,9 @@ describe('sandbox allowlists', () => {
     expect(
       getDatasetSandboxAllowlist({ name: 'ns-investigation-golden-2710', tags: ['customer0'] })
     ).toBe(CUSTOMER0_SANDBOX_ALLOWLIST);
+    expect(getDatasetSandboxAllowlist({ name: 'ns-recovery', tags: ['customer0-recovery'] })).toBe(
+      CUSTOMER0_SANDBOX_ALLOWLIST
+    );
     expect(getDatasetSandboxAllowlist({ name: 'nightshift/synthetic' })).toEqual([]);
   });
 });

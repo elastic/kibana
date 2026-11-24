@@ -28,6 +28,14 @@ export const CUSTOMER0_CUSTOM_CONTEXT: readonly string[] = [
 export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
   "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game. Read source code as it was when the alert fired, not today's: instead of a shallow clone, clone the week before the alert and check out its last commit before the alert, e.g. `git clone --filter=blob:none --no-checkout --shallow-since=<alert date minus 7 days> https://github.com/elastic/kibana && git -C kibana checkout $(git -C kibana rev-list -1 --first-parent --before=<alert timestamp> HEAD)`.";
 
+/**
+ * Recovery cases replay the round that follows an alert's recovery. The recovery is in the past, so
+ * the agent is held to the evidence that existed within an hour of it, which keeps a later
+ * re-fire or fix out of the verdict while leaving the alert's whole lifetime in reach.
+ */
+export const RECOVERY_GUARDRAIL_CONTEXT =
+  "Evaluation guardrail: this alert recovered in the past. Treat the recovery's timestamp as the present, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the recovery; the alert's whole earlier lifetime stays readable. Do not read human discussion of this incident (Slack or chat threads, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the recovery. Code, commits, deploys and config changes from before the recovery are fair game.";
+
 /** ORCA's environment is built on the upstream demo at this commit (paper, Appendix I). */
 export const ORCA_DEMO_COMMIT = 'fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733';
 
@@ -47,12 +55,14 @@ export interface DatasetIdentity {
 
 /**
  * Which deployment's space an investigation dataset reproduces, if any. Stored datasets are not
- * named `nightshift/customer0…`, so they are recognized by their `customer0` tag.
+ * named `nightshift/customer0…`, so they are recognized by their `customer0` or `customer0-recovery`
+ * tag.
  */
 export const getDatasetEnvironment = ({
   name,
   tags = [],
-}: DatasetIdentity): 'customer0' | 'orca' | undefined => {
+}: DatasetIdentity): 'customer0-recovery' | 'customer0' | 'orca' | undefined => {
+  if (tags.includes('customer0-recovery')) return 'customer0-recovery';
   if (name.startsWith('nightshift/customer0') || tags.includes('customer0')) return 'customer0';
   return name.startsWith('nightshift/orca-') ? 'orca' : undefined;
 };
@@ -60,6 +70,8 @@ export const getDatasetEnvironment = ({
 /** The custom context snippets an investigation dataset runs with. */
 export const getDatasetCustomContext = (dataset: DatasetIdentity): readonly string[] => {
   switch (getDatasetEnvironment(dataset)) {
+    case 'customer0-recovery':
+      return [...CUSTOMER0_CUSTOM_CONTEXT, RECOVERY_GUARDRAIL_CONTEXT];
     case 'customer0':
       return [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT];
     case 'orca':

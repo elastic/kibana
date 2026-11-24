@@ -34,6 +34,7 @@ interface GetDiverseSampleDocumentsOptions {
   iteration: number;
   size?: number;
   logger: Logger;
+  signal?: AbortSignal;
 }
 
 export async function getDiverseSampleDocuments({
@@ -44,13 +45,14 @@ export async function getDiverseSampleDocuments({
   size = 100,
   iteration,
   logger,
+  signal,
 }: GetDiverseSampleDocumentsOptions): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
   const timeRangeFilter = dateRangeQuery(start, end);
   const filter = { bool: { filter: timeRangeFilter } };
   const indices = Array.isArray(index) ? index : [index];
 
   const [messageField, totalDocs] = await Promise.all([
-    detectMessageField({ esClient, index, start, end }),
+    detectMessageField({ esClient, index, start, end, signal }),
     runEsqlCount({ esClient, indices, filter }),
   ]);
 
@@ -260,14 +262,23 @@ async function detectMessageField({
   index,
   start,
   end,
+  signal,
 }: {
   esClient: TracedElasticsearchClient;
   index: string | string[];
   start: number;
   end: number;
+  signal?: AbortSignal;
 }): Promise<string | undefined> {
   // Traced esql() hardcodes drop_null_columns: true, which prunes all columns from a LIMIT 0 probe.
-  const columns = await getEsqlColumnSchema({ esClient: esClient.client, index, start, end });
+  const columns = await getEsqlColumnSchema({
+    esClient: esClient.client,
+    index,
+    start,
+    end,
+    fields: MESSAGE_FIELD_CANDIDATES,
+    signal,
+  });
   const textColumnNames = new Set(
     columns.filter((column) => column.type === 'text').map((column) => column.name)
   );

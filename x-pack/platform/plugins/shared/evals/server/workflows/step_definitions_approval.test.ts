@@ -42,7 +42,7 @@ import {
  */
 
 const APPROVED_STEP_DEFINITIONS_DIR_REL =
-  'src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions';
+  'x-pack/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions';
 const APPROVED_STEP_DEFINITIONS_DIR_ABS = path.join(REPO_ROOT, APPROVED_STEP_DEFINITIONS_DIR_REL);
 
 const schemaToJson = (schema?: z.ZodType): unknown => (schema ? z.toJSONSchema(schema) : undefined);

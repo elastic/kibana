@@ -8,12 +8,8 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../../../flyout/entity_details/shared/components/right/test_ids';
-import {
-  mockEntityRecord,
-  mockHostRiskScoreState,
-  mockObservedHostData,
-} from '../../../../flyout/entity_details/mocks';
+import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../shared/components/test_ids';
+import { mockEntityRecord, mockHostRiskScoreState, mockObservedHostData } from '../../shared/mocks';
 import type { HostEntity } from '../../../../../common/api/entity_analytics';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { Host } from '.';
