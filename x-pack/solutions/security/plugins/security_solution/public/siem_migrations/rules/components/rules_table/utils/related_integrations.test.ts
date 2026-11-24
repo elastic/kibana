@@ -16,14 +16,16 @@ const nginxIntegration: RelatedIntegration = {
   integration: 'access',
 };
 
+const prebuiltElasticRule = {
+  title: 'Web Server Potential Spike in Error Response Codes',
+  description: 'Detects a spike in web server error response codes.',
+  prebuilt_rule_id: 'prebuilt-1',
+  severity: 'low',
+  risk_score: 21,
+};
+
 const prebuiltMigrationRule: Pick<RuleMigrationRule, 'elastic_rule'> = {
-  elastic_rule: {
-    title: 'Web Server Potential Spike in Error Response Codes',
-    description: 'Detects a spike in web server error response codes.',
-    prebuilt_rule_id: 'prebuilt-1',
-    severity: 'low',
-    risk_score: 21,
-  },
+  elastic_rule: prebuiltElasticRule,
 };
 
 const customMigrationRule: Pick<RuleMigrationRule, 'elastic_rule'> = {
@@ -72,7 +74,7 @@ describe('getRelatedIntegrationsForMigrationRule', () => {
     const relatedIntegrations = getRelatedIntegrationsForMigrationRule({
       migrationRule: {
         elastic_rule: {
-          ...prebuiltMigrationRule.elastic_rule,
+          ...prebuiltElasticRule,
           integration_ids: ['apache', 'missing-package'],
         },
       },
