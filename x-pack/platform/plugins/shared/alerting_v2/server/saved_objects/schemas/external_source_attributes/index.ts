@@ -6,9 +6,16 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { ExternalSourceType } from '@kbn/alerting-v2-schemas';
 import { externalSourceAttributesSchemaV1 } from './v1';
 
-/** Latest attributes shape, introduced by model version 1. */
-export type ExternalSourceSavedObjectAttributes = TypeOf<typeof externalSourceAttributesSchemaV1>;
+/**
+ * Latest attributes shape, introduced by model version 1. The schema stores `type` as an open
+ * string, and the API layer only writes supported sources, so it is narrowed here.
+ */
+export type ExternalSourceSavedObjectAttributes = Omit<
+  TypeOf<typeof externalSourceAttributesSchemaV1>,
+  'type'
+> & { type: ExternalSourceType };
 
 export { externalSourceAttributesSchemaV1 };

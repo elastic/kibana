@@ -6,57 +6,57 @@
  */
 
 import type {
-  CreateImportConfigData,
-  FindImportConfigsSortField,
-  ImportConfigResponse,
+  CreateExternalSourceData,
+  FindExternalSourcesSortField,
+  ExternalSourceResponse,
 } from '@kbn/alerting-v2-schemas';
 import type { SavedObjectReference } from '@kbn/core/server';
 import {
   CONNECTOR_SAVED_OBJECT_TYPE,
-  IMPORT_CONFIG_CONNECTOR_REFERENCE_NAME,
-  type ImportConfigSavedObjectAttributes,
+  EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME,
+  type ExternalSourceSavedObjectAttributes,
 } from '../../saved_objects';
 import type { Actor } from '../services/user_service/user_service';
 
-/** The fields of an import config that callers can set, without its id. */
-export type ImportConfigData = Omit<CreateImportConfigData, 'id'>;
+/** The fields of an external source that callers can set, without its id. */
+export type ExternalSourceData = Omit<CreateExternalSourceData, 'id'>;
 
-/** Builds the saved object references of an import config: one reference to its connector. */
-export const buildImportConfigReferences = (connectorId: string): SavedObjectReference[] => [
+/** Builds the saved object references of an external source: one reference to its connector. */
+export const buildExternalSourceReferences = (connectorId: string): SavedObjectReference[] => [
   {
-    name: IMPORT_CONFIG_CONNECTOR_REFERENCE_NAME,
+    name: EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME,
     type: CONNECTOR_SAVED_OBJECT_TYPE,
     id: connectorId,
   },
 ];
 
-/** Returns the connector id held by an import config's `connector` reference, if it has one. */
+/** Returns the connector id held by an external source's `connector` reference, if it has one. */
 export const getConnectorIdFromReferences = (
   references: SavedObjectReference[]
 ): string | undefined =>
   references.find(
     ({ name, type }) =>
-      name === IMPORT_CONFIG_CONNECTOR_REFERENCE_NAME && type === CONNECTOR_SAVED_OBJECT_TYPE
+      name === EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME && type === CONNECTOR_SAVED_OBJECT_TYPE
   )?.id;
 
 const toStoredMetadata = (
-  metadata: ImportConfigData['metadata']
-): ImportConfigSavedObjectAttributes['metadata'] => ({
+  metadata: ExternalSourceData['metadata']
+): ExternalSourceSavedObjectAttributes['metadata'] => ({
   name: metadata.name,
   ...(metadata.description !== undefined ? { description: metadata.description } : {}),
   ...(metadata.tags !== undefined ? { tags: metadata.tags } : {}),
   ...(metadata.routing_tags !== undefined ? { routing_tags: metadata.routing_tags } : {}),
 });
 
-export const buildCreateImportConfigAttributes = ({
+export const buildCreateExternalSourceAttributes = ({
   data,
   actor,
   now,
 }: {
-  data: ImportConfigData;
+  data: ExternalSourceData;
   actor: Actor | null;
   now: string;
-}): ImportConfigSavedObjectAttributes => ({
+}): ExternalSourceSavedObjectAttributes => ({
   type: data.type,
   kind: data.kind,
   metadata: toStoredMetadata(data.metadata),
@@ -68,17 +68,17 @@ export const buildCreateImportConfigAttributes = ({
   updatedAt: now,
 });
 
-export const buildUpdateImportConfigAttributes = ({
+export const buildUpdateExternalSourceAttributes = ({
   existing,
   data,
   actor,
   now,
 }: {
-  existing: ImportConfigSavedObjectAttributes;
-  data: ImportConfigData;
+  existing: ExternalSourceSavedObjectAttributes;
+  data: ExternalSourceData;
   actor: Actor | null;
   now: string;
-}): ImportConfigSavedObjectAttributes => ({
+}): ExternalSourceSavedObjectAttributes => ({
   type: existing.type,
   kind: data.kind,
   metadata: toStoredMetadata(data.metadata),
@@ -91,25 +91,25 @@ export const buildUpdateImportConfigAttributes = ({
 });
 
 /** The stored fields a PATCH merges into, in the shape of the create data. */
-export const toImportConfigData = (
-  attributes: ImportConfigSavedObjectAttributes,
+export const toExternalSourceData = (
+  attributes: ExternalSourceSavedObjectAttributes,
   connectorId: string
-): ImportConfigData => ({
+): ExternalSourceData => ({
   type: attributes.type,
   kind: attributes.kind,
   metadata: toStoredMetadata(attributes.metadata),
   connector_id: connectorId,
 });
 
-export const transformImportConfigToApiResponse = ({
+export const transformExternalSourceToApiResponse = ({
   id,
   attributes,
   connectorId,
 }: {
   id: string;
-  attributes: ImportConfigSavedObjectAttributes;
+  attributes: ExternalSourceSavedObjectAttributes;
   connectorId: string;
-}): ImportConfigResponse => ({
+}): ExternalSourceResponse => ({
   id,
   type: attributes.type,
   kind: attributes.kind,
@@ -122,12 +122,12 @@ export const transformImportConfigToApiResponse = ({
   updated_at: attributes.updatedAt,
 });
 
-const SORT_FIELDS: Record<FindImportConfigsSortField, string> = {
+const SORT_FIELDS: Record<FindExternalSourcesSortField, string> = {
   name: 'metadata.name.keyword',
   kind: 'kind',
   type: 'type',
 };
 
-export const mapImportConfigSortField = (
-  sortField?: FindImportConfigsSortField
+export const mapExternalSourceSortField = (
+  sortField?: FindExternalSourcesSortField
 ): string | undefined => (sortField ? SORT_FIELDS[sortField] : undefined);

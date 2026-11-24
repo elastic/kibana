@@ -8,18 +8,18 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createSpacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { ImportConfigSavedObjectService } from './import_config_saved_object_service';
-import type { ImportConfigSavedObjectServiceContract } from './types';
+import { ExternalSourceSavedObjectService } from './external_source_saved_object_service';
+import type { ExternalSourceSavedObjectServiceContract } from './types';
 
-export function createImportConfigSavedObjectService(): {
-  importConfigSavedObjectService: ImportConfigSavedObjectService;
+export function createExternalSourceSavedObjectService(): {
+  externalSourceSavedObjectService: ExternalSourceSavedObjectService;
   mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 } {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   const { spacesService } = createSpacesServiceMock();
 
   return {
-    importConfigSavedObjectService: new ImportConfigSavedObjectService(
+    externalSourceSavedObjectService: new ExternalSourceSavedObjectService(
       mockSavedObjectsClient,
       spacesService
     ),
@@ -27,14 +27,14 @@ export function createImportConfigSavedObjectService(): {
   };
 }
 
-export type ImportConfigSavedObjectServiceMock =
-  jest.Mocked<ImportConfigSavedObjectServiceContract>;
+export type ExternalSourceSavedObjectServiceMock =
+  jest.Mocked<ExternalSourceSavedObjectServiceContract>;
 
-export function createImportConfigSavedObjectServiceMock(): ImportConfigSavedObjectServiceMock {
+export function createExternalSourceSavedObjectServiceMock(): ExternalSourceSavedObjectServiceMock {
   return {
-    create: jest.fn().mockResolvedValue({ id: 'import-config-id-default' }),
+    create: jest.fn().mockResolvedValue({ id: 'external-source-id-default' }),
     get: jest.fn(),
-    update: jest.fn().mockResolvedValue({ id: 'import-config-id-default' }),
+    update: jest.fn().mockResolvedValue({ id: 'external-source-id-default' }),
     delete: jest.fn().mockResolvedValue(undefined),
     find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0 }),
   };

@@ -6,9 +6,9 @@
  */
 
 import {
-  createImportConfigDataSchema,
-  updateImportConfigDataSchema,
-} from './import_config_data_schema';
+  createExternalSourceDataSchema,
+  updateExternalSourceDataSchema,
+} from './external_source_data_schema';
 
 const validCreateData = {
   type: 'datadog',
@@ -17,13 +17,13 @@ const validCreateData = {
   connector_id: 'connector-1',
 };
 
-describe('createImportConfigDataSchema', () => {
+describe('createExternalSourceDataSchema', () => {
   it('accepts a valid import', () => {
-    expect(createImportConfigDataSchema.safeParse(validCreateData).success).toBe(true);
+    expect(createExternalSourceDataSchema.safeParse(validCreateData).success).toBe(true);
   });
 
   it('accepts a signal import without routing tags', () => {
-    const result = createImportConfigDataSchema.safeParse({
+    const result = createExternalSourceDataSchema.safeParse({
       ...validCreateData,
       kind: 'signal',
       metadata: { name: 'Signals' },
@@ -43,13 +43,13 @@ describe('createImportConfigDataSchema', () => {
     ['an unknown field', { ...validCreateData, enabled: true }],
     ['an id with invalid characters', { ...validCreateData, id: 'not valid!' }],
   ])('rejects %s', (_, data) => {
-    expect(createImportConfigDataSchema.safeParse(data).success).toBe(false);
+    expect(createExternalSourceDataSchema.safeParse(data).success).toBe(false);
   });
 });
 
-describe('updateImportConfigDataSchema', () => {
+describe('updateExternalSourceDataSchema', () => {
   it('accepts a partial metadata patch that clears a field', () => {
-    const result = updateImportConfigDataSchema.safeParse({
+    const result = updateExternalSourceDataSchema.safeParse({
       metadata: { description: null, tags: ['datadog'] },
     });
 
@@ -57,12 +57,12 @@ describe('updateImportConfigDataSchema', () => {
   });
 
   it('does not accept a connector id', () => {
-    expect(updateImportConfigDataSchema.safeParse({ connector_id: 'connector-2' }).success).toBe(
+    expect(updateExternalSourceDataSchema.safeParse({ connector_id: 'connector-2' }).success).toBe(
       false
     );
   });
 
   it('does not accept a type', () => {
-    expect(updateImportConfigDataSchema.safeParse({ type: 'datadog' }).success).toBe(false);
+    expect(updateExternalSourceDataSchema.safeParse({ type: 'datadog' }).success).toBe(false);
   });
 });

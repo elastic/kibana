@@ -9,37 +9,37 @@ import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { inject, injectable } from 'inversify';
-import type { ImportConfigSavedObjectAttributes } from '../../../saved_objects';
+import type { ExternalSourceSavedObjectAttributes } from '../../../saved_objects';
 import {
   CONNECTOR_SAVED_OBJECT_TYPE,
-  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
 } from '../../../saved_objects';
 import { SpacesService } from '../spaces_service/spaces_service';
-import { ImportConfigSavedObjectsClientToken } from './tokens';
+import { ExternalSourceSavedObjectsClientToken } from './tokens';
 import type {
-  FindImportConfigSavedObjectsParams,
-  FindImportConfigSavedObjectsResult,
-  ImportConfigSavedObjectDoc,
-  ImportConfigSavedObjectServiceContract,
-  ImportConfigSavedObjectWriteResult,
+  FindExternalSourceSavedObjectsParams,
+  FindExternalSourceSavedObjectsResult,
+  ExternalSourceSavedObjectDoc,
+  ExternalSourceSavedObjectServiceContract,
+  ExternalSourceSavedObjectWriteResult,
 } from './types';
 
 export type {
-  FindImportConfigSavedObjectsParams,
-  FindImportConfigSavedObjectsResult,
-  ImportConfigSavedObjectDoc,
-  ImportConfigSavedObjectServiceContract,
-  ImportConfigSavedObjectWriteResult,
+  FindExternalSourceSavedObjectsParams,
+  FindExternalSourceSavedObjectsResult,
+  ExternalSourceSavedObjectDoc,
+  ExternalSourceSavedObjectServiceContract,
+  ExternalSourceSavedObjectWriteResult,
 };
 
 const SEARCH_FIELDS = ['metadata.name', 'metadata.description'];
 const DEFAULT_SORT_FIELD = 'metadata.name.keyword';
 
-/** Reads and writes import config saved objects. Saved object errors propagate to the caller. */
+/** Reads and writes external source saved objects. Saved object errors propagate to the caller. */
 @injectable()
-export class ImportConfigSavedObjectService implements ImportConfigSavedObjectServiceContract {
+export class ExternalSourceSavedObjectService implements ExternalSourceSavedObjectServiceContract {
   constructor(
-    @inject(ImportConfigSavedObjectsClientToken)
+    @inject(ExternalSourceSavedObjectsClientToken)
     private readonly client: SavedObjectsClientContract,
     @inject(SpacesService) private readonly spacesService: SpacesService
   ) {}
@@ -49,22 +49,22 @@ export class ImportConfigSavedObjectService implements ImportConfigSavedObjectSe
     references,
     id,
   }: {
-    attrs: ImportConfigSavedObjectAttributes;
+    attrs: ExternalSourceSavedObjectAttributes;
     references: SavedObjectReference[];
     id?: string;
-  }): Promise<ImportConfigSavedObjectWriteResult> {
-    const result = await this.client.create<ImportConfigSavedObjectAttributes>(
-      IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  }): Promise<ExternalSourceSavedObjectWriteResult> {
+    const result = await this.client.create<ExternalSourceSavedObjectAttributes>(
+      EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
       attrs,
       { id: id ?? SavedObjectsUtils.generateId(), overwrite: false, references }
     );
     return { id: result.id, version: result.version };
   }
 
-  public async get(id: string, spaceId?: string): Promise<ImportConfigSavedObjectDoc> {
+  public async get(id: string, spaceId?: string): Promise<ExternalSourceSavedObjectDoc> {
     const namespace = this.spacesService.spaceIdToNamespace(spaceId);
-    const doc = await this.client.get<ImportConfigSavedObjectAttributes>(
-      IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+    const doc = await this.client.get<ExternalSourceSavedObjectAttributes>(
+      EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
       id,
       namespace ? { namespace } : undefined
     );
@@ -83,12 +83,12 @@ export class ImportConfigSavedObjectService implements ImportConfigSavedObjectSe
     version,
   }: {
     id: string;
-    attrs: ImportConfigSavedObjectAttributes;
+    attrs: ExternalSourceSavedObjectAttributes;
     references: SavedObjectReference[];
     version?: string;
-  }): Promise<ImportConfigSavedObjectWriteResult> {
-    const result = await this.client.update<ImportConfigSavedObjectAttributes>(
-      IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  }): Promise<ExternalSourceSavedObjectWriteResult> {
+    const result = await this.client.update<ExternalSourceSavedObjectAttributes>(
+      EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
       id,
       attrs,
       { ...(version ? { version } : {}), mergeAttributes: false, references }
@@ -97,7 +97,7 @@ export class ImportConfigSavedObjectService implements ImportConfigSavedObjectSe
   }
 
   public async delete({ id }: { id: string }): Promise<void> {
-    await this.client.delete(IMPORT_CONFIG_SAVED_OBJECT_TYPE, id);
+    await this.client.delete(EXTERNAL_SOURCE_SAVED_OBJECT_TYPE, id);
   }
 
   public async find({
@@ -108,9 +108,9 @@ export class ImportConfigSavedObjectService implements ImportConfigSavedObjectSe
     sortOrder = 'asc',
     connectorId,
     type,
-  }: FindImportConfigSavedObjectsParams): Promise<FindImportConfigSavedObjectsResult> {
-    const result = await this.client.find<ImportConfigSavedObjectAttributes>({
-      type: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  }: FindExternalSourceSavedObjectsParams): Promise<FindExternalSourceSavedObjectsResult> {
+    const result = await this.client.find<ExternalSourceSavedObjectAttributes>({
+      type: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
       page,
       perPage,
       sortField,
@@ -124,7 +124,7 @@ export class ImportConfigSavedObjectService implements ImportConfigSavedObjectSe
       ...(type
         ? {
             filter: nodeBuilder.is(
-              `${IMPORT_CONFIG_SAVED_OBJECT_TYPE}.attributes.type`,
+              `${EXTERNAL_SOURCE_SAVED_OBJECT_TYPE}.attributes.type`,
               nodeTypes.literal.buildNode(type, true)
             ),
           }

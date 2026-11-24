@@ -6,19 +6,19 @@
  */
 
 import Boom from '@hapi/boom';
-import type { CreateImportConfigData } from '@kbn/alerting-v2-schemas';
+import type { CreateExternalSourceData } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { IMPORT_CONFIG_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { ImportConfigSavedObjectAttributes } from '../../saved_objects';
+import { EXTERNAL_SOURCE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import type { ExternalSourceSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
-  createImportConfigSavedObjectServiceMock,
-  type ImportConfigSavedObjectServiceMock,
-} from '../services/import_config_saved_object_service/import_config_saved_object_service.mock';
-import type { ImportConfigSavedObjectDoc } from '../services/import_config_saved_object_service/types';
+  createExternalSourceSavedObjectServiceMock,
+  type ExternalSourceSavedObjectServiceMock,
+} from '../services/external_source_saved_object_service/external_source_saved_object_service.mock';
+import type { ExternalSourceSavedObjectDoc } from '../services/external_source_saved_object_service/types';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
-import { ImportConfigClient } from './import_config_client';
+import { ExternalSourceClient } from './external_source_client';
 
 const NOW = '2025-02-01T00:00:00.000Z';
 const CREATED_AT = '2025-01-01T00:00:00.000Z';
@@ -26,7 +26,9 @@ const ACTOR = { profile_uid: 'elastic_profile_uid' };
 const CREATOR = { profile_uid: 'creator_profile_uid' };
 const CONNECTOR_REFERENCE = { name: 'connector', type: 'action', id: 'connector-1' };
 
-const createData = (overrides: Partial<CreateImportConfigData> = {}): CreateImportConfigData => ({
+const createData = (
+  overrides: Partial<CreateExternalSourceData> = {}
+): CreateExternalSourceData => ({
   type: 'datadog',
   kind: 'alert',
   metadata: {
@@ -40,8 +42,8 @@ const createData = (overrides: Partial<CreateImportConfigData> = {}): CreateImpo
 });
 
 const storedAttributes = (
-  overrides: Partial<ImportConfigSavedObjectAttributes> = {}
-): ImportConfigSavedObjectAttributes => ({
+  overrides: Partial<ExternalSourceSavedObjectAttributes> = {}
+): ExternalSourceSavedObjectAttributes => ({
   type: 'datadog',
   kind: 'alert',
   metadata: {
@@ -60,8 +62,8 @@ const storedAttributes = (
 });
 
 const storedDoc = (
-  overrides: Partial<ImportConfigSavedObjectDoc> = {}
-): ImportConfigSavedObjectDoc => ({
+  overrides: Partial<ExternalSourceSavedObjectDoc> = {}
+): ExternalSourceSavedObjectDoc => ({
   id: 'import-1',
   attributes: storedAttributes(),
   version: 'WzEsMV0=',
@@ -71,17 +73,17 @@ const storedDoc = (
 
 const getBoomData = (error: unknown) => (Boom.isBoom(error) ? error.data : undefined);
 
-describe('ImportConfigClient', () => {
-  let savedObjectService: ImportConfigSavedObjectServiceMock;
+describe('ExternalSourceClient', () => {
+  let savedObjectService: ExternalSourceSavedObjectServiceMock;
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
-  let client: ImportConfigClient;
+  let client: ExternalSourceClient;
 
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date(NOW));
-    savedObjectService = createImportConfigSavedObjectServiceMock();
+    savedObjectService = createExternalSourceSavedObjectServiceMock();
     const logger = createLoggerService();
     mockLogger = logger.mockLogger;
-    client = new ImportConfigClient(
+    client = new ExternalSourceClient(
       savedObjectService,
       createUserService().userService,
       logger.loggerService
@@ -92,11 +94,11 @@ describe('ImportConfigClient', () => {
     jest.useRealTimers();
   });
 
-  describe('createImportConfig', () => {
+  describe('createExternalSource', () => {
     it('stores the attributes and a connector reference, and returns the import', async () => {
       savedObjectService.create.mockResolvedValue({ id: 'import-1', version: 'WzEsMV0=' });
 
-      const result = await client.createImportConfig({ data: createData({ id: 'import-1' }) });
+      const result = await client.createExternalSource({ data: createData({ id: 'import-1' }) });
 
       expect(savedObjectService.create).toHaveBeenCalledWith({
         id: 'import-1',
@@ -140,7 +142,7 @@ describe('ImportConfigClient', () => {
     it('leaves optional metadata unset when it is omitted', async () => {
       savedObjectService.create.mockResolvedValue({ id: 'generated-id' });
 
-      const result = await client.createImportConfig({
+      const result = await client.createExternalSource({
         data: createData({ kind: 'signal', metadata: { name: 'Signals only' } }),
       });
 
@@ -154,25 +156,25 @@ describe('ImportConfigClient', () => {
       expect(result.metadata).toEqual({ name: 'Signals only' });
     });
 
-    it('throws IMPORT_CONFIG_ALREADY_EXISTS when the id is taken', async () => {
+    it('throws EXTERNAL_SOURCE_ALREADY_EXISTS when the id is taken', async () => {
       savedObjectService.create.mockRejectedValue(
-        SavedObjectsErrorHelpers.createConflictError(IMPORT_CONFIG_SAVED_OBJECT_TYPE, 'import-1')
+        SavedObjectsErrorHelpers.createConflictError(EXTERNAL_SOURCE_SAVED_OBJECT_TYPE, 'import-1')
       );
 
       const error = await client
-        .createImportConfig({ data: createData({ id: 'import-1' }) })
+        .createExternalSource({ data: createData({ id: 'import-1' }) })
         .catch((e) => e);
 
       expect(error.output.statusCode).toBe(409);
       expect(getBoomData(error)).toEqual({
-        code: ALERTING_ERROR_CODES.IMPORT_CONFIG_ALREADY_EXISTS,
-        details: { import_config_id: 'import-1' },
+        code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_ALREADY_EXISTS,
+        details: { external_source_id: 'import-1' },
       });
     });
 
-    it('throws INVALID_IMPORT_CONFIG_DATA when the data fails validation', async () => {
+    it('throws INVALID_EXTERNAL_SOURCE_DATA when the data fails validation', async () => {
       const error = await client
-        .createImportConfig({
+        .createExternalSource({
           data: { ...createData(), connector_id: '' },
         })
         .catch((e) => e);
@@ -180,7 +182,7 @@ describe('ImportConfigClient', () => {
       expect(error.output.statusCode).toBe(400);
       expect(getBoomData(error)).toEqual(
         expect.objectContaining({
-          code: ALERTING_ERROR_CODES.INVALID_IMPORT_CONFIG_DATA,
+          code: ALERTING_ERROR_CODES.INVALID_EXTERNAL_SOURCE_DATA,
           details: expect.objectContaining({ context: 'create' }),
         })
       );
@@ -189,19 +191,19 @@ describe('ImportConfigClient', () => {
 
     it('rejects routing tags on a signal import', async () => {
       const error = await client
-        .createImportConfig({
+        .createExternalSource({
           data: createData({ kind: 'signal' }),
         })
         .catch((e) => e);
 
       expect(getBoomData(error)).toEqual(
-        expect.objectContaining({ code: ALERTING_ERROR_CODES.INVALID_IMPORT_CONFIG_DATA })
+        expect.objectContaining({ code: ALERTING_ERROR_CODES.INVALID_EXTERNAL_SOURCE_DATA })
       );
       expect(savedObjectService.create).not.toHaveBeenCalled();
     });
   });
 
-  describe('getImportConfig', () => {
+  describe('getExternalSource', () => {
     it('returns the import with the connector id from its reference', async () => {
       savedObjectService.get.mockResolvedValue(
         storedDoc({
@@ -210,7 +212,7 @@ describe('ImportConfigClient', () => {
         })
       );
 
-      const result = await client.getImportConfig({ id: 'import-1' });
+      const result = await client.getExternalSource({ id: 'import-1' });
 
       expect(result).toEqual({
         id: 'import-1',
@@ -235,35 +237,35 @@ describe('ImportConfigClient', () => {
     it('falls back to the stored connector id and logs when the reference is missing', async () => {
       savedObjectService.get.mockResolvedValue(storedDoc({ references: [] }));
 
-      const result = await client.getImportConfig({ id: 'import-1' });
+      const result = await client.getExternalSource({ id: 'import-1' });
 
       expect(result.connector_id).toBe('connector-1');
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           labels: expect.objectContaining({
-            code: ALERTING_LOG_CODES.IMPORT_CONFIG_CONNECTOR_REFERENCE_NOT_FOUND,
-            import_config_id: 'import-1',
+            code: ALERTING_LOG_CODES.EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NOT_FOUND,
+            external_source_id: 'import-1',
             connector_id: 'connector-1',
           }),
         })
       );
     });
 
-    it('throws IMPORT_CONFIG_NOT_FOUND when the import does not exist', async () => {
+    it('throws EXTERNAL_SOURCE_NOT_FOUND when the import does not exist', async () => {
       savedObjectService.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
-          IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+          EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
           'missing'
         )
       );
 
-      const error = await client.getImportConfig({ id: 'missing' }).catch((e) => e);
+      const error = await client.getExternalSource({ id: 'missing' }).catch((e) => e);
 
       expect(error.output.statusCode).toBe(404);
       expect(getBoomData(error)).toEqual({
-        code: ALERTING_ERROR_CODES.IMPORT_CONFIG_NOT_FOUND,
-        details: { import_config_id: 'missing' },
+        code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_NOT_FOUND,
+        details: { external_source_id: 'missing' },
       });
     });
 
@@ -271,15 +273,15 @@ describe('ImportConfigClient', () => {
       const failure = new Error('cluster unavailable');
       savedObjectService.get.mockRejectedValue(failure);
 
-      await expect(client.getImportConfig({ id: 'import-1' })).rejects.toBe(failure);
+      await expect(client.getExternalSource({ id: 'import-1' })).rejects.toBe(failure);
     });
   });
 
-  describe('updateImportConfig', () => {
+  describe('updateExternalSource', () => {
     it('merges the patch, increments the version and keeps the creation fields', async () => {
       savedObjectService.get.mockResolvedValue(storedDoc());
 
-      const result = await client.updateImportConfig({
+      const result = await client.updateExternalSource({
         id: 'import-1',
         data: { metadata: { name: 'Datadog prod', description: null } },
       });
@@ -313,7 +315,10 @@ describe('ImportConfigClient', () => {
         })
       );
 
-      await client.updateImportConfig({ id: 'import-1', data: { metadata: { name: 'Renamed' } } });
+      await client.updateExternalSource({
+        id: 'import-1',
+        data: { metadata: { name: 'Renamed' } },
+      });
 
       expect(savedObjectService.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -327,12 +332,12 @@ describe('ImportConfigClient', () => {
       savedObjectService.get.mockResolvedValue(storedDoc());
 
       const error = await client
-        .updateImportConfig({ id: 'import-1', data: { kind: 'signal' } })
+        .updateExternalSource({ id: 'import-1', data: { kind: 'signal' } })
         .catch((e) => e);
 
       expect(getBoomData(error)).toEqual(
         expect.objectContaining({
-          code: ALERTING_ERROR_CODES.INVALID_IMPORT_CONFIG_DATA,
+          code: ALERTING_ERROR_CODES.INVALID_EXTERNAL_SOURCE_DATA,
           details: expect.objectContaining({ context: 'update' }),
         })
       );
@@ -342,7 +347,7 @@ describe('ImportConfigClient', () => {
     it('accepts a change of kind to signal when the routing tags are cleared', async () => {
       savedObjectService.get.mockResolvedValue(storedDoc());
 
-      await client.updateImportConfig({
+      await client.updateExternalSource({
         id: 'import-1',
         data: { kind: 'signal', metadata: { routing_tags: null } },
       });
@@ -363,90 +368,90 @@ describe('ImportConfigClient', () => {
 
     it('does not accept a new connector id', async () => {
       const error = await client
-        .updateImportConfig({
+        .updateExternalSource({
           id: 'import-1',
           data: { connector_id: 'connector-2' } as never,
         })
         .catch((e) => e);
 
       expect(getBoomData(error)).toEqual(
-        expect.objectContaining({ code: ALERTING_ERROR_CODES.INVALID_IMPORT_CONFIG_DATA })
+        expect.objectContaining({ code: ALERTING_ERROR_CODES.INVALID_EXTERNAL_SOURCE_DATA })
       );
       expect(savedObjectService.get).not.toHaveBeenCalled();
     });
 
     it('does not accept a new type', async () => {
       const error = await client
-        .updateImportConfig({ id: 'import-1', data: { type: 'datadog' } as never })
+        .updateExternalSource({ id: 'import-1', data: { type: 'datadog' } as never })
         .catch((e) => e);
 
       expect(getBoomData(error)).toEqual(
-        expect.objectContaining({ code: ALERTING_ERROR_CODES.INVALID_IMPORT_CONFIG_DATA })
+        expect.objectContaining({ code: ALERTING_ERROR_CODES.INVALID_EXTERNAL_SOURCE_DATA })
       );
       expect(savedObjectService.get).not.toHaveBeenCalled();
     });
 
-    it('throws IMPORT_CONFIG_NOT_FOUND when the import does not exist', async () => {
+    it('throws EXTERNAL_SOURCE_NOT_FOUND when the import does not exist', async () => {
       savedObjectService.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
-          IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+          EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
           'missing'
         )
       );
 
       const error = await client
-        .updateImportConfig({ id: 'missing', data: { metadata: { name: 'Renamed' } } })
+        .updateExternalSource({ id: 'missing', data: { metadata: { name: 'Renamed' } } })
         .catch((e) => e);
 
       expect(getBoomData(error)).toEqual({
-        code: ALERTING_ERROR_CODES.IMPORT_CONFIG_NOT_FOUND,
-        details: { import_config_id: 'missing' },
+        code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_NOT_FOUND,
+        details: { external_source_id: 'missing' },
       });
     });
 
-    it('throws IMPORT_CONFIG_VERSION_CONFLICT when another writer updated the import', async () => {
+    it('throws EXTERNAL_SOURCE_VERSION_CONFLICT when another writer updated the import', async () => {
       savedObjectService.get.mockResolvedValue(storedDoc());
       savedObjectService.update.mockRejectedValue(
-        SavedObjectsErrorHelpers.createConflictError(IMPORT_CONFIG_SAVED_OBJECT_TYPE, 'import-1')
+        SavedObjectsErrorHelpers.createConflictError(EXTERNAL_SOURCE_SAVED_OBJECT_TYPE, 'import-1')
       );
 
       const error = await client
-        .updateImportConfig({ id: 'import-1', data: { metadata: { name: 'Renamed' } } })
+        .updateExternalSource({ id: 'import-1', data: { metadata: { name: 'Renamed' } } })
         .catch((e) => e);
 
       expect(error.output.statusCode).toBe(409);
       expect(getBoomData(error)).toEqual({
-        code: ALERTING_ERROR_CODES.IMPORT_CONFIG_VERSION_CONFLICT,
-        details: { import_config_id: 'import-1' },
+        code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_VERSION_CONFLICT,
+        details: { external_source_id: 'import-1' },
       });
     });
   });
 
-  describe('deleteImportConfig', () => {
+  describe('deleteExternalSource', () => {
     it('deletes the import', async () => {
-      await client.deleteImportConfig({ id: 'import-1' });
+      await client.deleteExternalSource({ id: 'import-1' });
 
       expect(savedObjectService.delete).toHaveBeenCalledWith({ id: 'import-1' });
     });
 
-    it('throws IMPORT_CONFIG_NOT_FOUND when the import does not exist', async () => {
+    it('throws EXTERNAL_SOURCE_NOT_FOUND when the import does not exist', async () => {
       savedObjectService.delete.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
-          IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+          EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
           'missing'
         )
       );
 
-      const error = await client.deleteImportConfig({ id: 'missing' }).catch((e) => e);
+      const error = await client.deleteExternalSource({ id: 'missing' }).catch((e) => e);
 
       expect(getBoomData(error)).toEqual({
-        code: ALERTING_ERROR_CODES.IMPORT_CONFIG_NOT_FOUND,
-        details: { import_config_id: 'missing' },
+        code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_NOT_FOUND,
+        details: { external_source_id: 'missing' },
       });
     });
   });
 
-  describe('findImportConfigs', () => {
+  describe('findExternalSources', () => {
     it('uses the default page and sort, and resolves each connector from its reference', async () => {
       savedObjectService.find.mockResolvedValue({
         saved_objects: [
@@ -455,7 +460,7 @@ describe('ImportConfigClient', () => {
         total: 1,
       });
 
-      const result = await client.findImportConfigs();
+      const result = await client.findExternalSources();
 
       expect(savedObjectService.find).toHaveBeenCalledWith({
         page: 1,
@@ -474,7 +479,7 @@ describe('ImportConfigClient', () => {
     });
 
     it('maps the sort field and passes the search, connector and type filters', async () => {
-      await client.findImportConfigs({
+      await client.findExternalSources({
         page: 2,
         perPage: 50,
         search: 'datadog',
@@ -497,7 +502,7 @@ describe('ImportConfigClient', () => {
 
     it('sorts by the type attribute', async () => {
       savedObjectService.find.mockResolvedValue({ saved_objects: [], total: 0 });
-      await client.findImportConfigs({ sortField: 'type' });
+      await client.findExternalSources({ sortField: 'type' });
 
       expect(savedObjectService.find).toHaveBeenCalledWith(
         expect.objectContaining({ sortField: 'type' })

@@ -34,7 +34,7 @@ export * from './policy_matcher_schema';
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './action_policy_attachment_schema';
-export * from './import_config_data_schema';
+export * from './external_source_data_schema';
 export * from './alert_attachment_schema';
 export * from './alert_episode_schema';
 export * from './alert_action_schema';

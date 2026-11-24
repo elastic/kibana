@@ -9,14 +9,14 @@ import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { actorSchema, entityIdSchema, ENTITY_ID_NOTE, tagsSchema } from './common';
 import {
   ID_MAX_LENGTH,
-  IMPORT_CONFIG_TYPES,
+  EXTERNAL_SOURCE_TYPES,
   MAX_DESCRIPTION_LENGTH,
   MAX_NAME_LENGTH,
 } from './constants';
 
 /** Kind */
 
-export const importConfigKindSchema = lazySchema(() =>
+export const externalSourceKindSchema = lazySchema(() =>
   z
     .union([
       z
@@ -33,19 +33,19 @@ export const importConfigKindSchema = lazySchema(() =>
     .describe('Whether events from this import become alerts (`alert`) or signals (`signal`).')
 );
 
-export type ImportConfigKind = z.infer<typeof importConfigKindSchema>;
+export type ExternalSourceKind = z.infer<typeof externalSourceKindSchema>;
 
 /** Type */
 
-export const importConfigTypeSchema = lazySchema(() =>
+export const externalSourceTypeSchema = lazySchema(() =>
   z
-    .enum(IMPORT_CONFIG_TYPES)
+    .enum(EXTERNAL_SOURCE_TYPES)
     .describe(
       'The source the import receives events from. It cannot be changed after the import is created.'
     )
 );
 
-export type ImportConfigType = z.infer<typeof importConfigTypeSchema>;
+export type ExternalSourceType = z.infer<typeof externalSourceTypeSchema>;
 
 /** Metadata */
 
@@ -62,7 +62,7 @@ const metadataDescriptionSchema = lazySchema(() =>
 );
 const metadataTagsSchema = lazySchema(() => tagsSchema.min(1));
 
-const importConfigMetadataSchema = lazySchema(() =>
+const externalSourceMetadataSchema = lazySchema(() =>
   z
     .object({
       name: metadataNameSchema.describe(METADATA_NAME_DESCRIPTION),
@@ -72,11 +72,11 @@ const importConfigMetadataSchema = lazySchema(() =>
     })
     .strict()
     .describe('Import metadata.')
-    .meta({ id: 'alerting_import_config_metadata' })
+    .meta({ id: 'alerting_external_source_metadata' })
 );
 
-/** The PATCH counterpart of {@link importConfigMetadataSchema}: leaves move, and clear, independently. */
-const importConfigMetadataPatchSchema = lazySchema(() =>
+/** The PATCH counterpart of {@link externalSourceMetadataSchema}: leaves move, and clear, independently. */
+const externalSourceMetadataPatchSchema = lazySchema(() =>
   z
     .object({
       name: metadataNameSchema.optional().describe(METADATA_NAME_DESCRIPTION),
@@ -109,25 +109,25 @@ const connectorIdSchema = lazySchema(() =>
 const ROUTING_TAGS_KIND_MESSAGE = 'metadata.routing_tags is only allowed when kind is "alert".';
 
 const isRoutingTagsAllowedForKind = (data: {
-  kind: ImportConfigKind;
+  kind: ExternalSourceKind;
   metadata: { routing_tags?: string[] };
 }): boolean => data.kind === 'alert' || data.metadata.routing_tags === undefined;
 
-const importConfigDataBaseSchema = lazySchema(() =>
+const externalSourceDataBaseSchema = lazySchema(() =>
   z.object({
-    type: importConfigTypeSchema,
-    kind: importConfigKindSchema,
-    metadata: importConfigMetadataSchema,
+    type: externalSourceTypeSchema,
+    kind: externalSourceKindSchema,
+    metadata: externalSourceMetadataSchema,
     connector_id: connectorIdSchema,
   })
 );
 
 /**
- * Data accepted when creating an import config. The `id` is optional; when omitted, Kibana
+ * Data accepted when creating an external source. The `id` is optional; when omitted, Kibana
  * generates one.
  */
-export const createImportConfigDataSchema = lazySchema(() =>
-  importConfigDataBaseSchema
+export const createExternalSourceDataSchema = lazySchema(() =>
+  externalSourceDataBaseSchema
     .extend({
       id: entityIdSchema
         .optional()
@@ -140,31 +140,31 @@ export const createImportConfigDataSchema = lazySchema(() =>
       message: ROUTING_TAGS_KIND_MESSAGE,
       path: ['metadata', 'routing_tags'],
     })
-    .meta({ id: 'alerting_new_import_config' })
+    .meta({ id: 'alerting_new_external_source' })
 );
 
-export type CreateImportConfigData = z.infer<typeof createImportConfigDataSchema>;
+export type CreateExternalSourceData = z.infer<typeof createExternalSourceDataSchema>;
 
 /**
- * Data accepted when updating an import config. Omitted fields are kept and `null` clears an
+ * Data accepted when updating an external source. Omitted fields are kept and `null` clears an
  * optional field. `type` and `connector_id` are not accepted: an import keeps the source and
  * connector it was created with.
  */
-export const updateImportConfigDataSchema = lazySchema(() =>
+export const updateExternalSourceDataSchema = lazySchema(() =>
   z
     .object({
-      kind: importConfigKindSchema.optional(),
-      metadata: importConfigMetadataPatchSchema.optional(),
+      kind: externalSourceKindSchema.optional(),
+      metadata: externalSourceMetadataPatchSchema.optional(),
     })
     .strict()
-    .meta({ id: 'alerting_update_import_config' })
+    .meta({ id: 'alerting_update_external_source' })
 );
 
-export type UpdateImportConfigData = z.infer<typeof updateImportConfigDataSchema>;
+export type UpdateExternalSourceData = z.infer<typeof updateExternalSourceDataSchema>;
 
-/** An import config as returned by the import config client. */
-export const importConfigResponseSchema = lazySchema(() =>
-  importConfigDataBaseSchema
+/** An external source as returned by the external source client. */
+export const externalSourceResponseSchema = lazySchema(() =>
+  externalSourceDataBaseSchema
     .extend({
       id: z.string().describe('Unique import identifier.'),
       version: z
@@ -177,14 +177,14 @@ export const importConfigResponseSchema = lazySchema(() =>
       updated_by: actorSchema.nullable().describe('Actor who last updated the import.'),
       updated_at: isoDateTime().describe('ISO timestamp when the import was last updated.'),
     })
-    .meta({ id: 'alerting_import_config_response' })
+    .meta({ id: 'alerting_external_source_response' })
 );
 
-export type ImportConfigResponse = z.infer<typeof importConfigResponseSchema>;
+export type ExternalSourceResponse = z.infer<typeof externalSourceResponseSchema>;
 
-/** Sort field for listing import configs. */
-export const findImportConfigsSortFieldSchema = lazySchema(() =>
+/** Sort field for listing external sources. */
+export const findExternalSourcesSortFieldSchema = lazySchema(() =>
   z.enum(['name', 'kind', 'type']).describe('The available fields to sort imports by.')
 );
 
-export type FindImportConfigsSortField = z.infer<typeof findImportConfigsSortFieldSchema>;
+export type FindExternalSourcesSortField = z.infer<typeof findExternalSourcesSortFieldSchema>;

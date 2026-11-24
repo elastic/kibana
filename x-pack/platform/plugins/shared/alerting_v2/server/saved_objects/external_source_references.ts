@@ -11,5 +11,5 @@
  */
 export const CONNECTOR_SAVED_OBJECT_TYPE = 'action';
 
-/** Name of the import config's saved object reference to its connector. */
-export const IMPORT_CONFIG_CONNECTOR_REFERENCE_NAME = 'connector';
+/** Name of the external source's saved object reference to its connector. */
+export const EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME = 'connector';

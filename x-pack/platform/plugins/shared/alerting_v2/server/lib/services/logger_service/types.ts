@@ -21,7 +21,7 @@ export type AlertingLabels = Partial<{
   rule_template_id: string;
   space_id: string;
   policy_id: string;
-  import_config_id: string;
+  external_source_id: string;
   connector_id: string;
   group_id: string;
   group_hash: string;
@@ -57,7 +57,7 @@ export type AlertingSubsystemName =
   | 'ruleTemplateClient'
   | 'actionPolicyClient'
   | 'actionPolicyTest'
-  | 'importConfigClient'
+  | 'externalSourceClient'
   | 'ruleExecutor'
   | 'director'
   | 'dispatcher'

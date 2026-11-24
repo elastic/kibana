@@ -6,10 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import type { ImportConfigResponse } from '@kbn/alerting-v2-schemas';
+import type { ExternalSourceResponse } from '@kbn/alerting-v2-schemas';
 import {
-  createImportConfigDataSchema,
-  updateImportConfigDataSchema,
+  createExternalSourceDataSchema,
+  updateExternalSourceDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
@@ -20,17 +20,17 @@ import { applyPatch } from '../apply_patch';
 import { buildSoSearch } from '../build_so_search';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
-  getImportConfigAlreadyExistsMessage,
-  getImportConfigNotFoundMessage,
-  getImportConfigVersionConflictMessage,
-  getInvalidImportConfigDataMessage,
-  type ImportConfigValidationContext,
-} from '../errors/import_config_error_messages';
-import { ImportConfigSavedObjectServiceScopedToken } from '../services/import_config_saved_object_service/tokens';
+  getExternalSourceAlreadyExistsMessage,
+  getExternalSourceNotFoundMessage,
+  getExternalSourceVersionConflictMessage,
+  getInvalidExternalSourceDataMessage,
+  type ExternalSourceValidationContext,
+} from '../errors/external_source_error_messages';
+import { ExternalSourceSavedObjectServiceScopedToken } from '../services/external_source_saved_object_service/tokens';
 import type {
-  ImportConfigSavedObjectDoc,
-  ImportConfigSavedObjectServiceContract,
-} from '../services/import_config_saved_object_service/types';
+  ExternalSourceSavedObjectDoc,
+  ExternalSourceSavedObjectServiceContract,
+} from '../services/external_source_saved_object_service/types';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -38,28 +38,28 @@ import {
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type {
-  CreateImportConfigParams,
-  FindImportConfigsParams,
-  FindImportConfigsResponse,
-  UpdateImportConfigParams,
+  CreateExternalSourceParams,
+  FindExternalSourcesParams,
+  FindExternalSourcesResponse,
+  UpdateExternalSourceParams,
 } from './types';
 import {
-  buildCreateImportConfigAttributes,
-  buildImportConfigReferences,
-  buildUpdateImportConfigAttributes,
+  buildCreateExternalSourceAttributes,
+  buildExternalSourceReferences,
+  buildUpdateExternalSourceAttributes,
   getConnectorIdFromReferences,
-  mapImportConfigSortField,
-  toImportConfigData,
-  transformImportConfigToApiResponse,
+  mapExternalSourceSortField,
+  toExternalSourceData,
+  transformExternalSourceToApiResponse,
 } from './utils';
 
-const withApm = withApmDecorator('ImportConfigClient');
+const withApm = withApmDecorator('ExternalSourceClient');
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
 
 /**
- * CRUD for alert import configs: the configuration of one source of external alerts, such as a
+ * CRUD for alert external sources: the configuration of one source of external alerts, such as a
  * Datadog connector that receives events.
  *
  * The connector is stored twice: as the `connector_id` attribute and as a `connector` saved object
@@ -68,27 +68,29 @@ const DEFAULT_PER_PAGE = 20;
  * the reference is missing.
  */
 @injectable()
-export class ImportConfigClient {
+export class ExternalSourceClient {
   private readonly logger: LoggerServiceContract;
 
   constructor(
-    @inject(ImportConfigSavedObjectServiceScopedToken)
-    private readonly importConfigSavedObjectService: ImportConfigSavedObjectServiceContract,
+    @inject(ExternalSourceSavedObjectServiceScopedToken)
+    private readonly externalSourceSavedObjectService: ExternalSourceSavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('importConfigClient');
+    this.logger = loggerService.forSubsystem('externalSourceClient');
   }
 
   @withApm
-  public async createImportConfig(params: CreateImportConfigParams): Promise<ImportConfigResponse> {
-    const { id, ...data } = this.parseImportConfigData(
-      createImportConfigDataSchema,
+  public async createExternalSource(
+    params: CreateExternalSourceParams
+  ): Promise<ExternalSourceResponse> {
+    const { id, ...data } = this.parseExternalSourceData(
+      createExternalSourceDataSchema,
       params.data,
       'create'
     );
     const actor = await this.userService.getCurrentActor();
-    const attributes = buildCreateImportConfigAttributes({
+    const attributes = buildCreateExternalSourceAttributes({
       data,
       actor,
       now: new Date().toISOString(),
@@ -96,22 +98,22 @@ export class ImportConfigClient {
 
     let createdId: string;
     try {
-      ({ id: createdId } = await this.importConfigSavedObjectService.create({
+      ({ id: createdId } = await this.externalSourceSavedObjectService.create({
         attrs: attributes,
-        references: buildImportConfigReferences(data.connector_id),
+        references: buildExternalSourceReferences(data.connector_id),
         id,
       }));
     } catch (e) {
       if (id && SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(getImportConfigAlreadyExistsMessage(id), {
-          code: ALERTING_ERROR_CODES.IMPORT_CONFIG_ALREADY_EXISTS,
-          details: { import_config_id: id },
+        throw Boom.conflict(getExternalSourceAlreadyExistsMessage(id), {
+          code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_ALREADY_EXISTS,
+          details: { external_source_id: id },
         });
       }
       throw e;
     }
 
-    return transformImportConfigToApiResponse({
+    return transformExternalSourceToApiResponse({
       id: createdId,
       attributes,
       connectorId: data.connector_id,
@@ -119,9 +121,9 @@ export class ImportConfigClient {
   }
 
   @withApm
-  public async getImportConfig({ id }: { id: string }): Promise<ImportConfigResponse> {
-    const doc = await this.getExistingImportConfig(id);
-    return transformImportConfigToApiResponse({
+  public async getExternalSource({ id }: { id: string }): Promise<ExternalSourceResponse> {
+    const doc = await this.getExistingExternalSource(id);
+    return transformExternalSourceToApiResponse({
       id: doc.id,
       attributes: doc.attributes,
       connectorId: this.resolveConnectorId(doc),
@@ -129,15 +131,21 @@ export class ImportConfigClient {
   }
 
   @withApm
-  public async updateImportConfig(params: UpdateImportConfigParams): Promise<ImportConfigResponse> {
-    const patch = this.parseImportConfigData(updateImportConfigDataSchema, params.data, 'update');
+  public async updateExternalSource(
+    params: UpdateExternalSourceParams
+  ): Promise<ExternalSourceResponse> {
+    const patch = this.parseExternalSourceData(
+      updateExternalSourceDataSchema,
+      params.data,
+      'update'
+    );
     const actor = await this.userService.getCurrentActor();
-    const existing = await this.getExistingImportConfig(params.id);
+    const existing = await this.getExistingExternalSource(params.id);
     const connectorId = this.resolveConnectorId(existing);
 
     const merged = applyPatch(
-      createImportConfigDataSchema,
-      toImportConfigData(existing.attributes, connectorId),
+      createExternalSourceDataSchema,
+      toExternalSourceData(existing.attributes, connectorId),
       patch
     );
     const {
@@ -145,10 +153,10 @@ export class ImportConfigClient {
       kind,
       metadata,
       connector_id: mergedConnectorId,
-    } = this.parseImportConfigData(createImportConfigDataSchema, merged, 'update');
+    } = this.parseExternalSourceData(createExternalSourceDataSchema, merged, 'update');
     const data = { type, kind, metadata, connector_id: mergedConnectorId };
 
-    const attributes = buildUpdateImportConfigAttributes({
+    const attributes = buildUpdateExternalSourceAttributes({
       existing: existing.attributes,
       data,
       actor,
@@ -156,23 +164,23 @@ export class ImportConfigClient {
     });
 
     try {
-      await this.importConfigSavedObjectService.update({
+      await this.externalSourceSavedObjectService.update({
         id: params.id,
         attrs: attributes,
-        references: buildImportConfigReferences(data.connector_id),
+        references: buildExternalSourceReferences(data.connector_id),
         version: existing.version,
       });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(getImportConfigVersionConflictMessage(params.id), {
-          code: ALERTING_ERROR_CODES.IMPORT_CONFIG_VERSION_CONFLICT,
-          details: { import_config_id: params.id },
+        throw Boom.conflict(getExternalSourceVersionConflictMessage(params.id), {
+          code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_VERSION_CONFLICT,
+          details: { external_source_id: params.id },
         });
       }
       throw e;
     }
 
-    return transformImportConfigToApiResponse({
+    return transformExternalSourceToApiResponse({
       id: params.id,
       attributes,
       connectorId: data.connector_id,
@@ -180,26 +188,26 @@ export class ImportConfigClient {
   }
 
   @withApm
-  public async deleteImportConfig({ id }: { id: string }): Promise<void> {
+  public async deleteExternalSource({ id }: { id: string }): Promise<void> {
     try {
-      await this.importConfigSavedObjectService.delete({ id });
+      await this.externalSourceSavedObjectService.delete({ id });
     } catch (e) {
       throw this.mapNotFound(id, e);
     }
   }
 
   @withApm
-  public async findImportConfigs(
-    params: FindImportConfigsParams = {}
-  ): Promise<FindImportConfigsResponse> {
+  public async findExternalSources(
+    params: FindExternalSourcesParams = {}
+  ): Promise<FindExternalSourcesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
 
-    const result = await this.importConfigSavedObjectService.find({
+    const result = await this.externalSourceSavedObjectService.find({
       page,
       perPage,
       search: buildSoSearch(params.search),
-      sortField: mapImportConfigSortField(params.sortField),
+      sortField: mapExternalSourceSortField(params.sortField),
       sortOrder: params.sortOrder,
       connectorId: params.connectorId,
       type: params.type,
@@ -207,7 +215,7 @@ export class ImportConfigClient {
 
     return {
       items: result.saved_objects.map((doc) =>
-        transformImportConfigToApiResponse({
+        transformExternalSourceToApiResponse({
           id: doc.id,
           attributes: doc.attributes,
           connectorId: this.resolveConnectorId(doc),
@@ -223,17 +231,17 @@ export class ImportConfigClient {
    * Validates input with a Zod schema and throws a uniform `Boom.badRequest` on failure, so create
    * and update report validation issues the same way.
    */
-  private parseImportConfigData<T>(
+  private parseExternalSourceData<T>(
     schema: z.ZodType<T>,
     data: unknown,
-    context: ImportConfigValidationContext
+    context: ExternalSourceValidationContext
   ): T {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(
-        getInvalidImportConfigDataMessage(context, stringifyZodError(parsed.error)),
+        getInvalidExternalSourceDataMessage(context, stringifyZodError(parsed.error)),
         {
-          code: ALERTING_ERROR_CODES.INVALID_IMPORT_CONFIG_DATA,
+          code: ALERTING_ERROR_CODES.INVALID_EXTERNAL_SOURCE_DATA,
           details: { context, errors: treeifyError(parsed.error) },
         }
       );
@@ -241,9 +249,9 @@ export class ImportConfigClient {
     return parsed.data;
   }
 
-  private async getExistingImportConfig(id: string): Promise<ImportConfigSavedObjectDoc> {
+  private async getExistingExternalSource(id: string): Promise<ExternalSourceSavedObjectDoc> {
     try {
-      return await this.importConfigSavedObjectService.get(id);
+      return await this.externalSourceSavedObjectService.get(id);
     } catch (e) {
       throw this.mapNotFound(id, e);
     }
@@ -251,9 +259,9 @@ export class ImportConfigClient {
 
   private mapNotFound(id: string, e: unknown): unknown {
     if (e instanceof Error && SavedObjectsErrorHelpers.isNotFoundError(e)) {
-      return Boom.notFound(getImportConfigNotFoundMessage(id), {
-        code: ALERTING_ERROR_CODES.IMPORT_CONFIG_NOT_FOUND,
-        details: { import_config_id: id },
+      return Boom.notFound(getExternalSourceNotFoundMessage(id), {
+        code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_NOT_FOUND,
+        details: { external_source_id: id },
       });
     }
     return e;
@@ -263,16 +271,16 @@ export class ImportConfigClient {
    * Returns the connector id from the `connector` reference. A missing reference is logged and
    * the stored attribute is used instead, since it is the only other copy.
    */
-  private resolveConnectorId(doc: ImportConfigSavedObjectDoc): string {
+  private resolveConnectorId(doc: ExternalSourceSavedObjectDoc): string {
     const connectorId = getConnectorIdFromReferences(doc.references);
     if (connectorId !== undefined) {
       return connectorId;
     }
 
     this.logger.warn({
-      message: 'Import config has no connector reference; using the stored connector id',
-      code: ALERTING_LOG_CODES.IMPORT_CONFIG_CONNECTOR_REFERENCE_NOT_FOUND,
-      labels: { import_config_id: doc.id, connector_id: doc.attributes.connector_id },
+      message: 'External source has no connector reference; using the stored connector id',
+      code: ALERTING_LOG_CODES.EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NOT_FOUND,
+      labels: { external_source_id: doc.id, connector_id: doc.attributes.connector_id },
     });
     return doc.attributes.connector_id;
   }

@@ -7,11 +7,11 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { toKqlExpression, type KueryNode } from '@kbn/es-query';
-import { IMPORT_CONFIG_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import type { ImportConfigSavedObjectAttributes } from '../../../saved_objects';
-import { createImportConfigSavedObjectService } from './import_config_saved_object_service.mock';
+import { EXTERNAL_SOURCE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import type { ExternalSourceSavedObjectAttributes } from '../../../saved_objects';
+import { createExternalSourceSavedObjectService } from './external_source_saved_object_service.mock';
 
-const attributes: ImportConfigSavedObjectAttributes = {
+const attributes: ExternalSourceSavedObjectAttributes = {
   type: 'datadog',
   kind: 'alert',
   metadata: { name: 'Datadog production' },
@@ -28,31 +28,31 @@ const references = [{ name: 'connector', type: 'action', id: 'connector-1' }];
 const emptyFindResult = { saved_objects: [], total: 0, page: 1, per_page: 20 };
 
 const savedObject = (
-  overrides: Partial<SavedObject<ImportConfigSavedObjectAttributes>> = {}
-): SavedObject<ImportConfigSavedObjectAttributes> => ({
+  overrides: Partial<SavedObject<ExternalSourceSavedObjectAttributes>> = {}
+): SavedObject<ExternalSourceSavedObjectAttributes> => ({
   id: 'import-1',
-  type: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  type: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   attributes,
   references,
   version: 'WzEsMV0=',
   ...overrides,
 });
 
-describe('ImportConfigSavedObjectService', () => {
+describe('ExternalSourceSavedObjectService', () => {
   describe('create', () => {
     it('creates the saved object with its references and without overwriting', async () => {
-      const { importConfigSavedObjectService, mockSavedObjectsClient } =
-        createImportConfigSavedObjectService();
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
       mockSavedObjectsClient.create.mockResolvedValue(savedObject());
 
-      const result = await importConfigSavedObjectService.create({
+      const result = await externalSourceSavedObjectService.create({
         attrs: attributes,
         references,
         id: 'import-1',
       });
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-        IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         attributes,
         { id: 'import-1', overwrite: false, references }
       );
@@ -60,14 +60,14 @@ describe('ImportConfigSavedObjectService', () => {
     });
 
     it('generates an id when none is given', async () => {
-      const { importConfigSavedObjectService, mockSavedObjectsClient } =
-        createImportConfigSavedObjectService();
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
       mockSavedObjectsClient.create.mockResolvedValue(savedObject());
 
-      await importConfigSavedObjectService.create({ attrs: attributes, references });
+      await externalSourceSavedObjectService.create({ attrs: attributes, references });
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-        IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         attributes,
         expect.objectContaining({ id: expect.any(String) })
       );
@@ -76,14 +76,14 @@ describe('ImportConfigSavedObjectService', () => {
 
   describe('get', () => {
     it('returns the attributes, version and references', async () => {
-      const { importConfigSavedObjectService, mockSavedObjectsClient } =
-        createImportConfigSavedObjectService();
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
       mockSavedObjectsClient.get.mockResolvedValue(savedObject());
 
-      const result = await importConfigSavedObjectService.get('import-1');
+      const result = await externalSourceSavedObjectService.get('import-1');
 
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
-        IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         'import-1',
         undefined
       );
@@ -96,13 +96,13 @@ describe('ImportConfigSavedObjectService', () => {
     });
 
     it('returns empty references when the saved object has none', async () => {
-      const { importConfigSavedObjectService, mockSavedObjectsClient } =
-        createImportConfigSavedObjectService();
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
       mockSavedObjectsClient.get.mockResolvedValue(
         savedObject({ references: undefined as unknown as [] })
       );
 
-      const result = await importConfigSavedObjectService.get('import-1');
+      const result = await externalSourceSavedObjectService.get('import-1');
 
       expect(result.references).toEqual([]);
     });
@@ -110,17 +110,17 @@ describe('ImportConfigSavedObjectService', () => {
 
   describe('update', () => {
     it('replaces the attributes and references, using the version for concurrency control', async () => {
-      const { importConfigSavedObjectService, mockSavedObjectsClient } =
-        createImportConfigSavedObjectService();
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
       mockSavedObjectsClient.update.mockResolvedValue({
         id: 'import-1',
-        type: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        type: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         attributes,
         references,
         version: 'WzIsMV0=',
       });
 
-      const result = await importConfigSavedObjectService.update({
+      const result = await externalSourceSavedObjectService.update({
         id: 'import-1',
         attrs: attributes,
         references,
@@ -128,7 +128,7 @@ describe('ImportConfigSavedObjectService', () => {
       });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-        IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         'import-1',
         attributes,
         { version: 'WzEsMV0=', mergeAttributes: false, references }
@@ -139,13 +139,13 @@ describe('ImportConfigSavedObjectService', () => {
 
   describe('delete', () => {
     it('deletes the saved object', async () => {
-      const { importConfigSavedObjectService, mockSavedObjectsClient } =
-        createImportConfigSavedObjectService();
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
 
-      await importConfigSavedObjectService.delete({ id: 'import-1' });
+      await externalSourceSavedObjectService.delete({ id: 'import-1' });
 
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
-        IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         'import-1'
       );
     });
@@ -153,8 +153,8 @@ describe('ImportConfigSavedObjectService', () => {
 
   describe('find', () => {
     it('sorts by name by default and returns the references of each result', async () => {
-      const { importConfigSavedObjectService, mockSavedObjectsClient } =
-        createImportConfigSavedObjectService();
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
       mockSavedObjectsClient.find.mockResolvedValue({
         saved_objects: [{ ...savedObject(), score: 1 }],
         total: 1,
@@ -162,10 +162,10 @@ describe('ImportConfigSavedObjectService', () => {
         per_page: 20,
       });
 
-      const result = await importConfigSavedObjectService.find({ page: 1, perPage: 20 });
+      const result = await externalSourceSavedObjectService.find({ page: 1, perPage: 20 });
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-        type: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        type: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
         sortField: 'metadata.name.keyword',
@@ -178,11 +178,11 @@ describe('ImportConfigSavedObjectService', () => {
     });
 
     it('searches the name and description fields', async () => {
-      const { importConfigSavedObjectService, mockSavedObjectsClient } =
-        createImportConfigSavedObjectService();
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
       mockSavedObjectsClient.find.mockResolvedValue(emptyFindResult);
 
-      await importConfigSavedObjectService.find({ page: 1, perPage: 20, search: 'datadog*' });
+      await externalSourceSavedObjectService.find({ page: 1, perPage: 20, search: 'datadog*' });
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -193,12 +193,12 @@ describe('ImportConfigSavedObjectService', () => {
       );
     });
 
-    it('finds the import configs that reference a connector', async () => {
-      const { importConfigSavedObjectService, mockSavedObjectsClient } =
-        createImportConfigSavedObjectService();
+    it('finds the external sources that reference a connector', async () => {
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
       mockSavedObjectsClient.find.mockResolvedValue(emptyFindResult);
 
-      await importConfigSavedObjectService.find({
+      await externalSourceSavedObjectService.find({
         page: 1,
         perPage: 20,
         connectorId: 'connector-1',
@@ -209,16 +209,16 @@ describe('ImportConfigSavedObjectService', () => {
       );
     });
 
-    it('filters the import configs by type', async () => {
-      const { importConfigSavedObjectService, mockSavedObjectsClient } =
-        createImportConfigSavedObjectService();
+    it('filters the external sources by type', async () => {
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
       mockSavedObjectsClient.find.mockResolvedValue(emptyFindResult);
 
-      await importConfigSavedObjectService.find({ page: 1, perPage: 20, type: 'datadog' });
+      await externalSourceSavedObjectService.find({ page: 1, perPage: 20, type: 'datadog' });
 
       const [{ filter }] = mockSavedObjectsClient.find.mock.calls[0];
       expect(toKqlExpression(filter as KueryNode)).toBe(
-        `${IMPORT_CONFIG_SAVED_OBJECT_TYPE}.attributes.type: "datadog"`
+        `${EXTERNAL_SOURCE_SAVED_OBJECT_TYPE}.attributes.type: "datadog"`
       );
     });
   });

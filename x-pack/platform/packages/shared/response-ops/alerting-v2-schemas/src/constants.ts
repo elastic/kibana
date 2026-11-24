@@ -177,4 +177,4 @@ export const SEVERITY_LEVELS = ['info', 'low', 'medium', 'high', 'critical'] as 
 /**
  * Sources an alert import can receive events from.
  */
-export const IMPORT_CONFIG_TYPES = ['datadog'] as const;
+export const EXTERNAL_SOURCE_TYPES = ['datadog'] as const;

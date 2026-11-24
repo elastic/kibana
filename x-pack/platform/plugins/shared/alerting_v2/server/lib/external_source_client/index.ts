@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export { ImportConfigClient } from './import_config_client';
+export { ExternalSourceClient } from './external_source_client';
 export type {
-  CreateImportConfigParams,
-  FindImportConfigsParams,
-  FindImportConfigsResponse,
-  UpdateImportConfigParams,
+  CreateExternalSourceParams,
+  FindExternalSourcesParams,
+  FindExternalSourcesResponse,
+  UpdateExternalSourceParams,
 } from './types';
