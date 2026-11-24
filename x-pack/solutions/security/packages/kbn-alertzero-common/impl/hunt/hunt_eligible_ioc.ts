@@ -6,6 +6,7 @@
  */
 
 import { isNonRoutableIpIoc } from '../ip_ranges';
+import { isPlaceholderEmailIoc } from './placeholder_email';
 
 /**
  * Which stored report IOCs a hunt may search.
@@ -24,6 +25,11 @@ import { isNonRoutableIpIoc } from '../ip_ranges';
  * lacks a tier or still carries a promotable one. extract_iocs already tiers
  * them `reference`/`private_ip` for new reports; this value check covers
  * reports extracted before that classification existed.
+ *
+ * A `email` IOC on a placeholder host (`test@test.com`, `a@x.example`) is never
+ * hunt-eligible, whatever tier a stored doc carries, including none. extract_iocs
+ * tiers these `reference`/`placeholder_email` for new reports; this value check
+ * covers reports extracted before that rule existed.
  */
 export const HUNT_ELIGIBLE_IOC_TIERS = ['discriminating', 'contextual', 'uncertain'] as const;
 
@@ -39,6 +45,9 @@ export const isHuntEligibleIoc = (ioc: {
     return false;
   }
   if (isNonRoutableIpIoc(ioc)) {
+    return false;
+  }
+  if (isPlaceholderEmailIoc(ioc)) {
     return false;
   }
   if (ioc.tier === undefined || ioc.tier === null || ioc.tier === '') {

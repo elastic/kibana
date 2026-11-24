@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { AvailabilityUnavailableReason } from '../availability/availability_service';
+import type { AvailabilityUnavailableReason } from '../../../common/tick';
 import { DetectionStateClient } from '../state/detection_state_client';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { DetectionStrategy } from '../strategies/detection_strategy';

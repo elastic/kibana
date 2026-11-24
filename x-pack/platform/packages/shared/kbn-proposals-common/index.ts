@@ -34,6 +34,16 @@ export {
 export { ACTION_WORKFLOW_TAG, actionMetadataSchema } from '@kbn/workflows';
 export type { ActionMetadata } from '@kbn/workflows';
 
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionCatalogEntry,
+  ActionImpact,
+  ActionSubjectKind,
+  JsonSchema,
+  ListActionsResponse,
+} from './src/action_catalog';
+
 export {
   approveProposalRequestSchema,
   boundedActionInput,
