@@ -46,7 +46,8 @@ export const useInfiniteFindCaseUserActions = (
         showErrorToast(error, { title: ERROR_TITLE });
       },
       getNextPageParam: (lastPage, pages) => {
-        const lastPageNumber = Math.ceil(lastPage.total / lastPage.perPage);
+        const initialTotal = pages[0].total;
+        const lastPageNumber = Math.ceil(initialTotal / lastPage.perPage);
         // here last page fetching is skipped because last page is fetched separately using useQuery hook
         const lastFetchablePage = shouldFetchAllPages ? lastPageNumber : lastPageNumber - 1;
         if (lastPage.page < lastFetchablePage) {
