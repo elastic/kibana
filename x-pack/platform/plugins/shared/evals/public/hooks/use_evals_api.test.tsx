@@ -14,6 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { queryKeys } from '../query_keys';
 import {
   useAddExamples,
+  useCompareExperiments,
   useCopyDataset,
   useDataset,
   useDatasets,
@@ -184,6 +185,27 @@ describe('useExperimentDatasetExamples', () => {
         .getQueryCache()
         .find(queryKeys.experiments.datasetExamples(EXPERIMENT_ID, DATASET_ID, EXECUTION_ID, false))
     ).toBeUndefined();
+  });
+});
+
+describe('useCompareExperiments', () => {
+  it('sends the repetition policy to the route', async () => {
+    const { http, wrapper } = setup();
+    const { result } = renderHook(
+      () => useCompareExperiments('execution', 'baseline', 'target', 'median'),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(http.get).toHaveBeenLastCalledWith('/internal/evals/experiments/compare', {
+      query: {
+        type: 'execution',
+        baseline_id: 'baseline',
+        target_id: 'target',
+        repetition_policy: 'median',
+      },
+      version: '1',
+    });
   });
 });
 

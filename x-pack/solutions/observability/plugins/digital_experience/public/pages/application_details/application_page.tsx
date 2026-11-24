@@ -12,10 +12,11 @@ import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageSection } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { APPLICATION_SOURCE } from '../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../common/application_source';
 import {
   APPLICATION_TAB_IDS,
   type ApplicationSource,
+  type ApplicationType,
   type ApplicationTabId,
 } from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
@@ -25,32 +26,20 @@ import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useShareAction } from '../../hooks/use_share_action';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { APPLICATIONS_LABEL, SESSIONS_LABEL } from '../../labels';
+import { APPLICATIONS_LABEL, APPLICATION_TAB_LABELS } from '../../labels';
 import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
+import { ReportsTab } from '../reports/reports_tab';
 import { SessionsTab } from '../sessions/sessions_tab';
+import { MobileApplicationPage } from './mobile_overview/mobile_application_page';
 import { OtelOverview } from './otel_overview/otel_overview';
 
-const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
-  overview: i18n.translate('xpack.digitalExperience.application.tabs.overview', {
-    defaultMessage: 'Overview',
-  }),
-  errors: i18n.translate('xpack.digitalExperience.application.tabs.errors', {
-    defaultMessage: 'Errors',
-  }),
-  network: i18n.translate('xpack.digitalExperience.application.tabs.network', {
-    defaultMessage: 'Network',
-  }),
-  sessions: SESSIONS_LABEL,
-};
-
 /**
- * Errors, network and sessions are read from EDOT Browser data only; Classic RUM applications have
+ * Errors, network, sessions and reports are read from EDOT Browser data only; Classic RUM applications have
  * the ux plugin's dashboard as their Overview.
  */
 const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
   source === APPLICATION_SOURCE.otel ? APPLICATION_TAB_IDS : ['overview'];
-
 const sessionsUnavailablePrompt = (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceSessionsUnavailable"
@@ -141,7 +130,36 @@ function ClassicRumOverview({ serviceName }: { serviceName: string }) {
   return withPagePadding(error || !ux ? overviewUnavailablePrompt : overviewLoadingPrompt);
 }
 
+/** An application's page: a mobile application's, or a web one's (EDOT Browser or Classic RUM). */
 export function ApplicationPage({
+  serviceName,
+  source,
+  applicationType,
+  selectedTab,
+}: {
+  serviceName: string;
+  source: ApplicationSource;
+  /** Whether the application is a web or a mobile one; web when unset. */
+  applicationType?: ApplicationType;
+  selectedTab: ApplicationTabId;
+}) {
+  // Mobile applications are EDOT data: their type, not their source, gives them their own page.
+  if (source === APPLICATION_SOURCE.otel && applicationType === APPLICATION_TYPE.mobile) {
+    // A new one per application, so its badges, filter options and KPIs never show the previous
+    // application's while the new one loads.
+    return (
+      <MobileApplicationPage
+        key={serviceName}
+        serviceName={serviceName}
+        selectedTab={selectedTab}
+      />
+    );
+  }
+  return <WebApplicationPage serviceName={serviceName} source={source} selectedTab={selectedTab} />;
+}
+
+/** A web application's page: the Overview of its source and, for EDOT Browser, its other tabs. */
+function WebApplicationPage({
   serviceName,
   source,
   selectedTab,
@@ -152,14 +170,12 @@ export function ApplicationPage({
 }) {
   const applicationsHref = useApplicationsHref();
   const history = useHistory();
-  const { overviewHref, overviewPath, errorsHref, networkHref, sessionsHref } = useApplicationLinks(
-    serviceName,
-    source
-  );
+  const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
+    useApplicationLinks(serviceName, source);
   const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
-  // Classic RUM has no Errors or Network tab, so their URLs are replaced by the Overview's.
-  const isUnsupportedTab =
-    source !== APPLICATION_SOURCE.otel && (selectedTab === 'errors' || selectedTab === 'network');
+  // Classic RUM only has the Overview (and Sessions' unavailable prompt); any other tab's URL is
+  // replaced by the Overview's.
+  const isUnsupportedTab = selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
   useEffect(() => {
     if (isUnsupportedTab) {
       history.replace(overviewPath);
@@ -169,6 +185,7 @@ export function ApplicationPage({
     overview: overviewHref,
     errors: errorsHref,
     network: networkHref,
+    reports: reportsHref,
     sessions: sessionsHref(),
   };
 
@@ -204,6 +221,8 @@ export function ApplicationPage({
         return withPagePadding(<NetworkTab serviceName={serviceName} />);
       case 'sessions':
         return renderSessions();
+      case 'reports':
+        return withPagePadding(<ReportsTab />);
       default:
         return renderOverview();
     }

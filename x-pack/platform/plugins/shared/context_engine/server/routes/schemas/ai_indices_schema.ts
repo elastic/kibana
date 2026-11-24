@@ -54,7 +54,7 @@ import {
   type KiLifecycleStatus,
 } from '../../../common/step_types/ki';
 import {
-  validateAbsoluteSignalWindow,
+  validateIsoDate,
   validateAiIndexId,
   validateAiIndexQueryLimit,
   validateFeedbackAnalysisInterval,
@@ -102,7 +102,7 @@ const signalTimeRangeSchema = schema.oneOf(
       type: schema.literal('absolute'),
       from: schema.string({
         maxLength: MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
-        validate: validateAbsoluteSignalWindow,
+        validate: validateIsoDate,
         meta: { description: 'ISO 8601 date to analyze signals since.' },
       }),
     }),

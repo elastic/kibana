@@ -101,6 +101,7 @@ const STANDARD_LIST_TYPES = [
   'lens',
   'links',
   'map',
+  'vega',
   // cases saved objects
   'cases',
   'cases-comments',

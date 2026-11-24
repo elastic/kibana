@@ -547,19 +547,20 @@ describe('fetchBranchCounts', () => {
 });
 
 describe('buildSetupBuildsQuery', () => {
-  it('reads whether the test failed per build, branch and setup, over executions only', () => {
+  it('reads whether the test failed and passed per build, branch and setup, over executions only', () => {
     const query = buildSetupBuildsQuery(scope, ['playwright'], ['p1', 'p2']);
 
     expect(query).toContain(
       'test.outcome IN ("expected", "unexpected", "flaky")) AND test.id IN ("p1", "p2")'
     );
     expect(query).toContain(
-      'EVAL failed = CASE(test.outcome IN ("unexpected", "flaky"), 1, 0), setup = CONCAT(' +
+      'EVAL failed = CASE(test.outcome IN ("unexpected", "flaky"), 1, 0), ' +
+        'passed = CASE(test.outcome IN ("expected", "flaky"), 1, 0), setup = CONCAT(' +
         'COALESCE(buildkite.pipeline.slug, "-"), " ", COALESCE(test_run.config.file.path, "-"), ' +
         '" ", COALESCE(test_run.target.mode, "-"), " ", COALESCE(test_run.target.type, "-"))'
     );
     expect(query).toContain(
-      'STATS failed = MAX(failed), ran_at = MIN(@timestamp), ' +
+      'STATS failed = MAX(failed), passed = MAX(passed), ran_at = MIN(@timestamp), ' +
         'failed_at = MAX(CASE(failed == 1, @timestamp, NULL)) ' +
         'BY test.id, buildkite.branch, setup, buildkite.build.id, buildkite.build.number'
     );
@@ -576,13 +577,20 @@ describe('buildSetupBuildsQuery', () => {
 describe('fetchSetupBuilds', () => {
   const setupA = 'kibana-on-merge a.config.ts stateful-classic local';
   const setupB = 'kibana-on-merge b.config.ts serverless-search local';
-  const row = (testId: string, setup: string, buildNumber: number, failed: number) => ({
+  const row = (
+    testId: string,
+    setup: string,
+    buildNumber: number,
+    failed: number,
+    passed = failed ? 0 : 1
+  ) => ({
     test_id: testId,
     branch: 'main',
     setup,
     build_id: `build-${buildNumber}`,
     build_number: buildNumber,
     failed,
+    passed,
     ran_at: `2026-10-01T${String(buildNumber).padStart(2, '0')}:00:00.000Z`,
     failed_at: failed ? `2026-10-01T${String(buildNumber).padStart(2, '0')}:30:00.000Z` : null,
   });
@@ -595,7 +603,8 @@ describe('fetchSetupBuilds', () => {
           records: [
             row('j1', setupA, 12, 1),
             row('j1', setupA, 11, 0),
-            row('j1', setupB, 11, 1),
+            // failed, then passed on a retry
+            row('j1', setupB, 11, 1, 1),
             row('j2', setupA, 11, 0),
             // no branch or build: ignored
             { ...row('j2', setupA, 13, 1), branch: null },
@@ -628,13 +637,13 @@ describe('fetchSetupBuilds', () => {
           {
             buildId: 'build-11',
             buildNumber: 11,
-            failed: false,
+            outcome: 'passed',
             ranAt: new Date('2026-10-01T11:00:00.000Z'),
           },
           {
             buildId: 'build-12',
             buildNumber: 12,
-            failed: true,
+            outcome: 'failed',
             ranAt: new Date('2026-10-01T12:00:00.000Z'),
             failedAt: new Date('2026-10-01T12:30:00.000Z'),
           },
@@ -647,7 +656,7 @@ describe('fetchSetupBuilds', () => {
           {
             buildId: 'build-11',
             buildNumber: 11,
-            failed: true,
+            outcome: 'recovered',
             ranAt: new Date('2026-10-01T11:00:00.000Z'),
             failedAt: new Date('2026-10-01T11:30:00.000Z'),
           },
@@ -662,7 +671,7 @@ describe('fetchSetupBuilds', () => {
           {
             buildId: 'build-11',
             buildNumber: 11,
-            failed: false,
+            outcome: 'passed',
             ranAt: new Date('2026-10-01T11:00:00.000Z'),
           },
         ],

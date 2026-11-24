@@ -13,7 +13,9 @@
         "hidden",
         "none"
       ],
-      "ignore_unavailable": "__flag__"
+      "ignore_unavailable": "__flag__",
+      "include_auto_calibration": "__flag__",
+      "vector_formats": "__flag__"
     },
     "methods": [
       "GET"

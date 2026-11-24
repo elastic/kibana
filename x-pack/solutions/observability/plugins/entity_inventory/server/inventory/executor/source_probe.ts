@@ -10,7 +10,7 @@ import { buildProbeQuery } from '../generator';
 import type { GeneratedQuery } from '../generator';
 import { isVerificationError, toSourceError } from './errors/source_error';
 import { executeEsql } from './esql_client';
-import type { EsqlQueryResult } from './esql_client';
+import type { EsqlQueryResult, EsqlStats } from './esql_client';
 
 // The only question the executor asks Elasticsearch before the list queries. On purpose it makes
 // no metadata calls (no resolve-index, `_has_privileges` or field capabilities) and never learns a
@@ -40,8 +40,19 @@ type ProbeOutcome =
   | { failed: false; hasTimeSeries: boolean }
   | { failed: true; status: number | null; reason: string };
 
-/** What the probe found behind one pattern, or why it could not tell, and the probe query sent. */
-export type ProbeResult = ProbeOutcome & { query: GeneratedQuery };
+/** How the probe query ran: its stats. */
+export interface ProbeExecution {
+  /** Null when the probe threw. */
+  stats: EsqlStats | null;
+  /** Null when the probe threw. */
+  isPartial: boolean | null;
+}
+
+/**
+ * What the probe found behind one pattern, or why it could not tell, the probe query sent and how
+ * it ran.
+ */
+export type ProbeResult = ProbeOutcome & { query: GeneratedQuery; execution: ProbeExecution };
 
 const TIMESTAMP_COLUMN = '@timestamp';
 
@@ -62,6 +73,14 @@ const fromError = (pattern: string, error: unknown): ProbeOutcome => {
   }
   const { status, reason } = toSourceError(pattern, error);
   return { failed: true, status, reason };
+};
+
+const toExecution = (outcome: PromiseSettledResult<EsqlQueryResult>): ProbeExecution => {
+  if (outcome.status === 'rejected') {
+    return { stats: null, isPartial: null };
+  }
+  const { stats, isPartial } = outcome.value;
+  return { stats, isPartial };
 };
 
 /**
@@ -90,6 +109,7 @@ export const probeSources = async (
             ? fromResponse(outcome.value)
             : fromError(pattern, outcome.reason)),
           query: probes[position],
+          execution: toExecution(outcome),
         },
       ];
     })
