@@ -24,6 +24,11 @@ import {
 } from '../../../../../../../common/constants';
 
 import { isManagedOtlpEndpointUrl } from '../../../../../../../common/services/managed_otlp_endpoint';
+import {
+  OTLP_QUEUE_SPEC_DEFAULTS,
+  getOtlpBatchSizer,
+  withManagedOtlpQueueDefaults,
+} from '../../../../../../../common/services/otlp_sending_queue';
 
 import { useInput, useKeyValueInput, useSwitchInput } from '../../../../hooks';
 
@@ -57,55 +62,72 @@ const OTLP_HTTP_DEFAULT_FORCE_ATTEMPT_HTTP2 = true;
 // that Elastic recommends. On any other endpoint, the spec defaults apply.
 const QUEUE_DEFAULTS = MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue;
 
-/** The spec defaults of the sending queue and the retry. */
-export const OTLP_QUEUE_SPEC_DEFAULT_SIZER = 'requests';
-const OTLP_QUEUE_SPEC_DEFAULT_SIZE = 1000;
-const OTLP_QUEUE_SPEC_DEFAULT_BLOCK_ON_OVERFLOW = false;
-const OTLP_BATCH_SPEC_DEFAULT_FLUSH_TIMEOUT = '200ms';
-const OTLP_BATCH_SPEC_DEFAULT_MIN_SIZE = 8192;
-const OTLP_BATCH_SPEC_DEFAULT_MAX_SIZE = 0;
+/** The spec defaults of the settings. */
+export const OTLP_QUEUE_SPEC_DEFAULT_SIZER = OTLP_QUEUE_SPEC_DEFAULTS.sizer;
 const OTLP_RETRY_SPEC_DEFAULT_INITIAL_INTERVAL = '5s';
 const OTLP_RETRY_SPEC_DEFAULT_MAX_INTERVAL = '30s';
 const OTLP_RETRY_SPEC_DEFAULT_MAX_ELAPSED_TIME = '5m';
 
+const toSize = (value: string | undefined) => (value?.trim() ? Number(value) : undefined);
+
 /**
  * The defaults that apply to the empty settings of the sending queue: the ones that the server sets
- * on the managed endpoint, or the spec defaults. The sizes that Elastic recommends are in bytes,
- * so they only apply to a queue or a batch that counts bytes.
+ * on the managed endpoint, or the spec defaults. The default of a size depends on the other sizes
+ * that are set, so it is computed with only that size empty.
  */
 export const getOtlpQueueDefaults = ({
   isManaged,
   queueSizer,
   batchSizer,
+  queueSize,
+  minSize,
+  maxSize,
 }: {
   isManaged: boolean;
   /** The unit of the queue, empty for the default one. */
   queueSizer: string;
   /** The unit of the batch, empty for the default one. */
   batchSizer: string;
+  queueSize?: string;
+  minSize?: string;
+  maxSize?: string;
 }) => {
   const sizer: string =
-    queueSizer || (isManaged ? QUEUE_DEFAULTS.sizer : OTLP_QUEUE_SPEC_DEFAULT_SIZER);
-  // with no unit, a batch uses the one of the queue, but it can not count requests: it counts items
-  const effectiveBatchSizer: string =
-    batchSizer || (isManaged ? QUEUE_DEFAULTS.batch.sizer : sizer === 'requests' ? 'items' : sizer);
-  const managedBatchSize = isManaged && effectiveBatchSizer === QUEUE_DEFAULTS.batch.sizer;
+    queueSizer || (isManaged ? QUEUE_DEFAULTS.sizer : OTLP_QUEUE_SPEC_DEFAULTS.sizer);
+  if (!isManaged) {
+    return {
+      isManaged,
+      sizer,
+      queueSize: OTLP_QUEUE_SPEC_DEFAULTS.queueSize,
+      blockOnOverflow: OTLP_QUEUE_SPEC_DEFAULTS.blockOnOverflow,
+      flushTimeout: OTLP_QUEUE_SPEC_DEFAULTS.flushTimeout,
+      batchSizer: getOtlpBatchSizer(batchSizer, sizer),
+      minSize: OTLP_QUEUE_SPEC_DEFAULTS.minSize,
+      maxSize: OTLP_QUEUE_SPEC_DEFAULTS.maxSize,
+    };
+  }
+
+  // what the server fills, with the size of each default left empty
+  const fill = (sizes: { queueSize?: string; minSize?: string; maxSize?: string }) =>
+    withManagedOtlpQueueDefaults({
+      sizer: sizer as OtlpQueueSizer,
+      queue_size: toSize(sizes.queueSize),
+      batch: {
+        ...(batchSizer ? { sizer: batchSizer as OtlpBatchSizer } : {}),
+        min_size: toSize(sizes.minSize),
+        max_size: toSize(sizes.maxSize),
+      },
+    });
+  const filled = fill({ queueSize, minSize, maxSize });
   return {
     isManaged,
     sizer,
-    queueSize:
-      isManaged && sizer === QUEUE_DEFAULTS.sizer
-        ? QUEUE_DEFAULTS.queue_size
-        : OTLP_QUEUE_SPEC_DEFAULT_SIZE,
-    blockOnOverflow: isManaged
-      ? QUEUE_DEFAULTS.block_on_overflow
-      : OTLP_QUEUE_SPEC_DEFAULT_BLOCK_ON_OVERFLOW,
-    flushTimeout: isManaged
-      ? QUEUE_DEFAULTS.batch.flush_timeout
-      : OTLP_BATCH_SPEC_DEFAULT_FLUSH_TIMEOUT,
-    batchSizer: effectiveBatchSizer,
-    minSize: managedBatchSize ? QUEUE_DEFAULTS.batch.min_size : OTLP_BATCH_SPEC_DEFAULT_MIN_SIZE,
-    maxSize: managedBatchSize ? QUEUE_DEFAULTS.batch.max_size : OTLP_BATCH_SPEC_DEFAULT_MAX_SIZE,
+    queueSize: fill({ minSize, maxSize }).queue_size ?? OTLP_QUEUE_SPEC_DEFAULTS.queueSize,
+    blockOnOverflow: QUEUE_DEFAULTS.block_on_overflow,
+    flushTimeout: QUEUE_DEFAULTS.batch.flush_timeout,
+    batchSizer: filled.batch?.sizer ?? QUEUE_DEFAULTS.batch.sizer,
+    minSize: fill({ queueSize, maxSize }).batch?.min_size ?? OTLP_QUEUE_SPEC_DEFAULTS.minSize,
+    maxSize: fill({ queueSize, minSize }).batch?.max_size ?? OTLP_QUEUE_SPEC_DEFAULTS.maxSize,
   };
 };
 
@@ -355,6 +377,9 @@ export function useOtlpInputs(
   // sending queue and retry, shared by both protocols
   const queueInitial: OtlpQueueConfig | null | undefined = exporter?.sending_queue;
   const batchInitial = queueInitial?.batch;
+  // a stored `null` queue opts out of the defaults of the managed endpoint: the spec ones apply,
+  // so the settings that follow the endpoint start at the spec defaults to keep it unset
+  const queueOptedOut = !!otlpOutput && queueInitial === null;
   const otlpQueueEnabledInput = useSwitchInput(queueInitial?.enabled ?? true, disabled);
   // the collector does not check a queue that is off: it only has to be a number
   const validateQueueCount = (value: string) =>
@@ -371,8 +396,8 @@ export function useOtlpInputs(
   );
   // an empty unit is the default of the endpoint
   const otlpQueueSizerInput = useDefaultedSelectInput(
-    queueInitial?.sizer,
-    isManaged ? QUEUE_DEFAULTS.sizer : OTLP_QUEUE_SPEC_DEFAULT_SIZER,
+    queueInitial?.sizer ?? (queueOptedOut ? OTLP_QUEUE_SPEC_DEFAULTS.sizer : undefined),
+    isManaged ? QUEUE_DEFAULTS.sizer : OTLP_QUEUE_SPEC_DEFAULTS.sizer,
     disabled
   );
   const otlpQueueWaitForResultInput = useSwitchInput(
@@ -380,8 +405,9 @@ export function useOtlpInputs(
     disabled
   );
   const otlpQueueBlockOnOverflowInput = useDefaultedSwitchInput(
-    queueInitial?.block_on_overflow,
-    isManaged ? QUEUE_DEFAULTS.block_on_overflow : OTLP_QUEUE_SPEC_DEFAULT_BLOCK_ON_OVERFLOW,
+    queueInitial?.block_on_overflow ??
+      (queueOptedOut ? OTLP_QUEUE_SPEC_DEFAULTS.blockOnOverflow : undefined),
+    isManaged ? QUEUE_DEFAULTS.block_on_overflow : OTLP_QUEUE_SPEC_DEFAULTS.blockOnOverflow,
     disabled
   );
 
@@ -401,11 +427,16 @@ export function useOtlpInputs(
     // the schema can not unset a stored unit, so it can not go back to the default
     { hasStoredValue: !!(otlpOutput && batchInitial?.sizer) }
   );
-  const getQueueDefaults = () =>
+  // the sizes are the ones of the inputs, except the one that is validated
+  const getQueueDefaults = (sizes: { minSize?: string; maxSize?: string }) =>
     getOtlpQueueDefaults({
       isManaged,
       queueSizer: otlpQueueSizerInput.value,
       batchSizer: otlpBatchSizerInput.value,
+      queueSize: otlpQueueSizeInput.value,
+      minSize: otlpBatchMinSizeInput.value,
+      maxSize: otlpBatchMaxSizeInput.value,
+      ...sizes,
     });
   const otlpBatchMinSizeInput = useInput(
     toInputValue(batchInitial?.min_size),
@@ -415,7 +446,7 @@ export function useOtlpInputs(
         return error;
       }
       // the sizes are compared when both use the same unit, and a blank size is the default
-      const defaults = getQueueDefaults();
+      const defaults = getQueueDefaults({ minSize: value });
       const queueSize = otlpQueueSizeInput.value.trim()
         ? Number(otlpQueueSizeInput.value)
         : defaults.queueSize;
@@ -440,7 +471,7 @@ export function useOtlpInputs(
         return error;
       }
       // a blank size is the default
-      const defaults = getQueueDefaults();
+      const defaults = getQueueDefaults({ maxSize: value });
       const maxSize = value.trim() ? Number(value) : defaults.maxSize;
       if (maxSize === 0) {
         return;
@@ -472,10 +503,12 @@ export function useOtlpInputs(
     otlpQueueSizeInput.value,
     otlpQueueSizerInput.value,
     otlpBatchSizerInput.value,
+    otlpBatchMaxSizeInput.value,
     otlpEndpointInput.value,
   ]);
   useRevalidateWhenChanged(otlpBatchMaxSizeInput, [
     otlpBatchMinSizeInput.value,
+    otlpQueueSizeInput.value,
     otlpQueueSizerInput.value,
     otlpBatchSizerInput.value,
     otlpEndpointInput.value,
@@ -726,6 +759,9 @@ export const getOtlpQueueDefaultsOfInputs = (inputs: OtlpInputs) =>
     isManaged: isManagedEndpoint(inputs),
     queueSizer: inputs.otlpQueueSizerInput.value,
     batchSizer: inputs.otlpBatchSizerInput.value,
+    queueSize: inputs.otlpQueueSizeInput.value,
+    minSize: inputs.otlpBatchMinSizeInput.value,
+    maxSize: inputs.otlpBatchMaxSizeInput.value,
   });
 
 /** Whether the settings of the sending queue are empty or at the defaults of the endpoint. */
