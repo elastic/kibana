@@ -24,13 +24,6 @@ export interface ResolveIndexPatternsResult {
 const isExcludingIndexPattern = (indexPattern: string): boolean =>
   indexPattern.trim().startsWith('-');
 
-/**
- * Resolves the index patterns of a rule with one field caps request. The patterns are sent in the order
- * the user specified them, so Elasticsearch applies an excluding pattern (starting with `-`) only to the
- * patterns listed before it, as it does when the rule searches them.
- *
- * Errors are not handled here. A failed request must not look like an empty result.
- */
 export const resolveIndexPatterns = async ({
   esClient,
   indexPatterns,
