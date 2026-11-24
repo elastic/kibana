@@ -109,10 +109,7 @@ test.describe(
         await pageObjects.dataFederation.createDatasetWizardMappingStep.waitFor({
           state: 'visible',
         });
-        await pageObjects.dataFederation.wizardNextButton.click();
-        await pageObjects.dataFederation.createDatasetWizardReviewStep.waitFor({
-          state: 'visible',
-        });
+        await pageObjects.dataFederation.goToDatasetReviewStep();
         await pageObjects.dataFederation.wizardNextButton.click();
         await pageObjects.dataFederation.createDatasetWizard.waitFor({ state: 'hidden' });
       });

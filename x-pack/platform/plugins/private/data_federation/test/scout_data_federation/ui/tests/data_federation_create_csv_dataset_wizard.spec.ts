@@ -355,8 +355,7 @@ test.describe(
       });
 
       await test.step('Review (preview): validate settings summary and save', async () => {
-        await pageObjects.dataFederation.wizardNextButton.click();
-        await page.getByTestId('createDatasetWizardReviewStep').waitFor({ state: 'visible' });
+        await pageObjects.dataFederation.goToDatasetReviewStep();
 
         // Dataset fields
         await expect(page.getByTestId('createDatasetWizardReview-name')).toContainText(
@@ -487,10 +486,7 @@ test.describe(
         await pageObjects.dataFederation.createDatasetWizardMappingStep.waitFor({
           state: 'visible',
         });
-        await pageObjects.dataFederation.wizardNextButton.click();
-        await pageObjects.dataFederation.createDatasetWizardReviewStep.waitFor({
-          state: 'visible',
-        });
+        await pageObjects.dataFederation.goToDatasetReviewStep();
         await pageObjects.dataFederation.wizardNextButton.click();
         await pageObjects.dataFederation.createDatasetWizard.waitFor({ state: 'hidden' });
       });
