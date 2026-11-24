@@ -48,18 +48,19 @@ describe('eval baselines routes', () => {
   let handlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>>;
   let routeConfigs: Record<string, { security?: { authz?: { requiredPrivileges?: string[] } } }>;
   let pin: jest.Mock;
+  let repin: jest.Mock;
   let findLatest: jest.Mock;
   let getScores: jest.Mock;
   let search: jest.Mock;
   let evalsStart: { evaluationScoreService?: { search: jest.Mock } } | undefined;
 
-  const createContext = () =>
+  const createContext = (spaceId = 'space-a') =>
     ({
       licensing: Promise.resolve({
         license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
       }),
       agentBuilder: Promise.resolve({
-        spaces: { getSpaceId: () => 'space-a' },
+        spaces: { getSpaceId: () => spaceId },
       }),
     } as any);
 
@@ -67,6 +68,7 @@ describe('eval baselines routes', () => {
     jest.clearAllMocks();
 
     pin = jest.fn();
+    repin = jest.fn();
     findLatest = jest.fn();
     getScores = jest.fn();
     search = jest.fn();
@@ -88,7 +90,9 @@ describe('eval baselines routes', () => {
         getStartServices: jest.fn().mockImplementation(async () => [{}, { evals: evalsStart }]),
       },
       getInternalServices: () =>
-        ({ evalBaselines: { pin, findLatest, getScores } } as unknown as InternalStartServices),
+        ({
+          evalBaselines: { pin, repin, findLatest, getScores },
+        } as unknown as InternalStartServices),
       pluginsSetup: { evals: { enabled: true, mode: 'full' } },
       logger: loggingSystemMock.createLogger(),
     } as unknown as RouteDependencies);
@@ -188,8 +192,9 @@ describe('eval baselines routes', () => {
       expect(second).toBe(first);
     });
 
-    it('returns 404 when the execution has no scores', async () => {
+    it('returns 404 when the execution has no scores and no stored snapshot', async () => {
       search.mockResolvedValue(createSearchResponse([]));
+      repin.mockResolvedValue(undefined);
 
       const response = await handlers[EVAL_BASELINES_PIN_URL](
         createContext(),
@@ -198,7 +203,52 @@ describe('eval baselines routes', () => {
       );
 
       expect(response.status).toBe(404);
+      expect(repin).toHaveBeenCalled();
       expect(pin).not.toHaveBeenCalled();
+    });
+
+    it('promotes the stored snapshot when the source scores aged out of retention', async () => {
+      search.mockResolvedValue(createSearchResponse([]));
+      repin.mockResolvedValue({ baseline_id: 'baseline-1', score_count: 7 });
+
+      const response = await handlers[EVAL_BASELINES_PIN_URL](
+        createContext(),
+        pinRequest(),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        baseline: { baseline_id: 'baseline-1', score_count: 7 },
+      });
+      expect(repin).toHaveBeenCalledWith({
+        baselineId: expect.stringMatching(/^[0-9a-f]{64}$/),
+        pinnedBy: 'pipeline',
+        reason: 'monthly re-pin',
+      });
+      expect(pin).not.toHaveBeenCalled();
+    });
+
+    it('derives a different baseline id when the same execution is pinned in another space', async () => {
+      search.mockResolvedValue(createSearchResponse([createScoreSource()]));
+      pin.mockResolvedValue({ baseline_id: 'ignored' });
+
+      await handlers[EVAL_BASELINES_PIN_URL](
+        createContext('space-a'),
+        pinRequest(),
+        kibanaResponseFactory
+      );
+      await handlers[EVAL_BASELINES_PIN_URL](
+        createContext('space-b'),
+        pinRequest(),
+        kibanaResponseFactory
+      );
+
+      const [first, second] = pin.mock.calls.map(([args]) => args.pointer.baseline_id);
+      expect(first).toMatch(/^[0-9a-f]{64}$/);
+      expect(second).toMatch(/^[0-9a-f]{64}$/);
+      // Each space owns its own baseline documents for a shared execution.
+      expect(second).not.toBe(first);
     });
 
     it('refuses a mixed-judge execution', async () => {

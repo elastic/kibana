@@ -23,22 +23,23 @@ import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 
+import { EVALS_API_PRIVILEGES } from '@kbn/evals-plugin/common';
+import type { RouteDependencies } from '../types';
+import { getHandlerWrapper } from '../wrap_handler';
+
 /**
  * One execution is one baseline per space: the id is derived from the tuple rather than
  * minted per request, so a retried `_pin` targets the same document IDs instead of
  * stranding a pointerless snapshot per failed attempt, and pinning the same execution
- * twice is a no-op rather than a duplicate. The space is part of the id so pinning a
- * shared execution in a second space creates that space's own baseline instead of
- * colliding with the first one's documents. JSON encoding keeps distinct tuples from
- * hashing alike whatever characters the ids contain.
+ * again re-promotes its stored snapshot rather than duplicating it. The space is part of
+ * the id so pinning a shared execution in a second space creates that space's own
+ * baseline instead of colliding with the first one's documents. JSON encoding keeps
+ * distinct tuples from hashing alike whatever characters the ids contain.
  */
 const deterministicBaselineId = (spaceId: string, suiteId: string, executionId: string): string =>
   createHash('sha256')
     .update(JSON.stringify([spaceId, suiteId, executionId]))
     .digest('hex');
-import { EVALS_API_PRIVILEGES } from '@kbn/evals-plugin/common';
-import type { RouteDependencies } from '../types';
-import { getHandlerWrapper } from '../wrap_handler';
 
 /**
  * The pinned-baseline registry for regression eval suites. The registry lives on the
@@ -91,6 +92,7 @@ export function registerEvalBaselineRoutes({
       } = request.body;
       const { evalBaselines } = getInternalServices();
       const spaceId = (await context.agentBuilder).spaces.getSpaceId();
+      const baselineId = deterministicBaselineId(spaceId, suiteId, executionId);
 
       const [, startDeps] = await coreSetup.getStartServices();
       const evaluationScoreService = startDeps.evals?.evaluationScoreService;
@@ -144,6 +146,17 @@ export function registerEvalBaselineRoutes({
       );
 
       if (scores.length === 0) {
+        // The snapshot outlives the source scores (365-day vs 90-day retention), so an
+        // execution whose scores aged out can still be re-pinned: rolling back to a pin
+        // older than the scores retention promotes its stored snapshot.
+        const repinned = await evalBaselines.repin({
+          baselineId,
+          pinnedBy: pinnedBy ?? null,
+          reason: reason ?? null,
+        });
+        if (repinned) {
+          return response.ok({ body: { baseline: repinned } });
+        }
         return response.notFound({
           body: {
             message: `No scores found for execution "${executionId}" in suite "${suiteId}". The run may not have exported scores yet, or they aged out of retention.`,
@@ -168,7 +181,7 @@ export function registerEvalBaselineRoutes({
 
       const baseline = await evalBaselines.pin({
         pointer: {
-          baseline_id: deterministicBaselineId(spaceId, suiteId, executionId),
+          baseline_id: baselineId,
           suite_id: suiteId,
           execution_id: executionId,
           task_model: scoreDocuments[0].task.model,

@@ -102,7 +102,8 @@ describe('PinnedBaselineService', () => {
     expect(create.mock.calls.map(([args]) => args.refresh)).toEqual([false, 'wait_for']);
     expect(captured.map(({ _id }) => _id)).toEqual([
       `baseline-1:${createHash('sha256').update('score-doc-1').digest('hex')}`,
-      'baseline-1',
+      // One pointer document per pin, so a later re-pin can promote the same snapshot.
+      expect.stringMatching(/^baseline-1:pointer:/),
     ]);
     expect(captured[1]).toMatchObject({
       doc_kind: 'pointer',
@@ -393,35 +394,35 @@ describe('PinnedBaselineService', () => {
     expect(search).toHaveBeenCalledTimes(1);
   });
 
-  it('pin returns an already-published baseline untouched instead of rewriting it', async () => {
+  const getStoredPointerHit = () => ({
+    _source: {
+      '@timestamp': '2026-11-01T00:00:00.000Z',
+      doc_kind: 'pointer',
+      space_ids: ['default'],
+      baseline: {
+        id: 'baseline-1',
+        suite_id: 'suite-1',
+        execution_id: 'bk-1::suite-1::gpt-5',
+        judge_model_id: 'glm-5.2',
+        pinned_at: '2026-11-01T00:00:00.000Z',
+        score_count: 7,
+        dataset_ids: ['dataset-1'],
+      },
+      task: { model: { id: 'gpt-5' } },
+      metadata: { git: {} },
+    },
+  });
+
+  it('pin promotes an already-published snapshot with a fresh pointer instead of rewriting it', async () => {
     const logger = loggingSystemMock.createLogger();
     const { coreDataStreams, create, search } = createDataStreamsMock();
     const service = new PinnedBaselineService(logger, coreDataStreams);
 
-    search.mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            _source: {
-              '@timestamp': '2026-11-01T00:00:00.000Z',
-              doc_kind: 'pointer',
-              space_ids: ['default'],
-              baseline: {
-                id: 'baseline-1',
-                suite_id: 'suite-1',
-                execution_id: 'bk-1::suite-1::gpt-5',
-                judge_model_id: 'glm-5.2',
-                pinned_at: '2026-11-01T00:00:00.000Z',
-                score_count: 7,
-                dataset_ids: ['dataset-1'],
-              },
-              task: { model: { id: 'gpt-5' } },
-              metadata: { git: {} },
-            },
-          },
-        ],
-      },
-    });
+    search.mockResolvedValueOnce({ hits: { hits: [getStoredPointerHit()] } });
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => ({
+      errors: false,
+      items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+    }));
 
     const baseline = await service.pin({
       pointer: getPointer(),
@@ -429,13 +430,93 @@ describe('PinnedBaselineService', () => {
       spaceIds: ['default'],
     });
 
-    // The published pin wins: nothing is written, and the stored metadata is returned.
-    expect(create).not.toHaveBeenCalled();
+    // The snapshot is immutable — no score is rewritten — but the pin still publishes a
+    // new pointer, so re-pinning a baseline promotes it back to latest (rollback).
+    expect(create).toHaveBeenCalledTimes(1);
+    const written = (create.mock.calls[0][0] as { documents: Array<Record<string, unknown>> })
+      .documents;
+    expect(written).toHaveLength(1);
+    expect(written[0]).toMatchObject({
+      _id: expect.stringMatching(/^baseline-1:pointer:/),
+      doc_kind: 'pointer',
+      baseline: expect.objectContaining({
+        id: 'baseline-1',
+        // The snapshot-derived metadata comes from the stored pointer, not this request.
+        score_count: 7,
+        // The pin attribution is this request's.
+        pinned_by: 'rakesh',
+        reason: 'monthly baseline',
+      }),
+    });
+    expect(baseline).toMatchObject({ baseline_id: 'baseline-1', score_count: 7 });
+    expect(baseline.pinned_at).not.toBe('2026-11-01T00:00:00.000Z');
+  });
+
+  it('repin promotes the stored snapshot without reading any source scores', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create, search } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    search.mockResolvedValueOnce({ hits: { hits: [getStoredPointerHit()] } });
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => ({
+      errors: false,
+      items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+    }));
+
+    const baseline = await service.repin({
+      baselineId: 'baseline-1',
+      pinnedBy: 'pipeline',
+      reason: 'rollback',
+    });
+
+    expect(create).toHaveBeenCalledTimes(1);
     expect(baseline).toMatchObject({
       baseline_id: 'baseline-1',
       score_count: 7,
-      pinned_at: '2026-11-01T00:00:00.000Z',
+      pinned_by: 'pipeline',
+      reason: 'rollback',
     });
+  });
+
+  it('repin answers an unknown baseline with undefined and writes nothing', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    await expect(
+      service.repin({ baselineId: 'nope', pinnedBy: null, reason: null })
+    ).resolves.toBeUndefined();
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('pin counts and writes a score served twice by the source stream only once', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create } = createDataStreamsMock();
+    const captured: Array<{ _id: string } & Record<string, unknown>> = [];
+
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => {
+      captured.push(...(documents as Array<{ _id: string } & Record<string, unknown>>));
+      return {
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+      };
+    });
+
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+    const baseline = await service.pin({
+      pointer: getPointer(),
+      scores: [
+        { id: 'score-doc-1', document: getScoreDocument() },
+        // A re-ingest after a rollover duplicates the same score across backing indices.
+        { id: 'score-doc-1', document: getScoreDocument() },
+        { id: 'score-doc-2', document: getScoreDocument() },
+      ],
+      spaceIds: ['default'],
+    });
+
+    // One snapshot document per source score, and a score_count a read can satisfy.
+    expect(captured.filter(({ doc_kind: kind }) => kind === 'score')).toHaveLength(2);
+    expect(baseline.score_count).toBe(2);
   });
 
   it('pin publishes no pointer when a later snapshot chunk fails', async () => {

@@ -50,6 +50,13 @@ const BULK_WRITE_CHUNK_SIZE = 1000;
 const snapshotDocumentId = (baselineId: string, scoreId: string): string =>
   `${baselineId}:${createHash('sha256').update(scoreId).digest('hex')}`;
 
+// One pointer document per pin, not per baseline: a re-pin publishes a fresh pointer over
+// the stored snapshot, and the reads select the newest one, so re-pinning execution A
+// after a bad pin of B makes A the latest baseline again. The `pointer` segment cannot
+// collide with snapshot score IDs, whose suffix is always a hex digest.
+const pointerDocumentId = (baselineId: string, pinnedAt: string): string =>
+  `${baselineId}:pointer:${pinnedAt}`;
+
 const pointerToResponse = (doc: PinnedBaselinePointerDocument): PinnedBaseline => ({
   baseline_id: doc.baseline.id,
   suite_id: doc.baseline.suite_id,
@@ -77,7 +84,8 @@ export class PinnedBaselineService {
 
   /**
    * Writes the pointer and the snapshotted score documents for one pin. Document IDs are
-   * deterministic per (baseline, source doc), so a retried pin does not duplicate scores.
+   * deterministic per (baseline, source doc), so a retried pin does not duplicate scores,
+   * and a pin of an already-pinned baseline re-promotes its stored snapshot.
    */
   async pin({
     pointer,
@@ -88,13 +96,35 @@ export class PinnedBaselineService {
     scores: Array<{ id: string; document: EvaluationScoreDocument }>;
     spaceIds: string[];
   }): Promise<PinnedBaseline> {
+    const client = await this.getClient();
+
+    // The snapshot of a published baseline is immutable, but a re-pin is not a no-op: it
+    // publishes a fresh pointer over the stored snapshot, so re-pinning execution A after
+    // a bad pin of B promotes A back to the latest baseline without the snapshot (or its
+    // recorded count and judge metadata) ever changing.
+    const existingPointer = await this.findPointerById(client, pointer.baseline_id);
+    if (existingPointer) {
+      this.logger.info(
+        `Baseline ${pointer.baseline_id} is already pinned; promoting its existing snapshot.`
+      );
+      return this.publishPointer(client, existingPointer, {
+        pinnedBy: pointer.pinned_by ?? null,
+        reason: pointer.reason ?? null,
+      });
+    }
+
+    // The source stream can serve the same score twice (e.g. a re-ingest duplicated it
+    // across backing indices after a rollover). Both copies map to one snapshot ID, so
+    // counting them separately would publish a score_count no read could ever satisfy.
+    const uniqueScores = [...new Map(scores.map((score) => [score.id, score])).values()];
+
     const pinnedAt = new Date().toISOString();
     const datasetIds = [
-      ...new Set(scores.map(({ document }) => document.example.dataset.id)),
+      ...new Set(uniqueScores.map(({ document }) => document.example.dataset.id)),
     ].sort();
 
     const pointerDocument: { _id: string } & PinnedBaselinePointerDocument = {
-      _id: pointer.baseline_id,
+      _id: pointerDocumentId(pointer.baseline_id, pinnedAt),
       '@timestamp': pinnedAt,
       doc_kind: 'pointer',
       space_ids: spaceIds,
@@ -106,7 +136,7 @@ export class PinnedBaselineService {
         pinned_at: pinnedAt,
         pinned_by: pointer.pinned_by ?? null,
         reason: pointer.reason ?? null,
-        score_count: scores.length,
+        score_count: uniqueScores.length,
         dataset_ids: datasetIds,
       },
       task: { model: pointer.task_model },
@@ -118,7 +148,7 @@ export class PinnedBaselineService {
       },
     };
 
-    const scoreDocuments = scores.map(({ id, document }) => ({
+    const scoreDocuments = uniqueScores.map(({ id, document }) => ({
       _id: snapshotDocumentId(pointer.baseline_id, id),
       ...document,
       // The snapshot is visible where the pin is: source scores shared into other spaces
@@ -127,19 +157,6 @@ export class PinnedBaselineService {
       doc_kind: 'score' as const,
       baseline: { id: pointer.baseline_id },
     }));
-
-    const client = await this.getClient();
-
-    // A published pin is immutable: once its pointer exists, a retry (or a re-pin after
-    // more scores arrived for the execution) must not grow the stored snapshot past the
-    // pointer's recorded count, so it returns the existing pin untouched.
-    const existingPointer = await this.findPointerById(client, pointer.baseline_id);
-    if (existingPointer) {
-      this.logger.info(
-        `Baseline ${pointer.baseline_id} is already pinned; returning the existing pin.`
-      );
-      return pointerToResponse(existingPointer);
-    }
 
     // Bulk writes are not atomic, and `findLatest` selects whatever pointer exists: write
     // the snapshot first and publish the pointer only once every score landed, so a
@@ -154,6 +171,49 @@ export class PinnedBaselineService {
     return pointerToResponse(pointerDocument);
   }
 
+  /**
+   * Promotes an already-pinned baseline back to the latest pin by publishing a fresh
+   * pointer over its stored snapshot — the rollback path, which must keep working even
+   * after the source scores aged out of the evals stream.
+   */
+  async repin({
+    baselineId,
+    pinnedBy,
+    reason,
+  }: {
+    baselineId: string;
+    pinnedBy: string | null;
+    reason: string | null;
+  }): Promise<PinnedBaseline | undefined> {
+    const client = await this.getClient();
+    const existingPointer = await this.findPointerById(client, baselineId);
+    if (!existingPointer) {
+      return undefined;
+    }
+    return this.publishPointer(client, existingPointer, { pinnedBy, reason });
+  }
+
+  private async publishPointer(
+    client: AnyIDataStreamClient,
+    existing: PinnedBaselinePointerDocument,
+    { pinnedBy, reason }: { pinnedBy: string | null; reason: string | null }
+  ): Promise<PinnedBaseline> {
+    const pinnedAt = new Date().toISOString();
+    const pointerDocument: { _id: string } & PinnedBaselinePointerDocument = {
+      ...existing,
+      _id: pointerDocumentId(existing.baseline.id, pinnedAt),
+      '@timestamp': pinnedAt,
+      baseline: {
+        ...existing.baseline,
+        pinned_at: pinnedAt,
+        pinned_by: pinnedBy,
+        reason,
+      },
+    };
+    await this.createDocuments(client, [pointerDocument], existing.baseline.id, 'wait_for');
+    return pointerToResponse(pointerDocument);
+  }
+
   private async findPointerById(
     client: AnyIDataStreamClient,
     baselineId: string
@@ -164,6 +224,9 @@ export class PinnedBaselineService {
           must: [{ term: { doc_kind: 'pointer' } }, { term: { 'baseline.id': baselineId } }],
         },
       },
+      // A re-pinned baseline has one pointer per pin; its snapshot metadata is identical
+      // on all of them, and the newest carries the latest pinned_at/pinned_by/reason.
+      sort: [{ 'baseline.pinned_at': { order: 'desc' } }],
       size: 1,
       allow_partial_search_results: false,
     });
@@ -265,6 +328,7 @@ export class PinnedBaselineService {
 
     const pointerResponse = await client.search({
       query: { bool: { must: pointerMust } },
+      sort: [{ 'baseline.pinned_at': { order: 'desc' } }],
       size: 1,
       allow_partial_search_results: false,
     });
@@ -296,7 +360,8 @@ export class PinnedBaselineService {
     if (scores.length !== expectedCount) {
       throw new Error(
         `Pinned baseline "${baselineId}" snapshot is incomplete: its pointer records ` +
-          `${expectedCount} score(s) but ${scores.length} are readable. Re-pin the baseline.`
+          `${expectedCount} score(s) but ${scores.length} are readable. Pin a different ` +
+          `execution to replace it.`
       );
     }
 
