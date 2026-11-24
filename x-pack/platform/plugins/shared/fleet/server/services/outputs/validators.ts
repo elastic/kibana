@@ -88,7 +88,8 @@ export const validateKafkaKerberos = (output: UpdateTypedOutput | NewOutput): vo
     throw new OutputInvalidError('kerberos.realm is required');
   }
 
-  if (!kerberos.username) {
+  // the schema rejects a missing or empty username, this also rejects a blank one
+  if (!kerberos.username?.trim()) {
     throw new OutputInvalidError('kerberos.username is required');
   }
 

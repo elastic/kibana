@@ -225,6 +225,14 @@ describe('validateKafkaKerberos', () => {
     ).toThrow(new OutputInvalidError('kerberos.username is required'));
   });
 
+  it('does not accept a blank username', () => {
+    expect(() =>
+      validateKafkaKerberos(
+        kafkaOutput({ auth_type: 'kerberos', kerberos: { ...keytabKerberos, username: '   ' } })
+      )
+    ).toThrow(new OutputInvalidError('kerberos.username is required'));
+  });
+
   it('requires a username and a password for the password authentication', () => {
     expect(() =>
       validateKafkaKerberos(

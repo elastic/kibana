@@ -169,12 +169,36 @@ describe('Output model', () => {
                 auth_type: 'keytab',
                 config_path: '/etc/krb5.conf',
                 keytab: '/etc/kafka.keytab',
+                username: 'kafka',
                 realm: 'EXAMPLE.COM',
               },
               secrets: undefined,
             })
           )
         ).not.toThrow();
+      });
+
+      it('should require a username for the keytab authentication', () => {
+        const keytabKerberos = {
+          auth_type: 'keytab',
+          config_path: '/etc/krb5.conf',
+          keytab: '/etc/kafka.keytab',
+          realm: 'EXAMPLE.COM',
+        };
+
+        expect(() =>
+          schema
+            .object(KafkaSchema)
+            .validate(kerberosOutput({ kerberos: keytabKerberos, secrets: undefined }))
+        ).toThrow();
+        expect(() =>
+          schema.object(KafkaSchema).validate(
+            kerberosOutput({
+              kerberos: { ...keytabKerberos, username: '' },
+              secrets: undefined,
+            })
+          )
+        ).toThrow();
       });
 
       it('should accept a secret reference as the password', () => {
