@@ -328,7 +328,7 @@ describe('MobileOverview', () => {
       '+20%'
     );
     expect(screen.getByTestId('digitalExperienceMobileKpiSessionsPrevious')).toHaveTextContent(
-      'Previous period: 10'
+      'vs 10'
     );
     ['Users', 'ErrorRate'].forEach((kpi) => {
       expect(screen.getByTestId(`digitalExperienceMobileKpi${kpi}Change`)).toBeInTheDocument();

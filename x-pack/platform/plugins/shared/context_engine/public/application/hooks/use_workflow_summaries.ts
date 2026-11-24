@@ -30,7 +30,7 @@ const is403 = (error: unknown): boolean => {
  * When `missingReadPrivilege` is true when the server returned 403 — the caller
  * should surface a clear "missing permissions" message.
  */
-export const useWorkflowSummaries = (workflowIds: string[]) => {
+export const useWorkflowSummaries = (workflowIds: readonly string[]) => {
   const api = useWorkflowsApi();
   const ids = useMemo(() => [...new Set(workflowIds)].sort(), [workflowIds]);
 

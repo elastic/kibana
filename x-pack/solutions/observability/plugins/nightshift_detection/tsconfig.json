@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "test/scout*/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout*/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/alerting-v2-constants",
@@ -31,6 +31,7 @@
     "@kbn/significant-events-schema",
     "@kbn/spaces-plugin",
     "@kbn/std",
+    "@kbn/ui-callout",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
