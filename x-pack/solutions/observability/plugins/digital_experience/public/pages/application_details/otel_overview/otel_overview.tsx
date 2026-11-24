@@ -21,6 +21,7 @@ import type {
 import { PAGE_FILTER_NAMES } from '../../../../common/overview_filters';
 import type {
   ApplicationOverview,
+  ApplicationOverviewKpisResponse,
   ApplicationOverviewResponse,
 } from '../../../../common/types/overview';
 import type { HistogramBuckets } from '../../../../common/types/applications';
@@ -33,6 +34,7 @@ import { useApplicationLinks } from '../../../hooks/use_application_links';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useOverviewFilters } from '../../../hooks/use_overview_filters';
 import { useOverviewPercentile, useOverviewSearchParams } from '../../../hooks/use_overview_search';
+import { useQueryParam } from '../../../hooks/use_query_param';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { TimeRangeSelect } from '../../../utils/brush_time_range';
 import { withOverviewFilters } from '../../../utils/with_overview_filters';
@@ -62,6 +64,11 @@ const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetch
   defaultMessage: 'Could not load the Overview',
 });
 
+const KPIS_FETCH_ERROR_TITLE = i18n.translate(
+  'xpack.digitalExperience.overview.kpisFetchErrorTitle',
+  { defaultMessage: 'Could not load the KPIs' }
+);
+
 const USAGE_FETCH_ERROR_TITLE = i18n.translate(
   'xpack.digitalExperience.overview.usageFetchErrorTitle',
   { defaultMessage: 'Could not load the pages, browsers and clicks' }
@@ -84,6 +91,19 @@ const overviewRequestOf = (
   };
 };
 
+/** The request for the KPI row, against the previous period, narrowed by `searchParams`. */
+const kpisRequestOf = (
+  searchParams: OverviewSearchParams,
+  percentile: OverviewPercentileParam | undefined
+): ApplicationRequest<ApplicationOverviewKpisResponse> => {
+  return (apiClient, options) => {
+    return apiClient.fetch(
+      'GET /internal/digital_experience/applications/{serviceName}/overview/kpis',
+      withOverviewFilters(options, searchParams, { percentile })
+    );
+  };
+};
+
 /** Shown while loading: no metric is a measured zero. */
 const emptyOverview = (
   serviceName: string,
@@ -99,7 +119,7 @@ const emptyOverview = (
   trend: [],
 });
 
-/** The KPIs, Core Web Vitals and trends of one Overview, empty while it loads. */
+/** The Core Web Vitals and trends of one Overview, empty while it loads. */
 function OverviewPanels({
   overview,
   trendHistogram,
@@ -119,8 +139,6 @@ function OverviewPanels({
 }) {
   return (
     <>
-      <OverviewKpis overview={overview} percentile={percentile} isLoading={isLoading} />
-      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" alignItems="stretch">
         <EuiFlexItem grow={2}>
           <CoreWebVitalsPanel webVitals={overview.webVitals} isLoading={isLoading} />
@@ -262,13 +280,20 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   const searchParams = useOverviewSearchParams();
   const formatters = useFormatters();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  // In the URL, so a reload or Share keeps it; the application page's header toggles it.
+  const { value: compare } = useQueryParam('compare');
   // Separate requests, so the KPIs never wait on the panels below and a failure replaces only its own.
   const overviewRequest = useMemo(
     () => overviewRequestOf(searchParams, percentileParam, formatters.timeZone),
     [searchParams, percentileParam, formatters.timeZone]
   );
+  const kpisRequest = useMemo(
+    () => kpisRequestOf(searchParams, percentileParam),
+    [searchParams, percentileParam]
+  );
   const usageRequest = useMemo(() => usageRequestOf(searchParams), [searchParams]);
   const overview = useApplicationData(serviceName, overviewRequest);
+  const kpis = useApplicationData(serviceName, kpisRequest);
   const usage = useApplicationData(serviceName, usageRequest);
   const topErrors = useApplicationErrors(serviceName);
   // The pickers swap their lists for a spinner while loading, so they only load until they have one.
@@ -279,6 +304,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
 
   const refreshAll = () => {
     overview.refresh();
+    kpis.refresh();
     usage.refresh();
     topErrors.refresh();
   };
@@ -321,6 +347,25 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
             {PAGE_FILTER_NOTE}
           </EuiText>
         </>
+      )}
+      <EuiSpacer size="m" />
+      {/* Its own request, so a failure replaces only the row and the panels below keep loading. */}
+      {kpis.error ? (
+        <LoadErrorPrompt
+          data-test-subj="digitalExperienceOverviewKpisError"
+          retryDataTestSubj="digitalExperienceOverviewKpisRetry"
+          retryEbtElement={APPLICATION_OVERVIEW_EBT_ELEMENTS.KPIS_RETRY}
+          title={KPIS_FETCH_ERROR_TITLE}
+          error={kpis.error}
+          onRetry={kpis.refresh}
+        />
+      ) : (
+        <OverviewKpis
+          kpis={kpis.isLoading ? undefined : kpis.response}
+          percentile={percentile}
+          isComparing={compare === 'true'}
+          isLoading={kpis.isLoading}
+        />
       )}
       <EuiSpacer size="m" />
       {overview.error ? (

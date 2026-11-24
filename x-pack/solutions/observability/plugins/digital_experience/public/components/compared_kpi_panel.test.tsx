@@ -9,12 +9,12 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { createFormatters, useFormatters } from '../../../hooks/use_formatters';
-import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
-import { MobilePanel } from './mobile_panel';
+import { createFormatters, useFormatters } from '../hooks/use_formatters';
+import { createUiSettingsMock } from '../test_utils/ui_settings_mock';
+import { ComparedKpiPanel } from './compared_kpi_panel';
 
-jest.mock('../../../hooks/use_formatters', () => ({
-  ...jest.requireActual('../../../hooks/use_formatters'),
+jest.mock('../hooks/use_formatters', () => ({
+  ...jest.requireActual('../hooks/use_formatters'),
   useFormatters: jest.fn(),
 }));
 // The badge's color as an attribute, rather than EUI's generated class names.
@@ -44,9 +44,9 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
   </I18nProvider>
 );
 
-const renderPanel = (props: Partial<React.ComponentProps<typeof MobilePanel>> = {}) =>
+const renderPanel = (props: Partial<React.ComponentProps<typeof ComparedKpiPanel>> = {}) =>
   render(
-    <MobilePanel
+    <ComparedKpiPanel
       data-test-subj="kpi"
       title="Sessions"
       tooltip="Distinct session.id values."
@@ -65,7 +65,7 @@ beforeEach(() => {
   jest.mocked(useFormatters).mockReturnValue(createFormatters(createUiSettingsMock()));
 });
 
-describe('MobilePanel', () => {
+describe('ComparedKpiPanel', () => {
   it('shows the value, its change and a tooltip', () => {
     renderPanel();
 

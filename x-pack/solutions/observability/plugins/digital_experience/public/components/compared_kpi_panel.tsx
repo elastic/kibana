@@ -10,15 +10,15 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
-import type { ComparedValue } from '../../../../common/types/applications';
-import { KpiPanel } from '../../../components/kpi_panel';
-import { useFormatters } from '../../../hooks/use_formatters';
-import { NOT_ENOUGH_DATA_LABEL } from '../../../labels';
-import { formatChange } from '../../../utils/compared_value';
-import type { ChangeDirection } from '../../../utils/compared_value';
-import type { ChangeUnit } from '../../../utils/compared_value';
+import type { ComparedValue } from '../../common/types/applications';
+import { KpiPanel } from './kpi_panel';
+import { useFormatters } from '../hooks/use_formatters';
+import { NOT_ENOUGH_DATA_LABEL } from '../labels';
+import { formatChange } from '../utils/compared_value';
+import type { ChangeDirection } from '../utils/compared_value';
+import type { ChangeUnit } from '../utils/compared_value';
 
-export interface MobilePanelProps {
+export interface ComparedKpiPanelProps {
   title: string;
   /** How the value is calculated. */
   tooltip: string;
@@ -45,10 +45,10 @@ const changeColor = (
 };
 
 /**
- * A mobile KPI: the current value, a tooltip with how it's calculated and, with Compare on, its
+ * A KPI: the current value, a tooltip with how it's calculated and, with Compare on, its
  * change and value of the previous period.
  */
-export function MobilePanel({
+export function ComparedKpiPanel({
   title,
   tooltip,
   value,
@@ -58,7 +58,7 @@ export function MobilePanel({
   isComparing,
   isLoading,
   'data-test-subj': dataTestSubj,
-}: MobilePanelProps) {
+}: ComparedKpiPanelProps) {
   const formatters = useFormatters();
   const change = value ? formatChange(value, changeUnit, formatters) : null;
 
@@ -89,7 +89,7 @@ export function MobilePanel({
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}Previous`}>
                 <FormattedMessage
-                  id="xpack.digitalExperience.mobile.panel.previous"
+                  id="xpack.digitalExperience.comparedKpiPanel.previous"
                   defaultMessage="Previous period: {previous}"
                   values={{
                     previous:

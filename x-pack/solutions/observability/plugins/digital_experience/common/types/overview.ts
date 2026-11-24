@@ -6,7 +6,7 @@
  */
 
 import type { OverviewFilterOptions, OverviewPercentile } from '../overview_filters';
-import type { HistogramBuckets, HttpRequests, WebVitals } from './applications';
+import type { ComparedValue, HistogramBuckets, HttpRequests, WebVitals } from './applications';
 
 /** One bucket of the Overview trend; both charts read the same buckets. */
 export interface OverviewTrendPoint {
@@ -55,4 +55,32 @@ export interface ApplicationOverviewResponse {
    * by the other selected filters; each filter lists its ten most used.
    */
   filters: OverviewFilterOptions;
+}
+
+/**
+ * The Overview's KPI row: each value over the time range against the period of equal length
+ * before it. A value is `null` without the data to compute it.
+ */
+export interface ApplicationOverviewKpisResponse {
+  /** The percentile of the load time, 75 unless the request asked for another. */
+  percentile: OverviewPercentile;
+  /** Sessions with any event in the period. */
+  sessions: ComparedValue;
+  /** The share of the sessions without a JS error or a failed HTTP request, from 0 to 1. */
+  errorFreeSessions: ComparedValue;
+  pageLoads: ComparedValue;
+  /** The load time at `percentile`, in milliseconds. */
+  loadTime: ComparedValue;
+  jsErrors: ComparedValue;
+  /** The share of the HTTP requests with a known outcome that failed, from 0 to 1. */
+  failedHttpRequests: ComparedValue;
+  /** The average duration of the HTTP requests, in milliseconds. */
+  requestLatency: ComparedValue;
+  /** The current period's counts that the tooltips name. */
+  counts: {
+    sessionsWithErrors: number;
+    loadTimeSamples: number;
+    httpRequests: number;
+    failedHttpRequests: number;
+  };
 }
