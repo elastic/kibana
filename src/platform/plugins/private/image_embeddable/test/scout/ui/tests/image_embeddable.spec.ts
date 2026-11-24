@@ -41,7 +41,7 @@ test.describe('Image embeddable', { tag: '@local-stateful-classic' }, () => {
       await pageObjects.dashboard.openAddPanelFlyout();
       await page.testSubj.click('create-action-Image');
       await expect(page.testSubj.locator('createImageEmbeddableFlyout')).toBeVisible();
-      await page.locator('.euiFilePicker__input').setInputFiles(ELASTIC_LOGO_PATH);
+      await page.locator('input[type="file"]').setInputFiles(ELASTIC_LOGO_PATH);
       await expect(page.testSubj.locator('imageEmbeddableEditorSave')).toBeEnabled({
         timeout: 15_000,
       });
