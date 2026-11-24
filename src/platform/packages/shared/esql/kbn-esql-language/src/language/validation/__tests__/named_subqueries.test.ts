@@ -29,7 +29,7 @@ it.each([
     ['[FUSE] The FROM command is missing the _id, _index, _score METADATA field.'],
   ],
   [
-    'LET a = (FROM index METADATA _id, _index); FROM a METADATA _id',
+    'LET a = (FROM index METADATA _id, _index); LET b = (FROM a METADATA _id); FROM b',
     ['[FUSE] The FROM command is missing the _score METADATA field.'],
   ],
   [
