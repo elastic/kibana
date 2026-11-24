@@ -155,3 +155,8 @@ export const valueWithChangeLabel = (value: string, change: string): string =>
     defaultMessage: '{value} ({change})',
     values: { value, change },
   });
+
+/** The header's toggle that compares the KPIs with the period of equal length before. */
+export const COMPARE_LABEL = i18n.translate('xpack.digitalExperience.compare', {
+  defaultMessage: 'Compare to the previous period',
+});
