@@ -108,18 +108,18 @@ describe('AlertZero access boundary', () => {
     expect(screen.getByText('AlertZero is unavailable')).toBeInTheDocument();
   });
 
-  it('explains that AlertZero needs a Security solution space for a direct URL in a Classic space', () => {
+  it('explains which spaces AlertZero is available in for a direct URL in an unsupported space', () => {
     const { contentMounted } = setup({ spaceSupported: false });
     expect(contentMounted).not.toHaveBeenCalled();
     expect(screen.getByText('AlertZero is not available in this space')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'AlertZero, Escalations, and Watches are available only in a Security solution space.'
+        'AlertZero, Escalations, and Watches are available only in Security solution and Classic spaces.'
       )
     ).toBeInTheDocument();
   });
 
-  it('shows the Classic space message before the setting, subscription and privilege gates', () => {
+  it('shows the unsupported space message before the setting, subscription and privilege gates', () => {
     setup({ spaceSupported: false, enabled: false, canRead: false, subscription: 'license' });
     expect(screen.getByText('AlertZero is not available in this space')).toBeInTheDocument();
     expect(screen.queryByText('AlertZero is not enabled')).not.toBeInTheDocument();

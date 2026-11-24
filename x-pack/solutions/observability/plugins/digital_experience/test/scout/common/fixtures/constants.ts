@@ -17,6 +17,12 @@ export const TIME_RANGE = {
 };
 
 /**
+ * From `TIME_RANGE` to now: the applications list reads EDOT Browser applications from the mock
+ * sessions, which are recent, and Classic RUM ones from the 2021 archive.
+ */
+export const LIST_TIME_RANGE = { rangeFrom: TIME_RANGE.rangeFrom, rangeTo: 'now' };
+
+/**
  * Has page loads in both sources inside `TIME_RANGE`: Classic RUM in `RUM_TEST_DATA` and EDOT
  * Browser in the mock OTel data.
  */
@@ -75,6 +81,23 @@ export const OTEL_SHOP_USAGE = {
     { cssSelector: '.nav-link', tagName: 'A', count: 1 },
   ],
   totalClicks: 4,
+  // The frustration documents are not clicks: they add to `frustration` and not to `totalClicks`.
+  frustration: { rageClicks: 1, deadClicks: 1, errorClicks: 0, total: 2, sessions: 1 },
+  frustratedElements: [
+    {
+      cssSelector: '#pay',
+      tagName: 'BUTTON',
+      rageClicks: 1,
+      deadClicks: 1,
+      errorClicks: 0,
+      total: 2,
+      sessions: 1,
+      topPage: '/products',
+    },
+  ],
+  frustratedPages: [
+    { page: '/products', rageClicks: 1, deadClicks: 1, errorClicks: 0, total: 2, sessions: 1 },
+  ],
 } as const;
 
 /** The Errors tab of `OTEL_APPS.shop` inside `TIME_RANGE`. */

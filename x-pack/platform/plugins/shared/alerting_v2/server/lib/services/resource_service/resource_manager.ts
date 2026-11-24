@@ -22,26 +22,12 @@ interface ResourceState {
   initializationPromise?: Promise<void>;
   error?: Error;
   status: 'not_started' | 'pending' | 'ready' | 'failed';
-  optional: boolean;
-}
-
-export interface RegisterResourceOptions {
-  /**
-   * When `true`, a failure during initialization will NOT cause `waitUntilReady()`
-   * to reject. The resource is still tracked as `'failed'`, but it is treated as
-   * non-blocking for startup readiness.
-   */
-  optional?: boolean;
 }
 
 export interface ResourceManagerContract {
-  registerResource(
-    key: string,
-    initializer: IResourceInitializer,
-    options?: RegisterResourceOptions
-  ): void;
+  registerResource(key: string, initializer: IResourceInitializer): void;
   startInitialization(options?: { resourceKeys?: string[] }): void;
-  waitUntilReady(): Promise<void>;
+  waitForResources(keys: readonly string[]): Promise<void>;
   isReady(key: string): boolean;
   ensureResourceReady(key: string): Promise<void>;
 }
@@ -49,7 +35,6 @@ export interface ResourceManagerContract {
 @injectable()
 export class ResourceManager implements ResourceManagerContract {
   private readonly resources = new Map<string, ResourceState>();
-  private readonly startupResourceKeys = new Set<string>();
   private readonly logger: LoggerServiceContract;
 
   constructor(
@@ -65,11 +50,7 @@ export class ResourceManager implements ResourceManagerContract {
    * A resource can later be initialized either at startup (via `startInitialization()`)
    * or on-demand (via `ensureResourceReady()`).
    */
-  public registerResource(
-    key: string,
-    initializer: IResourceInitializer,
-    options?: RegisterResourceOptions
-  ): void {
+  public registerResource(key: string, initializer: IResourceInitializer): void {
     const existing = this.resources.get(key);
     if (
       existing?.status === 'pending' ||
@@ -84,7 +65,6 @@ export class ResourceManager implements ResourceManagerContract {
     this.resources.set(key, {
       status: 'not_started',
       initializer,
-      optional: options?.optional ?? false,
     });
   }
 
@@ -97,11 +77,9 @@ export class ResourceManager implements ResourceManagerContract {
   public startInitialization({ resourceKeys }: { resourceKeys?: string[] } = {}): void {
     const keysToStart = resourceKeys ?? Array.from(this.resources.keys());
     for (const key of keysToStart) {
-      this.startupResourceKeys.add(key);
-
       // Fire-and-forget: initialization errors must NOT become unhandled rejections
       // (which would crash Kibana). The error is still stored on the resource state,
-      // and consumers will fail fast when calling `waitUntilReady()` / `ensureResourceReady()`.
+      // and consumers will fail fast when calling `waitForResources()` / `ensureResourceReady()`.
       void this.initResource(key).catch(() => {
         this.logger.debug({
           message: 'Resource initialization failed',
@@ -112,30 +90,13 @@ export class ResourceManager implements ResourceManagerContract {
   }
 
   /**
-   * Wait until startup-triggered resources are ready.
+   * Wait until the given resources are ready. Resources that are not listed cannot delay or fail
+   * the caller.
    *
-   * If initialization permanently fails, this rejects (fail-fast) and subsequent callers will
-   * also fail immediately with the stored error.
+   * If a listed resource permanently fails, this rejects (fail-fast) with the stored error.
    */
-  public async waitUntilReady(): Promise<void> {
-    await Promise.all(Array.from(this.startupResourceKeys).map((key) => this.waitForResource(key)));
-  }
-
-  private async waitForResource(key: string): Promise<void> {
-    try {
-      await this.ensureResourceReady(key);
-    } catch (err) {
-      const state = this.resources.get(key);
-
-      if (!state?.optional) {
-        throw err;
-      }
-
-      this.logger.debug({
-        message: 'Optional resource failed to initialize; continuing',
-        labels: { resource: key },
-      });
-    }
+  public async waitForResources(keys: readonly string[]): Promise<void> {
+    await Promise.all(keys.map((key) => this.ensureResourceReady(key)));
   }
 
   public isReady(key: string): boolean {

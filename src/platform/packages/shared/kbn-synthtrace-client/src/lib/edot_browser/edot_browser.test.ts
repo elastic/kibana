@@ -135,6 +135,16 @@ describe('edotBrowser', () => {
       expect(engineOf(BROWSER_PROFILES.safariIos)).toBe('webkit');
     });
 
+    it('tells the engine of a browser that is not identified from its user agent', () => {
+      const engineOf = (profile: BrowserProfile) =>
+        createClient('s', edotBrowser.withoutBrowserDetails(profile)).browserEngine;
+
+      expect(engineOf(BROWSER_PROFILES.chromeMacos)).toBe('chromium');
+      expect(engineOf(BROWSER_PROFILES.edgeWindows)).toBe('chromium');
+      expect(engineOf(BROWSER_PROFILES.firefoxLinux)).toBe('firefox');
+      expect(engineOf(BROWSER_PROFILES.safariIos)).toBe('webkit');
+    });
+
     it('keeps only the language, version and user agent of a browser that is not identified', () => {
       const { resourceAttributes } = edotBrowser.withoutBrowserDetails(BROWSER_PROFILES.safariIos);
 
@@ -669,6 +679,8 @@ describe('edotBrowser', () => {
           slowdown: 1,
           reportExceptions: true,
           reportResourceTimings: true,
+          impatience: 1,
+          persistentHits: new Map(),
         },
         { pageViews, dwell: DWELL, hardNavigationRate }
       );
@@ -1067,7 +1079,7 @@ describe('edotBrowser', () => {
         docs.filter(
           (doc) => 'event_name' in doc && String(doc.event_name).startsWith('browser.frustration.')
         );
-      const sessions = Array.from({ length: 20 }, (_, seed) => ({
+      const sessions = Array.from({ length: 50 }, (_, seed) => ({
         without: createSession({ seed, health: HEALTH_PROFILES.critical }),
         with: createSession({
           seed,
@@ -1091,6 +1103,179 @@ describe('edotBrowser', () => {
         if (frustrationOf(session.with).length === 0) {
           expect(session.with).toEqual(session.without);
         }
+      });
+    });
+
+    describe('frustration causes', () => {
+      const PRODUCT = 'https://shop.example.com/product';
+      const pageWith = (clickTargets: EdotBrowserSite['pages'][number]['clickTargets']) => ({
+        ...SITE,
+        pages: [{ path: '/product', clickTargets }],
+      });
+      const sessionsOf = (
+        site: EdotBrowserSite,
+        {
+          count = 200,
+          profile,
+          health,
+        }: { count?: number; profile?: BrowserProfile; health?: HealthProfile } = {}
+      ) =>
+        Array.from({ length: count }, (_, seed) =>
+          createSession({
+            seed,
+            site,
+            profile,
+            health,
+            pageViews: 3,
+            frustrationRandom: seededRandom(seed + 1_000),
+          })
+        );
+      const signalsOf = (docs: EdotBrowserDocument[], kind: string, selector?: string) =>
+        docs.filter(
+          (doc) =>
+            'event_name' in doc &&
+            doc.event_name === `browser.frustration.${kind}` &&
+            (selector === undefined || doc.attributes?.['browser.css_selector'] === selector)
+        );
+      const clicksOn = (docs: EdotBrowserDocument[], selector: string) =>
+        docs.filter(
+          (doc) =>
+            'event_name' in doc &&
+            doc.event_name === 'browser.user_action.click' &&
+            doc.attributes?.['browser.css_selector'] === selector
+        ).length;
+      const addToCart = {
+        tagName: 'BUTTON',
+        cssSelector: '#add-to-cart',
+        request: { method: 'POST', url: `${PRODUCT}/cart` },
+      };
+
+      it('rage-clicks slow responses far more than fast ones', () => {
+        const rageShare = (latencyFactor: number) => {
+          const docs = sessionsOf(
+            pageWith([{ ...addToCart, request: { ...addToCart.request, latencyFactor } }])
+          ).flat();
+          return signalsOf(docs, 'rage_click').length / clicksOn(docs, '#add-to-cart');
+        };
+
+        expect(rageShare(20)).toBeGreaterThan(5 * rageShare(0.1));
+      });
+
+      it('dead-clicks only elements that do not react, more on small screens', () => {
+        const site = pageWith([
+          { tagName: 'A', cssSelector: 'a.link' },
+          addToCart,
+          { tagName: 'SPAN', cssSelector: 'span.price', deadClickRate: 0.3 },
+        ]);
+        const desktop = sessionsOf(site).flat();
+        const mobile = sessionsOf(site, { profile: BROWSER_PROFILES.safariIos }).flat();
+        const deadShare = (docs: EdotBrowserDocument[]) =>
+          signalsOf(docs, 'dead_click', 'span.price').length / clicksOn(docs, 'span.price');
+
+        expect(signalsOf(desktop, 'dead_click', 'a.link')).toEqual([]);
+        expect(signalsOf(desktop, 'dead_click', '#add-to-cart')).toEqual([]);
+        expect(deadShare(desktop)).toBeGreaterThan(0.1);
+        expect(deadShare(mobile)).toBeGreaterThan(deadShare(desktop));
+      });
+
+      it('reports the exception an element throws on its error clicks, and retries the click', () => {
+        const exception = { type: 'TypeError', message: 'variant is undefined', rate: 1 };
+        const broken = sessionsOf(pageWith([{ ...addToCart, exceptions: [exception] }])).flat();
+        const working = sessionsOf(pageWith([addToCart])).flat();
+        const errorClicks = signalsOf(broken, 'error_click', '#add-to-cart');
+
+        expect(errorClicks.length).toBeGreaterThan(100);
+        errorClicks.forEach(({ attributes }) => {
+          expect(attributes).toMatchObject({
+            'exception.type': 'TypeError',
+            'exception.message': 'variant is undefined',
+          });
+        });
+        expect(clicksOn(broken, '#add-to-cart')).toBeGreaterThan(
+          1.5 * clicksOn(working, '#add-to-cart')
+        );
+      });
+
+      it('hits a session with a persistent exception on every click or on none', () => {
+        const hitsOf = (persistent: boolean) => {
+          const exception = { type: 'TypeError', message: 'sku', rate: 0.3, persistent };
+          const site = pageWith([{ ...addToCart, exceptions: [exception] }]);
+          // Without rage bursts, every click is one attempt
+          return Array.from({ length: 200 }, (_, seed) => {
+            const docs = createSession({ seed, site, pageViews: 3 });
+            return {
+              clicks: clicksOn(docs, '#add-to-cart'),
+              thrown: docs.filter(
+                (doc) =>
+                  'event_name' in doc &&
+                  doc.event_name === 'exception' &&
+                  doc.attributes?.['exception.message'] === 'sku'
+              ).length,
+            };
+          }).filter(({ clicks }) => clicks > 1);
+        };
+        const persistent = hitsOf(true);
+        const hitShare = (sessions: Array<{ thrown: number }>) =>
+          sessions.filter(({ thrown }) => thrown > 0).length / sessions.length;
+
+        expect(persistent.length).toBeGreaterThan(50);
+        persistent.forEach(({ clicks, thrown }) => expect([0, clicks]).toContain(thrown));
+        expect(hitShare(persistent)).toBeGreaterThan(0.1);
+        expect(hitShare(persistent)).toBeLessThan(hitShare(hitsOf(false)));
+      });
+
+      it('words failed fetches and property reads the way each browser engine does', () => {
+        const offline = { ...HEALTH_PROFILES.healthy, networkErrorRate: 1 };
+        const messagesOf = (profile: BrowserProfile) =>
+          new Set(
+            sessionsOf(pageWith([addToCart]), { count: 20, profile, health: offline })
+              .flat()
+              .filter((doc) => 'event_name' in doc && doc.event_name === 'exception')
+              .map((doc) => doc.attributes?.['exception.message'])
+          );
+
+        expect(messagesOf(BROWSER_PROFILES.chromeMacos)).toContain('Failed to fetch');
+        expect(messagesOf(BROWSER_PROFILES.firefoxLinux)).toContain(
+          'NetworkError when attempting to fetch resource.'
+        );
+        expect(messagesOf(BROWSER_PROFILES.safariIos)).toContain('Load failed');
+        expect(
+          edotBrowser
+            .readPropertyErrors({ variable: 'variant', property: 'sku' }, { type: 'TypeError' })
+            .map(({ message, engines }) => [engines, message])
+        ).toEqual([
+          [['chromium'], "Cannot read properties of undefined (reading 'sku')"],
+          [['firefox'], 'can\'t access property "sku", variant is undefined'],
+          [['webkit'], "undefined is not an object (evaluating 'variant.sku')"],
+        ]);
+      });
+
+      it('picks pages and elements by weight', () => {
+        const site: EdotBrowserSite = {
+          ...SITE,
+          pages: [
+            {
+              path: '/popular',
+              weight: 9,
+              clickTargets: [
+                { tagName: 'A', cssSelector: 'a.often', weight: 9 },
+                { tagName: 'A', cssSelector: 'a.rarely' },
+              ],
+            },
+            { path: '/rare' },
+          ],
+        };
+        const docs = sessionsOf(site, { count: 100 }).flat();
+        const views = (path: string) =>
+          docs.filter(
+            (doc) =>
+              'event_name' in doc &&
+              doc.event_name === 'browser.navigation' &&
+              doc.attributes?.['url.full'] === `https://shop.example.com${path}`
+          ).length;
+
+        expect(views('/popular')).toBeGreaterThan(4 * views('/rare'));
+        expect(clicksOn(docs, 'a.often')).toBeGreaterThan(4 * clicksOn(docs, 'a.rarely'));
       });
     });
 
@@ -1751,6 +1936,30 @@ describe('edotBrowser', () => {
         // The p95 is far above the median with a tail, and about like the profile's without
         expect(spread(plain)).toBeLessThan(3);
         expect(spread(tailed)).toBeGreaterThan(6);
+      });
+
+      it('fails the requests sent during an outage of the endpoint, and only those', () => {
+        const spans = spansOf(siteWith({ method: 'GET', url: '/api/a' }), 50);
+        const times = spans.map((span) => Number(span['@timestamp'])).sort((a, b) => a - b);
+        const outage = {
+          start: times[Math.floor(times.length / 3)],
+          end: times[Math.floor((2 * times.length) / 3)],
+          failureRate: 1,
+          failureStatusCodes: [418],
+        };
+        // Network errors have no status
+        const statusesSent = (during: boolean) =>
+          spansOf(siteWith({ method: 'GET', url: '/api/a', outages: [outage] }), 50)
+            .filter((span) => {
+              const time = Number(span['@timestamp']);
+              return (time >= outage.start && time < outage.end) === during;
+            })
+            .map((span) => span.attributes['http.response.status_code'])
+            .filter((status) => status !== undefined);
+
+        expect(new Set(statusesSent(true))).toEqual(new Set([418]));
+        expect(statusesSent(false)).not.toContain(418);
+        expect(statusesSent(false).length).toBeGreaterThan(0);
       });
     });
 

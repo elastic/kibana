@@ -59,6 +59,29 @@ export const getWorkflowsPerMigrationFromES = async ({
   });
 };
 
+/** Sets one stored workflow to `failed` so retry and translation-stats tests can cover that state. */
+export const markWorkflowFailed = async ({
+  es,
+  migrationId,
+  workflowId,
+}: {
+  es: Client;
+  migrationId: string;
+  workflowId: string;
+}): Promise<void> => {
+  const workflows = await getWorkflowsPerMigrationFromES({ es, migrationId });
+  const hit = workflows.hits.hits.find((item) => item._id === workflowId);
+  if (!hit?._index || !hit._id) {
+    throw new Error(`Workflow ${workflowId} was not stored for migration ${migrationId}`);
+  }
+  await es.update({
+    index: hit._index,
+    id: hit._id,
+    refresh: 'wait_for',
+    doc: { status: 'failed' },
+  });
+};
+
 export const deleteAllWorkflowMigrations = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: [
