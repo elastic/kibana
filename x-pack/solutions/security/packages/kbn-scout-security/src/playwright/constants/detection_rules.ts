@@ -124,7 +124,7 @@ export const EQL_RULE: EqlRule = {
   from: '2019-01-01T00:00:00.000Z',
 };
 
-export const ESQL_RULE: EsqlRule = {
+export const ESQL_RULE: Omit<EsqlRule, 'query'> = {
   enabled: true,
   name: 'ES|QL Alert Testing Query',
   description: 'Tests a simple ES|QL query',
@@ -133,6 +133,5 @@ export const ESQL_RULE: EsqlRule = {
   severity: 'high',
   type: 'esql',
   language: 'esql',
-  query: 'from auditbeat-* metadata _id, _version, _index | keep agent.*,_id | eval test_id=_id',
   from: '2019-01-01T00:00:00.000Z',
 };

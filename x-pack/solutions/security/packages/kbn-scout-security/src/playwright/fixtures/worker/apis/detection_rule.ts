@@ -13,7 +13,7 @@ import type {
   EsqlRule,
   ThreatMatchRule,
 } from '../../../constants/detection_rules';
-import { CUSTOM_QUERY_RULE, EQL_RULE, ESQL_RULE } from '../../../constants/detection_rules';
+import { CUSTOM_QUERY_RULE, EQL_RULE } from '../../../constants/detection_rules';
 
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_action';
@@ -60,7 +60,7 @@ export const getDetectionRuleApiService = ({
 
     createEqlRule: async (body = EQL_RULE) => createRule('createEqlRule', body),
 
-    createEsqlRule: async (body = ESQL_RULE) => createRule('createEsqlRule', body),
+    createEsqlRule: async (body: EsqlRule) => createRule('createEsqlRule', body),
 
     getById: async (id: string) => {
       const { data } = await kbnClient.request<CustomQueryRule>({
