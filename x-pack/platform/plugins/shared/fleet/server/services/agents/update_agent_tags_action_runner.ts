@@ -385,8 +385,19 @@ export async function updateTagsBatch(
 
   if (stopped) {
     // What the chunks before the one that was cancelled did is recorded above, and the batch is
-    // retried by the action for the rest. As for a version conflict, the retry may go through the
-    // agents that are recorded again, if its kuery does not leave out the agents it updated.
+    // retried by the action for the rest. The retry restarts behind the kuery of the action and is
+    // not told what is recorded, and there is a cost either way, so this is a choice:
+    //
+    // - For an update whose kuery leaves out the agents it updated, like `tags:old` for the removal
+    //   of a tag, the retry does not select them again. Without this record they would never be
+    //   counted, and the action would stay below its total for good.
+    // - For an update whose kuery does not, a rename or several tags, the retry goes through them
+    //   again and counts them a second time, as after a version conflict. The action can show as
+    //   complete while the retry is still running, and ends with every agent updated.
+    //
+    // Which of the two it is cannot be told here without reading that kuery. The agents cannot be
+    // left out of the retry by id either, as the retry of an update of tags does not deduplicate:
+    // an agent that failed is recorded under its id, and has to be run again.
     throw stopped;
   }
 
