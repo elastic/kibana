@@ -23,7 +23,8 @@ export type OverviewFilterName = (typeof OVERVIEW_FILTER_NAMES)[number];
 
 /**
  * The filters on the page, which narrow the page loads only: the web vitals, errors and clicks
- * carry no page URL yet. `pageContains` matches part of the URL, the others a whole URL.
+ * carry no page URL yet. `pageContains` matches part of the URL. `pageUrl` matches a page: its
+ * route when the app reports one, like `/products/{slug}`, and its whole URL when it doesn't.
  */
 export const PAGE_FILTER_NAMES = [
   'pageUrl',

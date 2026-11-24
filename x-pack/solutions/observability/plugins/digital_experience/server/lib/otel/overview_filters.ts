@@ -21,7 +21,7 @@ import {
   type OverviewFilters,
 } from '../../../common/overview_filters';
 import { ENVIRONMENT_FIELDS, EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
-import { SOURCE_URL_FIELD } from './source_fields';
+import { SOURCE_URL_FIELD, SOURCE_URL_TEMPLATE_FIELD } from './source_fields';
 import { environmentFilter } from '../helpers/environment';
 import { eventCount } from './queries';
 
@@ -48,7 +48,10 @@ const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
   country: SESSION_ATTRIBUTE_FIELDS.countryIso,
   // The version the application reports, a resource attribute of OpenTelemetry.
   appVersion: ['resource.attributes.service.version', 'attributes.service.version'],
-  pageUrl: [SOURCE_URL_FIELD],
+  // The route the app reports, like `/products/{slug}`, groups the URLs of a page; without one, as
+  // with an SDK that doesn't add routes, the page is its URL
+  pageUrl: [SOURCE_URL_TEMPLATE_FIELD, SOURCE_URL_FIELD],
+  // The text of the URL itself, which the route doesn't have
   pageContains: [SOURCE_URL_FIELD],
 };
 

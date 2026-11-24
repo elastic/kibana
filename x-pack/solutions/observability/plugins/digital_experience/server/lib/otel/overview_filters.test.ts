@@ -16,6 +16,9 @@ import {
   toFilterOptions,
 } from './overview_filters';
 
+/** The runtime field of the page filter, which reads the route of a page and then its URL. */
+const PAGE_FIELD = 'digital_experience_filter_pageUrl';
+
 const include = (...values: string[]): FilterValue[] =>
   values.map((value) => ({ value, exclude: false }));
 const exclude = (...values: string[]): FilterValue[] =>
@@ -72,16 +75,31 @@ describe('filterRuntimeMappings', () => {
     });
   });
 
-  it('has no runtime field for the page, which is one field', () => {
-    expect(Object.keys(filterRuntimeMappings())).not.toContain('digital_experience_filter_pageUrl');
+  it('reads the route of the page first and its URL when the app reports no route', () => {
+    const mappings = filterRuntimeMappings();
+
+    expect(
+      (
+        mappings.digital_experience_filter_pageUrl as unknown as {
+          script: { params: { fields: string[] } };
+        }
+      ).script.params.fields
+    ).toEqual(['attributes.url.template', 'attributes.url.full']);
+  });
+
+  it('has no runtime field for the text of the URL, which is one field', () => {
+    expect(Object.keys(filterRuntimeMappings())).not.toContain(
+      'digital_experience_filter_pageContains'
+    );
   });
 });
 
 describe('filterFieldOf', () => {
-  it('uses the runtime field of a filter with alternatives, and the field of the page', () => {
+  it('uses the runtime field of a filter with alternatives, and the field of the URL text', () => {
     expect(filterFieldOf('browser')).toBe('digital_experience_filter_browser');
     expect(filterFieldOf('country')).toBe('digital_experience_filter_country');
-    expect(filterFieldOf('pageUrl')).toBe('attributes.url.full');
+    expect(filterFieldOf('pageUrl')).toBe('digital_experience_filter_pageUrl');
+    expect(filterFieldOf('pageContains')).toBe('attributes.url.full');
   });
 });
 
@@ -207,7 +225,7 @@ describe('the page contains filter', () => {
       { bool: { should: [contains('cart')], minimum_should_match: 1 } },
     ]);
     expect(pageLoadFilters(filters, 'pageContains')).toEqual([
-      { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
+      { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
     ]);
   });
 
@@ -224,10 +242,14 @@ describe('the page contains filter', () => {
 describe('pageLoadFilters', () => {
   it('narrows the page loads to the selected pages, or leaves out the excluded ones', () => {
     expect(pageLoadFilters({ pageUrl: include('https://shop.example.com/') })).toEqual([
-      { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
+      { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
     ]);
     expect(pageLoadFilters({ pageUrl: exclude('https://shop.example.com/') })).toEqual([
-      { bool: { must_not: [{ terms: { 'attributes.url.full': ['https://shop.example.com/'] } }] } },
+      {
+        bool: {
+          must_not: [{ terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } }],
+        },
+      },
     ]);
     expect(pageLoadFilters({ browser: include('Chrome') })).toEqual([]);
   });
@@ -263,7 +285,7 @@ describe('filterOptionsAggs', () => {
       size: 10,
     });
     expect(optionsOf(aggs, 'pageUrl').aggs.values.terms).toEqual({
-      field: 'attributes.url.full',
+      field: 'digital_experience_filter_pageUrl',
       size: 10,
     });
   });
@@ -293,7 +315,7 @@ describe('filterOptionsAggs', () => {
     expect(clausesOf('browser')).toEqual(
       expect.arrayContaining([
         { terms: { digital_experience_filter_os: ['macOS'] } },
-        { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
+        { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
       ])
     );
     expect(clausesOf('browser')).not.toContainEqual({
@@ -303,7 +325,7 @@ describe('filterOptionsAggs', () => {
       terms: { digital_experience_filter_browser: ['Chrome'] },
     });
     expect(clausesOf('pageUrl')).not.toContainEqual({
-      terms: { 'attributes.url.full': ['https://shop.example.com/'] },
+      terms: { [PAGE_FIELD]: ['https://shop.example.com/'] },
     });
     expect(clausesOf('device')).toEqual(
       expect.arrayContaining([

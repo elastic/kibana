@@ -7,6 +7,9 @@
 
 import { usageSearch } from './search_request';
 
+/** The runtime field of the page filter, which reads the route of a page and then its URL. */
+const PAGE_FIELD = 'digital_experience_filter_pageUrl';
+
 const PARAMS = { serviceName: 'shop', start: 1000, end: 2000 };
 
 const inEnvironment = (request: ReturnType<typeof usageSearch>) => {
@@ -48,7 +51,11 @@ describe('usageSearch', () => {
     expect(pageLoads.filter.bool.filter).toEqual([
       { term: { event_name: 'browser.navigation_timing' } },
     ]);
-    expect(pageLoads.aggs.topPages.terms).toEqual({ field: 'url.full', size: 10 });
+    // The route of the page, or its URL for an app that reports none: the field the page filter reads
+    expect(pageLoads.aggs.topPages.terms).toEqual({
+      field: 'digital_experience_filter_pageUrl',
+      size: 10,
+    });
     expect(pageLoads.aggs.topPages.aggs.loadTime.percentiles).toMatchObject({
       field: 'browser.navigation_timing.load_event_end',
       percents: [75],
@@ -97,6 +104,7 @@ describe('usageSearch with filters', () => {
       'digital_experience_filter_device',
       'digital_experience_filter_country',
       'digital_experience_filter_appVersion',
+      'digital_experience_filter_pageUrl',
     ]);
   });
 
@@ -120,7 +128,7 @@ describe('usageSearch with filters', () => {
 
     expect(pageLoads.filter.bool.filter).toEqual([
       { term: { event_name: 'browser.navigation_timing' } },
-      { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
+      { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
     ]);
     expect(clicks.filter).toEqual({
       bool: { filter: [{ term: { event_name: 'browser.user_action.click' } }] },

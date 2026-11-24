@@ -7,6 +7,9 @@
 
 import { logsSearch, spansSearch } from './search_requests';
 
+/** The runtime field of the page filter, which reads the route of a page and then its URL. */
+const PAGE_FIELD = 'digital_experience_filter_pageUrl';
+
 const PARAMS = {
   serviceName: 'shop',
   start: 0,
@@ -188,6 +191,7 @@ describe('logsSearch and spansSearch with filters', () => {
         'digital_experience_filter_device',
         'digital_experience_filter_country',
         'digital_experience_filter_appVersion',
+        'digital_experience_filter_pageUrl',
       ]);
     });
   });
@@ -217,7 +221,7 @@ describe('logsSearch and spansSearch with filters', () => {
       bool: {
         filter: [
           { term: { event_name: 'browser.navigation_timing' } },
-          { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
+          { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
         ],
       },
     });

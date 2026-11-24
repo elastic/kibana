@@ -6,7 +6,7 @@
  */
 
 import { termQuery, termsQuery } from '@kbn/es-query';
-import { OTEL_EVENT_NAME, URL_FULL } from '@kbn/apm-types';
+import { OTEL_EVENT_NAME } from '@kbn/apm-types';
 import { TOP_ROWS } from '../../../../common/top_rows';
 import { p75Of } from '../../../lib/helpers/aggregations';
 import {
@@ -68,7 +68,7 @@ export const usageSearch = ({
             },
             aggs: {
               topPages: {
-                terms: { field: URL_FULL, size: TOP_ROWS },
+                terms: { field: filterFieldOf('pageUrl'), size: TOP_ROWS },
                 aggs: { loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END) },
               },
               browsers: { terms: { field: filterFieldOf('browser'), size: TOP_ROWS } },
