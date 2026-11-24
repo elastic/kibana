@@ -100,6 +100,17 @@ describe('splitQueryCommands branches', () => {
     expect(limit.branches).toBeUndefined();
   });
 
+  it('tells a command that only holds subqueries from one that has a source or an expression too', () => {
+    const holds = (query: string, index: number) =>
+      splitQueryCommands(query)[index].holdsOnlySubqueries;
+
+    expect(holds('FROM (FROM a), (FROM b)', 0)).toBe(true);
+    expect(holds('FROM a | FORK (LIMIT 1) (LIMIT 2)', 1)).toBe(true);
+    expect(holds('FROM a, (FROM b)', 0)).toBe(false);
+    expect(holds('FROM a | WHERE k IN (FROM b | KEEP k)', 1)).toBe(false);
+    expect(holds('FROM a', 0)).toBeUndefined();
+  });
+
   it('goes down through subqueries of subqueries', () => {
     const [nested] = splitQueryCommands('FROM (FROM (FROM a | LIMIT 1) | STATS c = COUNT(*))');
 

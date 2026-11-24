@@ -25,6 +25,11 @@ export interface QueryCommand {
    * which can have subqueries of their own.
    */
   branches?: QueryCommand[][];
+  /**
+   * True when the command is only a holder of its subqueries, such as `FROM (...), (...)` or a
+   * FORK, and has no sources or expressions of its own, as `FROM a, (...)` or `WHERE k IN (...)` do.
+   */
+  holdsOnlySubqueries?: boolean;
 }
 
 /** Turns a position counted in characters, as the parser does, into an index of the string. */
@@ -61,7 +66,13 @@ const toQueryCommand = (query: string, toIndex: ToIndex, command: ESQLAstCommand
     start,
     end,
   };
-  return branches.length > 0 ? { ...queryCommand, branches } : queryCommand;
+  if (branches.length === 0) {
+    return queryCommand;
+  }
+  const holdsOnlySubqueries = command.args.every(
+    (arg) => !Array.isArray(arg) && arg.type === 'parens'
+  );
+  return { ...queryCommand, branches, holdsOnlySubqueries };
 };
 
 /** The subqueries of a command, wherever it holds them. Those inside them are read in turn. */

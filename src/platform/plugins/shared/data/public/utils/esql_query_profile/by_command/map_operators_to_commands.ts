@@ -35,9 +35,6 @@ export interface QueryHeat {
   hasSubqueries: boolean;
 }
 
-/** The commands that can exist only to hold subqueries. */
-const CONTAINER_COMMANDS = ['FROM', 'FORK'];
-
 interface Entry {
   command: QueryCommand;
   subquery?: number;
@@ -181,12 +178,9 @@ export function mapOperatorsToCommands({
   }));
 
   return {
-    // The FROM or FORK that holds subqueries is only worth a row when it took time of its own. Any
-    // other command stays, as it can have a subquery in its expressions, such as WHERE a IN (...).
-    commands: heats.filter(
-      ({ command, share }) =>
-        !(CONTAINER_COMMANDS.includes(command.name) && command.branches?.length) || share > 0
-    ),
+    // A command that only holds subqueries is worth a row when it took time of its own. Any other
+    // stays, such as FROM a, (...) with a source, or WHERE k IN (...) with an expression.
+    commands: heats.filter(({ command, share }) => !command.holdsOnlySubqueries || share > 0),
     unattributedShare: shareOf(unattributedNanos, totalNanos),
     hasSubqueries: commands.some((command) => Boolean(command.branches?.length)),
   };

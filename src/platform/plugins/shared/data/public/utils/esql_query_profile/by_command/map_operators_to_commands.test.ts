@@ -320,6 +320,21 @@ describe('mapOperatorsToCommands with subqueries', () => {
     ]);
   });
 
+  it('keeps the row of a FROM that has a source of its own besides the subqueries', () => {
+    const query = 'FROM a, (FROM b | LIMIT 1) | LIMIT 5';
+    const sourceHeat = heatOf(query, [
+      { operator: 'LuceneSourceOperator', node: { id: '1', text: 'FROM a, (FROM b | LIMIT 1)' } },
+      { operator: 'LimitOperator', node: { id: '2', text: 'LIMIT 5' }, nanos: 10 },
+    ]);
+
+    expect(sourceHeat.commands.map(({ command }) => command.text)).toEqual([
+      'FROM b',
+      'LIMIT 1',
+      'FROM a, (FROM b | LIMIT 1)',
+      'LIMIT 5',
+    ]);
+  });
+
   it('keeps the row of a WHERE with a subquery in IN (...) when it has no operator of its own', () => {
     const query = 'FROM a | WHERE k IN (FROM b | KEEP k)';
     const idleHeat = heatOf(query, [
