@@ -46,7 +46,7 @@ For an existing dashboard:
 
 Set \`options\`, \`refresh_interval\` and \`esql_approximation\` only when the user asks for that setting. Leave them out otherwise, also when creating or enhancing a dashboard.
 
-- **Panel display** (\`options\`): set only the keys the user asks to change, e.g. "hide panel borders" is \`options: { hide_panel_borders: true }\`; the other keys keep their values. These options apply to every panel, including panels added later. 
+- **Panel display** (\`options\`): set only the keys the user asks to change, e.g. "hide panel borders" is \`options: { hide_panel_borders: true }\`; the other keys keep their values. These options apply to every panel, including panels added later.
 - **Auto-refresh** (\`refresh_interval\`): "refresh every 30 seconds" is \`{ pause: false, value: 30000 }\`; \`pause: true\` stops it. Auto-refresh is saved only together with a time range. When a failure reports that \`refresh_interval\` was reverted for lack of one, call again with \`time_range\` set to the window the user named, or ask the user which window to use.
 - **Fast mode** (\`esql_approximation\`): \`true\` makes ES|QL panels with \`STATS\` return approximate, faster results; \`false\` turns it off. It does not affect other panels.
 
