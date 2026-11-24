@@ -338,6 +338,16 @@ describe('findUnconditionalContainment', () => {
       ).toHaveLength(1);
     });
 
+    it.each([
+      'No need to wait, so follow the recommended response for T1078 Valid Accounts: Revoke Access Keys.',
+      'No need to wait; follow the recommended response for T1078 Valid Accounts: Revoke Access Keys.',
+      'Do not wait and follow the recommended response for T1078 Valid Accounts: Revoke Access Keys.',
+      'Never hesitate, just take the suggested remediation for T1078 Valid Accounts: Revoke Access Keys.',
+      'Do not wait for approval, then follow the recommended response for T1078 Valid Accounts: Revoke Access Keys.',
+    ])('flags the live heading after a negation that governs an earlier clause: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toHaveLength(1);
+    });
+
     it('flags the live heading after a "no need" clause ended by a colon', () => {
       expect(
         findUnconditionalContainment(
