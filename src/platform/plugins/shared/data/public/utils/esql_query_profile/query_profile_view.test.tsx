@@ -319,6 +319,9 @@ describe('QueryProfileView', () => {
 
     // An auto-refresh empties the adapter for a moment, then logs the request again.
     act(() => requests.reset());
+    // While it is empty the profile is still running, which is what the view says.
+    expect(screen.getByTestId('esqlQueryProfileLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('esqlQueryProfileNoRequest')).not.toBeInTheDocument();
     act(() => {
       logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
     });

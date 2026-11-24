@@ -327,7 +327,7 @@ export const QueryProfileView = ({
           <ProfileSummary view={view} />
           <ProfileDetails view={view} requestId={profiledRequest?.id} />
         </>
-      ) : !selected?.json ? (
+      ) : !selected?.json && !loading ? (
         <EuiText size="s" color="subdued" data-test-subj="esqlQueryProfileNoRequest">
           <p>
             <FormattedMessage
