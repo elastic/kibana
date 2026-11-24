@@ -8,6 +8,10 @@
 import { NEVER } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MobileKpisResponse } from '../../../common/types/mobile';
+import {
+  APPLICATION_TAB_ROUTE_OPTIONS,
+  APPLICATION_TAB_ROUTE_SECURITY,
+} from '../application_tab_route';
 import { hasPartialReadAccess } from '../applications/get_partial_access';
 import { getMobileKpis } from './get_mobile_kpis';
 import { getMobileReleases } from './get_mobile_releases';
@@ -138,11 +142,14 @@ describe('mobile releases route', () => {
     expect(isValid({ start: END, end: START })).toBe(false);
     expect(isValid({ osName: '' })).toBe(false);
     expect(isValid({ release: 'x'.repeat(1025) })).toBe(false);
-    expect(mobileRouteRepository[MOBILE_RELEASES_ENDPOINT].options).toEqual(
-      mobileRouteRepository[MOBILE_KPIS_ENDPOINT].options
-    );
-    expect(mobileRouteRepository[MOBILE_RELEASES_ENDPOINT].security).toEqual(
-      mobileRouteRepository[MOBILE_KPIS_ENDPOINT].security
+    // The options and security of every application tab route, as the KPI route has them.
+    ([MOBILE_RELEASES_ENDPOINT, MOBILE_KPIS_ENDPOINT] as const).forEach((endpoint) =>
+      expect(mobileRouteRepository[endpoint]).toEqual(
+        expect.objectContaining({
+          options: APPLICATION_TAB_ROUTE_OPTIONS,
+          security: APPLICATION_TAB_ROUTE_SECURITY,
+        })
+      )
     );
   });
 

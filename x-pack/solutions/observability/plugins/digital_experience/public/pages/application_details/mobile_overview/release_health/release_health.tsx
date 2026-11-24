@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { MobileReleasesResponse } from '../../../../../common/types/mobile';
 import { LoadErrorPrompt } from '../../../../components/load_error_prompt';
 import { MOBILE_APPLICATION_EBT_ELEMENTS } from '../../../../ebt_constants';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { ReleaseAdoptionChart, ReleaseErrorRateChart } from './release_charts';
 import { getReleaseColors } from './release_colors';
 import { ReleaseTable } from './release_table';
@@ -42,23 +43,38 @@ const NO_RELEASES = i18n.translate('xpack.digitalExperience.mobile.releases.empt
   defaultMessage: 'No release reported sessions in the selected time range',
 });
 
+/** Filters the page by a release, or by none with `undefined`. */
+type SelectRelease = (release: string | undefined) => void;
+
+interface ReleaseFilterProps {
+  /** The release the page is filtered by, if any. */
+  selectedRelease: string | undefined;
+  onSelectRelease: SelectRelease;
+}
+
 /** The table, and the two charts side by side below it. */
 function ReleaseHealthContent({
   response: { releases, series, markers, histogram },
-}: {
-  response: MobileReleasesResponse;
-}) {
+  selectedRelease,
+  onSelectRelease,
+}: ReleaseFilterProps & { response: MobileReleasesResponse }) {
   const { euiTheme } = useEuiTheme();
+  const { setTimeRange } = useTimeRange();
   // One colour per release, shared by the table and both charts.
   const colors = useMemo(
     () => getReleaseColors(releases, euiTheme.colors.vis),
     [releases, euiTheme.colors.vis]
   );
-  const chartProps = { series, markers, histogram, colors };
+  const chartProps = { series, markers, histogram, colors, onTimeRangeSelect: setTimeRange };
 
   return (
     <>
-      <ReleaseTable releases={releases} colors={colors} />
+      <ReleaseTable
+        releases={releases}
+        colors={colors}
+        selectedRelease={selectedRelease}
+        onSelectRelease={onSelectRelease}
+      />
       <EuiSpacer size="m" />
       {/* Side by side, one under the other on narrow screens. */}
       <EuiFlexGrid columns={2} gutterSize="m">
@@ -73,7 +89,10 @@ function ReleaseHealthContent({
   );
 }
 
-const sectionBody = ({ releases, isLoading, error, refresh }: MobileReleasesState): ReactNode => {
+const sectionBody = (
+  { releases, isLoading, error, refresh }: MobileReleasesState,
+  releaseFilter: ReleaseFilterProps
+): ReactNode => {
   if (error) {
     return (
       <LoadErrorPrompt
@@ -105,11 +124,17 @@ const sectionBody = ({ releases, isLoading, error, refresh }: MobileReleasesStat
       </EuiText>
     );
   }
-  return <ReleaseHealthContent response={releases} />;
+  return <ReleaseHealthContent response={releases} {...releaseFilter} />;
 };
 
-/** The release health of the application: its releases in a table, and over time in two charts. */
-export function ReleaseHealth({ releasesState }: { releasesState: MobileReleasesState }) {
+/**
+ * The release health of the application: its releases in a table, and over time in two charts. A
+ * release in the table filters the page by it; dragging over a chart narrows the time range.
+ */
+export function ReleaseHealth({
+  releasesState,
+  ...releaseFilter
+}: ReleaseFilterProps & { releasesState: MobileReleasesState }) {
   const titleId = useGeneratedHtmlId({ prefix: 'releaseHealthTitle' });
 
   return (
@@ -118,7 +143,7 @@ export function ReleaseHealth({ releasesState }: { releasesState: MobileReleases
         <h2 id={titleId}>{TITLE}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      {sectionBody(releasesState)}
+      {sectionBody(releasesState, releaseFilter)}
     </section>
   );
 }

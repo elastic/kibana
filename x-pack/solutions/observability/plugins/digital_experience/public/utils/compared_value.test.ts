@@ -51,8 +51,13 @@ describe('formatChange', () => {
       'percentagePoints',
       '0 pp',
     ],
-    ['a count that rounds to 0%', { value: 1001, previous: 1000, delta: 1 }, 'relative', '0%'],
-    ['a count that rounds down to 0%', { value: 999, previous: 1000, delta: -1 }, 'relative', '0%'],
+    ['a count that rounds to 0%', { value: 10001, previous: 10000, delta: 1 }, 'relative', '0%'],
+    [
+      'a count that rounds down to 0%',
+      { value: 9999, previous: 10000, delta: -1 },
+      'relative',
+      '0%',
+    ],
   ] as const)(
     'has no sign nor direction for %s, so it never reads "+0" or shows a color',
     (_, compared, unit, label) => {

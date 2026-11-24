@@ -10,14 +10,12 @@ import { useHistory } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
-import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import type { ApplicationTabId, MobilePlatform } from '../../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../../breadcrumbs/use_route_breadcrumb';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../../ebt_constants';
 import { useApplicationLinks } from '../../../hooks/use_application_links';
 import { useApplicationsHref } from '../../../hooks/use_applications_href';
-import { useQueryParam } from '../../../hooks/use_query_param';
 import { useShareAction } from '../../../hooks/use_share_action';
 import {
   APPLICATIONS_LABEL,
@@ -33,10 +31,6 @@ import { useMobileKpis } from './use_mobile_kpis';
 /** Mobile applications are EDOT data. */
 const SOURCE = APPLICATION_SOURCE.otel;
 
-const COMPARE_LABEL = i18n.translate('xpack.digitalExperience.mobile.compare', {
-  defaultMessage: 'Compare to the previous period',
-});
-
 /** The platforms the application reported on, as the header's badges. */
 const platformBadges = (platforms: MobilePlatform[]): AppHeaderBadge[] =>
   platforms.map((platform) => ({
@@ -47,7 +41,7 @@ const platformBadges = (platforms: MobilePlatform[]): AppHeaderBadge[] =>
 
 /**
  * A mobile application's page, all its platforms: its header, with its platforms as badges and
- * Compare and Open in Discover as actions, as the Session page has them, and its Overview, its only
+ * Open in Discover as an action, as the Session page has it, and its Overview, its only
  * tab, which shows the KPIs and the release health the page fetches.
  */
 export function MobileApplicationPage({
@@ -64,9 +58,6 @@ export function MobileApplicationPage({
   const discoverHref = useMobileDiscoverHref(serviceName);
   const kpisState = useMobileKpis(serviceName);
   const releasesState = useMobileReleases(serviceName);
-  // In the URL, so a reload or Share keeps it.
-  const { value: compare, setValue: setCompare } = useQueryParam('compare');
-  const isComparing = compare === 'true';
 
   // Any other tab's URL is replaced by the Overview's.
   const isOverview = selectedTab === 'overview';
@@ -90,21 +81,11 @@ export function MobileApplicationPage({
         badges={platformBadges(kpisState.kpis?.platforms ?? [])}
         menu={{
           items: [
-            {
-              id: 'compare',
-              order: 1,
-              label: COMPARE_LABEL,
-              iconType: 'compare',
-              isSelected: isComparing,
-              run: () => setCompare(isComparing ? undefined : 'true'),
-              testId: 'digitalExperienceMobileCompareToggle',
-              ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_COMPARE },
-            },
             ...(discoverHref
               ? [
                   {
                     id: 'openInDiscover',
-                    order: 2,
+                    order: 1,
                     label: OPEN_IN_DISCOVER_LABEL,
                     iconType: 'discoverApp',
                     href: discoverHref,

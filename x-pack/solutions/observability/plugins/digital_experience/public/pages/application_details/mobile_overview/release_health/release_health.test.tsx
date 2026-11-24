@@ -10,18 +10,35 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MobileReleasesResponse } from '../../../../../common/types/mobile';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { ReleaseAdoptionChart, ReleaseErrorRateChart } from './release_charts';
 import { ReleaseHealth } from './release_health';
+import { ReleaseTable } from './release_table';
 import type { MobileReleasesState } from './use_mobile_releases';
 
 jest.mock('./release_table', () => ({
-  ReleaseTable: () => <div data-test-subj="digitalExperienceMobileReleaseTable" />,
+  ReleaseTable: jest.fn(() => <div data-test-subj="digitalExperienceMobileReleaseTable" />),
 }));
 jest.mock('./release_charts', () => ({
-  ReleaseErrorRateChart: () => (
+  ReleaseErrorRateChart: jest.fn(() => (
     <div data-test-subj="digitalExperienceMobileReleaseErrorRateChart" />
-  ),
-  ReleaseAdoptionChart: () => <div data-test-subj="digitalExperienceMobileReleaseAdoptionChart" />,
+  )),
+  ReleaseAdoptionChart: jest.fn(() => (
+    <div data-test-subj="digitalExperienceMobileReleaseAdoptionChart" />
+  )),
 }));
+jest.mock('../../../../hooks/use_time_range');
+
+const setTimeRange = jest.fn();
+const onSelectRelease = jest.fn();
+
+beforeEach(() => {
+  jest.mocked(useTimeRange).mockReturnValue({
+    timeRange: { rangeFrom: 'now-1h', rangeTo: 'now' },
+    isTimeRangeInUrl: true,
+    setTimeRange,
+  });
+});
 
 const RELEASES: MobileReleasesResponse = {
   histogram: { interval: { value: 60, unit: 's' }, start: 0, end: 3_600_000 },
@@ -40,6 +57,8 @@ const renderSection = (state: Partial<MobileReleasesState>) =>
         refresh: jest.fn(),
         ...state,
       }}
+      selectedRelease="1.0.0"
+      onSelectRelease={onSelectRelease}
     />,
     {
       wrapper: ({ children }) => (
@@ -58,6 +77,19 @@ describe('ReleaseHealth', () => {
     expect(screen.getByTestId('digitalExperienceMobileReleaseTable')).toBeInTheDocument();
     expect(screen.getByTestId('digitalExperienceMobileReleaseErrorRateChart')).toBeInTheDocument();
     expect(screen.getByTestId('digitalExperienceMobileReleaseAdoptionChart')).toBeInTheDocument();
+  });
+
+  it('lets the table filter by a release, and the charts narrow the time range', () => {
+    renderSection({ releases: RELEASES });
+
+    expect(jest.mocked(ReleaseTable).mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ selectedRelease: '1.0.0', onSelectRelease })
+    );
+    [ReleaseErrorRateChart, ReleaseAdoptionChart].forEach((chart) =>
+      expect(jest.mocked(chart).mock.calls.at(-1)?.[0]).toEqual(
+        expect.objectContaining({ onTimeRangeSelect: setTimeRange })
+      )
+    );
   });
 
   it('shows its own loading state', () => {

@@ -85,6 +85,7 @@ export const MOBILE_APPLICATION_EBT_ELEMENTS = {
   OS_FILTER: 'mobileOsFilter',
   RETRY: 'mobileRetry',
   CLEAR_FILTERS: 'mobileClearFilters',
+  COMPARE_TOGGLE: 'mobileCompareToggle',
 } as const;
 
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {

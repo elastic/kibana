@@ -20,7 +20,16 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { sortBy, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import {
@@ -38,9 +47,13 @@ import { ChartArea } from '../../../../components/chart_area';
 import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
 import { useFormatters } from '../../../../hooks/use_formatters';
 import { MOBILE_ERROR_RATE_DESCRIPTION } from '../../../../labels';
+import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
+import { onBrushTimeRange } from '../../../../utils/brush_time_range';
+import { formatErrorRate } from '../../../../utils/format_error_rate';
 import { getTimeChartXDomain } from '../../../../utils/histogram_interval';
 
-const CHART_HEIGHT = 200;
+/** Room for the plot and the legend below it. */
+const CHART_HEIGHT = 240;
 
 const HIDDEN_AXIS_LINES = { tickLine: { visible: false }, axisLine: { visible: false } };
 
@@ -90,16 +103,26 @@ interface ReleaseChartProps {
   markers: MobileReleaseMarker[];
   histogram: HistogramBuckets;
   colors: ReadonlyMap<string, string>;
+  /** Narrows the page's time range to the one dragged over the chart. */
+  onTimeRangeSelect: TimeRangeSelect;
 }
 
+/**
+ * A chart's bordered panel: an `h3` under the section's title, with the calculation in an info
+ * tip, so both panels' headers are one line and their plots line up side by side.
+ */
 function ChartPanel({
   title,
   tooltip,
+  hasData,
+  emptyMessage,
   'data-test-subj': dataTestSubj,
   children,
 }: {
   title: string;
   tooltip: string;
+  hasData: boolean;
+  emptyMessage: string;
   'data-test-subj': string;
   children: ReactNode;
 }) {
@@ -107,15 +130,23 @@ function ChartPanel({
     <EuiPanel hasBorder data-test-subj={dataTestSubj}>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
+          <EuiTitle size="xs">
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIconTip content={tooltip} type="question" color="subdued" aria-label={title} />
+          <EuiIconTip content={tooltip} type="info" />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {children}
+      <EuiSpacer size="s" />
+      <ChartArea
+        height={CHART_HEIGHT}
+        isLoading={false}
+        hasData={hasData}
+        emptyMessage={emptyMessage}
+      >
+        {children}
+      </ChartArea>
     </EuiPanel>
   );
 }
@@ -148,6 +179,7 @@ function ReleaseChart({
   markers,
   histogram,
   colors,
+  onTimeRangeSelect,
   renderSeries,
   formatValue,
   yAxisId,
@@ -162,10 +194,13 @@ function ReleaseChart({
 }) {
   const baseTheme = useElasticChartsTheme();
   const { formatDate, timeZone } = useFormatters();
-  const points = series.flatMap((item) => item.points);
   const xDomain = getTimeChartXDomain({
-    points: [...new Map(points.map((point) => [point.timestamp, point])).values()].sort(
-      (a, b) => a.timestamp - b.timestamp
+    points: sortBy(
+      uniqBy(
+        series.flatMap(({ points }) => points),
+        'timestamp'
+      ),
+      'timestamp'
     ),
     histogram,
     timeZone,
@@ -174,7 +209,15 @@ function ReleaseChart({
 
   return (
     <Chart size={{ height: '100%' }}>
-      <Settings baseTheme={baseTheme} locale={i18n.getLocale()} xDomain={xDomain} />
+      {/* The legend below the plot keeps its width: hover a release to spotlight it, click to hide it. */}
+      <Settings
+        baseTheme={baseTheme}
+        locale={i18n.getLocale()}
+        xDomain={xDomain}
+        showLegend
+        legendPosition={Position.Bottom}
+        onBrushEnd={onBrushTimeRange(onTimeRangeSelect)}
+      />
       <Tooltip headerFormatter={({ value }) => formatDate(value)} />
       <PartialBucketsEndzones xDomain={xDomain} />
       <Axis id="time" position={Position.Bottom} style={HIDDEN_AXIS_LINES} />
@@ -196,7 +239,6 @@ function ReleaseChart({
 
 /** The error rate of each release with enough sessions, one line per release. */
 export function ReleaseErrorRateChart({ releases, ...props }: ReleaseChartProps) {
-  const { formatNumber } = useFormatters();
   const withRate = new Set(
     releases.filter(({ errorRate }) => errorRate !== null).map(({ release }) => release)
   );
@@ -207,35 +249,30 @@ export function ReleaseErrorRateChart({ releases, ...props }: ReleaseChartProps)
       data-test-subj="digitalExperienceMobileReleaseErrorRateChart"
       title={ERROR_RATE_TITLE}
       tooltip={ERROR_RATE_TOOLTIP}
+      hasData={series.length > 0}
+      emptyMessage={ERROR_RATE_EMPTY}
     >
-      <ChartArea
-        height={CHART_HEIGHT}
-        isLoading={false}
-        hasData={series.length > 0}
-        emptyMessage={ERROR_RATE_EMPTY}
-      >
-        <ReleaseChart
-          {...props}
-          series={series}
-          yAxisId="releaseErrorRateAxis"
-          formatValue={formatNumber}
-          renderSeries={({ series: { release, isOther, points }, color, timeZone }) => (
-            <LineSeries
-              key={release}
-              id={`errorRate-${release}`}
-              name={seriesName({ release, isOther })}
-              color={color}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor="timestamp"
-              yAccessors={['errorRate']}
-              data={points}
-              curve={CurveType.CURVE_MONOTONE_X}
-              timeZone={timeZone}
-            />
-          )}
-        />
-      </ChartArea>
+      <ReleaseChart
+        {...props}
+        series={series}
+        yAxisId="releaseErrorRateAxis"
+        formatValue={formatErrorRate}
+        renderSeries={({ series: { release, isOther, points }, color, timeZone }) => (
+          <LineSeries
+            key={release}
+            id={`errorRate-${release}`}
+            name={seriesName({ release, isOther })}
+            color={color}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="timestamp"
+            yAccessors={['errorRate']}
+            data={points}
+            curve={CurveType.CURVE_MONOTONE_X}
+            timeZone={timeZone}
+          />
+        )}
+      />
     </ChartPanel>
   );
 }
@@ -250,36 +287,31 @@ export function ReleaseAdoptionChart(props: Omit<ReleaseChartProps, 'releases'>)
       data-test-subj="digitalExperienceMobileReleaseAdoptionChart"
       title={ADOPTION_TITLE}
       tooltip={ADOPTION_TOOLTIP}
+      hasData={series.some(({ points }) => points.length > 0)}
+      emptyMessage={ADOPTION_EMPTY}
     >
-      <ChartArea
-        height={CHART_HEIGHT}
-        isLoading={false}
-        hasData={series.some(({ points }) => points.length > 0)}
-        emptyMessage={ADOPTION_EMPTY}
-      >
-        <ReleaseChart
-          {...props}
-          yAxisId="releaseAdoptionAxis"
-          formatValue={formatNumber}
-          renderSeries={({ series: { release, isOther, points }, color, timeZone }) => (
-            <AreaSeries
-              key={release}
-              id={`adoption-${release}`}
-              name={seriesName({ release, isOther })}
-              color={color}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor="timestamp"
-              yAccessors={['sessions']}
-              stackAccessors={['timestamp']}
-              data={points}
-              curve={CurveType.CURVE_MONOTONE_X}
-              areaSeriesStyle={{ area: { opacity: 0.6 }, point: { visible: 'never' } }}
-              timeZone={timeZone}
-            />
-          )}
-        />
-      </ChartArea>
+      <ReleaseChart
+        {...props}
+        yAxisId="releaseAdoptionAxis"
+        formatValue={formatNumber}
+        renderSeries={({ series: { release, isOther, points }, color, timeZone }) => (
+          <AreaSeries
+            key={release}
+            id={`adoption-${release}`}
+            name={seriesName({ release, isOther })}
+            color={color}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="timestamp"
+            yAccessors={['sessions']}
+            stackAccessors={['timestamp']}
+            data={points}
+            curve={CurveType.CURVE_MONOTONE_X}
+            areaSeriesStyle={{ area: { opacity: 0.6 }, point: { visible: 'never' } }}
+            timeZone={timeZone}
+          />
+        )}
+      />
     </ChartPanel>
   );
 }

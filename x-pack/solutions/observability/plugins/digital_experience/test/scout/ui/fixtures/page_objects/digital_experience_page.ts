@@ -228,14 +228,8 @@ export class DigitalExperiencePage {
     await this.page.getByTestId(`digitalExperienceMobileOsFilterOption-${osName}`).click();
   }
 
-  /**
-   * Turns the mobile page's Compare on or off from its header, whose narrow layouts move the menu
-   * items into the overflow menu.
-   */
+  /** Turns Compare on or off from the mobile page's Health summary. */
   async toggleMobileCompare(): Promise<void> {
-    if (!(await this.mobileCompareToggle.isVisible())) {
-      await this.page.getByTestId('app-menu-overflow-button').click();
-    }
     await this.mobileCompareToggle.click();
   }
 

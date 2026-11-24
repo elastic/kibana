@@ -8,7 +8,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import type { AreaSeriesProps, LineAnnotationProps, LineSeriesProps } from '@elastic/charts';
+import type {
+  AreaSeriesProps,
+  LineAnnotationProps,
+  LineSeriesProps,
+  SettingsProps,
+} from '@elastic/charts';
 import type { MobileReleaseRow, MobileReleaseSeries } from '../../../../../common/types/mobile';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
@@ -19,10 +24,12 @@ import { TEST_VIS_COLORS } from './release_colors.test_helpers';
 const mockLines: LineSeriesProps[] = [];
 const mockAreas: AreaSeriesProps[] = [];
 const mockAnnotations: LineAnnotationProps[] = [];
+const mockSettings: SettingsProps[] = [];
 
 // jsdom draws no canvas, so the test reads the series and annotations the charts are given.
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
+  const { createElement } = jest.requireActual('react');
   return {
     ...actual,
     LineSeries: (props: LineSeriesProps) => {
@@ -36,6 +43,10 @@ jest.mock('@elastic/charts', () => {
     LineAnnotation: (props: LineAnnotationProps) => {
       mockAnnotations.push(props);
       return null;
+    },
+    Settings: (props: SettingsProps) => {
+      mockSettings.push(props);
+      return createElement(actual.Settings, props);
     },
   };
 });
@@ -61,6 +72,7 @@ const props = {
   markers: [{ release: '2.0.0', firstSeen: 3_600_000 }],
   histogram: { interval: { value: 3600, unit: 's' as const }, start: 0, end: 7_200_000 },
   colors: getReleaseColors(RELEASES, TEST_VIS_COLORS),
+  onTimeRangeSelect: jest.fn(),
 };
 
 const renderWithTheme = (ui: React.ReactElement) => render(ui, { wrapper: EuiProvider });
@@ -69,6 +81,8 @@ beforeEach(() => {
   mockLines.length = 0;
   mockAreas.length = 0;
   mockAnnotations.length = 0;
+  mockSettings.length = 0;
+  props.onTimeRangeSelect.mockClear();
   jest.mocked(useKibanaServices).mockReturnValue({
     uiSettings: createUiSettingsMock(),
   } as unknown as ReturnType<typeof useKibanaServices>);
@@ -129,5 +143,30 @@ describe('release charts', () => {
     );
 
     expect(getByText('No release has enough sessions to show an error rate')).toBeInTheDocument();
+  });
+
+  it('shows the legend below the plot, so it keeps its width', () => {
+    renderWithTheme(<ReleaseAdoptionChart {...props} />);
+
+    expect(mockSettings.at(-1)).toEqual(
+      expect.objectContaining({ showLegend: true, legendPosition: 'bottom' })
+    );
+  });
+
+  it('narrows the time range to the one dragged over a chart', () => {
+    renderWithTheme(<ReleaseErrorRateChart releases={RELEASES} {...props} />);
+
+    mockSettings.at(-1)?.onBrushEnd?.({ x: [1_000, 2_000] });
+
+    expect(props.onTimeRangeSelect).toHaveBeenCalledWith({
+      rangeFrom: new Date(1_000).toISOString(),
+      rangeTo: new Date(2_000).toISOString(),
+    });
+  });
+
+  it('titles each chart as a heading under the section, with its calculation in a tip', () => {
+    const { getByRole } = renderWithTheme(<ReleaseAdoptionChart {...props} />);
+
+    expect(getByRole('heading', { level: 3, name: 'Release adoption' })).toBeInTheDocument();
   });
 });

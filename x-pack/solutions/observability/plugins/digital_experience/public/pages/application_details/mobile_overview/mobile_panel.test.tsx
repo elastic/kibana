@@ -110,7 +110,8 @@ describe('MobilePanel', () => {
       { value: 0.999995, previous: 0.999999, delta: -0.000004 },
       '0 pp',
     ],
-    ['a count', 'relative', { value: 1001, previous: 1000, delta: 1 }, '0%'],
+    // +0.01%, below the one decimal a relative change shows.
+    ['a count', 'relative', { value: 10001, previous: 10000, delta: 1 }, '0%'],
   ] as const)(
     'shows a change of %s that rounds to nothing without a sign, and neither red nor green',
     (_, changeUnit, value, label) => {

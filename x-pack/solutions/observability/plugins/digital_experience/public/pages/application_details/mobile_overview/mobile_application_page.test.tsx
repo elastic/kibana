@@ -13,7 +13,6 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { useRouteBreadcrumb } from '../../../breadcrumbs/use_route_breadcrumb';
 import { useApplicationLinks } from '../../../hooks/use_application_links';
-import { useQueryParam } from '../../../hooks/use_query_param';
 import { useShareAction } from '../../../hooks/use_share_action';
 import { MobileApplicationPage } from './mobile_application_page';
 import { MobileOverview } from './mobile_overview';
@@ -37,7 +36,6 @@ jest.mock('../../../hooks/use_share_action');
 jest.mock('./use_mobile_discover_href');
 jest.mock('./use_mobile_kpis');
 jest.mock('./release_health/use_mobile_releases');
-jest.mock('../../../hooks/use_query_param');
 jest.mock('./mobile_overview', () => ({
   MobileOverview: jest.fn(() => <div data-test-subj="mobileOverview" />),
 }));
@@ -45,7 +43,7 @@ jest.mock('./mobile_overview', () => ({
 const OVERVIEW_PATH = '/shop-mobile?applicationType=mobile&source=otel';
 const DISCOVER_HREF = '/app/discover#/?_a=(query:(esql:mobile))';
 
-// EUI's theme too: a selected header action, as Compare when on, reads it.
+// EUI's theme too, which the header's actions read.
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiProvider>
     <MockAppHeaderProvider>{children}</MockAppHeaderProvider>
@@ -79,10 +77,6 @@ const RELEASES_STATE: MobileReleasesState = {
   refresh: jest.fn(),
 };
 
-const setCompare = jest.fn();
-const mockCompare = (compare?: 'true') =>
-  jest.mocked(useQueryParam).mockReturnValue({ value: compare, setValue: setCompare });
-
 beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(useApplicationLinks).mockReturnValue({
@@ -97,7 +91,6 @@ beforeEach(() => {
   jest.mocked(useMobileDiscoverHref).mockReturnValue(DISCOVER_HREF);
   jest.mocked(useMobileKpis).mockReturnValue(KPIS_STATE);
   jest.mocked(useMobileReleases).mockReturnValue(RELEASES_STATE);
-  mockCompare();
 });
 
 describe('MobileApplicationPage', () => {
@@ -138,13 +131,10 @@ describe('MobileApplicationPage', () => {
     expect(useMobileDiscoverHref).toHaveBeenCalledWith('shop-mobile');
   });
 
-  it('has no Open in Discover without access to Discover', async () => {
+  it('has no Open in Discover without access to Discover', () => {
     jest.mocked(useMobileDiscoverHref).mockReturnValue(undefined);
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
-    await openAppMenuOverflow();
 
-    // Compare is still there.
-    expect(screen.getByTestId('digitalExperienceMobileCompareToggle')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceMobileOpenInDiscover')).toBeNull();
   });
 
@@ -197,24 +187,11 @@ describe('MobileApplicationPage', () => {
     expect(useMobileKpis).toHaveBeenCalledWith('shop-mobile');
   });
 
-  it('turns Compare on from the header, in the URL, so a reload or Share keeps it', async () => {
+  it("leaves Compare to the Overview's health summary, out of the header", async () => {
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
     await openAppMenuOverflow();
 
-    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
-
-    expect(useQueryParam).toHaveBeenCalledWith('compare');
-    expect(setCompare).toHaveBeenCalledWith('true');
-  });
-
-  it('turns Compare off from the header when the URL has it on', async () => {
-    mockCompare('true');
-    render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
-    await openAppMenuOverflow();
-
-    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
-
-    expect(setCompare).toHaveBeenCalledWith(undefined);
+    expect(screen.queryByTestId('digitalExperienceMobileCompareToggle')).toBeNull();
   });
 
   it('gives the Overview the KPIs and the release health the page fetched', () => {

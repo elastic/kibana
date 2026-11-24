@@ -49,8 +49,16 @@ describe('useFormatters', () => {
     expect(formatSignedNumber(-0.0004)).toBe('0');
     expect(formatSignedPercent(0.2)).toBe('+20%');
     expect(formatSignedPercent(-0.2)).toBe('-20%');
-    expect(formatSignedPercent(0.001)).toBe('0%');
-    expect(formatSignedPercent(-0.001)).toBe('0%');
+    expect(formatSignedPercent(0.0004)).toBe('0%');
+    expect(formatSignedPercent(-0.0004)).toBe('0%');
+  });
+
+  it('shows a relative change with one decimal at most, whatever the percent pattern', () => {
+    const { formatSignedPercent } = renderFormatters();
+
+    expect(formatSignedPercent(0.00499)).toBe('+0.5%');
+    expect(formatSignedPercent(0.03898)).toBe('+3.9%');
+    expect(formatSignedPercent(-0.2)).toBe('-20%');
   });
 
   it('formats dates with the date format in the configured time zone', () => {

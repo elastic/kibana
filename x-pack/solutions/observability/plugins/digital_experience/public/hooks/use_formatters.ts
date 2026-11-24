@@ -30,7 +30,7 @@ export interface Formatters {
   formatPercent: (share: number) => string;
   /** `formatNumber` with a sign unless it rounds to 0, e.g. "+1.5", "-1.5" or "0". */
   formatSignedNumber: (value: number) => string;
-  /** `formatPercent` with a sign unless it rounds to 0, e.g. "+20%", "-20%" or "0%". */
+  /** A relative change with a sign unless it rounds to 0, one decimal at most: "+3.9%", "0%". */
   formatSignedPercent: (share: number) => string;
   /** An absolute date, with the `dateFormat` and `dateFormat:tz` advanced settings. */
   formatDate: (date: string | number) => string;
@@ -41,6 +41,8 @@ export interface Formatters {
   timeZone: string;
 }
 
+const SIGNED_PERCENT_PATTERN = '0,0.[0]%';
+
 /** The formatters of `uiSettings`, with Kibana's number and percent field formats. */
 export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
   const getConfig: FieldFormatsGetConfigFn = (key, defaultOverride) =>
@@ -48,7 +50,11 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
   const number = new NumberFormat({}, getConfig);
   const percent = new PercentFormat({}, getConfig);
   const signedNumber = new NumberFormat({ alwaysShowSign: true }, getConfig);
-  const signedPercent = new PercentFormat({ alwaysShowSign: true }, getConfig);
+  // A change badge, e.g. "+3.9%": one decimal at most, whatever the percent pattern.
+  const signedPercent = new PercentFormat(
+    { pattern: SIGNED_PERCENT_PATTERN, alwaysShowSign: true },
+    getConfig
+  );
   const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
   // As Kibana's own date histograms do: `Browser` becomes the browser's IANA time zone.
   const userTimeZone = getUserTimeZone((key) => uiSettings.get(key));

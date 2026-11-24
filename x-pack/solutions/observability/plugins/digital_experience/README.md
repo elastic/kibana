@@ -101,8 +101,7 @@ on serverless and stateful.
   `ApplicationPage` stays the route's page and hands a mobile application to
   `MobileApplicationPage` (web ones keep the EDOT Browser and Classic RUM page). That page owns its
   header, as the Session page does: the title, a badge per platform the application reported on,
-  Share, the Overview tab, and two actions, **Compare to the previous period** (`compare=true` in
-  the URL, so a reload or Share keeps it) and **Open in Discover**, which opens the application's
+  Share, the Overview tab, and **Open in Discover**, which opens the application's
   mobile events with the URL's filters, newest first, built in the browser from the URL
   (`use_mobile_discover_href.ts`, `common/mobile/discover.ts`). It fetches the KPIs
   (`use_mobile_kpis.ts`) for the header's badges and the Overview, and remounts per application, so
@@ -114,11 +113,14 @@ on serverless and stateful.
   date picker pinned to the right. A picked value fits its capped button (`12em`), so picking one
   never moves the page. The filters are in the URL, so a reload or a shared link keeps them; the
   router drops a value longer than the KPI route accepts (`common/filter_lengths.ts`). Below, the
-  KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
+  **Health summary**: its title, a **Compare to the previous period** toggle (`compare=true` in the
+  URL, so a reload or Share keeps it) and the KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
   (health summary, release health, stability, users, performance, views) join the page as those
   issues fill them, rather than showing placeholders. Every KPI uses `MobilePanel`: the current
   value and a tooltip with the calculation and, with Compare on, its change against the previous
-  period of equal length and the previous value. A change's sign and color follow the rounded value
+  period of equal length and the previous value. The error rate shows with two decimals, as in the
+  release table, its chart and the applications list. A relative change shows one decimal at most
+  (`+3.9%`), whatever the percent pattern. A change's sign and color follow the rounded value
   shown, so one that rounds to 0 reads `0%` with a neutral badge. A warning shows when the user
   can't read every OTel index, as the counts may then miss data. Without mobile data it links to
   the EDOT Android and iOS setup docs, unless the user can't read every OTel index: then it says
@@ -145,7 +147,12 @@ on serverless and stateful.
   up 30 days before the range; one first seen before the range start gets no marker. The section
   loads apart from the KPIs (`GET .../mobile_applications/{serviceName}/releases`, same params as
   the KPI route) and has its own error state with a retry; the toolbar's refresh reloads both.
-  The crash rate (#64) and the cold start (#68) join the table's columns and the charts later.
+  The table, in a bordered panel like the KPIs and charts, shows each release's share of the
+  sessions, sorts by sessions, users or error rate ("Other" stays last) and shows the error rate
+  with two decimals; a release filters the page by it (the `release` filter), or takes the filter
+  off when selected. Each chart has a one-line header (an `h3` and an info tip with the
+  calculation), so both plots line up, and a legend below it (hover a release to spotlight it,
+  click to hide it); dragging over one narrows the time range. The crash rate (#64) and the cold start (#68) join the table's columns and the charts later.
 
 ## Pages
 

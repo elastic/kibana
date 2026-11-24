@@ -20,11 +20,12 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
 import { MobileOverview } from './mobile_overview';
+import { ReleaseHealth } from './release_health/release_health';
 import type { MobileReleasesState } from './release_health/use_mobile_releases';
 import { useMobileKpis } from './use_mobile_kpis';
 
 jest.mock('./release_health/release_health', () => ({
-  ReleaseHealth: () => <div data-test-subj="digitalExperienceMobileReleaseHealth" />,
+  ReleaseHealth: jest.fn(() => <div data-test-subj="digitalExperienceMobileReleaseHealth" />),
 }));
 jest.mock('../../../hooks/use_api_client');
 jest.mock('../../../hooks/use_digital_experience_params');
@@ -129,7 +130,10 @@ describe('MobileOverview', () => {
       '12'
     );
     expect(screen.getByTestId('digitalExperienceMobileKpiUsersValue')).toHaveTextContent('4');
-    expect(screen.getByTestId('digitalExperienceMobileKpiErrorRateValue')).toHaveTextContent('0.5');
+    // Two decimals, as the release table and the applications list show it.
+    expect(screen.getByTestId('digitalExperienceMobileKpiErrorRateValue')).toHaveTextContent(
+      '0.50'
+    );
     expect(
       Array.from(
         screen
@@ -324,6 +328,51 @@ describe('MobileOverview', () => {
       )
     );
     expect(environmentProps()).toMatchObject({ isLoading: false, environments: ['production'] });
+  });
+
+  it('heads the KPI row with the health summary and its Compare toggle', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    expect(screen.getByRole('region', { name: 'Health summary' })).toContainElement(
+      screen.getByTestId('digitalExperienceMobileKpis')
+    );
+    const toggle = screen.getByTestId('digitalExperienceMobileCompareToggle');
+    expect(screen.getByText('Compare to the previous period')).toBeInTheDocument();
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('turns Compare on in the URL, so a reload or Share keeps it', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
+
+    expect(updateUrlQuery).toHaveBeenCalledWith({ compare: 'true' });
+  });
+
+  it('turns Compare off when the URL has it on', async () => {
+    mockParams({ compare: 'true' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    const toggle = screen.getByTestId('digitalExperienceMobileCompareToggle');
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(toggle);
+
+    expect(updateUrlQuery).toHaveBeenCalledWith({ compare: undefined });
+  });
+
+  it('lets the release health filter the page by a release, kept in the URL', async () => {
+    mockParams({ release: '2.0.0' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    const props = jest.mocked(ReleaseHealth).mock.calls.at(-1)?.[0];
+    expect(props?.selectedRelease).toBe('2.0.0');
+    props?.onSelectRelease('1.9.0');
+
+    expect(updateUrlQuery).toHaveBeenCalledWith({ release: '1.9.0' });
   });
 
   it('shows no change nor previous period with Compare off, its default', async () => {

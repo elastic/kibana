@@ -5,18 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiHealth, EuiToolTip } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { orderBy } from 'lodash';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiHealth, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { MIN_RELEASE_SESSIONS, OTHER_RELEASE_LABEL } from '../../../../../common/mobile/releases';
 import type { MobileReleaseRow } from '../../../../../common/types/mobile';
+import {
+  DIGITAL_EXPERIENCE_EBT_ACTIONS,
+  MOBILE_APPLICATION_EBT_ELEMENTS,
+} from '../../../../ebt_constants';
+import type { Formatters } from '../../../../hooks/use_formatters';
 import { useFormatters } from '../../../../hooks/use_formatters';
 import {
   MOBILE_ERROR_RATE_DESCRIPTION,
   MOBILE_USERS_DESCRIPTION,
   NOT_ENOUGH_DATA_LABEL,
 } from '../../../../labels';
+import { metricColumnPreset } from '../../../../utils/column_presets';
+import { formatErrorRate } from '../../../../utils/format_error_rate';
 
 const TABLE_CAPTION = i18n.translate('xpack.digitalExperience.mobile.releases.table.caption', {
   defaultMessage: 'Release health by app version',
@@ -48,45 +57,111 @@ const ERROR_RATE_COLUMN = i18n.translate(
   { defaultMessage: 'Error rate' }
 );
 
+const filterLabel = (release: string, isSelected: boolean): string =>
+  isSelected
+    ? i18n.translate('xpack.digitalExperience.mobile.releases.table.removeFilter', {
+        defaultMessage: 'Stop filtering by release {release}',
+        values: { release },
+      })
+    : i18n.translate('xpack.digitalExperience.mobile.releases.table.filter', {
+        defaultMessage: 'Filter by release {release}',
+        values: { release },
+      });
+
+type Sort = NonNullable<Criteria<MobileReleaseRow>['sort']>;
+
+/** Most sessions first, as the route returns them. */
+const DEFAULT_SORT: Sort = { field: 'sessions', direction: 'desc' };
+
+/**
+ * The rows by `sort`, "Other" always last; a release without an error rate comes after those with
+ * one, as it can't be compared.
+ */
+export const sortReleases = (
+  releases: readonly MobileReleaseRow[],
+  { field, direction }: Sort
+): MobileReleaseRow[] =>
+  orderBy(
+    releases,
+    ['isOther', ({ [field]: value }) => value === null, field],
+    ['asc', 'asc', direction]
+  );
+
+/** The sessions with their share of every release's sessions, e.g. `1,200 (60%)`. */
+const formatSessions = (
+  sessions: number,
+  totalSessions: number,
+  { formatNumber, formatPercent }: Formatters
+): string =>
+  totalSessions > 0
+    ? `${formatNumber(sessions)} (${formatPercent(sessions / totalSessions)})`
+    : formatNumber(sessions);
+
 /**
  * The table's columns, in order. The crash rate (#64) and the cold start (#68) join them here.
  */
 const releaseColumns = ({
   colors,
-  formatNumber,
+  formatters,
+  totalSessions,
+  selectedRelease,
+  onSelectRelease,
 }: {
   colors: ReadonlyMap<string, string>;
-  formatNumber: (value: number) => string;
+  formatters: Formatters;
+  totalSessions: number;
+  selectedRelease: string | undefined;
+  onSelectRelease: (release: string | undefined) => void;
 }): Array<EuiBasicTableColumn<MobileReleaseRow>> => [
   {
     field: 'release',
     name: RELEASE_COLUMN,
     'data-test-subj': 'digitalExperienceMobileReleaseName',
-    render: (release: string, { isOther }) => (
-      <EuiHealth color={colors.get(release)}>{isOther ? OTHER_RELEASE_LABEL : release}</EuiHealth>
-    ),
+    render: (release: string, { isOther }) => {
+      if (isOther) {
+        return <EuiHealth color={colors.get(release)}>{OTHER_RELEASE_LABEL}</EuiHealth>;
+      }
+      const isSelected = release === selectedRelease;
+      return (
+        <EuiHealth color={colors.get(release)}>
+          <EuiLink
+            color={isSelected ? 'primary' : 'text'}
+            aria-pressed={isSelected}
+            aria-label={filterLabel(release, isSelected)}
+            onClick={() => onSelectRelease(isSelected ? undefined : release)}
+            data-test-subj="digitalExperienceMobileReleaseFilterLink"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+              element: MOBILE_APPLICATION_EBT_ELEMENTS.RELEASE_FILTER,
+            })}
+          >
+            {release}
+          </EuiLink>
+        </EuiHealth>
+      );
+    },
   },
   {
     field: 'sessions',
     name: SESSIONS_COLUMN,
-    align: 'right',
-    dataType: 'number',
-    render: (sessions: number) => formatNumber(sessions),
+    ...metricColumnPreset<MobileReleaseRow>(),
+    sortable: true,
+    render: (sessions: number) => formatSessions(sessions, totalSessions, formatters),
   },
   {
     field: 'users',
     name: USERS_COLUMN,
     nameTooltip: { content: MOBILE_USERS_DESCRIPTION },
-    align: 'right',
-    dataType: 'number',
-    render: (users: number) => formatNumber(users),
+    ...metricColumnPreset<MobileReleaseRow>(),
+    sortable: true,
+    render: (users: number) => formatters.formatNumber(users),
   },
   {
     field: 'errorRate',
     name: ERROR_RATE_COLUMN,
     nameTooltip: { content: MOBILE_ERROR_RATE_DESCRIPTION },
-    align: 'right',
-    dataType: 'number',
+    ...metricColumnPreset<MobileReleaseRow>(),
+    sortable: true,
     'data-test-subj': 'digitalExperienceMobileReleaseErrorRate',
     render: (errorRate: number | null) =>
       errorRate === null ? (
@@ -94,30 +169,60 @@ const releaseColumns = ({
           <span tabIndex={0}>{NOT_ENOUGH_DATA_LABEL}</span>
         </EuiToolTip>
       ) : (
-        formatNumber(errorRate)
+        formatErrorRate(errorRate)
       ),
   },
 ];
 
-/** The releases of the time range with their sessions, users and error rate; "Other" comes last. */
+/**
+ * The releases of the time range with their sessions, users and error rate, sortable, "Other"
+ * always last. A release filters the page by it, or takes the filter off when it's selected.
+ */
 export function ReleaseTable({
   releases,
   colors,
+  selectedRelease,
+  onSelectRelease,
 }: {
   releases: MobileReleaseRow[];
   colors: ReadonlyMap<string, string>;
+  /** The release the page is filtered by, if any. */
+  selectedRelease: string | undefined;
+  onSelectRelease: (release: string | undefined) => void;
 }) {
-  const { formatNumber } = useFormatters();
+  const formatters = useFormatters();
+  const [sort, setSort] = useState<Sort>(DEFAULT_SORT);
+  const totalSessions = releases.reduce((total, { sessions }) => total + sessions, 0);
+  const items = useMemo(() => sortReleases(releases, sort), [releases, sort]);
+
+  const onChange = ({ sort: nextSort }: Criteria<MobileReleaseRow>) => {
+    if (nextSort) {
+      setSort(nextSort);
+    }
+  };
+
   return (
-    <EuiBasicTable<MobileReleaseRow>
-      data-test-subj="digitalExperienceMobileReleaseTable"
-      tableCaption={TABLE_CAPTION}
-      items={releases}
-      itemId="release"
-      columns={releaseColumns({ colors, formatNumber })}
-      rowProps={({ release }) => ({
-        'data-test-subj': `digitalExperienceMobileReleaseRow-${release}`,
-      })}
-    />
+    <EuiPanel hasBorder paddingSize="m">
+      <EuiBasicTable<MobileReleaseRow>
+        data-test-subj="digitalExperienceMobileReleaseTable"
+        tableCaption={TABLE_CAPTION}
+        tableLayout="auto"
+        items={items}
+        itemId="release"
+        rowHeader="release"
+        columns={releaseColumns({
+          colors,
+          formatters,
+          totalSessions,
+          selectedRelease,
+          onSelectRelease,
+        })}
+        sorting={{ sort }}
+        onChange={onChange}
+        rowProps={({ release }) => ({
+          'data-test-subj': `digitalExperienceMobileReleaseRow-${release}`,
+        })}
+      />
+    </EuiPanel>
   );
 }
