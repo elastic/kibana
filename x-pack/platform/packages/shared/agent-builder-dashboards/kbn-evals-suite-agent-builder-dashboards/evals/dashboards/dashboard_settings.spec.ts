@@ -19,7 +19,7 @@ evaluate.describe('Agent Builder Dashboards - Settings', { tag: tags.serverless.
       dataset: {
         name: 'agent builder dashboards: settings',
         description:
-          'Hides panel borders, sets auto-refresh and turns on fast mode on a seeded sectioned logs dashboard, and renames it without touching any setting. Scores the requested setting, the settings that must keep their seed values, and the layout the change must keep.',
+          'Hides panel titles and borders and syncs tooltips in one call, sets auto-refresh and turns on fast mode on a seeded sectioned logs dashboard, and renames it without touching any setting. Scores the requested settings, the settings that must keep their seed values, the time range, and the layout the change must keep.',
         examples: DASHBOARD_SETTINGS_EXAMPLES,
       },
     });
