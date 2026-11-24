@@ -19,6 +19,7 @@ import {
 } from '../../../../../constants';
 import { parseDuration } from '../../../../../parse_duration';
 import { gapReasonType } from '../../../../../constants/gap_reason';
+import { gapReasonTypeSchema } from '../../../../../schemas';
 
 const { maxBackfills, numRetries, minScheduleIntervalInMs } = gapAutoFillSchedulerLimits;
 
@@ -127,16 +128,10 @@ const scheduleSchema = schema.object({
 });
 
 const excludedReasonsSchema = schema.maybe(
-  schema.arrayOf(
-    schema.oneOf([
-      schema.literal(gapReasonType.RULE_DISABLED),
-      schema.literal(gapReasonType.RULE_DID_NOT_RUN),
-    ]),
-    {
-      maxSize: Object.values(gapReasonType).length,
-      meta: { description: schedulerFieldDescriptions.excludedReasons },
-    }
-  )
+  schema.arrayOf(gapReasonTypeSchema, {
+    maxSize: Object.values(gapReasonType).length,
+    meta: { description: schedulerFieldDescriptions.excludedReasons },
+  })
 );
 
 export const gapAutoFillSchedulerBodySchema = schema.object(
