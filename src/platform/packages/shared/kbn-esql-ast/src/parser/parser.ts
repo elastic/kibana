@@ -17,6 +17,7 @@ import { Builder } from '../builder';
 import { default as ESQLLexer } from '../antlr/esql_lexer';
 import { default as ESQLParser } from '../antlr/esql_parser';
 import type { ESQLAst, ESQLAstQueryExpression, EditorError } from '../types';
+import { assertQueryNesting, QUERY_NESTING_ERROR_CODE, QueryNestingError } from './query_nesting';
 
 export interface ParseOptions {
   /**
@@ -49,6 +50,16 @@ export interface ParseResult {
    */
   errors: EditorError[];
 }
+
+const createUnlocatedError = (message: string, code?: string): EditorError => ({
+  startLineNumber: 0,
+  endLineNumber: 0,
+  startColumn: 0,
+  endColumn: 0,
+  message,
+  severity: 'error',
+  ...(code ? { code } : {}),
+});
 
 export class Parser {
   public static readonly create = (src: string, options?: ParseOptions) => {
@@ -90,10 +101,16 @@ export class Parser {
     }
   }
 
+  private assertQueryNesting(): void {
+    this.tokens.fill();
+    assertQueryNesting(this.tokens.tokens);
+  }
+
   public parse(): ParseResult {
     const { src, options } = this;
 
     try {
+      this.assertQueryNesting();
       this.parser[GRAMMAR_ROOT_RULE]();
 
       const errors = this.errors.getErrors();
@@ -112,32 +129,41 @@ export class Parser {
 
       return { root, ast: commands, errors, tokens: this.tokens.tokens };
     } catch (error) {
+      const root = Builder.expression.query();
+
+      if (error instanceof QueryNestingError) {
+        return {
+          root,
+          ast: root.commands,
+          errors: [createUnlocatedError(error.message, QUERY_NESTING_ERROR_CODE)],
+          tokens: [],
+        };
+      }
+
       if (error !== 'Empty Stack')
         // eslint-disable-next-line no-console
         console.error(error);
 
-      const root = Builder.expression.query();
-
       return {
         root,
         ast: root.commands,
-        errors: [
-          {
-            startLineNumber: 0,
-            endLineNumber: 0,
-            startColumn: 0,
-            endColumn: 0,
-            message: `Invalid query [${src}]`,
-            severity: 'error',
-          },
-        ],
+        errors: [createUnlocatedError(`Invalid query [${src}]`)],
         tokens: [],
       };
     }
   }
 
   public parseErrors(): EditorError[] {
-    this.parser[GRAMMAR_ROOT_RULE]();
+    try {
+      this.assertQueryNesting();
+      this.parser[GRAMMAR_ROOT_RULE]();
+    } catch (error) {
+      if (error instanceof QueryNestingError) {
+        return [createUnlocatedError(error.message, QUERY_NESTING_ERROR_CODE)];
+      }
+
+      throw error;
+    }
 
     return this.errors.getErrors();
   }
