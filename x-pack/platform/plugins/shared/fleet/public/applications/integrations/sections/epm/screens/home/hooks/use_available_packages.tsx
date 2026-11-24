@@ -18,7 +18,6 @@ import {
   useGetAppendCustomIntegrationsQuery,
   useGetPackageVerificationKeyId,
 } from '../../../../../hooks';
-import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
 
 import { mapToCard } from '..';
 import type { PackageList, PackageListItem } from '../../../../../types';
@@ -31,6 +30,7 @@ import {
   filterPolicyTemplatesTiles,
   shouldAddIntegrationFromCatalog,
 } from '../../../../../../../../common/services';
+import { FLEET_APM_PACKAGE } from '../../../../../../../../common/constants';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
 
@@ -57,8 +57,6 @@ export interface IntegrationsURLParameters {
   subCategoryId?: string;
   showDeprecated?: boolean;
 }
-
-const NO_REPLACEMENT_INTEGRATIONS: CustomIntegration[] = [];
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
   if (!doesPackageHaveIntegrations(pkg)) {
@@ -216,8 +214,11 @@ export const useAvailablePackages = ({
   const { isInitialLoading: isLoadingAppendCustomIntegrations, data: appendCustomIntegrations } =
     useGetAppendCustomIntegrationsQuery();
 
-  const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
-    useMergeEprPackagesWithReplacements(eprIntegrationList, NO_REPLACEMENT_INTEGRATIONS);
+  // The APM EPR package is never shown in the catalog, APM has special handling.
+  const eprPackagesWithoutApm = useMemo(
+    () => eprIntegrationList.filter((pkg) => pkg.name !== FLEET_APM_PACKAGE),
+    [eprIntegrationList]
+  );
 
   const { enableIntegrationCollectionTiles } = ExperimentalFeaturesService.get();
   // `authz` is not provided when the hook is used outside of Fleet (e.g. Observability onboarding),
@@ -227,7 +228,7 @@ export const useAvailablePackages = ({
   // All cards before the category filter.
   // Used by useBrowseIntegrationHook which applies its own filters from the live URL.
   const allCards: IntegrationCardItem[] = useMemo(() => {
-    const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
+    const eprAndCustomPackages = [...eprPackagesWithoutApm, ...(appendCustomIntegrations || [])];
 
     let itemsToMap: Array<PackageListItem | CustomIntegration>;
     let extraCards: IntegrationCardItem[] = [];
@@ -271,7 +272,7 @@ export const useAvailablePackages = ({
     enableIntegrationCollectionTiles,
     getAbsolutePath,
     getHref,
-    mergedEprPackages,
+    eprPackagesWithoutApm,
     packageVerificationKeyId,
   ]);
 

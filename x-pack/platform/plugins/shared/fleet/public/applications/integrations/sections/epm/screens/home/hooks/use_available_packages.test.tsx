@@ -15,7 +15,6 @@ const mockUseGetPackageVerificationKeyId = jest.fn();
 const mockUseGetPackagesQuery = jest.fn();
 const mockUseGetCategoriesQuery = jest.fn();
 const mockUseGetAppendCustomIntegrationsQuery = jest.fn();
-const mockUseMergeEprPackagesWithReplacements = jest.fn();
 const mockUseBuildIntegrationsUrl = jest.fn();
 
 jest.mock(
@@ -38,11 +37,6 @@ jest.mock('../../../../../hooks', () => ({
       getUrlForApp: jest.fn().mockReturnValue('/app/onboarding/aws'),
     },
   }),
-}));
-
-jest.mock('../../../../../hooks/use_merge_epr_with_replacements', () => ({
-  useMergeEprPackagesWithReplacements: (epr: any, custom: any) =>
-    mockUseMergeEprPackagesWithReplacements(epr, custom),
 }));
 
 jest.mock('./use_build_integrations_url', () => ({
@@ -214,11 +208,6 @@ describe('useAvailablePackages', () => {
       isInitialLoading: false,
     });
 
-    mockUseMergeEprPackagesWithReplacements.mockImplementation((epr, custom) => [
-      ...epr,
-      ...custom,
-    ]);
-
     mockUseBuildIntegrationsUrl.mockReturnValue({
       initialSelectedCategory: '',
       initialSubcategory: undefined,
@@ -321,11 +310,16 @@ describe('useAvailablePackages', () => {
           items: [
             {
               ...mockBasicPackage,
-              id: 'apm-1.0.0',
-              name: 'apm',
-              title: 'APM',
+              id: 'policy_only-1.0.0',
+              name: 'policy_only',
+              title: 'Policy only',
               policy_templates: [
-                { name: 'apmserver', title: 'APM Server', description: 'APM', type: 'integration' },
+                {
+                  name: 'server',
+                  title: 'Policy only server',
+                  description: 'Policy only',
+                  type: 'integration',
+                },
               ],
             },
           ],
@@ -650,11 +644,21 @@ describe('useAvailablePackages', () => {
     });
   });
 
-  describe('replacement integrations', () => {
-    it('should not merge replacement custom integrations into the EPR packages', () => {
-      renderHook(() => useAvailablePackages({ prereleaseIntegrationsEnabled: false }));
+  describe('APM package', () => {
+    it('should not show the APM package', () => {
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: {
+          items: [mockBasicPackage, { ...mockBasicPackage, id: 'apm-1.0.0', name: 'apm' }],
+        },
+        isLoading: false,
+        error: null,
+      });
 
-      expect(mockUseMergeEprPackagesWithReplacements).toHaveBeenCalledWith(expect.any(Array), []);
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.allCards.map((card) => card.id)).toEqual(['nginx-1.0.0']);
     });
   });
 
@@ -867,7 +871,6 @@ describe('useAvailablePackages', () => {
         collectionCards: [nginxCollectionCard],
         ungroupedItems: [],
       });
-      mockUseMergeEprPackagesWithReplacements.mockReturnValue([]);
       mockUseGetPackagesQuery.mockReturnValue({
         data: { items: [] },
         isLoading: false,
