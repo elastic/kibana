@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Env } from '@kbn/config';
+import { Env, type BuildFlavor } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
@@ -39,10 +39,12 @@ export const createConfigService = ({
   server,
   externalUrl,
   csp,
+  buildFlavor = 'traditional',
 }: Partial<{
   server: Partial<HttpConfigType>;
   externalUrl: Partial<ExternalUrlConfigType>;
   csp: Partial<CspConfigType>;
+  buildFlavor: BuildFlavor;
 }> = {}) => {
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
@@ -94,11 +96,14 @@ export const createConfigService = ({
     if (path === 'csp') {
       // validates through the schema so the fixture gets the same defaults as a real config
       return new BehaviorSubject(
-        cspConfig.schema.validate({
-          strict: false,
-          disableUnsafeEval: false,
-          ...csp,
-        })
+        cspConfig.schema.validate(
+          {
+            strict: false,
+            disableUnsafeEval: false,
+            ...csp,
+          },
+          { serverless: buildFlavor === 'serverless' }
+        )
       );
     }
     if (path === 'permissionsPolicy') {
@@ -119,18 +124,18 @@ export const createConfigService = ({
   return configService;
 };
 
-const createDefaultContext = (): CoreContext => {
+const createDefaultContext = (contextEnv: Env = env): CoreContext => {
   return lazyObject({
     coreId,
-    env,
+    env: contextEnv,
     logger,
-    configService: createConfigService(),
+    configService: createConfigService({ buildFlavor: contextEnv.packageInfo.buildFlavor }),
   });
 };
 
 export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreContext =>
   lazyObject({
-    ...createDefaultContext(),
+    ...createDefaultContext(overrides.env),
     ...overrides,
   });
 

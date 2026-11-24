@@ -46,11 +46,13 @@ describe('Routing versioned requests', () => {
           options.useVersionResolutionStrategyForInternalPaths ?? [],
       },
     };
+    const env = createTestEnv({ envOptions: getEnvOptions({ cliArgs }) });
     server = createInternalHttpService({
       logger,
-      env: createTestEnv({ envOptions: getEnvOptions({ cliArgs }) }),
+      env,
       configService: createConfigService({
         server: serverConfig,
+        buildFlavor: env.packageInfo.buildFlavor,
       }),
     });
     await server.preboot({
