@@ -181,11 +181,67 @@ describe('MigrationWorkflowsTable', () => {
     });
   });
 
-  it('should not offer to select workflows', async () => {
+  describe('selection', () => {
+    const getRow = async (title: string) =>
+      within((await screen.findByText(title)).closest('tr') as HTMLElement);
+
+    it('should let the user select a translated workflow that is not installed', async () => {
+      renderTable();
+
+      expect((await getRow('Phishing triage')).getByRole('checkbox')).toBeEnabled();
+    });
+
+    it('should let the user select a partially translated workflow', async () => {
+      renderTable();
+
+      expect((await getRow('Enrich IOCs')).getByRole('checkbox')).toBeEnabled();
+    });
+
+    it('should not let the user select a workflow that failed', async () => {
+      renderTable();
+
+      expect((await getRow('Broken story')).getByRole('checkbox')).toBeDisabled();
+    });
+
+    it('should not let the user select an untranslatable workflow', async () => {
+      mockWorkflows([getWorkflow({ translation_result: 'untranslatable' })]);
+      renderTable();
+
+      expect((await getRow('Phishing triage')).getByRole('checkbox')).toBeDisabled();
+    });
+
+    it('should not let the user select a workflow that is installed', async () => {
+      mockWorkflows([
+        getWorkflow({
+          elastic_workflow: { id: 'elastic-workflow-1', title: 'Phishing triage elastic' },
+        }),
+      ]);
+      renderTable();
+
+      expect((await getRow('Phishing triage elastic')).getByRole('checkbox')).toBeDisabled();
+    });
+
+    it('should show how many workflows are selected', async () => {
+      renderTable();
+
+      fireEvent.click((await getRow('Phishing triage')).getByRole('checkbox'));
+
+      expect(screen.getByTestId('workflowsTableSummary')).toHaveTextContent('Selected 1 workflow');
+    });
+  });
+
+  it('should label the last column "Actions"', async () => {
     renderTable();
     await screen.findByText('Phishing triage');
 
-    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    const header = screen.getByRole('columnheader', { name: /Actions/ });
+    expect(header.querySelector('.euiScreenReaderOnly')).toBeNull();
+  });
+
+  it('should truncate a long description with an ellipsis', async () => {
+    renderTable();
+
+    expect(await screen.findByTestId('workflowDescription')).toHaveClass('eui-textTruncate');
   });
 
   it('should show the empty state when the migration has no workflows', async () => {

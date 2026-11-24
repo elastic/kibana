@@ -7,7 +7,8 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiScreenReaderOnly, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiHorizontalRule, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowMigrationWorkflow } from '../../../../../common/siem_migrations/model/workflow_migration.gen';
 import {
   MigrationTranslationResult,
@@ -15,12 +16,14 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { PanelText } from '../../../../common/components/panel_text';
+import { TableHeader } from '../../../common/components';
 import { StatusBadge } from './status_badge';
 import * as i18n from './translations';
 
 export type TableColumn = EuiBasicTableColumn<WorkflowMigrationWorkflow>;
 
 const NameCell = ({ workflow }: { workflow: WorkflowMigrationWorkflow }) => {
+  const { euiTheme } = useEuiTheme();
   const title = workflow.elastic_workflow?.title ?? workflow.original_workflow.title;
   const description =
     workflow.elastic_workflow?.description ?? workflow.original_workflow.description;
@@ -37,8 +40,15 @@ const NameCell = ({ workflow }: { workflow: WorkflowMigrationWorkflow }) => {
         <strong>{title}</strong>
       </EuiText>
       {description && (
-        <PanelText data-test-subj="workflowDescription" size="xs" subdued>
-          <span className="eui-textTruncate">{description}</span>
+        <PanelText size="xs" subdued>
+          {/* a block element, the ellipsis does not apply to an inline one */}
+          <div
+            data-test-subj="workflowDescription"
+            className="eui-textTruncate"
+            style={{ paddingRight: euiTheme.size.l }}
+          >
+            {description}
+          </div>
         </PanelText>
       )}
     </>
@@ -120,13 +130,34 @@ const ActionsCell = ({ workflow }: { workflow: WorkflowMigrationWorkflow }) => {
 
 export const createActionsColumn = (): TableColumn => ({
   name: (
-    <EuiScreenReaderOnly>
-      <span>{i18n.COLUMN_ACTIONS}</span>
-    </EuiScreenReaderOnly>
+    <TableHeader
+      title={i18n.COLUMN_ACTIONS}
+      tooltipContent={
+        <FormattedMessage
+          id="xpack.securitySolution.siemMigrations.workflows.table.actionsTooltip"
+          defaultMessage="{title}
+          {view} - go to the installed workflow.{lineBreak}
+          {install} - install workflow to view and edit it."
+          values={{
+            lineBreak: <br />,
+            title: (
+              <EuiText size="s">
+                <p>
+                  <b>{i18n.COLUMN_ACTIONS}</b>
+                  <EuiHorizontalRule margin="s" />
+                </p>
+              </EuiText>
+            ),
+            view: <b>{i18n.ACTIONS_VIEW_LABEL}</b>,
+            install: <b>{i18n.ACTIONS_INSTALL_LABEL}</b>,
+          }}
+        />
+      }
+    />
   ),
   render: (workflow: WorkflowMigrationWorkflow) => <ActionsCell workflow={workflow} />,
   width: '10%',
-  align: 'right',
+  align: 'left',
 });
 
 export const getWorkflowsTableColumns = (): TableColumn[] => [

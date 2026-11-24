@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiTableSelectionType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +16,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  MigrationTranslationResult,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
 import type { SiemMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { WorkflowMigrationWorkflow } from '../../../../../common/siem_migrations/model/workflow_migration.gen';
 import {
@@ -78,6 +82,27 @@ export const MigrationWorkflowsTable = React.memo<MigrationWorkflowsTableProps>(
     });
 
     const columns = useMemo(() => getWorkflowsTableColumns(), []);
+
+    const [selectedWorkflows, setSelectedWorkflows] = useState<WorkflowMigrationWorkflow[]>([]);
+    const tableSelection = useMemo<EuiTableSelectionType<WorkflowMigrationWorkflow>>(
+      () => ({
+        selectable: (item) =>
+          !item.elastic_workflow?.id &&
+          item.status !== SiemMigrationStatus.FAILED &&
+          item.translation_result !== MigrationTranslationResult.UNTRANSLATABLE,
+        selectableMessage: (selectable, item) => {
+          if (selectable) {
+            return '';
+          }
+          return item.elastic_workflow?.id
+            ? i18n.ALREADY_INSTALLED_WORKFLOW_TOOLTIP
+            : i18n.NOT_TRANSLATED_WORKFLOW_TOOLTIP;
+        },
+        onSelectionChange: setSelectedWorkflows,
+        selected: selectedWorkflows,
+      }),
+      [selectedWorkflows]
+    );
 
     const pagination = useMemo(
       () => ({ pageIndex, pageSize, totalItemCount: total }),
@@ -152,11 +177,13 @@ export const MigrationWorkflowsTable = React.memo<MigrationWorkflowsTableProps>(
                       <span data-test-subj="workflowsTableSummary">
                         <FormattedMessage
                           id="xpack.securitySolution.siemMigrations.workflows.table.showingPageOfTotalLabel"
-                          defaultMessage="Showing {from} - {to} of {total, plural, one {# workflow} other {# workflows}}"
+                          defaultMessage="Showing {from} - {to} of {total, plural, one {# workflow} other {# workflows}} {pipe} Selected {selected, plural, one {# workflow} other {# workflows}}"
                           values={{
                             from: total === 0 ? 0 : pageIndex * pageSize + 1,
                             to: Math.min((pageIndex + 1) * pageSize, total),
                             total,
+                            selected: selectedWorkflows.length,
+                            pipe: '\u2000|\u2000',
                           }}
                         />
                       </span>
@@ -172,6 +199,7 @@ export const MigrationWorkflowsTable = React.memo<MigrationWorkflowsTableProps>(
                 pagination={pagination}
                 sorting={sorting}
                 onChange={onTableChange}
+                selection={tableSelection}
                 itemId="id"
                 data-test-subj="workflows-translation-table"
                 columns={columns}

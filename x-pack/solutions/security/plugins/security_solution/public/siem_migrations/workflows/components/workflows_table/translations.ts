@@ -51,3 +51,23 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.siemMigrations.workflows.table.searchPlaceholder',
   { defaultMessage: 'Search by name' }
 );
+
+export const ACTIONS_VIEW_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.table.actionsViewLabel',
+  { defaultMessage: 'View' }
+);
+
+export const ACTIONS_INSTALL_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.table.actionsInstallLabel',
+  { defaultMessage: 'Install' }
+);
+
+export const ALREADY_INSTALLED_WORKFLOW_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.table.alreadyInstalledTooltip',
+  { defaultMessage: 'Already installed migration workflow' }
+);
+
+export const NOT_TRANSLATED_WORKFLOW_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.table.notTranslatedTooltip',
+  { defaultMessage: 'Not translated migration workflow' }
+);
