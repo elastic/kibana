@@ -140,7 +140,6 @@ export function generateBuiltInStepSnippet(
       break;
     case 'workflow.awaitExecutions':
       parameters = {
-        timeout: '10m',
         with: {
           'from-steps': ['previous_step'],
         },
