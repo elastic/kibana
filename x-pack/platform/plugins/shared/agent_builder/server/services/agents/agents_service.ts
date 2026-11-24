@@ -156,9 +156,12 @@ export class AgentsService {
     });
 
     // Created once per service start, so that availability results are reused across requests.
+    // Both providers share it: `ensure` rejects a persisted agent that uses a built-in agent's id.
+    const availabilityCache = new AvailabilityCache({ getPrincipalKey });
+
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
-      availabilityCache: new AvailabilityCache({ getPrincipalKey }),
+      availabilityCache,
     });
     const persistedProviderFn = createPersistedProviderFn({
       elasticsearch,
@@ -167,7 +170,7 @@ export class AgentsService {
       logger,
       availabilityByAgentId: this.availabilityByAgentId,
       hiddenByAgentId: this.hiddenByAgentId,
-      availabilityCache: new AvailabilityCache({ getPrincipalKey }),
+      availabilityCache,
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
