@@ -119,7 +119,6 @@ type PanelProps = React.ComponentProps<typeof AutomationsPanel>;
 
 interface RenderPanelOptions {
   canCreateWorkflow?: boolean;
-  /** The AI index tab the panel is on. */
   pathname?: string;
 }
 

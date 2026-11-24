@@ -9,10 +9,6 @@ import { useQueryClient } from '@kbn/react-query';
 import { useEffect, useRef } from 'react';
 import { contextEngineQueryKeys } from './query_keys';
 
-/**
- * Refreshes the knowledge document lists, counts and chart of an AI index when an automation
- * run ends, because a run can add or change knowledge documents.
- */
 export const useRefreshKnowledgeDocumentsAfterRun = (
   aiIndexId: string | undefined,
   isRunning: boolean

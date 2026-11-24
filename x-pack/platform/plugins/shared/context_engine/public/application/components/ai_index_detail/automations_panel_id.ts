@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-/** DOM id of the Automations panel, so links can scroll to it. */
 export const AUTOMATIONS_PANEL_ID = 'contextAiIndexAutomationsPanel';
-/** DOM id of the Automations heading, so links can move focus to it. */
 export const AUTOMATIONS_HEADING_ID = 'contextAiIndexAutomationsHeading';
 
-/**
- * Scrolls to the Automations panel and moves keyboard focus to its heading, so a screen reader
- * announces "Automations" and Tab continues from there.
- */
+/** Scrolls to the Automations panel and focuses its heading, so a screen reader announces it. */
 export const goToAutomations = (): void => {
   document
     .getElementById(AUTOMATIONS_PANEL_ID)

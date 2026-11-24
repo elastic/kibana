@@ -18,7 +18,6 @@ interface ManageAutomationsLinkProps {
   aiIndexId: string;
 }
 
-/** Links from the Overview Automations panel to the Settings tab, where automations are added. */
 export const ManageAutomationsLink = ({ aiIndexId }: ManageAutomationsLinkProps) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const automationsPath = getAiIndexAutomationsPath(aiIndexId);

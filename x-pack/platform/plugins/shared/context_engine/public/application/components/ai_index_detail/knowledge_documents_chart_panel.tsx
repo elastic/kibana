@@ -58,7 +58,6 @@ interface KnowledgeDocumentsChartPanelProps {
   aiIndexId: string;
 }
 
-/** Bar chart of the Knowledge documents added each day in the last 30 days. */
 export const KnowledgeDocumentsChartPanel = ({ aiIndexId }: KnowledgeDocumentsChartPanelProps) => {
   const { buckets, isLoading, error } = useKiHistogram(aiIndexId);
   const baseTheme = useElasticChartsTheme();

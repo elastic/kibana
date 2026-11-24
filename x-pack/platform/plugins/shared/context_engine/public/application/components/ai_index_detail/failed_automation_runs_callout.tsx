@@ -19,11 +19,9 @@ import { getWorkflowExecutionPath } from '../../utils/get_workflow_execution_pat
 import { goToAutomations } from './automations_panel_id';
 
 interface FailedAutomationRunsCalloutProps {
-  /** Workflow ids of the automations shown on the page. */
   workflowIds: string[];
 }
 
-/** Warns when the latest run of an automation failed, and links to that run. */
 export const FailedAutomationRunsCallout = ({ workflowIds }: FailedAutomationRunsCalloutProps) => {
   const {
     services: { application },
@@ -70,7 +68,6 @@ export const FailedAutomationRunsCallout = ({ workflowIds }: FailedAutomationRun
                 )
               : name}{' '}
             {failedRuns.length > 1 ? (
-              // Several failures: the automation rows below list each one with its own run link.
               <EuiLink
                 onClick={goToAutomations}
                 data-test-subj="contextOverviewFailedRunsViewAutomationsLink"

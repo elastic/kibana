@@ -69,7 +69,7 @@ export const isKiDeleted = (source: StoredKi): boolean =>
 
 /**
  * The `@timestamp` of a KI that is written again in full. An index dest keeps one document per
- * KI, so it keeps the first `@timestamp`: the date the KI was added (the Overview chart reads it).
+ * KI, so it keeps the first `@timestamp`: the date the KI was added.
  * A data stream appends a new revision, which needs its own time.
  */
 export const rewrittenKiTimestamp = (

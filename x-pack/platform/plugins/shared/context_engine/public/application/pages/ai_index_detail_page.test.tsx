@@ -976,7 +976,6 @@ describe('AiIndexDetailPage', () => {
       );
     });
 
-    // The Workflows back button returns to the Settings tab, where the user started.
     expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
       path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index%2Fsettings',
     });

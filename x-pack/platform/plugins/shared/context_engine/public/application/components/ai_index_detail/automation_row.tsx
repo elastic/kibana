@@ -154,7 +154,6 @@ const LastExecution = ({
 };
 
 interface AutomationRowProps {
-  /** The AI index whose knowledge documents a finished run refreshes. */
   aiIndexId?: string;
   automation: AiIndexAutomation;
   workflowSummary?: WorkflowSummary;

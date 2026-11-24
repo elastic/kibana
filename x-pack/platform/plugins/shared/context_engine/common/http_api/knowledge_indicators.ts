@@ -48,7 +48,6 @@ export interface ListKiGroupsResponse {
   groups: KiGroup[];
 }
 
-/** KIs added on one UTC day. */
 export interface KiHistogramBucket {
   /** UTC day, `YYYY-MM-DD`. */
   date: string;

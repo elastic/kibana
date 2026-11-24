@@ -106,8 +106,7 @@ export const AutomationsPanel = ({
   const { pathname, hash, key: locationKey } = useLocation();
   const isAutomationsLinkTarget = hash === AUTOMATIONS_HASH;
 
-  // A link to `#automations` (the Overview card, "Manage in Settings") lands here. Wait for the
-  // AI index, so the sections above the panel have their height before we scroll.
+  // Wait for the AI index, so the sections above the panel have their height before we scroll.
   useEffect(() => {
     if (isAutomationsLinkTarget && !isLoading) {
       goToAutomations();
@@ -241,7 +240,7 @@ export const AutomationsPanel = ({
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
-            {/* `tabIndex={-1}`: the failed-runs warning moves focus here, but Tab does not stop on it. */}
+            {/* `tabIndex={-1}`: links can focus the heading, but Tab does not stop on it. */}
             <h2 id={AUTOMATIONS_HEADING_ID} tabIndex={-1}>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {
                 defaultMessage: 'Automations',

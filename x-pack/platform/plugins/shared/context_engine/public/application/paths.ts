@@ -31,7 +31,6 @@ export const getAiIndexSettingsPath = (id: string): string => `/ai_index/${id}/s
 /** URL hash that makes the Settings tab scroll to its Automations panel. */
 export const AUTOMATIONS_HASH = '#automations';
 
-/** Path of the Settings tab, scrolled to the Automations panel. */
 export const getAiIndexAutomationsPath = (id: string): string =>
   `${getAiIndexSettingsPath(id)}${AUTOMATIONS_HASH}`;
 
@@ -47,7 +46,6 @@ export const getAiIndexDreamingTemplatePath = (id: string): string =>
 export const getKnowledgeDocumentPath = (aiIndexId: string, index: string): string =>
   `${getAiIndexKnowledgeDocumentsPath(aiIndexId)}/${encodeURIComponent(index)}`;
 
-/** Path and query params that open one Knowledge document on the Knowledge documents tab. */
 export const getKnowledgeDocumentLocation = (
   aiIndexId: string,
   { id, index }: { id: string; index: string }

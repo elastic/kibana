@@ -40,7 +40,6 @@ const badgeItemCss = css({ minWidth: 0, maxWidth: '40%' });
 interface RecentKnowledgeDocumentRowProps {
   aiIndexId: string;
   ki: KiListItem;
-  /** Draws a line above the row. Every row but the first has one. */
   hasDivider: boolean;
 }
 
@@ -128,7 +127,6 @@ interface RecentKnowledgeDocumentsPanelProps {
   isMemoryEnabled: boolean;
 }
 
-/** The most recently updated Knowledge documents of the AI index. */
 export const RecentKnowledgeDocumentsPanel = ({
   aiIndexId,
   isManaged,

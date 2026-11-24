@@ -27,7 +27,6 @@ interface AutomationsSectionProps {
   aiIndexId: string;
   onSaved: () => void;
   isUnlocked: boolean;
-  /** Replaces the "Add automation" menu in the panel header (see `AutomationsPanel`). */
   headerAction?: ReactNode;
 }
 

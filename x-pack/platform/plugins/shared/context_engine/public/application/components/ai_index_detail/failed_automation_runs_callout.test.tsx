@@ -69,7 +69,6 @@ describe('FailedAutomationRunsCallout', () => {
       summaries: summaries([
         { id: 'wf-1', name: 'Sync runbooks', definition },
         { id: 'wf-2', definition },
-        // No definition: the workflow is missing or cannot be read.
         { id: 'wf-3', name: 'Deleted workflow', definition: null },
       ]),
       isLoading: false,
@@ -121,7 +120,6 @@ describe('FailedAutomationRunsCallout', () => {
     expect(screen.getByTestId('contextOverviewFailedRunsCallout')).toHaveTextContent(
       '2 automation runs failed.'
     );
-    // wf-2 has no resolved name, so the workflow id stands in.
     expect(screen.getByTestId('contextOverviewFailedRunsMessage')).toHaveTextContent(
       'wf-2: Timed out'
     );

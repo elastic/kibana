@@ -98,7 +98,6 @@ interface OverviewStatCardsProps {
   isLoading: boolean;
 }
 
-/** Counts of the AI index's knowledge documents, sources and automations. Each card opens its tab. */
 export const OverviewStatCards = ({
   aiIndexId,
   knowledgeDocumentsCount,

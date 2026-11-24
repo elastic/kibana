@@ -1305,7 +1305,6 @@ describe('getKiHistogram', () => {
     expect(allowPartialResults).toBe(false);
     expect(text).toContain('first_seen = MIN(@timestamp)');
     expect(text).toContain('| WHERE ki_status IN ("active", "expired")\n');
-    // A KI without any revision timestamp still counts by its updated_at.
     expect(text).toContain('| EVAL added_at = COALESCE(first_seen, TO_DATETIME(updated_at))\n');
     expect(text).toContain(
       '| WHERE added_at >= TO_DATETIME(?from) AND added_at < TO_DATETIME(?to)\n'
