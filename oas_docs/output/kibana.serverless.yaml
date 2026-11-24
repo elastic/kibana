@@ -177524,30 +177524,37 @@ components:
               type: number
         sending_queue:
           additionalProperties: false
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. On the managed OTLP endpoint, settings that you don't set, or set to `null`, get the Elastic defaults.
           nullable: true
           type: object
           properties:
             batch:
               additionalProperties: false
+              description: Batching of the queue. An empty object batches with the defaults. Set to `null` to turn batching off.
               nullable: true
               type: object
               properties:
                 flush_timeout:
+                  description: 'Time after which a batch is sent, whatever its size. Default: `200ms`, or `1s` on the managed OTLP endpoint.'
                   maxLength: 64
                   nullable: true
                   type: string
                 max_size:
+                  description: 'Maximum size of a batch, `0` for no maximum. Default: `0`, or `4000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 min_size:
+                  description: 'Minimum size of a batch, in the unit of the batch `sizer`. Default: `8192`, or `1000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 partition:
                   additionalProperties: false
+                  description: Batches data separately by client metadata.
                   nullable: true
                   type: object
                   properties:
                     metadata_keys:
+                      description: Client metadata keys used to batch data separately.
                       items:
                         maxLength: 256
                         type: string
@@ -177555,6 +177562,7 @@ components:
                       nullable: true
                       type: array
                 sizer:
+                  description: 'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.'
                   enum:
                     - items
                     - bytes
@@ -177562,18 +177570,23 @@ components:
                   nullable: true
                   type: string
             block_on_overflow:
+              description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
               nullable: true
               type: boolean
             enabled:
+              description: 'Whether the exporter uses a sending queue. Default: `true`.'
               nullable: true
               type: boolean
             num_consumers:
+              description: 'Number of consumers that send the data of the queue. Default: `10`.'
               nullable: true
               type: number
             queue_size:
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint.'
               nullable: true
               type: number
             sizer:
+              description: 'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.'
               enum:
                 - requests
                 - items
@@ -177582,6 +177595,7 @@ components:
               nullable: true
               type: string
             wait_for_result:
+              description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
               nullable: true
               type: boolean
         timeout:
@@ -177791,30 +177805,37 @@ components:
               type: number
         sending_queue:
           additionalProperties: false
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. On the managed OTLP endpoint, settings that you don't set, or set to `null`, get the Elastic defaults.
           nullable: true
           type: object
           properties:
             batch:
               additionalProperties: false
+              description: Batching of the queue. An empty object batches with the defaults. Set to `null` to turn batching off.
               nullable: true
               type: object
               properties:
                 flush_timeout:
+                  description: 'Time after which a batch is sent, whatever its size. Default: `200ms`, or `1s` on the managed OTLP endpoint.'
                   maxLength: 64
                   nullable: true
                   type: string
                 max_size:
+                  description: 'Maximum size of a batch, `0` for no maximum. Default: `0`, or `4000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 min_size:
+                  description: 'Minimum size of a batch, in the unit of the batch `sizer`. Default: `8192`, or `1000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 partition:
                   additionalProperties: false
+                  description: Batches data separately by client metadata.
                   nullable: true
                   type: object
                   properties:
                     metadata_keys:
+                      description: Client metadata keys used to batch data separately.
                       items:
                         maxLength: 256
                         type: string
@@ -177822,6 +177843,7 @@ components:
                       nullable: true
                       type: array
                 sizer:
+                  description: 'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.'
                   enum:
                     - items
                     - bytes
@@ -177829,18 +177851,23 @@ components:
                   nullable: true
                   type: string
             block_on_overflow:
+              description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
               nullable: true
               type: boolean
             enabled:
+              description: 'Whether the exporter uses a sending queue. Default: `true`.'
               nullable: true
               type: boolean
             num_consumers:
+              description: 'Number of consumers that send the data of the queue. Default: `10`.'
               nullable: true
               type: number
             queue_size:
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint.'
               nullable: true
               type: number
             sizer:
+              description: 'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.'
               enum:
                 - requests
                 - items
@@ -177849,6 +177876,7 @@ components:
               nullable: true
               type: string
             wait_for_result:
+              description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
               nullable: true
               type: boolean
         timeout:
@@ -178021,30 +178049,37 @@ components:
               type: number
         sending_queue:
           additionalProperties: true
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. On the managed OTLP endpoint, settings that you don't set, or set to `null`, get the Elastic defaults.
           nullable: true
           type: object
           properties:
             batch:
               additionalProperties: true
+              description: Batching of the queue. An empty object batches with the defaults. Set to `null` to turn batching off.
               nullable: true
               type: object
               properties:
                 flush_timeout:
+                  description: 'Time after which a batch is sent, whatever its size. Default: `200ms`, or `1s` on the managed OTLP endpoint.'
                   maxLength: 64
                   nullable: true
                   type: string
                 max_size:
+                  description: 'Maximum size of a batch, `0` for no maximum. Default: `0`, or `4000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 min_size:
+                  description: 'Minimum size of a batch, in the unit of the batch `sizer`. Default: `8192`, or `1000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 partition:
                   additionalProperties: true
+                  description: Batches data separately by client metadata.
                   nullable: true
                   type: object
                   properties:
                     metadata_keys:
+                      description: Client metadata keys used to batch data separately.
                       items:
                         maxLength: 256
                         type: string
@@ -178052,6 +178087,7 @@ components:
                       nullable: true
                       type: array
                 sizer:
+                  description: 'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.'
                   enum:
                     - items
                     - bytes
@@ -178059,18 +178095,23 @@ components:
                   nullable: true
                   type: string
             block_on_overflow:
+              description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
               nullable: true
               type: boolean
             enabled:
+              description: 'Whether the exporter uses a sending queue. Default: `true`.'
               nullable: true
               type: boolean
             num_consumers:
+              description: 'Number of consumers that send the data of the queue. Default: `10`.'
               nullable: true
               type: number
             queue_size:
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint.'
               nullable: true
               type: number
             sizer:
+              description: 'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.'
               enum:
                 - requests
                 - items
@@ -178079,6 +178120,7 @@ components:
               nullable: true
               type: string
             wait_for_result:
+              description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
               nullable: true
               type: boolean
         timeout:
@@ -178288,30 +178330,37 @@ components:
               type: number
         sending_queue:
           additionalProperties: true
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. On the managed OTLP endpoint, settings that you don't set, or set to `null`, get the Elastic defaults.
           nullable: true
           type: object
           properties:
             batch:
               additionalProperties: true
+              description: Batching of the queue. An empty object batches with the defaults. Set to `null` to turn batching off.
               nullable: true
               type: object
               properties:
                 flush_timeout:
+                  description: 'Time after which a batch is sent, whatever its size. Default: `200ms`, or `1s` on the managed OTLP endpoint.'
                   maxLength: 64
                   nullable: true
                   type: string
                 max_size:
+                  description: 'Maximum size of a batch, `0` for no maximum. Default: `0`, or `4000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 min_size:
+                  description: 'Minimum size of a batch, in the unit of the batch `sizer`. Default: `8192`, or `1000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 partition:
                   additionalProperties: true
+                  description: Batches data separately by client metadata.
                   nullable: true
                   type: object
                   properties:
                     metadata_keys:
+                      description: Client metadata keys used to batch data separately.
                       items:
                         maxLength: 256
                         type: string
@@ -178319,6 +178368,7 @@ components:
                       nullable: true
                       type: array
                 sizer:
+                  description: 'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.'
                   enum:
                     - items
                     - bytes
@@ -178326,18 +178376,23 @@ components:
                   nullable: true
                   type: string
             block_on_overflow:
+              description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
               nullable: true
               type: boolean
             enabled:
+              description: 'Whether the exporter uses a sending queue. Default: `true`.'
               nullable: true
               type: boolean
             num_consumers:
+              description: 'Number of consumers that send the data of the queue. Default: `10`.'
               nullable: true
               type: number
             queue_size:
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint.'
               nullable: true
               type: number
             sizer:
+              description: 'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.'
               enum:
                 - requests
                 - items
@@ -178346,6 +178401,7 @@ components:
               nullable: true
               type: string
             wait_for_result:
+              description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
               nullable: true
               type: boolean
         timeout:
