@@ -307,7 +307,7 @@ const evaluatePullRequest = async ({
   if (pr.draft) {
     await api.setStatus({ sha: pr.headSha, state: 'success', description: DRAFT_DESCRIPTION });
     if (commentId) {
-      await api.deleteComment(commentId);
+      await bestEffort(core, 'decision comment', () => api.deleteComment(commentId));
     }
     return;
   }
@@ -321,7 +321,7 @@ const evaluatePullRequest = async ({
       description: TOO_MANY_FILES_DESCRIPTION,
     });
     if (commentId) {
-      await api.deleteComment(commentId);
+      await bestEffort(core, 'decision comment', () => api.deleteComment(commentId));
     }
     return;
   }
@@ -378,13 +378,31 @@ const evaluatePullRequest = async ({
   core.info(
     `evals gate for #${pr.number} (${pr.headSha}): ${combined.state} - ${combined.description}`
   );
-  await core.summary.addRaw(formatSummary(pr, combined, reports), true).write();
 
+  // The status is the verdict; the summary and comment only explain it. Their errors are logged
+  // rather than thrown, so the fail-open catch below can't overwrite a failure with success.
   const missing = reports.filter(({ decision }) => decision.kind === 'missing');
-  if (missing.length > 0) {
-    await api.upsertComment(pr.number, commentId, formatComment(pr.author, missing));
-  } else if (commentId) {
-    await api.deleteComment(commentId);
+  await bestEffort(core, 'job summary', () =>
+    core.summary.addRaw(formatSummary(pr, combined, reports), true).write()
+  );
+  await bestEffort(core, 'decision comment', () =>
+    missing.length > 0
+      ? api.upsertComment(pr.number, commentId, formatComment(pr.author, missing))
+      : commentId
+      ? api.deleteComment(commentId)
+      : Promise.resolve()
+  );
+};
+
+const bestEffort = async (
+  core: GateCore,
+  what: string,
+  action: () => Promise<unknown>
+): Promise<void> => {
+  try {
+    await action();
+  } catch (error) {
+    core.error(`evals gate could not update the ${what}: ${String(error)}`);
   }
 };
 
@@ -416,7 +434,24 @@ export const runEvalsGate = async ({
   context: GateContext;
   readSuites?: () => EvalsDecisionSuite[];
 }): Promise<void> => {
-  const prNumbers = await resolvePullRequestNumbers(api, context);
+  const eventSha =
+    context.eventName === 'status' ? context.payload.sha : context.payload.pull_request?.head?.sha;
+  // Fail open when even the PR can't be read: post on the event's commit, the best guess at its head.
+  const failOpen = async (sha: string | undefined) => {
+    if (sha) {
+      await api.setStatus({ sha, state: 'success', description: ERROR_DESCRIPTION });
+    }
+  };
+
+  let prNumbers: number[];
+  try {
+    prNumbers = await resolvePullRequestNumbers(api, context);
+  } catch (error) {
+    core.error(`evals gate could not find the PR: ${String(error)}`);
+    await failOpen(eventSha);
+    return;
+  }
+
   for (const prNumber of prNumbers) {
     let headSha: string | undefined;
     try {
@@ -429,10 +464,6 @@ export const runEvalsGate = async ({
       }
       // An event for an older commit runs in that commit's concurrency group, so evaluating the
       // new head here could race the head's own run with stale labels. The head's events cover it.
-      const eventSha =
-        context.eventName === 'status'
-          ? context.payload.sha
-          : context.payload.pull_request?.head?.sha;
       if (eventSha && pr.headSha !== eventSha) {
         core.info(`Skipping #${prNumber}: the event is for ${eventSha}, not its head.`);
         continue;
@@ -441,9 +472,7 @@ export const runEvalsGate = async ({
       await evaluatePullRequest({ api, core, pr, suites: readSuites() });
     } catch (error) {
       core.error(`evals gate failed for #${prNumber}: ${String(error)}`);
-      if (headSha) {
-        await api.setStatus({ sha: headSha, state: 'success', description: ERROR_DESCRIPTION });
-      }
+      await failOpen(headSha ?? eventSha);
     }
   }
 };

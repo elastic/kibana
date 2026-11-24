@@ -12,6 +12,7 @@ import Fs from 'fs';
 import Path from 'path';
 import { parse as parseYaml } from 'yaml';
 import type { EvalsSuiteMetadataEntry } from './eval_pipeline.ts';
+import { matchesDecisionPaths } from './evals_gate_rules.ts';
 
 // Reads the real config, unlike `eval_pipeline.test.ts` which mocks `fs` with a fixture. These
 // mistakes are only reachable by hand-editing the file, so a PR-time check is the cheapest guard.
@@ -172,9 +173,9 @@ describe('evals.suites.json evals decision', () => {
   const decisionSuites = suites.filter((suite) => suite.requireDecisionOnPaths !== undefined);
   const gatedSuites = suites.filter((suite) => suite.regressionGate !== undefined);
 
-  it('lists include globs that each match a tracked file', () => {
-    // A glob that matches nothing (e.g. after a directory move) silently stops requiring a decision.
-    const trackedFiles =
+  let trackedFilesCache: string[] | undefined;
+  const getTrackedFiles = (): string[] => {
+    trackedFilesCache ??=
       decisionSuites.length > 0
         ? execFileSync('git', ['ls-files'], {
             cwd: Path.resolve(__dirname, '../../..'),
@@ -182,6 +183,36 @@ describe('evals.suites.json evals decision', () => {
             maxBuffer: 256 * 1024 * 1024,
           }).split('\n')
         : [];
+    return trackedFilesCache;
+  };
+
+  it('only requires a decision for files that run CI', () => {
+    // A PR changing only CI-skippable files (e.g. `.md`) never reaches the eval trigger, so a gated
+    // run label on it would wait forever. Such files must be excluded from the decision paths.
+    const prPipeline = (
+      JSON.parse(Fs.readFileSync(Path.join(__dirname, '../../pull_requests.json'), 'utf-8')) as {
+        jobs: Array<{ pipelineSlug: string; skip_ci_on_only_changed?: string[] }>;
+      }
+    ).jobs.find(({ pipelineSlug }) => pipelineSlug === 'kibana-pull-request');
+    const skippable = (prPipeline?.skip_ci_on_only_changed ?? []).map((re) => new RegExp(re, 'i'));
+
+    const problems = decisionSuites.flatMap(({ id, requireDecisionOnPaths }) =>
+      getTrackedFiles()
+        .filter(
+          (file) =>
+            requireDecisionOnPaths !== undefined &&
+            matchesDecisionPaths(file, requireDecisionOnPaths) &&
+            skippable.some((re) => re.test(file))
+        )
+        .map((file) => `${id}: ${file} requires a decision but doesn't run CI`)
+    );
+
+    expect(problems).toEqual([]);
+  });
+
+  it('lists include globs that each match a tracked file', () => {
+    // A glob that matches nothing (e.g. after a directory move) silently stops requiring a decision.
+    const trackedFiles = getTrackedFiles();
 
     const problems = decisionSuites.flatMap(({ id, requireDecisionOnPaths }) => {
       const { include = [], exclude = [] } = requireDecisionOnPaths ?? {};

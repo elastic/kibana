@@ -19,7 +19,7 @@ import {
   isSuiteSkipped,
 } from './evals_gate_rules.ts';
 
-const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
+export const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 // Consumed by `run_suite.sh` (via jq) rather than here, but declared so this type describes the
 // whole file. Each shard becomes its own fanout step running the spec files it lists, resolved
@@ -357,13 +357,16 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   };
 
   const resolveJudge = (suite: EvalsSuiteMetadataEntry): EvalJudge => {
+    // Baselines are matched on the task model only, so a different judge on a gated run could
+    // fake or hide a regression; gated suites keep their configured judge.
+    const labelJudge = suite.regressionGate ? undefined : labelEvaluationConnectorId;
     const evaluationConnectorId =
-      labelEvaluationConnectorId ??
+      labelJudge ??
       (suite.defaultJudge ? normalizeEvaluationConnectorId(suite.defaultJudge) : undefined);
     return {
       evaluationConnectorId,
       hasEisJudge:
-        !!rawEvaluationConnectorId?.startsWith('eis/') ||
+        (labelJudge !== undefined && !!rawEvaluationConnectorId?.startsWith('eis/')) ||
         !!evaluationConnectorId?.startsWith('eis-'),
     };
   };
