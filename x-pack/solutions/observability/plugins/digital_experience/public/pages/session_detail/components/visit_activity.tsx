@@ -539,10 +539,12 @@ function EventRow({
 }) {
   const { euiTheme } = useEuiTheme();
   const toTraceHref = useTraceHref();
-  const traceHref = toTraceHref(event.traceId, { startTime: event.timestamp, durationMs: 0 });
   const isError = event.kind === 'error';
   const isFrustration = event.kind === 'frustration';
   const isDanger = isError || isFrustration;
+  const traceHref = isDanger
+    ? toTraceHref(event.traceId, { startTime: event.timestamp, durationMs: 0 })
+    : undefined;
   const exception = event.exception ?? null;
   const expandable = isError || (isFrustration && (exception !== null || traceHref !== undefined));
   const webVital = webVitalOf(event);

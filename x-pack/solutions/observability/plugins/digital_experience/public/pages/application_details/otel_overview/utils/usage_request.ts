@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { emptyFrustration } from '../../../../../common/frustration';
 import type { OverviewSearchParams } from '../../../../../common/overview_filters';
 import type { ApplicationUsage, ApplicationUsageResponse } from '../../../../../common/types/usage';
 import type { ApplicationRequest } from '../../../../hooks/use_application_data';
@@ -15,7 +16,7 @@ export const EMPTY_USAGE: ApplicationUsage = {
   breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
   topClicks: [],
   totalClicks: 0,
-  frustration: { rageClicks: 0, deadClicks: 0, errorClicks: 0, total: 0, sessions: 0 },
+  frustration: { ...emptyFrustration(), sessions: 0 },
   frustratedElements: [],
   frustratedPages: [],
 };
