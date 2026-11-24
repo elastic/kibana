@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiHorizontalRule, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowMigrationWorkflow } from '../../../../../common/siem_migrations/model/workflow_migration.gen';
 import {
@@ -17,48 +24,78 @@ import {
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { PanelText } from '../../../../common/components/panel_text';
 import { TableHeader } from '../../../common/components';
+import { isMigrationItemNavigableWithFlyout } from '../../../common/utils';
 import { StatusBadge } from './status_badge';
 import * as i18n from './translations';
 
 export type TableColumn = EuiBasicTableColumn<WorkflowMigrationWorkflow>;
 
-const NameCell = ({ workflow }: { workflow: WorkflowMigrationWorkflow }) => {
+interface NameCellProps {
+  workflow: WorkflowMigrationWorkflow;
+  openWorkflowDetailsFlyout: (workflow: WorkflowMigrationWorkflow) => void;
+}
+
+// The tooltips show the full text of the name and of the description, as both are truncated.
+// The tooltip anchor is a block so the truncation of its content still applies.
+const NameCell = ({ workflow, openWorkflowDetailsFlyout }: NameCellProps) => {
   const { euiTheme } = useEuiTheme();
   const title = workflow.elastic_workflow?.title ?? workflow.original_workflow.title;
   const description =
     workflow.elastic_workflow?.description ?? workflow.original_workflow.description;
-  const isFailed = workflow.status === SiemMigrationStatus.FAILED;
+
+  const onClick = useCallback(
+    () => openWorkflowDetailsFlyout(workflow),
+    [openWorkflowDetailsFlyout, workflow]
+  );
 
   return (
     <>
-      <EuiText
-        data-test-subj="workflowName"
-        size="s"
-        color={isFailed ? 'danger' : undefined}
-        className="eui-textTruncate"
-      >
-        <strong>{title}</strong>
-      </EuiText>
-      {description && (
-        <PanelText size="xs" subdued>
-          {/* a block element, the ellipsis does not apply to an inline one */}
-          <div
-            data-test-subj="workflowDescription"
+      <EuiToolTip content={title} display="block">
+        {isMigrationItemNavigableWithFlyout(workflow) ? (
+          <EuiText size="s" className="eui-textTruncate">
+            <EuiLink onClick={onClick} data-test-subj="workflowName">
+              <strong>{title}</strong>
+            </EuiLink>
+          </EuiText>
+        ) : (
+          <EuiText
+            data-test-subj="workflowName"
+            size="s"
+            color="danger"
             className="eui-textTruncate"
-            style={{ paddingRight: euiTheme.size.l }}
           >
-            {description}
-          </div>
-        </PanelText>
+            <strong>{title}</strong>
+          </EuiText>
+        )}
+      </EuiToolTip>
+      {description && (
+        <EuiToolTip content={description} display="block">
+          <PanelText size="xs" subdued>
+            {/* a block element, the ellipsis does not apply to an inline one */}
+            <div
+              data-test-subj="workflowDescription"
+              className="eui-textTruncate"
+              style={{ paddingRight: euiTheme.size.l }}
+            >
+              {description}
+            </div>
+          </PanelText>
+        </EuiToolTip>
       )}
     </>
   );
 };
 
-export const createNameColumn = (): TableColumn => ({
+export type CreateNameColumnParams = Pick<NameCellProps, 'openWorkflowDetailsFlyout'>;
+
+export const createNameColumn = ({
+  openWorkflowDetailsFlyout,
+}: CreateNameColumnParams): TableColumn => ({
   field: 'original_workflow.title',
   name: i18n.COLUMN_NAME,
-  render: (_, workflow: WorkflowMigrationWorkflow) => <NameCell workflow={workflow} />,
+  render: (_, workflow: WorkflowMigrationWorkflow) => (
+    <NameCell workflow={workflow} openWorkflowDetailsFlyout={openWorkflowDetailsFlyout} />
+  ),
   sortable: true,
   truncateText: true,
   width: '50%',
@@ -160,8 +197,10 @@ export const createActionsColumn = (): TableColumn => ({
   align: 'left',
 });
 
-export const getWorkflowsTableColumns = (): TableColumn[] => [
-  createNameColumn(),
+export const getWorkflowsTableColumns = ({
+  openWorkflowDetailsFlyout,
+}: CreateNameColumnParams): TableColumn[] => [
+  createNameColumn({ openWorkflowDetailsFlyout }),
   createStatusColumn(),
   createTranslatedOnColumn(),
   createActionsColumn(),

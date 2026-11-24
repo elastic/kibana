@@ -238,6 +238,68 @@ describe('MigrationWorkflowsTable', () => {
     expect(header.querySelector('.euiScreenReaderOnly')).toBeNull();
   });
 
+  describe('details flyout', () => {
+    it('should open the details of a workflow when its name is clicked', async () => {
+      renderTable();
+
+      fireEvent.click((await screen.findAllByTestId('workflowName'))[0]);
+
+      expect(await screen.findByTestId('workflowDetailsFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Phishing triage');
+    });
+
+    it('should show the Translation and Summary tabs in the details', async () => {
+      renderTable();
+
+      fireEvent.click((await screen.findAllByTestId('workflowName'))[0]);
+
+      expect(await screen.findByTestId('tabTranslation')).toBeInTheDocument();
+      expect(screen.getByTestId('tabSummary')).toBeInTheDocument();
+    });
+
+    it('should not open any details for a workflow that failed', async () => {
+      renderTable();
+      const failedName = within(
+        (await screen.findByText('Broken story')).closest('tr') as HTMLElement
+      ).getByTestId('workflowName');
+
+      fireEvent.click(failedName);
+
+      expect(screen.queryByTestId('workflowDetailsFlyout')).not.toBeInTheDocument();
+    });
+
+    it('should close the details when the close button is clicked', async () => {
+      renderTable();
+      fireEvent.click((await screen.findAllByTestId('workflowName'))[0]);
+
+      fireEvent.click(await screen.findByTestId('detailsFlyoutCloseButton'));
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('workflowDetailsFlyout')).not.toBeInTheDocument()
+      );
+    });
+  });
+
+  describe('tooltips', () => {
+    it('should show the full description when hovering the description', async () => {
+      renderTable();
+
+      fireEvent.mouseOver(await screen.findByTestId('workflowDescription'));
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'Triages reported phishing emails'
+      );
+    });
+
+    it('should show the full name when hovering the name', async () => {
+      renderTable();
+
+      fireEvent.mouseOver((await screen.findAllByTestId('workflowName'))[0]);
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('Phishing triage');
+    });
+  });
+
   it('should truncate a long description with an ellipsis', async () => {
     renderTable();
 

@@ -33,6 +33,7 @@ import type { FilterOptionsBase } from '../../../common/types';
 import { useGetMigrationTranslationStats } from '../../service/hooks/use_get_migration_translation_stats';
 import { useGetMigrationWorkflows } from '../../service/hooks/use_get_migration_workflows';
 import type { WorkflowMigrationStats } from '../../types';
+import { WorkflowMigrationDetailsFlyout } from '../workflow_details_flyout';
 import { getWorkflowsTableColumns } from './columns';
 import { convertFilterOptions } from './convert_filter_options';
 import { MigrationWorkflowsFilter } from './filters';
@@ -81,7 +82,22 @@ export const MigrationWorkflowsTable = React.memo<MigrationWorkflowsTableProps>(
       filters,
     });
 
-    const columns = useMemo(() => getWorkflowsTableColumns(), []);
+    const [openedWorkflowId, setOpenedWorkflowId] = useState<string | undefined>();
+    const openWorkflowDetailsFlyout = useCallback(
+      (workflow: WorkflowMigrationWorkflow) => setOpenedWorkflowId(workflow.id),
+      []
+    );
+    const closeWorkflowDetailsFlyout = useCallback(() => setOpenedWorkflowId(undefined), []);
+    // the details are shown only while the workflow is part of the loaded page
+    const openedWorkflow = useMemo(
+      () => migrationWorkflows.find((workflow) => workflow.id === openedWorkflowId),
+      [migrationWorkflows, openedWorkflowId]
+    );
+
+    const columns = useMemo(
+      () => getWorkflowsTableColumns({ openWorkflowDetailsFlyout }),
+      [openWorkflowDetailsFlyout]
+    );
 
     const [selectedWorkflows, setSelectedWorkflows] = useState<WorkflowMigrationWorkflow[]>([]);
     const tableSelection = useMemo<EuiTableSelectionType<WorkflowMigrationWorkflow>>(
@@ -204,6 +220,12 @@ export const MigrationWorkflowsTable = React.memo<MigrationWorkflowsTableProps>(
                 data-test-subj="workflows-translation-table"
                 columns={columns}
               />
+              {openedWorkflow && (
+                <WorkflowMigrationDetailsFlyout
+                  migrationWorkflow={openedWorkflow}
+                  closeFlyout={closeWorkflowDetailsFlyout}
+                />
+              )}
             </div>
           )
         }
