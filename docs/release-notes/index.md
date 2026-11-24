@@ -77,7 +77,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Warn you in the field library and the template editor when a required field has no default value. The field library also tells you, before you first save a field, that its name and type can't change afterward [#285453]({{kib-pull}}285453).
 * Improve the Cases UI. The cases list moves its filters to a second row, you can collapse and expand comments and attachments, the attributes panel stays in place and you can resize it as you scroll the activity, and template fields share one edit mode with a single **Save** [#282197]({{kib-pull}}282197).
 * Add limits to case templates: up to 200 templates per owner, 200 fields per template, and 30,000 characters per template definition. The field library editor also validates field definitions and default values before you save [#281650]({{kib-pull}}281650).
-* Store the username, full name, and email of case assignees on the case and in the cases analytics index. {{kib}} fills them in when you create or update a case and does not backfill existing cases. To turn this off, set `xpack.cases.assigneeIdentity.enabled` to `false` [#281579]({{kib-pull}}281579).
+* Store the username, full name, and email of case assignees on the case and in the cases analytics index. {{kib}} fills them in when you create a case or change its assignees, and does not backfill existing cases. To turn this off, set `xpack.cases.assigneeIdentity.enabled` to `false` [#281579]({{kib-pull}}281579).
 * Run workflows without leaving Cases. Select **Run workflow** from the case view, from the cases list for up to 10 cases at once, or from attachments and observables in a case. The case activity records each run [#287993]({{kib-pull}}287993), [#287999]({{kib-pull}}287999), [#296254]({{kib-pull}}296254).
 * Show where each case action came from, such as an agent, a workflow, a rule, an attack, or the API, in the case activity, and filter the activity by source. Select an agent or workflow name to open the conversation or the workflow execution. Actions recorded before this release show **Not recorded** [#287149]({{kib-pull}}287149), [#291285]({{kib-pull}}291285).
 * Add public Cases attachments APIs under `/api/cases/{caseId}/attachments` in technical preview. They cover the legacy `/comments` APIs and return a single attachment format for all attachment types [#294886]({{kib-pull}}294886).
@@ -168,7 +168,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a `policy_namespace` field to agent status change documents in the `logs-elastic_agent.status_change-default` data stream. The field holds the namespace of the agent's policy [#287194]({{kib-pull}}287194).
 * Add a **Rotate uninstall token** button to the agent policy tamper protection settings and the `POST /api/fleet/uninstall_tokens/{agentPolicyId}/rotate` API [#278923]({{kib-pull}}278923).
 * Add support for multiple download sources in {{fleet}}-managed agent policies, and for preconfigured agent binary download sources in `kibana.yml` [#290101]({{kib-pull}}290101), [#283454]({{kib-pull}}283454).
-* Add the **Reserve disk space before upgrading agents** setting to agent binary download sources. When it's on, which is the default, agents reserve disk space for the new agent package before an upgrade, so an upgrade without enough space fails early [#304395]({{kib-pull}}304395).
+* Add the **Reserve disk space before upgrading agents** setting to agent binary download sources. When it's on, which is the default, agents reserve disk space for the new agent package before an upgrade, so an upgrade without enough space fails early. An agent policy with several download sources uses the setting of its first source [#304395]({{kib-pull}}304395).
 * Add the **Include agent tags in events** agent policy advanced setting (`agent.features.include_tags_in_events.enabled`). When you turn it on, {{fleet}}-managed agents add their tags to every event they collect, so you can filter by tag in Discover, dashboards, and alerts [#300052]({{kib-pull}}300052).
 * Group related integrations into a single collection tile in the integrations catalog. Select the tile to see the integrations in the collection [#287372]({{kib-pull}}287372), [#283107]({{kib-pull}}283107).
 * Open the **Add integration** page, instead of the integration details page, when you select an integration tile in the integrations catalog. Integrations with nothing to configure keep opening their details page [#299010]({{kib-pull}}299010).
@@ -181,7 +181,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % Consider whether #299837 needs a breaking change entry: bulk routes that skipped KQL validation before now return a validation error for fields outside the agent mappings. The PR is not labeled breaking and its API contracts check calls the schema diff a false positive, so it stays an enhancement.
 
 #### Data management [kibana-9.6.0-features-data-management]
-* Add an **{{esql}} Views** management page to create, edit, preview, and delete {{esql}} views. To use the page, you need the `read_view_metadata` index privilege [#297834]({{kib-pull}}297834).
+* Add an **{{esql}} Views** management page to create, edit, preview, and delete {{esql}} views. To open the page, you need the `read_view_metadata` index privilege on `*`. Creating and editing views also requires `create_view`, and deleting them requires `delete_view` [#297834]({{kib-pull}}297834).
 * Show lifecycle information in Index Management for hidden and system indices [#282137]({{kib-pull}}282137).
 
 #### Developer tools [kibana-9.6.0-features-developer-tools]
@@ -228,7 +228,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add the **Index full raw email (including headers)** setting to the Gmail and Outlook content connectors [#291419]({{kib-pull}}291419).
 * Add the **Sync all mail folders** advanced toggle to the Outlook native connector. Turn it on to index all user mail folders in each mailbox, not only Inbox, Sent, Junk, and Archive [#291396]({{kib-pull}}291396).
 * Add personal access token authentication fields to the Confluence Data Center and Jira Data Center connectors, for when password-based basic auth is disabled [#284332]({{kib-pull}}284332), [#284331]({{kib-pull}}284331).
-* Update the Microsoft Teams content connector to application-only authentication with a client secret or a certificate, and remove username and password authentication [#287028]({{kib-pull}}287028).
+* Update the Microsoft Teams content connector configuration to match the connectors service, which uses application-only authentication. The configuration now asks for a client secret or a certificate instead of a username and password [#287028]({{kib-pull}}287028).
 * Clarify that Salesforce document level security applies per object type, not per record [#297728]({{kib-pull}}297728).
 * Add an **Expand role members** toggle for compact document-level security to ServiceNow connectors, and an **Expand site group members** toggle to SharePoint Online connectors, in {{fleet}} [#288071]({{kib-pull}}288071), [#288070]({{kib-pull}}288070).
 
@@ -257,7 +257,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Add `user.full_name` and `user.email`, when available, to audit logs [#287148]({{kib-pull}}287148), [#286616]({{kib-pull}}286616).
 * Add the `process.memory.heap.limit` OpenTelemetry metric, which reports the V8 heap size limit in bytes [#295414]({{kib-pull}}295414).
 * Add the `i18n.detectBrowserLocale` setting. Set it to `false` to stop {{kib}} from choosing the interface language from the browser's language preferences while each person can still choose their own language [#295756]({{kib-pull}}295756).
-* Add the Brazilian Portuguese (`pt-BR`) locale, which you can set with `i18n.locale` [#291123]({{kib-pull}}291123).
+* Add the Brazilian Portuguese (`pt-BR`) locale, which you can set with `i18n.defaultLocale` [#291123]({{kib-pull}}291123).
 * Add a **Remember last selected space** option to the **Spaces preferences** modal, so {{kib}} opens the last space you visited when you log in on {{ech}} and Serverless [#281118]({{kib-pull}}281118).
 
 #### Machine learning and {{infer}} [kibana-9.6.0-features-machine-learning-inference]
@@ -363,7 +363,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix field library toggle filters missing from **More filters** on the **All cases** page [#283645]({{kib-pull}}283645).
 * Fix the Cases list keeping the previous page after you change filters [#287945]({{kib-pull}}287945).
 * Fix Cases free-text search failing when a case's extended fields produced too many runtime-field values [#284475]({{kib-pull}}284475).
-* Fix case search returning no results for comment text, alert IDs, and event IDs in attachments that {{kib}} stores when `xpack.cases.attachments.enabled` is on, which is the default. Searches that match many attachments also no longer miss cases [#304470]({{kib-pull}}304470).
+* Fix case search returning no results for comment text, alert IDs, and event IDs in attachments that {{kib}} stores when `xpack.cases.attachments.enabled` is on, which is the default [#304470]({{kib-pull}}304470).
 * Fix duplicate case activity entries when you set or change a legacy custom field. Legacy custom fields now also stay in sync with their matching global fields when you update a case [#282813]({{kib-pull}}282813), [#282772]({{kib-pull}}282772).
 * Fix assigning users to a case creating duplicate activity entries [#284035]({{kib-pull}}284035).
 * Fix case Activity recording a row for every unchanged template or global field default when you create a case [#284310]({{kib-pull}}284310).
@@ -381,7 +381,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 
 #### Connectivity [kibana-9.6.0-fixes-connectivity]
 * Fix the Jira Service Management and Opsgenie connectors failing when a rendered alert message is longer than 130 characters, by truncating the message [#291698]({{kib-pull}}291698).
-* Fix the MCP connector waiting for the full request timeout on every call after an MCP server stops responding or returns a `5xx` error. The connector also stops retrying an action after 3 consecutive connection failures within 5 minutes [#303531]({{kib-pull}}303531).
+* Fix the MCP connector waiting for the full request timeout on every call after an MCP server stops responding or returns a `5xx` error. The connector also stops retrying an action after 3 consecutive connection failures, each less than 5 minutes after the previous one [#303531]({{kib-pull}}303531).
 
 #### Dashboards and Visualizations [kibana-9.6.0-fixes-dashboards-visualizations]
 * Fix the Dashboards API dropping {{esql}} panels whose color mapping assigns colors to `boolean`, `null`, multi-value, or open-ended range values [#298850]({{kib-pull}}298850).
@@ -677,7 +677,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix chat requests failing through OpenAI-compatible gateways, such as LiteLLM, that reject a conversation containing earlier tool calls when no tools are listed. This affected Agent Builder after a tool had already run [#284017]({{kib-pull}}284017).
 * Fix the cursor jumping when you edit an {{infer}} endpoint ID [#280894]({{kib-pull}}280894).
 * Fix the region count text in the **Manage region preferences** modal not expanding or collapsing the zone when you select it, and the modal shrinking when you dismiss the model availability notice [#280253]({{kib-pull}}280253), [#280242]({{kib-pull}}280242).
-* Fix gaps in AI anonymization. The built-in account rule no longer lets account names in JSON or SPL reach the model unmasked, and no longer corrupts {{esql}} text. Custom patterns now use RE2 syntax, so a slow pattern can no longer turn masking off for a request. Patterns that you saved earlier keep working. A regex timeout no longer fails other requests in progress. A new built-in rule masks IPv6 addresses, and well-known public sites are no longer masked as host names [#300154]({{kib-pull}}300154).
+* Fix gaps in AI anonymization. The built-in account rule no longer lets account names in JSON or SPL reach the model unmasked, and no longer corrupts {{esql}} text. Custom patterns now use RE2 syntax, so a slow pattern can no longer turn masking off for a request. Patterns that you saved earlier keep working. A saved pattern that RE2 can't compile still runs on the previous regex engine. If it times out, the **If masking cannot run** setting decides whether {{kib}} blocks the request or sends it without that pattern's masks. A regex timeout no longer fails other requests in progress. A new built-in rule masks IPv6 addresses, and well-known public sites are no longer masked as host names [#300154]({{kib-pull}}300154).
 * Fix the model list on the **Elastic Inference Service** page showing outdated models after you save region preferences, until you refresh the browser [#300999]({{kib-pull}}300999).
 % #300999 carries the nonstandard label release_note:bug, so the generator does not pick it up. Consider changing it to release_note:fix.
 

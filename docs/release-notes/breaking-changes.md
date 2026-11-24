@@ -71,7 +71,6 @@ $$$kibana-285645$$$
 View [#285645]({{kib-pull}}285645).
 ::::
 
-$$$kibana-283150$$$
 ::::{dropdown} Update HTTPS proxy TLS settings if the email connector fails after upgrade
 **Details**<br> {{kib}} now ships nodemailer 9, which validates the proxy server's TLS certificate when the email connector sends mail through an HTTPS proxy. Earlier versions skipped that check, so a proxy with a self-signed, expired, or hostname-mismatched certificate now causes sending to fail. Hosted and cloud SMTP with public certificate authorities is unaffected.
 
@@ -82,7 +81,6 @@ $$$kibana-283150$$$
 View [#283150]({{kib-pull}}283150).
 ::::
 
-$$$kibana-282404$$$
 ::::{dropdown} Update `additional_datastreams_permissions` values to the `<type>-<suffix>` format
 **Details**<br> {{fleet}} now validates the `additional_datastreams_permissions` field of a package policy against the documented `<type>-<suffix>` data stream format, for example `logs-nginx-*`. Previously, the validation accepted any values that started with, contained, or ended with a valid type.
 
