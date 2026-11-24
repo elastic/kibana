@@ -79,6 +79,11 @@ export interface ControlGroupEditorConfig {
   hideDataViewSelector?: boolean;
   hideAdditionalSettings?: boolean;
   hideValuesSourceSelector?: boolean;
+  /**
+   * The id of the data view that is initially selected in the data control editor when a new
+   * control is created. The user can change it. The id must point to a persisted (saved) data view,
+   * not an ad hoc data view.
+   */
   defaultDataViewId?: string;
   fieldFilterPredicate?: FieldFilterPredicate;
   controlStateTransform?: ControlStateTransform;
