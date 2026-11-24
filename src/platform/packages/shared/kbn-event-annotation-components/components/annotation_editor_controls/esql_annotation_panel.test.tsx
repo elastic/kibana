@@ -99,6 +99,20 @@ describe('ConfigPanelEsqlAnnotation', () => {
     expect(onChange).toHaveBeenCalledWith({ ...range, endTimeColumn: 'start' });
   });
 
+  it('explains the chart time range limitation only while the time range switch is on', () => {
+    const hint = /Ranges that started before the chart time range are not shown/;
+    const { unmount } = renderPanel(annotation);
+    expect(screen.queryByText(hint)).not.toBeInTheDocument();
+    unmount();
+
+    renderPanel({
+      ...annotation,
+      key: { type: 'range' },
+      endTimeColumn: 'end',
+    } as EsqlEventAnnotationConfig);
+    expect(screen.getByText(hint)).toBeInTheDocument();
+  });
+
   it('adds tooltip columns without changing the existing configuration', async () => {
     const { onChange } = renderPanel();
 

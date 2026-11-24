@@ -30,6 +30,7 @@ export const ConfigPanelEsqlAnnotation = ({
 }: Props) => {
   const tooltipColumnsId = useId();
   const rangeSwitchId = useId();
+  const isRange = 'endTimeColumn' in annotation;
   const dateColumns = columns.filter(({ meta }) => meta.type === 'date');
   const extraColumns = annotation.extraColumns ?? [];
   const missingExtraColumns = extraColumns.filter(
@@ -40,7 +41,18 @@ export const ConfigPanelEsqlAnnotation = ({
     <>
       {queryEditor}
       <EuiSpacer size="m" />
-      <EuiFormRow display="rowCompressed" fullWidth>
+      <EuiFormRow
+        display="rowCompressed"
+        fullWidth
+        helpText={
+          isRange
+            ? i18n.translate('eventAnnotationComponents.esqlAnnotation.timeRangeHelpText', {
+                defaultMessage:
+                  'The chart time range is applied to the time field of the query source. Ranges that started before the chart time range are not shown.',
+              })
+            : undefined
+        }
+      >
         <EuiSwitch
           id={rangeSwitchId}
           labelProps={{ id: `${rangeSwitchId}-label` }}
@@ -49,7 +61,7 @@ export const ConfigPanelEsqlAnnotation = ({
           label={i18n.translate('eventAnnotationComponents.esqlAnnotation.timeRangeToggleSwitch', {
             defaultMessage: 'Time range',
           })}
-          checked={'endTimeColumn' in annotation}
+          checked={isRange}
           onChange={() => {
             if ('endTimeColumn' in annotation) {
               const { endTimeColumn, outside, ...point } = annotation;
