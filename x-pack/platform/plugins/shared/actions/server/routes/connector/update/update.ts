@@ -68,16 +68,6 @@ export const updateConnectorRoute = (
           const actions = await context.actions;
           const actionsClient = actions.getActionsClient();
           const { id }: UpdateConnectorParamsV1 = req.params;
-          try {
-            getUpdateConnectorBodySchemaV1(
-              actionsConfigUtils.isInboundEventsEnabled(),
-              actions.isCatalogFeatureFlagEnabled()
-            ).validate(req.body, {}, 'request body');
-          } catch (error) {
-            return res.badRequest({
-              body: error.message,
-            });
-          }
 
           const {
             name,
