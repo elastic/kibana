@@ -385,8 +385,8 @@ Overview's Frustration panel with **View dashboard**; it has no tab. Its breadcr
     type, so a release or browser with less traffic but more signals per session stands out; the
     busiest values without signals stay as a baseline.
 
-  Once sessions are set up and built (`/sessions/status`: installed, not rebuilding, healthy or
-  lagging, so not degraded or turned off),
+  Once sessions are set up and built (`/sessions/status`: installed, not rebuilding, healthy, so
+  not lagging, degraded or turned off),
   the per-session panels (signals and frustrated share per session, per page view, the
   distribution and the breakdowns) read the session summaries, one document per session instead
   of every event, with the sessions that overlap the time range (`start_time <= ?_tend AND
@@ -402,7 +402,9 @@ Overview's Frustration panel with **View dashboard**; it has no tab. Its breadcr
   (`dashboard_v2.showWriteControls`), opens Kibana's save modal (`DashboardApi.runInteractiveSave`)
   titled after the application (and environment), then opens the saved dashboard. It keeps the
   panels and sections with the application and environment in their ES|QL; the native panel
-  isn't part of it.
+  isn't part of it. Saved while the per-session panels read the summaries, it keeps reading them
+  for any time range, which its description says: older ranges than the summaries keep, or
+  sessions turned off, have no sessions there.
 - **Queries:** every panel filters on the application and, unless all environments are picked, the
   environment, in the ES|QL `WHERE` (escaped); the time range goes through the dashboard. The field
   names are shared with the summary query (`common/otel_source_fields.ts`) and the event names come

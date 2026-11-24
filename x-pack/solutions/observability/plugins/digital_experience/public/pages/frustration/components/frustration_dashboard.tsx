@@ -33,9 +33,16 @@ const savedTitleOf = (serviceName: string, environment: string | undefined): str
         values: { serviceName },
       });
 
-const SAVED_DESCRIPTION = i18n.translate('xpack.digitalExperience.frustration.savedDescription', {
-  defaultMessage: 'Rage, dead and error clicks reported by EDOT Browser.',
-});
+const SAVED_DESCRIPTIONS: Record<FrustrationSessionSource, string> = {
+  events: i18n.translate('xpack.digitalExperience.frustration.savedDescription', {
+    defaultMessage: 'Rage, dead and error clicks reported by EDOT Browser.',
+  }),
+  // The saved panels keep reading the summaries whatever range the dashboard is opened with.
+  summaries: i18n.translate('xpack.digitalExperience.frustration.savedDescriptionSummaries', {
+    defaultMessage:
+      'Rage, dead and error clicks reported by EDOT Browser. The per-session panels read the session summaries, so they have no sessions older than the summaries keep, or after sessions are turned off.',
+  }),
+};
 
 const toError = (error: unknown): Error => (error instanceof Error ? error : new Error(`${error}`));
 
@@ -145,10 +152,10 @@ export function FrustrationDashboard({
         time_range: { from: rangeFrom, to: rangeTo },
         // The defaults of the save modal, which saves the panels as a dashboard.
         title: savedTitleOf(serviceName, environment),
-        description: SAVED_DESCRIPTION,
+        description: SAVED_DESCRIPTIONS[sessionSource],
       }),
     }),
-    [panels, rangeFrom, rangeTo, serviceName, environment]
+    [panels, rangeFrom, rangeTo, serviceName, environment, sessionSource]
   );
 
   if (buildError || !panels) {

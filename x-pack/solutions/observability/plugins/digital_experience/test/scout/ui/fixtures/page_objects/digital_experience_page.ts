@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AppMenu } from '@kbn/scout-oblt';
 import type {
   EuiBasicTableObject,
   EuiSelectableObject,
@@ -63,7 +64,9 @@ export class DigitalExperiencePage {
   public readonly frustrationPageTitle: Locator;
   public readonly frustrationDashboardSlot: Locator;
   public readonly frustrationDashboardErrors: Locator;
+  public readonly frustrationPanelsRendering: Locator;
   public readonly frustrationSaveAsDashboard: Locator;
+  public readonly appMenu: AppMenu;
   public readonly overviewClearFilters: Locator;
   public readonly overviewAllFilters: Locator;
   public readonly overviewFiltersFlyout: Locator;
@@ -149,9 +152,13 @@ export class DigitalExperiencePage {
     this.frustrationDashboardErrors = this.frustrationDashboardSlot.locator(
       '[data-test-subj="embeddableError"], [data-test-subj="embeddable-lens-failure"]'
     );
+    this.frustrationPanelsRendering = this.frustrationDashboardSlot.locator(
+      '[data-test-subj="embeddablePanel"]:not([data-render-complete="true"])'
+    );
     this.frustrationSaveAsDashboard = page.getByTestId(
       'digitalExperienceFrustrationSaveAsDashboard'
     );
+    this.appMenu = new AppMenu(page);
     this.overviewClearFilters = page.getByTestId('digitalExperienceOverviewClearFilters');
     this.overviewAllFilters = page.getByTestId('digitalExperienceOverviewAllFilters');
     this.overviewFiltersFlyout = page.getByTestId('digitalExperienceOverviewFiltersFlyout');

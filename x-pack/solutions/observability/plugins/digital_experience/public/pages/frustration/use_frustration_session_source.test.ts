@@ -56,7 +56,7 @@ const LAST_DAY = NOW - DAY_MS;
 describe('sessionSourceOf', () => {
   it.each([
     ['healthy summaries', status(), LAST_DAY, 'summaries'],
-    ['lagging summaries', status({ health: 'lagging' }), LAST_DAY, 'summaries'],
+    ['lagging summaries', status({ health: 'lagging' }), LAST_DAY, 'events'],
     ['the oldest kept day', status(), NOW - 30 * DAY_MS, 'summaries'],
     ['a range older than the kept sessions', status(), NOW - 31 * DAY_MS, 'events'],
     [

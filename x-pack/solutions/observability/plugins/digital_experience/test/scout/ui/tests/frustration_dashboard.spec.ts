@@ -38,12 +38,16 @@ const BREAKDOWN_PANELS = [
 ];
 
 test.describe('Digital Experience frustration dashboard', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
+  let savedDashboardId: string | undefined;
+
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.core.settings(FLAG_ON_OVERRIDE);
   });
 
   test.afterAll(async ({ apiServices, kbnClient }) => {
-    await kbnClient.savedObjects.clean({ types: ['dashboard'] });
+    if (savedDashboardId) {
+      await kbnClient.savedObjects.delete({ type: 'dashboard', id: savedDashboardId });
+    }
     await apiServices.core.settings(FLAG_RESET_OVERRIDE);
   });
 
@@ -88,13 +92,16 @@ test.describe('Digital Experience frustration dashboard', { tag: DIGITAL_EXPERIE
     for (const title of BREAKDOWN_PANELS) {
       await expect(digitalExperience.frustrationPanelHeading(title)).toBeVisible();
     }
+    await expect(digitalExperience.frustrationPanelsRendering).toHaveCount(0);
     await expect(digitalExperience.frustrationDashboardErrors).toHaveCount(0);
 
     await expect(digitalExperience.frustrationRow(element.cssSelector)).toContainText(
       element.cssSelector
     );
     // A viewer can't save dashboards.
-    await expect(digitalExperience.frustrationSaveAsDashboard).toHaveCount(0);
+    expect(
+      await digitalExperience.appMenu.hasItem(digitalExperience.frustrationSaveAsDashboard)
+    ).toBe(false);
   });
 
   test('saves the panels as a dashboard and opens it', async ({
@@ -102,7 +109,7 @@ test.describe('Digital Experience frustration dashboard', { tag: DIGITAL_EXPERIE
     page,
     pageObjects: { digitalExperience },
   }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
       ...testData.TIME_RANGE,
       source: 'otel',
@@ -110,12 +117,13 @@ test.describe('Digital Experience frustration dashboard', { tag: DIGITAL_EXPERIE
     await digitalExperience.frustrationDashboardLink.click();
     await expect(digitalExperience.frustrationPanelHeading(DASHBOARD_PANELS[0])).toBeVisible();
 
-    await digitalExperience.frustrationSaveAsDashboard.click();
+    await digitalExperience.appMenu.clickItem(digitalExperience.frustrationSaveAsDashboard);
     const title = page.getByTestId('savedObjectTitle');
     await expect(title).toHaveValue(`${testData.OTEL_APPS.shop} frustration signals`);
     await page.getByTestId('confirmSaveSavedObjectButton').click();
 
     await expect(page).toHaveURL(/\/app\/dashboards#\/view\//);
+    savedDashboardId = page.url().match(/#\/view\/([^/?]+)/)?.[1];
     await expect(page).toHaveTitle(new RegExp(`${testData.OTEL_APPS.shop} frustration signals`));
     for (const panelTitle of DASHBOARD_PANELS) {
       await expect(digitalExperience.savedDashboardPanelHeading(panelTitle)).toBeVisible();

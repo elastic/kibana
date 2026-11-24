@@ -89,6 +89,15 @@ describe('FrustrationDashboard', () => {
       panels,
       time_range: { from: 'now-24h', to: 'now' },
       title: 'checkout-web (production) frustration signals',
+      description: expect.stringContaining('The per-session panels read the session summaries'),
+    });
+  });
+
+  it('describes the saved dashboard without the summaries caveat when the panels read the events', async () => {
+    renderDashboard({ sessionSource: 'events' });
+
+    const { getInitialInput } = await lastProps().getCreationOptions!();
+    expect(getInitialInput?.()).toMatchObject({
       description: 'Rage, dead and error clicks reported by EDOT Browser.',
     });
   });

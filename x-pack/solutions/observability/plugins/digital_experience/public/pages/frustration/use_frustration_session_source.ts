@@ -13,8 +13,9 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * The summaries only once they hold every session of the range: not before sessions are set up,
- * while the first build runs oldest first, when the task can't keep them current or was turned off,
- * or for a range that starts before the oldest kept sessions.
+ * while the first build runs oldest first, when the task is behind (its checkpoint can be before
+ * the whole range), can't keep them current or was turned off, or for a range that starts before
+ * the oldest kept sessions.
  */
 export const sessionSourceOf = (
   status: SessionsStatus | undefined,
@@ -23,7 +24,7 @@ export const sessionSourceOf = (
 ): FrustrationSessionSource =>
   status?.installed &&
   !status.rebuilding &&
-  (status.health === 'healthy' || status.health === 'lagging') &&
+  status.health === 'healthy' &&
   rangeStart >= now - status.retentionDays * DAY_MS
     ? 'summaries'
     : 'events';
