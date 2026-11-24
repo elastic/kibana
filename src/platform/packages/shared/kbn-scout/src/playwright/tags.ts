@@ -187,6 +187,7 @@ export const tags = {
      */
     only: {
       fips: getPlaywrightLimitTagFor('only', 'fips'),
+      upgradeAssistant: getPlaywrightLimitTagFor('only', 'upgradeAssistant'),
     },
 
     /**
@@ -194,6 +195,7 @@ export const tags = {
      */
     except: {
       fips: getPlaywrightLimitTagFor('except', 'fips'),
+      upgradeAssistant: getPlaywrightLimitTagFor('except', 'upgradeAssistant'),
     },
   },
 };
