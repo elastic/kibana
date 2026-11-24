@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { fromKueryExpression } from '@kbn/es-query';
 import type { RequestHandler } from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getAgentsRoute } from './get_agents';
@@ -110,5 +111,57 @@ describe('getAgentsRoute', () => {
         kuery: expect.stringContaining('policy_id:("policy-1" or policy-1#*)'),
       })
     );
+    // Fleet rejects `policy_name`, which is not an agent field.
+    expect(mockListAgents.mock.calls[0][0].kuery).not.toContain('policy_name');
+  });
+
+  // Mirrors the client kuery shape from use_all_agents.ts.
+  const buildSearchKuery = (searchValue: string) =>
+    `policy_id:("policy-1" or policy-1#*) and (local_metadata.host.hostname.keyword:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}* or policy_id: *${searchValue}* or local_metadata.os.platform: *${searchValue}* or policy_name:${searchValue} )`;
+
+  const receivedKuery = (): string => mockListAgents.mock.calls[0][0].kuery;
+
+  it('replaces the policy_name clause of a client search with the resolved policy ids', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest(buildSearchKuery('Production Policy')) as never,
+      mockResponse
+    );
+
+    const kuery = receivedKuery();
+    expect(kuery).not.toContain('policy_name');
+    expect(kuery).toContain(
+      'local_metadata.os.platform: *Production Policy* or policy_id:("policy-1" or policy-1#*) )'
+    );
+    expect(() => fromKueryExpression(kuery)).not.toThrow();
+  });
+
+  it('replaces the policy_name clause with a match-nothing clause when no policy matches', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest(buildSearchKuery('nonexistent')) as never,
+      mockResponse
+    );
+
+    const kuery = receivedKuery();
+    expect(kuery).not.toContain('policy_name');
+    expect(kuery).toContain('or policy_id:("") )');
+    expect(() => fromKueryExpression(kuery)).not.toThrow();
+  });
+
+  it('replaces only the trailing policy_name clause when the search text contains one', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest(buildSearchKuery('webpolicy_name:Production')) as never,
+      mockResponse
+    );
+
+    const kuery = receivedKuery();
+    expect(kuery).toContain('local_metadata.host.hostname.keyword:*webpolicy_name:Production*');
+    expect(kuery).toContain('local_metadata.os.platform: *webpolicy_name:Production*');
+    expect(kuery).toMatch(/ or policy_id:\(""\) \)$/);
   });
 });
