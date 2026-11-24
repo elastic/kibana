@@ -31,7 +31,7 @@ apiTest.describe(
         const { agentId, hostname } = enrolledHost;
 
         await apiTest.step('the agent applies the unprotected policy', async () => {
-          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, unprotectedPolicy);
+          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, unprotectedPolicy, log);
         });
 
         await apiTest.step('reassign the agent to the protected policy', async () => {
@@ -42,7 +42,7 @@ apiTest.describe(
             protectedPolicy.agentPolicyId
           );
           expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
-          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, protectedPolicy);
+          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, protectedPolicy, log);
         });
 
         await apiTest.step('an uninstall without a token is rejected', async () => {

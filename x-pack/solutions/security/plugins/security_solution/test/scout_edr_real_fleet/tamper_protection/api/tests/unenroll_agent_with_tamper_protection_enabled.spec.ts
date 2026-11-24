@@ -28,13 +28,13 @@ apiTest.describe(
 
     apiTest(
       'the agent acknowledges a Fleet unenroll',
-      async ({ apiClient, agentPolicies, enrolledHost, requestHeaders }) => {
+      async ({ apiClient, log, agentPolicies, enrolledHost, requestHeaders }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
         const { first: protectedPolicy } = agentPolicies;
         const { agentId } = enrolledHost;
 
         await apiTest.step('the agent applies the protected policy', async () => {
-          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, protectedPolicy);
+          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, protectedPolicy, log);
         });
 
         await apiTest.step('unenroll the agent from Fleet', async () => {

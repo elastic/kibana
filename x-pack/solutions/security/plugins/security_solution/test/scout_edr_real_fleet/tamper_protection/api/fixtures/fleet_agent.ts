@@ -16,13 +16,22 @@ import type {
   GetUninstallTokenResponse,
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
-import type { ApiClientFixture } from '@kbn/scout-security';
+import type { ApiClientFixture, ScoutLogger } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
+import type { HostInfo } from '../../../../../common/endpoint/types';
+import { HostPolicyResponseActionStatus } from '../../../../../common/endpoint/types';
+import type { EndpointAgentPolicy } from './protected_policy';
 
 type RequestHeaders = Record<string, string>;
 
 const AGENT_POLICY_TIMEOUT_MS = 120_000;
 const AGENT_UNENROLL_TIMEOUT_MS = 120_000;
+const ENDPOINT_POLICY_TIMEOUT_MS = 180_000;
+const ACCEPTED_APPLIED_STATUSES: readonly HostPolicyResponseActionStatus[] = [
+  HostPolicyResponseActionStatus.success,
+  HostPolicyResponseActionStatus.warning,
+];
 
 export interface FleetApiResponse<T> {
   statusCode: number;
@@ -51,13 +60,95 @@ const readAgent = async (
     responseType: 'json',
   });
 
-/** Polls until the agent reports `agentPolicyId` at `revision` or later and is not updating. */
+const readHostMetadata = async (
+  apiClient: ApiClientFixture,
+  headers: RequestHeaders,
+  agentId: string
+): Promise<FleetApiResponse<HostInfo>> =>
+  apiClient.get<HostInfo>(HOST_METADATA_GET_ROUTE.replace('{id}', agentId), {
+    headers,
+    responseType: 'json',
+  });
+
+/**
+ * Polls host metadata until Endpoint reports `packagePolicyId` applied at `packagePolicyRevision`
+ * or later with a `success` or `warning` status. Throws as soon as that revision reports `failure`.
+ */
+const waitForEndpointOnPolicy = async (
+  apiClient: ApiClientFixture,
+  headers: RequestHeaders,
+  agentId: string,
+  {
+    packagePolicyId,
+    packagePolicyRevision,
+  }: Pick<EndpointAgentPolicy, 'packagePolicyId' | 'packagePolicyRevision'>,
+  log?: ScoutLogger
+): Promise<void> => {
+  const startedAt = Date.now();
+  let isFirstRead = true;
+
+  await expect
+    .poll(
+      async () => {
+        const { statusCode, body } = await readHostMetadata(apiClient, headers, agentId);
+        if (statusCode !== 200) {
+          return `status ${statusCode}: ${JSON.stringify(body)}`;
+        }
+
+        const { applied } = body.metadata.Endpoint.policy;
+        const { id, status, endpoint_policy_version: endpointPolicyVersion } = applied;
+        const revisionApplied = Number(endpointPolicyVersion) >= packagePolicyRevision;
+        if (isFirstRead) {
+          isFirstRead = false;
+          log?.info(
+            `[edr_real_fleet] agent ${agentId} first Endpoint policy read: applied.id=${id}, endpoint_policy_version=${endpointPolicyVersion}, status=${status}; waiting for ${packagePolicyId} at revision ${packagePolicyRevision}`
+          );
+        }
+        if (
+          id === packagePolicyId &&
+          revisionApplied &&
+          status === HostPolicyResponseActionStatus.failure
+        ) {
+          throw new Error(
+            `Endpoint on agent ${agentId} failed to apply package policy ${packagePolicyId}: ${JSON.stringify(
+              applied
+            )}`
+          );
+        }
+
+        return { id, revisionApplied, statusAccepted: ACCEPTED_APPLIED_STATUSES.includes(status) };
+      },
+      {
+        message: `Endpoint on agent ${agentId} reports package policy ${packagePolicyId} applied at revision ${packagePolicyRevision} or later`,
+        timeout: ENDPOINT_POLICY_TIMEOUT_MS,
+        intervals: [5_000],
+      }
+    )
+    .toStrictEqual({ id: packagePolicyId, revisionApplied: true, statusAccepted: true });
+
+  log?.info(
+    `[edr_real_fleet] agent ${agentId} Endpoint applied package policy ${packagePolicyId} after ${
+      Date.now() - startedAt
+    } ms`
+  );
+};
+
+/**
+ * Polls until the agent reports `agentPolicyId` at `revision` or later and is not updating, then until
+ * Endpoint reports the agent policy's Elastic Defend package policy applied. The headers need the
+ * `securitySolution` API privilege for the host metadata route.
+ */
 export const waitForAgentOnPolicy = async (
   apiClient: ApiClientFixture,
   headers: RequestHeaders,
   agentId: string,
-  { agentPolicyId, revision }: { agentPolicyId: string; revision: number }
+  policy: Pick<
+    EndpointAgentPolicy,
+    'agentPolicyId' | 'revision' | 'packagePolicyId' | 'packagePolicyRevision'
+  >,
+  log?: ScoutLogger
 ): Promise<void> => {
+  const { agentPolicyId, revision } = policy;
   await expect
     .poll(
       async () => {
@@ -80,6 +171,8 @@ export const waitForAgentOnPolicy = async (
       }
     )
     .toStrictEqual({ policyId: agentPolicyId, revisionApplied: true, updating: false });
+
+  await waitForEndpointOnPolicy(apiClient, headers, agentId, policy, log);
 };
 
 /** Sends a graceful unenroll (no `revoke`): Fleet waits for the agent to acknowledge it. */

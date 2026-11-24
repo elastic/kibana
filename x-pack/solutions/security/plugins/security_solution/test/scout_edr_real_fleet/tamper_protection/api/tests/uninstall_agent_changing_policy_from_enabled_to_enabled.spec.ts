@@ -23,7 +23,7 @@ apiTest.describe(
         const { agentId, hostname } = enrolledHost;
 
         await apiTest.step('the agent applies the first protected policy', async () => {
-          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, first);
+          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, first, log);
         });
 
         await apiTest.step('reassign the agent to the second protected policy', async () => {
@@ -34,7 +34,7 @@ apiTest.describe(
             second.agentPolicyId
           );
           expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
-          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, second);
+          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, second, log);
         });
 
         await apiTest.step('the first policy uninstall token is rejected', async () => {
