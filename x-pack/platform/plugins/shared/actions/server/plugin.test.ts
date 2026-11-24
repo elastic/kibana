@@ -985,7 +985,7 @@ describe('Actions Plugin', () => {
 
         it('waits only until the load is ready on a normal load, and leaves no timer', async () => {
           seedCatalog();
-          const catalogRead = defer<object>();
+          const catalogRead = Promise.withResolvers<object>();
           getEsClient().get.mockReturnValue(catalogRead.promise);
           await setupPlugin();
           const pluginStart = plugin.start(coreStart, pluginsStart);
