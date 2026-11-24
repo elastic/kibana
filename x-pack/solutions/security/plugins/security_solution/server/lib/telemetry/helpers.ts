@@ -281,10 +281,15 @@ export const responseActionsCustomRuleTelemetryData = (
  */
 export const createUsageCounterLabel = (labelList: string[]): string => labelList.join('-');
 
+const hasResponseActions = (policy: PolicyConfig): boolean =>
+  [policy.windows, policy.mac, policy.linux].some(
+    (os) => isPlainObject(os) && 'response_actions' in os
+  );
+
 /**
  * Resiliantly handles an edge case where the endpoint config details are not present
  *
- * @returns a copy of the endpoint policy configuration without export providers
+ * @returns the endpoint policy configuration, copied without export providers when it has `response_actions`
  */
 export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
   const epPolicyConfig = policyData?.inputs[0]?.config?.policy;
@@ -294,10 +299,11 @@ export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
   }
 
   // Export providers name the customer's storage accounts and containers, so they are never sent.
-  // `value` is checked too: a stored policy can lack it.
-  return epPolicyConfig.value
+  // Any other policy is returned as is, not copied: the endpoint task writes `value` back through
+  // the result, and a copy changes what it sends when a cluster has several policies.
+  return epPolicyConfig.value && hasResponseActions(epPolicyConfig.value)
     ? { ...epPolicyConfig, value: removeExportProviders(epPolicyConfig.value) }
-    : { ...epPolicyConfig };
+    : epPolicyConfig;
 };
 
 export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfig) => {

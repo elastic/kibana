@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual, isPlainObject } from 'lodash';
+import { isEqual, isPlainObject, omitBy } from 'lodash';
 import type { ExportProvider, PolicyConfig } from '../../../common/endpoint/types';
 import type {
   ExportProviderFieldError,
@@ -169,6 +169,42 @@ export const validateNoDottedResponseActionsKeys = (policy: PolicyConfig): void 
       `response_actions can't be set with a dotted key (${quoteForMessage(dottedKey)})`
     );
   }
+};
+
+type PolicyOsConfig = PolicyConfig[(typeof POLICY_OPERATING_SYSTEMS)[number]];
+
+const withoutDottedResponseActionsKeys = <OsConfig extends PolicyOsConfig>(
+  os: OsConfig
+): OsConfig => {
+  if (!isPlainObject(os)) {
+    return os;
+  }
+
+  const osConfig = omitBy(os, (_, key) => key.startsWith('response_actions.')) as OsConfig;
+
+  return isPlainObject(osConfig.response_actions)
+    ? {
+        ...osConfig,
+        response_actions: omitBy(osConfig.response_actions, (_, key) => key.includes('.')),
+      }
+    : osConfig;
+};
+
+/**
+ * Returns a copy of `policy` without the dotted keys that `validateNoDottedResponseActionsKeys()`
+ * rejects, for deployments where export providers are stripped (feature flag / product feature).
+ */
+export const removeDottedResponseActionsKeys = (policy: PolicyConfig): PolicyConfig => {
+  if (findDottedResponseActionsKey(policy) === undefined) {
+    return policy;
+  }
+
+  return {
+    ...omitBy(policy, (_, key) => DOTTED_OS_RESPONSE_ACTIONS_KEY_PATTERN.test(key)),
+    windows: withoutDottedResponseActionsKeys(policy.windows),
+    mac: withoutDottedResponseActionsKeys(policy.mac),
+    linux: withoutDottedResponseActionsKeys(policy.linux),
+  } as PolicyConfig;
 };
 
 /** Rejects (400) a policy whose export providers are invalid. */
