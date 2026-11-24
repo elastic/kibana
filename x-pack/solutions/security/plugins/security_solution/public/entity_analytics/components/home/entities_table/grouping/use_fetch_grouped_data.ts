@@ -12,7 +12,6 @@ import { useQuery } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import { useContext, useMemo } from 'react';
-import { getESQLResults } from '@kbn/esql-utils';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -300,12 +299,10 @@ export const useFetchUnfilteredResolutionGroupData = ({
       const esqlQuery = buildTopNTargetsEsql(indexPattern, limit);
 
       const [esqlResult, groupsCountResult, unitsCountResult] = await Promise.all([
-        getESQLResults({
-          esqlQuery,
-          search: searchService.search,
-          projectRouting: ESQL_PROJECT_ROUTING,
-          executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_CONTEXT,
-        }),
+        searchService.esql(
+          { query: esqlQuery, projectRouting: ESQL_PROJECT_ROUTING },
+          { executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_CONTEXT }
+        ),
         // Group count: targets only (each target is one resolution group).
         lastValueFrom(
           searchService.search<{}, IKibanaSearchResponse<SearchResponse>>(
@@ -349,7 +346,7 @@ export const useFetchUnfilteredResolutionGroupData = ({
         ),
       ]);
 
-      const allRows = esqlResponseToRecords<UnfilteredResolutionTargetRow>(esqlResult.response);
+      const allRows = esqlResponseToRecords<UnfilteredResolutionTargetRow>(esqlResult.rawResponse);
       const pageRows = allRows.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
       const pageTargetIds = pageRows
         .map((r) => r[ENTITY_FIELDS.ENTITY_ID])
@@ -460,21 +457,19 @@ export const useFetchFilteredResolutionGroupData = ({
       const esqlQuery = buildStatsJoinEsql(indexPattern, limit);
 
       const [esqlResult, groupCountResult, totalCountResult] = await Promise.all([
-        getESQLResults({
-          esqlQuery,
-          search: searchService.search,
-          filter,
-          projectRouting: ESQL_PROJECT_ROUTING,
-          executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_FILTERED_CONTEXT,
-        }),
+        searchService.esql(
+          { query: esqlQuery, filter, projectRouting: ESQL_PROJECT_ROUTING },
+          { executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_FILTERED_CONTEXT }
+        ),
         // Distinct-group count over the filtered set → drives pagination (see buildGroupCountEsql).
-        getESQLResults({
-          esqlQuery: buildGroupCountEsql(indexPattern),
-          search: searchService.search,
-          filter,
-          projectRouting: ESQL_PROJECT_ROUTING,
-          executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_FILTERED_CONTEXT,
-        }),
+        searchService.esql(
+          {
+            query: buildGroupCountEsql(indexPattern),
+            filter,
+            projectRouting: ESQL_PROJECT_ROUTING,
+          },
+          { executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_FILTERED_CONTEXT }
+        ),
         // Unit count: all entities matching the filter for the "N entities" label.
         lastValueFrom(
           searchService.search<{}, IKibanaSearchResponse<SearchResponse>>(
@@ -497,7 +492,7 @@ export const useFetchFilteredResolutionGroupData = ({
         ),
       ]);
 
-      const allRows = esqlResponseToRecords<FilteredResolutionGroupRow>(esqlResult.response);
+      const allRows = esqlResponseToRecords<FilteredResolutionGroupRow>(esqlResult.rawResponse);
       const pageRows = allRows.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
       const pageGroupKeys = pageRows.map((r) => r.group_key).filter((k): k is string => k !== null);
 
@@ -546,7 +541,7 @@ export const useFetchFilteredResolutionGroupData = ({
         });
 
       const [groupCountRow] = esqlResponseToRecords<{ total: number | null }>(
-        groupCountResult.response
+        groupCountResult.rawResponse
       );
       const totalGroups = Number(groupCountRow?.total ?? 0);
       const totalUnits = getTotalHits(totalCountResult.rawResponse.hits);

@@ -29,7 +29,7 @@ describe('useNlToEsqlCheck', () => {
   const getLicenseMock = jest.fn();
 
   const createWrapper =
-    (esqlService?: { getLicense: typeof getLicenseMock }) =>
+    (esqlService?: { getLicense: typeof getLicenseMock; isInferenceAvailable?: boolean }) =>
     ({ children }: { children: React.ReactNode }) => (
       <KibanaContextProvider services={{ core: coreStart, esql: esqlService }}>
         <>{children}</>
@@ -51,9 +51,20 @@ describe('useNlToEsqlCheck', () => {
     expect(getLicenseMock).not.toHaveBeenCalled();
   });
 
-  it('should return true when license is enterprise', async () => {
+  it('should return false when inference is unavailable', async () => {
     const { result } = renderHook(() => useNlToEsqlCheck(), {
-      wrapper: createWrapper({ getLicense: getLicenseMock }),
+      wrapper: createWrapper({ getLicense: getLicenseMock, isInferenceAvailable: false }),
+    });
+
+    await act(async () => {});
+
+    expect(result.current).toBe(false);
+    expect(getLicenseMock).not.toHaveBeenCalled();
+  });
+
+  it('should return true when license is enterprise and inference is available', async () => {
+    const { result } = renderHook(() => useNlToEsqlCheck(), {
+      wrapper: createWrapper({ getLicense: getLicenseMock, isInferenceAvailable: true }),
     });
 
     await act(async () => {});
@@ -66,7 +77,7 @@ describe('useNlToEsqlCheck', () => {
     getLicenseMock.mockResolvedValue(invalidLicense);
 
     const { result } = renderHook(() => useNlToEsqlCheck(), {
-      wrapper: createWrapper({ getLicense: getLicenseMock }),
+      wrapper: createWrapper({ getLicense: getLicenseMock, isInferenceAvailable: true }),
     });
 
     await act(async () => {});
@@ -75,7 +86,7 @@ describe('useNlToEsqlCheck', () => {
   });
 
   it('reuses the license result for the next editor', async () => {
-    const wrapper = createWrapper({ getLicense: getLicenseMock });
+    const wrapper = createWrapper({ getLicense: getLicenseMock, isInferenceAvailable: true });
     const first = renderHook(() => useNlToEsqlCheck(), { wrapper });
 
     await act(async () => {});

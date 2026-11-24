@@ -145,6 +145,13 @@ export const toPresetSchedule = (
     : { schedulePreset: 'daily', time, timezone };
 };
 
+export const getScheduledRunsPerDay = (trigger: TriggerFormValues): number | undefined => {
+  if (trigger.kind !== 'every') return undefined;
+  if (trigger.unit !== 'hour') return 1;
+  if (!trigger.betweenHours) return 24;
+  return Number(trigger.endTime.slice(0, 2)) - Number(trigger.startTime.slice(0, 2)) + 1;
+};
+
 export const toAutomationFormValues = (automation: Automation): AutomationFormValues => {
   const row = automation.trigger.rows[0];
   const [completion] = automation.completions;

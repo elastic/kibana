@@ -915,6 +915,25 @@ describe('esql query helpers', () => {
   });
 
   describe('fixESQLQueryWithVariables', () => {
+    it('should not parse the query unless a fields or functions variable is given', () => {
+      const parseSpy = jest.spyOn(Parser, 'parse');
+      const esql = 'FROM my_index | WHERE field == ?value';
+
+      fixESQLQueryWithVariables(esql, undefined);
+      fixESQLQueryWithVariables(esql, []);
+      fixESQLQueryWithVariables(esql, [
+        { key: 'value', value: 'x', type: ESQLVariableType.VALUES },
+        { key: 'interval', value: '1 hour', type: ESQLVariableType.TIME_LITERAL },
+      ]);
+      expect(parseSpy).not.toHaveBeenCalled();
+
+      fixESQLQueryWithVariables('FROM my_index | STATS COUNT(?field)', [
+        { key: 'field', value: 'bytes', type: ESQLVariableType.FIELDS },
+      ]);
+      expect(parseSpy).toHaveBeenCalled();
+      parseSpy.mockRestore();
+    });
+
     it('should return the query as is if no variables are given', () => {
       const esql = 'FROM my_index | STATS COUNT(?field)';
       const variables: ESQLControlVariable[] = [];

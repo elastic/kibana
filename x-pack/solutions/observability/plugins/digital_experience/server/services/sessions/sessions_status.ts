@@ -28,6 +28,7 @@ import type { SessionsTaskState } from './sessions_task';
 
 const missingStatusOf = ({ version }: SessionsPlatform): SessionsStatus => ({
   installed: false,
+  disabled: false,
   health: 'missing',
   installedVersion: null,
   currentVersion: version,
@@ -40,9 +41,14 @@ const missingStatusOf = ({ version }: SessionsPlatform): SessionsStatus => ({
   lastError: null,
   enabledBy: null,
   retentionDays: SESSIONS_LOOKBACK_DAYS,
+  canEnable: false,
+  autoEnable: false,
+  canManage: false,
+  setUpBlocker: null,
 });
 
-const getTask = async (
+/** A platform's summaries task, or undefined before sessions are set up. */
+export const getSessionsTask = async (
   taskManager: TaskManagerStartContract,
   { taskId }: SessionsPlatform
 ): Promise<ConcreteTaskInstance | undefined> => {
@@ -75,35 +81,49 @@ const healthOf = ({
 interface SessionsStatusParams {
   taskManager: TaskManagerStartContract | undefined;
   settings: SessionsSettings;
-  withDetails?: boolean;
+  canManage?: boolean;
   now?: number;
 }
 
 /**
  * A platform's sessions status, from its summaries task and what its last run recorded. Without
  * Task Manager, nothing can build sessions, so they're missing. Who enabled sessions and why the
- * last run failed are only told `withDetails`, to users who can set sessions up.
+ * last run failed are only told to users who `canManage` sessions.
  */
 export const getSessionsStatus = async ({
   platform,
   taskManager,
   settings,
-  withDetails = false,
+  canManage = false,
   now = Date.now(),
 }: SessionsStatusParams & { platform: SessionsPlatform }): Promise<SessionsStatus> => {
-  const missingStatus = missingStatusOf(platform);
-  const task = taskManager ? await getTask(taskManager, platform) : undefined;
+  const missingStatus = { ...missingStatusOf(platform), canManage };
+  const task = taskManager ? await getSessionsTask(taskManager, platform) : undefined;
   if (!task) {
     return missingStatus;
   }
   const state: SessionsTaskState = task.state;
   const installedVersion = state.version ?? null;
-  const rebuilding = state.caughtUp !== true || installedVersion !== platform.version;
   const summarizedUntil = state.checkpoint ?? null;
   const lagSeconds =
     summarizedUntil === null
       ? null
       : Math.max(0, Math.round((now - Date.parse(summarizedUntil)) / 1000));
+  const shared = {
+    ...missingStatus,
+    installed: true,
+    installedVersion,
+    lagSeconds,
+    summarizedUntil,
+    lastRunAt: state.lastRunAt ?? null,
+    lastSuccessAt: state.lastSuccessAt ?? null,
+    enabledBy: canManage ? (task.userScope?.userName ?? null) : null,
+  };
+  // Turned off on purpose: neither rebuilding nor failing, as the task doesn't run.
+  if (task.enabled === false) {
+    return { ...shared, disabled: true, health: 'disabled' };
+  }
+  const rebuilding = state.caughtUp !== true || installedVersion !== platform.version;
   // A rejected key that the task no longer has: sessions were enabled again since, with a new key
   // that no run has used yet, so the failure is the old key's.
   const replacedKeyFailed =
@@ -114,27 +134,20 @@ export const getSessionsStatus = async ({
   const apiKeyInvalid = !task.userScope || (state.apiKeyInvalid === true && !replacedKeyFailed);
   const recordedError = replacedKeyFailed ? null : (state.lastError ?? null);
   // Elasticsearch errors can name the user who enabled sessions, their roles and indices, so
-  // only users who can set sessions up are told why a run failed; the others just that one did.
+  // only users who manage sessions are told why a run failed; the others just that one did.
   const lastError: SessionsRunError | null =
-    recordedError && !withDetails ? { ...recordedError, message: null } : recordedError;
+    recordedError && !canManage ? { ...recordedError, message: null } : recordedError;
   const lagging =
     !rebuilding &&
     lagSeconds !== null &&
     lagSeconds > sessionsLagThresholdSeconds(settings.frequency);
 
   return {
-    ...missingStatus,
-    installed: true,
+    ...shared,
     health: healthOf({ apiKeyInvalid, lastError, lagging }),
-    installedVersion,
     rebuilding,
     apiKeyInvalid,
-    lagSeconds,
-    summarizedUntil,
-    lastRunAt: state.lastRunAt ?? null,
-    lastSuccessAt: state.lastSuccessAt ?? null,
     lastError,
-    enabledBy: withDetails ? (task.userScope?.userName ?? null) : null,
   };
 };
 

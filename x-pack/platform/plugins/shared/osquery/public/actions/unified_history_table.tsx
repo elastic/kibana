@@ -380,7 +380,12 @@ const UnifiedHistoryTableComponent = () => {
   }, []);
 
   const renderSourceColumn = useCallback(
-    (_: unknown, row: UnifiedHistoryRow) => <SourceBadge source={row.source} />,
+    (_: unknown, row: UnifiedHistoryRow) => (
+      <SourceBadge
+        source={row.source}
+        originVerified={row.sourceType === 'live' ? row.originVerified : undefined}
+      />
+    ),
     []
   );
 

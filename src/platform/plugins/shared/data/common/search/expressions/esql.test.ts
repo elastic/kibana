@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UiSettingsCommon } from '../..';
 import { getEsqlFn } from './esql';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type {
@@ -45,14 +46,47 @@ const getMockSearchService = (): MockTypedSearchService => ({
   }),
 });
 
-const createEsqlFn = (mockSearchService: MockTypedSearchService) =>
+const createUiSettings = (dateFormatTZ?: string): UiSettingsCommon =>
+  ({
+    get: async (key: string) => (key === 'dateFormat:tz' ? dateFormatTZ : undefined),
+  } as unknown as UiSettingsCommon);
+
+const createEsqlFn = (mockSearchService: MockTypedSearchService, dateFormatTZ?: string) =>
   getEsqlFn({
     getStartDependencies: async () => ({
       searchService: mockSearchService as unknown as ISearchMethods,
+      uiSettings: createUiSettings(dateFormatTZ),
     }),
   });
 
 describe('getEsqlFn', () => {
+  it('sends the dateFormat:tz time zone and the locale argument', async () => {
+    const mockSearchService = getMockSearchService();
+
+    await createEsqlFn(mockSearchService, 'Europe/Paris').fn(
+      null,
+      { query: 'FROM index', locale: 'fr-FR' },
+      createExecutionContext()
+    );
+
+    const [params] = mockSearchService.esql.mock.calls[0];
+    expect(params.timeZone).toBe('Europe/Paris');
+    expect(params.locale).toBe('fr-FR');
+  });
+
+  it('sends UTC when dateFormat:tz is not set', async () => {
+    const mockSearchService = getMockSearchService();
+
+    await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index' },
+      createExecutionContext()
+    );
+
+    const [params] = mockSearchService.esql.mock.calls[0];
+    expect(params.timeZone).toBe('UTC');
+  });
+
   it('returns the datatable from the search service', async () => {
     const mockSearchService = getMockSearchService();
     const esqlFn = createEsqlFn(mockSearchService);

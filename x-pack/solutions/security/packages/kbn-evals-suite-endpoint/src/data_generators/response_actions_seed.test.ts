@@ -26,11 +26,13 @@ jest.mock(
 const AGENT_POLICY_ID = 'agent-policy-with-endpoint-package-policy';
 
 describe('response actions seed', () => {
-  const { isolate, release } = buildResponseActionsScenarios(AGENT_POLICY_ID);
+  const { isolate, release, sharedIp } = buildResponseActionsScenarios(AGENT_POLICY_ID);
 
   it.each([
     ['isolate', isolate],
     ['release', release],
+    ['shared-ip a', sharedIp[0]],
+    ['shared-ip b', sharedIp[1]],
   ])('%s host is enrolled on the endpoint package policy agent policy', (_name, scenario) => {
     // getHostMetadataList filters on united.agent.policy_id IN <agent policies of endpoint package policies>
     expect(scenario.policyId).toBe(AGENT_POLICY_ID);
@@ -39,6 +41,8 @@ describe('response actions seed', () => {
   it.each([
     ['isolate', isolate],
     ['release', release],
+    ['shared-ip a', sharedIp[0]],
+    ['shared-ip b', sharedIp[1]],
   ])('%s host carries a package the endpoint_lookup filter keeps', (_name, scenario) => {
     // endpoint_lookup drops Fleet agents without a package in RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES
     const supported = new Set(Object.values(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES).flat());
@@ -48,6 +52,27 @@ describe('response actions seed', () => {
   it('uses ids inside the suite namespace that cleanup deletes', () => {
     expect(isolate.agentId.startsWith(RESPONSE_ACTIONS_AGENT_ID_PREFIX)).toBe(true);
     expect(release.agentId.startsWith(RESPONSE_ACTIONS_AGENT_ID_PREFIX)).toBe(true);
+  });
+
+  it('gives two endpoints one address, and keeps the unique-IP target unique', () => {
+    expect(sharedIp[0].hostIp).toEqual(sharedIp[1].hostIp);
+    expect(sharedIp[0].agentId).not.toBe(sharedIp[1].agentId);
+    expect(sharedIp[0].agentId.startsWith(RESPONSE_ACTIONS_AGENT_ID_PREFIX)).toBe(true);
+    expect(sharedIp[1].agentId.startsWith(RESPONSE_ACTIONS_AGENT_ID_PREFIX)).toBe(true);
+    expect(sharedIp[0].hostIp).not.toEqual(isolate.hostIp);
+    expect(release.hostIp).toBeUndefined();
+  });
+
+  it('seeds the isolate target IP in endpoint metadata for the exact-IP eval', async () => {
+    const esClient = { create: jest.fn().mockResolvedValue({}) };
+    const internalEsClient = { index: jest.fn().mockResolvedValue({}) };
+
+    await seedScenario({ esClient, internalEsClient } as never, isolate);
+
+    const metadataCall = esClient.create.mock.calls.find(
+      ([args]) => args.index === 'metrics-endpoint.metadata-default'
+    );
+    expect(metadataCall?.[0].document.host.ip).toEqual(['10.42.0.15']);
   });
 
   it('writes policy_id and packages onto the .fleet-agents doc', async () => {

@@ -32,6 +32,7 @@ import {
 import { createLiveQueryResponseSchema } from './response_schemas';
 import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
 import type { DispatchSource } from '../../handlers/action/dispatch_source';
+import { resolveWorkflowOrigin } from '../../handlers/action/action_origin';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -227,6 +228,13 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             });
           }
 
+          // Any workflow run that calls this route is recorded, whether it comes from an osquery
+          // step or a generic `kibana.request` step. The execution ID is not verified: any
+          // internal-origin caller that sends the header is recorded as Workflow (attribution only).
+          const origin = osqueryContext.experimentalFeatures.workflowsExtensionsEnabled
+            ? resolveWorkflowOrigin(request)
+            : undefined;
+
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,
@@ -236,6 +244,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               space,
               dispatch: { entryPoint: 'live_query', source: liveDispatchSource },
               maxAgents,
+              ...(origin ? { origin } : {}),
             }
           );
 

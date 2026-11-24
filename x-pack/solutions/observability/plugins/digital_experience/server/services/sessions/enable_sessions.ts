@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IScopedClusterClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SessionsSettings } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
 import { checkSessionsPrivileges } from './sessions_privileges';
+import { SessionsPrivilegesError } from './sessions_privileges_error';
+import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 import { createSessionsIndex, putSessionsIndexTemplate } from './sessions_index';
 import { SESSIONS_PLATFORMS, type SessionsPlatform } from './sessions_platforms';
 import { scheduleSessionsTask } from './sessions_task';
 
-const forEachPlatform = async (run: (platform: SessionsPlatform) => Promise<unknown>) => {
-  for (const platform of SESSIONS_PLATFORMS) {
+const forEachPlatform = async (
+  platforms: readonly SessionsPlatform[],
+  run: (platform: SessionsPlatform) => Promise<unknown>
+) => {
+  for (const platform of platforms) {
     await run(platform);
   }
 };
@@ -50,11 +60,45 @@ const step = async <T>(name: SessionsEnableStep, run: () => Promise<T>): Promise
 };
 
 /**
+ * Whether enabling sessions as the requesting user would pass its checks: Kibana can store the
+ * task's API key, and the user has the privileges `checkSessionsPrivileges` asks for. Never throws,
+ * so a failed check only means the app asks instead of enabling on its own.
+ */
+export const canEnableSessions = async ({
+  client,
+  canEncrypt,
+  isServerless,
+  logger,
+}: {
+  client: ElasticsearchClient;
+  canEncrypt: boolean;
+  isServerless: boolean;
+  logger: Logger;
+}): Promise<boolean> => {
+  if (!canEncrypt) {
+    return false;
+  }
+  try {
+    await checkSessionsPrivileges(client, { isServerless });
+    return true;
+  } catch (error) {
+    if (
+      !(error instanceof SessionsPrivilegesError) &&
+      !(error instanceof SessionsRestrictedReadError)
+    ) {
+      logger.debug(`Could not check whether sessions can be enabled: ${describeError(error)}`);
+    }
+    return false;
+  }
+};
+
+/**
  * Enables sessions for the requesting user: checks they can read every event in full and write
  * the summaries, puts each platform's index template and creates its index, then schedules each
  * platform's summaries task with an API key Task Manager grants on their behalf. Enabling again
  * replaces the keys, so the tasks then read what that user can read, and keep the summaries built
- * so far.
+ * so far; it also turns tasks that were turned off back on. Only `platforms` are set up, every
+ * one by default.
  */
 export const enableSessions = async ({
   esClient,
@@ -64,6 +108,7 @@ export const enableSessions = async ({
   settings,
   isServerless,
   logger,
+  platforms = SESSIONS_PLATFORMS,
 }: {
   esClient: IScopedClusterClient;
   request: KibanaRequest;
@@ -72,6 +117,7 @@ export const enableSessions = async ({
   settings: SessionsSettings;
   isServerless: boolean;
   logger: Logger;
+  platforms?: readonly SessionsPlatform[];
 }): Promise<void> => {
   await checkSessionsPrivileges(esClient.asCurrentUser, { isServerless });
   await step('credentials', async () => {
@@ -80,18 +126,31 @@ export const enableSessions = async ({
     }
   });
   await step('template', () =>
-    forEachPlatform((platform) => putSessionsIndexTemplate(esClient.asInternalUser, platform))
-  );
-  await step('index', () =>
-    forEachPlatform((platform) => createSessionsIndex(esClient.asCurrentUser, platform))
-  );
-  await step('task', () =>
-    forEachPlatform((platform) =>
-      scheduleSessionsTask({ platform, taskManager, request, settings })
+    forEachPlatform(platforms, (platform) =>
+      putSessionsIndexTemplate(esClient.asInternalUser, platform)
     )
   );
+  await step('index', () =>
+    forEachPlatform(platforms, (platform) => createSessionsIndex(esClient.asCurrentUser, platform))
+  );
+  await step('task', async () => {
+    await forEachPlatform(platforms, (platform) =>
+      scheduleSessionsTask({ platform, taskManager, request, settings })
+    );
+    // A task that was turned off keeps its checkpoint, so it carries on from where it stopped.
+    const {
+      errors: [failure],
+    } = await taskManager.bulkEnable(
+      platforms.map(({ taskId }) => taskId),
+      false,
+      { request }
+    );
+    if (failure) {
+      throw new Error(`Could not turn the summaries task on: ${JSON.stringify(failure.error)}`);
+    }
+  });
   // Start building now rather than at the next interval; the interval runs them anyway.
-  await forEachPlatform(async ({ name, taskId }) => {
+  await forEachPlatform(platforms, async ({ name, taskId }) => {
     try {
       await taskManager.runSoon(taskId);
     } catch (error) {

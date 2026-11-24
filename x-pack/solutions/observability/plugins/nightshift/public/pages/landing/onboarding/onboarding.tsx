@@ -26,6 +26,7 @@ import {
   getNightshiftInvestigationIdFromSearch,
   setNightshiftInvestigationIdParam,
 } from '../../../common/url_params';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 import { useKibana } from '../../../hooks/use_kibana';
 import { OnboardingIntroBanner } from './intro_banner';
 import type { IntroBannerDismissal } from '../../../components/use_intro_banner_dismissal';
@@ -121,6 +122,7 @@ export function NightshiftOnboarding({
   onFinish: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
+  const isMobile = useIsMobile();
   const { agentBuilder } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
@@ -376,7 +378,7 @@ export function NightshiftOnboarding({
       <div
         css={css`
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 280px;
+          grid-template-columns: ${isMobile ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 280px'};
           gap: ${euiTheme.size.base};
           align-items: start;
         `}

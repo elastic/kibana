@@ -28,6 +28,7 @@ import {
   axisPercent,
   displayUrl,
   formatElapsed,
+  frustrationLabelOf,
   originOf,
   requestFamilyOf,
   urlWithoutQuery,
@@ -35,7 +36,7 @@ import {
   type RequestFamily,
   type VisitActivity as Activity,
 } from '../utils/visit_activity';
-import { ErrorDetails, RequestDetails } from './request_details';
+import { ErrorDetails, FrustrationDetails, RequestDetails } from './request_details';
 
 const PALETTE = euiPaletteColorBlind();
 
@@ -103,6 +104,7 @@ const EVENT_ICONS: Partial<Record<SessionTimelineEvent['kind'], IconType>> = {
   page_view: 'document',
   click: 'clickLeft',
   error: 'error',
+  frustration: 'faceSad',
   web_vital: 'visGauge',
 };
 
@@ -536,21 +538,33 @@ function EventRow({
   onToggle: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  const toTraceHref = useTraceHref();
   const isError = event.kind === 'error';
+  const isFrustration = event.kind === 'frustration';
+  const isDanger = isError || isFrustration;
+  const traceHref = isDanger
+    ? toTraceHref(event.traceId, { startTime: event.timestamp, durationMs: 0 })
+    : undefined;
+  const exception = event.exception ?? null;
+  const expandable = isError || (isFrustration && (exception !== null || traceHref !== undefined));
   const webVital = webVitalOf(event);
   const offsetMs = Date.parse(event.timestamp) - axis.originMs;
-  const markerColor = isError ? euiTheme.colors.danger : euiTheme.colors.primary;
-  const kindLabel = EVENT_LABELS[event.kind];
+  const markerColors: Partial<Record<typeof event.kind, string>> = {
+    error: euiTheme.colors.danger,
+    frustration: euiTheme.colors.warning,
+  };
+  const markerColor = markerColors[event.kind] ?? euiTheme.colors.primary;
+  const kindLabel = isFrustration ? frustrationLabelOf(event) : EVENT_LABELS[event.kind];
   return (
     <Row
       data-test-subj={`digitalExperienceSessionEvent-${event.kind}`}
       offsetMs={offsetMs}
-      tone={isError ? 'error' : event.kind === 'click' ? 'click' : undefined}
+      tone={isDanger ? 'error' : event.kind === 'click' ? 'click' : undefined}
       label={
         <>
           <EuiIcon
             type={EVENT_ICONS[event.kind] ?? 'dot'}
-            color={isError ? 'danger' : 'subdued'}
+            color={isDanger ? 'danger' : 'subdued'}
             aria-hidden={true}
           />
           {webVital ? (
@@ -559,14 +573,14 @@ function EventRow({
             <>
               <EuiText
                 size="xs"
-                color={isError ? 'danger' : undefined}
+                color={isDanger ? 'danger' : undefined}
                 css={css({ flexShrink: 0, fontWeight: euiTheme.font.weight.semiBold })}
               >
                 {kindLabel ?? event.name}
               </EuiText>
               {event.detail && (
                 <Truncated code={!isError} title={event.detail ?? undefined}>
-                  <span style={isError ? { color: euiTheme.colors.textDanger } : undefined}>
+                  <span style={isDanger ? { color: euiTheme.colors.textDanger } : undefined}>
                     {event.detail}
                   </span>
                 </Truncated>
@@ -590,9 +604,10 @@ function EventRow({
         </Track>
       }
       expanded={expanded}
-      onToggle={isError ? onToggle : undefined}
+      onToggle={expandable ? onToggle : undefined}
     >
-      {isError && <ErrorDetails stacktrace={event.stacktrace} />}
+      {isError && <ErrorDetails stacktrace={event.stacktrace} traceHref={traceHref} />}
+      {isFrustration && <FrustrationDetails exception={exception} traceHref={traceHref} />}
     </Row>
   );
 }

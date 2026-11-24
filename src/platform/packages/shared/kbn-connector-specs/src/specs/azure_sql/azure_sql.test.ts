@@ -369,6 +369,8 @@ describe('AzureSql', () => {
       "SELECT [it's] DELETE FROM Customers",
       "SELECT 'it''s' DELETE FROM Customers",
       'SELECT 1 /* a /* b */ */ DELETE FROM Customers',
+      // SQL Server ends a line comment at a bare CR, so the DROP runs even though it looks commented out.
+      'SELECT 1 -- note\rDROP TABLE dbo.Customers',
     ])('still rejects a write hidden by comments or quoting: %j', async (sql) => {
       const { pool } = makePool({});
       const ctx = makeContext(pool);

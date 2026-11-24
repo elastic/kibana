@@ -15,7 +15,12 @@ import type {
 import type { ScopedHistory } from '@kbn/core/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Writable } from '@kbn/utility-types';
-import type { AdhocDataView, MapAttributes } from '../../../../server';
+import type { AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
+import {
+  fromStoredDataView as toAsCodeEmbeddedDataView,
+  toStoredDataView as toDataViewSpec,
+} from '@kbn/as-code-data-views-transforms';
+import type { MapAttributes } from '../../../../server';
 import {
   APP_ID,
   MAP_PATH,
@@ -234,8 +239,8 @@ export class SavedMap {
 
     if (this._attributes?.adHocDataViews?.length) {
       const dataViewService = getIndexPatternService();
-      const promises = this._attributes.adHocDataViews.map((spec) => {
-        return dataViewService.create(spec);
+      const promises = this._attributes.adHocDataViews.map((asCodeDataView) => {
+        return dataViewService.create(toDataViewSpec(asCodeDataView));
       });
       await Promise.all(promises);
     }
@@ -427,12 +432,26 @@ export class SavedMap {
       throw new Error('Invalid usage, must await whenReady before calling save');
     }
 
+    let serializedAttributes: Omit<MapAttributes, 'title' | 'description'>;
+    try {
+      serializedAttributes = await this._serializeAttributes();
+    } catch (e) {
+      getToasts().addDanger({
+        title: i18n.translate('xpack.maps.topNav.saveErrorTitle', {
+          defaultMessage: `Error saving ''{title}''`,
+          values: { title: newTitle },
+        }),
+        text: e.message,
+      });
+      return;
+    }
+
     const prevTitle = this._attributes.title;
     const prevDescription = this._attributes.description;
     this._attributes = {
       title: newTitle,
       ...(newDescription ? { description: newDescription } : {}),
-      ...(await this._getStoreAttributes()),
+      ...serializedAttributes,
     };
 
     let mapEmbeddableState: MapEmbeddableState | undefined;
@@ -532,11 +551,14 @@ export class SavedMap {
     return;
   }
 
-  private async _getStoreAttributes() {
+  /**
+   * Reads the current map state from the redux store and returns it in REST API shape.
+   */
+  private async _serializeAttributes(): Promise<Omit<MapAttributes, 'title' | 'description'>> {
     const state: MapStoreState = this._store.getState();
     const mapSettings = getMapSettings(state);
     return {
-      adHocDataViews: await this._getAdHocDataViews(),
+      adHocDataViews: await this._serializeAdHocDataViews(),
       center: getMapCenter(state),
       filters: getFilters(state),
       isLayerTOCOpen: getIsLayerTOCOpen(state),
@@ -556,7 +578,7 @@ export class SavedMap {
     };
   }
 
-  private async _getAdHocDataViews() {
+  private async _serializeAdHocDataViews() {
     const dataViewIds: string[] = [];
     getLayerList(this._store.getState())
       // exclude adhoc data views from ESQL sources
@@ -571,14 +593,9 @@ export class SavedMap {
         return !dataView.isPersisted();
       })
       .map((dataView) => {
-        const { allowHidden, id, name, timeFieldName, title } = dataView.toSpec(false);
-        return {
-          allowHidden,
-          id,
-          name,
-          timeFieldName,
-          title,
-        } as AdhocDataView;
+        const spec = dataView.toSpec(false);
+        if (!spec.id) throw new Error('Cannot save ad hoc data view without `id`');
+        return { ...(toAsCodeEmbeddedDataView(spec) as AsCodeDataViewSpec), id: spec.id };
       });
   }
 }
