@@ -68,7 +68,7 @@ export const registerESQLExtensionsRoute = (
               defaultValue: 'classic',
             }
           ),
-          query: schema.string(),
+          query: schema.string({ maxLength: 10000 }),
         }),
       },
     },
