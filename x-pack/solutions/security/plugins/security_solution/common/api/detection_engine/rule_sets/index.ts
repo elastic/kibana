@@ -7,4 +7,5 @@
 
 export * from './rule_set.gen';
 export * from './rule_sets_route.gen';
+export * from './rule_sets_internal_route.gen';
 export * from './urls';

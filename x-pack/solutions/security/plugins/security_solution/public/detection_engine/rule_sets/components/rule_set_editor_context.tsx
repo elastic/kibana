@@ -13,15 +13,15 @@ import {
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { RuleSet, RuleSetDefinition } from '../../../../common/api/detection_engine/rule_sets';
+import type { RuleSetDefinition } from '../../../../common/api/detection_engine/rule_sets';
 import { useRulesTableContextOptional } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { RuleSetEditorFlyout } from './rule_set_editor_flyout';
 import { RuleSetsSelectable } from './rule_sets_selectable';
 
 export interface OpenEditorParams {
-  /** Edit this group. Without it, the editor creates a new group. */
-  group?: RuleSet;
-  /** Start values for a new group, for example rules that the user selected. */
+  /** Edit this set. Without it, the editor creates a new set. */
+  ruleSetId?: string;
+  /** Start values for a new set, for example rules that the user selected. */
   initial?: Partial<RuleSetDefinition>;
 }
 
@@ -48,7 +48,7 @@ export const RuleSetEditorProvider = ({ children }: { children: React.ReactNode 
       {children}
       {params && (
         <RuleSetEditorFlyout
-          group={params.group}
+          ruleSetId={params.ruleSetId}
           initial={params.initial}
           onClose={() => setParams(null)}
           onSaved={(saved) => rulesTable?.actions.setFilterOptions({ ruleSetId: saved.id })}

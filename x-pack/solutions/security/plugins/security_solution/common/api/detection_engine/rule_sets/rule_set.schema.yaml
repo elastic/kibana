@@ -198,30 +198,56 @@ components:
           items:
             $ref: '#/components/schemas/RuleSetRuleId'
 
+    RuleSetMeta:
+      type: object
+      required: [id, is_owner, version]
+      properties:
+        id:
+          $ref: '#/components/schemas/RuleSetId'
+        created_by:
+          type: string
+          description: Profile uid of the user who created the set.
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        is_owner:
+          type: boolean
+          description: True when the current user created the set.
+        version:
+          type: string
+          description: Saved object version, for optimistic concurrency on update.
+
     RuleSet:
+      description: A rule set with its full definition.
       allOf:
         - $ref: '#/components/schemas/RuleSetDefinition'
+        - $ref: '#/components/schemas/RuleSetMeta'
+
+    RuleSetSummary:
+      description: A rule set without the picked and left-out rule lists, for lists of sets.
+      allOf:
+        - $ref: '#/components/schemas/RuleSetMeta'
         - type: object
-          required: [id, is_owner, version]
+          required: [name, visibility, conditions, included_rules_count, excluded_rules_count]
           properties:
-            id:
-              $ref: '#/components/schemas/RuleSetId'
-            created_by:
+            name:
               type: string
-              description: Profile uid of the user who created the set.
-            created_at:
+            description:
               type: string
-            updated_at:
-              type: string
-            is_owner:
-              type: boolean
-              description: True when the current user created the set.
-            version:
-              type: string
-              description: Saved object version, for optimistic concurrency on update.
+            visibility:
+              $ref: '#/components/schemas/RuleSetVisibility'
+            conditions:
+              $ref: '#/components/schemas/RuleSetConditions'
+            included_rules_count:
+              type: integer
+              description: How many rules were picked by hand.
+            excluded_rules_count:
+              type: integer
+              description: How many rules were left out by hand.
             rules_count:
               type: integer
-              description: How many rules are in the set now. Only in the list response.
+              description: How many rules are in the set now. Only with `with_counts`.
             failed_count:
               type: integer
-              description: How many rules of the set failed on the last run. Only in the list response.
+              description: How many rules of the set failed on the last run. Only with `with_counts`.

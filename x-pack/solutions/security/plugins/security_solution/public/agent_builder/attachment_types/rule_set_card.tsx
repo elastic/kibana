@@ -27,7 +27,10 @@ import type {
   RuleSetConditions,
   RuleSetDefinition,
 } from '../../../common/api/detection_engine/rule_sets';
-import { RULE_SETS_URL } from '../../../common/api/detection_engine/rule_sets';
+import {
+  RULE_SETS_API_VERSION,
+  RULE_SETS_URL,
+} from '../../../common/api/detection_engine/rule_sets';
 import { URL_PARAM_KEY } from '../../common/hooks/constants';
 import { describeConditionParts } from '../../detection_engine/rule_sets/components/condition_labels';
 import { notifyRuleSetCreated } from '../../detection_engine/rule_sets/rule_set_events';
@@ -115,7 +118,7 @@ export const RuleSetCard = ({ suggestion, http, application, canEditRules }: Rul
       };
       const ruleSet = await http.fetch<RuleSet>(RULE_SETS_URL, {
         method: 'POST',
-        version: '1',
+        version: RULE_SETS_API_VERSION,
         body: JSON.stringify(definition),
       });
       setCreated(ruleSet);

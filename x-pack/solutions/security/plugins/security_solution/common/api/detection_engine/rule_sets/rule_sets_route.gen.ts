@@ -11,35 +11,13 @@
  *
  * info:
  *   title: Rule sets API endpoints
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
-import { RuleSet, RuleSetDefinition, RuleSetId, RuleSetConditions } from './rule_set.gen';
-
-export const BulkAssignRuleSetsRequestBody = lazySchema(() =>
-  z
-    .object({
-      /**
-       * Saved object ids of the rules.
-       */
-      ids: z.array(z.string()).min(1).max(10000).describe('Saved object ids of the rules.'),
-      add_to: z.array(RuleSetId).optional(),
-      remove_from: z.array(RuleSetId).optional(),
-    })
-    .strict()
-);
-export type BulkAssignRuleSetsRequestBody = z.infer<typeof BulkAssignRuleSetsRequestBody>;
-export type BulkAssignRuleSetsRequestBodyInput = z.input<typeof BulkAssignRuleSetsRequestBody>;
-
-export const BulkAssignRuleSetsResponse = lazySchema(() =>
-  z.object({
-    updated: z.array(RuleSetId),
-  })
-);
-export type BulkAssignRuleSetsResponse = z.infer<typeof BulkAssignRuleSetsResponse>;
+import { RuleSetSummary, RuleSetDefinition, RuleSet, RuleSetId } from './rule_set.gen';
 
 export const CreateRuleSetRequestBody = lazySchema(() => RuleSetDefinition);
 export type CreateRuleSetRequestBody = z.infer<typeof CreateRuleSetRequestBody>;
@@ -58,7 +36,12 @@ export type DeleteRuleSetRequestParamsInput = z.input<typeof DeleteRuleSetReques
 
 export const FindRuleSetsRequestQuery = lazySchema(() =>
   z.object({
-    with_counts: BooleanFromString.optional().default(true),
+    /**
+     * Count the rules in each set now. Without counts the response is faster.
+     */
+    with_counts: BooleanFromString.optional()
+      .default(true)
+      .describe('Count the rules in each set now. Without counts the response is faster.'),
   })
 );
 export type FindRuleSetsRequestQuery = z.infer<typeof FindRuleSetsRequestQuery>;
@@ -66,79 +49,22 @@ export type FindRuleSetsRequestQueryInput = z.input<typeof FindRuleSetsRequestQu
 
 export const FindRuleSetsResponse = lazySchema(() =>
   z.object({
-    groups: z.array(RuleSet),
+    data: z.array(RuleSetSummary),
+    total: z.number().int(),
   })
 );
 export type FindRuleSetsResponse = z.infer<typeof FindRuleSetsResponse>;
 
-export const GetRuleSetsMembershipRequestBody = lazySchema(() =>
-  z
-    .object({
-      /**
-       * Saved object ids of the rules.
-       */
-      ids: z.array(z.string()).min(1).max(10000).describe('Saved object ids of the rules.'),
-    })
-    .strict()
-);
-export type GetRuleSetsMembershipRequestBody = z.infer<typeof GetRuleSetsMembershipRequestBody>;
-export type GetRuleSetsMembershipRequestBodyInput = z.input<
-  typeof GetRuleSetsMembershipRequestBody
->;
-
-export const GetRuleSetsMembershipResponse = lazySchema(() =>
+export const GetRuleSetRequestParams = lazySchema(() =>
   z.object({
-    groups: z.array(
-      z.object({
-        id: RuleSetId,
-        state: z.enum(['all', 'some', 'none']),
-      })
-    ),
+    id: RuleSetId,
   })
 );
-export type GetRuleSetsMembershipResponse = z.infer<typeof GetRuleSetsMembershipResponse>;
+export type GetRuleSetRequestParams = z.infer<typeof GetRuleSetRequestParams>;
+export type GetRuleSetRequestParamsInput = z.input<typeof GetRuleSetRequestParams>;
 
-export const PreviewRuleSetRequestBody = lazySchema(() =>
-  z
-    .object({
-      conditions: RuleSetConditions,
-      included_rule_ids: z.array(z.string()).max(10000),
-      excluded_rule_ids: z.array(z.string()).max(10000),
-      page: z.number().int().min(1).optional().default(1),
-      per_page: z.number().int().min(1).max(100).optional().default(12),
-    })
-    .strict()
-);
-export type PreviewRuleSetRequestBody = z.infer<typeof PreviewRuleSetRequestBody>;
-export type PreviewRuleSetRequestBodyInput = z.input<typeof PreviewRuleSetRequestBody>;
-
-export const PreviewRuleSetResponse = lazySchema(() =>
-  z.object({
-    total: z.number().int(),
-    /**
-     * Rules in the group because they match the conditions.
-     */
-    by_conditions: z
-      .number()
-      .int()
-      .describe('Rules in the group because they match the conditions.'),
-    /**
-     * Rules in the group only because they were picked.
-     */
-    only_picked: z.number().int().describe('Rules in the group only because they were picked.'),
-    rules: z.array(
-      z.object({
-        id: z.string(),
-        rule_id: z.string(),
-        name: z.string(),
-        type: z.string(),
-        severity: z.string(),
-        reason: z.enum(['conditions', 'picked', 'both']),
-      })
-    ),
-  })
-);
-export type PreviewRuleSetResponse = z.infer<typeof PreviewRuleSetResponse>;
+export const GetRuleSetResponse = lazySchema(() => RuleSet);
+export type GetRuleSetResponse = z.infer<typeof GetRuleSetResponse>;
 
 export const UpdateRuleSetRequestParams = lazySchema(() =>
   z.object({
@@ -156,6 +82,7 @@ export const UpdateRuleSetRequestBody = lazySchema(() =>
        */
       version: z
         .string()
+        .max(256)
         .optional()
         .describe('The version that the client read. A newer version on the server gives 409.'),
     })

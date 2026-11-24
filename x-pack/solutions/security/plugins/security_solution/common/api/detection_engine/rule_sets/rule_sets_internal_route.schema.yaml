@@ -1,0 +1,297 @@
+openapi: 3.0.0
+info:
+  title: Rule sets internal API endpoints
+  version: '1'
+paths:
+  /internal/detection_engine/rule_sets/_preview:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: PreviewRuleSet
+      summary: Show the rules of a rule set definition before it is saved
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [conditions, included_rule_ids, excluded_rule_ids]
+              properties:
+                conditions:
+                  $ref: './rule_set.schema.yaml#/components/schemas/RuleSetConditions'
+                included_rule_ids:
+                  type: array
+                  maxItems: 10000
+                  items:
+                    $ref: './rule_set.schema.yaml#/components/schemas/RuleSetRuleId'
+                excluded_rule_ids:
+                  type: array
+                  maxItems: 10000
+                  items:
+                    $ref: './rule_set.schema.yaml#/components/schemas/RuleSetRuleId'
+                page:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000
+                  default: 1
+                per_page:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 12
+      responses:
+        200:
+          description: The page of rules and the counts.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [total, by_conditions, only_picked, rules]
+                properties:
+                  total:
+                    type: integer
+                  by_conditions:
+                    type: integer
+                    description: Rules in the set because they match the conditions.
+                  only_picked:
+                    type: integer
+                    description: Rules in the set only because they were picked.
+                  rules:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, rule_id, name, type, severity, reason]
+                      properties:
+                        id:
+                          type: string
+                        rule_id:
+                          type: string
+                        name:
+                          type: string
+                        type:
+                          type: string
+                        severity:
+                          type: string
+                        reason:
+                          type: string
+                          enum: [conditions, picked, both]
+
+  /internal/detection_engine/rule_sets/_membership:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetRuleSetsMembership
+      summary: For some rules, say for each rule set if all, some or none of them are in it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  minItems: 1
+                  maxItems: 10000
+                  description: Saved object ids of the rules.
+                  items:
+                    $ref: '#/components/schemas/RuleSavedObjectId'
+      responses:
+        200:
+          description: One entry for each rule set that the user can see.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [rule_sets]
+                properties:
+                  rule_sets:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, state]
+                      properties:
+                        id:
+                          $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+                        state:
+                          type: string
+                          enum: [all, some, none]
+
+  /internal/detection_engine/rule_sets/_bulk_assign:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: BulkAssignRuleSets
+      summary: Add rules to rule sets and remove rules from rule sets
+      description: |
+        Adding a rule removes it from the left-out list, and picks it only if the set conditions do not match it.
+        Removing a rule unpicks it, and leaves it out if the set conditions still match it. The rules do not change.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  minItems: 1
+                  maxItems: 10000
+                  description: Saved object ids of the rules.
+                  items:
+                    $ref: '#/components/schemas/RuleSavedObjectId'
+                add_to:
+                  type: array
+                  maxItems: 250
+                  items:
+                    $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+                remove_from:
+                  type: array
+                  maxItems: 250
+                  items:
+                    $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+      responses:
+        200:
+          description: The rule sets that changed.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [updated]
+                properties:
+                  updated:
+                    type: array
+                    items:
+                      $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+
+  /internal/detection_engine/rule_sets/_gaps_summary:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetRuleSetGapsSummary
+      summary: Summary of rule execution gaps of the rules of a rule set
+      description: |
+        The rule ids stay on the server, so a large set does not travel to the browser and back.
+        Gap reasons that the space settings exclude are excluded, as in the rules table.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [rule_set_id, start, end]
+              properties:
+                rule_set_id:
+                  $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+                start:
+                  type: string
+                  maxLength: 64
+                end:
+                  type: string
+                  maxLength: 64
+                scheduler_id:
+                  type: string
+                  maxLength: 256
+      responses:
+        200:
+          description: The gap summary, in the shape of the alerting rules with gaps API.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [total, summary]
+                properties:
+                  total:
+                    type: integer
+                    description: How many rules of the set have gaps.
+                  latest_gap_timestamp:
+                    type: number
+                  summary:
+                    $ref: '#/components/schemas/RuleSetGapsSummary'
+
+  /internal/detection_engine/rule_sets/_private:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: FindAllPrivateRuleSets
+      summary: List the private rule sets of all users of the space, for administrators
+      description: |
+        Needs the `manage_security` cluster privilege. It lets an administrator find and delete the
+        private sets of users who left. The response has no rule lists.
+      responses:
+        200:
+          description: The private rule sets of the space.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: './rule_set.schema.yaml#/components/schemas/RuleSetSummary'
+
+  /internal/detection_engine/rule_sets/_private/{id}:
+    delete:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: DeletePrivateRuleSet
+      summary: Delete a private rule set of any user, for administrators
+      description: Needs the `manage_security` cluster privilege. The rules do not change.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+      responses:
+        200:
+          description: Deleted.
+
+components:
+  x-codegen-enabled: true
+  schemas:
+    RuleSavedObjectId:
+      type: string
+      minLength: 1
+      maxLength: 256
+
+    RuleSetGapsSummary:
+      type: object
+      required:
+        - total_unfilled_duration_ms
+        - total_in_progress_duration_ms
+        - total_filled_duration_ms
+        - total_error_duration_ms
+        - total_duration_ms
+        - rules_by_gap_fill_status
+      properties:
+        total_unfilled_duration_ms:
+          type: number
+        total_in_progress_duration_ms:
+          type: number
+        total_filled_duration_ms:
+          type: number
+        total_error_duration_ms:
+          type: number
+        total_duration_ms:
+          type: number
+        rules_by_gap_fill_status:
+          type: object
+          required: [unfilled, in_progress, filled, error]
+          properties:
+            unfilled:
+              type: integer
+            in_progress:
+              type: integer
+            filled:
+              type: integer
+            error:
+              type: integer

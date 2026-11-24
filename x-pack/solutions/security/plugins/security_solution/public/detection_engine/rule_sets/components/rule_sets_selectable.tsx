@@ -56,12 +56,12 @@ export const RuleSetsSelectable = ({
 
   useEffect(() => {
     if (!membership) return;
-    const next = Object.fromEntries(membership.groups.map(({ id, state: s }) => [id, s]));
+    const next = Object.fromEntries(membership.rule_sets.map(({ id, state: s }) => [id, s]));
     setInitial(next);
     setState(next);
   }, [membership]);
 
-  const groups = groupsData?.groups ?? [];
+  const groups = groupsData ?? [];
   const changed = groups.filter((group) => state[group.id] !== initial[group.id]);
 
   const options: EuiSelectableOption[] = groups.map((group) => ({

@@ -26,16 +26,21 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import type {
   BulkAssignRuleSetsRequestBodyInput,
+  DeletePrivateRuleSetRequestParamsInput,
+  GetRuleSetGapsSummaryRequestBodyInput,
+  GetRuleSetsMembershipRequestBodyInput,
+  PreviewRuleSetRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_sets/rule_sets_internal_route.gen';
+import type { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
+import type { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import type {
   CreateRuleSetRequestBodyInput,
   DeleteRuleSetRequestParamsInput,
   FindRuleSetsRequestQueryInput,
-  GetRuleSetsMembershipRequestBodyInput,
-  PreviewRuleSetRequestBodyInput,
+  GetRuleSetRequestParamsInput,
   UpdateRuleSetRequestParamsInput,
   UpdateRuleSetRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_sets/rule_sets_route.gen';
-import type { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
-import type { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
 import type { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
 import type {
   ExportRulesRequestQueryInput,
@@ -108,8 +113,8 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
       .send(props.body as object);
   },
   /**
-      * Adding a rule removes it from the left-out list, and picks it only if the group conditions do not match it.
-Removing a rule unpicks it, and leaves it out if the group conditions still match it. The rules do not change.
+      * Adding a rule removes it from the left-out list, and picks it only if the set conditions do not match it.
+Removing a rule unpicks it, and leaves it out if the set conditions still match it. The rules do not change.
 
       */
   bulkAssignRuleSets(props: BulkAssignRuleSetsProps, kibanaSpace: string = 'default') {
@@ -215,11 +220,16 @@ For detailed information on Kibana actions and alerting, and additional API call
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * Creates a rule set: conditions on rule fields, plus rules picked and left out by `rule_id`.
+The rules do not change.
+
+      */
   createRuleSet(props: CreateRuleSetProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/internal/detection_engine/rule_sets', kibanaSpace))
+      .post(getRouteUrlForSpace('/api/detection_engine/rule_sets', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -234,6 +244,21 @@ Call `GET /api/detection_engine/index` first to confirm the index that will be r
       .delete(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Needs the `manage_security` cluster privilege. The rules do not change.
+   */
+  deletePrivateRuleSet(props: DeletePrivateRuleSetProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(
+        getRouteUrlForSpace(
+          replaceParams('/internal/detection_engine/rule_sets/_private/{id}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
@@ -255,16 +280,19 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+   * Deletes a rule set. The rules do not change.
+   */
   deleteRuleSet(props: DeleteRuleSetProps, kibanaSpace: string = 'default') {
     return supertest
       .delete(
         getRouteUrlForSpace(
-          replaceParams('/internal/detection_engine/rule_sets/{id}', props.params),
+          replaceParams('/api/detection_engine/rule_sets/{id}', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
@@ -306,6 +334,18 @@ finishes and then call this operation once.
       .send(props.body as object);
   },
   /**
+      * Needs the `manage_security` cluster privilege. It lets an administrator find and delete the
+private sets of users who left. The response has no rule lists.
+
+      */
+  findAllPrivateRuleSets(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/detection_engine/rule_sets/_private', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
    * Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
    */
   findRules(props: FindRulesProps, kibanaSpace: string = 'default') {
@@ -316,13 +356,46 @@ finishes and then call this operation once.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+      * Lists the shared rule sets of the space and the private rule sets of the current user.
+The response does not include the picked and left-out rule lists; get one rule set for them.
+
+      */
   findRuleSets(props: FindRuleSetsProps, kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/internal/detection_engine/rule_sets', kibanaSpace))
+      .get(getRouteUrlForSpace('/api/detection_engine/rule_sets', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Returns one rule set with its full definition.
+   */
+  getRuleSet(props: GetRuleSetProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/detection_engine/rule_sets/{id}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+      * The rule ids stay on the server, so a large set does not travel to the browser and back.
+Gap reasons that the space settings exclude are excluded, as in the rules table.
+
+      */
+  getRuleSetGapsSummary(props: GetRuleSetGapsSummaryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/detection_engine/rule_sets/_gaps_summary', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
+      .send(props.body as object);
   },
   getRuleSetsMembership(props: GetRuleSetsMembershipProps, kibanaSpace: string = 'default') {
     return supertest
@@ -816,16 +889,21 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * Replaces the definition of a rule set. Send `version` from the last read: if someone changed
+the set since then, the request fails with 409.
+
+      */
   updateRuleSet(props: UpdateRuleSetProps, kibanaSpace: string = 'default') {
     return supertest
       .put(
         getRouteUrlForSpace(
-          replaceParams('/internal/detection_engine/rule_sets/{id}', props.params),
+          replaceParams('/api/detection_engine/rule_sets/{id}', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -862,6 +940,9 @@ export interface CreateRuleProps {
 export interface CreateRuleSetProps {
   body: CreateRuleSetRequestBodyInput;
 }
+export interface DeletePrivateRuleSetProps {
+  params: DeletePrivateRuleSetRequestParamsInput;
+}
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
 }
@@ -880,6 +961,12 @@ export interface FindRulesProps {
 }
 export interface FindRuleSetsProps {
   query: FindRuleSetsRequestQueryInput;
+}
+export interface GetRuleSetProps {
+  params: GetRuleSetRequestParamsInput;
+}
+export interface GetRuleSetGapsSummaryProps {
+  body: GetRuleSetGapsSummaryRequestBodyInput;
 }
 export interface GetRuleSetsMembershipProps {
   body: GetRuleSetsMembershipRequestBodyInput;

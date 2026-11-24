@@ -202,41 +202,68 @@ export const RuleSetDefinition = lazySchema(() =>
 );
 export type RuleSetDefinition = z.infer<typeof RuleSetDefinition>;
 
-export const RuleSet = lazySchema(() =>
-  RuleSetDefinition.merge(
+export const RuleSetMeta = lazySchema(() =>
+  z.object({
+    id: RuleSetId,
+    /**
+     * Profile uid of the user who created the set.
+     */
+    created_by: z.string().optional().describe('Profile uid of the user who created the set.'),
+    created_at: z.string().optional(),
+    updated_at: z.string().optional(),
+    /**
+     * True when the current user created the set.
+     */
+    is_owner: z.boolean().describe('True when the current user created the set.'),
+    /**
+     * Saved object version, for optimistic concurrency on update.
+     */
+    version: z.string().describe('Saved object version, for optimistic concurrency on update.'),
+  })
+);
+export type RuleSetMeta = z.infer<typeof RuleSetMeta>;
+
+/**
+ * A rule set with its full definition.
+ */
+export const RuleSet = lazySchema(() => RuleSetDefinition.merge(RuleSetMeta));
+export type RuleSet = z.infer<typeof RuleSet>;
+
+/**
+ * A rule set without the picked and left-out rule lists, for lists of sets.
+ */
+export const RuleSetSummary = lazySchema(() =>
+  RuleSetMeta.merge(
     z.object({
-      id: RuleSetId,
+      name: z.string(),
+      description: z.string().optional(),
+      visibility: RuleSetVisibility,
+      conditions: RuleSetConditions,
       /**
-       * Profile uid of the user who created the set.
+       * How many rules were picked by hand.
        */
-      created_by: z.string().optional().describe('Profile uid of the user who created the set.'),
-      created_at: z.string().optional(),
-      updated_at: z.string().optional(),
+      included_rules_count: z.number().int().describe('How many rules were picked by hand.'),
       /**
-       * True when the current user created the set.
+       * How many rules were left out by hand.
        */
-      is_owner: z.boolean().describe('True when the current user created the set.'),
+      excluded_rules_count: z.number().int().describe('How many rules were left out by hand.'),
       /**
-       * Saved object version, for optimistic concurrency on update.
-       */
-      version: z.string().describe('Saved object version, for optimistic concurrency on update.'),
-      /**
-       * How many rules are in the set now. Only in the list response.
+       * How many rules are in the set now. Only with `with_counts`.
        */
       rules_count: z
         .number()
         .int()
         .optional()
-        .describe('How many rules are in the set now. Only in the list response.'),
+        .describe('How many rules are in the set now. Only with `with_counts`.'),
       /**
-       * How many rules of the set failed on the last run. Only in the list response.
+       * How many rules of the set failed on the last run. Only with `with_counts`.
        */
       failed_count: z
         .number()
         .int()
         .optional()
-        .describe('How many rules of the set failed on the last run. Only in the list response.'),
+        .describe('How many rules of the set failed on the last run. Only with `with_counts`.'),
     })
   )
 );
-export type RuleSet = z.infer<typeof RuleSet>;
+export type RuleSetSummary = z.infer<typeof RuleSetSummary>;

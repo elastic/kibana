@@ -20,7 +20,7 @@ import {
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { useRuleSetRuleIdsQuery } from '../../../rule_sets/api';
+import { useInvalidateRuleSetStats, useRuleSetGapsSummaryQuery } from '../../../rule_sets/api';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import {
   useGetRuleIdsWithGaps,
@@ -59,25 +59,33 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
   const {
     state: { filterOptions },
   } = useRulesTableContext();
-  // With a rule set selected, the chart counts only the rules of the group.
-  const { data: groupRuleIds } = useRuleSetRuleIdsQuery(filterOptions.ruleSetId);
+  // With a rule set selected, the server counts only the rules of the set.
+  const { ruleSetId } = filterOptions;
   const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
 
-  const {
-    data: gapsData,
-    isLoading: isFirstLoad,
-    isPreviousData,
-    isError,
-  } = useGetRuleIdsWithGaps(
+  const spaceGaps = useGetRuleIdsWithGaps(
     {
       gapRange: defaultRangeValue,
       gapFillStatuses: [],
       excludedReasons,
       schedulerId: activeSchedulerId,
-      ruleIds: filterOptions.ruleSetId ? groupRuleIds ?? [] : undefined,
     },
-    { enabled: enabled && (!filterOptions.ruleSetId || groupRuleIds != null) }
+    { enabled: enabled && !ruleSetId }
   );
+  const setGaps = useRuleSetGapsSummaryQuery(
+    {
+      ruleSetId,
+      gapRange: defaultRangeValue,
+      schedulerId: activeSchedulerId,
+    },
+    enabled
+  );
+  const {
+    data: gapsData,
+    isLoading: isFirstLoad,
+    isPreviousData,
+    isError,
+  } = ruleSetId ? setGaps : spaceGaps;
   // Previous data is from another rule set or from the whole space: wrong numbers, not stale ones.
   const isLoading = isFirstLoad || isPreviousData;
 
@@ -85,10 +93,12 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
     state: { lastUpdated: rulesTableLastUpdatedAt },
   } = useRulesTableContext();
   const invalidateGapsQuery = useInvalidateGetRuleIdsWithGapsQuery();
+  const invalidateRuleSetStats = useInvalidateRuleSetStats();
 
   useEffect(() => {
     invalidateGapsQuery();
-  }, [rulesTableLastUpdatedAt, invalidateGapsQuery]);
+    invalidateRuleSetStats();
+  }, [rulesTableLastUpdatedAt, invalidateGapsQuery, invalidateRuleSetStats]);
 
   const { chartData, tableData, totalDurationLabel, totalDurationMs, fillColor } = useMemo(() => {
     if (!gapsData?.summary) {

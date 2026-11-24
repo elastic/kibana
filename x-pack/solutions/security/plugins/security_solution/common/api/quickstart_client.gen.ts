@@ -123,15 +123,23 @@ import type {
 import type {
   BulkAssignRuleSetsRequestBodyInput,
   BulkAssignRuleSetsResponse,
+  DeletePrivateRuleSetRequestParamsInput,
+  FindAllPrivateRuleSetsResponse,
+  GetRuleSetGapsSummaryRequestBodyInput,
+  GetRuleSetGapsSummaryResponse,
+  GetRuleSetsMembershipRequestBodyInput,
+  GetRuleSetsMembershipResponse,
+  PreviewRuleSetRequestBodyInput,
+  PreviewRuleSetResponse,
+} from './detection_engine/rule_sets/rule_sets_internal_route.gen';
+import type {
   CreateRuleSetRequestBodyInput,
   CreateRuleSetResponse,
   DeleteRuleSetRequestParamsInput,
   FindRuleSetsRequestQueryInput,
   FindRuleSetsResponse,
-  GetRuleSetsMembershipRequestBodyInput,
-  GetRuleSetsMembershipResponse,
-  PreviewRuleSetRequestBodyInput,
-  PreviewRuleSetResponse,
+  GetRuleSetRequestParamsInput,
+  GetRuleSetResponse,
   UpdateRuleSetRequestParamsInput,
   UpdateRuleSetRequestBodyInput,
   UpdateRuleSetResponse,
@@ -674,8 +682,8 @@ is added to its existing source labels instead.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Adding a rule removes it from the left-out list, and picks it only if the group conditions do not match it.
-Removing a rule unpicks it, and leaves it out if the group conditions still match it. The rules do not change.
+    * Adding a rule removes it from the left-out list, and picks it only if the set conditions do not match it.
+Removing a rule unpicks it, and leaves it out if the set conditions still match it. The rules do not change.
 
     */
   async bulkAssignRuleSets(props: BulkAssignRuleSetsProps) {
@@ -1069,13 +1077,18 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Creates a rule set: conditions on rule fields, plus rules picked and left out by `rule_id`.
+The rules do not change.
+
+    */
   async createRuleSet(props: CreateRuleSetProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleSet`);
     return this.kbnClient
       .request<CreateRuleSetResponse>({
-        path: '/internal/detection_engine/rule_sets',
+        path: '/api/detection_engine/rule_sets',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
         body: props.body,
@@ -1314,6 +1327,21 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Needs the `manage_security` cluster privilege. The rules do not change.
+   */
+  async deletePrivateRuleSet(props: DeletePrivateRuleSetProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeletePrivateRuleSet`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/detection_engine/rule_sets/_private/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Removes a privileged user from monitoring by their document ID.
@@ -1371,13 +1399,16 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Deletes a rule set. The rules do not change.
+   */
   async deleteRuleSet(props: DeleteRuleSetProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteRuleSet`);
     return this.kbnClient
       .request({
-        path: replaceParams('/internal/detection_engine/rule_sets/{id}', props.params),
+        path: replaceParams('/api/detection_engine/rule_sets/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
       })
@@ -1753,6 +1784,23 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Needs the `manage_security` cluster privilege. It lets an administrator find and delete the
+private sets of users who left. The response has no rule lists.
+
+    */
+  async findAllPrivateRuleSets() {
+    this.log.info(`${new Date().toISOString()} Calling API FindAllPrivateRuleSets`);
+    return this.kbnClient
+      .request<FindAllPrivateRuleSetsResponse>({
+        path: '/internal/detection_engine/rule_sets/_private',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * **Deprecated in 9.4.0.** List asset criticality records, paging, sorting and filtering as needed.
    */
   async findAssetCriticalityRecords(props: FindAssetCriticalityRecordsProps) {
@@ -1786,13 +1834,18 @@ finishes and then call this operation once.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Lists the shared rule sets of the space and the private rule sets of the current user.
+The response does not include the picked and left-out rule lists; get one rule set for them.
+
+    */
   async findRuleSets(props: FindRuleSetsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindRuleSets`);
     return this.kbnClient
       .request<FindRuleSetsResponse>({
-        path: '/internal/detection_engine/rule_sets',
+        path: '/api/detection_engine/rule_sets',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
 
@@ -2366,6 +2419,39 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Returns one rule set with its full definition.
+   */
+  async getRuleSet(props: GetRuleSetProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleSet`);
+    return this.kbnClient
+      .request<GetRuleSetResponse>({
+        path: replaceParams('/api/detection_engine/rule_sets/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * The rule ids stay on the server, so a large set does not travel to the browser and back.
+Gap reasons that the space settings exclude are excluded, as in the rules table.
+
+    */
+  async getRuleSetGapsSummary(props: GetRuleSetGapsSummaryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleSetGapsSummary`);
+    return this.kbnClient
+      .request<GetRuleSetGapsSummaryResponse>({
+        path: '/internal/detection_engine/rule_sets/_gaps_summary',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3864,13 +3950,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Replaces the definition of a rule set. Send `version` from the last read: if someone changed
+the set since then, the request fails with 409.
+
+    */
   async updateRuleSet(props: UpdateRuleSetProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleSet`);
     return this.kbnClient
       .request<UpdateRuleSetResponse>({
-        path: replaceParams('/internal/detection_engine/rule_sets/{id}', props.params),
+        path: replaceParams('/api/detection_engine/rule_sets/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'PUT',
         body: props.body,
@@ -4150,6 +4241,9 @@ export interface DeleteMonitoringEngineProps {
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
 }
+export interface DeletePrivateRuleSetProps {
+  params: DeletePrivateRuleSetRequestParamsInput;
+}
 export interface DeletePrivMonUserProps {
   params: DeletePrivMonUserRequestParamsInput;
 }
@@ -4311,6 +4405,12 @@ export interface GetRuleMigrationStatsProps {
 }
 export interface GetRuleMigrationTranslationStatsProps {
   params: GetRuleMigrationTranslationStatsRequestParamsInput;
+}
+export interface GetRuleSetProps {
+  params: GetRuleSetRequestParamsInput;
+}
+export interface GetRuleSetGapsSummaryProps {
+  body: GetRuleSetGapsSummaryRequestBodyInput;
 }
 export interface GetRuleSetsMembershipProps {
   body: GetRuleSetsMembershipRequestBodyInput;

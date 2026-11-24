@@ -26,6 +26,7 @@ import {
 } from '../../../../common/detection_engine/rule_management/rule_fields';
 import { RuleSetsClient } from '../../../lib/detection_engine/rule_sets/logic/rule_sets_client';
 import { buildConditionsFilter } from '../../../lib/detection_engine/rule_sets/logic/build_rule_set_filter';
+import { termsBuckets } from '../../../lib/detection_engine/rule_sets/logic/terms_buckets';
 
 export const RULE_SETS_INVENTORY_TOOL_ID = 'security.rule_sets.get_inventory';
 export const RULE_SETS_PROPOSE_TOOL_ID = 'security.rule_sets.propose';
@@ -42,30 +43,10 @@ const MAX_SAMPLE_NAMES = 200;
 
 type GetStartServices = StartServicesAccessor<StartPlugins>;
 
-interface Bucket {
-  key: string | number;
-  doc_count: number;
-}
-
 const termsAgg = (field: string, size = 1000) => ({ terms: { field, size } });
 
-const isBucket = (value: unknown): value is Bucket =>
-  typeof value === 'object' &&
-  value !== null &&
-  'key' in value &&
-  (typeof value.key === 'string' || typeof value.key === 'number') &&
-  'doc_count' in value &&
-  typeof value.doc_count === 'number';
-
-/** Buckets of a terms aggregation; the rules client returns aggregations untyped. */
-const toCounts = (aggs: Record<string, unknown> | undefined, name: string) => {
-  const agg = aggs?.[name];
-  const buckets =
-    typeof agg === 'object' && agg !== null && 'buckets' in agg && Array.isArray(agg.buckets)
-      ? agg.buckets.filter(isBucket)
-      : [];
-  return buckets.map(({ key, doc_count: rules }) => ({ value: String(key), rules }));
-};
+const toCounts = (aggs: Record<string, unknown> | undefined, name: string) =>
+  termsBuckets(aggs, name).map(({ key, doc_count: rules }) => ({ value: String(key), rules }));
 
 const createClient = async (getStartServices: GetStartServices, context: ToolHandlerContext) => {
   const [coreStart, startPlugins] = await getStartServices();

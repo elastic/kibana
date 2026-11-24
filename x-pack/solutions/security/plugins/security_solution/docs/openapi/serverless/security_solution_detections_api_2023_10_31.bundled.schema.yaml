@@ -547,6 +547,164 @@ paths:
       tags:
         - Security Detections API
         - Privileges API
+  /api/detection_engine/rule_sets:
+    get:
+      description: >
+        Lists the shared rule sets of the space and the private rule sets of the
+        current user.
+
+        The response does not include the picked and left-out rule lists; get
+        one rule set for them.
+      operationId: FindRuleSets
+      parameters:
+        - description: Count the rules in each set now. Without counts the response is
+            faster.
+          in: query
+          name: with_counts
+          required: false
+          schema:
+            default: true
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/RuleSetSummary'
+                    type: array
+                  total:
+                    type: integer
+                required:
+                  - data
+                  - total
+          description: The rule sets that the current user can see, sorted by name.
+      summary: List rule sets
+      tags:
+        - Security Detections API
+        - Security Detections API
+      x-state: Technical Preview
+    post:
+      description: >
+        Creates a rule set: conditions on rule fields, plus rules picked and
+        left out by `rule_id`.
+
+        The rules do not change.
+      operationId: CreateRuleSet
+      requestBody:
+        content:
+          application/json:
+            examples:
+              okta:
+                summary: Okta rules of the identity team
+                value:
+                  conditions:
+                    tags:
+                      include:
+                        - 'Data Source: Okta'
+                      match: all
+                  excluded_rule_ids:
+                    - f960e8a4-31c1-4a6e-b172-8f5c8e5c8c2a
+                  included_rule_ids:
+                    - dafa3235-76dc-40e2-9f71-1773b96d24cf
+                  name: 'Identity team: Okta'
+                  visibility: space
+            schema:
+              $ref: '#/components/schemas/RuleSetDefinition'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleSet'
+          description: The created rule set.
+      summary: Create a rule set
+      tags:
+        - Security Detections API
+        - Security Detections API
+      x-state: Technical Preview
+  /api/detection_engine/rule_sets/{id}:
+    delete:
+      description: Deletes a rule set. The rules do not change.
+      operationId: DeleteRuleSet
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/RuleSetId'
+      responses:
+        '200':
+          description: Deleted.
+      summary: Delete a rule set
+      tags:
+        - Security Detections API
+        - Security Detections API
+      x-state: Technical Preview
+    get:
+      description: Returns one rule set with its full definition.
+      operationId: GetRuleSet
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/RuleSetId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleSet'
+          description: The rule set.
+      summary: Get a rule set
+      tags:
+        - Security Detections API
+        - Security Detections API
+      x-state: Technical Preview
+    put:
+      description: >
+        Replaces the definition of a rule set. Send `version` from the last
+        read: if someone changed
+
+        the set since then, the request fails with 409.
+      operationId: UpdateRuleSet
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/RuleSetId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/RuleSetDefinition'
+                - type: object
+                  properties:
+                    version:
+                      description: The version that the client read. A newer version on the server
+                        gives 409.
+                      maxLength: 256
+                      type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleSet'
+          description: The updated rule set.
+      summary: Replace a rule set
+      tags:
+        - Security Detections API
+        - Security Detections API
+      x-state: Technical Preview
   /api/detection_engine/rules:
     delete:
       description: >
@@ -4617,6 +4775,16 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_set_id:
+          description: >
+            Limit the action to the rules of this rule set. Valid only with
+            `query`; send an empty
+
+            query for all rules of the set. Rule sets are managed with the rule
+            sets API.
+          maxLength: 256
+          minLength: 1
+          type: string
       required:
         - action
     BulkDeleteSkipReason:
@@ -4658,6 +4826,16 @@ components:
           type: array
         query:
           description: Query to filter rules.
+          type: string
+        rule_set_id:
+          description: >
+            Limit the action to the rules of this rule set. Valid only with
+            `query`; send an empty
+
+            query for all rules of the set. Rule sets are managed with the rule
+            sets API.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - action
@@ -4709,6 +4887,16 @@ components:
           type: array
         query:
           description: Query to filter rules.
+          type: string
+        rule_set_id:
+          description: >
+            Limit the action to the rules of this rule set. Valid only with
+            `query`; send an empty
+
+            query for all rules of the set. Rule sets are managed with the rule
+            sets API.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - action
@@ -4827,6 +5015,16 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_set_id:
+          description: >
+            Limit the action to the rules of this rule set. Valid only with
+            `query`; send an empty
+
+            query for all rules of the set. Rule sets are managed with the rule
+            sets API.
+          maxLength: 256
+          minLength: 1
+          type: string
       required:
         - action
         - edit
@@ -4870,6 +5068,16 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_set_id:
+          description: >
+            Limit the action to the rules of this rule set. Valid only with
+            `query`; send an empty
+
+            query for all rules of the set. Rule sets are managed with the rule
+            sets API.
+          maxLength: 256
+          minLength: 1
+          type: string
       required:
         - action
     BulkExportActionResponse:
@@ -4909,6 +5117,16 @@ components:
           type: array
         query:
           description: Query to filter rules.
+          type: string
+        rule_set_id:
+          description: >
+            Limit the action to the rules of this rule set. Valid only with
+            `query`; send an empty
+
+            query for all rules of the set. Rule sets are managed with the rule
+            sets API.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - action
@@ -4966,6 +5184,16 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_set_id:
+          description: >
+            Limit the action to the rules of this rule set. Valid only with
+            `query`; send an empty
+
+            query for all rules of the set. Rule sets are managed with the rule
+            sets API.
+          maxLength: 256
+          minLength: 1
+          type: string
       required:
         - action
         - fill_gaps
@@ -5004,6 +5232,16 @@ components:
           type: array
         query:
           description: Query to filter rules.
+          type: string
+        rule_set_id:
+          description: >
+            Limit the action to the rules of this rule set. Valid only with
+            `query`; send an empty
+
+            query for all rules of the set. Rule sets are managed with the rule
+            sets API.
+          maxLength: 256
+          minLength: 1
           type: string
         run:
           description: Object that describes applying a manual rule run action.
@@ -8872,6 +9110,252 @@ components:
         cause revision increments.
       minimum: 0
       type: integer
+    RuleSet:
+      allOf:
+        - $ref: '#/components/schemas/RuleSetDefinition'
+        - $ref: '#/components/schemas/RuleSetMeta'
+      description: A rule set with its full definition.
+    RuleSetConditions:
+      additionalProperties: false
+      description: >
+        Rules that match ALL filled conditions are in the set. New rules that
+        match join the set
+
+        automatically. Field names are the names of the rule API.
+        `related_integrations` takes
+
+        integration package names, for example `endpoint` or `okta`.
+      type: object
+      properties:
+        related_integrations:
+          $ref: '#/components/schemas/RuleSetValues'
+        rule_source:
+          $ref: '#/components/schemas/RuleSetRuleSource'
+        search:
+          $ref: '#/components/schemas/RuleSetSearch'
+        severity:
+          $ref: '#/components/schemas/RuleSetSeverities'
+        tags:
+          $ref: '#/components/schemas/RuleSetValues'
+        type:
+          $ref: '#/components/schemas/RuleSetRuleTypes'
+    RuleSetDefinition:
+      additionalProperties: false
+      type: object
+      properties:
+        conditions:
+          $ref: '#/components/schemas/RuleSetConditions'
+        description:
+          maxLength: 2048
+          type: string
+        excluded_rule_ids:
+          description: '`rule_id`s of rules that match the conditions but are never in the
+            set.'
+          items:
+            $ref: '#/components/schemas/RuleSetRuleId'
+          maxItems: 10000
+          type: array
+        included_rule_ids:
+          description: '`rule_id`s of rules that are in the set even if they do not match
+            the conditions.'
+          items:
+            $ref: '#/components/schemas/RuleSetRuleId'
+          maxItems: 10000
+          type: array
+        name:
+          maxLength: 256
+          minLength: 1
+          type: string
+        visibility:
+          $ref: '#/components/schemas/RuleSetVisibility'
+      required:
+        - name
+        - visibility
+        - conditions
+        - included_rule_ids
+        - excluded_rule_ids
+    RuleSetId:
+      description: The saved object id of a rule set.
+      maxLength: 256
+      minLength: 1
+      type: string
+    RuleSetMeta:
+      type: object
+      properties:
+        created_at:
+          type: string
+        created_by:
+          description: Profile uid of the user who created the set.
+          type: string
+        id:
+          $ref: '#/components/schemas/RuleSetId'
+        is_owner:
+          description: True when the current user created the set.
+          type: boolean
+        updated_at:
+          type: string
+        version:
+          description: Saved object version, for optimistic concurrency on update.
+          type: string
+      required:
+        - id
+        - is_owner
+        - version
+    RuleSetRuleId:
+      description: The `rule_id` of a rule. It stays the same through import, upgrade
+        and revert.
+      maxLength: 256
+      minLength: 1
+      type: string
+    RuleSetRuleSource:
+      additionalProperties: false
+      description: '`external`: Elastic prebuilt rules. `internal`: rules created in
+        Kibana.'
+      type: object
+      properties:
+        include:
+          items:
+            enum:
+              - external
+              - internal
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+      required:
+        - include
+    RuleSetRuleType:
+      enum:
+        - query
+        - saved_query
+        - eql
+        - esql
+        - threshold
+        - threat_match
+        - machine_learning
+        - new_terms
+      type: string
+    RuleSetRuleTypes:
+      additionalProperties: false
+      description: A rule matches when its type is one of `include` and none of `exclude`.
+      type: object
+      properties:
+        exclude:
+          items:
+            $ref: '#/components/schemas/RuleSetRuleType'
+          maxItems: 8
+          type: array
+        include:
+          items:
+            $ref: '#/components/schemas/RuleSetRuleType'
+          maxItems: 8
+          type: array
+    RuleSetSearch:
+      additionalProperties: false
+      description: Free-text search. `legacy` is the search of the rules table (rule
+        name, index patterns, MITRE ATT&CK).
+      type: object
+      properties:
+        mode:
+          enum:
+            - legacy
+          type: string
+        term:
+          maxLength: 256
+          minLength: 1
+          type: string
+      required:
+        - term
+        - mode
+    RuleSetSeverities:
+      additionalProperties: false
+      description: A rule matches when its severity is one of `include` and none of
+        `exclude`.
+      type: object
+      properties:
+        exclude:
+          items:
+            $ref: '#/components/schemas/Severity'
+          maxItems: 4
+          type: array
+        include:
+          items:
+            $ref: '#/components/schemas/Severity'
+          maxItems: 4
+          type: array
+    RuleSetSummary:
+      allOf:
+        - $ref: '#/components/schemas/RuleSetMeta'
+        - type: object
+          properties:
+            conditions:
+              $ref: '#/components/schemas/RuleSetConditions'
+            description:
+              type: string
+            excluded_rules_count:
+              description: How many rules were left out by hand.
+              type: integer
+            failed_count:
+              description: How many rules of the set failed on the last run. Only with
+                `with_counts`.
+              type: integer
+            included_rules_count:
+              description: How many rules were picked by hand.
+              type: integer
+            name:
+              type: string
+            rules_count:
+              description: How many rules are in the set now. Only with `with_counts`.
+              type: integer
+            visibility:
+              $ref: '#/components/schemas/RuleSetVisibility'
+          required:
+            - name
+            - visibility
+            - conditions
+            - included_rules_count
+            - excluded_rules_count
+      description: A rule set without the picked and left-out rule lists, for lists of sets.
+    RuleSetValue:
+      maxLength: 1024
+      minLength: 1
+      type: string
+    RuleSetValues:
+      additionalProperties: false
+      description: >
+        Values of one rule field that can have several values. A rule matches
+        when it has the
+
+        `include` values (all of them with `match: all`, any of them with
+        `match: any`) and none of
+
+        the `exclude` values.
+      type: object
+      properties:
+        exclude:
+          items:
+            $ref: '#/components/schemas/RuleSetValue'
+          maxItems: 100
+          type: array
+        include:
+          items:
+            $ref: '#/components/schemas/RuleSetValue'
+          maxItems: 100
+          type: array
+        match:
+          description: How the `include` values combine. The server always stores it.
+          enum:
+            - all
+            - any
+          type: string
+    RuleSetVisibility:
+      description: |
+        `space`: every user of the space sees the set.
+        `private`: only the user who created the set sees it.
+      enum:
+        - space
+        - private
+      type: string
     RuleSignatureId:
       description: A stable unique identifier for the rule object. It can be assigned
         during rule creation. It can be any string, but often is a UUID. It

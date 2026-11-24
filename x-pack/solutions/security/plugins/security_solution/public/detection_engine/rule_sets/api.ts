@@ -11,26 +11,33 @@ import type {
   BulkAssignRuleSetsRequestBody,
   BulkAssignRuleSetsResponse,
   FindRuleSetsResponse,
+  GetRuleSetGapsSummaryRequestBody,
+  GetRuleSetGapsSummaryResponse,
   GetRuleSetsMembershipResponse,
   PreviewRuleSetRequestBody,
   PreviewRuleSetResponse,
   RuleSet,
   RuleSetDefinition,
+  RuleSetSummary,
 } from '../../../common/api/detection_engine/rule_sets';
 import {
+  RULE_SETS_API_VERSION,
   RULE_SETS_BULK_ASSIGN_URL,
+  RULE_SETS_GAPS_SUMMARY_URL,
+  RULE_SETS_INTERNAL_API_VERSION,
   RULE_SETS_MEMBERSHIP_URL,
   RULE_SETS_PREVIEW_URL,
   RULE_SETS_URL,
-  RULE_SET_RULE_IDS_URL,
+  RULE_SET_URL,
 } from '../../../common/api/detection_engine/rule_sets';
 import type { GranularRulesFacetCategory } from '../../../common/api/detection_engine/rule_management';
 import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../common/api/detection_engine/rule_management/urls';
 import { KibanaServices } from '../../common/lib/kibana';
 import { fetchSearchRules } from '../rule_management/api/api';
+import type { GapRangeValue } from '../rule_gaps/constants';
+import { getGapRange } from '../rule_gaps/api/hooks/utils';
 
-const VERSION = '1';
-const groupUrl = (id: string) => `${RULE_SETS_URL}/${encodeURIComponent(id)}`;
+const ruleSetUrl = (id: string) => RULE_SET_URL.replace('{id}', encodeURIComponent(id));
 const http = () => KibanaServices.get().http;
 
 export const fetchRuleSets = ({
@@ -42,15 +49,22 @@ export const fetchRuleSets = ({
 }) =>
   http().fetch<FindRuleSetsResponse>(RULE_SETS_URL, {
     method: 'GET',
-    version: VERSION,
+    version: RULE_SETS_API_VERSION,
     query: { with_counts: withCounts },
+    signal,
+  });
+
+export const fetchRuleSet = (id: string, signal?: AbortSignal) =>
+  http().fetch<RuleSet>(ruleSetUrl(id), {
+    method: 'GET',
+    version: RULE_SETS_API_VERSION,
     signal,
   });
 
 export const createRuleSet = (definition: RuleSetDefinition) =>
   http().fetch<RuleSet>(RULE_SETS_URL, {
     method: 'POST',
-    version: VERSION,
+    version: RULE_SETS_API_VERSION,
     body: JSON.stringify(definition),
   });
 
@@ -59,19 +73,19 @@ export const updateRuleSet = ({
   version,
   ...definition
 }: RuleSetDefinition & { id: string; version?: string }) =>
-  http().fetch<RuleSet>(groupUrl(id), {
+  http().fetch<RuleSet>(ruleSetUrl(id), {
     method: 'PUT',
-    version: VERSION,
+    version: RULE_SETS_API_VERSION,
     body: JSON.stringify({ ...definition, version }),
   });
 
 export const deleteRuleSet = (id: string) =>
-  http().fetch(groupUrl(id), { method: 'DELETE', version: VERSION });
+  http().fetch(ruleSetUrl(id), { method: 'DELETE', version: RULE_SETS_API_VERSION });
 
 export const previewRuleSet = (body: PreviewRuleSetRequestBody, signal?: AbortSignal) =>
   http().fetch<PreviewRuleSetResponse>(RULE_SETS_PREVIEW_URL, {
     method: 'POST',
-    version: VERSION,
+    version: RULE_SETS_INTERNAL_API_VERSION,
     body: JSON.stringify(body),
     signal,
   });
@@ -79,7 +93,7 @@ export const previewRuleSet = (body: PreviewRuleSetRequestBody, signal?: AbortSi
 export const fetchRuleSetsMembership = (ids: string[], signal?: AbortSignal) =>
   http().fetch<GetRuleSetsMembershipResponse>(RULE_SETS_MEMBERSHIP_URL, {
     method: 'POST',
-    version: VERSION,
+    version: RULE_SETS_INTERNAL_API_VERSION,
     body: JSON.stringify({ ids }),
     signal,
   });
@@ -87,21 +101,34 @@ export const fetchRuleSetsMembership = (ids: string[], signal?: AbortSignal) =>
 export const bulkAssignRuleSets = (body: BulkAssignRuleSetsRequestBody) =>
   http().fetch<BulkAssignRuleSetsResponse>(RULE_SETS_BULK_ASSIGN_URL, {
     method: 'POST',
-    version: VERSION,
+    version: RULE_SETS_INTERNAL_API_VERSION,
     body: JSON.stringify(body),
   });
 
-const RULE_SETS_QUERY_KEY = ['GET', RULE_SETS_URL];
+export const fetchRuleSetGapsSummary = (
+  body: GetRuleSetGapsSummaryRequestBody,
+  signal?: AbortSignal
+) =>
+  http().fetch<GetRuleSetGapsSummaryResponse>(RULE_SETS_GAPS_SUMMARY_URL, {
+    method: 'POST',
+    version: RULE_SETS_INTERNAL_API_VERSION,
+    body: JSON.stringify(body),
+    signal,
+  });
 
-/** The groups the user can see, without rule counts: fast, for lists and menus. */
+const RULE_SETS_QUERY_KEY = ['GET', RULE_SETS_URL];
+const RULE_SET_QUERY_KEY = ['GET', RULE_SET_URL];
+
+/** The sets the user can see, without rule counts: fast, for lists and menus. */
 export const useRuleSetsQuery = () =>
   useQuery(RULE_SETS_QUERY_KEY, ({ signal }) => fetchRuleSets({ signal, withCounts: false }), {
     refetchOnWindowFocus: false,
+    select: (response): RuleSetSummary[] => response.data,
   });
 
 /**
- * The groups with rule counts. The server runs one small count per group, so this request is
- * slower; the sidebar shows the list first and the counts when they arrive.
+ * The sets with rule counts. The server runs one small count per set, so this request is
+ * slower; the switcher shows the list first and the counts when they arrive.
  */
 export const useRuleSetsWithCountsQuery = () => {
   const list = useRuleSetsQuery();
@@ -112,17 +139,22 @@ export const useRuleSetsWithCountsQuery = () => {
   );
   const data = useMemo(() => {
     if (!list.data) return undefined;
-    const byId = new Map((counts.data?.groups ?? []).map((group) => [group.id, group]));
-    return {
-      groups: list.data.groups.map((group) => ({
-        ...group,
-        rules_count: byId.get(group.id)?.rules_count,
-        failed_count: byId.get(group.id)?.failed_count,
-      })),
-    };
+    const byId = new Map((counts.data?.data ?? []).map((set) => [set.id, set]));
+    return list.data.map((set) => ({
+      ...set,
+      rules_count: byId.get(set.id)?.rules_count,
+      failed_count: byId.get(set.id)?.failed_count,
+    }));
   }, [list.data, counts.data]);
   return { ...list, data };
 };
+
+/** One set with its full definition (picked and left-out rules), for the editor. */
+export const useRuleSetQuery = (id: string | undefined) =>
+  useQuery([...RULE_SET_QUERY_KEY, id], ({ signal }) => fetchRuleSet(id ?? '', signal), {
+    enabled: Boolean(id),
+    refetchOnWindowFocus: false,
+  });
 
 export const useRuleSetPreviewQuery = (body: PreviewRuleSetRequestBody, enabled = true) =>
   useQuery(['POST', RULE_SETS_PREVIEW_URL, body], ({ signal }) => previewRuleSet(body, signal), {
@@ -139,12 +171,12 @@ export const useRuleSetsMembershipQuery = (ids: string[], enabled: boolean) =>
   );
 
 const RULE_SET_STATS_QUERY_KEYS = [
-  ['ruleSetRuleIds'],
+  ['POST', RULE_SETS_GAPS_SUMMARY_URL],
   ['ruleSetOutcomes'],
   ['ruleSetFilterCounts'],
 ];
 
-/** Refreshes the per-group data of the monitoring panels (rule ids and last run outcomes). */
+/** Refreshes the per-set data of the monitoring panels (gaps and last run outcomes). */
 export const useInvalidateRuleSetStats = () => {
   const queryClient = useQueryClient();
   return useCallback(() => {
@@ -154,7 +186,7 @@ export const useInvalidateRuleSetStats = () => {
   }, [queryClient]);
 };
 
-/** After rules change (for example a bulk action), the rule counts of the groups are stale. */
+/** After rules change (for example a bulk action), the rule counts of the sets are stale. */
 export const useInvalidateRuleSetCounts = () => {
   const queryClient = useQueryClient();
   const invalidateStats = useInvalidateRuleSetStats();
@@ -164,13 +196,14 @@ export const useInvalidateRuleSetCounts = () => {
   }, [queryClient, invalidateStats]);
 };
 
-/** After a group changes, the group list and the rules table (filtered by group) are stale. */
+/** After a set changes, the set list and the rules table (filtered by set) are stale. */
 export const useInvalidateRuleSets = () => {
   const queryClient = useQueryClient();
   const invalidateStats = useInvalidateRuleSetStats();
   return useCallback(() => {
     invalidateStats();
     queryClient.invalidateQueries(RULE_SETS_QUERY_KEY, { refetchType: 'active' });
+    queryClient.invalidateQueries(RULE_SET_QUERY_KEY, { refetchType: 'active' });
     queryClient.invalidateQueries(['POST', RULE_MANAGEMENT_RULES_URL_SEARCH], {
       refetchType: 'active',
     });
@@ -181,8 +214,8 @@ export const useInvalidateRuleSets = () => {
 export const useSaveRuleSetMutation = () => {
   const invalidate = useInvalidateRuleSets();
   return useMutation(
-    (group: RuleSetDefinition & { id?: string; version?: string }) =>
-      group.id ? updateRuleSet({ ...group, id: group.id }) : createRuleSet(group),
+    (set: RuleSetDefinition & { id?: string; version?: string }) =>
+      set.id ? updateRuleSet({ ...set, id: set.id }) : createRuleSet(set),
     { onSettled: invalidate }
   );
 };
@@ -197,18 +230,36 @@ export const useBulkAssignRuleSetsMutation = () => {
   return useMutation(bulkAssignRuleSets, { onSettled: invalidate });
 };
 
-/** Saved object ids of all rules in a group, for APIs that take a rule id list (rule gaps). */
-export const useRuleSetRuleIdsQuery = (ruleSetId: string | undefined) =>
+/** Gap summary of the rules of a set, computed on the server. */
+export const useRuleSetGapsSummaryQuery = (
+  {
+    ruleSetId,
+    gapRange,
+    schedulerId,
+  }: {
+    ruleSetId: string | undefined;
+    gapRange: GapRangeValue;
+    schedulerId?: string;
+  },
+  enabled: boolean
+) =>
   useQuery(
-    ['ruleSetRuleIds', ruleSetId],
-    async ({ signal }) => {
-      const response = await http().fetch<{ ids: string[] }>(
-        RULE_SET_RULE_IDS_URL.replace('{id}', encodeURIComponent(ruleSetId ?? '')),
-        { method: 'GET', version: VERSION, signal }
-      );
-      return response.ids;
-    },
-    { enabled: Boolean(ruleSetId), refetchOnWindowFocus: false }
+    // The relative range is the key: start and end move with the clock.
+    ['POST', RULE_SETS_GAPS_SUMMARY_URL, ruleSetId, gapRange, schedulerId],
+    ({ signal }) =>
+      fetchRuleSetGapsSummary(
+        {
+          rule_set_id: ruleSetId ?? '',
+          ...getGapRange(gapRange),
+          scheduler_id: schedulerId,
+        },
+        signal
+      ),
+    {
+      enabled: enabled && Boolean(ruleSetId),
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
   );
 
 /** Last run outcome counts of the rules in a group, in the shape of the space health API. */

@@ -21,7 +21,7 @@ import {
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { AllRulesTabs } from '../../rule_management_ui/components/rules_table/constants';
-import type { RuleSet } from '../../../../common/api/detection_engine/rule_sets';
+import type { RuleSetSummary } from '../../../../common/api/detection_engine/rule_sets';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRuleSetOutcomesQuery, useRuleSetsWithCountsQuery } from '../api';
@@ -46,7 +46,7 @@ const Stat = ({ label, value, color }: { label: string; value?: number; color?: 
 );
 
 /** Health of the selected set: run outcomes on the monitoring tab, size elsewhere. */
-const RuleSetStats = ({ group }: { group: RuleSet }) => {
+const RuleSetStats = ({ group }: { group: RuleSetSummary }) => {
   const { euiTheme } = useEuiTheme();
   const { data: outcomes } = useRuleSetOutcomesQuery(group.id);
   const [{ tabName }] = useRouteSpy();
@@ -97,8 +97,8 @@ export const RuleSetHeader = () => {
   const { openEditor } = useRuleSetEditor();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const suggestRuleSets = useSuggestRuleSets();
-  const group: RuleSet | undefined = data?.groups.find(({ id }) => id === filterOptions.ruleSetId);
-  const hasNoSets = !isLoading && data?.groups.length === 0;
+  const group: RuleSetSummary | undefined = data?.find(({ id }) => id === filterOptions.ruleSetId);
+  const hasNoSets = !isLoading && data?.length === 0;
 
   return (
     <>
@@ -162,7 +162,7 @@ export const RuleSetHeader = () => {
                   <EuiButton
                     size="s"
                     iconType="pencil"
-                    onClick={() => openEditor({ group })}
+                    onClick={() => openEditor({ ruleSetId: group.id })}
                     data-test-subj="ruleSetHeaderEdit"
                   >
                     {i18n.EDIT_GROUP}

@@ -26,6 +26,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -42,7 +43,13 @@ import type {
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useFetchRuleManagementFiltersQuery } from '../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import { fetchSearchRules } from '../../rule_management/api/api';
-import { useRuleFacetCountsQuery, useRuleSetPreviewQuery, useSaveRuleSetMutation } from '../api';
+import {
+  useRuleFacetCountsQuery,
+  useRuleSetPreviewQuery,
+  useRuleSetQuery,
+  useRuleSetsWithCountsQuery,
+  useSaveRuleSetMutation,
+} from '../api';
 import type { PickedRule } from './rule_picker_modal';
 import { RulePickerModal } from './rule_picker_modal';
 import { RuleConditionsFilterBar } from './rule_conditions_filter_bar';
@@ -170,19 +177,44 @@ const Step = ({
 );
 
 interface RuleSetEditorFlyoutProps {
-  group?: RuleSet;
+  /** Edit this set. The editor reads its full definition (picked and left-out rules). */
+  ruleSetId?: string;
   initial?: Partial<RuleSetDefinition>;
   onClose: () => void;
   onSaved: (group: RuleSet) => void;
 }
 
 /** One place to create or change a rule set: conditions, picked rules, left-out rules, live preview. */
-export const RuleSetEditorFlyout = ({
+export const RuleSetEditorFlyout = ({ ruleSetId, ...props }: RuleSetEditorFlyoutProps) => {
+  const { data: group, isLoading, error } = useRuleSetQuery(ruleSetId);
+  const titleId = useGeneratedHtmlId();
+  if (ruleSetId && !group) {
+    return (
+      <EuiFlyout aria-labelledby={titleId} onClose={props.onClose} size={1200} ownFocus>
+        <EuiFlyoutBody>
+          <h2 id={titleId} className="euiScreenReaderOnly">
+            {i18n.EDIT_GROUP}
+          </h2>
+          {isLoading ? (
+            <EuiSkeletonText lines={8} />
+          ) : (
+            <EuiText color="danger">
+              {error instanceof Error ? error.message : i18n.SAVE_ERROR}
+            </EuiText>
+          )}
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    );
+  }
+  return <RuleSetEditorForm group={group} {...props} />;
+};
+
+const RuleSetEditorForm = ({
   group,
   initial,
   onClose,
   onSaved,
-}: RuleSetEditorFlyoutProps) => {
+}: Omit<RuleSetEditorFlyoutProps, 'ruleSetId'> & { group?: RuleSet }) => {
   const start = group ?? initial ?? {};
   const [name, setName] = useState(start.name ?? '');
   const [description, setDescription] = useState(start.description ?? '');
@@ -253,6 +285,8 @@ export const RuleSetEditorFlyout = ({
   });
 
   const { mutateAsync: save, isLoading: isSaving } = useSaveRuleSetMutation();
+  const { data: savedSets } = useRuleSetsWithCountsQuery();
+  const savedCount = savedSets?.find(({ id }) => id === group?.id)?.rules_count;
   const { addSuccess, addError } = useAppToasts();
   const onSave = async () => {
     try {
@@ -448,10 +482,10 @@ export const RuleSetEditorFlyout = ({
                     )}
                   </EuiText>
                 </EuiFlexItem>
-                {group && total !== group.rules_count && group.rules_count != null && (
+                {group && savedCount != null && total !== savedCount && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color={total > group.rules_count ? 'success' : 'danger'}>
-                      {i18n.PREVIEW_DIFF(total - group.rules_count)}
+                    <EuiBadge color={total > savedCount ? 'success' : 'danger'}>
+                      {i18n.PREVIEW_DIFF(total - savedCount)}
                     </EuiBadge>
                   </EuiFlexItem>
                 )}

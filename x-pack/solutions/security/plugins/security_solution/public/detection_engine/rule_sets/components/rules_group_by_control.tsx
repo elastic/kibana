@@ -16,11 +16,11 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import type { RuleSet } from '../../../../common/api/detection_engine/rule_sets';
+import type { RuleSetSummary } from '../../../../common/api/detection_engine/rule_sets';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
-import { useRuleSetsQuery, useSaveRuleSetMutation } from '../api';
+import { fetchRuleSet, useRuleSetsQuery, useSaveRuleSetMutation } from '../api';
 import { describeConditionParts, mergeConditions } from './condition_labels';
 import { useRuleSetEditor } from './rule_set_editor_context';
 import {
@@ -46,14 +46,14 @@ const GroupConditionChips = ({
   group,
   integrationTitles,
 }: {
-  group: RuleSet;
+  group: RuleSetSummary;
   integrationTitles: Map<string, string>;
 }) => {
   const { openEditor } = useRuleSetEditor();
   const parts = [
     ...describeConditionParts(group.conditions, integrationTitles),
-    ...(group.included_rule_ids.length ? [i18n.PICKED(group.included_rule_ids.length)] : []),
-    ...(group.excluded_rule_ids.length ? [i18n.LEFT_OUT(group.excluded_rule_ids.length)] : []),
+    ...(group.included_rules_count ? [i18n.PICKED(group.included_rules_count)] : []),
+    ...(group.excluded_rules_count ? [i18n.LEFT_OUT(group.excluded_rules_count)] : []),
   ];
   return (
     <>
@@ -63,7 +63,7 @@ const GroupConditionChips = ({
             <EuiBadge
               color="hollow"
               iconType="folder"
-              onClick={() => openEditor({ group })}
+              onClick={() => openEditor({ ruleSetId: group.id })}
               onClickAriaLabel={i18n.EDIT_GROUP}
               data-test-subj="ruleSetConditionChip"
             >
@@ -76,7 +76,7 @@ const GroupConditionChips = ({
   );
 };
 
-const SaveFiltersButton = ({ group }: { group?: RuleSet }) => {
+const SaveFiltersButton = ({ group }: { group?: RuleSetSummary }) => {
   const [isOpen, setIsOpen] = useState(false);
   const {
     state: { filterOptions },
@@ -111,8 +111,9 @@ const SaveFiltersButton = ({ group }: { group?: RuleSet }) => {
   const addToGroup = async () => {
     setIsOpen(false);
     try {
+      // The list has no rule id lists; read the full set, then write it back with the filters.
       const { id, version, name, description, visibility, included_rule_ids, excluded_rule_ids } =
-        group;
+        await fetchRuleSet(group.id);
       await save({
         id,
         version,
@@ -154,16 +155,21 @@ const SaveFiltersButton = ({ group }: { group?: RuleSet }) => {
           <EuiContextMenuItem
             key="new"
             icon="folderOpen"
-            onClick={() => {
+            onClick={async () => {
               setIsOpen(false);
-              openEditor({
-                initial: {
-                  conditions: merged,
-                  included_rule_ids: group.included_rule_ids,
-                  excluded_rule_ids: group.excluded_rule_ids,
-                  visibility: group.visibility,
-                },
-              });
+              try {
+                const full = await fetchRuleSet(group.id);
+                openEditor({
+                  initial: {
+                    conditions: mergeConditions(full.conditions, filters),
+                    included_rule_ids: full.included_rule_ids,
+                    excluded_rule_ids: full.excluded_rule_ids,
+                    visibility: full.visibility,
+                  },
+                });
+              } catch (error) {
+                addError(error, { title: i18n.SAVE_ERROR });
+              }
             }}
             data-test-subj="ruleSetsSaveAsNewGroup"
           >
@@ -187,7 +193,7 @@ export const RulesGroupByControl = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { groupBy, browse, ruleSetId } = filterOptions;
   const { data } = useRuleSetsQuery();
-  const group = data?.groups.find(({ id }) => id === ruleSetId);
+  const group = data?.find(({ id }) => id === ruleSetId);
   const selected = GROUP_BY_FIELDS.find((field) => field.value === groupBy);
   const browseField = browse && GROUP_BY_FIELDS.find((field) => field.value === browse.category);
   const integrationTitles = useIntegrationTitles();

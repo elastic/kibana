@@ -27,7 +27,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { RuleSet } from '../../../../common/api/detection_engine/rule_sets';
+import type { RuleSetSummary } from '../../../../common/api/detection_engine/rule_sets';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -125,7 +125,7 @@ const NavItem = ({
   );
 };
 
-const RuleSetIcon = ({ group }: { group?: RuleSet }) =>
+const RuleSetIcon = ({ group }: { group?: RuleSetSummary }) =>
   group ? (
     <EuiIcon
       type={group.visibility === 'private' ? 'lock' : 'folder'}
@@ -181,7 +181,7 @@ export const RuleSetSwitcher = () => {
   const [{ tabName }] = useRouteSpy();
   const showFailed = tabName === AllRulesTabs.monitoring;
 
-  const groups = useMemo(() => data?.groups ?? [], [data]);
+  const groups = useMemo(() => data ?? [], [data]);
   const selectedId = filterOptions.ruleSetId;
   const selected = groups.find(({ id }) => id === selectedId);
 
@@ -189,7 +189,7 @@ export const RuleSetSwitcher = () => {
   // user, or from another space. Then show all rules instead of an error.
   useEffect(() => {
     // Wait for a refetch: a group that was just created is not in the old list yet.
-    if (data && !isFetching && selectedId && !data.groups.some(({ id }) => id === selectedId)) {
+    if (data && !isFetching && selectedId && !data.some(({ id }) => id === selectedId)) {
       setFilterOptions({ ruleSetId: undefined });
     }
   }, [data, isFetching, selectedId, setFilterOptions]);
@@ -220,7 +220,7 @@ export const RuleSetSwitcher = () => {
   const shared = visible.filter((group) => group.visibility === 'space');
   const mine = visible.filter((group) => group.visibility === 'private');
 
-  const renderList = (items: RuleSet[]) =>
+  const renderList = (items: RuleSetSummary[]) =>
     items.length ? (
       items.map((group) => (
         <NavItem
@@ -357,7 +357,7 @@ export const RuleSetSwitcher = () => {
 };
 
 /** "More actions" of the selected rule set: today only delete; edit is a button next to it. */
-export const RuleSetMoreActions = ({ group }: { group: RuleSet }) => {
+export const RuleSetMoreActions = ({ group }: { group: RuleSetSummary }) => {
   const [isOpen, setIsOpen] = useState(false);
   const {
     actions: { setFilterOptions },
