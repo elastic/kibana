@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { AnyIDataStreamClient } from '@kbn/data-streams';
 import type { EvaluationScoreDocument, PinnedBaseline } from '@kbn/evals-common';
-import { EvaluationIndices, buildSpaceFilter } from '@kbn/evals-common';
+import { EvaluationIndices, MAX_PINNABLE_SCORES, buildSpaceFilter } from '@kbn/evals-common';
 
 /** A snapshotted score document: the original score plus its baseline attribution. */
 export type PinnedBaselineScoreDocument = EvaluationScoreDocument & {
@@ -38,6 +38,10 @@ interface PinnedBaselinePointerDocument {
     git?: { branch?: string | null; commit_sha?: string | null };
   };
 }
+
+// A snapshot bulk request carries at most this many documents, matching the cap score
+// ingestion puts on one request, so a 10k-score pin doesn't go out as a single huge bulk.
+const BULK_WRITE_CHUNK_SIZE = 1000;
 
 // Elasticsearch caps document IDs at 512 bytes. A source score ID long enough to overflow
 // the combined ID is hashed instead (still deterministic per source doc, so retried pins
@@ -146,24 +150,26 @@ export class PinnedBaselineService {
     documents: T[],
     baselineId: string
   ): Promise<void> {
-    const response = await client.create({
-      documents,
-      refresh: 'wait_for',
-    });
+    for (let offset = 0; offset < documents.length; offset += BULK_WRITE_CHUNK_SIZE) {
+      const response = await client.create({
+        documents: documents.slice(offset, offset + BULK_WRITE_CHUNK_SIZE),
+        refresh: 'wait_for',
+      });
 
-    const conflicted = response.items.filter((item) => item.create?.status === 409).length;
-    if (conflicted > 0) {
-      // Already written by a retried pin with the same deterministic IDs.
-      this.logger.warn(`${conflicted} baseline document(s) for ${baselineId} already existed`);
-    }
-    const failures = response.items.filter((item) => {
-      const status = item.create?.status;
-      return !status || (status !== 409 && (status < 200 || status >= 300));
-    });
-    if (failures.length > 0) {
-      const reason =
-        failures[0].create?.error?.reason ?? failures[0].create?.error?.type ?? 'unknown';
-      throw new Error(`Failed to write ${failures.length} baseline document(s): ${reason}`);
+      const conflicted = response.items.filter((item) => item.create?.status === 409).length;
+      if (conflicted > 0) {
+        // Already written by a retried pin with the same deterministic IDs.
+        this.logger.warn(`${conflicted} baseline document(s) for ${baselineId} already existed`);
+      }
+      const failures = response.items.filter((item) => {
+        const status = item.create?.status;
+        return !status || (status !== 409 && (status < 200 || status >= 300));
+      });
+      if (failures.length > 0) {
+        const reason =
+          failures[0].create?.error?.reason ?? failures[0].create?.error?.type ?? 'unknown';
+        throw new Error(`Failed to write ${failures.length} baseline document(s): ${reason}`);
+      }
     }
   }
 
@@ -192,6 +198,8 @@ export class PinnedBaselineService {
       query: { bool: { must } },
       sort: [{ 'baseline.pinned_at': { order: 'desc' } }],
       size: 1,
+      // A failed shard must not silently resolve an older pointer as the active baseline.
+      allow_partial_search_results: false,
     });
 
     const hit = response.hits?.hits?.[0];
@@ -201,26 +209,48 @@ export class PinnedBaselineService {
     return pointerToResponse(hit._source as unknown as PinnedBaselinePointerDocument);
   }
 
+  /**
+   * The snapshotted scores of one baseline, or undefined when no pointer for it is
+   * visible to the caller — an unknown id (or a pin from a space the caller can't see)
+   * must be distinguishable from a pinned-but-empty baseline.
+   */
   async getScores({
     baselineId,
     spaceId,
   }: {
     baselineId: string;
     spaceId?: string;
-  }): Promise<EvaluationScoreDocument[]> {
-    const must: Array<Record<string, unknown>> = [
+  }): Promise<EvaluationScoreDocument[] | undefined> {
+    const pointerMust: Array<Record<string, unknown>> = [
+      { term: { doc_kind: 'pointer' } },
+      { term: { 'baseline.id': baselineId } },
+    ];
+    const scoresMust: Array<Record<string, unknown>> = [
       { term: { doc_kind: 'score' } },
       { term: { 'baseline.id': baselineId } },
     ];
     if (spaceId) {
-      must.push(buildSpaceFilter(spaceId));
+      pointerMust.push(buildSpaceFilter(spaceId));
+      scoresMust.push(buildSpaceFilter(spaceId));
     }
 
     const client = await this.getClient();
+
+    const pointerResponse = await client.search({
+      query: { bool: { must: pointerMust } },
+      size: 1,
+      allow_partial_search_results: false,
+    });
+    if ((pointerResponse.hits?.hits ?? []).length === 0) {
+      return undefined;
+    }
+
     const response = await client.search({
-      query: { bool: { must } },
+      query: { bool: { must: scoresMust } },
       sort: [{ '@timestamp': { order: 'asc' } }],
-      size: 10000,
+      size: MAX_PINNABLE_SCORES,
+      // A failed shard must not silently shrink the baseline the comparison runs on.
+      allow_partial_search_results: false,
     });
 
     const hits = response.hits?.hits ?? [];

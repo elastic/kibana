@@ -323,6 +323,18 @@ describe('eval baselines routes', () => {
       expect(getScores).toHaveBeenCalledWith({ baselineId: 'baseline-1', spaceId: 'space-a' });
     });
 
+    it('answers an unknown baseline id with 404', async () => {
+      getScores.mockResolvedValue(undefined);
+
+      const response = await handlers[EVAL_BASELINE_SCORES_URL](
+        createContext(),
+        scoresRequest(),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(404);
+    });
+
     it('returns 500 when reading the snapshot fails', async () => {
       getScores.mockRejectedValue(new Error('search failed'));
 

@@ -229,6 +229,11 @@ export function registerEvalBaselineRoutes({
 
       try {
         const scores = await evalBaselines.getScores({ baselineId, spaceId });
+        if (!scores) {
+          return response.notFound({
+            body: { message: `No pinned baseline found for id "${baselineId}".` },
+          });
+        }
         return response.ok({ body: { scores, total: scores.length } });
       } catch (error) {
         if (isMaximumResponseSizeExceededError(error)) {

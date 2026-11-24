@@ -283,29 +283,42 @@ describe('PinnedBaselineService', () => {
     await expect(service.findLatest({ suiteId: 'suite-1' })).resolves.toBeUndefined();
   });
 
-  it('getScores strips the snapshot attribution fields from the returned documents', async () => {
+  it('getScores serves a snapshot only through a visible pointer and strips attribution fields', async () => {
     const logger = loggingSystemMock.createLogger();
     const { coreDataStreams, search } = createDataStreamsMock();
     const service = new PinnedBaselineService(logger, coreDataStreams);
 
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _source: {
-              ...getScoreDocument(),
-              doc_kind: 'score',
-              baseline: { id: 'baseline-1' },
+    search
+      .mockResolvedValueOnce({
+        hits: { hits: [{ _source: { doc_kind: 'pointer', baseline: { id: 'baseline-1' } } }] },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                ...getScoreDocument(),
+                doc_kind: 'score',
+                baseline: { id: 'baseline-1' },
+              },
             },
-          },
-        ],
-      },
-    });
+          ],
+        },
+      });
 
     const scores = await service.getScores({ baselineId: 'baseline-1', spaceId: 'default' });
 
-    const searchRequest = search.mock.calls[0][0];
-    expect(searchRequest.query.bool.must).toEqual(
+    // The pointer lookup is space-scoped like the scores read.
+    const pointerRequest = search.mock.calls[0][0];
+    expect(pointerRequest.query.bool.must).toEqual(
+      expect.arrayContaining([
+        { term: { doc_kind: 'pointer' } },
+        { term: { 'baseline.id': 'baseline-1' } },
+        buildSpaceFilter('default'),
+      ])
+    );
+    const scoresRequest = search.mock.calls[1][0];
+    expect(scoresRequest.query.bool.must).toEqual(
       expect.arrayContaining([
         { term: { doc_kind: 'score' } },
         { term: { 'baseline.id': 'baseline-1' } },
@@ -313,9 +326,54 @@ describe('PinnedBaselineService', () => {
         buildSpaceFilter('default'),
       ])
     );
+    expect(scoresRequest).toMatchObject({
+      size: 10000,
+      // A failed shard must not silently shrink the baseline a comparison runs on.
+      allow_partial_search_results: false,
+    });
     expect(scores).toHaveLength(1);
-    expect(scores[0]).not.toHaveProperty('doc_kind');
-    expect(scores[0]).not.toHaveProperty('baseline');
-    expect(scores[0]).toMatchObject({ experiment_id: 'exp-1' });
+    expect(scores![0]).not.toHaveProperty('doc_kind');
+    expect(scores![0]).not.toHaveProperty('baseline');
+    expect(scores![0]).toMatchObject({ experiment_id: 'exp-1' });
+  });
+
+  it('getScores answers an unknown or invisible baseline with undefined, not an empty list', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, search } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    search.mockResolvedValueOnce({ hits: { hits: [] } });
+
+    await expect(
+      service.getScores({ baselineId: 'nope', spaceId: 'default' })
+    ).resolves.toBeUndefined();
+    expect(search).toHaveBeenCalledTimes(1);
+  });
+
+  it('pin writes a large snapshot in bounded chunks before the pointer', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create } = createDataStreamsMock();
+    const batchSizes: number[] = [];
+
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => {
+      batchSizes.push(documents.length);
+      return {
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+      };
+    });
+
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+    await service.pin({
+      pointer: getPointer(),
+      scores: Array.from({ length: 1500 }, (_, index) => ({
+        id: `score-doc-${index}`,
+        document: getScoreDocument(),
+      })),
+      spaceIds: ['default'],
+    });
+
+    // Two score chunks capped at 1000, then the pointer on its own.
+    expect(batchSizes).toEqual([1000, 500, 1]);
   });
 });
