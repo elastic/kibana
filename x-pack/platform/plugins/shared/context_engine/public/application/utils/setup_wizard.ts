@@ -75,8 +75,8 @@ export const getSetupWizardDoneSteps = ({
 });
 
 /**
- * Steps that count when deciding where setup stands. Without memory no agent can save a memory, so
- * Connect agent can never be done and doesn't count.
+ * Steps that count when deciding whether setup is finished. Without memory no agent can save a
+ * memory, so Connect agent can never be done and doesn't count.
  */
 const getCountedSteps = (
   steps: readonly SetupWizardStepId[],
@@ -108,15 +108,18 @@ export const getSetupWizardView = ({
   }
 
   const steps = getSetupWizardSteps(isMemoryEnabled);
-  const firstNotDone = getCountedSteps(steps, isMemoryEnabled).find((stepId) => !done[stepId]);
+  const isFinished = getCountedSteps(steps, isMemoryEnabled).every((stepId) => done[stepId]);
 
-  if (firstNotDone === undefined) {
+  if (isFinished) {
     return { show: false };
   }
 
   const storedStep = stored !== undefined && steps.includes(stored) ? stored : undefined;
+  // Connect agent counts here even without memory: it still has a prompt to copy, and opening past
+  // it would show it as skipped before the user ever saw it.
+  const firstNotDone = steps.find((stepId) => !done[stepId]);
 
-  return { show: true, steps, initialStep: storedStep ?? firstNotDone };
+  return { show: true, steps, initialStep: storedStep ?? firstNotDone ?? steps[0] };
 };
 
 type SetupWizardEntryKeyParams = Parameters<typeof getSetupWizardEntryKey>[0];

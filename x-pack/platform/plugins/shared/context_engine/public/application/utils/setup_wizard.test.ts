@@ -146,7 +146,7 @@ describe('getSetupWizardView', () => {
     expect(getSetupWizardView({ ...base, done: allDone })).toEqual({ show: false });
   });
 
-  it('without memory, has no dreaming step and ignores Connect agent', () => {
+  it('without memory, has no dreaming step and opens on Connect agent', () => {
     const view = getSetupWizardView({
       ...base,
       isMemoryEnabled: false,
@@ -155,8 +155,14 @@ describe('getSetupWizardView', () => {
     expect(view).toEqual({
       show: true,
       steps: ['connect', 'sources', 'describe'],
-      initialStep: 'describe',
+      initialStep: 'connect',
     });
+  });
+
+  it('without memory, opens past Connect agent once an agent saved a memory', () => {
+    expect(
+      getSetupWizardView({ ...base, isMemoryEnabled: false, done: { ...noneDone, connect: true } })
+    ).toMatchObject({ initialStep: 'sources' });
   });
 
   it('without memory, is hidden when sources and description are done', () => {
@@ -172,7 +178,7 @@ describe('getSetupWizardView', () => {
   it('without memory, ignores a stored dreaming step', () => {
     expect(
       getSetupWizardView({ ...base, isMemoryEnabled: false, stored: 'dreaming' })
-    ).toMatchObject({ initialStep: 'sources' });
+    ).toMatchObject({ initialStep: 'connect' });
   });
 });
 
