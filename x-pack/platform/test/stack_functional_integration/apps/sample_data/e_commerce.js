@@ -10,6 +10,7 @@ export default function ({ getService, getPageObjects }) {
     const browser = getService('browser');
     const PageObjects = getPageObjects(['common', 'home']);
     const testSubjects = getService('testSubjects');
+    const retry = getService('retry');
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
@@ -21,8 +22,16 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('install eCommerce sample data', async function installECommerceData() {
-      await PageObjects.home.addSampleDataSet('ecommerce');
-      await PageObjects.common.sleep(5000);
+      // Not home.addSampleDataSet: its 20s budget has to cover the ~15s before its click lands as
+      // well as the install, so a slightly slow install fails it
+      await retry.try(async () => {
+        // The accordion is uncontrolled and re-collapses when the card list loads async
+        await PageObjects.home.openSampleDataAccordion();
+        await testSubjects.click('addSampleDataSetecommerce', 5000);
+      });
+      await retry.waitForWithTimeout('ecommerce sample data to be installed', 120_000, () =>
+        PageObjects.home.isSampleDataSetInstalled('ecommerce')
+      );
       // verify it's installed by finding the remove link
       await testSubjects.find('removeSampleDataSetecommerce');
     });
