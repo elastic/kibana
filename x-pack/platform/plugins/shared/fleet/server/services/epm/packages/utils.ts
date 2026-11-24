@@ -62,10 +62,9 @@ export const logFailedPackagePolicyUpgrades = (
     )
     .join('; ');
   const notListed = failed.length - MAX_LOGGED_FAILED_POLICY_UPGRADES;
+  const more = notListed > 0 ? ` …and ${notListed} more` : '';
   logger.warn(
-    `Failed to upgrade ${failed.length} of ${results.length} package policies of package ${pkgName}: ${details}${
-      notListed > 0 ? ` …and ${notListed} more` : ''
-    }`
+    `Failed to upgrade ${failed.length} of ${results.length} package policies of package ${pkgName}: ${details}${more}`
   );
 };
 
