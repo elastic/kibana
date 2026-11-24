@@ -11,8 +11,8 @@ import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import {
   getDefaultRiskEngineConfiguration,
   updateSavedObjectAttribute,
-} from '../utils/saved_object_configuration';
-import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
+} from '../configuration/saved_object_configuration';
+import { RiskScoreDataClient } from '../risk_score_data_client';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
 import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';

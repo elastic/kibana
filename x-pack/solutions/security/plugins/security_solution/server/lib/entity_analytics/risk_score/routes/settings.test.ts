@@ -12,9 +12,9 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { riskEngineSettingsRoute } from './settings';
-import { getConfiguration } from '../utils/saved_object_configuration';
+import { getConfiguration } from '../configuration/saved_object_configuration';
 
-jest.mock('../utils/saved_object_configuration', () => ({
+jest.mock('../configuration/saved_object_configuration', () => ({
   getConfiguration: jest.fn(),
 }));
 
