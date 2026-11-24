@@ -104,6 +104,30 @@ describe('sorting resolved rows by a value over the aliases', () => {
     );
   });
 
+  it.each(['asset.criticality', 'entity.lifecycle.first_seen', '@timestamp'])(
+    "reads a group's main entity's own watchlists beside the group's when sorting by %s",
+    async (field) => {
+      // The group's watchlists are on the row; the main entity's own, which are none, come beside them.
+      const group = {
+        ...row('host:g1', 'low_impact'),
+        'entity.attributes.watchlists': ['wl-1', 'wl-2'],
+        own_watchlists: null,
+      };
+      const runQuery = createRunner({ withAliases: [group] });
+
+      const rows = await fetchSorted({ ...ARGS, sort: { field, direction: 'desc' } }, runQuery);
+
+      const groupsQuery = runQuery.mock.calls
+        .map(([steps]) => steps.join('\n'))
+        .find((query) => query.includes('resolved_to IS NOT NULL'));
+      expect(groupsQuery).toContain('| EVAL own_watchlists = entity.attributes.watchlists');
+      expect(groupsQuery?.split('\n').find((step) => step.startsWith('| KEEP'))).toMatch(
+        /own_watchlists$/
+      );
+      expect(rows).toEqual([group]);
+    }
+  );
+
   it('merges the resolved entities with aliases and the others in the order of the sort', async () => {
     const runQuery = createRunner({
       withAliases: [row('host:g1', 'medium_impact'), row('host:g2', 'low_impact')],

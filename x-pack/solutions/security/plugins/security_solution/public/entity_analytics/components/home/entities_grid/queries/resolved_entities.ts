@@ -37,6 +37,11 @@ import type { EsqlRunner } from './types';
 
 export const SOURCE_FIELD = 'entity.source';
 export const WATCHLISTS_FIELD = 'entity.attributes.watchlists';
+/**
+ * Where a grouped row keeps the watchlists of its main entity alone: `WATCHLISTS_FIELD` holds the
+ * group's, so a row action that acts on the main entity reads this one.
+ */
+export const OWN_WATCHLISTS_FIELD = 'own_watchlists';
 const FIRST_SEEN_FIELD = 'entity.lifecycle.first_seen';
 const LAST_SEEN_FIELD = '`@timestamp`';
 
@@ -83,6 +88,8 @@ const buildResolvedEntityAliasSteps = ({
 
 /** Group values: highest criticality, all sources and watchlists, earliest first seen, latest last seen. */
 const buildResolvedEntityValueSteps = (): string[] => [
+  // The main entity's own watchlists, kept before the group's replace them below.
+  `| EVAL ${OWN_WATCHLISTS_FIELD} = ${WATCHLISTS_FIELD}`,
   `| EVAL own_rank = ${buildCriticalityRankExpression(CRITICALITY_FIELD)}`,
   `| EVAL group_rank = ${buildExtreme('GREATEST', 'own_rank', 'alias_rank')}`,
   `| EVAL ${CRITICALITY_FIELD} = ${buildCriticalityLevelExpression(
@@ -131,7 +138,11 @@ export const withResolvedEntityValues = async (
   const valuesById = new Map(groups.map((group) => [getEntityId(group), group]));
   return rows.map((row) => {
     const values = valuesById.get(getEntityId(row));
-    return values ? { ...row, ...values } : row;
+    if (!values) return row;
+    // A row read with its group values in the query (groups with aliases, sorted natively) already
+    // has the main entity's own watchlists; one read apart still holds them in its own field.
+    const own = OWN_WATCHLISTS_FIELD in row ? row[OWN_WATCHLISTS_FIELD] : row[WATCHLISTS_FIELD];
+    return { ...row, ...values, [OWN_WATCHLISTS_FIELD]: own };
   });
 };
 

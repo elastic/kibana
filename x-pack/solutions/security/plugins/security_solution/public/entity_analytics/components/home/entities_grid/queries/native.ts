@@ -37,7 +37,7 @@ import {
   getSortedPage,
   toList,
 } from './esql';
-import { buildResolvedEntityRowSteps } from './resolved_entities';
+import { buildResolvedEntityRowSteps, OWN_WATCHLISTS_FIELD } from './resolved_entities';
 import type { ColumnQuerySpec, EsqlRunner, SortPageContext } from './types';
 
 const fetchSortedByField = (args: QueryArgs, { runQuery }: SortPageContext) => {
@@ -138,7 +138,8 @@ const buildResolvedEntitiesWithAliasesQuery = (
   ...buildFilterClause(targetIds && `${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`),
   ...buildResolvedEntityRowSteps(args),
   ...buildEntityFilterConditions(args).map((condition) => `| WHERE ${condition}`),
-  ...buildRowFieldsSteps(args),
+  // The main entity's own watchlists come back beside the group's.
+  ...buildRowFieldsSteps(args, OWN_WATCHLISTS_FIELD),
   // One extra row tells there are too many groups to merge.
   `| LIMIT ${getMaxAliasGroups(args.pageSize) + 1}`,
 ];
