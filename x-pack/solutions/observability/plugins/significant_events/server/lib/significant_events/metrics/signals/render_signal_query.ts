@@ -8,7 +8,12 @@
 import { toFromSourceQuery } from '@kbn/nightshift-shared';
 import { quoteEsqlString } from '../entity_rows/helpers';
 import { WORKLOAD_OWNER_DERIVATION } from '../kubernetes/workloads';
-import type { SignalTemplate, SignalTemplateVariant, SignalTemplateEntityField } from './types';
+import {
+  getSignalDirection,
+  type SignalTemplate,
+  type SignalTemplateVariant,
+  type SignalTemplateEntityField,
+} from './types';
 
 const CLUSTER_FIELD = 'orchestrator.cluster.name';
 const POD_FIELD = 'kubernetes.pod.name';
@@ -338,7 +343,14 @@ export const renderSignalQuery = ({
       ...workloadPipeline,
       ...renderEntityFieldDerivations(additionalEntityFields),
       aggregation,
-      ...(perMinute ? [renderPreviewRanking(entityFields, template.hint.comparison === '<')] : []),
+      ...(perMinute
+        ? [
+            renderPreviewRanking(
+              entityFields,
+              getSignalDirection(template.hint.comparison) === 'lower_is_worse'
+            ),
+          ]
+        : []),
     ].join('\n'),
   };
 };

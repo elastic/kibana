@@ -11,7 +11,12 @@ import type { SignalFieldPresence } from './check_signal_fields';
 import { planMeasurementDefinition } from './plan_measurement_definitions';
 import { renderSignalQuery } from './render_signal_query';
 import type { SignalQueryRenderPlan } from './render_signal_query';
-import type { MeasurementDefinition, SignalTemplate, SkippedMeasurementDefinition } from './types';
+import {
+  getSignalDirection,
+  type MeasurementDefinition,
+  type SignalTemplate,
+  type SkippedMeasurementDefinition,
+} from './types';
 
 export type MetricsTypeKnowledgeIndicator = Feature & {
   subtype: string;
@@ -108,6 +113,8 @@ export const buildMeasurementDefinitions = ({
         entity_fields: entityFields,
         metric_type: template.metricType,
         unit: template.unit,
+        direction: getSignalDirection(template.hint.comparison),
+        bounded: template.bounded,
         value_column: 'value',
         context_columns: [...template.contextColumns],
         esql: definitionEsql,

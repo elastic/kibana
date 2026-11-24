@@ -8,6 +8,11 @@
 export type SignalSchema = 'ecs' | 'otel';
 export type SignalComparison = '>' | '>=' | '<' | '==';
 export type SignalMetricType = 'gauge' | 'counter' | 'state';
+export type SignalDirection = 'higher_is_worse' | 'lower_is_worse';
+
+/** Returns whether a higher or a lower value is the bad side of a threshold. */
+export const getSignalDirection = (comparison: SignalComparison): SignalDirection =>
+  comparison === '<' ? 'lower_is_worse' : 'higher_is_worse';
 
 export type SignalSource =
   | {
@@ -81,6 +86,8 @@ export interface SignalTemplate {
   subtypes: readonly string[];
   metricType: SignalMetricType;
   unit: string;
+  /** True when the value has a known maximum, such as 1.0 for a ratio or a state. */
+  bounded: boolean;
   contextColumns: readonly string[];
   hint: SignalTemplateHint;
   additionalEntityFields?: readonly SignalTemplateEntityField[];
@@ -121,6 +128,8 @@ export interface MeasurementDefinition {
   entity_fields: string[];
   metric_type: SignalMetricType;
   unit: string;
+  direction: SignalDirection;
+  bounded: boolean;
   value_column: 'value';
   context_columns: string[];
   esql: string;

@@ -42,6 +42,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
     subtypes: WORKLOAD_SUBTYPES.slice(0, 3),
     metricType: 'gauge',
     unit: 'ratio',
+    bounded: true,
     contextColumns: ['worst_container'],
     hint: { comparison: '>', threshold: 0.9, window: '15 minutes' },
     variants: [
@@ -71,6 +72,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
     subtypes: WORKLOAD_SUBTYPES.slice(0, 3),
     metricType: 'gauge',
     unit: 'ratio',
+    bounded: true,
     contextColumns: ['worst_container'],
     hint: { comparison: '>', threshold: 0.9, window: '15 minutes' },
     variants: [
@@ -98,6 +100,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
     subtypes: ['k8s.node'],
     metricType: 'state',
     unit: 'boolean',
+    bounded: true,
     contextColumns: [],
     hint: { comparison: '==', threshold: 1, window: '1 minute' },
     variants: [
@@ -128,6 +131,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
     subtypes: ['k8s.node'],
     metricType: 'state',
     unit: 'boolean',
+    bounded: true,
     contextColumns: [],
     hint: { comparison: '==', threshold: 1, window: '1 minute' },
     variants: [
@@ -156,6 +160,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
     subtypes: ['k8s.node'],
     metricType: 'state',
     unit: 'boolean',
+    bounded: true,
     contextColumns: [],
     hint: { comparison: '==', threshold: 1, window: '1 minute' },
     variants: [
@@ -184,6 +189,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
     subtypes: ['k8s.node'],
     metricType: 'gauge',
     unit: 'ratio',
+    bounded: true,
     contextColumns: [],
     hint: { comparison: '>', threshold: 0.85, window: '15 minutes' },
     variants: [
@@ -213,6 +219,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
     subtypes: ['k8s.namespace'],
     metricType: 'gauge',
     unit: 'ratio',
+    bounded: true,
     contextColumns: [],
     hint: { comparison: '<', threshold: 0.2, window: '15 minutes' },
     additionalEntityFields: [
@@ -247,6 +254,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
     subtypes: ['host'],
     metricType: 'gauge',
     unit: 'ratio',
+    bounded: true,
     contextColumns: ['sample_count'],
     hint: {
       comparison: '>=',
@@ -283,6 +291,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
     subtypes: ['host'],
     metricType: 'gauge',
     unit: 'ratio',
+    bounded: true,
     contextColumns: ['sample_count'],
     hint: {
       comparison: '>=',
@@ -319,6 +328,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
     subtypes: ['service'],
     metricType: 'gauge',
     unit: 'ratio',
+    bounded: true,
     contextColumns: ['request_count'],
     hint: {
       comparison: '>',

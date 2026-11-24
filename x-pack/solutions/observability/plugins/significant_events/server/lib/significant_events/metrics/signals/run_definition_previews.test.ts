@@ -8,11 +8,12 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SignalQueryRenderPlan } from './render_signal_query';
 import { runDefinitionPreviews } from './run_definition_previews';
-import type {
-  MeasurementDefinition,
-  SignalComparison,
-  SignalTemplate,
-  SignalTemplateVariant,
+import {
+  getSignalDirection,
+  type MeasurementDefinition,
+  type SignalComparison,
+  type SignalTemplate,
+  type SignalTemplateVariant,
 } from './types';
 
 const source = { kind: 'nightshift_default' as const, reason: 'test' };
@@ -32,6 +33,8 @@ const createDefinition = (signal: string, comparison: SignalComparison): Measure
   entity_fields: ['host.name'],
   metric_type: 'gauge',
   unit: 'ratio',
+  direction: getSignalDirection(comparison),
+  bounded: true,
   value_column: 'value',
   context_columns: [],
   esql: 'stored query',
@@ -53,6 +56,7 @@ const createPlan = (signal: string, comparison: SignalComparison): SignalQueryRe
     subtypes: ['host'],
     metricType: 'gauge',
     unit: 'ratio',
+    bounded: true,
     contextColumns: [],
     hint: { comparison, threshold: 0.9, window: '5 minutes' },
     variants: [variant],
