@@ -47,7 +47,7 @@ const baseParams = {
 };
 
 // Build a fake ES|QL row in the column order parseEsqlBaseScoreRow expects:
-// [alert_count, scores, risk_inputs, alert_sources, entity_id]
+// [alert_count, scores, risk_inputs, source_alert_counts, entity_id]
 const esqlRow = (entityId: string, alertCount = 1, sources: string | string[] = '1:okta') =>
   [
     alertCount,

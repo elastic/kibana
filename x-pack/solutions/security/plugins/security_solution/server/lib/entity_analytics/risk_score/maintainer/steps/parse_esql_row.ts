@@ -16,7 +16,7 @@ export interface ParsedRiskScore {
   normalized_score: number;
   risk_inputs: SearchHitRiskInput[];
   /** Alert count per `entity.source` of the entity's alerts; absent when the row carries none. */
-  alert_sources?: SourceAlertCount[];
+  source_alert_counts?: SourceAlertCount[];
 }
 
 export interface SourceAlertCount {
@@ -109,7 +109,7 @@ export const parseEsqlBaseScoreRow =
       score,
       normalized_score: score / zetaValue,
       risk_inputs: inputs,
-      alert_sources: [_sources].flat().flatMap(parseSourceAlertCount),
+      source_alert_counts: [_sources].flat().flatMap(parseSourceAlertCount),
     };
   };
 
@@ -124,6 +124,8 @@ export const parseEsqlResolutionScoreRow =
       string
     ];
 
+    // No source counts here: base scoring already counted these alerts, so counting them again
+    // would double them in telemetry.
     const baseParsed = parseEsqlBaseScoreRow(
       index,
       sampleSize

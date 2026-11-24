@@ -17,12 +17,12 @@ export interface AlertSourceCount {
 export type AlertSourceCounts = Record<string, AlertSourceCount>;
 
 /** Counts alerts per source, split by whether their entity exists in the store. */
-export const tallyAlertSources = (
-  scores: ReadonlyArray<Pick<ParsedRiskScore, 'entity_id' | 'alert_sources'>>,
+export const buildSourceCountsResult = (
+  scores: ReadonlyArray<Pick<ParsedRiskScore, 'entity_id' | 'source_alert_counts'>>,
   entities: ReadonlyMap<string, unknown>
 ): AlertSourceCounts => {
   const counts: AlertSourceCounts = Object.create(null);
-  for (const { entity_id: entityId, alert_sources: sources } of scores) {
+  for (const { entity_id: entityId, source_alert_counts: sources } of scores) {
     const key = entities.has(entityId) ? 'scored' : 'unmatched';
     for (const { source, alerts } of sources ?? []) {
       const entry = counts[source] ?? { scored: 0, unmatched: 0 };
@@ -33,14 +33,15 @@ export const tallyAlertSources = (
   return counts;
 };
 
+/** Adds two sets of counts into a new one, leaving both inputs unchanged. */
 export const mergeAlertSourceCounts = (
-  target: AlertSourceCounts,
+  current: Readonly<AlertSourceCounts>,
   addition: Readonly<AlertSourceCounts>
-): void => {
+): AlertSourceCounts => {
+  const merged: AlertSourceCounts = Object.assign(Object.create(null), current);
   for (const [source, { scored, unmatched }] of Object.entries(addition)) {
-    const entry = target[source] ?? { scored: 0, unmatched: 0 };
-    entry.scored += scored;
-    entry.unmatched += unmatched;
-    target[source] = entry;
+    const entry = merged[source] ?? { scored: 0, unmatched: 0 };
+    merged[source] = { scored: entry.scored + scored, unmatched: entry.unmatched + unmatched };
   }
+  return merged;
 };

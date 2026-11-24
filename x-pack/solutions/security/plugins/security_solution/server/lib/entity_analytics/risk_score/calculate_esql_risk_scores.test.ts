@@ -399,16 +399,18 @@ describe('Calculate risk scores with ESQL', () => {
             '.alerts-security.alerts-default'
           );
 
-          expect(query).toContain('EVAL alert_source = COALESCE(entity.source, "unknown")');
+          expect(query).toContain('EVAL alert_sources = COALESCE(entity.source, "unknown")');
           expect(query).toContain(
-            'INLINE STATS source_alert_count = COUNT(*) BY entity_id, alert_source'
+            'INLINE STATS alerts_per_source = COUNT(*) BY entity_id, alert_sources'
           );
           expect(query).toContain(
-            'EVAL alert_source_count = CONCAT(TO_STRING(source_alert_count), ":", alert_source)'
+            'EVAL source_alert_count = CONCAT(TO_STRING(alerts_per_source), ":", alert_sources)'
           );
-          expect(query).toMatch(/alert_sources = VALUES\(alert_source_count\)\s+BY entity_id/);
+          expect(query).toMatch(
+            /source_alert_counts = VALUES\(source_alert_count\)\s+BY entity_id/
+          );
           expect(query.indexOf('WHERE entity_id >')).toBeLessThan(query.indexOf('INLINE STATS'));
-          expect(query.indexOf('entity.source =')).toBeLessThan(query.indexOf('alert_source ='));
+          expect(query.indexOf('entity.source =')).toBeLessThan(query.indexOf('alert_sources ='));
         }
       );
 

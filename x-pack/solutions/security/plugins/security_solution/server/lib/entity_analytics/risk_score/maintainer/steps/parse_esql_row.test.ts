@@ -17,29 +17,29 @@ describe('parseEsqlBaseScoreRow', () => {
 
     expect(parsed.entity_id).toBe('user:a@okta');
     expect(parsed.alert_count).toBe(10);
-    expect(parsed.alert_sources).toEqual([
+    expect(parsed.source_alert_counts).toEqual([
       { source: 'okta', alerts: 9 },
       { source: 'azure', alerts: 1 },
     ]);
   });
 
   it('wraps a single source and drops null sources', () => {
-    expect(parseRow([1, 10, input, '1:okta', 'user:a@okta']).alert_sources).toEqual([
+    expect(parseRow([1, 10, input, '1:okta', 'user:a@okta']).source_alert_counts).toEqual([
       { source: 'okta', alerts: 1 },
     ]);
-    expect(parseRow([1, 10, input, null, 'user:a@okta']).alert_sources).toEqual([]);
+    expect(parseRow([1, 10, input, null, 'user:a@okta']).source_alert_counts).toEqual([]);
   });
 
   it('splits on the first colon, so sources can contain colons', () => {
-    expect(parseRow([3, 10, input, '3:custom:source', 'user:a@okta']).alert_sources).toEqual([
+    expect(parseRow([3, 10, input, '3:custom:source', 'user:a@okta']).source_alert_counts).toEqual([
       { source: 'custom:source', alerts: 3 },
     ]);
   });
 
   it('drops values without a count', () => {
-    expect(parseRow([1, 10, input, ['okta', ':okta', 'x:okta'], 'user:a']).alert_sources).toEqual(
-      []
-    );
+    expect(
+      parseRow([1, 10, input, ['okta', ':okta', 'x:okta'], 'user:a']).source_alert_counts
+    ).toEqual([]);
   });
 });
 

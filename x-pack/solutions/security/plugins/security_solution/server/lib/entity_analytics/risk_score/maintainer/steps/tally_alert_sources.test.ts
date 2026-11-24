@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { mergeAlertSourceCounts, tallyAlertSources } from './tally_alert_sources';
+import { mergeAlertSourceCounts, buildSourceCountsResult } from './tally_alert_sources';
 
-describe('tallyAlertSources', () => {
+describe('buildSourceCountsResult', () => {
   const entities = new Map([['user:a', {}]]);
 
   it('splits alerts by whether the entity is in the store', () => {
     expect(
-      tallyAlertSources(
+      buildSourceCountsResult(
         [
-          { entity_id: 'user:a', alert_sources: [{ source: 'okta', alerts: 3 }] },
-          { entity_id: 'user:ghost', alert_sources: [{ source: 'okta', alerts: 2 }] },
+          { entity_id: 'user:a', source_alert_counts: [{ source: 'okta', alerts: 3 }] },
+          { entity_id: 'user:ghost', source_alert_counts: [{ source: 'okta', alerts: 2 }] },
         ],
         entities
       )
@@ -24,11 +24,11 @@ describe('tallyAlertSources', () => {
 
   it('gives each source only its own alerts when an entity has several sources', () => {
     expect(
-      tallyAlertSources(
+      buildSourceCountsResult(
         [
           {
             entity_id: 'user:a',
-            alert_sources: [
+            source_alert_counts: [
               { source: 'okta', alerts: 9 },
               { source: 'azure', alerts: 1 },
             ],
@@ -43,15 +43,15 @@ describe('tallyAlertSources', () => {
   });
 
   it('ignores scores without sources', () => {
-    expect(tallyAlertSources([{ entity_id: 'user:a' }], entities)).toEqual({});
+    expect(buildSourceCountsResult([{ entity_id: 'user:a' }], entities)).toEqual({});
   });
 
   it('does not treat names like __proto__ or constructor specially', () => {
-    const counts = tallyAlertSources(
+    const counts = buildSourceCountsResult(
       [
         {
           entity_id: 'user:a',
-          alert_sources: [
+          source_alert_counts: [
             { source: '__proto__', alerts: 1 },
             { source: 'constructor', alerts: 1 },
           ],
@@ -69,14 +69,15 @@ describe('mergeAlertSourceCounts', () => {
   it('adds the counts of a page to the run total', () => {
     const total = { okta: { scored: 1, unmatched: 1 } };
 
-    mergeAlertSourceCounts(total, {
+    const merged = mergeAlertSourceCounts(total, {
       okta: { scored: 2, unmatched: 0 },
       azure: { scored: 0, unmatched: 5 },
     });
 
-    expect(total).toEqual({
+    expect(merged).toEqual({
       okta: { scored: 3, unmatched: 1 },
       azure: { scored: 0, unmatched: 5 },
     });
+    expect(total).toEqual({ okta: { scored: 1, unmatched: 1 } });
   });
 });

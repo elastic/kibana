@@ -107,10 +107,10 @@ export interface EuidCompositeAggregation {
  * 1. Filters documents where the entity has an identifiable EUID
  * 2. Uses the entity store EUID evaluation logic to compute entity_id
  * 3. Filters to the EUID page bounds: WHERE entity_id > lower AND entity_id <= upper
- * 4. STATs alert_count, scores (MV_PSERIES_WEIGHTED_SUM), risk_inputs, alert_sources BY entity_id.
- *    Each `alert_sources` value is `<alert count>:<source>`, so the counts are exact per source.
+ * 4. STATs alert_count, scores (MV_PSERIES_WEIGHTED_SUM), risk_inputs, source_alert_counts BY entity_id.
+ *    Each `source_alert_counts` value is `<alert count>:<source>`, so the counts are exact per source.
  *
- * Column order: [alert_count, scores, risk_inputs, alert_sources, entity_id]
+ * Column order: [alert_count, scores, risk_inputs, source_alert_counts, entity_id]
  * This order must match buildBaseScoreRiskScoreBucket().
  */
 export const getBaseScoreESQL = (
@@ -130,8 +130,8 @@ export const getBaseScoreESQL = (
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
   // Same `entity.source` derivation the entity store uses, so alert and entity sources line up.
   const alertSourceEvalClause = fieldEvals?.includes('entity.source')
-    ? '| EVAL alert_source = COALESCE(entity.source, "unknown")'
-    : '| EVAL alert_source = "unknown"';
+    ? '| EVAL alert_sources = COALESCE(entity.source, "unknown")'
+    : '| EVAL alert_sources = "unknown"';
   const euidEvalClause = `| EVAL ${euid.esql.getEuidEvaluation(definition, 'entity_id', {
     withTypeId: true,
   })}`;
@@ -181,8 +181,8 @@ export const getBaseScoreESQL = (
     ${euidEvalClause}
     ${storedEuidCoalesceClause}
     | WHERE ${rangeClause}
-    | INLINE STATS source_alert_count = COUNT(*) BY entity_id, alert_source
-    | EVAL alert_source_count = CONCAT(TO_STRING(source_alert_count), ":", alert_source)
+    | INLINE STATS alerts_per_source = COUNT(*) BY entity_id, alert_sources
+    | EVAL source_alert_count = CONCAT(TO_STRING(alerts_per_source), ":", alert_sources)
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
@@ -198,7 +198,7 @@ export const getBaseScoreESQL = (
           sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = ${RISK_INPUTS_TOP},
-        alert_sources = VALUES(alert_source_count)
+        source_alert_counts = VALUES(source_alert_count)
         BY entity_id
     | SORT scores DESC
     | LIMIT ${pageSize}
