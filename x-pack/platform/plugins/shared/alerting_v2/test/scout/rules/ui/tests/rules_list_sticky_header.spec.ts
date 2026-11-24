@@ -11,6 +11,7 @@ import { buildCreateRuleData, test, testData } from '../fixtures';
 
 const RULE_COUNT = 20;
 const RULE_TAG = `scout-sticky-header-${randomUUID()}`;
+// The 000 prefix sorts this row first; its disappearance after tag filtering confirms updated results before scrolling.
 const UNRELATED_RULE_NAME = `000 unrelated sticky header rule ${RULE_TAG}`;
 const UNRELATED_RULE_TAG = `scout-unrelated-sticky-header-${RULE_TAG}`;
 const firstRuleId = randomUUID();
