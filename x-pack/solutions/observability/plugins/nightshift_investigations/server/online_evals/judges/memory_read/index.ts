@@ -9,7 +9,7 @@ import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
 import { lazySchema, z } from '@kbn/zod/v4';
 
 export const READ_JUDGE_EVALUATOR_NAME = 'nightshift_memory_read_judge';
-export const MEMORY_READ_JUDGE_VERSION = '1.0.0';
+export const MEMORY_READ_JUDGE_VERSION = '1.1.0';
 
 export const memoryReadJudgeReferenceDataSchema = lazySchema(() =>
   z.object({
@@ -21,7 +21,7 @@ export const memoryReadJudgeReferenceDataSchema = lazySchema(() =>
 export type MemoryReadJudgeReferenceData = z.infer<typeof memoryReadJudgeReferenceDataSchema>;
 
 /**
- * Scores whether recalled or hydrated items (Wiki pages, Semantic Memories, Decision Trees)
+ * Scores whether recalled Semantic Memories
  * were opened during a Nightshift investigation round.
  */
 export const memoryReadJudge: RegisteredEvaluatorDefinition<MemoryReadJudgeReferenceData> = {
@@ -30,7 +30,7 @@ export const memoryReadJudge: RegisteredEvaluatorDefinition<MemoryReadJudgeRefer
   kind: 'code',
   direction: 'maximize',
   description:
-    'Evaluates whether recalled or hydrated memory items (Wiki, Semantic Memory, Decision Trees) were opened during a Nightshift investigation round.',
+    'Evaluates whether recalled Semantic Memories were opened during a Nightshift investigation round.',
   referenceDataSchema: memoryReadJudgeReferenceDataSchema,
   async evaluate({ referenceData }) {
     const recalledIds = [...new Set((referenceData?.recalled_ids ?? []).filter(Boolean))];

@@ -94,6 +94,26 @@ steps:
       entry_point: '${{ inputs.entry_point }}'
       alert_rule_type: '${{ inputs.alert_rule_type }}'
 
+  # The scorer accepts at most five evaluators per call, so the Wiki judges run as a second call. Rounds
+  # that read no Wiki pages are skipped by the judges themselves.
+  - name: score_wiki
+    type: nightshift.onlineEvals.score
+    if: "${{ inputs.round_kind == 'initial' }}"
+    with:
+      investigation_id: '{{ inputs.investigation_id }}'
+      round_id: '{{ inputs.round_id }}'
+      round_kind: '{{ inputs.round_kind }}'
+      graded_report: first_round
+      evaluator_set: reference_free
+      evaluators:
+        - name: nightshift_wiki_pages_read
+        - name: nightshift_wiki_page_influence
+      investigation_started_at: '{{ inputs.investigation_started_at }}'
+      investigation_ended_at: '${{ inputs.investigation_ended_at }}'
+      investigation_execution_id: '${{ inputs.investigation_execution_id }}'
+      entry_point: '${{ inputs.entry_point }}'
+      alert_rule_type: '${{ inputs.alert_rule_type }}'
+
   # An alert recovery grades the first round against the recovery round's conclusion, the ground
   # truth. The recovery round itself isn't graded.
   - name: score_alert_outcome

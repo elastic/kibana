@@ -22,20 +22,20 @@ describe('nightshift online evals workflow', () => {
     expect(NIGHTSHIFT_ONLINE_EVALS_WORKFLOW.billable).toBe(false);
   });
 
-  const [scoreReferenceFree, scoreAlertOutcome] = workflow.steps;
+  const [scoreReferenceFree, scoreWiki, scoreAlertOutcome] = workflow.steps;
   const runsFor = (step: (typeof workflow.steps)[number], roundKind: string) =>
     createWorkflowLiquidEngine().evalValueSync((step.if ?? '').slice(3, -2), {
       inputs: { round_kind: roundKind },
     });
 
   it.each([
-    ['initial', 'score_reference_free'],
-    ['follow_up', undefined],
-    ['alert_recovery', 'score_alert_outcome'],
+    ['initial', ['score_reference_free', 'score_wiki']],
+    ['follow_up', []],
+    ['alert_recovery', ['score_alert_outcome']],
   ])('scores a %s round with only %s', (roundKind, expected) => {
     expect(
       workflow.steps.filter((step) => runsFor(step, roundKind)).map(({ name }) => name)
-    ).toEqual(expected ? [expected] : []);
+    ).toEqual(expected);
   });
 
   it('grades the first-round report with the reference-free judges', () => {
@@ -51,6 +51,23 @@ describe('nightshift online evals workflow', () => {
             { name: 'nightshift_conclusion_quality' },
             { name: 'nightshift_missing_data' },
             { name: 'nightshift_tool_call_health' },
+          ],
+          entry_point: '${{ inputs.entry_point }}',
+        }),
+      })
+    );
+  });
+
+  it('scores the first-round report with the Wiki page judges in a separate call', () => {
+    expect(scoreWiki).toEqual(
+      expect.objectContaining({
+        type: 'nightshift.onlineEvals.score',
+        with: expect.objectContaining({
+          graded_report: 'first_round',
+          evaluator_set: 'reference_free',
+          evaluators: [
+            { name: 'nightshift_wiki_pages_read' },
+            { name: 'nightshift_wiki_page_influence' },
           ],
           entry_point: '${{ inputs.entry_point }}',
         }),

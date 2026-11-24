@@ -13,9 +13,7 @@ import type { EvaluateFn, EvidenceRound } from '@kbn/evals-plugin/server';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { lazySchema, z } from '@kbn/zod/v4';
-import { usesDecisionTrees, usesKnowledge } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
-import { createDecisionTreeStore } from '../decision_trees/store';
 import {
   APPLIED_WRITE_STORES,
   extractWorkspaceReads,
@@ -33,7 +31,6 @@ import {
 } from '../online_evals/judges';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { toDeterministicTraceId, withNightshiftBackgroundSpan } from '../tracing';
-import { createWikiStore } from '../wiki/register_wiki';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
 export const MEMORY_EVALUATOR_SET = 'memory';
@@ -201,8 +198,6 @@ export const scoreMemoryOnlineEvalsStepDefinition = ({
   telemetry,
   logger,
   isEnabled,
-  isWikiEnabled,
-  isDecisionTreesEnabled,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   /** The evals plugin's `evaluate()`; absent when the evals plugin is not loaded. */
@@ -216,8 +211,6 @@ export const scoreMemoryOnlineEvalsStepDefinition = ({
   telemetry: Pick<NightshiftTelemetryClient, 'reportOnlineEvalScore'>;
   logger: Logger;
   isEnabled?: () => boolean;
-  isWikiEnabled?: () => boolean;
-  isDecisionTreesEnabled?: () => boolean;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.onlineEvals.scoreMemory',
@@ -304,99 +297,12 @@ export const scoreMemoryOnlineEvalsStepDefinition = ({
         ...(input.decision_tree_applied_writes ?? []),
       ] as AppliedWriteRecord[];
 
-      const newlyCreatedItemIds = new Set(
-        appliedWrites
-          .filter(
-            (write) =>
-              write.before_status === 'archived' ||
-              (write.before_content === undefined &&
-                (write.action === 'create' || write.version === 1 || write.version === '1'))
-          )
-          .map((write) => write.item_id)
-      );
-      const archivedThisRoundIds = new Set(
-        appliedWrites
-          .filter(
-            (write) => write.after_status === 'archived' && write.before_status !== 'archived'
-          )
-          .map((write) => write.item_id)
-      );
-
-      // Include hydrated Wiki and Decision Tree IDs alongside Semantic Memory recalled_ids
-      // so Wiki-only and Decision-Tree reads match the candidate set.
-      const hydratedStoreIds: string[] = [...(input.hydrated_ids ?? [])];
-      const esClient = context.contextManager.getScopedEsClient?.();
-      if (esClient && typeof esClient.search === 'function') {
-        if ((isWikiEnabled ? isWikiEnabled() : true) && usesKnowledge(agentId)) {
-          try {
-            const { pages } = await createWikiStore({
-              esClient,
-              logger,
-              spaceId: workflow.spaceId,
-              signal: context.abortSignal,
-            }).list();
-            for (const page of pages ?? []) {
-              if (
-                (page.status !== 'archived' || archivedThisRoundIds.has(page.id)) &&
-                !newlyCreatedItemIds.has(page.id)
-              ) {
-                hydratedStoreIds.push(page.id);
-              }
-            }
-          } catch (error) {
-            context.logger.debug(
-              `Memory online evals could not list Wiki store for hydrated IDs: ${
-                error instanceof Error ? error.message : String(error)
-              }`
-            );
-          }
-        }
-        if (
-          (isDecisionTreesEnabled ? isDecisionTreesEnabled() : true) &&
-          usesDecisionTrees(agentId)
-        ) {
-          try {
-            const trees = await createDecisionTreeStore({
-              esClient,
-              logger,
-              spaceId: workflow.spaceId,
-              signal: context.abortSignal,
-            }).list();
-            for (const tree of trees ?? []) {
-              if (
-                (tree.status !== 'archived' || archivedThisRoundIds.has(tree.tree_id)) &&
-                !newlyCreatedItemIds.has(tree.tree_id)
-              ) {
-                hydratedStoreIds.push(tree.tree_id);
-              }
-            }
-          } catch (error) {
-            context.logger.debug(
-              `Memory online evals could not list Decision Tree store for hydrated IDs: ${
-                error instanceof Error ? error.message : String(error)
-              }`
-            );
-          }
-        }
-      }
-
-      const explicitOpenedIds = [
-        ...(input.wiki_opened_ids ?? []),
-        ...(input.memory_opened_ids ?? []),
-        ...(input.decision_tree_opened_ids ?? []),
-      ].filter(Boolean);
-      const recalledIds = [
-        ...new Set([...(input.recalled_ids ?? []), ...hydratedStoreIds].filter(Boolean)),
-      ];
+      // The read judge only scores workspace Semantic Memories: the candidate set is the recalled
+      // memories, not every Wiki page or Decision Tree in the store.
+      const explicitOpenedIds = (input.memory_opened_ids ?? []).filter(Boolean);
+      const recalledIds = [...new Set((input.recalled_ids ?? []).filter(Boolean))];
       const openedIds = [
-        ...new Set(
-          [
-            ...explicitOpenedIds,
-            ...transcriptReads.wikiIds,
-            ...transcriptReads.memoryIds,
-            ...transcriptReads.decisionTreeIds,
-          ].filter(Boolean)
-        ),
+        ...new Set([...explicitOpenedIds, ...transcriptReads.memoryIds].filter(Boolean)),
       ];
 
       // When the conversation is unreadable (e.g. a private conversation), the round loader

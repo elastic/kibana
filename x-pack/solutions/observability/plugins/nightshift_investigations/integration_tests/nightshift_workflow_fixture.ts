@@ -362,8 +362,6 @@ export const createNightshiftWorkflowFixture = ({
       telemetry: { reportOnlineEvalScore },
       logger,
       isEnabled: () => wikiEnabled || memoryEnabled || decisionTreesEnabled,
-      isWikiEnabled: () => wikiEnabled,
-      isDecisionTreesEnabled: () => decisionTreesEnabled,
     }),
   ];
   const byId = new Map(definitions.map((definition) => [definition.id, definition]));
