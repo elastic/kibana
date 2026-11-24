@@ -8,20 +8,19 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import { pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
   combineLatestWith,
-  debounce,
   debounceTime,
   distinctUntilChanged,
   filter,
   first,
   map,
-  of,
   skip,
+  skipWhile,
   switchMap,
-  timer,
   type Subject,
 } from 'rxjs';
 
@@ -50,20 +49,23 @@ export const initializeFiltersManager = (
 
   const pinnedPanelIds$ = layoutManager.api.layout$.pipe(
     map((layout) => Object.keys(layout.pinnedPanels)),
-    distinctUntilChanged(deepEqual)
+    distinctUntilChanged<string[]>(deepEqual)
   );
 
-  const childrenAwaitingRequiredFilters$ = new BehaviorSubject<boolean>(false);
+  /** whether the pinned children are awaiting required filters, regardless of whether it is published yet */
+  const childrenAwaitingRequiredFilters$ = new BehaviorSubject<boolean>(
+    awaitingRequiredFilters$.getValue()
+  );
   const requiredFiltersSubscription = combineCompatibleChildrenApis<
     PublishesAwaitingRequiredFilters,
     boolean
   >(
     {
+      // only pinned panels can be required; re-evaluate when children or pinned panels change
       children$: combineLatest([layoutManager.api.children$, pinnedPanelIds$]).pipe(
-        // only pinned panels can be required; re-evaluate when children or pinned panels change
-        map(([children, pinnedIds]) =>
-          Object.values(children).filter((child) => pinnedIds.includes(child.uuid))
-        )
+        // controls can only report that they are awaiting filters once mounted, so keep the initial value until then
+        skipWhile(([children, pinnedIds]) => pinnedIds.some((uuid) => !children[uuid])),
+        map(([children, pinnedIds]) => pick(children, pinnedIds))
       ),
     },
     'awaitingRequiredFilters$',
@@ -72,8 +74,9 @@ export const initializeFiltersManager = (
     (values) => {
       return values.some((awaitingRequired) => awaitingRequired);
     }
-  ).subscribe((a) => {
-    childrenAwaitingRequiredFilters$.next(a);
+  ).subscribe((awaiting) => {
+    if (awaiting !== childrenAwaitingRequiredFilters$.getValue())
+      childrenAwaitingRequiredFilters$.next(awaiting);
   });
 
   /** `true` while any child is still computing its filters */
@@ -113,7 +116,8 @@ export const initializeFiltersManager = (
   /** push filters to `unpublishedChildFilters$` once children are done computing their filters */
   const unpublishedFiltersSubscription = childFilters$
     .pipe(
-      combineLatestWith(anyChildFiltersLoading$),
+      // a change in what the children are awaiting also pushes, so that auto-apply publishes it along with their filters
+      combineLatestWith(anyChildFiltersLoading$, childrenAwaitingRequiredFilters$),
       skip(1),
       debounceTime(0),
       filter(([, loading]) => !loading)
@@ -128,7 +132,10 @@ export const initializeFiltersManager = (
     if (!deepEqual(published, unpublished)) {
       publishedChildFilters$.next(unpublished);
     }
-    awaitingRequiredFilters$.next(childrenAwaitingRequiredFilters$.getValue());
+    const awaiting = childrenAwaitingRequiredFilters$.getValue();
+    if (awaiting !== awaitingRequiredFilters$.getValue()) {
+      awaitingRequiredFilters$.next(awaiting);
+    }
   };
 
   /** `true` while the unpublished child filters differ from the published ones */
