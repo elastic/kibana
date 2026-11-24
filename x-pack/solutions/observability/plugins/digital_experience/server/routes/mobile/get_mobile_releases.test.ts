@@ -43,6 +43,7 @@ const setup = ({
       start: START,
       end: END,
       environment: 'production',
+      timeZone: 'America/New_York',
     });
   return { client, run };
 };
@@ -211,6 +212,24 @@ describe('getMobileReleases', () => {
       sessions: 0,
       errorRate: null,
     });
+  });
+
+  it("buckets the series in the user's time zone, and only the series", async () => {
+    const { client, run } = setup({
+      top: [{ release: '1', sessions: 300 }],
+      totals: [total('1', 300)],
+    });
+
+    await run();
+
+    const [topRequest, totalsRequest, seriesRequest, firstSeenRequest] =
+      client.esql.query.mock.calls.map(([request]) => request);
+    expect(seriesRequest.time_zone).toBe('America/New_York');
+    // The other queries have no buckets, nor users in the series
+    [topRequest, totalsRequest, firstSeenRequest].forEach((request) =>
+      expect(request).not.toHaveProperty('time_zone')
+    );
+    expect(seriesRequest.query).not.toContain('users');
   });
 
   it('leaves the error rate of a bucket below 10 sessions out: 9 has none', async () => {

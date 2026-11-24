@@ -66,7 +66,9 @@ const ERROR_RATE_TITLE = i18n.translate('xpack.digitalExperience.mobile.releases
 });
 
 const ERROR_RATE_EMPTY = i18n.translate('xpack.digitalExperience.mobile.releases.errorRate.empty', {
-  defaultMessage: 'No release has enough sessions to show an error rate',
+  defaultMessage:
+    'No release has enough sessions to show an error rate over time: it takes {minSessions} sessions in the time range, and {minBucketSessions} in a time bucket.',
+  values: { minSessions: MIN_RELEASE_SESSIONS, minBucketSessions: MIN_BUCKET_SESSIONS },
 });
 
 const ADOPTION_TITLE = i18n.translate('xpack.digitalExperience.mobile.releases.adoption.title', {
@@ -281,7 +283,11 @@ export function ReleaseErrorRateChart({ releases, ...props }: ReleaseChartProps)
   const withRate = new Set(
     releases.filter(({ errorRate }) => errorRate !== null).map(({ release }) => release)
   );
-  const series = props.series.filter(({ release }) => withRate.has(release));
+  // A release over the range's floor can still have every bucket below the bucket's, so no point
+  const series = props.series.filter(
+    ({ release, points }) =>
+      withRate.has(release) && points.some(({ errorRate }) => errorRate !== null)
+  );
 
   return (
     <ChartPanel

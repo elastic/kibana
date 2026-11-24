@@ -274,14 +274,29 @@ export function ApplicationsListPage() {
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
+  const hasWebApplications = response?.applications.some(isWebApplication) ?? false;
+  const hasMobileApplications = response?.applications.some(isMobileApplication) ?? false;
+  const unavailableSources = response?.unavailableSources ?? [];
+  const hasWebFailures = unavailableSources.length > 0;
+  const typeWithData =
+    !hasWebApplications && !hasWebFailures && hasMobileApplications
+      ? APPLICATION_TYPE.mobile
+      : APPLICATION_TYPE.web;
+  const selectedType = applicationType ?? typeWithData;
+  const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
+
+  // Sessions are web only. The Mobile tab the URL picks requests no status; the one the list opens
+  // by itself, with only mobile rows, requests it once, for its Web tab, but doesn't poll it.
   const {
     status: sessionsStatus,
     refresh: refreshSessionsStatus,
     enable: enableSessions,
     enabling: enablingSessions,
     enableError: enableSessionsError,
-    // Sessions are web only: the Mobile tab, when the URL picks it, requests no status.
-  } = useSessionsStatus({ enabled: applicationType !== APPLICATION_TYPE.mobile });
+  } = useSessionsStatus({
+    enabled: applicationType !== APPLICATION_TYPE.mobile,
+    poll: !isMobileTab,
+  });
   // Once sessions are set up and built, the list has applications it was fetched without.
   const sessionsReady = sessionsStatus
     ? sessionsStatus.installed && !sessionsStatus.rebuilding
@@ -303,18 +318,10 @@ export function ApplicationsListPage() {
   // row doesn't change once the data loads.
   const canFilterBySource = ux !== undefined;
   const mobileAvailability = response?.mobileAvailability ?? 'complete';
-  const hasWebApplications = response?.applications.some(isWebApplication) ?? false;
-  const hasMobileApplications = response?.applications.some(isMobileApplication) ?? false;
-  const unavailableSources = response?.unavailableSources ?? [];
-  const hasWebFailures = unavailableSources.length > 0;
   // Nothing matched in the indices the user can read, without full access: the prompt says so in
   // place of the setup docs or the environment's empty state, and of the partial access warning.
   const showsMobileUnreadableDataPrompt =
     mobileAvailability === 'partial' && !hasMobileApplications;
-  const typeWithData =
-    !hasWebApplications && !hasWebFailures && hasMobileApplications
-      ? APPLICATION_TYPE.mobile
-      : APPLICATION_TYPE.web;
   // Web and mobile applications have their own tab when both have something to show (web rows, a
   // web retry or sessions still to set up or build, or maybe so, and mobile rows), for the mobile
   // retry or unreadable data prompt whatever the web, and
@@ -325,8 +332,6 @@ export function ApplicationsListPage() {
     showsMobileUnreadableDataPrompt ||
     ((hasWebApplications || hasWebFailures || mayNeedSessionsSetup) && hasMobileApplications) ||
     (response !== undefined && applicationType !== undefined && applicationType !== typeWithData);
-  const selectedType = applicationType ?? typeWithData;
-  const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
   // The status only refreshes by itself while sessions rebuild, so a refresh also checks it again,
   // on the Web tab only: sessions are web only.
   const refreshAll = useCallback(() => {

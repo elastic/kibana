@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
-import { MOBILE_APPS } from '../../common/fixtures/mobile_data';
+import { BUSY_RELEASE, MOBILE_APPS } from '../../common/fixtures/mobile_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
@@ -80,15 +80,6 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       await expect(digitalExperience.mobilePagePlatforms).toHaveText(['Android', 'iOS']);
     });
 
-    await test.step('shows the release health below the KPIs: the table and both charts', async () => {
-      await expect(digitalExperience.mobileReleaseHealth).toBeVisible();
-      await expect(
-        digitalExperience.mobileReleaseTable.getByText('1.0.0', { exact: true })
-      ).toBeVisible();
-      await expect(digitalExperience.mobileReleaseErrorRateChart).toBeVisible();
-      await expect(digitalExperience.mobileReleaseAdoptionChart).toBeVisible();
-    });
-
     await test.step('has no accessibility violations on the mobile page', async () => {
       const { violations } = await page.checkA11y({ include: ['main'] });
       expect(violations).toHaveLength(0);
@@ -118,6 +109,45 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       await digitalExperience.toggleMobileCompare();
       await expect(page).not.toHaveURL(/compare=/);
       await expect(digitalExperience.mobileKpiPrevious('Sessions')).toBeHidden();
+    });
+  });
+
+  test('shows the release health of an application with enough sessions, drawn', async ({
+    page,
+    pageObjects: { digitalExperience },
+  }) => {
+    await digitalExperience.gotoApplication(MOBILE_APPS.busyAndroid, {
+      ...TIME_RANGE,
+      source: 'otel',
+      applicationType: 'mobile',
+    });
+
+    await test.step('lists the release in the table, with its error rate', async () => {
+      await expect(digitalExperience.mobileReleaseHealth).toBeVisible();
+      await expect(
+        digitalExperience.mobileReleaseTable.getByText(BUSY_RELEASE, { exact: true })
+      ).toBeVisible();
+      await expect(digitalExperience.mobileReleaseTable.getByText('0.10')).toBeVisible();
+    });
+
+    await test.step('draws both charts, the release in their legends', async () => {
+      await expect(
+        digitalExperience.mobileReleaseChartSeries(
+          digitalExperience.mobileReleaseErrorRateChart,
+          BUSY_RELEASE
+        )
+      ).toBeVisible();
+      await expect(
+        digitalExperience.mobileReleaseChartSeries(
+          digitalExperience.mobileReleaseAdoptionChart,
+          BUSY_RELEASE
+        )
+      ).toBeVisible();
+    });
+
+    await test.step('has no accessibility violations with the charts drawn', async () => {
+      const { violations } = await page.checkA11y({ include: ['main'] });
+      expect(violations).toHaveLength(0);
     });
   });
 });

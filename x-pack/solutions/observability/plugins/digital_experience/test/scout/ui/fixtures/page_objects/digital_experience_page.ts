@@ -208,6 +208,14 @@ export class DigitalExperiencePage {
     });
   }
 
+  /**
+   * The legend item of `release` in a Release health chart (`chart`), which only shows once the
+   * chart is drawn. `@elastic/charts` names it by the series; there's no test subject to add.
+   */
+  mobileReleaseChartSeries(chart: Locator, release: string): Locator {
+    return chart.locator(`[data-ech-series-name="${release}"]`);
+  }
+
   /** The value of a KPI of the mobile page, e.g. `Sessions`. */
   mobileKpiValue(kpi: MobileKpi): Locator {
     return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Value`);

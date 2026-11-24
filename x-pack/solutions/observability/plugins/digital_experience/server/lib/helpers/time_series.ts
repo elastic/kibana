@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { range } from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { TARGET_BUCKETS } from '../../../common/histogram';
 import type { HistogramInterval, TimeSeriesPoint } from '../../../common/types/applications';
@@ -28,21 +28,29 @@ export const getHistogramInterval = (start: number, end: number): HistogramInter
   return { value: Math.max(Math.round(interval?.asSeconds() ?? 0), 1), unit: 's' };
 };
 
+/** `time` in `timeZone`: a moment-timezone name, or a UTC offset such as `+05:30`. */
+const inTimeZone = (time: number, timeZone: string): moment.Moment =>
+  moment.tz.zone(timeZone) ? moment.tz(time, timeZone) : moment.utc(time).utcOffset(timeZone);
+
 /**
- * The start of every bucket of `interval` that covers `[start, end)`, in UTC as ES|QL's `TBUCKET`
- * aligns them, so a series can fill the buckets its query left out for having no documents.
+ * The start of every bucket of `interval` that covers `[start, end)` in `timeZone`, as an ES|QL
+ * `TBUCKET` with that `time_zone` lines them up (local midnight for calendar units), so a series
+ * can fill the buckets its query left out for having no documents.
  */
 export const getBucketTimestamps = (
   start: number,
   end: number,
-  { value, unit }: HistogramInterval
+  { value, unit }: HistogramInterval,
+  timeZone: string = 'UTC'
 ): number[] => {
   if (unit === 's') {
     const step = value * 1000;
-    return range(Math.floor(start / step) * step, end, step);
+    // Rounded in local time, as Elasticsearch rounds a fixed interval in a time zone
+    const offset = inTimeZone(start, timeZone).utcOffset() * 60_000;
+    return range(Math.floor((start + offset) / step) * step - offset, end, step);
   }
   const timestamps: number[] = [];
-  const bucket = moment.utc(start).startOf(unit === 'w' ? 'isoWeek' : unit);
+  const bucket = inTimeZone(start, timeZone).startOf(unit === 'w' ? 'isoWeek' : unit);
   while (bucket.valueOf() < end) {
     timestamps.push(bucket.valueOf());
     bucket.add(value, unit);

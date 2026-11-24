@@ -39,6 +39,35 @@ describe('getBucketTimestamps', () => {
       getBucketTimestamps(start, Date.parse('2026-11-24T00:00:00.000Z'), { value: 1, unit: 'w' })
     ).toEqual([Date.parse('2026-11-16T00:00:00.000Z'), Date.parse('2026-11-23T00:00:00.000Z')]);
   });
+
+  it('starts calendar buckets at local midnight in the time zone', () => {
+    expect(
+      getBucketTimestamps(
+        Date.parse('2026-11-18T10:00:00.000Z'),
+        Date.parse('2026-11-20T01:00:00.000Z'),
+        { value: 1, unit: 'd' },
+        'America/New_York'
+      )
+    ).toEqual([
+      Date.parse('2026-11-18T00:00:00.000-05:00'),
+      Date.parse('2026-11-19T00:00:00.000-05:00'),
+    ]);
+  });
+
+  it('aligns fixed buckets in local time, e.g. 3 hours on a half-hour offset', () => {
+    expect(
+      getBucketTimestamps(
+        Date.parse('2026-11-18T00:00:00.000Z'),
+        Date.parse('2026-11-18T05:00:00.000Z'),
+        { value: 3 * 3600, unit: 's' },
+        '+05:30'
+      )
+    ).toEqual([
+      Date.parse('2026-11-18T03:00:00.000+05:30'),
+      Date.parse('2026-11-18T06:00:00.000+05:30'),
+      Date.parse('2026-11-18T09:00:00.000+05:30'),
+    ]);
+  });
 });
 
 describe('getHistogramInterval', () => {

@@ -142,7 +142,29 @@ describe('release charts', () => {
       />
     );
 
-    expect(getByText('No release has enough sessions to show an error rate')).toBeInTheDocument();
+    expect(
+      getByText(
+        'No release has enough sessions to show an error rate over time: it takes 100 sessions in the time range, and 10 in a time bucket.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('says so too when releases pass the range floor but none of their buckets the bucket floor', () => {
+    const { getByText } = renderWithTheme(
+      <ReleaseErrorRateChart
+        releases={RELEASES}
+        {...props}
+        series={SERIES.map((item) => ({
+          ...item,
+          points: item.points.map((bucket) => ({ ...bucket, errorRate: null })),
+        }))}
+      />
+    );
+
+    expect(mockLines).toHaveLength(0);
+    expect(
+      getByText(/it takes 100 sessions in the time range, and 10 in a time bucket/)
+    ).toBeInTheDocument();
   });
 
   it('shows the legend below the plot, so it keeps its width', () => {

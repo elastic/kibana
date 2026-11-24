@@ -22,6 +22,7 @@ import {
   isStartBeforeEnd,
   serviceNameParam,
   timeRangeShape,
+  timeZoneShape,
 } from '../params';
 import { getMobileKpis } from './get_mobile_kpis';
 import { getMobileReleases } from './get_mobile_releases';
@@ -32,15 +33,25 @@ export const MOBILE_KPIS_ENDPOINT =
 export const MOBILE_RELEASES_ENDPOINT =
   'GET /internal/digital_experience/mobile_applications/{serviceName}/releases';
 
+/** The query of the mobile routes: the time range, the environment, the OS and the release. */
+const mobileFiltersShape = () => ({
+  ...timeRangeShape(),
+  osName: z.string().min(1).max(MAX_OS_NAME_LENGTH).optional(),
+  release: z.string().min(1).max(MAX_RELEASE_LENGTH).optional(),
+});
+
 const mobileFiltersParams = () =>
   z.object({
     path: z.object({ serviceName: serviceNameParam() }),
+    query: z.object(mobileFiltersShape()).refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
+  });
+
+/** The KPI route's params, and the time zone the charts' buckets line up with. */
+const mobileSeriesParams = () =>
+  z.object({
+    path: z.object({ serviceName: serviceNameParam() }),
     query: z
-      .object({
-        ...timeRangeShape(),
-        osName: z.string().min(1).max(MAX_OS_NAME_LENGTH).optional(),
-        release: z.string().min(1).max(MAX_RELEASE_LENGTH).optional(),
-      })
+      .object({ ...mobileFiltersShape(), ...timeZoneShape() })
       .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
   });
 
@@ -48,9 +59,9 @@ const releasesRoute = createDigitalExperienceServerRoute({
   endpoint: MOBILE_RELEASES_ENDPOINT,
   options: APPLICATION_TAB_ROUTE_OPTIONS,
   security: APPLICATION_TAB_ROUTE_SECURITY,
-  params: lazySchema(mobileFiltersParams),
+  params: lazySchema(mobileSeriesParams),
   handler: async ({ params, context, request, logger }): Promise<MobileReleasesResponse> => {
-    const { osName, release } = params.query;
+    const { osName, release, timeZone } = params.query;
     const { esClient, serviceName, start, end, environment } = await toApplicationSearch({
       params,
       context,
@@ -63,6 +74,7 @@ const releasesRoute = createDigitalExperienceServerRoute({
       start,
       end,
       environment,
+      timeZone,
     });
   },
 });

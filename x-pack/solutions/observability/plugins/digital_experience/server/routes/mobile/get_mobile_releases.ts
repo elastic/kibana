@@ -39,6 +39,8 @@ export interface GetMobileReleasesParams {
   start: number;
   end: number;
   environment?: string;
+  /** The time zone the series' buckets line up with: a moment-timezone name or a UTC offset. */
+  timeZone: string;
 }
 
 /** How far before the range a release's first document is looked for. */
@@ -57,6 +59,7 @@ export const getMobileReleases = async ({
   start,
   end,
   environment,
+  timeZone,
 }: GetMobileReleasesParams): Promise<MobileReleasesResponse> => {
   const histogram = { interval: getHistogramInterval(start, end), start, end };
   // A new query each time: `pipe` adds to the query it's called on.
@@ -86,7 +89,8 @@ export const getMobileReleases = async ({
       esClient,
       'get_mobile_release_series',
       withReleaseSeries(query(), top, histogram.interval),
-      timeFilter(start, end, environment)
+      timeFilter(start, end, environment),
+      timeZone
     ),
     runEsql<ReleaseFirstSeenRow>(
       esClient,
@@ -133,7 +137,7 @@ export const getMobileReleases = async ({
       ? []
       : sortedUniq(
           sortBy([
-            ...getBucketTimestamps(start, end, histogram.interval),
+            ...getBucketTimestamps(start, end, histogram.interval, timeZone),
             ...pointRows.map(({ point }) => point.timestamp),
           ])
         );

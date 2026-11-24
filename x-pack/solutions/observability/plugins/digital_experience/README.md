@@ -142,14 +142,18 @@ on serverless and stateful.
   **100 sessions** (`MIN_RELEASE_SESSIONS`) in the range for an error rate: below it the table
   shows "Not enough data" and the error rate chart leaves the release out. The chart also leaves a
   gap for a time bucket with fewer than 10 sessions (`MIN_BUCKET_SESSIONS`), where one exception
-  would swing the rate from 0 to a spike. Every release gets every bucket of the range: ES|QL's
-  `TBUCKET` leaves out the empty ones, which the route fills with no sessions and no error rate, so
-  the charts never draw across them. A release **first appears** at its first document with that
-  `service.version` in the selected environment, looked up 30 days before the range; one first
-  seen before the range start gets no marker, and releases first seen in the same bucket share one
-  (e.g. `2.3.0, 2.2.1`, or `2.3.0 +2` for more). The section
-  loads apart from the KPIs (`GET .../mobile_applications/{serviceName}/releases`, same params as
-  the KPI route) and has its own error state with a retry; the toolbar's refresh reloads both.
+  would swing the rate from 0 to a spike; with no point left to draw, it says why. The charts'
+  buckets line up with the user's time zone, as the other time charts': the route takes
+  `timeZone` and sends it as the ES|QL request's `time_zone`, which `TBUCKET` follows (local
+  midnight for days, weeks and months, local alignment for fixed intervals); the series counts
+  sessions and exceptions only. Every release gets every bucket of the range: `TBUCKET` leaves out
+  the empty ones, which the route fills, in the same time zone, with no sessions and no error rate,
+  so the charts never draw across them. A release **first appears** at its first document with
+  that `service.version` in the selected environment, looked up 30 days before the range; one
+  first seen before the range start gets no marker, and releases first seen in the same bucket
+  share one (e.g. `2.3.0, 2.2.1`, or `2.3.0 +2` for more). The section loads apart from the KPIs
+  (`GET .../mobile_applications/{serviceName}/releases`, the KPI route's params and `timeZone`)
+  and has its own error state with a retry; the toolbar's refresh reloads both.
   The table, in a bordered panel like the KPIs and charts, shows each release's share of the
   sessions (none while filtered by a release, where it would read 100%), sorts by sessions, users
   or error rate ("Other" stays last) and shows the error rate with two decimals; a release filters
@@ -880,8 +884,9 @@ logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status` (fetched by `SessionsStatusProvider` only once
   a web page asks for it, and checked back only while one is open, so mobile pages and the list's
-  Mobile tab request none; on that tab, with the status unknown, the list keeps its Web tab, where
-  sessions may still need setting up, and its refresh doesn't check the status again): whether sessions are set up or turned off, the
+  Mobile tab the URL picks request none; on that tab, with the status unknown, the list keeps its
+  Web tab, where sessions may still need setting up. The Mobile tab the list opens by itself, with
+  only mobile rows, requests it once, for its Web tab, without checking back or on refresh): whether sessions are set up or turned off, the
   task's health, lag and last error, whether it is still building, how many days sessions are kept,
   whether the current user can set them up (`canEnable`) and whether the app should do it for them
   (`autoEnable`), what keeps anyone from

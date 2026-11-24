@@ -9,6 +9,7 @@ import { useAbortableAsync } from '@kbn/react-hooks';
 import type { MobileReleasesResponse } from '../../../../../common/types/mobile';
 import { useApiClient } from '../../../../hooks/use_api_client';
 import { useEnvironment } from '../../../../hooks/use_environment';
+import { useFormatters } from '../../../../hooks/use_formatters';
 import { useQueryParam } from '../../../../hooks/use_query_param';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { toTimeRangeQuery } from '../../../../utils/time_range_query';
@@ -29,6 +30,7 @@ export const useMobileReleases = (serviceName: string): MobileReleasesState => {
   const { environment } = useEnvironment();
   const { value: osName } = useQueryParam('osName');
   const { value: release } = useQueryParam('release');
+  const { timeZone } = useFormatters();
 
   const {
     value: releases,
@@ -43,11 +45,12 @@ export const useMobileReleases = (serviceName: string): MobileReleasesState => {
           signal,
           params: {
             path: { serviceName },
-            query: { ...toTimeRangeQuery(timeRange, environment), osName, release },
+            // The charts' buckets line up with the user's time zone, as the other time charts'
+            query: { ...toTimeRangeQuery(timeRange, environment, timeZone), osName, release },
           },
         }
       ),
-    [apiClient, serviceName, timeRange, environment, osName, release],
+    [apiClient, serviceName, timeRange, environment, timeZone, osName, release],
     { unsetValueOnError: true }
   );
   // Nothing has been fetched before the first request starts.

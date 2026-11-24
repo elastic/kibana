@@ -11,9 +11,9 @@ const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
 
 /** Inside `TIME_RANGE`. */
-const TIMESTAMP = '2021-01-18T12:30:00.000Z';
+export const TIMESTAMP = '2021-01-18T12:30:00.000Z';
 /** Inside `TIME_RANGE`, before and after `TIMESTAMP`, for releases that show up apart. */
-const EARLIER_TIMESTAMP = '2021-01-18T12:10:00.000Z';
+export const EARLIER_TIMESTAMP = '2021-01-18T12:10:00.000Z';
 const LATER_TIMESTAMP = '2021-01-18T12:45:00.000Z';
 
 /**
@@ -33,7 +33,8 @@ export const BOUNDARY_TIMESTAMPS = {
  * A React Native app on Android, iOS and iPadOS, an Android app, an Android app on an SDK that
  * still sends `telemetry.sdk.name: android` without the distribution, an Android app with sessions
  * on the edges of the periods, an Android app without numeric releases, one whose releases all
- * showed up at once, an iOS app on two-part releases, and two services that must never show up as
+ * showed up at once, an iOS app on two-part releases, an Android app with enough sessions in one
+ * minute for the release health's error rates, and two services that must never show up as
  * mobile: a backend Java service, and EDOT Browser on an iPhone, which is the Elastic distribution
  * on `os.name: iOS` too.
  */
@@ -45,6 +46,7 @@ export const MOBILE_APPS = {
   nightlyAndroid: 'scout-nightly-android',
   tiedAndroid: 'scout-tied-android',
   shortVersionIos: 'scout-short-version-ios',
+  busyAndroid: 'scout-busy-android',
   backendJava: 'scout-backend-java',
   browserOnIphone: 'scout-browser-on-iphone',
 } as const;
@@ -69,6 +71,10 @@ interface MobileDocument {
 }
 
 const EDOT_MOBILE = { distroName: 'elastic', version: '1.0.0' };
+
+/** The sessions and release of `MOBILE_APPS.busyAndroid`. */
+export const BUSY_SESSIONS = 120;
+export const BUSY_RELEASE = '4.0.0';
 
 const MOBILE_DOCUMENTS: MobileDocument[] = [
   // React Native, Android: `versionName` as the release, `versionCode` as the build.
@@ -193,6 +199,18 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     sessionId: 'SHORT-1',
     timestamp,
   })),
+  // Above the release health's floors: 120 sessions in the range, all in the same minute so a
+  // time bucket has them too, an exception in every tenth.
+  ...Array.from({ length: BUSY_SESSIONS }, (_, index) => ({
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.busyAndroid,
+    sdkLanguage: 'java',
+    osName: 'Android',
+    version: BUSY_RELEASE,
+    installationId: `installation-busy-${index}`,
+    sessionId: `busy-${index}`,
+    exception: index % 10 === 0,
+  })),
   {
     serviceName: MOBILE_APPS.backendJava,
     sdkLanguage: 'java',
@@ -251,6 +269,14 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
 
 /** What the applications route should answer for each mobile application, all its platforms. */
 export const EXPECTED_MOBILE_ROWS = [
+  {
+    serviceName: MOBILE_APPS.busyAndroid,
+    platforms: ['android'],
+    latestRelease: BUSY_RELEASE,
+    sessions: { count: BUSY_SESSIONS },
+    users: { count: BUSY_SESSIONS },
+    errorRate: 0.1,
+  },
   {
     // One application on Android, iOS and iPadOS, which counts as iOS.
     serviceName: MOBILE_APPS.reactNative,

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { HistogramInterval } from '../types/applications';
 import type { RESULT_COLUMNS } from './fields';
 import { inValues, mobileColumn, resultColumn } from './fields';
-import { kpiStats } from './kpis';
+import { errorRateStats, kpiStats } from './kpis';
 
 /** The releases shown by name; the others are grouped as "Other". */
 export const TOP_RELEASES = 5;
@@ -64,13 +64,16 @@ export const withReleaseTotals = (
 ): ComposerQuery =>
   withReleaseGroup(query, releases).pipe`STATS ${kpiStats()} BY ${resultColumn('releaseGroup')}`;
 
-/** The same stats per bucket of `interval` and group. */
+/**
+ * Sessions and exceptions per bucket of `interval` and group, for the charts, which show no users.
+ * The buckets follow the request's `time_zone`.
+ */
 export const withReleaseSeries = (
   query: ComposerQuery,
   releases: readonly string[],
   interval: HistogramInterval
 ): ComposerQuery =>
-  withReleaseGroup(query, releases).pipe`STATS ${kpiStats()}
+  withReleaseGroup(query, releases).pipe`STATS ${errorRateStats()}
     BY ${resultColumn('bucket')} = TBUCKET(${toEsqlDuration(interval)}), ${resultColumn(
     'releaseGroup'
   )}`;
@@ -93,7 +96,7 @@ export interface ReleaseTotalsRow {
 }
 
 /** The row of `withReleaseSeries`. */
-export interface ReleaseSeriesRow extends ReleaseTotalsRow {
+export interface ReleaseSeriesRow extends Omit<ReleaseTotalsRow, typeof RESULT_COLUMNS.users> {
   [RESULT_COLUMNS.bucket]: string;
 }
 

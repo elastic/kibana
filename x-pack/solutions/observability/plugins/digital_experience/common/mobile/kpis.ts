@@ -27,12 +27,18 @@ export const toComparedValue = (
   delta: current !== null && previous !== null ? current - previous : null,
 });
 
+const sessionsStat = () =>
+  esql.exp`${resultColumn('sessions')} = COUNT_DISTINCT(${mobileColumn('sessionId')})`;
+const usersStat = () =>
+  esql.exp`${resultColumn('users')} = COUNT_DISTINCT(${mobileColumn('installationId')})`;
+const exceptionsStat = () =>
+  esql.exp`${resultColumn('exceptions')} = COUNT(${mobileColumn('exceptionType')})`;
+
 /** The KPIs as `STATS` fields: sessions, users and exceptions; an unmapped field counts 0. */
-export const kpiStats = (): ESQLSingleAstItem[] => [
-  esql.exp`${resultColumn('sessions')} = COUNT_DISTINCT(${mobileColumn('sessionId')})`,
-  esql.exp`${resultColumn('users')} = COUNT_DISTINCT(${mobileColumn('installationId')})`,
-  esql.exp`${resultColumn('exceptions')} = COUNT(${mobileColumn('exceptionType')})`,
-];
+export const kpiStats = (): ESQLSingleAstItem[] => [sessionsStat(), usersStat(), exceptionsStat()];
+
+/** What an error rate needs, as `kpiStats` defines it: sessions and exceptions, without users. */
+export const errorRateStats = (): ESQLSingleAstItem[] => [sessionsStat(), exceptionsStat()];
 
 /** The KPIs of the documents, and their count, which tells whether there is any data. */
 export const withKpiStats = (query: ComposerQuery): ComposerQuery =>

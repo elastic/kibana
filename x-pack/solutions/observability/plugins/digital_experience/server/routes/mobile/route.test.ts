@@ -142,6 +142,10 @@ describe('mobile releases route', () => {
     expect(isValid({ start: END, end: START })).toBe(false);
     expect(isValid({ osName: '' })).toBe(false);
     expect(isValid({ release: 'x'.repeat(1025) })).toBe(false);
+    // The time zone of the charts' buckets, as the applications and Overview routes take it
+    expect(isValid({ timeZone: 'America/New_York' })).toBe(true);
+    expect(isValid({ timeZone: '+05:30' })).toBe(true);
+    expect(isValid({ timeZone: 'Mars/Olympus' })).toBe(false);
     // The options and security of every application tab route, as the KPI route has them.
     ([MOBILE_RELEASES_ENDPOINT, MOBILE_KPIS_ENDPOINT] as const).forEach((endpoint) =>
       expect(mobileRouteRepository[endpoint]).toEqual(
@@ -166,6 +170,7 @@ describe('mobile releases route', () => {
           environment: 'production',
           osName: 'iOS',
           release: '1.2.3',
+          timeZone: 'Europe/Madrid',
         },
       },
       context: {
@@ -188,6 +193,7 @@ describe('mobile releases route', () => {
         start: Date.parse(START),
         end: Date.parse(END),
         environment: 'production',
+        timeZone: 'Europe/Madrid',
       })
     );
   });

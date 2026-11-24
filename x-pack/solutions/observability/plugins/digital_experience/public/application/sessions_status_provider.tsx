@@ -14,8 +14,11 @@ import {
 
 interface SessionsStatusContextValue {
   state: SessionsStatusState;
-  /** Marks a page that shows the status as open; returns what marks it closed. */
-  watch: () => () => void;
+  /**
+   * Marks a page that needs the status as open, `poll`ing it while sessions rebuild or not;
+   * returns what marks it closed.
+   */
+  watch: (poll: boolean) => () => void;
 }
 
 const SessionsStatusContext = createContext<SessionsStatusContextValue | undefined>(undefined);
@@ -31,8 +34,11 @@ export function SessionsStatusProvider({ children }: { children: ReactNode }) {
   const [isRequested, setRequested] = useState(false);
   const state = useSessionsStatusState({ isRequested, isWatched: watchers > 0 });
 
-  const watch = useCallback(() => {
+  const watch = useCallback((poll: boolean) => {
     setRequested(true);
+    if (!poll) {
+      return () => {};
+    }
     setWatchers((count) => count + 1);
     return () => setWatchers((count) => count - 1);
   }, []);
@@ -43,16 +49,18 @@ export function SessionsStatusProvider({ children }: { children: ReactNode }) {
 
 /**
  * The sessions status of `SessionsStatusProvider`, fetched for the calling page unless `enabled`
- * is off, e.g. on the applications list's Mobile tab.
+ * is off, e.g. on the applications list's Mobile tab the URL picks, and checked back while sessions
+ * rebuild unless `poll` is off, e.g. on a Mobile tab that needs the status only once.
  */
 export const useSessionsStatus = ({
   enabled = true,
-}: { enabled?: boolean } = {}): SessionsStatusState => {
+  poll = true,
+}: { enabled?: boolean; poll?: boolean } = {}): SessionsStatusState => {
   const context = useContext(SessionsStatusContext);
   if (!context) {
     throw new Error('useSessionsStatus must be used within a SessionsStatusProvider');
   }
   const { state, watch } = context;
-  useEffect(() => (enabled ? watch() : undefined), [enabled, watch]);
+  useEffect(() => (enabled ? watch(poll) : undefined), [enabled, poll, watch]);
   return state;
 };
