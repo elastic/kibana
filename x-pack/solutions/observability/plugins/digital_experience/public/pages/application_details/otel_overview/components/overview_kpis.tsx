@@ -60,12 +60,12 @@ const kpiPanels = ({
   percentile,
   counts,
   formatNumber,
-  formatPercent,
+  formatKpiPercent,
 }: {
   percentile: OverviewPercentile;
   counts: KpiCounts;
   formatNumber: (value: number) => string;
-  formatPercent: (share: number) => string;
+  formatKpiPercent: (share: number) => string;
 }): KpiPanel[] => [
   {
     kpi: 'sessions',
@@ -85,7 +85,7 @@ const kpiPanels = ({
       defaultMessage: 'Error-free sessions',
     }),
     tooltip: errorFreeSessionsHint(counts.sessionsWithErrors),
-    formatValue: formatPercent,
+    formatValue: formatKpiPercent,
     changeUnit: 'percentagePoints',
     higherIsBetter: true,
   },
@@ -128,7 +128,7 @@ const kpiPanels = ({
       defaultMessage: 'Failed HTTP requests',
     }),
     tooltip: failedHttpHint(counts.failedHttpRequests, counts.httpRequests),
-    formatValue: formatPercent,
+    formatValue: formatKpiPercent,
     changeUnit: 'percentagePoints',
     higherIsBetter: false,
   },
@@ -164,12 +164,12 @@ export function OverviewKpis({
   isComparing: boolean;
   isLoading: boolean;
 }) {
-  const { formatNumber, formatPercent } = useFormatters();
+  const { formatNumber, formatKpiPercent } = useFormatters();
   const panels = kpiPanels({
     percentile,
     counts: kpis?.counts ?? NO_COUNTS,
     formatNumber,
-    formatPercent,
+    formatKpiPercent,
   });
 
   return (

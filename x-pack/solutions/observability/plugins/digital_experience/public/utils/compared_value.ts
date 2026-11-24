@@ -22,7 +22,16 @@ export interface FormattedChange {
   /** E.g. "+20%", "-1.5 pp" or "0 pp". */
   readonly label: string;
   readonly direction: ChangeDirection;
+  /**
+   * Too small to call better or worse, e.g. a load time 0.6% faster: shown, but not colored, so
+   * day-to-day noise doesn't read as an improvement or a regression.
+   */
+  readonly isNegligible: boolean;
 }
+
+/** The largest relative change, and change in percentage points, that is still noise. */
+export const NEGLIGIBLE_RELATIVE_CHANGE = 0.02;
+export const NEGLIGIBLE_PERCENTAGE_POINTS = 0.5;
 
 type SignedFormatters = Pick<Formatters, 'formatSignedNumber' | 'formatSignedPercent'>;
 
@@ -52,13 +61,22 @@ export const formatChange = (
     if (delta === null) {
       return null;
     }
-    const { text, direction } = toSigned(formatSignedNumber, delta * 100);
-    return { label: percentagePointsLabel(text), direction };
+    const points = delta * 100;
+    const { text, direction } = toSigned(formatSignedNumber, points);
+    return {
+      label: percentagePointsLabel(text),
+      direction,
+      isNegligible: Math.abs(points) < NEGLIGIBLE_PERCENTAGE_POINTS,
+    };
   }
   const change = relativeChange(compared);
   if (change === null) {
     return null;
   }
   const { text, direction } = toSigned(formatSignedPercent, change);
-  return { label: text, direction };
+  return {
+    label: text,
+    direction,
+    isNegligible: Math.abs(change) < NEGLIGIBLE_RELATIVE_CHANGE,
+  };
 };

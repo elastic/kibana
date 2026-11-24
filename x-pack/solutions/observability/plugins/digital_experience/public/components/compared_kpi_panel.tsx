@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { EuiBadgeProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import type { ComparedValue } from '../../common/types/applications';
@@ -15,7 +16,7 @@ import { KpiPanel } from './kpi_panel';
 import { useFormatters } from '../hooks/use_formatters';
 import { NOT_ENOUGH_DATA_LABEL } from '../labels';
 import { formatChange } from '../utils/compared_value';
-import type { ChangeDirection } from '../utils/compared_value';
+import type { FormattedChange } from '../utils/compared_value';
 import type { ChangeUnit } from '../utils/compared_value';
 
 export interface ComparedKpiPanelProps {
@@ -33,16 +34,33 @@ export interface ComparedKpiPanelProps {
   'data-test-subj': string;
 }
 
-/** Neutral for a change that reads as none once rounded, so "0%" is never red or green. */
+/**
+ * Neutral for a change that reads as none once rounded, so "0%" is never red or green, and for one
+ * too small to call better or worse.
+ */
 const changeColor = (
-  direction: ChangeDirection,
+  { direction, isNegligible }: FormattedChange,
   higherIsBetter: boolean | undefined
 ): EuiBadgeProps['color'] => {
-  if (direction === 0 || higherIsBetter === undefined) {
+  if (direction === 0 || isNegligible || higherIsBetter === undefined) {
     return 'hollow';
   }
   return direction > 0 === higherIsBetter ? 'success' : 'danger';
 };
+
+/** An arrow for the way the value went, so the change doesn't rely on its color alone. */
+const changeIcon = ({ direction }: FormattedChange): EuiBadgeProps['iconType'] => {
+  if (direction === 0) {
+    return undefined;
+  }
+  return direction > 0 ? 'sortUp' : 'sortDown';
+};
+
+const previousPeriodLabel = (previous: string) =>
+  i18n.translate('xpack.digitalExperience.comparedKpiPanel.previous', {
+    defaultMessage: 'Previous period: {previous}',
+    values: { previous },
+  });
 
 /**
  * A KPI: the current value, a tooltip with how it's calculated and, with Compare on, its
@@ -78,7 +96,8 @@ export function ComparedKpiPanel({
           {isComparing && change !== null && (
             <EuiFlexItem grow={false}>
               <EuiBadge
-                color={changeColor(change.direction, higherIsBetter)}
+                color={changeColor(change, higherIsBetter)}
+                iconType={changeIcon(change)}
                 data-test-subj={`${dataTestSubj}Change`}
               >
                 {change.label}
@@ -87,16 +106,31 @@ export function ComparedKpiPanel({
           )}
           {isComparing && value && (
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}Previous`}>
-                <FormattedMessage
-                  id="xpack.digitalExperience.comparedKpiPanel.previous"
-                  defaultMessage="Previous period: {previous}"
-                  values={{
-                    previous:
-                      value.previous === null ? <EmptyCellValue /> : formatValue(value.previous),
-                  }}
-                />
-              </EuiText>
+              {/* Short beside the badge, so the tile keeps its height; the tooltip spells it out. */}
+              {value.previous === null ? (
+                <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}Previous`}>
+                  <FormattedMessage
+                    id="xpack.digitalExperience.comparedKpiPanel.noPrevious"
+                    defaultMessage="vs {previous}"
+                    values={{ previous: <EmptyCellValue /> }}
+                  />
+                </EuiText>
+              ) : (
+                <EuiToolTip content={previousPeriodLabel(formatValue(value.previous))}>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    tabIndex={0}
+                    data-test-subj={`${dataTestSubj}Previous`}
+                  >
+                    <FormattedMessage
+                      id="xpack.digitalExperience.comparedKpiPanel.versus"
+                      defaultMessage="vs {previous}"
+                      values={{ previous: formatValue(value.previous) }}
+                    />
+                  </EuiText>
+                </EuiToolTip>
+              )}
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

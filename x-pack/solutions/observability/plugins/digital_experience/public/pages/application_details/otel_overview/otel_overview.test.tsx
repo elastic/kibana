@@ -1043,7 +1043,7 @@ describe('OtelOverview', () => {
     // More sessions, but fewer of them without errors.
     expect(screen.getByTestId('digitalExperienceOverviewSessionsChange')).toHaveTextContent('+25%');
     expect(screen.getByTestId('digitalExperienceOverviewSessionsPrevious')).toHaveTextContent(
-      'Previous period: 320'
+      'vs 320'
     );
     expect(
       screen.getByTestId('digitalExperienceOverviewErrorFreeSessionsChange')

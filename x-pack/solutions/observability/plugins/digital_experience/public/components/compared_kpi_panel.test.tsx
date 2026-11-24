@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createFormatters, useFormatters } from '../hooks/use_formatters';
@@ -24,14 +24,16 @@ jest.mock('@elastic/eui', () => {
     ...actual,
     EuiBadge: ({
       color,
+      iconType,
       children,
       'data-test-subj': dataTestSubj,
     }: {
       color: string;
+      iconType?: string;
       children: React.ReactNode;
       'data-test-subj': string;
     }) => (
-      <span data-test-subj={dataTestSubj} data-color={color}>
+      <span data-test-subj={dataTestSubj} data-color={color} data-icon={iconType}>
         {children}
       </span>
     ),
@@ -110,7 +112,7 @@ describe('ComparedKpiPanel', () => {
       { value: 0.999995, previous: 0.999999, delta: -0.000004 },
       '0 pp',
     ],
-    ['a count', 'relative', { value: 1001, previous: 1000, delta: 1 }, '0%'],
+    ['a count', 'relative', { value: 10001, previous: 10000, delta: 1 }, '0%'],
   ] as const)(
     'shows a change of %s that rounds to nothing without a sign, and neither red nor green',
     (_, changeUnit, value, label) => {
@@ -126,8 +128,43 @@ describe('ComparedKpiPanel', () => {
 
       expect(screen.getByTestId('kpiChange')).toHaveTextContent(new RegExp(`^${label}$`));
       expect(screen.getByTestId('kpiChange')).toHaveAttribute('data-color', 'hollow');
+      expect(screen.getByTestId('kpiChange')).not.toHaveAttribute('data-icon');
     }
   );
+
+  it.each([
+    ['a relative change under 2%', 'relative', { value: 1015, previous: 1000, delta: 15 }],
+    [
+      'a share change under 0.5 pp',
+      'percentagePoints',
+      { value: 0.424, previous: 0.42, delta: 0.004 },
+    ],
+  ] as const)(
+    'shows %s with its arrow but neither red nor green, as noise',
+    (_, changeUnit, value) => {
+      renderPanel({ value, changeUnit, higherIsBetter: true });
+
+      expect(screen.getByTestId('kpiChange')).toHaveAttribute('data-color', 'hollow');
+      expect(screen.getByTestId('kpiChange')).toHaveAttribute('data-icon', 'sortUp');
+    }
+  );
+
+  it('points the arrow the way the value went, whatever its color', () => {
+    const { unmount } = renderPanel({ higherIsBetter: false });
+    expect(screen.getByTestId('kpiChange')).toHaveAttribute('data-icon', 'sortUp');
+    unmount();
+
+    renderPanel({ value: { value: 8, previous: 10, delta: -2 }, higherIsBetter: false });
+    expect(screen.getByTestId('kpiChange')).toHaveAttribute('data-icon', 'sortDown');
+  });
+
+  it('shows the previous value briefly, and in full in its tooltip', async () => {
+    renderPanel();
+
+    expect(screen.getByTestId('kpiPrevious')).toHaveTextContent(/^vs 10 sessions$/);
+    fireEvent.mouseOver(screen.getByTestId('kpiPrevious'));
+    expect(await screen.findByText('Previous period: 10 sessions')).toBeInTheDocument();
+  });
 
   it('shows the change and the previous value only while comparing, so the toggle means both', () => {
     const { unmount } = renderPanel({ isComparing: false });
@@ -138,6 +175,6 @@ describe('ComparedKpiPanel', () => {
 
     renderPanel({ isComparing: true });
     expect(screen.getByTestId('kpiChange')).toHaveTextContent('+20%');
-    expect(screen.getByTestId('kpiPrevious')).toHaveTextContent('Previous period: 10 sessions');
+    expect(screen.getByTestId('kpiPrevious')).toHaveTextContent('vs 10 sessions');
   });
 });
