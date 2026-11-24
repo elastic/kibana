@@ -226,6 +226,15 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
       expect(firstSignal.aborted).toBe(true);
     }, 10000);
 
+    it('unsubscribing should abort the in-flight request', () => {
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      const signal: AbortSignal = fetchSpy.mock.calls[0][1].signal;
+      expect(signal.aborted).toBe(false);
+
+      subscription.unsubscribe();
+      expect(signal.aborted).toBe(true);
+    });
+
     it('cancelRequests() should abort in-flight request', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       const signal: AbortSignal = fetchSpy.mock.calls[0][1].signal;
