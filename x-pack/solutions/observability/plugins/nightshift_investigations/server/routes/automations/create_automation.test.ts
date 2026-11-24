@@ -266,12 +266,13 @@ describe('Slack destinations', () => {
     expect(soClient.create).not.toHaveBeenCalled();
   });
 
-  it('saves when the bindings cannot be read', async () => {
-    checkChannelBound.mockResolvedValue(undefined);
+  it('rejects the save when the bindings cannot be read', async () => {
+    checkChannelBound.mockRejectedValue(new Error('relay down'));
 
-    await call({ completions: [channelCompletion()] });
-
-    expect(soClient.create).toHaveBeenCalled();
+    await expect(call({ completions: [channelCompletion()] })).rejects.toThrow(
+      'Could not check that Slack channel C012ABCDEF is connected.'
+    );
+    expect(soClient.create).not.toHaveBeenCalled();
   });
 
   it('does not check a channel posted through a custom connector', async () => {

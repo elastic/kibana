@@ -51,6 +51,7 @@ let serviceAccountService = createServiceAccountService();
 
 beforeEach(() => {
   jest.resetAllMocks();
+  checkChannelBound.mockResolvedValue(true);
   getAutomationsSoClient.mockReturnValue(soClient);
   getWorkflowsManagement.mockReturnValue({ management: { updateWorkflow } });
   serviceAccountService = createServiceAccountService();

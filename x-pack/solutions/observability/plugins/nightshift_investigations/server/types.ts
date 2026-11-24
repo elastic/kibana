@@ -73,11 +73,10 @@ export interface AutomationBudget {
   release: () => Promise<void>;
 }
 
-/** Whether the channel is bound to this deployment, or undefined when bindings cannot be read. */
 export type SlackChannelBindingChecker = (
   request: KibanaRequest,
   channelId: string
-) => Promise<boolean | undefined>;
+) => Promise<boolean>;
 
 export interface NightshiftInvestigationsServerSetup {
   /** Adds the counts only the registering plugin can read to the daily detection snapshot. */

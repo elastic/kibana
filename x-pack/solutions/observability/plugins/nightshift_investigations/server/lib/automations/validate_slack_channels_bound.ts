@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
+import { badRequest, serverUnavailable } from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SlackChannelBindingChecker } from '../../types';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from './generate_workflow_yaml';
@@ -30,7 +30,10 @@ export const validateSlackChannelsBound = async ({
     }
   }
   for (const channel of channels) {
-    if ((await checker(request, channel)) === false) {
+    const isBound = await checker(request, channel).catch(() => {
+      throw serverUnavailable(`Could not check that Slack channel ${channel} is connected.`);
+    });
+    if (!isBound) {
       throw badRequest(`Slack channel ${channel} is not connected to Nightshift.`);
     }
   }
