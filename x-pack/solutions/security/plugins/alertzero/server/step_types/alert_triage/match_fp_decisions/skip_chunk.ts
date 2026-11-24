@@ -14,7 +14,7 @@ interface SkipChunkParams {
   api: KibanaApi;
   write: ReturnType<typeof tagAlerts>;
   chunk: string[];
-  /** The tags that keep an alert out of analysis: the inconclusive verdict and the decision's skip tag. */
+  /** The tags that keep an alert out of analysis: the inconclusive verdict and the skip tag. */
   skipTags: string[];
   /** The decision's own skip tag, which marks what this call wrote. */
   skipTag: string;

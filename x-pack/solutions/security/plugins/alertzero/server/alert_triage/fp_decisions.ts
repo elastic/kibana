@@ -141,7 +141,7 @@ export const selectDecisionKeys = ({
 export const decisionId = (kind: FpDecisionKind, hash: string): string =>
   `${kind === 'false_positive' ? FP_DECISION_ID_PREFIX : FP_DO_NOT_PROPOSE_ID_PREFIX}${hash}`;
 
-/** The key hash a decision id was built from, or `undefined` for an id that is not a decision id. */
+/** The key hash a decision id was built from, or `undefined` if the id is not a decision id. */
 export const hashOfDecisionId = (id: string): string | undefined => {
   const prefix = [FP_DECISION_ID_PREFIX, FP_DO_NOT_PROPOSE_ID_PREFIX].find((candidate) =>
     id.startsWith(candidate)

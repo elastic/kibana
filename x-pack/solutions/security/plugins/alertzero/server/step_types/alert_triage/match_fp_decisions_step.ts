@@ -115,8 +115,8 @@ const splitHeld = (byDecision: ReadonlyMap<string, string[]>, held: ReadonlySet<
  * false positive, up to the decision's daily cap; the rest wait for the normal path. A dismissed
  * match is tagged `az:inconclusive` and `az:skipped_by_decision:<decision>`, so it is neither
  * analysed nor proposed. Neither calls a model. A match on a `cloud` key, on a signer the alert
- * does not mark as trusted, on a process key, or on a key with neither a signer nor a hash, is only tagged, as in
- * shadow, and counted in `held_in_shadow`.
+ * does not mark as trusted, on a process key, or on a key with neither a signer nor a hash, is
+ * only tagged, as in shadow, and counted in `held_in_shadow`.
  *
  * It fails open. A step that cannot read the setting, the decisions or the alerts reports `failed`
  * and matches nothing, so every alert goes through analysis as before.
