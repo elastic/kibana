@@ -32,6 +32,7 @@ import type {
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerAutomationSuggestionRoutes } from './routes/automation_suggestions';
 import { registerSessionEventsRoutes } from './routes/session_events';
 import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
@@ -352,6 +353,20 @@ export class ContextEnginePlugin
       },
       // Reads the current value at request time (assigned in start(), after this setup() runs).
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
+    });
+
+    registerAutomationSuggestionRoutes({
+      router,
+      getAiIndexService,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSecurity: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.security;
+      },
+      getWorkflows: () => this.workflowsManagementApiPromise,
     });
 
     registerSessionEventsRoutes({
