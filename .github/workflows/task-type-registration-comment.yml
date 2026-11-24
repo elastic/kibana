@@ -5,12 +5,19 @@ on:
     types:
       - opened
       - synchronize
+    # Backports target version branches; the `backport` label can be added after the PR is opened.
+    branches:
+      - main
     paths:
       - 'x-pack/platform/test/plugin_api_integration/test_suites/task_manager/check_registered_task_types.ts'
 
+# Serialize runs per PR so a quick `synchronize` sees the comment posted by the `opened` run.
+concurrency:
+  group: task-type-registration-comment-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
   task-type-registration-comment:
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'backport') }}
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -35,7 +42,9 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            const botComment = existingComments.find((c) => c.body && c.body.includes(marker));
+            const botComment = existingComments.find(
+              (c) => c.user && c.user.type === 'Bot' && c.body && c.body.includes(marker)
+            );
 
             if (!botComment) {
               await github.rest.issues.createComment({

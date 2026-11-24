@@ -14,7 +14,7 @@ Review background tasks that a pull request registers or schedules with the Task
 
 - This review is selected when the pull request changes the registered task types assertion, which means a task type was added, renamed, or removed. That file is only the trigger; do not review it beyond checking that the new id is present and the list stays sorted.
 - Find the task code itself in the pull request's other changed files: search them for `registerTaskDefinitions`, `createTaskRunner`, `ensureScheduled`, `schedule`, and `bulkSchedule`, and read the full diff of each matching file with `read_file_diff`. Follow the `run()` call chain into the functions it calls, including ones in files the pull request does not change.
-- If the pull request only removes a task type, check that the type is handled as a removed type so existing task documents are not left unclaimable, then finish.
+- For every task type id the pull request removes from the assertion, including the old id of a rename, check that the id is added to `REMOVED_TYPES` in `x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts` or that existing task documents of that type are migrated or deleted, so none are left unclaimable. If the pull request only removes task types, finish after this check.
 - If no task registration or scheduling code can be found, finish without findings.
 - Do not review backport pull requests. Use a version-prefixed title such as `[9.x]` or the `backport` label as the available backport signal.
 
