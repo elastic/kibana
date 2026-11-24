@@ -37,7 +37,6 @@ import { registerSessionEventsRoutes } from './routes/session_events';
 import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
 import type { ProposalsProvider } from './proposals/provider';
-import type { WorkflowProvider } from './workflows/provider';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowsManagementPort,
@@ -92,7 +91,6 @@ export class ContextEnginePlugin
   private dreamingScheduleService?: DreamingScheduleService;
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
   private workflowsManagement?: WorkflowsManagementPort;
-  private workflowProvider?: WorkflowProvider;
   private proposalsProvider?: ProposalsProvider;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private isGlobalMemoryEnabled: () => Promise<boolean> = async () => false;
@@ -404,12 +402,6 @@ export class ContextEnginePlugin
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
-      registerWorkflowProvider: (provider) => {
-        if (this.workflowProvider) {
-          throw new Error('A workflow provider is already registered for the Context Engine');
-        }
-        this.workflowProvider = provider;
-      },
       registerProposalsProvider: (provider) => {
         if (this.proposalsProvider) {
           throw new Error('A proposals provider is already registered for the Context Engine');

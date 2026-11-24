@@ -15,7 +15,6 @@ import type {
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
 import { registerContextEngineInferenceFeatures } from './register_inference_features';
 import { createProposalsProvider } from './proposals_provider';
-import { createWorkflowProvider } from './workflow_provider';
 
 export class ContextEngineAgentBuilderPlugin
   implements
@@ -44,10 +43,6 @@ export class ContextEngineAgentBuilderPlugin
     if (setupDeps.searchInferenceEndpoints) {
       registerContextEngineInferenceFeatures(setupDeps.searchInferenceEndpoints);
     }
-
-    setupDeps.contextEngine.registerWorkflowProvider(
-      createWorkflowProvider(setupDeps.workflowsManagement.management)
-    );
 
     // Proposals is optional: it is off by default in serverless, and improvements are then only
     // recorded.

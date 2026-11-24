@@ -28,12 +28,9 @@ import type { SessionMemoryService } from './session_memory/types';
 import type { SessionEventsService } from './session_events/types';
 import type { SignalsServiceApi } from './signals/service';
 import type { ProposalsProvider } from './proposals/provider';
-import type { WorkflowProvider } from './workflows/provider';
 
 export interface ContextEnginePluginSetup {
   registerAiIndex: (id: string, properties: AiIndexProperties) => void;
-  /** Registers the workflow operations used to apply automation improvements. */
-  registerWorkflowProvider: (provider: WorkflowProvider) => void;
   /** Registers the proposals operations used to put improvements up for review. */
   registerProposalsProvider: (provider: ProposalsProvider) => void;
 }

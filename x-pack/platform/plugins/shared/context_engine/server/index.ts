@@ -20,12 +20,6 @@ export type {
   ProposalsProvider,
   ProposalsProviderContext,
 } from './proposals/provider';
-export type {
-  WorkflowProvider,
-  WorkflowProviderContext,
-  WorkflowSummary,
-  WorkflowValidationResult,
-} from './workflows/provider';
 
 export const plugin: PluginInitializer<
   ContextEnginePluginSetup,
