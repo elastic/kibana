@@ -167,6 +167,7 @@ describe('improvements routes', () => {
       router,
       getAiIndexService: () => aiIndexService,
       getImprovementsService: () => improvements,
+      getProposalsProvider: () => undefined,
       getWorkflowProvider: () => workflowProvider,
       getScheduleService: () => scheduleService,
       getActions: async () => ({} as ActionsPluginStart),

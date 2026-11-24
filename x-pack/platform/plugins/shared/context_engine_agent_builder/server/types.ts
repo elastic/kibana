@@ -10,6 +10,7 @@ import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
 } from '@kbn/context-engine-plugin/server';
+import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -25,12 +26,14 @@ export interface ContextEngineAgentBuilderSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   contextEngine: ContextEnginePluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  proposals?: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface ContextEngineAgentBuilderStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   contextEngine: ContextEnginePluginStart;
+  proposals?: ProposalsPluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }

@@ -25,6 +25,7 @@ import {
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
+import type { ProposalsProvider } from '../proposals/provider';
 import type { KiVerificationSummary } from '../ki_verification';
 import { WORKFLOW_VERIFIER_ID_PREFIX } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
@@ -64,6 +65,8 @@ export interface FeedbackAnalysisStepDependencies {
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsServiceApi;
+  /** The registered proposals operations, or `undefined` when no provider is registered. */
+  getProposalsProvider: () => ProposalsProvider | undefined;
   getAuditLogger: (request: KibanaRequest) => Promise<AuditLogger | undefined>;
   isContextEngineEnabled: (spaceId: string) => Promise<boolean>;
   /** Whether the feedback loop advanced setting is on. */

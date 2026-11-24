@@ -191,4 +191,85 @@ describe('recordImprovements', () => {
     expect(result.skipped).toHaveLength(2);
     expect(result.skipped.every(({ reason }) => reason === 'invalid')).toBe(true);
   });
+
+  describe('when proposals are available', () => {
+    const request = {} as never;
+    let provider: { create: jest.Mock; getOutcome: jest.Mock };
+    const logger = { warn: jest.fn() } as never;
+
+    const review = () => ({
+      provider: provider as never,
+      context: { spaceId: 'default', request },
+      logger,
+    });
+
+    beforeEach(() => {
+      provider = { create: jest.fn(async () => true), getOutcome: jest.fn() };
+    });
+
+    it('puts a recorded KI improvement up as a proposal under a deterministic id', async () => {
+      const result = await run({ review: review() });
+
+      expect(result.skipped).toEqual([]);
+      const { improvement_id: improvementId } = result.recorded[0];
+      expect(provider.create).toHaveBeenCalledTimes(1);
+      expect(provider.create).toHaveBeenCalledWith({
+        spaceId: 'default',
+        request,
+        proposal: expect.objectContaining({
+          id: `context-engine-${improvementId}`,
+          conversationId: 'context-engine:orders',
+          title: 'Add a KI for failed logins',
+          actionWorkflowId: 'system-context-engine-action-add-ki',
+          actionInput: {
+            ai_index_id: 'orders',
+            ki_id: `improvement-${improvementId}`,
+            ki: { type: 'document', title: 'Failed logins' },
+          },
+        }),
+      });
+    });
+
+    it('skips an action that has no action workflow instead of leaving it unreviewable', async () => {
+      const result = await run({
+        review: review(),
+        proposals: [
+          buildProposal({
+            action: 'add_workflow',
+            payload: { workflow_yaml: 'name: x' },
+          }),
+        ],
+      });
+
+      expect(result.recorded).toEqual([]);
+      expect(result.skipped).toEqual([
+        expect.objectContaining({ action: 'add_workflow', reason: 'action_not_allowed' }),
+      ]);
+      expect(improvementsService.write).toHaveBeenCalledWith([]);
+      expect(provider.create).not.toHaveBeenCalled();
+    });
+
+    it('reports an improvement that was recorded but could not be proposed', async () => {
+      provider.create.mockRejectedValue(new Error('workflow [x] is disabled'));
+
+      const result = await run({ review: review() });
+
+      expect(result.recorded).toEqual([]);
+      expect(result.skipped).toEqual([
+        expect.objectContaining({
+          reason: 'proposal_failed',
+          detail: expect.stringContaining('workflow [x] is disabled'),
+        }),
+      ]);
+    });
+
+    it('treats a proposal that already exists as proposed', async () => {
+      provider.create.mockResolvedValue(false);
+
+      const result = await run({ review: review() });
+
+      expect(result.skipped).toEqual([]);
+      expect(result.recorded).toHaveLength(1);
+    });
+  });
 });

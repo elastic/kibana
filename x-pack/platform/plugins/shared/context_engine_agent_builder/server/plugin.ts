@@ -14,6 +14,7 @@ import type {
 } from './types';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
 import { registerContextEngineInferenceFeatures } from './register_inference_features';
+import { createProposalsProvider } from './proposals_provider';
 import { createWorkflowProvider } from './workflow_provider';
 
 export class ContextEngineAgentBuilderPlugin
@@ -47,6 +48,20 @@ export class ContextEngineAgentBuilderPlugin
     setupDeps.contextEngine.registerWorkflowProvider(
       createWorkflowProvider(setupDeps.workflowsManagement.management)
     );
+
+    // Proposals is optional: it is off by default in serverless, and improvements are then only
+    // recorded.
+    if (setupDeps.proposals) {
+      setupDeps.contextEngine.registerProposalsProvider(
+        createProposalsProvider(async () => {
+          const [, startDeps] = await coreSetup.getStartServices();
+          if (!startDeps.proposals) {
+            throw new Error('The proposals plugin is not available');
+          }
+          return startDeps.proposals;
+        })
+      );
+    }
 
     return {};
   }

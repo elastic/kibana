@@ -15,6 +15,8 @@ import MAINTENANCE_YAML from './maintenance.yaml';
 import RELATIONSHIPS_YAML from './relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
+export * from './actions';
+
 export const CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID =
   'system-context-engine-feedback-analysis';
 

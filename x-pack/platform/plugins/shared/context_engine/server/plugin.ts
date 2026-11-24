@@ -36,6 +36,7 @@ import { registerImprovementRoutes } from './routes/improvements';
 import { registerSessionEventsRoutes } from './routes/session_events';
 import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
+import type { ProposalsProvider } from './proposals/provider';
 import type { WorkflowProvider } from './workflows/provider';
 import type {
   FeedbackAnalysisScheduleService,
@@ -92,6 +93,7 @@ export class ContextEnginePlugin
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
   private workflowsManagement?: WorkflowsManagementPort;
   private workflowProvider?: WorkflowProvider;
+  private proposalsProvider?: ProposalsProvider;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private isGlobalMemoryEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
@@ -329,6 +331,7 @@ export class ContextEnginePlugin
       feedbackAnalysis: {
         getAiIndexService,
         getImprovementsService,
+        getProposalsProvider: () => this.proposalsProvider,
         getAuditLogger: async (request) => {
           const [coreStart] = await coreSetup.getStartServices();
           return coreStart.security.audit.asScoped(request);
@@ -368,6 +371,7 @@ export class ContextEnginePlugin
       router,
       getAiIndexService,
       getImprovementsService,
+      getProposalsProvider: () => this.proposalsProvider,
       getWorkflowProvider: () => this.workflowProvider,
       getScheduleService,
       getActions,
@@ -412,6 +416,12 @@ export class ContextEnginePlugin
           throw new Error('A workflow provider is already registered for the Context Engine');
         }
         this.workflowProvider = provider;
+      },
+      registerProposalsProvider: (provider) => {
+        if (this.proposalsProvider) {
+          throw new Error('A proposals provider is already registered for the Context Engine');
+        }
+        this.proposalsProvider = provider;
       },
     };
   }

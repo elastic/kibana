@@ -49,6 +49,8 @@ import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/sched
 import { ApplyImprovementError, applyImprovement } from '../improvements/apply';
 import { ImprovementConflictError, ImprovementNotFoundError } from '../improvements/errors';
 import type { ImprovementsServiceApi } from '../improvements/service';
+import { reconcileImprovements } from '../improvements/reconcile';
+import type { ProposalsProvider } from '../proposals/provider';
 import type { WorkflowProvider } from '../workflows/provider';
 import { handleAiIndexError } from './ai_index_errors';
 import { ImprovementAuditAction, improvementDecisionAuditEvent } from '../audit/audit_events';
@@ -127,6 +129,8 @@ export interface ImprovementRouteDeps {
   ) => ImprovementsServiceApi;
   /** Returns the registered workflow operations, or `undefined` if none are registered. */
   getWorkflowProvider: () => WorkflowProvider | undefined;
+  /** Returns the registered proposals operations, or `undefined` if none are registered. */
+  getProposalsProvider: () => ProposalsProvider | undefined;
   getScheduleService: () => FeedbackAnalysisScheduleService;
   getActions: () => Promise<ActionsPluginStart>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
@@ -141,6 +145,7 @@ export const registerImprovementRoutes = ({
   getAiIndexService,
   getImprovementsService,
   getWorkflowProvider,
+  getProposalsProvider,
   getScheduleService,
   getActions,
   getSpaces,
@@ -176,14 +181,27 @@ export const registerImprovementRoutes = ({
         const spaceId = 'default';
         const { status, from, size } = request.query;
 
-        const body: ListImprovementsResponse = await getImprovementsService(esClient, spaceId).list(
-          {
-            aiIndexId: request.params.aiIndexId,
-            status: (status ?? OPEN_IMPROVEMENT_STATUSES) as ImprovementStatus[],
-            from,
-            size,
-          }
-        );
+        const improvements = getImprovementsService(esClient, spaceId);
+        const listed = await improvements.list({
+          aiIndexId: request.params.aiIndexId,
+          status: (status ?? OPEN_IMPROVEMENT_STATUSES) as ImprovementStatus[],
+          from,
+          size,
+        });
+
+        const proposals = getProposalsProvider();
+        const body: ListImprovementsResponse = proposals
+          ? {
+              ...listed,
+              items: await reconcileImprovements({
+                improvements: listed.items,
+                improvementsService: improvements,
+                proposals,
+                context: { spaceId, request },
+                logger,
+              }),
+            }
+          : listed;
 
         return response.ok({ body });
       })

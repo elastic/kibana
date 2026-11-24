@@ -30,6 +30,7 @@ describe('registerStepDefinitions', () => {
       feedbackAnalysis: {
         getAiIndexService: () => ({} as AiIndexService),
         getImprovementsService: () => ({} as ImprovementsServiceApi),
+        getProposalsProvider: () => undefined,
         getAuditLogger: async () => undefined,
         isContextEngineEnabled: async () => true,
         isFeedbackLoopEnabled: async () => true,

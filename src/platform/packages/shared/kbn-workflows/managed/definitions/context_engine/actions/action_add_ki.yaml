@@ -1,0 +1,58 @@
+version: '1'
+name: Add Knowledge Indicator
+description: >
+  Context Engine action: adds a Knowledge Indicator to an AI index. Run by the proposals service
+  once an analyst approves the proposal, so the write is attributed to the approver.
+enabled: true
+tags:
+  - action
+  - context-engine
+consts:
+  actionMetadata:
+    name: Add Knowledge Indicator
+    category: context-engine
+    description: Adds a Knowledge Indicator to an AI index.
+    impact: low
+    # The KI is created as a new document; removing it again is a separate, recoverable action.
+    reversible: true
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: The Knowledge Indicator to add.
+          properties:
+            ai_index_id:
+              type: string
+              description: The AI index to add the Knowledge Indicator to.
+            ki_id:
+              type: string
+              description: The id to create the Knowledge Indicator under. Generated when omitted.
+            ki:
+              type: object
+              description: The Knowledge Indicator document, as `context-engine.createKi` takes it.
+          required:
+            - ai_index_id
+            - ki_id
+            - ki
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: applied_target_id
+    type: string
+steps:
+  - name: create_ki
+    type: context-engine.createKi
+    with:
+      ai_index_id: '{{ inputs.actionInput.ai_index_id }}'
+      ki_id: '{{ inputs.actionInput.ki_id }}'
+      ki: '${{ inputs.actionInput.ki }}'
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      applied_target_id: '${{ steps.create_ki.output.id }}'

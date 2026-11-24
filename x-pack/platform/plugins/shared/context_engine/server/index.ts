@@ -15,6 +15,12 @@ import type {
 
 export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
 export type {
+  ImprovementProposal,
+  ProposalOutcome,
+  ProposalsProvider,
+  ProposalsProviderContext,
+} from './proposals/provider';
+export type {
   WorkflowProvider,
   WorkflowProviderContext,
   WorkflowSummary,

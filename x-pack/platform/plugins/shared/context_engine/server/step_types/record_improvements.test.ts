@@ -52,6 +52,7 @@ const buildStep = ({
   const definition = getRecordImprovementsStepDefinition({
     getAiIndexService: () => ({ get } as unknown as AiIndexService),
     getImprovementsService: () => improvementsService,
+    getProposalsProvider: () => undefined,
     getAuditLogger: async () => auditLogger,
     isContextEngineEnabled: async () => contextEngineEnabled,
     isFeedbackLoopEnabled: async () => feedbackLoopEnabled,
@@ -170,6 +171,7 @@ describe('getRecordImprovementsStepDefinition', () => {
       getAiIndexService: () =>
         ({ get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('orders')) } as never),
       getImprovementsService: () => improvementsService,
+      getProposalsProvider: () => undefined,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled: async () => true,
       isFeedbackLoopEnabled: async () => true,
@@ -221,6 +223,7 @@ describe('getRecordImprovementsStepDefinition', () => {
     const { handler } = getRecordImprovementsStepDefinition({
       getAiIndexService: () => ({ get } as never),
       getImprovementsService,
+      getProposalsProvider: () => undefined,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled,
       isFeedbackLoopEnabled: async () => true,

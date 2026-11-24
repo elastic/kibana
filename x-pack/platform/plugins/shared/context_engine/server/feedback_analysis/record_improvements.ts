@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { MAX_IMPROVEMENTS_PER_RUN } from '../../common/constants';
 import type { ImprovementAction } from '../../common/http_api/improvement_actions';
 import type {
@@ -15,7 +16,9 @@ import type { ProposedImprovement } from '../../common/http_api/improvements_out
 import { proposedImprovementSchema } from '../../common/http_api/improvements_output_schema';
 import { InvalidImprovementError } from '../improvements/errors';
 import { buildImprovementId } from '../improvements/identity';
+import { isProposable, toProposal } from '../improvements/propose';
 import type { ImprovementsServiceApi } from '../improvements/service';
+import type { ProposalsProvider, ProposalsProviderContext } from '../proposals/provider';
 
 export interface RecordImprovementsOptions {
   aiIndexId: string;
@@ -28,6 +31,15 @@ export interface RecordImprovementsOptions {
   /** Straight off the agent, unvalidated. */
   proposals: unknown[];
   improvementsService: ImprovementsServiceApi;
+  /**
+   * Where an improvement is put up for review. Without it improvements are only recorded, which
+   * is all an observe-only index does with them.
+   */
+  review?: {
+    provider: ProposalsProvider;
+    context: ProposalsProviderContext;
+    logger: Logger;
+  };
   suggestedAt?: string;
 }
 
@@ -70,6 +82,7 @@ export const recordImprovements = async ({
   allowedActions,
   proposals,
   improvementsService,
+  review,
   suggestedAt,
 }: RecordImprovementsOptions): Promise<RecordImprovementsResponse> => {
   const skipped: RecordImprovementsResponse['skipped'] = [];
@@ -108,6 +121,16 @@ export const recordImprovements = async ({
         title: proposal.title,
         reason: 'invalid',
         detail: `The ${proposal.action} proposal is missing ${missing}.`,
+      });
+      continue;
+    }
+
+    if (review && !isProposable(proposal.action)) {
+      skipped.push({
+        action: proposal.action,
+        title: proposal.title,
+        reason: 'action_not_allowed',
+        detail: `'${proposal.action}' cannot be reviewed as a proposal yet, so it is not recorded.`,
       });
       continue;
     }
@@ -185,8 +208,38 @@ export const recordImprovements = async ({
   const written = await improvementsService.write(candidates.map(({ input }) => input));
   const writtenIds = new Set(written.map(({ improvement_id: id }) => id));
 
+  const proposalFailures = new Map<string, string>();
+  if (review) {
+    for (const improvement of written) {
+      const proposal = toProposal(improvement);
+      if (!proposal) {
+        continue;
+      }
+      try {
+        await review.provider.create({ ...review.context, proposal });
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        review.logger.warn(
+          `Could not propose improvement [${improvement.improvement_id}] for review: ${detail}`
+        );
+        proposalFailures.set(improvement.improvement_id, detail);
+      }
+    }
+  }
+
   const recorded: RecordImprovementsResponse['recorded'] = [];
   for (const candidate of candidates) {
+    if (proposalFailures.has(candidate.improvementId)) {
+      skipped.push({
+        action: candidate.proposal.action,
+        title: candidate.proposal.title,
+        reason: 'proposal_failed',
+        detail: `It was recorded but could not be put up for review: ${proposalFailures.get(
+          candidate.improvementId
+        )}`,
+      });
+      continue;
+    }
     if (writtenIds.has(candidate.improvementId)) {
       recorded.push({
         improvement_id: candidate.improvementId,

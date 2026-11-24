@@ -1,0 +1,53 @@
+version: '1'
+name: Remove Knowledge Indicator
+description: >
+  Context Engine action: removes a Knowledge Indicator from an AI index. Run by the proposals
+  service once an analyst approves the proposal, so the removal is attributed to the approver.
+enabled: true
+tags:
+  - action
+  - context-engine
+consts:
+  actionMetadata:
+    name: Remove Knowledge Indicator
+    category: context-engine
+    description: Removes a Knowledge Indicator from an AI index.
+    impact: medium
+    # `context-engine.deleteKi` soft-deletes, so the Knowledge Indicator can be restored.
+    reversible: true
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: The Knowledge Indicator to remove.
+          properties:
+            ai_index_id:
+              type: string
+              description: The AI index the Knowledge Indicator belongs to.
+            ki_id:
+              type: string
+              description: The Knowledge Indicator to remove.
+          required:
+            - ai_index_id
+            - ki_id
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: applied_target_id
+    type: string
+steps:
+  - name: delete_ki
+    type: context-engine.deleteKi
+    with:
+      ai_index_id: '{{ inputs.actionInput.ai_index_id }}'
+      ki_id: '{{ inputs.actionInput.ki_id }}'
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      applied_target_id: '${{ steps.delete_ki.output.id }}'

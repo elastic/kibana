@@ -19,6 +19,7 @@ import { assertContextEngineEnabled, assertFeedbackLoopEnabled } from './helpers
 export const getRecordImprovementsStepDefinition = ({
   getAiIndexService,
   getImprovementsService,
+  getProposalsProvider,
   getAuditLogger,
   isContextEngineEnabled,
   isFeedbackLoopEnabled,
@@ -58,6 +59,7 @@ export const getRecordImprovementsStepDefinition = ({
         );
         const allowedActions = feedbackAnalysis?.allowed_actions ?? [...IMPROVEMENT_ACTIONS];
 
+        const proposalsProvider = getProposalsProvider();
         const result = await recordImprovements({
           aiIndexId,
           spaceId,
@@ -67,6 +69,9 @@ export const getRecordImprovementsStepDefinition = ({
           allowedActions,
           proposals: improvements,
           improvementsService: getImprovementsService(esClient, spaceId),
+          ...(proposalsProvider && {
+            review: { provider: proposalsProvider, context: { spaceId, request }, logger },
+          }),
         });
 
         auditLogger?.log(improvementAuditEvent({ aiIndexId, recorded: result.recorded.length }));

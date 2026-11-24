@@ -41,6 +41,7 @@ const buildStep = ({
   getFeedbackContextStepDefinition({
     getAiIndexService: () => aiIndexService,
     getImprovementsService: () => improvementsService,
+    getProposalsProvider: () => undefined,
     getAuditLogger: async () => undefined,
     isContextEngineEnabled: async () => contextEngineEnabled,
     isFeedbackLoopEnabled: async () => feedbackLoopEnabled,
@@ -170,6 +171,7 @@ describe('getFeedbackContextStepDefinition', () => {
     const { handler } = getFeedbackContextStepDefinition({
       getAiIndexService: () => aiIndexService,
       getImprovementsService,
+      getProposalsProvider: () => undefined,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled,
       isFeedbackLoopEnabled: async () => true,

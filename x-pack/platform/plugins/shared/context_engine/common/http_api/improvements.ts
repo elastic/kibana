@@ -166,7 +166,8 @@ export type SkippedImprovementReason =
   | 'invalid'
   | 'duplicate'
   | 'conflict'
-  | 'limit_exceeded';
+  | 'limit_exceeded'
+  | 'proposal_failed';
 
 export interface RecordImprovementsResponse {
   /** Lineages that gained a revision, in the order they were proposed. */

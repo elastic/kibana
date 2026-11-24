@@ -1,0 +1,58 @@
+version: '1'
+name: Edit Knowledge Indicator
+description: >
+  Context Engine action: changes fields of a Knowledge Indicator in an AI index. Run by the
+  proposals service once an analyst approves the proposal, so the write is attributed to the
+  approver.
+enabled: true
+tags:
+  - action
+  - context-engine
+consts:
+  actionMetadata:
+    name: Edit Knowledge Indicator
+    category: context-engine
+    description: Changes fields of a Knowledge Indicator in an AI index.
+    impact: medium
+    reversible: false
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: The Knowledge Indicator to edit and the fields to change.
+          properties:
+            ai_index_id:
+              type: string
+              description: The AI index the Knowledge Indicator belongs to.
+            ki_id:
+              type: string
+              description: The Knowledge Indicator to edit.
+            ki_patch:
+              type: object
+              description: The fields to change, as `context-engine.updateKi` takes them.
+          required:
+            - ai_index_id
+            - ki_id
+            - ki_patch
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: applied_target_id
+    type: string
+steps:
+  - name: update_ki
+    type: context-engine.updateKi
+    with:
+      ai_index_id: '{{ inputs.actionInput.ai_index_id }}'
+      ki_id: '{{ inputs.actionInput.ki_id }}'
+      ki: '${{ inputs.actionInput.ki_patch }}'
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      applied_target_id: '${{ steps.update_ki.output.id }}'
