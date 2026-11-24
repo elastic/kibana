@@ -119,13 +119,15 @@ export const useDiscoverHistogram = (
     chartLoadedFor !== getAbortController();
 
   const chartHidden = useAppStateSelector((state) => state.hideChart);
+  // read in onChartLoaded without changing it, a new callback would replay the last chart result
+  const chartHiddenRef = useLatest(chartHidden);
 
   const onChartLoaded = useCallback(
     (fetchAbortController: AbortController | undefined) => {
       // ignore a hidden chart and charts of an older or aborted fetch, they must not reveal the
       // results of the current one
       if (
-        chartHidden ||
+        chartHiddenRef.current ||
         !fetchAbortController ||
         fetchAbortController.signal.aborted ||
         fetchAbortController !== getAbortController()
@@ -142,7 +144,7 @@ export const useDiscoverHistogram = (
         sendCompleteMsg(main$);
       }
     },
-    [chartHidden, getAbortController, main$, documents$]
+    [chartHiddenRef, getAbortController, main$, documents$]
   );
 
   /**
