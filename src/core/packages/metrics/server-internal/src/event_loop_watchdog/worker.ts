@@ -158,13 +158,7 @@ const formatFrameLists = ({ frames, kibanaFrames }: ProfileSummary): string => {
 
 /** Starts detection; returns a function that stops it (for tests: the worker never stops itself). */
 export const runWatchdogWorker = (
-  {
-    shared: sharedBuffer,
-    thresholdsMs,
-    statsIntervalMs,
-    profiling,
-    sampleExecutionContext,
-  }: WatchdogWorkerData,
+  { shared: sharedBuffer, thresholdsMs, statsIntervalMs, profiling }: WatchdogWorkerData,
   {
     logger,
     nowUs = monotonicUs,
@@ -192,6 +186,7 @@ export const runWatchdogWorker = (
   let samplingFailureLogged = false;
   const sampler = new ContextSampler({
     createSession,
+    nowUs,
     // The heartbeat the block started at is still the last one: the main thread hasn't resumed.
     isBlocked: (blockStartedAt) =>
       toMs(Number(Atomics.load(shared, Slot.heartbeat))) <= blockStartedAt,
@@ -479,7 +474,9 @@ export const runWatchdogWorker = (
       onBlock(block, nowMs);
     }
     const { current } = detector;
-    if (current && sampleExecutionContext) {
+    // Read on every poll: the flag takes effect without restarting the worker. A block that is
+    // being sampled when it turns off keeps the samples it has.
+    if (current && Atomics.load(shared, Slot.contextSampling) === 1n) {
       sampler.sample(current.startedAt, nowMs);
     }
     if (capture?.stopReason === 'block_ended') {

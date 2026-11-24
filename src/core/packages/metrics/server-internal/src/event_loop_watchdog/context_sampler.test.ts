@@ -39,7 +39,19 @@ describe('ContextSampler', () => {
   let failConnect: boolean;
   let onFailure: jest.Mock;
   let sampler: ContextSampler;
+  let nowUs: number;
+  /** How far the clock moves between a sample's request and its answer. */
+  let answerTakesUs: number;
 
+  const stats = (counts: Partial<ContextSampler['stats']> = {}): ContextSampler['stats'] => ({
+    sampledBlocks: 0,
+    requested: 0,
+    samples: 0,
+    failed: 0,
+    answerMs: 0,
+    maxAnswerMs: 0,
+    ...counts,
+  });
   const settle = async () => {
     for (let i = 0; i < 5; i++) {
       await Promise.resolve();
@@ -59,7 +71,10 @@ describe('ContextSampler', () => {
     blocked = true;
     failConnect = false;
     onFailure = jest.fn();
+    nowUs = 5_000_000;
+    answerTakesUs = 0;
     sampler = new ContextSampler({
+      nowUs: () => nowUs,
       createSession: () => {
         const session: jest.Mocked<InspectorSession> = {
           connectToMainThread: jest.fn(() => {
@@ -68,9 +83,10 @@ describe('ContextSampler', () => {
             }
           }),
           disconnect: jest.fn(),
-          post: jest.fn(
-            async (method: string): Promise<unknown> => answerFor(running)
-          ) as jest.Mocked<InspectorSession>['post'],
+          post: jest.fn(async (method: string): Promise<unknown> => {
+            nowUs += answerTakesUs;
+            return answerFor(running);
+          }) as jest.Mocked<InspectorSession>['post'],
         };
         sessions.push(session);
         return session;
@@ -90,7 +106,7 @@ describe('ContextSampler', () => {
     await sampleUntil(CONTEXT_SAMPLE_AFTER_MS - 25);
     expect(sessions).toHaveLength(0);
     expect(sampler.end(BLOCK)).toBeUndefined();
-    expect(sampler.stats).toEqual({ sampledBlocks: 0, samples: 0, failed: 0 });
+    expect(sampler.stats).toEqual(stats());
   });
 
   it('samples the block through one session, after the delay and then every interval', async () => {
@@ -126,7 +142,32 @@ describe('ContextSampler', () => {
         { context: otherTask, samples: 1 },
       ],
     });
-    expect(sampler.stats).toEqual({ sampledBlocks: 1, samples: 4, failed: 0 });
+    expect(sampler.stats).toEqual(stats({ sampledBlocks: 1, requested: 4, samples: 4 }));
+  });
+
+  it('times how long the samples take to be answered', async () => {
+    answerTakesUs = 300;
+    await sampleUntil(CONTEXT_SAMPLE_AFTER_MS + CONTEXT_SAMPLE_INTERVAL_MS);
+    answerTakesUs = 1_250;
+    await sampleUntil(
+      CONTEXT_SAMPLE_AFTER_MS + 2 * CONTEXT_SAMPLE_INTERVAL_MS,
+      CONTEXT_SAMPLE_AFTER_MS + CONTEXT_SAMPLE_INTERVAL_MS + 25
+    );
+    expect(sampler.stats).toEqual(
+      stats({ requested: 3, samples: 3, answerMs: 1.85, maxAnswerMs: 1.25 })
+    );
+  });
+
+  it("doesn't time a sample that isn't answered while the block lasts", async () => {
+    answerTakesUs = 300;
+    await sampleUntil(CONTEXT_SAMPLE_AFTER_MS);
+    // As when the main thread is in one long native call: answered once the block is over.
+    answerTakesUs = 4_000_000;
+    blocked = false;
+    await sampleUntil(CONTEXT_SAMPLE_AFTER_MS + 500, CONTEXT_SAMPLE_AFTER_MS + 25);
+    expect(sampler.stats).toEqual(
+      stats({ requested: 2, samples: 1, answerMs: 0.3, maxAnswerMs: 0.3 })
+    );
   });
 
   it('ends the session with the block, and opens a new one for the next block', async () => {
@@ -263,7 +304,7 @@ describe('ContextSampler', () => {
     expect(onFailure).toHaveBeenCalledTimes(1);
     expect(onFailure).toHaveBeenCalledWith(new Error('inspector not available'));
     expect(sampler.end(BLOCK)).toBeUndefined();
-    expect(sampler.stats).toEqual({ sampledBlocks: 0, samples: 0, failed: 1 });
+    expect(sampler.stats).toEqual(stats({ requested: 1, failed: 1 }));
 
     // The next block is tried again.
     failConnect = false;
@@ -302,7 +343,9 @@ describe('ContextSampler', () => {
         withoutContext: 0,
         top: [{ context: task, samples: 1 }],
       });
-      expect(sampler.stats).toEqual({ sampledBlocks: 1, samples: 1, failed: 1 });
+      expect(sampler.stats).toEqual(
+        stats({ sampledBlocks: 1, requested: 2, samples: 1, failed: 1 })
+      );
     }
   );
 
@@ -310,7 +353,7 @@ describe('ContextSampler', () => {
     await sampleUntil(CONTEXT_SAMPLE_AFTER_MS);
     sampler.end(BLOCK);
     sampler.resetStats();
-    expect(sampler.stats).toEqual({ sampledBlocks: 0, samples: 0, failed: 0 });
+    expect(sampler.stats).toEqual(stats());
   });
 
   it('closes the session of the block being sampled when released', async () => {

@@ -15,6 +15,7 @@ import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common
 import { opsConfig } from '../ops_config';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import {
+  EVENT_LOOP_WATCHDOG_CONTEXT_SAMPLING_FEATURE_FLAG,
   EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
   EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAGS,
   EventLoopWatchdogService,
@@ -33,6 +34,7 @@ const available: ServiceStatus = { level: ServiceStatusLevels.available, summary
 const degraded: ServiceStatus = { level: ServiceStatusLevels.degraded, summary: '' };
 const BG_PROFILING_FLAG = 'core.eventLoopWatchdog.profiling.backgroundTasks.enabled';
 const UI_PROFILING_FLAG = 'core.eventLoopWatchdog.profiling.ui.enabled';
+const SAMPLING_FLAG = 'core.eventLoopWatchdog.executionContextSampling.enabled';
 const readExecutionContext: ReadExecutionContext = () => ({ type: 'task manager' });
 
 describe('EventLoopWatchdogService', () => {
@@ -302,8 +304,8 @@ describe('EventLoopWatchdogService', () => {
       [['migrator'], []],
     ])('with roles %j, reads %j with a false fallback', async (roles, flags) => {
       await start({ enabled: true }, roles);
-      const read = getBooleanValue$.mock.calls.filter(
-        ([name]) => name !== EVENT_LOOP_WATCHDOG_FEATURE_FLAG
+      const read = getBooleanValue$.mock.calls.filter(([name]) =>
+        String(name).startsWith('core.eventLoopWatchdog.profiling.')
       );
       expect(read).toEqual(flags.map((flag) => [flag, false]));
     });
@@ -405,6 +407,74 @@ describe('EventLoopWatchdogService', () => {
     });
   });
 
+  describe('execution context sampling flag', () => {
+    const samplingFlag = () => profilingFlags[SAMPLING_FLAG];
+
+    it('reads the flag with a false fallback', async () => {
+      await start({ enabled: true });
+      expect(EVENT_LOOP_WATCHDOG_CONTEXT_SAMPLING_FEATURE_FLAG).toBe(SAMPLING_FLAG);
+      expect(getBooleanValue$).toHaveBeenCalledWith(SAMPLING_FLAG, false);
+    });
+
+    it('turns sampling on and off with the flag', async () => {
+      await start();
+      samplingFlag().next(false);
+      expect(watchdog().setContextSampling).not.toHaveBeenCalled();
+      samplingFlag().next(true);
+      samplingFlag().next(true);
+      expect(watchdog().setContextSampling.mock.calls).toEqual([[true]]);
+      samplingFlag().next(false);
+      expect(watchdog().setContextSampling).toHaveBeenLastCalledWith(false);
+    });
+
+    it('is separate from the profiling flags', async () => {
+      await start();
+      profilingFlags[BG_PROFILING_FLAG].next(true);
+      expect(watchdog().setContextSampling).not.toHaveBeenCalled();
+      samplingFlag().next(true);
+      expect(watchdog().setProfiling).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['before', 'after'])(
+      'applies sampling when its flag arrives %s the watchdog flag',
+      async (order) => {
+        await start();
+        if (order === 'before') {
+          samplingFlag().next(true);
+        }
+        flag$.next(true);
+        if (order === 'after') {
+          samplingFlag().next(true);
+        }
+        expect(watchdog().start).toHaveBeenCalledTimes(1);
+        expect(watchdog().setContextSampling).toHaveBeenLastCalledWith(true);
+      }
+    );
+
+    it('toggles sampling without restarting the watchdog', async () => {
+      await start();
+      flag$.next(true);
+      samplingFlag().next(true);
+      samplingFlag().next(false);
+      samplingFlag().next(true);
+      await Promise.resolve();
+      expect(watchdog().start).toHaveBeenCalledTimes(1);
+      expect(watchdog().stop).not.toHaveBeenCalled();
+    });
+
+    it('treats a failed flag as off', async () => {
+      await start();
+      flag$.next(true);
+      samplingFlag().next(true);
+      expect(() => samplingFlag().error(new Error('provider failed'))).not.toThrow();
+      expect(logger.get().error).toHaveBeenCalledWith(
+        `Sampling flag ${SAMPLING_FLAG} failed, treating it as off: provider failed`
+      );
+      expect(watchdog().setContextSampling).toHaveBeenLastCalledWith(false);
+      expect(watchdog().stop).not.toHaveBeenCalled();
+    });
+  });
+
   describe('#getBlocks$()', () => {
     const block = { startedAt: 1_700_000_000_000, blockedMs: 5_200, phase: 'running' as const };
 
@@ -431,7 +501,9 @@ describe('EventLoopWatchdogService', () => {
       expect(watchdog().stop).toHaveBeenCalledTimes(1);
       flag$.next(true);
       profilingFlags[BG_PROFILING_FLAG].next(true);
+      profilingFlags[SAMPLING_FLAG].next(true);
       expect(watchdog().setProfiling).not.toHaveBeenCalled();
+      expect(watchdog().setContextSampling).not.toHaveBeenCalled();
       overall$.next(available);
       jest.advanceTimersByTime(RUNNING_FALLBACK_MS);
       expect(watchdog().start).not.toHaveBeenCalled();

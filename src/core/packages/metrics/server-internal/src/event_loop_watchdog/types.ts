@@ -31,8 +31,6 @@ export interface WatchdogWorkerData {
   statsIntervalMs: number;
   logging: WorkerLoggingConfig;
   profiling: WatchdogProfilingData;
-  /** Whether the main thread installed an execution context reader to sample during a block. */
-  sampleExecutionContext: boolean;
 }
 
 export interface BlockLogMeta extends LogMeta {
@@ -123,10 +121,23 @@ export interface ProfilingStats {
 export interface ContextSamplingStats {
   /** Blocks that ended with at least one sample. */
   sampledBlocks: number;
+  /**
+   * Samples requested. More of these than `samples` means some weren't answered before their
+   * block ended, as when the main thread is inside one long native call.
+   */
+  requested: number;
   /** Samples answered while their block was still ongoing. */
   samples: number;
   /** Blocks whose sampling failed; such a block isn't sampled further. */
   failed: number;
+  /**
+   * Time from requesting each of the `samples` until its answer, summed, in milliseconds. A
+   * sample waits for the main thread to reach a point where V8 can interrupt it, then runs the
+   * reader there; a block's first sample also opens the inspector session.
+   */
+  answerMs: number;
+  /** Largest such time for a single sample, in milliseconds. */
+  maxAnswerMs: number;
 }
 
 export interface StatsLogMeta extends LogMeta {

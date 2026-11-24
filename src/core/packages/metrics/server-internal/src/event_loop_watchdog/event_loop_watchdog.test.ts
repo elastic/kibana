@@ -92,7 +92,6 @@ describe('EventLoopWatchdog', () => {
         statsIntervalMs: 600_000,
         logging,
         profiling,
-        sampleExecutionContext: false,
       },
     });
     expect(worker.start).toHaveBeenCalledTimes(1);
@@ -246,36 +245,69 @@ describe('EventLoopWatchdog', () => {
     // A test that leaves its watchdog running leaves the reader too.
     afterEach(() => uninstallExecutionContextReader());
 
-    it('tells the worker to sample when it can read the execution context', () => {
+    const ON = 'Event loop watchdog execution context sampling on';
+    const OFF = 'Event loop watchdog execution context sampling off';
+    const samplingLines = () =>
+      logger.info.mock.calls
+        .map(([message]) => message)
+        .filter((message) => String(message).includes('execution context sampling'));
+
+    it('starts with sampling off and no reader installed', () => {
       create({ readExecutionContext }).start();
-      expect(options().workerData?.sampleExecutionContext).toBe(true);
-    });
-
-    it("tells the worker not to sample when it can't, and installs no reader", () => {
-      create().start();
-      expect(options().workerData?.sampleExecutionContext).toBe(false);
+      expect(slots()[Slot.contextSampling]).toBe(0n);
       expect(reader()).toBeUndefined();
+      expect(samplingLines()).toEqual([]);
     });
 
-    it('installs the execution context reader while the worker runs', async () => {
+    it('turns sampling on and off without restarting the worker', () => {
       const watchdog = create({ readExecutionContext });
-      expect(reader()).toBeUndefined();
       watchdog.start();
+      watchdog.setContextSampling(true);
+      expect(slots()[Slot.contextSampling]).toBe(1n);
       expect(reader()()).toEqual(task);
+      watchdog.setContextSampling(true);
+      watchdog.setContextSampling(false);
+      expect(slots()[Slot.contextSampling]).toBe(0n);
+      expect(reader()).toBeUndefined();
+      expect(samplingLines()).toEqual([ON, OFF]);
+      expect(createWorker).toHaveBeenCalledTimes(1);
+      expect(worker.stop).not.toHaveBeenCalled();
+    });
+
+    it("leaves sampling off when it can't read the execution context", () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setContextSampling(true);
+      expect(slots()[Slot.contextSampling]).toBe(0n);
+      expect(reader()).toBeUndefined();
+      expect(samplingLines()).toEqual([]);
+    });
+
+    it('removes the reader when the worker stops', async () => {
+      const watchdog = create({ readExecutionContext });
+      watchdog.start();
+      watchdog.setContextSampling(true);
       const stopped = watchdog.stop();
       expect(reader()).toBeUndefined();
+      expect(samplingLines()).toEqual([ON, OFF]);
       resolveStop();
       await stopped;
     });
 
-    it('installs the reader again for a worker started later', async () => {
+    it('carries sampling over to a worker started later', async () => {
       const watchdog = create({ readExecutionContext });
+      watchdog.setContextSampling(true);
+      expect(reader()).toBeUndefined();
+      expect(samplingLines()).toEqual([]);
       watchdog.start();
+      expect(slots()[Slot.contextSampling]).toBe(1n);
       const stopped = watchdog.stop();
       resolveStop();
       await stopped;
       watchdog.start();
+      expect(slots(1)[Slot.contextSampling]).toBe(1n);
       expect(reader()()).toEqual(task);
+      expect(samplingLines()).toEqual([ON, OFF, ON]);
     });
   });
 

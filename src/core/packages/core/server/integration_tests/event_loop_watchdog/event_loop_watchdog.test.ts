@@ -11,7 +11,10 @@ import { spawn } from 'node:child_process';
 import Path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { EventLoopBlock, EventLoopBlockContexts } from '@kbn/core-metrics-server';
-import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
+import {
+  CONTEXT_SAMPLE_INTERVAL_MS,
+  REPORT_BURST,
+} from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
 
 const HARNESS = Path.resolve(__dirname, 'fixtures', 'watchdog_harness.ts');
 
@@ -19,6 +22,15 @@ interface PhaseStats {
   thresholdMs: number;
   blocks: number;
   suppressed: number;
+}
+
+interface ContextSamplingStats {
+  sampledBlocks: number;
+  requested: number;
+  samples: number;
+  failed: number;
+  answerMs: number;
+  maxAnswerMs: number;
 }
 
 /** The parts of a worker log line these tests read. */
@@ -43,7 +55,7 @@ interface WorkerLogLine {
           captureFailed: number;
           skippedCooldown: number;
         };
-        contextSampling?: { sampledBlocks: number; samples: number; failed: number };
+        contextSampling?: ContextSamplingStats;
       };
       profile?: {
         blockedMs: number;
@@ -174,6 +186,22 @@ const warnings = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.filter(({ log }) => log.level === 'WARN');
 const statsOf = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.flatMap(({ kibana }) => kibana?.event_loop_watchdog?.stats ?? []);
+/** Context sampling counts over every stats period: summed, and the largest of the maximums. */
+const samplingTotals = (result: HarnessResult): ContextSamplingStats =>
+  statsOf(result).reduce<ContextSamplingStats>(
+    (totals, { contextSampling }) =>
+      contextSampling
+        ? {
+            sampledBlocks: totals.sampledBlocks + contextSampling.sampledBlocks,
+            requested: totals.requested + contextSampling.requested,
+            samples: totals.samples + contextSampling.samples,
+            failed: totals.failed + contextSampling.failed,
+            answerMs: totals.answerMs + contextSampling.answerMs,
+            maxAnswerMs: Math.max(totals.maxAnswerMs, contextSampling.maxAnswerMs),
+          }
+        : totals,
+    { sampledBlocks: 0, requested: 0, samples: 0, failed: 0, answerMs: 0, maxAnswerMs: 0 }
+  );
 const statsLogLines = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.filter(({ kibana }) => kibana?.event_loop_watchdog?.stats);
 const blockOf = ({ kibana }: WorkerLogLine) => kibana?.event_loop_watchdog;
@@ -472,14 +500,20 @@ describe('event loop watchdog in a child process', () => {
       expectCleanExit(sampled);
       expect(restarts(sampled)).toEqual([]);
       expect(ended).toHaveLength(3);
-      const total = statsOf(sampled).reduce(
-        (totals, { contextSampling }) => ({
-          sampledBlocks: totals.sampledBlocks + (contextSampling?.sampledBlocks ?? 0),
-          failed: totals.failed + (contextSampling?.failed ?? 0),
-        }),
-        { sampledBlocks: 0, failed: 0 }
-      );
-      expect(total).toEqual({ sampledBlocks: 3, failed: 0 });
+      const total = samplingTotals(sampled);
+      expect(total).toMatchObject({ sampledBlocks: 3, failed: 0 });
+      // 3 s, 2 s and 3 s blocks, sampled at 1 s and then every 500 ms.
+      expect(total.samples).toBeGreaterThanOrEqual(7);
+      expect(total.requested).toBeGreaterThanOrEqual(total.samples);
+    });
+
+    it('reports how long the samples took to be answered', () => {
+      const { samples, answerMs, maxAnswerMs } = samplingTotals(sampled);
+      expect(answerMs).toBeGreaterThan(0);
+      expect(maxAnswerMs).toBeGreaterThan(0);
+      expect(maxAnswerMs).toBeLessThanOrEqual(answerMs);
+      // The main thread spins in JS, where V8 interrupts it within milliseconds.
+      expect(answerMs / samples).toBeLessThan(CONTEXT_SAMPLE_INTERVAL_MS);
     });
 
     it('says which task a block ran in, while the main thread is still blocked and once it ends', () => {
@@ -561,11 +595,26 @@ describe('event loop watchdog in a child process', () => {
       expect(receivedBlocks(result)).toEqual([
         { startedAt: expect.any(Number), blockedMs: blockOf(warning)?.blockedMs, phase: 'running' },
       ]);
-      const sampledBlocks = statsOf(result).reduce(
-        (total, { contextSampling }) => total + (contextSampling?.sampledBlocks ?? 0),
-        0
-      );
-      expect(sampledBlocks).toBe(0);
+      expect(samplingTotals(result)).toMatchObject({ sampledBlocks: 0, requested: 0 });
+    }, 120_000);
+
+    it('samples only while sampling is on, following it without restarting the worker', async () => {
+      const result = await runHarness('sample_toggle');
+      expectCleanExit(result);
+      expect(restarts(result)).toEqual([]);
+      expect(
+        result.mainLogLines
+          .map(({ message }) => message)
+          .filter((message) => message.includes('execution context sampling'))
+      ).toEqual([
+        'Event loop watchdog execution context sampling on',
+        'Event loop watchdog execution context sampling off',
+      ]);
+      const [off, on, offAgain] = receivedBlocks(result);
+      expect(off).not.toHaveProperty('contexts');
+      expect(on.contexts?.top).toEqual([{ context: task, samples: on.contexts?.samples }]);
+      expect(offAgain).not.toHaveProperty('contexts');
+      expect(samplingTotals(result)).toMatchObject({ sampledBlocks: 1, failed: 0 });
     }, 120_000);
   });
 });

@@ -70,7 +70,9 @@ export const Slot = {
   runningSince: 1,
   /** 1 while CPU profiling is on for one of this node's roles, 0 otherwise. */
   profiling: 2,
+  /** 1 while execution context sampling is on and the main thread has a reader, 0 otherwise. */
+  contextSampling: 3,
 } as const;
-export const SLOT_COUNT = 3;
+export const SLOT_COUNT = 4;
 
 export const monotonicUs = (): number => Number(process.hrtime.bigint() / 1000n);

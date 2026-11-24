@@ -57,8 +57,8 @@ export interface EventLoopBlock {
   /** Whether the block started while Kibana was starting, or once it was running. */
   readonly phase: 'starting' | 'running';
   /**
-   * What was running during the block. Unset when the block ended before its first sample, or
-   * when sampling it failed.
+   * What was running during the block. Unset when sampling is off, when the block ended before
+   * its first sample, or when sampling it failed.
    */
   readonly contexts?: EventLoopBlockContexts;
 }

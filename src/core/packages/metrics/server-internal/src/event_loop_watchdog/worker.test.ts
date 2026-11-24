@@ -107,7 +107,6 @@ describe('runWatchdogWorker', () => {
           maxDurationMs: { starting: 10_000, running: 10_000 },
           cooldownMs: { starting: 60_000, running: 60_000 },
         },
-        sampleExecutionContext: false,
         ...overrides,
       },
       {
@@ -446,7 +445,14 @@ describe('runWatchdogWorker', () => {
         profilingActiveMs: 0,
         maxStopHeartbeatGapMs: 0,
       },
-      contextSampling: { sampledBlocks: 0, samples: 0, failed: 0 },
+      contextSampling: {
+        sampledBlocks: 0,
+        requested: 0,
+        samples: 0,
+        failed: 0,
+        answerMs: 0,
+        maxAnswerMs: 0,
+      },
     });
   });
 
@@ -525,8 +531,23 @@ describe('runWatchdogWorker', () => {
   describe('execution context sampling', () => {
     const task = { type: 'task manager', name: 'run alerting:example', id: 'task-1' };
     const rule = { ...task, child: { type: 'alert', name: 'execute example', id: 'rule-1' } };
-    const startSampling = (depOverrides: Partial<WatchdogWorkerDeps> = {}) =>
-      start({ sampleExecutionContext: true }, () => nowUs, depOverrides);
+    const startSampling = (depOverrides: Partial<WatchdogWorkerDeps> = {}) => {
+      start({}, () => nowUs, depOverrides);
+      setSlot(Slot.contextSampling, 1);
+    };
+    const samplingStats = (
+      counts: Partial<
+        StatsLogMeta['kibana']['event_loop_watchdog']['stats']['contextSampling']
+      > = {}
+    ) => ({
+      sampledBlocks: 0,
+      requested: 0,
+      samples: 0,
+      failed: 0,
+      answerMs: 0,
+      maxAnswerMs: 0,
+      ...counts,
+    });
     /** Stalls in sampling-interval steps, letting each sample's answer arrive during the block. */
     const stallSampled = async (ms: number) => {
       for (let elapsed = 0; elapsed < ms; elapsed += CONTEXT_SAMPLE_INTERVAL_MS) {
@@ -543,7 +564,7 @@ describe('runWatchdogWorker', () => {
     const blockMeta = (call = 0) =>
       (logger.warn.mock.calls[call][1] as BlockLogMeta).kibana.event_loop_watchdog;
 
-    it("doesn't sample when the main thread has no execution context reader", async () => {
+    it("doesn't sample while sampling is off", async () => {
       start();
       runningContext = task;
       await sampledBlock(3_000);
@@ -556,6 +577,44 @@ describe('runWatchdogWorker', () => {
       });
     });
 
+    it('follows sampling being turned on and off, without a restart', async () => {
+      start();
+      runningContext = task;
+      await sampledBlock(1_500);
+      expect(sessions).toHaveLength(0);
+
+      setSlot(Slot.contextSampling, 1);
+      await sampledBlock(1_500);
+      expect(sessions).toHaveLength(1);
+      expect(logger.warn).toHaveBeenLastCalledWith(
+        'Event loop blocked for ~1500ms; 2 of 2 samples in task manager:run alerting:example:task-1',
+        expect.anything()
+      );
+
+      setSlot(Slot.contextSampling, 0);
+      await sampledBlock(1_500);
+      expect(sessions).toHaveLength(1);
+      expect(logger.warn).toHaveBeenLastCalledWith(
+        'Event loop blocked for ~1500ms',
+        expect.anything()
+      );
+    });
+
+    it('keeps the samples of a block when sampling is turned off during it', async () => {
+      startSampling();
+      runningContext = task;
+      beat();
+      await stallSampled(1_500);
+      setSlot(Slot.contextSampling, 0);
+      await stallSampled(1_500);
+      resume();
+      expect(posted()).toEqual(new Array(2).fill('Runtime.evaluate'));
+      expect(logger.warn).toHaveBeenLastCalledWith(
+        'Event loop blocked for ~3000ms; 2 of 2 samples in task manager:run alerting:example:task-1',
+        expect.anything()
+      );
+    });
+
     it("doesn't sample a block shorter than the first sample", async () => {
       startSampling();
       runningContext = task;
@@ -566,7 +625,7 @@ describe('runWatchdogWorker', () => {
         expect.anything()
       );
       idle(STATS_INTERVAL_MS);
-      expect(lastStats().contextSampling).toEqual({ sampledBlocks: 0, samples: 0, failed: 0 });
+      expect(lastStats().contextSampling).toEqual(samplingStats());
     });
 
     it('says which execution context a block ran in, while it is ongoing and once it ends', async () => {
@@ -598,7 +657,26 @@ describe('runWatchdogWorker', () => {
       expect(posted()).toEqual(new Array(5).fill('Runtime.evaluate'));
       expect(sessions[0].disconnect).toHaveBeenCalledTimes(1);
       idle(STATS_INTERVAL_MS);
-      expect(lastStats().contextSampling).toEqual({ sampledBlocks: 1, samples: 5, failed: 0 });
+      expect(lastStats().contextSampling).toEqual(
+        samplingStats({ sampledBlocks: 1, requested: 5, samples: 5 })
+      );
+    });
+
+    it('reports how long the samples took to be answered, and those not answered in time', async () => {
+      startSampling();
+      runningContext = task;
+      beat();
+      // Requested at 1s, answered 25ms later: the clock moves before the reply settles.
+      stall(1_025);
+      await settle();
+      // Requested at 1.525s, answered once the block is over.
+      stall(500);
+      resume();
+      await settle();
+      idle(STATS_INTERVAL_MS);
+      expect(lastStats().contextSampling).toEqual(
+        samplingStats({ sampledBlocks: 1, requested: 2, samples: 1, answerMs: 25, maxAnswerMs: 25 })
+      );
     });
 
     it('says when most samples found no execution context', async () => {
@@ -684,17 +762,18 @@ describe('runWatchdogWorker', () => {
       // A block whose sampling failed is still reported, without contexts.
       expect(logger.warn).toHaveBeenCalledWith('Event loop blocked for ~1500ms', expect.anything());
       idle(STATS_INTERVAL_MS);
-      expect(lastStats().contextSampling).toEqual({ sampledBlocks: 0, samples: 0, failed: 2 });
+      expect(lastStats().contextSampling).toEqual(samplingStats({ requested: 2, failed: 2 }));
 
       await sampledBlock(1_500);
       expect(failures()).toHaveLength(2);
       idle(STATS_INTERVAL_MS);
-      expect(lastStats().contextSampling).toEqual({ sampledBlocks: 0, samples: 0, failed: 1 });
+      expect(lastStats().contextSampling).toEqual(samplingStats({ requested: 1, failed: 1 }));
     });
 
     it('samples and profiles the same block through separate sessions', async () => {
-      start({ profiling: profilingData, sampleExecutionContext: true });
+      start({ profiling: profilingData });
       setSlot(Slot.profiling, 1);
+      setSlot(Slot.contextSampling, 1);
       runningContext = task;
       await sampledBlock(2_000);
       expect(sessions).toHaveLength(2);

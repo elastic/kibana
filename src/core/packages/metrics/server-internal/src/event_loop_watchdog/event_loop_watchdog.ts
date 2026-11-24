@@ -38,8 +38,8 @@ export interface EventLoopWatchdogParams {
   logging: WorkerLoggingConfig;
   profiling: WatchdogProfilingData;
   /**
-   * Returns the execution context of the running code. The worker samples it during a block;
-   * without it, blocks are reported without their execution context.
+   * Returns the execution context of the running code. The worker samples it during a block while
+   * sampling is on (`setContextSampling`); otherwise blocks are reported without their context.
    */
   readExecutionContext?: ReadExecutionContext;
   /** Called on the main thread with each block the worker detected, once the block has ended. */
@@ -60,6 +60,8 @@ export class EventLoopWatchdog {
   private runningSinceUs = 0;
   private profilingEnabled = false;
   private profilingLoggedOn = false;
+  private contextSamplingEnabled = false;
+  private contextSamplingOn = false;
 
   constructor(private readonly params: EventLoopWatchdogParams) {}
 
@@ -70,16 +72,8 @@ export class EventLoopWatchdog {
     if (this.stopping) {
       throw new Error('Cannot start the event loop watchdog while it is stopping');
     }
-    const {
-      logger,
-      thresholdsMs,
-      statsIntervalMs,
-      logging,
-      profiling,
-      readExecutionContext,
-      onBlock,
-      workerEntry,
-    } = this.params;
+    const { logger, thresholdsMs, statsIntervalMs, logging, profiling, onBlock, workerEntry } =
+      this.params;
     // Resolve first: if it throws, no heartbeat timer is left behind.
     const entry = workerEntry ?? require.resolve('./worker');
     const shared = new BigInt64Array(
@@ -90,9 +84,7 @@ export class EventLoopWatchdog {
     Atomics.store(shared, Slot.runningSince, BigInt(this.runningSinceUs));
     this.shared = shared;
     this.writeProfilingSlot();
-    if (readExecutionContext) {
-      installExecutionContextReader(readExecutionContext);
-    }
+    this.applyContextSampling();
     this.heartbeatTimer = setInterval(
       () => Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs())),
       HEARTBEAT_INTERVAL_MS
@@ -105,7 +97,6 @@ export class EventLoopWatchdog {
       statsIntervalMs,
       logging,
       profiling,
-      sampleExecutionContext: readExecutionContext !== undefined,
     };
     this.worker = createManagedWorker<WatchdogWorkerData>({
       name: WATCHDOG_WORKER_NAME,
@@ -195,6 +186,37 @@ export class EventLoopWatchdog {
     }
   }
 
+  /**
+   * Turns the sampling of execution contexts during blocks on or off for the running worker. The
+   * setting is retained when the worker stops and applied if it starts again.
+   */
+  public setContextSampling(enabled: boolean): void {
+    this.contextSamplingEnabled = enabled;
+    this.applyContextSampling();
+  }
+
+  /** Sampling is on while the worker runs, the setting is on and there is a reader to call. */
+  private applyContextSampling(): void {
+    const { logger, readExecutionContext } = this.params;
+    const { shared } = this;
+    const on =
+      shared !== undefined && this.contextSamplingEnabled && readExecutionContext !== undefined;
+    // The reader is there before the worker is told to call it, and until after it is told not to.
+    if (on) {
+      installExecutionContextReader(readExecutionContext);
+    }
+    if (shared) {
+      Atomics.store(shared, Slot.contextSampling, on ? 1n : 0n);
+    }
+    if (!on) {
+      uninstallExecutionContextReader();
+    }
+    if (on !== this.contextSamplingOn) {
+      this.contextSamplingOn = on;
+      logger.info(`Event loop watchdog execution context sampling ${on ? 'on' : 'off'}`);
+    }
+  }
+
   public stop(): Promise<void> {
     if (this.stopping) {
       return this.stopping;
@@ -205,7 +227,7 @@ export class EventLoopWatchdog {
     }
     this.worker = undefined;
     this.shared = undefined;
-    uninstallExecutionContextReader();
+    this.applyContextSampling();
     this.logProfiling();
     this.clearHeartbeat();
     this.stopping = worker

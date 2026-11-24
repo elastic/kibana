@@ -57,6 +57,18 @@ export interface ContextSamplerParams {
   isBlocked: (blockStartedAt: number) => boolean;
   /** Called when a block's sampling fails; that block isn't sampled further. */
   onFailure: (error: unknown) => void;
+  /** Monotonic clock in microseconds; times how long each sample takes to be answered. */
+  nowUs: () => number;
+}
+
+/** What is counted per stats period; the answer times are kept in microseconds until reported. */
+interface SamplingCounts {
+  sampledBlocks: number;
+  requested: number;
+  samples: number;
+  failed: number;
+  answerUs: number;
+  maxAnswerUs: number;
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -79,7 +91,16 @@ const toContext = (value: Record<string, unknown>): EventLoopBlockExecutionConte
   };
 };
 
-const noSamples = (): ContextSamplingStats => ({ sampledBlocks: 0, samples: 0, failed: 0 });
+const noSamples = (): SamplingCounts => ({
+  sampledBlocks: 0,
+  requested: 0,
+  samples: 0,
+  failed: 0,
+  answerUs: 0,
+  maxAnswerUs: 0,
+});
+/** Milliseconds with microsecond precision: an answer usually takes less than a millisecond. */
+const usToMs = (us: number): number => Math.round(us) / 1000;
 
 /**
  * Samples which execution context the main thread is running in while it is blocked. Each sample
@@ -94,7 +115,15 @@ export class ContextSampler {
 
   /** Counts since the last `resetStats()`. */
   public get stats(): ContextSamplingStats {
-    return this.counts;
+    const { sampledBlocks, requested, samples, failed, answerUs, maxAnswerUs } = this.counts;
+    return {
+      sampledBlocks,
+      requested,
+      samples,
+      failed,
+      answerMs: usToMs(answerUs),
+      maxAnswerMs: usToMs(maxAnswerUs),
+    };
   }
 
   public resetStats(): void {
@@ -127,7 +156,10 @@ export class ContextSampler {
     }
     block.nextSampleAt = nowMs + CONTEXT_SAMPLE_INTERVAL_MS;
     block.requested++;
+    this.counts.requested++;
     block.pending = true;
+    // Before the session is opened, so a block's first sample includes that.
+    const requestedAtUs = this.params.nowUs();
     let answer: Promise<unknown>;
     try {
       if (!block.session) {
@@ -147,7 +179,11 @@ export class ContextSampler {
       (response) => {
         block.pending = false;
         if (this.block === block && this.params.isBlocked(block.startedAt)) {
-          this.record(block, response as EvaluateResponse);
+          this.record(
+            block,
+            response as EvaluateResponse,
+            Math.max(0, this.params.nowUs() - requestedAtUs)
+          );
         }
       },
       (error) => {
@@ -191,15 +227,18 @@ export class ContextSampler {
     }
   }
 
-  private record(block: SampledBlock, { result, exceptionDetails }: EvaluateResponse): void {
+  private record(
+    block: SampledBlock,
+    { result, exceptionDetails }: EvaluateResponse,
+    answerUs: number
+  ): void {
     if (exceptionDetails) {
       this.fail(block, new Error(exceptionDetails.text ?? 'the execution context reader threw'));
       return;
     }
     if (result?.subtype === 'null') {
-      block.answered++;
       block.withoutContext++;
-      this.counts.samples++;
+      this.countSample(block, answerUs);
       return;
     }
     if (!isRecord(result?.value)) {
@@ -214,8 +253,14 @@ export class ContextSampler {
     } else {
       block.byContext.set(key, { context, samples: 1 });
     }
+    this.countSample(block, answerUs);
+  }
+
+  private countSample(block: SampledBlock, answerUs: number): void {
     block.answered++;
     this.counts.samples++;
+    this.counts.answerUs += answerUs;
+    this.counts.maxAnswerUs = Math.max(this.counts.maxAnswerUs, answerUs);
   }
 
   private fail(block: SampledBlock, error: unknown): void {

@@ -298,6 +298,7 @@ const scenarios: Record<string, () => Promise<void>> = {
       readExecutionContext: () => executionContexts.getStore(),
       onBlock: (block) => writeMainLogLine('info', `block ${JSON.stringify(block)}`),
     });
+    watchdog.setContextSampling(true);
     watchdog.start();
     await waitForLogLine('ready', 30_000);
     watchdog.markRunning();
@@ -325,6 +326,7 @@ const scenarios: Record<string, () => Promise<void>> = {
       readExecutionContext: () => executionContexts.getStore(),
       onBlock: (block) => writeMainLogLine('info', `block ${JSON.stringify(block)}`),
     });
+    watchdog.setContextSampling(true);
     watchdog.start();
     await waitForLogLine('ready', 30_000);
     watchdog.markRunning();
@@ -333,6 +335,29 @@ const scenarios: Record<string, () => Promise<void>> = {
       await sleep(10);
       blockFor(500);
     });
+    await sleep(STATS_INTERVAL_MS * 2);
+    await watchdog.stop();
+  },
+  // The same block in a task three times: with sampling off, as it is by default, then turned on
+  // and off again while the worker runs.
+  sample_toggle: async () => {
+    const watchdog = create(undefined, NO_PROFILING, {
+      readExecutionContext: () => executionContexts.getStore(),
+      onBlock: (block) => writeMainLogLine('info', `block ${JSON.stringify(block)}`),
+    });
+    watchdog.start();
+    await waitForLogLine('ready', 30_000);
+    watchdog.markRunning();
+    for (const enabled of [undefined, true, false]) {
+      if (enabled !== undefined) {
+        watchdog.setContextSampling(enabled);
+      }
+      await sleep(BLOCK_GAP_MS);
+      await withContext(TASK_CONTEXT, async () => {
+        await sleep(10);
+        blockFor(2_000);
+      });
+    }
     await sleep(STATS_INTERVAL_MS * 2);
     await watchdog.stop();
   },
