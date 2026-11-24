@@ -417,7 +417,7 @@ describe('DataViewsAsCodeService', () => {
 
       const transformedData = getExpectedMappedData(storedSpec);
 
-      const result = await service.create(inputSpec);
+      const result = await service.create(inputSpec, 'default');
 
       expect(mockDataViewsService.createAndSaveDataViewLazy).toHaveBeenCalledWith(storedSpec);
       expect(mockDataView.toMinimalSpec).toHaveBeenCalledTimes(1);
@@ -438,9 +438,9 @@ describe('DataViewsAsCodeService', () => {
       const error = new Error('Failed to create data view');
       mockDataViewsService.createAndSaveDataViewLazy.mockRejectedValue(error);
 
-      await expect(service.create({ id: 'dv-fail', index_pattern: 'logs-*' })).rejects.toThrow(
-        'Failed to create data view'
-      );
+      await expect(
+        service.create({ id: 'dv-fail', index_pattern: 'logs-*' }, 'default')
+      ).rejects.toThrow('Failed to create data view');
     });
 
     it('should pass the transformed spec to createAndSaveDataViewLazy', async () => {
@@ -460,7 +460,7 @@ describe('DataViewsAsCodeService', () => {
       });
       mockDataViewsService.createAndSaveDataViewLazy.mockResolvedValue(mockDataView);
 
-      await service.create(inputSpec);
+      await service.create(inputSpec, 'default');
 
       expect(mockDataViewsService.createAndSaveDataViewLazy).toHaveBeenCalledWith(
         transformedStoredSpec
@@ -479,7 +479,7 @@ describe('DataViewsAsCodeService', () => {
       });
       mockDataViewsService.createAndSaveDataViewLazy.mockResolvedValue(mockDataView);
 
-      const result = await service.create({ id: 'dv-meta', index_pattern: 'test-*' });
+      const result = await service.create({ id: 'dv-meta', index_pattern: 'test-*' }, 'default');
 
       expect(result.meta).toEqual({
         managed: true,
@@ -494,22 +494,57 @@ describe('DataViewsAsCodeService', () => {
       mockFieldFormats.has.mockReturnValue(false);
 
       await expect(
-        service.create({
-          id: 'dv-invalid-format',
-          index_pattern: 'logs-*',
-          field_settings: {
-            bytes: {
-              format: {
-                type: 'not-a-real-format',
+        service.create(
+          {
+            id: 'dv-invalid-format',
+            index_pattern: 'logs-*',
+            field_settings: {
+              bytes: {
+                format: {
+                  type: 'not-a-real-format',
+                },
               },
             },
           },
-        })
+          'default'
+        )
       ).rejects.toMatchObject({
         isBoom: true,
         output: { statusCode: 400 },
         message: 'Invalid field format types: not-a-real-format',
       });
+
+      expect(mockDataViewsService.createAndSaveDataViewLazy).not.toHaveBeenCalled();
+    });
+
+    it('should accept spaces that include the url space or `*`', async () => {
+      const { service, mockDataViewsService } = createService();
+      mockDataViewsService.createAndSaveDataViewLazy.mockResolvedValue(
+        createMockDataViewLazy({ id: 'dv-spaces', spec: { title: 'logs-*' } })
+      );
+
+      await service.create({ index_pattern: 'logs-*', spaces: ['default', 'space-1'] }, 'default');
+      await service.create({ index_pattern: 'logs-*', spaces: ['*'] }, 'default');
+
+      expect(mockDataViewsService.createAndSaveDataViewLazy).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw a 400 when the spaces do not include the url space', async () => {
+      const { service, mockDataViewsService } = createService();
+
+      await expect(
+        service.create({ index_pattern: 'logs-*', spaces: ['space-1'] }, 'default')
+      ).rejects.toMatchObject({ isBoom: true, output: { statusCode: 400 } });
+
+      expect(mockDataViewsService.createAndSaveDataViewLazy).not.toHaveBeenCalled();
+    });
+
+    it('should throw a 403 when the spaces include an unknown space', async () => {
+      const { service, mockDataViewsService } = createService();
+
+      await expect(
+        service.create({ index_pattern: 'logs-*', spaces: ['default', '?'] }, 'default')
+      ).rejects.toMatchObject({ isBoom: true, output: { statusCode: 403 } });
 
       expect(mockDataViewsService.createAndSaveDataViewLazy).not.toHaveBeenCalled();
     });
@@ -725,6 +760,19 @@ describe('DataViewsAsCodeService', () => {
         expect(mockSavedObjectsClient.updateObjectsSpaces).not.toHaveBeenCalled();
         expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
       });
+    });
+
+    it('should throw a 400 when creating with spaces that do not include the url space', async () => {
+      const { service, mockDataViewsService } = createService();
+      mockDataViewsService.getDataViewLazy.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError()
+      );
+
+      await expect(
+        service.upsert(id, { ...inputSpecWithoutId, spaces: ['space-1'] }, 'default')
+      ).rejects.toMatchObject({ isBoom: true, output: { statusCode: 400 } });
+
+      expect(mockDataViewsService.createAndSaveDataViewLazy).not.toHaveBeenCalled();
     });
 
     it('should create a data view when it does not already exist', async () => {

@@ -101,8 +101,9 @@ export class DataViewsAsCodeService {
     return this.mapDataView(result);
   }
 
-  public async create(spec: AsCodeSavedDataView) {
+  public async create(spec: AsCodeSavedDataView, urlSpaceId: string) {
     this.validateFieldFormatTypes(spec);
+    this.validateSpaces([], spec.spaces, urlSpaceId);
 
     const dataViewSpec = toStoredDataView(spec);
 
@@ -119,10 +120,9 @@ export class DataViewsAsCodeService {
     this.validateFieldFormatTypes(spec);
 
     const existingDataView = await this.getDataViewLazy(id);
+    this.validateSpaces(existingDataView?.namespaces ?? [], spec.spaces, urlSpaceId);
 
     if (!!existingDataView) {
-      this.validateSpaces(existingDataView.namespaces, spec.spaces, urlSpaceId);
-
       // The id can be a legacy alias, for that we use the resolved id.
       const resolvedId = existingDataView.id!;
 
@@ -165,9 +165,9 @@ export class DataViewsAsCodeService {
     urlSpaceId: string
   ) {
     // An unknown space means the data view is shared with a space the user has no access to,
-    // either currently or in the request, so it can't be updated.
+    // either currently or in the request, so it can't be written.
     if (existingSpaces.includes(UNKNOWN_SPACE) || requestedSpaces?.includes(UNKNOWN_SPACE))
-      throw forbidden('Cannot update data view in unknown space.');
+      throw forbidden('Cannot write a data view in an unknown space.');
 
     if (!requestedSpaces) return;
 
@@ -176,7 +176,7 @@ export class DataViewsAsCodeService {
       requestedSpaces.includes(urlSpaceId) || requestedSpaces.includes(ALL_SPACES_ID);
     if (!includesUrlSpace)
       throw badRequest(
-        'Cannot move data view to a different space without it being in the current one.'
+        `The requested spaces must include the current space. Make sure that the spaces array includes ${urlSpaceId}.`
       );
   }
 

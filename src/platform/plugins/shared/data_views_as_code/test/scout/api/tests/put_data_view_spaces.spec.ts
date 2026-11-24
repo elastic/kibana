@@ -107,6 +107,28 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'returns 400 when creating with spaces that do not include the url space',
+      async ({ apiClient }) => {
+        const response = await apiClient.put(
+          `${BASE_PATH}/dv-put-without-url-space-${Date.now()}`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            body: {
+              index_pattern: `put-without-url-space-${Date.now()}-*`,
+              spaces: [spaceId],
+            },
+            responseType: 'json',
+          }
+        );
+
+        expect(response).toHaveStatusCode(400);
+      }
+    );
+
     apiTest('returns 400 when spaces contains an empty id', async ({ apiClient }) => {
       const response = await apiClient.put(`${BASE_PATH}/dv-put-bad-spaces-${Date.now()}`, {
         headers: {

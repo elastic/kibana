@@ -27,7 +27,7 @@ export const registerPutDataViewAsCodeRoute = ({
       enableQueryVersion: true,
       summary: 'Upsert a data view',
       description:
-        "Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`, and also removes any deprecated scripted fields the data view has. Scripted fields can't be set through this API; sending `scripted_fields` fails with a `400`.",
+        "Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`, and also removes any deprecated scripted fields the data view has. Scripted fields can't be set through this API; sending `scripted_fields` fails with a `400`. When provided, `spaces` must include the current space or the request fails with a `400`; when omitted, the data view is available only in the current space.",
       options: {
         tags: ['oas-tag:data-views-v2'],
         availability: {

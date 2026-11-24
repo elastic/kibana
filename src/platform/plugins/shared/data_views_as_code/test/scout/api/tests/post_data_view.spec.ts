@@ -417,6 +417,41 @@ apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgno
     }
   );
 
+  apiTest('returns 400 when spaces does not include the current space', async ({ apiClient }) => {
+    const response = await apiClient.post(BASE_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminApiCredentials.apiKeyHeader,
+      },
+      body: {
+        index_pattern: `logs-without-url-space-${Date.now()}-*`,
+        spaces: [spaceId],
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('can create a data view in all spaces with `*`', async ({ apiClient }) => {
+    const response = await apiClient.post(BASE_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminApiCredentials.apiKeyHeader,
+      },
+      body: {
+        index_pattern: `logs-all-spaces-${Date.now()}-*`,
+        spaces: ['*'],
+      },
+      responseType: 'json',
+    });
+
+    createdIds.push(response.body.id);
+
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.meta.spaces).toStrictEqual(['*']);
+  });
+
   apiTest('returns 400 when spaces contains an empty id', async ({ apiClient }) => {
     const response = await apiClient.post(BASE_PATH, {
       headers: {
