@@ -458,6 +458,35 @@ describe('filters manager: awaiting required filters', () => {
     expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
   });
 
+  test('excludes filters from non-rendered children while the grid is hidden, and restores them after', async () => {
+    const { filtersManager, setChildren, setVisibleChildren } = buildSetup(['control1']);
+    // the real layout manager hides the grid while awaiting; the mock needs to be told
+    setVisibleChildren([]);
+    const awaiting$ = new BehaviorSubject<boolean>(true);
+    const pinnedFilter = { meta: { key: 'pinned' } } as Filter;
+    const gridFilter = { meta: { key: 'grid' } } as Filter;
+    setChildren([
+      {
+        uuid: 'control1',
+        awaitingRequiredFilters$: awaiting$,
+        filtersLoading$: new BehaviorSubject<boolean>(false),
+        appliedFilters$: new BehaviorSubject<Filter[] | undefined>([pinnedFilter]),
+      },
+      {
+        uuid: 'gridControl',
+        filtersLoading$: new BehaviorSubject<boolean>(false),
+        appliedFilters$: new BehaviorSubject<Filter[] | undefined>([gridFilter]),
+      },
+    ]);
+    await flush();
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([pinnedFilter]);
+
+    awaiting$.next(false);
+    setVisibleChildren(['gridControl']);
+    await flush();
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([pinnedFilter, gridFilter]);
+  });
+
   test('ignores filtersLoading$ of children that are not rendered, so the restored required selection can publish', async () => {
     const { filtersManager, setChildren, setVisibleChildren } = buildSetup(['control1']);
     const requiredFilter = { meta: { key: 'required' } } as Filter;

@@ -113,7 +113,9 @@ export const initializeFiltersManager = (
 
   /** the filters that the children are currently outputting, regardless of whether they are published */
   const childFilters$ = combineCompatibleChildrenApis<AppliesFilters, Filter[] | undefined>(
-    { children$: layoutManager.api.children$ },
+    // Only rendered children apply filters. While required controls are unsatisfied the grid is hidden, so a
+    // hidden grid control's filter can't leave a required control with no values it could select.
+    { children$: renderedChildren$ },
     'appliedFilters$',
     apiAppliesFilters,
     [],
