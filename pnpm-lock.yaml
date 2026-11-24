@@ -6718,8 +6718,8 @@ importers:
         specifier: 5.0.53
         version: 5.0.53
       http2-wrapper:
-        specifier: 2.2.1
-        version: 2.2.1
+        specifier: 2.2.4
+        version: 2.2.4
       ignore:
         specifier: 7.0.14
         version: 7.0.14
@@ -19216,8 +19216,8 @@ packages:
   http2-proxy@5.0.53:
     resolution: {integrity: sha512-k9OUKrPWau/YeViJGv5peEFgSGPE2n8CDyk/G3f+JfaaJzbFMPAK5PJTd99QYSUvgUwVBGNbZJCY/BEb+kUZNQ==}
 
-  http2-wrapper@2.2.1:
-    resolution: {integrity: sha512-V5nVw1PAOgfI3Lmeaj2Exmeg7fenjhRUgz1lPSezy1CuhPYbgQtbQj4jZfEAEMlaL+vupsvhjqCyjzob0yxsmQ==}
+  http2-wrapper@2.2.4:
+    resolution: {integrity: sha512-y5jx4isTOKEC5Hu1lswc+IxytGlqDmwF1qJtk9qIS8l1KVxuHO5g522UfmErt1H2pMcH/xq+KiFQUB8aVWIABA==}
     engines: {node: '>=10.19.0'}
 
   https-browserify@1.0.0:
@@ -36132,7 +36132,7 @@ snapshots:
 
   http2-proxy@5.0.53: {}
 
-  http2-wrapper@2.2.1:
+  http2-wrapper@2.2.4:
     dependencies:
       quick-lru: 5.1.1
       resolve-alpn: 1.2.1
