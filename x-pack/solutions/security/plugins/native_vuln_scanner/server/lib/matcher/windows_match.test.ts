@@ -187,6 +187,84 @@ describe('matchWindowsHost', () => {
       expect(finding.windows?.supersededKbs).toHaveLength(32);
     });
 
+    it('unions what the ceiling update replaces across all of its rows', () => {
+      const slices = buildWindowsAdvisoryIndex([
+        {
+          rows: [
+            row({ cve: 'CVE-2026-1', kb: '900', ubr: 900, supersedes: ['800', '700'] }),
+            row({ cve: 'CVE-2026-2', kb: '900', ubr: 900, supersedes: ['700', '600'] }),
+            row({ cve: 'CVE-2026-3', kb: '900', ubr: 900 }),
+          ],
+          cves: [],
+        },
+      ]);
+
+      const findings = matchWindowsHost({ id: 'h', product: productAt(WIN10, 1) }, slices);
+
+      expect(findings).toHaveLength(3);
+      for (const finding of findings) {
+        expect(finding.windows?.supersededKbs).toEqual(['800', '700', '600']);
+      }
+    });
+
+    it('records the installed KBs as bare digits, deduplicated and capped at 32', () => {
+      const slices = buildWindowsAdvisoryIndex([
+        { rows: [row({ cve: 'CVE-2026-1', kb: '9', ubr: 300 })], cves: [] },
+      ]);
+      const many = Array.from({ length: 40 }, (_, i) => `KB${2000 + i}`);
+
+      const [finding] = matchWindowsHost(
+        {
+          id: 'h',
+          product: productAt(WIN10, 1),
+          hotfixIds: ['KB5131096', 'kb5131096', '5131097', 'not a kb', '', ...many],
+        },
+        slices
+      );
+
+      expect(finding.windows?.installedKbs).toHaveLength(32);
+      expect(finding.windows?.installedKbs.slice(0, 3)).toEqual(['5131096', '5131097', '2000']);
+      expect(new Set(finding.windows?.installedKbs).size).toBe(32);
+    });
+
+    it('records an empty list when the host reported no patches', () => {
+      const slices = buildWindowsAdvisoryIndex([
+        { rows: [row({ cve: 'CVE-2026-1', kb: '9', ubr: 300 })], cves: [] },
+      ]);
+
+      const [finding] = matchWindowsHost({ id: 'h', product: productAt(WIN10, 1) }, slices);
+
+      expect(finding.windows?.installedKbs).toEqual([]);
+    });
+
+    it('finds nothing for a product the feed lists only as known affected, with no fix', async () => {
+      // A status-only entry (affected, no Vendor Fix row) is not a finding: with no fixed build
+      // there is nothing to compare the host against and nothing to tell the user to install.
+      const document = {
+        DocumentTracking: { Identification: { ID: { Value: '2026-Oct' } } },
+        ProductTree: {
+          FullProductName: [
+            { ProductID: '12097', Value: 'Windows 10 Version 22H2 for x64-based Systems' },
+          ],
+        },
+        Vulnerability: [
+          {
+            CVE: 'CVE-2026-0003',
+            Title: { Value: 'Status-only' },
+            ProductStatuses: [{ Type: 3, ProductID: ['12097'] }],
+            Remediations: [
+              { Type: 3, ProductID: ['12097'], Description: { Value: 'Release Notes' } },
+            ],
+          },
+        ],
+      };
+      const parsed = await parseMsrcCvrf(Buffer.from(JSON.stringify(document)));
+      const slices = buildWindowsAdvisoryIndex([parsed]);
+
+      expect(parsed.rows).toEqual([]);
+      expect(matchWindowsHost({ id: 'h', product: productAt(WIN10, 1) }, slices)).toEqual([]);
+    });
+
     it('picks the cumulative update by sub-type, not a servicing stack update with a higher build', () => {
       const slices = buildWindowsAdvisoryIndex([
         {

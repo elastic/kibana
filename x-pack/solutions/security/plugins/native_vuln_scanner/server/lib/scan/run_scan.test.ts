@@ -13,12 +13,20 @@ import { parseRhelOval } from '../feeds/rhel_oval';
 import type { KevEntries, LoadKevResult } from '../enrichment/kev';
 import { clearKevCache } from '../enrichment/kev';
 import type { FeedOs, LoadFeedResult } from '../feeds/fetch';
+import * as fetchModule from '../feeds/fetch';
+import { clearMsrcStore, refreshMsrcFeed } from '../feeds/msrc_refresh';
 import type { KnowledgeEntry } from '../feeds/types';
 import type { AgentInventoryRows } from '../inventory';
 import { findInventoryScheduleIds, normalizeInventories, readAgentInventories } from '../inventory';
 import { ensureFindingsIndex, toFindingDoc, writeFindings } from '../findings';
 import type { ScanDeps } from './run_scan';
-import { ScanFailedError, inventoryFingerprint, runScan, truncate } from './run_scan';
+import {
+  MSRC_RELEASE_KEY,
+  ScanFailedError,
+  inventoryFingerprint,
+  runScan,
+  truncate,
+} from './run_scan';
 import type { CheckpointDoc } from '../checkpoint';
 
 jest.mock('../inventory', () => ({
@@ -921,5 +929,199 @@ describe('refresh checkpoint-read resilience', () => {
     );
     expect(summary.releases['rhel:9']).toBe('matched');
     expect(writeMock).toHaveBeenCalled();
+  });
+});
+
+describe('runScan on Windows hosts', () => {
+  const msrc = join(__dirname, '..', 'feeds', '__fixtures__', 'msrc');
+  const fixture = (name: string) => readFileSync(join(msrc, name));
+  const body = (data: Uint8Array | string, status = 200) =>
+    ({
+      status,
+      ok: status >= 200 && status < 300,
+      headers: { get: () => null },
+      body: new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(typeof data === 'string' ? Buffer.from(data) : data);
+          controller.close();
+        },
+      }),
+    } as unknown as Response);
+  /** The trimmed MSRC API; a month listed in `broken` answers 500. */
+  const msrcFetch = (broken: string[] = []) =>
+    jest.fn(async (url: string) => {
+      if (url.endsWith('/cvrf/v3.0/updates')) return body(fixture('updates_trimmed.json'));
+      const month = url.slice(url.lastIndexOf('/') + 1);
+      return broken.includes(month)
+        ? body('boom', 500)
+        : body(fixture(`cvrf_${month}_trimmed.json`));
+    });
+
+  const windowsAgent = (
+    agentId: string,
+    windowsOs: Record<string, string>
+  ): AgentInventoryRows => ({
+    agentId,
+    hostName: `host-${agentId}`,
+    windowsOs,
+    patches: [{ hotfix_id: 'KB5099539' }, { hotfix_id: 'KB5131096' }],
+  });
+  const WIN10_OS = {
+    platform: 'windows',
+    name: 'Microsoft Windows 10 Pro',
+    version: '10.0.19045',
+    build: '19045',
+    revision: '7500',
+    arch: '64-bit',
+  };
+
+  const scanWindows = async (
+    agents: AgentInventoryRows[],
+    fetchImpl: typeof fetch = msrcFetch() as unknown as typeof fetch,
+    extra: Partial<ScanDeps> = {}
+  ) => {
+    const { deps } = setup(agents);
+    const refreshMsrc = jest.fn((options: Parameters<typeof refreshMsrcFeed>[0]) =>
+      refreshMsrcFeed({ ...options, fetchImpl })
+    );
+    const summary = await runScan(
+      { ...deps, refreshMsrc, ...extra },
+      { signal: new AbortController().signal, runId: 'r1' }
+    );
+    return { deps, summary, refreshMsrc };
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    clearMsrcStore();
+  });
+
+  it('matches a Windows host against the MSRC window and writes findings that name the update', async () => {
+    const { summary, refreshMsrc } = await scanWindows([windowsAgent('w1', WIN10_OS)]);
+
+    expect(refreshMsrc).toHaveBeenCalledTimes(1);
+    expect(writeMock).toHaveBeenCalledTimes(1);
+    const [, params] = writeMock.mock.calls[0];
+    expect(params.hosts).toEqual([
+      expect.objectContaining({
+        id: 'w1',
+        os: expect.objectContaining({ family: 'windows', kernel: '10.0.19045.7500' }),
+      }),
+    ]);
+    expect(params.findings.length).toBeGreaterThan(0);
+    for (const { scheme, windows, package: pkg } of params.findings) {
+      expect(scheme).toBe('windows_build');
+      expect(pkg).toEqual({ name: '12097', version: '10.0.19045.7500' });
+      expect(windows).toMatchObject({
+        kb: '5131096',
+        kind: 'security_update',
+        productId: '12097',
+        installedBuild: '10.0.19045.7500',
+        installedKbs: ['5099539', '5131096'],
+      });
+      expect(windows?.fixedBuild).toMatch(/^10\.0\.19045\./);
+    }
+    expect(summary.releases[MSRC_RELEASE_KEY]).toBe('matched');
+    expect(summary.hosts).toBe(1);
+    expect(summary.findings).toBe(params.findings.length);
+    expect(summary.feedInfo[MSRC_RELEASE_KEY]?.sourceUrl).toBe(
+      'https://api.msrc.microsoft.com/cvrf/v3.0/updates'
+    );
+    expect(summary.feedInfo[MSRC_RELEASE_KEY]?.snapshotTime).toEqual(expect.any(String));
+  });
+
+  it('indexes findings with the fields the Windows UI reads', async () => {
+    const { deps } = setup([windowsAgent('w1', WIN10_OS)]);
+    const { toFindingDoc: realDoc } = jest.requireActual('../findings');
+    await runScan(
+      { ...deps, refreshMsrc: (o) => refreshMsrcFeed({ ...o, fetchImpl: msrcFetch() as never }) },
+      { signal: new AbortController().signal, runId: 'r1' }
+    );
+    const [, { findings, hosts }] = writeMock.mock.calls[0];
+    const doc = realDoc(findings[0], hosts[0], {
+      now: '2026-11-13T00:00:00.000Z',
+      runId: 'r1',
+    });
+    expect(doc.native_vuln_scanner).toMatchObject({
+      remediation_kb: '5131096',
+      fixed_build: expect.stringMatching(/^10\.0\.19045\./),
+      installed_build: '10.0.19045.7500',
+      msrc_product_id: '12097',
+      remediation_kind: 'security_update',
+      installed_kbs: ['5099539', '5131096'],
+    });
+  });
+
+  it('leaves a host whose product cannot be told out of the scan and says so', async () => {
+    const { summary } = await scanWindows([
+      windowsAgent('w1', WIN10_OS),
+      windowsAgent('w2', { ...WIN10_OS, revision: '' }),
+    ]);
+
+    const [, params] = writeMock.mock.calls[0];
+    expect(params.hosts.map(({ id }) => id)).toEqual(['w1']);
+    expect(summary.skippedRows).toMatchObject({ windows_no_ubr: 1 });
+    expect(summary.skippedHosts).toMatchObject({ unsupported_os: 1 });
+    expect(summary.notes?.[MSRC_RELEASE_KEY]).toContain('windows_no_ubr=1');
+  });
+
+  it('surfaces a host older than the window and a month that could not be refreshed', async () => {
+    const { summary } = await scanWindows(
+      [windowsAgent('w1', { ...WIN10_OS, revision: '1' })],
+      msrcFetch(['2026-Oct']) as unknown as typeof fetch
+    );
+
+    expect(summary.releases[MSRC_RELEASE_KEY]).toBe('matched');
+    expect(summary.matchStats.windows_build_older_than_window).toBe(1);
+    const note = summary.notes?.[MSRC_RELEASE_KEY] ?? '';
+    expect(note).toContain('older than the months the feed covers');
+    expect(note).toContain('2026-Oct');
+  });
+
+  it('fails the Windows release, not the Linux one, when the first month cannot be fetched', async () => {
+    const { deps } = setup([rhelAgent('a1', '9'), windowsAgent('w1', WIN10_OS)]);
+    const refreshMsrc = (o: Parameters<typeof refreshMsrcFeed>[0]) =>
+      refreshMsrcFeed({ ...o, fetchImpl: msrcFetch(['2026-Nov']) as never });
+
+    const error = await runScan(
+      { ...deps, refreshMsrc },
+      { signal: new AbortController().signal, runId: 'r1' }
+    ).catch((e) => e);
+
+    expect(error).toBeInstanceOf(ScanFailedError);
+    expect(error.summary.releases).toEqual({ 'rhel:9': 'matched', [MSRC_RELEASE_KEY]: 'failed' });
+    expect(error.failures[MSRC_RELEASE_KEY]).toEqual(expect.any(String));
+  });
+
+  it('does not touch the Microsoft feed when there is no Windows host', async () => {
+    const { deps } = setup([rhelAgent('a1', '9')]);
+    const refreshMsrc = jest.fn();
+    await runScan({ ...deps, refreshMsrc }, { signal: new AbortController().signal, runId: 'r1' });
+    expect(refreshMsrc).not.toHaveBeenCalled();
+  });
+
+  it('ends every CVRF download it starts', async () => {
+    const real = fetchModule.downloadMsrcCvrf;
+    const cancels = jest.fn();
+    const started = jest.fn();
+    const spy = jest.spyOn(fetchModule, 'downloadMsrcCvrf').mockImplementation(async (...args) => {
+      const download = await real(...args);
+      started();
+      if (download.status !== 'ok') return download;
+      return {
+        ...download,
+        cancel: async () => {
+          cancels();
+          await download.cancel();
+        },
+      };
+    });
+    try {
+      await scanWindows([windowsAgent('w1', WIN10_OS)]);
+      expect(started.mock.calls.length).toBeGreaterThan(0);
+      expect(cancels).toHaveBeenCalledTimes(started.mock.calls.length);
+    } finally {
+      spy.mockRestore();
+    }
   });
 });

@@ -42,7 +42,7 @@ export const compareWindowsBuild = (a: string, b: string): Ordering => {
   return 0;
 };
 
-/** Zero-padded sortable key: one length char plus the digits per component, so `.999` < `.7846`. */
+/** Length-prefixed sortable key: each component is its digit count then its digits, so `.999` < `.7846`. */
 export const windowsBuildKey = (raw: string): string => {
   const parsed = parseWindowsBuild(raw);
   return COMPONENTS.map((component) => encodeNumber(String(parsed[component]))).join('.');

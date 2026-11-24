@@ -15,7 +15,7 @@ export const INVENTORY_PACK_INTERVAL_SECONDS = 86_400;
 export interface InventoryPackQueryBody {
   id: string;
   query: string;
-  platform: 'linux';
+  platform: 'linux' | 'windows';
   snapshot: true;
 }
 

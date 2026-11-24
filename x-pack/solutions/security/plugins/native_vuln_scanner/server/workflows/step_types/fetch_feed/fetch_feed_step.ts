@@ -43,7 +43,11 @@ export const buildFetchFeedStepDefinition = ({
       }
 
       const feeds: FetchedFeed[] = [];
-      const output = () => ({ feeds, hosts: inventory.hosts.length, pack_missing: false });
+      const output = () => ({
+        feeds,
+        hosts: inventory.hosts.length + inventory.windowsHosts.length,
+        pack_missing: false,
+      });
       for (const [release, hosts] of groupByRelease(inventory.hosts)) {
         if (signal.aborted) return { output: output(), error: new Error(ABORTED) };
         const known = getCachedFeed(release, includeUnfixed);

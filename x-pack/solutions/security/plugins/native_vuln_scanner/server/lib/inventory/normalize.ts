@@ -6,7 +6,14 @@
  */
 
 import type { HostMeta } from '../findings';
-import type { HostInventory, InstalledPackage, LanguagePackage } from '../matcher';
+import type {
+  HostInventory,
+  InstalledPackage,
+  LanguagePackage,
+  WindowsHostInventory,
+} from '../matcher';
+import { kbDigitsOf } from '../matcher';
+import { resolveWindowsOsProduct } from './windows_os_product';
 
 /** One osquery result row as stored under `osquery.*`; osquerybeat types numeric columns. */
 export type OsqueryRow = Readonly<Record<string, unknown>>;
@@ -20,10 +27,19 @@ export interface AgentInventoryRows {
   os?: OsqueryRow;
   kernel?: OsqueryRow;
   language?: readonly OsqueryRow[];
+  /** The Windows `os_version` row; Windows agents never report the Linux queries. */
+  windowsOs?: OsqueryRow;
+  /** `patches` rows (`hotfix_id`); absent when the table could not be read. */
+  patches?: readonly OsqueryRow[];
 }
 
 export interface NormalizedHost {
   inventory: HostInventory;
+  meta: HostMeta;
+}
+
+export interface NormalizedWindowsHost {
+  inventory: WindowsHostInventory;
   meta: HostMeta;
 }
 
@@ -35,6 +51,8 @@ export type HostSkipReason =
 
 export interface NormalizeResult {
   hosts: NormalizedHost[];
+  /** Windows hosts placed on an MSRC product; matched by build, not by package. */
+  windowsHosts: NormalizedWindowsHost[];
   /** Agents left out of the run, by reason; their findings are left untouched. */
   skippedHosts: Partial<Record<HostSkipReason, number>>;
   /** Package rows dropped, by reason (e.g. `deb_not_installed`, `rpm_missing_field`). */
@@ -163,6 +181,18 @@ export const normalizeOs = (row: OsqueryRow): HostOs | HostSkipReason => {
   return 'unsupported_os';
 };
 
+/** The counter key for a Windows host the resolver could not place, from its reason text. */
+const windowsSkipReason = (reason: string): string => {
+  if (reason.startsWith('no UBR')) return 'windows_no_ubr';
+  if (reason.startsWith('no build')) return 'windows_no_build';
+  if (reason.startsWith('unrecognised architecture')) return 'windows_unknown_arch';
+  if (reason.includes('is not a supported Windows version')) return 'windows_unsupported_build';
+  return 'windows_ambiguous_product';
+};
+
+const hotfixIdsOf = (rows: readonly OsqueryRow[] | undefined): string[] =>
+  kbDigitsOf((rows ?? []).flatMap(({ hotfix_id: id }) => text(id) ?? []));
+
 /**
  * Turns one snapshot per agent into matcher input. An agent without an OS row or without any
  * package row is skipped instead of scanned as empty: an empty inventory would mark every one
@@ -170,6 +200,7 @@ export const normalizeOs = (row: OsqueryRow): HostOs | HostSkipReason => {
  */
 export const normalizeInventories = (agents: Iterable<AgentInventoryRows>): NormalizeResult => {
   const hosts: NormalizedHost[] = [];
+  const windowsHosts: NormalizedWindowsHost[] = [];
   const skippedHosts: NormalizeResult['skippedHosts'] = {};
   const skippedRows: Record<string, number> = {};
   const skip = (reason: HostSkipReason) => {
@@ -177,6 +208,30 @@ export const normalizeInventories = (agents: Iterable<AgentInventoryRows>): Norm
   };
 
   for (const agent of agents) {
+    if (agent.windowsOs) {
+      const resolved = resolveWindowsOsProduct(agent.windowsOs);
+      if (!resolved.ok) {
+        // A host that cannot be placed exactly is never scanned on a guess; its findings stay put.
+        skip('unsupported_os');
+        count(skippedRows, windowsSkipReason(resolved.reason));
+        continue;
+      }
+      const { product } = resolved;
+      windowsHosts.push({
+        inventory: { id: agent.agentId, product, hotfixIds: hotfixIdsOf(agent.patches) },
+        meta: {
+          id: agent.agentId,
+          name: agent.hostName,
+          os: {
+            family: 'windows',
+            version: String(product.build),
+            name: text(agent.windowsOs.name) ?? product.label,
+            kernel: product.installedBuild,
+          },
+        },
+      });
+      continue;
+    }
     if (!agent.os) {
       skip('missing_os_version');
       continue;
@@ -215,5 +270,5 @@ export const normalizeInventories = (agents: Iterable<AgentInventoryRows>): Norm
       },
     });
   }
-  return { hosts, skippedHosts, skippedRows };
+  return { hosts, windowsHosts, skippedHosts, skippedRows };
 };

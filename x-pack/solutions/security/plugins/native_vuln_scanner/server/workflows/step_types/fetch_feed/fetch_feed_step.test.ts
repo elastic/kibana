@@ -30,6 +30,7 @@ const rhelHost = { inventory: { os: { family: 'rhel', version: '9' } } };
 
 const snapshot = (hosts: unknown[], packMissing = false): InventorySnapshot => ({
   hosts: hosts as InventorySnapshot['hosts'],
+  windowsHosts: [],
   skippedHosts: {},
   skippedRows: {},
   packMissing,

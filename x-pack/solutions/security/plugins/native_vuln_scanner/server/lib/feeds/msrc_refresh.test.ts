@@ -282,6 +282,74 @@ describe('refreshMsrcFeed', () => {
     expect(site.months()).toEqual([]);
   });
 
+  it('shares one fetch between concurrent refreshes of the same mirror and month', async () => {
+    const site = msrcSite();
+    const options = { fetchImpl: site.fetchImpl, feedMirrorUrl: undefined, windowMonths: 2 };
+
+    const [first, second] = await Promise.all([refreshMsrcFeed(options), refreshMsrcFeed(options)]);
+
+    expect(site.months().sort()).toEqual(['2026-Nov', '2026-Oct']);
+    expect(first.slices.map(({ id }) => id)).toEqual(second.slices.map(({ id }) => id));
+    expect(first.slices).toHaveLength(2);
+    expect(second.slices).toHaveLength(2);
+    // Each caller is told what its own refresh brought in.
+    expect(first.refreshed.sort()).toEqual(['2026-Nov', '2026-Oct']);
+    expect(second.refreshed.sort()).toEqual(['2026-Nov', '2026-Oct']);
+  });
+
+  it('does not share a fetch across mirrors, or once a month was re-stamped', async () => {
+    const site = msrcSite();
+    await Promise.all([
+      refreshMsrcFeed({ fetchImpl: site.fetchImpl, feedMirrorUrl: undefined, windowMonths: 1 }),
+      refreshMsrcFeed({
+        fetchImpl: site.fetchImpl,
+        feedMirrorUrl: 'https://mirror.example.test/feeds',
+        windowMonths: 1,
+      }),
+    ]);
+    expect(site.months()).toHaveLength(2);
+
+    site.restamp('2026-Nov', '2026-12-01T08:00:00Z');
+    await refreshMsrcFeed({ fetchImpl: site.fetchImpl, feedMirrorUrl: undefined, windowMonths: 1 });
+    expect(site.months()).toHaveLength(3);
+  });
+
+  it('retries a month the next call after a shared fetch failed', async () => {
+    const site = msrcSite();
+    const options = { fetchImpl: site.fetchImpl, feedMirrorUrl: undefined, windowMonths: 1 };
+    site.failing.add('2026-Nov');
+
+    const settled = await Promise.allSettled([refreshMsrcFeed(options), refreshMsrcFeed(options)]);
+
+    expect(settled.map(({ status }) => status)).toEqual(['rejected', 'rejected']);
+    expect(site.months()).toHaveLength(1);
+
+    site.failing.clear();
+    await expect(refreshMsrcFeed(options)).resolves.toEqual(
+      expect.objectContaining({ refreshed: ['2026-Nov'] })
+    );
+  });
+
+  it('treats a trailing slash on the mirror as the same mirror', async () => {
+    const site = msrcSite();
+    await refreshMsrcFeed({
+      fetchImpl: site.fetchImpl,
+      feedMirrorUrl: 'https://m.example.test/',
+      windowMonths: 2,
+    });
+    site.reset();
+
+    const bare = await refreshMsrcFeed({
+      fetchImpl: site.fetchImpl,
+      feedMirrorUrl: 'https://m.example.test',
+      windowMonths: 2,
+    });
+
+    expect(site.months()).toEqual([]);
+    expect(bare.refreshed).toEqual([]);
+    expect(bare.slices).toHaveLength(2);
+  });
+
   it('ends every download, including a document that is not the one requested', async () => {
     const realDownload = fetchModule.downloadMsrcCvrf;
     const cancels = jest.fn();

@@ -125,6 +125,8 @@ export class AgentAccumulator {
       os: rowsByKind.get('os_version')?.[0],
       kernel: rowsByKind.get('kernel_info')?.[0],
       language: rowsByKind.get('language_packages'),
+      windowsOs: rowsByKind.get('windows_os_version')?.[0],
+      patches: rowsByKind.get('windows_patches'),
     };
   }
 }

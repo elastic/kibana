@@ -17,6 +17,7 @@ import {
   FEED_DOWNLOAD_TIMEOUT_MS,
   CSAF_REQUEST_TIMEOUT_MS,
   downloadFeed,
+  downloadMsrcCvrf,
   feedUrl,
   loadFeed,
   MAX_FEED_BYTES,
@@ -865,5 +866,125 @@ describe('RHEL 10+ via CSAF', () => {
     );
     expect(feed.definitions).toBe(1);
     expect(feed.records).toHaveLength(3);
+  });
+});
+
+describe('downloadMsrcCvrf', () => {
+  /** A body that never ends and records whether it was cancelled. */
+  const openBody = () => {
+    const state = { cancelled: false, pulled: 0 };
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        state.pulled++;
+        controller.enqueue(new Uint8Array(1024));
+      },
+      cancel() {
+        state.cancelled = true;
+      },
+    });
+    return { stream, state };
+  };
+  const drain = async (chunks: AsyncIterable<Uint8Array>): Promise<number> => {
+    let total = 0;
+    for await (const chunk of chunks) total += chunk.byteLength;
+    return total;
+  };
+
+  it('streams the document and reports the url it read', async () => {
+    const result = await downloadMsrcCvrf('2026-Nov', {
+      feedMirrorUrl: undefined,
+      fetchImpl: respond('{"a":1}'),
+    });
+    if (result.status !== 'ok') throw new Error(`expected ok, got ${result.status}`);
+    expect(result.url).toMatch(/\/cvrf\/2026-Nov$/);
+    expect(await drain(result.chunks)).toBe(7);
+  });
+
+  it('reports a month with no document as unavailable and drops its body', async () => {
+    const { stream, state } = openBody();
+    const result = await downloadMsrcCvrf('2026-Nov', {
+      feedMirrorUrl: undefined,
+      fetchImpl: respond(stream, { status: 404 }),
+    });
+    expect(result).toEqual({ status: 'unavailable', url: expect.stringMatching(/2026-Nov$/) });
+    expect(state.cancelled).toBe(true);
+  });
+
+  it('throws on other HTTP errors', async () => {
+    await expect(
+      downloadMsrcCvrf('2026-Nov', {
+        feedMirrorUrl: undefined,
+        fetchImpl: respond('busy', { status: 503 }),
+      })
+    ).rejects.toThrow('returned HTTP 503');
+  });
+
+  it('refuses a declared size over the cap without reading the body', async () => {
+    const { stream, state } = openBody();
+    await expect(
+      downloadMsrcCvrf('2026-Nov', {
+        feedMirrorUrl: undefined,
+        fetchImpl: respond(stream, { headers: { 'content-length': String(MAX_FEED_BYTES + 1) } }),
+      })
+    ).rejects.toThrow(`over ${MAX_FEED_BYTES} bytes`);
+    expect(state.pulled).toBeLessThanOrEqual(1);
+    expect(state.cancelled).toBe(true);
+  });
+
+  it('stops reading an undeclared body once it passes the cap', async () => {
+    const chunk = 1024 * 1024;
+    const { stream, pulled } = streamOf(MAX_FEED_BYTES / chunk + 10, chunk);
+    const result = await downloadMsrcCvrf('2026-Nov', {
+      feedMirrorUrl: undefined,
+      fetchImpl: respond(stream),
+    });
+    if (result.status !== 'ok') throw new Error(`expected ok, got ${result.status}`);
+    await expect(drain(result.chunks)).rejects.toThrow(`over ${MAX_FEED_BYTES} bytes`);
+    expect(pulled.count).toBeLessThan(MAX_FEED_BYTES / chunk + 5);
+  });
+
+  it('cancel() releases a stream nobody started reading, and can be called twice', async () => {
+    const { stream, state } = openBody();
+    const result = await downloadMsrcCvrf('2026-Nov', {
+      feedMirrorUrl: undefined,
+      fetchImpl: respond(stream),
+    });
+    if (result.status !== 'ok') throw new Error(`expected ok, got ${result.status}`);
+    expect(state.cancelled).toBe(false);
+
+    await result.cancel();
+    await result.cancel();
+
+    expect(state.cancelled).toBe(true);
+  });
+
+  it('closes the body when the caller aborts after the headers', async () => {
+    const { stream, state } = openBody();
+    const controller = new AbortController();
+    const result = await downloadMsrcCvrf('2026-Nov', {
+      feedMirrorUrl: undefined,
+      signal: controller.signal,
+      fetchImpl: respond(stream),
+    });
+    if (result.status !== 'ok') throw new Error(`expected ok, got ${result.status}`);
+
+    controller.abort();
+    await expect(drain(result.chunks)).rejects.toThrow();
+
+    expect(state.cancelled).toBe(true);
+  });
+
+  it('does not call the network when the caller has already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const fetchImpl = respond('x');
+    await expect(
+      downloadMsrcCvrf('2026-Nov', {
+        feedMirrorUrl: undefined,
+        signal: controller.signal,
+        fetchImpl,
+      })
+    ).rejects.toThrow();
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 });

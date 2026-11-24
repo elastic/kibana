@@ -422,6 +422,7 @@ describe('toFindingDoc', () => {
         installedBuild: '10.0.26100.9911',
         productId: '12390',
         kind: 'security_update',
+        installedKbs: ['5127648', '5130001'],
       },
       ...overrides,
     });
@@ -442,7 +443,19 @@ describe('toFindingDoc', () => {
         installed_build: '10.0.26100.9911',
         msrc_product_id: '12390',
         remediation_kind: 'security_update',
+        installed_kbs: ['5127648', '5130001'],
       });
+    });
+
+    it('leaves installed_kbs out when no update was reported', () => {
+      const base = windowsFinding();
+      const doc = toFindingDoc(
+        windowsFinding({ windows: { ...base.windows!, installedKbs: [] } }),
+        WINDOWS_HOST,
+        CTX
+      );
+
+      expect(doc.native_vuln_scanner.installed_kbs).toBeUndefined();
     });
 
     it('has no package type and falls back to the Microsoft data source', () => {

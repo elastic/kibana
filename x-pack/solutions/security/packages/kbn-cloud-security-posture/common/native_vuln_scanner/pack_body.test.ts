@@ -53,4 +53,36 @@ describe('INVENTORY_PACK_BODY', () => {
     }
     expect(query.query).toContain('FROM elastic_language_packages');
   });
+
+  it('scopes the Windows queries to windows and the Linux ones to linux', () => {
+    const { windows_os_version: osVersion, windows_patches: patches } = INVENTORY_QUERIES;
+    expect(osVersion.platform).toBe('windows');
+    expect(patches.platform).toBe('windows');
+    for (const column of [
+      'name',
+      'version',
+      'major',
+      'minor',
+      'build',
+      'revision',
+      'arch',
+      'platform',
+    ]) {
+      expect(osVersion.query).toContain(column);
+    }
+    expect(osVersion.query).toContain('FROM os_version');
+    expect(patches.query).toBe('SELECT hotfix_id FROM patches;');
+    expect(INVENTORY_QUERIES.os_version.platform).toBe('linux');
+  });
+
+  it('puts both Windows queries in the pack with unique ids', () => {
+    const ids = Object.values(INVENTORY_QUERIES).map(({ id }) => id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(INVENTORY_PACK_BODY.queries.native_vuln_scanner_windows_os_version.platform).toBe(
+      'windows'
+    );
+    expect(INVENTORY_PACK_BODY.queries.native_vuln_scanner_windows_patches.platform).toBe(
+      'windows'
+    );
+  });
 });

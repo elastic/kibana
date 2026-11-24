@@ -25,7 +25,7 @@ import {
  * fetched from one mirror is never served for another.
  */
 
-/** Months kept by default. A host older than this window gets the `windows_build_older_than_window` note. */
+/** Months kept by default. A host older than this window is counted as `windows_build_older_than_window` in the scan's notes. */
 export const MSRC_WINDOW_MONTHS = 12;
 
 /** The most months a caller may ask for. */
@@ -58,11 +58,24 @@ export interface MsrcRefreshResult {
   skipped: Record<string, number>;
 }
 
+interface FetchedMonth {
+  slice: MsrcMonthSlice;
+  /** What the parser dropped in this fetch, by reason. */
+  skipped: Record<string, number>;
+}
+
 /** Stored months by mirror base URL (`''` for the public feed), then month token. */
 const stores = new Map<string, Map<string, MsrcMonthSlice>>();
 
+/** Months being fetched right now, by `${mirrorKey}|${month}`; concurrent callers await one fetch. */
+const inFlight = new Map<string, Promise<FetchedMonth>>();
+
+/** The mirror as `resolveFeedUrl` reads it: a trailing slash does not name another mirror. */
+const mirrorKey = (feedMirrorUrl: string | undefined): string =>
+  (feedMirrorUrl ?? '').replace(/\/+$/, '');
+
 const storeFor = (feedMirrorUrl: string | undefined): Map<string, MsrcMonthSlice> => {
-  const key = feedMirrorUrl ?? '';
+  const key = mirrorKey(feedMirrorUrl);
   let store = stores.get(key);
   if (!store) {
     store = new Map();
@@ -72,7 +85,10 @@ const storeFor = (feedMirrorUrl: string | undefined): Map<string, MsrcMonthSlice
 };
 
 /** Forgets every stored month; for tests. */
-export const clearMsrcStore = (): void => stores.clear();
+export const clearMsrcStore = (): void => {
+  stores.clear();
+  inFlight.clear();
+};
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -83,11 +99,10 @@ const monthOrder = (id: string): number =>
 const failureText = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-const fetchMonth = async (
+const downloadMonth = async (
   { id, currentReleaseDate }: MsrcUpdatesIndexEntry,
-  options: MsrcRefreshOptions,
-  skipped: Record<string, number>
-): Promise<MsrcMonthSlice> => {
+  options: MsrcRefreshOptions
+): Promise<FetchedMonth> => {
   const download = await downloadMsrcCvrf(id, options);
   if (download.status === 'unavailable') throw new Error(`MSRC has no document at ${download.url}`);
   try {
@@ -95,11 +110,33 @@ const fetchMonth = async (
     if (parsed.documentId !== id) {
       throw new Error(`MSRC document is ${parsed.documentId}, not the requested ${id}`);
     }
-    for (const [reason, count] of Object.entries(parsed.skipped)) countInto(skipped, reason, count);
-    return { id, currentReleaseDate, rows: parsed.rows, cves: parsed.cves };
+    return {
+      slice: { id, currentReleaseDate, rows: parsed.rows, cves: parsed.cves },
+      skipped: parsed.skipped,
+    };
   } finally {
     await download.cancel();
   }
+};
+
+/**
+ * Fetches one month, sharing the download with any concurrent call for the same mirror and month
+ * and with the same `CurrentReleaseDate`, so two scans starting together do not pull and parse a
+ * multi-megabyte document twice. The entry is dropped as soon as the fetch settles, so a failure
+ * is retried by the next call and a finished fetch is served from the store, not from here.
+ */
+const fetchMonth = (
+  entry: MsrcUpdatesIndexEntry,
+  options: MsrcRefreshOptions
+): Promise<FetchedMonth> => {
+  const key = `${mirrorKey(options.feedMirrorUrl)}|${entry.id}|${entry.currentReleaseDate ?? ''}`;
+  const running = inFlight.get(key);
+  if (running) return running;
+  const started = downloadMonth(entry, options).finally(() => {
+    if (inFlight.get(key) === started) inFlight.delete(key);
+  });
+  inFlight.set(key, started);
+  return started;
 };
 
 /**
@@ -144,7 +181,11 @@ export const refreshMsrcFeed = async (options: MsrcRefreshOptions): Promise<Msrc
       continue;
     }
     try {
-      store.set(entry.id, await fetchMonth(entry, options, skipped));
+      const fetched = await fetchMonth(entry, options);
+      for (const [reason, count] of Object.entries(fetched.skipped)) {
+        countInto(skipped, reason, count);
+      }
+      store.set(entry.id, fetched.slice);
       refreshed.push(entry.id);
     } catch (error) {
       if (signal?.aborted) throw error;

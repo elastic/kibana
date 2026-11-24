@@ -61,6 +61,11 @@ export interface WindowsRemediation {
   installedBuild: string;
   productId: string;
   kind: 'security_update' | 'hotpatch';
+  /**
+   * The host's `patches` KBs (digits, at most 32): evidence for the operator, never an input to
+   * whether the finding exists.
+   */
+  installedKbs: string[];
   /** The hotpatch KB in `patches` that made the host count as enrolled; set for enrolled hosts only. */
   enrolmentKb?: string;
 }

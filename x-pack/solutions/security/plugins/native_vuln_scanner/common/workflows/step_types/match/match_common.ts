@@ -44,6 +44,8 @@ export const matchOutputSchema = lazySchema(() =>
     /** Count of releases the refresh skipped as unchanged. */
     skipped_releases: z.number().int().min(0),
     failures: z.record(z.string(), z.string()),
+    /** A release's caveats that are not failures (refresh warnings, hosts left out), shown with its feed. */
+    notes: z.record(z.string(), z.string().max(2048)).optional(),
     /** Feed provenance per release: where the feed came from and how old its snapshot was. */
     feed_provenance: z.record(
       z.string(),

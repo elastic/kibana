@@ -30,6 +30,7 @@ const toOutput = (summary: ScanSummary): MatchOutput => ({
   releases: summary.releases,
   skipped_releases: summary.skippedReleases,
   failures: {},
+  ...(summary.notes ? { notes: summary.notes } : {}),
   feed_provenance: Object.fromEntries(
     Object.entries(summary.feedInfo).map(([release, info]) => [
       release,

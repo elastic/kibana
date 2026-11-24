@@ -114,6 +114,8 @@ export interface FindingDoc {
     /** Windows findings only; the KB of the update that clears the CVE. */
     remediation_kb?: string;
     superseded_kbs?: string[];
+    /** The host's `patches` KBs at scan time, at most 32; evidence only. */
+    installed_kbs?: string[];
     fixed_build?: string;
     installed_build?: string;
     msrc_product_id?: string;
@@ -351,6 +353,9 @@ export const toFindingDoc = (
             remediation_kb: finding.windows.kb,
             ...(finding.windows.supersededKbs.length
               ? { superseded_kbs: finding.windows.supersededKbs }
+              : {}),
+            ...(finding.windows.installedKbs.length
+              ? { installed_kbs: finding.windows.installedKbs }
               : {}),
             fixed_build: finding.windows.fixedBuild,
             installed_build: finding.windows.installedBuild,

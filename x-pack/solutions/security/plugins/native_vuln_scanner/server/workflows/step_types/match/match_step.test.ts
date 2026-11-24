@@ -104,6 +104,17 @@ describe('native_vuln.match handler', () => {
     });
   });
 
+  it('passes the scan notes on, and leaves them out when there are none', async () => {
+    const notes = { 'windows:msrc': '2026-Oct could not be refreshed' };
+    runScanMock.mockResolvedValue(summary({ notes }));
+    const { result } = await run();
+    expect(result.output).toEqual(expect.objectContaining({ notes }));
+
+    runScanMock.mockResolvedValue(summary());
+    const { result: plain } = await run();
+    expect(plain.output).not.toHaveProperty('notes');
+  });
+
   it('keeps the partial output and fails the step when a release failed to write', async () => {
     const partial = summary({ releases: { 'ubuntu:noble': 'failed', 'rhel:9': 'matched' } });
     runScanMock.mockRejectedValue(

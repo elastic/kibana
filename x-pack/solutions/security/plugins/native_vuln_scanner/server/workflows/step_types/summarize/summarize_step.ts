@@ -53,7 +53,7 @@ const feedsOf = ({ fetch, match, match_error: matchError }: SummarizeInput): Sum
         release,
         status,
         etag: cost?.etag,
-        error: match.failures[release],
+        error: match.failures[release] ?? match.notes?.[release],
         ...(cost?.downloaded_bytes !== undefined
           ? { downloaded_bytes: cost.downloaded_bytes }
           : {}),
@@ -98,10 +98,15 @@ export const buildSummarizeStepDefinition = ({
       const finished = now();
       const status = statusOf(params);
       const feeds = feedsOf(params);
+      // A matched or skipped release's message is a note, not a failure.
+      const failedFeeds = feeds.filter(
+        ({ error, status: feedStatus }) =>
+          error && feedStatus !== 'matched' && feedStatus !== 'skipped'
+      );
       const failures = [
-        ...feeds.filter(({ error }) => error).map(({ release, error }) => `${release}: ${error}`),
+        ...failedFeeds.map(({ release, error }) => `${release}: ${error}`),
         ...(fetchError ? [`fetch: ${fetchError}`] : []),
-        ...(matchError && !feeds.some(({ error }) => error) ? [`match: ${matchError}`] : []),
+        ...(matchError && failedFeeds.length === 0 ? [`match: ${matchError}`] : []),
       ].map((message) => truncate(message));
 
       const doc: SummaryDoc = {

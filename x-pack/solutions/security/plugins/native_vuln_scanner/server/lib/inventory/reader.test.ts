@@ -135,6 +135,33 @@ describe('readAgentInventories', () => {
     expect(es.closePointInTime).toHaveBeenCalledWith({ id: 'pit-9' });
   });
 
+  it('hands a Windows agent its version row and every patch row', async () => {
+    const es = setup([
+      {
+        agent: 'w1',
+        schedule: 'win-os',
+        time: 200,
+        row: { platform: 'windows', build: '19045', revision: '4651' },
+      },
+      { agent: 'w1', schedule: 'win-patches', time: 200, row: { hotfix_id: 'KB5131096' } },
+      { agent: 'w1', schedule: 'win-patches', time: 200, row: { hotfix_id: 'KB5099539' } },
+    ]);
+
+    const agents = await collect(
+      readAgentInventories(es, {
+        scheduleIds: { windows_os_version: ['win-os'], windows_patches: ['win-patches'] },
+      })
+    );
+
+    expect(agents).toEqual([
+      expect.objectContaining({
+        agentId: 'w1',
+        windowsOs: { platform: 'windows', build: '19045', revision: '4651' },
+        patches: [{ hotfix_id: 'KB5131096' }, { hotfix_id: 'KB5099539' }],
+      }),
+    ]);
+  });
+
   it('pins the point in time, the sort and the filters on every page', async () => {
     const es = setup(docs);
     await collect(
@@ -168,6 +195,8 @@ describe('readAgentInventories', () => {
                             'native_vuln_scanner_os_version',
                             'native_vuln_scanner_kernel_info',
                             'native_vuln_scanner_language_packages',
+                            'native_vuln_scanner_windows_os_version',
+                            'native_vuln_scanner_windows_patches',
                           ],
                         },
                       },

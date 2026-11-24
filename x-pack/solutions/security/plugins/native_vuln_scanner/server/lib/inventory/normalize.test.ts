@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { normalizeDebRow, normalizeOs, normalizeRpmRow } from './normalize';
+import { normalizeDebRow, normalizeInventories, normalizeOs, normalizeRpmRow } from './normalize';
 
 describe('normalizeDebRow', () => {
   it('keeps installed rows and derives the source package', () => {
@@ -123,5 +123,118 @@ describe('normalizeOs', () => {
     expect(normalizeOs({ platform: 'ubuntu' })).toBe('missing_os_release');
     // osquery defaults major to "0" when it cannot read a version.
     expect(normalizeOs({ platform: 'rhel', major: '0' })).toBe('missing_os_release');
+  });
+});
+
+describe('normalizeInventories for Windows', () => {
+  const win10 = {
+    arch: '64-bit',
+    build: '19045',
+    name: 'Microsoft Windows 10 Professionnel',
+    platform: 'windows',
+    revision: '4651',
+    version: '10.0.19045',
+  };
+  const win11 = {
+    ...win10,
+    build: '26100',
+    name: 'Microsoft Windows 11 Pro',
+    revision: '8875',
+    version: '10.0.26100',
+  };
+  const agent = (windowsOs: Record<string, unknown>, patches?: Array<Record<string, unknown>>) => ({
+    agentId: 'win-1',
+    hostName: 'win-host',
+    windowsOs,
+    patches,
+  });
+
+  it('places a host on its MSRC product and keeps the build and the installed KBs', () => {
+    const result = normalizeInventories([
+      agent(win10, [{ hotfix_id: 'KB5131096' }, { hotfix_id: 'kb5131096' }, { hotfix_id: 'junk' }]),
+    ]);
+
+    expect(result.hosts).toEqual([]);
+    expect(result.skippedHosts).toEqual({});
+    expect(result.windowsHosts).toEqual([
+      {
+        inventory: {
+          id: 'win-1',
+          product: expect.objectContaining({
+            productId: '12097',
+            build: 19045,
+            ubr: 4651,
+            installedBuild: '10.0.19045.4651',
+          }),
+          hotfixIds: ['5131096'],
+        },
+        meta: {
+          id: 'win-1',
+          name: 'win-host',
+          os: {
+            family: 'windows',
+            version: '19045',
+            name: 'Microsoft Windows 10 Professionnel',
+            kernel: '10.0.19045.4651',
+          },
+        },
+      },
+    ]);
+  });
+
+  it('still scans a host whose patches could not be read', () => {
+    const { windowsHosts } = normalizeInventories([agent(win10)]);
+
+    expect(windowsHosts).toHaveLength(1);
+    expect(windowsHosts[0].inventory.hotfixIds).toEqual([]);
+  });
+
+  it('caps the installed KBs at 32', () => {
+    const patches = Array.from({ length: 50 }, (_, i) => ({ hotfix_id: `KB${3000 + i}` }));
+
+    const { windowsHosts } = normalizeInventories([agent(win10, patches)]);
+
+    expect(windowsHosts[0].inventory.hotfixIds).toHaveLength(32);
+  });
+
+  it.each([
+    ['an empty revision', { ...win10, revision: '' }, 'windows_no_ubr'],
+    ['a zero revision', { ...win10, revision: '0' }, 'windows_no_ubr'],
+    ['a missing revision', { ...win10, revision: undefined }, 'windows_no_ubr'],
+    ['an unsupported build', { ...win10, build: '9600' }, 'windows_unsupported_build'],
+    ['a missing build', { ...win10, build: '' }, 'windows_no_build'],
+    ['an unknown architecture', { ...win10, arch: 'sparc' }, 'windows_unknown_arch'],
+    [
+      'a name that contradicts the revision',
+      { ...win11, revision: '33828' },
+      'windows_ambiguous_product',
+    ],
+  ])('leaves %s out of the run without a guess', (_label, row, reason) => {
+    const result = normalizeInventories([agent(row)]);
+
+    expect(result.windowsHosts).toEqual([]);
+    expect(result.skippedHosts).toEqual({ unsupported_os: 1 });
+    expect(result.skippedRows).toEqual({ [reason]: 1 });
+  });
+
+  it('places Windows 11 24H2 apart from Server 2025 by UBR', () => {
+    const { windowsHosts } = normalizeInventories([agent(win11)]);
+
+    expect(windowsHosts[0].inventory.product.productId).toBe('12390');
+  });
+
+  it('keeps Linux and Windows agents in their own lists', () => {
+    const result = normalizeInventories([
+      agent(win10),
+      {
+        agentId: 'linux-1',
+        hostName: 'linux-host',
+        os: { platform: 'ubuntu', major: '22', minor: '04', codename: 'jammy' },
+        deb: [{ name: 'x', version: '1', status: 'install ok installed' }],
+      },
+    ]);
+
+    expect(result.windowsHosts.map(({ inventory }) => inventory.id)).toEqual(['win-1']);
+    expect(result.hosts.map(({ inventory }) => inventory.id)).toEqual(['linux-1']);
   });
 });

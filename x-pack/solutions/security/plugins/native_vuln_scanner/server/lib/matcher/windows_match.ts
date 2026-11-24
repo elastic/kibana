@@ -47,6 +47,12 @@ export interface WindowsAdvisoryIndex {
   ceiling: Map<string, MsrcAdvisoryRow>;
   /** The window's `Security Hotpatch Update` rows, one per KB, by `${productId}:${build}`. */
   hotpatches: Map<string, MsrcAdvisoryRow[]>;
+  /**
+   * What the ceiling update replaces, by `${productId}:${build}`: the union over every row of the
+   * ceiling KB. One KB's rows differ in `Supercedence` (the CVRF lists a predecessor per
+   * remediation entry), so the first row alone under-reports.
+   */
+  ceilingSupersedes: Map<string, string[]>;
 }
 
 const floorKey = (productId: string, build: number): string => `${productId}:${build}`;
@@ -109,16 +115,37 @@ export const buildWindowsAdvisoryIndex = (
   }
   const windowFloor = new Map<string, string>();
   const ceiling = new Map<string, MsrcAdvisoryRow>();
+  const ceilingSupersedes = new Map<string, string[]>();
   for (const [key, rows] of regular) {
     const low = earliest(rows);
     if (low) windowFloor.set(key, low);
     const top = latest(rows);
-    if (top) ceiling.set(key, top);
+    if (!top) continue;
+    ceiling.set(key, top);
+    const replaced = new Set<string>();
+    for (const row of rows) {
+      if (row.kb === top.kb) for (const kb of row.supersedes) replaced.add(kb);
+    }
+    ceilingSupersedes.set(key, [...replaced].slice(0, MAX_SUPERSEDED_KBS));
   }
-  return { byProduct, cves, windowFloor, ceiling, hotpatches };
+  return { byProduct, cves, windowFloor, ceiling, hotpatches, ceilingSupersedes };
 };
 
 const KB_DIGITS = /^(?:KB)?(\d{1,9})$/i;
+
+/** Most installed KBs kept on a finding as evidence. */
+export const MAX_INSTALLED_KBS = 32;
+
+/** `KB5131096`/`5131096` -> `5131096`; anything else is dropped. Deduplicated, in order, bounded. */
+export const kbDigitsOf = (ids: readonly string[] | undefined): string[] => {
+  const kbs = new Set<string>();
+  for (const id of ids ?? []) {
+    const kb = KB_DIGITS.exec(id.trim())?.[1];
+    if (kb) kbs.add(kb);
+    if (kbs.size >= MAX_INSTALLED_KBS) break;
+  }
+  return [...kbs];
+};
 
 const enrolmentKbOf = (
   hotfixIds: readonly string[] | undefined,
@@ -159,7 +186,7 @@ const targetRow = (
 const remediationRow = (
   target: { row: MsrcAdvisoryRow; kind: WindowsRemediation['kind'] },
   index: WindowsAdvisoryIndex
-): { row: MsrcAdvisoryRow; kind: WindowsRemediation['kind'] } => {
+): { row: MsrcAdvisoryRow; kind: WindowsRemediation['kind']; supersedes: readonly string[] } => {
   const { row, kind } = target;
   const key = floorKey(row.productId, row.build);
   if (kind === 'hotpatch') {
@@ -168,10 +195,12 @@ const remediationRow = (
         ({ fixedBuild }) => compareWindowsBuild(fixedBuild, row.fixedBuild) >= 0
       )
     );
-    if (hotpatch) return { row: hotpatch, kind };
+    if (hotpatch) return { row: hotpatch, kind, supersedes: hotpatch.supersedes };
   }
   const top = index.ceiling.get(key);
-  return top ? { row: top, kind: 'security_update' } : target;
+  return top
+    ? { row: top, kind: 'security_update', supersedes: index.ceilingSupersedes.get(key) ?? [] }
+    : { ...target, supersedes: target.row.supersedes };
 };
 
 const toAdvisory = (row: MsrcAdvisoryRow, cve: MsrcCve | undefined): MatchedAdvisory => ({
@@ -205,13 +234,14 @@ export const matchWindowsHost = (
   }
 
   const enrolmentKb = enrolmentKbOf(host.hotfixIds, advisories.hotpatchKbs);
+  const installedKbs = kbDigitsOf(host.hotfixIds);
   const findings: Finding[] = [];
   for (const [cveId, rows] of byCve) {
     const target = targetRow(rows, enrolmentKb !== undefined);
     if (!target) continue;
     if (compareWindowsBuild(product.installedBuild, target.row.fixedBuild) >= 0) continue;
     const { row: fixRow } = target;
-    const { row, kind } = remediationRow(target, index);
+    const { row, kind, supersedes } = remediationRow(target, index);
     const cve = index.cves.get(cveId);
     findings.push({
       hostId: host.id,
@@ -224,11 +254,12 @@ export const matchWindowsHost = (
       why: `${product.label} build ${product.installedBuild} is below ${fixRow.fixedBuild}; install KB${row.kb} (${row.fixedBuild})`,
       windows: {
         kb: row.kb,
-        supersededKbs: row.supersedes.slice(0, MAX_SUPERSEDED_KBS),
+        supersededKbs: supersedes.slice(0, MAX_SUPERSEDED_KBS),
         fixedBuild: fixRow.fixedBuild,
         installedBuild: product.installedBuild,
         productId: product.productId,
         kind,
+        installedKbs,
         ...(kind === 'hotpatch' && enrolmentKb ? { enrolmentKb } : {}),
       },
     });

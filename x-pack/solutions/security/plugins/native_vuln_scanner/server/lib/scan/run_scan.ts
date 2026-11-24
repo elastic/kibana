@@ -10,12 +10,19 @@ import { createHash } from 'crypto';
 import type { KevEntries, LoadKevResult } from '../enrichment/kev';
 import { loadKev } from '../enrichment/kev';
 import type { FeedOs, LoadFeedResult } from '../feeds/fetch';
-import { feedUrl, loadFeed } from '../feeds/fetch';
+import { feedUrl, loadFeed, MSRC_UPDATES_URL } from '../feeds/fetch';
+import type { MsrcRefreshOptions, MsrcRefreshResult } from '../feeds/msrc_refresh';
+import { refreshMsrcFeed } from '../feeds/msrc_refresh';
 import { resolveFeedUrl } from '../feeds/mirror';
-import type { AgentInventoryRows, NormalizedHost } from '../inventory';
+import type { AgentInventoryRows, NormalizedHost, NormalizedWindowsHost } from '../inventory';
 import { findInventoryScheduleIds, normalizeInventories, readAgentInventories } from '../inventory';
 import type { Finding, MatchStats } from '../matcher';
-import { buildAdvisoryIndex, matchHost } from '../matcher';
+import {
+  buildAdvisoryIndex,
+  buildWindowsAdvisoryIndex,
+  matchHost,
+  matchWindowsHost,
+} from '../matcher';
 import { ensureFindingsIndex, writeFindings } from '../findings';
 import type { CheckpointDoc, ScanRunScope } from '../checkpoint';
 import { defaultReadCheckpoints, defaultWriteCheckpoint } from '../checkpoint';
@@ -38,6 +45,8 @@ export interface ScanDeps {
   loadFeed?: (os: FeedOs, options: { signal: AbortSignal }) => Promise<LoadFeedResult>;
   /** Loads the CISA KEV catalog; failure only skips enrichment. */
   loadKev?: (signal: AbortSignal) => Promise<LoadKevResult>;
+  /** Refreshes the Microsoft security-update window the Windows hosts are matched against. */
+  refreshMsrc?: (options: MsrcRefreshOptions) => Promise<MsrcRefreshResult>;
   /** From kibana.yml: whether this run's feeds and findings include vendor-unfixed CVEs. */
   includeUnfixed?: boolean;
   /** From kibana.yml: air-gap feed mirror base; the run summary records the URL fetched from it. */
@@ -85,6 +94,11 @@ export interface ScanSummary {
   distinctCves: number;
   /** Feed provenance the run actually used, keyed like `releases`. */
   feedInfo: Record<string, { sourceUrl?: string; snapshotTime?: string; ageSeconds?: number }>;
+  /**
+   * What the user should read next to a release's status, keyed like `releases`: feed refresh
+   * warnings, hosts left out and match counters that explain a gap. Shown as the feed's message.
+   */
+  notes?: Record<string, string>;
   /** Vendor-text docs written to the knowledge index; a failure there never fails the scan. */
   knowledge: KnowledgeWriteResult & {
     /** Releases whose write a 304 skipped because their text was already stored. */
@@ -157,6 +171,7 @@ const collect = async (rows: AsyncIterable<AgentInventoryRows>): Promise<AgentIn
 
 export interface InventorySnapshot {
   hosts: NormalizedHost[];
+  windowsHosts: NormalizedWindowsHost[];
   skippedHosts: Record<string, number>;
   skippedRows: Record<string, number>;
   packMissing: boolean;
@@ -174,21 +189,21 @@ export const readInventory = async (
         'with its inventory queries and assign it to an agent policy (see the ' +
         'native_vuln_scanner README); the next scan picks it up.'
     );
-    return { hosts: [], skippedHosts: {}, skippedRows: {}, packMissing: true };
+    return { hosts: [], windowsHosts: [], skippedHosts: {}, skippedRows: {}, packMissing: true };
   }
 
   // Start-up creates the index too, but a write before it exists would auto-create it unmapped.
   await ensureFindingsIndex(es);
   const agents = await collect(readAgentInventories(es, { scheduleIds, signal }));
-  const { hosts, skippedHosts, skippedRows } = normalizeInventories(agents);
-  if (hosts.length === 0) {
+  const { hosts, windowsHosts, skippedHosts, skippedRows } = normalizeInventories(agents);
+  if (hosts.length === 0 && windowsHosts.length === 0) {
     logger.warn(
       'The "software-inventory" pack exists but no agent has reported inventory results yet. ' +
         'Check that the pack is assigned to an agent policy and that its queries have run ' +
         '(a pack with a long interval can take that long to report the first time).'
     );
   }
-  return { hosts, skippedHosts, skippedRows, packMissing: false };
+  return { hosts, windowsHosts, skippedHosts, skippedRows, packMissing: false };
 };
 
 interface KevCatalog {
@@ -274,6 +289,50 @@ const storeKnowledge = async (
   }
 };
 
+/** The `releases` key of the Windows run, which matches by build against one Microsoft feed. */
+export const MSRC_RELEASE_KEY = 'windows:msrc';
+
+const msrcFeedInfo = (
+  { slices }: MsrcRefreshResult,
+  feedMirrorUrl: string | undefined,
+  scanStart: Date
+): ScanSummary['feedInfo'][string] => {
+  const released = slices[0]?.currentReleaseDate;
+  const releasedAt = released ? new Date(released).getTime() : Number.NaN;
+  return {
+    sourceUrl: resolveFeedUrl(MSRC_UPDATES_URL, feedMirrorUrl),
+    ...(Number.isNaN(releasedAt)
+      ? {}
+      : {
+          snapshotTime: new Date(releasedAt).toISOString(),
+          ageSeconds: Math.max(0, Math.floor((scanStart.getTime() - releasedAt) / 1000)),
+        }),
+  };
+};
+
+const WINDOWS_STAT_LABELS: Record<string, string> = {
+  windows_build_older_than_window:
+    'Windows host(s) are on a build older than the months the feed covers, so fixes released before that window are not reported',
+};
+
+/** What the user should know about the Windows feed: refresh warnings, hosts left out, match counters. */
+const windowsNote = (
+  { warnings }: MsrcRefreshResult,
+  { skippedRows, matchStats }: ScanSummary
+): string => {
+  const parts = [...warnings];
+  const left = Object.entries(skippedRows)
+    .filter(([reason]) => reason.startsWith('windows_'))
+    .map(([reason, count]) => `${reason}=${count}`);
+  if (left.length > 0)
+    parts.push(`Windows hosts not scanned (no exact product or UBR): ${left.join(', ')}`);
+  for (const [stat, label] of Object.entries(WINDOWS_STAT_LABELS)) {
+    const count = matchStats[stat];
+    if (count) parts.push(`${count} ${label}`);
+  }
+  return parts.join('; ');
+};
+
 /**
  * Reads the latest inventory, then matches and writes one OS release at a time (a parsed feed
  * takes a few hundred MB of heap). A failed release does not stop the others; the run throws at
@@ -288,6 +347,7 @@ export const runScan = async (
     feedMirrorUrl,
     loadFeed: load = (os, options) => loadFeed(os, { ...options, feedMirrorUrl }),
     loadKev: loadKevCatalog = (abort) => loadKev(abort, { logger, feedMirrorUrl }),
+    refreshMsrc = refreshMsrcFeed,
     scope = 'full',
     readCheckpoints = defaultReadCheckpoints(es),
     writeCheckpoint = defaultWriteCheckpoint(es, logger),
@@ -323,15 +383,15 @@ export const runScan = async (
     summary.packMissing = true;
     return summary;
   }
-  const { hosts, skippedHosts, skippedRows } = inventory;
-  Object.assign(summary, { hosts: hosts.length, skippedHosts, skippedRows });
+  const { hosts, windowsHosts, skippedHosts, skippedRows } = inventory;
+  Object.assign(summary, { hosts: hosts.length + windowsHosts.length, skippedHosts, skippedRows });
 
   const byRelease = groupByRelease(hosts);
 
   // Enrichment is optional: a failed load leaves findings unenriched but never fails the scan.
   // With no hosts there is nothing to stamp, so the catalog is not downloaded.
   let kev: KevCatalog | undefined;
-  if (byRelease.size > 0) {
+  if (byRelease.size > 0 || windowsHosts.length > 0) {
     kev = await loadKevEntries(loadKevCatalog, signal, logger);
     summary.kev.status = kev.status;
   }
@@ -485,6 +545,54 @@ export const runScan = async (
             feedMirrorUrl ? `the feed mirror (${feedMirrorUrl})` : 'the vendor advisory host'
           }; the scan is retried on its next run.`
       );
+    }
+  }
+
+  if (windowsHosts.length > 0 && !summary.aborted && !signal.aborted) {
+    try {
+      const refreshed = await refreshMsrc({ signal, feedMirrorUrl });
+      const index = buildWindowsAdvisoryIndex(refreshed.slices);
+      const findings = windowsHosts.flatMap(({ inventory: host }) =>
+        matchWindowsHost(host, index, summary.matchStats)
+      );
+      const written = await writeFindings(es, {
+        hosts: windowsHosts.map(({ meta }) => meta),
+        findings,
+        now: now().toISOString(),
+        runId,
+        unfixedScanned: includeUnfixed ?? false,
+        kev: kev?.entries,
+        keepKev: kev?.status === 'unavailable',
+        signal,
+      });
+      for (const { cve } of findings) cves.add(cve.id);
+      summary.distinctCves = cves.size;
+      summary.releases[MSRC_RELEASE_KEY] = 'matched';
+      summary.matchedReleases++;
+      summary.findings += written.written;
+      summary.fixed += written.fixed;
+      summary.fixSkipped += written.fixSkipped;
+      summary.kev.listed += written.kevListed;
+      summary.feedInfo[MSRC_RELEASE_KEY] = msrcFeedInfo(refreshed, feedMirrorUrl, scanStart);
+      const note = windowsNote(refreshed, summary);
+      if (note) (summary.notes ??= {})[MSRC_RELEASE_KEY] = truncate(note);
+      for (const warning of refreshed.warnings) logger.warn(warning);
+    } catch (error) {
+      if (signal.aborted) {
+        summary.aborted = true;
+      } else {
+        summary.releases[MSRC_RELEASE_KEY] = 'failed';
+        summary.failedReleases++;
+        failures[MSRC_RELEASE_KEY] = error instanceof Error ? error.message : String(error);
+        logger.warn(
+          `Vulnerability scan of ${MSRC_RELEASE_KEY} failed: ${failures[MSRC_RELEASE_KEY]}. Check ` +
+            `that Kibana can reach ${
+              feedMirrorUrl
+                ? `the feed mirror (${feedMirrorUrl})`
+                : 'the Microsoft security update API'
+            }; the scan is retried on its next run.`
+        );
+      }
     }
   }
 

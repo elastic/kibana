@@ -83,6 +83,40 @@ describe('native_vuln.summarize handler', () => {
     expect(result).toEqual({ output: { run_id: RUN_ID, status: 'success', index: SUMMARY_INDEX } });
   });
 
+  it('shows a note as the feed message without counting it as a failure', async () => {
+    const { doc } = await run({
+      fetch: fetched,
+      match: matched({
+        releases: { 'ubuntu:noble': 'matched', 'windows:msrc': 'matched' },
+        notes: { 'windows:msrc': '3 Windows host(s) are on a build older than the window' },
+      }),
+    });
+
+    expect(doc?.status).toBe('success');
+    expect(doc?.failures).toEqual([]);
+    expect(doc?.feeds).toContainEqual(
+      expect.objectContaining({
+        release: 'windows:msrc',
+        status: 'matched',
+        error: '3 Windows host(s) are on a build older than the window',
+      })
+    );
+  });
+
+  it('prefers the failure over the note of a failed release', async () => {
+    const { doc } = await run({
+      fetch: fetched,
+      match: matched({
+        releases: { 'windows:msrc': 'failed' },
+        failures: { 'windows:msrc': 'HTTP 503' },
+        notes: { 'windows:msrc': 'a note' },
+      }),
+      match_error: 'Vulnerability scan failed for windows:msrc',
+    });
+
+    expect(doc?.failures).toEqual(['windows:msrc: HTTP 503']);
+  });
+
   it('records the KEV outcome when the match step reports it', async () => {
     const { doc } = await run({
       fetch: fetched,

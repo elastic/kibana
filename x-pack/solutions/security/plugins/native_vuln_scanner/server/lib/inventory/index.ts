@@ -11,6 +11,7 @@ export type {
   AgentInventoryRows,
   HostSkipReason,
   NormalizedHost,
+  NormalizedWindowsHost,
   NormalizeResult,
   OsqueryRow,
 } from './normalize';
