@@ -62,7 +62,6 @@ export type DataRetention =
 /** An index or data stream that a boost rule matches. */
 export interface BoostRuleMatch {
   name: string;
-  isHidden: boolean;
   /** Name of the higher-ranked rule that applies to this match instead. */
   outrankedByRuleName?: string;
   storageSizeInBytes?: number;

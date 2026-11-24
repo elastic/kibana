@@ -684,6 +684,7 @@ export const AutomationDetailFlyout = ({
                 justifyContent="flexEnd"
                 gutterSize="s"
                 responsive={false}
+                wrap
                 css={{ padding: euiTheme.size.m }}
               >
                 {isEditing ? (

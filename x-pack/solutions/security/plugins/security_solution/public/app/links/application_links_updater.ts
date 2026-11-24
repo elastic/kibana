@@ -146,11 +146,18 @@ class ApplicationLinksUpdater {
     }
 
     if (typeof link.uiSettingRequired === 'string') {
-      return uiSettingsClient.get(link.uiSettingRequired) === true;
+      // Some features can opt of registering in their UI setting based on the tier customer is in.
+      // In that case, this would have created an error if setting was not even registered with kibana.
+      // isDeclared guard helps with that situation.
+      return uiSettingsClient.isDeclared(link.uiSettingRequired)
+        ? uiSettingsClient.get(link.uiSettingRequired) === true
+        : false;
     }
 
     if (typeof link.uiSettingRequired === 'object') {
-      return uiSettingsClient.get(link.uiSettingRequired.key) === link.uiSettingRequired.value;
+      return uiSettingsClient.isDeclared(link.uiSettingRequired.key)
+        ? uiSettingsClient.get(link.uiSettingRequired.key) === link.uiSettingRequired.value
+        : false;
     }
 
     // unsupported uiSettingRequired type

@@ -14,4 +14,5 @@ export { ConnectAgentPanel } from './connect_agent_panel';
 export { LockedSectionPanel } from './locked_section_panel';
 export { SignalsPanel } from './signals_panel';
 export { SourcesPanel } from './sources/sources_panel';
+export { SpendPanel } from './spend_panel';
 export { TracesPanel } from './traces_panel';
