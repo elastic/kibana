@@ -255,7 +255,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             <UtilityBar border>
               <UtilityBarSection>
                 <UtilityBarGroup>
-                  <UtilityBarText data-test-subj="query-message">
+                  <UtilityBarText dataTestSubj="query-message">
                     <>
                       {i18n.SHOWING}{' '}
                       {timelineType === TimelineTypeEnum.template ? nTemplates : nTimelines}
@@ -265,7 +265,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                 <UtilityBarGroup>
                   {timelineStatus !== TimelineStatusEnum.immutable && (
                     <>
-                      <UtilityBarText data-test-subj="selected-count">
+                      <UtilityBarText dataTestSubj="selected-count">
                         {timelineType === TimelineTypeEnum.template
                           ? i18n.SELECTED_TEMPLATES((selectedItems || []).length)
                           : i18n.SELECTED_TIMELINES((selectedItems || []).length)}

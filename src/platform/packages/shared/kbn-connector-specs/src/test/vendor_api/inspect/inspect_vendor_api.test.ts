@@ -331,6 +331,174 @@ actions:
     });
   });
 
+  it('skips a captured source, which the vendor would not serve to a plain fetch', async () => {
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      JSON.stringify({
+        sources: {
+          v1: {
+            format: 'openapi',
+            url: SPEC_URL,
+            captured: true,
+            note: 'Captured with credentials.',
+            fetchedAt: '2026-10-08T00:00:00.000Z',
+          },
+        },
+        operations: {},
+      })
+    );
+    const fetchText = jest.fn(async () => {
+      throw new Error('401 Unauthorized');
+    });
+    const warnings: string[] = [];
+
+    await inspect({
+      sources: {},
+      directory,
+      fetchText,
+      log: { info: () => {}, warning: (message) => warnings.push(message) },
+    });
+
+    expect(fetchText).not.toHaveBeenCalled();
+    expect(warnings).toEqual([expect.stringContaining('Skipping v1: it is captured')]);
+  });
+
+  it('inspects a URL given in place of a captured source, which is not the one that was captured', async () => {
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      JSON.stringify({
+        sources: {
+          v1: {
+            format: 'openapi',
+            url: SPEC_URL,
+            captured: true,
+            note: 'Captured with credentials.',
+            fetchedAt: '2026-10-08T00:00:00.000Z',
+          },
+        },
+        operations: {},
+      })
+    );
+    const fetched: string[] = [];
+    const warnings: string[] = [];
+
+    const { output, problems } = await inspect({
+      sources: { v1: SWAGGER_URL },
+      directory,
+      fetchText: async (url) => {
+        fetched.push(url);
+        return JSON.stringify(swagger);
+      },
+      log: { info: () => {}, warning: (message) => warnings.push(message) },
+    });
+
+    expect(fetched).toEqual([SWAGGER_URL]);
+    expect(warnings).toEqual([]);
+    expect(output).toContain('/things');
+    // Recording tells Swagger from OpenAPI by itself, so the manifest needs no edit for it.
+    expect(problems).toEqual([
+      `v1 is captured from ${SPEC_URL} in manifest.json. If ${SWAGGER_URL} also needs credentials, capture it from there: record with --source v1=${SWAGGER_URL} --capture v1=<file>. If it is public, also remove "captured" from v1, or drift checks skip it, and record with --source v1=${SWAGGER_URL}.`,
+    ]);
+  });
+
+  describe('with a URL given in place of a source of the manifest', () => {
+    const captured = (extra: Record<string, unknown> = {}) =>
+      fs.writeFile(
+        path.join(directory, 'manifest.json'),
+        JSON.stringify({
+          sources: {
+            v1: {
+              format: 'openapi',
+              url: SPEC_URL,
+              captured: true,
+              note: 'Captured with credentials.',
+              fetchedAt: '2026-10-08T00:00:00.000Z',
+              ...extra,
+            },
+          },
+          operations: {},
+        })
+      );
+
+    it('leaves the overlay alone, as the source the manifest records was not loaded', async () => {
+      await captured();
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `overlay: 1.0.0
+info: { title: Corrections, version: 1.0.0 }
+actions:
+  - target: $.paths['/things'].get
+    update: { summary: Lists things }
+  - target: $.paths['/gone'].get
+    update: { summary: Gone }
+`
+      );
+      const warnings: string[] = [];
+
+      const { output } = await inspect({
+        sources: { v1: SWAGGER_URL },
+        directory,
+        log: { info: () => {}, warning: (message) => warnings.push(message) },
+      });
+
+      // It still applies to what is inspected, but whether it is stale can't be told
+      expect(output).toContain('Lists things');
+      expect(warnings).toEqual([]);
+    });
+
+    it('does not read it as the kind of document the captured one was', async () => {
+      await captured({ format: 'brave-markdown', pages: ['api/'] });
+
+      const { output, problems } = await inspect({ sources: { v1: SWAGGER_URL }, directory });
+
+      expect(output).toContain('/things');
+      expect(problems).toEqual([
+        expect.stringContaining(
+          `${SWAGGER_URL} is swagger, so first edit v1 in manifest.json: set "format" to "swagger", remove "pages".`
+        ),
+      ]);
+    });
+
+    it('sets the format of an MCP source a Markdown reference replaces, and does not suggest capturing it', async () => {
+      const indexUrl = 'https://docs.example.com/llms.txt';
+      const documents: Record<string, string> = {
+        [indexUrl]: '- [Search](api/search.md)',
+        'https://docs.example.com/api/search.md': [
+          '# Search',
+          '',
+          '`GET` `/v1/search`',
+          '',
+          '**Base URL:** `https://api.example.com`',
+        ].join('\n'),
+      };
+      await captured({ format: 'mcp', endpoints: ['https://mcp.example.com/mcp'] });
+
+      const { problems } = await inspect({
+        sources: { v1: indexUrl },
+        formats: { v1: 'brave-markdown' },
+        pages: { v1: ['api/'] },
+        directory,
+        fetchText: async (url) => documents[url],
+      });
+
+      expect(problems).toEqual([
+        `v1 is captured from ${SPEC_URL} in manifest.json. ${indexUrl} is brave-markdown, so first edit v1 in manifest.json: set "format" to "brave-markdown", remove "endpoints". A Markdown reference can't be captured, so it is public: remove "captured" from v1 too, or drift checks skip it, and record with --source v1=${indexUrl} --format v1=brave-markdown --pages v1=api/.`,
+      ]);
+    });
+
+    it('says which GraphQL and MCP fields the replacement leaves behind', async () => {
+      await captured({ format: 'mcp', endpoints: ['https://mcp.example.com/mcp'] });
+
+      const { problems } = await inspect({ sources: { v1: SWAGGER_URL }, directory });
+
+      expect(problems).toEqual([
+        expect.stringContaining(
+          `${SWAGGER_URL} is swagger, so first edit v1 in manifest.json: set "format" to "swagger", remove "endpoints".`
+        ),
+      ]);
+    });
+  });
+
   it('does not move a source the manifest has to another URL', async () => {
     await inspect({ directory });
     const { manifestUpdated, problems } = await inspect({

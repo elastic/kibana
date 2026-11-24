@@ -27,21 +27,21 @@ import type {
 } from './types';
 import type { CpsTelemetryContextProvider, TargetClusterScope } from './cps_telemetry_context';
 import {
-  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_FAILED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
+  NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+  NIGHTSHIFT_FEATURES_IDENTIFIED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_FAILED_EVENT_TYPE,
+  NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_COMPLETED_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_STARTED_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  NIGHTSHIFT_DETECTION_SCAN_EVENT_TYPE,
+  NIGHTSHIFT_ONBOARDING_SCHEDULED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
+  NIGHTSHIFT_EVENT_STATUS_CHANGED_EVENT_TYPE,
 } from './constants';
 
 type TrackParams<T> = Omit<T, keyof EbtTelemetryContext> & Partial<EbtTelemetryContext>;
@@ -58,7 +58,7 @@ export class EbtTelemetryClient {
     request: KibanaRequest
   ) {
     this.report(
-      SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+      NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
       params,
       request,
       'all'
@@ -69,7 +69,7 @@ export class EbtTelemetryClient {
     params: TrackParams<KnowledgeIndicatorFeaturesIdentifiedProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE, params, request, 'all');
+    this.report(NIGHTSHIFT_FEATURES_IDENTIFIED_EVENT_TYPE, params, request, 'all');
   }
 
   public trackAgentBuilderKnowledgeIndicatorCreated(
@@ -77,7 +77,7 @@ export class EbtTelemetryClient {
     request: KibanaRequest
   ) {
     this.report(
-      SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+      NIGHTSHIFT_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
       params,
       request,
       'origin'
@@ -88,75 +88,70 @@ export class EbtTelemetryClient {
     params: TrackParams<AgentToolKnowledgeIndicatorIdentificationStartedProps>,
     request: KibanaRequest
   ) {
-    this.report(
-      SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
-      params,
-      request,
-      'all'
-    );
+    this.report(NIGHTSHIFT_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE, params, request, 'all');
   }
 
   public trackAgentToolEventCreate(
     params: TrackParams<AgentToolEventCreateProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE, params, request, 'origin');
+    this.report(NIGHTSHIFT_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE, params, request, 'origin');
   }
 
   public trackSignificantEventsDiscoveryStarted(
     params: TrackParams<DiscoveryStartedProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE, params, request, 'all');
+    this.report(NIGHTSHIFT_DISCOVERY_STARTED_EVENT_TYPE, params, request, 'all');
   }
 
   public trackSignificantEventsDiscoveryCompleted(
     params: TrackParams<DiscoveryCompletedProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE, params, request, 'all');
+    this.report(NIGHTSHIFT_DISCOVERY_COMPLETED_EVENT_TYPE, params, request, 'all');
   }
 
   public trackEventStatusChanged(
     params: TrackParams<EventStatusChangedProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE, params, request, 'origin');
+    this.report(NIGHTSHIFT_EVENT_STATUS_CHANGED_EVENT_TYPE, params, request, 'origin');
   }
 
   public trackSignificantEventsDiscoveryTriggered(
     params: TrackParams<DiscoveryTriggeredProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE, params, request, 'all');
+    this.report(NIGHTSHIFT_DISCOVERY_TRIGGERED_EVENT_TYPE, params, request, 'all');
   }
 
   public trackOnboardingScheduled(
     params: TrackParams<KnowledgeIndicatorOnboardingScheduledProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE, params, request, 'all');
+    this.report(NIGHTSHIFT_ONBOARDING_SCHEDULED_EVENT_TYPE, params, request, 'all');
   }
 
   public trackSignificantEventsDetectionScan(
     params: TrackParams<DetectionScanProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE, params, request, 'origin');
+    this.report(NIGHTSHIFT_DETECTION_SCAN_EVENT_TYPE, params, request, 'origin');
   }
 
   public trackAgentToolEventsWrite(
     params: TrackParams<AgentToolEventWriteProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE, params, request, 'origin');
+    this.report(NIGHTSHIFT_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE, params, request, 'origin');
   }
 
   public trackAgentToolEventSearch(
     params: TrackParams<AgentToolEventSearchProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE, params, request, 'origin');
+    this.report(NIGHTSHIFT_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE, params, request, 'origin');
   }
 
   private report<T>(
@@ -180,7 +175,7 @@ export class EbtTelemetryClient {
   }
 
   public trackAgentToolFailed(params: TrackParams<AgentToolFailedProps>, request: KibanaRequest) {
-    this.report(SIGNIFICANT_EVENTS_AGENT_TOOL_FAILED_EVENT_TYPE, params, request, 'origin');
+    this.report(NIGHTSHIFT_AGENT_TOOL_FAILED_EVENT_TYPE, params, request, 'origin');
   }
 
   public trackSignificantEventsQueriesGenerationFailed(
@@ -188,7 +183,7 @@ export class EbtTelemetryClient {
     request: KibanaRequest
   ) {
     this.report(
-      SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
+      NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
       params,
       request,
       'all'

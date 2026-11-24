@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import React, { useId, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import useLatest from 'react-use/lib/useLatest';
-import {
-  EuiEmptyPrompt,
-  EuiScreenReaderOnly,
-  EuiSwitch,
-  EuiToolTip,
-  useIsWithinMinBreakpoint,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, useIsWithinMinBreakpoint } from '@elastic/eui';
 import type { ActiveFilters, ContentListItem, FindItemsParams } from '@kbn/content-list-provider';
-import { useContentListFilters } from '@kbn/content-list-provider';
 import { ContentListFooter, ContentListTable, ContentListToolbar } from '@kbn/content-list';
 import { filter } from '@kbn/content-list-toolbar';
 import type { LinkProps } from '../../types';
@@ -34,13 +27,11 @@ import {
   StatusFilter,
 } from './status_filter';
 import {
-  HIDDEN_BADGE,
   MATCHES_LABELS,
   NO_MATCHES_MESSAGE,
   RETENTION_COLUMN,
-  SHOW_HIDDEN_LABEL,
   STORAGE_SIZE_LABEL,
-  formatMatchesTotal,
+  formatTargetCount,
 } from '../../translations';
 
 const { Column } = ContentListTable;
@@ -53,8 +44,6 @@ type MatchItem = ContentListItem &
   };
 
 const FIELDS = [STATUS_FIELD_DEFINITION];
-
-const HIDDEN_BADGE_PROPS = { label: HIDDEN_BADGE, 'data-test-subj': 'searchBoostHiddenBadge' };
 
 // Shorter retention first, then indefinitely, then disabled.
 const getRetentionOrder = (retention?: DataRetention): number => {
@@ -79,33 +68,19 @@ const toItem = (match: BoostRuleMatch): MatchItem => ({
   status: match.outrankedByRuleName ? 'outranked' : 'applied',
 });
 
-const summarizeMatches = (matches: BoostRuleMatch[], showsHidden: boolean) => {
-  const shownItems: MatchItem[] = [];
-  const hiddenMatchesLeftOut: MatchItem[] = [];
+const summarizeMatches = (matches: BoostRuleMatch[]) => {
+  const items: MatchItem[] = [];
   const itemsById = new Map<string, MatchItem>();
-  let hasHidden = false;
-  let hasShownOutranked = false;
+  let hasOutranked = false;
   let largestBytes = 0;
   for (const match of matches) {
     const item = toItem(match);
+    items.push(item);
     itemsById.set(item.id, item);
-    hasHidden ||= item.isHidden;
-    if (item.isHidden && !showsHidden) {
-      hiddenMatchesLeftOut.push(item);
-    } else {
-      shownItems.push(item);
-      hasShownOutranked ||= Boolean(item.outrankedByRuleName);
-      largestBytes = Math.max(largestBytes, item.storageSizeInBytes);
-    }
+    hasOutranked ||= Boolean(item.outrankedByRuleName);
+    largestBytes = Math.max(largestBytes, item.storageSizeInBytes);
   }
-  return {
-    shownItems,
-    itemsById,
-    hiddenMatchesLeftOut,
-    hasHidden,
-    hasShownOutranked,
-    largestBytes,
-  };
+  return { items, itemsById, hasOutranked, largestBytes };
 };
 
 const matchesFilters = (match: MatchItem, filters: ActiveFilters) =>
@@ -117,22 +92,6 @@ const matchesMatch = (match: MatchItem, { filters }: FindItemsParams) =>
 
 // An empty `Filters` falls back to the default filters, such as the sort menu.
 const SuppressDefaultFilters = filter.createComponent({ resolve: () => undefined });
-
-interface MatchesCountProps {
-  type: BoostProfileType;
-  hiddenMatchesLeftOut: MatchItem[];
-}
-
-const MatchesCount = ({ type, hiddenMatchesLeftOut }: MatchesCountProps) => {
-  const { filters } = useContentListFilters();
-  const hiddenCount = hiddenMatchesLeftOut.filter((match) => matchesFilters(match, filters)).length;
-  return (
-    <TableCount
-      formatTotal={(count) => formatMatchesTotal(type, count, hiddenCount)}
-      data-test-subj="searchBoostMatchesCount"
-    />
-  );
-};
 
 export interface MatchesTableProps {
   type: BoostProfileType;
@@ -153,42 +112,22 @@ export const MatchesTable = ({
   isOutrankingComputed = false,
 }: MatchesTableProps) => {
   const labels = MATCHES_LABELS[type];
-  const [showsHidden, setShowsHidden] = useState(false);
   const isWide = useIsWithinMinBreakpoint('l');
 
-  const {
-    shownItems,
-    itemsById,
-    hiddenMatchesLeftOut,
-    hasHidden,
-    hasShownOutranked,
-    largestBytes,
-  } = useMemo(() => summarizeMatches(matches, showsHidden), [matches, showsHidden]);
-  const hasOutrankedColumn = isOutrankingComputed && hasShownOutranked;
+  const { items, itemsById, hasOutranked, largestBytes } = useMemo(
+    () => summarizeMatches(matches),
+    [matches]
+  );
+  const hasOutrankedColumn = isOutrankingComputed && hasOutranked;
   // Content List keeps the first render's cell renderers, so they read the latest values.
   const latest = useLatest({ itemsById, largestBytes, getMatchLinkProps, getRuleLinkProps });
   const getMatch = (item: ContentListItem) => latest.current.itemsById.get(item.id);
-  const noHiddenDescriptionId = useId();
   const getRowStatuses = (filters: ActiveFilters) =>
-    shownItems
-      .filter(({ name }) => matchesSearch(filters.search, [name]))
-      .map(({ status }) => status);
-
-  const showHiddenSwitch = (
-    <EuiSwitch
-      label={SHOW_HIDDEN_LABEL}
-      checked={showsHidden}
-      disabled={!hasHidden}
-      onChange={(event) => setShowsHidden(event.target.checked)}
-      compressed
-      aria-describedby={hasHidden ? undefined : noHiddenDescriptionId}
-      data-test-subj="searchBoostShowHidden"
-    />
-  );
+    items.filter(({ name }) => matchesSearch(filters.search, [name])).map(({ status }) => status);
 
   return (
     <InMemoryListProvider
-      items={shownItems}
+      items={items}
       queryKeyScope={queryKeyScope}
       labels={labels.list}
       matches={matchesMatch}
@@ -203,27 +142,15 @@ export const MatchesTable = ({
               </ContentListToolbar.Filters>
             </ContentListToolbar>
           }
-          toolbarAppend={
-            hasHidden ? (
-              showHiddenSwitch
-            ) : (
-              <>
-                <EuiToolTip content={labels.noHidden}>{showHiddenSwitch}</EuiToolTip>
-                <EuiScreenReaderOnly>
-                  <span id={noHiddenDescriptionId}>{labels.noHidden}</span>
-                </EuiScreenReaderOnly>
-              </>
-            )
-          }
           emptyState={
-            <EuiEmptyPrompt
-              body={matches.length === 0 ? NO_MATCHES_MESSAGE : labels.onlyHidden}
-              data-test-subj="searchBoostMatchesEmpty"
-            />
+            <EuiEmptyPrompt body={NO_MATCHES_MESSAGE} data-test-subj="searchBoostMatchesEmpty" />
           }
           data-test-subj="searchBoostMatches"
         >
-          <MatchesCount type={type} hiddenMatchesLeftOut={hiddenMatchesLeftOut} />
+          <TableCount
+            formatTotal={(count) => formatTargetCount(type, count)}
+            data-test-subj="searchBoostMatchesCount"
+          />
           <ContentListTable
             // Content List keeps its first columns, so a change of columns remounts the table.
             key={`${hasOutrankedColumn}-${isWide}`}
@@ -240,7 +167,6 @@ export const MatchesTable = ({
                     <NameCell
                       name={match.name}
                       linkProps={latest.current.getMatchLinkProps(match.name)}
-                      badge={match.isHidden ? HIDDEN_BADGE_PROPS : undefined}
                       isStruckThrough={Boolean(match.outrankedByRuleName)}
                       data-test-subj="searchBoostMatchLink"
                     />
