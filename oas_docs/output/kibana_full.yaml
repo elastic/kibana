@@ -61658,7 +61658,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Upgrade a package policy to a newer package version.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.
+        Upgrade a package policy to a newer package version. When some package policies are upgraded and the others are only blocked because some active agents don't satisfy the package's agent version condition, the response is a 200 with a result per package policy: check each item's `success` field. When any other upgrade fails, the response is the first such failure. When none succeeds and every failure is an agent version block, the response is the first block.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.
       operationId: post-fleet-package-policies-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -61886,6 +61886,8 @@ paths:
                         type: array
                       maxItems: 1
                       type: array
+                    agent_version_block:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_agent_version_block'
                     body:
                       additionalProperties: false
                       type: object
@@ -157612,6 +157614,21 @@ components:
     Kibana_HTTP_APIs_agent_policy_response:
       additionalProperties: false
       properties:
+        active_agents_per_version:
+          description: Number of active agents per version, excluding OpAMP agents. These are the agents package-level agent version conditions apply to.
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              count:
+                type: number
+              version:
+                type: string
+            required:
+              - version
+              - count
+          maxItems: 1000
+          type: array
         advanced_settings:
           additionalProperties: false
           type: object
@@ -162655,6 +162672,10 @@ components:
     Kibana_HTTP_APIs_create_managed_integration_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -162877,6 +162898,10 @@ components:
     Kibana_HTTP_APIs_create_package_policy_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -163700,6 +163725,11 @@ components:
           additionalProperties: false
           type: object
           properties:
+            attributes:
+              additionalProperties: true
+              description: Details of the error. `type` is `agent_version_incompatible` when the package policy was not upgraded because some active agents do not satisfy the package agent version condition.
+              type: object
+              properties: {}
             message:
               type: string
           required:
@@ -166835,6 +166865,22 @@ components:
                   - message
               name:
                 type: string
+              skipped_package_policies:
+                description: Package policies not upgraded because some of their active agents do not satisfy the agent version condition of the new package version.
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    version_condition:
+                      type: string
+                  required:
+                    - id
+                maxItems: 10000
+                type: array
               success:
                 type: boolean
             required:
@@ -181210,6 +181256,34 @@ components:
         - has_policies
       title: package_metadata
       type: object
+    Kibana_HTTP_APIs_package_policy_agent_version_block:
+      additionalProperties: false
+      description: Set when some active agents don't satisfy the package-level agent version condition of the target package version.
+      properties:
+        blocked_count:
+          description: Number of active agents that don't satisfy the condition and would stop collecting the integration's data. Omitted when the user can't read agents.
+          type: number
+        min_version:
+          description: Lowest agent version satisfying the condition, when every blocked agent runs below it. Omitted when the user can't read agents.
+          type: string
+        observed_versions:
+          description: Versions reported by those agents. Omitted when the user can't read agents.
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        package_name:
+          type: string
+        package_version:
+          type: string
+        version_condition:
+          type: string
+      required:
+        - package_name
+        - package_version
+        - version_condition
+      title: package_policy_agent_version_block
+      type: object
     Kibana_HTTP_APIs_package_policy_input_deprecation_info:
       additionalProperties: false
       properties:
@@ -181755,6 +181829,11 @@ components:
           additionalProperties: false
           type: object
           properties:
+            attributes:
+              additionalProperties: true
+              description: Details of the error. `type` is `agent_version_incompatible` when the package policy was not upgraded because some active agents do not satisfy the package agent version condition.
+              type: object
+              properties: {}
             message:
               type: string
           required:
@@ -182743,7 +182822,7 @@ components:
             description: A list of data source names or wildcard patterns to which the permissions in this entry apply.
             maxLength: 1000
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
@@ -182772,7 +182851,7 @@ components:
           items:
             description: Cluster privileges that define the cluster level actions that users can perform.
             type: string
-          maxItems: 100
+          maxItems: 1000
           type: array
         global:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_global_privileges'
@@ -182784,7 +182863,7 @@ components:
         remote_cluster:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_remote_cluster_privileges'
-          maxItems: 100
+          maxItems: 1000
           type: array
         remote_indices:
           items:
@@ -182795,7 +182874,7 @@ components:
           items:
             description: A username that members of this role can impersonate.
             type: string
-          maxItems: 100
+          maxItems: 1000
           type: array
       title: security_role_elasticsearch
       type: object
@@ -182868,14 +182947,14 @@ components:
           items:
             description: The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
           items:
             description: The index level privileges that the role members have for the data streams and indices.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         query:
@@ -182935,7 +183014,7 @@ components:
             items:
               description: The privileges that the role member has for the feature.
               type: string
-            maxItems: 100
+            maxItems: 1000
             type: array
           type: object
         spaces:
@@ -183021,14 +183100,14 @@ components:
           items:
             description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
           items:
             description: The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
       required:
@@ -183047,7 +183126,7 @@ components:
           items:
             description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         field_security:
@@ -183062,14 +183141,14 @@ components:
           items:
             description: A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
           items:
             description: The index level privileges that role members have for the specified indices.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         query:
@@ -183150,6 +183229,10 @@ components:
     Kibana_HTTP_APIs_simplified_create_package_policy_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -186714,6 +186797,10 @@ components:
     Kibana_HTTP_APIs_update_package_policy_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -187271,6 +187358,10 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         acknowledge_breaking_changes:
           default: false
           description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.

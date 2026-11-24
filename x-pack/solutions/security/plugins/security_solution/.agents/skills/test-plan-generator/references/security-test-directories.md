@@ -190,7 +190,7 @@ These skills describe test file conventions, runner commands, authentication pat
 
 | Test type | Directory |
 |---|---|
-| Functional (FTR) | `test/security_solution_endpoint/` |
+| Functional (FTR) | `x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/` |
 | Cypress E2E | `test/defend_workflows_cypress/` |
 | API integration | `test_suites/test-suites-security-solution-apis/test_suites/edr_workflows/` |
 

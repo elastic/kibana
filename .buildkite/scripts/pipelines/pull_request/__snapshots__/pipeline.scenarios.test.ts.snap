@@ -879,6 +879,30 @@ exports[`pull_request pipeline scenarios next docs label 1`] = `
 ]
 `;
 
+exports[`pull_request pipeline scenarios osquery Cypress path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "osquery-cypress",
+  "osquery-serverless",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
 exports[`pull_request pipeline scenarios osquery path 1`] = `
 [
   "build",

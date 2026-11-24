@@ -153,6 +153,10 @@ const SCENARIOS: Scenario[] = [
     changedFiles: ['x-pack/platform/plugins/shared/osquery/server/index.ts'],
   },
   {
+    name: 'osquery Cypress path',
+    changedFiles: ['x-pack/platform/packages/private/osquery-plugin-cypress/cypress.config.ts'],
+  },
+  {
     name: 'cloud security posture path',
     changedFiles: ['x-pack/solutions/security/plugins/cloud_security_posture/server/index.ts'],
   },

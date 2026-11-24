@@ -8,11 +8,12 @@
  */
 
 jest.mock('#pipeline-utils', () => ({
-  expandAgentQueue: (queue: string, size: number) => ({ queue, size }),
+  expandAgentQueue: (queue: string, size?: number) =>
+    size === undefined ? { queue } : { queue, size },
 }));
 
 import {
-  buildFunctionalAggregateWaitStep,
+  buildFunctionalAggregateStep,
   buildFunctionalStepGroups,
   buildJestStep,
   registerCancelKeys,
@@ -136,7 +137,7 @@ describe('buildFunctionalStepGroups', () => {
         ],
       },
     });
-    expect(buildFunctionalAggregateWaitStep([step])).toBeUndefined();
+    expect(buildFunctionalAggregateStep([step], 'q1')).toBeUndefined();
   });
 
   it('splits more than 500 FTR jobs into uploads with unique group keys', () => {
@@ -151,8 +152,10 @@ describe('buildFunctionalStepGroups', () => {
 
     expect(groups.map((group) => group.key)).toEqual(['ftr-configs-1', 'ftr-configs-2']);
     expect(groups.map((group) => group.steps.length)).toEqual([400, 101]);
-    expect(buildFunctionalAggregateWaitStep(groups)).toEqual({
-      wait: null,
+    expect(buildFunctionalAggregateStep(groups, 'q1')).toEqual({
+      label: 'FTR Configs Complete',
+      command: ':',
+      agents: { queue: 'q1' },
       key: 'ftr-configs',
       depends_on: ['ftr-configs-1', 'ftr-configs-2'],
     });

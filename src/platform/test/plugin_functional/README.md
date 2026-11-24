@@ -3,17 +3,17 @@
 This folder contains plugin functional tests, i.e. functional tests that should be executed
 against a Kibana instance with specific test plugins available.
 
-To add a plugin to the instance, just place the plugin folder in the `plugins`
-directory.
+To add a plugin to the instance, place it in
+`src/platform/test_plugins/plugin_functional`; `config.ts` discovers its direct children.
 
 The custom visualizations test plugin lives in
 `src/platform/test_plugins/kbn_tp_custom_visualizations` and is loaded by
-`config.ts` alongside the plugins in this directory.
+`config.ts` alongside the other test plugins.
 
 Add new test suites into the `test_suites` folder and reference them from the
 `config.js` file. These test suites work the same as regular functional test
 except that they are executed against a Kibana with all plugins (from the
-`plugins` directory) installed.
+`src/platform/test_plugins/plugin_functional` directory) installed.
 
 ## Run the test
 
@@ -32,7 +32,7 @@ In case you want to start Kibana with one of the test plugins (e.g. for developi
 test plugin), you can just run:
 
 ```
-pnpm start --plugin-path=test/plugin_functional/plugins/<plugin_folder>
+pnpm start --plugin-path=src/platform/test_plugins/plugin_functional/<plugin_folder>
 ```
 
 For the custom visualizations plugin, use
@@ -41,7 +41,7 @@ For the custom visualizations plugin, use
 If you wish to start Kibana with multiple test plugins, you can run:
 
 ```
-pnpm start --plugin-path=test/plugin_functional/plugins/<plugin_folder1> --plugin-path=test/plugin_functional/plugins/<plugin_folder2> ...
+pnpm start --plugin-path=src/platform/test_plugins/plugin_functional/<plugin_folder1> --plugin-path=src/platform/test_plugins/plugin_functional/<plugin_folder2> ...
 ```
 
 If you wish to load up specific es archived data for your test, you can do so via the `es_archiver` script detailed in the [Scripts README.md](../../../../scripts/README.md#es-archiver)

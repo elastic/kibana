@@ -129,6 +129,13 @@ describe('WorkflowExecuteIndexForm', () => {
   });
 
   it('triggers search on query submission', async () => {
+    const SearchBarSpy = jest.fn(MockSearchBar);
+    const kibana = mockUseKibana();
+    mockUseKibana.mockReturnValue({
+      ...kibana,
+      services: { ...kibana.services, unifiedSearch: { ui: { SearchBar: SearchBarSpy } } },
+    } as any);
+
     const { getByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
@@ -148,8 +155,14 @@ describe('WorkflowExecuteIndexForm', () => {
     fireEvent.keyDown(queryInput, { key: 'Enter' });
 
     await waitFor(() => {
-      expect(mockData.search.search).toHaveBeenCalled();
+      expect(JSON.stringify(mockData.search.search.mock.calls.at(-1))).toContain('rule.name');
     });
+    expect(SearchBarSpy.mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({
+        disableSubscribingToGlobalDataServices: true,
+        isAutoRefreshDisabled: true,
+      })
+    );
   });
 
   it('fetches documents on data view selection', async () => {

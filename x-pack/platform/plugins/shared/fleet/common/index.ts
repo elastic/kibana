@@ -126,6 +126,8 @@ export {
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
   extractAgentIdsWithData,
+  agentSatisfiesPackageVersionCondition,
+  getAgentVersionBlockers,
   getIncompatibleIntegrations,
 } from './services';
 
@@ -176,6 +178,7 @@ export type {
   UpgradePackagePolicyResponseItem,
   UpgradePackagePolicyBaseResponse,
   UpgradePackagePolicyDryRunResponseItem,
+  AgentVersionBlock,
   BulkGetPackagePoliciesResponse,
   BulkGetAgentPoliciesResponse,
   GetBulkAssetsResponse,

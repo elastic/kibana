@@ -54,6 +54,8 @@ export interface UseWorkflowExecuteHitTabSearchStateOptions {
 
 export interface UseWorkflowExecuteHitTabSearchStateResult {
   query: Query;
+  /** Unsubmitted KQL, used to restore the search bar when it remounts. */
+  draftQuery: Query;
   timeRange: TimeRange;
   submittedQueryString: string;
   handleQueryChange: (params: { query?: Query; dateRange: TimeRange }) => void;
@@ -77,7 +79,7 @@ export function useWorkflowExecuteHitTabSearchState({
   isTableGridFullScreen = false,
   onTableGridFullScreenChange,
 }: UseWorkflowExecuteHitTabSearchStateOptions): UseWorkflowExecuteHitTabSearchStateResult {
-  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [draftQuery, setDraftQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
@@ -145,7 +147,7 @@ export function useWorkflowExecuteHitTabSearchState({
   const handleQueryChange = useCallback(
     ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
       if (newQuery) {
-        setQuery(newQuery);
+        setDraftQuery(newQuery);
       }
       setTimeRange((previousTimeRange) =>
         previousTimeRange.from === dateRange.from && previousTimeRange.to === dateRange.to
@@ -159,7 +161,7 @@ export function useWorkflowExecuteHitTabSearchState({
   const handleQuerySubmit = useCallback(
     ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
       if (newQuery) {
-        setQuery(newQuery);
+        setDraftQuery(newQuery);
         setSubmittedQuery(newQuery);
       }
       setTimeRange(dateRange);
@@ -174,7 +176,8 @@ export function useWorkflowExecuteHitTabSearchState({
   }, [hitSearch.hits.length, isTableGridFullScreen, onTableGridFullScreenChange]);
 
   return {
-    query,
+    query: submittedQuery,
+    draftQuery,
     timeRange,
     submittedQueryString,
     handleQueryChange,

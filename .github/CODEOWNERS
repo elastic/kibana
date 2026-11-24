@@ -2310,7 +2310,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/interpreter_functional @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/blob/main/test/interpreter_functional/plugins/kbn_tp_run_pipeline/kibana.jsonc#L4
 /src/platform/test/api_integration/apis/general/*.js @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/199795/files/894a8ede3f9d0398c5af56bf5a82654a9bc0610b#r1846691639
 x-pack/platform/test/plugin_api_integration/*.ts @elastic/kibana-core @elastic/response-ops # Shared files across test suites owned by Core and Response Ops
-/x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
+/x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
 x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/licensed_feature_usage @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kibana-core
@@ -2337,11 +2337,11 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /src/platform/test/server_integration @elastic/kibana-core
 /x-pack/platform/test/functional_cors @elastic/kibana-core
 /x-pack/platform/test/stack_functional_integration/apps/telemetry @elastic/kibana-core
-/src/platform/test/plugin_functional/plugins/core* @elastic/kibana-core
+/src/platform/test_plugins/plugin_functional/core* @elastic/kibana-core
 /src/platform/test_plugins/plugin_functional/session_notifications @elastic/kibana-core
 /src/platform/test_plugins/plugin_functional/kbn_top_nav/ @elastic/kibana-core
 /src/platform/test_plugins/plugin_functional/app_link_test @elastic/kibana-core
-/src/platform/test/plugin_functional/plugins/saved_object* @elastic/kibana-core
+/src/platform/test_plugins/plugin_functional/saved_object* @elastic/kibana-core
 /src/platform/test_plugins/plugin_functional/rendering_plugin @elastic/kibana-core
 /src/platform/test/plugin_functional/test_suites/application_links @elastic/kibana-core
 /src/platform/test/plugin_functional/test_suites/telemetry @elastic/kibana-core
@@ -2491,7 +2491,7 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /src/platform/packages/shared/kbn-std/src/is_internal_url.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.test.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.ts @elastic/kibana-core @elastic/kibana-security
-/src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
+/src/platform/test_plugins/plugin_functional/plugins/hardening @elastic/kibana-security
 /src/platform/test/plugin_functional/test_suites/hardening @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/login_page.ts @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/roles.ts @elastic/kibana-security

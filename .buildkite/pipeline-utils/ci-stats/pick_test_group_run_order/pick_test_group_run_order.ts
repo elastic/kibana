@@ -35,7 +35,7 @@ import {
   resolveSelectiveTestingContext,
 } from './selective_testing.ts';
 import {
-  buildFunctionalAggregateWaitStep,
+  buildFunctionalAggregateStep,
   buildFunctionalStepGroups,
   buildJestStep,
   registerCancelKeys,
@@ -258,8 +258,8 @@ export async function pickTestGroupRunOrder() {
 
   if (steps.length) bk.uploadSteps(steps);
   for (const group of functionalStepGroups) bk.uploadSteps([group]);
-  const aggregateWaitStep = buildFunctionalAggregateWaitStep(functionalStepGroups);
-  if (aggregateWaitStep) bk.uploadSteps([aggregateWaitStep]);
+  const aggregateStep = buildFunctionalAggregateStep(functionalStepGroups, ftrManifest.default.queue);
+  if (aggregateStep) bk.uploadSteps([aggregateStep]);
 }
 
 /**

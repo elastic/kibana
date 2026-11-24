@@ -11,7 +11,7 @@ import type {
   BuildkiteClient,
   BuildkiteGroupStep,
   BuildkiteStep,
-  BuildkiteWaitStep,
+  BuildkiteCommandStep,
 } from '../../buildkite/index.ts';
 import { AGENT_DISK_GIB, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from './const.ts';
 import type { FunctionalGroup } from './types.ts';
@@ -110,14 +110,17 @@ export function buildFunctionalStepGroups(
   return groups;
 }
 
-/** Keep the existing FTR dependency key waiting for every uploaded group. */
-export function buildFunctionalAggregateWaitStep(
-  groups: KeyedBuildkiteGroupStep[]
-): BuildkiteWaitStep | undefined {
+/** Keep the FTR dependency key without blocking unrelated pipeline steps. */
+export function buildFunctionalAggregateStep(
+  groups: KeyedBuildkiteGroupStep[],
+  defaultQueue: string
+): BuildkiteCommandStep | undefined {
   if (groups.length <= 1) return undefined;
 
   return {
-    wait: null,
+    label: 'FTR Configs Complete',
+    command: ':',
+    agents: expandAgentQueue(defaultQueue),
     key: STEP_KEYS.FTR_GROUP,
     depends_on: groups.map((group) => group.key),
   };
