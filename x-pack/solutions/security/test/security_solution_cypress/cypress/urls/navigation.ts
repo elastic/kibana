@@ -134,3 +134,4 @@ export const VALUE_REPORTS_URL = 'app/security/reports/ai_value';
 export const MANAGE_AUTOMATIC_MIGRATIONS_URL = 'app/security/siem_migrations/manage';
 export const TRANSLATED_RULES_PAGE_URL = 'app/security/siem_migrations/rules';
 export const TRANSLATED_DASHBOARDS_PAGE_URL = 'app/security/siem_migrations/dashboards';
+export const TRANSLATED_WORKFLOWS_PAGE_URL = 'app/security/siem_migrations/workflows';
