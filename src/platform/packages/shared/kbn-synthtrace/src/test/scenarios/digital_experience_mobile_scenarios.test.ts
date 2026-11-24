@@ -37,6 +37,7 @@ import type { SynthGenerator } from '../../lib/utils/with_client';
 import singleInstallation from '../../scenarios/digital_experience_mobile_single_installation';
 import singleSession from '../../scenarios/digital_experience_mobile_single_session';
 import native from '../../scenarios/digital_experience_mobile_native';
+import releases from '../../scenarios/digital_experience_mobile_releases';
 import mixed from '../../scenarios/digital_experience_mixed';
 import {
   DIGITAL_EXPERIENCE_MOBILE_APPS,
@@ -328,7 +329,7 @@ describe('digital experience mobile scenarios', () => {
       const otelServices = new Set(
         docs.flatMap((doc) => (isOtel(doc) ? [otelServiceOf(doc)] : []))
       );
-      [...REACT_NATIVE_SERVICES, ...NATIVE_SERVICES].forEach((service) =>
+      [...REACT_NATIVE_SERVICES, ...NATIVE_SERVICES, 'release-train-mobile'].forEach((service) =>
         expect(otelServices).toContain(service)
       );
       const classicServices = new Set(
@@ -349,6 +350,37 @@ describe('digital experience mobile scenarios', () => {
       REACT_NATIVE_SERVICES.forEach((service) =>
         expect(mobileServicesWithSessionStart).not.toContain(service)
       );
+    });
+  });
+
+  describe('digital_experience_mobile_releases', () => {
+    const from = new Date('2026-10-16T00:00:00.000Z').getTime();
+    const to = from + 24 * 60 * MINUTE_MS;
+    const rolloutStart = from + 12 * 60 * MINUTE_MS;
+    let docs: OtelDocument[];
+
+    beforeAll(async () => {
+      docs = await run(releases, { scenarioOpts: { seed: 'releases', scale: 0.25 }, from, to });
+    });
+
+    const versionOf = (doc: OtelDocument) => String(resourceOf(doc)['service.version']);
+
+    it('writes one app on seven releases, more than the five the release health names', () => {
+      expect(new Set(docs.map((doc) => resourceOf(doc)['service.name']))).toEqual(
+        new Set(['release-train-mobile'])
+      );
+      expect(new Set(docs.map(versionOf)).size).toBe(7);
+    });
+
+    it('rolls the newest release out halfway into the run, so it first appears inside it', () => {
+      const newest = docs.filter((doc) => versionOf(doc) === '6.0.0');
+
+      const firstSeen = Math.min(...newest.map((doc) => Number(doc['@timestamp'])));
+
+      expect(newest.length).toBeGreaterThan(0);
+      // React Native sessions end at their time, so the first ones started a few minutes before
+      expect(firstSeen).toBeGreaterThan(rolloutStart - 30 * MINUTE_MS);
+      expect(firstSeen).toBeLessThan(to);
     });
   });
 });

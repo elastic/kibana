@@ -555,12 +555,14 @@ describe('digital experience mobile apps', () => {
           );
           return onNewest.length / inWindow.length;
         };
-        // Every installation takes part in the rollout, from its initial adoption to all of them
+        // The rollout goes from its initial adoption to its target, and older versions keep the rest
         const initialAdoption = newest.rollout?.initialAdoption ?? 0;
+        const targetAdoption = newest.rollout?.targetAdoption ?? 1;
         expect(newestShare(0, 0.5)).toBeGreaterThan(initialAdoption - 0.15);
         expect(newestShare(0, 0.5)).toBeLessThan(initialAdoption + 0.2);
-        expect(newestShare(5.5, hours)).toBeGreaterThan(0.85);
-        expect(newestShare(hours, hours + cycleHours)).toBe(1);
+        expect(newestShare(5.5, hours)).toBeGreaterThan(targetAdoption - 0.15);
+        expect(newestShare(hours, hours + cycleHours)).toBeGreaterThan(targetAdoption - 0.1);
+        expect(newestShare(hours, hours + cycleHours)).toBeLessThan(targetAdoption + 0.1);
 
         // An installation never goes back to an older version
         const versionsByInstallation = new Map<unknown, string[]>();
@@ -640,6 +642,75 @@ describe('digital experience mobile apps', () => {
       expect(
         new Set(immediateLogs.map(({ resource }) => resource?.attributes?.['service.version']))
       ).toEqual(new Set([newest.serviceVersion]));
+    });
+
+    it('leaves older versions the installations above the target adoption', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, ...older] = app.versions;
+      const halfway = {
+        ...app,
+        versions: [
+          { ...newest, rollout: { initialAdoption: 0.5, hours: 0, targetAdoption: 0.5 } },
+          ...older,
+        ],
+      };
+      const versions = logsOf(
+        generateEdotNativeSessions(range, {
+          environment: 'test',
+          from: FROM,
+          scale: 1,
+          platform: 'both',
+          seed: 'digital-experience-native-target-adoption',
+          apps: [halfway],
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+        )
+      )
+        .filter((doc) => doc.event_name === EVENT_SESSION_START)
+        .map((doc) => doc.resource?.attributes?.['service.version']);
+      const newestShare =
+        versions.filter((version) => version === newest.serviceVersion).length / versions.length;
+
+      expect(newestShare).toBeGreaterThan(0.35);
+      expect(newestShare).toBeLessThan(0.65);
+    });
+
+    it('runs no installation on the newest version before its rollout starts', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, ...older] = app.versions;
+      // Starts halfway into the 30 minutes of the run, everywhere at once
+      const delayed = {
+        ...app,
+        versions: [
+          { ...newest, rollout: { initialAdoption: 1, hours: 0, startsAfterHours: 0.25 } },
+          ...older,
+        ],
+      };
+      const delayedLogs = logsOf(
+        generateEdotNativeSessions(range, {
+          environment: 'test',
+          from: FROM,
+          scale: 1,
+          platform: 'both',
+          seed: 'digital-experience-native-delayed-rollout',
+          apps: [delayed],
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+        )
+      );
+      const startsOn = (serviceVersion: string) =>
+        delayedLogs
+          .filter(
+            (doc) =>
+              doc.event_name === EVENT_SESSION_START &&
+              doc.resource?.attributes?.['service.version'] === serviceVersion
+          )
+          .map((doc) => Number(doc['@timestamp']));
+      const rolloutStart = FROM + 15 * 60_000;
+
+      expect(startsOn(newest.serviceVersion).length).toBeGreaterThan(0);
+      expect(Math.min(...startsOn(newest.serviceVersion))).toBeGreaterThanOrEqual(rolloutStart);
+      expect(startsOn(older[0].serviceVersion).some((time) => time < rolloutStart)).toBe(true);
     });
 
     it('keeps the sessions in progress of apps that share a service name apart', () => {
