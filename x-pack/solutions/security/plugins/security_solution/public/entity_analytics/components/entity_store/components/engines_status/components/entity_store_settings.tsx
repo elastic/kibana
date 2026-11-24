@@ -91,7 +91,7 @@ export const EntityStoreSettings = ({
 }) => {
   // Engines of types that are not enabled have no section, so they don't count either.
   const engines = useMemo(
-    () => data.engines.filter(({ type }) => entityTypes.includes(type)),
+    () => data.engines.filter(({ type }) => entityTypes.some((entityType) => entityType === type)),
     [data.engines, entityTypes]
   );
   const { health, problems } = useMemo(() => getOverallHealth(engines), [engines]);
