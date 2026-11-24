@@ -50,6 +50,7 @@ apiTest.describe('kibana stats api', { tag: ['@local-stateful-classic'] }, () =>
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.kibana.uuid).toHaveLength(UUID_LENGTH);
+    expect(() => statsResponseSchema.validate(response.body)).not.toThrow();
   });
 
   apiTest('returns cluster_uuid and usage when extended is present', async ({ apiClient }) => {
