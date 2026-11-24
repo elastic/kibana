@@ -87,11 +87,11 @@
  *   from the start
  *
  * Frustration signals: like EDOT Browser's frustration detection (elastic/elastic-otel-rum-js#191),
- * `browser.frustration.rage_click`, `dead_click` and `error_click` log records with the clicked
+ * `elastic.frustration.rage_click`, `dead_click` and `error_click` log records with the clicked
  * element's `browser.css_selector`, `browser.tag_name`, `browser.page.x` and `.y`, and `url.full`,
  * timestamped with the first click:
  * - rage clicks repeat a click 3 to 7 times, each within 300 ms of the previous one, and carry
- *   `browser.frustration.click_count`. The repeated clicks are `browser.user_action.click` records
+ *   `elastic.frustration.click_count`. The repeated clicks are `browser.user_action.click` records
  *   too
  * - dead clicks are clicks that fire no request
  * - error clicks are clicks followed by an uncaught exception within a second, or by the failure

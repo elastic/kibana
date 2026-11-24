@@ -34,9 +34,9 @@ describe('usageSearch', () => {
         event_name: [
           'browser.navigation_timing',
           'browser.user_action.click',
-          'browser.frustration.rage_click',
-          'browser.frustration.dead_click',
-          'browser.frustration.error_click',
+          'elastic.frustration.rage_click',
+          'elastic.frustration.dead_click',
+          'elastic.frustration.error_click',
         ],
       },
     });

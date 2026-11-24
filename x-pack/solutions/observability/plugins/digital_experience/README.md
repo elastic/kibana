@@ -558,7 +558,7 @@ country, city and pages, which the list's search matches anywhere in.
 ### Frustration signals
 
 EDOT Browser reports a rage, dead or error click as a log event of its own
-(`browser.frustration.rage_click`, `.dead_click` and `.error_click`, in `common/otel_data.ts`),
+(`elastic.frustration.rage_click`, `.dead_click` and `.error_click`, in `common/otel_data.ts`),
 timestamped at the first click, with the element's `browser.css_selector` and the page's `url.full`.
 Kibana adds no detection of its own; it counts what the SDK reports:
 
