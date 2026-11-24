@@ -229,6 +229,33 @@ describe('process_events_route.ts', () => {
         expect(find).toHaveBeenCalledTimes(2);
       });
 
+      it('starts the gap search and the page search together', async () => {
+        const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+        const alertsClient = getAlertsClientMockInstance();
+        let pending = 0;
+        let maxPending = 0;
+        jest.spyOn(alertsClient, 'find').mockImplementation(async () => {
+          maxPending = Math.max(maxPending, ++pending);
+          await new Promise((resolve) => setImmediate(resolve));
+          pending--;
+
+          return { hits: { hits: [], total: { value: 0, relation: 'eq' } } } as never;
+        });
+
+        await fetchEventsAndScopedAlerts(
+          client,
+          alertsClient,
+          TEST_PROCESS_INDEX,
+          'mockId',
+          TEST_SESSION_START_TIME,
+          '2021-11-23T15:25:00.000Z',
+          true,
+          mockEvents.length
+        );
+
+        expect(maxPending).toBe(2);
+      });
+
       it('does not search a gap when the first event is at the cursor', async () => {
         // normal paging: the cursor is the time of the last event of the previous page
         const range = await fetchAndGetAlertsRange(firstTimestamp, true, mockEvents.length);

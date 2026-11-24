@@ -236,23 +236,25 @@ export const fetchEventsAndScopedAlerts = async (
       }
     }
 
-    const gapAlertsBody = gapRange
-      ? await searchAlerts(
-          alertsClient,
-          sessionEntityId,
-          ALERTS_PER_PROCESS_EVENTS_PAGE,
-          undefined,
-          gapRange
-        )
-      : undefined;
-
-    const alertsBody = await searchAlerts(
-      alertsClient,
-      sessionEntityId,
-      ALERTS_PER_PROCESS_EVENTS_PAGE,
-      undefined,
-      alertsRange
-    );
+    // the two alert searches do not depend on each other, so they run together
+    const [gapAlertsBody, alertsBody] = await Promise.all([
+      gapRange
+        ? searchAlerts(
+            alertsClient,
+            sessionEntityId,
+            ALERTS_PER_PROCESS_EVENTS_PAGE,
+            undefined,
+            gapRange
+          )
+        : undefined,
+      searchAlerts(
+        alertsClient,
+        sessionEntityId,
+        ALERTS_PER_PROCESS_EVENTS_PAGE,
+        undefined,
+        alertsRange
+      ),
+    ]);
 
     const processesWithIOEvents = await searchProcessWithIOEvents(
       client,
