@@ -67,6 +67,7 @@ const actionTypeRegistry: ActionTypeRegistry = {
   getUtils: jest.fn().mockReturnValue({
     isHostnameAllowed: jest.fn().mockReturnValue(true),
     isUriAllowed: jest.fn().mockReturnValue(true),
+    isCatalogEnabled: jest.fn().mockReturnValue(false),
     getMicrosoftGraphApiUrl: jest.fn(),
     getProxySettings: jest.fn(),
   }),
@@ -196,6 +197,7 @@ describe('update()', () => {
 
     beforeEach(() => {
       configurationUtilities.ensureUriAllowed.mockReset();
+      configurationUtilities.isCatalogEnabled.mockReturnValue(true);
       jest.mocked(actionTypeRegistry.getUtils).mockReturnValue(configurationUtilities);
       registeredActionType = getConnectorType({
         source: ACTION_TYPE_SOURCES.spec,
@@ -229,6 +231,52 @@ describe('update()', () => {
 
     afterEach(() => {
       jest.mocked(actionTypeRegistry.getUtils).mockReturnValue(originalConfigurationUtilities);
+    });
+
+    test('ignores the version pinned on the saved object when the connector catalog is disabled', async () => {
+      configurationUtilities.isCatalogEnabled.mockReturnValue(false);
+      const unversionedAction = {
+        name: action.name,
+        config: { unrelated: 'config' },
+        secrets: { unrelated: 'secret' },
+      };
+
+      const storedConnector = {
+        ...existingRawAction,
+        attributes: { ...existingRawAction.attributes, specVersion: '1.3' },
+      };
+      unsecuredSavedObjectsClient.get.mockResolvedValue(storedConnector);
+
+      const result = await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: unversionedAction,
+      });
+
+      // The type is versioned and the fetched connector is pinned, yet neither is used because the catalog config is off.
+      expect(result).not.toHaveProperty('specVersion');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).not.toHaveProperty('specVersion');
+    });
+
+    test('does not default to major 1 when the saved object has no version and the connector catalog is disabled', async () => {
+      configurationUtilities.isCatalogEnabled.mockReturnValue(false);
+      const unversionedAction = {
+        name: action.name,
+        config: { unrelated: 'config' },
+        secrets: { unrelated: 'secret' },
+      };
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingRawAction);
+
+      const result = await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: unversionedAction,
+      });
+
+      expect(result).not.toHaveProperty('specVersion');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).not.toHaveProperty('specVersion');
     });
 
     test.each([

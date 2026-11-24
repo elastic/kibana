@@ -136,17 +136,18 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const registeredActionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
 
-  // Without a requested version, a versioned connector keeps its major and takes the latest minor.
-  const pinnedMajor = registeredActionType.specs
-    ? parseSpecVersion(attributes.specVersion ?? '')?.major
-    : undefined;
-  const specVersion =
-    requestedSpecVersion ?? (pinnedMajor !== undefined ? String(pinnedMajor) : undefined);
-  const { resolvedSpecVersion, actionTypeForValidation: actionType } = resolveConnectorSpecVersion({
-    actionType: registeredActionType,
-    specVersion,
-    configurationUtilities,
-  });
+  const pinnedMajor =
+    configurationUtilities.isCatalogEnabled() && registeredActionType.specs
+      ? parseSpecVersion(attributes.specVersion ?? '')?.major
+      : undefined;
+  const { resolvedSpecVersion, actionTypeForValidation: actionType } =
+    configurationUtilities.isCatalogEnabled()
+      ? resolveConnectorSpecVersion({
+          actionType: registeredActionType,
+          specVersion: requestedSpecVersion ?? pinnedMajor?.toString(),
+          configurationUtilities,
+        })
+      : { resolvedSpecVersion: undefined, actionTypeForValidation: registeredActionType };
 
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
@@ -241,10 +242,12 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
       })
     : undefined;
 
+  // With the catalog disabled the update is unversioned, so a previously pinned version is dropped.
   const attributesWithoutIdentity = omit(attributes, [
     'apiKey',
     'uiamApiKey',
     'uiamApiKeyExternal',
+    ...(configurationUtilities.isCatalogEnabled() ? [] : ['specVersion']),
   ]);
 
   const result = await tryCatch(
