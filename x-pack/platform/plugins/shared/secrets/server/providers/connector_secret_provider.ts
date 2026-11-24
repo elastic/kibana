@@ -51,7 +51,7 @@ export const createConnectorSecretProvider = ({
     const connectors = await actions.getUnsecuredActionsClient().getAll(spaceId);
     const connector = connectors.find(({ id }) => id === connectorId);
     if (!connector) {
-      throw new Error('its connector no longer exists');
+      throw new Error('Its connector no longer exists');
     }
     return connector.actionTypeId;
   };
@@ -102,11 +102,16 @@ export const createConnectorSecretProvider = ({
         ],
       });
       if (result.status !== 'ok') {
-        throw new Error(result.serviceMessage ?? result.message ?? 'the connector call failed');
+        // What the service answered names accounts and resources, and differs for each secret
+        // manager. The actions plugin already logs it, so the reader of a run or of a test
+        // gets the same short explanation whatever the connector.
+        throw new Error(
+          'Its connector could not read it: either the connector does not have permission, or the reference is wrong'
+        );
       }
       const value = reader.getValue(result.data);
       if (value === undefined) {
-        throw new Error('the secret manager returned no value');
+        throw new Error('The secret manager returned no value');
       }
       return value;
     },

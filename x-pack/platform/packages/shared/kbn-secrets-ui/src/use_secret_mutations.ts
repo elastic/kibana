@@ -9,6 +9,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { UseMutationResult } from '@kbn/react-query';
+import { SECRET_PROVIDER_TYPE } from '@kbn/secrets';
 import type {
   DeleteSecretParams,
   UpdateSecretParams,
@@ -27,6 +28,32 @@ interface SecretMutationDeps {
 }
 
 /**
+ * Warns when the value of a secret that was just saved cannot be read. A secret from a connector
+ * is saved even then, so that it can be set up before its value exists in the secret manager.
+ */
+const warnIfUnreadable = async ({
+  api,
+  notifications,
+  name,
+  source,
+}: SecretMutationDeps & Pick<UpdateSecretParams, 'name' | 'source'>): Promise<void> => {
+  if (source?.provider !== SECRET_PROVIDER_TYPE.connector) {
+    return;
+  }
+  // The secret is saved whatever happens here: a test that fails to run is not reported.
+  const result = await api.testSecret({ name }).catch(() => undefined);
+  if (result && !result.resolved) {
+    notifications.toasts.addWarning({
+      title: i18n.translate('xpack.secretsUi.savedUnreadableToast', {
+        defaultMessage: 'Secret "{name}" was saved, but its value could not be read',
+        values: { name },
+      }),
+      text: result.message,
+    });
+  }
+};
+
+/**
  * Creates a secret. A failure is left to the caller, because the form shows it next to the
  * fields that caused it.
  */
@@ -37,7 +64,7 @@ export const useCreateSecret = ({
   const queryClient = useQueryClient();
   return useMutation<SecretMetadata, SecretsHttpError, WriteSecretParams>({
     mutationFn: api.createSecret,
-    onSuccess: (_data, { name }) => {
+    onSuccess: (_data, { name, source }) => {
       queryClient.invalidateQueries({ queryKey: getSecretsQueryKey(api) });
       notifications.toasts.addSuccess(
         i18n.translate('xpack.secretsUi.createSuccessToast', {
@@ -45,6 +72,7 @@ export const useCreateSecret = ({
           values: { name },
         })
       );
+      warnIfUnreadable({ api, notifications, name, source });
     },
   });
 };
@@ -57,7 +85,7 @@ export const useUpdateSecret = ({
   const queryClient = useQueryClient();
   return useMutation<SecretMetadata, SecretsHttpError, UpdateSecretParams>({
     mutationFn: api.updateSecret,
-    onSuccess: (_data, { name }) => {
+    onSuccess: (_data, { name, source }) => {
       queryClient.invalidateQueries({ queryKey: getSecretsQueryKey(api) });
       notifications.toasts.addSuccess(
         i18n.translate('xpack.secretsUi.updateSuccessToast', {
@@ -65,6 +93,7 @@ export const useUpdateSecret = ({
           values: { name },
         })
       );
+      warnIfUnreadable({ api, notifications, name, source });
     },
   });
 };
