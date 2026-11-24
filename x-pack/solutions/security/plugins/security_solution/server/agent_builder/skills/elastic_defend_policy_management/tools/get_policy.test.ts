@@ -13,14 +13,17 @@ import { policyFactory } from '../../../../../common/endpoint/models/policy_conf
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
 import { z } from '@kbn/zod/v4';
-import { hashPolicyConfig } from '../domain/hash_policy_config';
-import { normalize } from '../domain/normalize_policy_config';
-import type { EndpointPolicyBaseline } from '../domain/normalized_endpoint_policy';
-import type { EndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
-import type { EndpointPolicyRead } from '../services/read_policy';
+import { hashPolicyConfig } from '../../../../endpoint/services/policy_management/domain/hash_policy_config';
+import { normalize } from '../../../../endpoint/services/policy_management/domain/normalize_policy_config';
+import type { EndpointPolicyBaseline } from '../../../../endpoint/services/policy_management/domain/normalized_endpoint_policy';
+import type { EndpointPolicyManagementService } from '../../../../endpoint/services/policy_management/services/endpoint_policy_management_service';
+import type { EndpointPolicyRead } from '../../../../endpoint/services/policy_management/services/read_policy';
 import { createPolicyTool } from './create_policy_tool';
 import { GET_POLICY_TOOL_ID, createGetPolicyTool, getPolicySchema } from './get_policy';
-import { estimateGuardedEnvelopeTokens, toPresentationHash } from './trim_policy_result';
+import {
+  estimateGuardedEnvelopeTokens,
+  toPresentationHash,
+} from '../../../../endpoint/services/policy_management/presentation/trim_policy_result';
 
 jest.mock('./create_policy_tool', () => ({
   createPolicyTool: jest.fn(),

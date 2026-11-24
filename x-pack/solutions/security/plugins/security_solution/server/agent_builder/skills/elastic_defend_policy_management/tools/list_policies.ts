@@ -6,78 +6,27 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { type z, lazySchema } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { createPolicyTool } from './create_policy_tool';
-import type {
-  ListPoliciesResult,
-  ListedPolicyItem,
-} from '../services/endpoint_policy_management_service';
-import { omitTrailingToFit, toPresentationHash } from './trim_policy_result';
+import { listPoliciesInputSchema } from '../../../../../common/workflows/step_types/endpoint/policies/list_policies';
+import {
+  LIST_POLICIES_MAX_RESULT_TOKENS,
+  presentListPolicies,
+} from '../../../../endpoint/services/policy_management/presentation/present_list_policies';
 
 export const LIST_POLICIES_TOOL_ID = 'security.policy_management.list_policies';
 
-const LIST_PAGE_MIN = 1;
-const LIST_PAGE_MAX = 200;
-const LIST_PER_PAGE_MIN = 1;
-const LIST_PER_PAGE_MAX = 50;
-const LIST_PER_PAGE_DEFAULT = 20;
-const LIST_POLICIES_MAX_RESULT_TOKENS = 8_000;
-
 export const listPoliciesSchema = lazySchema(() =>
-  z.object({
-    page: z
-      .number()
-      .int()
-      .min(LIST_PAGE_MIN)
-      .max(LIST_PAGE_MAX)
-      .default(LIST_PAGE_MIN)
-      .describe(
-        '1-based page of endpoint package policies in the current space (1–200, default 1).'
-      ),
-    perPage: z
-      .number()
-      .int()
-      .min(LIST_PER_PAGE_MIN)
-      .max(LIST_PER_PAGE_MAX)
-      .default(LIST_PER_PAGE_DEFAULT)
-      .describe(
-        'Page size (1–50, default 20). Usage and enrolled-agent counts are returned only in usage mode under endpoint-list read.'
-      ),
-    includeEndpointUsage: z
-      .boolean()
-      .default(false)
-      .describe(
-        'When true, return per-policy enrolled-agent-backed usage classification. Requires endpoint-list read.'
-      ),
+  listPoliciesInputSchema.extend({
+    perPage: listPoliciesInputSchema.shape.perPage.describe(
+      'Page size (1–50, default 20). Usage and enrolled-agent counts are returned only in usage mode under endpoint-list read.'
+    ),
+    includeEndpointUsage: listPoliciesInputSchema.shape.includeEndpointUsage.describe(
+      'When true, return per-policy enrolled-agent-backed usage classification. Requires endpoint-list read.'
+    ),
   })
 );
-
-type PresentedListPolicies = ListPoliciesResult & {
-  items_total?: number;
-  items_truncated?: true;
-};
-
-const presentListPolicyItem = (item: ListedPolicyItem): ListedPolicyItem => ({
-  ...item,
-  normalizedHash: toPresentationHash(item.normalizedHash),
-});
-
-const presentListPolicies = (dto: ListPoliciesResult): PresentedListPolicies => {
-  const presentedItems = dto.items.map(presentListPolicyItem);
-
-  return omitTrailingToFit(
-    (keep): PresentedListPolicies => ({
-      ...dto,
-      items: presentedItems.slice(0, keep),
-      ...(keep < presentedItems.length
-        ? { items_total: presentedItems.length, items_truncated: true as const }
-        : {}),
-    }),
-    presentedItems.length,
-    LIST_POLICIES_MAX_RESULT_TOKENS
-  );
-};
 
 export const createListPoliciesTool = ({
   endpointAppContextService,

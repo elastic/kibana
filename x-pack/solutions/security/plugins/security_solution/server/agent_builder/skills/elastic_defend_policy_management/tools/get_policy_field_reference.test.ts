@@ -188,10 +188,59 @@ describe('createGetPolicyFieldReferenceTool', () => {
       },
     });
   });
-  it('emits strict keyword selector schema', () => {
+  it('emits the exact serialized input schema', () => {
     const schema = z.toJSONSchema(getPolicyFieldReferenceSchema, { io: 'input' });
-    expect(schema.required).toEqual(['selector']);
-    expect(JSON.stringify(schema)).toContain('keywords');
-    expect(JSON.stringify(schema)).not.toContain('query');
+    expect(schema).toEqual({
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      type: 'object',
+      properties: {
+        selector: {
+          anyOf: [
+            {
+              type: 'object',
+              properties: {
+                path: {
+                  type: 'string',
+                  minLength: 1,
+                  maxLength: 256,
+                  description:
+                    'Exact registry path, protection key, or supported OS-less remainder, such as linux.events.dns, malware.mode, or behavior_protection.reputation_service. UI setting words belong in a keywords selector; never invent a path from memory. Valid: {"selector":{"path":"windows.events.dns"}}. Do not send null, an empty string, or placeholder text.',
+                },
+              },
+              required: ['path'],
+              additionalProperties: false,
+            },
+            {
+              type: 'object',
+              properties: {
+                keywords: {
+                  minItems: 1,
+                  maxItems: 5,
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    minLength: 1,
+                    maxLength: 512,
+                  },
+                  description:
+                    'One to five single words naming a setting the way the policy UI names it, such as antivirus, credential, dns, or blocklist. Each keyword is one word; do not include the desired value or state.',
+                },
+                os: {
+                  description: 'Optional operating-system filter. Use only with keywords.',
+                  type: 'string',
+                  enum: ['windows', 'mac', 'linux'],
+                },
+              },
+              required: ['keywords'],
+              additionalProperties: false,
+            },
+          ],
+          description:
+            'Exactly one selector object. {"selector":{"path":"windows.events.dns"}} selects an exact registry path, protection key, or supported OS-less remainder; {"selector":{"keywords":["dns"],"os":"mac"}} searches UI words. The selector object carries exactly one required property for path, or keywords with an optional os. Invalid inputs: {"keywords":["dns"]} (no selector wrapper), {"selector":{"path":"windows.events.dns","keywords":["dns"]}}, {"selector":{"path":"windows.events.dns","os":"windows"}}, {"selector":{}}.',
+        },
+      },
+      required: ['selector'],
+      additionalProperties: false,
+    });
   });
 });

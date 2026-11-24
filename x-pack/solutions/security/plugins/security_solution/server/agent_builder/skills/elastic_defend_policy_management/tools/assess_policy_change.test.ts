@@ -13,17 +13,21 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { PolicyOperatingSystem, ProtectionModes } from '../../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
-import type { AssessPolicyChangeParams, PolicyChangeFact } from '../domain/impact';
-import { assessPolicyChangeParamsSchema } from '../domain/impact';
-import type { AssessPolicyChangeDto } from '../services/assess_change';
-import { assessChange } from '../services/assess_change';
+import type { AssessPolicyChangeParams } from '../../../../../common/workflows/step_types/endpoint/policies/policy_change_operation';
+import type { PolicyChangeFact } from '../../../../endpoint/services/policy_management/domain/impact';
+import { assessPolicyChangeParamsSchema } from '../../../../../common/workflows/step_types/endpoint/policies/policy_change_operation';
+import type { AssessPolicyChangeDto } from '../../../../endpoint/services/policy_management/services/assess_change';
+import { assessChange } from '../../../../endpoint/services/policy_management/services/assess_change';
 import { createPolicyTool } from './create_policy_tool';
 import {
   ASSESS_POLICY_CHANGE_TOOL_ID,
   assessPolicyChangeSchema,
   createAssessPolicyChangeTool,
 } from './assess_policy_change';
-import { estimateGuardedEnvelopeTokens, fitsGuardedEnvelope } from './trim_policy_result';
+import {
+  estimateGuardedEnvelopeTokens,
+  fitsGuardedEnvelope,
+} from '../../../../endpoint/services/policy_management/presentation/trim_policy_result';
 
 jest.mock('./create_policy_tool', () => {
   const actual = jest.requireActual('./create_policy_tool');
@@ -35,7 +39,7 @@ jest.mock('./create_policy_tool', () => {
 
 const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
 
-jest.mock('../services/assess_change', () => ({
+jest.mock('../../../../endpoint/services/policy_management/services/assess_change', () => ({
   assessChange: jest.fn(),
 }));
 
