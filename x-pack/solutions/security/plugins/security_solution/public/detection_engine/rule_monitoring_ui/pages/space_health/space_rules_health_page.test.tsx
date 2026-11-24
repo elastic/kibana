@@ -17,7 +17,9 @@ import { DetectionEngineSpaceRulesHealthPage } from './space_rules_health_page';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
-jest.mock('./space_rules_health_app_header', () => ({ SpaceRulesHealthAppHeader: () => null }));
+jest.mock('./space_rules_health_app_header', () => ({
+  SpaceRulesHealthAppHeader: () => <div data-test-subj="mockSpaceRulesHealthAppHeader" />,
+}));
 jest.mock('../../../rule_monitoring/logic/detection_engine_health/use_space_rules_health', () => ({
   useSpaceRulesHealth: jest.fn(),
 }));
@@ -57,11 +59,13 @@ describe('DetectionEngineSpaceRulesHealthPage', () => {
     });
   });
 
-  it('renders the interval controls in the page body above the dashboard', () => {
+  it('renders the interval controls between the app header and the dashboard', () => {
     renderPage();
 
+    const header = screen.getByTestId('mockSpaceRulesHealthAppHeader');
     const dashboard = screen.getByTestId('healthOverviewCards');
     for (const control of [getTimeRangeSelect(), getGranularitySelect()]) {
+      expect(header.compareDocumentPosition(control)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
       expect(control.compareDocumentPosition(dashboard)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     }
   });

@@ -71,11 +71,15 @@ describe('RuleChangeHistoryAppHeader', () => {
     expect(back).toHaveAttribute('aria-label', 'Back to Rule details');
   });
 
-  it('renders a stable title while the rule is loading', () => {
-    renderHeader({ rule: null });
+  it('renders a stable title and links back with the route rule id while the rule is loading', () => {
+    renderHeader({ ruleId: 'route-rule-id', rule: null });
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
       'Rule changes history'
+    );
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+      'href',
+      '/app/security/rules/id/route-rule-id/overview'
     );
   });
 
