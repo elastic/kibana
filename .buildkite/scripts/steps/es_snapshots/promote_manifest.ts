@@ -71,6 +71,13 @@ function getExpectedSnapshotBucket(version: string, id: string) {
       if (!isAllowedArchiveUrl(url, bucket)) {
         throw Error(`Unexpected archive url: ${url}`);
       }
+      // Cloud image entries omit filename (create_manifest.ts); GCS archives must have one.
+      if (filename == null) {
+        if (isAllowedGcsObjectUrl(url, bucket)) {
+          throw Error(`Missing archive filename for ${url}`);
+        }
+        continue;
+      }
       if (!isSafeArchiveFilename(filename)) {
         throw Error(`Unsafe archive filename: ${filename}`);
       }

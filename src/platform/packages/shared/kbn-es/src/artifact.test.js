@@ -385,15 +385,21 @@ describe('Artifact', () => {
     });
 
     describe('with an unsafe archive filename', () => {
-      it.each(['../../.zshrc', '/etc/passwd', '..', 'sub/dir.tar.gz', '..\\evil.tar.gz'])(
-        'should refuse %s',
-        async (filename) => {
-          mockFetch({ archives: [createArchive({ filename })] });
-          await expect(Artifact.getSnapshot('default', MOCK_VERSION, log)).rejects.toThrow(
-            'unsafe archive filename'
-          );
-        }
-      );
+      it.each([
+        '../../.zshrc',
+        '/etc/passwd',
+        '..',
+        'sub/dir.tar.gz',
+        '..\\evil.tar.gz',
+        null,
+        undefined,
+        1,
+      ])('should refuse %j', async (filename) => {
+        mockFetch({ archives: [createArchive({ filename })] });
+        await expect(Artifact.getSnapshot('default', MOCK_VERSION, log)).rejects.toThrow(
+          'unsafe archive filename'
+        );
+      });
     });
 
     describe('with a transient server error', () => {

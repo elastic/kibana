@@ -84,10 +84,18 @@ describe('isSafeArchiveFilename', () => {
     expect(isSafeArchiveFilename('elasticsearch-9.6.0-SNAPSHOT-linux-x86_64.tar.gz')).toBe(true);
   });
 
-  it.each(['../../.zshrc', '/etc/passwd', '..', '.', 'sub/dir.tar.gz', '..\\evil.tar.gz', ''])(
-    'rejects %s',
-    (filename) => {
-      expect(isSafeArchiveFilename(filename)).toBe(false);
-    }
-  );
+  it.each([
+    '../../.zshrc',
+    '/etc/passwd',
+    '..',
+    '.',
+    'sub/dir.tar.gz',
+    '..\\evil.tar.gz',
+    '',
+    null,
+    undefined,
+    1,
+  ])('rejects %j', (filename) => {
+    expect(isSafeArchiveFilename(filename)).toBe(false);
+  });
 });

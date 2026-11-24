@@ -216,7 +216,7 @@ async function getArtifactSpecForSnapshot(
     throw createCliError(`Snapshot manifest points to an unexpected archive url: ${archive.url}`);
   }
 
-  if (!SAFE_FILENAME_PATTERN.test(archive.filename)) {
+  if (typeof archive.filename !== 'string' || !SAFE_FILENAME_PATTERN.test(archive.filename)) {
     throw createCliError(`Snapshot manifest has an unsafe archive filename: ${archive.filename}`);
   }
 

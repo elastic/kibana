@@ -19,8 +19,8 @@ export function isAllowedArchiveUrl(url: string, bucket: string): boolean {
   return isAllowedGcsObjectUrl(url, bucket);
 }
 
-export function isSafeArchiveFilename(filename: string): boolean {
-  return SAFE_FILENAME_PATTERN.test(filename);
+export function isSafeArchiveFilename(filename: unknown): boolean {
+  return typeof filename === 'string' && SAFE_FILENAME_PATTERN.test(filename);
 }
 
 export function isAllowedGcsObjectUrl(url: string, bucket: string): boolean {
