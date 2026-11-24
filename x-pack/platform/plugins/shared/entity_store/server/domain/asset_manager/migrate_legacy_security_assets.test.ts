@@ -183,6 +183,57 @@ describe('migrateLegacySecurityAssets', () => {
     ).resolves.toBe(false);
   });
 
+  describe('abort signal', () => {
+    const abortedController = () => {
+      const controller = new AbortController();
+      controller.abort();
+      return controller;
+    };
+    const aborted = () =>
+      Object.assign(new Error('Request aborted'), { name: 'RequestAbortedError' });
+
+    it('hasCollidingNeutralNamespaceAssets rethrows an abort instead of reporting no collision', async () => {
+      esClient.indices.getAlias.mockRejectedValue(aborted());
+
+      await expect(
+        hasCollidingNeutralNamespaceAssets(esClient, namespace, abortedController().signal)
+      ).rejects.toThrow('Request aborted');
+    });
+
+    it('hasCollidingNeutralNamespaceAssets still reports no collision on a failed lookup when not aborted', async () => {
+      esClient.indices.getAlias.mockRejectedValue(new Error('boom'));
+
+      await expect(
+        hasCollidingNeutralNamespaceAssets(esClient, namespace, new AbortController().signal)
+      ).resolves.toBe(false);
+    });
+
+    it('isConcreteIndexOrDataStream rethrows an abort of the data stream lookup instead of returning false', async () => {
+      esClient.indices.getDataStream.mockRejectedValue(aborted());
+
+      await expect(
+        isConcreteIndexOrDataStream(esClient, 'some-name', abortedController().signal)
+      ).rejects.toThrow('Request aborted');
+    });
+
+    it('isConcreteIndexOrDataStream rethrows an abort of the index lookup instead of returning false', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({ data_streams: [] });
+      esClient.indices.get.mockRejectedValue(aborted());
+
+      await expect(
+        isConcreteIndexOrDataStream(esClient, 'some-name', abortedController().signal)
+      ).rejects.toThrow('Request aborted');
+    });
+
+    it('isConcreteIndexOrDataStream still returns false for a missing name when not aborted', async () => {
+      mockConcrete([]);
+
+      await expect(
+        isConcreteIndexOrDataStream(esClient, 'some-name', new AbortController().signal)
+      ).resolves.toBe(false);
+    });
+  });
+
   it('migrates legacy latest index into the neutral name and deletes legacy', async () => {
     const legacyIndex = getLegacySecurityLatestEntitiesIndexName(namespace);
     const newIndex = getLatestEntitiesIndexName(namespace);

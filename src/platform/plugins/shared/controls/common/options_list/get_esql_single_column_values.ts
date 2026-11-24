@@ -8,7 +8,7 @@
  */
 
 import type { IEsqlSearchParams, ISearchMethods } from '@kbn/search-types';
-import type { TimeRange } from '@kbn/es-query';
+import { getTimeZoneFromSettings, type TimeRange } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLColumn } from '@kbn/es-types';
@@ -51,6 +51,8 @@ interface GetESQLSingleColumnValuesParams {
   /** ES DSL filter applied as `params.filter` on the ES|QL `_query` endpoint to pre-filter the pipeline. */
   filter?: IEsqlSearchParams['filter'];
   esqlVariables: ESQLControlVariable[];
+  /** From UI settings `dateFormat:tz` on either client or server. */
+  timezone?: string;
   projectRouting?: string;
 }
 export const getESQLSingleColumnValues = async ({
@@ -60,6 +62,7 @@ export const getESQLSingleColumnValues = async ({
   timeRange,
   filter,
   esqlVariables,
+  timezone,
   projectRouting,
 }: GetESQLSingleColumnValuesParams): Promise<
   GetESQLSingleColumnValuesSuccess | GetESQLSingleColumnValuesFailure
@@ -70,6 +73,7 @@ export const getESQLSingleColumnValues = async ({
         query,
         filter,
         dropNullColumns: true,
+        timeZone: timezone ? getTimeZoneFromSettings(timezone) : undefined,
         projectRouting,
         kibanaQueryContext: { timeRange, esqlVariables },
       },

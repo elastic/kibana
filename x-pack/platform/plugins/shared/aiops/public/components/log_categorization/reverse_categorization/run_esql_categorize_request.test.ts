@@ -33,7 +33,7 @@ describe('runEsqlCategorizeRequest', () => {
 
     expect(esql).toHaveBeenCalledTimes(1);
     expect(esql).toHaveBeenCalledWith(
-      expect.objectContaining({ timeZone: 'UTC' }),
+      expect.objectContaining({ dropNullColumns: true }),
       expect.objectContaining({ abortSignal: signal })
     );
     expect(categories).toHaveLength(1);

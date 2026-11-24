@@ -34,6 +34,8 @@ import { ESQLValuesPreview } from '@kbn/esql-browser';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ISearchMethods } from '@kbn/search-types';
+import { getTimeZoneFromSettings } from '@kbn/es-query';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -180,10 +182,12 @@ export function ValueControlForm({
 
       setIsLoading(true);
       try {
+        const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
         const { rawResponse: response } = await search.esql(
           {
             query,
             dropNullColumns: true,
+            timeZone: timezone ? getTimeZoneFromSettings(timezone) : undefined,
             kibanaQueryContext: { timeRange, esqlVariables },
           },
           { abortSignal: controller.signal }
@@ -225,7 +229,7 @@ export function ValueControlForm({
       }
       setIsLoading(false);
     },
-    [isMounted, search, timeRange, esqlVariables, setIsValid]
+    [isMounted, search, timeRange, esqlVariables, core.uiSettings, setIsValid]
   );
 
   const setSuggestedQuery = useCallback(async () => {

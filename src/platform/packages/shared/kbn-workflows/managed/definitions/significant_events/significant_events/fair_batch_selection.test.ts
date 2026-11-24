@@ -114,7 +114,7 @@ describe('significant events fair batch selection', () => {
     const backlog = gate?.steps?.find(({ name }) => name === 'get_written_rules_backlog');
     expect(backlog?.type).toBe('elasticsearch.esql.query');
     expect(backlog?.if).toBeUndefined();
-    expect(JSON.stringify(backlog?.with?.filter)).toContain('written_rule_uuids');
+    expect(JSON.stringify(backlog?.with?.filter)).toContain('stamp_rule_uuids');
     expect(discovery.steps.some(({ name }) => name === 'get_rule_backlog')).toBe(false);
     expect(hasStepLevelIfOnEsql(discovery.steps)).toBe(false);
   });

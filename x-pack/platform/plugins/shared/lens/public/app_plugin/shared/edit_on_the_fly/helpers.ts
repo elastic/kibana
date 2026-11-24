@@ -9,9 +9,14 @@ import {
   formatESQLColumns,
   mapVariableToColumn,
 } from '@kbn/esql-utils';
-import { type AggregateQuery, buildEsQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  type AggregateQuery,
+  buildEsQuery,
+  getTimeZoneFromSettings,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getEsQueryConfig, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLColumn, ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
@@ -113,6 +118,7 @@ export const getGridAttrs = async (
       });
 
   const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
+  const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
   const {
     rawResponse: { all_columns: allColumns = [], columns: valueColumns = [], values },
   } = await data.search.esql(
@@ -121,6 +127,7 @@ export const getGridAttrs = async (
       filter,
       dropNullColumns: true,
       columnMetadata: true,
+      timeZone: timezone ? getTimeZoneFromSettings(timezone) : undefined,
       ...(approximation !== undefined ? { approximation } : {}),
       kibanaQueryContext: {
         timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),

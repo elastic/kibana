@@ -20,6 +20,7 @@ import {
   getGeoPrecisionParamValues,
   hasStartEndParams,
 } from '@kbn/esql-utils';
+import { getTimeZoneFromSettings } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { GeoJsonProperties } from 'geojson';
@@ -44,7 +45,7 @@ import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_sou
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
 import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
-import { getData, getHttp, getIndexPatternService } from '../../../kibana_services';
+import { getData, getHttp, getIndexPatternService, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
 import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE, getFields } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -243,31 +244,26 @@ export class ESQLSource
           })
         );
       }
-      const timeFilter = getTime(undefined, timeRange, {
-        fieldName: this._descriptor.dateField,
-      });
-
-      if (timeFilter) {
-        filters.push(timeFilter);
-      }
     }
 
-    const namedParams = getNamedParams(this._descriptor.esql, timeRange, undefined, {
+    // search.esql fills ?_tstart and ?_tend from timeRange; the geo precision params need the map zoom
+    const geoPrecisionParams = getNamedParams(this._descriptor.esql, undefined, undefined, {
       zoom: requestMeta.zoom,
       resolution: this._getResolution(),
     });
-    if (namedParams.length) {
-      params.params = namedParams;
-    }
 
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
-    // timeRange always fills the ?_tstart and ?_tend params; timeField also narrows by time
+    const timezone = getUiSettings().get<'Browser' | string>('dateFormat:tz');
+
+    // timeField narrows by time; timeRange alone only fills ?_tstart and ?_tend
     const { rawResponse } = await getData().search.esql(
       {
         query: this._descriptor.esql,
         dropNullColumns: true,
+        params: geoPrecisionParams,
+        timeZone: timezone ? getTimeZoneFromSettings(timezone) : undefined,
         kibanaQueryContext: {
           timeRange,
           timeField: requestMeta.applyGlobalTime ? this._descriptor.dateField : undefined,

@@ -51,8 +51,6 @@ describe('get_esql_document_stats', () => {
         kibanaQueryContext: {
           timeRange: { from: '2024-01-01T10:12:00.000Z', to: '2024-01-01T11:20:00.000Z' },
         },
-        // Buckets are zero-filled on UTC epoch multiples, so ES must bucket in UTC as well
-        timeZone: 'UTC',
       }),
       expect.anything()
     );

@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import type {
   ServiceAccountWorkloadBinder,
@@ -23,7 +23,7 @@ import {
   getWorkloadBindingId,
   SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
 } from './binding_saved_object';
-import { getDetailedErrorMessage } from '../../errors';
+import { getDetailedErrorMessage, toErrorStatusCode } from '../../errors';
 
 /** Pages of this size are walked when listing every workload bound to a service account. */
 const FIND_PAGE_SIZE = 100;
@@ -119,6 +119,38 @@ const toBinding = (attributes: WorkloadBindingAttributes): ServiceAccountWorkloa
   boundAt: attributes.boundAt,
 });
 
+/** The outcome of writing one binding in a bulk write. */
+export type WorkloadBindingWriteOutcome<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: Boom.Boom };
+
+/**
+ * A per-object saved objects error, as the bulk APIs report it, as the error it stands for. Most
+ * are reported as plain `{ message, statusCode }`, but some are the original error itself, such as
+ * a failed create schema validation. Those are kept as they are, so their status and their saved
+ * objects error type survive for a caller that checks them.
+ */
+const toBoom = (error: { message: string; statusCode: number }): Boom.Boom => {
+  if (Boom.isBoom(error)) {
+    return error;
+  }
+
+  const { message, statusCode } = error;
+  return new Boom.Boom(message, { statusCode: toErrorStatusCode(statusCode) });
+};
+
+/**
+ * The one space a bulk write addresses. A bulk write is one request to one namespace, so bindings
+ * of several spaces cannot share it.
+ */
+const getSingleSpaceId = (bindings: ReadonlyArray<{ spaceId: string }>): string => {
+  const [{ spaceId }] = bindings;
+  if (bindings.some((binding) => binding.spaceId !== spaceId)) {
+    throw new Error('A bulk write of workload bindings must address a single space.');
+  }
+  return spaceId;
+};
+
 /**
  * Persistence for workload bindings.
  */
@@ -136,21 +168,82 @@ export class WorkloadBindingStore {
   }
 
   /**
-   * Writes the binding, replacing any existing one for the same coordinates. Re-binding a workload
-   * to a different service account is the same call as binding it for the first time.
+   * Writes the bindings, replacing any existing one for the same coordinates. Re-binding a
+   * workload to a different service account is the same write as binding it for the first time.
+   * Every binding must be in the same space, since they are written with one request.
+   *
+   * Resolves one outcome per binding, in the order given: a binding that could not be written
+   * fails on its own and leaves the others written. Rejects when the write as a whole fails. A
+   * rejection does not always mean nothing was written: a request that timed out or lost its
+   * connection may have written some, all or none of the bindings.
    */
-  async set(
-    attributes: Omit<WorkloadBindingAttributes, 'bindingKey'>
-  ): Promise<ServiceAccountWorkloadBinding> {
-    const id = getWorkloadBindingId(attributes);
+  async bulkSet(
+    attributes: ReadonlyArray<Omit<WorkloadBindingAttributes, 'bindingKey'>>
+  ): Promise<Array<WorkloadBindingWriteOutcome<ServiceAccountWorkloadBinding>>> {
+    if (attributes.length === 0) {
+      return [];
+    }
 
-    await this.client.create<WorkloadBindingAttributes>(
-      SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
-      { ...attributes, bindingKey: id },
-      { id, namespace: attributes.spaceId, overwrite: true, refresh: 'wait_for' }
+    const { saved_objects: savedObjects } = await this.client.bulkCreate<WorkloadBindingAttributes>(
+      attributes.map((binding) => {
+        const id = getWorkloadBindingId(binding);
+        return {
+          type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+          id,
+          attributes: { ...binding, bindingKey: id },
+        };
+      }),
+      { namespace: getSingleSpaceId(attributes), overwrite: true, refresh: 'wait_for' }
     );
 
-    return toBinding(attributes);
+    return attributes.map((binding, index) => {
+      const result = savedObjects[index];
+      if (!result) {
+        return { ok: false, error: Boom.internal('The binding write reported no result.') };
+      }
+      return isSavedObjectErrorResult(result)
+        ? { ok: false, error: toBoom(result.error) }
+        : { ok: true, value: toBinding(binding) };
+    });
+  }
+
+  /**
+   * Removes the bindings, which must all be in the same space. Resolves one outcome per binding,
+   * in the order given, with whether there was a binding to remove: removing one that is already
+   * gone is not an error, since the caller's desired end state has been reached either way.
+   * Rejects when the delete as a whole fails. As with {@link bulkSet}, a rejection after the
+   * request was sent may have removed some, all or none of the bindings.
+   */
+  async bulkDelete(
+    coordinates: readonly WorkloadBindingCoordinates[]
+  ): Promise<Array<WorkloadBindingWriteOutcome<boolean>>> {
+    if (coordinates.length === 0) {
+      return [];
+    }
+
+    const { statuses } = await this.client.bulkDelete(
+      coordinates.map((binding) => ({
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        id: getWorkloadBindingId(binding),
+      })),
+      { namespace: getSingleSpaceId(coordinates), refresh: 'wait_for' }
+    );
+
+    return coordinates.map((_binding, index) => {
+      const status = statuses[index];
+      if (status?.success) {
+        return { ok: true, value: true };
+      }
+      if (status?.error?.statusCode === 404) {
+        return { ok: true, value: false };
+      }
+      return {
+        ok: false,
+        error: status?.error
+          ? toBoom(status.error)
+          : Boom.internal('The binding delete reported no status.'),
+      };
+    });
   }
 
   /**

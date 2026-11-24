@@ -64,14 +64,16 @@ describe('loadWorkflowThunk', () => {
     });
     expect(result.type).toBe('detail/loadWorkflowThunk/rejected');
     expect(result.payload).toBe(error);
+    expect(mockServices.workflowsManagement.recentlyViewed.remove).not.toHaveBeenCalled();
   });
 
   it('should reject with the original error when workflow is not found', async () => {
-    const error = {
-      message: 'Workflow not found',
+    const error = Object.assign(new Error('Workflow not found'), {
+      name: 'HttpFetchError',
+      request: {},
       response: { status: 404 },
       body: { message: 'Workflow not found' },
-    };
+    });
 
     mockWorkflowApi.getWorkflow.mockRejectedValue(error);
 
@@ -79,6 +81,9 @@ describe('loadWorkflowThunk', () => {
 
     expect(result.type).toBe('detail/loadWorkflowThunk/rejected');
     expect(result.payload).toBe(error);
+    expect(mockServices.workflowsManagement.recentlyViewed.remove).toHaveBeenCalledWith(
+      'missing-workflow'
+    );
   });
 
   it('should handle error without message', async () => {

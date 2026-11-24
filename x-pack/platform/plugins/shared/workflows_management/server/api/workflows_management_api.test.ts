@@ -731,6 +731,25 @@ describe('WorkflowsManagementApi', () => {
       expect(result.id).toBe('workflow-clone-456');
     });
 
+    it('should not carry the template origin over to the clone', async () => {
+      const originalWorkflow = createMockWorkflow({
+        templateSlug: 'triage-alerts',
+        templateVersion: '1.2.0',
+        templateOrigin: 'install',
+      });
+      mockWorkflowsService.createWorkflow.mockResolvedValue({
+        ...createMockWorkflow(),
+        id: 'workflow-clone-789',
+      });
+
+      await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
+
+      const [command, , , options] = mockWorkflowsService.createWorkflow.mock.calls[0];
+      expect(command).not.toHaveProperty('template');
+      expect(options).toEqual({ nameFallback: 'Original Workflow Copy' });
+      expect(options).not.toHaveProperty('templateOrigin');
+    });
+
     it('should not create duplicate name keys in YAML', async () => {
       const originalWorkflow = createMockWorkflow({
         yaml: 'name: Original Workflow\ndescription: A workflow to be cloned\nenabled: true',

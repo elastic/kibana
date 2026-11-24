@@ -14,7 +14,7 @@ import {
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '@kbn/timelines-plugin/public';
+} from '../../../common/utils/accessibility';
 
 import { prepareKQLParam, prepareKQLStringParam } from '../../../../common/utils/kql';
 import { assertUnreachable } from '../../../../common/utility_types';

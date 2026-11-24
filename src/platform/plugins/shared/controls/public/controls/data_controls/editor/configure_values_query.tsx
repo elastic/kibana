@@ -35,6 +35,7 @@ import {
 import { ESQLValuesPreview } from '@kbn/esql-browser';
 import { dataService } from '../../../services/kibana_services';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
+import { getControlsTimezone } from '../../utils';
 import type { DataControlEditorState } from './types';
 import { getDataViewIdFromESQLQuery } from '../../utils/get_data_view_id_from_esql_query';
 import { DataControlEditorStrings } from '../data_control_constants';
@@ -86,6 +87,7 @@ export const ConfigureValuesQuery = ({
         search: dataService.search,
         esqlVariables,
         timeRange: dataService.query.timefilter.timefilter.getTime(),
+        timezone: getControlsTimezone(),
       });
 
       setIsPreviewQueryRunning(false);

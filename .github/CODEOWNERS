@@ -582,6 +582,7 @@ src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-emulate @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs @elastic/response-ops
+src/platform/packages/shared/kbn-connector-topics @elastic/workflows-eng @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-discover
 src/platform/packages/shared/kbn-core-server-benchmarks @elastic/kibana-core
 src/platform/packages/shared/kbn-cps-server-utils @elastic/kibana-core
@@ -1537,7 +1538,6 @@ x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/timelines @elastic/security-investigations
 x-pack/solutions/security/test
 x-pack/solutions/security/test_helpers/detections-response-ftr-services @elastic/security-detection-engineering
 x-pack/solutions/security/test_plugins/resolver_test @elastic/security-solution
@@ -2539,13 +2539,13 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /.github/workflows/index-dependency-usage.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/packages/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
+/src/core/packages/core/server/integration_tests/exposed_config_keys/ @elastic/kibana-security
 /src/platform/plugins/shared/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/is_internal_url.test.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/is_internal_url.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.test.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
-/src/platform/test/plugin_functional/test_suites/core_plugins/rendering.ts @elastic/kibana-security
 /src/platform/test/plugin_functional/test_suites/hardening @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/login_page.ts @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/roles.ts @elastic/kibana-security
@@ -2706,6 +2706,7 @@ src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
 src/platform/packages/shared/kbn-connector-specs/src/lib/clients/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/generic_db_connector* @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/mssql_sql* @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/mcp/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
@@ -2716,6 +2717,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/aws/** @elastic/workf
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_cloudwatch/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_eks/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/aws_rds/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_ssm/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_x_ray/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_aks/** @elastic/nightshift
@@ -2754,6 +2756,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/inbound_webhook/** @e
 src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_sql_server/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/misp/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/monday_com/** @elastic/workchat-eng
@@ -2803,6 +2806,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/w
 
 # Connector vendor API contracts (must stay after the per-connector rules above)
 src/platform/packages/shared/kbn-connector-specs/src/specs/**/vendor_api/ @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/ @elastic/workflows-eng
 
 
 # Connector Workflow Tests
@@ -3307,7 +3311,12 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
 
+# AlertZero Triage Watch
+/x-pack/solutions/security/plugins/alertzero/server/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/step_types/alert_triage @elastic/security-investigations
+
 # AlertZero Worker settings contract
+# Keep this section below every AlertZero Worker section: CODEOWNERS uses the last match.
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/test_helpers @elastic/alertzero-common-layer
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts @elastic/alertzero-common-layer
@@ -3708,6 +3717,7 @@ x-pack/solutions/security/plugins/security_solution/public/entity_analytics/comp
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_store @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/maintainers @elastic/contextual-security-apps @elastic/siem-beacon @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/security-entity-analytics
@@ -3792,7 +3802,6 @@ x-pack/solutions/security/plugins/security_solution/public/cloud_security_postur
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/contextual-security-apps @elastic/siem-beacon
-x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity/generic @elastic/contextual-security-apps @elastic/siem-beacon
 /x-pack/solutions/security/plugins/security_solution/public/flyout_v2/csp @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/graph @elastic/contextual-security-apps @elastic/siem-beacon

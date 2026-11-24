@@ -15,17 +15,26 @@ jest.mock('../../../library', () => {
 
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { WORKFLOWS_LIBRARY_ENABLED_SETTING_ID } from '@kbn/workflows';
 import { parseTemplateYaml } from '@kbn/workflows-library';
+import { WorkflowValidationError } from '@kbn/workflows-yaml';
 
 import { registerLibraryRoutes } from '.';
-import { LibraryFetchError, LibraryNotFoundError, LibraryService } from '../../../library';
+import {
+  LibraryFetchError,
+  LibraryNotFoundError,
+  LibraryService,
+  LibraryTelemetry,
+} from '../../../library';
+import { TEMPLATE_INSTALLED_EVENT_TYPE } from '../../../library/telemetry/events';
 import type { RouteDependencies } from '../types';
 
 const TEMPLATES_PATH = '/internal/workflows/library/templates';
 const TEMPLATE_PATH = '/internal/workflows/library/templates/{slug}';
 const INSTALL_PATH = '/internal/workflows/library/templates/{slug}/install';
 const INSTALL_FROM_YAML_PATH = '/internal/workflows/library/templates/install';
+const REMIX_PATH = '/internal/workflows/library/templates/{slug}/remix';
 const HEALTH_PATH = '/internal/workflows/library/health';
 
 const INSTALLABLE_TEMPLATE = parseTemplateYaml(`template-metadata:
@@ -59,13 +68,16 @@ describe('Library Routes', () => {
   let routeHandlers: Record<string, { handler: MockRouteHandler }>;
   let mockLibraryService: {
     listTemplates: jest.Mock;
+    getCachedTemplates: jest.Mock;
     getTemplate: jest.Mock;
     getHealth: jest.Mock;
+    telemetry: LibraryTelemetry;
   };
   let mockGlobalUiSettings: { get: jest.Mock };
   let mockApi: { createWorkflow: jest.Mock };
   let mockSpaces: { getSpaceId: jest.Mock };
   let mockAudit: { logWorkflowCreated: jest.Mock; logWorkflowCreateFailed: jest.Mock };
+  let mockAnalytics: { reportEvent: jest.Mock };
 
   const setToggle = (value: boolean) => mockGlobalUiSettings.get.mockResolvedValue(value);
 
@@ -91,10 +103,21 @@ describe('Library Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     routeHandlers = {};
-    mockLibraryService = {
+    mockAnalytics = { reportEvent: jest.fn() };
+    const library = {
       listTemplates: jest.fn(),
+      getCachedTemplates: jest.fn(),
       getTemplate: jest.fn(),
-      getHealth: jest.fn(),
+      getHealth: jest.fn().mockReturnValue({ sourceMode: 'http', lastRefreshAt: null }),
+    };
+    // The real telemetry, so the route tests check the reported events.
+    mockLibraryService = {
+      ...library,
+      telemetry: new LibraryTelemetry({
+        analytics: mockAnalytics,
+        logger: loggerMock.create(),
+        library,
+      }),
     };
     mockGlobalUiSettings = { get: jest.fn().mockResolvedValue(true) };
     mockApi = { createWorkflow: jest.fn() };
@@ -146,6 +169,7 @@ describe('Library Routes', () => {
       api: mockApi,
       spaces: mockSpaces,
       audit: mockAudit,
+      analytics: mockAnalytics,
     } as unknown as RouteDependencies;
 
     registerLibraryRoutes(routeDependencies);
@@ -320,7 +344,14 @@ describe('Library Routes', () => {
       expect(mockApi.createWorkflow).toHaveBeenCalledWith(
         { yaml: expect.stringContaining('connector-id: my-connector-id') },
         'default',
-        request
+        request,
+        {
+          templateOrigin: {
+            templateSlug: 'demo',
+            templateVersion: '1.0.0',
+            templateOrigin: 'install',
+          },
+        }
       );
       const submittedYaml = mockApi.createWorkflow.mock.calls[0][0].yaml;
       expect(submittedYaml).not.toContain('template-metadata');
@@ -431,6 +462,7 @@ describe('Library Routes', () => {
 
     it('should parse the supplied YAML, render it, and create a workflow through the shared create path', async () => {
       setToggle(true);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo', version: '1.0.0' }]);
       mockApi.createWorkflow.mockResolvedValue({ id: 'wf-2' });
 
       const response = httpServerMock.createResponseFactory();
@@ -443,13 +475,58 @@ describe('Library Routes', () => {
       expect(mockApi.createWorkflow).toHaveBeenCalledWith(
         { yaml: expect.stringContaining('connector-id: my-connector-id') },
         'default',
-        request
+        request,
+        {
+          templateOrigin: {
+            templateSlug: 'demo',
+            templateVersion: '1.0.0',
+            templateOrigin: 'import',
+          },
+        }
       );
       const submittedYaml = mockApi.createWorkflow.mock.calls[0][0].yaml;
       expect(submittedYaml).not.toContain('template-metadata');
       expect(submittedYaml).not.toContain('__install__');
       expect(mockAudit.logWorkflowCreated).toHaveBeenCalledWith(request, { id: 'wf-2' });
       expect(response.ok).toHaveBeenCalledWith({ body: { workflowId: 'wf-2' } });
+    });
+
+    it('should store a template that is not in the catalog as custom', async () => {
+      setToggle(true);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'another-template' }]);
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-3' });
+
+      const response = httpServerMock.createResponseFactory();
+      const request = installFromYamlRequest(INSTALLABLE_TEMPLATE.raw, {
+        'demo-connector': 'my-connector-id',
+      });
+
+      await routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(expect.anything(), 'default', request, {
+        templateOrigin: { templateSlug: 'custom', templateOrigin: 'import' },
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: { workflowId: 'wf-3' } });
+    });
+
+    it('should still install, as unresolved, when no catalog can be read', async () => {
+      setToggle(true);
+      mockLibraryService.listTemplates.mockRejectedValue(
+        new LibraryFetchError('upstream down', 'unavailable')
+      );
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-4' });
+
+      const response = httpServerMock.createResponseFactory();
+      const request = installFromYamlRequest(INSTALLABLE_TEMPLATE.raw, {
+        'demo-connector': 'my-connector-id',
+      });
+
+      await routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(expect.anything(), 'default', request, {
+        templateOrigin: { templateSlug: 'unresolved', templateOrigin: 'import' },
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: { workflowId: 'wf-4' } });
     });
 
     it('should return 400 when the supplied YAML is not a valid template', async () => {
@@ -519,6 +596,342 @@ describe('Library Routes', () => {
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: { message: expect.stringContaining('yaml creation boom') },
+      });
+    });
+  });
+
+  describe('telemetry', () => {
+    const catalogDemo = { slug: 'demo', version: '1.0.0', solutions: ['security'] };
+    const connectorValues = { 'demo-connector': 'my-connector-id' };
+
+    const installFromCatalog = (values: Record<string, unknown> = {}) =>
+      routeHandlers[`POST:${INSTALL_PATH}`].handler(
+        mockContext,
+        httpServerMock.createKibanaRequest({ params: { slug: 'demo' }, body: { values } }),
+        httpServerMock.createResponseFactory()
+      );
+
+    const installFromFile = (yaml: string, values: Record<string, unknown> = {}) =>
+      routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(
+        mockContext,
+        httpServerMock.createKibanaRequest({ body: { yaml, values } }),
+        httpServerMock.createResponseFactory()
+      );
+
+    const saveRemix = (slug = 'demo') =>
+      routeHandlers[`POST:${REMIX_PATH}`].handler(
+        mockContext,
+        httpServerMock.createKibanaRequest({
+          params: { slug },
+          body: { yaml: 'name: Remixed demo\nsteps: []\n', version: '1.0.0' },
+        }),
+        httpServerMock.createResponseFactory()
+      );
+
+    beforeEach(() => {
+      setToggle(true);
+      mockLibraryService.getCachedTemplates.mockReturnValue([catalogDemo]);
+      mockLibraryService.listTemplates.mockResolvedValue([catalogDemo]);
+    });
+
+    it('gives the library service the analytics client, so it reports catalog failures itself', () => {
+      expect(MockedLibraryService).toHaveBeenCalledWith(
+        expect.objectContaining({ analytics: mockAnalytics })
+      );
+    });
+
+    it('reports a successful install from the catalog', async () => {
+      mockLibraryService.getTemplate.mockResolvedValue(INSTALLABLE_TEMPLATE);
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-1', valid: true });
+
+      await installFromCatalog(connectorValues);
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: true,
+        templateOrigin: 'install',
+        sourceMode: 'http',
+        templateSlug: 'demo',
+        templateVersion: '1.0.0',
+        solutions: ['security'],
+        formFieldCount: 1,
+        connectorTypes: ['.demo'],
+        workflowId: 'wf-1',
+        workflowValid: true,
+      });
+    });
+
+    it('reports the form fields that failed validation on a catalog install', async () => {
+      mockLibraryService.getTemplate.mockResolvedValue(INSTALLABLE_TEMPLATE);
+
+      await installFromCatalog();
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+        TEMPLATE_INSTALLED_EVENT_TYPE,
+        expect.objectContaining({
+          success: false,
+          templateSlug: 'demo',
+          errorType: 'form_validation',
+          invalidFields: ['demo-connector'],
+        })
+      );
+    });
+
+    it('reports a slug that is not in the catalog without naming it', async () => {
+      mockLibraryService.getTemplate.mockRejectedValue(new LibraryNotFoundError('demo'));
+
+      await installFromCatalog();
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: false,
+        templateOrigin: 'install',
+        sourceMode: 'http',
+        errorType: 'template_not_found',
+      });
+    });
+
+    it('reports why the template could not be fetched', async () => {
+      mockLibraryService.getTemplate.mockRejectedValue(new LibraryFetchError('down', 'timeout'));
+
+      await installFromCatalog();
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: false,
+        templateOrigin: 'install',
+        sourceMode: 'http',
+        errorType: 'fetch_failed',
+        fetchErrorReason: 'timeout',
+      });
+    });
+
+    it('reports a rendered workflow that fails validation as workflow_invalid', async () => {
+      mockLibraryService.getTemplate.mockResolvedValue(INSTALLABLE_TEMPLATE);
+      mockApi.createWorkflow.mockRejectedValue(new WorkflowValidationError('invalid', ['bad']));
+
+      await installFromCatalog(connectorValues);
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+        TEMPLATE_INSTALLED_EVENT_TYPE,
+        expect.objectContaining({ success: false, errorType: 'workflow_invalid' })
+      );
+    });
+
+    it('reports a successful import with the slug and version stored on the workflow', async () => {
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-2', valid: true });
+
+      await installFromFile(INSTALLABLE_TEMPLATE.raw, connectorValues);
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: true,
+        templateOrigin: 'import',
+        sourceMode: 'http',
+        templateSlug: 'demo',
+        templateVersion: '1.0.0',
+        solutions: ['security'],
+        formFieldCount: 1,
+        workflowId: 'wf-2',
+        workflowValid: true,
+      });
+    });
+
+    it('reports the template, but not its field names, when an imported form is invalid', async () => {
+      await installFromFile(INSTALLABLE_TEMPLATE.raw);
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: false,
+        templateOrigin: 'import',
+        sourceMode: 'http',
+        templateSlug: 'demo',
+        templateVersion: '1.0.0',
+        solutions: ['security'],
+        formFieldCount: 1,
+        errorType: 'form_validation',
+      });
+    });
+
+    it('reports an uploaded file that is not a template as template_parse', async () => {
+      await installFromFile('not: a template');
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: false,
+        templateOrigin: 'import',
+        sourceMode: 'http',
+        errorType: 'template_parse',
+      });
+    });
+
+    it('reports a saved remix with the template it started from', async () => {
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-remix', valid: true });
+
+      await saveRemix();
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: true,
+        templateOrigin: 'remix',
+        sourceMode: 'http',
+        templateSlug: 'demo',
+        templateVersion: '1.0.0',
+        solutions: ['security'],
+        workflowId: 'wf-remix',
+        workflowValid: true,
+      });
+    });
+
+    it('reports a remix saved while the library is off without a template', async () => {
+      setToggle(false);
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-remix', valid: true });
+
+      await saveRemix();
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: true,
+        templateOrigin: 'remix',
+        sourceMode: 'http',
+        workflowId: 'wf-remix',
+        workflowValid: true,
+      });
+    });
+
+    it('reports a remix saved as an invalid workflow', async () => {
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-remix', valid: false });
+
+      await saveRemix();
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+        TEMPLATE_INSTALLED_EVENT_TYPE,
+        expect.objectContaining({ success: true, workflowId: 'wf-remix', workflowValid: false })
+      );
+    });
+
+    it('reports a remix that fails to save', async () => {
+      mockApi.createWorkflow.mockRejectedValue(new WorkflowValidationError('invalid', ['bad']));
+
+      await saveRemix('acme-internal');
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: false,
+        templateOrigin: 'remix',
+        sourceMode: 'http',
+        templateSlug: 'custom',
+        errorType: 'workflow_invalid',
+      });
+    });
+
+    it.each([
+      ['is shown', () => mockLibraryService.getTemplate.mockResolvedValue(INSTALLABLE_TEMPLATE)],
+      [
+        'cannot be loaded',
+        () => mockLibraryService.getTemplate.mockRejectedValue(new LibraryNotFoundError('missing')),
+      ],
+    ])('reports nothing from the template page when the template %s', async (_, arrange) => {
+      arrange();
+
+      await routeHandlers[`GET:${TEMPLATE_PATH}`].handler(
+        mockContext,
+        httpServerMock.createKibanaRequest({ params: { slug: 'missing' } }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe(`POST ${REMIX_PATH}`, () => {
+    const REMIXED_YAML = 'name: Remixed demo\nsteps: []\n';
+    const remixRequest = (slug = 'demo', version: string | undefined = '1.0.0') =>
+      httpServerMock.createKibanaRequest({
+        params: { slug },
+        body: { yaml: REMIXED_YAML, ...(version !== undefined ? { version } : {}) },
+      });
+
+    it('should register the route handler', () => {
+      expect(routeHandlers[`POST:${REMIX_PATH}`]).toBeDefined();
+      expect(routeHandlers[`POST:${REMIX_PATH}`].handler).toEqual(expect.any(Function));
+    });
+
+    it('should create the workflow with the remixed catalog template as its origin', async () => {
+      setToggle(true);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo', version: '1.0.0' }]);
+      const createdWorkflow = { id: 'wf-remix', yaml: REMIXED_YAML };
+      mockApi.createWorkflow.mockResolvedValue(createdWorkflow);
+
+      const response = httpServerMock.createResponseFactory();
+      const request = remixRequest();
+
+      await routeHandlers[`POST:${REMIX_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(
+        { yaml: REMIXED_YAML },
+        'default',
+        request,
+        {
+          templateOrigin: {
+            templateSlug: 'demo',
+            templateVersion: '1.0.0',
+            templateOrigin: 'remix',
+          },
+        }
+      );
+      expect(mockAudit.logWorkflowCreated).toHaveBeenCalledWith(request, { id: 'wf-remix' });
+      expect(response.ok).toHaveBeenCalledWith({ body: createdWorkflow });
+    });
+
+    it('should store a remix of a template outside the catalog as custom', async () => {
+      setToggle(true);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo' }]);
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-remix' });
+
+      const response = httpServerMock.createResponseFactory();
+      const request = remixRequest('uploaded-template');
+
+      await routeHandlers[`POST:${REMIX_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(
+        { yaml: REMIXED_YAML },
+        'default',
+        request,
+        {
+          templateOrigin: { templateSlug: 'custom', templateOrigin: 'remix' },
+        }
+      );
+    });
+
+    it('should still create the workflow, without a template origin, when the library is off', async () => {
+      setToggle(false);
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-remix' });
+
+      const response = httpServerMock.createResponseFactory();
+      const request = remixRequest();
+
+      await routeHandlers[`POST:${REMIX_PATH}`].handler(mockContext, request, response);
+
+      expect(mockLibraryService.listTemplates).not.toHaveBeenCalled();
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(
+        { yaml: REMIXED_YAML },
+        'default',
+        request,
+        {
+          templateOrigin: undefined,
+        }
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: { id: 'wf-remix' } });
+    });
+
+    it('should audit the failure and map the error when workflow creation fails', async () => {
+      setToggle(true);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo' }]);
+      const creationError = new Error('remix creation boom');
+      mockApi.createWorkflow.mockRejectedValue(creationError);
+
+      const response = httpServerMock.createResponseFactory();
+      const request = remixRequest();
+
+      await routeHandlers[`POST:${REMIX_PATH}`].handler(mockContext, request, response);
+
+      expect(mockAudit.logWorkflowCreateFailed).toHaveBeenCalledWith(request, creationError);
+      expect(mockAudit.logWorkflowCreated).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: expect.stringContaining('remix creation boom') },
       });
     });
   });

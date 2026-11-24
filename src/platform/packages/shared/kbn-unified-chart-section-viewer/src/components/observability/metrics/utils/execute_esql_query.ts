@@ -45,7 +45,7 @@ export interface ExecuteEsqlParams {
   executionContextName?: MetricsExecutionContextName;
   /**
    * When provided, `search.esql` logs the request it actually sends (including the resolved
-   * time zone and locale) and its response to this Inspector adapter.
+   * project routing) and its response to this Inspector adapter.
    */
   inspector?: IEsqlSearchOptions['inspector'];
 }

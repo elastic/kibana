@@ -94,6 +94,7 @@ export {
   narrowChangePointEsqlToEntity,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
+  formatEsqlSources,
   formatEsqlLiteral,
   formatEsqlEntityPredicate,
   isComputedColumn,

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ESQLSource } from './esql_source';
-import { of } from 'rxjs';
 import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ESQLSource } from './esql_source';
@@ -234,7 +232,7 @@ describe('getGeoJsonWithMeta', () => {
 
   test('should bind ?_geotile_precision to a precision derived from the map zoom', async () => {
     mockGetNamedParams.mockReturnValue([{ geotile: 9 }]);
-    mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(1), requestParams: {} }));
+    mockEsql.mockResolvedValue({ rawResponse: makeEsqlResponse(1) });
 
     await createSource().getGeoJsonWithMeta(
       'test',
@@ -244,11 +242,11 @@ describe('getGeoJsonWithMeta', () => {
       makeInspectorAdapters() as any
     );
 
-    expect(mockGetNamedParams).toHaveBeenCalledWith(ESQL, expect.anything(), undefined, {
+    expect(mockGetNamedParams).toHaveBeenCalledWith(ESQL, undefined, undefined, {
       zoom: 4.5,
       resolution: GRID_RESOLUTION.FINE,
     });
-    expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ geotile: 9 }]);
+    expect(mockEsql.mock.calls[0][0].params).toEqual([{ geotile: 9 }]);
   });
 });
 

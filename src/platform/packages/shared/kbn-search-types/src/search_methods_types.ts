@@ -269,12 +269,12 @@ export interface IEsqlSearchParams extends BaseSearchParams {
   filter?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
 
   /**
-   * Time zone for date calculations. Defaults to the `dateFormat:tz` advanced setting.
+   * Time zone for date calculations. Not sent when omitted, so Elasticsearch uses UTC.
    */
   timeZone?: string;
 
   /**
-   * Locale for string operations
+   * Locale for string operations. Not sent when omitted, so Elasticsearch uses its default.
    */
   locale?: string;
 
@@ -304,6 +304,12 @@ export interface IEsqlSearchParams extends BaseSearchParams {
    * to receive the `_meta` field on columns in the response.
    */
   columnMetadata?: boolean;
+
+  /**
+   * When true, Elasticsearch includes a `profile` object on the response.
+   * Use this for an explicit debug view. It is extra work on the cluster.
+   */
+  profile?: boolean;
 
   /**
    * When true, ES|QL queries use approximate execution for faster, estimated results.
