@@ -23,7 +23,10 @@ const SUBMIT_BUTTON_SELECTOR =
 type ComboBox = ReturnType<ScoutPage['components']['comboBox']>;
 
 /** Window flag that records whether the button was disabled since the observer was installed. */
-type SubmitButtonWindow = Window & { __esqlSubmitButtonWasDisabled?: boolean };
+type SubmitButtonWindow = Window & {
+  __esqlSubmitButtonWasDisabled?: boolean;
+  __esqlSubmitButtonObserver?: MutationObserver;
+};
 
 /** Same derivation as the form, which treats a query the parser cannot read as having no index. */
 const getIndexPattern = (query: string): string => {
@@ -133,6 +136,7 @@ export class EsqlRuleFormPage {
   private async recordWhenSubmitButtonIsDisabled(): Promise<void> {
     await this.page.evaluate((selector) => {
       const buttonWindow: SubmitButtonWindow = window;
+      buttonWindow.__esqlSubmitButtonObserver?.disconnect();
       buttonWindow.__esqlSubmitButtonWasDisabled = false;
 
       const observer = new MutationObserver(() => {
@@ -147,21 +151,28 @@ export class EsqlRuleFormPage {
         attributes: true,
         attributeFilter: ['disabled'],
       });
+      buttonWindow.__esqlSubmitButtonObserver = observer;
     }, SUBMIT_BUTTON_SELECTOR);
   }
 
   private async waitForSubmitButtonToBeEnabledAgain(): Promise<void> {
-    await this.page.waitForFunction(
-      (selector) => {
-        const button = document.querySelector<HTMLButtonElement>(selector);
-        return (
-          (window as SubmitButtonWindow).__esqlSubmitButtonWasDisabled === true &&
-          button?.disabled === false
-        );
-      },
-      SUBMIT_BUTTON_SELECTOR,
-      { timeout: DATA_LOAD_TIMEOUT_MS }
-    );
+    try {
+      await this.page.waitForFunction(
+        (selector) => {
+          const button = document.querySelector<HTMLButtonElement>(selector);
+          return (
+            (window as SubmitButtonWindow).__esqlSubmitButtonWasDisabled === true &&
+            button?.disabled === false
+          );
+        },
+        SUBMIT_BUTTON_SELECTOR,
+        { timeout: DATA_LOAD_TIMEOUT_MS }
+      );
+    } finally {
+      await this.page.evaluate(() =>
+        (window as SubmitButtonWindow).__esqlSubmitButtonObserver?.disconnect()
+      );
+    }
   }
 
   /** Clicks "Continue" once. Use it when the Define step is expected to stay open on an error. */
