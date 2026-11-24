@@ -73,11 +73,11 @@ For sequential suites you can enable flags in `beforeAll` and reset them in `aft
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('My feature', { tag: tags.stateful.classic }, () => {
+test.describe('Discover with ES|QL as the default query mode', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'my-plugin.my-feature-flag': true,
+        'discover.isEsqlDefault': true,
       },
     });
   });
@@ -85,13 +85,15 @@ test.describe('My feature', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'my-plugin.my-feature-flag': false,
+        'discover.isEsqlDefault': false,
       },
     });
   });
 
-  test('loads the page', async ({ pageObjects, browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+  test('opens Discover in ES|QL mode', async ({ page, pageObjects, browserAuth }) => {
+    await browserAuth.loginAsViewer();
+    await page.gotoApp('discover');
+    await pageObjects.discover.waitUntilTabIsLoaded();
     // ...
   });
 });
