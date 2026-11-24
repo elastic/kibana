@@ -167,7 +167,11 @@ export class ActionTypeRegistry {
 
     const { specs } = actionType;
 
-    if (registeredActionType && (!hasVersionedSpecs || !specs?.size)) {
+    // A type with `specVersions` owns its versions and is never merged into.
+    if (
+      registeredActionType &&
+      (registeredActionType.specVersions || !hasVersionedSpecs || !specs?.size)
+    ) {
       throw new Error(
         i18n.translate(
           'xpack.actions.actionTypeRegistry.register.duplicateActionTypeErrorMessage',
@@ -253,10 +257,15 @@ export class ActionTypeRegistry {
       actionTypeMaxAttempts: actionType.maxAttempts,
     });
 
-    this.actionTypes.set(actionType.id, {
-      ...actionType,
-      ...(specs && { specs: new Map([...(registeredActionType?.specs ?? []), ...specs]) }),
-    } as unknown as ActionType);
+    // Clone with property descriptors, so getters of a type with `specVersions` stay live.
+    const storedActionType = Object.create(
+      Object.getPrototypeOf(actionType),
+      Object.getOwnPropertyDescriptors(actionType)
+    );
+    if (specs && !actionType.specVersions) {
+      storedActionType.specs = new Map([...(registeredActionType?.specs ?? []), ...specs]);
+    }
+    this.actionTypes.set(actionType.id, storedActionType as ActionType);
 
     // Skip task type registration for new connectors without execute/params or for already registered connectors
     if (!registeredActionType && actionType.executor && actionType.validate.params) {

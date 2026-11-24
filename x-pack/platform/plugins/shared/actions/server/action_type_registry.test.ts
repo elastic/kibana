@@ -22,6 +22,9 @@ import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import { getConnectorType } from './fixtures';
 import { createMockInMemoryConnector } from './application/connector/mocks';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+import { createVersionedConnectorType } from './lib/connector_catalog';
+import type { CatalogActionType } from './lib/connector_catalog';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
@@ -292,6 +295,65 @@ describe('actionTypeRegistry', () => {
         `"Invalid feature ids \\"foo\\" for connector type \\"catalog-type\\"."`
       );
       expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toBeUndefined();
+    });
+  });
+
+  describe('register() - types with specVersions', () => {
+    const createVersionedType = (id: string, versions: string[]) =>
+      createVersionedConnectorType({
+        id,
+        versions: versions.map((version) => ({
+          version,
+          type: getConnectorType({
+            id,
+            spec: { spec: `v${version}` } as unknown as ConnectorSpec,
+          }) as CatalogActionType,
+        })),
+      });
+
+    test('a version added after register is visible at once', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const versioned = createVersionedType('catalog-type', ['1.0']);
+      actionTypeRegistry.register(versioned.actionType);
+      expect(actionTypeRegistry.getSpec('catalog-type', '1.1')).toBeUndefined();
+      expect(actionTypeRegistry.getSpec('catalog-type')).toEqual({ spec: 'v1.0' });
+
+      versioned.addVersion({
+        version: '1.1',
+        type: getConnectorType({
+          id: 'catalog-type',
+          spec: { spec: 'v1.1' } as unknown as ConnectorSpec,
+        }) as CatalogActionType,
+      });
+
+      expect([...(actionTypeRegistry.get('catalog-type').specs?.keys() ?? [])]).toEqual([
+        '1.0',
+        '1.1',
+      ]);
+      expect(actionTypeRegistry.getSpec('catalog-type', '1.1')).toEqual({ spec: 'v1.1' });
+      expect(actionTypeRegistry.getSpec('catalog-type')).toEqual({ spec: 'v1.1' });
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    });
+
+    test('throws on a second register of the id', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(createVersionedType('catalog-type', ['1.0']).actionType);
+
+      expect(() =>
+        actionTypeRegistry.register(createVersionedType('catalog-type', ['1.1']).actionType)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Action type \\"catalog-type\\" is already registered."`
+      );
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            specs: new Map([['2.0', { spec: 'v2' }]]),
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Action type \\"catalog-type\\" is already registered."`
+      );
     });
   });
 
