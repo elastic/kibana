@@ -273,6 +273,7 @@ export const fetchSearchRules = async ({
   gaps_range_start,
   gaps_range_end,
   gap_auto_fill_scheduler_id,
+  rule_group_id,
 }: FetchSearchRulesProps): Promise<FetchSearchRulesResponse> => {
   const body = {
     page: pagination.page,
@@ -288,6 +289,7 @@ export const fetchSearchRules = async ({
     ...(gaps_range_start ? { gaps_range_start } : {}),
     ...(gaps_range_end ? { gaps_range_end } : {}),
     ...(gap_auto_fill_scheduler_id ? { gap_auto_fill_scheduler_id } : {}),
+    ...(rule_group_id ? { rule_group_id } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchSearchRulesResponse>(
@@ -490,6 +492,7 @@ export type QueryOrIds =
       gapRange?: { start: string; end: string };
       gapFillStatuses?: GapFillStatus[];
       schedulerId?: string;
+      ruleGroupId?: string;
     }
   | { query?: undefined; ids: string[] };
 
@@ -565,6 +568,7 @@ export async function performBulkAction({
     fill_gaps:
       bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
     gap_auto_fill_scheduler_id: 'schedulerId' in bulkAction ? bulkAction.schedulerId : undefined,
+    rule_group_id: 'ruleGroupId' in bulkAction ? bulkAction.ruleGroupId : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {

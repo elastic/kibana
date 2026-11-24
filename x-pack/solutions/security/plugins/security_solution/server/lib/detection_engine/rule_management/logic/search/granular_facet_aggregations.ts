@@ -15,7 +15,8 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import { findRules } from './find_rules';
 
-const DEFAULT_AGGREGATION_MAX_SIZE = 200;
+// Group by in the rules table shows one section per value; tags alone can have hundreds.
+const DEFAULT_AGGREGATION_MAX_SIZE = 1000;
 
 const FACET_AGG_ID_CHUNK_SIZE = 1024;
 export interface TermsAggBuckets {

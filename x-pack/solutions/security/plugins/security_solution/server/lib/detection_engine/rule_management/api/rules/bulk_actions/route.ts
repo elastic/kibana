@@ -52,6 +52,7 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../constants';
 import type { BulkActionError } from './bulk_actions_response';
 import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
+import { getRuleGroupsClient } from '../../../../rule_groups/api/register_routes';
 import { fetchRulesByQueryOrIds, BulkActionRuleNotFoundError } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
@@ -87,6 +88,13 @@ const validateBulkAction = (
   if (body?.ids && body.query !== undefined) {
     return {
       body: `Both query and ids are sent. Define either ids or query in request payload.`,
+      statusCode: 400,
+    };
+  }
+
+  if (body?.rule_group_id && body.query === undefined) {
+    return {
+      body: `rule_group_id needs query. Send an empty query for all rules of the group.`,
       statusCode: 400,
     };
   }
@@ -285,6 +293,9 @@ export const performBulkActionRoute = (
             gapRange: gapParams.gapRange,
             gapFillStatuses: gapParams.gapFillStatuses,
             schedulerId: body.gap_auto_fill_scheduler_id,
+            kueryFilter: body.rule_group_id
+              ? await (await getRuleGroupsClient(context)).getFilter(body.rule_group_id)
+              : undefined,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);

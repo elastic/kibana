@@ -1232,6 +1232,11 @@ components:
         gap_auto_fill_scheduler_id:
           description: Gap auto fill scheduler ID used to determine gap fill status for rules
           type: string
+        rule_group_id:
+          description: |
+            Limit the action to the rules of this rule group. Valid only when query is provided
+            (use an empty query for all rules of the group).
+          type: string
 
     BulkDeleteRules:
       allOf:

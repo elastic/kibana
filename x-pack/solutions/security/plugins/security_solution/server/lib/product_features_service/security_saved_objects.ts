@@ -21,6 +21,7 @@ import {
 } from '../../saved_objects';
 import { noteType, pinnedEventType, timelineType } from '../timeline/saved_object_mappings';
 import { prebuiltRuleAssetType } from '../detection_engine/prebuilt_rules';
+import { RULE_GROUP_SO_TYPE } from '../detection_engine/rule_groups/saved_object/rule_group_type';
 
 // Same as the saved-object type for rules defined by Cloud Security Posture
 const CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE = 'csp_rule';
@@ -77,6 +78,7 @@ export const securityV5SavedObjects = [
         pinnedEventType.name,
         timelineType.name,
         prebuiltRuleAssetType.name,
+        RULE_GROUP_SO_TYPE,
       ].includes(type)
   ),
 ];
@@ -88,6 +90,7 @@ export const securityNotesSavedObjects = notesSavedObjectTypes;
 export const rulesSavedObjects = ['exception-list', prebuiltRuleAssetType.name];
 export const rulesV2SavedObjects = [prebuiltRuleAssetType.name];
 export const rulesV3SavedObjects = [...rulesV2SavedObjects];
-export const rulesV4SavedObjects = [...rulesV3SavedObjects];
+// Rule groups are managed by the rules feature: rules `read` reads them, rules `all` writes them.
+export const rulesV4SavedObjects = [...rulesV3SavedObjects, RULE_GROUP_SO_TYPE];
 
 export const securityExceptionsSavedObjects = exceptionsSavedObjectTypes;

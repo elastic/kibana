@@ -6,6 +6,8 @@
  */
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { GranularRulesFacetCategory } from '../../api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
+import { RULES_FACET_CATEGORY_TO_ATTRIBUTE } from '../../api/detection_engine/rule_management/granular_rules/granular_rules_facet_dimensions';
 import type { RuleExecutionStatus } from '../../api/detection_engine';
 import { RuleCustomizationStatus, RuleExecutionStatusEnum } from '../../api/detection_engine';
 import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../utils/kql';
@@ -27,6 +29,9 @@ export const KQL_FILTER_DISABLED_RULES = `${ENABLED_FIELD}: false`;
 export const KQL_FILTER_CUSTOMIZED_RULES = `${IS_CUSTOMIZED_FIELD}: true`;
 export const KQL_FILTER_NOT_CUSTOMIZED_RULES = `NOT ${IS_CUSTOMIZED_FIELD}: true`;
 
+/** The "no value" section of a facet: rules that do not have the field. */
+export const FACET_MISSING_VALUE = '__missing__';
+
 interface RulesFilterOptions {
   filter: string;
   showCustomRules: boolean;
@@ -38,6 +43,8 @@ interface RulesFilterOptions {
   customizationStatus: RuleCustomizationStatus;
   ruleIds: string[];
   includeRuleTypes?: Type[];
+  /** One value of one facet, picked in "Browse by" of the rules page. */
+  browse?: { category: GranularRulesFacetCategory; value: string };
 }
 
 /**
@@ -57,6 +64,7 @@ export function convertRulesFilterToKQL({
   ruleExecutionStatus,
   customizationStatus,
   includeRuleTypes = [],
+  browse,
 }: Partial<RulesFilterOptions>): string {
   const kql: string[] = [];
 
@@ -100,6 +108,15 @@ export function convertRulesFilterToKQL({
     kql.push(KQL_FILTER_CUSTOMIZED_RULES);
   } else if (customizationStatus === RuleCustomizationStatus.NOT_CUSTOMIZED) {
     kql.push(KQL_FILTER_NOT_CUSTOMIZED_RULES);
+  }
+
+  if (browse) {
+    const field = RULES_FACET_CATEGORY_TO_ATTRIBUTE[browse.category];
+    kql.push(
+      browse.value === FACET_MISSING_VALUE
+        ? `NOT ${field}: *`
+        : `${field}: ${prepareKQLStringParam(browse.value)}`
+    );
   }
 
   return kql.join(' AND ');

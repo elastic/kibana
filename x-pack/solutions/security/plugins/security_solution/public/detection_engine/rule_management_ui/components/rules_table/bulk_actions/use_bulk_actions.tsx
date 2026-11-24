@@ -92,7 +92,6 @@ export const useBulkActions = ({
   const rulesTableContext = useRulesTableContext();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
-  const kql = convertRulesFilterToKQL(filterOptions);
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
@@ -110,35 +109,47 @@ export const useBulkActions = ({
   } = useUserPrivileges();
 
   const {
-    state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
+    state: { isAllSelected: isTableAllSelected, rules, loadingRuleIds, selectedRuleIds },
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
-  const globalQuery = useMemo(() => {
-    const gapRange = filterOptions?.gapFillStatuses?.length
-      ? getGapRange(defaultRangeValue)
-      : undefined;
+  const toGlobalQuery = useCallback(
+    (options: FilterOptions) => {
+      const gapRange = options.gapFillStatuses?.length ? getGapRange(defaultRangeValue) : undefined;
 
-    return {
-      query: kql,
-      ...(gapRange && { gapRange }),
-      ...(filterOptions?.gapFillStatuses?.length && {
-        gapFillStatuses: filterOptions.gapFillStatuses,
-      }),
-      ...(activeSchedulerId && { schedulerId: activeSchedulerId }),
-    };
-  }, [kql, filterOptions, activeSchedulerId]);
+      return {
+        query: convertRulesFilterToKQL(options),
+        ...(gapRange && { gapRange }),
+        ...(options.gapFillStatuses?.length && {
+          gapFillStatuses: options.gapFillStatuses,
+        }),
+        ...(activeSchedulerId && { schedulerId: activeSchedulerId }),
+        ...(options.ruleGroupId && { ruleGroupId: options.ruleGroupId }),
+      };
+    },
+    [activeSchedulerId]
+  );
+  const tableQuery = useMemo(() => toGlobalQuery(filterOptions), [toGlobalQuery, filterOptions]);
 
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const license = useLicense();
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
+  /**
+   * `scope`: the actions are for all rules that match these filters (for example one Group by
+   * section), not for the rules selected in the table.
+   */
   const getBulkItemsPopoverContent = useCallback(
-    (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
-      const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
+    (closePopover: () => void, scope?: FilterOptions): EuiContextMenuPanelDescriptor[] => {
+      const scopeFilterOptions = scope ?? filterOptions;
+      const isAllSelected = scope !== undefined || isTableAllSelected;
+      const globalQuery = scope ? toGlobalQuery(scope) : tableQuery;
+      const hasNoRules = scope === undefined && selectedRuleIds.length === 0;
+      const selectedRules = scope ? [] : rules.filter(({ id }) => selectedRuleIds.includes(id));
 
       const containsEnabled = selectedRules.some(({ enabled }) => enabled);
       const containsDisabled = selectedRules.some(({ enabled }) => !enabled);
-      const containsLoading = selectedRuleIds.some((id) => loadingRuleIds.includes(id));
+      const containsLoading =
+        scope === undefined && selectedRuleIds.some((id) => loadingRuleIds.includes(id));
 
       const missingActionPrivileges =
         !hasActionsPrivileges &&
@@ -482,9 +493,9 @@ export const useBulkActions = ({
           ...prepareSearchParams({
             ...(isAllSelected
               ? {
-                  filterOptions,
+                  filterOptions: scopeFilterOptions,
                   gapRange: globalQuery.gapRange,
-                  gapFillStatuses: filterOptions.gapFillStatuses,
+                  gapFillStatuses: scopeFilterOptions.gapFillStatuses,
                   schedulerId: activeSchedulerId,
                 }
               : { selectedRuleIds }),
@@ -498,9 +509,8 @@ export const useBulkActions = ({
         isBulkEditFinished = true;
       };
 
-      const isDeleteDisabled = !canEditRules || containsLoading || selectedRuleIds.length === 0;
-      const isEditDisabled =
-        missingActionPrivileges || containsLoading || selectedRuleIds.length === 0;
+      const isDeleteDisabled = !canEditRules || containsLoading || hasNoRules;
+      const isEditDisabled = missingActionPrivileges || containsLoading || hasNoRules;
       const isAlertSuppressionDisabled = isEditDisabled || !isAlertSuppressionLicenseValid;
 
       return [
@@ -607,7 +617,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_EXPORT,
               name: i18n.BULK_ACTION_EXPORT,
               'data-test-subj': 'exportRuleBulk',
-              disabled: containsLoading || selectedRuleIds.length === 0,
+              disabled: containsLoading || hasNoRules,
               onClick: handleExportAction,
               icon: undefined,
             },
@@ -782,7 +792,7 @@ export const useBulkActions = ({
       hasActionsPrivileges,
       canEditRules,
       isAlertSuppressionLicenseValid,
-      isAllSelected,
+      isTableAllSelected,
       canEnableDisableRules,
       canEditCustomHighlightedFields,
       alertSuppressionUpsellingMessage,
@@ -792,7 +802,8 @@ export const useBulkActions = ({
       startTransaction,
       hasMlPermissions,
       executeBulkAction,
-      globalQuery,
+      toGlobalQuery,
+      tableQuery,
       toasts,
       showBulkDuplicateConfirmation,
       clearRulesSelection,

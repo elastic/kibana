@@ -36,7 +36,6 @@ import type {
 } from '../../../../rule_management/logic/types';
 import type { WarningSchema } from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
-import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_PAGE,
@@ -45,6 +44,7 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
+import { useRulesTableStorageKey } from './use_rules_table_storage_key';
 import { defaultRangeValue } from '../../../../rule_gaps/constants';
 import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
 
@@ -209,6 +209,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     idleTimeout: number;
   }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
   const { sessionStorage, uiSettings } = useKibana().services;
+  const storageKey = useRulesTableStorageKey();
   const excludedReasons = uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
   const {
     filter: savedFilter,
@@ -229,6 +230,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ruleExecutionStatus:
       savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
     gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
+    ruleGroupId: savedFilter?.ruleGroupId,
+    groupBy: savedFilter?.groupBy,
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
@@ -268,11 +271,18 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       ...(shouldApplyGaps ? { gap_fill_statuses: filterOptions.gapFillStatuses } : {}),
       ...(gapRange ? { gaps_range_start: gapRange.start, gaps_range_end: gapRange.end } : {}),
       ...(activeSchedulerId ? { gap_auto_fill_scheduler_id: activeSchedulerId } : {}),
+      ...(filterOptions.ruleGroupId ? { rule_group_id: filterOptions.ruleGroupId } : {}),
     };
   }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
 
   const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
-    setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
+    setFilterOptions((currentFilter) =>
+      // Another rule group starts with clear filters: a search or tag from the previous view can
+      // hide all rules of the group.
+      'ruleGroupId' in newFilter && newFilter.ruleGroupId !== currentFilter.ruleGroupId
+        ? { ...DEFAULT_FILTER_OPTIONS, ...newFilter }
+        : { ...currentFilter, ...newFilter }
+    );
     setPage(1);
     setSelectedRuleIds([]);
     setIsAllSelected(false);
@@ -285,7 +295,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   const replaceUrlParams = useReplaceUrlParams();
   const clearFilters = useCallback(() => {
-    setFilterOptions({
+    setFilterOptions((current) => ({
       filter: DEFAULT_FILTER_OPTIONS.filter,
       showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
       showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
@@ -293,7 +303,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       enabled: undefined,
       ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
       gapFillStatuses: undefined,
-    });
+      // The selected rule group is where the user is, not a filter. Keep it.
+      ruleGroupId: current.ruleGroupId,
+      groupBy: current.groupBy,
+    }));
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
       order: DEFAULT_SORTING_OPTIONS.order,
@@ -302,8 +315,16 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     setPerPage(DEFAULT_RULES_PER_PAGE);
 
     replaceUrlParams({ [URL_PARAM_KEY.rulesTable]: null });
-    sessionStorage.remove(RULES_TABLE_STATE_STORAGE_KEY);
-  }, [setFilterOptions, setSortingOptions, setPage, setPerPage, replaceUrlParams, sessionStorage]);
+    sessionStorage.remove(storageKey);
+  }, [
+    setFilterOptions,
+    setSortingOptions,
+    setPage,
+    setPerPage,
+    replaceUrlParams,
+    sessionStorage,
+    storageKey,
+  ]);
 
   useEffect(() => {
     // pause table auto refresh when any of rule selected

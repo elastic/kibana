@@ -137,10 +137,12 @@ export const getRuleIdsWithGaps = async ({
   hasFilledIntervals,
   excludedReasons,
   schedulerId,
+  ruleIds,
 }: {
   start: string;
   end: string;
   gapFillStatuses: string[];
+  ruleIds?: string[];
   hasUnfilledIntervals?: boolean;
   hasInProgressIntervals?: boolean;
   hasFilledIntervals?: boolean;
@@ -167,6 +169,7 @@ export const getRuleIdsWithGaps = async ({
         }),
         ...(excludedReasons?.length ? { excluded_reasons: excludedReasons } : {}),
         ...(schedulerId && { gap_auto_fill_scheduler_id: schedulerId }),
+        ...(ruleIds && { rule_ids: ruleIds }),
       }),
       signal,
     }

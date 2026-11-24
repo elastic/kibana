@@ -11,6 +11,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { ExperimentalFeatures } from '../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { createRuleAttachmentType } from './rule';
+import { createRuleSetAttachmentType } from './rule_set';
 import { createAlertAttachmentType } from './alert';
 import { createBulkAlertsAttachmentType } from './alerts';
 import { createEntityAttachmentType } from './entity';
@@ -64,6 +65,7 @@ export const registerAttachments = async (
     agentBuilder.attachments.registerType(createInvestigationIocsAttachmentType());
   }
   agentBuilder.attachments.registerType(createRuleAttachmentType(core, logger));
+  agentBuilder.attachments.registerType(createRuleSetAttachmentType());
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
     agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());
   }

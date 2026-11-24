@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KueryNode } from '@kbn/es-query';
 import { partition, isEmpty } from 'lodash/fp';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
@@ -91,6 +92,7 @@ export const transformFindAlerts = (
 export const resolveGapPreFilter = async ({
   rulesClient,
   filter,
+  kueryFilter,
   sortField,
   sortOrder,
   gapFillStatuses,
@@ -101,6 +103,7 @@ export const resolveGapPreFilter = async ({
 }: {
   rulesClient: RulesClient;
   filter: string | undefined;
+  kueryFilter?: KueryNode;
   sortField?: FindRulesSortField;
   sortOrder?: SortOrder;
   gapFillStatuses: GapFillStatus[];
@@ -115,6 +118,7 @@ export const resolveGapPreFilter = async ({
     gapFillStatuses,
     maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
     filter,
+    kueryFilter,
     sortField,
     sortOrder,
     excludedReasons,

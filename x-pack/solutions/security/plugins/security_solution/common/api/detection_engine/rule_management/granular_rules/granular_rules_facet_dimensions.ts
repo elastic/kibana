@@ -15,4 +15,7 @@ export const RULES_FACET_CATEGORY_TO_ATTRIBUTE: Record<GranularRulesFacetCategor
   lastRunOutcome: 'alert.attributes.lastRun.outcome',
   isCustomized: 'alert.attributes.params.ruleSource.isCustomized',
   type: 'alert.attributes.params.type',
+  integration: 'alert.attributes.params.relatedIntegrations.package',
+  tactic: 'alert.attributes.params.threat.tactic.name',
+  source: 'alert.attributes.params.immutable',
 };

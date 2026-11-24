@@ -26,6 +26,22 @@ import type {
   AlertsMigrationCleanupRequestBodyInput,
   AlertsMigrationCleanupResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
+import type {
+  BulkAssignRuleGroupsRequestBodyInput,
+  BulkAssignRuleGroupsResponse,
+  CreateRuleGroupRequestBodyInput,
+  CreateRuleGroupResponse,
+  DeleteRuleGroupRequestParamsInput,
+  FindRuleGroupsRequestQueryInput,
+  FindRuleGroupsResponse,
+  GetRuleGroupsMembershipRequestBodyInput,
+  GetRuleGroupsMembershipResponse,
+  PreviewRuleGroupRequestBodyInput,
+  PreviewRuleGroupResponse,
+  UpdateRuleGroupRequestParamsInput,
+  UpdateRuleGroupRequestBodyInput,
+  UpdateRuleGroupResponse,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_groups/rule_groups_route.gen';
 import type { CreateAlertsIndexResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/index_management/create_index/create_index.gen';
 import type {
   CreateAlertsMigrationRequestBodyInput,
@@ -229,6 +245,30 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
     );
   },
   /**
+      * Adding a rule removes it from the left-out list, and picks it only if the group conditions do not match it.
+Removing a rule unpicks it, and leaves it out if the group conditions still match it. The rules do not change.
+
+      */
+  async bulkAssignRuleGroups<TResponseType extends ScoutResponseType = 'json'>(
+    props: BulkAssignRuleGroupsProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, BulkAssignRuleGroupsResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/detection_engine/rule_groups/_bulk_assign`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, BulkAssignRuleGroupsResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
       * Creates an index for Elastic Security alerts. Calling this API is not
 required for the detection engine to function properly. You can create
 rules and alerts without calling this API.
@@ -356,6 +396,25 @@ For detailed information on Kibana actions and alerting, and additional API call
       responseType: options.responseType ?? 'json',
     });
   },
+  async createRuleGroup<TResponseType extends ScoutResponseType = 'json'>(
+    props: CreateRuleGroupProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateRuleGroupResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/detection_engine/rule_groups`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateRuleGroupResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
   /**
       * Permanently deletes the Elastic Security alerts backing index in the current space, including the alerts
 stored in it. Use with caution; prefer lifecycle policies or the UI when available.
@@ -412,6 +471,28 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         responseType: options.responseType ?? 'json',
       }
     );
+  },
+  async deleteRuleGroup<TResponseType extends ScoutResponseType = 'json'>(
+    props: DeleteRuleGroupProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}${replaceParams(
+      '/internal/detection_engine/rule_groups/{id}',
+      encodePathParams(props.params)
+    )}`;
+
+    return apiClient.delete<ScoutResponseBody<TResponseType>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
   },
   /**
       * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
@@ -475,6 +556,28 @@ finishes and then call this operation once.
       responseType: options.responseType ?? 'json',
     });
   },
+  async findRuleGroups<TResponseType extends ScoutResponseType = 'json'>(
+    props: FindRuleGroupsProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, FindRuleGroupsResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/detection_engine/rule_groups`;
+
+    return apiClient.get<ScoutResponseBody<TResponseType, FindRuleGroupsResponse>>(
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
+  },
   /**
    * Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
    */
@@ -499,6 +602,25 @@ finishes and then call this operation once.
         responseType: options.responseType ?? 'json',
       }
     );
+  },
+  async getRuleGroupsMembership<TResponseType extends ScoutResponseType = 'json'>(
+    props: GetRuleGroupsMembershipProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRuleGroupsMembershipResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/detection_engine/rule_groups/_membership`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, GetRuleGroupsMembershipResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
   },
   /**
       * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
@@ -638,6 +760,25 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
         responseType: options.responseType ?? 'json',
       }
     );
+  },
+  async previewRuleGroup<TResponseType extends ScoutResponseType = 'json'>(
+    props: PreviewRuleGroupProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PreviewRuleGroupResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/detection_engine/rule_groups/_preview`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, PreviewRuleGroupResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
   },
   /**
       * Returns the backing Elasticsearch index for Elastic Security detection alerts in the current space, and
@@ -1325,6 +1466,28 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       responseType: options.responseType ?? 'json',
     });
   },
+  async updateRuleGroup<TResponseType extends ScoutResponseType = 'json'>(
+    props: UpdateRuleGroupProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateRuleGroupResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}${replaceParams(
+      '/internal/detection_engine/rule_groups/{id}',
+      encodePathParams(props.params)
+    )}`;
+
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateRuleGroupResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
 });
 
 export function SecuritySolutionScoutApiServiceProvider(apiClient: ApiClientFixture) {
@@ -1334,14 +1497,23 @@ export function SecuritySolutionScoutApiServiceProvider(apiClient: ApiClientFixt
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
 }
+export interface BulkAssignRuleGroupsProps {
+  body: BulkAssignRuleGroupsRequestBodyInput;
+}
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
+export interface CreateRuleGroupProps {
+  body: CreateRuleGroupRequestBodyInput;
+}
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
+}
+export interface DeleteRuleGroupProps {
+  params: DeleteRuleGroupRequestParamsInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
@@ -1350,8 +1522,14 @@ export interface ExportRulesProps {
 export interface FinalizeAlertsMigrationProps {
   body: FinalizeAlertsMigrationRequestBodyInput;
 }
+export interface FindRuleGroupsProps {
+  query: FindRuleGroupsRequestQueryInput;
+}
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
+}
+export interface GetRuleGroupsMembershipProps {
+  body: GetRuleGroupsMembershipRequestBodyInput;
 }
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
@@ -1362,6 +1540,9 @@ export interface PatchRuleProps {
 export interface PerformRulesBulkActionProps {
   query: PerformRulesBulkActionRequestQueryInput;
   body: PerformRulesBulkActionRequestBodyInput;
+}
+export interface PreviewRuleGroupProps {
+  body: PreviewRuleGroupRequestBodyInput;
 }
 export interface ReadAlertsMigrationStatusProps {
   query: ReadAlertsMigrationStatusRequestQueryInput;
@@ -1435,4 +1616,8 @@ export interface SuggestUserProfilesProps {
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
+}
+export interface UpdateRuleGroupProps {
+  params: UpdateRuleGroupRequestParamsInput;
+  body: UpdateRuleGroupRequestBodyInput;
 }

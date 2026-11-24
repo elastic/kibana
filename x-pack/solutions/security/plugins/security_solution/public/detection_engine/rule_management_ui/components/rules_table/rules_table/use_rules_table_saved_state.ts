@@ -11,7 +11,6 @@ import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_q
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
-import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import type {
   RulesTableStorageSavedState,
   RulesTableUrlSavedState,
@@ -22,10 +21,11 @@ import {
   RulesTableUrlSavedPagination,
   RulesTableSavedSorting,
 } from './rules_table_saved_state';
+import { useRulesTableStorageKey } from './use_rules_table_storage_key';
 
-function readStorageState(storage: Storage): RulesTableStorageSavedState | null {
+function readStorageState(storage: Storage, key: string): RulesTableStorageSavedState | null {
   try {
-    return storage.get(RULES_TABLE_STATE_STORAGE_KEY);
+    return storage.get(key);
   } catch {
     return null;
   }
@@ -40,9 +40,10 @@ export function useRulesTableSavedState(): {
   const {
     services: { sessionStorage },
   } = useKibana();
+  const storageKey = useRulesTableStorageKey();
 
   const urlState = getUrlParam();
-  const storageState = readStorageState(sessionStorage);
+  const storageState = readStorageState(sessionStorage, storageKey);
 
   if (!urlState && !storageState) {
     return {};
@@ -69,6 +70,8 @@ function validateState(
     enabled: filterFromUrl?.enabled ?? filterFromStorage?.enabled,
     ruleExecutionStatus:
       filterFromUrl?.ruleExecutionStatus ?? filterFromStorage?.ruleExecutionStatus,
+    ruleGroupId: filterFromUrl?.ruleGroupId ?? filterFromStorage?.ruleGroupId,
+    groupBy: filterFromUrl?.groupBy ?? filterFromStorage?.groupBy,
   };
 
   const sortingFromUrl = safeParseResult(urlState, RulesTableSavedSorting);

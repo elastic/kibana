@@ -83,5 +83,6 @@ export const prepareSearchParams = ({
     ...(props.gapRange ? { gapRange: props.gapRange } : {}),
     ...(props.gapFillStatuses?.length ? { gapFillStatuses: props.gapFillStatuses } : {}),
     ...(props.schedulerId ? { schedulerId: props.schedulerId } : {}),
+    ...(props.filterOptions.ruleGroupId ? { ruleGroupId: props.filterOptions.ruleGroupId } : {}),
   };
 };

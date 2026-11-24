@@ -100,6 +100,7 @@ import {
   registerSiemMigrationRuleItemsAttachment,
   registerInvestigationTimelineAttachment,
   registerInvestigationIocsAttachment,
+  registerRuleSetAttachment,
 } from './agent_builder/attachment_types';
 import { registerAlertsFlyoutGroupedAttachment } from './agent_builder/attachment_types/alerts';
 import { registerAttacksFlyoutGroupedAttachment } from './agent_builder/attachment_types/attack_discovery/register_attacks_flyout_grouped_attachment';
@@ -411,6 +412,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           uiSettings: core.uiSettings,
         });
       }
+      registerRuleSetAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        http: core.http,
+      });
       registerEntityAnalyticsDashboardAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,

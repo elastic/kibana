@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KueryNode } from '@kbn/es-query';
 import { chunk } from 'lodash';
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
@@ -25,13 +26,15 @@ const filterRuleIdsWithGaps = async ({
   rulesClient,
   ruleIdsWithGaps,
   filter,
+  kueryFilter,
   maxRuleIds,
   sortField,
   sortOrder,
 }: {
   rulesClient: RulesClient;
   ruleIdsWithGaps: string[];
-  filter: string;
+  filter: string | undefined;
+  kueryFilter?: KueryNode;
   maxRuleIds: number;
   sortField?: FindRulesSortField;
   sortOrder?: SortOrder;
@@ -52,6 +55,7 @@ const filterRuleIdsWithGaps = async ({
       sortField,
       sortOrder,
       filter,
+      kueryFilter,
       ruleIds: batch,
       fields: ['id'],
     });
@@ -78,6 +82,8 @@ export interface GapFilteredRuleIdsOptions {
   gapFillStatuses: GapFillStatus[];
   maxRuleIds: number;
   filter?: string;
+  /** Extra KQL node filter, for example a rule group. It is applied before the `maxRuleIds` cut. */
+  kueryFilter?: KueryNode;
   sortField?: FindRulesSortField;
   sortOrder?: SortOrder;
   excludedReasons?: GapReasonType[];
@@ -101,6 +107,7 @@ export const getGapFilteredRuleIds = async ({
   gapFillStatuses,
   maxRuleIds,
   filter,
+  kueryFilter,
   sortField,
   sortOrder,
   excludedReasons,
@@ -120,7 +127,7 @@ export const getGapFilteredRuleIds = async ({
 
   // If the number of rules with gaps is under our cap, or no filter is applied,
   // we can just return them directly.
-  if (!gapsTruncated || !filter) {
+  if (!gapsTruncated || (!filter && !kueryFilter)) {
     return {
       ruleIds: initialRuleIds,
       truncated: gapsTruncated,
@@ -134,6 +141,7 @@ export const getGapFilteredRuleIds = async ({
     rulesClient,
     ruleIdsWithGaps: ruleIdsWithGaps.ruleIds,
     filter,
+    kueryFilter,
     maxRuleIds,
     sortField,
     sortOrder,

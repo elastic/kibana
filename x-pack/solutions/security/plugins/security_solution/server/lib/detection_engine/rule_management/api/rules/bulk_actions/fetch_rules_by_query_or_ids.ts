@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KueryNode } from '@kbn/es-query';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { RulesNotFoundError, RulesNotVisibleError } from '@kbn/alerting-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
@@ -34,6 +35,7 @@ export const fetchRulesByQueryOrIds = async ({
   gapRange,
   gapFillStatuses,
   schedulerId,
+  kueryFilter,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
@@ -42,6 +44,8 @@ export const fetchRulesByQueryOrIds = async ({
   gapRange?: { start: string; end: string };
   gapFillStatuses?: GapFillStatus[];
   schedulerId?: string;
+  /** Extra KQL node filter, for example a rule group. Only used with `query`. */
+  kueryFilter?: KueryNode;
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> =>
   withSecuritySpan(
     {
@@ -93,6 +97,7 @@ export const fetchRulesByQueryOrIds = async ({
           gapFillStatuses,
           maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
           filter: query,
+          kueryFilter,
           schedulerId,
         });
 
@@ -110,6 +115,7 @@ export const fetchRulesByQueryOrIds = async ({
         rulesClient,
         perPage: maxRules,
         filter: query,
+        kueryFilter,
         page: undefined,
         sortField: undefined,
         sortOrder: undefined,

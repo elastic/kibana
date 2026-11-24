@@ -69,6 +69,17 @@ export const SearchRulesRequestBody = lazySchema(() =>
       filter: GranularRulesFilter.optional().describe(
         'Structured KQL filter applied to detection rules (alert saved objects).'
       ),
+      /**
+      * Return only the rules of this rule group. The server resolves the group, so the
+filter has no length or clause limit for groups with many picked rules.
+
+      */
+      rule_group_id: z
+        .string()
+        .optional()
+        .describe(
+          'Return only the rules of this rule group. The server resolves the group, so the\nfilter has no length or clause limit for groups with many picked rules.\n'
+        ),
       aggregations: SearchRulesAggregations.optional(),
       search: GranularRulesSearch.optional(),
       sort_field: FindRulesSortField.optional(),

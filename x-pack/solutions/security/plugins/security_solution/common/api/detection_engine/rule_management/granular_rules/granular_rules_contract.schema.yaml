@@ -60,6 +60,9 @@ components:
         - lastRunOutcome
         - isCustomized
         - type
+        - integration
+        - tactic
+        - source
 
 
     SearchRulesAggregations:

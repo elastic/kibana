@@ -10,6 +10,8 @@ import type {
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import type { FindRulesSortField } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { Page, PerPage, SortOrder } from '../../../../../../common/api/detection_engine';
@@ -38,6 +40,8 @@ export interface FindRuleOptions {
   aggregations?: Record<string, AggregationsAggregationContainer>;
   search?: string;
   searchFields?: string[];
+  /** Extra filter as a KQL node, ANDed with `filter`. Used for rule groups (`terms` nodes). */
+  kueryFilter?: KueryNode;
 }
 
 export const findRules = ({
@@ -54,13 +58,17 @@ export const findRules = ({
   ruleIds,
   search,
   searchFields,
+  kueryFilter,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
+  const stringFilter = enrichFilterWithRuleTypeMapping(enrichFilterWithRuleIds(filter, ruleIds));
   return rulesClient.find({
     options: {
       fields,
       page,
       perPage,
-      filter: enrichFilterWithRuleTypeMapping(enrichFilterWithRuleIds(filter, ruleIds)),
+      filter: kueryFilter
+        ? nodeBuilder.and([fromKueryExpression(stringFilter), kueryFilter])
+        : stringFilter,
       sortOrder,
       sortField: transformSortField(sortField),
       searchAfter,

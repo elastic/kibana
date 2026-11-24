@@ -20,6 +20,7 @@ import {
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { useRuleGroupRuleIdsQuery } from '../../../rule_groups/api';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import {
   useGetRuleIdsWithGaps,
@@ -55,11 +56,17 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
   const { services } = useKibana();
   const excludedReasons = services.uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
   const { scheduler } = useGapAutoFillSchedulerContext();
+  const {
+    state: { filterOptions },
+  } = useRulesTableContext();
+  // With a rule group selected, the chart counts only the rules of the group.
+  const { data: groupRuleIds } = useRuleGroupRuleIdsQuery(filterOptions.ruleGroupId);
   const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
 
   const {
     data: gapsData,
-    isLoading,
+    isLoading: isFirstLoad,
+    isPreviousData,
     isError,
   } = useGetRuleIdsWithGaps(
     {
@@ -67,9 +74,12 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
       gapFillStatuses: [],
       excludedReasons,
       schedulerId: activeSchedulerId,
+      ruleIds: filterOptions.ruleGroupId ? groupRuleIds ?? [] : undefined,
     },
-    { enabled }
+    { enabled: enabled && (!filterOptions.ruleGroupId || groupRuleIds != null) }
   );
+  // Previous data is from another rule group or from the whole space: wrong numbers, not stale ones.
+  const isLoading = isFirstLoad || isPreviousData;
 
   const {
     state: { lastUpdated: rulesTableLastUpdatedAt },

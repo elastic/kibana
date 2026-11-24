@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiConfirmModal,
@@ -14,11 +18,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { RulesGroupByControl } from '../../../rule_groups/components/rules_group_by_control';
+import { GroupedRulesTable } from '../../../rule_groups/components/grouped_rules_table';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { PrePackagedRulesPrompt } from '../pre_packaged_rules/load_empty_prompt';
 import type { Rule } from '../../../rule_management/logic';
+import type { FilterOptions } from '../../../rule_management/logic/types';
 import * as i18n from '../../../common/translations';
 import type { EuiBasicTableOnChange } from '../../../common/types';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
@@ -56,6 +63,21 @@ const INITIAL_SORT_FIELD = 'enabled';
 interface RulesTableProps {
   selectedTab: AllRulesTabs;
 }
+
+type MenuItemClick = (event: React.MouseEvent) => unknown;
+
+const wrapMenuItemClick = (
+  item: EuiContextMenuPanelItemDescriptor,
+  wrap: (onClick: () => unknown) => Promise<void>
+): EuiContextMenuPanelItemDescriptor => {
+  const { onClick } = item as { onClick?: MenuItemClick };
+  return onClick
+    ? ({
+        ...item,
+        onClick: (event: React.MouseEvent) => wrap(() => onClick(event)),
+      } as EuiContextMenuPanelItemDescriptor)
+    : item;
+};
 
 const NO_ITEMS_MESSAGE = (
   <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
@@ -115,8 +137,12 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     onFinish: hideDeleteConfirmation,
   });
 
+  // Rules count of a Group by section action while it runs; the dialogs show it instead of the selection.
+  const [sectionRulesCount, setSectionRulesCount] = useState<number>();
+
   // If no rules are selected, we are deleting a single rule
-  const rulesToDeleteCount = isAllSelected ? pagination.total : selectedRuleIds.length || 1;
+  const rulesToDeleteCount =
+    sectionRulesCount ?? (isAllSelected ? pagination.total : selectedRuleIds.length || 1);
 
   const {
     bulkActionsDryRunResult,
@@ -182,6 +208,28 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     completeBulkEditForm,
     executeBulkActionsDryRun,
   });
+
+  const getSectionBulkItems = useCallback(
+    (
+      closePopover: () => void,
+      scope: FilterOptions,
+      rulesCount: number
+    ): EuiContextMenuPanelDescriptor[] =>
+      getBulkItemsPopoverContent(closePopover, scope).map((panel) => ({
+        ...panel,
+        items: panel.items?.map((item) =>
+          wrapMenuItemClick(item, async (onClick) => {
+            setSectionRulesCount(rulesCount);
+            try {
+              await onClick();
+            } finally {
+              setSectionRulesCount(undefined);
+            }
+          })
+        ),
+      })),
+    [getBulkItemsPopoverContent]
+  );
 
   const paginationMemo = useMemo(() => {
     return {
@@ -283,7 +331,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const shouldShowLinearProgress =
     (isFetched && isRefetching) || isInitializingPrebuiltRulesPackage;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
-  const rulesCount = Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
+  const rulesCount =
+    sectionRulesCount ??
+    Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
 
   return (
     <>
@@ -333,7 +383,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <BulkFillRuleGapsModal
           onCancel={cancelBulkFillRuleGaps}
           onConfirm={confirmBulkFillRuleGaps}
-          rulesCount={selectedRuleIds.length}
+          rulesCount={sectionRulesCount ?? selectedRuleIds.length}
         />
       )}
       {isManualRuleRunLimitErrorVisible && (
@@ -383,6 +433,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             </>
           )}
           <RulesTableFilters selectedTab={selectedTab} />
+          <EuiSpacer size="s" />
+          <RulesGroupByControl />
           <RulesTableWarnings warnings={warnings} />
           <RulesTableUtilityBar
             canBulkEdit={canReadRules}
@@ -390,26 +442,34 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             onToggleSelectAll={toggleSelectAll}
             isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
           />
-          <EuiBasicTable
-            itemId="id"
-            items={rules}
-            tableCaption={i18n.RULES_TABLE_CAPTION}
-            noItemsMessage={NO_ITEMS_MESSAGE}
-            onChange={tableOnChangeCallback}
-            pagination={paginationMemo}
-            selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
-            sorting={{
-              sort: {
-                // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
-                field: sortingOptions.field as keyof Rule,
-                direction: sortingOptions.order,
-              },
-            }}
-            {...tableProps}
-            tableLayout="auto"
-            scrollableInline
-            responsiveBreakpoint={false}
-          />
+          {filterOptions.groupBy ? (
+            <GroupedRulesTable
+              key={filterOptions.groupBy}
+              columns={tableProps.columns}
+              getSectionBulkItems={getSectionBulkItems}
+            />
+          ) : (
+            <EuiBasicTable
+              itemId="id"
+              items={rules}
+              tableCaption={i18n.RULES_TABLE_CAPTION}
+              noItemsMessage={NO_ITEMS_MESSAGE}
+              onChange={tableOnChangeCallback}
+              pagination={paginationMemo}
+              selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
+              sorting={{
+                sort: {
+                  // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
+                  field: sortingOptions.field as keyof Rule,
+                  direction: sortingOptions.order,
+                },
+              }}
+              {...tableProps}
+              tableLayout="auto"
+              scrollableInline
+              responsiveBreakpoint={false}
+            />
+          )}
         </>
       )}
     </>

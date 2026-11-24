@@ -8,6 +8,8 @@
 import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { RULE_GROUPS_ROW_ACTION } from '../../../rule_groups/components/translations';
+import { useRuleGroupEditorOptional } from '../../../rule_groups/components/rule_group_editor_context';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -53,6 +55,7 @@ export const useRulesTableActions = ({
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
+  const ruleGroupEditor = useRuleGroupEditorOptional();
 
   return [
     {
@@ -150,6 +153,15 @@ export const useRulesTableActions = ({
         });
       },
       enabled: (rule: Rule) => canManualRunRules && rule.enabled,
+    },
+    {
+      type: 'icon',
+      'data-test-subj': 'ruleGroupsRowAction',
+      description: RULE_GROUPS_ROW_ACTION,
+      icon: 'folderClosed',
+      name: RULE_GROUPS_ROW_ACTION,
+      onClick: (rule: Rule) => ruleGroupEditor?.openGroupsMenu(rule),
+      enabled: () => canEditRules && ruleGroupEditor != null,
     },
     {
       type: 'icon',

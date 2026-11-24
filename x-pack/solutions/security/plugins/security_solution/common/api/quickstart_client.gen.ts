@@ -59,6 +59,22 @@ import type {
   ReviewRuleUpgradeResponse,
 } from './detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.gen';
 import type {
+  BulkAssignRuleGroupsRequestBodyInput,
+  BulkAssignRuleGroupsResponse,
+  CreateRuleGroupRequestBodyInput,
+  CreateRuleGroupResponse,
+  DeleteRuleGroupRequestParamsInput,
+  FindRuleGroupsRequestQueryInput,
+  FindRuleGroupsResponse,
+  GetRuleGroupsMembershipRequestBodyInput,
+  GetRuleGroupsMembershipResponse,
+  PreviewRuleGroupRequestBodyInput,
+  PreviewRuleGroupResponse,
+  UpdateRuleGroupRequestParamsInput,
+  UpdateRuleGroupRequestBodyInput,
+  UpdateRuleGroupResponse,
+} from './detection_engine/rule_groups/rule_groups_route.gen';
+import type {
   PerformRulesBulkActionRequestQueryInput,
   PerformRulesBulkActionRequestBodyInput,
   PerformRulesBulkActionResponse,
@@ -658,6 +674,24 @@ is added to its existing source labels instead.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Adding a rule removes it from the left-out list, and picks it only if the group conditions do not match it.
+Removing a rule unpicks it, and leaves it out if the group conditions still match it. The rules do not change.
+
+    */
+  async bulkAssignRuleGroups(props: BulkAssignRuleGroupsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API BulkAssignRuleGroups`);
+    return this.kbnClient
+      .request<BulkAssignRuleGroupsResponse>({
+        path: '/internal/detection_engine/rule_groups/_bulk_assign',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * **Deprecated in 9.4.0.** Use the Entity Store APIs to bulk assign asset criticality.
 
 Bulk upsert up to 1000 asset criticality records.
@@ -1003,6 +1037,19 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async createRuleGroup(props: CreateRuleGroupProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateRuleGroup`);
+    return this.kbnClient
+      .request<CreateRuleGroupResponse>({
+        path: '/internal/detection_engine/rule_groups',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Creates a new rule migration and returns the corresponding migration_id
    */
@@ -1306,6 +1353,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         method: 'DELETE',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteRuleGroup(props: DeleteRuleGroupProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteRuleGroup`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/detection_engine/rule_groups/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1703,6 +1762,20 @@ finishes and then call this operation once.
         path: '/api/asset_criticality/list',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async findRuleGroups(props: FindRuleGroupsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API FindRuleGroups`);
+    return this.kbnClient
+      .request<FindRuleGroupsResponse>({
+        path: '/internal/detection_engine/rule_groups',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
 
@@ -2127,6 +2200,19 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getRuleGroupsMembership(props: GetRuleGroupsMembershipProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleGroupsMembership`);
+    return this.kbnClient
+      .request<GetRuleGroupsMembershipResponse>({
+        path: '/internal/detection_engine/rule_groups/_membership',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2844,6 +2930,19 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
     return this.kbnClient
       .request<PreviewRiskScoreResponse>({
         path: '/internal/risk_score/preview',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async previewRuleGroup(props: PreviewRuleGroupProps) {
+    this.log.info(`${new Date().toISOString()} Calling API PreviewRuleGroup`);
+    return this.kbnClient
+      .request<PreviewRuleGroupResponse>({
+        path: '/internal/detection_engine/rule_groups/_preview',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -3714,6 +3813,19 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async updateRuleGroup(props: UpdateRuleGroupProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateRuleGroup`);
+    return this.kbnClient
+      .request<UpdateRuleGroupResponse>({
+        path: replaceParams('/internal/detection_engine/rule_groups/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Updates rules migrations data
    */
@@ -3941,6 +4053,9 @@ export interface AssignWatchlistEntitiesProps {
   params: AssignWatchlistEntitiesRequestParamsInput;
   body: AssignWatchlistEntitiesRequestBodyInput;
 }
+export interface BulkAssignRuleGroupsProps {
+  body: BulkAssignRuleGroupsRequestBodyInput;
+}
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
 }
@@ -3984,6 +4099,9 @@ export interface CreateQRadarRuleMigrationRulesProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateRuleGroupProps {
+  body: CreateRuleGroupRequestBodyInput;
 }
 export interface CreateRuleMigrationProps {
   body: CreateRuleMigrationRequestBodyInput;
@@ -4037,6 +4155,9 @@ export interface DeletePrivMonUserProps {
 }
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
+}
+export interface DeleteRuleGroupProps {
+  params: DeleteRuleGroupRequestParamsInput;
 }
 export interface DeleteRuleMigrationProps {
   params: DeleteRuleMigrationRequestParamsInput;
@@ -4106,6 +4227,9 @@ export interface FinalizeAlertsMigrationProps {
 export interface FindAssetCriticalityRecordsProps {
   query: FindAssetCriticalityRecordsRequestQueryInput;
 }
+export interface FindRuleGroupsProps {
+  query: FindRuleGroupsRequestQueryInput;
+}
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
@@ -4164,6 +4288,9 @@ export interface GetProtectionUpdatesNoteProps {
 }
 export interface GetRiskScoreHistoryProps {
   query: GetRiskScoreHistoryRequestQueryInput;
+}
+export interface GetRuleGroupsMembershipProps {
+  body: GetRuleGroupsMembershipRequestBodyInput;
 }
 export interface GetRuleMigrationProps {
   params: GetRuleMigrationRequestParamsInput;
@@ -4268,6 +4395,9 @@ export interface PersistPinnedEventRouteProps {
 }
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
+}
+export interface PreviewRuleGroupProps {
+  body: PreviewRuleGroupRequestBodyInput;
 }
 export interface PrivmonBulkUploadUsersCSVProps {
   attachment: FormData;
@@ -4397,6 +4527,10 @@ export interface UpdatePrivMonUserProps {
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
+}
+export interface UpdateRuleGroupProps {
+  params: UpdateRuleGroupRequestParamsInput;
+  body: UpdateRuleGroupRequestBodyInput;
 }
 export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;

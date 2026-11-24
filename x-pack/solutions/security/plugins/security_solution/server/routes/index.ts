@@ -7,6 +7,7 @@
 
 import type { DocLinksServiceSetup, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import { registerRuleGroupsRoutes } from '../lib/detection_engine/rule_groups/api/register_routes';
 
 import { registerTrialCompanionRoutes } from '../lib/trial_companion/register_routes';
 import type { EndpointAppContext } from '../endpoint/types';
@@ -95,6 +96,7 @@ export const initRoutes = (
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
+  registerRuleGroupsRoutes(router);
   registerRuleMonitoringRoutes(router);
   registerRulePreviewRoutes(
     router,
