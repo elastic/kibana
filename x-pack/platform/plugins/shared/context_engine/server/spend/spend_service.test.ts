@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexSpendTarget } from '../ai_indices/service';
 import { SpendService } from './spend_service';
 import type { PriceSnapshot } from './pricing/price_catalog';
@@ -51,7 +51,6 @@ const createService = ({
       getPrices: jest.fn().mockResolvedValue(pricesUnavailable ? undefined : prices),
     },
     sources: [source, ...extraSources],
-    logger: loggingSystemMock.createLogger(),
     getNow: () => NOW,
   });
   return { service, source };
@@ -84,6 +83,14 @@ describe('SpendService', () => {
         to: new Date('2026-11-01T00:00:00.000Z'),
         aiIndices: [target('tickets'), target('docs')],
       });
+    });
+
+    it('rejects an AI index that does not exist in the space', async () => {
+      const { service } = createService({ targets: [target('tickets')] });
+
+      await expect(service.getAiIndexSpend('default', 'missing')).rejects.toBeInstanceOf(
+        AiIndexNotFoundError
+      );
     });
 
     it('reports zero spend for an AI index without usage', async () => {
@@ -140,13 +147,17 @@ describe('SpendService', () => {
     expect(source.getUsage).toHaveBeenCalledTimes(1);
   });
 
-  it('counts no usage from a failing source instead of failing', async () => {
+  it('fails instead of reporting zero spend when a source fails, and retries on the next read', async () => {
+    const getUsage = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockResolvedValue([usage('tickets', 3)]);
     const { service } = createService({
       targets: [target('tickets')],
-      records: [usage('tickets', 3)],
-      extraSources: [{ id: 'broken', getUsage: jest.fn().mockRejectedValue(new Error('boom')) }],
+      extraSources: [{ id: 'flaky', getUsage }],
     });
 
+    await expect(service.getSpaceSpend('default')).rejects.toThrow('boom');
     const spend = await service.getSpaceSpend('default');
 
     expect(spend.space.cost_usd).toBe(3);

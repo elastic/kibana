@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
+import { AiIndexNotFoundError } from '../ai_indices/errors';
 import {
   getSpendPeriod,
   type AiIndexSpendResponse,
@@ -68,7 +68,6 @@ export class SpendService implements SpendServiceApi {
       aiIndexService: Pick<AiIndexService, 'listSpendTargets'>;
       priceCatalog: PriceCatalog;
       sources: readonly SpendSource[];
-      logger: Logger;
       getNow?: () => Date;
       usageCacheTtlMs?: number;
     }
@@ -89,6 +88,9 @@ export class SpendService implements SpendServiceApi {
 
   async getAiIndexSpend(spaceId: string, aiIndexId: string): Promise<AiIndexSpendResponse> {
     const spend = await this.loadSpaceSpend(spaceId);
+    if (!spend.targets.some(({ id }) => id === aiIndexId)) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
     return {
       ai_index_id: aiIndexId,
       period: spend.period,
@@ -159,20 +161,7 @@ export class SpendService implements SpendServiceApi {
       to: new Date(period.end),
       aiIndices: targets,
     };
-    const usage = await Promise.all(
-      this.deps.sources.map(async (source) => {
-        try {
-          return await source.getUsage(query);
-        } catch (error) {
-          this.deps.logger.warn(
-            `Spend source "${source.id}" failed for space "${spaceId}"; its usage is not counted: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-          return [];
-        }
-      })
-    );
+    const usage = await Promise.all(this.deps.sources.map((source) => source.getUsage(query)));
     return usage.flat();
   }
 }

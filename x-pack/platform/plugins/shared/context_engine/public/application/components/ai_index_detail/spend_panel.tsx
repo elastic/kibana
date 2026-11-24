@@ -17,25 +17,42 @@ import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_descripti
 const SpendSummary = ({ spend }: { spend: AiIndexSpendResponse }) => {
   const { ai_index: aiIndex, space } = spend;
   const totalTokens = aiIndex.tokens.input_tokens + aiIndex.tokens.output_tokens;
+  const hasPrices = spend.pricing.source !== 'unavailable';
+  const isPartial = (totals: { unpriced_tokens: number }) =>
+    hasPrices && totals.unpriced_tokens > 0;
 
   return (
     <div data-test-subj="contextAiIndexSpendSummary">
-      <EuiText size="s">
-        <strong>
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.spend.aiIndexSpend', {
-            defaultMessage: 'This AI index: {spent}',
-            values: { spent: formatUsd(aiIndex.cost_usd) },
-          })}
-        </strong>
-      </EuiText>
+      {hasPrices && (
+        <>
+          <EuiText size="s">
+            <strong>
+              {isPartial(aiIndex)
+                ? i18n.translate('xpack.contextEngine.aiIndexDetail.spend.aiIndexSpendPartial', {
+                    defaultMessage: 'This AI index: at least {spent}',
+                    values: { spent: formatUsd(aiIndex.cost_usd) },
+                  })
+                : i18n.translate('xpack.contextEngine.aiIndexDetail.spend.aiIndexSpend', {
+                    defaultMessage: 'This AI index: {spent}',
+                    values: { spent: formatUsd(aiIndex.cost_usd) },
+                  })}
+            </strong>
+          </EuiText>
+          <EuiText size="xs" color="subdued">
+            {isPartial(space)
+              ? i18n.translate('xpack.contextEngine.aiIndexDetail.spend.spaceSpendPartial', {
+                  defaultMessage: 'All AI indices in this space: at least {spent}',
+                  values: { spent: formatUsd(space.cost_usd) },
+                })
+              : i18n.translate('xpack.contextEngine.aiIndexDetail.spend.spaceSpend', {
+                  defaultMessage: 'All AI indices in this space: {spent}',
+                  values: { spent: formatUsd(space.cost_usd) },
+                })}
+          </EuiText>
+        </>
+      )}
       <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.contextEngine.aiIndexDetail.spend.spaceSpend', {
-          defaultMessage: 'All AI indices in this space: {spent}',
-          values: { spent: formatUsd(space.cost_usd) },
-        })}
-      </EuiText>
-      <EuiText size="xs" color="subdued">
-        {aiIndex.unpriced_tokens > 0
+        {hasPrices && aiIndex.unpriced_tokens > 0
           ? i18n.translate('xpack.contextEngine.aiIndexDetail.spend.tokensWithUnpriced', {
               defaultMessage: '{total} tokens, {unpriced} from models without a known price',
               values: {

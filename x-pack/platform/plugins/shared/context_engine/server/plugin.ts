@@ -487,7 +487,6 @@ export class ContextEnginePlugin
         logger: this.logger.get('spend', 'pricing'),
       }),
       sources: [createWorkflowExecutionsSpendSource({ getEsClient: () => internalEsClient })],
-      logger: this.logger.get('spend'),
     });
 
     const sessionMemoryService = createSessionMemoryService(this.esClient);

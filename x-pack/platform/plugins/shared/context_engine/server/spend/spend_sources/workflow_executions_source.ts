@@ -89,6 +89,7 @@ export const createWorkflowExecutionsSpendSource = ({
               { terms: { workflowId: [...aiIndexByWorkflowId.keys()] } },
               { range: { createdAt: { gte: from.toISOString(), lt: to.toISOString() } } },
             ],
+            must_not: [{ term: { isTestRun: true } }],
           },
         },
         aggs: {

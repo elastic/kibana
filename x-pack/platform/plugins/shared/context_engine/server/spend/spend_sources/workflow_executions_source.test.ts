@@ -36,7 +36,7 @@ describe('createWorkflowExecutionsSpendSource', () => {
     await source.getUsage(query);
 
     const [request] = esClient.search.mock.calls[0] as unknown as [
-      { index: string; query: { bool: { filter: unknown[] } } }
+      { index: string; query: { bool: { filter: unknown[]; must_not: unknown[] } } }
     ];
     expect(request.index).toBe('.workflows-executions');
     expect(request.query.bool.filter).toEqual([
@@ -48,6 +48,7 @@ describe('createWorkflowExecutionsSpendSource', () => {
         },
       },
     ]);
+    expect(request.query.bool.must_not).toEqual([{ term: { isTestRun: true } }]);
   });
 
   it('attributes per-connector step usage to the owning AI index', async () => {

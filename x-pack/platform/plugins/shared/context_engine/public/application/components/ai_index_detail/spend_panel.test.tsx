@@ -76,9 +76,23 @@ describe('SpendPanel', () => {
 
     renderPanel();
 
-    expect(screen.getByTestId('contextAiIndexSpendSummary')).toHaveTextContent(
-      '400 from models without a known price'
-    );
+    const summary = screen.getByTestId('contextAiIndexSpendSummary');
+    expect(summary).toHaveTextContent('400 from models without a known price');
+    expect(summary).toHaveTextContent('This AI index: at least $1.00');
+  });
+
+  it('marks the amounts as lower bounds when the space has unpriced usage', () => {
+    mockUseAiIndexSpend.mockReturnValue({
+      spend: spendResponse({ ai_index: totals(1), space: totals(45, 400) }),
+      isLoading: false,
+      error: undefined,
+    });
+
+    renderPanel();
+
+    const summary = screen.getByTestId('contextAiIndexSpendSummary');
+    expect(summary).toHaveTextContent('This AI index: $1.00');
+    expect(summary).toHaveTextContent('All AI indices in this space: at least $45.00');
   });
 
   it('explains that spend cannot be estimated when prices are unavailable', () => {
@@ -91,6 +105,9 @@ describe('SpendPanel', () => {
     renderPanel();
 
     expect(screen.getByTestId('contextAiIndexSpendPricesUnavailable')).toBeInTheDocument();
+    const summary = screen.getByTestId('contextAiIndexSpendSummary');
+    expect(summary).not.toHaveTextContent('$');
+    expect(summary).toHaveTextContent('15K tokens');
   });
 
   it('shows a skeleton while loading', () => {
