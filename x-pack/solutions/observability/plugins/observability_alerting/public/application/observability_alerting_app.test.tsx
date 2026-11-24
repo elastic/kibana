@@ -342,6 +342,20 @@ describe('ObservabilityAlertingApp', () => {
     expect(mockTriggersActionsUi.getClassicRulesPage).not.toHaveBeenCalled();
   });
 
+  it('keeps classic rules settings for a user with universal rules and classic rules settings', async () => {
+    const settingsPath = `${OBSERVABILITY_ALERTING_RULES_V1_PATH}/settings`;
+    const { getByTestId, history } = renderAt(settingsPath, {
+      alerting_v2_rules: { read: true },
+      rulesSettings: { show: true },
+    } as unknown as Capabilities);
+
+    await waitFor(() => {
+      expect(getByTestId('classicRulesPage')).toBeInTheDocument();
+    });
+    expect(history.location.pathname).toBe(settingsPath);
+    expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenCalled();
+  });
+
   it('shows both rules tabs for a mixed v1 and v2 user on the classic rules page', async () => {
     const { getByTestId, coreStart } = renderAt(
       OBSERVABILITY_ALERTING_RULES_V1_PATH,
@@ -537,6 +551,19 @@ describe('ObservabilityAlertingApp', () => {
     expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
       'data-manage-rules-href',
       prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`)
+    );
+  });
+
+  it('omits manageRulesHref when the user can read alerts but not rules', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH, {
+      stackAlertsOnly: { show: true },
+    } as unknown as Capabilities);
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).not.toHaveAttribute(
+      'data-manage-rules-href'
     );
   });
 

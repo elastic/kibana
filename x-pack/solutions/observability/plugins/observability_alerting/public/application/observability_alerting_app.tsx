@@ -191,12 +191,17 @@ export const ObservabilityAlertingApp = ({
     persistOnUnmount: true,
   });
 
-  const manageRulesHref = useMemo(() => {
+  const manageRulesHref = useMemo((): string | null => {
+    const canReadRules = rulesTabVisibility.showV1 || hasV2Rules;
+    if (!canReadRules) {
+      return null;
+    }
+
     const rulesPath = hasV2Rules
       ? OBSERVABILITY_ALERTING_RULES_V2_PATH
       : OBSERVABILITY_ALERTING_RULES_V1_PATH;
     return prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${rulesPath}`);
-  }, [hasV2Rules, prepend]);
+  }, [hasV2Rules, prepend, rulesTabVisibility.showV1]);
   const rulesV1Tabs = useObservabilityRulesTabs(
     prepend,
     'v1',
@@ -253,9 +258,11 @@ export const ObservabilityAlertingApp = ({
         </Route>
         <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
           <EuiPageSection paddingSize="m">
-            {/* Universal-only users belong on Universal. Everyone else gets the classic
-                page, which already explains missing access. Classic rules have no single read privilege. */}
-            {rulesTabVisibility.showV2 && !rulesTabVisibility.showV1 ? (
+            {/* Universal-only users opening the classic rules list belong on Universal.
+                Settings and other subpages stay here and honor their own privileges. */}
+            {rulesTabVisibility.showV2 &&
+            !rulesTabVisibility.showV1 &&
+            pathname === OBSERVABILITY_ALERTING_RULES_V1_PATH ? (
               <Redirect to={OBSERVABILITY_ALERTING_RULES_V2_PATH} />
             ) : (
               <ClassicRulesV1Route

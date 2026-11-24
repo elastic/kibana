@@ -231,9 +231,14 @@ const AlertsListPageContent = () => {
 
   const locatorHref = rulesLocators.useUrl({});
   const manageRulesHrefOverride = useManageRulesHref();
-  const manageRulesHref = manageRulesHrefOverride ?? locatorHref;
 
-  const alertsMenu = useMemo(() => getAlertsListMenu({ manageRulesHref }), [manageRulesHref]);
+  const alertsMenu = useMemo(() => {
+    if (manageRulesHrefOverride === null) {
+      return undefined;
+    }
+
+    return getAlertsListMenu({ manageRulesHref: manageRulesHrefOverride ?? locatorHref });
+  }, [locatorHref, manageRulesHrefOverride]);
 
   const content = (
     <div

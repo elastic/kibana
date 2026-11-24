@@ -51,7 +51,7 @@ export interface AlertingV2PageProps extends EpisodeDetailsPageProps {
   privilegeCheck?: PrivilegeCheck;
   tabs?: AppHeaderTab[];
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
-  manageRulesHref?: string;
+  manageRulesHref?: string | null;
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */

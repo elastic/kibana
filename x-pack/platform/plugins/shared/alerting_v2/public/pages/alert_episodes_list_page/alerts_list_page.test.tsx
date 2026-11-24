@@ -929,6 +929,21 @@ describe('manageRulesHref override', () => {
     expect(manageRulesLink).toHaveAttribute('href', overrideHref);
   });
 
+  it('hides Manage rules when the host passes null', async () => {
+    render(
+      <ManageRulesHrefProvider value={null}>
+        <ListPageTestProviders locators={mockLocators}>
+          <AlertsListPage />
+        </ListPageTestProviders>
+      </ManageRulesHrefProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('alertingV2AlertsListPage')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('alertingV2EpisodesListManageRules')).not.toBeInTheDocument();
+  });
+
   it('falls back to the locator href when no override is provided', async () => {
     render(
       <ListPageTestProviders locators={mockLocators}>
