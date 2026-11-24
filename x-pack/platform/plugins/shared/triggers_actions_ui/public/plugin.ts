@@ -635,6 +635,7 @@ export class Plugin
       getRulesList: (props: RulesListProps) => {
         return getRulesListLazy({
           connectorServices: this.connectorServices!,
+          isServerless: this.isServerless,
           rulesListProps: props,
         });
       },
