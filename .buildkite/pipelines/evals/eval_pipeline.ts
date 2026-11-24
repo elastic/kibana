@@ -258,10 +258,22 @@ function buildDirectFanoutYaml({
     Number(process.env.EVAL_STEP_TIMEOUT_IN_MINUTES) ||
     suite.stepTimeoutInMinutes ||
     DEFAULT_FANOUT_STEP_TIMEOUT_IN_MINUTES;
-  const concurrency =
+  const suiteConcurrency =
     Number(process.env.EVAL_FANOUT_CONCURRENCY) ||
     suite.fanoutConcurrency ||
     DEFAULT_FANOUT_CONCURRENCY;
+  const shardConcurrency = ({ id, concurrencyGroup }: EvalsSuiteShard) => {
+    if (!concurrencyGroup) {
+      return { group: `kbn-evals-${suiteKey}`, limit: suiteConcurrency };
+    }
+    const limit = suite.concurrencyGroups?.[concurrencyGroup];
+    if (!limit) {
+      throw new Error(
+        `Shard ${id} of ${suite.id} names concurrencyGroup "${concurrencyGroup}", which the suite's concurrencyGroups does not define`
+      );
+    }
+    return { group: `kbn-evals-${suiteKey}-${normalizeBuildkiteKey(concurrencyGroup)}`, limit };
+  };
   const pullRequest =
     process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
       ? process.env.BUILDKITE_PULL_REQUEST
@@ -275,6 +287,7 @@ function buildDirectFanoutYaml({
   const evalSteps = shards.flatMap((shard) =>
     connectorIds.map((connectorId) => {
       const shardKey = normalizeBuildkiteKey(shard.id);
+      const concurrency = shardConcurrency(shard);
       const stepKey = [`kbn-evals-${suiteKey}-${normalizeBuildkiteKey(connectorId)}`, shardKey]
         .filter(Boolean)
         .join('-');
@@ -305,8 +318,8 @@ function buildDirectFanoutYaml({
           EVAL_SPEC_FILES: shard.specFiles.join(' '),
         }),
         `        timeout_in_minutes: ${timeoutInMinutes}`,
-        `        concurrency_group: ${toBuildkiteYamlString(`kbn-evals-${suiteKey}`)}`,
-        `        concurrency: ${concurrency}`,
+        `        concurrency_group: ${toBuildkiteYamlString(concurrency.group)}`,
+        `        concurrency: ${concurrency.limit}`,
         `        agents:`,
         `          image: family/kibana-ubuntu-2404`,
         `          imageProject: elastic-images-prod`,

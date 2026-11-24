@@ -50,8 +50,13 @@ const SUITES = {
       scoutDomain: 'observability_complete',
       stepTimeoutInMinutes: 240,
       fanoutConcurrency: 8,
+      concurrencyGroups: { 'sandbox-heavy': 2 },
       shards: [
-        { id: 'customer0-golden', specFiles: ['evals/stored.spec.ts'] },
+        {
+          id: 'customer0-golden',
+          concurrencyGroup: 'sandbox-heavy',
+          specFiles: ['evals/stored.spec.ts'],
+        },
         { id: 'orcabench-1-of-2', judge: 'eis-judge', specFiles: ['evals/orcabench.spec.ts'] },
         { id: 'orcabench-2-of-2', judge: 'eis-judge', specFiles: ['evals/orcabench.spec.ts'] },
       ],
@@ -402,6 +407,23 @@ describe('eval_pipeline', () => {
         EVAL_SCOUT_DOMAIN: 'observability_complete',
         EVAL_SPEC_FILES: 'evals/orcabench.spec.ts',
       });
+    });
+
+    it("puts a shard in its suite concurrency group, with that group's limit", () => {
+      const [goldenStep, orcaStep] = planFor(LABELS).steps[0].steps;
+
+      expect(goldenStep).toEqual(
+        expect.objectContaining({
+          concurrency_group: 'kbn-evals-nightshift-investigations-sandbox-heavy',
+          concurrency: 2,
+        })
+      );
+      expect(orcaStep).toEqual(
+        expect.objectContaining({
+          concurrency_group: 'kbn-evals-nightshift-investigations',
+          concurrency: 8,
+        })
+      );
     });
 
     it('lets the suite judge apply to shards without their own', () => {
