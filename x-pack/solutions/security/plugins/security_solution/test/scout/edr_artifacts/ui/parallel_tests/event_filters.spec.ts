@@ -27,6 +27,7 @@ const EDITED_VALUE = `${SEEDED_VALUE}.lnk`;
 // Not the value `global.setup.ts` seeds, so a `notepad.exe` option can only be
 // a real suggestion and not the selected value the combo box re-adds.
 const NOT_SEEDED_VALUE = 'cmd.exe';
+const NO_MATCH_VALUE = 'aaaaaaaaaaaaaa as custom input';
 
 /**
  * The suggestion expected once the value is cleared. Cloud data streams can
@@ -144,10 +145,18 @@ spaceTest.describe(
         await spaceTest.step('a value with no match shows no suggestions', async () => {
           await policyArtifactsPage.clearEventFiltersValue();
           await expect(policyArtifactsPage.eventFiltersValueInput).toHaveValue('');
-          await policyArtifactsPage.typeInEventFiltersValue('aaaaaaaaaaaaaa as custom input');
+          // Suggestions on screen first, so the list can only become empty once
+          // the response for the typed value is rendered.
+          await expect(
+            policyArtifactsPage
+              .eventFiltersValueOptions()
+              .filter({ hasText: expectedSuggestion(config.isCloud) })
+          ).not.toHaveCount(0);
+          await policyArtifactsPage.typeInEventFiltersValue(NO_MATCH_VALUE);
 
-          // The visible list first, so a locator that matches nothing cannot pass.
-          await expect(policyArtifactsPage.eventFiltersValueOptionsList).toBeVisible();
+          await expect(
+            policyArtifactsPage.eventFiltersValueNoMatchHint(NO_MATCH_VALUE)
+          ).toBeVisible();
           await expect(policyArtifactsPage.eventFiltersValueOptions()).toHaveCount(0);
         });
 

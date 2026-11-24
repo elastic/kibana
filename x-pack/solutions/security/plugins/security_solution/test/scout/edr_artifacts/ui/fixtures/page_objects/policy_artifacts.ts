@@ -129,6 +129,11 @@ export class PolicyArtifactsPage {
     return this.eventFiltersValueOptionsList.getByRole('option');
   }
 
+  /** EUI shows this hint only once the list has loaded and no option matches `value`. */
+  eventFiltersValueNoMatchHint(value: string): Locator {
+    return this.eventFiltersValueOptionsList.getByText(`Add ${value} as a custom option`);
+  }
+
   criteria(selector: string): Locator {
     return this.page.testSubj.locator(selector);
   }
