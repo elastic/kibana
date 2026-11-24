@@ -454,6 +454,14 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
-
   ['.redis', lazy(() => import(/* webpackChunkName: "connectorIconredis" */ './specs/redis/icon'))],
+  [
+    '.microsoft_sql_server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconmicrosoftsqlserver" */ './specs/microsoft_sql_server/icon'
+        )
+    ),
+  ],
 ]);

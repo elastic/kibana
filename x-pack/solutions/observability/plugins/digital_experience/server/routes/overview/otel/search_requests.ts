@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { termQuery, termsQuery } from '@kbn/es-query';
 import { OTEL_EVENT_NAME } from '@kbn/apm-types';
 import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
-import { countOf, percentileOf } from '../../../lib/helpers/aggregations';
+import { percentileOf } from '../../../lib/helpers/aggregations';
 import type { HistogramParams } from '../../../lib/helpers/time_series';
 import { dateHistogram } from '../../../lib/helpers/time_series';
 import type { OverviewFilters, OverviewPercentile } from '../../../../common/overview_filters';
@@ -20,17 +20,11 @@ import {
   EVENT_WEB_VITAL,
   NAVIGATION_TIMING_LOAD_EVENT_END,
   OTEL_LOGS_INDEX,
-  OTEL_TRACES_INDEX,
 } from '../../../../common/otel_data';
 import {
   browserDocuments,
   byEnvironment,
-  eventCount,
-  failedRequests,
-  httpRequestDocuments,
-  inEnvironmentFilter,
   otelSearchDefaults,
-  requestsWithOutcome,
   serviceDocuments,
   webVital,
 } from '../../../lib/otel/queries';
@@ -58,7 +52,8 @@ export interface OverviewSearchParams {
 }
 
 /**
- * Page loads, load time, JS errors, web vitals and the trend of one application, from the logs.
+ * Page loads, load time, web vitals and the trend of one application, from the logs. The KPI row
+ * has its own route (`get_otel_overview_kpis.ts`).
  *
  * Page loads count the navigation-timing events only, so soft navigations (`browser.navigation`)
  * and resource timings (`browser.resource_timing`), which carry timing attributes of their own, are
@@ -85,7 +80,8 @@ export const logsSearch = ({
         ...browserDocuments(start, end),
         ...serviceDocuments(serviceName),
         ...(kuery ? [kuery] : []),
-        // Only the events the metrics count.
+        // The events the metrics count, and the JS errors, which no metric here counts but whose
+        // environments the picker still lists, e.g. under a KQL query that keeps only them.
         ...termsQuery(OTEL_EVENT_NAME, [EVENT_NAVIGATION_TIMING, EVENT_WEB_VITAL, EVENT_EXCEPTION]),
       ],
     },
@@ -107,7 +103,6 @@ export const logsSearch = ({
           aggs: {
             // Page loads without a load event are counted but left out of the percentile.
             loadTime: percentileOf(NAVIGATION_TIMING_LOAD_EVENT_END, percentile),
-            loadTimeSamples: countOf(NAVIGATION_TIMING_LOAD_EVENT_END),
             // The counts of the trend sum to the page loads, and both charts share its buckets.
             trend: {
               ...dateHistogram({ start, end, histogram }),
@@ -115,7 +110,6 @@ export const logsSearch = ({
             },
           },
         },
-        jsErrors: eventCount(EVENT_EXCEPTION),
         lcp: webVital(CORE_WEB_VITAL.lcp),
         inp: webVital(CORE_WEB_VITAL.inp),
         cls: webVital(CORE_WEB_VITAL.cls),
@@ -125,39 +119,5 @@ export const logsSearch = ({
       documentFilters(filters)
     ),
     ...filterOptionsAggs(filters, environment),
-  },
-});
-
-/** The HTTP requests of one application and the failed ones, from the traces. */
-export const spansSearch = ({
-  serviceName,
-  start,
-  end,
-  environment,
-  filters = {},
-  kuery,
-}: OverviewSearchParams): estypes.SearchRequest => ({
-  ...otelSearchDefaults(OTEL_TRACES_INDEX),
-  runtime_mappings: filterRuntimeMappings(),
-  query: {
-    bool: {
-      filter: [
-        ...browserDocuments(start, end),
-        ...serviceDocuments(serviceName),
-        ...(kuery ? [kuery] : []),
-        ...httpRequestDocuments(),
-      ],
-    },
-  },
-  // Only the selected environment: the picker's environments come from the logs. The page filter
-  // is not applied: a request's `url.full` is the URL requested, not the page it was made from.
-  aggs: {
-    inEnvironment: {
-      filter: inEnvironmentFilter(environment, documentFilters(filters)),
-      aggs: {
-        requests: requestsWithOutcome(),
-        failed: failedRequests(),
-      },
-    },
   },
 });

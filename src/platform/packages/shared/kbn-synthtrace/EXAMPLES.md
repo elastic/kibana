@@ -603,7 +603,7 @@ node scripts/synthtrace otel_logs_and_metrics_only --type=log --live
 
 #### `infra_hosts_with_apm_hosts`
 
-Generates infrastructure host metrics along with APM host data.
+Generates infrastructure host metrics along with APM host data. Hosts with system metrics (`host-0` to `host-4` by default) also report process metrics, shown in the Processes tab of the host details flyout. That tab only shows the last minute of data, so run it with `--live`.
 
 **Usage:**
 

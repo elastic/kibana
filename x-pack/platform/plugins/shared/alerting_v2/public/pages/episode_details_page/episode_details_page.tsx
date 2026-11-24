@@ -452,7 +452,6 @@ export function EpisodeDetailsPage({
       `}
     >
       <AppHeader
-        sticky={false}
         title={episodeBreadcrumbTitle}
         back={{
           href: episodesListHref,
