@@ -35,10 +35,7 @@ const dataStreamsProfile: DataStreamsBoostProfile = {
 
 const defaultProps: AppliesToFooterProps = {
   type: 'indices',
-  matches: [
-    { name: 'products', isHidden: false },
-    { name: 'users', isHidden: false },
-  ],
+  matches: [{ name: 'products' }, { name: 'users' }],
   storageSizeInBytes: 2.1 * 1024 ** 3,
 };
 
@@ -58,10 +55,7 @@ describe('AppliesToFooter', () => {
     render(
       <AppliesToFooter
         {...defaultProps}
-        matches={[
-          ...defaultProps.matches,
-          { name: 'archive', isHidden: false, outrankedByRuleName: 'catalog' },
-        ]}
+        matches={[...defaultProps.matches, { name: 'archive', outrankedByRuleName: 'catalog' }]}
       />
     );
 

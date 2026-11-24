@@ -49,6 +49,7 @@ export type NamedParams = Array<Record<string, string | number | boolean>>;
 export interface InventoryTypeColumn {
   name: string;
   kind: OutputColumnKind;
+  label?: string;
 }
 
 export interface InventoryTypeSource {

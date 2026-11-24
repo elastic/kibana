@@ -43,6 +43,7 @@ import {
 import type {
   AiIndexHttpItem,
   AiIndexItem,
+  AiIndexSaveWarning,
   CreateAiIndexResponse,
   DeleteAiIndexResponse,
   GetAiIndexResponse,
@@ -141,7 +142,7 @@ import {
 } from './schemas/dreaming_schema';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
-import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
+import { CONTEXT_ENGINE_DOCS_NOTE, SOURCE_AUTOMATIONS_NOTE } from './constants';
 import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
@@ -300,7 +301,7 @@ export const registerAiIndexRoutes = ({
     request: KibanaRequest;
     previous: AiIndexItem | undefined;
     saved?: readonly AiIndexChangeField[];
-  }) => {
+  }): Promise<AiIndexSaveWarning[]> => {
     let current: AiIndexItem;
     try {
       current = await getAiIndexService().get(aiIndexId, spaceId);
@@ -310,9 +311,9 @@ export const registerAiIndexRoutes = ({
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return;
+      return [];
     }
-    await aiIndexChanges.notify({
+    return aiIndexChanges.notify({
       aiIndexId,
       spaceId,
       request,
@@ -330,6 +331,7 @@ export const registerAiIndexRoutes = ({
       summary: 'Create an AI Index',
       description: [
         'Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists.',
+        SOURCE_AUTOMATIONS_NOTE,
         CONTEXT_ENGINE_DISABLED_NOTE,
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
@@ -394,8 +396,16 @@ export const registerAiIndexRoutes = ({
           const spaceId = resolveSpaceId(await getSpaces(), request);
           await getAiIndexService().create(id, spaceId, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
-          await notifySaved({ aiIndexId: id, spaceId, request, previous: undefined });
-          const body: CreateAiIndexResponse = { status: 'created' };
+          const warnings = await notifySaved({
+            aiIndexId: id,
+            spaceId,
+            request,
+            previous: undefined,
+          });
+          const body: CreateAiIndexResponse = {
+            status: 'created',
+            ...(warnings.length > 0 && { warnings }),
+          };
           return response.created({ body });
         } catch (error) {
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id, error }));
@@ -413,6 +423,7 @@ export const registerAiIndexRoutes = ({
       summary: 'Create or update an AI Index',
       description: [
         'Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.',
+        SOURCE_AUTOMATIONS_NOTE,
         CONTEXT_ENGINE_DISABLED_NOTE,
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
@@ -487,8 +498,11 @@ export const registerAiIndexRoutes = ({
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
-          await notifySaved({ aiIndexId, spaceId, request, previous });
-          const body: PutAiIndexResponse = { status };
+          const warnings = await notifySaved({ aiIndexId, spaceId, request, previous });
+          const body: PutAiIndexResponse = {
+            status,
+            ...(warnings.length > 0 && { warnings }),
+          };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
           auditLogger.log(
