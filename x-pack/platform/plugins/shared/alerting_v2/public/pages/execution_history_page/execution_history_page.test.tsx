@@ -307,6 +307,13 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.getByRole('tab', { name: /action policies/i })).toBeInTheDocument();
   });
 
+  it('does not opt out of AppHeader sticky behavior', () => {
+    mockFetchResult();
+    renderPage();
+
+    expect(mockAppHeader).toHaveBeenLastCalledWith(expect.not.objectContaining({ sticky: false }));
+  });
+
   it('switches the Documentation link when changing tabs', async () => {
     mockFetchResult();
     mockRulesFetchResult();
