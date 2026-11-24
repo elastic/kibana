@@ -221,10 +221,6 @@ export const FLYOUT_TAKE_ACTION = i18n.translate(
   }
 );
 
-export const FLYOUT_CLOSE = i18n.translate('xpack.alertingV2EpisodesUi.details.flyout.close', {
-  defaultMessage: 'Close',
-});
-
 /** --- Header --- */
 export const HEADER_EPISODE_TITLE_FALLBACK = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.header.episodeTitleFallback',
