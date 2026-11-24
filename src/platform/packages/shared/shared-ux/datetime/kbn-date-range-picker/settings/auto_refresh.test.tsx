@@ -18,27 +18,18 @@ import {
   DateRangePickerPanelNavigationProvider,
 } from '../date_range_picker_panel_navigation';
 import { SettingsPanel } from '../panels/settings_panel';
-import type { DateRangePickerSettings } from '../types';
+import type { AutoRefreshSettings } from '../types';
 
 const providerDefaults = {
   defaultValue: 'last 15 minutes',
   onChange: () => {},
+  settings: { roundRelativeTime: true },
+  onSettingsChange: () => {},
 } as const;
 
-const renderWithProvider = (
-  settings: DateRangePickerSettings,
-  onSettingsChange: (s: DateRangePickerSettings) => void,
-  onRefresh?: () => void
-) => {
-  const providerProps: DateRangePickerProps = {
-    ...providerDefaults,
-    settings,
-    onSettingsChange,
-    ...(onRefresh ? { onRefresh } : {}),
-  };
-
-  return renderWithKibanaRenderContext(
-    <DateRangePickerProvider {...providerProps}>
+const renderSettingsPanel = (props: Partial<DateRangePickerProps> = {}) =>
+  renderWithKibanaRenderContext(
+    <DateRangePickerProvider {...providerDefaults} {...props}>
       <DateRangePickerPanelNavigationProvider
         defaultPanelId={SettingsPanel.PANEL_ID}
         panelDescriptors={[]}
@@ -49,78 +40,54 @@ const renderWithProvider = (
       </DateRangePickerPanelNavigationProvider>
     </DateRangePickerProvider>
   );
-};
 
 describe('Auto-refresh settings row', () => {
-  it('omits auto-refresh controls when `settings.autoRefresh` is absent', () => {
-    renderWithProvider({ roundRelativeTime: true }, () => {});
+  it('omits auto-refresh controls when `autoRefresh` is absent', () => {
+    renderSettingsPanel({ onRefresh: () => {} });
 
     expect(screen.queryByTestId('dateRangePickerAutoRefreshToggle')).not.toBeInTheDocument();
   });
 
-  it('omits auto-refresh controls when `onRefresh` is absent even if `settings.autoRefresh` is set', () => {
-    renderWithProvider(
-      {
-        roundRelativeTime: true,
-        autoRefresh: {
-          isEnabled: true,
-          isPaused: false,
-          intervalMs: 10_000,
-          intervalDisplayUnit: 's',
-        },
-      },
-      () => {}
-    );
+  it('omits auto-refresh controls when `onRefresh` is absent even if `autoRefresh` is set', () => {
+    renderSettingsPanel({
+      autoRefresh: { isEnabled: true, isPaused: false, intervalMs: 10_000 },
+    });
 
     expect(screen.queryByTestId('dateRangePickerAutoRefreshToggle')).not.toBeInTheDocument();
   });
 
-  it('toggles `isEnabled` via the switch and calls `onSettingsChange`', () => {
-    const onSettingsChange = jest.fn();
-    const onRefresh = jest.fn();
+  it('starts the timer when the switch turns auto-refresh on', () => {
+    const onAutoRefreshChange = jest.fn();
 
-    renderWithProvider(
-      {
-        roundRelativeTime: true,
-        autoRefresh: {
-          isEnabled: false,
-          isPaused: true,
-          intervalMs: 10_000,
-          intervalDisplayUnit: 's',
-        },
-      },
-      onSettingsChange,
-      onRefresh
-    );
+    renderSettingsPanel({
+      onRefresh: () => {},
+      autoRefresh: { isEnabled: false, isPaused: true, intervalMs: 10_000 },
+      onAutoRefreshChange,
+    });
 
     fireEvent.click(screen.getByTestId('dateRangePickerAutoRefreshToggle'));
 
-    expect(onSettingsChange).toHaveBeenCalledTimes(1);
-
-    const next = onSettingsChange.mock.calls[0][0];
-
-    expect(next.autoRefresh).toEqual(
-      expect.objectContaining({ isEnabled: true, isPaused: true, intervalMs: 10_000 })
-    );
+    expect(onAutoRefreshChange).toHaveBeenCalledTimes(1);
+    expect(onAutoRefreshChange).toHaveBeenCalledWith({
+      isEnabled: true,
+      isPaused: false,
+      intervalMs: 10_000,
+    });
   });
 
   it('updates interval when the count field changes', () => {
-    const onSettingsChange = jest.fn();
-    const onRefresh = jest.fn();
+    const onAutoRefreshChange = jest.fn();
 
-    renderWithProvider(
-      {
-        roundRelativeTime: true,
-        autoRefresh: {
-          isEnabled: true,
-          isPaused: false,
-          intervalMs: 60_000,
-          intervalDisplayUnit: 'm',
-        },
+    renderSettingsPanel({
+      onRefresh: () => {},
+      autoRefresh: {
+        isEnabled: true,
+        isPaused: false,
+        intervalMs: 60_000,
+        intervalDisplayUnit: 'm',
       },
-      onSettingsChange,
-      onRefresh
-    );
+      onAutoRefreshChange,
+    });
 
     const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
 
@@ -128,64 +95,42 @@ describe('Auto-refresh settings row', () => {
 
     fireEvent.change(count, { target: { value: '5' } });
 
-    expect(onSettingsChange).toHaveBeenCalled();
-
-    const last = onSettingsChange.mock.calls.at(-1)[0];
-
-    expect(last.autoRefresh?.intervalMs).toBe(5 * 60_000);
+    expect(onAutoRefreshChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ intervalMs: 5 * 60_000 })
+    );
   });
 
   it('updates `intervalMs` and `intervalDisplayUnit` when the unit select changes', () => {
-    const onSettingsChange = jest.fn();
-    const onRefresh = jest.fn();
+    const onAutoRefreshChange = jest.fn();
 
-    renderWithProvider(
-      {
-        roundRelativeTime: true,
-        autoRefresh: {
-          isEnabled: true,
-          isPaused: false,
-          intervalMs: 60_000,
-          intervalDisplayUnit: 'm',
-        },
+    renderSettingsPanel({
+      onRefresh: () => {},
+      autoRefresh: {
+        isEnabled: true,
+        isPaused: false,
+        intervalMs: 60_000,
+        intervalDisplayUnit: 'm',
       },
-      onSettingsChange,
-      onRefresh
-    );
+      onAutoRefreshChange,
+    });
 
     fireEvent.change(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit'), {
       target: { value: 'h' },
     });
 
-    expect(onSettingsChange).toHaveBeenCalled();
-
-    const last = onSettingsChange.mock.calls.at(-1)[0];
-
-    expect(last.autoRefresh).toEqual(
-      expect.objectContaining({
-        intervalDisplayUnit: 'h',
-        intervalMs: 60 * 60_000,
-      })
+    expect(onAutoRefreshChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ intervalDisplayUnit: 'h', intervalMs: 60 * 60_000 })
     );
   });
 
   it('re-syncs the count field when intervalMs stays the same but intervalDisplayUnit is updated externally', () => {
     const Harness = () => {
-      const [settings, setSettings] = useState<DateRangePickerSettings>({
-        roundRelativeTime: true,
-        autoRefresh: {
-          isEnabled: true,
-          isPaused: true,
-          intervalMs: 60_000,
-          intervalDisplayUnit: 'm',
-        },
+      const [autoRefresh, setAutoRefresh] = useState<AutoRefreshSettings>({
+        isEnabled: true,
+        isPaused: true,
+        intervalMs: 60_000,
+        intervalDisplayUnit: 'm',
       });
-      const harnessProviderProps: DateRangePickerProps = {
-        ...providerDefaults,
-        onRefresh: () => {},
-        settings,
-        onSettingsChange: setSettings,
-      };
 
       return (
         <>
@@ -193,16 +138,15 @@ describe('Auto-refresh settings row', () => {
             type="button"
             data-test-subj="externalSameMsSwitchToSeconds"
             onClick={() =>
-              setSettings((s) => {
-                if (!s.autoRefresh) return s;
-                return {
-                  ...s,
-                  autoRefresh: { ...s.autoRefresh, intervalMs: 60_000, intervalDisplayUnit: 's' },
-                };
-              })
+              setAutoRefresh((prev) => ({ ...prev, intervalMs: 60_000, intervalDisplayUnit: 's' }))
             }
           />
-          <DateRangePickerProvider {...harnessProviderProps}>
+          <DateRangePickerProvider
+            {...providerDefaults}
+            onRefresh={() => {}}
+            autoRefresh={autoRefresh}
+            onAutoRefreshChange={setAutoRefresh}
+          >
             <DateRangePickerPanelNavigationProvider
               defaultPanelId={SettingsPanel.PANEL_ID}
               panelDescriptors={[]}

@@ -32,6 +32,7 @@ import {
   findCorrespondingInputPart,
   getInputScrollLeftToCenter,
   isRelativeToNow,
+  msToAutoRefreshInterval,
   resolveInitialFocus,
 } from './utils';
 import { DateRangePickerAutoRefreshButton } from './date_range_picker_auto_refresh_button';
@@ -73,7 +74,7 @@ export function DateRangePickerControl() {
     disabledTooltip,
     readOnly,
     isLoading,
-    settings,
+    autoRefresh,
     hasAutoRefresh,
     autoRefreshSecondsRemaining,
     toggleAutoRefresh,
@@ -265,10 +266,10 @@ export function DateRangePickerControl() {
         fullWidth={width !== 'auto'}
         clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
         append={
-          hasAutoRefresh && settings.autoRefresh?.isEnabled ? (
+          hasAutoRefresh && autoRefresh?.isEnabled ? (
             <DateRangePickerAutoRefreshButton
-              isPaused={settings.autoRefresh.isPaused}
-              intervalMs={settings.autoRefresh.intervalMs}
+              isPaused={autoRefresh.isPaused}
+              intervalMs={autoRefresh.intervalMs}
               secondsRemaining={autoRefreshSecondsRemaining}
               onClick={toggleAutoRefresh}
               disabled={disabled}
@@ -324,9 +325,14 @@ export function DateRangePickerControl() {
               `}
               data-test-subj="dateRangePickerControlButton"
               data-date-range={`${timeRange.start} to ${timeRange.end}`}
-              data-refresh-interval={settings.autoRefresh?.intervalMs}
-              data-refresh-interval-unit={settings.autoRefresh?.intervalDisplayUnit}
-              data-refresh-paused={settings.autoRefresh?.isPaused}
+              data-refresh-interval={autoRefresh?.intervalMs}
+              data-refresh-interval-unit={
+                autoRefresh
+                  ? msToAutoRefreshInterval(autoRefresh.intervalMs, autoRefresh.intervalDisplayUnit)
+                      .unit
+                  : undefined
+              }
+              data-refresh-paused={autoRefresh?.isPaused}
               buttonRef={buttonRef}
               aria-label={collapsed ? accessibleDisplayText : undefined}
               onClick={onButtonClick}

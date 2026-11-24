@@ -17,6 +17,7 @@ import type {
   TimeRangeBoundsOption,
   CalendarOptions,
   DateRangePickerSettings,
+  AutoRefreshSettings,
 } from './types';
 import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 import { DateRangePickerProvider } from './date_range_picker_context';
@@ -157,7 +158,7 @@ export interface DateRangePickerProps {
   onPresetDelete?: (option: TimeRangeBoundsOption) => void;
   /** Calendar-specific options (e.g. first day of week). */
   calendarOptions?: CalendarOptions;
-  /** Current picker settings (e.g. rounding, refresh). */
+  /** Current picker display settings (e.g. rounding, time precision). */
   settings: DateRangePickerSettings;
   /** Called when the user changes a setting in the settings panel. */
   onSettingsChange: (settings: DateRangePickerSettings) => void;
@@ -173,8 +174,15 @@ export interface DateRangePickerProps {
    * @link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
    */
   timeZone?: string;
-  /** Fires at the end of each auto-refresh interval while `settings.autoRefresh` exists, is enabled and timer is unpaused. */
+  /**
+   * Fires at the end of each auto-refresh interval while `autoRefresh` is enabled and unpaused.
+   * The auto-refresh UI is shown only when both this and `autoRefresh` are set.
+   */
   onRefresh?: () => void;
+  /** Current auto-refresh state. The auto-refresh UI is shown only when both this and `onRefresh` are set. */
+  autoRefresh?: AutoRefreshSettings;
+  /** Called when the user changes the auto-refresh state, e.g. enables it or pauses the timer. */
+  onAutoRefreshChange?: (autoRefresh: AutoRefreshSettings) => void;
   /**
    * Increment this value whenever an external timer (e.g. the Kibana timefilter) triggers a
    * refresh, so the visual countdown resets to stay in sync with actual query cadence and

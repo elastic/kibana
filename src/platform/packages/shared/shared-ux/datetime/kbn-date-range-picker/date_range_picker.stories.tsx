@@ -18,7 +18,7 @@ import {
   type DateRangePickerProps,
   type DateRangePickerOnChangeProps,
 } from './date_range_picker';
-import type { DateRangePickerSettings, TimeRangeBoundsOption } from './types';
+import type { AutoRefreshSettings, DateRangePickerSettings, TimeRangeBoundsOption } from './types';
 
 const meta: Meta<DateRangePickerProps> = {
   title: 'Date Time/DateRangePicker',
@@ -143,20 +143,17 @@ export const Presets: Story = {
   render: (args) => <StatefulDateRangePicker {...args} />,
 };
 
-/** `onRefresh` + `settings.autoRefresh`: Settings refresh row, input append when `isEnabled`, timer when unpaused. */
+/** `onRefresh` + `autoRefresh`: refresh row, input append when `isEnabled`, timer when unpaused. */
 export const AutoRefresh: Story = {
   args: {
     defaultValue: 'last 15 minutes',
-    settings: {
-      roundRelativeTime: false,
-      timePrecision: 's',
-      autoRefresh: {
-        isEnabled: true,
-        isPaused: false,
-        intervalMs: 60_000,
-        intervalDisplayUnit: 's',
-      },
+    autoRefresh: {
+      isEnabled: true,
+      isPaused: false,
+      intervalMs: 60_000,
+      intervalDisplayUnit: 's',
     },
+    onAutoRefreshChange: action('onAutoRefreshChange'),
     showTimeWindowButtons: true,
     timeZone: 'Europe/Amsterdam',
     onRefresh: fn(),
@@ -188,7 +185,11 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
   const [recents, setRecents] = useState<TimeRangeBoundsOption[]>([]);
   const [presets, setPresets] = useState<TimeRangeBoundsOption[]>(props.presets ?? []);
   const [settings, setSettings] = useState<DateRangePickerSettings>(props.settings);
-  const { onChange, onPresetSave, onPresetDelete, onInputChange, ...rest } = props;
+  const [autoRefresh, setAutoRefresh] = useState<AutoRefreshSettings | undefined>(
+    props.autoRefresh
+  );
+  const { onChange, onPresetSave, onPresetDelete, onInputChange, onAutoRefreshChange, ...rest } =
+    props;
 
   const handleOnChange = (args: DateRangePickerOnChangeProps) => {
     setInvalid(args.isInvalid);
@@ -224,6 +225,14 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
     [onPresetDelete]
   );
 
+  const handleAutoRefreshChange = useCallback(
+    (next: AutoRefreshSettings) => {
+      setAutoRefresh(next);
+      onAutoRefreshChange?.(next);
+    },
+    [onAutoRefreshChange]
+  );
+
   const handleInputChange = useCallback(
     (value: string) => {
       setInvalid(false);
@@ -244,6 +253,8 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
       onPresetDelete={onPresetDelete ? handlePresetDelete : undefined}
       settings={settings}
       onSettingsChange={setSettings}
+      autoRefresh={autoRefresh}
+      onAutoRefreshChange={handleAutoRefreshChange}
     />
   );
 }

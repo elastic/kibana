@@ -309,9 +309,11 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     DEFAULT_DATE_RANGE_PICKER_SETTINGS
   );
   // The play/pause control is only shown once auto-refresh has been enabled, either from the
-  // settings panel or because a running refresh interval was restored from the URL.
+  // picker or because a running refresh interval was restored from the URL.
   const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(!refreshInterval.pause);
-  const [intervalDisplayUnit, setIntervalDisplayUnit] = useState<AutoRefreshIntervalUnit>('s');
+  const [intervalDisplayUnit, setIntervalDisplayUnit] = useState<
+    AutoRefreshIntervalUnit | undefined
+  >('s');
 
   useEffect(
     function enableAutoRefreshWhenUnpaused() {
@@ -334,30 +336,15 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     [isAutoRefreshEnabled, refreshInterval.pause, refreshInterval.value, intervalDisplayUnit]
   );
 
-  const dateRangePickerSettingsWithAutoRefresh = useMemo<DateRangePickerSettings>(
-    () => ({ ...dateRangePickerSettings, autoRefresh }),
-    [dateRangePickerSettings, autoRefresh]
-  );
+  const onAutoRefreshChange = useCallback(
+    (next: AutoRefreshSettings) => {
+      const isPaused = !next.isEnabled || next.isPaused;
 
-  const onDateRangePickerSettingsChange = useCallback(
-    (next: DateRangePickerSettings) => {
-      const { autoRefresh: nextAutoRefresh, ...rest } = next;
-      setDateRangePickerSettings(rest);
+      setIsAutoRefreshEnabled(next.isEnabled);
+      setIntervalDisplayUnit(next.intervalDisplayUnit);
 
-      if (!nextAutoRefresh) return;
-
-      // Enabling auto-refresh also starts the timer, so a second click on play is not needed.
-      const isEnabling = !autoRefresh.isEnabled && nextAutoRefresh.isEnabled;
-      const isPaused = !nextAutoRefresh.isEnabled || (!isEnabling && nextAutoRefresh.isPaused);
-
-      setIsAutoRefreshEnabled(nextAutoRefresh.isEnabled);
-      setIntervalDisplayUnit(nextAutoRefresh.intervalDisplayUnit);
-
-      if (
-        isPaused !== refreshInterval.pause ||
-        nextAutoRefresh.intervalMs !== autoRefresh.intervalMs
-      ) {
-        updateInterval({ isPaused, refreshInterval: nextAutoRefresh.intervalMs });
+      if (isPaused !== refreshInterval.pause || next.intervalMs !== autoRefresh.intervalMs) {
+        updateInterval({ isPaused, refreshInterval: next.intervalMs });
       }
     },
     [autoRefresh, refreshInterval.pause, updateInterval]
@@ -406,8 +393,10 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
             onPresetDelete={
               isAutoRefreshOnlyMode ? undefined : dateRangePickerPresets.onPresetDelete
             }
-            settings={dateRangePickerSettingsWithAutoRefresh}
-            onSettingsChange={onDateRangePickerSettingsChange}
+            settings={dateRangePickerSettings}
+            onSettingsChange={setDateRangePickerSettings}
+            autoRefresh={autoRefresh}
+            onAutoRefreshChange={onAutoRefreshChange}
             onRefresh={handleRefresh}
             inputDateFormats={[dateFormat]}
             timeZone={timeZoneName}

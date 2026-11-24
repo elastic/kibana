@@ -485,7 +485,7 @@ export const QueryBarTopRow = React.memo(
       return {
         // Only show the auto-refresh UI when the timer is actively running on load.
         // When paused or unconfigured, isEnabled starts false; the user must re-enable
-        // from Settings. This avoids the UI reappearing after a page reload when the
+        // it in the picker. This avoids the UI reappearing after a page reload when the
         // user had disabled it.
         isEnabled: isAutoRefreshEnabled,
         isPaused: isConfigured && (props.isRefreshPaused ?? false),
@@ -841,49 +841,30 @@ export const QueryBarTopRow = React.memo(
       [dateFormatSetting]
     );
 
-    const dateRangePickerSettingsWithAutoRefresh = useMemo<DateRangePickerSettings>(
-      () =>
-        propsOnRefreshChange
-          ? {
-              ...dateRangePickerSettings,
-              // In auto-refresh-only mode the settings panel (the only place to
-              // enable auto-refresh) is unreachable behind readOnly, so force the
-              // play/pause button visible; paused state still follows props.
-              autoRefresh: isAutoRefreshOnly ? { ...autoRefresh, isEnabled: true } : autoRefresh,
-            }
-          : dateRangePickerSettings,
-      [dateRangePickerSettings, autoRefresh, propsOnRefreshChange, isAutoRefreshOnly]
-    );
+    const dateRangePickerAutoRefresh = useMemo<AutoRefreshSettings | undefined>(() => {
+      if (!propsOnRefreshChange) return undefined;
+      // In auto-refresh-only mode the picker's auto-refresh switch is unreachable
+      // behind readOnly, so force the play/pause button visible; paused state
+      // still follows props.
+      return isAutoRefreshOnly ? { ...autoRefresh, isEnabled: true } : autoRefresh;
+    }, [autoRefresh, propsOnRefreshChange, isAutoRefreshOnly]);
 
-    const onDateRangePickerSettingsChange = useCallback(
-      (next: DateRangePickerSettings) => {
-        const { autoRefresh: nextAutoRefresh, ...rest } = next;
+    const onDateRangePickerAutoRefreshChange = useCallback(
+      (next: AutoRefreshSettings) => {
+        setAutoRefresh((prev) => {
+          const isEnabledChanged = prev.isEnabled !== next.isEnabled;
+          const intervalChanged = prev.intervalMs !== next.intervalMs;
+          const isPausedChanged = prev.isPaused !== next.isPaused;
 
-        setDateRangePickerSettings(rest);
+          if (isEnabledChanged || intervalChanged || isPausedChanged) {
+            propsOnRefreshChange?.({
+              isPaused: !next.isEnabled || next.isPaused,
+              refreshInterval: next.intervalMs,
+            });
+          }
 
-        if (nextAutoRefresh) {
-          setAutoRefresh((prev) => {
-            // When enabling auto-refresh, also clear isPaused so the timer starts immediately
-            // without requiring a second click on the play button.
-            const resolved: AutoRefreshSettings =
-              !prev.isEnabled && nextAutoRefresh.isEnabled
-                ? { ...nextAutoRefresh, isPaused: false }
-                : nextAutoRefresh;
-
-            const isEnabledChanged = prev.isEnabled !== resolved.isEnabled;
-            const intervalChanged = prev.intervalMs !== resolved.intervalMs;
-            const isPausedChanged = prev.isPaused !== resolved.isPaused;
-
-            if (isEnabledChanged || intervalChanged || isPausedChanged) {
-              propsOnRefreshChange?.({
-                isPaused: !resolved.isEnabled || resolved.isPaused,
-                refreshInterval: resolved.intervalMs,
-              });
-            }
-
-            return resolved;
-          });
-        }
+          return next;
+        });
       },
       [propsOnRefreshChange]
     );
@@ -1118,8 +1099,10 @@ export const QueryBarTopRow = React.memo(
               recent={recentlyUsedRanges}
               onPresetSave={dateRangePickerPresets.onPresetSave}
               onPresetDelete={dateRangePickerPresets.onPresetDelete}
-              settings={dateRangePickerSettingsWithAutoRefresh}
-              onSettingsChange={onDateRangePickerSettingsChange}
+              settings={dateRangePickerSettings}
+              onSettingsChange={setDateRangePickerSettings}
+              autoRefresh={dateRangePickerAutoRefresh}
+              onAutoRefreshChange={onDateRangePickerAutoRefreshChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
               refreshEpoch={autoRefreshEpoch}
               resolveEpoch={submitEpoch}

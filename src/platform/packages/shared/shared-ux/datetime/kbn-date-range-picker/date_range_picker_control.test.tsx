@@ -871,15 +871,15 @@ describe('DateRangePickerControl', () => {
       jest.useRealTimers();
     });
 
-    const autoRefreshSettings = {
-      roundRelativeTime: true,
-      autoRefresh: { isEnabled: true, isPaused: false, intervalMs: 4000, intervalDisplayUnit: 's' },
+    const autoRefresh = {
+      isEnabled: true,
+      isPaused: false,
+      intervalMs: 4000,
+      intervalDisplayUnit: 's',
     } as const;
 
-    it('does not render the auto-refresh append control when `settings.autoRefresh` is absent', () => {
-      renderWithEuiTheme(
-        <DateRangePicker {...defaultProps} settings={{ roundRelativeTime: true }} />
-      );
+    it('does not render the auto-refresh append control when `autoRefresh` is absent', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} onRefresh={onRefresh} />);
 
       expect(screen.queryByTestId('dateRangePickerAutoRefreshButton')).not.toBeInTheDocument();
       const button = screen.getByTestId('dateRangePickerControlButton');
@@ -888,43 +888,49 @@ describe('DateRangePickerControl', () => {
       expect(button).not.toHaveAttribute('data-refresh-paused');
     });
 
-    it('exposes `settings.autoRefresh` as concrete DOM attributes on the control button', () => {
+    it('exposes `autoRefresh` as concrete DOM attributes on the control button', () => {
       renderWithEuiTheme(
-        <DateRangePicker
-          {...defaultProps}
-          onRefresh={onRefresh}
-          settings={{ ...autoRefreshSettings }}
-        />
+        <DateRangePicker {...defaultProps} onRefresh={onRefresh} autoRefresh={autoRefresh} />
       );
 
-      const { intervalMs, intervalDisplayUnit, isPaused } = autoRefreshSettings.autoRefresh;
+      const { intervalMs, intervalDisplayUnit, isPaused } = autoRefresh;
       const button = screen.getByTestId('dateRangePickerControlButton');
       expect(button).toHaveAttribute('data-refresh-interval', String(intervalMs));
       expect(button).toHaveAttribute('data-refresh-interval-unit', intervalDisplayUnit);
       expect(button).toHaveAttribute('data-refresh-paused', String(isPaused));
     });
 
-    it('does not render the auto-refresh append control when `onRefresh` is absent', () => {
-      renderWithEuiTheme(
-        <DateRangePicker {...defaultProps} settings={{ ...autoRefreshSettings }} />
-      );
-
-      expect(screen.queryByTestId('dateRangePickerAutoRefreshButton')).not.toBeInTheDocument();
-    });
-
-    it('does not render the auto-refresh append control when `settings.autoRefresh.isEnabled` is false', () => {
+    it('exposes the auto-determined unit when `autoRefresh.intervalDisplayUnit` is absent', () => {
       renderWithEuiTheme(
         <DateRangePicker
           {...defaultProps}
           onRefresh={onRefresh}
-          settings={{
-            roundRelativeTime: true,
-            autoRefresh: {
-              isEnabled: false,
-              isPaused: false,
-              intervalMs: 4000,
-              intervalDisplayUnit: 's',
-            },
+          autoRefresh={{ isEnabled: true, isPaused: true, intervalMs: 120_000 }}
+        />
+      );
+
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveAttribute(
+        'data-refresh-interval-unit',
+        'm'
+      );
+    });
+
+    it('does not render the auto-refresh append control when `onRefresh` is absent', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} autoRefresh={autoRefresh} />);
+
+      expect(screen.queryByTestId('dateRangePickerAutoRefreshButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render the auto-refresh append control when `autoRefresh.isEnabled` is false', () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onRefresh={onRefresh}
+          autoRefresh={{
+            isEnabled: false,
+            isPaused: false,
+            intervalMs: 4000,
+            intervalDisplayUnit: 's',
           }}
         />
       );
@@ -932,19 +938,16 @@ describe('DateRangePickerControl', () => {
       expect(screen.queryByTestId('dateRangePickerAutoRefreshButton')).not.toBeInTheDocument();
     });
 
-    it('shows the auto-refresh append control when `settings.autoRefresh.isPaused` is true (play to resume)', () => {
+    it('shows the auto-refresh append control when `autoRefresh.isPaused` is true (play to resume)', () => {
       renderWithEuiTheme(
         <DateRangePicker
           {...defaultProps}
           onRefresh={onRefresh}
-          settings={{
-            roundRelativeTime: true,
-            autoRefresh: {
-              isEnabled: true,
-              isPaused: true,
-              intervalMs: 4000,
-              intervalDisplayUnit: 's',
-            },
+          autoRefresh={{
+            isEnabled: true,
+            isPaused: true,
+            intervalMs: 4000,
+            intervalDisplayUnit: 's',
           }}
         />
       );
@@ -952,13 +955,9 @@ describe('DateRangePickerControl', () => {
       expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toBeInTheDocument();
     });
 
-    it('shows mm:ss countdown on the auto-refresh append control while idle when `settings.autoRefresh` is set', () => {
+    it('shows mm:ss countdown on the auto-refresh append control while idle when `autoRefresh` is set', () => {
       renderWithEuiTheme(
-        <DateRangePicker
-          {...defaultProps}
-          onRefresh={onRefresh}
-          settings={{ ...autoRefreshSettings }}
-        />
+        <DateRangePicker {...defaultProps} onRefresh={onRefresh} autoRefresh={autoRefresh} />
       );
 
       const refreshBtn = screen.getByTestId('dateRangePickerAutoRefreshButton');
@@ -967,13 +966,9 @@ describe('DateRangePickerControl', () => {
       expect(refreshBtn).toHaveTextContent('00:04');
     });
 
-    it('shows the auto-refresh append control while editing when `settings.autoRefresh` is set', async () => {
+    it('shows the auto-refresh append control while editing when `autoRefresh` is set', async () => {
       renderWithEuiTheme(
-        <DateRangePicker
-          {...defaultProps}
-          onRefresh={onRefresh}
-          settings={{ ...autoRefreshSettings }}
-        />
+        <DateRangePicker {...defaultProps} onRefresh={onRefresh} autoRefresh={autoRefresh} />
       );
 
       openEditing();
@@ -985,15 +980,15 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
-    it('calls `onSettingsChange` when the auto-refresh append control is clicked', async () => {
-      const onSettingsChange = jest.fn();
+    it('calls `onAutoRefreshChange` when the auto-refresh append control is clicked', async () => {
+      const onAutoRefreshChange = jest.fn();
 
       renderWithEuiTheme(
         <DateRangePicker
           {...defaultProps}
           onRefresh={onRefresh}
-          settings={{ ...autoRefreshSettings }}
-          onSettingsChange={onSettingsChange}
+          autoRefresh={autoRefresh}
+          onAutoRefreshChange={onAutoRefreshChange}
         />
       );
 
@@ -1001,11 +996,7 @@ describe('DateRangePickerControl', () => {
 
       fireEvent.click(screen.getByTestId('dateRangePickerAutoRefreshButton'));
 
-      expect(onSettingsChange).toHaveBeenCalledWith(
-        expect.objectContaining({
-          autoRefresh: expect.objectContaining({ isPaused: true }),
-        })
-      );
+      expect(onAutoRefreshChange).toHaveBeenCalledWith(expect.objectContaining({ isPaused: true }));
 
       fireEvent.keyDown(screen.getByTestId('dateRangePickerInput'), { key: 'Escape' });
 
@@ -1013,14 +1004,14 @@ describe('DateRangePickerControl', () => {
     });
 
     it('remains interactive when readOnly is true, unlike the control button', () => {
-      const onSettingsChange = jest.fn();
+      const onAutoRefreshChange = jest.fn();
 
       renderWithEuiTheme(
         <DateRangePicker
           {...defaultProps}
           onRefresh={onRefresh}
-          settings={{ ...autoRefreshSettings }}
-          onSettingsChange={onSettingsChange}
+          autoRefresh={autoRefresh}
+          onAutoRefreshChange={onAutoRefreshChange}
           readOnly
         />
       );
@@ -1029,22 +1020,14 @@ describe('DateRangePickerControl', () => {
 
       fireEvent.click(screen.getByTestId('dateRangePickerAutoRefreshButton'));
 
-      expect(onSettingsChange).toHaveBeenCalledWith(
-        expect.objectContaining({
-          autoRefresh: expect.objectContaining({ isPaused: true }),
-        })
-      );
+      expect(onAutoRefreshChange).toHaveBeenCalledWith(expect.objectContaining({ isPaused: true }));
     });
 
-    it('calls `onRefresh` on each interval while `settings.autoRefresh` is active', () => {
+    it('calls `onRefresh` on each interval while `autoRefresh` is active', () => {
       const tickOnRefresh = jest.fn();
 
       renderWithEuiTheme(
-        <DateRangePicker
-          {...defaultProps}
-          settings={{ ...autoRefreshSettings }}
-          onRefresh={tickOnRefresh}
-        />
+        <DateRangePicker {...defaultProps} autoRefresh={autoRefresh} onRefresh={tickOnRefresh} />
       );
 
       act(() => {
@@ -1062,20 +1045,17 @@ describe('DateRangePickerControl', () => {
       expect(tickOnRefresh).toHaveBeenLastCalledWith();
     });
 
-    it('does not call `onRefresh` while `settings.autoRefresh.isPaused` is true', () => {
+    it('does not call `onRefresh` while `autoRefresh.isPaused` is true', () => {
       const pausedOnRefresh = jest.fn();
 
       renderWithEuiTheme(
         <DateRangePicker
           {...defaultProps}
-          settings={{
-            roundRelativeTime: true,
-            autoRefresh: {
-              isEnabled: true,
-              isPaused: true,
-              intervalMs: 1000,
-              intervalDisplayUnit: 's',
-            },
+          autoRefresh={{
+            isEnabled: true,
+            isPaused: true,
+            intervalMs: 1000,
+            intervalDisplayUnit: 's',
           }}
           onRefresh={pausedOnRefresh}
         />
@@ -1088,20 +1068,17 @@ describe('DateRangePickerControl', () => {
       expect(pausedOnRefresh).not.toHaveBeenCalled();
     });
 
-    it('does not call `onRefresh` while `settings.autoRefresh.isEnabled` is false', () => {
+    it('does not call `onRefresh` while `autoRefresh.isEnabled` is false', () => {
       const disabledOnRefresh = jest.fn();
 
       renderWithEuiTheme(
         <DateRangePicker
           {...defaultProps}
-          settings={{
-            roundRelativeTime: true,
-            autoRefresh: {
-              isEnabled: false,
-              isPaused: false,
-              intervalMs: 1000,
-              intervalDisplayUnit: 's',
-            },
+          autoRefresh={{
+            isEnabled: false,
+            isPaused: false,
+            intervalMs: 1000,
+            intervalDisplayUnit: 's',
           }}
           onRefresh={disabledOnRefresh}
         />
@@ -1123,14 +1100,11 @@ describe('DateRangePickerControl', () => {
     const BOUNDS_AFTER_1M = 'Jun 4, 2026, 11:41:00.000 → Jun 4, 2026, 12:01:00.000';
     const BOUNDS_AFTER_5M = 'Jun 4, 2026, 11:45:00.000 → Jun 4, 2026, 12:05:00.000';
 
-    const autoRefreshSettings: DateRangePickerProps['settings'] = {
-      roundRelativeTime: false,
-      autoRefresh: {
-        isEnabled: true,
-        isPaused: false,
-        intervalMs: 60_000,
-        intervalDisplayUnit: 'm',
-      },
+    const autoRefresh: DateRangePickerProps['autoRefresh'] = {
+      isEnabled: true,
+      isPaused: false,
+      intervalMs: 60_000,
+      intervalDisplayUnit: 'm',
     };
 
     beforeEach(() => {
@@ -1244,7 +1218,7 @@ describe('DateRangePickerControl', () => {
 
     it('re-resolves the bounds when the auto-refresh timer fires', () => {
       const onRefresh = jest.fn();
-      renderPicker({ onRefresh, settings: autoRefreshSettings });
+      renderPicker({ onRefresh, autoRefresh });
       expect(hoverTooltipText()).toContain(INITIAL_BOUNDS);
 
       act(() => {
@@ -1260,7 +1234,7 @@ describe('DateRangePickerControl', () => {
       const { rerenderPicker } = renderPicker({
         onRefresh,
         resolveEpoch: 0,
-        settings: autoRefreshSettings,
+        autoRefresh,
       });
 
       expect(autoRefreshCountdown()).toHaveTextContent('01:00');
@@ -1271,7 +1245,7 @@ describe('DateRangePickerControl', () => {
       expect(autoRefreshCountdown()).toHaveTextContent('00:45');
 
       advanceClockBy(5);
-      rerenderPicker({ onRefresh, resolveEpoch: 1, settings: autoRefreshSettings });
+      rerenderPicker({ onRefresh, resolveEpoch: 1, autoRefresh });
 
       expect(hoverTooltipText()).toContain(BOUNDS_AFTER_5M);
       expect(autoRefreshCountdown()).toHaveTextContent('00:45');
@@ -1282,7 +1256,7 @@ describe('DateRangePickerControl', () => {
       const { rerenderPicker } = renderPicker({
         onRefresh,
         refreshEpoch: 0,
-        settings: autoRefreshSettings,
+        autoRefresh,
       });
 
       act(() => {
@@ -1291,7 +1265,7 @@ describe('DateRangePickerControl', () => {
       expect(autoRefreshCountdown()).toHaveTextContent('00:45');
 
       advanceClockBy(5);
-      rerenderPicker({ onRefresh, refreshEpoch: 1, settings: autoRefreshSettings });
+      rerenderPicker({ onRefresh, refreshEpoch: 1, autoRefresh });
 
       expect(hoverTooltipText()).toContain(BOUNDS_AFTER_5M);
       expect(autoRefreshCountdown()).toHaveTextContent('01:00');

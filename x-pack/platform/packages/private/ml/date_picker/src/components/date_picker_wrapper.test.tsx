@@ -190,7 +190,7 @@ describe('<DatePickerWrapper />', () => {
     // assert
     // Show warning that the interval set is too short
     expect(displayWarningSpy).toHaveBeenCalled();
-    const { autoRefresh } = MockedDateRangePicker.mock.calls[0][0].settings;
+    const { autoRefresh } = MockedDateRangePicker.mock.calls[0][0];
     expect(autoRefresh?.isPaused).toBe(false);
     expect(autoRefresh?.intervalMs).toBe(5000);
   });
@@ -208,7 +208,7 @@ describe('<DatePickerWrapper />', () => {
 
     // assert
     expect(displayWarningSpy).toHaveBeenCalled();
-    const { autoRefresh } = MockedDateRangePicker.mock.calls[0][0].settings;
+    const { autoRefresh } = MockedDateRangePicker.mock.calls[0][0];
     expect(autoRefresh?.isPaused).toBe(false);
     expect(autoRefresh?.intervalMs).toBe(10);
   });
@@ -220,7 +220,7 @@ describe('<DatePickerWrapper />', () => {
     render(<DatePickerWrapper />);
 
     const calledWith = MockedDateRangePicker.mock.calls[0][0];
-    expect(calledWith.settings.autoRefresh).toEqual({
+    expect(calledWith.autoRefresh).toEqual({
       isEnabled: true,
       isPaused: false,
       intervalMs: 10000,
@@ -247,24 +247,21 @@ describe('<DatePickerWrapper />', () => {
 
     render(<DatePickerWrapper isAutoRefreshOnly showRefresh />);
 
-    const { settings, onSettingsChange } = MockedDateRangePicker.mock.calls[0][0];
-    expect(settings.autoRefresh?.isEnabled).toBe(true);
+    const { autoRefresh, onAutoRefreshChange } = MockedDateRangePicker.mock.calls[0][0];
+    expect(autoRefresh?.isEnabled).toBe(true);
 
     act(() => {
-      onSettingsChange?.({
-        ...settings,
-        autoRefresh: {
-          isEnabled: false,
-          isPaused: false,
-          intervalMs: 10000,
-          intervalDisplayUnit: 's',
-        },
+      onAutoRefreshChange?.({
+        isEnabled: false,
+        isPaused: true,
+        intervalMs: 10000,
+        intervalDisplayUnit: 's',
       });
     });
 
     const latestCall =
       MockedDateRangePicker.mock.calls[MockedDateRangePicker.mock.calls.length - 1];
-    expect(latestCall[0].settings.autoRefresh?.isEnabled).toBe(false);
+    expect(latestCall[0].autoRefresh?.isEnabled).toBe(false);
   });
 
   test('should show the auto-refresh toggle as off when the refresh interval is paused', () => {
@@ -273,7 +270,7 @@ describe('<DatePickerWrapper />', () => {
 
     render(<DatePickerWrapper isAutoRefreshOnly showRefresh />);
 
-    expect(MockedDateRangePicker.mock.calls[0][0].settings.autoRefresh?.isEnabled).toBe(false);
+    expect(MockedDateRangePicker.mock.calls[0][0].autoRefresh?.isEnabled).toBe(false);
   });
 
   test('should show the full picker when a time range is shown', () => {

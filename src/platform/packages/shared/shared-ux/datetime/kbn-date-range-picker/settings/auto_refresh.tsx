@@ -35,7 +35,12 @@ const AUTO_REFRESH_UNIT_OPTIONS: Array<{ value: AutoRefreshIntervalUnit; text: s
  * "Refresh every" row which contains switch toggle to enable/disable auto-refresh, count input and unit select.
  */
 export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings }) {
-  const { settings, onSettingsChange } = useDateRangePickerContext();
+  const { onAutoRefreshChange } = useDateRangePickerContext();
+
+  const onChange = useCallback(
+    (next: AutoRefreshSettings) => onAutoRefreshChange?.(next),
+    [onAutoRefreshChange]
+  );
 
   const derived = msToAutoRefreshInterval(autoRefresh.intervalMs, autoRefresh.intervalDisplayUnit);
 
@@ -56,15 +61,11 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
     }
   }, [autoRefresh.intervalMs, autoRefresh.intervalDisplayUnit]);
 
+  // Turning auto-refresh on also starts the timer, so a second click on play is not needed.
   const handleToggle = useCallback(() => {
-    onSettingsChange({
-      ...settings,
-      autoRefresh: {
-        ...autoRefresh,
-        isEnabled: !autoRefresh.isEnabled,
-      },
-    });
-  }, [settings, onSettingsChange, autoRefresh]);
+    const isEnabled = !autoRefresh.isEnabled;
+    onChange({ ...autoRefresh, isEnabled, isPaused: !isEnabled });
+  }, [onChange, autoRefresh]);
 
   const handleCountChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -75,16 +76,10 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
       setCountInput(parsed);
 
       if (typeof parsed === 'number' && !isNaN(parsed) && parsed > 0) {
-        onSettingsChange({
-          ...settings,
-          autoRefresh: {
-            ...autoRefresh,
-            intervalMs: autoRefreshIntervalToMs(parsed, derived.unit),
-          },
-        });
+        onChange({ ...autoRefresh, intervalMs: autoRefreshIntervalToMs(parsed, derived.unit) });
       }
     },
-    [settings, onSettingsChange, autoRefresh, derived.unit]
+    [onChange, autoRefresh, derived.unit]
   );
 
   const handleUnitChange = useCallback(
@@ -92,16 +87,13 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
       const newUnit = e.target.value as AutoRefreshIntervalUnit;
       const currentCount = typeof countInput === 'number' && countInput > 0 ? countInput : 1;
 
-      onSettingsChange({
-        ...settings,
-        autoRefresh: {
-          ...autoRefresh,
-          intervalMs: autoRefreshIntervalToMs(currentCount, newUnit),
-          intervalDisplayUnit: newUnit,
-        },
+      onChange({
+        ...autoRefresh,
+        intervalMs: autoRefreshIntervalToMs(currentCount, newUnit),
+        intervalDisplayUnit: newUnit,
       });
     },
-    [settings, onSettingsChange, autoRefresh, countInput]
+    [onChange, autoRefresh, countInput]
   );
 
   return (
