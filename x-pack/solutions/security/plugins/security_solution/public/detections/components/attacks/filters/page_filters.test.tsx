@@ -127,10 +127,10 @@ describe('PageFilters', () => {
     ];
     jest
       .spyOn(alertFilterControlsPackage, 'AlertFilterControls')
-      .mockImplementationOnce((props) => {
+      .mockImplementationOnce(({ setControlsUrlState }) => {
         useEffect(() => {
-          props.setControlsUrlState!(controlsConfig);
-        }, [props.setControlsUrlState]);
+          setControlsUrlState!(controlsConfig);
+        }, [setControlsUrlState]);
         return <span />;
       });
 

@@ -16,6 +16,7 @@ import type {
   AgentExecutionMode,
   InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
+import type { ModelSource } from '../runner';
 import type { AgentParams, AgentResponse, ExecutionConversationAccess } from './provider';
 import type { ExecutionRunAs } from '../execution/types';
 
@@ -86,10 +87,10 @@ export interface RunAgentParams {
    */
   request: KibanaRequest;
   /**
-   * Optional genAI connector id to use as default.
+   * Where the run's default model comes from: an explicit connector or an inference feature.
    * If unspecified, will use internal logic to use the default connector
    */
-  defaultConnectorId?: string;
+  defaultModel?: ModelSource;
   /**
    * Optional connector telemetry used to attribute this run's LLM calls to a specific
    * feature. When omitted, the default Agent Builder telemetry is used.

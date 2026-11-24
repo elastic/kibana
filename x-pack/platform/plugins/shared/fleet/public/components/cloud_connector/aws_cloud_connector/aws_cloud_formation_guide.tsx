@@ -17,11 +17,18 @@ const CLOUD_FORMATION_EXTERNAL_DOC_URL =
 
 export type CloudFormationCredentialType = 'identity_federation' | 'direct_access_keys';
 
+/**
+ * How the setup finishes once the stack exists: the user pastes values from the stack outputs
+ * into the form below, or the stack reports back to Kibana and the form completes on its own.
+ */
+export type CloudFormationCompletion = 'paste' | 'callback';
+
 export interface CloudFormationCloudCredentialsGuideProps {
   accountType?: AccountType;
   credentialType?: CloudFormationCredentialType;
   /** Whether the form below asks for an External ID next to the Role ARN. */
   hasExternalId?: boolean;
+  completion?: CloudFormationCompletion;
 }
 
 export const CloudFormationCloudCredentialsGuide: React.FC<
@@ -30,37 +37,43 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
   accountType = ORGANIZATION_ACCOUNT,
   credentialType = 'identity_federation',
   hasExternalId = false,
+  completion = 'paste',
 }) => {
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
+  const reportsBack = completion === 'callback';
 
-  const lastStep =
-    credentialType === 'direct_access_keys' ? (
-      <FormattedMessage
-        id="xpack.fleet.cloudConnector.aws.guide.steps.accessKeyCredentials"
-        defaultMessage="Copy {accessKeyId} and {secretAccessKey} then paste the credentials below"
-        values={{
-          accessKeyId: <strong>{'Access Key ID'}</strong>,
-          secretAccessKey: <strong>{'Secret Access Key'}</strong>,
-        }}
-      />
-    ) : hasExternalId ? (
-      <FormattedMessage
-        id="xpack.fleet.cloudConnector.aws.guide.steps.credentials"
-        defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
-        values={{
-          role: <strong>{'Role ARN'}</strong>,
-          external_id: <strong>{'External ID'}</strong>,
-        }}
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.fleet.cloudConnector.aws.guide.steps.roleArnCredentials"
-        defaultMessage="Copy {role} then paste it below"
-        values={{
-          role: <strong>{'Role ARN'}</strong>,
-        }}
-      />
-    );
+  const lastStep = reportsBack ? (
+    <FormattedMessage
+      id="xpack.fleet.cloudConnector.aws.guide.steps.reportedBack"
+      defaultMessage="Return to this page. The stack reports back to Kibana, and the federated identity is created and selected here for you."
+    />
+  ) : credentialType === 'direct_access_keys' ? (
+    <FormattedMessage
+      id="xpack.fleet.cloudConnector.aws.guide.steps.accessKeyCredentials"
+      defaultMessage="Copy {accessKeyId} and {secretAccessKey} then paste the credentials below"
+      values={{
+        accessKeyId: <strong>{'Access Key ID'}</strong>,
+        secretAccessKey: <strong>{'Secret Access Key'}</strong>,
+      }}
+    />
+  ) : hasExternalId ? (
+    <FormattedMessage
+      id="xpack.fleet.cloudConnector.aws.guide.steps.credentials"
+      defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
+      values={{
+        role: <strong>{'Role ARN'}</strong>,
+        external_id: <strong>{'External ID'}</strong>,
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.cloudConnector.aws.guide.steps.roleArnCredentials"
+      defaultMessage="Copy {role} then paste it below"
+      values={{
+        role: <strong>{'Role ARN'}</strong>,
+      }}
+    />
+  );
 
   return (
     <div>
@@ -163,13 +176,20 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
             />
           </li>
           <li>
-            <FormattedMessage
-              id="xpack.fleet.cloudConnector.aws.guide.steps.stackStatus"
-              defaultMessage="Once stack status is {createComplete} then click the Outputs tab"
-              values={{
-                createComplete: <strong>{'CREATE_COMPLETE'}</strong>,
-              }}
-            />
+            {reportsBack ? (
+              <FormattedMessage
+                id="xpack.fleet.cloudConnector.aws.guide.steps.stackStatusReportedBack"
+                defaultMessage="Waiting for the AWS CloudFormation stack to finish"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.cloudConnector.aws.guide.steps.stackStatus"
+                defaultMessage="Once stack status is {createComplete} then click the Outputs tab"
+                values={{
+                  createComplete: <strong>{'CREATE_COMPLETE'}</strong>,
+                }}
+              />
+            )}
           </li>
           <li>{lastStep}</li>
         </ol>

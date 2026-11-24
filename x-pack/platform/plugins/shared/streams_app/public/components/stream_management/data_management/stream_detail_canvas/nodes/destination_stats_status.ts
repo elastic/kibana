@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { DestinationViewModel } from '../../../../streams_layout/destinations/types';
+import {
+  REMOTE_ELASTICSEARCH_TYPE,
+  type DestinationViewModel,
+} from '../../../../streams_layout/destinations/types';
 
 /**
  * The destination types that currently report collector metrics.
  */
 export const DESTINATION_TYPES_WITH_STATS: ReadonlyArray<DestinationViewModel['type']> = [
   'elasticsearch',
+  REMOTE_ELASTICSEARCH_TYPE,
+  's3',
 ];

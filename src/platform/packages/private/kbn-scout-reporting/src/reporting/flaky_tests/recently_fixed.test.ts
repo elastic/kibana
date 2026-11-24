@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SetupBuilds } from './breakages';
+import type { BuildOutcome, SetupBuilds } from './breakages';
 import { describeFix, lastFailures, looksFixed } from './recently_fixed';
 
 const FIRST_BUILD_AT = Date.UTC(2026, 9, 1);
@@ -20,14 +20,15 @@ const setupBuilds = (
 ): SetupBuilds => ({
   branch,
   setup,
-  builds: [...pattern].map((outcome, index) => {
+  builds: [...pattern].map((mark, index) => {
     const ranAt = new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS);
+    const outcome: BuildOutcome = mark === 'x' ? 'failed' : 'passed';
     return {
       buildId: `build-${first + index}`,
       buildNumber: first + index,
-      failed: outcome === 'x',
+      outcome,
       ranAt,
-      failedAt: outcome === 'x' ? ranAt : undefined,
+      failedAt: mark === 'x' ? ranAt : undefined,
     };
   }),
 });
@@ -55,6 +56,26 @@ describe('lastFailures', () => {
     expect(lastFailures([{ ...setup, builds: [{ ...retried, failedAt }, ...later] }])).toEqual(
       // only build 4 ran after the retry
       [{ branch: 'main', at: failedAt, cleanBuilds: 1 }]
+    );
+  });
+
+  it('finds the last failure of a pipeline judged on its own apart from the same branch', () => {
+    const setups = [
+      setupBuilds('x.......'),
+      { ...setupBuilds('.....x..', { setup: 'kibana-fips a.config.ts' }), pipeline: 'kibana-fips' },
+    ];
+
+    expect(lastFailures(setups)).toEqual([
+      { branch: 'main', at: new Date(FIRST_BUILD_AT + 1 * HOUR_MS), cleanBuilds: 7 },
+      {
+        branch: 'main',
+        pipeline: 'kibana-fips',
+        at: new Date(FIRST_BUILD_AT + 6 * HOUR_MS),
+        cleanBuilds: 2,
+      },
+    ]);
+    expect(describeFix(lastFailures(setups)[1])).toBe(
+      'no failures in the 2 builds on main in kibana-fips since 2026-10-01'
     );
   });
 

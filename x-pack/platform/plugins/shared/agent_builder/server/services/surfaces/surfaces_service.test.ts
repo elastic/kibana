@@ -6,12 +6,7 @@
  */
 
 import * as isomerSlack from '@elastic/isomer-sdk/slack';
-import {
-  ChatEventType,
-  ConversationOriginType,
-  ConversationRoundStatus,
-  type RoundCompleteEvent,
-} from '@kbn/agent-builder-common';
+import { ConversationOriginType } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { IBasePath } from '@kbn/core/server';
@@ -40,25 +35,14 @@ const esqlAttachment: VersionedAttachment = {
   ],
 };
 
-const createRoundCompleteEvent = (
-  message: string,
-  attachments: VersionedAttachment[] = []
-): RoundCompleteEvent => ({
-  type: ChatEventType.roundComplete,
-  data: {
-    round: {
-      id: 'round-1',
-      status: ConversationRoundStatus.completed,
-      input: { message: 'user message' },
-      response: { message },
-      steps: [],
-      started_at: '2026-10-06T00:00:00.000Z',
-      time_to_first_token: 0,
-      time_to_last_token: 0,
-      model_usage: { connector_id: 'unknown', input_tokens: 0, output_tokens: 0, llm_calls: 0 },
-    },
-    attachments,
-  },
+interface Response {
+  message: string;
+  attachments: VersionedAttachment[];
+}
+
+const createResponse = (message: string, attachments: VersionedAttachment[] = []): Response => ({
+  message,
+  attachments,
 });
 
 const unmappedAttachmentsService = {
@@ -74,7 +58,7 @@ const context = {
 const basePath = { publicBaseUrl: 'https://kibana.example.com' } as IBasePath;
 
 const renderPayload = (
-  event: RoundCompleteEvent,
+  response: Response,
   attachmentsService: AttachmentServiceStart = unmappedAttachmentsService,
   kibanaBasePath: IBasePath = basePath
 ) =>
@@ -84,17 +68,17 @@ const renderPayload = (
     isomer: isomerPluginMock.createStartContract(),
     basePath: kibanaBasePath,
     cloud: undefined,
-  }).renderPayload(event, { originType: ConversationOriginType.Slack, ...context });
+  }).renderPayload(response, { originType: ConversationOriginType.Slack, ...context });
 
 describe('renderPayload', () => {
   it('renders the payload of the round surface', async () => {
-    const payload = await renderPayload(createRoundCompleteEvent('Hello'));
+    const payload = await renderPayload(createResponse('Hello'));
 
     expect(payload?.text).toBe('Hello');
   });
 
   it('renders mapped attachments in place of their tags', async () => {
-    const event = createRoundCompleteEvent(
+    const event = createResponse(
       'Here is the query:\n\n<render_attachment id="a1" version="1" />',
       [esqlAttachment]
     );
@@ -110,14 +94,11 @@ describe('renderPayload', () => {
 
     expect(slack).toContain('FROM logs | LIMIT 10');
     expect(slack).not.toContain('render_attachment');
-    expect(toSurfaceComposition).toHaveBeenCalledWith(expect.anything(), {
-      ...context,
-      kibanaUrl: 'https://kibana.example.com/s/space-1',
-    });
+    expect(toSurfaceComposition).toHaveBeenCalledWith(expect.anything(), context);
   });
 
   describe('Kibana app links', () => {
-    const event = createRoundCompleteEvent('See: <render_attachment id="a1" />', [esqlAttachment]);
+    const event = createResponse('See: <render_attachment id="a1" />', [esqlAttachment]);
     const attachmentsService = {
       getTypeDefinition: () => ({
         toSurfaceComposition: () => ({
@@ -142,7 +123,7 @@ describe('renderPayload', () => {
   });
 
   it('leaves out unmapped attachments', async () => {
-    const event = createRoundCompleteEvent('Here: <render_attachment id="a1" />', [esqlAttachment]);
+    const event = createResponse('Here: <render_attachment id="a1" />', [esqlAttachment]);
 
     const slack = JSON.stringify(await renderPayload(event));
 
@@ -156,7 +137,7 @@ describe('renderPayload', () => {
       throw new Error('boom');
     });
 
-    await expect(renderPayload(createRoundCompleteEvent('Hello'))).resolves.toBeUndefined();
+    await expect(renderPayload(createResponse('Hello'))).resolves.toBeUndefined();
   });
 
   it('renders a later round after the runtime fails to load', async () => {
@@ -170,7 +151,7 @@ describe('renderPayload', () => {
       basePath,
       cloud: undefined,
     });
-    const event = createRoundCompleteEvent('Hello');
+    const event = createResponse('Hello');
     const options = { originType: ConversationOriginType.Slack, ...context };
 
     await expect(service.renderPayload(event, options)).resolves.toBeUndefined();
@@ -183,11 +164,11 @@ describe('renderPayload', () => {
   });
 
   it('renders nothing when the message is empty', async () => {
-    await expect(renderPayload(createRoundCompleteEvent(''))).resolves.toBeUndefined();
+    await expect(renderPayload(createResponse(''))).resolves.toBeUndefined();
   });
 
   it('renders nothing when none of the message can be rendered', async () => {
-    const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
+    const event = createResponse('<render_attachment id="a1" />', [esqlAttachment]);
 
     await expect(renderPayload(event)).resolves.toBeUndefined();
   });
@@ -203,7 +184,7 @@ describe('renderPayload', () => {
     });
 
     await expect(
-      surfacesService.renderPayload(createRoundCompleteEvent('Hello'), {
+      surfacesService.renderPayload(createResponse('Hello'), {
         originType: undefined,
         ...context,
       })

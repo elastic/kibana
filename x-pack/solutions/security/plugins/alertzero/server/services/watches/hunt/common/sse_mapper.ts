@@ -34,7 +34,7 @@ import {
   SSE_TIER1_HIT_BULLET_PREFIX,
   SSE_TIER2_HIT_BULLET_PREFIX,
 } from '../../../../../common/sse_view';
-import { splitRemoteCluster, stripBackingPrefix } from '../../../../../common/remote_cluster';
+import { isDotPrefixedIndex, splitRemoteCluster } from '../../../../../common/remote_cluster';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
 import { clausesOf, type HuntFilterClause } from '../tier2/report_grounding';
 import { HostOrigins, toEntityOrigin } from './host_origin';
@@ -347,8 +347,7 @@ const hostOrigins = (result: HuntCoordinatorCoreResult, onlyTechniqueId?: string
  * backing prefix first so `.ds-logs-aws...` is not mistaken for a hidden index and
  * `remote:.alerts-...` is not mistaken for an event index.
  */
-const isAlertsIndex = (name: string): boolean =>
-  splitRemoteCluster(stripBackingPrefix(name)).index.startsWith('.');
+const isAlertsIndex = (name: string): boolean => isDotPrefixedIndex(name);
 
 /**
  * Every alert exit ramp is pinned to this space's local alerts alias, so an alert on a
@@ -968,7 +967,11 @@ const buildEntry = ({
     data: {
       ...chrome,
       ...(summary.length > 0 ? { summary } : {}),
-      ...(detections.length > 0 ? { basis, detections } : {}),
+      // `detections` is written even when empty: the reader treats a stored array as
+      // authoritative and derives from the report-wide `per_ioc` only when it is absent,
+      // so an entry with nothing in scope cannot pick up another technique's IOCs.
+      detections,
+      ...(detections.length > 0 ? { basis } : {}),
       source_watch: SOURCE_WATCH_MANAGED_ID,
       capability: CAPABILITY_ID,
       run_id: result.run_id,

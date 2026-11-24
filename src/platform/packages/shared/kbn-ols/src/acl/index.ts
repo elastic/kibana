@@ -7,4 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { Acl, AclEntry, AclState, StoredAcl, StoredAclEntry } from './types';
+export { ACL_MAPPING } from './acl_mapping';
+export { ACL_FIELD, normalizeAclSource, toAclSource } from './acl_source';
+export { getAclState } from './acl_state';
+export type {
+  Acl,
+  AclEntry,
+  AclGeneral,
+  AclGrant,
+  AclState,
+  StoredAcl,
+  StoredAclEntry,
+  StoredAclGeneral,
+} from './types';

@@ -11,6 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationActionsSection } from './automation_actions_section';
 import type { SlackActionFormValues } from '../automation_form_values';
 
+jest.mock('../../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({ services: { application: { getUrlForApp: () => '' } } }),
+}));
+
 jest.mock('../../../../../data/relay_apps/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../../../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
@@ -44,8 +48,14 @@ const ActionsSection = () => {
 describe('AutomationActionsSection', () => {
   beforeEach(() => onSlackActionChange.mockClear());
 
-  it('adds, edits, and removes a Slack action', async () => {
+  it('adds, edits, and removes a Slack notification', async () => {
     render(<ActionsSection />);
+
+    expect(screen.getByText('Notifications')).toBeInTheDocument();
+    expect(
+      screen.getByText('Choose where Nightshift posts when this automation runs.')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('automationAddAction')).toHaveTextContent('Add notification');
 
     fireEvent.click(screen.getByTestId('automationAddAction'));
     fireEvent.click(await screen.findByTestId('automationAddSlackAction'));
@@ -63,9 +73,24 @@ describe('AutomationActionsSection', () => {
     expect(screen.queryByLabelText('Where to respond')).not.toBeInTheDocument();
     expect(screen.queryByText('Direct message')).not.toBeInTheDocument();
 
+    expect(screen.getByTestId('automationRemoveSlackAction')).toHaveAttribute(
+      'aria-label',
+      'Remove notification'
+    );
     fireEvent.click(screen.getByTestId('automationRemoveSlackAction'));
     expect(onSlackActionChange).toHaveBeenLastCalledWith(undefined);
     expect(screen.getByTestId('automationAddAction')).toBeInTheDocument();
+  });
+
+  it('shows an empty state when read only without a notification', () => {
+    render(
+      <I18nProvider>
+        <AutomationActionsSection readOnly onSlackActionChange={onSlackActionChange} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Notifications')).toBeInTheDocument();
+    expect(screen.getByText('No notifications')).toBeInTheDocument();
   });
 
   it('shows the channel name when read only', () => {

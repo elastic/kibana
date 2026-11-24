@@ -15,6 +15,7 @@ import type {
   Conversation,
   ConversationRoundStep,
   ConverseInput,
+  DynamicToolDefinition,
   RoundCompleteEvent,
   TimelineEvent,
   ToolCallStep,
@@ -298,6 +299,56 @@ describe('renderVisibleContext', () => {
     }
   });
 
+  describe('a steer the current run read', () => {
+    const delivered: ConversationRoundStep = {
+      type: ConversationRoundStepType.deliveredMessage,
+      event_id: 'steer-1',
+      author: { type: 'user', id: 'u1' },
+      is_run_owner: true,
+      message: 'STEER_TEXT',
+      delivered_at: '2026-01-01T00:00:00.000Z',
+      cycle: 1,
+      tool_call_group_id: 'x1',
+    } as ConversationRoundStep;
+    const steps = [call('x1'), delivered, call('x2'), call('x3')];
+    const currentRun = (cursor?: CompactionCursor) =>
+      run(steps, { cursor, renderState: renderStateOf(['x1', 'x2', 'x3']) });
+
+    it('stays after the request once its cycle is covered, rendered once', async () => {
+      for (const cursor of [undefined, { round_id: 'current', tool_call_id: 'x2' }]) {
+        const rendered = text(
+          await renderVisibleContext(
+            {
+              conversation: conversation(twoRoundTimeline()),
+              run: currentRun(cursor),
+              phase: 'research',
+            },
+            deps()
+          )
+        );
+        expect(rendered.split('STEER_TEXT')).toHaveLength(2);
+        expect(rendered.indexOf('STEER_TEXT')).toBeGreaterThan(rendered.indexOf('NEXT_INPUT'));
+        expect(rendered.indexOf('STEER_TEXT')).toBeLessThan(rendered.indexOf('RAW_x3'));
+      }
+    });
+
+    it('is in the unit of its own cycle only, so later units and their estimates leave it out', async () => {
+      const convo = conversation(twoRoundTimeline());
+      const view = buildContextView({ conversation: convo, run: currentRun() }, deps());
+      const units = listVisibleUnits({
+        entries: view.history.entries,
+        steps,
+        visibility: view.visibility,
+      }).filter((unit) => unit.kind === 'current_cycle');
+      const rendered = await Promise.all(
+        units.map(async (unit) =>
+          text(await renderUnit(unit, { view, run: currentRun(), conversation: convo }))
+        )
+      );
+      expect(rendered.map((unit) => unit.includes('STEER_TEXT'))).toEqual([false, true, false]);
+    });
+  });
+
   it('renders the custom events after the cursor, and hides the ones it covers', async () => {
     const [roundA, roundB] = [
       { id: 'a', input: { message: 'FIRST_INPUT', attachments: [] }, steps: [call('a1')] },
@@ -322,6 +373,90 @@ describe('renderVisibleContext', () => {
     expect(rendered).not.toContain('FIRST_INPUT');
     expect(rendered).not.toContain('COVERED_TEXT');
     expect(rendered.indexOf('VISIBLE_TEXT')).toBeLessThan(rendered.indexOf('SECOND_INPUT'));
+  });
+
+  describe('dynamic tool definitions', () => {
+    const definition = (id: string): DynamicToolDefinition => ({
+      tool_id: id,
+      description: `${id} description`,
+      parameters: { type: 'object', properties: {} },
+    });
+
+    const runWithSnapshot = (dynamicTools?: DynamicToolDefinition[]): CurrentRun => {
+      const current = run([], { cursor: { round_id: 'a', tool_call_id: 'a1' } });
+      return {
+        ...current,
+        compactionSummary: { ...current.compactionSummary!, dynamic_tools: dynamicTools },
+      };
+    };
+
+    it('re-injects the summary snapshot right after the summary', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: runWithSnapshot([definition('dynamic-1')]),
+          phase: 'research',
+        },
+        deps()
+      );
+      const rendered = text(messages);
+
+      expect(rendered.indexOf('SUMMARY_TEXT')).toBeLessThan(rendered.indexOf('<dynamic_tools>'));
+      expect(rendered.indexOf('<dynamic_tools>')).toBeLessThan(rendered.indexOf('FIRST_INPUT'));
+      // `text` JSON-encodes the messages, so match on the content rather than the quoting
+      expect(rendered).toContain('tool_id');
+      expect(rendered).toContain('dynamic-1 description');
+    });
+
+    it('renders the same notice when tools are loaded after the compaction', async () => {
+      const snapshot = runWithSnapshot([definition('dynamic-1')]);
+      const before = await renderVisibleContext(
+        { conversation: conversation(twoRoundTimeline()), run: snapshot, phase: 'research' },
+        deps()
+      );
+      // a skill loaded after the compaction adds a tool call to the run, not to the snapshot
+      const after = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: { ...snapshot, steps: [...snapshot.steps, call('late-load')] },
+          phase: 'research',
+        },
+        deps()
+      );
+
+      const notice = (messages: BaseMessage[]) =>
+        messages.find((message) => String(message.content).startsWith('<dynamic_tools>'))?.content;
+      expect(notice(after)).toEqual(notice(before));
+      expect(text(after)).not.toContain('late-load description');
+    });
+
+    it('renders nothing for a summary without a snapshot', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: runWithSnapshot(undefined),
+          phase: 'research',
+        },
+        deps()
+      );
+
+      expect(text(messages)).toContain('SUMMARY_TEXT');
+      expect(text(messages)).not.toContain('<dynamic_tools>');
+    });
+
+    it('renders nothing in the answer phase, which has no tools', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: runWithSnapshot([definition('dynamic-1')]),
+          phase: 'answer',
+        },
+        deps()
+      );
+
+      expect(text(messages)).toContain('SUMMARY_TEXT');
+      expect(text(messages)).not.toContain('<dynamic_tools>');
+    });
   });
 });
 

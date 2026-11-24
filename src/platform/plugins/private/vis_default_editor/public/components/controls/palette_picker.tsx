@@ -14,7 +14,7 @@ import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getAppendedTag } from '@kbn/palettes';
+import { getAppendedTag } from '@kbn/palettes-components';
 
 const DEFAULT_PALETTE = 'default';
 

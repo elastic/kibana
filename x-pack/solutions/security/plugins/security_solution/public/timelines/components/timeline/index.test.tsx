@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
@@ -110,16 +110,16 @@ describe('StatefulTimeline', () => {
   });
 
   test('renders ', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulTimeline {...props} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="timeline"]')).toBeTruthy();
+    expect(screen.getByTestId('timeline')).toBeInTheDocument();
   });
 
   test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`, () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <StatefulTimeline {...props} />
@@ -127,10 +127,9 @@ describe('StatefulTimeline', () => {
       </TestProviders>
     );
     expect(
-      wrapper
-        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
-        .first()
-        .exists()
-    ).toEqual(true);
+      container.querySelector(
+        `[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`
+      )
+    ).toBeInTheDocument();
   });
 });
