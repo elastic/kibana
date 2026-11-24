@@ -11,6 +11,7 @@ import {
   MAP_SPAN_BUDGET,
   buildDurationStatsQuery,
   buildLatencyGridQuery,
+  buildOperationHistogramQuery,
   getMapQueryParts,
   getMapSampling,
   getMapSource,
@@ -68,6 +69,27 @@ describe('latency map queries', () => {
       'b == 2',
     ]);
     expect(getMapSource(source, {})).toBe(source);
+  });
+
+  it('bins the operation histograms by service, operation and row, populous first', () => {
+    const query = buildOperationHistogramQuery(source, stats);
+    expect(query).toContain('EVAL operation = COALESCE(transaction.name, span.name, name)');
+    expect(query).toContain('WHERE operation IS NOT NULL AND service.name IS NOT NULL');
+    expect(query).toContain(
+      'STATS spans = COUNT(*), failed = COUNT(*) WHERE is_failed BY service.name, operation, yi'
+    );
+    // Sorted by count: if the row limit truncates, the populous operations survive.
+    expect(query.indexOf('SORT spans DESC')).toBeLessThan(query.indexOf('LIMIT'));
+    expect(query).not.toContain('SAMPLE');
+  });
+
+  it('reads the operation histograms of a sampled range from one plain sample', () => {
+    const query = buildOperationHistogramQuery(source, stats, {
+      probability: 0.25,
+      tail: 8_000_000,
+    });
+    expect(query).toContain('SAMPLE 0.25');
+    expect(query.indexOf('SAMPLE 0.25')).toBeLessThan(query.indexOf('EVAL otel_duration_ns'));
   });
 
   describe('sampling', () => {

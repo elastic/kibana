@@ -66,7 +66,7 @@ describe('InternalStateStore', () => {
 
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
     store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDoc?.raw).toBe(mockDoc.raw);
 
     const differentDataView = buildDataViewMock({
       id: 'different-data-view-id',
@@ -84,11 +84,11 @@ describe('InternalStateStore', () => {
 
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
     store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDoc?.raw).toBe(mockDoc.raw);
 
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
 
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDoc?.raw).toBe(mockDoc.raw);
   });
 
   it('should not clear expandedDoc when ES|QL DataView id changes but the dataset is the same', async () => {
@@ -110,11 +110,11 @@ describe('InternalStateStore', () => {
 
     store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: descSource }));
     store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDoc?.raw).toBe(mockDoc.raw);
 
     store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: ascSource }));
 
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDoc?.raw).toBe(mockDoc.raw);
   });
 
   it('should clear expandedDoc when ES|QL DataView index pattern changes', async () => {
@@ -136,7 +136,7 @@ describe('InternalStateStore', () => {
 
     store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: logsSource }));
     store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDoc?.raw).toBe(mockDoc.raw);
 
     store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: metricsSource }));
 
@@ -555,7 +555,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDoc?.raw).toBe(mockDoc.raw);
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe('test-grid');
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBe('Table');
   });
@@ -638,10 +638,10 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), initialTabId).expandedDoc).toBe(mockDoc1);
+    expect(selectTab(store.getState(), initialTabId).expandedDoc?.raw).toBe(mockDoc1.raw);
     expect(selectTab(store.getState(), initialTabId).expandedDocOwner).toBe('grid-1');
     expect(selectTab(store.getState(), initialTabId).initialDocViewerTabId).toBe('Table');
-    expect(selectTab(store.getState(), secondTabId).expandedDoc).toBe(mockDoc2);
+    expect(selectTab(store.getState(), secondTabId).expandedDoc?.raw).toBe(mockDoc2.raw);
     expect(selectTab(store.getState(), secondTabId).expandedDocOwner).toBe('grid-2');
     expect(selectTab(store.getState(), secondTabId).initialDocViewerTabId).toBe('JSON');
   });
@@ -677,7 +677,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDoc?.raw).toBe(mockDoc.raw);
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe('grid-2');
     expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
   });
@@ -729,7 +729,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDoc?.raw).toBe(mockDoc.raw);
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe('grid-1');
 
     store.dispatch(internalStateActions.resetOnSavedSearchChange({ tabId }));

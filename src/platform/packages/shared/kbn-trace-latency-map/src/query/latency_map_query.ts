@@ -23,7 +23,10 @@ import {
   IS_FAILED_COLUMN,
   NORMALIZE_COMMANDS,
   NOT_FAILED_CONDITION,
+  OPERATION_COLUMN,
+  OPERATION_COMMAND,
   ROOT_SPAN_CONDITION,
+  SERVICE_NAME_FIELD,
   TRACES_INDEX_PATTERN,
   durationAtLeastCondition,
   durationBelowCondition,
@@ -52,7 +55,7 @@ export function getMapSampling(stats: DurationStats): MapSampling | undefined {
 /** One part of a map query: the spans it reads, and the share of them it samples. */
 export interface MapQueryPart {
   /** ES|QL condition over raw fields, so Elasticsearch filters it with its index. */
-  condition: string;
+  condition?: string;
   probability?: number;
 }
 
@@ -92,7 +95,7 @@ function buildSpans(
   part?: MapQueryPart
 ): ComposerQuery {
   const conditions = [
-    ...(part ? [part.condition] : []),
+    ...(part?.condition ? [part.condition] : []),
     // Throws on an invalid timestamp, which keeps anything else out of the query.
     `@timestamp >= TO_DATETIME("${new Date(timeRange.from).toISOString()}")`,
     `@timestamp < TO_DATETIME("${new Date(timeRange.to).toISOString()}")`,
@@ -151,6 +154,31 @@ export function buildLatencyGridQuery(
     .pipe(`EVAL yi = ${buildRowExpression(stats)}`)
     .pipe(`EVAL xi = TO_INTEGER((TO_LONG(@timestamp) - ${fromMs}) / ${binMs})`)
     .pipe(`STATS spans = COUNT(*), failed = COUNT(*) WHERE ${IS_FAILED_COLUMN} BY xi, yi`)
+    .pipe(`LIMIT ${ESQL_MAX_ROWS}`)
+    .print('pipe-multiline');
+}
+
+/**
+ * Step 3, with the operations feature on: span and failure counts per (service, operation,
+ * duration row). No time axis, so the histogram does not depend on the columns and a resize
+ * never refetches it. On a sampled range one plain sample covers every span: band shares
+ * tolerate the approximation, and only the labels read the slightly thinned failures - the
+ * grid still reads them exactly. Sorted by count, so if the row limit truncates, the
+ * populous operations survive.
+ */
+export function buildOperationHistogramQuery(
+  source: TraceSource,
+  stats: DurationStats,
+  sampling?: MapSampling
+): string {
+  return buildSpans(source, sampling && { probability: sampling.probability })
+    .pipe(OPERATION_COMMAND)
+    .pipe(`WHERE ${OPERATION_COLUMN} IS NOT NULL AND ${SERVICE_NAME_FIELD} IS NOT NULL`)
+    .pipe(`EVAL yi = ${buildRowExpression(stats)}`)
+    .pipe(
+      `STATS spans = COUNT(*), failed = COUNT(*) WHERE ${IS_FAILED_COLUMN} BY ${SERVICE_NAME_FIELD}, ${OPERATION_COLUMN}, yi`
+    )
+    .pipe(`SORT spans DESC`)
     .pipe(`LIMIT ${ESQL_MAX_ROWS}`)
     .print('pipe-multiline');
 }

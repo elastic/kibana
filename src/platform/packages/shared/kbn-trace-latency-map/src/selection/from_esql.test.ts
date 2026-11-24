@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isSelectionCondition, parseSelectionCondition } from './from_esql';
+import { FAILED_SPAN_CONDITION } from '../query/fields';
+import { isFailedOnlyCondition, isSelectionCondition, parseSelectionCondition } from './from_esql';
 import { selectionToEsqlCondition } from './to_esql';
 
 const selection = {
@@ -74,5 +75,14 @@ describe('isSelectionCondition', () => {
   it('tells conditions this package wrote from the rest of a query', () => {
     expect(isSelectionCondition(selectionToEsqlCondition(selection))).toBe(true);
     expect(isSelectionCondition('KQL("service.name: cart")')).toBe(false);
+  });
+});
+
+describe('isFailedOnlyCondition', () => {
+  it('tells the failed-spans clause a host writes from the rest of a query', () => {
+    expect(isFailedOnlyCondition(FAILED_SPAN_CONDITION)).toBe(true);
+    expect(isFailedOnlyCondition('event.outcome == "failure"')).toBe(false);
+    expect(isFailedOnlyCondition(selectionToEsqlCondition(selection))).toBe(false);
+    expect(isFailedOnlyCondition('KQL("service.name: cart")')).toBe(false);
   });
 });

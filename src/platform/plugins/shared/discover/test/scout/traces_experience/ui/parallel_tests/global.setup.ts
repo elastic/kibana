@@ -16,11 +16,22 @@ import {
   minimalTraceCorrelatedLogs,
   deepTrace,
   indexUnprocessedOtelTrace,
+  latencyMapTraces,
 } from '../fixtures';
 
 globalSetupHook(
   'Setup traces experience tests data',
   async ({ esClient, apiServices, config, log, kbnUrl }) => {
+    // The latency map next to the RED charts. The flag is server-wide, so it is set once
+    // for the whole suite; the RED charts stay the default view, which
+    // red_metrics_charts.spec.ts keeps asserting.
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'observability.tracesLatencyMapEnabled': true,
+      },
+    });
+    log.debug('[setup:traces] feature flag overrides set');
+
     const hasFleetSupport = !config.serverless || config.projectType === 'oblt';
     if (!hasFleetSupport) {
       log.debug('[setup:traces] skipping Fleet/APM setup (not supported in this environment)');
@@ -59,6 +70,9 @@ globalSetupHook(
 
     await apmEsClient.index(deepTrace(timeRange));
     log.debug('[setup:traces] Deep trace data indexed');
+
+    await apmEsClient.index(latencyMapTraces(timeRange));
+    log.debug('[setup:traces] Latency map trace data indexed');
 
     const logData = traceCorrelatedLogs({
       ...timeRange,

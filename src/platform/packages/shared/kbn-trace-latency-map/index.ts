@@ -10,8 +10,19 @@
 export { LatencyMap } from './src/components/latency_map';
 export type { LatencyMapProps } from './src/components/latency_map';
 export { selectionToEsqlCondition } from './src/selection/to_esql';
-export { isSelectionCondition, parseSelectionCondition } from './src/selection/from_esql';
-export { TRACES_INDEX_PATTERN } from './src/query/fields';
+export {
+  isFailedOnlyCondition,
+  isSelectionCondition,
+  parseSelectionCondition,
+} from './src/selection/from_esql';
+export { operationToEsqlCondition } from './src/operations/to_esql';
+export { isOperationCondition, parseOperationCondition } from './src/operations/from_esql';
+export type { LatencyMapOperation } from './src/operations/operation_bands';
+export {
+  FAILED_SPAN_CONDITION,
+  TRACES_INDEX_PATTERN,
+  TRACE_CONDITION_FIELDS,
+} from './src/query/fields';
 export type {
   DurationStats,
   LatencyMapCell,
