@@ -106,6 +106,54 @@ describe('InferenceFlyout', () => {
     );
   });
 
+  it('omits empty optional fields when creating an endpoint', async () => {
+    const user = userEvent.setup();
+    renderComponent();
+    await user.click(screen.getByTestId('provider-select'));
+    await user.click(await screen.findByTestId('Hugging Face-provider'));
+    await user.type(screen.getByTestId('api_key-password'), 'test-key');
+    await user.click(screen.getByTestId('inference-endpoint-submit-button'));
+
+    await waitFor(() => expect(mockMutationFn).toHaveBeenCalled());
+    const [submittedData, isEditing] = mockMutationFn.mock.calls[0];
+    expect(isEditing).toBe(false);
+    expect(submittedData.config.providerConfig).toEqual({
+      url: 'https://api.openai.com/v1/embeddings',
+    });
+    expect(submittedData.secrets.providerSecrets).toEqual({ api_key: 'test-key' });
+  });
+
+  it('keeps empty fields when editing an endpoint', async () => {
+    const user = userEvent.setup();
+    const mockEndpoint = {
+      config: {
+        inferenceId: 'test-id',
+        provider: 'elasticsearch',
+        taskType: 'text_embedding',
+        providerConfig: {
+          model_id: '.elser_model_2',
+          num_allocations: 1,
+          num_threads: 2,
+          'rate_limit.requests_per_minute': null,
+        },
+      },
+      secrets: {
+        providerSecrets: {},
+      },
+    };
+
+    renderComponent({ isEdit: true, inferenceEndpoint: mockEndpoint });
+    await user.click(screen.getByTestId('inference-endpoint-submit-button'));
+
+    await waitFor(() => expect(mockMutationFn).toHaveBeenCalled());
+    const [submittedData, isEditing] = mockMutationFn.mock.calls[0];
+    expect(isEditing).toBe(true);
+    expect(submittedData.config.providerConfig).toHaveProperty(
+      ['rate_limit.requests_per_minute'],
+      null
+    );
+  });
+
   // skipping this test for now until we figure out why its failing in CI only
   it.skip('handles edit mode correctly', async () => {
     const mockEndpoint = {

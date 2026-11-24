@@ -61,8 +61,6 @@
                     ]
                   }
                 },
-                "number_of_shards": "",
-                "number_of_replicas": "",
                 "number_of_routing_shards": "",
                 "check_on_startup": {
                   "__one_of": [
@@ -153,6 +151,9 @@
                     "include": {
                       "_tier_preference": "",
                       "_id": ""
+                    },
+                    "require": {
+                      "*": ""
                     },
                     "initial_recovery": {
                       "_id": ""
@@ -257,6 +258,11 @@
                         false
                       ]
                     }
+                  }
+                },
+                "requests": {
+                  "cache": {
+                    "enable": ""
                   }
                 },
                 "similarity": {
@@ -566,7 +572,6 @@
                   "__one_of": [
                     "disabled",
                     "stored",
-                    "columnar_stored",
                     "synthetic"
                   ]
                 }
@@ -718,8 +723,7 @@
                   true,
                   false
                 ]
-              },
-              "frozen_after": ""
+              }
             },
             "data_stream_options": {
               "failure_store": {
@@ -1007,7 +1011,6 @@
                   "__one_of": [
                     "disabled",
                     "stored",
-                    "columnar_stored",
                     "synthetic"
                   ]
                 }
@@ -1145,8 +1148,6 @@
                   ]
                 }
               },
-              "number_of_shards": "",
-              "number_of_replicas": "",
               "number_of_routing_shards": "",
               "check_on_startup": {
                 "__one_of": [
@@ -1237,6 +1238,9 @@
                   "include": {
                     "_tier_preference": "",
                     "_id": ""
+                  },
+                  "require": {
+                    "*": ""
                   },
                   "initial_recovery": {
                     "_id": ""
@@ -1341,6 +1345,11 @@
                       false
                     ]
                   }
+                }
+              },
+              "requests": {
+                "cache": {
+                  "enable": ""
                 }
               },
               "similarity": {
@@ -1452,8 +1461,7 @@
                   true,
                   false
                 ]
-              },
-              "frozen_after": ""
+              }
             },
             "data_stream_options": {
               "failure_store": {
@@ -1736,7 +1744,6 @@
             "__one_of": [
               "disabled",
               "stored",
-              "columnar_stored",
               "synthetic"
             ]
           }
@@ -3287,6 +3294,40 @@
                   ]
                 }
               },
+              "recover_failure_document": {
+                "description": "",
+                "if": {
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
+                },
+                "ignore_failure": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "on_failure": [
+                  {}
+                ],
+                "tag": ""
+              },
               "redact": {
                 "description": "",
                 "if": {
@@ -3465,6 +3506,12 @@
                 "tag": "",
                 "field": "",
                 "ignore_missing": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "override": {
                   "__one_of": [
                     true,
                     false
@@ -5451,6 +5498,40 @@
                   ]
                 }
               },
+              "recover_failure_document": {
+                "description": "",
+                "if": {
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
+                },
+                "ignore_failure": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "on_failure": [
+                  {}
+                ],
+                "tag": ""
+              },
               "redact": {
                 "description": "",
                 "if": {
@@ -5629,6 +5710,12 @@
                 "tag": "",
                 "field": "",
                 "ignore_missing": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "override": {
                   "__one_of": [
                     true,
                     false
@@ -6201,7 +6288,7 @@
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-simulate-ingest",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

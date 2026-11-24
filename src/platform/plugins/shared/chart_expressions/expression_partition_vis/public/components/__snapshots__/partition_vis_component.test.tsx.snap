@@ -267,7 +267,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.5)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -684,7 +684,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.35)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -1228,7 +1228,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.5)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -1645,7 +1645,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.35)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -2249,7 +2249,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.5)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -2666,7 +2666,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.35)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -3272,7 +3272,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.5)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -3689,7 +3689,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.35)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -4233,7 +4233,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.5)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -4650,7 +4650,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.35)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -5149,7 +5149,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.5)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {
@@ -5566,7 +5566,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "point": Object {
                   "dimmed": Object {
                     "fill": "#FFFFFF",
-                    "stroke": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.35)",
                   },
                   "fill": "#FFFFFF",
                   "focused": Object {

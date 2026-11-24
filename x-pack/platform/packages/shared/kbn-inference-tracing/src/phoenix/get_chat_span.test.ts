@@ -6,9 +6,9 @@
  */
 
 import { LLM_TOOLS } from '@arizeai/openinference-semantic-conventions';
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { GenAISemanticConventions } from '../types';
 import { getChatSpan } from './get_chat_span';
+import type { ReadableSpan } from '@opentelemetry/sdk-trace';
 
 describe('getChatSpan', () => {
   it('converts OTel tool definitions to the existing Phoenix tool representation', () => {
@@ -23,7 +23,7 @@ describe('getChatSpan', () => {
           },
         ]),
       },
-    } as unknown as tracing.ReadableSpan;
+    } as unknown as ReadableSpan;
 
     getChatSpan(span);
 

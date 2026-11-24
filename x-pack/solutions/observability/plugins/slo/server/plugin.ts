@@ -163,7 +163,16 @@ export class SLOPlugin
     core.savedObjects.registerType(sloComposite);
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.isCpsEnabled);
-    registerSloUsageCollector(plugins.usageCollection);
+    registerSloUsageCollector(
+      plugins.usageCollection,
+      this.logger.get('usage-collector'),
+      async () => {
+        const [coreStart] = await core.getStartServices();
+        return new SavedObjectsClient(
+          coreStart.savedObjects.createInternalRepository([SO_SLO_COMPOSITE_TYPE])
+        );
+      }
+    );
     registerSloEbtEvents(core.analytics);
     const telemetryService = new SloTelemetryService(core.analytics, this.logger.get('telemetry'));
 

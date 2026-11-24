@@ -13,8 +13,9 @@ components:
         `ok`: the hunt universe resolved and every list derived from it fit its
         bounds. `degraded`: the universe resolved but a derived list could not be
         computed or had to collapse (the `_field_caps` call failed, or a bounded
-        list outgrew the request path). `blocked`: nothing in the universe is
-        visible to this hunt, or resolving it failed; the hunt must not run.
+        list outgrew the request path). `blocked`: no pattern a hunt may search
+        resolved, including a data view left with no searchable pattern, or
+        resolving it failed; the hunt must not run.
 
     HuntIncompleteReason:
       type: string
@@ -35,6 +36,7 @@ components:
         - nothing_searched
         - input_truncated
         - extraction_pending
+        - index_not_searched
       description: >-
         Why a hunt could not corroborate part of what it was asked to look at, or
         could not show what it found. Ten are transient, named rather than
@@ -58,7 +60,10 @@ components:
         own. The artifacts were searched; this
         technique's own behavior was not. The same report and quotes reproduce it.
         `input_truncated` means the report carried more IOCs, techniques or text
-        than a hunt accepts, so only a prefix of it was hunted.
+        than a hunt accepts, so only a prefix of it was hunted. `index_not_searched`
+        is a default data view name the hunt could not read (no read access, not
+        found, or closed), so the index was never searched; the same data view
+        reproduces it.
 
     HuntIncompleteness:
       type: object
@@ -71,12 +76,17 @@ components:
           $ref: '#/components/schemas/HuntIncompleteReason'
         detail:
           type: string
-          description: What was not covered, in a form a human reading the run can act on.
+          description: >-
+            What was not covered, in a form a human reading the run can act on. No
+            length bound: the hunt result is validated whole when it is stored, so a
+            bound here would fail the run over one long gap. Readers truncate it
+            where they render it.
         technique_id:
           type: string
           description: >-
             Set when the gap is scoped to one technique rather than to the whole
-            search.
+            search. Can be an id the model emitted that is not in the ATT&CK
+            catalog, so it carries no length bound either.
 
     HuntCompleteness:
       type: string
@@ -106,9 +116,9 @@ components:
       enum: [universe, 'blocked:empty_universe', 'blocked:discovery_failed']
       description: >-
         How the hunt scope was produced. `universe`: at least one pattern of the
-        space's default data view resolves, and IOC Hunt searches the list as given.
-        `blocked:empty_universe`: nothing under any universe pattern is visible to
-        this hunt. `blocked:discovery_failed`: `_resolve/index` failed, so the scope
+        space's default data view resolves, and IOC Hunt searches the resolved ones.
+        `blocked:empty_universe`: no pattern a hunt may search resolved, including a
+        data view left with no searchable pattern. `blocked:discovery_failed`: `_resolve/index` failed, so the scope
         stays blocked rather than guessing.
 
     HuntScope:
@@ -125,8 +135,10 @@ components:
       description: >-
         What a hunt searches and where an action could land. `index_patterns` is the
         universe IOC Hunt searches: the space's Security Solution default data view
-        patterns, exclusions included, never an alerts index. `blocked` scopes carry
-        an empty `index_patterns`.
+        patterns as searched, exclusions included. Hidden and alerts names
+        (dot-prefixed, apart from a `.ds-` backing index) are never included.
+        `blocked` scopes carry an empty `index_patterns`. The lists are not bounded
+        here: they echo a user-edited setting, and a stored scope is parsed whole.
       properties:
         status:
           $ref: '#/components/schemas/IndexScopeStatus'
@@ -135,12 +147,24 @@ components:
         index_patterns:
           type: array
           description: >-
-            The universe as searched by IOC Hunt. Empty when the scope is blocked.
+            The universe as searched by IOC Hunt, with policy-skipped entries and the
+            local concrete names in `missing` removed (under cross-project search none is
+            removed, so a name can be in both lists). Empty when the scope is blocked.
           items:
             type: string
         missing:
           type: array
-          description: Universe patterns that resolved to nothing. Informational.
+          description: >-
+            Universe patterns the caller cannot search: not found, closed, not
+            readable (a concrete name that resolves without read access counts), or on
+            a remote cluster or linked project that did not answer.
+          items:
+            type: string
+        policy_skipped:
+          type: array
+          description: >-
+            Default data view entries the hunt never searches because their index name is
+            dot-prefixed (hidden or alerts indices).
           items:
             type: string
         report_matches:
@@ -363,7 +387,9 @@ components:
             Gaps in what the search actually covered. Absent or empty means the
             search ran over the whole scope, so `status: no_environment_hits` is a
             statement about the environment. Present means it is not: shards failed,
-            the search timed out, or every searched pattern resolved to no index.
+            the search timed out, or every searched pattern resolved to no index. The
+            standalone route also lists a default data view name the scope dropped
+            from the search, first, as `index_not_searched`.
           items:
             $ref: '#/components/schemas/HuntIncompleteness'
         searched_iocs:

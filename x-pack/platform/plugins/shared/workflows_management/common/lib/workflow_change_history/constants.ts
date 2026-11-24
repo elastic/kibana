@@ -1,0 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export const WORKFLOW_CHANGE_HISTORY_MODULE = 'stack';
+export const WORKFLOW_CHANGE_HISTORY_DATASET = 'workflows';
+export const WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE = 'workflow';
+export const WORKFLOW_CHANGE_HISTORY_SYSTEM_USER = 'elastic/kibana';
+
+export const WorkflowChangeHistoryAction = {
+  workflowCreate: 'create',
+  workflowUpdate: 'update',
+  workflowInstall: 'install',
+  workflowRestore: 'restore',
+} as const;
+
+export type WorkflowChangeHistoryActionType =
+  (typeof WorkflowChangeHistoryAction)[keyof typeof WorkflowChangeHistoryAction];
+
+export const WORKFLOW_CHANGE_HISTORY_LIST_PATH = '/internal/workflows/workflow';

@@ -23,7 +23,7 @@ export interface ContinuationCycle {
   ruleName?: string;
   /** event_id(s) the agent emitted this cycle (one per produced discovery). */
   producedEventIds: string[];
-  /** Active/inactive events emitted this cycle — used by continuation severity stability. */
+  /** Active, recovering or inactive events emitted this cycle — used by continuation severity stability. */
   producedEvents?: ContinuationProducedEvent[];
 
   /** Whether this cycle should reuse an established event ID. Defaults to true. */
@@ -34,6 +34,8 @@ export interface ContinuationCycle {
   requestedEventIds?: string[];
   /** Raw events_write request items — used to verify topology fields were sent. */
   writeItems?: Partial<SignificantEvent>[];
+  /** Event narratives actually seeded after successful writes and fixture overrides. */
+  narrativeEvents?: Partial<SignificantEvent>[];
 
   steps?: ConverseStep[];
 }

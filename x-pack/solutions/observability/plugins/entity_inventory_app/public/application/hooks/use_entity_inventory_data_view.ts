@@ -11,8 +11,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEntityInventorySearch } from '../context/search_context';
-import { getTypesInScope } from '../filters/get_filter_controls';
-import { useEntityInventoryTypes } from '../filters/use_entity_inventory_types';
+import { getTypesInScope } from '../filters/utils/get_filter_controls';
+import { useEntityInventoryTypes } from './use_entity_inventory_types';
 
 const DATA_VIEW_ID_PREFIX = 'entity-inventory:';
 
@@ -20,25 +20,25 @@ export const useEntityInventoryDataView = (): { dataView: DataView | undefined }
   const {
     services: { dataViews },
   } = useKibana();
-  const { entityCategory, filterSelection } = useEntityInventorySearch();
+  const { entityCategory, filterControls } = useEntityInventorySearch();
   const { types } = useEntityInventoryTypes();
 
   const indexPattern = useMemo(() => {
     const pageCategory = entityCategory === 'all' ? undefined : entityCategory;
     const typesInScope =
-      pageCategory || filterSelection.category
+      pageCategory || filterControls.category
         ? getTypesInScope({
             types,
             pageCategory,
-            selectedCategory: filterSelection.category,
-            selectedType: filterSelection.type,
+            selectedCategory: filterControls.category,
+            selectedType: filterControls.type,
           })
         : types;
 
     return uniq(typesInScope.flatMap(({ sources }) => sources.map((source) => source.indexPattern)))
       .sort()
       .join(',');
-  }, [types, entityCategory, filterSelection.category, filterSelection.type]);
+  }, [types, entityCategory, filterControls.category, filterControls.type]);
 
   const { value: dataView } = useAbortableAsync(
     () =>

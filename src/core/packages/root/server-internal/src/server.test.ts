@@ -141,6 +141,7 @@ test('preboot services on "preboot"', async () => {
   expect(mockPluginsService.preboot).not.toHaveBeenCalled();
   expect(mockPrebootService.preboot).not.toHaveBeenCalled();
   expect(mockStatusService.preboot).not.toHaveBeenCalled();
+  expect(mockMetricsService.preboot).not.toHaveBeenCalled();
 
   await server.preboot();
 
@@ -157,6 +158,7 @@ test('preboot services on "preboot"', async () => {
   expect(mockPluginsService.preboot).toHaveBeenCalledTimes(1);
   expect(mockPrebootService.preboot).toHaveBeenCalledTimes(1);
   expect(mockStatusService.preboot).toHaveBeenCalledTimes(1);
+  expect(mockMetricsService.preboot).toHaveBeenCalledTimes(1);
 });
 
 test('sets up services on "setup"', async () => {
@@ -305,6 +307,10 @@ test('runs services on "start"', async () => {
   await server.start();
 
   expect(mockHttpService.start).toHaveBeenCalledTimes(1);
+  expect(mockStatusService.setReady).toHaveBeenCalledWith(true);
+  expect(mockHttpService.start.mock.invocationCallOrder[0]).toBeLessThan(
+    mockStatusService.setReady.mock.invocationCallOrder[0]
+  );
   expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.start).toHaveBeenCalledTimes(1);
@@ -351,6 +357,10 @@ test('stops services on "stop"', async () => {
 
   await server.stop();
 
+  expect(mockStatusService.setReady).toHaveBeenCalledWith(false);
+  expect(mockStatusService.setReady.mock.invocationCallOrder[0]).toBeLessThan(
+    mockHttpService.stop.mock.invocationCallOrder[0]
+  );
   expect(mockEventLoopWatchdogService.stop).toHaveBeenCalledTimes(1);
   // Stops before logging, so its last log line is still written.
   expect(mockEventLoopWatchdogService.stop.mock.invocationCallOrder[0]).toBeLessThan(
@@ -391,6 +401,7 @@ test(`doesn't preboot core services if config validation fails`, async () => {
   expect(mockLoggingService.preboot).not.toHaveBeenCalled();
   expect(mockPluginsService.preboot).not.toHaveBeenCalled();
   expect(mockPrebootService.preboot).not.toHaveBeenCalled();
+  expect(mockMetricsService.preboot).not.toHaveBeenCalled();
 });
 
 describe('stripUnknownsWorkaround', () => {
@@ -512,14 +523,23 @@ describe('When preboot is disabled', () => {
     expect(mockUiSettingsService.preboot).toHaveBeenCalledTimes(1);
     expect(mockLoggingService.preboot).toHaveBeenCalledTimes(1);
 
-    expect(mockContextService.preboot).not.toHaveBeenCalled();
-    expect(mockHttpService.preboot).not.toHaveBeenCalled();
     expect(mockI18nService.preboot).not.toHaveBeenCalled();
     expect(mockElasticsearchService.preboot).not.toHaveBeenCalled();
     expect(mockRenderingService.preboot).not.toHaveBeenCalled();
     expect(mockPluginsService.preboot).not.toHaveBeenCalled();
     expect(mockPrebootService.preboot).not.toHaveBeenCalled();
-    expect(mockStatusService.preboot).not.toHaveBeenCalled();
+  });
+
+  test('preboots the HTTP server with the status and ELU history routes', async () => {
+    const server = new Server(rawConfigService, env, logger);
+
+    await server.preboot();
+
+    expect(mockContextService.preboot).toHaveBeenCalledTimes(1);
+    expect(mockHttpService.preboot).toHaveBeenCalledTimes(1);
+    const httpPreboot = await mockHttpService.preboot.mock.results[0].value;
+    expect(mockStatusService.preboot).toHaveBeenCalledWith({ http: httpPreboot });
+    expect(mockMetricsService.preboot).toHaveBeenCalledWith({ http: httpPreboot });
   });
 });
 

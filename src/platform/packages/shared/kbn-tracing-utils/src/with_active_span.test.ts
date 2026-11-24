@@ -13,8 +13,13 @@ import { of, throwError } from 'rxjs';
 import type { WithActiveSpan } from './with_active_span';
 import { withActiveSpan } from './with_active_span';
 import { last } from 'lodash';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
-import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+import {
+  AlwaysOnSampler,
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+  TracerProvider,
+} from '@opentelemetry/sdk-trace';
 
 const createMockSpan = () => {
   return {
@@ -39,10 +44,10 @@ const createMockTracer = (span: Span) => {
  * so that tests can assert on the finished spans without any mocks.
  */
 const setupInMemoryTracer = () => {
-  const exporter = new tracing.InMemorySpanExporter();
-  const provider = new tracing.BasicTracerProvider({
-    spanProcessors: [new tracing.SimpleSpanProcessor(exporter)],
-    sampler: new tracing.AlwaysOnSampler(),
+  const exporter = new InMemorySpanExporter();
+  const provider = new TracerProvider({
+    spanProcessors: [new SimpleSpanProcessor({ exporter })],
+    sampler: new AlwaysOnSampler(),
   });
   const tracer = provider.getTracer('test');
 
@@ -50,10 +55,10 @@ const setupInMemoryTracer = () => {
 };
 
 describe('withActiveSpan', () => {
-  let cm: AsyncHooksContextManager;
+  let cm: AsyncLocalStorageContextManager;
 
   beforeAll(() => {
-    cm = new AsyncHooksContextManager().enable();
+    cm = new AsyncLocalStorageContextManager().enable();
     context.setGlobalContextManager(cm);
   });
 

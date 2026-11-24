@@ -47,9 +47,8 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
  * (`buildVegaConfig`), and returns it to dashboard authoring through the type-agnostic
  * {@link PanelContentAttempt} contract.
  *
- * It trusts the request's `renderer` (Lens when omitted). On edits,
- * upsert sets it from the existing panel and rejects panels neither
- * renderer can edit, so the existing panel always matches the renderer.
+ * It trusts the request's `type`: on edits, upsert has checked that the
+ * existing panel is of that kind.
  */
 export const createVisPanelResolver = ({
   logger,
@@ -62,13 +61,13 @@ export const createVisPanelResolver = ({
     index,
     chartType,
     esql,
-    renderer = 'lens',
+    type,
     preserveESQL,
     applyChartRules,
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
     try {
-      if (renderer === 'vega') {
+      if (type === 'vega') {
         if (applyChartRules) {
           throw new Error('Presentation enhancement is only supported for ES|QL Lens panels.');
         }

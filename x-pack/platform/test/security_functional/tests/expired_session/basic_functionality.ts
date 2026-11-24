@@ -6,7 +6,6 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { parse } from 'url';
 
 import expect from '@kbn/expect';
 
@@ -17,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const deployment = getService('deployment');
   const PageObjects = getPageObjects(['security', 'common']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/304115
-  describe.skip('Basic functionality', function () {
+  describe('Basic functionality', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -45,8 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         shouldLoginIfPrompted: false,
       });
 
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/login');
+      expect(currentURL.searchParams.get('msg')).to.eql('SESSION_IDLE_TIMEOUT');
 
       expect(await PageObjects.security.loginPage.getInfoMessage()).to.be(
         'Your session has timed out due to inactivity. Please log in again.'

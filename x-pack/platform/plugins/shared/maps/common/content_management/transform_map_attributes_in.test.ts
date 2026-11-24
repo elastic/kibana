@@ -50,6 +50,23 @@ describe('transformMapIn', () => {
     `);
   });
 
+  test('should convert as code ad hoc data views and retain id', () => {
+    const { attributes } = transformMapAttributesIn({
+      title: 'my map',
+      adHocDataViews: [
+        {
+          id: 'adhoc-1',
+          type: 'data_view_spec',
+          index_pattern: 'logs-*',
+          time_field: '@timestamp',
+        },
+      ],
+    });
+    expect(JSON.parse(attributes.mapStateJSON!).adHocDataViews).toEqual([
+      { id: 'adhoc-1', title: 'logs-*', timeFieldName: '@timestamp' },
+    ]);
+  });
+
   test('mapStateJSON', () => {
     expect(
       transformMapAttributesIn({
