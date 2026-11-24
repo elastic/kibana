@@ -4,41 +4,43 @@ Five plugins that use each other through Kibana's dependency injection, with no 
 Each plugin works when its peer is disabled, and the pairs do not form a circular plugin dependency.
 Every plugin has a server and a browser half.
 
-`tokens/` (`@kbn/di-soft-dependencies-example-tokens`) holds the shared tokens and types, with no runtime code.
-Each plugin imports tokens from it and never from another plugin, so the TypeScript project references stay acyclic.
+`tokens/` (`@kbn/di-soft-dependencies-example-tokens`) holds the shared extension points and types, declared with `createExtensionPoint`.
+Each plugin imports extension points from it and never from another plugin, so the TypeScript project references stay acyclic.
 
 ## Lookup: `lookup_a` and `lookup_b`
 
-Each plugin exposes a greeter and uses the other plugin's greeter when that plugin is enabled.
-The greeter depends on `CoreStart('http')`, which exists only once its plugin has started, so the consumer resolves it in an `OnReady` hook or a request handler.
+Each plugin contributes a greeter and uses the other plugin's greeter when that plugin is enabled.
+The greeter depends on `CoreStart('http')`, which exists only once its plugin has started, so the consumer resolves it in an `OnExtensionsReady` hook or a request handler.
 
 ```ts
+// extension point
+export const LookupAGreeter = createExtensionPoint<Greeter>('diSoftDepsLookupA.Greeter');
+
 // provider
-expose(LookupAGreeter).toResolvedValue(
-  (http) => ({ greet: () => 'hello from diSoftDepsLookupA' }),
-  [CoreStart('http')]
-);
+extensions
+  .contribute(LookupAGreeter)
+  .toResolvedValue((http) => ({ greet: () => 'hello from diSoftDepsLookupA' }), [CoreStart('http')]);
 
 // consumer
-constructor(@inject(SoftDependencies) private readonly softDependencies: SoftDependencies) {}
+constructor(@inject(ExtensionService) private readonly extensionService: ExtensionService) {}
 
 getStatus() {
-  return this.softDependencies.get(LookupAGreeter)?.greet() ?? 'diSoftDepsLookupA is disabled';
+  return this.extensionService.get(LookupAGreeter)?.greet() ?? 'diSoftDepsLookupA is disabled';
 }
 ```
 
 ## Registry: `registry_a` and `registry_b`
 
 Each plugin owns a registry that it fills once every plugin has started, and contributes one entry to the other plugin's registry.
-This is the shape of a registry like embeddable's: the owner defines the token in the tokens package, and contributors only expose entries for it.
-Each owner also exposes a built-in entry to its own token, which the registry collects once.
+This is the shape of a registry like embeddable's: the owner defines the extension point in the tokens package, and contributors only contribute entries to it.
+Each owner also contributes a built-in entry to its own extension point, which the registry collects once.
 
 ```ts
 // owner
-collect(RegistryAEntry, Registry, (context, entry, registry) => registry.register(entry));
+extensions.collect(RegistryAEntry, Registry, (context, entry, registry) => registry.register(entry));
 
 // contributor
-expose(RegistryAEntry).toConstantValue({ id: 'diSoftDepsRegistryB', label: '...' });
+extensions.contribute(RegistryAEntry).toConstantValue({ id: 'diSoftDepsRegistryB', label: '...' });
 ```
 
 The registry stays empty until every plugin has started.
@@ -46,41 +48,42 @@ A registry that something reads before that, such as saved objects migrations on
 
 ## Classic plugin: `classic_consumer`
 
-A plugin with a `setup`/`start` class and no `module` export uses soft dependencies too.
-It gets `SoftDependencies` and binds an `OnReady` hook through `core.injection.getContainer()`:
+A plugin with a `setup`/`start` class and no `module` export uses extension points too.
+It gets `ExtensionService` and binds an `OnExtensionsReady` hook through `core.injection.getContainer()`:
 
 ```ts
 setup(core: CoreSetup) {
   const container = core.injection.getContainer();
-  this.softDependencies = container.get(SoftDependencies);
-  container.bind(OnReady).toConstantValue(() => {
-    this.status.onReady = this.softDependencies?.get(LookupBGreeter)?.greet() ?? 'diSoftDepsLookupB is disabled';
+  this.extensionService = container.get(ExtensionService);
+  container.bind(OnExtensionsReady).toConstantValue(() => {
+    this.status.onReady = this.extensionService?.get(LookupBGreeter)?.greet() ?? 'diSoftDepsLookupB is disabled';
   });
 }
 ```
 
 Its server route returns what the lookup of `LookupBGreeter` gave at each point of the lifecycle.
-Its browser half writes `{ id, fromLookupB }` to `window.__diSoftDeps.diSoftDepsClassicConsumer` in an `OnReady` hook, without logging.
+Its browser half writes `{ id, fromLookupB }` to `window.__diSoftDeps.diSoftDepsClassicConsumer` in an `OnExtensionsReady` hook, without logging.
 
 | Where the lookup runs | Result |
 | --- | --- |
 | `setup()` | throws |
 | `start()` | throws |
-| `OnReady` hook | the greeting, or `diSoftDepsLookupB is disabled` |
+| `OnExtensionsReady` hook (the `onReady` field) | the greeting, or `diSoftDepsLookupB is disabled` |
 | `initialize()` | the greeting, or `diSoftDepsLookupB is disabled` |
 | request handler | the greeting, or `diSoftDepsLookupB is disabled` |
 
 ## Find the hidden edges
 
-Soft dependencies add no manifest edge, so the plugin tooling cannot show that one plugin uses another.
-`scripts/report_edges.js` scans the source and lists, per token, which plugins call `expose`, `collect`, and `softDependencies.get` or `softDependencies.getAll`:
+Extension points add no manifest edge, so the plugin tooling cannot show that one plugin uses another.
+`scripts/report_edges.js` scans the source and lists, per extension point id, which plugins call `extensions.contribute`, `extensions.collect`, and `get` or `getAll` on an `ExtensionService`:
 
 ```sh
 node examples/di_soft_dependencies/scripts/report_edges.js
 ```
 
 It scans `src`, `x-pack`, and `examples` by default. Pass directories to scan only those.
-It groups calls by the identifier passed at the call site, so two tokens imported under the same name are reported together.
+It maps the identifier passed at a call site to an id through the `createExtensionPoint<...>('id')` declarations it finds, and reports an identifier with no single declaration, such as an import alias, by name.
+It counts `get` and `getAll` on a variable typed or assigned as `ExtensionService`, or on one whose name contains `extension` when the argument is a declared extension point.
 It skips test files and files that do not import `@kbn/core-di`.
 
 ## Run
@@ -99,7 +102,7 @@ curl -u elastic:changeme http://localhost:5601/api/di_soft_deps/diSoftDepsRegist
 curl -u elastic:changeme http://localhost:5601/api/di_soft_deps/diSoftDepsClassicConsumer
 ```
 
-In the browser, every plugin writes its status to `window.__diSoftDeps[pluginId]` in an `OnReady` hook, once every plugin has started.
+In the browser, every plugin writes its status to `window.__diSoftDeps[pluginId]` in an `OnExtensionsReady` hook, once every plugin has started.
 Every plugin but `classic_consumer` also logs it with `console.info`.
 
 Disable a plugin to see its peer fall back:

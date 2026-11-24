@@ -18,11 +18,15 @@ export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
 };
 
-const pluginModule = new KibanaContainerModule(({ bind, collect, expose }) => {
+const pluginModule = new KibanaContainerModule(({ bind, extensions }) => {
   bind(Registry).toSelf().inSingletonScope();
-  collect(RegistryBEntry, Registry, (_context, entry, registry) => registry.register(entry));
-  expose(RegistryBEntry).toConstantValue({ id: PLUGIN_ID, label: `built into ${PLUGIN_ID}` });
-  expose(RegistryAEntry).toConstantValue({
+  extensions.collect(RegistryBEntry, Registry, (_context, entry, registry) =>
+    registry.register(entry)
+  );
+  extensions
+    .contribute(RegistryBEntry)
+    .toConstantValue({ id: PLUGIN_ID, label: `built into ${PLUGIN_ID}` });
+  extensions.contribute(RegistryAEntry).toConstantValue({
     id: PLUGIN_ID,
     label: `server entry from ${PLUGIN_ID}`,
   });

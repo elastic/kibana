@@ -8,7 +8,7 @@
  */
 
 import type { CoreSetup, Plugin } from '@kbn/core/server';
-import { OnReady, SoftDependencies } from '@kbn/core-di';
+import { ExtensionService, OnExtensionsReady } from '@kbn/core-di';
 import { LookupBGreeter } from '@kbn/di-soft-dependencies-example-tokens';
 import { LOOKUP_B_DISABLED, PLUGIN_ID } from '../common';
 
@@ -23,7 +23,7 @@ export interface ClassicConsumerStatus {
 }
 
 export class ClassicConsumerPlugin implements Plugin {
-  private softDependencies?: SoftDependencies;
+  private extensionService?: ExtensionService;
   private readonly status: Omit<ClassicConsumerStatus, 'request'> = {
     id: PLUGIN_ID,
     setup: 'not run',
@@ -34,9 +34,9 @@ export class ClassicConsumerPlugin implements Plugin {
 
   public setup(core: CoreSetup): void {
     const container = core.injection.getContainer();
-    this.softDependencies = container.get(SoftDependencies);
+    this.extensionService = container.get(ExtensionService);
     this.status.setup = this.greetFromLookupB();
-    container.bind(OnReady).toConstantValue(() => {
+    container.bind(OnExtensionsReady).toConstantValue(() => {
       this.status.onReady = this.greetFromLookupB();
     });
 
@@ -68,10 +68,10 @@ export class ClassicConsumerPlugin implements Plugin {
     this.status.initialize = this.greetFromLookupB();
   }
 
-  // SoftDependencies.get throws until every plugin has started, so setup and start record 'throws'.
+  // ExtensionService.get throws until every plugin has started, so setup and start record 'throws'.
   private greetFromLookupB(): string {
     try {
-      return this.softDependencies?.get(LookupBGreeter)?.greet() ?? LOOKUP_B_DISABLED;
+      return this.extensionService?.get(LookupBGreeter)?.greet() ?? LOOKUP_B_DISABLED;
     } catch {
       return 'throws';
     }

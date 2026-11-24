@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaContainerModule, Logger, OnReady } from '@kbn/core-di';
+import { KibanaContainerModule, Logger, OnExtensionsReady } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-browser';
 import { LookupAGreeter } from '@kbn/di-soft-dependencies-example-tokens';
 import { LookupStatusService, PLUGIN_ID } from '../common';
 import { report } from './report';
 
-const pluginModule = new KibanaContainerModule(({ bind, expose }) => {
-  expose(LookupAGreeter).toResolvedValue(
-    (http) => ({ greet: () => `hello from ${PLUGIN_ID} browser` }),
-    [CoreStart('http')]
-  );
+const pluginModule = new KibanaContainerModule(({ bind, extensions }) => {
+  extensions
+    .contribute(LookupAGreeter)
+    .toResolvedValue(
+      (http) => ({ greet: () => `hello from ${PLUGIN_ID} browser` }),
+      [CoreStart('http')]
+    );
   bind(LookupStatusService).toSelf().inRequestScope();
-  bind(OnReady).toResolvedValue(
+  bind(OnExtensionsReady).toResolvedValue(
     (status, logger) => () => report(logger, status.getStatus()),
     [LookupStatusService, Logger]
   );

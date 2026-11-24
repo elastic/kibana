@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Lists, per soft dependency token, which plugins expose, collect, and look it up.
-// Soft dependencies have no manifest edge, so this is how to find who uses whom.
-// Tokens are grouped by the identifier passed at the call site, not by the token id.
+// Lists, per extension point, which plugins contribute to it, collect it, and look it up.
+// Extension points have no manifest edge, so this is how to find who uses whom.
+// Call sites are mapped to extension point ids through the `createExtensionPoint<...>('id')`
+// declarations in the scanned files; an identifier with no single declaration is reported by name.
 // Usage: node report_edges.js [dir ...]   (defaults to src x-pack examples)
 const Fs = require('fs');
 const Path = require('path');
@@ -23,19 +24,29 @@ const SOURCE_FILE = /\.tsx?$/;
 const TEST_FILE = /\.(test|mock)\.tsx?$/;
 const DI_IMPORT = /from '@kbn\/core-di'/;
 
+const IDENTIFIER = '[A-Za-z_$][\\w$]*';
 const KINDS = [
-  { key: 'expose', label: 'exposed by' },
+  { key: 'contribute', label: 'contributed by' },
   { key: 'collect', label: 'collected by' },
   { key: 'lookup', label: 'looked up by' },
 ];
-const PATTERNS = [
-  { regex: /(?<![\w$.])(expose|collect)\(\s*([A-Za-z_$][\w$]*)/g },
-  {
-    regex: /\bsoftDependencies\s*\??\.\s*(?:get|getAll)\(\s*([A-Za-z_$][\w$]*)\s*\)/g,
-    kind: 'lookup',
-  },
+const DECLARATION = new RegExp(
+  `\\b(?:const|let|var)\\s+(${IDENTIFIER})\\s*(?::[^=]+)?=\\s*createExtensionPoint\\s*(?:<[\\s\\S]*?>)?\\s*\\(\\s*(['"\`])(.+?)\\2`,
+  'g'
+);
+const EXTENSIONS_CALL = new RegExp(
+  `\\bextensions\\s*\\.\\s*(contribute|collect)\\(\\s*(${IDENTIFIER})`,
+  'g'
+);
+const LOOKUP_CALL = new RegExp(
+  `(${IDENTIFIER})\\s*\\??\\.\\s*(?:get|getAll)\\(\\s*(${IDENTIFIER})\\s*\\)`,
+  'g'
+);
+const SERVICE_VARIABLES = [
+  new RegExp(`(${IDENTIFIER})\\s*\\??:\\s*ExtensionService\\b`, 'g'),
+  new RegExp(`(${IDENTIFIER})\\s*=\\s*[\\w$.]+\\.get\\(\\s*ExtensionService\\s*\\)`, 'g'),
 ];
-const PREFILTER = 'expose\\(|collect\\(|softDependencies';
+const PREFILTER = 'createExtensionPoint|extensions|ExtensionService';
 
 function listCandidatesWithRipgrep(roots) {
   const result = spawnSync(
@@ -80,37 +91,63 @@ function getOwner(file) {
   return pkg.manifest.plugin?.id ?? `${pkg.id} (package)`;
 }
 
-const files = listCandidatesWithRipgrep(ROOTS) ?? listCandidatesByWalking(ROOTS);
+// A receiver typed or assigned as `ExtensionService` always counts; one only named like it
+// counts when the argument is a declared extension point, which skips plain maps named `extensions`.
+function isLookup(receiver, identifier, serviceVariables) {
+  return serviceVariables.has(receiver) || (/extension/i.test(receiver) && ids.has(identifier));
+}
+
+const files = (listCandidatesWithRipgrep(ROOTS) ?? listCandidatesByWalking(ROOTS))
+  .filter((file) => !TEST_FILE.test(file))
+  .sort();
+const sources = files
+  .map((file) => ({ file, source: Fs.readFileSync(Path.resolve(REPO_ROOT, file), 'utf8') }))
+  .filter(({ source }) => DI_IMPORT.test(source))
+  .map(({ file, source }) => ({ file, code: stripComments(source) }));
+
+const ids = new Map();
+for (const { code } of sources) {
+  for (const [, identifier, , id] of code.matchAll(DECLARATION)) {
+    ids.set(identifier, new Set([...(ids.get(identifier) ?? []), id]));
+  }
+}
+
+const resolveId = (identifier) => {
+  const candidates = [...(ids.get(identifier) ?? [])];
+
+  return candidates.length === 1 ? candidates[0] : `${identifier} (no single declaration)`;
+};
+
 const edges = new Map();
-
-for (const file of files.sort()) {
-  if (TEST_FILE.test(file)) {
-    continue;
+const addEdge = (identifier, kind, owner) => {
+  const id = resolveId(identifier);
+  if (!edges.has(id)) {
+    edges.set(id, Object.fromEntries(KINDS.map(({ key }) => [key, new Set()])));
   }
+  edges.get(id)[kind].add(owner);
+};
 
-  const source = Fs.readFileSync(Path.resolve(REPO_ROOT, file), 'utf8');
-  if (!DI_IMPORT.test(source)) {
-    continue;
-  }
-
-  const code = stripComments(source);
+for (const { file, code } of sources) {
   const owner = getOwner(file);
-  for (const { regex, kind } of PATTERNS) {
-    for (const match of code.matchAll(regex)) {
-      const [key, token] = kind ? [kind, match[1]] : [match[1], match[2]];
-      if (!edges.has(token)) {
-        edges.set(token, Object.fromEntries(KINDS.map((entry) => [entry.key, new Set()])));
-      }
-      edges.get(token)[key].add(owner);
+  const serviceVariables = new Set(
+    SERVICE_VARIABLES.flatMap((regex) => [...code.matchAll(regex)].map(([, name]) => name))
+  );
+
+  for (const [, kind, identifier] of code.matchAll(EXTENSIONS_CALL)) {
+    addEdge(identifier, kind, owner);
+  }
+  for (const [, receiver, identifier] of code.matchAll(LOOKUP_CALL)) {
+    if (identifier !== 'ExtensionService' && isLookup(receiver, identifier, serviceVariables)) {
+      addEdge(identifier, 'lookup', owner);
     }
   }
 }
 
 const width = Math.max(...KINDS.map(({ label }) => label.length)) + 1;
-const lines = [...edges.keys()].sort().flatMap((token) => [
-  token,
+const lines = [...edges.keys()].sort().flatMap((id) => [
+  id,
   ...KINDS.map(({ key, label }) => {
-    const owners = [...edges.get(token)[key]].sort();
+    const owners = [...edges.get(id)[key]].sort();
 
     return `  ${`${label}:`.padEnd(width + 1)} ${owners.length ? owners.join(', ') : '-'}`;
   }),
@@ -118,5 +155,5 @@ const lines = [...edges.keys()].sort().flatMap((token) => [
 ]);
 
 process.stdout.write(
-  lines.length ? lines.join('\n') : `No soft dependency calls found in ${ROOTS.join(', ')}.\n`
+  lines.length ? lines.join('\n') : `No extension point calls found in ${ROOTS.join(', ')}.\n`
 );

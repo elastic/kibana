@@ -18,11 +18,13 @@ export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
 };
 
-const pluginModule = new KibanaContainerModule(({ bind, expose }) => {
-  expose(LookupAGreeter).toResolvedValue(
-    (http) => ({ greet: () => `hello from ${PLUGIN_ID} server` }),
-    [CoreStart('http')]
-  );
+const pluginModule = new KibanaContainerModule(({ bind, extensions }) => {
+  extensions
+    .contribute(LookupAGreeter)
+    .toResolvedValue(
+      (http) => ({ greet: () => `hello from ${PLUGIN_ID} server` }),
+      [CoreStart('http')]
+    );
   bind(LookupStatusService).toSelf().inRequestScope();
   bind(Route).toConstantValue(StatusRoute);
 });

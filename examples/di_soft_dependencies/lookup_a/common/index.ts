@@ -8,7 +8,7 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { SoftDependencies } from '@kbn/core-di';
+import { ExtensionService } from '@kbn/core-di';
 import { LookupBGreeter } from '@kbn/di-soft-dependencies-example-tokens';
 
 export const PLUGIN_ID = 'diSoftDepsLookupA';
@@ -20,10 +20,10 @@ export interface LookupStatus {
 
 @injectable()
 export class LookupStatusService {
-  constructor(@inject(SoftDependencies) private readonly softDependencies: SoftDependencies) {}
+  constructor(@inject(ExtensionService) private readonly extensionService: ExtensionService) {}
 
   getStatus(): LookupStatus {
-    const greeter = this.softDependencies.get(LookupBGreeter);
+    const greeter = this.extensionService.get(LookupBGreeter);
 
     return {
       id: PLUGIN_ID,

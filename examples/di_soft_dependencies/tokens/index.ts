@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createToken } from '@kbn/core-di';
+import { createExtensionPoint } from '@kbn/core-di';
 
-/** A service one lookup plugin exposes and the other one uses when it is enabled. */
+/** A service one lookup plugin contributes and the other one uses when it is enabled. */
 export interface Greeter {
   greet(): string;
 }
 
-/** The greeter exposed by `diSoftDepsLookupA`. */
-export const LookupAGreeter = createToken<Greeter>('diSoftDepsLookupA.Greeter');
+/** The greeter contributed by `diSoftDepsLookupA`. */
+export const LookupAGreeter = createExtensionPoint<Greeter>('diSoftDepsLookupA.Greeter');
 
-/** The greeter exposed by `diSoftDepsLookupB`. */
-export const LookupBGreeter = createToken<Greeter>('diSoftDepsLookupB.Greeter');
+/** The greeter contributed by `diSoftDepsLookupB`. */
+export const LookupBGreeter = createExtensionPoint<Greeter>('diSoftDepsLookupB.Greeter');
 
 /** An entry any plugin, the registry owner included, contributes to a registry. */
 export interface RegistryEntry {
@@ -27,7 +27,7 @@ export interface RegistryEntry {
 }
 
 /** Entries collected by `diSoftDepsRegistryA`. */
-export const RegistryAEntry = createToken<RegistryEntry>('diSoftDepsRegistryA.Entry');
+export const RegistryAEntry = createExtensionPoint<RegistryEntry>('diSoftDepsRegistryA.Entry');
 
 /** Entries collected by `diSoftDepsRegistryB`. */
-export const RegistryBEntry = createToken<RegistryEntry>('diSoftDepsRegistryB.Entry');
+export const RegistryBEntry = createExtensionPoint<RegistryEntry>('diSoftDepsRegistryB.Entry');
