@@ -314,12 +314,12 @@ describe('EpisodesTable', () => {
     expect(container.querySelector(`span[id="${labelId}"]`)).toBeInTheDocument();
   });
 
-  describe('column visibility', () => {
-    const openColumnSelector = async () => {
-      fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
-      await screen.findByTestId('dataGridColumnSelectorSearch');
-    };
+  const openColumnSelector = async () => {
+    fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+    await screen.findByTestId('dataGridColumnSelectorSearch');
+  };
 
+  describe('column visibility', () => {
     it("disables the grid's column selector and time column prepend", () => {
       renderTable();
 
@@ -327,13 +327,26 @@ describe('EpisodesTable', () => {
       expect(lastGridProps().showTimeCol).toBe(false);
     });
 
-    it('keeps the header remove action available', () => {
+    it('keeps the header remove action on every non-time column', () => {
       renderTable();
 
-      const column = { id: 'tags', actions: { showHide: { label: 'Remove column' } } };
-      const customized = lastGridProps().customGridColumnsConfiguration.tags({ column });
+      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.filter((id) => id !== '@timestamp').forEach((id) => {
+        const column = lastGridProps().customGridColumnsConfiguration[id]({
+          column: { id, actions: { showHide: { label: 'Remove column' } } },
+        });
+        expect(column.actions.showHide).toEqual({ label: 'Remove column' });
+      });
+    });
 
-      expect(customized.actions.showHide).toEqual({ label: 'Remove column' });
+    it('leaves columns without actions untouched', () => {
+      renderTable();
+
+      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.forEach((id) => {
+        const column = lastGridProps().customGridColumnsConfiguration[id]({
+          column: { id, actions: false },
+        });
+        expect(column.actions).toBe(false);
+      });
     });
 
     it('lists every column in the selector, including hidden ones', async () => {
@@ -420,7 +433,7 @@ describe('EpisodesTable', () => {
     });
   });
 
-  describe('column order shared with the grid header', () => {
+  describe('column order', () => {
     const ControlledTable = ({
       initialColumns,
       onVisibleColumnsChange,
@@ -457,46 +470,33 @@ describe('EpisodesTable', () => {
         </I18nProvider>
       );
 
-    const openColumnSelector = async () => {
-      fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
-      await screen.findByTestId('dataGridColumnSelectorSearch');
-    };
+    it('turns off header drag and the header move actions', () => {
+      renderTable();
 
-    it('keeps a header reorder when a column is then hidden from the selector', async () => {
+      expect(lastGridProps().canDragAndDropColumns).toBeFalsy();
+      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.forEach((id) => {
+        const column = lastGridProps().customGridColumnsConfiguration[id]({
+          column: { id, actions: { showMoveLeft: true, showMoveRight: true } },
+        });
+        expect(column.actions).toEqual(
+          expect.objectContaining({ showMoveLeft: false, showMoveRight: false })
+        );
+      });
+    });
+
+    it('brings a reordered column back to its position after it is hidden and shown again', async () => {
       const onVisibleColumnsChange = jest.fn();
-      renderControlledTable(['tags', 'reason', 'severity'], onVisibleColumnsChange);
+      const tagsFirst = [
+        'tags',
+        ...DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.filter((id) => id !== 'tags'),
+      ];
+      renderControlledTable(tagsFirst, onVisibleColumnsChange);
 
-      act(() => lastGridProps().onSetColumns(['severity', 'tags', 'reason'], false));
       await openColumnSelector();
       fireEvent.click(screen.getByTestId('dataGridColumnSelectorToggleColumnVisibility-tags'));
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorToggleColumnVisibility-tags'));
 
-      expect(onVisibleColumnsChange).toHaveBeenLastCalledWith(['severity', 'reason']);
-    });
-
-    it('keeps a header reorder when Show all is then used', async () => {
-      const onVisibleColumnsChange = jest.fn();
-      renderControlledTable(['tags', 'reason', 'severity'], onVisibleColumnsChange);
-
-      act(() => lastGridProps().onSetColumns(['severity', 'tags', 'reason'], false));
-      await openColumnSelector();
-      fireEvent.click(screen.getByTestId('dataGridColumnSelectorShowAllButton'));
-
-      const shown: string[] = onVisibleColumnsChange.mock.calls.at(-1)[0];
-      expect(shown).toHaveLength(DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.length);
-      expect(shown.filter((id) => ['tags', 'reason', 'severity'].includes(id))).toEqual([
-        'severity',
-        'tags',
-        'reason',
-      ]);
-    });
-
-    it('skips updates that leave the visible columns unchanged', () => {
-      const onVisibleColumnsChange = jest.fn();
-      renderTable({ visibleColumns: ['tags', 'reason'], onVisibleColumnsChange });
-
-      act(() => lastGridProps().onSetColumns(['tags', 'reason'], false));
-
-      expect(onVisibleColumnsChange).not.toHaveBeenCalled();
+      expect(onVisibleColumnsChange).toHaveBeenLastCalledWith(tagsFirst);
     });
   });
 
@@ -506,21 +506,10 @@ describe('EpisodesTable', () => {
 
       const customize = lastGridProps().customGridColumnsConfiguration['@timestamp'];
       const column = customize({
-        column: { id: '@timestamp', actions: { showHide: false, showMoveLeft: true } },
+        column: { id: '@timestamp', actions: { showHide: false } },
       });
 
-      expect(column.actions).toEqual({
-        showHide: expect.objectContaining({ label: 'Remove column' }),
-        showMoveLeft: true,
-      });
-    });
-
-    it('leaves a time column without actions untouched', () => {
-      renderTable();
-
-      const customize = lastGridProps().customGridColumnsConfiguration['@timestamp'];
-
-      expect(customize({ column: { id: '@timestamp', actions: false } }).actions).toBe(false);
+      expect(column.actions.showHide).toEqual(expect.objectContaining({ label: 'Remove column' }));
     });
 
     it('resets an oldest-first time sort when the time column is hidden', () => {

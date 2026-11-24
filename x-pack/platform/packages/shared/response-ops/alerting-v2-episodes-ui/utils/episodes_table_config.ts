@@ -66,19 +66,6 @@ export const isEpisodesTableColumnId = (value: unknown): value is EpisodesTableC
   typeof value === 'string' && COLUMN_ID_SET.has(value);
 
 /**
- * Full column order for the column selector: hidden columns keep their default slots and visible
- * columns fill the remaining slots in display order.
- */
-export const getColumnSelectorOrder = (visibleColumns: string[]): EpisodesTableColumnId[] => {
-  const visibleIds = [...new Set(visibleColumns.filter(isEpisodesTableColumnId))];
-  const visibleSet = new Set<string>(visibleIds);
-  let nextVisibleIndex = 0;
-  return EPISODES_TABLE_COLUMN_IDS.map((columnId) =>
-    visibleSet.has(columnId) ? visibleIds[nextVisibleIndex++] : columnId
-  );
-};
-
-/**
  * Turns a stored value into a valid, de-duplicated, ordered list of column ids. An empty list is
  * kept: the grid then shows its document summary column.
  */
@@ -94,21 +81,12 @@ export const DEFAULT_EPISODES_TABLE_SORT: EpisodesTableConfig['sort'] = {
   sortDirection: 'desc',
 };
 
-/**
- * Falls back to the default sort when a non-default sort targets a hidden column, because the
- * grid shows no sort indicator for hidden columns.
- */
+/** Falls back to the default sort when the sorted column is hidden, which the grid shows no indicator for. */
 export const resolveSortForVisibleColumns = (
   sort: EpisodesTableConfig['sort'],
   visibleColumns: string[]
-): EpisodesTableConfig['sort'] => {
-  const isDefaultSort =
-    sort.sortField === DEFAULT_EPISODES_TABLE_SORT.sortField &&
-    sort.sortDirection === DEFAULT_EPISODES_TABLE_SORT.sortDirection;
-  return visibleColumns.includes(sort.sortField) || isDefaultSort
-    ? sort
-    : DEFAULT_EPISODES_TABLE_SORT;
-};
+): EpisodesTableConfig['sort'] =>
+  visibleColumns.includes(sort.sortField) ? sort : DEFAULT_EPISODES_TABLE_SORT;
 
 export const DEFAULT_EPISODES_TABLE_COLUMN_SETTINGS: EpisodesTableColumnSettings = {
   duration: { width: 110 },

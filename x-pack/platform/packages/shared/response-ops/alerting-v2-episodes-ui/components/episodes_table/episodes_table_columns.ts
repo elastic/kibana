@@ -10,7 +10,7 @@ import type {
   EuiDataGridToolBarVisibilityColumnSelectorOptions,
 } from '@elastic/eui';
 import {
-  getColumnSelectorOrder,
+  EPISODES_TABLE_COLUMN_IDS,
   type EpisodesTableColumnId,
 } from '../../utils/episodes_table_config';
 import {
@@ -47,12 +47,12 @@ export const EPISODES_TABLE_COLUMN_LABELS: Readonly<Record<EpisodesTableColumnId
 };
 
 /*
- * The EUI column selector keeps its own column order and re-seeds it only when `availableColumns`
- * changes identity. Rebuilding this list whenever the visible columns change keeps that order in
- * line with header moves, which go through the grid's own selector instead.
+ * Module-level so the identity never changes: the EUI column selector resets its
+ * internal order state whenever `availableColumns` changes identity.
  */
-export const getSelectorColumns = (visibleColumns: string[]): EuiDataGridColumn[] =>
-  getColumnSelectorOrder(visibleColumns).map((id) => ({ id }));
+export const SELECTOR_COLUMNS: EuiDataGridColumn[] = EPISODES_TABLE_COLUMN_IDS.map((id) => ({
+  id,
+}));
 
 export const SELECTOR_OPTIONS: EuiDataGridToolBarVisibilityColumnSelectorOptions = {
   allowHide: true,

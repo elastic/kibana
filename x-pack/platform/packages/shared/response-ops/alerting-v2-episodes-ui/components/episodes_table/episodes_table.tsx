@@ -21,7 +21,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { isEqual } from 'lodash';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type {
   ApplicationStart,
@@ -90,6 +89,7 @@ import {
   DEFAULT_EPISODES_TABLE_CONFIG,
   DEFAULT_EPISODES_TABLE_SORT,
   DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS,
+  EPISODES_TABLE_COLUMN_IDS,
   EPISODES_TABLE_TIME_COLUMN_ID,
   isEpisodesTableColumnId,
   resolveSortForVisibleColumns,
@@ -97,8 +97,8 @@ import {
 } from '../../utils/episodes_table_config';
 import {
   EPISODES_TABLE_COLUMN_LABELS,
+  SELECTOR_COLUMNS,
   SELECTOR_OPTIONS,
-  getSelectorColumns,
 } from './episodes_table_columns';
 import {
   EPISODES_LIST_COLUMN_ALERT_TAGS,
@@ -122,7 +122,7 @@ const EPISODES_TABLE_CONSUMER = 'alertingV2Alerts';
  * Some fields are not in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a
  * sort on them falls back to `@timestamp` and only looks like it works.
  */
-const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
+const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
     displayAsText: EPISODES_LIST_COLUMN_ALERT_TAGS,
@@ -168,6 +168,23 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
         }
       : column,
 };
+
+/*
+ * The Columns popover is the only way to reorder, so its order (hidden columns included) is the
+ * single source of column order. Header moves would change the visible order behind its back.
+ */
+const withoutMoveActions = (column: EuiDataGridColumn): EuiDataGridColumn =>
+  column.actions
+    ? { ...column, actions: { ...column.actions, showMoveLeft: false, showMoveRight: false } }
+    : column;
+
+const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = Object.fromEntries(
+  EPISODES_TABLE_COLUMN_IDS.map((columnId) => [
+    columnId,
+    (props: Parameters<CustomGridColumnsConfiguration[string]>[0]) =>
+      withoutMoveActions(COLUMN_CUSTOMIZATIONS[columnId]?.(props) ?? props.column),
+  ])
+);
 
 /**
  * Two reasons this is a whole pixel value rather than the `1.6em` default:
@@ -458,31 +475,20 @@ export const EpisodesTable = ({
   const applyVisibleColumns = useCallback(
     (columnIds: string[]) => {
       const nextVisibleColumns = columnIds.filter(isEpisodesTableColumnId);
-      // Moving a hidden column in the selector reports the same visible columns; skipping the
-      // update keeps the selector from re-seeding its order and undoing that move.
-      if (isEqual(nextVisibleColumns, visibleColumns)) {
-        return;
-      }
       setVisibleColumns(nextVisibleColumns);
       const nextSort = resolveSortForVisibleColumns(episodesSort, nextVisibleColumns);
-      if (nextSort !== episodesSort) {
+      if (
+        nextSort.sortField !== episodesSort.sortField ||
+        nextSort.sortDirection !== episodesSort.sortDirection
+      ) {
         setSort(nextSort);
       }
     },
-    [episodesSort, setSort, setVisibleColumns, visibleColumns]
+    [episodesSort, setSort, setVisibleColumns]
   );
-
-  const onSetColumns = useCallback(
-    (cols: string[], _hideTimeCol: boolean) => {
-      applyVisibleColumns(cols);
-    },
-    [applyVisibleColumns]
-  );
-
-  const selectorColumns = useMemo(() => getSelectorColumns(visibleColumns), [visibleColumns]);
 
   const [columnSelector] = useDataGridColumnSelector(
-    selectorColumns,
+    SELECTOR_COLUMNS,
     { visibleColumns, setVisibleColumns: applyVisibleColumns },
     SELECTOR_OPTIONS,
     EPISODES_TABLE_COLUMN_LABELS
@@ -704,8 +710,7 @@ export const EpisodesTable = ({
           rowLineHeightOverride={TABLE_ROW_LINE_HEIGHT}
           dataView={dataView}
           columns={visibleColumns}
-          onSetColumns={onSetColumns}
-          canDragAndDropColumns
+          onSetColumns={applyVisibleColumns}
           isColumnSelectorEnabled={false}
           // Otherwise the grid renders the data view's time field first whenever it's not in `columns`.
           showTimeCol={false}

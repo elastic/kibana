@@ -9,7 +9,6 @@ import {
   DEFAULT_EPISODES_TABLE_SORT,
   DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS,
   episodesTableConfigSchema,
-  getColumnSelectorOrder,
   resolveEpisodesTableVisibleColumns,
   resolveSortForVisibleColumns,
 } from './episodes_table_config';
@@ -56,37 +55,6 @@ describe('resolveEpisodesTableVisibleColumns', () => {
   });
 });
 
-describe('getColumnSelectorOrder', () => {
-  it('returns the default order when every column is visible in default order', () => {
-    expect(getColumnSelectorOrder(DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS)).toEqual(
-      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS
-    );
-  });
-
-  it('keeps hidden columns in their default slots and fills the rest in display order', () => {
-    expect(getColumnSelectorOrder(['tags', 'episode.status'])).toEqual([
-      'tags',
-      'alerting_source',
-      'severity',
-      '@timestamp',
-      'rule.id',
-      'reason',
-      'duration',
-      'episode.status',
-      'rule_tags',
-      'assignees',
-      'suppressed',
-    ]);
-  });
-
-  it('lists each column once when the visible columns repeat an id', () => {
-    const order = getColumnSelectorOrder(['tags', 'tags', 'reason']);
-
-    expect(new Set(order).size).toBe(DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.length);
-    expect(order).toContain('reason');
-  });
-});
-
 describe('resolveSortForVisibleColumns', () => {
   it('keeps a sort on a visible column', () => {
     const sort = { sortField: 'duration', sortDirection: 'asc' as const };
@@ -105,6 +73,6 @@ describe('resolveSortForVisibleColumns', () => {
 
   it('keeps the default sort on a hidden time column', () => {
     const sort = { sortField: '@timestamp', sortDirection: 'desc' as const };
-    expect(resolveSortForVisibleColumns(sort, ['tags'])).toBe(sort);
+    expect(resolveSortForVisibleColumns(sort, ['tags'])).toEqual(DEFAULT_EPISODES_TABLE_SORT);
   });
 });
