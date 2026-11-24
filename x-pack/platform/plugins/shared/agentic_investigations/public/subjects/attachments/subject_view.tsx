@@ -6,17 +6,27 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { isEqual } from 'lodash';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
-import { EuiIcon, EuiIconTip, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiIconTip,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  euiTextTruncate,
+  useEuiTheme,
+} from '@elastic/eui';
 import type {
   InvestigationSubject,
   InvestigationSubjectType,
+  SubjectVia,
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectDisplayType, getSubjectTitle, type SubjectRowData } from './subject_title';
-import { useAlertsListLink, useSubjectLink } from './subject_link';
+import { useAlertsListLink, useSubjectLink, useViaLink } from './subject_link';
 import { useSubjectFlyout } from './use_subject_flyout';
 import {
   OPEN_IN_FLYOUT,
@@ -264,6 +274,53 @@ const CompactRow = ({
 };
 
 /**
+ * What a trigger came through, as a line under the trigger's row: "via <label>", the label
+ * linking to the page its locator resolves to. It sits outside the row, which is a link itself.
+ */
+const ViaLine: React.FC<{ via: SubjectVia; isNested?: boolean }> = ({
+  via: { label, locator },
+  isNested = false,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const { href, onClick } = useViaLink(locator);
+  // Lines up with the row's title: past the icon, and past the nesting indent too.
+  const textInset = `${euiTheme.size.xl} + ${euiTheme.size.m}`;
+
+  return (
+    <EuiText
+      size="xs"
+      color="subdued"
+      data-test-subj="investigationSubjectVia"
+      data-subject-via
+      css={css`
+        margin-block-start: -${euiTheme.size.xs};
+        padding-block-end: ${euiTheme.size.m};
+        padding-inline: calc(
+            ${euiTheme.size.base} + ${textInset} ${isNested ? `+ ${textInset}` : ''}
+          )
+          ${euiTheme.size.base};
+        ${euiTextTruncate()}
+      `}
+    >
+      <FormattedMessage
+        id="xpack.agenticInvestigations.subjects.via"
+        defaultMessage="via {label}"
+        values={{
+          label:
+            href === undefined ? (
+              label
+            ) : (
+              <EuiLink href={href} onClick={onClick} data-test-subj="investigationSubjectViaLink">
+                {label}
+              </EuiLink>
+            ),
+        }}
+      />
+    </EuiText>
+  );
+};
+
+/**
  * The subdued line under a row's title. Alerts listed under an "N alerts" row usually share the
  * rule name, so they also show when each alert started.
  */
@@ -300,10 +357,12 @@ const getSubjectDescription = (subject: SubjectRowData, isNested: boolean): Reac
  * The row links where `useSubjectLink` says (the subject's page, else its own link); without a
  * link it is plain text.
  */
-export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean }> = ({
-  subject,
-  isNested = false,
-}) => {
+export const SubjectRow: React.FC<{
+  subject: SubjectRowData;
+  isNested?: boolean;
+  /** Whether the row says what the subject came through. By default only top-level rows do. */
+  showVia?: boolean;
+}> = ({ subject, isNested = false, showVia = !isNested }) => {
   const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
   const {
     onClick: onRowClick,
@@ -311,6 +370,7 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
     canOpenFlyout,
   } = useSubjectFlyout(subject, href, { onLinkClick });
   const displayType = getSubjectDisplayType(subject);
+  const { via } = subject;
 
   return (
     <>
@@ -326,6 +386,7 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
         isNested={isNested}
         data-test-subj={`investigationSubject-${subject.type}`}
       />
+      {via && showVia && <ViaLine via={via} isNested={isNested} />}
       {flyout}
     </>
   );
@@ -340,6 +401,12 @@ const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
 const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) => {
   const { href } = useAlertsListLink(alerts);
   const [isExpanded, setIsExpanded] = useState(false);
+  // Alerts added by different starts can come through different things (or none), so the row
+  // names what they came through only when they all share it; otherwise each nested alert does.
+  const sharedVia = useMemo(() => {
+    const [{ via }, ...rest] = alerts;
+    return rest.every((alert) => isEqual(alert.via, via)) ? via : undefined;
+  }, [alerts]);
 
   return (
     <>
@@ -354,16 +421,25 @@ const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) =
         isExpanded={href === undefined ? isExpanded : undefined}
         data-test-subj="investigationSubject-alerts"
       />
+      {sharedVia && <ViaLine via={sharedVia} />}
       {href === undefined &&
         isExpanded &&
-        alerts.map((alert) => <SubjectRow key={subjectKey(alert)} subject={alert} isNested />)}
+        alerts.map((alert) => (
+          <SubjectRow
+            key={subjectKey(alert)}
+            subject={alert}
+            isNested
+            showVia={sharedVia === undefined}
+          />
+        ))}
     </>
   );
 };
 
 /**
  * An investigation's subjects in one bordered list. Several alerts collapse into one "N alerts"
- * row, which opens the alerts list filtered to them.
+ * row, which opens the alerts list filtered to them. A subject that came through something (for
+ * example an automation) says so in a "via <label>" line under its row.
  */
 export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({
   subjects: allSubjects,
@@ -398,7 +474,7 @@ export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({
       paddingSize="none"
       css={css`
         overflow: hidden;
-        & > * + * {
+        & > * + *:not([data-subject-via]) {
           border-block-start: ${euiTheme.border.thin};
         }
       `}
@@ -411,5 +487,5 @@ export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({
 
 /** An investigation subject, the same compact row inline in the chat and in the details flyout. */
 export const SubjectView: React.FC<InvestigationAttachmentContentProps<InvestigationSubject>> = ({
-  document: { subjectType, subjectId, summary, snapshot, slack },
-}) => <SubjectRow subject={{ type: subjectType, id: subjectId, summary, snapshot, slack }} />;
+  document: { subjectType, subjectId, summary, via, snapshot, slack },
+}) => <SubjectRow subject={{ type: subjectType, id: subjectId, summary, via, snapshot, slack }} />;
