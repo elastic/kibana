@@ -34,6 +34,13 @@ export const ONGOING_FAST_REPEATS_UNTIL_MS = 12_000;
 /** CPU profiler sampling interval in microseconds: about 99 Hz. */
 export const SAMPLING_INTERVAL_US = 10_101;
 
+export const HOUR_MS = 60 * 60_000;
+/**
+ * A file is only saved if it has a different top frame to the previous ones seen within the same
+ * clock hour.
+ */
+export const FILES_PER_HOUR = 3;
+
 /** Kibana is considered running this long after its overall status first becomes available... */
 export const RUNNING_GRACE_MS = 30_000;
 /** ...or this long after the watchdog service starts, whichever comes first. */

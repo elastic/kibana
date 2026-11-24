@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type {
+  SaveSessionEventResult,
+  SaveSessionEventsResponse,
+} from '../../common/http_api/session_events';
+
 interface SessionEventBase {
   /** Unique within the session. */
   id: string;
@@ -22,7 +27,7 @@ export interface UserSessionEvent extends SessionEventBase {
 export interface AssistantToolCall {
   id: string;
   name: string;
-  args?: string;
+  args?: JsonValue;
 }
 
 export interface AssistantSessionEvent extends SessionEventBase {
@@ -36,11 +41,19 @@ export interface ReasoningSessionEvent extends SessionEventBase {
   content?: string;
 }
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
 export interface ToolSessionEvent extends SessionEventBase {
   type: 'tool';
   tool_call_id: string;
   tool_name: string;
-  result?: string;
+  result?: JsonValue;
   /** Null or missing when the outcome is unknown. */
   status?: 'successful' | 'failed' | null;
 }
@@ -91,17 +104,12 @@ export interface SaveEventsInput {
   events: readonly SessionEventInput[];
 }
 
-export type SaveEventResult =
-  | { id: string; status: 'created' }
-  | { id: string; status: 'failed'; error: string };
+export type SaveEventResult = SaveSessionEventResult;
 
 export interface SessionEventsService {
   /**
    * Writes one document per event. A resent event is stored again, so readers drop duplicates by
    * session and event id. Results follow the order of `input.events`.
    */
-  saveEvents(
-    scope: SessionEventsScope,
-    input: SaveEventsInput
-  ): Promise<{ results: SaveEventResult[] }>;
+  saveEvents(scope: SessionEventsScope, input: SaveEventsInput): Promise<SaveSessionEventsResponse>;
 }

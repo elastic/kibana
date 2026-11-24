@@ -20,6 +20,7 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
   SavedObject,
+  SavedObjectsUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
@@ -330,8 +331,9 @@ function keepsAgentVersionConditions({
   assetsMap: PackagePolicyAssetsMap;
 }): boolean {
   // The update writes the manifest condition, so a stale stored one (left by an upgrade before
-  // #294439) gets cleared. `inputs_for_versions` is only rewritten when `hasAgentVersionCondition`
-  // holds. (Un)assigning changes which agent policies count this package policy's conditions.
+  // #294439) gets cleared. A stale `inputs_for_versions` is cleared by
+  // `clearStaleInputsForVersions`, which forces a recompute separately. (Un)assigning changes
+  // which agent policies count this package policy's conditions.
   return (
     oldPackagePolicy.package?.name === newPackage?.name &&
     oldPackagePolicy.package?.version === newPackage?.version &&
@@ -966,6 +968,79 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         t.end();
       }
     );
+  }
+
+  /**
+   * An upgrade to a package that dropped its agent version condition leaves the `inputs_for_versions`
+   * of the old version behind, so agents keep receiving the stale inputs and the agent policy keeps
+   * its version conditions. Clears the cache of the given package policies whose package has no
+   * condition, with a single read and write. Returns whether any cache was cleared, so the caller
+   * recomputes the agent version conditions of their agent policies.
+   *
+   * Best effort, like the read path backfill: a clear that loses a version conflict to a concurrent
+   * edit is only logged. The next update of that package policy finds the cache again and clears it.
+   */
+  private async clearStaleInputsForVersions(
+    soClient: SavedObjectsClientContract,
+    candidates: Array<{
+      packagePolicyId: string;
+      packageInfo: PackageInfo;
+      assetsMap: PackagePolicyAssetsMap;
+    }>
+  ): Promise<boolean> {
+    if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+      return false;
+    }
+    const withoutCondition = candidates.filter(
+      ({ packageInfo, assetsMap }) => !hasAgentVersionCondition(packageInfo, assetsMap)
+    );
+    if (withoutCondition.length === 0) {
+      return false;
+    }
+    const logger = appContextService.getLogger();
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    // Runs after the package policies were saved: failing here would skip deploying them.
+    try {
+      const { saved_objects: packagePolicySOs } = await soClient.bulkGet<PackagePolicySOAttributes>(
+        withoutCondition.map(({ packagePolicyId }) => ({
+          type: savedObjectType,
+          id: packagePolicyId,
+          fields: ['inputs_for_versions'],
+        }))
+      );
+      const stale = packagePolicySOs.filter(
+        (so): so is SavedObject<PackagePolicySOAttributes> =>
+          !isSavedObjectErrorResult(so) &&
+          Object.keys(so.attributes?.inputs_for_versions ?? {}).length > 0
+      );
+      if (stale.length === 0) {
+        return false;
+      }
+      // Pass the version so a concurrent edit is not overwritten.
+      const { saved_objects: clearResults } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
+        stale.map(({ id, version }) => ({
+          type: savedObjectType,
+          id,
+          attributes: { inputs_for_versions: {} },
+          version,
+        }))
+      );
+      // Bulk operations report per object failures in the results instead of rejecting.
+      const failedClears = clearResults.filter(isSavedObjectErrorResult);
+      for (const { id, error } of failedClears) {
+        logger.warn(
+          `Failed to clear the stale inputs_for_versions of package policy [${id}], it is cleared on its next update: ${error.message}`
+        );
+      }
+      return failedClears.length < stale.length;
+    } catch (error) {
+      logger.warn(
+        `Failed to clear the stale inputs_for_versions of package policies [${withoutCondition
+          .map(({ packagePolicyId }) => packagePolicyId)
+          .join(', ')}], they are cleared on their next update: ${error.message}`
+      );
+      return false;
+    }
   }
 
   private async bumpAgentPoliciesRevision(
@@ -2106,6 +2181,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
+    const clearedInputsForVersions = await this.clearStaleInputsForVersions(soClient, [
+      { packagePolicyId: newPolicy.id, packageInfo: pkgInfo, assetsMap },
+    ]);
     await this.compilePackagePolicyForVersions(soClient, pkgInfo, assetsMap, newPolicy);
 
     // Bump revision of all associated agent policies (old and new), unless the
@@ -2131,13 +2209,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? this.bumpAgentPoliciesRevision({ soClient, esClient }, [...associatedPolicyIds], {
           user: options?.user,
           asyncDeploy: options?.asyncDeploy,
-          agentVersionConditionsUnchanged: keepsAgentVersionConditions({
-            oldPackagePolicy,
-            newPackage: newPolicy.package,
-            newPolicyIds: newPolicy.policy_ids,
-            pkgInfo,
-            assetsMap,
-          }),
+          agentVersionConditionsUnchanged:
+            !clearedInputsForVersions &&
+            keepsAgentVersionConditions({
+              oldPackagePolicy,
+              newPackage: newPolicy.package,
+              newPolicyIds: newPolicy.policy_ids,
+              pkgInfo,
+              assetsMap,
+            }),
           updatedPackageNames: newPolicy.package ? [newPolicy.package.name] : [],
           removeProtectionFn: (policyId) => {
             const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
@@ -2604,17 +2684,37 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate)
       .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed`));
 
-    for (const updatedPolicy of updatedPolicies) {
-      if (isSavedObjectErrorResult(updatedPolicy)) {
-        continue;
-      }
+    const savedPolicies = updatedPolicies.filter(
+      (updatedPolicy): updatedPolicy is SavedObjectsUpdateResponse<PackagePolicySOAttributes> =>
+        !isSavedObjectErrorResult(updatedPolicy)
+    );
+    const toAssets = (updatedPolicy: SavedObjectsUpdateResponse<PackagePolicySOAttributes>) => {
       const pkgInfo = packageInfos.get(
         `${updatedPolicy.attributes.package?.name}-${updatedPolicy.attributes.package?.version}`
       )!;
+      return {
+        pkgInfo,
+        assetsMap: packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!,
+      };
+    };
+    // A cleared cache changes the agent policies' conditions, so they must be recomputed.
+    if (
+      await this.clearStaleInputsForVersions(
+        soClient,
+        savedPolicies.map((updatedPolicy) => {
+          const { pkgInfo, assetsMap } = toAssets(updatedPolicy);
+          return { packagePolicyId: updatedPolicy.id, packageInfo: pkgInfo, assetsMap };
+        })
+      )
+    ) {
+      agentVersionConditionsUnchanged = false;
+    }
+    for (const updatedPolicy of savedPolicies) {
+      const { pkgInfo, assetsMap } = toAssets(updatedPolicy);
       await this.compilePackagePolicyForVersions(
         soClient,
         pkgInfo,
-        packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!,
+        assetsMap,
         mapPackagePolicySavedObjectToPackagePolicy(updatedPolicy as any)
       );
     }

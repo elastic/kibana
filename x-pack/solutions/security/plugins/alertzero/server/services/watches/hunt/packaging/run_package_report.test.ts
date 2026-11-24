@@ -553,6 +553,62 @@ describe('runPackageReport', () => {
       expect(result.coverage.written.length).toBeGreaterThan(0);
     });
 
+    describe('when no search ran at all', () => {
+      const nothingSearchedGap = {
+        reason: 'nothing_searched',
+        detail: 'IOC Hunt mapped no searchable term and Behavior Hunt executed no query.',
+      };
+      const SHORT_SUMMARY =
+        'Hunt Watch searched nothing for this report. This is not a statement that the environment is clean.';
+
+      it('says nothing was searched, and not that the environment is clean', async () => {
+        const result = await retiredRun({ coverageGaps: [nothingSearchedGap] });
+
+        expect(result.status).toBe('packaged');
+        if (result.status !== 'packaged') return;
+        expect(result.dismiss).toBe(true);
+        expect(result.closureSummary).toBe(SHORT_SUMMARY);
+      });
+
+      it('says the same when other gaps accompany it', async () => {
+        const result = await retiredRun({
+          coverageGaps: [nothingSearchedGap, { reason: 'query_ungrounded', detail: 'no quote' }],
+        });
+
+        expect(result.status === 'packaged' && result.closureSummary).toBe(SHORT_SUMMARY);
+      });
+
+      it('still holds the dismissal for an open Proposal, and says why', async () => {
+        const result = await retiredRun({
+          coverageGaps: [nothingSearchedGap],
+          hasOpenProposal: async () => true,
+        });
+
+        expect(result.status).toBe('packaged');
+        if (result.status !== 'packaged') return;
+        expect(result.dismiss).toBe(false);
+        expect(result.closureSummary).toBe(
+          'Hunt for report ' +
+            reportId +
+            ' found no confirmed hits, but no search ran. Leaving the Investigation open: it still has a pending or executing Proposal from an earlier run.'
+        );
+        expect(result.closureSummary).not.toContain('part of the report could not be searched');
+      });
+
+      it('keeps the existing text for a retired run whose gaps do not include it', async () => {
+        const result = await retiredRun({
+          coverageGaps: [{ reason: 'input_truncated', detail: 'only a prefix was hunted' }],
+        });
+
+        expect(result.status === 'packaged' && result.closureSummary).toContain(
+          'retired without a full search'
+        );
+        expect(result.status === 'packaged' && result.closureSummary).not.toContain(
+          'searched nothing'
+        );
+      });
+    });
+
     it('holds the dismissal when the Proposal lookup fails', async () => {
       const result = await retiredRun({
         hasOpenProposal: async () => {

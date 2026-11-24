@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual, pick } from 'lodash';
 import pRetry from 'p-retry';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -29,7 +30,7 @@ import {
   type StoredKi,
 } from '../ai_indices/ki_revision';
 import { findLinkingRelationshipIds } from '../ai_indices/ki_relationships';
-import { softDeleteKi } from '../ai_indices/ki_write';
+import { isPersonEdited, softDeleteKi } from '../ai_indices/ki_write';
 import {
   accessPatternAttributes,
   accessPatternsOf,
@@ -68,7 +69,7 @@ export interface ApplyCounts {
 }
 
 export interface ApplyResult extends ApplyCounts {
-  /** Writes refused because the KI has different permissions than its memories. */
+  /** Writes refused: the KI has different permissions than its memories, or a person edited it. */
   rejected: Array<{ item: string; reason: string }>;
 }
 
@@ -87,6 +88,11 @@ export interface ApplyContext {
   spaceId: string;
   /** The permissions of each memory the model was shown. */
   memoryPermissions: ReadonlyMap<string, KiPermissions | undefined>;
+  /**
+   * For writes without memories: who the KIs may be for, in place of the memories' permissions.
+   * Each KI keeps its own permissions. `own` accepts any KI.
+   */
+  audience?: { permissions?: KiPermissions } | 'own';
   abortSignal?: AbortSignal;
   /** Collects the writes by KI id instead of storing them. */
   dryRun?: Map<string, PlannedWrite>;
@@ -122,13 +128,16 @@ export const addReferences = (
 const sourceReferences = (sourceMemoryIds: readonly string[]): DreamedKiReference[] =>
   sourceMemoryIds.map((id) => ({ uri: memoryUri(id), relation: 'derived_from' }));
 
-type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'> | undefined;
+/** Builds the KI to store; undefined when it would not change. */
+export type BuildDocument = (
+  current: DreamedKi | undefined
+) => Omit<DreamedKi, 'governance'> | undefined;
 
 type BuildPermittedDocument = (
   current: DreamedKi | undefined
 ) => Omit<DreamedKi, 'governance'> | 'rejected' | undefined;
 
-type WriteResult = 'created' | 'updated' | 'skipped' | 'rejected';
+export type WriteResult = 'created' | 'updated' | 'skipped' | 'rejected';
 
 const activeSource = (revision: KiRevision | undefined): DreamedKi | undefined => {
   const source = revision?.source as DreamedKi | undefined;
@@ -168,6 +177,30 @@ const batchPermissions = ({
 }: ApplyContext): KiPermissions | undefined =>
   derivedPermissions([...memoryPermissions.values()], spaceId);
 
+const fitsAudience = (
+  audience: NonNullable<ApplyContext['audience']>,
+  permissions: KiPermissions | undefined
+): boolean => audience === 'own' || samePermissions(permissions, audience.permissions);
+
+const SIGHTING_ATTRIBUTES = [OCCURRENCES_ATTRIBUTE, LAST_SEEN_AT_ATTRIBUTE];
+
+/** Keeps what a person-edited KI says, taking only the new sighting and references. */
+const keepPersonEdits = (
+  current: DreamedKi,
+  document: Omit<DreamedKi, 'governance'>
+): Omit<DreamedKi, 'governance'> | undefined => {
+  const attributes = { ...current.attributes, ...pick(document.attributes, SIGHTING_ATTRIBUTES) };
+  const { references } = document;
+  if (isEqual(attributes, current.attributes) && isEqual(references, current.references)) {
+    return undefined;
+  }
+  return {
+    ...current,
+    attributes,
+    references,
+  };
+};
+
 const withDerivedPermissions =
   (
     context: ApplyContext,
@@ -175,7 +208,14 @@ const withDerivedPermissions =
     build: BuildDocument
   ): BuildPermittedDocument =>
   (current) => {
-    const { spaceId, memoryPermissions } = context;
+    const { spaceId, memoryPermissions, audience } = context;
+    if (audience !== undefined) {
+      if (current && !fitsAudience(audience, current.permissions)) {
+        return 'rejected';
+      }
+      const built = build(current);
+      return built && current && isPersonEdited(current) ? keepPersonEdits(current, built) : built;
+    }
     const cited = new Set(current ? citedMemoryIds(current) : []);
     const sources = sourceMemoryIds.filter((id) => memoryPermissions.has(id) || !cited.has(id));
     const permissions =
@@ -188,7 +228,9 @@ const withDerivedPermissions =
     if (current && !samePermissions(current.permissions, permissions)) {
       return 'rejected';
     }
-    const document = build(current);
+    const built = build(current);
+    const document =
+      built && current && isPersonEdited(current) ? keepPersonEdits(current, built) : built;
     return document && permissions ? { ...document, permissions } : document;
   };
 
@@ -348,8 +390,17 @@ const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
     references: addReferences(current?.references, sourceReferences(operation.sourceMemoryIds)),
   }));
 
-const relationshipTitle = ({ from, relation, to }: UpsertRelationshipOperation): string =>
-  `${from.title} ${relation.replace(/_/g, ' ')} ${to.title}`;
+export const relationshipTitle = ({
+  from,
+  relation,
+  to,
+}: Pick<UpsertRelationshipOperation, 'relation'> & {
+  from: { title: string };
+  to: { title: string };
+}): string => `${from.title} ${relation.replace(/_/g, ' ')} ${to.title}`;
+
+export const relationshipContent = (title: string, description: string | undefined): string =>
+  description !== undefined ? `${title}.\n${description}` : `${title}.`;
 
 const upsertRelationship = (context: ApplyContext, operation: UpsertRelationshipOperation) =>
   writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => {
@@ -369,7 +420,7 @@ const upsertRelationship = (context: ApplyContext, operation: UpsertRelationship
       type: RELATIONSHIP_KI_TYPE,
       title,
       ...(description !== undefined && { description }),
-      content: description !== undefined ? `${title}.\n${description}` : `${title}.`,
+      content: relationshipContent(title, description),
       attributes: {
         ...current?.attributes,
         [RELATIONSHIP_RELATION_ATTRIBUTE]: operation.relation,
@@ -407,7 +458,7 @@ const upsert = (context: ApplyContext, operation: UpsertOperation): Promise<Writ
   }
 };
 
-type DeleteResult = 'deleted' | 'skipped' | 'rejected';
+export type DeleteResult = 'deleted' | 'skipped' | 'rejected' | 'person_edited';
 
 const deletable = async (
   context: ApplyContext,
@@ -425,8 +476,16 @@ const deletable = async (
   if (revision === undefined || hiddenFrom(context, revision)) {
     return 'skipped';
   }
-  const { permissions } = revision.source as DreamedKi;
-  return samePermissions(permissions, batchPermissions(context)) ? 'allowed' : 'rejected';
+  const source = revision.source as DreamedKi;
+  if (isPersonEdited(source)) {
+    return 'person_edited';
+  }
+  const { audience } = context;
+  const fits =
+    audience !== undefined
+      ? fitsAudience(audience, source.permissions)
+      : samePermissions(source.permissions, batchPermissions(context));
+  return fits ? 'allowed' : 'rejected';
 };
 
 const planDelete = async (
@@ -487,6 +546,17 @@ const deleteKi = async (context: ApplyContext, kiId: string): Promise<DeleteResu
   return 'deleted';
 };
 
+/** Writes one KI built from its newest revision. The context must set `audience`. */
+export const writeKi = (
+  context: ApplyContext,
+  kiId: string,
+  build: BuildDocument
+): Promise<WriteResult> => writeDocument(context, kiId, [], build);
+
+/** Tombstones one KI and the relationships that link it. The context must set `audience`. */
+export const tombstoneKi = (context: ApplyContext, kiId: string): Promise<DeleteResult> =>
+  deleteKi(context, kiId);
+
 /** Applies dreaming operations in order. */
 export const applyOperations = async (
   context: ApplyContext,
@@ -501,6 +571,8 @@ export const applyOperations = async (
           item: `delete ${operation.id}`,
           reason: "it has different permissions than this batch's memories",
         });
+      } else if (deleted === 'person_edited') {
+        result.rejected.push({ item: `delete ${operation.id}`, reason: 'a person edited it' });
       } else if (deleted === 'deleted') {
         result.deleted += 1;
       }

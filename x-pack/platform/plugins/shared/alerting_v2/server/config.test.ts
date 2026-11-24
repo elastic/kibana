@@ -334,6 +334,28 @@ describe('alerting_v2 config schema', () => {
     });
   });
 
+  describe('dispatcher.run.hydration.maxResponseSize', () => {
+    it('defaults to 50mb', () => {
+      expect(
+        configSchema.validate({}).dispatcher.run.hydration.maxResponseSize.getValueInBytes()
+      ).toBe(50 * 1024 * 1024);
+    });
+
+    it('accepts a lower value', () => {
+      expect(
+        configSchema
+          .validate({ dispatcher: { run: { hydration: { maxResponseSize: '10mb' } } } })
+          .dispatcher.run.hydration.maxResponseSize.getValueInBytes()
+      ).toBe(10 * 1024 * 1024);
+    });
+
+    it.each(['512kb', '101mb'])('rejects %s, outside 1mb–100mb', (maxResponseSize) => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { hydration: { maxResponseSize } } } })
+      ).toThrow();
+    });
+  });
+
   describe('dispatcher.run.alerts.max', () => {
     it('defaults to 10000', () => {
       expect(configSchema.validate({}).dispatcher.run.alerts.max).toBe(10000);
