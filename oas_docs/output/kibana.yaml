@@ -182888,6 +182888,7 @@ components:
           maxItems: 1000
           type: array
         auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
           discriminator:
             mapping:
               auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
@@ -185476,6 +185477,7 @@ components:
           maxItems: 1000
           type: array
         auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
           discriminator:
             mapping:
               auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
@@ -193350,6 +193352,7 @@ components:
           maxItems: 1000
           type: array
         auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
           discriminator:
             mapping:
               auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
