@@ -31,6 +31,8 @@ export type CustomContentDatasetExample = Example<
     addsMeasure?: string;
     /** Text the final queries must contain, ignoring case and whitespace, in any of them. */
     queryContains?: string[];
+    /** Fields some query of the final panel groups by (`STATS … BY`), however the grouping is aliased. */
+    groupsBy?: string[];
     /** Positions of the queries a data edit must leave exactly as they were. */
     unchangedQueries?: number[];
   },

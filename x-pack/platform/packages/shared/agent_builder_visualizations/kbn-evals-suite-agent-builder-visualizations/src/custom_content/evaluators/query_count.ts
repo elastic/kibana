@@ -25,7 +25,7 @@ export const createQueryCountEvaluator = (): CustomContentEvaluator => ({
       return { score: 0, label: 'no-panel', explanation: 'The agent stored no panel.' };
     }
 
-    const count = getQueries(output.after).length;
+    const count = getQueries(output.after).filter((query) => query.trim().length > 0).length;
     const passed = typeof wanted === 'number' ? count === wanted : count >= wanted.min;
     const description = typeof wanted === 'number' ? `exactly ${wanted}` : `at least ${wanted.min}`;
     return passed

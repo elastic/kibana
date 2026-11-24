@@ -11,6 +11,7 @@ import { createDataExpectationEvaluator } from './data_expectation';
 import { createEditEvaluator } from './edit';
 import { createQueriesUsedEvaluator } from './queries_used';
 import { createQueryCountEvaluator } from './query_count';
+import { createQueryGroupingEvaluator, readGroupings } from './query_grouping';
 import { createQueryContentsEvaluator } from './query_contents';
 import { createRowLimitEvaluator, readLimit } from './row_limit';
 import { createRowOrderEvaluator, labelsInOrder } from './row_order';
@@ -690,10 +691,77 @@ describe('Custom Content Query Count', () => {
     ).toBe(1);
   });
 
+  it('does not count a blank query', async () => {
+    expect(
+      await run(evaluator, outputWith({ esqls: ['FROM a', '  '] }), {
+        data: 'query',
+        queryCount: 2,
+      })
+    ).toMatchObject({ score: 0, label: 'too-few-queries' });
+  });
+
   it('fails when there is no panel', async () => {
     expect(
       await run(evaluator, outputWith(undefined), { data: 'query', queryCount: 2 })
     ).toMatchObject({ score: 0, label: 'no-panel' });
+  });
+});
+
+describe('Custom Content Query Grouping', () => {
+  const evaluator = createQueryGroupingEvaluator();
+  const expected = { data: 'query' as const, groupsBy: ['host', 'response'] };
+
+  it('reads what each STATS groups by, aliases included', () => {
+    expect(
+      readGroupings('FROM l | STATS c = COUNT(*) BY status = response.keyword, host | LIMIT 5')
+    ).toEqual(['status = response.keyword', 'host']);
+    expect(readGroupings('FROM l | STATS COUNT(*) | WHERE response >= 500')).toEqual([]);
+  });
+
+  it('skips an example that declares no grouping', async () => {
+    expect((await run(evaluator, outputWith({ esql: QUERY }))).score).toBeNull();
+  });
+
+  it('accepts groupings spread over the queries, aliased or not', async () => {
+    const result = await run(
+      evaluator,
+      outputWith({
+        esqls: [
+          'FROM l | STATS c = COUNT(*) BY host | LIMIT 5',
+          'FROM l | STATS c = COUNT(*) BY status = response.keyword | LIMIT 5',
+        ],
+      }),
+      expected
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('does not take a filter on the field for a grouping', async () => {
+    const result = await run(
+      evaluator,
+      outputWith({
+        esqls: [
+          'FROM l | STATS errors = COUNT(*) WHERE response >= 500',
+          'FROM l | STATS c = COUNT(*) BY host | LIMIT 5',
+        ],
+      }),
+      expected
+    );
+    expect(result).toMatchObject({ score: 0.5, label: 'missing-grouping' });
+  });
+
+  it('fails a panel that repeats one grouping', async () => {
+    const hosts = 'FROM l | STATS c = COUNT(*) BY host | LIMIT 5';
+    expect((await run(evaluator, outputWith({ esqls: [hosts, hosts] }), expected)).score).toBe(0.5);
+  });
+
+  it('ignores a query that does not parse', async () => {
+    const result = await run(
+      evaluator,
+      outputWith({ esqls: ['FROM l | STATS BY BY', 'FROM l | STATS c = COUNT(*) BY host'] }),
+      { data: 'query', groupsBy: ['host'] }
+    );
+    expect(result.score).toBe(1);
   });
 });
 

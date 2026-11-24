@@ -34,6 +34,7 @@ import { createEditEvaluator } from './evaluators/edit';
 import { createDataEditAppliedEvaluator } from './evaluators/edit_applied';
 import { createQueriesUsedEvaluator } from './evaluators/queries_used';
 import { createQueryContentsEvaluator } from './evaluators/query_contents';
+import { createQueryGroupingEvaluator } from './evaluators/query_grouping';
 import { createQueryCountEvaluator } from './evaluators/query_count';
 import { createRowLimitEvaluator } from './evaluators/row_limit';
 import { createRowOrderEvaluator } from './evaluators/row_order';
@@ -198,6 +199,7 @@ export function createEvaluateCustomContentDataset({
       skipStaticExamples(esqlExecutionEvaluator as CustomContentEvaluator),
       createQueryCountEvaluator(),
       createQueryContentsEvaluator(),
+      createQueryGroupingEvaluator(),
       createRowLimitEvaluator(),
       createRowOrderEvaluator({ runQuery }),
       createTemplateColumnsEvaluator({ runQuery }),
