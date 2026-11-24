@@ -46,9 +46,9 @@ describe('logsSearch defaults', () => {
 });
 
 describe('logsSearch', () => {
-  it('reads only the events the metrics count', () => {
+  it('reads only the events the metrics count, and the JS errors for the environment picker', () => {
     expect(logsSearch(PARAMS).query?.bool?.filter).toContainEqual({
-      terms: { event_name: ['browser.navigation_timing', 'browser.web_vital'] },
+      terms: { event_name: ['browser.navigation_timing', 'browser.web_vital', 'exception'] },
     });
   });
 

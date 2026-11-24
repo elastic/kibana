@@ -15,6 +15,7 @@ import { dateHistogram } from '../../../lib/helpers/time_series';
 import type { OverviewFilters, OverviewPercentile } from '../../../../common/overview_filters';
 import { DEFAULT_OVERVIEW_PERCENTILE } from '../../../../common/overview_filters';
 import {
+  EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
   EVENT_WEB_VITAL,
   NAVIGATION_TIMING_LOAD_EVENT_END,
@@ -79,8 +80,9 @@ export const logsSearch = ({
         ...browserDocuments(start, end),
         ...serviceDocuments(serviceName),
         ...(kuery ? [kuery] : []),
-        // Only the events the metrics count.
-        ...termsQuery(OTEL_EVENT_NAME, [EVENT_NAVIGATION_TIMING, EVENT_WEB_VITAL]),
+        // The events the metrics count, and the JS errors, which no metric here counts but whose
+        // environments the picker still lists, e.g. under a KQL query that keeps only them.
+        ...termsQuery(OTEL_EVENT_NAME, [EVENT_NAVIGATION_TIMING, EVENT_WEB_VITAL, EVENT_EXCEPTION]),
       ],
     },
   },
