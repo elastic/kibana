@@ -211,7 +211,6 @@ export {
   type AgentAccessControlEntry,
   type AgentAccessControlPrincipalType,
   type AgentDefinition,
-  type ConversationStarter,
   type AgentApprovals,
   type AgentConfiguration,
   type AgentCapabilities,
@@ -223,8 +222,6 @@ export {
   agentIdMaxLength,
   AGENT_NAME_MAX_LENGTH,
   AGENT_DESCRIPTION_MAX_LENGTH,
-  MAX_CONVERSATION_STARTERS,
-  CONVERSATION_STARTER_LABEL_MAX_LENGTH,
   SELF_AGENT_ID,
   AgentExecutionMode,
   SubagentExecutionMode,
@@ -605,6 +602,11 @@ export {
   type ReferencedContentRefineIssue,
   collectReferencedContentRefineIssues,
 } from './skills';
+export {
+  type ConversationStarter,
+  MAX_CONVERSATION_STARTERS,
+  CONVERSATION_STARTER_LABEL_MAX_LENGTH,
+} from './conversation_starters';
 export * from './telemetry';
 export {
   getLatestVersion,

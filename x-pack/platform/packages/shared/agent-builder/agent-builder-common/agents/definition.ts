@@ -40,18 +40,6 @@ export const agentBuilderDefaultAiIndexId = 'elastic';
 export const kiRetrievalSkillId = 'ki-retrieval';
 
 /**
- * A conversation starter: a card on the new conversation empty state that sends its label as the
- * message when clicked. It is an object so that more fields can be added later without breaking
- * the API.
- */
-export interface ConversationStarter {
-  /**
-   * Short text shown on the card, and sent as the message when the card is clicked.
-   */
-  label: string;
-}
-
-/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
@@ -107,12 +95,6 @@ export interface AgentDefinition {
    * Optional labels used to organize or filter agents
    */
   labels?: string[];
-  /**
-   * Optional conversation starters shown on the new conversation empty state.
-   * At most {@link MAX_CONVERSATION_STARTERS} are shown. An empty list means the agent has no
-   * starters.
-   */
-  conversation_starters?: ConversationStarter[];
   /**
    * Optional avatar eui icon for built-in agents
    */
