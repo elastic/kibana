@@ -101,6 +101,41 @@ describe('SettingsEntryRow', () => {
     );
   });
 
+  describe('the value of a constant', () => {
+    const query = 'FROM alerts-*\n| WHERE host.os.type == "windows"\n| LIMIT 10';
+
+    it('takes a string over several lines, such as an ES|QL query', () => {
+      const { onChange } = renderConstantRow({
+        mode: 'committed',
+        field: { ...committedField, value: query },
+      });
+
+      fireEvent.click(screen.getByTestId('workflowSettingsConstRow-const-1'));
+      const value = screen.getByTestId('workflowSettingsConstValue-const-1');
+
+      expect(value.tagName).toBe('TEXTAREA');
+      expect(value).toHaveValue(query);
+
+      fireEvent.change(value, { target: { value: `${query}\n| SORT @timestamp` } });
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ value: `${query}\n| SORT @timestamp` })
+      );
+    });
+
+    it('is one line for a number or a boolean, which are typed as a word', () => {
+      ['number', 'boolean'].forEach((type) => {
+        const { unmount } = renderConstantRow({
+          mode: 'committed',
+          field: { ...committedField, type: type as ConstantField['type'], value: '1' },
+        });
+        fireEvent.click(screen.getByTestId('workflowSettingsConstRow-const-1'));
+
+        expect(screen.getByTestId('workflowSettingsConstValue-const-1').tagName).toBe('INPUT');
+        unmount();
+      });
+    });
+  });
+
   it('commits draft entries on Done', () => {
     const { onCommit } = renderConstantRow({
       mode: 'draft',

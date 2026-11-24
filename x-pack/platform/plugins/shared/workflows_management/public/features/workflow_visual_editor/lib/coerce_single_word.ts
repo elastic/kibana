@@ -32,6 +32,19 @@ const coerceJsonCollection = (text: string): unknown => {
 };
 
 /**
+ * For a map whose values are text or nested objects (`data.map` fields): a JSON object is the nested
+ * value it spells, under the same exact-round-trip rule as {@link coerceSingleWord}; every other text,
+ * words such as `true` or `1` and lists included, stays text.
+ */
+export const coerceJsonObject = (text: string): unknown => {
+  if (!/^\{[\s\S]*\}$/.test(text)) return text;
+  const coerced = coerceJsonCollection(text);
+  return coerced !== null && typeof coerced === 'object' && !Array.isArray(coerced)
+    ? coerced
+    : text;
+};
+
+/**
  * What a single typed word means as YAML: `true` is a boolean, `null` is null, `1.5` is a number,
  * and anything else (`true_false`, `1N`, `undefined`) is the text itself. Text with a space is
  * always text, except a JSON list or object, whose spaces mean nothing (`["a", "b"]`).

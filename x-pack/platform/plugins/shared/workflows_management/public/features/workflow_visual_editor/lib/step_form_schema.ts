@@ -110,8 +110,10 @@ export interface StepFormField {
   /**
    * A map whose values may be of any type (`data.set`): a single word typed in a row is read as
    * YAML reads it, so `true` is a boolean and `1` a number. See `coerceSingleWord`.
+   * `'objects'` is for a map of text or nested objects (`data.map` fields): a JSON object typed in
+   * a row becomes the nested value, a word stays text. See `coerceJsonObject`.
    */
-  readonly typedValues?: true;
+  readonly typedValues?: true | 'objects';
 }
 
 export interface StepFormSchema {
@@ -293,6 +295,16 @@ const isStringLikeSchema = (schema: z.ZodType): boolean => {
 const isAnyValueSchema = (schema: z.ZodType): boolean => {
   const inner = unwrapSchema(schema);
   return inner instanceof z.ZodUnknown || inner instanceof z.ZodAny;
+};
+
+/** A map that holds more than scalars but is not free-form either (`data.map` fields: text or nested objects). */
+const holdsNestedValues = (schema: z.ZodType): boolean => {
+  const inner = unwrapSchema(schema);
+  return (
+    inner instanceof z.ZodRecord &&
+    !isScalarValueSchema(inner.valueType as z.ZodType) &&
+    !isAnyValueSchema(inner.valueType as z.ZodType)
+  );
 };
 
 /** A map's value type is a single scalar, so each entry fits one text cell (e.g. HTTP headers). */
@@ -709,6 +721,9 @@ const fieldsFromObject = (
         language,
         options,
         ...(acceptsSingle !== undefined ? { acceptsSingle } : {}),
+        ...(kind === 'key-value' && holdsNestedValues(fieldSchema)
+          ? { typedValues: 'objects' as const }
+          : {}),
         ...(startsOnData ? { preferData: true } : {}),
         defaultValue: getDefault(fieldSchema),
         ...(fixedOnly ? { templatable: false as const } : {}),

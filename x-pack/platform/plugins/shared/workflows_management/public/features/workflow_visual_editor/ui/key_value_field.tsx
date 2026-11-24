@@ -19,7 +19,7 @@ import { isRecord } from '@kbn/workflows-yaml';
 import { ReferenceCapableField } from './reference_capable_field';
 import { ReferenceTextInput } from './reference_text_input';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
-import { coerceSingleWord } from '../lib/coerce_single_word';
+import { coerceJsonObject, coerceSingleWord } from '../lib/coerce_single_word';
 import { normalizeReferenceForm } from '../lib/reference_value';
 
 interface Row {
@@ -54,8 +54,10 @@ export interface KeyValueFieldProps {
   /**
    * The values may be of any type: a single word typed in a row is read as YAML reads it (`true`
    * is a boolean, `1` a number), see `coerceSingleWord`. Off for maps whose values are text.
+   * `'objects'` is for maps whose values are text or nested objects: only a JSON object typed in a
+   * row becomes a nested value, see `coerceJsonObject`; words stay text.
    */
-  readonly typedValues?: boolean;
+  readonly typedValues?: boolean | 'objects';
   /**
    * Renders a value that isn't text (a number, a list, a record) as JSON. Injected so this file
    * doesn't import the panel that renders it.
@@ -295,8 +297,14 @@ export function KeyValueField({
     const normalized = normalizeReferenceForm(
       typeof current?.value === 'string' ? current.value : ''
     );
+    const typed = typedValuesRef.current;
     updateRowRef.current(id, {
-      value: typedValuesRef.current ? coerceSingleWord(normalized) : normalized,
+      value:
+        typed === 'objects'
+          ? coerceJsonObject(normalized)
+          : typed
+          ? coerceSingleWord(normalized)
+          : normalized,
     });
   }, []);
   const onRemove = useCallback((id: number) => {

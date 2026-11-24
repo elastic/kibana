@@ -209,11 +209,14 @@ const ConstantFields = ({
         error={valueError}
         fullWidth
       >
-        {field.type === 'object' || field.type === 'array' ? (
+        {field.type === 'object' || field.type === 'array' || field.type === 'string' ? (
           <EuiTextArea
             compressed
             fullWidth
-            rows={4}
+            // A string grows with its lines (a multi-line ES|QL query is a common constant); the others are JSON.
+            rows={
+              field.type === 'string' ? Math.min(Math.max(field.value.split('\n').length, 1), 8) : 4
+            }
             value={field.value}
             disabled={readOnly}
             onChange={(e) => onUpdate({ ...field, value: e.target.value })}

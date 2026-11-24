@@ -305,6 +305,33 @@ describe('step_form_schema', () => {
       expect(kindOf('plain')).toBe('code');
     });
 
+    it('types only the JSON objects of a map of text or nested objects, and the words of a map of anything', () => {
+      const nestedValue = z.union([z.string(), z.object({ a: z.string() })]);
+      const mapConnectors = [
+        {
+          type: 'mapper',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            fields: z.record(z.string(), nestedValue).meta({ keyValue: true }),
+            headers: z.record(z.string(), z.string()).optional(),
+            anything: z.record(z.string(), z.unknown()).meta({ keyValue: true }),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const typedValuesOf = (key: string) =>
+        getStepFormSchema('mapper', mapConnectors)?.fields.find((f) => f.key === key)?.typedValues;
+      expect(typedValuesOf('fields')).toBe('objects');
+      expect(typedValuesOf('headers')).toBeUndefined();
+      expect(typedValuesOf('anything')).toBeUndefined();
+    });
+
+    it('keeps the typed words of a data.set map', () => {
+      expect(getStepFormSchema('data.set', [])?.fields[0].typedValues).toBe(true);
+    });
+
     it('asks for the value form on the condition of `if` and `while`, and nowhere else', () => {
       const filterLike = {
         type: 'data.filter',

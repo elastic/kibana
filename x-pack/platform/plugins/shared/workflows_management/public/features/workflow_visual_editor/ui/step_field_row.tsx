@@ -653,7 +653,7 @@ export function StepFieldRow({
                   })
             }
             testSubj={testSubj}
-            typedValues={field.typedValues === true}
+            typedValues={field.typedValues}
             renderJsonValue={(cell) =>
               containsMapDirective(cell.value) ? (
                 <YamlOnlyValue

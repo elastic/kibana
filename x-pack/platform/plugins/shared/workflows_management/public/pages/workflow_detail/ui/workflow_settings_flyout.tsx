@@ -33,6 +33,11 @@ import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowConstantsEditor } from './workflow_constants_editor';
+import { WorkflowExecutionSettings } from './workflow_execution_settings';
+import {
+  type ExecutionSettingsPatch,
+  writeExecutionSettings,
+} from './workflow_execution_settings_model';
 import { WorkflowOutputsEditor } from './workflow_outputs_editor';
 import {
   type ConstantField,
@@ -222,6 +227,17 @@ export const WorkflowSettingsFlyout = ({
     [applyYamlPatch, tagOptions]
   );
 
+  const handleExecutionSettingsCommit = useCallback(
+    (patch: ExecutionSettingsPatch) => {
+      if (readOnly) return;
+      const nextYaml = writeExecutionSettings(yamlString, patch);
+      if (nextYaml !== yamlString) {
+        dispatch(setYamlString(nextYaml));
+      }
+    },
+    [dispatch, readOnly, yamlString]
+  );
+
   const handleConstantsChange = useCallback(
     (next: readonly ConstantField[]) => {
       if (readOnly) return;
@@ -379,6 +395,14 @@ export const WorkflowSettingsFlyout = ({
                 data-test-subj="workflowSettingsTagsInput"
               />
             </EuiFormRow>
+
+            <EuiSpacer size="l" />
+
+            <WorkflowExecutionSettings
+              settings={definition?.settings}
+              onCommit={handleExecutionSettingsCommit}
+              readOnly={readOnly}
+            />
 
             <EuiSpacer size="l" />
 

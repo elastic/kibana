@@ -6,9 +6,33 @@
  */
 
 import { parse, stringify } from 'yaml';
-import { coerceSingleWord } from './coerce_single_word';
+import { coerceJsonObject, coerceSingleWord } from './coerce_single_word';
 
 const written = (value: unknown): string => stringify({ k: value }).trim();
+
+describe('coerceJsonObject', () => {
+  it('turns a JSON object into the object, spaces or not', () => {
+    expect(coerceJsonObject('{"a":{"b":"{{ item.b }}"}}')).toEqual({ a: { b: '{{ item.b }}' } });
+    expect(coerceJsonObject('{ "a": "x" }')).toEqual({ a: 'x' });
+  });
+
+  it.each([
+    'true',
+    'null',
+    '1',
+    '1.5',
+    'plain text',
+    '["a"]',
+    '[]',
+    '{{ item.name }}',
+    '{a}',
+    '{"a":1.0}',
+    '{"a":1,"a":2}',
+    '',
+  ])('%s stays text', (text) => {
+    expect(coerceJsonObject(text)).toBe(text);
+  });
+});
 
 describe('coerceSingleWord', () => {
   describe('booleans and null are read as YAML reads them', () => {

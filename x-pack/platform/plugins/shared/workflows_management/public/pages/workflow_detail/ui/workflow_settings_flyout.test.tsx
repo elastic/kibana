@@ -101,6 +101,42 @@ describe('WorkflowSettingsFlyout', () => {
     expect(screen.getByTestId('workflowSettingsTagsInput')).toBeInTheDocument();
   });
 
+  describe('execution settings', () => {
+    const settle = (testId: string, value: string) => {
+      const input = screen.getByTestId(testId);
+      fireEvent.change(input, { target: { value } });
+      fireEvent.blur(input);
+    };
+
+    it('writes the timeout, the maximum step size and the concurrency into the workflow settings', () => {
+      const { store } = renderFlyout();
+
+      settle('workflowSettingsTimeoutInput', '20m');
+      settle('workflowSettingsMaxStepSizeInput', '10mb');
+      settle('workflowSettingsConcurrencyKeyInput', 'case-{{ event.id }}');
+      fireEvent.change(screen.getByTestId('workflowSettingsConcurrencyStrategySelect'), {
+        target: { value: 'drop' },
+      });
+      settle('workflowSettingsConcurrencyMaxInput', '1');
+
+      const yaml = selectYamlString(store.getState());
+      expect(yaml).toMatch(/settings:\n\s+timeout: 20m\n\s+max-step-size: 10mb\n\s+concurrency:/);
+      expect(yaml).toMatch(/key: case-\{\{ event\.id \}\}/);
+      expect(yaml).toMatch(/strategy: drop/);
+      expect(yaml).toMatch(/max: 1/);
+    });
+
+    it('shows the settings a workflow already has and removes one that is emptied', () => {
+      const { store } = renderFlyout(`${BASE_YAML}settings:\n  timeout: 5m\n`);
+
+      expect(screen.getByTestId('workflowSettingsTimeoutInput')).toHaveValue('5m');
+
+      settle('workflowSettingsTimeoutInput', '');
+
+      expect(selectYamlString(store.getState())).not.toContain('settings');
+    });
+  });
+
   it('adds a typed tag that is also part of another suggestion', () => {
     const { store } = renderFlyout();
     const input = within(screen.getByTestId('workflowSettingsTagsInput')).getByTestId(
