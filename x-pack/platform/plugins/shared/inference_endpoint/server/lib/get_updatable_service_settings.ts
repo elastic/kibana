@@ -11,8 +11,6 @@ import { unflattenObject } from '../utils/unflatten_object';
 
 type ProviderSettings = NonNullable<InferenceEndpointRequestBody['config']['providerConfig']>;
 
-const ALLOCATION_KEYS = ['adaptive_allocations', 'num_allocations'];
-
 const isEmptyValue = (value: ProviderSettings[string]): boolean => isNil(value) || value === '';
 
 /**
@@ -23,11 +21,8 @@ export const getUpdatableServiceSettings = (
   providerConfig: ProviderSettings = {},
   providerSecrets: ProviderSettings = {}
 ): ProviderSettings => {
-  const isUpdatableKey = (key: string): boolean =>
-    configurations[key]?.updatable === true && !ALLOCATION_KEYS.includes(key);
-
   const updatableEntries = Object.entries({ ...providerConfig, ...providerSecrets }).filter(
-    ([key, value]) => isUpdatableKey(key) && !isEmptyValue(value)
+    ([key, value]) => configurations[key]?.updatable === true && !isEmptyValue(value)
   );
 
   return unflattenObject<ProviderSettings>(Object.fromEntries(updatableEntries));

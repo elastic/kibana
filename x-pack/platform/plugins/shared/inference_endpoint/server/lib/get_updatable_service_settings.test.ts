@@ -27,7 +27,6 @@ const configurations = {
   token_url: createField({}),
   scopes: createField({ type: FieldType.LIST }),
   'rate_limit.requests_per_minute': createField({ type: FieldType.INTEGER }),
-  num_allocations: createField({ type: FieldType.INTEGER }),
   api_key: createField({ sensitive: true }),
   client_secret: createField({ sensitive: true }),
 };
@@ -55,13 +54,11 @@ describe('getUpdatableServiceSettings', () => {
     });
   });
 
-  it('omits non-updatable fields, fields the service does not define, and allocation settings', () => {
+  it('omits non-updatable fields and fields the service does not define', () => {
     expect(
       getUpdatableServiceSettings(configurations, {
         model_id: 'text-embedding-3-small',
         unknown_field: 'value',
-        num_allocations: 2,
-        adaptive_allocations: { enabled: true },
       })
     ).toEqual({});
   });
