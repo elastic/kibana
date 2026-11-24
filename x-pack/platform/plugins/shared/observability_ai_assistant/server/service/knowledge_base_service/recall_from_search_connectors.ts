@@ -29,7 +29,7 @@ export async function recallFromSearchConnectors({
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
 }): Promise<RecalledEntry[]> {
   const connectorIndices = await getConnectorIndices(esClient, uiSettingsClient, logger);
-  logger.debug(`Found content crawler indices: ${connectorIndices}`);
+  logger.debug(`Found connector indices: ${connectorIndices}`);
 
   const [semanticTextConnectors, legacyConnectors] = await Promise.all([
     recallFromSemanticTextConnectors({
@@ -86,7 +86,7 @@ async function recallFromSemanticTextConnectors({
     return [];
   }
 
-  logger.debug(`Text field for content crawlers: ${textFields}`);
+  logger.debug(`Text field for search connectors: ${textFields}`);
 
   const params = {
     index: connectorIndices,
@@ -213,7 +213,7 @@ async function getConnectorIndices(
   const responsePromise = esClient.asInternalUser.connector
     .list({ filter_path: 'results.index_name' })
     .catch((e) => {
-      logger.warn(`Failed to fetch content crawler indices due to ${e.message}`);
+      logger.warn(`Failed to fetch connector indices due to ${e.message}`);
       return { results: [] };
     });
 
