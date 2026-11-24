@@ -28,6 +28,9 @@ jest.mock('../use_update_action_tags', () => ({
   useUpdateActionTags: () => ({ mutate: jest.fn(), isLoading: false }),
 }));
 
+// Guard only: the alert Response tool renders PackQueriesStatusTable without
+// `showResultsHeader`, so this flyout is not reachable there today. It keeps the
+// flyout nest-safe if a managed host ever renders the results header.
 describe('AddTagsFlyout', () => {
   let consoleErrorSpy: jest.SpyInstance;
 
