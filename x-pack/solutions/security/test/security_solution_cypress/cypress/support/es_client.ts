@@ -108,9 +108,6 @@ export const esClient = (
         conflicts: 'proceed',
         scroll_size: 10000,
         refresh: true,
-        // some indices, like the workflow migrations ones, are only created on first use
-        ignore_unavailable: true,
-        allow_no_indices: true,
       });
       return null;
     },

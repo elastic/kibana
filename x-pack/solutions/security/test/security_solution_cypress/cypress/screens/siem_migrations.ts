@@ -44,9 +44,6 @@ export const WORKFLOWS_FLYOUT_TRANSLATE_BTN = getDataTestSubjectSelector(
   'workflowDataFlyoutTranslateButton'
 );
 export const WORKFLOWS_CARD_BODY = getDataTestSubjectSelector('startWorkflowMigrationsCardBody');
-export const WORKFLOWS_UI_DISABLED_CALLOUT = getDataTestSubjectSelector(
-  'workflowsUiDisabledCallout'
-);
 export const MISSING_PRIVILEGES_CALLOUT = getDataTestSubjectSelector('missingPrivilegesGroup');
 
 export const START_MIGRATION_FROM_FLYOUT_BTN = getDataTestSubjectSelector('startMigrationButton');

@@ -47,7 +47,6 @@ describe(
 
     beforeEach(() => {
       deleteConnectors();
-      cleanWorkflowsMigrationData();
       role.login();
       cy.waitUntil(
         () => {
@@ -59,9 +58,12 @@ describe(
       visit(`${GET_STARTED_URL}/siem_migrations`);
     });
 
+    afterEach(() => {
+      cleanWorkflowsMigrationData();
+    });
+
     after(() => {
       role.teardown();
-      cleanWorkflowsMigrationData();
     });
 
     it('should be able to create a workflow migration by uploading a Tines story export', () => {

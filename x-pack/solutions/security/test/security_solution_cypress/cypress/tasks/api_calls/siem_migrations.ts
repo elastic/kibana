@@ -40,8 +40,6 @@ export const cleanWorkflowsMigrationData = () => {
       `${WORKFLOWS_MIGRATION_INDEX_PREFIX}-migrations-${spaceId}`,
     ];
 
-    // The workflow migrations indices are created on first use, so they may not exist yet and
-    // can not be refreshed first like `deleteAllDocuments` does.
-    cy.task('deleteDocuments', migrationIndices.join(','));
+    deleteAllDocuments(migrationIndices.join(','));
   });
 };
