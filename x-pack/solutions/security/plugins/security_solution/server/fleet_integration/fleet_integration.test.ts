@@ -476,8 +476,8 @@ describe('Fleet integrations', () => {
       });
     });
 
-    describe('dotted response_actions keys', () => {
-      // Called without a request context, which otherwise returns the incoming policy as it is
+    describe('export providers without a request context', () => {
+      // Without a request context, the incoming policy is kept instead of being replaced by the defaults
       const invokeWithoutRequest = (policyValue: PolicyConfig): Promise<NewPackagePolicy> => {
         const callback = getPackagePolicyCreateCallback(
           logger,
@@ -508,26 +508,99 @@ describe('Fleet integrations', () => {
         );
       };
 
+      const provider = {
+        id: 'azure-1',
+        type: 'azure_blob',
+        account_name: 'acct',
+        container: 'dumps',
+      } as const;
       // `set()` with an array path writes a literal (dotted) key instead of expanding it
-      it.each([
-        ['windows.response_actions', ['windows.response_actions'], {}],
-        ['response_actions.export_providers', ['linux', 'response_actions.export_providers'], []],
-      ])('should reject the dotted key %s', async (key, path, value) => {
-        await expect(invokeWithoutRequest(set(policyFactory(), path, value))).rejects.toMatchObject(
-          {
+      const dottedKeyCases: Array<[string, string[], unknown]> = [
+        [
+          'windows.response_actions',
+          ['windows.response_actions'],
+          { export_providers: [provider] },
+        ],
+        [
+          'response_actions.export_providers',
+          ['linux', 'response_actions.export_providers'],
+          [provider],
+        ],
+      ];
+
+      describe('when export providers are enabled', () => {
+        beforeEach(() => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            responseActionsEndpointFileExport: true,
+          };
+        });
+
+        it.each(dottedKeyCases)('should reject the dotted key %s', async (key, path, value) => {
+          await expect(
+            invokeWithoutRequest(set(policyFactory(), path, value))
+          ).rejects.toMatchObject({
             statusCode: 400,
             apiPassThrough: true,
             message: `response_actions can't be set with a dotted key ("${key}")`,
-          }
-        );
+          });
+        });
+
+        it('should return the incoming policy as it is when it has no dotted keys', async () => {
+          const policyValue = setExportProviders(policyFactory(), [provider]);
+
+          const packagePolicy = await invokeWithoutRequest(policyValue);
+
+          expect(packagePolicy.inputs[0].config!.policy.value).toBe(policyValue);
+        });
       });
 
-      it('should still return the incoming policy when it has no dotted keys', async () => {
-        const policyValue = policyFactory();
+      describe.each<[string, () => void]>([
+        [
+          'the feature flag is off',
+          () => {
+            experimentalFeatures = {
+              ...experimentalFeatures,
+              responseActionsEndpointFileExport: false,
+            };
+          },
+        ],
+        [
+          'the endpointResponseActions product feature is disabled',
+          () => {
+            experimentalFeatures = {
+              ...experimentalFeatures,
+              responseActionsEndpointFileExport: true,
+            };
+            productFeaturesService = createProductFeaturesServiceMock(
+              ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_response_actions')
+            );
+          },
+        ],
+      ])('when %s', (_, setUp) => {
+        beforeEach(() => {
+          setUp();
+        });
 
-        const packagePolicy = await invokeWithoutRequest(policyValue);
+        it.each(dottedKeyCases)(
+          'should remove the dotted key %s without an error',
+          async (_key, path, value) => {
+            const packagePolicy = await invokeWithoutRequest(set(policyFactory(), path, value));
 
-        expect(packagePolicy.inputs[0].config!.policy.value).toBe(policyValue);
+            expect(packagePolicy.inputs[0].config!.policy.value).not.toHaveProperty(path);
+          }
+        );
+
+        it('should remove export providers from every OS', async () => {
+          const packagePolicy = await invokeWithoutRequest(
+            setExportProviders(policyFactory(), [provider])
+          );
+          const policy: PolicyConfig = packagePolicy.inputs[0].config!.policy.value;
+
+          for (const os of ['windows', 'mac', 'linux'] as const) {
+            expect(policy[os]).not.toHaveProperty('response_actions');
+          }
+        });
       });
     });
   });

@@ -136,6 +136,13 @@ const shouldUpdateMetaValues = (
   );
 };
 
+const isExportProvidersEnabled = (
+  productFeatures: ProductFeaturesService,
+  experimentalFeatures: ExperimentalFeatures
+): boolean =>
+  productFeatures.isEnabled(ProductFeatureSecurityKey.endpointResponseActions) &&
+  experimentalFeatures.responseActionsEndpointFileExport;
+
 /**
  * Callback to handle creation of PackagePolicies in Fleet
  */
@@ -157,15 +164,25 @@ export const getPackagePolicyCreateCallback = (
     context,
     request
   ): Promise<NewPackagePolicy> => {
-    // Checked first: the early return below keeps the incoming policy as it is
-    const incomingPolicyValue = newPackagePolicy.inputs?.[0]?.config?.policy?.value;
-    if (isEndpointPackagePolicy(newPackagePolicy) && incomingPolicyValue) {
-      validateNoDottedResponseActionsKeys(incomingPolicyValue as PolicyConfig);
-    }
-
     // callback is called outside request context
     if (!context || !request) {
       logger.debug('PackagePolicyCreateCallback called outside request context. Skipping...');
+
+      const endpointPolicyData = newPackagePolicy as NewPolicyData;
+      const incomingPolicyValue = endpointPolicyData.inputs?.[0]?.config?.policy?.value;
+
+      // The incoming policy is kept here (with a request it's replaced by the defaults below),
+      // so it gets the export provider gating of an update
+      if (isEndpointPackagePolicy(newPackagePolicy) && incomingPolicyValue) {
+        if (isExportProvidersEnabled(productFeatures, experimentalFeatures)) {
+          validateNoDottedResponseActionsKeys(incomingPolicyValue);
+        } else {
+          endpointPolicyData.inputs[0].config.policy.value = removeExportProviders(
+            removeDottedResponseActionsKeys(incomingPolicyValue)
+          );
+        }
+      }
+
       return newPackagePolicy;
     }
 
@@ -365,8 +382,7 @@ export const getPackagePolicyUpdateCallback = (
 
       // Stripped before license validation for the same reason as custom YARA signatures above.
       if (
-        (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointResponseActions) ||
-          !experimentalFeatures.responseActionsEndpointFileExport) &&
+        !isExportProvidersEnabled(productFeatures, experimentalFeatures) &&
         endpointIntegrationData.inputs?.[0]?.config?.policy?.value
       ) {
         endpointIntegrationData.inputs[0].config.policy.value = removeExportProviders(
