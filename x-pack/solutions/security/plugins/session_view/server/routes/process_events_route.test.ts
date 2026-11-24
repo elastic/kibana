@@ -234,6 +234,12 @@ describe('process_events_route.ts', () => {
       // The event query ignores a cursor that is not a date. An alert range with such a cursor makes
       // Elasticsearch reject the range, so the alerts of a valid page would all be dropped.
       describe('with a cursor that is not a date', () => {
+        it('sends a date that Elasticsearch can parse for a date that only JavaScript parses', async () => {
+          const range = await fetchAndGetAlertsRange('Sun, 08 May 2022 13:46:40 GMT', true);
+
+          expect(range).toEqual({ gte: '2022-05-08T13:46:40.000Z' });
+        });
+
         it('ignores it on a short forward page', async () => {
           const range = await fetchAndGetAlertsRange('not-a-date', true);
 

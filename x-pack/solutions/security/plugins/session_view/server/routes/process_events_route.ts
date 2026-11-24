@@ -135,8 +135,10 @@ export const fetchEventsAndScopedAlerts = async (
 ) => {
   const cursorMillis = cursor && new Date(cursor).getTime() + (forward ? -1 : 1);
   // The event query ignores a cursor that is not a date, so the alert range must too: Elasticsearch
-  // rejects the range and the alert search then returns no alerts.
-  const alertsCursor = cursorMillis ? cursor : undefined;
+  // rejects the range and the alert search then returns no alerts. A cursor that JavaScript parses can
+  // still be rejected by the alert date field (for example 2022/05/08), so send the parsed time.
+  const cursorTime = cursor ? new Date(cursor).getTime() : NaN;
+  const alertsCursor = Number.isNaN(cursorTime) ? undefined : new Date(cursorTime).toISOString();
   const size = Math.min(pageSize, PROCESS_EVENTS_PER_PAGE);
 
   const search = await client.search({
