@@ -70,7 +70,9 @@ export const addConnector = async (
     !nativeConnector &&
     input.serviceType !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
   ) {
-    throw new Error(`Could not find connector definition for service type ${input.serviceType}`);
+    throw new Error(
+      `Could not find content crawler definition for service type ${input.serviceType}`
+    );
   }
 
   const nativeFields = nativeConnector
