@@ -9,7 +9,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonEmpty, EuiCode, EuiSwitch, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { BulkActions } from '../bulk_actions';
 import * as i18n from '../translations';

@@ -46,14 +46,11 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
-import { isEntityGroupView } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
-import {
-  useEntityPanelTabs,
-  TABLE_TAB_ID,
-} from '../../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
-import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
-import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
-import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
+import { isEntityGroupView } from '../../shared/utils/entity_store_group_utils';
+import { useEntityPanelTabs, TABLE_TAB_ID } from '../../shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../../shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../../shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../../shared/components/entity_summary_grid';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { Header } from './header';
 import { Content } from './content';

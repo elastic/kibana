@@ -122,6 +122,26 @@ export const guardedExpandStep = <K extends OptionalStateKey>(
   });
 
 /**
+ * Yields every element from `source` unchanged, invoking `onEach` for each one
+ * just before it is forwarded. Any thrown error from `source` propagates
+ * unchanged.
+ *
+ * The utility holds no state of its own; `onEach` folds each observation into
+ * the consumer's state (e.g. a batch counter the consumer owns). This lets a
+ * step distinguish real elements from any later-injected ones — e.g. the
+ * synthetic empty batch {@link withAtLeastOne} appends never reaches `onEach`.
+ */
+export async function* tap<T>(
+  source: AsyncIterable<T>,
+  onEach: (item: T) => void
+): AsyncIterable<T> {
+  for await (const item of source) {
+    onEach(item);
+    yield item;
+  }
+}
+
+/**
  * Wraps an async iterable so consumers observe at least one element.
  *
  * Yields every element from `source`. If `source` completes without yielding,

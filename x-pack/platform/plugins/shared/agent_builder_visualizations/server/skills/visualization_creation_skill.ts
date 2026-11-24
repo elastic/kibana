@@ -45,7 +45,7 @@ Do **not** use this skill when:
 
 - **${
     platformCoreTools.createVisualization
-  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL internally from your natural-language \`query\` — you do not need to build ES|QL yourself for the common case. You say what to build in \`target\`, discriminated by \`target.type\`: \`lens\`, \`vega\`, \`custom_content\`, or \`attachment\` (update an existing visualization).
+  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL internally from your natural-language \`query\` — you do not need to build ES|QL yourself for the common case. You say what to build in \`target\`, discriminated by \`target.type\`: \`vis\` (Lens), \`vega\`, \`custom_content\`, or \`attachment\` (update an existing visualization).
 - **${
     platformCoreTools.generateEsql
   }**: Optional. Only for genuinely complex aggregations/joins you want to control and validate precisely; pass the result to ${
@@ -85,7 +85,7 @@ Do **not** use this skill when:
      - \`query\` (required, specific and field-accurate)
      - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
      - \`target\` (required) — one of:
-       - \`{ "type": "lens", "chartType": <required>, "esql"?: <ES|QL from generate_esql or the user> }\` for a standard chart
+       - \`{ "type": "vis", "chartType": <required>, "esql"?: <ES|QL from generate_esql or the user> }\` for a standard chart
        - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <ES|QL from generate_esql or the user> }\` for a custom Vega-Lite visualization
        - \`{ "type": "custom_content", "dataQueries": [...] }\` or \`{ "type": "custom_content", "removeAllQueries": true }\` for an HTML layout — always pass one: \`dataQueries\` has a query generated for each entry, \`removeAllQueries\` is for a panel that genuinely has no data
        - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "dataQueries"?, "removeAllQueries"? }\` (\`esql\` for Lens and Vega, \`dataQueries\` and \`removeAllQueries\` for custom content) to update an existing visualization
@@ -146,7 +146,7 @@ ${
   - The user explicitly asks for a Vega or Vega-Lite visualization, OR
   - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts of **different measures** (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
 - Pass \`target.type: "custom_content"\` only when **neither chart grammar** can express the request: an HTML/CSS layout such as a KPI scorecard with colored status badges, a health or status board, a panel mixing narrative text with live values, or when the user explicitly asks for a custom or HTML panel. Anything that is a standard time series, bar, pie, metric or table belongs on Lens; anything faceted, layered or scatter-shaped belongs on Vega. Reach for custom content last.
-- Otherwise pass \`target.type: "lens"\` with the required best-fitting \`chartType\`. Legend statistics of one series stay on Lens xy — see the average/min/max distinction above.
+- Otherwise pass \`target.type: "vis"\` with the required best-fitting \`chartType\`. Legend statistics of one series stay on Lens xy — see the average/min/max distinction above.
 - When updating an existing attachment, pass \`target.type: "attachment"\` with its \`attachment_id\` — edits keep the existing renderer.
 
 ### Custom content
@@ -194,7 +194,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 {
   "query": "Show average system.cpu.total.pct over time grouped by host.name",
   "index": "metrics-system.cpu-default",
-  "target": { "type": "lens", "chartType": "xy" }
+  "target": { "type": "vis", "chartType": "xy" }
 }
 \`\`\`
 
@@ -204,7 +204,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 {
   "query": "Show error count over the last 7 days",
   "index": "logs-*",
-  "target": { "type": "lens", "chartType": "xy" },
+  "target": { "type": "vis", "chartType": "xy" },
   "time_range": { "from": "now-7d", "to": "now" }
 }
 \`\`\`
@@ -216,7 +216,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
   "query": "Top 10 source IPs by request count",
   "index": "logs-nginx.access-default",
   "target": {
-    "type": "lens",
+    "type": "vis",
     "chartType": "xy",
     "esql": "FROM logs-nginx.access-default | STATS requests = COUNT(*) BY source.ip | SORT requests DESC | LIMIT 10"
   }

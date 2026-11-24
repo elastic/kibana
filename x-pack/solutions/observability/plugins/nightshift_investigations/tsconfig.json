@@ -89,6 +89,7 @@
     "@kbn/evals",
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
-    "@kbn/setup-node-env"
+    "@kbn/setup-node-env",
+    "@kbn/user-profile-components"
   ]
 }
