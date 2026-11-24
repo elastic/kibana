@@ -266,24 +266,28 @@ steps:
 
                 You are given MEMORIES (new notes agents saved while working) and EXISTING long-term items.
 
-                A memory is a note an agent chose to remember: its title and content. Take from it only what it states.
+                A memory is a note an agent chose to remember: its title and content. Take from it only what it states. What it mentions in passing, such as something the user owns, a count, a price or something they did, counts as much as its main point. Do not record what it only guesses, or a step of a task that does not stay true afterwards.
+
+                Keep lists whole. When a memory lists options, steps, fields, values or names, record every one, in the order given, rather than a few examples ("such as", "including", "and others").
+
+                Record every piece of knowledge in the MEMORIES that a configured type covers, the small ones too, not only the main point of a memory: a later question can be about any of them.
 
                 Return only changes. Update an existing item by repeating its id as ref with the new values; create one with a new key like "new:1"; delete one with delete: true.
 
-                Merge rather than duplicate: if a memory restates or refines an existing item, update that item.
+                Merge rather than duplicate: write one item per piece of knowledge. If a memory restates or refines an existing item, update that item; when several MEMORIES state the same thing, write it once, with each of them in source_memory_ids. When a memory changes a value an item holds, such as a count, an amount, a measurement or a goal, write the latest value and keep the earlier ones with when they held, such as "gets 28 miles per gallon as of May 2023, down from 30 in February 2023". When a memory shows an item is no longer true, write what holds now.
 
                 When a memory restates or confirms an existing item, return its ref with that memory in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many memories it was seen in, and attributes["memory.last_seen_at"], when it was last seen.
 
                 An EXISTING item with attributes["memory.edited_by"] was edited by a person, and its text cannot change. When a memory changes or contradicts what it says, write what the memory says as a new item, and do not return the edited item's ref for that memory. When a memory only restates it, record the sighting as usual.
                 {%- if consts.fact_types.size > 0 %}
 
-                Facts are read on their own, so write each one to stand alone: name what it is about in its title and content, and keep every name, number, code and date exactly as stated.
+                Facts are read on their own, so write each one to stand alone: name what it is about in its title and content, keep every name, number, code and date exactly as stated, and give dates in full rather than as "yesterday" or "next week", working them out from when the memory was saved (its updated_at).
 
                 State the knowledge itself rather than copying the memory, and leave out how it was found and where it came from. When a memory holds several separate pieces of knowledge, write a fact for each.
                 {%- endif %}
                 {%- if consts.entity_types.size > 0 %}
 
-                Give every entity a content summary of what is known about it: its attribute values and the main facts about it.
+                Give every entity a content summary of what is known about it: its attribute values and the main facts about it. Name each entity by its canonical name, the same way every time: an entity is kept by its type and name, so one named the same as an EXISTING entity or in other MEMORIES is the same entity.
                 {%- endif %}
 
                 Give an entity or fact access_patterns when the MEMORIES show how to query the raw data about it: up to 5 distinct questions a later agent could answer from that data. Build them only from indices, fields, values and queries that appear in the MEMORIES; return none rather than invent an index or field. Each has:
