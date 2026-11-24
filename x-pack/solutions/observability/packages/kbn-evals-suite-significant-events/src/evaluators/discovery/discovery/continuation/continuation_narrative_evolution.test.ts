@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH, type SignificantEvent } from '@kbn/significant-events-schema';
 import type { ContinuationCycle } from './continuation_stability';
 import { scoreContinuationNarrativeEvolution } from './continuation_narrative_evolution';
 
@@ -60,7 +60,7 @@ describe('scoreContinuationNarrativeEvolution', () => {
         })
       )
     );
-    expect([result.passedChecks, result.comparableChecks]).toEqual([1, 3]);
+    expect([result.passedChecks, result.comparableChecks]).toEqual([0, 2]);
     expect(result.explanation).toContain('title changed');
     expect(result.explanation).toContain(
       'assessment_note is unchanged although a rule newly confirms'
@@ -104,6 +104,72 @@ describe('scoreContinuationNarrativeEvolution', () => {
       )
     );
     expect(result.score).toBeLessThan(1);
+  });
+
+  it('reports without scoring a dropped summary sentence when a rule newly confirms', () => {
+    const result = scoreContinuationNarrativeEvolution(
+      cycles(
+        event({}),
+        event({
+          summary: 'Storage times out. Retries follow.',
+          assessment_note: 'High: two paths. Confidence is 65.0%.',
+          signals: [signal('rule-a', 'confirms'), signal('rule-b', 'confirms')],
+        })
+      )
+    );
+    expect(result.explanation).not.toContain('summary was rewritten');
+    expect(result.evolution[0]).toContain('dropped 1 stored summary sentence(s), not scored');
+  });
+
+  it('leaves a full summary rewrite unscored when a rule newly confirms', () => {
+    const result = scoreContinuationNarrativeEvolution(
+      cycles(
+        event({}),
+        event({
+          summary: 'A different account entirely.',
+          assessment_note: 'High: two paths. Confidence is 65.0%.',
+          signals: [signal('rule-a', 'confirms'), signal('rule-b', 'confirms')],
+        })
+      )
+    );
+    expect(result.score).toBe(1);
+    expect(result.evolution[0]).toContain('dropped 2 stored summary sentence(s), not scored');
+  });
+
+  it('adds no summary check when the next cycle has no summary', () => {
+    const result = scoreContinuationNarrativeEvolution(
+      cycles(event({}), event({ summary: undefined }))
+    );
+    expect(result.comparableChecks).toBe(1);
+    expect(result.explanation).not.toContain('summary was rewritten');
+  });
+
+  it('does not report a drop as unscored when the stored summary was at capacity', () => {
+    const stored = `${'A stored sentence. '.repeat(1000)}`.slice(0, MAX_TEXT_LENGTH);
+    const result = scoreContinuationNarrativeEvolution(
+      cycles(
+        event({ summary: stored }),
+        event({
+          summary: 'Replaced.',
+          assessment_note: 'High: two paths. Confidence is 65.0%.',
+          signals: [signal('rule-a', 'confirms'), signal('rule-b', 'confirms')],
+        })
+      )
+    );
+    expect(result.evolution[0]).not.toContain('not scored');
+  });
+
+  it('flags a dropped summary sentence when a new rule does not confirm', () => {
+    const result = scoreContinuationNarrativeEvolution(
+      cycles(
+        event({}),
+        event({
+          summary: 'Storage times out. Retries follow.',
+          signals: [signal('rule-a', 'confirms'), signal('rule-b', 'off_topic')],
+        })
+      )
+    );
+    expect(result.explanation).toContain('summary was rewritten');
   });
 
   it('flags an unchanged note when only the severity changed', () => {

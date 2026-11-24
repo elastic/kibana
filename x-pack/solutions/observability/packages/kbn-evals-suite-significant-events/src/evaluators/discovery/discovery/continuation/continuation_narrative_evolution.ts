@@ -59,23 +59,25 @@ const storedWording = (text: string): string => text.replace(/\s+/g, ' ').trim()
 const SENTENCE_END = /(?<=[.!?])\s+(?=[A-Z0-9`"'([])/;
 
 /**
- * Whether `next` keeps every sentence `previous` says. New text may sit in the part it belongs
- * to, between stored sentences, so the stored text need not survive as one contiguous span; a
- * rewrite drops a sentence the reader already had, so it fails. The check is best-effort: a
- * stored sentence that reappears inside a longer rewritten sentence still counts as kept.
+ * How many sentences `previous` says that `next` no longer keeps. New text may sit in the part it
+ * belongs to, between stored sentences, so the stored text need not survive as one contiguous
+ * span. The check is best-effort: a stored sentence that reappears inside a longer rewritten
+ * sentence still counts as kept.
  */
-const keepsStoredSentences = (previous: string, next: string): boolean => {
+const countDroppedStoredSentences = (previous: string, next: string): number => {
   const kept = storedWording(next);
   return storedWording(previous)
     .split(SENTENCE_END)
-    .every((sentence) => kept.includes(sentence));
+    .filter((sentence) => !kept.includes(sentence)).length;
 };
 
 /**
  * Scores how the narrative fields of a continued event evolve across cycles:
  * - the title is preserved verbatim;
  * - `summary` keeps every stored sentence, never rewritten, unless a rule the event held as
- *   `off_topic` now confirms (the stored text described a sampled error);
+ *   `off_topic` now confirms (the stored text described a sampled error). When a rule newly
+ *   confirms, newer evidence may supersede a stored statement, so dropped sentences are reported
+ *   but not scored;
  * - `assessment_note` is re-reasoned when the evidence behind it changed (a rule that newly
  *   confirms, whether new to the event or moved from another verdict, or a new severity), so a stale
  *   note does not sit beside new evidence. A new rule that does not
@@ -130,16 +132,19 @@ export const scoreContinuationNarrativeEvolution = (
         check(previous.event.title === event.title, `${label} title changed`);
       }
       const summaryAtCapacity = previous.event.summary?.length === MAX_TEXT_LENGTH;
+      const droppedSentences =
+        previous.event.summary !== undefined && event.summary !== undefined
+          ? countDroppedStoredSentences(previous.event.summary, event.summary)
+          : 0;
+      // New confirming evidence may supersede a stored statement, so even a full rewrite there is reported, not scored.
+      const summaryCheckScored =
+        !rewriteAllowed && !summaryAtCapacity && newlyConfirmingRules.length === 0;
       if (
+        summaryCheckScored &&
         previous.event.summary !== undefined &&
-        event.summary !== undefined &&
-        !rewriteAllowed &&
-        !summaryAtCapacity
+        event.summary !== undefined
       ) {
-        check(
-          keepsStoredSentences(previous.event.summary, event.summary),
-          `${label} summary was rewritten`
-        );
+        check(droppedSentences === 0, `${label} summary was rewritten`);
       }
       const evidenceMoved =
         newlyConfirmingRules.length > 0 || previous.event.severity !== event.severity;
@@ -159,7 +164,13 @@ export const scoreContinuationNarrativeEvolution = (
       evolution.push(
         `${label} ${newRules.length > 0 ? `+${newRules.length} rule(s)` : 'no new rule'}` +
           `${notConfirming > 0 ? ` (${notConfirming} not confirming)` : ''}: ` +
-          (changed.length > 0 ? `changed ${changed.join(', ')}` : 'narrative unchanged')
+          (changed.length > 0 ? `changed ${changed.join(', ')}` : 'narrative unchanged') +
+          (droppedSentences > 0 &&
+          newlyConfirmingRules.length > 0 &&
+          !rewriteAllowed &&
+          !summaryAtCapacity
+            ? ` (dropped ${droppedSentences} stored summary sentence(s), not scored)`
+            : '')
       );
     }
   });
