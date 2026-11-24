@@ -199,16 +199,19 @@ export const createDecisionSweep = ({
     }
   };
 
-  /** Tags the alerts of each decision. A decision that cannot be tagged is counted and skipped. */
+  /** Tags the alerts of one decision. A decision that cannot be tagged is counted. */
+  const tagDecision = async (prefix: string, id: string, alertIds: string[]) => {
+    try {
+      await tagInChunks(write, { alertIds, add: [`${prefix}${id}`], remove: [] });
+    } catch (error) {
+      totals.tag_failures++;
+      warn(`Could not tag the alerts of decision ${id}`, error);
+    }
+  };
+
+  /** Tags the alerts of each decision, as far as the work deadline allows. */
   const tag = (prefix: string, byDecision: Map<string, string[]>) =>
-    eachDecision(byDecision, async (id, alertIds) => {
-      try {
-        await tagInChunks(write, { alertIds, add: [`${prefix}${id}`], remove: [] });
-      } catch (error) {
-        totals.tag_failures++;
-        warn(`Could not tag the alerts of decision ${id}`, error);
-      }
-    });
+    eachDecision(byDecision, (id, alertIds) => tagDecision(prefix, id, alertIds));
 
   // --- Approved decisions: close the alerts ---
 
@@ -232,7 +235,9 @@ export const createDecisionSweep = ({
     // At debug: a blocked decision is seen again by every sweep until its verdict goes away, and
     // `blocked_by_verdict` already counts it.
     logger.debug(`Decision ${id} has a conflicting verdict on its key: its matches go to analysis`);
-    await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, new Map([[id, alertIds]]));
+    // Not through `tag`: the decision passed the deadline check that started it, and a second check
+    // here would count a decision that is already counted as blocked as deferred, with no tag.
+    await tagDecision(TRIAGE_WOULD_CLOSE_TAG_PREFIX, id, alertIds);
   };
 
   /**

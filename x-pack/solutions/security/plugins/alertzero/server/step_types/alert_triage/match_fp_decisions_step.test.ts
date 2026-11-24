@@ -1467,6 +1467,30 @@ describe('triage match decisions step in on mode', () => {
       expect(output).toEqual(expect.objectContaining({ close_failures: 1, deferred: 0 }));
     });
 
+    it('tags the matches of a decision blocked by a verdict even if the deadline passes while it is handled', async () => {
+      const id = idOf('C:\\x.exe');
+      const { run, get, tags } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+        conflictingVerdicts: [id],
+      });
+      // The deadline passes when the sweep reads the decision to start on it, after the check that
+      // starts each decision and before the matches are tagged.
+      get.mockImplementation(async () => {
+        jest.setSystemTime(NOW + DECISION_MATCH_WORK_BUDGET_MS + 1);
+        return { _source: approved('C:\\x.exe')[id] };
+      });
+
+      const { output } = await run();
+
+      expect(tags()).toContainEqual({
+        ids: ['a'],
+        tags: { tags_to_add: [`az:would_close:${id}`], tags_to_remove: [] },
+      });
+      expect(output).toEqual(expect.objectContaining({ blocked_by_verdict: 1, deferred: 0 }));
+    });
+
     it('counts a decision once in the deferred decisions when it is deferred in the close and in the shadow tags', async () => {
       // One key, two alerts: the trusted one is closed, the untrusted one is only tagged.
       const library = (trusted: boolean) => ({
