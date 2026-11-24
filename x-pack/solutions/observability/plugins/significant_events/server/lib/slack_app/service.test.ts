@@ -1593,7 +1593,7 @@ describe('SlackAppService', () => {
   });
 
   describe('isChannelBound', () => {
-    const listBindings = jest.fn();
+    const isChannelBound = jest.fn();
 
     const createConnectedHarness = () => {
       const harness = createHarness();
@@ -1601,7 +1601,7 @@ describe('SlackAppService', () => {
         startInstall,
         fetchClaim,
         unbind,
-        listBindings,
+        isChannelBound,
       };
       harness.soClient.get.mockResolvedValue({
         attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
@@ -1610,33 +1610,39 @@ describe('SlackAppService', () => {
     };
 
     beforeEach(() => {
-      listBindings.mockReset();
+      isChannelBound.mockReset();
     });
 
-    it('finds a channel on a later page', async () => {
+    it('returns true when the Relay says the channel is bound', async () => {
       const { server } = createConnectedHarness();
-      listBindings
-        .mockResolvedValueOnce({ bindings: [{ scope_id: 'C1' }], nextCursor: 'next' })
-        .mockResolvedValueOnce({ bindings: [{ scope_id: 'C2' }] });
+      isChannelBound.mockResolvedValue(true);
 
-      await expect(new SlackAppService(server).isChannelBound(request, 'C2')).resolves.toBe(true);
-      expect(listBindings).toHaveBeenLastCalledWith('tenant-A', { cursor: 'next', limit: 200 });
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).resolves.toBe(true);
+      expect(isChannelBound).toHaveBeenCalledWith('tenant-A', 'C1');
     });
 
-    it('returns false when no page has the channel', async () => {
+    it('returns false when the Relay says the channel is not bound', async () => {
       const { server } = createConnectedHarness();
-      listBindings.mockResolvedValue({ bindings: [{ scope_id: 'C1' }] });
+      isChannelBound.mockResolvedValue(false);
 
-      await expect(new SlackAppService(server).isChannelBound(request, 'C2')).resolves.toBe(false);
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).resolves.toBe(false);
     });
 
-    it('returns undefined when the Slack App is not connected', async () => {
+    it('returns false when the Slack App is not connected', async () => {
       const { server } = createHarness();
 
-      await expect(
-        new SlackAppService(server).isChannelBound(request, 'C1')
-      ).resolves.toBeUndefined();
-      expect(listBindings).not.toHaveBeenCalled();
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).resolves.toBe(false);
+      expect(isChannelBound).not.toHaveBeenCalled();
+    });
+
+    it('rethrows a Relay failure', async () => {
+      const { server } = createConnectedHarness();
+      const relayError = new Error('relay down');
+      isChannelBound.mockRejectedValue(relayError);
+
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).rejects.toBe(
+        relayError
+      );
     });
   });
 
