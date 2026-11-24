@@ -36,7 +36,9 @@ import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
 import type { DispatchSource } from '../../handlers/action/dispatch_source';
 import { resolveWorkflowOrigin } from '../../handlers/action/action_origin';
 
-// alert_ids is not bounded by the request schema, so cap parallel alert lookups.
+// alert_ids is not bounded by the request schema: reject oversized requests before any lookup
+// runs, and cap parallel alert lookups for the ones that are accepted.
+const MAX_DISTINCT_ALERT_IDS = 100;
 const ALERT_LOOKUP_CONCURRENCY = 10;
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -73,10 +75,18 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
         const logger = osqueryContext.logFactory.get('liveQuery');
 
+        const alertIds = uniq(request.body.alert_ids);
+
+        if (alertIds.length > MAX_DISTINCT_ALERT_IDS) {
+          return response.badRequest({
+            body: `alert_ids must contain at most ${MAX_DISTINCT_ALERT_IDS} distinct ids`,
+          });
+        }
+
         let alertData: (ParsedTechnicalFields & { _index: string }) | undefined;
         let alertError: { statusCode: number; message: string } | undefined;
         try {
-          if (request.body.alert_ids?.length) {
+          if (alertIds.length) {
             const client = await osqueryContext.service
               .getRuleRegistryService()
               ?.getRacClientWithRequest(request);
@@ -86,9 +96,11 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             }
 
             // Every referenced alert must resolve; the first one drives the rest of the request.
-            // The alerts client reports both missing and unauthorized alerts as a Boom 404.
+            // AlertsClient.get wraps every lookup failure (missing, unauthorized, and Elasticsearch
+            // errors alike) in a Boom 404, so all of them surface as the neutral 404 below. The
+            // controlled 500 is only for an unavailable client or an error without a status code.
             const alerts = await pMap(
-              uniq(request.body.alert_ids),
+              alertIds,
               async (id) => {
                 const alert = await client.get({ id });
                 if (!alert) {

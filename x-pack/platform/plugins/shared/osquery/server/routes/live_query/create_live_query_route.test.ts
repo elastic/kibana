@@ -467,6 +467,105 @@ describe('createLiveQueryRoute', () => {
 
       expect(racGet).toHaveBeenCalledTimes(2);
     });
+
+    it('keeps the first alert as the handler input when a later lookup finishes first', async () => {
+      const racGet = jest.fn(
+        ({ id }: { id: string }) =>
+          new Promise<typeof readableAlert & { id: string }>((resolve) => {
+            setTimeout(() => resolve({ ...readableAlert, id }), id === 'alert-1' ? 20 : 0);
+          })
+      );
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1', 'alert-2'], agent_ids: ['agent-1'] },
+        { coreStart, racGet }
+      );
+
+      expect(mockedCreateActionHandler).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ alertData: expect.objectContaining({ id: 'alert-1' }) })
+      );
+    });
+
+    it('returns 404 when the lookup resolves without an alert', async () => {
+      const racGet = jest.fn().mockResolvedValue(undefined);
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
+        { coreStart, racGet }
+      );
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 404,
+        body: { message: ALERT_NOT_ACCESSIBLE },
+      });
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('returns 404 for an error that only carries the status in meta.statusCode', async () => {
+      const racGet = jest
+        .fn()
+        .mockRejectedValue(Object.assign(new Error('es error'), { meta: { statusCode: 404 } }));
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
+        { coreStart, racGet }
+      );
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 404,
+        body: { message: ALERT_NOT_ACCESSIBLE },
+      });
+    });
+
+    it('returns 400 without any lookup when there are too many distinct alert ids', async () => {
+      const racGet = jest.fn(async ({ id }: { id: string }) => ({ ...readableAlert, id }));
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+      const alertIds = Array.from({ length: 101 }, (_, index) => `alert-${index}`);
+
+      const response = await invokeRoute(
+        { query: 'select 1;', alert_ids: alertIds, agent_ids: ['agent-1'] },
+        { coreStart, racGet }
+      );
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: 'alert_ids must contain at most 100 distinct ids',
+      });
+      expect(racGet).not.toHaveBeenCalled();
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('counts distinct ids toward the limit, not duplicates', async () => {
+      const racGet = jest.fn(async ({ id }: { id: string }) => ({ ...readableAlert, id }));
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        {
+          query: 'select 1;',
+          alert_ids: Array.from({ length: 150 }, () => 'alert-1'),
+          agent_ids: ['agent-1'],
+        },
+        { coreStart, racGet }
+      );
+
+      expect(response.badRequest).not.toHaveBeenCalled();
+      expect(racGet).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('returns 403, not 500, when the alerts client is unavailable and the caller cannot run the query', async () => {
+    const response = await invokeRoute(
+      { query: 'select 42 as custom;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
+      { racClientUnavailable: true }
+    );
+
+    expect(response.forbidden).toHaveBeenCalledWith();
+    expect(response.customError).not.toHaveBeenCalled();
+    expect(mockedCreateActionHandler).not.toHaveBeenCalled();
   });
 
   it('returns 403 and no alert details when the caller cannot run the query and the alert is missing', async () => {
