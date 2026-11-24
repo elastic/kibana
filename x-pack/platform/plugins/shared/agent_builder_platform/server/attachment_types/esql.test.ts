@@ -59,6 +59,19 @@ describe('esql attachment type', () => {
       expect(slack).toContain('Open in Discover');
     });
 
+    it('renders a query whose Discover path is 2,500 characters in Slack', async () => {
+      const query = `FROM logs | KEEP ${'a'.repeat(2450)}`;
+      const composition = await toComposition({ query }, discoverLocator);
+      const path = `#/?_a=(query:(esql:'${encodeURIComponent(query)}'))`;
+
+      expect(path).toHaveLength(2500);
+
+      const { valid, slack } = await renderSurface(composition);
+      expect(valid).toBe(true);
+      expect(slack).toContain(`"url":"${SURFACE_BASE_URL}/app/discover${path}"`);
+      expect(slack).toContain(query);
+    });
+
     it('leaves out the description when there is none', async () => {
       const composition = await toComposition({ query: 'FROM logs' }, discoverLocator);
 

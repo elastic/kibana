@@ -70,6 +70,30 @@ describe('actions', () => {
     expect(surfaces.slack.renderNode(links(relative)).blocks).toEqual([]);
   });
 
+  it('takes a label and URL past Slack’s limits, which Slack clamps and drops', () => {
+    const view = (node: ActionsNode) => validate({ type: 'view', body: [node] });
+    const label = 'x'.repeat(100);
+    const long = { label: 'Docs', url: `${URL}?q=${'x'.repeat(3000)}` };
+    const node = links({ label, url: URL }, long);
+
+    expect(view(node).valid).toBe(true);
+    expect(view(links({ label: `${label}x`, url: URL })).valid).toBe(false);
+    expect(surfaces.slack.renderNode(node).blocks).toEqual([
+      {
+        type: 'actions',
+        elements: [
+          {
+            type: 'button',
+            text: { type: 'plain_text', text: `${'x'.repeat(74)}…`, emoji: true },
+            url: URL,
+          },
+        ],
+      },
+    ]);
+    expect(surfaces.slack.renderNode(links(long)).blocks).toEqual([]);
+    expect(surfaces.markdown.renderNode(node)).toBe(`[${label}](${URL}) · [Docs](${long.url})`);
+  });
+
   it('renders links on the other surfaces', () => {
     const node = links({ label: 'Open', url: '/app/discover' }, { label: 'Docs', url: URL });
 
@@ -114,6 +138,30 @@ describe('actions', () => {
         },
       ]);
       expect(surfaces.slack.renderNode(node).blocks).toEqual([]);
+    });
+
+    it('take a 2,500-character path, and are dropped from Slack past its URL limit', () => {
+      const baseUrl = 'https://kibana.example.com/base/s/ops';
+      const discover = (path: string) =>
+        links({ label: 'Open in Discover', app: 'discover', path });
+      const path = `#/${'x'.repeat(2498)}`;
+      const tooLong = discover(`#/${'x'.repeat(3000)}`);
+
+      expect(validate({ type: 'view', body: [discover(path)] }).valid).toBe(true);
+      expect(surfaces.slack.renderNode(discover(path), { baseUrl }).blocks).toEqual([
+        {
+          type: 'actions',
+          elements: [
+            {
+              type: 'button',
+              text: { type: 'plain_text', text: 'Open in Discover', emoji: true },
+              url: `${baseUrl}/app/discover${path}`,
+            },
+          ],
+        },
+      ]);
+      expect(validate({ type: 'view', body: [tooLong] }).valid).toBe(true);
+      expect(surfaces.slack.renderNode(tooLong, { baseUrl }).blocks).toEqual([]);
     });
 
     it('resolve through the React host, and are left out of text and Markdown', () => {

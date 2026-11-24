@@ -23,7 +23,7 @@ const slackButtonHref = ({ url, app, path }: ActionsButton, baseUrl: string | un
 const slackButton = (button: ActionsButton, baseUrl: string | undefined): SlackButtonElement[] => {
   const { label, primary } = button;
   const href = slackButtonHref(button, baseUrl);
-  if (!href) {
+  if (!href || href.length > SLACK_LIMITS.urlChars) {
     return [];
   }
   return [

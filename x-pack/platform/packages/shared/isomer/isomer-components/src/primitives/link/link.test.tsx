@@ -104,6 +104,38 @@ describe('link', () => {
     );
   });
 
+  it('takes a label, URL and path past Slack’s limits', () => {
+    expect(view({ label: 'x'.repeat(100), url: DOCS })).toBe(true);
+    expect(view({ label: 'x'.repeat(101), url: DOCS })).toBe(false);
+    expect(view({ url: `${DOCS}?q=${'x'.repeat(3000)}` })).toBe(true);
+    expect(view({ app: 'discover', path: `#/${'x'.repeat(3000)}` })).toBe(true);
+  });
+
+  it('links a long label and a 2,500-character app path in Slack', () => {
+    const baseUrl = 'https://kibana.example.com/base/s/ops';
+    const label = 'x'.repeat(100);
+    const path = `#/${'x'.repeat(2498)}`;
+
+    expect(slack({ type: 'link', label, app: 'discover', path }, baseUrl)).toEqual([
+      {
+        type: 'section',
+        text: { type: 'mrkdwn', text: `<${baseUrl}/app/discover${path}|${label}>` },
+      },
+    ]);
+  });
+
+  it('renders nothing in Slack for a URL past its limit, and links it elsewhere', () => {
+    const url = `${DOCS}?q=${'x'.repeat(3000)}`;
+    const node: LinkNode = { type: 'link', label: 'Docs', url };
+
+    expect(slack(node)).toEqual([]);
+    expect(
+      slack({ type: 'link', label: 'Open', app: 'discover', path: `#/${'x'.repeat(3000)}` }, DOCS)
+    ).toEqual([]);
+    expect(surfaces.markdown.renderNode(node)).toBe(`[Docs](${url})`);
+    expect(surfaces.text.renderNode(node)).toBe(`Docs: ${url}`);
+  });
+
   it('resolves an app link in React through the host’s resolver', () => {
     const resolveKibanaPath = jest.fn((path: string) => `/base/s/ops${path}`);
 
