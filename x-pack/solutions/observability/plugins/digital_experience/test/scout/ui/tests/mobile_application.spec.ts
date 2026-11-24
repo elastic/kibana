@@ -31,7 +31,9 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
     pageObjects: { digitalExperience },
   }) => {
     await test.step('lists a row per application on the Mobile tab, with its platforms', async () => {
-      await digitalExperience.gotoApplications(TIME_RANGE);
+      // Picks the Web tab, whose tabs show even without web rows: EDOT Browser rows come from
+      // sessions, which are never built for this range, and serverless has no Classic RUM data.
+      await digitalExperience.gotoApplications({ ...TIME_RANGE, applicationType: 'web' });
       await digitalExperience.mobileTab.click();
       await expect(page).toHaveURL(/applicationType=mobile/);
 

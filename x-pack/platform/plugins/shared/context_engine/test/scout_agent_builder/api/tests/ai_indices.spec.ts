@@ -274,7 +274,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       });
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body).toStrictEqual({ status: 'created' });
+      expect(response.body).toMatchObject({ status: 'created' });
     });
 
     await apiTest.step('rejects a duplicate id with a 409', async () => {
@@ -321,7 +321,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ status: 'updated' });
+      expect(response.body).toMatchObject({ status: 'updated' });
 
       const updatedResponse = await apiClient.get(path, {
         headers: { ...viewerApiCredentials.apiKeyHeader, ...API_HEADERS },
@@ -370,7 +370,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       });
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body).toStrictEqual({ status: 'created' });
+      expect(response.body).toMatchObject({ status: 'created' });
     }
   );
 

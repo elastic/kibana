@@ -16,10 +16,7 @@ const defaultProps: ProjectDefaultCardProps = {
   type: 'indices',
   ruleName: 'default_indices',
   profile: { name: 'default_indices', is_builtin: true },
-  matches: [
-    { name: 'products', isHidden: false },
-    { name: 'users', isHidden: false },
-  ],
+  matches: [{ name: 'products' }, { name: 'users' }],
   canEdit: true,
   onEdit: jest.fn(),
   onViewProfile: jest.fn(),
@@ -47,9 +44,9 @@ describe('ProjectDefaultCard', () => {
       <ProjectDefaultCard
         {...defaultProps}
         matches={[
-          { name: 'products', isHidden: false },
-          { name: 'users', isHidden: false },
-          { name: 'archive', isHidden: false, outrankedByRuleName: 'Product catalog' },
+          { name: 'products' },
+          { name: 'users' },
+          { name: 'archive', outrankedByRuleName: 'Product catalog' },
         ]}
       />
     );
