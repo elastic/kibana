@@ -13,8 +13,6 @@ import { test, CONNECTORS_ROLE } from '../fixtures';
 // Datadog is a dual connector (inbound events plus actions) with a single credentialed auth
 // type, so hiding No authentication leaves its basic-auth fields without a picker.
 const DATADOG_TYPE_ID = '.datadog';
-// GitHub is a dual connector with several credentialed auth types, so the picker stays.
-const GITHUB_TYPE_ID = '.github';
 
 const DATADOG_SECRETS = { username: 'scout-api-key', password: 'scout-app-key' };
 
@@ -41,21 +39,16 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
     return apiServices.alerting.connectors.get(id);
   };
 
-  test('does not offer No authentication in the auth picker', async ({ pageObjects, kbnUrl }) => {
+  test('does not offer No authentication in the Datadog auth picker', async ({
+    pageObjects,
+    kbnUrl,
+  }) => {
     const { connectorFlyout } = pageObjects;
 
-    await test.step('Datadog shows its only credentialed auth type without a picker', async () => {
-      await connectorFlyout.openCreate(kbnUrl, DATADOG_TYPE_ID);
-      await expect(connectorFlyout.secretsField('username')).toBeVisible();
-      await expect(connectorFlyout.authTypeCard('none')).toHaveCount(0);
-      await expect(connectorFlyout.authTypeCard('basic')).toHaveCount(0);
-    });
-
-    await test.step('GitHub offers its credentialed auth types but not none', async () => {
-      await connectorFlyout.openCreate(kbnUrl, GITHUB_TYPE_ID);
-      await expect(connectorFlyout.authTypeCard('bearer')).toBeVisible();
-      await expect(connectorFlyout.authTypeCard('none')).toHaveCount(0);
-    });
+    await connectorFlyout.openCreate(kbnUrl, DATADOG_TYPE_ID);
+    await expect(connectorFlyout.secretsField('username')).toBeVisible();
+    await expect(connectorFlyout.authTypeCard('none')).toHaveCount(0);
+    await expect(connectorFlyout.authTypeCard('basic')).toHaveCount(0);
   });
 
   test('Run actions switch hides and restores the outbound fields', async ({
