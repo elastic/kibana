@@ -22,7 +22,8 @@ export const KNOWN_FAILURES_SETTINGS = {
   /**
    * Newest minutes the rule returns counts for. Two more than `rule_every_minutes`, so a run that
    * starts late, or the first run of a replaced rule, leaves no minute unread, and a minute whose
-   * documents arrived late is counted again.
+   * documents arrived late is counted again. The overlap only covers a run up to two minutes late: a
+   * skipped run leaves three minutes that no row counts.
    */
   newest_minutes: 7,
   /** Minutes before the newest ones that give the knowledge indicator's normal level. */
