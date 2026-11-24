@@ -26358,7 +26358,8 @@ paths:
                             spaces:
                               description: The IDs of the spaces where the data view is available.
                               items:
-                                maxLength: 1000
+                                maxLength: 512
+                                minLength: 1
                                 type: string
                               maxItems: 100
                               type: array
@@ -26517,7 +26518,8 @@ paths:
                       spaces:
                         description: The IDs of the spaces where the data view is available.
                         items:
-                          maxLength: 1000
+                          maxLength: 512
+                          minLength: 1
                           type: string
                         maxItems: 100
                         type: array
@@ -26536,7 +26538,7 @@ paths:
                   - meta
           description: The data view was created.
         '400':
-          description: The request is invalid, for example when a field format type does not exist.
+          description: The request is invalid, for example when a field format type does not exist or `spaces` does not include the current space.
         '403':
           description: forbidden
         '409':
@@ -26657,7 +26659,8 @@ paths:
                       spaces:
                         description: The IDs of the spaces where the data view is available.
                         items:
-                          maxLength: 1000
+                          maxLength: 512
+                          minLength: 1
                           type: string
                         maxItems: 100
                         type: array
@@ -26692,7 +26695,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`, and also removes any deprecated scripted fields the data view has. Scripted fields can't be set through this API; sending `scripted_fields` fails with a `400`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`, and also removes any deprecated scripted fields the data view has. Scripted fields can't be set through this API; sending `scripted_fields` fails with a `400`. When provided, `spaces` must include the current space or the request fails with a `400`; when omitted, the data view is available only in the current space.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
       operationId: put-data-views-v2-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26799,7 +26802,8 @@ paths:
                       spaces:
                         description: The IDs of the spaces where the data view is available.
                         items:
-                          maxLength: 1000
+                          maxLength: 512
+                          minLength: 1
                           type: string
                         maxItems: 100
                         type: array
@@ -26865,7 +26869,8 @@ paths:
                       spaces:
                         description: The IDs of the spaces where the data view is available.
                         items:
-                          maxLength: 1000
+                          maxLength: 512
+                          minLength: 1
                           type: string
                         maxItems: 100
                         type: array
@@ -167369,7 +167374,7 @@ components:
     Kibana_HTTP_APIs_kbn-data-view-spaces-schema:
       description: 'The IDs of the spaces where the data view is available. Use `*` to make it available in all spaces. Example: ["default", "marketing"].'
       items:
-        maxLength: 256
+        maxLength: 512
         minLength: 1
         type: string
       maxItems: 100
