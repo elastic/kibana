@@ -11,7 +11,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { agentPolicyService } from '../agent_policy';
 import type { Agent } from '../../types';
-import { FleetVersionConflictError, UpdateByQueryCancelledError } from '../../errors';
+import { FleetVersionConflictError, UpdateByQueryIncompleteError } from '../../errors';
 
 import { createClientMock } from './action.mock';
 import { MAX_RETRY_COUNT } from './retry_helper';
@@ -515,7 +515,7 @@ describe('update_agent_tags', () => {
         { tagsToAdd: ['new'], tagsToRemove: ['old'], kuery: '', total: 5 }
       ).catch((e) => e);
 
-      expect(error).toBeInstanceOf(UpdateByQueryCancelledError);
+      expect(error).toBeInstanceOf(UpdateByQueryIncompleteError);
       expect(error.message).toMatch(/cancelled .* after updating 3 of 5 agents, giving up/);
       expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
       expect(esClient.create).not.toHaveBeenCalled();
@@ -553,7 +553,7 @@ describe('update_agent_tags', () => {
 
         const error = await batch().catch((e) => e);
 
-        expect(error).toBeInstanceOf(UpdateByQueryCancelledError);
+        expect(error).toBeInstanceOf(UpdateByQueryIncompleteError);
         expect(error.message).toMatch(/timed out after updating 0 agents, giving up/);
         expect(esClient.create).not.toHaveBeenCalled();
         expect(getErrorResults(esClient)).toEqual([]);
@@ -608,8 +608,9 @@ describe('update_agent_tags', () => {
             tagsToAdd: ['new'],
             tagsToRemove: ['old'],
             total: agentsOfBatch.length,
-            // an action of the runner, which retries a batch that fails
             actionId: 'action1',
+            // a batch of the runner, which retries a batch that fails
+            retriedByAction: true,
             retryCount,
           }
         );
@@ -690,7 +691,7 @@ describe('update_agent_tags', () => {
 
         const error = await batch(manyAgents(2500)).catch((e) => e);
 
-        expect(error).toBeInstanceOf(UpdateByQueryCancelledError);
+        expect(error).toBeInstanceOf(UpdateByQueryIncompleteError);
         expect(error.message).toMatch(
           /cancelled .* after updating 3 of 5 agents, giving up after running it again in chunks/
         );
@@ -718,7 +719,7 @@ describe('update_agent_tags', () => {
       it('should record nothing when the first chunk is cancelled', async () => {
         mockChunks(1);
 
-        await expect(batch(manyAgents(2500))).rejects.toBeInstanceOf(UpdateByQueryCancelledError);
+        await expect(batch(manyAgents(2500))).rejects.toBeInstanceOf(UpdateByQueryIncompleteError);
 
         expect(sizesOfRuns()).toEqual([2500, 1000]);
         expect(esClient.create).not.toHaveBeenCalled();
@@ -736,7 +737,7 @@ describe('update_agent_tags', () => {
           { tagsToAdd: ['new'], tagsToRemove: ['old'] }
         ).catch((e) => e);
 
-        expect(error).toBeInstanceOf(UpdateByQueryCancelledError);
+        expect(error).toBeInstanceOf(UpdateByQueryIncompleteError);
         expect(esClient.create).not.toHaveBeenCalled();
       });
 

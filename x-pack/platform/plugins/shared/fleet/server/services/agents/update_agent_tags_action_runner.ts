@@ -17,7 +17,7 @@ import { AGENTS_INDEX } from '../../constants';
 import { appContextService } from '../app_context';
 import { agentsNamespaceQuery } from '../spaces/agent_namespaces';
 
-import { FleetError, FleetVersionConflictError, UpdateByQueryCancelledError } from '../../errors';
+import { FleetError, FleetVersionConflictError, UpdateByQueryIncompleteError } from '../../errors';
 
 import { ActionRunner } from './action_runner';
 
@@ -51,6 +51,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
         spaceId: this.actionParams.spaceId,
+        retriedByAction: true,
       }
     );
   }
@@ -77,6 +78,11 @@ export async function updateTagsBatch(
     kuery?: string;
     retryCount?: number;
     spaceId?: string;
+    /**
+     * Whether the action retries a batch that fails (a batch of the runner, and not agents given by
+     * id, which fail the request). A batch that stays incomplete records what it did only then.
+     */
+    retriedByAction?: boolean;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   // Only the restriction errors of agents the caller can access are persisted in the action results.
@@ -198,7 +204,7 @@ export async function updateTagsBatch(
   let res = await runUpdate(agentIds);
   // how many of the agents of the batch `res` is the result for, and why it is not for all of them
   let agentsInResult = new Set(agentIds).size;
-  let stopped: UpdateByQueryCancelledError | undefined;
+  let stopped: UpdateByQueryIncompleteError | undefined;
 
   if (isIncomplete(res)) {
     // What the cancelled update did is not recorded, as which of the agents it updated is not
@@ -240,7 +246,7 @@ export async function updateTagsBatch(
               } agents: ${JSON.stringify(failures).slice(0, 1000)}`
             );
         }
-        stopped = new UpdateByQueryCancelledError(
+        stopped = new UpdateByQueryIncompleteError(
           `${describeIncomplete(chunk)}, giving up after running it again in chunks`
         );
         break;
@@ -257,7 +263,7 @@ export async function updateTagsBatch(
     }
     // Agents given by id have no action that is retried, so the request just fails, and with no
     // chunk through there is nothing to record.
-    if (stopped && (!options.actionId || agentsInResult === 0)) {
+    if (stopped && (!options.retriedByAction || agentsInResult === 0)) {
       throw stopped;
     }
     res = chunked;
