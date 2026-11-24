@@ -7,14 +7,38 @@
 
 import type { BoostProfileType } from './types';
 
-const MANAGED_PROFILE_NAMES = {
-  indices: ['default_indices'],
-  data_streams: ['data_streams_1d', 'data_streams_3d', 'default_data_streams_7d'],
-} as const satisfies Readonly<Record<BoostProfileType, readonly string[]>>;
+const MANAGED_PROFILE_NAME = {
+  defaultIndices: 'default_indices',
+  dataStreams1d: 'data_streams_1d',
+  dataStreams3d: 'data_streams_3d',
+  defaultDataStreams7d: 'default_data_streams_7d',
+} as const;
 
-export type ManagedProfileName = (typeof MANAGED_PROFILE_NAMES)[BoostProfileType][number];
+export type ManagedProfileName = (typeof MANAGED_PROFILE_NAME)[keyof typeof MANAGED_PROFILE_NAME];
 
-const ALL_MANAGED_PROFILE_NAMES: readonly string[] = Object.values(MANAGED_PROFILE_NAMES).flat();
+export const MANAGED_PROFILE_NAMES: Readonly<
+  Record<BoostProfileType, readonly ManagedProfileName[]>
+> = {
+  indices: [MANAGED_PROFILE_NAME.defaultIndices],
+  data_streams: [
+    MANAGED_PROFILE_NAME.dataStreams1d,
+    MANAGED_PROFILE_NAME.dataStreams3d,
+    MANAGED_PROFILE_NAME.defaultDataStreams7d,
+  ],
+};
+
+/**
+ * The Elastic-managed profile marked as the default, per type. Indices have none, because the
+ * label of their only managed profile already says "Default".
+ */
+export const DEFAULT_MANAGED_PROFILE_NAMES: Readonly<
+  Record<BoostProfileType, ManagedProfileName | undefined>
+> = {
+  indices: undefined,
+  data_streams: MANAGED_PROFILE_NAME.defaultDataStreams7d,
+};
+
+const ALL_MANAGED_PROFILE_NAMES: readonly string[] = Object.values(MANAGED_PROFILE_NAME);
 
 export const isManagedProfileName = (name: string): name is ManagedProfileName =>
   ALL_MANAGED_PROFILE_NAMES.includes(name);

@@ -14,6 +14,7 @@ import {
 import { ALERTS_LOCATOR_ID, createObservabilityAlertingV2Host } from '@kbn/deeplinks-observability';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { SubjectLocator } from '../../../common/subjects/subject';
 import { isUniversalAlertSnapshot } from '../../../common/subjects/subject';
 import type { SubjectRowData } from './subject_title';
 import type { SubjectServices } from './subject_services';
@@ -210,6 +211,25 @@ export const useAlertsListLink = (alerts: readonly SubjectRowData[]): SubjectLin
 
 /** Alert ids are uuids, so a comma never appears in one. */
 const ALERT_IDS_KEY_SEPARATOR = ',';
+
+/**
+ * Where a subject's "via" label goes: the page its locator resolves to. Without a locator, or
+ * when the locator is not registered (its plugin disabled), there is no link and the label stays
+ * plain text.
+ */
+export const useViaLink = (locator: SubjectLocator | undefined): SubjectLink => {
+  // Keyed on the serialized locator, so a re-render with an equal one keeps the located URL.
+  const locatorKey = locator ? JSON.stringify(locator) : undefined;
+  const target = useMemo<SubjectLocatorTarget | undefined>(() => {
+    if (!locatorKey) {
+      return undefined;
+    }
+    const { id, params } = JSON.parse(locatorKey) as SubjectLocator;
+    return { locatorId: id, params: params as SerializableRecord };
+  }, [locatorKey]);
+  const { href, onClick } = useLocatorLink(target);
+  return { href, onClick: href === undefined ? undefined : onClick, isExternal: false };
+};
 
 /** Resolves a locator target to a URL, and to a click that navigates to it inside Kibana. */
 const useLocatorLink = (

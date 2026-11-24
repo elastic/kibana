@@ -28,6 +28,25 @@ import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
 
 const ADVANCED_SETTINGS_URL_TIME_ZONE = '/app/management/kibana/settings?query=dateFormat:tz';
 
+const getTimeZoneDescription = (timeZone: string | undefined, offset: string | null): string => {
+  if (timeZone === 'Browser') {
+    return settingsPanelTexts.timeFormatDescription(
+      settingsPanelTexts.timeZoneBrowserLocale(offset ?? '')
+    );
+  }
+  if (timeZone) {
+    return settingsPanelTexts.timeFormatDescription(`${timeZone} (${offset})`);
+  }
+
+  const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if (!browserTimeZone) {
+    return settingsPanelTexts.timeZoneUnsetDescription;
+  }
+  return settingsPanelTexts.timeZoneUnsetBrowserDescription(
+    offset ? `${browserTimeZone} (${offset})` : browserTimeZone
+  );
+};
+
 /**
  * Settings panel for the date range picker, accessible from the main panel gear button.
  */
@@ -59,11 +78,8 @@ export function SettingsPanel() {
     { id: 'ms', label: settingsPanelTexts.timePrecisionMilliseconds },
   ];
 
-  const timeZoneDisplayAbbr = useTimeZoneDisplay(timeZone, null, true);
-  const timeZoneLabel =
-    timeZone === 'Browser'
-      ? settingsPanelTexts.timeZoneBrowserLocale(timeZoneDisplayAbbr ?? '')
-      : `${timeZone} (${timeZoneDisplayAbbr})`;
+  const timeZoneDisplayAbbr = useTimeZoneDisplay(timeZone ?? 'Browser', null, true);
+  const timeZoneDescription = getTimeZoneDescription(timeZone, timeZoneDisplayAbbr);
 
   return (
     <PanelContainer data-test-subj="dateRangePickerSettingsPanel">
@@ -78,7 +94,7 @@ export function SettingsPanel() {
             ) : null}
             <PanelBodySectionInfo
               heading={settingsPanelTexts.timeFormatHeading}
-              markdown={settingsPanelTexts.timeFormatDescription(timeZoneLabel)}
+              markdown={timeZoneDescription}
               linkLabel={
                 canAccessAdvancedSettings ? settingsPanelTexts.advancedSettingsLink : undefined
               }

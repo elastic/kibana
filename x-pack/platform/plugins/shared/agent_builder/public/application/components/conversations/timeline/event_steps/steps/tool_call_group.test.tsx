@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -33,7 +33,13 @@ const otherResult = (id: string): ToolResult => ({
 });
 
 const toolStep = (id: string, toolId: string, results: ToolResult[] = []) =>
-  createToolCallStep({ tool_call_id: id, tool_id: toolId, params: {}, results });
+  createToolCallStep({
+    tool_call_id: id,
+    tool_id: toolId,
+    params: {},
+    results,
+    intent: `Calling ${toolId}`,
+  });
 
 describe('ToolCallGroup', () => {
   it('shows "N tools ran" once every step in the group has a result', () => {
@@ -93,17 +99,15 @@ describe('ToolCallGroup', () => {
       />
     );
     await user.click(screen.getByText('2 tools ran'));
-    const childStatuses = screen
-      .getAllByRole('status')
-      .filter((el) => el.textContent !== '2 tools ran');
-    expect(childStatuses.map((el) => el.querySelector('.euiBadge')?.textContent)).toEqual([
-      'tool: search',
-      'tool: read',
-    ]);
-    // textContent concatenates badge + suffix without a space (e.g. "tool: searchran")
-    expect(childStatuses.every((el) => /ran$/.test(el.textContent ?? ''))).toBe(true);
+    const childSteps = screen.getAllByTestId('agentBuilderToolCallStep');
+    expect(
+      childSteps.map((step) => within(step).getByTestId('agentBuilderToolCallIntent').textContent)
+    ).toEqual(['Calling search', 'Calling read']);
 
-    await user.click(screen.getAllByRole('button')[1]);
+    await user.click(screen.getByText('2 tools ran'));
+    expect(screen.queryByTestId('agentBuilderToolCallStep')).not.toBeInTheDocument();
+    await user.click(screen.getByText('2 tools ran'));
+    await user.click(screen.getByText('Calling search'));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

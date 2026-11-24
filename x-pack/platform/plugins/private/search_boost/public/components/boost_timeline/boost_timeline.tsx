@@ -15,6 +15,7 @@ import {
   LifecycleTimelineTrack,
 } from '@kbn/data-lifecycle-phases';
 import type { DataStreamsBoostProfile } from '../../../common/types';
+import { formatPeriodBoost } from '../../translations';
 import { formatBoostRange, getBoostPeriods } from './boost_periods';
 import { useBoostPeriodColors } from './use_boost_period_colors';
 
@@ -41,10 +42,7 @@ export const BoostTimeline = ({
       label,
       color: colors[id],
       maxAge,
-      tooltipContent: i18n.translate('xpack.searchBoost.boostTimeline.boostTooltip', {
-        defaultMessage: '{range} boost',
-        values: { range: formatBoostRange(boost) },
-      }),
+      tooltipContent: formatPeriodBoost(formatBoostRange(boost)),
     }));
   const layout = getLifecycleTimelineLayout(periods);
 

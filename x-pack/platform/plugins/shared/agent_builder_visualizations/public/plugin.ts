@@ -52,7 +52,7 @@ export class AgentBuilderVisualizationsPublicPlugin
         customContent: {
           http: core.http,
           uiSettings: core.uiSettings,
-          search: plugins.data.search.search,
+          search: plugins.data.search,
         },
       })
     );

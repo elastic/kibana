@@ -31,6 +31,32 @@ describe('DailyLimitField', () => {
     expect(onChange).toHaveBeenCalledWith('5');
   });
 
+  it('warns only when the limit is below the schedule runs per day', () => {
+    const renderField = (value: string) =>
+      render(
+        <I18nProvider>
+          <DailyLimitField
+            value={value}
+            helpText="Help text"
+            onChange={jest.fn()}
+            scheduledRunsPerDay={24}
+          />
+        </I18nProvider>
+      );
+    const callout = 'automationDailyLimitBelowScheduleCallout';
+
+    const { unmount } = renderField('5');
+    expect(screen.getByTestId(callout)).toBeInTheDocument();
+    unmount();
+
+    const { unmount: unmountAtLimit } = renderField('24');
+    expect(screen.queryByTestId(callout)).not.toBeInTheDocument();
+    unmountAtLimit();
+
+    renderField('unlimited');
+    expect(screen.queryByTestId(callout)).not.toBeInTheDocument();
+  });
+
   it('flags an invalid limit', () => {
     render(
       <I18nProvider>

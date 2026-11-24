@@ -123,12 +123,15 @@ const buildNoHitClosureSummary = ({
   reportId,
   dismissHold,
   retired,
+  nothingSearched,
   gapPhrase,
   gapDescription,
 }: {
   reportId: string;
   dismissHold: DismissHold;
   retired: boolean;
+  /** The run recorded that no search ran at all, whatever else it also could not search. */
+  nothingSearched: boolean;
   gapPhrase?: string;
   /** What was not searched, bounded; this closure summary is the Investigation's own summary. */
   gapDescription?: string;
@@ -139,12 +142,18 @@ const buildNoHitClosureSummary = ({
       dismissHold === 'open_proposal'
         ? 'it still has a pending or executing Proposal from an earlier run.'
         : 'could not verify whether it has an open Proposal.';
-    return `${found}${
-      retired ? ', but part of the report could not be searched' : ''
-    }. Leaving the Investigation open: ${held}`;
+    const unsearchedClause = nothingSearched
+      ? ', but no search ran'
+      : retired
+      ? ', but part of the report could not be searched'
+      : '';
+    return `${found}${unsearchedClause}. Leaving the Investigation open: ${held}`;
   }
   if (!retired) {
     return `${found}. Closing: nothing in this environment matched the report at the confirming-index bar.`;
+  }
+  if (nothingSearched) {
+    return 'Hunt Watch searched nothing for this report. This is not a statement that the environment is clean.';
   }
   const unsearched = gapPhrase
     ? `${gapPhrase} left part of the report unsearched`
@@ -286,6 +295,8 @@ export const runPackageReport = async ({
           reportId,
           dismissHold,
           retired,
+          nothingSearched:
+            unsearched?.gaps.some(({ reason }) => reason === 'nothing_searched') ?? false,
           gapPhrase: hasGaps ? gapCountPhrase(unsearched) : undefined,
           gapDescription: hasGaps ? describeGaps(unsearched, MAX_CLOSURE_GAP_CHARS) : undefined,
         }),

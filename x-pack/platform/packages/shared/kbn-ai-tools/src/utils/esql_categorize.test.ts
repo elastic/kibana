@@ -33,7 +33,22 @@ describe('buildCategorizeWithSampleQuery', () => {
     });
 
     expect(query).toBe(
-      'FROM logs-* | STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message) | SORT count ASC | LIMIT 1000'
+      'FROM logs-* | WHERE message IS NOT NULL | STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message) | SORT count ASC | LIMIT 1000'
+    );
+  });
+
+  it('inlines the time range and KQL before SAMPLE', () => {
+    const query = buildCategorizeWithSampleQuery({
+      indices: 'logs-*',
+      field: 'message',
+      samplingProbability: 0.5,
+      start: 100,
+      end: 200,
+      kql: 'service.name:"checkout"',
+    });
+
+    expect(query).toContain(
+      'FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | WHERE KQL("service.name:\\"checkout\\"") | WHERE message IS NOT NULL | SAMPLE 0.5 | STATS'
     );
   });
 
@@ -79,7 +94,7 @@ describe('buildCategorizeWithSampleQuery', () => {
     });
 
     expect(query).toContain(
-      'WHERE NOT MATCH(body.text, "request completed", {"operator": "AND"}) AND NOT MATCH(body.text, "metadata updated", {"operator": "AND"})'
+      'WHERE body.text IS NOT NULL AND NOT MATCH(body.text, "request completed", {"operator": "AND"}) AND NOT MATCH(body.text, "metadata updated", {"operator": "AND"})'
     );
     expect(query.indexOf('NOT MATCH')).toBeLessThan(query.indexOf('STATS'));
   });
@@ -197,8 +212,11 @@ describe('categorizeWithNoiseExclusion', () => {
     ]);
   });
 
-  it('skips pass 2 when counts are exact and the head is the whole population', async () => {
-    const esql = jest.fn().mockResolvedValueOnce(categorizeResponse([[100, 'all', 'all']]));
+  it('runs pass 2 even when head counts add up to the population', async () => {
+    const esql = jest
+      .fn()
+      .mockResolvedValueOnce(categorizeResponse([[100, 'all', 'all']]))
+      .mockResolvedValueOnce(categorizeResponse([[1, 'rare', 'rare']]));
 
     const rows = await categorizeWithNoiseExclusion({
       esClient: createTracedEsClient(esql),
@@ -208,8 +226,11 @@ describe('categorizeWithNoiseExclusion', () => {
       samplingProbability: 1,
     });
 
-    expect(esql).toHaveBeenCalledTimes(1);
-    expect(rows).toEqual([{ count: 100, pattern: 'all', sample: 'all' }]);
+    expect(esql).toHaveBeenCalledTimes(2);
+    expect(rows).toEqual([
+      { count: 100, pattern: 'all', sample: 'all' },
+      { count: 1, pattern: 'rare', sample: 'rare' },
+    ]);
   });
 
   it('sorts by count descending and dedupes head remnants left by approximate exclusion', async () => {
