@@ -173,6 +173,37 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     subscription.unsubscribe();
   }, 10000);
 
+  it('unsubscribing aborts a request that is still in flight', async () => {
+    // The fetch never settles, so the request is still running when the subscriber leaves.
+    fetchSpy.mockImplementation(() => new Promise(() => {}));
+    const api = buildApi({
+      filters$: new BehaviorSubject<unknown>([]),
+      parentQuery$: new BehaviorSubject<unknown>(undefined),
+    });
+
+    const { suggestions$ } = fetchAndValidate$({
+      api,
+      requestSize$: new BehaviorSubject<number>(10) as any,
+      runPastTimeout$: new BehaviorSubject<boolean>(false) as any,
+      selectedOptions$: new BehaviorSubject<unknown[]>([]) as any,
+      searchTechnique$: new BehaviorSubject<'wildcard' | 'prefix' | 'exact'>('wildcard') as any,
+      sort$: new BehaviorSubject<unknown>({ by: '_count', direction: 'desc' }) as any,
+    });
+    const emitted: unknown[] = [];
+    const subscription = suggestions$.subscribe((result) => emitted.push(result));
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(emitted).toEqual([]);
+    expect(api.loadingSuggestions$.getValue()).toBe(true);
+    const signal: AbortSignal = fetchSpy.mock.calls[0][1].signal;
+    expect(signal.aborted).toBe(false);
+
+    subscription.unsubscribe();
+    expect(signal.aborted).toBe(true);
+  }, 10000);
+
   describe('cancellation', () => {
     let filters$: BehaviorSubject<unknown>;
     let cancelRequests: () => void;
@@ -225,15 +256,6 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
 
       expect(firstSignal.aborted).toBe(true);
     }, 10000);
-
-    it('unsubscribing should abort the in-flight request', () => {
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-      const signal: AbortSignal = fetchSpy.mock.calls[0][1].signal;
-      expect(signal.aborted).toBe(false);
-
-      subscription.unsubscribe();
-      expect(signal.aborted).toBe(true);
-    });
 
     it('cancelRequests() should abort in-flight request', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
