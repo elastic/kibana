@@ -6,6 +6,7 @@
  */
 
 import { getTriageLoadAlertsStepDefinition } from '../step_types/alert_triage/alert_triage_steps';
+import { WORKER_SERVER_DEFINITIONS } from '../workers';
 import { createWorkerServerContextMock } from '../workers/worker_server_context.mock';
 import { TRIAGE_GROUPING_KILL_SWITCH, alertTriageServerDefinition } from './worker_server';
 
@@ -27,6 +28,10 @@ const stepNamed = (steps: ReturnType<typeof stepsFor>, id: string) => {
 };
 
 describe('alertTriageServerDefinition', () => {
+  it('is listed in WORKER_SERVER_DEFINITIONS, so its steps and flags are registered', () => {
+    expect(WORKER_SERVER_DEFINITIONS).toContain(alertTriageServerDefinition);
+  });
+
   it('declares the grouping kill switch, on where no flag provider exists, and the decision mode, off', () => {
     expect(alertTriageServerDefinition.featureFlags).toEqual([
       { key: 'alertzero.triageGrouping', fallback: true },

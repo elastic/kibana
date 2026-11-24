@@ -79,4 +79,12 @@ describe('createWorkerFeatureFlagValues', () => {
 
     expect(featureFlags.getBooleanValue$).toHaveBeenCalledTimes(1);
   });
+
+  it('throws when a flag is read with a fallback of another type than its declaration', () => {
+    const values = createWorkerFeatureFlagValues([BOOLEAN_FLAG]);
+
+    expect(() => values.get({ key: BOOLEAN_FLAG.key, fallback: 'off' })).toThrow(
+      'Feature flag alertzero.example is declared as a boolean flag'
+    );
+  });
 });

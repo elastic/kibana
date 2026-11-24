@@ -32,10 +32,13 @@ export const createWorkerFeatureFlagValues = (
   const followedFlags = [...values].map(([key, fallback]) => ({ key, fallback }));
 
   return {
-    get: <T extends boolean | string>({ key }: WorkerFeatureFlag<T>): T => {
+    get: <T extends boolean | string>({ key, fallback }: WorkerFeatureFlag<T>): T => {
       const value = values.get(key);
       if (value === undefined) {
         throw new Error(`Feature flag ${key} is not declared by any AlertZero Worker`);
+      }
+      if (typeof value !== typeof fallback) {
+        throw new Error(`Feature flag ${key} is declared as a ${typeof value} flag`);
       }
       // The value comes from the observable matching the declared fallback's type.
       return value as T;

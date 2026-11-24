@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { getPackageReportStepDefinition } from '../../../step_types/package_report';
+import { WORKER_SERVER_DEFINITIONS } from '../../../workers';
 import { createWorkerServerContextMock } from '../../../workers/worker_server_context.mock';
 import { continuousThreatHuntServerDefinition } from './worker_server';
 
@@ -19,6 +20,10 @@ jest.mock('../../../step_types/package_report', () => {
 });
 
 describe('continuousThreatHuntServerDefinition', () => {
+  it('is listed in WORKER_SERVER_DEFINITIONS, so its steps are registered', () => {
+    expect(WORKER_SERVER_DEFINITIONS).toContain(continuousThreatHuntServerDefinition);
+  });
+
   it('builds its packaging step without resolving any service before start', () => {
     const context = createWorkerServerContextMock();
 

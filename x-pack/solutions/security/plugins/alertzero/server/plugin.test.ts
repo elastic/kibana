@@ -861,6 +861,40 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
     });
 
+    it.each([
+      [false, 'keeps the Worker context unstarted'],
+      [true, 'marks the Worker context started'],
+    ])('with service accounts enabled: %s, %s', async (serviceAccountsEnabled) => {
+      const getStepDefinitions = jest.spyOn(alertTriageServerDefinition, 'getStepDefinitions');
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      setupWithSteps(plugin, {
+        registerManagedWorkflowOwner: jest.fn(),
+        registerStepDefinition: jest.fn(),
+      });
+      const [[context]] = getStepDefinitions.mock.calls;
+      const coreStart = coreMock.createStart();
+      jest
+        .spyOn(coreStart.security.serviceAccounts, 'isEnabled')
+        .mockReturnValue(serviceAccountsEnabled);
+
+      await plugin.start(coreStart, {
+        spaces: undefined,
+        agentBuilder: { agents: { ensure: jest.fn() } },
+        workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
+        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
+        agenticInvestigations: { getImpactClient: jest.fn() },
+        inference: {},
+      } as never);
+
+      if (serviceAccountsEnabled) {
+        expect(() => context.assertStarted()).not.toThrow();
+      } else {
+        expect(() => context.assertStarted()).toThrow('AlertZero has not finished starting');
+      }
+      plugin.stop();
+      getStepDefinitions.mockRestore();
+    });
+
     it('ensures the thin agent in the default space', async () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
