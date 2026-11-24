@@ -1,5 +1,5 @@
 {
-  "sha1": "b446df1fb36f42416ef20e52b1c9b0dbc954dac7",
+  "sha1": "e72365daafa25fd82d7acd44967f67eb580cf331",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -587,6 +587,54 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
         "line": 187,
         "column": 11
+      }
+    },
+    {
+      "id": "8f109d4450943ac-6e3225d0c78641b",
+      "title": "Event Filters — edit the condition value updates the value after typing a space, Backspace and a suffix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/parallel_tests/event_filters.spec.ts",
+        "line": 65,
+        "column": 21
+      }
+    },
+    {
+      "id": "8f109d4450943ac-10e5a24eea24f95",
+      "title": "Event Filters — edit the condition value updates the value by typing a suffix without Backspace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/parallel_tests/event_filters.spec.ts",
+        "line": 83,
+        "column": 22
+      }
+    },
+    {
+      "id": "8f109d4450943ac-229d92369579f68",
+      "title": "Event Filters — edit the condition value shows value suggestions again after the value is cleared",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/parallel_tests/event_filters.spec.ts",
+        "line": 92,
+        "column": 60
       }
     },
     {
