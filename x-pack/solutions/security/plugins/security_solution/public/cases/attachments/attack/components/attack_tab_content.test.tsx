@@ -1031,11 +1031,6 @@ describe('AttackTabContent', () => {
       );
     };
 
-    // The twelve-row tests click with fireEvent. user-event's click also moves focus into the
-    // grid, which re-renders every cell, and each cell's first re-render has EUI scan it with
-    // `tabbable`, reading jsdom's computed style for every candidate. That scan, not the
-    // selection, took most of these tests' time. The checkboxes still select through their own
-    // change handlers.
     const showTenRowsPerPage = async () => {
       fireEvent.click(screen.getByTestId(EUI_PAGINATION_TEST_ID));
       fireEvent.click(await screen.findByTestId(EUI_TEN_ROWS_PER_PAGE_TEST_ID));
