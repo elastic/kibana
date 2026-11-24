@@ -6,6 +6,9 @@
  */
 import { riskScorePreviewRoute } from './preview';
 import { riskScoreEntityCalculationRouteV2 } from './entity_calculation_v2';
+import { riskEngineSettingsRoute } from './settings';
+import { riskEnginePrivilegesRoute } from './privileges';
+import { riskEngineConfigureSavedObjectRoute } from './configure_saved_object';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const registerRiskScoreRoutes = ({
@@ -15,4 +18,7 @@ export const registerRiskScoreRoutes = ({
 }: EntityAnalyticsRoutesDeps) => {
   riskScorePreviewRoute(router, logger);
   riskScoreEntityCalculationRouteV2(router, getStartServices, logger);
+  riskEngineSettingsRoute(router, logger);
+  riskEnginePrivilegesRoute(router, getStartServices);
+  riskEngineConfigureSavedObjectRoute(router, logger, getStartServices);
 };

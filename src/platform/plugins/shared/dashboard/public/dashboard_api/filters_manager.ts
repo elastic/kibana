@@ -51,6 +51,27 @@ export const initializeFiltersManager = (
     map((layout) => Object.keys(layout.pinnedPanels)),
     distinctUntilChanged<string[]>(deepEqual)
   );
+  const childFiltersLoading$ = layoutManager.internalApi.childApisPending$
+    .pipe(
+      combineLatestWith(
+        combineCompatibleChildrenApis<AppliesFilters, boolean>(
+          { children$: layoutManager.api.children$ },
+          'filtersLoading$',
+          apiAppliesFilters,
+          false,
+          (values) => {
+            return values.some((loading) => loading);
+          }
+        )
+      )
+    )
+    .pipe(
+      map(
+        ([hasPendingChildApis, hasChildFiltersLoading]) =>
+          hasPendingChildApis || hasChildFiltersLoading
+      ),
+      distinctUntilChanged()
+    );
 
   /** whether the pinned children are awaiting required filters, regardless of whether it is published yet */
   const childrenAwaitingRequiredFilters$ = new BehaviorSubject<boolean>(
@@ -103,15 +124,6 @@ export const initializeFiltersManager = (
       return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : undefined;
     }
   ).pipe(distinctUntilChanged(deepEqual));
-
-  /** children that are awaiting required filters count as loading, so that the grid stays hidden */
-  const childFiltersLoading$ = combineLatest([
-    anyChildFiltersLoading$,
-    awaitingRequiredFilters$,
-  ]).pipe(
-    map(([loading, awaiting]) => loading || awaiting),
-    distinctUntilChanged()
-  );
 
   /** push filters to `unpublishedChildFilters$` once children are done computing their filters */
   const unpublishedFiltersSubscription = childFilters$
