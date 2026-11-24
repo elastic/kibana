@@ -839,15 +839,15 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Count Knowledge Indicators added per day. A static segment wins over `{kiId}` in hapi routing.
+  // Count knowledge documents added per day. A static segment wins over `{kiId}` in hapi routing.
   router.versioned
     .get({
       path: AI_INDEX_KI_HISTOGRAM_PATH,
       security: READ_SECURITY,
       access: 'internal',
-      summary: 'Count Knowledge Indicators added per day',
+      summary: 'Count knowledge documents added per day',
       description:
-        'Returns how many non-deleted Knowledge Indicators were added on each of the last 30 UTC days, oldest first, days without KIs included. The added date is the first revision `@timestamp` of a KI, else its `updated_at`.',
+        'Returns how many non-deleted knowledge documents were added on each of the last 30 UTC days, oldest first, days without knowledge documents included. The added date is the first revision `@timestamp` of a knowledge document, else its `updated_at`.',
     })
     .addVersion(
       {
