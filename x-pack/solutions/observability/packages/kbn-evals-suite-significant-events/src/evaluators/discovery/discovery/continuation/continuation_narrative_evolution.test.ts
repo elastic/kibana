@@ -184,6 +184,23 @@ describe('scoreContinuationNarrativeEvolution', () => {
     expect(result.score).toBe(1);
   });
 
+  it('allows a rewrite when a rule held as off_topic confirms after a cycle that omitted it', () => {
+    const result = scoreContinuationNarrativeEvolution(
+      cycles(
+        event({ signals: [signal('rule-a', 'off_topic')] }),
+        event({ signals: [signal('rule-b', 'confirms')] }),
+        event({
+          title: 'Storage — connection refused',
+          summary: 'A different, better-grounded account.',
+          assessment_note: 'High: now confirmed. Confidence is 70.0%.',
+          signals: [signal('rule-a', 'confirms')],
+        })
+      )
+    );
+    expect(result.explanation).not.toContain('title changed');
+    expect(result.explanation).not.toContain('summary was rewritten');
+  });
+
   it('compares a continuation against a successfully created event', () => {
     const result = scoreContinuationNarrativeEvolution([
       {

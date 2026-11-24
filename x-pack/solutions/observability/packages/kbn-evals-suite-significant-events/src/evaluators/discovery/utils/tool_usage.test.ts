@@ -471,6 +471,7 @@ describe('summarizeEsqlGrounding', () => {
       noOfToolCalls: 2,
       noOfToolCallsWithResults: 1,
       noOfToolCallsWithErrors: 0,
+      noOfToolCallsWithoutResult: 0,
     });
   });
 
@@ -487,6 +488,7 @@ describe('summarizeEsqlGrounding', () => {
       noOfToolCalls: 3,
       noOfToolCallsWithResults: 1,
       noOfToolCallsWithErrors: 1,
+      noOfToolCallsWithoutResult: 0,
     });
   });
 
@@ -506,6 +508,7 @@ describe('summarizeEsqlGrounding', () => {
       noOfToolCalls: 1,
       noOfToolCallsWithResults: 1,
       noOfToolCallsWithErrors: 1,
+      noOfToolCallsWithoutResult: 0,
     });
   });
 
@@ -514,6 +517,27 @@ describe('summarizeEsqlGrounding', () => {
       noOfToolCalls: 0,
       noOfToolCallsWithResults: 0,
       noOfToolCallsWithErrors: 0,
+      noOfToolCallsWithoutResult: 0,
+    });
+  });
+
+  it('counts only a call without any captured result as missing, not a zero-row response', () => {
+    const zeroRows: ConverseStep = {
+      type: 'tool_call',
+      tool_id: TOOL_ID_EXECUTE_ESQL,
+      tool_call_id: 'esql-5',
+      results: [{ type: 'esql_results', data: { columns: [], values: [] } }],
+    };
+    const missing: ConverseStep = {
+      type: 'tool_call',
+      tool_id: TOOL_ID_EXECUTE_ESQL,
+      tool_call_id: 'esql-6',
+    };
+    expect(summarizeEsqlGrounding([zeroRows, missing])).toEqual({
+      noOfToolCalls: 2,
+      noOfToolCallsWithResults: 0,
+      noOfToolCallsWithErrors: 0,
+      noOfToolCallsWithoutResult: 1,
     });
   });
 });

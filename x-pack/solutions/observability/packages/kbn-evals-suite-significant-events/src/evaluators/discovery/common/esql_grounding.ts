@@ -24,8 +24,12 @@ export function createExecuteEsqlGroundingEvaluator<
     kind: 'CODE',
     direction: 'maximize',
     evaluate: ({ output }) => {
-      const { noOfToolCalls, noOfToolCallsWithResults, noOfToolCallsWithErrors } =
-        summarizeEsqlGrounding(output.steps ?? []);
+      const {
+        noOfToolCalls,
+        noOfToolCallsWithResults,
+        noOfToolCallsWithErrors,
+        noOfToolCallsWithoutResult,
+      } = summarizeEsqlGrounding(output.steps ?? []);
 
       if (noOfToolCalls === 0) {
         return Promise.resolve({
@@ -36,18 +40,16 @@ export function createExecuteEsqlGroundingEvaluator<
       }
 
       const grounded = noOfToolCallsWithResults > 0;
-      const noOfCallsWithoutResult =
-        noOfToolCalls - noOfToolCallsWithResults - noOfToolCallsWithErrors;
       const failureReason =
-        noOfToolCallsWithErrors === 0 && noOfCallsWithoutResult === 0
+        noOfToolCallsWithErrors === 0 && noOfToolCallsWithoutResult === 0
           ? `All ${noOfToolCalls} execute_esql call(s) returned zero rows`
           : [
               noOfToolCallsWithErrors > 0 &&
                 `${noOfToolCallsWithErrors} execute_esql call(s) failed with a query error`,
-              noOfCallsWithoutResult > 0 &&
-                `${noOfCallsWithoutResult} execute_esql call(s) returned no result`,
+              noOfToolCallsWithoutResult > 0 &&
+                `${noOfToolCallsWithoutResult} execute_esql call(s) returned no result`,
               noOfToolCallsWithResults === 0 &&
-                noOfToolCallsWithErrors + noOfCallsWithoutResult < noOfToolCalls &&
+                noOfToolCallsWithErrors + noOfToolCallsWithoutResult < noOfToolCalls &&
                 'the remaining call(s) returned zero rows',
             ]
               .filter(Boolean)

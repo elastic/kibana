@@ -33,4 +33,21 @@ describe('createExecuteEsqlGroundingEvaluator', () => {
     expect(result.explanation).toContain('1 execute_esql call(s) returned no result');
     expect(result.explanation).not.toContain('returned zero rows');
   });
+
+  it('reports zero-row responses as such when no call errored or went missing', async () => {
+    const zeroRowCall = (id: string): ConverseStep => ({
+      type: 'tool_call',
+      tool_id: platformCoreTools.executeEsql,
+      tool_call_id: id,
+      results: [{ type: 'esql_results', data: { columns: [], values: [] } }],
+    });
+
+    const result = await createExecuteEsqlGroundingEvaluator().evaluate({
+      output: { steps: [zeroRowCall('a'), zeroRowCall('b')] },
+    } as never);
+
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('All 2 execute_esql call(s) returned zero rows');
+    expect(result.explanation).not.toContain('returned no result');
+  });
 });

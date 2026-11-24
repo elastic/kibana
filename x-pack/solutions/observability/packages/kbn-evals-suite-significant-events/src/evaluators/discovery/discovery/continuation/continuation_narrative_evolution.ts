@@ -122,7 +122,9 @@ export const scoreContinuationNarrativeEvolution = (
       const newlyConfirmingRules = [...now.confirming].filter(
         (ruleUuid) => previous.ruleVerdicts.get(ruleUuid) !== 'confirms'
       );
-      const rewriteAllowed = [...before.offTopic].some((ruleUuid) => now.confirming.has(ruleUuid));
+      const rewriteAllowed = [...now.confirming].some(
+        (ruleUuid) => previous.ruleVerdicts.get(ruleUuid) === 'off_topic'
+      );
 
       if (previous.event.title !== undefined && event.title !== undefined && !rewriteAllowed) {
         check(previous.event.title === event.title, `${label} title changed`);
