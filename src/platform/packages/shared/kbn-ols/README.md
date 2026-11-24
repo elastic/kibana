@@ -304,12 +304,6 @@ other refusal reveals something about the object, such as that it exists or alre
   don't count against `MAX_ACL_ENTRIES`: an ACL stored from outside Kibana can have more, and the new owner trims them
   with a replacement. An object without an ACL has nobody to transfer from, so it needs a claim instead.
 
-An `AclWarning` names access that a successful change stores but that its principal can't fully use yet. Its
-`target` is `entry` when an entry's principal lacks the feature privileges of the entry's access, and `owner` when a
-new owner lacks the privileges of the `view` and `edit` operations, which managing access and transfers need. The
-access applies as soon as the principal gets them. The package only defines the shape: the service that stores the
-change checks privileges and returns warnings.
-
 `readEditableAcl` reads an object's current access from its stored ACL into an `EditableAcl`, so that it can be shown,
 edited, or written back in the shapes Kibana writes. It keeps only what grants something. An entry with several IDs
 becomes one entry for each ID, an entry that grants nothing is dropped, and several entries for one principal keep the
