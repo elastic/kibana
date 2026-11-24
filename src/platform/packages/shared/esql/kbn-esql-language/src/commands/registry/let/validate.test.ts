@@ -68,7 +68,9 @@ describe('LET Validation', () => {
     });
 
     test('ignores sources with a cluster prefix or a selector', () => {
-      letExpectErrors('LET a = (FROM cluster:b, b::data); LET b = (ROW x = 1); FROM a', []);
+      letExpectErrors('LET a = (FROM cluster:b, b::data); LET b = (ROW x = 1); FROM a', [
+        'LET binding "b" is declared but never referenced',
+      ]);
     });
   });
 });

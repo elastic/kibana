@@ -111,6 +111,13 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           }
         ),
       };
+    case 'namedSubqueryUnused':
+      return {
+        message: i18n.translate('esqlLanguage.esql.validation.namedSubqueryUnusedErrorMessage', {
+          defaultMessage: 'LET binding "{name}" is declared but never referenced',
+          values: { name: out.name },
+        }),
+      };
     case 'subqueryNotSupportedInTs':
       return {
         message: i18n.translate(

@@ -20,7 +20,7 @@ import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
   command: ESQLAstAllCommands,
-  _commands: ESQLCommand[],
+  commands: ESQLCommand[],
   context?: ICommandContext
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
@@ -57,7 +57,39 @@ export const validate = (
 
   messages.push(...validateForwardReferences(namedSubquery, namedSubqueries, declaredBefore));
 
+  // Elasticsearch rejects an unused LET, but a repeated name is reported first.
+  const isRepeated = namedSubqueries.some(
+    (other) => other !== namedSubquery && other.name === name
+  );
+  if (
+    messages.length === 0 &&
+    !isRepeated &&
+    !isReferenced(namedSubquery, commands, namedSubqueries)
+  ) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'namedSubqueryUnused',
+        values: { name },
+        locations: identifier.location,
+      })
+    );
+  }
+
   return messages;
+};
+
+// A reference counts even inside the body of an unused LET, as Elasticsearch resolves every body.
+const isReferenced = (
+  namedSubquery: NamedSubquery,
+  commands: ESQLCommand[],
+  namedSubqueries: readonly NamedSubquery[]
+): boolean => {
+  const sources = Walker.matchAll(
+    [...commands, ...namedSubqueries.flatMap(({ query }) => query.commands)],
+    { type: 'source' }
+  ) as ESQLSource[];
+
+  return sources.some((source) => findNamedSubqueryForSource(source, [namedSubquery]));
 };
 
 // Elasticsearch rejects a LET body that reads itself or a later LET, even when the LET is unused.

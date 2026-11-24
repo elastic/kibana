@@ -160,26 +160,48 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
           name: 'FROM requests METADATA without a LET',
           query: 'FROM index METADATA * | KEEP missingField',
         },
-        {
-          name: 'FROM requests METADATA alongside an unused LET',
-          query: 'LET a = (ROW x = 1); FROM index METADATA _id | KEEP missingField',
-        },
-        {
-          name: 'only an unused LET requests METADATA',
-          query:
-            'LET a = (ROW x = 1); LET unused = (FROM index METADATA _id); FROM a | KEEP missingField',
-        },
       ])('reports an unknown KEEP column when $name', async ({ query }) => {
         const { expectErrors } = await setup();
 
         await expectErrors(query, ['Unknown column "missingField"']);
       });
+
+      it.each([
+        {
+          name: 'FROM requests METADATA alongside an unused LET',
+          query: 'LET a = (ROW x = 1); FROM index METADATA _id | KEEP missingField',
+          unused: 'a',
+        },
+        {
+          name: 'only an unused LET requests METADATA',
+          query:
+            'LET a = (ROW x = 1); LET unused = (FROM index METADATA _id); FROM a | KEEP missingField',
+          unused: 'unused',
+        },
+      ])('reports an unknown KEEP column when $name', async ({ query, unused }) => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(query, [
+          `LET binding "${unused}" is declared but never referenced`,
+          'Unknown column "missingField"',
+        ]);
+      });
     });
 
-    it('ignores an unknown column inside an unused LET', async () => {
+    it('reports an unused LET but not the unknown column inside it', async () => {
       const { expectErrors } = await setup();
 
-      await expectErrors('LET a = (ROW x = 1 | KEEP missing); ROW y = 2', []);
+      await expectErrors('LET a = (ROW x = 1 | KEEP missing); ROW y = 2', [
+        'LET binding "a" is declared but never referenced',
+      ]);
+    });
+
+    it('reports only the unused LET when it reads another LET', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('LET a = (ROW x = 1); LET b = (FROM a); ROW x = 1', [
+        'LET binding "b" is declared but never referenced',
+      ]);
     });
 
     it('reports an unknown column inside a LET read by FROM', async () => {

@@ -343,6 +343,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  namedSubqueryUnused: {
+    message: string;
+    type: { name: string };
+  };
   subqueryNotSupportedInTs: {
     message: string;
     type: {};
