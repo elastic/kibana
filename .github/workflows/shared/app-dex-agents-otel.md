@@ -16,6 +16,8 @@ network:
   allowed:
     - agent-observability-ce9858.ingest.us-east4.gcp.elastic.cloud
     - api.anthropic.com
+    # Dropped from gh-aw's engine defaults in v0.87.10; agents read files from other branches and repos through it.
+    - raw.githubusercontent.com
 env:
   CLAUDE_CODE_ENABLE_TELEMETRY: "1"
   OTEL_METRICS_EXPORTER: otlp
