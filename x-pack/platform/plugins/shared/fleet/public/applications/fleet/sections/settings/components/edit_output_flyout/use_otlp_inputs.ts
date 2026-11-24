@@ -517,7 +517,7 @@ export function useOtlpInputs(
         },
       ].map(({ text: intervalText, fallback }) => {
         const interval = intervalText || fallback;
-        return { interval, ns: parseOtlpDurationNs(interval) ?? BigInt(0) };
+        return { interval, ns: parseOtlpDurationNs(interval) ?? 0 };
       });
       const longest = intervals.reduce((a, b) => (b.ns > a.ns ? b : a));
       if (elapsed < longest.ns) {
