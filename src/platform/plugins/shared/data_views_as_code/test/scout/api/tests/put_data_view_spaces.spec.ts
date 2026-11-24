@@ -280,6 +280,49 @@ apiTest.describe(
     );
 
     apiTest(
+      'with spaces in the body that do not include the url space, returns 400 and does not update the data view',
+      async ({ apiClient }) => {
+        const id = await createSharedDataView(apiClient, ['default', spaceId]);
+        const originalPattern = (
+          await apiClient.get(`${BASE_PATH}/${id}`, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+          })
+        ).body.data.index_pattern;
+
+        const response = await apiClient.put(`${BASE_PATH}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          body: {
+            index_pattern: `put-spaces-without-url-space-${Date.now()}-*`,
+            spaces: [spaceId],
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(400);
+
+        const unchangedResponse = await apiClient.get(`${BASE_PATH}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(unchangedResponse.body.data.index_pattern).toBe(originalPattern);
+        expect([...unchangedResponse.body.meta.spaces].sort()).toStrictEqual(
+          ['default', spaceId].sort()
+        );
+      }
+    );
+
+    apiTest(
       'with many spaces in the body, updates the data view when they already match its spaces',
       async ({ apiClient }) => {
         const id = await createSharedDataView(apiClient, ['default', spaceId, secondSpaceId]);

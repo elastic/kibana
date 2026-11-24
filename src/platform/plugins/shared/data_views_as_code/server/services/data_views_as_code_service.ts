@@ -21,8 +21,8 @@ import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { badRequest, Boom } from '@hapi/boom';
-import { UNKNOWN_SPACE } from '@kbn/core-spaces-common';
+import { badRequest, Boom, forbidden } from '@hapi/boom';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 import type { asCodePaginatedResponseSchema } from '../rest_routes/schema';
 
 export class DataViewsAsCodeService {
@@ -65,7 +65,8 @@ export class DataViewsAsCodeService {
   }
 
   private async mapDataView(dataView: DataViewLazy) {
-    const dataViewSpec = await dataView.toMinimalSpec();
+    const namespaces = dataView.namespaces;
+    const dataViewSpec = { ...(await dataView.toMinimalSpec()), namespaces };
     if (dataView.getFieldAttrs().size > 0)
       dataViewSpec.fieldAttrs = Object.fromEntries(dataView.getFieldAttrs().entries());
 
@@ -90,7 +91,7 @@ export class DataViewsAsCodeService {
       meta: {
         managed: dataView.managed,
         version: dataView.version,
-        spaces: dataView.namespaces,
+        spaces: namespaces,
       },
     };
   }
@@ -120,10 +121,7 @@ export class DataViewsAsCodeService {
     const existingDataView = await this.getDataViewLazy(id);
 
     if (!!existingDataView) {
-      // If the data view is present in an unknown space, meaning the user doesn't have access to it,
-      // the request is refused with a 403 error.
-      if (existingDataView.namespaces.includes(UNKNOWN_SPACE))
-        throw new Boom('Cannot update data view in unknown space.', { statusCode: 403 });
+      this.validateSpaces(existingDataView.namespaces, spec.spaces, urlSpaceId);
 
       // The id can be a legacy alias, for that we use the resolved id.
       const resolvedId = existingDataView.id!;
@@ -133,16 +131,16 @@ export class DataViewsAsCodeService {
         toStoredDataView({ id: resolvedId, ...spec })
       );
 
-      // 2. Update the saved object with the new data view instance.
+      // 2. Update the spaces of the data view
+      await this.updateSpaces(resolvedId, existingDataView, spec.spaces, urlSpaceId);
+
+      // 3. Update the saved object with the new data view instance.
       await this.savedObjectsClient.update(
         DATA_VIEW_SAVED_OBJECT_TYPE,
         resolvedId,
         dataViewInstance.getAsSavedObjectBody(),
         { mergeAttributes: false, refresh: true }
       );
-
-      // 3. Update the spaces of the data view
-      await this.updateSpaces(resolvedId, existingDataView, spec.spaces, urlSpaceId);
 
       // 4 . Clear the data view service cache
       this.dataViewsService.clearInstanceCache(resolvedId);
@@ -159,6 +157,27 @@ export class DataViewsAsCodeService {
       toStoredDataView({ id, ...spec })
     );
     return { action: 'created', body: await this.mapDataView(createdDataView) };
+  }
+
+  private validateSpaces(
+    existingSpaces: string[],
+    requestedSpaces: string[] | undefined,
+    urlSpaceId: string
+  ) {
+    // An unknown space means the data view is shared with a space the user has no access to,
+    // either currently or in the request, so it can't be updated.
+    if (existingSpaces.includes(UNKNOWN_SPACE) || requestedSpaces?.includes(UNKNOWN_SPACE))
+      throw forbidden('Cannot update data view in unknown space.');
+
+    if (!requestedSpaces) return;
+
+    // `*` makes the data view available in every space, including the url one.
+    const includesUrlSpace =
+      requestedSpaces.includes(urlSpaceId) || requestedSpaces.includes(ALL_SPACES_ID);
+    if (!includesUrlSpace)
+      throw badRequest(
+        'Cannot move data view to a different space without it being in the current one.'
+      );
   }
 
   private async updateSpaces(

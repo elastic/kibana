@@ -86,8 +86,8 @@ const createService = ({
   };
 };
 
-const getExpectedMappedData = (spec: DataViewSpec) => {
-  const { id: _id, ...data } = fromStoredDataViewToAsCodeSavedSchema(spec);
+const getExpectedMappedData = (spec: DataViewSpec, namespaces: string[] = ['default']) => {
+  const { id: _id, ...data } = fromStoredDataViewToAsCodeSavedSchema({ ...spec, namespaces });
   return data;
 };
 
@@ -222,7 +222,7 @@ describe('DataViewsAsCodeService', () => {
       });
       mockDataViewsService.getDataViewLazy.mockResolvedValue(mockDataView);
 
-      const transformedData = getExpectedMappedData(mockSpec);
+      const transformedData = getExpectedMappedData(mockSpec, ['default', 'space-1']);
 
       const result = await service.get('dv-1');
 
@@ -263,7 +263,7 @@ describe('DataViewsAsCodeService', () => {
 
       expect(result).toEqual({
         id: 'dv-2',
-        data: getExpectedMappedData({ title: 'logs-*' }),
+        data: getExpectedMappedData({ title: 'logs-*' }, []),
         meta: {
           managed: false,
           version: '1',
@@ -334,6 +334,7 @@ describe('DataViewsAsCodeService', () => {
 
       expect(result.data).toEqual({
         index_pattern: 'logs-*',
+        spaces: ['default'],
         // The overrides are stored by field name, so they are returned in `field_settings` as well
         field_settings: {
           double_bytes: {
@@ -367,7 +368,7 @@ describe('DataViewsAsCodeService', () => {
 
       const result = await service.get('test-id');
 
-      expect(result.data).toEqual({ index_pattern: 'logs-*' });
+      expect(result.data).toEqual({ index_pattern: 'logs-*', spaces: ['default'] });
       expect(dataView.getScriptedFields).not.toHaveBeenCalled();
     });
 
@@ -582,7 +583,7 @@ describe('DataViewsAsCodeService', () => {
         action: 'updated',
         body: {
           id,
-          data: getExpectedMappedData(storedSpec),
+          data: getExpectedMappedData(storedSpec, ['default', 'space-1']),
           meta: {
             managed: true,
             version: '2',
@@ -608,7 +609,7 @@ describe('DataViewsAsCodeService', () => {
         mockSavedObjectsClient.updateObjectsSpaces.mockResolvedValue({
           objects: [{ type: DATA_VIEW_SAVED_OBJECT_TYPE, id, spaces: [] }],
         });
-        return { service, mockSavedObjectsClient };
+        return { service, mockDataViewsService, mockSavedObjectsClient };
       };
 
       it('adds and removes spaces to match the requested spaces', async () => {
@@ -673,6 +674,22 @@ describe('DataViewsAsCodeService', () => {
         });
       });
 
+      it('throws a 400 when the requested spaces do not include the url space', async () => {
+        const { service, mockDataViewsService, mockSavedObjectsClient } = setup({
+          namespaces: ['default'],
+        });
+
+        await expect(
+          service.upsert(id, { ...inputSpecWithoutId, spaces: ['space-1'] }, 'default')
+        ).rejects.toMatchObject({
+          isBoom: true,
+          output: { statusCode: 400 },
+        });
+        expect(mockDataViewsService.createFromSpecLazy).not.toHaveBeenCalled();
+        expect(mockSavedObjectsClient.updateObjectsSpaces).not.toHaveBeenCalled();
+        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+      });
+
       it('throws a 403 when the data view exists in a space the user cannot access', async () => {
         const { service, mockSavedObjectsClient } = setup({ namespaces: ['default', '?'] });
 
@@ -680,6 +697,32 @@ describe('DataViewsAsCodeService', () => {
           isBoom: true,
           output: { statusCode: 403 },
         });
+        expect(mockSavedObjectsClient.updateObjectsSpaces).not.toHaveBeenCalled();
+        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+      });
+
+      it('accepts `*` as the requested spaces and shares the data view with all spaces', async () => {
+        const { service, mockSavedObjectsClient } = setup({ namespaces: ['default', 'space-1'] });
+
+        await service.upsert(id, { ...inputSpecWithoutId, spaces: ['*'] }, 'default');
+
+        expect(mockSavedObjectsClient.updateObjectsSpaces).toHaveBeenCalledWith(
+          [{ id, type: DATA_VIEW_SAVED_OBJECT_TYPE }],
+          ['*'],
+          ['default', 'space-1']
+        );
+      });
+
+      it('throws a 403 when the requested spaces include an unknown space', async () => {
+        const { service, mockSavedObjectsClient } = setup({ namespaces: ['default', '?'] });
+
+        await expect(
+          service.upsert(id, { ...inputSpecWithoutId, spaces: ['default', '?'] }, 'default')
+        ).rejects.toMatchObject({
+          isBoom: true,
+          output: { statusCode: 403 },
+        });
+        expect(mockSavedObjectsClient.updateObjectsSpaces).not.toHaveBeenCalled();
         expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
       });
     });
