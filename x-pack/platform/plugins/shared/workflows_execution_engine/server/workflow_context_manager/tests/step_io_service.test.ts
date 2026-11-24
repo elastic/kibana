@@ -414,6 +414,25 @@ describe('StepIoService', () => {
       expect(batch.get('b')).toEqual({ v: 'b' });
     });
 
+    it('keeps a cache hit written during the fetch even when ES omits that id', async () => {
+      // Same race as above, but mget never returns `a` (not persisted yet when the
+      // fetch ran). The first pass must still copy `a` from the LRU for every
+      // missing id — not only for docs ES returned — or inserts of b–f evict it.
+      const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 45 });
+      stepExecutionRepository.getStepExecutionsByIds.mockImplementation(async () => {
+        writeOutput(service, 'a', { v: 'cached' }, 9);
+        state.clearFlushedOutputs(['a']);
+        return ['b', 'c', 'd', 'e', 'f'].map(
+          (id) => ({ id, output: { v: 'b' } } as unknown as EsWorkflowStepExecution)
+        );
+      });
+
+      const batch = await readOutputs(service, ['a', 'b', 'c', 'd', 'e', 'f']);
+
+      expect(batch.get('a')).toEqual({ v: 'cached' });
+      expect(batch.get('b')).toEqual({ v: 'b' });
+    });
+
     it('keeps a resident output in the returned map when the same batch evicts it', async () => {
       const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 45 });
       writeOutput(service, 'a', { v: 'a' }, 9);

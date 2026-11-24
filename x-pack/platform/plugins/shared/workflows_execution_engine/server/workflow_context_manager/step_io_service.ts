@@ -277,23 +277,22 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   /**
-   * Values to return for this fetch. A sibling cache hit is copied before any
-   * insert, so a later insert cannot drop it. That copy wins over the document:
-   * a flush may already have removed a newer write from state.
+   * Values to return for this fetch. Cache hits for every requested miss are
+   * copied before any insert, so a later insert cannot drop them — including
+   * ids Elasticsearch did not return (written during the fetch, then flushed
+   * from state). That copy wins over the document: a flush may already have
+   * removed a newer write from state.
    */
   private retainFetchedOutputs(
     docs: ReadonlyArray<{ id: string; output?: JsonValue | null }>,
     contextByExecutionId: ReadonlyMap<string, string>
   ): Map<string, JsonValue | null> {
     const fetched = new Map<string, JsonValue | null>();
-    for (const doc of docs) {
-      if (this.state.getStepIo(doc.id, 'output') === undefined) {
-        const contextId = contextByExecutionId.get(doc.id);
-        if (contextId !== undefined) {
-          const cached = this.getCachedOutput(contextId, doc.id);
-          if (cached !== undefined) {
-            fetched.set(doc.id, cached);
-          }
+    for (const [executionId, contextId] of contextByExecutionId) {
+      if (this.state.getStepIo(executionId, 'output') === undefined) {
+        const cached = this.getCachedOutput(contextId, executionId);
+        if (cached !== undefined) {
+          fetched.set(executionId, cached);
         }
       }
     }
