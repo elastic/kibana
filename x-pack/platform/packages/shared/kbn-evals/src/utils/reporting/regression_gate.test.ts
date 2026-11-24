@@ -84,7 +84,7 @@ describe('evaluateRegressionGate', () => {
   it('treats a baseline just past the age limit as stale, without rounding the age down', () => {
     expect(evaluate([makeResult()], { baselineTimestamp: '2026-11-15T13:00:00Z' })).toEqual({
       state: 'inconclusive',
-      summary: 'baseline is 3 days old',
+      summary: 'baseline is 4.0 days old (limit 3)',
     });
     expect(evaluate([makeResult()], { baselineTimestamp: '2026-11-16T12:00:00Z' }).state).toBe(
       'regression'
@@ -103,7 +103,7 @@ describe('evaluateRegressionGate', () => {
       'a stale baseline',
       { baselineTimestamp: '2026-11-14T12:00:00Z' },
       [makeResult()],
-      'baseline is 5 days old',
+      'baseline is 5.0 days old (limit 3)',
     ],
     [
       'an unknown baseline age',
