@@ -33,6 +33,28 @@ export const UPDATE_BY_QUERY_CANCEL_WAIT_MS = 30 * 1000;
 
 const CANCELED_REASON = 'cancelled after exceeding the maximum duration';
 
+interface UpdateByQueryTaskOptions {
+  pollIntervalMs?: number;
+  maxDurationMs?: number;
+  cancelWaitMs?: number;
+}
+
+/**
+ * `canceled` is set when the update by query was cancelled before it went through all of its
+ * documents. The counters are then the partial outcome: the documents it did update stay updated.
+ */
+export type UpdateByQueryTaskResponse = UpdateByQueryResponse & { canceled?: string };
+
+/** A task to follow, and what is needed to read it. */
+interface TaskToFollow {
+  esClient: ElasticsearchClient;
+  taskId: string;
+  logger: Logger;
+  pollIntervalMs: number;
+}
+
+const statusOf = (task: TasksGetResponse) => JSON.stringify(task.task.status ?? {}).slice(0, 500);
+
 /**
  * Whether an update by query ended before it went through all of its documents. A failure also
  * ends the request early, but the documents it left are no more recorded for that: the caller
@@ -50,18 +72,6 @@ const endedEarly = (response: UpdateByQueryResponse): boolean => {
   return processed < response.total;
 };
 
-interface UpdateByQueryTaskOptions {
-  pollIntervalMs?: number;
-  maxDurationMs?: number;
-  cancelWaitMs?: number;
-}
-
-/**
- * `canceled` is set when the update by query was cancelled before it went through all of its
- * documents. The counters are then the partial outcome: the documents it did update stay updated.
- */
-export type UpdateByQueryTaskResponse = UpdateByQueryResponse & { canceled?: string };
-
 /**
  * The final result of a finished task. `response` is what the task returned when it finished
  * successfully. Without it, the counters of the task's status are the only record of what it did.
@@ -69,8 +79,7 @@ export type UpdateByQueryTaskResponse = UpdateByQueryResponse & { canceled?: str
  */
 const toUpdateByQueryResponse = (
   task: TasksGetResponse,
-  taskId: string,
-  logger: Logger
+  { taskId, logger }: TaskToFollow
 ): UpdateByQueryTaskResponse => {
   if (task.response) {
     return task.response as UpdateByQueryTaskResponse;
@@ -89,6 +98,121 @@ const toUpdateByQueryResponse = (
 };
 
 /**
+ * The outcome of a task that has finished. Once a cancellation was requested the outcome is that of
+ * a cancelled task, if the task stopped before it went through every document. Asking for a
+ * cancellation does not mean the task was stopped by it, as it can finish between the last poll and
+ * the request: a result that went through every document stays a plain success, so that it is not
+ * turned into an error and a retry.
+ */
+const outcomeOf = (
+  task: TasksGetResponse,
+  toFollow: TaskToFollow,
+  cancellationRequested: boolean
+): UpdateByQueryTaskResponse => {
+  if (task.error) {
+    throw new FleetError(
+      `Update by query task ${toFollow.taskId} failed: ${JSON.stringify(task.error).slice(0, 1000)}`
+    );
+  }
+  const response = toUpdateByQueryResponse(task, toFollow);
+  if (!cancellationRequested || response.canceled || !endedEarly(response)) {
+    return response;
+  }
+  return { ...response, canceled: CANCELED_REASON };
+};
+
+/**
+ * Reads the task until it has finished, or `maxDurationMs` has passed, in which case it says what
+ * the status of the task was. Reading the task is retried on transient errors.
+ */
+const followTask = async (
+  { esClient, taskId, logger, pollIntervalMs }: TaskToFollow,
+  maxDurationMs: number
+): Promise<{ finished: TasksGetResponse } | { stillRunning: string }> => {
+  const deadline = Date.now() + maxDurationMs;
+  for (;;) {
+    const task = await retryTransientEsErrors(
+      () => esClient.tasks.get({ task_id: taskId, wait_for_completion: false }),
+      { logger }
+    );
+    if (task.completed) {
+      return { finished: task };
+    }
+    if (Date.now() >= deadline) {
+      return { stillRunning: statusOf(task) };
+    }
+    await sleep(pollIntervalMs);
+  }
+};
+
+/**
+ * Asks for the task to be cancelled, and says why it was not if it was not. The request can
+ * succeed without cancelling anything: the task already finished, or its node did not take the
+ * cancellation.
+ */
+const cancelTask = async ({ esClient, taskId }: TaskToFollow): Promise<string | undefined> => {
+  try {
+    const cancelled = await esClient.tasks.cancel({ task_id: taskId });
+    return cancelled?.node_failures?.length
+      ? JSON.stringify(cancelled.node_failures).slice(0, 500)
+      : undefined;
+  } catch (error) {
+    return error.message;
+  }
+};
+
+/**
+ * Reads a task that was asked to stop until it has finished, for at most `cancelWaitMs`. A task
+ * that is not stopped by then has an outcome that is not known, so there is nothing to hand to the
+ * caller to record, and it throws.
+ *
+ * The wait is bounded, and `retryTransientEsErrors` backs off for up to a minute between attempts.
+ * So a poll here is a single request that gives up with the time that is left, and one that fails
+ * is tried again until that time is up.
+ */
+const followCancelledTask = async (
+  { esClient, taskId, logger, pollIntervalMs }: TaskToFollow,
+  {
+    cancelWaitMs,
+    lastStatus,
+    cancelFailure,
+  }: { cancelWaitMs: number; lastStatus: string; cancelFailure?: string }
+): Promise<TasksGetResponse> => {
+  const cancelRequestedAt = Date.now();
+  const timeLeft = () => cancelWaitMs - (Date.now() - cancelRequestedAt);
+  let status = lastStatus;
+  let lastPollError: string | undefined;
+
+  for (;;) {
+    await sleep(Math.max(0, Math.min(pollIntervalMs, timeLeft())));
+    const waitLeft = timeLeft();
+    if (waitLeft <= 0) {
+      throw new FleetError(
+        `Update by query task ${taskId} did not stop within ${cancelWaitMs}ms of being cancelled, status: ${status}${
+          cancelFailure ? `, cancellation failed: ${cancelFailure}` : ''
+        }${lastPollError ? `, last error: ${lastPollError}` : ''}`
+      );
+    }
+
+    try {
+      const task = await esClient.tasks.get(
+        { task_id: taskId, wait_for_completion: false },
+        { requestTimeout: waitLeft }
+      );
+      if (task.completed) {
+        return task;
+      }
+      status = statusOf(task);
+    } catch (error) {
+      lastPollError = error.message;
+      logger.warn(
+        `Could not read update by query task ${taskId} after cancelling it: ${error.message}`
+      );
+    }
+  }
+};
+
+/**
  * Runs an update by query and returns its result, without depending on a single HTTP request
  * staying open until the update is done.
  *
@@ -98,7 +222,7 @@ const toUpdateByQueryResponse = (
  * are then missing from the record, and a retry that skips agents already updated never adds them.
  *
  * Here the update runs as a task, and its result is read back from the tasks API, so a slow
- * update is waited for instead of lost. Reading the task is retried on transient errors.
+ * update is waited for instead of lost.
  *
  * A task that runs past `maxDurationMs` is cancelled. The documents it already updated stay
  * updated, so the cancelled task is followed until it stops and its partial outcome is returned
@@ -122,104 +246,28 @@ export async function updateByQueryAndWait(
     return started;
   }
 
-  const taskId = String(started.task);
-  const deadline = Date.now() + maxDurationMs;
-  let cancelRequestedAt: number | undefined;
-  let lastStatus = '{}';
-  let lastPollError: string | undefined;
-  let cancelFailure: string | undefined;
+  const toFollow: TaskToFollow = { esClient, taskId: String(started.task), logger, pollIntervalMs };
 
-  // The outcome of a task that has finished.
-  const outcomeOf = (task: TasksGetResponse): UpdateByQueryTaskResponse => {
-    if (task.error) {
-      throw new FleetError(
-        `Update by query task ${taskId} failed: ${JSON.stringify(task.error).slice(0, 1000)}`
-      );
-    }
-    const response = toUpdateByQueryResponse(task, taskId, logger);
-    // Asking for a cancellation does not mean the task was stopped by it: it can finish between
-    // the last poll and the request. A result that went through every document stays a plain
-    // success, so it is not turned into an error and a retry.
-    if (cancelRequestedAt === undefined || response.canceled || !endedEarly(response)) {
-      return response;
-    }
-    return { ...response, canceled: CANCELED_REASON };
-  };
-
-  // Time left for a cancelled task to stop, or undefined while it has not been cancelled.
-  const cancelWaitLeft = () =>
-    cancelRequestedAt === undefined ? undefined : cancelWaitMs - (Date.now() - cancelRequestedAt);
-
-  for (;;) {
-    const waitLeft = cancelWaitLeft();
-    if (waitLeft !== undefined && waitLeft <= 0) {
-      // The outcome of this task is unknown, so there is nothing to hand to the caller to record.
-      throw new FleetError(
-        `Update by query task ${taskId} did not stop within ${cancelWaitMs}ms of being cancelled, status: ${lastStatus}${
-          cancelFailure ? `, cancellation failed: ${cancelFailure}` : ''
-        }${lastPollError ? `, last error: ${lastPollError}` : ''}`
-      );
-    }
-
-    let task: TasksGetResponse | undefined;
-    if (waitLeft === undefined) {
-      task = await retryTransientEsErrors(
-        () => esClient.tasks.get({ task_id: taskId, wait_for_completion: false }),
-        { logger }
-      );
-    } else {
-      // The wait for a cancelled task is bounded, and `retryTransientEsErrors` backs off for up
-      // to a minute between attempts. So a poll here is a single request that gives up with the
-      // time that is left, and one that fails is tried again until that time is up.
-      try {
-        task = await esClient.tasks.get(
-          { task_id: taskId, wait_for_completion: false },
-          { requestTimeout: waitLeft }
-        );
-      } catch (error) {
-        lastPollError = error.message;
-        logger.warn(
-          `Could not read update by query task ${taskId} after cancelling it: ${error.message}`
-        );
-      }
-    }
-
-    if (task) {
-      if (task.completed) {
-        return outcomeOf(task);
-      }
-      lastStatus = JSON.stringify(task.task.status ?? {}).slice(0, 500);
-    }
-
-    if (cancelRequestedAt === undefined && Date.now() >= deadline) {
-      logger.warn(
-        `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, cancelling it`
-      );
-      try {
-        const cancelled = await esClient.tasks.cancel({ task_id: taskId });
-        // The request can succeed without cancelling anything: the task already finished, or its
-        // node did not take the cancellation.
-        if (cancelled?.node_failures?.length) {
-          cancelFailure = JSON.stringify(cancelled.node_failures).slice(0, 500);
-        }
-      } catch (error) {
-        cancelFailure = error.message;
-      }
-
-      // A cancellation that failed may still have taken effect, and one that failed because the
-      // task was just finishing still leaves its result to record. So the task is followed for the
-      // same bounded time as one that was cancelled, and what it ends with is read as the outcome
-      // of a cancelled one: a partial result is marked as such, and retried.
-      cancelRequestedAt = Date.now();
-
-      if (cancelFailure !== undefined) {
-        logger.warn(
-          `Could not cancel update by query task ${taskId}: ${cancelFailure}. Following it for up to ${cancelWaitMs}ms`
-        );
-      }
-    }
-
-    const left = cancelWaitLeft();
-    await sleep(left === undefined ? pollIntervalMs : Math.max(0, Math.min(pollIntervalMs, left)));
+  const followed = await followTask(toFollow, maxDurationMs);
+  if ('finished' in followed) {
+    return outcomeOf(followed.finished, toFollow, false);
   }
+
+  logger.warn(
+    `Update by query task ${toFollow.taskId} did not finish within ${maxDurationMs}ms, cancelling it`
+  );
+  const cancelFailure = await cancelTask(toFollow);
+  if (cancelFailure !== undefined) {
+    // A cancellation that failed may still have taken effect, and one that failed because the task
+    // was just finishing still leaves its result to record, so the task is followed all the same.
+    logger.warn(
+      `Could not cancel update by query task ${toFollow.taskId}: ${cancelFailure}. Following it for up to ${cancelWaitMs}ms`
+    );
+  }
+  const stopped = await followCancelledTask(toFollow, {
+    cancelWaitMs,
+    lastStatus: followed.stillRunning,
+    cancelFailure,
+  });
+  return outcomeOf(stopped, toFollow, true);
 }
