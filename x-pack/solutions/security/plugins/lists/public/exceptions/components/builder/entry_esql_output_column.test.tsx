@@ -147,7 +147,7 @@ describe('BuilderEsqlOutputColumnEntryItem', () => {
     render(
       <Harness
         entry={
-          { ...initialEntry, value_type: 'ip', field: 'src', value: '10.0.0.1' } as BuilderEntry
+          { ...initialEntry, field: 'src', value: '10.0.0.1', value_type: 'ip' } as BuilderEntry
         }
       />
     );
@@ -197,7 +197,7 @@ describe('BuilderEsqlOutputColumnEntryItem', () => {
 
   describe('the value is checked as the API checks it', () => {
     const typed = (columnType: string, value: string): BuilderEntry =>
-      ({ ...initialEntry, value_type: columnType, field: 'src', value } as BuilderEntry);
+      ({ ...initialEntry, field: 'src', value, value_type: columnType } as BuilderEntry);
 
     it('shows why a value does not fit the column type, and tells the form about the error', () => {
       const setErrorsExist = jest.fn();
@@ -230,10 +230,10 @@ describe('BuilderEsqlOutputColumnEntryItem', () => {
           entry={
             {
               ...initialEntry,
-              value_type: 'integer',
               field: 'n',
               type: 'match_any',
               value: ['1', 'many', 'few'],
+              value_type: 'integer',
             } as BuilderEntry
           }
         />

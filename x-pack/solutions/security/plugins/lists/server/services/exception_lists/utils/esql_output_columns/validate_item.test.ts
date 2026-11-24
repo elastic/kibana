@@ -15,10 +15,10 @@ const esqlItem = (
 ): ValidateEsqlOutputColumnsItemOptions => ({
   appliesTo: 'esql_output_columns',
   entries: [
-    { value_type: 'keyword', field: 'target_host', type: 'match', value: 'dc-01' },
-    { value_type: 'ip', field: 'src_ip', type: 'match_any', value: ['10.0.0.1', '10.0.0.2'] },
-    { value_type: 'text', field: 'user', type: 'wildcard', value: 'svc-*' },
-    { value_type: 'double', field: 'score', type: 'exists' },
+    { field: 'target_host', type: 'match', value: 'dc-01', value_type: 'keyword' },
+    { field: 'src_ip', type: 'match_any', value: ['10.0.0.1', '10.0.0.2'], value_type: 'ip' },
+    { field: 'user', type: 'wildcard', value: 'svc-*', value_type: 'text' },
+    { field: 'score', type: 'exists', value_type: 'double' },
   ],
   listType: 'rule_default',
   osTypes: [],
@@ -34,7 +34,7 @@ describe('validateEsqlOutputColumnsItem', () => {
     const run = (): void =>
       validateEsqlOutputColumnsItem(
         esqlItem({
-          entries: [{ value_type: 'ip', field: 'c', type: 'match', value: 'bogus' }],
+          entries: [{ field: 'c', type: 'match', value: 'bogus', value_type: 'ip' }],
           listType: 'endpoint',
           osTypes: ['linux'],
         })
@@ -48,10 +48,10 @@ describe('validateEsqlOutputColumnsItem', () => {
 
   it('reports at most 10 problems and counts the others', () => {
     const entries = Array.from({ length: 13 }, (_, i) => ({
-      value_type: 'ip',
       field: `c${i}`,
       type: 'match',
       value: `bogus${i}`,
+      value_type: 'ip',
     }));
     let message = '';
     try {

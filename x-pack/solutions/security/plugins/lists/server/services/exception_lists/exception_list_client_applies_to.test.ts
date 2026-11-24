@@ -18,13 +18,13 @@ import { getCreateExceptionListItemOptionsMock } from './exception_list_client.m
 
 const esqlEntries: ExceptionListItemEntryArray = [
   {
-    value_type: 'keyword',
     field: 'target_host',
     operator: 'included',
     type: 'match',
     value: 'dc-01',
+    value_type: 'keyword',
   },
-  { value_type: 'double', field: 'score', operator: 'excluded', type: 'exists' },
+  { field: 'score', operator: 'excluded', type: 'exists', value_type: 'double' },
 ];
 
 const listSavedObject = {

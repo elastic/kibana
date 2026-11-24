@@ -100,11 +100,11 @@ describe('ExceptionBuilderComponent with an item that applies to the ES|QL outpu
         applies_to: 'esql_output_columns',
         entries: [
           {
-            value_type: 'keyword',
             field: 'risk',
             operator: 'included',
             type: 'match',
             value: 'low',
+            value_type: 'keyword',
           },
         ],
       });

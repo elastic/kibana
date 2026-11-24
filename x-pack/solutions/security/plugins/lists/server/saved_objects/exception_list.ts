@@ -115,10 +115,6 @@ export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
     },
     entries: {
       properties: {
-        value_type: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
         entries: {
           properties: {
             field: {
@@ -165,6 +161,10 @@ export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
               type: 'text',
             },
           },
+          type: 'keyword',
+        },
+        value_type: {
+          ignore_above: 1024,
           type: 'keyword',
         },
       },

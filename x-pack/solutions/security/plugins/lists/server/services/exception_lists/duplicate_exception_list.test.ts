@@ -135,11 +135,11 @@ describe('duplicateExceptionListAndItems', () => {
               applies_to: 'esql_output_columns',
               entries: [
                 {
-                  value_type: 'keyword',
                   field: 'target_host',
                   operator: 'included',
                   type: 'match',
                   value: 'dc-01',
+                  value_type: 'keyword',
                 },
               ],
               item_id: 'esql-item',

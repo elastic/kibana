@@ -28,11 +28,11 @@ const esqlItem = (
   applies_to: 'esql_output_columns',
   entries: [
     {
-      value_type: 'keyword',
       field: 'target_host',
       operator: 'included',
       type: 'match',
       value: 'dc-01',
+      value_type: 'keyword',
     },
   ],
   os_types: [],
@@ -76,11 +76,11 @@ describe('importing the items that apply to the ES|QL output columns', () => {
         esqlItem({
           entries: [
             {
-              value_type: 'ip',
               field: 'src_ip',
               operator: 'included',
               type: 'match',
               value: 'bogus',
+              value_type: 'ip',
             },
           ],
         }),
@@ -112,11 +112,11 @@ describe('importing the items that apply to the ES|QL output columns', () => {
         esqlItem({
           entries: [
             {
-              value_type: 'ip',
               field: 'src_ip',
               operator: 'included',
               type: 'match',
               value: 'bogus',
+              value_type: 'ip',
             },
           ],
           os_types: ['linux'],

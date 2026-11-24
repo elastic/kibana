@@ -203,9 +203,7 @@ export const mapColumnTypeToRuntimeType = (columnType: EsqlOutputColumnType): Ru
 const getDeclaredColumnType = (
   entry: Entry | EmptyListEntry | EmptyEntry
 ): EsqlOutputColumnType | undefined =>
-  'value_type' in entry && isEsqlOutputColumnType(entry.value_type)
-    ? entry.value_type
-    : undefined;
+  'value_type' in entry && isEsqlOutputColumnType(entry.value_type) ? entry.value_type : undefined;
 
 /**
  * Build the `runtimeFields` map the bulk-close endpoint expects.

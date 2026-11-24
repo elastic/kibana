@@ -74,7 +74,7 @@ describe('transforms of the items and what they apply to', () => {
 
     it('reads the value_type of the entries', () => {
       const entries = [
-        { value_type: 'keyword', field: 'f', operator: 'included', type: 'match', value: 'v' },
+        { field: 'f', operator: 'included', type: 'match', value: 'v', value_type: 'keyword' },
       ] as ExceptionListSoSchema['entries'];
       expect(
         transformSavedObjectToExceptionListItem({ savedObject: itemSavedObject({ entries }) })

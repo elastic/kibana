@@ -28,18 +28,18 @@ jest.mock('./get_exception_list_item');
 
 const esqlEntries: ExceptionListItemEntryArray = [
   {
-    value_type: 'keyword',
     field: 'target_host',
     operator: 'included',
     type: 'match',
     value: 'dc-01',
+    value_type: 'keyword',
   },
   {
-    value_type: 'ip',
     field: 'src_ip',
     operator: 'included',
     type: 'match_any',
     value: ['10.0.0.1', '10.0.0.0/24'],
+    value_type: 'ip',
   },
 ];
 
@@ -201,15 +201,15 @@ describe('exception items and what they apply to', () => {
 
     it('rejects a value that does not fit its value_type, and an operation that the type does not support', async () => {
       const entries: ExceptionListItemEntryArray = [
-        { value_type: 'ip', field: 'src_ip', operator: 'included', type: 'match', value: 'bogus' },
+        { field: 'src_ip', operator: 'included', type: 'match', value: 'bogus', value_type: 'ip' },
         {
-          value_type: 'long',
           field: 'count',
           operator: 'included',
           type: 'wildcard',
           value: '1*',
+          value_type: 'long',
         },
-        { value_type: 'double', field: 'ratio', operator: 'included', type: 'match', value: '1' },
+        { field: 'ratio', operator: 'included', type: 'match', value: '1', value_type: 'double' },
         { field: 'plain', operator: 'included', type: 'match', value: 'x' },
       ];
 
@@ -377,11 +377,11 @@ describe('exception items and what they apply to', () => {
             appliesTo: 'esql_output_columns',
             entries: [
               {
-                value_type: 'ip',
                 field: 'src_ip',
                 operator: 'included',
                 type: 'match',
                 value: 'bogus',
+                value_type: 'ip',
               },
             ],
           }),

@@ -1,4 +1,13 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * Demo of the exceptions on the computed columns of ES|QL rules.
  *
  *   node esql_exceptions_demo.mjs                 creates the data, the exception lists, the rules, waits for their first run and prints the results
@@ -146,12 +155,18 @@ const INDICES = {
 };
 
 const writeDocuments = async (index) => {
-  const lines = INDICES[index].documents().flatMap(({ id, doc }) => [
-    JSON.stringify({ index: { _index: index, _id: id } }),
-    JSON.stringify(doc),
-  ]);
-  const result = must(`bulk ${index}`, await es('/_bulk?refresh=true', 'POST', lines.join('\n') + '\n', true));
-  if (result.errors) throw new Error('bulk: ' + JSON.stringify(result.items.find((i) => i.index.error)));
+  const lines = INDICES[index]
+    .documents()
+    .flatMap(({ id, doc }) => [
+      JSON.stringify({ index: { _index: index, _id: id } }),
+      JSON.stringify(doc),
+    ]);
+  const result = must(
+    `bulk ${index}`,
+    await es('/_bulk?refresh=true', 'POST', lines.join('\n') + '\n', true)
+  );
+  if (result.errors)
+    throw new Error('bulk: ' + JSON.stringify(result.items.find((i) => i.index.error)));
   return lines.length / 2;
 };
 
@@ -233,7 +248,8 @@ const CASES = [
       {
         id: 'backup-server',
         name: 'Backup server',
-        description: 'The backup server sends large volumes by design (a source field, it stays in the DSL filter)',
+        description:
+          'The backup server sends large volumes by design (a source field, it stays in the DSL filter)',
         appliesTo: 'source_documents',
         entries: [{ field: 'host.name', type: 'match', operator: 'included', value: 'backup-01' }],
       },
@@ -368,7 +384,15 @@ const ensureLogSetting = async () => {
   const value = current.body?.settings?.[LOG_SETTING]?.userValue;
   console.log(`  ${LOG_SETTING}: ${value === undefined ? '(default)' : value}`);
   if (value !== 'info') {
-    must('setting', await kbn('/internal/kibana/settings', 'POST', { changes: { [LOG_SETTING]: 'info' } }, INTERNAL));
+    must(
+      'setting',
+      await kbn(
+        '/internal/kibana/settings',
+        'POST',
+        { changes: { [LOG_SETTING]: 'info' } },
+        INTERNAL
+      )
+    );
     console.log(`  set to info (before: ${value === undefined ? 'unset, the default' : value})`);
   }
 };
@@ -385,7 +409,10 @@ const createCase = async (c) => {
     })
   );
   for (const item of c.items) {
-    must(`item ${item.id}`, await kbn('/api/exception_lists/items', 'POST', itemBody(listIdOf(c), item)));
+    must(
+      `item ${item.id}`,
+      await kbn('/api/exception_lists/items', 'POST', itemBody(listIdOf(c), item))
+    );
   }
   const rule = must(
     `rule ${c.n}`,
@@ -484,19 +511,33 @@ const report = async (c, rule, last) => {
   if (e.applied && log) {
     checks.push([
       'applied at the end',
-      sameList(log.appliedAtEndOfQuery.map((i) => i.item_id), e.applied),
+      sameList(
+        log.appliedAtEndOfQuery.map((i) => i.item_id),
+        e.applied
+      ),
       JSON.stringify(log.appliedAtEndOfQuery.map((i) => i.item_id)),
     ]);
     checks.push([
       'not applied',
-      sameList(log.notApplied.map((i) => `${i.item_id}:${i.code}`), e.notApplied),
+      sameList(
+        log.notApplied.map((i) => `${i.item_id}:${i.code}`),
+        e.notApplied
+      ),
       JSON.stringify(log.notApplied.map((i) => `${i.item_id}:${i.code}`)),
     ]);
   }
   console.log(`\n${c.rule}`);
-  for (const [label, ok, detail] of checks) console.log(`  ${ok ? 'OK  ' : 'DIFF'} ${label}: ${detail}`);
-  if (last?.message && last.status !== 'succeeded') console.log(`  message of the rule: ${last.message.slice(0, 600)}`);
-  if (log) console.log(`  final query in the log:\n${log.query.split('\n').map((l) => '    ' + l).join('\n')}`);
+  for (const [label, ok, detail] of checks)
+    console.log(`  ${ok ? 'OK  ' : 'DIFF'} ${label}: ${detail}`);
+  if (last?.message && last.status !== 'succeeded')
+    console.log(`  message of the rule: ${last.message.slice(0, 600)}`);
+  if (log)
+    console.log(
+      `  final query in the log:\n${log.query
+        .split('\n')
+        .map((l) => '    ' + l)
+        .join('\n')}`
+    );
   else console.log('  (no esql_exceptions message in the log)');
   return checks.every(([, ok]) => ok);
 };
@@ -524,13 +565,20 @@ const setup = async () => {
     allOk = ok && allOk;
     if (ok) {
       // the rule ran once and showed what it should: disable it, so that it makes no noise while the demo is recorded
-      must(`disable ${c.n}`, await kbn('/api/detection_engine/rules', 'PATCH', { id: rule.id, enabled: false }));
+      must(
+        `disable ${c.n}`,
+        await kbn('/api/detection_engine/rules', 'PATCH', { id: rule.id, enabled: false })
+      );
       console.log('  rule disabled');
     } else {
       console.log('  rule left enabled, because the result differs from the plan');
     }
   }
-  console.log(allOk ? '\nEvery case shows what the plan expects, and every rule is disabled.' : '\nSome cases differ from the plan.');
+  console.log(
+    allOk
+      ? '\nEvery case shows what the plan expects, and every rule is disabled.'
+      : '\nSome cases differ from the plan.'
+  );
   process.exitCode = allOk ? 0 : 2;
 };
 
@@ -538,9 +586,12 @@ const args = process.argv.slice(2);
 if (args.includes('--clean')) {
   await clean();
   console.log('Removed the rules of the cases, their alerts, the exception lists and the indices.');
-  console.log(`The advanced setting ${LOG_SETTING} stays at info. To reset it: POST /internal/kibana/settings with {"changes":{"${LOG_SETTING}":null}}.`);
+  console.log(
+    `The advanced setting ${LOG_SETTING} stays at info. To reset it: POST /internal/kibana/settings with {"changes":{"${LOG_SETTING}":null}}.`
+  );
 } else if (args.includes('--refresh-data')) {
-  for (const index of Object.keys(INDICES)) console.log(`${index}: ${await writeDocuments(index)} documents`);
+  for (const index of Object.keys(INDICES))
+    console.log(`${index}: ${await writeDocuments(index)} documents`);
 } else {
   await setup();
 }

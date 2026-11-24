@@ -69,11 +69,11 @@ const esqlItem = {
   applies_to: 'esql_output_columns',
   entries: [
     {
-      value_type: 'keyword',
       field: 'target_host',
       operator: 'included',
       type: 'match',
       value: 'dc-01',
+      value_type: 'keyword',
     },
   ],
   os_types: [],
@@ -146,7 +146,7 @@ describe('exception list saved object model versions', () => {
       expect(() =>
         exceptionListSchemaV2.validate({
           ...legacyItem,
-          entries: [{ value_type: 1, field: 'f', type: 'match', value: 'x' }],
+          entries: [{ field: 'f', type: 'match', value: 'x', value_type: 1 }],
         })
       ).toThrow();
     });

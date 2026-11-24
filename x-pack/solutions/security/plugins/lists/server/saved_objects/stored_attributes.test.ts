@@ -85,11 +85,11 @@ describe('what the services write to the exception list saved objects', () => {
       'esql_output_columns' as const,
       [
         {
-          value_type: 'ip' as const,
           field: 'src_ip',
           operator: 'included' as const,
           type: 'match_any' as const,
           value: ['10.0.0.1', '10.0.0.0/24'],
+          value_type: 'ip' as const,
         },
       ],
     ],

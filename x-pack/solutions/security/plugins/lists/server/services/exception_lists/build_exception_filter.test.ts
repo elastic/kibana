@@ -1234,9 +1234,9 @@ describe('build_exceptions_filter', () => {
       (columnType) => {
         const booleanFilter = buildMatchClause({
           ...getEntryMatchMock(),
-          value_type: columnType,
           field: 'c_date',
           value: '2026-09-30',
+          value_type: columnType,
         } as EntryMatch);
 
         expect(booleanFilter).toEqual({
@@ -1251,8 +1251,8 @@ describe('build_exceptions_filter', () => {
     test('it should keep match_phrase for a column type that is not a date', () => {
       const booleanFilter = buildMatchClause({
         ...getEntryMatchMock(),
-        value_type: 'long',
         value: '4',
+        value_type: 'long',
       } as EntryMatch);
 
       expect(booleanFilter).toEqual({
@@ -1266,9 +1266,9 @@ describe('build_exceptions_filter', () => {
     test('it should negate the range when operator is "excluded"', () => {
       const booleanFilter = buildMatchClause({
         ...getEntryMatchExcludeMock(),
-        value_type: 'date',
         field: 'c_date',
         value: '2026-09-30',
+        value_type: 'date',
       } as EntryMatch);
 
       expect(booleanFilter).toEqual({
@@ -1288,9 +1288,9 @@ describe('build_exceptions_filter', () => {
     test('it should test each value on a date column as a range from the value to itself', () => {
       const booleanFilter = buildMatchAnyClause({
         ...modifiedGetEntryMatchAnyMock(),
-        value_type: 'date',
         field: 'c_date',
         value: ['2026-09-30', '2026-09-15'],
+        value_type: 'date',
       } as EntryMatchAny);
 
       expect(booleanFilter).toEqual({

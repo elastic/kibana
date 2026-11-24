@@ -34,11 +34,11 @@ describe('bulkCreateExceptionListItems', () => {
           applies_to: 'esql_output_columns',
           entries: [
             {
-              value_type: 'keyword',
               field: 'target_host',
               operator: 'included',
               type: 'match',
               value: 'x',
+              value_type: 'keyword',
             },
           ],
           item_id: 'item-2',
