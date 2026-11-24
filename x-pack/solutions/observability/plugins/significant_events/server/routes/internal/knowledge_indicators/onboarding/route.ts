@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_ID_LENGTH,
   KIsOnboardingStep,
@@ -254,9 +254,11 @@ const canOnboardRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+    })
+  ),
   handler: async ({
     params,
     request,
