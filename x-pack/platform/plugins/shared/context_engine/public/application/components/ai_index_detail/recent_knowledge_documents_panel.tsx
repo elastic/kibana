@@ -13,15 +13,14 @@ import {
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
+  EuiText,
   EuiTitle,
-  useEuiFontSize,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { KI_NOT_DELETED_STATUSES } from '../../../../common/ki_lifecycle_status';
 import type { KiListItem } from '../../../../common/http_api/knowledge_indicators';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
@@ -35,47 +34,9 @@ import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_descripti
 
 export const RECENT_KNOWLEDGE_DOCUMENTS_SIZE = 5;
 
-const useRowStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const { fontSize: smallFontSize } = useEuiFontSize('xs');
-  return useMemo(
-    () => ({
-      row: css({
-        display: 'flex',
-        alignItems: 'center',
-        gap: euiTheme.size.m,
-        padding: `${euiTheme.size.s} ${euiTheme.size.xs}`,
-        borderTop: euiTheme.border.thin,
-        color: euiTheme.colors.textParagraph,
-        textDecoration: 'none',
-        '&:first-of-type': {
-          borderTop: 'none',
-        },
-        '&:hover, &:focus-visible': {
-          backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-          textDecoration: 'none',
-        },
-      }),
-      title: css({
-        flex: 1,
-        minWidth: 0,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        fontWeight: euiTheme.font.weight.medium,
-      }),
-      updated: css({
-        flexShrink: 0,
-        color: euiTheme.colors.textSubdued,
-        fontSize: smallFontSize,
-      }),
-    }),
-    [euiTheme, smallFontSize]
-  );
-};
+const badgeItemCss = css({ minWidth: 0, maxWidth: '40%' });
 
 const RecentKnowledgeDocumentRow = ({ aiIndexId, ki }: { aiIndexId: string; ki: KiListItem }) => {
-  const styles = useRowStyles();
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { path, params } = getKnowledgeDocumentLocation(aiIndexId, ki);
   const { href, onClick } = getRouterLinkProps({
@@ -85,27 +46,42 @@ const RecentKnowledgeDocumentRow = ({ aiIndexId, ki }: { aiIndexId: string; ki: 
   const { title, type, updated_at: updatedAt } = ki;
 
   return (
-    <a
-      href={href}
-      onClick={onClick}
-      css={styles.row}
+    <EuiFlexGroup
+      component="li"
+      alignItems="center"
+      gutterSize="m"
+      responsive={false}
       data-test-subj="contextOverviewRecentDocumentRow"
-      {...getEbtProps({
-        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
-        action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_RECENT_DOCUMENT,
-      })}
     >
-      <EuiIcon type="document" color="subdued" aria-hidden={true} />
-      <span css={styles.title} data-test-subj="contextOverviewRecentDocumentTitle">
-        {getKiDisplayTitle(title)}
-      </span>
-      <KiTypeDisplay as="badge" type={type} />
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="document" color="subdued" aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem className="eui-textTruncate">
+        <EuiLink
+          href={href}
+          onClick={onClick}
+          className="eui-textTruncate"
+          data-test-subj="contextOverviewRecentDocumentTitle"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
+            action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_RECENT_DOCUMENT,
+          })}
+        >
+          {getKiDisplayTitle(title)}
+        </EuiLink>
+      </EuiFlexItem>
+      {/* A long type name must not push the title out: the badge cuts its text with "…". */}
+      <EuiFlexItem grow={false} css={badgeItemCss}>
+        <KiTypeDisplay as="badge" type={type} />
+      </EuiFlexItem>
       {updatedAt ? (
-        <span css={styles.updated}>
-          <KiFormattedDate value={updatedAt} />
-        </span>
+        <EuiFlexItem grow={false} className="eui-textNoWrap">
+          <EuiText size="xs" color="subdued">
+            <KiFormattedDate value={updatedAt} />
+          </EuiText>
+        </EuiFlexItem>
       ) : null}
-    </a>
+    </EuiFlexGroup>
   );
 };
 
@@ -207,7 +183,10 @@ export const RecentKnowledgeDocumentsPanel = ({
       ) : hasDocuments ? (
         <>
           <EuiSpacer size="s" />
-          <nav
+          <EuiFlexGroup
+            component="ul"
+            direction="column"
+            gutterSize="s"
             aria-label={i18n.translate(
               'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.listAriaLabel',
               { defaultMessage: 'Recent knowledge documents' }
@@ -220,7 +199,7 @@ export const RecentKnowledgeDocumentsPanel = ({
                 ki={ki}
               />
             ))}
-          </nav>
+          </EuiFlexGroup>
         </>
       ) : (
         <AiIndexDetailPanelDescription data-test-subj="contextOverviewRecentDocumentsEmpty">

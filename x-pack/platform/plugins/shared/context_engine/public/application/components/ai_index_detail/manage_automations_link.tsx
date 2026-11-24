@@ -12,7 +12,7 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useNavigation } from '../../hooks/use_navigation';
-import { getAiIndexSettingsPath } from '../../paths';
+import { getAiIndexAutomationsPath } from '../../paths';
 
 interface ManageAutomationsLinkProps {
   aiIndexId: string;
@@ -21,10 +21,10 @@ interface ManageAutomationsLinkProps {
 /** Links from the Overview Automations panel to the Settings tab, where automations are added. */
 export const ManageAutomationsLink = ({ aiIndexId }: ManageAutomationsLinkProps) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
-  const settingsPath = getAiIndexSettingsPath(aiIndexId);
+  const automationsPath = getAiIndexAutomationsPath(aiIndexId);
   const { href, onClick } = getRouterLinkProps({
-    href: createContextEngineUrl(settingsPath),
-    onClick: () => navigateToContextEngine(settingsPath),
+    href: createContextEngineUrl(automationsPath),
+    onClick: () => navigateToContextEngine(automationsPath),
   });
 
   return (

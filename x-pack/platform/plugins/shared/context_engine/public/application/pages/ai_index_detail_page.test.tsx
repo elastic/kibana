@@ -31,6 +31,7 @@ import {
   CONTEXT_ENGINE_PATHS,
   getAiIndexDetailPath,
   getAiIndexKnowledgeDocumentsPath,
+  getAiIndexAutomationsPath,
   getAiIndexSettingsPath,
   getAiIndexSourcesPath,
 } from '../paths';
@@ -256,7 +257,11 @@ const removeAutomationFromRow = async (rowIndex: number) => {
 };
 
 describe('AiIndexDetailPage', () => {
+  // jsdom has no scrollIntoView. Links to `#automations` scroll to the Automations panel.
+  const scrollIntoView = jest.fn();
+
   beforeEach(() => {
+    Element.prototype.scrollIntoView = scrollIntoView;
     mockMgetWorkflows.mockResolvedValue([]);
     mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
     mockGetWorkflowExecutions.mockResolvedValue({ results: [] });
@@ -577,7 +582,7 @@ describe('AiIndexDetailPage', () => {
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith(
       CONTEXT_ENGINE_APP_ID,
-      expect.objectContaining({ path: getAiIndexSettingsPath(aiIndex.id) })
+      expect.objectContaining({ path: getAiIndexAutomationsPath(aiIndex.id) })
     );
   });
 
@@ -712,6 +717,8 @@ describe('AiIndexDetailPage', () => {
     expect(await within(settingsTab).findByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
       'My workflow'
     );
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+    expect(within(settingsTab).getByRole('heading', { name: 'Automations' })).toHaveFocus();
   });
 
   it('does not count dreaming automations while memory is off', async () => {

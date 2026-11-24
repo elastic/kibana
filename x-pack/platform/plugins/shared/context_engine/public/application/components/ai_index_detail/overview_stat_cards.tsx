@@ -23,7 +23,7 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useNavigation } from '../../hooks/use_navigation';
 import {
   getAiIndexKnowledgeDocumentsPath,
-  getAiIndexSettingsPath,
+  getAiIndexAutomationsPath,
   getAiIndexSourcesPath,
 } from '../../paths';
 
@@ -166,7 +166,7 @@ export const OverviewStatCards = ({
           'xpack.contextEngine.aiIndexDetail.overview.statCards.automationsCaption',
           { defaultMessage: 'keep documents up to date' }
         )}
-        path={getAiIndexSettingsPath(aiIndexId)}
+        path={getAiIndexAutomationsPath(aiIndexId)}
         isLoading={false}
       />
     </EuiFlexItem>

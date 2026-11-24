@@ -98,20 +98,20 @@ describe('RecentKnowledgeDocumentsPanel', () => {
     expect(rows[1]).toHaveTextContent('Untitled');
   });
 
-  it('opens a document from its row', () => {
+  it('opens a document from its title link', () => {
     renderPanel();
 
-    const [firstRow, secondRow] = screen.getAllByTestId('contextOverviewRecentDocumentRow');
-    expect(firstRow).toHaveAttribute(
+    const [firstLink, secondLink] = screen.getAllByTestId('contextOverviewRecentDocumentTitle');
+    expect(firstLink).toHaveAttribute(
       'href',
       '/app/context_engine/ai_index/my-index/knowledge_documents/ai-index-idx-my-index?doc=doc-1'
     );
-    expect(secondRow).toHaveAttribute(
+    expect(secondLink).toHaveAttribute(
       'href',
       '/app/context_engine/ai_index/my-index/knowledge_documents?doc=doc-2'
     );
 
-    fireEvent.click(firstRow);
+    fireEvent.click(firstLink);
 
     expect(mockNavigateToContextEngine).toHaveBeenCalledWith(
       '/ai_index/my-index/knowledge_documents/ai-index-idx-my-index',

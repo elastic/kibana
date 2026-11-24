@@ -323,6 +323,40 @@ describe('AutomationsPanel', () => {
     expect(heading).toHaveAttribute('tabindex', '-1');
   });
 
+  describe('when a link targets #automations', () => {
+    const scrollIntoView = jest.fn();
+
+    beforeEach(() => {
+      scrollIntoView.mockClear();
+      Element.prototype.scrollIntoView = scrollIntoView;
+    });
+
+    it('scrolls to the panel and focuses its heading', () => {
+      renderPanel({}, { pathname: '/ai_index/my-ai-index/settings#automations' });
+
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+      expect(screen.getByRole('heading', { name: 'Automations' })).toHaveFocus();
+    });
+
+    it('waits for the AI index before it scrolls', () => {
+      const { rerender } = renderPanel(
+        { isLoading: true },
+        { pathname: '/ai_index/my-ai-index/settings#automations' }
+      );
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      rerender({ isLoading: false });
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not scroll without the hash', () => {
+      renderPanel();
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+  });
+
   it('renders one row per automation', () => {
     const automations: AiIndexAutomation[] = [
       { type: 'workflow', value: 'wf-1' },

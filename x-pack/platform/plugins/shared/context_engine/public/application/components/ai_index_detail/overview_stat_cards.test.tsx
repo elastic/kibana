@@ -113,7 +113,7 @@ describe('OverviewStatCards', () => {
   it.each([
     ['knowledgeDocuments', '/ai_index/my-index/knowledge_documents'],
     ['sources', '/ai_index/my-index/sources'],
-    ['automations', '/ai_index/my-index/settings'],
+    ['automations', '/ai_index/my-index/settings#automations'],
   ])('opens the matching page from the %s card', (id, path) => {
     renderCards();
 

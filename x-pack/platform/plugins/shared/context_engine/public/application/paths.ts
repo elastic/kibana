@@ -28,6 +28,13 @@ export const getAiIndexKnowledgeDocumentsPath = (id: string): string =>
 
 export const getAiIndexSettingsPath = (id: string): string => `/ai_index/${id}/settings`;
 
+/** URL hash that makes the Settings tab scroll to its Automations panel. */
+export const AUTOMATIONS_HASH = '#automations';
+
+/** Path of the Settings tab, scrolled to the Automations panel. */
+export const getAiIndexAutomationsPath = (id: string): string =>
+  `${getAiIndexSettingsPath(id)}${AUTOMATIONS_HASH}`;
+
 /** Path of the page for picking an example dreaming config for a new AI index with memory. */
 export const getAiIndexDreamingTemplatePath = (id: string): string =>
   `/ai_index/${id}/dreaming_template`;
