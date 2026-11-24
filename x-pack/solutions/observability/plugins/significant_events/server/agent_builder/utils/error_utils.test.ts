@@ -6,6 +6,7 @@
  */
 
 import { SignificantEventsPausedError } from '../../lib/errors/significant_events_paused_error';
+import { StatusError } from '../../lib/errors/status_error';
 import { classifyError } from './error_utils';
 import { SourceDisabledError, UnknownSourceSlugError } from './resolve_source_slugs';
 
@@ -22,6 +23,12 @@ describe('classifyError', () => {
   it('returns the disabled-source message', () => {
     expect(classifyError(new SourceDisabledError('payments'))).toBe(
       'Source "payments" is disabled.'
+    );
+  });
+
+  it('returns the reason of a call refused with a 400', () => {
+    expect(classifyError(new StatusError('The source holds no document.', 400))).toBe(
+      'The source holds no document.'
     );
   });
 
