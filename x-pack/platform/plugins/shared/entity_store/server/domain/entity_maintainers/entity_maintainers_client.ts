@@ -41,6 +41,7 @@ import { ResolutionRulesClient } from '../resolution/rules';
 import { EntityMetadataClient } from '../entity_metadata';
 import { RelationshipsClient } from '../relationships';
 import { createMaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
+import { SystemEventsWriter } from '../system_events';
 
 interface TaskSnapshot {
   runs: number;
@@ -232,6 +233,12 @@ export class EntityMaintainersClient {
         setup,
         analytics: this.analytics,
         telemetryClient,
+        systemEventsWriter: new SystemEventsWriter({
+          esClient: this.coreStart.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+          namespace: this.namespace,
+        }),
+        trigger: 'user',
       });
 
       await persistMaintainerState({

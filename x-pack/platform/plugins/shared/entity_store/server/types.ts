@@ -40,6 +40,7 @@ import type {
 } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { LogsExtractionClient } from './domain/logs_extraction';
+import type { SystemEventsWriter } from './domain/system_events';
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { EntityMetadataClient } from './domain/entity_metadata';
@@ -89,6 +90,7 @@ export interface EntityStoreApiRequestHandlerContext {
   isDualProcessEnabled: () => Promise<boolean>;
   logsExtractionClient: LogsExtractionClient;
   historySnapshotClient: HistorySnapshotClient;
+  systemEventsWriter: SystemEventsWriter;
   security: SecurityPluginStart;
   namespace: string;
   analytics: TelemetryReporter;

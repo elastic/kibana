@@ -86,6 +86,7 @@ export const ENTITY_STORE_ROUTES = {
     ENGINE_CONFIG: `${INTERNAL_BASE_ROUTE}/{entityType}`,
     FORCE_LOG_EXTRACTION: `${INTERNAL_BASE_ROUTE}/{entityType}/force_log_extraction`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE_ROUTE}/force_history_snapshot`,
+    SYSTEM_EVENTS_SETUP: `${INTERNAL_BASE_ROUTE}/system_events/_setup`,
     ENTITY_MAINTAINERS_START: `${INTERNAL_BASE_ROUTE}/entity_maintainers/start/{id}`,
     ENTITY_MAINTAINERS_STOP: `${INTERNAL_BASE_ROUTE}/entity_maintainers/stop/{id}`,
     ENTITY_MAINTAINERS_RUN: `${INTERNAL_BASE_ROUTE}/entity_maintainers/run/{id}`,
@@ -104,6 +105,7 @@ export {
 } from './entity_maintainers';
 
 export { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from './domain/resolution_rules/constants';
+export { SYSTEM_EVENTS_INDEX_PATTERN, getSystemEventsDashboardId } from './domain/system_events';
 export type { ResolutionRuleId, ResolutionRuleKind } from './domain/resolution_rules/constants';
 
 export const getErrorMessage = (error: unknown): string => {

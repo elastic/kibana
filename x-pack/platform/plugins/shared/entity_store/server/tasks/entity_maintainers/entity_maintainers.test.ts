@@ -32,6 +32,14 @@ jest.mock('./entity_maintainers_registry', () => ({
     hasId: jest.fn(),
   },
 }));
+const mockWriteRun = jest.fn();
+jest.mock('../../domain/system_events', () => ({
+  ...jest.requireActual('../../domain/system_events'),
+  SystemEventsWriter: class {
+    writeRun = (...args: unknown[]) => mockWriteRun(...args);
+  },
+}));
+
 jest.mock('../should_delete_orphaned_task', () => ({
   shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
 }));
@@ -560,6 +568,45 @@ describe('entity_maintainer task', () => {
       expect(result.state.metadata.lastErrorTimestamp).toBeDefined();
       expect(typeof result.state.metadata.lastErrorTimestamp).toBe('string');
       expect(result.state.metadata.runs).toBe(1);
+    });
+
+    it('records a failed run doc with the maintainer id', async () => {
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
+      const config = createMockConfig({
+        run: jest.fn().mockRejectedValue(new Error('run failed')),
+      });
+      mockWriteRun.mockClear();
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      await defs[taskType]
+        .createTaskRunner(
+          taskManagerMock.createRunContext({
+            taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } } as any,
+            fakeRequest: { headers: {} } as KibanaRequest,
+          })
+        )
+        .run();
+
+      expect(mockWriteRun).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'maintainer',
+          outcome: 'failure',
+          trigger: 'task',
+          maintainerId: 'test-maintainer',
+          taskType,
+          error: new Error('run failed'),
+        })
+      );
     });
 
     it('should set status.metadata lastSuccessTimestamp and runs correctly', async () => {

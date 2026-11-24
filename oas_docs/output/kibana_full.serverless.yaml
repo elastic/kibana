@@ -87310,6 +87310,10 @@ paths:
                         timestampField: '@timestamp'
                         type: service
                     excludedUserNames: []
+                    historySnapshot:
+                      frequency: 24h
+                      retentionDays: 60
+                      status: started
                     status: running
           description: Indicates a successful response.
       summary: Get Entity Store status

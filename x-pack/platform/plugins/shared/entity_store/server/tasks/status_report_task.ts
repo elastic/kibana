@@ -37,6 +37,7 @@ import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { wrapTaskRun } from '../telemetry/traces';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
+import { SystemEventsWriter, summarizeExtractionRuns } from '../domain/system_events';
 
 const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
@@ -436,6 +437,20 @@ async function runTask({
   } catch (e) {
     logger.error(`Error reporting entity store health: ${getErrorMessage(e)}`);
     errors.push(getErrorMessage(e));
+  }
+
+  // Compact raw extraction runs into daily summaries. Kept apart from `errors`: this
+  // housekeeping must not fail the status report, and the report must not block it.
+  try {
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    await summarizeExtractionRuns({
+      esClient: internalEsClient,
+      writer: new SystemEventsWriter({ esClient: internalEsClient, logger, namespace }),
+      namespace,
+      logger,
+    });
+  } catch (e) {
+    logger.warn(`Error summarizing extraction runs: ${getErrorMessage(e)}`);
   }
 
   if (errors.length > 0) {

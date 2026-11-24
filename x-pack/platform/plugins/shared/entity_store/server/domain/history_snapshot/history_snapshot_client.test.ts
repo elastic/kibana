@@ -296,6 +296,74 @@ describe('HistorySnapshotClient', () => {
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });
 
+    describe('system events', () => {
+      const writeRun = jest.fn();
+      const createClientWithWriter = () =>
+        new HistorySnapshotClient({
+          logger: mockLogger,
+          esClient: mockEsClient,
+          internalEsClient: mockInternalEsClient,
+          namespace,
+          globalStateClient:
+            mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+          taskManager: mockTaskManager as unknown as TaskManagerStartContract,
+          systemEventsWriter: {
+            writeRun,
+          } as unknown as import('../system_events').SystemEventsWriter,
+        });
+
+      beforeEach(() => writeRun.mockReset());
+
+      it('records a successful run with the doc count and trigger', async () => {
+        mockCreateIndex.mockResolvedValue(undefined);
+        mockReindex.mockResolvedValue({
+          created: 5,
+          updated: 0,
+          versionConflicts: 0,
+          total: 5,
+          failures: [],
+        });
+        mockUpdateByQueryWithScript.mockResolvedValue({ updated: 5, total: 5 });
+
+        await createClientWithWriter().runHistorySnapshot({ trigger: 'task', executionUuid: 'e1' });
+
+        expect(writeRun).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'history_snapshot',
+            outcome: 'success',
+            trigger: 'task',
+            executionUuid: 'e1',
+            historySnapshot: { doc_count: 5 },
+          })
+        );
+      });
+
+      it('records a failed run with the underlying error', async () => {
+        mockCreateIndex.mockRejectedValue(new Error('index creation failed'));
+
+        await createClientWithWriter().runHistorySnapshot();
+
+        expect(writeRun).toHaveBeenCalledWith(
+          expect.objectContaining({
+            outcome: 'failure',
+            trigger: 'user',
+            error: new Error('index creation failed'),
+          })
+        );
+      });
+
+      it('records nothing for a skipped run', async () => {
+        mockGlobalStateClient.findOrThrow.mockResolvedValue({
+          ...mockGlobalStateStarted,
+          historySnapshot: { ...mockGlobalStateStarted.historySnapshot, status: 'stopped' },
+        });
+
+        await createClientWithWriter().runHistorySnapshot();
+
+        expect(writeRun).not.toHaveBeenCalled();
+      });
+    });
+
     it('returns error when reindex throws', async () => {
       mockCreateIndex.mockResolvedValue(undefined);
       mockReindex.mockRejectedValue(new Error('reindex failed'));

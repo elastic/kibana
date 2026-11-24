@@ -19,6 +19,7 @@ import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
 import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import { HistorySnapshotClient } from '../domain/history_snapshot';
+import { SystemEventsWriter } from '../domain/system_events';
 import { wrapTaskRun } from '../telemetry/traces';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
@@ -32,6 +33,7 @@ interface RunHistorySnapshotTaskParams {
     schedule?: { interval?: string };
   };
   signal: AbortSignal;
+  executionUuid?: string;
   core: EntityStoreCoreSetup;
   logger: Logger;
 }
@@ -39,6 +41,7 @@ interface RunHistorySnapshotTaskParams {
 async function runHistorySnapshotTask({
   taskInstance,
   signal,
+  executionUuid,
   core,
   logger,
 }: RunHistorySnapshotTaskParams): Promise<{
@@ -75,10 +78,13 @@ async function runHistorySnapshotTask({
     namespace,
     globalStateClient,
     taskManager: plugins.taskManager,
+    systemEventsWriter: new SystemEventsWriter({ esClient, logger: taskLogger, namespace }),
   });
 
   await historySnapshotClient.runHistorySnapshot({
     abortSignal: signal,
+    trigger: 'task',
+    executionUuid,
   });
 
   // A run that was already in progress skips Task Manager's schedule update. Adopt the stored
@@ -123,7 +129,7 @@ export function registerHistorySnapshotTask({
           }),
         },
       },
-      createTaskRunner: ({ taskInstance, signal }) => ({
+      createTaskRunner: ({ taskInstance, signal, executionUuid }) => ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
           return coreStart.executionContext.withContext(
@@ -143,6 +149,7 @@ export function registerHistorySnapshotTask({
                   runHistorySnapshotTask({
                     taskInstance,
                     signal,
+                    executionUuid,
                     core,
                     logger,
                   }),

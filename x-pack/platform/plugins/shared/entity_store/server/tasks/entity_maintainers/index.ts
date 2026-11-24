@@ -118,6 +118,7 @@ export function registerEntityMaintainerTask({
               taskInstance,
               signal,
               fakeRequest,
+              executionUuid,
               setCustomTaskRunEventFields,
             }) => ({
               run: async () =>
@@ -154,6 +155,7 @@ export function registerEntityMaintainerTask({
                       status,
                       request: fakeRequest,
                       taskId: taskInstance.id,
+                      executionUuid,
                       signal,
                       id,
                       run,

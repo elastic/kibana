@@ -30,6 +30,12 @@ import {
   type InternalMaintainerTelemetryClient,
 } from './maintainer_telemetry_client';
 import { createWorkflowTriggerEmitter } from '../../workflow/create_workflow_trigger_emitter';
+import {
+  SYSTEM_EVENT_ACTION,
+  SYSTEM_EVENT_REASON,
+  SystemEventsWriter,
+  type SystemEventTrigger,
+} from '../../domain/system_events';
 
 const ENTITY_MAINTAINER_LICENSE_CHECK_VALID = 'valid' as const satisfies LicenseCheckState;
 
@@ -38,6 +44,7 @@ export interface ExecuteMaintainerRunParams {
   status: Partial<EntityMaintainerStatus>;
   request: KibanaRequest;
   taskId: string;
+  executionUuid?: string;
   signal?: AbortSignal;
   namespace?: string;
   id: string;
@@ -108,6 +115,7 @@ export async function executeMaintainerRun({
   status,
   request,
   taskId,
+  executionUuid,
   signal,
   namespace,
   id,
@@ -203,6 +211,13 @@ export async function executeMaintainerRun({
         id,
         analytics,
         telemetryClient,
+        systemEventsWriter: new SystemEventsWriter({
+          esClient: coreStart.elasticsearch.client.asInternalUser,
+          logger: taskLogger,
+          namespace: maintainerStatus.metadata.namespace,
+        }),
+        taskType: type,
+        executionUuid,
       }),
   });
 }
@@ -238,6 +253,10 @@ export async function runEntityMaintainerTask({
   id,
   analytics,
   telemetryClient,
+  systemEventsWriter,
+  trigger = 'task',
+  taskType,
+  executionUuid,
 }: {
   setCustomTaskRunEventFields?: RunContext['setCustomTaskRunEventFields'];
   status: EntityMaintainerStatus;
@@ -255,6 +274,10 @@ export async function runEntityMaintainerTask({
   id: string;
   analytics: TelemetryReporter;
   telemetryClient: InternalMaintainerTelemetryClient;
+  systemEventsWriter?: SystemEventsWriter;
+  trigger?: SystemEventTrigger;
+  taskType?: string;
+  executionUuid?: string;
 }): Promise<{ state: EntityMaintainerStatus }> {
   const namespace = status.metadata.namespace;
   let aborted = false;
@@ -346,6 +369,22 @@ export async function runEntityMaintainerTask({
       );
     }
   }
+
+  await systemEventsWriter?.writeRun({
+    action: SYSTEM_EVENT_ACTION.maintainer,
+    startedAt: runStartedAt,
+    trigger,
+    taskType,
+    executionUuid,
+    maintainerId: id,
+    ...(caughtError === undefined
+      ? { outcome: 'success' }
+      : {
+          outcome: 'failure',
+          ...(aborted ? { reason: SYSTEM_EVENT_REASON.aborted } : {}),
+          error: caughtError,
+        }),
+  });
 
   return {
     state: status,
