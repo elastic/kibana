@@ -25,6 +25,8 @@ import {
 import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import {
   createSessionsIndex,
+  deleteExpiredSessions,
+  deleteOlderSessionsIndices,
   putSessionsIndexTemplate,
   sessionsIndexExists,
 } from './sessions_index';
@@ -64,6 +66,7 @@ const caughtUpState: SessionsTaskState = {
   lastSuccessAt: minutesAgo(1),
   lastError: null,
   apiKeyInvalid: false,
+  lastRetentionAt: minutesAgo(10),
 };
 
 const summarized = {
@@ -108,6 +111,8 @@ describe('runSessionsTask', () => {
     logger = loggingSystemMock.createLogger();
     jest.mocked(createSessionsIndex).mockResolvedValue(false);
     jest.mocked(sessionsIndexExists).mockResolvedValue(true);
+    jest.mocked(deleteOlderSessionsIndices).mockResolvedValue([]);
+    jest.mocked(deleteExpiredSessions).mockResolvedValue(0);
     jest.mocked(summarizeSessions).mockResolvedValue(summarized);
   });
 
@@ -170,29 +175,49 @@ describe('runSessionsTask', () => {
     it.each([
       ['the first run', {}],
       ['a new version', { ...caughtUpState, version: SESSIONS_VERSION - 1 }],
-    ])('puts the template and starts from the lookback on %s', async (_name, state) => {
-      const result = await run(state);
+    ])(
+      'puts the template, replaces the older versions and starts from the lookback on %s',
+      async (_name, state) => {
+        const result = await run(state);
 
-      expect(putSessionsIndexTemplate).toHaveBeenCalledWith(
-        internalClient,
-        BROWSER_SESSIONS_PLATFORM,
-        signal
-      );
-      expect(createSessionsIndex).toHaveBeenCalledWith(esClient, BROWSER_SESSIONS_PLATFORM, signal);
-      expect(summarizeSessions).toHaveBeenCalledWith({
-        platform: BROWSER_SESSIONS_PLATFORM,
-        esClient,
-        signal,
-        now: NOW,
-        checkpoint: null,
-        windowMs: INITIAL_WINDOW_MS,
-        budgetMs: 45_000,
-        timeLimitMs: 240_000,
-        concurrency: 2,
-        logger,
-        maxRows: ESQL_DEFAULT_MAX_ROWS,
-      });
-      expect(result.state).toEqual(expect.objectContaining({ version: SESSIONS_VERSION }));
+        expect(putSessionsIndexTemplate).toHaveBeenCalledWith(
+          internalClient,
+          BROWSER_SESSIONS_PLATFORM,
+          signal
+        );
+        expect(createSessionsIndex).toHaveBeenCalledWith(
+          esClient,
+          BROWSER_SESSIONS_PLATFORM,
+          signal
+        );
+        expect(deleteOlderSessionsIndices).toHaveBeenCalledWith(
+          esClient,
+          BROWSER_SESSIONS_PLATFORM,
+          signal
+        );
+        expect(summarizeSessions).toHaveBeenCalledWith({
+          platform: BROWSER_SESSIONS_PLATFORM,
+          esClient,
+          signal,
+          now: NOW,
+          checkpoint: null,
+          windowMs: INITIAL_WINDOW_MS,
+          budgetMs: 45_000,
+          timeLimitMs: 240_000,
+          concurrency: 2,
+          logger,
+          maxRows: ESQL_DEFAULT_MAX_ROWS,
+        });
+        expect(result.state).toEqual(expect.objectContaining({ version: SESSIONS_VERSION }));
+      }
+    );
+
+    it('creates the index of this version before deleting the older ones', async () => {
+      await run({});
+
+      const [create] = jest.mocked(createSessionsIndex).mock.invocationCallOrder;
+      const [deleteOlder] = jest.mocked(deleteOlderSessionsIndices).mock.invocationCallOrder;
+      expect(create).toBeLessThan(deleteOlder);
     });
 
     it('is not caught up until a run of the new version is', async () => {
@@ -209,6 +234,7 @@ describe('runSessionsTask', () => {
       const result = await run(caughtUpState);
 
       expect(putSessionsIndexTemplate).not.toHaveBeenCalled();
+      expect(deleteOlderSessionsIndices).not.toHaveBeenCalled();
       expect(createSessionsIndex).toHaveBeenCalledWith(esClient, BROWSER_SESSIONS_PLATFORM, signal);
       expect(summarizeSessions).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -227,6 +253,7 @@ describe('runSessionsTask', () => {
           lastError: null,
           apiKeyInvalid: false,
           failedApiKeyId: null,
+          lastRetentionAt: caughtUpState.lastRetentionAt,
         },
       });
     });
@@ -248,6 +275,8 @@ describe('runSessionsTask', () => {
         BROWSER_SESSIONS_PLATFORM,
         signal
       );
+      // Only a new version replaces the older indices.
+      expect(deleteOlderSessionsIndices).not.toHaveBeenCalled();
     });
 
     it('stays caught up when one run falls behind, and runs again right away', async () => {
@@ -280,6 +309,67 @@ describe('runSessionsTask', () => {
       expect(summarizeSessions).toHaveBeenCalledWith(
         expect.objectContaining({ checkpoint: null, windowMs: INITIAL_WINDOW_MS })
       );
+    });
+  });
+
+  describe('retention', () => {
+    it.each([
+      ['never ran', undefined],
+      ['last ran an hour ago', minutesAgo(60)],
+    ])('deletes the expired sessions when it %s', async (_name, lastRetentionAt) => {
+      const { state } = await run({ ...caughtUpState, lastRetentionAt });
+
+      expect(deleteExpiredSessions).toHaveBeenCalledWith(
+        esClient,
+        BROWSER_SESSIONS_PLATFORM,
+        NOW,
+        signal
+      );
+      expect(state.lastRetentionAt).toBe(AT);
+    });
+
+    it('runs at most hourly', async () => {
+      const { state } = await run({ ...caughtUpState, lastRetentionAt: minutesAgo(59) });
+
+      expect(deleteExpiredSessions).not.toHaveBeenCalled();
+      expect(state.lastRetentionAt).toBe(minutesAgo(59));
+    });
+
+    it('deletes after the summaries are written', async () => {
+      await run({ ...caughtUpState, lastRetentionAt: undefined });
+
+      const [summarize] = jest.mocked(summarizeSessions).mock.invocationCallOrder;
+      const [expire] = jest.mocked(deleteExpiredSessions).mock.invocationCallOrder;
+      expect(summarize).toBeLessThan(expire);
+    });
+
+    // Keeping it in the state would send the next run back to the start of the lookback.
+    it('keeps the checkpoint and only logs when deleting fails', async () => {
+      jest.mocked(deleteExpiredSessions).mockRejectedValue(new Error('search_phase_execution'));
+
+      const { state } = await run({ ...caughtUpState, lastRetentionAt: undefined });
+
+      expect(state).toMatchObject({
+        version: SESSIONS_VERSION,
+        checkpoint: summarized.checkpoint,
+        caughtUp: true,
+        lastSuccessAt: AT,
+        lastError: null,
+        // Waits for the interval rather than retrying on every run.
+        lastRetentionAt: AT,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Deleting the expired ${BROWSER_SESSIONS_PLATFORM.label} failed: search_phase_execution`
+      );
+    });
+
+    it('does not delete after a failed run, which has nothing to keep it from', async () => {
+      jest.mocked(summarizeSessions).mockRejectedValue(new Error('esql timed out'));
+
+      const { state } = await run({ ...caughtUpState, lastRetentionAt: undefined });
+
+      expect(deleteExpiredSessions).not.toHaveBeenCalled();
+      expect(state.lastRetentionAt).toBeUndefined();
     });
   });
 
@@ -333,6 +423,7 @@ describe('runSessionsTask', () => {
       const { state } = await run(caughtUpState);
 
       expect(summarizeSessions).not.toHaveBeenCalled();
+      expect(deleteExpiredSessions).not.toHaveBeenCalled();
       expect(state.lastError?.message).toBe('cluster_block_exception');
     });
 

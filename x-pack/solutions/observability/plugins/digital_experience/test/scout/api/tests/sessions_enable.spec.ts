@@ -38,7 +38,14 @@ const roleWith = ({
       },
       {
         names: [ALL_SESSIONS_INDEX_PATTERN],
-        privileges: ['read', 'view_index_metadata', 'index', 'create_index'],
+        privileges: [
+          'read',
+          'view_index_metadata',
+          'index',
+          'create_index',
+          'delete',
+          'delete_index',
+        ],
       },
     ],
   },

@@ -12,9 +12,20 @@ import { CORE_WEB_VITALS, type CoreWebVital } from '../../../common/core_web_vit
 import {
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
+  SESSIONS_LOOKBACK_DAYS,
   SESSIONS_MANAGED_BY,
   SESSIONS_VERSION,
 } from '../../../common/sessions';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+/**
+ * Deleting the expired summaries waits this long. A run summarizes for up to `RUN_TIME_LIMIT_MS`,
+ * so this still ends inside the task's timeout; an hour's expired sessions delete well within it.
+ */
+const RETENTION_TIMEOUT_MS = 30 * 1000;
+
+/** Splits a platform's index into its base name and version, e.g. `…-browser` and `1`. */
+const SESSIONS_INDEX_NAME = /^(.+)-(\d+)$/;
 
 // `managed` makes the Index Management UI warn before editing or deleting these.
 export const sessionsMetaOf = (version: number) => ({
@@ -188,4 +199,64 @@ export const createSessionsIndex = async (
     }
     throw error;
   }
+};
+
+/**
+ * Deletes the platform's sessions indices of older versions, by name, as Elasticsearch refuses
+ * wildcard deletes by default. Readers search every version, so an older one would count sessions
+ * twice. Only this platform's own indices are considered, and a newer version's is left alone:
+ * during a rolling upgrade, or a rollback, a node of this version runs beside one that writes it.
+ */
+export const deleteOlderSessionsIndices = async (
+  client: ElasticsearchClient,
+  { index }: SessionsIndex,
+  signal?: AbortSignal
+): Promise<string[]> => {
+  const current = SESSIONS_INDEX_NAME.exec(index);
+  if (!current) {
+    return [];
+  }
+  const [, base, version] = current;
+  const indices = await client.indices.get(
+    { index: `${base}-*`, allow_no_indices: true, expand_wildcards: ['open', 'closed'] },
+    { signal }
+  );
+  const older = Object.keys(indices).filter((name) => {
+    const match = SESSIONS_INDEX_NAME.exec(name);
+    return match?.[1] === base && Number(match[2]) < Number(version);
+  });
+  if (older.length > 0) {
+    await client.indices.delete({ index: older, ignore_unavailable: true }, { signal });
+  }
+  return older;
+};
+
+/**
+ * Deletes the summaries of sessions that ended before the lookback, plus a day of margin: they no
+ * longer get events, and the list never reads that far back. Waits for the deletion and throws
+ * what failed, rather than leaving a task document behind that nothing reads or deletes.
+ */
+export const deleteExpiredSessions = async (
+  client: ElasticsearchClient,
+  { index }: SessionsIndex,
+  now: number,
+  signal?: AbortSignal
+): Promise<number> => {
+  const cutoff = now - (SESSIONS_LOOKBACK_DAYS + 1) * DAY_MS;
+  const response = await client.deleteByQuery(
+    {
+      index,
+      ignore_unavailable: true,
+      conflicts: 'proceed',
+      query: { range: { end_time: { lt: new Date(cutoff).toISOString() } } },
+    },
+    { signal, requestTimeout: RETENTION_TIMEOUT_MS }
+  );
+  const failures = response.failures ?? [];
+  if (failures.length > 0) {
+    const { cause } = failures[0];
+    const reason = cause?.reason ?? cause?.type ?? 'an unknown error';
+    throw new Error(`${reason} (${failures.length} failed)`);
+  }
+  return response.deleted ?? 0;
 };

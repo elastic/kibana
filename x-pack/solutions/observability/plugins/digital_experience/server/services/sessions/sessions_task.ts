@@ -23,6 +23,8 @@ import { describeError } from '../../lib/helpers/errors';
 import { esqlMaxRows } from './esql_max_rows';
 import {
   createSessionsIndex,
+  deleteExpiredSessions,
+  deleteOlderSessionsIndices,
   putSessionsIndexTemplate,
   sessionsIndexExists,
 } from './sessions_index';
@@ -41,6 +43,9 @@ const RUN_BUDGET_MS = 45 * 1000;
  * window without end.
  */
 const RUN_TIME_LIMIT_MS = 4 * 60 * 1000;
+
+/** The expired summaries are deleted at most this often, not on every run. */
+const RETENTION_INTERVAL_MS = 60 * 60 * 1000;
 
 export const RECONCILE_INTERVAL_MS = MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES * 60 * 1000;
 export const RECONCILE_MS = MOBILE_SESSIONS_RECONCILE_HOURS * 60 * 60 * 1000;
@@ -69,6 +74,8 @@ const stateSchemaV1 = schema.object({
    * by enabling sessions again isn't taken for invalid while a run of the old one finishes.
    */
   failedApiKeyId: schema.maybe(schema.nullable(schema.string())),
+  /** When the expired summaries were last deleted, whether or not that worked. */
+  lastRetentionAt: schema.maybe(schema.nullable(schema.string())),
 });
 
 /** The state of a platform's task that rebuilds its recent sessions, as the mobile one does. */
@@ -122,6 +129,12 @@ export const apiKeyIdOf = (request: KibanaRequest): string | null => {
   }
   const { id, secret } = decodeStoredApiKey(header.credentials);
   return secret && API_KEY_ID.test(id) ? id : null;
+};
+
+/** Whether the expired summaries are due to be deleted; an unreadable time counts as never. */
+const isRetentionDue = (lastRetentionAt: string | null | undefined, now: number): boolean => {
+  const last = lastRetentionAt ? Date.parse(lastRetentionAt) : NaN;
+  return Number.isNaN(last) || now - last >= RETENTION_INTERVAL_MS;
 };
 
 const logErrorChange = (
@@ -241,6 +254,7 @@ export const runSessionsTask = async ({
   const started = Date.now();
   // A deleted index, or a new version, is rebuilt from the lookback, also after a failed run.
   let rebuild = state.version !== platform.version;
+  let outcome: { state: SessionsTaskState; runAt?: Date };
   try {
     // The template has to be in place before the index is created, or the index gets dynamic
     // mappings and nothing repairs it until the next version. Put it while rebuilding, and
@@ -249,6 +263,9 @@ export const runSessionsTask = async ({
       await putSessionsIndexTemplate(internalClient, platform, signal);
     }
     const created = await createSessionsIndex(esClient, platform, signal);
+    if (rebuild) {
+      await deleteOlderSessionsIndices(esClient, platform, signal);
+    }
     rebuild = rebuild || created;
     // Once a run: the setting only changes with the cluster, and every query of the run is
     // split against it.
@@ -323,7 +340,7 @@ export const runSessionsTask = async ({
     if (state.lastError && !reconcileError) {
       logger.info(`Summarizing ${platform.label} works again.`);
     }
-    return {
+    outcome = {
       state: {
         version: platform.version,
         checkpoint: result.checkpoint,
@@ -334,6 +351,7 @@ export const runSessionsTask = async ({
         lastError: reconcileError ? { message: reconcileError, at } : null,
         apiKeyInvalid: false,
         failedApiKeyId: null,
+        lastRetentionAt: state.lastRetentionAt ?? null,
         ...reconcileState,
       },
       // Behind: run again right away instead of waiting for the interval.
@@ -343,7 +361,7 @@ export const runSessionsTask = async ({
     const message = describeError(error);
     const unauthorized = isResponseError(error) && error.statusCode === 401;
     logErrorChange(logger, platform, state, message);
-    return {
+    outcome = {
       state: {
         ...state,
         // A rebuild that failed starts over: the next run finds the index it created.
@@ -355,6 +373,23 @@ export const runSessionsTask = async ({
       },
     };
   }
+
+  // Retention runs on the state the summaries already reached, in its own try: a failure here
+  // must never reset the checkpoint, or every later run would restart the backfill from the
+  // lookback. It only logs, as the summaries the run wrote are correct either way.
+  if (outcome.state.lastError || !isRetentionDue(state.lastRetentionAt, now)) {
+    return outcome;
+  }
+  try {
+    const deleted = await deleteExpiredSessions(esClient, platform, now, signal);
+    if (deleted > 0) {
+      logger.debug(`Deleted ${deleted} expired ${platform.label}.`);
+    }
+  } catch (error) {
+    logger.warn(`Deleting the expired ${platform.label} failed: ${describeError(error)}`);
+  }
+  // Whether or not it worked: a failure waits for the interval instead of retrying every run.
+  return { ...outcome, state: { ...outcome.state, lastRetentionAt: at } };
 };
 
 /**

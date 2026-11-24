@@ -1,5 +1,5 @@
 {
-  "sha1": "617bdc2e17d956b74f16bdbdbea0cb2f70cf2fdb",
+  "sha1": "541ec55275eb24dab32c17e2201bd3409ec1e212",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -237,8 +237,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_disabled.spec.ts",
-        "line": 32,
-        "column": 49
+        "line": 34,
+        "column": 30
+      }
+    },
+    {
+      "id": "352c90281147e6e-66c451bfa9363ff",
+      "title": "Digital Experience with its feature flag off GET internal/digital_experience/mobile_applications/shop-mobile/kpis answers 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_disabled.spec.ts",
+        "line": 34,
+        "column": 30
       }
     },
     {
@@ -252,8 +267,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_disabled.spec.ts",
-        "line": 32,
-        "column": 49
+        "line": 34,
+        "column": 30
       }
     },
     {
@@ -267,8 +282,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_disabled.spec.ts",
-        "line": 32,
-        "column": 49
+        "line": 34,
+        "column": 30
       }
     },
     {
@@ -367,6 +382,146 @@
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
         "line": 220,
         "column": 32
+      }
+    },
+    {
+      "id": "f330a5f7a723147-1f78d7a3f6644cb",
+      "title": "Digital Experience applications API with mobile data returns a row per mobile application, with its platforms and EDOT as its source, and never a backend Java service nor EDOT Browser on an iPhone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_applications.spec.ts",
+        "line": 25,
+        "column": 17
+      }
+    },
+    {
+      "id": "f330a5f7a723147-e0e419633d8b8c6",
+      "title": "Digital Experience applications API with mobile data answers the KPIs of a mobile application, all platforms or one OS, and lists its OS names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_applications.spec.ts",
+        "line": 48,
+        "column": 15
+      }
+    },
+    {
+      "id": "f330a5f7a723147-52164a696de629d",
+      "title": "Digital Experience applications API with mobile data counts a session on the edge of a period in that period only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_applications.spec.ts",
+        "line": 102,
+        "column": 35
+      }
+    },
+    {
+      "id": "f330a5f7a723147-a9fb783f96c59db",
+      "title": "Digital Experience applications API with mobile data answers 403 for the KPIs without the APM privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_applications.spec.ts",
+        "line": 111,
+        "column": 6
+      }
+    },
+    {
+      "id": "f330a5f7a723147-30bfc4698a4944e",
+      "title": "Digital Experience applications API with mobile data answers 400 for the KPIs of a range that starts after it ends",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_applications.spec.ts",
+        "line": 119,
+        "column": 44
+      }
+    },
+    {
+      "id": "3018e93676da7c3-beb706a61498146",
+      "title": "Digital Experience mobile APIs with partial index access reports the mobile applications as partial, counted from the traces only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_partial_index_access.spec.ts",
+        "line": 51,
+        "column": 25
+      }
+    },
+    {
+      "id": "3018e93676da7c3-64a3a70e4dec988",
+      "title": "Digital Experience mobile APIs with partial index access reports the KPIs of a mobile application as partial, counted from the traces only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_partial_index_access.spec.ts",
+        "line": 62,
+        "column": 9
+      }
+    },
+    {
+      "id": "3018e93676da7c3-80458ff5fc0f317",
+      "title": "Digital Experience mobile APIs with partial index access reports the KPIs as partial without data when all of the application is in unreadable indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_partial_index_access.spec.ts",
+        "line": 75,
+        "column": 58
+      }
+    },
+    {
+      "id": "3018e93676da7c3-716ced8d612f15f",
+      "title": "Digital Experience mobile APIs with partial index access reports the KPIs of the same application with data once the logs are readable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_partial_index_access.spec.ts",
+        "line": 91,
+        "column": 15
+      }
+    },
+    {
+      "id": "0425b00ffb45977-b89ddf8dbf85925",
+      "title": "Digital Experience mobile session summaries task summarizes EDOT iOS and EDOT Android sessions, with late crashes at their time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_sessions_task.spec.ts",
+        "line": 279,
+        "column": 52
       }
     },
     {
@@ -486,8 +641,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access.spec.ts",
-        "line": 84,
-        "column": 37
+        "line": 85,
+        "column": 48
       }
     },
     {
@@ -556,8 +711,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_enable.spec.ts",
-        "line": 57,
-        "column": 35
+        "line": 64,
+        "column": 54
       }
     },
     {
@@ -570,8 +725,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_enable.spec.ts",
-        "line": 70,
-        "column": 13
+        "line": 77,
+        "column": 47
       }
     },
     {
@@ -724,7 +879,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/global.teardown.ts",
-        "line": 14,
+        "line": 15,
         "column": 35
       }
     },
@@ -739,8 +894,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/global.teardown.ts",
-        "line": 19,
-        "column": 27
+        "line": 37,
+        "column": 19
       }
     }
   ]
