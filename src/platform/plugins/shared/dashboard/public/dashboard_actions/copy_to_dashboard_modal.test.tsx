@@ -9,9 +9,10 @@
 
 import type { ComponentType } from 'react';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of, type Observable } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { CopyToDashboardParentApi } from './copy_to_dashboard_action';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 import { coreServices } from '../services/kibana_services';
@@ -69,6 +70,8 @@ describe('CopyToDashboardModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (coreServices.application as { currentAppId$: Observable<string | undefined> }).currentAppId$ =
+      of<string | undefined>(DASHBOARD_APP_ID);
 
     // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require('../services/kibana_services').embeddableService = {
@@ -112,7 +115,7 @@ describe('CopyToDashboardModal', () => {
 
       fireEvent.mouseOver(screen.getByText('New dashboard'));
       expect(await screen.findByRole('tooltip')).toHaveTextContent(
-        'Copying to a new dashboard is only available from a saved dashboard.'
+        'Save the current dashboard first.'
       );
     });
 

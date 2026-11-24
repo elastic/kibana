@@ -22,6 +22,8 @@ import {
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../utils/urls';
 import { coreServices, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
@@ -55,9 +57,15 @@ export function CopyToDashboardModal({
 
   const dashboardId = parentApi.savedObjectId$.value;
   const isNewDashboardDisabled = !dashboardId;
-  const newDashboardDisabledTooltip = isNewDashboardDisabled
-    ? dashboardCopyToDashboardActionStrings.getNewDashboardDisabledTooltip()
-    : undefined;
+  const currentAppId = useObservable(coreServices.application.currentAppId$);
+  const canSaveCurrentDashboard = currentAppId === DASHBOARD_APP_ID && canEditExisting;
+  const getNewDashboardDisabledTooltip = () => {
+    if (!isNewDashboardDisabled) return undefined;
+    return canSaveCurrentDashboard
+      ? dashboardCopyToDashboardActionStrings.getNewDashboardSaveFirstTooltip()
+      : dashboardCopyToDashboardActionStrings.getNewDashboardUnavailableTooltip();
+  };
+  const newDashboardDisabledTooltip = getNewDashboardDisabledTooltip();
 
   const onSubmit = useCallback(() => {
     const state: EmbeddablePackageState[] = [];
