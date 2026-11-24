@@ -6,6 +6,7 @@
  */
 
 import { registerTemplateRoutes } from '.';
+import { templateSchema } from './validate_schemas';
 import { addBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
 import { RouterMock, routeDependencies, getTransportRequest } from '../../../test/helpers';
@@ -133,6 +134,22 @@ describe('Component templates API', () => {
       expect(res).toEqual({
         body: true,
       });
+    });
+  });
+
+  describe('templateSchema', () => {
+    it('accepts data_stream_options in the template', () => {
+      expect(() =>
+        templateSchema.validate({
+          name: 'test-fs',
+          indexPatterns: ['test-fs-*'],
+          template: {
+            settings: { index: { number_of_replicas: '1' } },
+            data_stream_options: { failure_store: { enabled: true } },
+          },
+          _kbnMeta: { type: 'default', hasDatastream: true },
+        })
+      ).not.toThrow();
     });
   });
 });
