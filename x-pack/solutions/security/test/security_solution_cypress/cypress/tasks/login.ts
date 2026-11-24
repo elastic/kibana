@@ -6,6 +6,7 @@
  */
 import type { LoginState } from '@kbn/security-plugin/common/login_state';
 import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
+import { USER_SETTINGS_KEYS } from '@kbn/security-solution-plugin/common/user_settings/keys';
 import { LOGOUT_URL } from '../urls/navigation';
 import {
   CLOUD_SERVERLESS,
@@ -20,6 +21,26 @@ export interface User {
   username: string;
   password: string;
 }
+
+/**
+ * Per-user UI preferences (flyout tab, overview sections, alerts table columns) are stored
+ * server-side, so unlike localStorage they are not cleared between tests. Reset them after login
+ * so every test starts from the defaults. Uses the session cookie set by the login, and ignores
+ * failures (for example a session without a user profile).
+ */
+const resetUserSettings = (): void => {
+  Object.values(USER_SETTINGS_KEYS).forEach((key) => {
+    cy.request({
+      method: 'DELETE',
+      url: `/internal/user_storage/${encodeURIComponent(key)}`,
+      headers: {
+        'kbn-xsrf': API_HEADERS['kbn-xsrf'],
+        'x-elastic-internal-origin': API_HEADERS['x-elastic-internal-origin'],
+      },
+      failOnStatusCode: false,
+    });
+  });
+};
 
 export const defaultUser: User = {
   username: Cypress.env(ELASTICSEARCH_USERNAME),
@@ -67,6 +88,8 @@ export const login = (role?: string): void => {
       const sessionCookies = cookies.filter((cookie) => cookie.name === 'sid');
       expect(sessionCookies).to.have.length(1);
     });
+
+    resetUserSettings();
   } else {
     const user = role ? getEnvAuth(role) : defaultUser;
     loginWithUser(user);
@@ -98,6 +121,8 @@ export const loginWithUser = (user: User): void => {
       },
       headers: API_HEADERS,
     });
+
+    resetUserSettings();
   });
 };
 

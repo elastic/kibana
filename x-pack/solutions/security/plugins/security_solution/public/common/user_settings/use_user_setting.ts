@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isEqual } from 'lodash';
 import { Subject, merge, filter, map } from 'rxjs';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 import type { UserSettingsKey } from '../../../common/user_settings/keys';
 import { useKibana } from '../lib/kibana';
@@ -17,18 +18,34 @@ import { UserSettingsWriteQueue } from './write_queue';
 /** One queue per client, so every hook instance in the page shares the same single writer. */
 const queues = new WeakMap<IUserStorageClient, UserSettingsWriteQueue>();
 
-const getQueue = (client: IUserStorageClient): UserSettingsWriteQueue => {
+const USER_STORAGE_PATH = '/internal/user_storage';
+
+const getQueue = (client: IUserStorageClient, http: HttpStart): UserSettingsWriteQueue => {
   const existing = queues.get(client);
   if (existing) return existing;
 
   const queue = new UserSettingsWriteQueue(client);
   queues.set(client, queue);
+  // Values a previous page (for example one that was just reloaded) did not get to save.
+  if (client.isAvailable()) queue.replayOutbox();
 
-  // Best effort flush when the tab is hidden or closed. A keepalive request is a follow-up
-  // (the core client does not expose one), so this only helps when the tab stays alive long enough.
   if (typeof document !== 'undefined') {
+    // Tab hidden (switched away or closing): send what is pending now.
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') void queue.flush();
+    });
+    // Page unload (reload, navigation, close): a regular request would be cancelled, so resend the
+    // unsaved values with `keepalive`. The writes are idempotent, so overlapping a request that was
+    // already in flight is harmless.
+    window.addEventListener('pagehide', () => {
+      queue.getUnsaved().forEach(([key, value]) => {
+        http
+          .put(`${USER_STORAGE_PATH}/${encodeURIComponent(key)}`, {
+            body: JSON.stringify({ value }),
+            keepalive: true,
+          })
+          .catch(() => {});
+      });
     });
   }
   return queue;
@@ -62,8 +79,8 @@ export const useUserSetting = <T>(
   defaultValue: T,
   { legacyLocalStorageKey }: UseUserSettingOptions = {}
 ): [T, UserSettingSetter<T>] => {
-  const { userStorage, storage } = useKibana().services;
-  const queue = useMemo(() => getQueue(userStorage), [userStorage]);
+  const { userStorage, storage, http } = useKibana().services;
+  const queue = useMemo(() => getQueue(userStorage, http), [userStorage, http]);
   const available = userStorage.isAvailable();
 
   const defaultRef = useRef(defaultValue);
