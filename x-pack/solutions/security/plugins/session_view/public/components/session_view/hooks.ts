@@ -95,9 +95,10 @@ export const useFetchSessionViewProcessEvents = (
     {
       getNextPageParam: (lastPage, pages) => {
         const isRefetch = pages.length === 1 && jumpToCursor;
-        if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
-          const filtered = lastPage.events.filter(isSessionProcessEvent);
+        // alerts and IO events come in the same page, so only the process events tell a full page
+        const filtered = lastPage.events.filter(isSessionProcessEvent);
 
+        if (isRefetch || filtered.length >= PROCESS_EVENTS_PER_PAGE) {
           const cursor = filtered?.[filtered.length - 1]?.['@timestamp'];
 
           if (cursor) {

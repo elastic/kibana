@@ -52,4 +52,28 @@ describe('useFetchSessionViewProcessEvents', () => {
       expect.objectContaining({ cursor: lastProcessEvent['@timestamp'], forward: true })
     );
   });
+
+  it('does not take a page with many alerts for a full page of process events', async () => {
+    const { coreStart, AppWrapper } = createAppRootMockRenderer();
+    const get = coreStart.http.get as jest.Mock;
+    // the last page of the session holds few process events, but the alerts bring it over the page size
+    const processEvents = Array.from({ length: 10 }, (_, i) => getEvent('event', START + i));
+    const alerts = Array.from({ length: PROCESS_EVENTS_PER_PAGE }, (_, i) =>
+      getEvent('signal', START + 1000 + i)
+    );
+
+    get.mockResolvedValue({
+      total: processEvents.length,
+      events: [...processEvents, ...alerts].map((_source) => ({ _source })),
+    });
+
+    const { result } = renderHook(
+      () => useFetchSessionViewProcessEvents('index', 'entity-id', '2022-05-10T00:00:00.000Z'),
+      { wrapper: AppWrapper }
+    );
+
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(1));
+
+    expect(result.current.hasNextPage).toBe(false);
+  });
 });
