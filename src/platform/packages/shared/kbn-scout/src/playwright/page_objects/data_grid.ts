@@ -383,7 +383,7 @@ export class DataGrid {
       return 0;
     }
 
-    const badgeText = await selectedRowsMenu.locator('.euiNotificationBadge').innerText();
+    const badgeText = await selectedRowsMenu.getByText(/^\d+$/).innerText();
     return Number(badgeText);
   }
 
