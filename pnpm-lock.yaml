@@ -16430,8 +16430,8 @@ packages:
   fastq@1.15.0:
     resolution: {integrity: sha512-wBrocU2LCXXa+lWBt8RoIRD89Fi8OdABODa/kEnyeyjS5aZO5/GNvI5sEINADqP/h8M29UHTHUb53sUu5Ihqdw==}
 
-  faye-websocket@0.11.3:
-    resolution: {integrity: sha512-D2y4bovYpzziGgbHYtGCMjlJM36vAl/y+xUyn1C+FVx8szd1E+86KwVw6XvYSzOP8iMpm1X0I4xJD+QtUb36OA==}
+  faye-websocket@0.11.4:
+    resolution: {integrity: sha512-CzbClwlXAuiRQAlUyfqPgvPoNKTckTPGfwZV4ZdAhVcP2lh9KUxJg2b5GkE7XbjKQ3YJnQ9z6D9ntLAlB+tP8g==}
     engines: {node: '>=0.8.0'}
 
   fb-watchman@2.0.0:
@@ -22932,9 +22932,9 @@ packages:
     resolution: {integrity: sha512-ZL2+3c7kMBdIRCMz6l8jQMHyGVxj+UL+xVk74Ombiciboca8rHa15L86B19E5oh1pL9Ii/uj54gtsIrZGMo6zA==}
     engines: {node: '>=0.8.0'}
 
-  websocket-extensions@0.1.4:
-    resolution: {integrity: sha512-OqedPIGOfsDlo31UNwYbCFMSaO9m9G/0faIHj5/dZFDMFqPTcx6UwqyOy3COEaEOg/9VsGIpdqn62W5KhoKSpg==}
-    engines: {node: '>=0.8.0'}
+  websocket-extensions@0.2.0:
+    resolution: {integrity: sha512-vQaTTgDDgwlrreIJAprknlnvEtZMMxfLqoxyQYnWO8dgcz2qIzQNysCpwOekz8kqLvzrZ0dcaL9hejZ+2AszCA==}
+    engines: {node: '>=0.10.0'}
 
   wellknown@0.5.0:
     resolution: {integrity: sha512-za5vTLuPF9nmrVOovYQwNEWE/PwJCM+yHMAj4xN1WWUvtq9OElsvKiPL0CR9rO8xhrYqL7NpI7IknqR8r6eYOg==}
@@ -33534,7 +33534,7 @@ snapshots:
     dependencies:
       reusify: 1.0.4
 
-  faye-websocket@0.11.3:
+  faye-websocket@0.11.4:
     dependencies:
       websocket-driver: 0.7.5
 
@@ -39381,7 +39381,7 @@ snapshots:
 
   sockjs@0.3.24:
     dependencies:
-      faye-websocket: 0.11.3
+      faye-websocket: 0.11.4
       uuid: 8.3.2
       websocket-driver: 0.7.5
 
@@ -41230,9 +41230,9 @@ snapshots:
     dependencies:
       http-parser-js: 0.5.3
       safe-buffer: 5.2.1
-      websocket-extensions: 0.1.4
+      websocket-extensions: 0.2.0
 
-  websocket-extensions@0.1.4: {}
+  websocket-extensions@0.2.0: {}
 
   wellknown@0.5.0:
     dependencies:
