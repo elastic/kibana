@@ -158,9 +158,8 @@ A plugin can use what another plugin provides when that plugin is enabled and ke
 Without a manifest edge, two plugins can use each other without forming a circular dependency.
 Put the shared extension points and types in a separate package with no runtime code, so the TypeScript project references stay acyclic too.
 
-`createExtensionPoint` from `@kbn/core-di` declares an extension point with the type of its contributions.
-Contributions are grouped by the id, so the id must be unique across Kibana.
-An extension point is not a service identifier, so it cannot be bound with `bind` or injected with `@inject`:
+An extension point is a token created with `createExtensionPoint` from `@kbn/core-di`, typed with its contributions.
+Two extension points with the same id are the same point, so the id must be unique across Kibana:
 ```ts
 import { createExtensionPoint } from '@kbn/core-di';
 
@@ -173,6 +172,7 @@ export const Greeter = createExtensionPoint<Greeter>('greeter.Greeter');
 
 `extensions.contribute` from `KibanaContainerModule` adds one contribution and returns the usual binding syntax.
 The contribution stays private to the plugin that contributes it, and other plugins reach it only through `ExtensionService` or `extensions.collect`.
+Register contributions with `extensions.contribute(point)`, not `bind(point)`. A plain `bind` stays local to the plugin and other plugins never see it.
 Each call adds one contribution, so a plugin can contribute to the same point several times:
 ```ts
 import { KibanaContainerModule } from '@kbn/core-di';

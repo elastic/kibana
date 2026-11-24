@@ -44,7 +44,7 @@ function createContainer(options?: ContainerOptions) {
   const getContributions = <T>(point: ExtensionPoint<T>): Array<Contribution<T>> =>
     container
       .getAll(ExtensionContribution, { optional: true })
-      .filter(({ pointId }) => pointId === point.id)
+      .filter((contribution) => contribution.point === point)
       .map(({ slot }) => ({ plugin: 'mock', resolve: () => container.get(slot) as T }));
   container.bind(Contributions).toConstantValue(getContributions);
   container.bind(ExtensionService).toConstantValue(createExtensionService(getContributions));

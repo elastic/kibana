@@ -36,14 +36,18 @@ export const Contributions = createToken<ContributionsResolver>('core.di.Contrib
 /**
  * Records one `extensions.contribute` call in the contributing plugin's container: the point and the private slot bound to the value.
  */
-export const ExtensionContribution = createToken<{ pointId: string; slot: ServiceIdentifier }>(
-  'core.di.ExtensionContribution'
-);
+export const ExtensionContribution = createToken<{
+  point: ExtensionPoint<unknown>;
+  slot: ServiceIdentifier;
+}>('core.di.ExtensionContribution');
 
 const getMessage = (reason: unknown): string =>
   reason instanceof Error ? reason.message : String(reason);
 
-const build = <T>({ id }: ExtensionPoint<T>, { plugin, resolve }: Contribution<T>): T => {
+const build = <T>(
+  { description: id }: ExtensionPoint<T>,
+  { plugin, resolve }: Contribution<T>
+): T => {
   try {
     return resolve();
   } catch (reason) {
@@ -65,7 +69,7 @@ export const createExtensionService = (
     if (contributions.length > 1) {
       const plugins = contributions.map(({ plugin }) => `"${plugin}"`).join(', ');
       throw new Error(
-        `Cannot get extension point "${point.id}" because it has ${contributions.length} contributions, from plugins ${plugins}. Use getAll or collect instead.`
+        `Cannot get extension point "${point.description}" because it has ${contributions.length} contributions, from plugins ${plugins}. Use getAll or collect instead.`
       );
     }
 

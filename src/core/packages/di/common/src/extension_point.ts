@@ -7,20 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare const contributionType: unique symbol;
+import { createToken, type ServiceToken } from './token';
+
+declare const extensionPointBrand: unique symbol;
 
 /**
- * A point other plugins contribute values of type `T` to, without a plugin dependency on its owner.
- * It is not a service identifier, so it cannot be bound or injected directly.
+ * A token other plugins contribute values of type `T` to, without a plugin dependency on its owner.
+ * Contributions are registered with `extensions.contribute` and read through `ExtensionService` or `extensions.collect`, never bound under the token itself.
  * @public
  */
-export interface ExtensionPoint<T> {
-  /** The unique id that contributions are grouped by. */
-  readonly id: string;
-
-  /** Carries the contribution type at compile time only. */
-  readonly [contributionType]: T;
-}
+export type ExtensionPoint<T> = ServiceToken<T> & symbol & { readonly [extensionPointBrand]: true };
 
 /**
  * Options of an extension point.
@@ -30,7 +26,7 @@ export interface ExtensionPoint<T> {
 export type ExtensionPointOptions = Record<string, never>;
 
 /**
- * Creates an extension point.
+ * Creates an extension point token.
  * Two extension points with the same id are the same point, so ids must be unique across Kibana.
  * @example
  * ```ts
@@ -43,4 +39,4 @@ export type ExtensionPointOptions = Record<string, never>;
 export const createExtensionPoint = <T>(
   id: string,
   options?: ExtensionPointOptions
-): ExtensionPoint<T> => Object.freeze({ id }) as ExtensionPoint<T>;
+): ExtensionPoint<T> => createToken<T>(id) as ExtensionPoint<T>;

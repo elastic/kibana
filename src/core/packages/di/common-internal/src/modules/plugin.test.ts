@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Container, ContainerModule, type ServiceIdentifier } from 'inversify';
+import { Container, ContainerModule, inject, injectable, type ServiceIdentifier } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -281,6 +281,31 @@ describe('PluginModule', () => {
       expect(root.get(Fork)(token2).isBound(slot)).toBe(false);
     });
 
+    it('should not resolve the extension point token directly in another plugin', () => {
+      @injectable()
+      class DirectGreeter {
+        constructor(@inject(Greeter) public readonly greeter: string) {}
+      }
+
+      const provider = createPlugin(token1, ({ extensions }) => {
+        extensions.contribute(Greeter).toConstantValue('hello');
+      });
+      const consumer = createPlugin(token2, ({ bind }) => {
+        bind(DirectGreeter).toSelf();
+      });
+      const expectNoDirectBinding = () => {
+        expect(() => consumer.get(Greeter)).toThrow(/No bindings found/);
+        expect(() => consumer.get(DirectGreeter)).toThrow(/No bindings found/);
+      };
+
+      [provider, consumer].forEach((plugin) => plugin.get(Setup));
+      expectNoDirectBinding();
+
+      setupStartAndReady(provider, consumer);
+      expectNoDirectBinding();
+      expect(consumer.get(ExtensionService).get(Greeter)).toBe('hello');
+    });
+
     describe('get', () => {
       it('should return the contribution of another plugin', () => {
         const provider = createPlugin(token1, ({ extensions }) => {
@@ -299,7 +324,7 @@ describe('PluginModule', () => {
         expect(consumer.get(ExtensionService).get(Greeter)).toBeUndefined();
       });
 
-      it('should group contributions by extension point id', () => {
+      it('should treat extension points with the same id as the same point', () => {
         const provider = createPlugin(token1, ({ extensions }) => {
           extensions.contribute(createExtensionPoint<string>('test.Greeter')).toConstantValue('hi');
         });

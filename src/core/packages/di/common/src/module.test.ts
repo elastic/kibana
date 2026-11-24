@@ -26,10 +26,10 @@ describe('KibanaContainerModule', () => {
   const point = createExtensionPoint<string>('test.Point');
   const Collect = Symbol.for('core.di.Collect') as Hook;
   const Contributions = Symbol.for('core.di.Contributions') as ServiceIdentifier<
-    (point: { id: string }) => Array<{ plugin: string; resolve(): unknown }>
+    (point: symbol) => Array<{ plugin: string; resolve(): unknown }>
   >;
   const ExtensionContribution = Symbol.for('core.di.ExtensionContribution') as ServiceIdentifier<{
-    pointId: string;
+    point: symbol;
     slot: ServiceIdentifier;
   }>;
 
@@ -222,17 +222,16 @@ describe('KibanaContainerModule', () => {
       options.extensions.contribute(point).toConstantValue('value2');
 
       const records = container.getAll(ExtensionContribution);
-      expect(records.map(({ pointId }) => pointId)).toEqual(['test.Point', 'test.Point']);
+      expect(records.map((record) => record.point)).toEqual([point, point]);
       expect(records.map(({ slot }) => container.get(slot))).toEqual(['value1', 'value2']);
     });
 
-    it('should not bind the extension point id or any registered symbol', () => {
+    it('should not bind the extension point token or any registered symbol', () => {
       options.extensions.contribute(point).toConstantValue('value');
 
       const [{ slot }] = container.getAll(ExtensionContribution);
       expect(typeof slot === 'symbol' && Symbol.keyFor(slot)).toBeUndefined();
-      expect(container.isBound('test.Point')).toBe(false);
-      expect(container.isBound(Symbol.for('test.Point'))).toBe(false);
+      expect(container.isBound(point)).toBe(false);
     });
   });
 
@@ -245,8 +244,8 @@ describe('KibanaContainerModule', () => {
       logger = { error: jest.fn() };
       container
         .bind(Contributions)
-        .toConstantValue(({ id }) =>
-          id === point.id
+        .toConstantValue((requested) =>
+          requested === point
             ? contributions.map((resolve) => ({ plugin: 'contributor', resolve }))
             : []
         );

@@ -42,9 +42,10 @@ interface Contribution<T> {
 const Collect = createToken<(container: Container) => void>('core.di.Collect');
 const Contributions =
   createToken<<T>(point: ExtensionPoint<T>) => Array<Contribution<T>>>('core.di.Contributions');
-const ExtensionContribution = createToken<{ pointId: string; slot: ServiceIdentifier }>(
-  'core.di.ExtensionContribution'
-);
+const ExtensionContribution = createToken<{
+  point: ExtensionPoint<unknown>;
+  slot: ServiceIdentifier;
+}>('core.di.ExtensionContribution');
 
 /**
  * Extended container module options providing Kibana-specific features.
@@ -118,7 +119,7 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
  */
 export interface KibanaContainerModuleExtensions {
   /**
-   * Binds one contribution to the extension point in the current plugin.
+   * Binds one contribution to the extension point in the current plugin, under a private slot rather than the point token.
    * Each call adds one contribution, so a plugin can contribute to the same point several times.
    * Other plugins read it only through `ExtensionService` or `collect`, in an `OnExtensionsReady` hook, a request handler, or later.
    * @example
@@ -386,7 +387,7 @@ function toKibanaContainerModuleLoadOptions(
           container
             .get(Logger, { optional: true })
             ?.error(
-              `Skipped the "${point.id}" contribution from plugin "${plugin}" because it failed to build: ${message}`
+              `Skipped the "${point.description}" contribution from plugin "${plugin}" because it failed to build: ${message}`
             );
 
           return [];
@@ -426,8 +427,8 @@ function toKibanaContainerModuleLoadOptions(
 
   const extensions: KibanaContainerModuleExtensions = {
     contribute: <T>(point: ExtensionPoint<T>) => {
-      const slot: ServiceIdentifier<T> = Symbol(point.id);
-      options.bind(ExtensionContribution).toConstantValue({ pointId: point.id, slot });
+      const slot: ServiceIdentifier<T> = Symbol(point.description);
+      options.bind(ExtensionContribution).toConstantValue({ point, slot });
 
       return bind(slot);
     },

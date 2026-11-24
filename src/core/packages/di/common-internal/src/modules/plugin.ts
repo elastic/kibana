@@ -46,11 +46,11 @@ interface ExtensionEntry {
 }
 
 /**
- * `pending`: plugins run setup and start. `ready`: every plugin started, and its contributions are indexed by extension point id.
+ * `pending`: plugins run setup and start. `ready`: every plugin started, and its contributions are indexed by extension point.
  */
 type Phase =
   | { name: 'pending' }
-  | { name: 'ready'; extensions: ReadonlyMap<string, readonly ExtensionEntry[]> };
+  | { name: 'ready'; extensions: ReadonlyMap<ExtensionPoint<unknown>, readonly ExtensionEntry[]> };
 
 /**
  * Current context to resolve the global services.
@@ -147,11 +147,11 @@ export class PluginModule extends ContainerModule {
   protected getContributions<T>(point: ExtensionPoint<T>): Array<Contribution<T>> {
     if (this.phase.name !== 'ready') {
       throw new Error(
-        `Cannot resolve extension point "${point.id}" before all plugins started. Call it in an OnExtensionsReady hook, a request handler, or later.`
+        `Cannot resolve extension point "${point.description}" before all plugins started. Call it in an OnExtensionsReady hook, a request handler, or later.`
       );
     }
 
-    return (this.phase.extensions.get(point.id) ?? []).map(({ plugin, scope, slot }) => ({
+    return (this.phase.extensions.get(point) ?? []).map(({ plugin, scope, slot }) => ({
       plugin,
       resolve: () => scope.get(slot) as T,
     }));
@@ -296,8 +296,8 @@ export class PluginModule extends ContainerModule {
     }
   }
 
-  private indexExtensions(): Map<string, ExtensionEntry[]> {
-    const extensions = new Map<string, ExtensionEntry[]>();
+  private indexExtensions(): Map<ExtensionPoint<unknown>, ExtensionEntry[]> {
+    const extensions = new Map<ExtensionPoint<unknown>, ExtensionEntry[]>();
     for (const scope of this.scopes) {
       if (!scope.isCurrentBound(ExtensionContribution)) {
         continue;
@@ -305,8 +305,8 @@ export class PluginModule extends ContainerModule {
 
       const id = scope.get(Id);
       const plugin = id.description ?? String(id);
-      for (const { pointId, slot } of scope.getAll(ExtensionContribution)) {
-        extensions.set(pointId, [...(extensions.get(pointId) ?? []), { plugin, scope, slot }]);
+      for (const { point, slot } of scope.getAll(ExtensionContribution)) {
+        extensions.set(point, [...(extensions.get(point) ?? []), { plugin, scope, slot }]);
       }
     }
 
