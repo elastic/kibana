@@ -135,11 +135,6 @@ describe('convertQueryAnnotationsToEsql', () => {
 
   it.each([
     [
-      'global filters apply to the layer',
-      annotationLayer([queryAnnotation], { ignoreGlobalFilters: false }),
-      'global_filters_not_supported',
-    ],
-    [
       'its data view is not loaded',
       annotationLayer([queryAnnotation], { indexPatternId: 'missing' }),
       'data_view_not_found',
@@ -168,6 +163,19 @@ describe('convertQueryAnnotationsToEsql', () => {
       ok: false,
       reason: 'filter_not_convertible',
     });
+  });
+
+  it('converts layers that apply global filters and keeps the setting, since ES|QL annotations apply them too', () => {
+    const state = {
+      layers: [annotationLayer([queryAnnotation], { ignoreGlobalFilters: false })],
+    };
+
+    const result = convertQueryAnnotationsToEsql(state, indexPatterns);
+
+    expect(result).toEqual({ ok: true, state: expect.anything() });
+    const [layer] = (result as { state: { layers: Array<{ ignoreGlobalFilters: boolean }> } }).state
+      .layers;
+    expect(layer.ignoreGlobalFilters).toBe(false);
   });
 
   it('accepts manual-only layers that apply global filters', () => {

@@ -203,11 +203,6 @@ describe('useEsqlConversionCheck', () => {
       'annotation_library_not_supported',
     ],
     [
-      'a query annotation layer that applies global filters',
-      { ignoreGlobalFilters: false, indexPatternId: 'dv1' },
-      'query_annotation_global_filters_not_supported',
-    ],
-    [
       'a query annotation layer with a missing data view',
       { ignoreGlobalFilters: true, indexPatternId: 'missing' },
       'query_annotation_data_view_not_found',

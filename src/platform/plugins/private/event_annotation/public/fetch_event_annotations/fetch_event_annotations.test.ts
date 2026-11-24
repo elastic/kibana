@@ -280,9 +280,12 @@ const input = {
   },
 } as ExpressionValueSearchContext;
 
-const runGetFetchEventAnnotations = async (args: FetchEventAnnotationsArgs) => {
+const runGetFetchEventAnnotations = async (
+  args: FetchEventAnnotationsArgs,
+  searchContext: ExpressionValueSearchContext = input
+) => {
   return await getFetchEventAnnotations({ getStartServices })
-    .fn(input, args, mockHandlers)
+    .fn(searchContext, args, mockHandlers)
     .toPromise();
 };
 
@@ -321,21 +324,50 @@ describe('getFetchEventAnnotations', () => {
         });
     });
 
-    it('executes independent queries without data views and forwards search context without global filters', async () => {
-      const result = await runGetFetchEventAnnotations({
-        interval: '1h',
-        groups: [
-          {
-            type: 'event_annotation_group',
-            ignoreGlobalFilters: false,
-            annotations: [
-              annotation,
-              { ...annotation, id: 'other', query: 'FROM other | KEEP time' },
-              { ...annotation, id: 'hidden', isHidden: true },
-            ],
-          },
-        ],
-      });
+    const inputWithGlobalFilters = {
+      ...input,
+      query: { language: 'kuery', query: 'service.name: "api"' },
+      filters: [{ meta: { index: 'logs' }, query: { match_all: {} } }],
+    } as unknown as ExpressionValueSearchContext;
+
+    it('does not forward global filters when the layer ignores them', async () => {
+      await runGetFetchEventAnnotations(
+        {
+          interval: '1h',
+          groups: [
+            {
+              type: 'event_annotation_group',
+              ignoreGlobalFilters: true,
+              annotations: [annotation],
+            },
+          ],
+        },
+        inputWithGlobalFilters
+      );
+      const context = jest.mocked(dataMock.search.esql).mock.calls[0][0].kibanaQueryContext;
+      expect(context?.kibanaFilters).toBeUndefined();
+      expect(context?.kqlQuery).toBeUndefined();
+      expect(context?.timeRange).toEqual(input.timeRange);
+    });
+
+    it('executes independent queries without data views and forwards the search context including global filters', async () => {
+      const result = await runGetFetchEventAnnotations(
+        {
+          interval: '1h',
+          groups: [
+            {
+              type: 'event_annotation_group',
+              ignoreGlobalFilters: false,
+              annotations: [
+                annotation,
+                { ...annotation, id: 'other', query: 'FROM other | KEEP time' },
+                { ...annotation, id: 'hidden', isHidden: true },
+              ],
+            },
+          ],
+        },
+        inputWithGlobalFilters
+      );
       expect(dataMock.search.esql).toHaveBeenCalledTimes(2);
       expect(jest.mocked(dataMock.search.esql).mock.calls.map(([params]) => params.query)).toEqual([
         'FROM events | KEEP time',
@@ -343,6 +375,8 @@ describe('getFetchEventAnnotations', () => {
       ]);
       expect(jest.mocked(dataMock.search.esql).mock.calls[0][0].kibanaQueryContext).toEqual({
         timeRange: input.timeRange,
+        kibanaFilters: inputWithGlobalFilters.filters,
+        kqlQuery: inputWithGlobalFilters.query,
         esqlVariables: undefined,
       });
       expect(jest.mocked(dataMock.search.esql).mock.calls[0][1]).toEqual(

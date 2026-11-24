@@ -45,7 +45,6 @@ interface AnnotationLayerShape {
 }
 
 export type AnnotationConversionFailureReason =
-  | 'global_filters_not_supported'
   | 'data_view_not_found'
   | 'time_field_not_found'
   | 'filter_not_convertible'
@@ -106,10 +105,6 @@ const convertAnnotationLayer = (
       continue;
     }
     hasQueryAnnotation = true;
-    // ES|QL annotations ignore global filters, so converting would change what is shown.
-    if (layer.ignoreGlobalFilters === false) {
-      return { ok: false, reason: 'global_filters_not_supported' };
-    }
     const indexPattern = layer.indexPatternId ? indexPatterns[layer.indexPatternId] : undefined;
     if (!indexPattern) {
       return { ok: false, reason: 'data_view_not_found' };

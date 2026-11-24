@@ -32,7 +32,6 @@ export type EsqlConversionFailureReason =
   | 'terms_rank_metric_not_supported'
   | 'saved_to_library_not_supported'
   | 'annotation_library_not_supported'
-  | 'query_annotation_global_filters_not_supported'
   | 'query_annotation_data_view_not_found'
   | 'query_annotation_time_field_not_found'
   | 'query_annotation_filter_not_convertible'
@@ -152,13 +151,6 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
       defaultMessage: 'Annotation groups from the library cannot be converted.',
     }
   ),
-  query_annotation_global_filters_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationGlobalFiltersReason',
-    {
-      defaultMessage:
-        'Query-based annotations that apply global filters cannot be converted, because ES|QL annotations ignore them.',
-    }
-  ),
   query_annotation_data_view_not_found: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlQueryAnnotationDataViewNotFoundReason',
     {
@@ -210,7 +202,6 @@ export const annotationConversionFailureToReason: Record<
   AnnotationConversionFailureReason,
   EsqlConversionFailureReason
 > = {
-  global_filters_not_supported: 'query_annotation_global_filters_not_supported',
   data_view_not_found: 'query_annotation_data_view_not_found',
   time_field_not_found: 'query_annotation_time_field_not_found',
   filter_not_convertible: 'query_annotation_filter_not_convertible',
