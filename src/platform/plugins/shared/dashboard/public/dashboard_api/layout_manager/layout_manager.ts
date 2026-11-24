@@ -32,7 +32,11 @@ import type {
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError, PlacementStrategy } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { PanelPackage, SerializedTitles } from '@kbn/presentation-publishing';
+import type {
+  HasSerializableState,
+  PanelPackage,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 import {
   apiHasLibraryTransforms,
   apiHasSerializableState,
@@ -145,14 +149,22 @@ export function initializeLayoutManager(
       }
       currentChildState = cloneDeep(childStateToApply);
 
+      const childrenToApply: Array<[string, HasSerializableState]> = [];
       const setStatePromises: MaybePromise<void>[] = [];
       for (const [uuid, child] of Object.entries(children$.value)) {
         const nextChildState = cloneDeep(childStateToApply[uuid]); // prevent shallow copies from being mutated unexpectedly
         if (nextChildState && apiHasSerializableState(child)) {
+          childrenToApply.push([uuid, child]);
           setStatePromises.push(child.applySerializedState(nextChildState));
         }
       }
       await Promise.all(setStatePromises);
+
+      // Children may serialize applied state in a different shape. Read it back before loading ends,
+      // so history doesn't record the reshaping as a separate step that undo can never get past.
+      for (const [uuid, child] of childrenToApply) {
+        currentChildState[uuid] = child.serializeState();
+      }
     } finally {
       childrenStateLoading$.next(false);
     }
@@ -241,8 +253,13 @@ export function initializeLayoutManager(
       if (sameType && child && apiHasSerializableState(child)) {
         const stateToApply = cloneDeep(nextState);
         // Apply state after the loop so loading is set first and a synchronous error doesn't stop the remaining panels.
+        // Read the applied state back before loading ends, same as in resetLayout.
         applyStatePromises.push(
-          Promise.resolve().then(() => child.applySerializedState(stateToApply))
+          Promise.resolve()
+            .then(() => child.applySerializedState(stateToApply))
+            .then(() => {
+              currentChildState[uuid] = child.serializeState();
+            })
         );
       }
 
