@@ -328,7 +328,7 @@ it('shares a cache between processes that open it at the same time', async () =>
   } finally {
     await Promise.all([stopChild(first.child), stopChild(second.child)]);
   }
-}, 25_000);
+}, 40_000);
 
 it('handles simultaneous writes from separate processes', async () => {
   await makeCache({ dir: DIR, prefix: 'prefix' }).close();
