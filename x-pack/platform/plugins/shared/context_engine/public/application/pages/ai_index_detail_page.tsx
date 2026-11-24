@@ -10,6 +10,7 @@ import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-heade
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
@@ -55,6 +56,10 @@ import {
   getAiIndexSettingsPath,
 } from '../paths';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
+
+// Flex items don't shrink below their content, so a long title or type name would push the
+// chart off screen.
+const shrinkableFlexItemStyle = css({ minWidth: 0 });
 
 const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
   defaultMessage: 'Managed',
@@ -313,7 +318,7 @@ export const AiIndexDetailPage = () => {
       {hasLoadedKiSummary && (
         <>
           <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem>
+            <EuiFlexItem css={shrinkableFlexItemStyle}>
               <RecentKnowledgeDocumentsPanel
                 aiIndexId={resolvedAiIndexId}
                 isManaged={isManaged}
@@ -321,7 +326,7 @@ export const AiIndexDetailPage = () => {
               />
             </EuiFlexItem>
             {hasKnowledgeIndicators && (
-              <EuiFlexItem>
+              <EuiFlexItem css={shrinkableFlexItemStyle}>
                 <KnowledgeDocumentsChartPanel aiIndexId={resolvedAiIndexId} />
               </EuiFlexItem>
             )}
