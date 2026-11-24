@@ -1192,6 +1192,39 @@ describe('runScan on Windows hosts', () => {
       );
     });
 
+    it('fixes no host and reports both reasons when a month is missing and a host is older than the window', async () => {
+      const { deps } = setup([windowsAgent('w1', BELOW_WINDOW), windowsAgent('w2', IN_WINDOW)]);
+      realWriter();
+      (deps.es.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [], took: 1 });
+      (deps.es.updateByQuery as jest.Mock).mockResolvedValue({ updated: 3 });
+
+      const summary = await runScan(
+        {
+          ...deps,
+          refreshMsrc: (o) =>
+            refreshMsrcFeed({
+              ...o,
+              windowMonths: 3,
+              fetchImpl: msrcFetch(['2026-Sep']) as never,
+            }),
+        },
+        { signal: new AbortController().signal, runId: 'r1' }
+      );
+
+      expect(summary.releases[MSRC_RELEASE_KEY]).toBe('matched');
+      expect(summary.matchStats.windows_build_older_than_window).toBe(1);
+      expect(fixedHostIds(deps.es)).toEqual([]);
+      expect(summary.fixed).toBe(0);
+      const note = summary.notes?.[MSRC_RELEASE_KEY] ?? '';
+      expect(note).toContain('fixed status not updated this run: MSRC 2026-Sep unavailable');
+      expect(note).toContain(
+        '1 Windows host(s) are on a build older than the months the feed covers'
+      );
+      // The missing month already stops the fix pass for every host, so the per-host sentence is
+      // not repeated.
+      expect(note).not.toContain('older than the MSRC window');
+    });
+
     it('still runs the fix pass when every month has rows', async () => {
       const { summary, es } = await openFindingsFixed([]);
 
