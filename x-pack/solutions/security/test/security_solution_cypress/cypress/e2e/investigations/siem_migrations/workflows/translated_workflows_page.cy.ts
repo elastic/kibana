@@ -52,7 +52,6 @@ describe(
 
     beforeEach(() => {
       deleteConnectors();
-      cleanWorkflowsMigrationData();
       role.login();
       cy.waitUntil(
         () => {
@@ -72,9 +71,12 @@ describe(
       uploadTinesStories(TINES_TEST_STORY);
     });
 
+    afterEach(() => {
+      cleanWorkflowsMigrationData();
+    });
+
     after(() => {
       role.teardown();
-      cleanWorkflowsMigrationData();
     });
 
     it('should translate the uploaded stories and show the result in the table', () => {
