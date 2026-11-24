@@ -39,6 +39,7 @@ test.describe(
     }) => {
       await test.step('opens the Classic Overview from a Classic row', async () => {
         await digitalExperience.selectSource('Classic RUM');
+        await expect(digitalExperience.applicationSource(SERVICE_NAME)).toHaveText('Classic RUM');
         await digitalExperience.applicationLink(SERVICE_NAME).click();
 
         await expect(digitalExperience.overviewTab).toBeVisible();
@@ -51,7 +52,7 @@ test.describe(
       await test.step('goes back to the list with the same time range and filters', async () => {
         await digitalExperience.breadcrumbLink('Applications').click();
 
-        await expect(digitalExperience.applicationRow(SERVICE_NAME)).toContainText('Classic RUM');
+        await expect(digitalExperience.applicationSource(SERVICE_NAME)).toHaveText('Classic RUM');
         await expect(page).toHaveURL(hasTimeRange);
         await expect(page).toHaveURL(/sourceFilter=classic/);
       });
