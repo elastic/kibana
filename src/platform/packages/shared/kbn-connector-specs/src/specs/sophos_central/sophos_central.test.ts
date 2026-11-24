@@ -1228,4 +1228,93 @@ describe('non-idempotent retry behaviour', () => {
     // Should have retried after the 429
     expect(client.request).toHaveBeenCalledTimes(2);
   });
+
+  it('honours an HTTP-date Retry-After header on 429', async () => {
+    const client = makeClient();
+    stubWhoami(client);
+    // Retry-After is an HTTP-date 2 seconds in the future
+    const futureDate = new Date(Date.now() + 2_000).toUTCString();
+    client.request
+      .mockRejectedValueOnce(
+        Object.assign(new Error('Too Many Requests'), {
+          response: { status: 429, data: {}, headers: { 'retry-after': futureDate } },
+        })
+      )
+      .mockResolvedValueOnce({ data: { action: 'acknowledge', result: 'success' } });
+    const ctx = makeCtx(client);
+
+    jest.useFakeTimers();
+    const resultPromise = SophosCentral.actions.actOnAlert.handler(ctx as never, {
+      alertId: ALERT_ID,
+      action: 'acknowledge',
+    });
+
+    // After the first timer tick the 429 delay should be pending —
+    // the second request should not have been sent yet.
+    await jest.advanceTimersByTimeAsync(500);
+    expect(client.request).toHaveBeenCalledTimes(1);
+
+    // Drain remaining timers to let the retry complete
+    await jest.runAllTimersAsync();
+    await resultPromise;
+    expect(client.request).toHaveBeenCalledTimes(2);
+  });
+
+  it('throws immediately when Retry-After exceeds the retry budget', async () => {
+    const client = makeClient();
+    stubWhoami(client);
+    // Retry-After of 60s exceeds the 30s cap
+    client.request.mockRejectedValueOnce(
+      Object.assign(new Error('Too Many Requests'), {
+        response: { status: 429, data: {}, headers: { 'retry-after': '60' } },
+      })
+    );
+    const ctx = makeCtx(client);
+
+    await expect(
+      SophosCentral.actions.actOnAlert.handler(ctx as never, {
+        alertId: ALERT_ID,
+        action: 'acknowledge',
+      })
+    ).rejects.toThrow('Rate limited');
+
+    // Only one request — no retry attempted
+    expect(client.request).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// actOnAlertsBulk — rate limit halts the batch
+// ---------------------------------------------------------------------------
+
+describe('actOnAlertsBulk rate-limit batch halt', () => {
+  const ALERT_ID_2 = '22223333-4444-5555-6666-777788889999';
+  const ALERT_ID_3 = '33334444-5555-6666-7777-888899990000';
+
+  it('stops the batch and marks remaining IDs as unattempted on rate limit', async () => {
+    const client = makeClient();
+    stubWhoami(client);
+    // First alert succeeds, second gets 429 with Retry-After > budget
+    client.request
+      .mockResolvedValueOnce({ data: { result: 'success' } })
+      .mockRejectedValueOnce(
+        Object.assign(new Error('Too Many Requests'), {
+          response: { status: 429, data: {}, headers: { 'retry-after': '60' } },
+        })
+      );
+    const ctx = makeCtx(client);
+
+    const result = await SophosCentral.actions.actOnAlertsBulk.handler(ctx as never, {
+      ids: [ALERT_ID, ALERT_ID_2, ALERT_ID_3],
+      action: 'acknowledge',
+    });
+
+    expect(result.successCount).toBe(1);
+    expect(result.failureCount).toBe(2);
+    expect(result.results[0]).toMatchObject({ alertId: ALERT_ID, status: 'success' });
+    expect(result.results[1]).toMatchObject({ alertId: ALERT_ID_2, status: 'unattempted' });
+    expect(result.results[2]).toMatchObject({ alertId: ALERT_ID_3, status: 'unattempted' });
+    // Only 2 requests sent (1 success + 1 that got 429), not 3
+    expect(client.request).toHaveBeenCalledTimes(2);
+  });
 });

@@ -108,6 +108,17 @@ async function whoami(ctx: ActionContext): Promise<WhoamiResult> {
 const RETRY_ON = new Set([429, 500, 502, 503, 504]);
 const NO_RETRY_ON = new Set([400, 401, 403, 404, 405, 409, 413, 422]);
 
+/** Thrown when a 429 Retry-After exceeds the local retry budget. Callers that
+ *  iterate (e.g. actOnAlertsBulk) should stop the batch on this error. */
+class RateLimitExceededError extends Error {
+  public readonly retryAfterMs: number;
+  constructor(retryAfterMs: number) {
+    super(`Rate limited: server asked to wait ${Math.ceil(retryAfterMs / 1_000)}s, exceeding retry budget`);
+    this.name = 'RateLimitExceededError';
+    this.retryAfterMs = retryAfterMs;
+  }
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -157,8 +168,9 @@ async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3, idempotent = 
             }
           }
           if (Number.isFinite(waitMs) && waitMs > cap) {
-            // Server wants us to wait longer than our budget — stop retrying
-            throw err;
+            // Server wants us to wait longer than our budget — stop retrying.
+            // Throw RateLimitExceededError so batch callers can halt early.
+            throw new RateLimitExceededError(waitMs);
           }
           delay = Number.isFinite(waitMs)
             ? waitMs
@@ -453,7 +465,8 @@ export const SophosCentral: ConnectorSpec = {
         let successCount = 0;
         let failureCount = 0;
 
-        for (const alertId of input.ids) {
+        for (let i = 0; i < input.ids.length; i++) {
+          const alertId = input.ids[i];
           try {
             await withRetry(
               async () => {
@@ -475,6 +488,19 @@ export const SophosCentral: ConnectorSpec = {
             results.push({ alertId, status: 'success' });
             successCount++;
           } catch (err) {
+            if (err instanceof RateLimitExceededError) {
+              // Rate limit exceeds retry budget — stop the batch and mark
+              // the current and all remaining IDs as unattempted.
+              for (let j = i; j < input.ids.length; j++) {
+                results.push({
+                  alertId: input.ids[j],
+                  status: 'unattempted',
+                  error: err.message,
+                });
+                failureCount++;
+              }
+              break;
+            }
             const axiosErr = err as AxiosError<{ error?: string; message?: string }>;
             const status = axiosErr?.response?.status;
             const body = axiosErr?.response?.data;
