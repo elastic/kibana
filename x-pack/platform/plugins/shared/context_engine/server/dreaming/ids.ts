@@ -66,7 +66,6 @@ export const SESSION_MEMORY_ID_PREFIX = 'session-memory:';
 /** Memory ids of session turns: the prefix, then the session id, a slash and the turn id. */
 export const SESSION_TURN_ID_PREFIX = 'session:';
 
-/** The memories dreaming reads from outside the AI index, each cited by a URI scheme of its own. */
 const EXTERNAL_MEMORY_SOURCES = [
   { idPrefix: SESSION_MEMORY_ID_PREFIX, uriPrefix: 'session-memory://' },
   { idPrefix: SESSION_TURN_ID_PREFIX, uriPrefix: 'session://' },

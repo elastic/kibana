@@ -36,7 +36,6 @@ const MAX_PRIVILEGE_GROUPS = 100;
 const MAX_PRIVILEGE_NAMES = 50;
 const MAX_PRIVILEGE_LENGTH = 256;
 
-/** A session turn is cited as `session:<session id>/<turn id>`, two ids of up to 256 characters. */
 const MAX_MEMORY_REFERENCE_LENGTH = 1024;
 const memoryReferenceSchema = lazySchema(() => z.string().min(1).max(MAX_MEMORY_REFERENCE_LENGTH));
 

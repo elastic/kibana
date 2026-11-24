@@ -69,14 +69,11 @@ const toResult = (id: string, item: BulkResponseItem | undefined): SaveEventResu
   return { id, status: 'failed', error: cause ? `${reason}: ${cause}` : reason };
 };
 
-/** How many turns are loaded at once, each by a search of its own. */
 const TURNS_LOAD_CONCURRENCY = 10;
-/** The most events loaded of one turn: a longer turn is read from its first events. */
 const MAX_TURN_EVENTS_LOADED = 1000;
 
 const turnKey = (sessionId: string, turnId: string): string => `${sessionId}\u0000${turnId}`;
 
-/** By `seq` when every event has one, else by when the agent created them: never a mix of both. */
 const sortEvents = (events: StoredSessionEvent[]): StoredSessionEvent[] =>
   events.every(({ seq }) => seq !== undefined)
     ? [...events].sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0) || compareEvents(a, b))
@@ -89,7 +86,6 @@ const compareEvents = (a: StoredSessionEvent, b: StoredSessionEvent): number => 
   );
 };
 
-/** The first copy of each event: a resent event is stored again under the same session and id. */
 const withoutResent = (events: StoredSessionEvent[]): StoredSessionEvent[] => {
   const seen = new Set<string>();
   return [...events]
@@ -144,7 +140,6 @@ export const createSessionEventsService = (
       { term: { space } },
       { term: { ai_index_id: aiIndexId } },
     ];
-    // Events of one save share a timestamp, so the session and event id break the tie.
     const found = await esClient.search<StoredSessionEvent>({
       index: SESSION_EVENTS_DATA_STREAM,
       ignore_unavailable: true,
@@ -213,8 +208,6 @@ export const createSessionEventsService = (
         })
       );
       for (const { sessionId, turnId, stored } of loaded) {
-        // A turn with events saved after `until` may still be running. Those events are found by
-        // the next read, which then reads the whole turn.
         const settled = stored.every((event) => Date.parse(event['@timestamp']) <= untilMs);
         if (stored.length > 0 && settled) {
           turns.push({

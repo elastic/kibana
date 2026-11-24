@@ -23,8 +23,9 @@ export const citedMemoryKiIds = (ki: DreamedKi): string[] =>
   citedMemoryIds(ki).filter(isMemoryKiId);
 
 /**
- * Whether an item lost the memories it came from, and what to do about it. A memory read from outside
- * the AI index, such as a trace round or a session memory, always counts as present. A memory missing from the AI index aged out, and only a deleted one is lost.
+ * Whether an item lost the memories it came from, and what to do about it. A memory read from
+ * outside the AI index, such as a session memory or turn, always counts as present. A memory missing
+ * from the AI index aged out, and only a deleted one is lost.
  */
 export const sourceVerdictOf = (
   ki: DreamedKi,

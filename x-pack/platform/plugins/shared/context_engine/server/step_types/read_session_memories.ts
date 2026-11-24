@@ -16,7 +16,6 @@ import { SESSION_MEMORY_ID_PREFIX } from '../dreaming/ids';
 import type { SessionMemory } from '../session_memory/types';
 import type { DreamingStepDependencies } from './helpers';
 
-/** The memory type of a session memory read for dreaming. */
 export const SESSION_MEMORY_TYPE = 'memory.session';
 
 const MAX_TITLE_CHARS = 120;

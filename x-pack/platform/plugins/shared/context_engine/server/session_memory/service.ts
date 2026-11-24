@@ -178,8 +178,6 @@ export const createSessionMemoryService = (
     if (space.trim() === '') {
       throw new Error('Reading session memories requires a non-empty space');
     }
-    // Same-time revisions continue after the last id read, so a page boundary never repeats or
-    // skips one.
     const afterCursor: QueryDslQueryContainer[] = [{ range: { '@timestamp': { gt: since } } }];
     if (after) {
       afterCursor.push({
@@ -212,8 +210,6 @@ export const createSessionMemoryService = (
     const next =
       candidates.length === size ? { revisedAt: last['@timestamp'], id: last.id } : undefined;
 
-    // The latest revision decides: it may be a tombstone, or may have dropped the AI index, which an
-    // older revision found above would hide.
     const latest = await esClient.search<StoredSessionMemory>({
       index: SESSION_MEMORY_DATA_STREAM,
       ignore_unavailable: true,

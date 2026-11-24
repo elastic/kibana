@@ -155,7 +155,8 @@ export interface SessionEventsService {
   saveEvents(scope: SessionEventsScope, input: SaveEventsInput): Promise<SaveSessionEventsResponse>;
   /**
    * Reads the turns that got events since a time, across all users of a space, for dreaming. A
-   * turn is read whole, so one that continues after the read is read again with its later events.
+   * turn is read whole, up to its first 1000 events, and only once none of its events is newer than
+   * `until`. A turn that continues after the read is read again with its later events.
    */
   readTurns(input: ReadSessionTurnsInput): Promise<ReadSessionTurnsResult>;
 }

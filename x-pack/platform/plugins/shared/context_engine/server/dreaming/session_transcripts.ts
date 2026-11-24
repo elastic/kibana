@@ -22,7 +22,6 @@ import {
   truncate,
 } from './transcript_text';
 
-/** The memory type of a turn read from session events. */
 export const SESSION_TURN_TYPE = 'session.turn';
 
 const asText = (value: unknown): string =>
