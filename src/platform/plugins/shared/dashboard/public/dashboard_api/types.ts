@@ -267,6 +267,7 @@ export type DashboardApi = CanExpandPanels &
 
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
+    hasUnpublishedFilters$: PublishingSubject<boolean>;
     publishFilters: () => void;
 
     publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;

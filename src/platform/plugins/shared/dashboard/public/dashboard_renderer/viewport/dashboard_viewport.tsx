@@ -89,10 +89,10 @@ export const DashboardViewport = () => {
         data-view-mode={viewMode}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? (
-          <DashboardEmptyScreen />
-        ) : awaitingRequired ? (
+        {awaitingRequired ? (
           <AwaitingFiltersScreen />
+        ) : panelCount === 0 && sectionCount === 0 ? (
+          <DashboardEmptyScreen />
         ) : (
           <DashboardGrid />
         )}

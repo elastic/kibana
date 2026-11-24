@@ -151,13 +151,17 @@ export const initializeFiltersManager = (
   };
 
   /** `true` while the unpublished child filters differ from the published ones */
-  const hasUnpublishedFilters$ = combineLatest([
+  const hasUnpublishedFilters$ = new BehaviorSubject<boolean>(false);
+  const hasUnpublishedFiltersSubscription = combineLatest([
     publishedChildFilters$,
     unpublishedChildFilters$,
-  ]).pipe(
-    map(([published, unpublished]) => !deepEqual(published ?? [], unpublished ?? [])),
-    distinctUntilChanged()
-  );
+  ])
+    .pipe(map(([published, unpublished]) => !deepEqual(published ?? [], unpublished ?? [])))
+    .subscribe((hasUnpublished) => {
+      if (hasUnpublished !== hasUnpublishedFilters$.getValue()) {
+        hasUnpublishedFilters$.next(hasUnpublished);
+      }
+    });
 
   /** when auto-apply is `true`, push filters from `unpublishedFilters$` directly to published */
   const autoPublishFiltersSubscription = unpublishedChildFilters$
@@ -217,6 +221,7 @@ export const initializeFiltersManager = (
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();
       unpublishedFiltersSubscription.unsubscribe();
+      hasUnpublishedFiltersSubscription.unsubscribe();
       filtersSubscription.unsubscribe();
       forcePublishSubscription.unsubscribe();
       requiredFiltersSubscription.unsubscribe();

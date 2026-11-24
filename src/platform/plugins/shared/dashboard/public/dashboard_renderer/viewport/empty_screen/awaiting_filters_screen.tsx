@@ -66,7 +66,10 @@ const useAwaitingControlLabels = (): string[] | undefined => {
 
 export function AwaitingFiltersScreen() {
   const dashboardApi = useDashboardApi();
-  const [hasUnpublished] = useBatchedPublishingSubjects(dashboardApi.hasUnpublishedFilters$);
+  const [hasUnpublished, viewMode] = useBatchedPublishingSubjects(
+    dashboardApi.hasUnpublishedFilters$,
+    dashboardApi.viewMode$
+  );
 
   const labels = useAwaitingControlLabels();
   const isDarkTheme = useKibanaIsDarkMode();
@@ -75,11 +78,17 @@ export function AwaitingFiltersScreen() {
   const imageUrl = coreServices.http.basePath.prepend(
     `/plugins/dashboard/assets/${isDarkTheme ? 'required_filters_dark' : 'required_filters'}.svg`
   );
+  // read-only previews (e.g. dashboard history) disable control interaction, so viewers cannot select values
+  const isReadOnly = viewMode === 'non-interactive';
 
   const title = (() => {
-    const titleString = i18n.translate('dashboard.emptyScreen.awaitingRequiredControlsTitle', {
-      defaultMessage: 'Waiting for required controls',
-    });
+    const titleString = isReadOnly
+      ? i18n.translate('dashboard.emptyScreen.requiredControlsEmptyTitle', {
+          defaultMessage: 'Required controls are empty',
+        })
+      : i18n.translate('dashboard.emptyScreen.awaitingRequiredControlsTitle', {
+          defaultMessage: 'Waiting for required controls',
+        });
     return <h2>{titleString}</h2>;
   })();
 
@@ -92,6 +101,13 @@ export function AwaitingFiltersScreen() {
           isLoading
           data-test-subj="dashboardAwaitingRequiredFiltersSkeleton"
         />
+      ) : isReadOnly ? (
+        <span data-test-subj="dashboardAwaitingRequiredFiltersReadOnly">
+          {i18n.translate('dashboard.emptyScreen.awaitingRequiredControlsReadOnlySubtitle', {
+            defaultMessage:
+              'This version of the dashboard has required controls without a selected value, so its panels are not shown in this preview.',
+          })}
+        </span>
       ) : labels.length === 0 && hasUnpublished ? (
         <span data-test-subj="dashboardAwaitingPublishSubtitle">
           {i18n.translate('dashboard.emptyScreen.awaitingPublishSubtitle', {
