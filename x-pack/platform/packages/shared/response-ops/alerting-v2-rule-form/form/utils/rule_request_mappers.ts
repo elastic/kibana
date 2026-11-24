@@ -15,6 +15,7 @@ import type {
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
+import { formReasonToApiReason } from './reason_mappers';
 import {
   apiStateTransitionToFormStateTransition,
   buildStateTransitionRequest,
@@ -60,6 +61,7 @@ const mapGrouping = (grouping: FormValues['grouping']) =>
  */
 export interface RuleRequestCommon {
   metadata: { name: string; description?: string; tags?: string[]; routing_tags?: string[] };
+  reason?: { template: string };
   time_field: string;
   schedule: { every: string; lookback?: string };
   query: Query;
@@ -75,9 +77,11 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recovery = formRecoveryToApiRecovery(formValues);
   const noData = formNoDataToApiNoData(formValues);
+  const reason = formReasonToApiReason(formValues);
 
   return {
     metadata: mapMetadata(metadata),
+    ...(reason ? { reason } : {}),
     time_field: timeField,
     schedule: mapSchedule(schedule),
     query: ruleQueryToApiQuery(query),
@@ -117,7 +121,7 @@ const mapStateTransitionPhase = (
  * PATCH merges leaf by leaf, and an omitted leaf would keep the value they just cleared.
  */
 export const toUpdateRuleData = (request: RuleRequestCommon): UpdateRuleData => {
-  const { grouping, state_transition, artifacts, metadata, query, ...rest } = request;
+  const { grouping, state_transition, artifacts, metadata, query, reason, ...rest } = request;
 
   return {
     ...rest,
@@ -127,6 +131,7 @@ export const toUpdateRuleData = (request: RuleRequestCommon): UpdateRuleData => 
       tags: metadata.tags ?? null,
       routing_tags: metadata.routing_tags ?? null,
     },
+    reason: reason ?? null,
     query: { ...query, breach: query.breach ?? null },
     grouping: grouping ?? null,
     state_transition: state_transition
@@ -158,6 +163,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       tags: rule.metadata.tags,
       routingTags: rule.metadata.routing_tags,
     },
+    ...(rule.reason ? { reason: rule.reason } : {}),
     timeField: rule.time_field,
     schedule: {
       every: rule.schedule.every,

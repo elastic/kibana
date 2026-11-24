@@ -68,6 +68,25 @@ describe('composeFormToCreateRequest', () => {
     });
   });
 
+  it('maps the reason of an alert rule', () => {
+    const result = composeFormToCreateRequest({
+      ...baseFormValues,
+      reason: { template: 'CPU on {{ data.host.name }}' },
+    });
+
+    expect(result.reason).toEqual({ template: 'CPU on {{ data.host.name }}' });
+  });
+
+  it('omits the reason of a signal rule', () => {
+    const result = composeFormToCreateRequest({
+      ...baseFormValues,
+      kind: 'signal',
+      reason: { template: 'CPU on {{ data.host.name }}' },
+    });
+
+    expect(result).not.toHaveProperty('reason');
+  });
+
   it('maps basic form values to create request', () => {
     const result = composeFormToCreateRequest(baseFormValues);
     expect(result.kind).toBe('alert');
@@ -338,6 +357,19 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.metadata?.builder).toBeNull();
   });
 
+  it('clears the reason when the form has none', () => {
+    expect(composeFormToUpdateRequest(baseFormValues).reason).toBeNull();
+  });
+
+  it('sends the reason the form holds', () => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      reason: { template: 'CPU on {{ data.host.name }}' },
+    });
+
+    expect(result.reason).toEqual({ template: 'CPU on {{ data.host.name }}' });
+  });
+
   it('excludes kind from update request', () => {
     const result = composeFormToUpdateRequest(baseFormValues);
     expect(result).not.toHaveProperty('kind');
@@ -482,6 +514,11 @@ describe('mapRuleToComposeFormValues', () => {
       metadata: { ...baseRuleResponse.metadata, routing_tags: ['sre'] },
     } as RuleResponse;
     expect(mapRuleToComposeFormValues(rule).metadata.routingTags).toEqual(['sre']);
+  });
+
+  it('loads the reason from the rule', () => {
+    const rule = { ...baseRuleResponse, reason: { template: 'CPU {{ data.cpu }}' } } as RuleResponse;
+    expect(mapRuleToComposeFormValues(rule).reason).toEqual({ template: 'CPU {{ data.cpu }}' });
   });
 
   it('maps schedule with lookback', () => {

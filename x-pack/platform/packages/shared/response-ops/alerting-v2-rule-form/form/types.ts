@@ -63,6 +63,10 @@ export interface RuleMetadata {
   routingTags?: string[];
 }
 
+export interface RuleReason {
+  template: string;
+}
+
 export interface RuleSchedule {
   every: string;
   lookback: string;
@@ -105,6 +109,7 @@ export interface StateTransition {
 export interface FormValues {
   kind: RuleKind;
   metadata: RuleMetadata;
+  reason?: RuleReason;
   timeField: string;
   schedule: RuleSchedule;
   query: RuleQuery;
