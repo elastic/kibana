@@ -30,7 +30,7 @@ Before starting, make sure you have:
 
 ## Step 1 — Generate a GitHub Personal Access Token (optional)
 
-You only need this token if you enable the GitHub MCP server, or if you pass a token to `gh` through `GH_TOKEN`. Otherwise the `gh` CLI gets its own token from the browser login in Step 4, so you can skip to Step 2. For the GitHub MCP's `mcp.json` entry, see [GitHub MCP shows as disconnected in Cursor](#github-mcp-shows-as-disconnected-in-cursor).
+You only need this token if you enable the GitHub MCP server, or if you pass a token to `gh` through `GH_TOKEN`. Otherwise the `gh` CLI gets its own token from the browser login in Step 4, so you can skip to Step 2. If you use `GH_TOKEN`, skip the browser login in Step 4 and only run `gh auth status`; to switch to the browser login, unset `GH_TOKEN` first. For the GitHub MCP's `mcp.json` entry, see [GitHub MCP shows as disconnected in Cursor](#github-mcp-shows-as-disconnected-in-cursor).
 
 1. Go to [github.com/settings/tokens](https://github.com/settings/tokens)
 2. Click **"Generate new token (classic)"**
