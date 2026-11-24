@@ -431,7 +431,7 @@ describe('generateDashboardTool handler', () => {
       });
     });
 
-    it('saves the other changes of the call without a refresh interval set without a time range', async () => {
+    it('removes a refresh interval set on a dashboard without a time range and saves the other changes', async () => {
       mockExistingDashboard();
       mockUpsertResult({
         ...generatedDashboard,
@@ -442,11 +442,10 @@ describe('generateDashboardTool handler', () => {
 
       const { results, attachments } = await callHandler('dashboard-attachment-id');
 
-      const [[, { data: savedData }]] = attachments.update.mock.calls as unknown as Array<
-        [string, { data: DashboardAttachmentData }]
-      >;
-      expect(savedData).toEqual({ ...generatedDashboard, description: 'Updated' });
-      expect(savedData).not.toHaveProperty('refresh_interval');
+      expect(attachments.update).toHaveBeenCalledWith('dashboard-attachment-id', {
+        data: { ...generatedDashboard, description: 'Updated' },
+        description: expect.any(String),
+      });
       expect(results[0]).toMatchObject({ data: { failures: [refreshIntervalFailure] } });
     });
 
