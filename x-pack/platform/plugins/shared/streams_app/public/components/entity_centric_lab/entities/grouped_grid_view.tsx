@@ -83,6 +83,7 @@ import {
   STAT_OPTIONS,
   alertHintFromEntity,
   bucketKeyFor,
+  builtInMetricSignature,
   effectiveStatForMetric,
   metricStatSelectionLockHelpText,
   metricStatSelectionLocked,
@@ -4344,31 +4345,30 @@ const GroupBucketHeader = ({
  * Derive the bucket key for a set of entities so custom-grouping buckets
  * can re-use the per-type metric catalog (Color by, legend, palette).
  *
- * 1. If all entities share the same category **and** subType/type →
- *    returns the specific `category:subType` key (e.g. `kubernetes:Pods`).
- * 2. If all entities share the same category but have mixed types →
- *    returns the category-level key (e.g. `hosts`), which still provides
- *    metric controls via the category's metric catalog.
- * 3. If entities span multiple categories → returns `undefined` (no
- *    per-bucket metric catalog available).
+ * 1. If all entities share the same category and type → that type's key.
+ * 2. If they share a category and every type uses the same metric catalog
+ *    (Hosts, Functions, Storage) → the category key when it lists that
+ *    catalog, otherwise one member type. Color by then offers those metrics.
+ * 3. If the types do not share a catalog (Kubernetes, mixed Cloud) → the
+ *    category key, which does not inherit one subtype's metrics.
+ * 4. If entities span multiple categories → `undefined` (health / alerts only).
  */
 const inferBucketKey = (entities: readonly Entity[]): BucketKey | undefined => {
   if (entities.length === 0) return undefined;
-  const first = entities[0];
-  const category = first.category;
-  const subType =
-    category === 'kubernetes' ? first.subType ?? first.type : first.type;
-  let sameType = true;
-  for (let i = 1; i < entities.length; i++) {
-    const entity = entities[i];
+  const category = entities[0].category;
+  const typeKeys = new Set<BucketKey>();
+  for (const entity of entities) {
     if (entity.category !== category) return undefined;
-    if (sameType) {
-      const entitySubType =
-        entity.category === 'kubernetes' ? entity.subType ?? entity.type : entity.type;
-      if (entitySubType !== subType) sameType = false;
-    }
+    const subType = entity.category === 'kubernetes' ? entity.subType ?? entity.type : entity.type;
+    typeKeys.add(bucketKeyFor(category, subType));
   }
-  return sameType ? bucketKeyFor(category, subType) : (category as BucketKey);
+  const sorted = [...typeKeys].sort();
+  if (sorted.length <= 1) return sorted[0];
+  const signature = builtInMetricSignature(sorted[0]);
+  const shared =
+    signature.length > 0 && sorted.every((key) => builtInMetricSignature(key) === signature);
+  if (!shared) return category as BucketKey;
+  return builtInMetricSignature(category) === signature ? (category as BucketKey) : sorted[0];
 };
 
 /**

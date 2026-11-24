@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.30';
+export const PROTOTYPE_VERSION = '1.31';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-24',
+    summary:
+      'Mixed tables and hex groups use the shared metrics when every type in the category agrees.',
+    details:
+      'A list of one category opens with the same three sparkline columns as its types when those types share a metric set. Hosts, Functions, and Storage do. Kubernetes does not, so a mixed Kubernetes table stays on the identity columns. In the hex view, grouping that same category by Entity category offers those shared metrics in Color by. A mixed Kubernetes or Cloud group does not inherit one type's metrics. Bump to v1.31.',
+  },
   {
     date: '2026-11-24',
     summary:

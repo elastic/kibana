@@ -49,11 +49,7 @@ import { HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import { useVariation } from './variation_context';
 import type { PhaseVariation } from './variation_registry';
 import { readPageSizeForTable, writePageSizeForTable } from './storage_keys';
-import {
-  DEFAULT_LIST_DENSITY,
-  getListGridStyle,
-  type ListDensity,
-} from './list_density';
+import { DEFAULT_LIST_DENSITY, getListGridStyle, type ListDensity } from './list_density';
 import { CLOUD_PROVIDERS } from './cloud_providers';
 import {
   K8S_CONTEXT_KEYS,
@@ -74,6 +70,7 @@ import {
   ENTITY_ALERTS_METRIC_ID,
   alertHintFromEntity,
   bucketKeyFor,
+  builtInMetricSignature,
   findMetric,
   getBucketMetrics,
   inventoryGridStatForMetric,
@@ -320,11 +317,7 @@ const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
   cloud: ['metric:cpu-util', 'metric:memory-util'],
   'cloud:aws ec2 instance': ['metric:cpu-util', 'metric:memory-util', 'metric:network-out'],
   'cloud:aws region': ['metric:api-success', 'metric:throttle-rate', 'metric:spend-mtd'],
-  'cloud:aws lambda function': [
-    'metric:invocations',
-    'metric:error-rate',
-    'metric:p99-duration',
-  ],
+  'cloud:aws lambda function': ['metric:invocations', 'metric:error-rate', 'metric:p99-duration'],
   'cloud:aws s3 bucket': ['metric:request-rate', 'metric:s3-4xx', 'metric:first-byte'],
   // Functions category (same metrics as cloud Lambda)
   'functions:aws lambda function': [
@@ -333,7 +326,11 @@ const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
     'metric:p99-duration',
   ],
   'functions:azure function': ['metric:invocations', 'metric:error-rate', 'metric:p99-duration'],
-  'functions:gcp cloud function': ['metric:invocations', 'metric:error-rate', 'metric:p99-duration'],
+  'functions:gcp cloud function': [
+    'metric:invocations',
+    'metric:error-rate',
+    'metric:p99-duration',
+  ],
   // Storage category (same metrics as cloud S3)
   'storage:aws s3 bucket': ['metric:request-rate', 'metric:s3-4xx', 'metric:first-byte'],
   'storage:azure blob storage': ['metric:request-rate', 'metric:s3-4xx', 'metric:first-byte'],
@@ -374,13 +371,28 @@ const orderCatalogLikeDefaultTable = (
   return ordered;
 };
 
-const defaultVisibleIdsFor = (bucketKey: string, isHomogeneous: boolean): string[] => {
+const defaultMetricColumnIds = (bucketKey: string): readonly string[] =>
+  (DEFAULT_METRICS_BY_BUCKET[bucketKey] ?? []).slice(0, MAX_DEFAULT_METRIC_COLUMNS);
+
+const defaultVisibleIdsFor = (
+  bucketKey: string,
+  isHomogeneous: boolean,
+  sharedDefaultMetricIds: readonly string[] = []
+): string[] => {
   const base = [...DEFAULT_VISIBLE_IDS];
   if (!isHomogeneous) {
-    // Mixed-type tables: identity only, plus Type so the mix is readable.
+    // Mixed-type tables keep Type so the mix is readable. Sparkline columns
+    // are added only when every type in the table shares one metric set and
+    // the same default selection (Hosts, Functions, Storage). Kubernetes does
+    // not, so those tables stay on identity columns.
     const typeId = 'type';
     const [name, ...rest] = base;
-    return withUptimeLast([name, typeId, ...rest.filter((id) => id !== typeId)]);
+    return withUptimeLast([
+      name,
+      typeId,
+      ...rest.filter((id) => id !== typeId),
+      ...sharedDefaultMetricIds,
+    ]);
   }
   const extra = getK8sContextColumnIds(bucketKey).defaultVisible;
   const metricIds = (DEFAULT_METRICS_BY_BUCKET[bucketKey] ?? []).slice(
@@ -392,14 +404,7 @@ const defaultVisibleIdsFor = (bucketKey: string, isHomogeneous: boolean): string
     : [];
   if (extra.length > 0) {
     const [name, health, ...rest] = base;
-    return withUptimeLast([
-      name,
-      health,
-      ...extra,
-      ...cloudAccountIds,
-      ...rest,
-      ...metricIds,
-    ]);
+    return withUptimeLast([name, health, ...extra, ...cloudAccountIds, ...rest, ...metricIds]);
   }
   if (cloudAccountIds.length > 0) {
     const [name, health, ...rest] = base;
@@ -413,11 +418,42 @@ const rowBucketKey = (category: EntityCategoryId, entity: Entity): BucketKey => 
   return bucketKeyFor(category, groupLabel);
 };
 
-/** True when every row shares one metric-catalog identity (Pods table, Clusters table, …). */
-const isHomogeneousTypeGroup = (category: EntityCategoryId, rows: readonly Entity[]): boolean => {
-  if (rows.length <= 1) return true;
-  const first = rowBucketKey(category, rows[0]);
-  return rows.every((entity) => rowBucketKey(category, entity) === first);
+interface TableMetricScope {
+  /** Every row is one type (Pods table, one Functions type, …). */
+  readonly homogeneous: boolean;
+  /**
+   * Set when the table mixes types of one category that share one metric
+   * catalog and the same default sparkline columns. Null for Kubernetes and
+   * any other mix whose types do not agree.
+   */
+  readonly sharedMetricKey: BucketKey | null;
+}
+
+const tableMetricScope = (
+  category: EntityCategoryId,
+  rows: readonly Entity[]
+): TableMetricScope => {
+  if (rows.length === 0) return { homogeneous: true, sharedMetricKey: null };
+  const keys = new Set<BucketKey>();
+  for (const entity of rows) {
+    if (entity.category !== category) return { homogeneous: false, sharedMetricKey: null };
+    keys.add(rowBucketKey(category, entity));
+  }
+  const sorted = [...keys].sort();
+  if (sorted.length <= 1) return { homogeneous: true, sharedMetricKey: null };
+  const [first, ...rest] = sorted;
+  const signature = builtInMetricSignature(first);
+  const defaults = defaultMetricColumnIds(first).join('\0');
+  if (!defaults) return { homogeneous: false, sharedMetricKey: null };
+  for (const key of rest) {
+    if (builtInMetricSignature(key) !== signature) {
+      return { homogeneous: false, sharedMetricKey: null };
+    }
+    if (defaultMetricColumnIds(key).join('\0') !== defaults) {
+      return { homogeneous: false, sharedMetricKey: null };
+    }
+  }
+  return { homogeneous: false, sharedMetricKey: first };
 };
 
 const PROVIDER_LABEL: Record<string, string> = Object.fromEntries(
@@ -680,7 +716,10 @@ const LazySparkline = ({ values, color }: { values: readonly number[]; color: st
             transition: 'opacity 200ms ease-out',
           }}
           ref={(el) => {
-            if (el) requestAnimationFrame(() => { el.style.opacity = '1'; });
+            if (el)
+              requestAnimationFrame(() => {
+                el.style.opacity = '1';
+              });
           }}
         >
           <CellSparkline values={values} color={color} />
@@ -881,7 +920,10 @@ export const EntityDataGridSection = ({
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const phase = useVariation('phase') as PhaseVariation;
   const isPhase1 = phase === 'phase1';
-  const isHomogeneous = useMemo(() => isHomogeneousTypeGroup(category, rows), [category, rows]);
+  const { homogeneous: isHomogeneous, sharedMetricKey } = useMemo(
+    () => tableMetricScope(category, rows),
+    [category, rows]
+  );
   // Bucket key = entity type identity (Kubernetes groups by sub-type, everyone
   // else by `.type`), matching the hex-map metric catalog so metric columns and
   // the per-type column config line up. Mixed tables use a dedicated key so
@@ -892,26 +934,23 @@ export const EntityDataGridSection = ({
     const groupLabel = category === 'kubernetes' ? first?.subType ?? first?.type : first?.type;
     return bucketKeyFor(category, groupLabel);
   }, [category, rows, isHomogeneous]);
+  // Catalog used to draw metric cells. A single-type table uses its own key.
+  // A mixed table uses one member type's key only when every type shares that
+  // catalog (Hosts, Functions). Kubernetes mixes stay without a catalog.
+  const metricCatalogKey = isHomogeneous ? bucketKey : sharedMetricKey;
 
-  // Type-specific metrics (API latency, replica counts, …) only belong on a
-  // homogeneous table. A mixed bag would show signals that are meaningless
-  // for most rows.
-  const metricColumns = useMemo<CatalogColumn[]>(
-    () =>
-      isHomogeneous
-        ? getBucketMetrics(bucketKey)
-            .filter(
-              (metric) =>
-                metric.id !== ENTITY_HEALTH_METRIC_ID && metric.id !== ENTITY_ALERTS_METRIC_ID
-            )
-            .map((metric) => ({
-              id: `${METRIC_PREFIX}${metric.id}`,
-              label: metricColumnHeaderLabel(metric),
-              description: metricColumnDescription(metric),
-            }))
-        : [],
-    [bucketKey, isHomogeneous]
-  );
+  const metricColumns = useMemo<CatalogColumn[]>(() => {
+    if (!metricCatalogKey) return [];
+    return getBucketMetrics(metricCatalogKey)
+      .filter(
+        (metric) => metric.id !== ENTITY_HEALTH_METRIC_ID && metric.id !== ENTITY_ALERTS_METRIC_ID
+      )
+      .map((metric) => ({
+        id: `${METRIC_PREFIX}${metric.id}`,
+        label: metricColumnHeaderLabel(metric),
+        description: metricColumnDescription(metric),
+      }));
+  }, [metricCatalogKey]);
 
   const k8sContext = useMemo(
     () =>
@@ -921,7 +960,11 @@ export const EntityDataGridSection = ({
     [bucketKey, isHomogeneous]
   );
   const defaultVisibleIds = useMemo(() => {
-    const ids = defaultVisibleIdsFor(bucketKey, isHomogeneous);
+    const ids = defaultVisibleIdsFor(
+      bucketKey,
+      isHomogeneous,
+      sharedMetricKey ? defaultMetricColumnIds(sharedMetricKey) : []
+    );
     const withType =
       showTypeColumn && !ids.includes('type')
         ? ids[0] === 'name'
@@ -929,10 +972,16 @@ export const EntityDataGridSection = ({
           : ['type', ...ids]
         : ids;
     return isPhase1 ? withType.filter((id) => !PHASE1_HIDDEN_COLUMN_IDS.has(id)) : withType;
-  }, [bucketKey, isHomogeneous, isPhase1, showTypeColumn]);
+  }, [bucketKey, isHomogeneous, isPhase1, showTypeColumn, sharedMetricKey]);
   // A saved single-type layout (Databases → Postgres) omits Type. Category
   // grouping needs its own slot so that layout does not hide the column.
-  const columnStorageKey = showTypeColumn && isHomogeneous ? `${bucketKey}:with-type` : bucketKey;
+  // Shared-metric mixes use their own key so an older identity-only layout
+  // does not hide the new sparkline columns.
+  const columnStorageKey = sharedMetricKey
+    ? `${category}:shared-metrics`
+    : showTypeColumn && isHomogeneous
+    ? `${bucketKey}:with-type`
+    : bucketKey;
 
   const catalog = useMemo<CatalogColumn[]>(() => {
     const allColumns = [
@@ -972,8 +1021,8 @@ export const EntityDataGridSection = ({
         : [{ id: isPhase1 ? 'alerts' : 'health', direction: 'asc' as const }];
     copy.sort((a, b) => {
       for (const { id, direction } of sorters) {
-        const va = sortValueFor(a, id, bucketKey);
-        const vb = sortValueFor(b, id, bucketKey);
+        const va = sortValueFor(a, id, metricCatalogKey ?? bucketKey);
+        const vb = sortValueFor(b, id, metricCatalogKey ?? bucketKey);
         let cmp = 0;
         if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
         else cmp = String(va).localeCompare(String(vb));
@@ -983,7 +1032,7 @@ export const EntityDataGridSection = ({
     });
     return copy;
     // refreshTick re-rolls the synthesized metric readings used by sortValueFor.
-  }, [rows, sortingColumns, bucketKey, refreshTick, isPhase1]);
+  }, [rows, sortingColumns, bucketKey, metricCatalogKey, refreshTick, isPhase1]);
 
   const gridColumns = useMemo<EuiDataGridColumn[]>(
     () =>
@@ -1107,7 +1156,10 @@ export const EntityDataGridSection = ({
         return value ? <EuiBadge color="hollow">{value}</EuiBadge> : '—';
       }
       if (columnId.startsWith(METRIC_PREFIX)) {
-        const metric = findMetric(bucketKey, columnId.slice(METRIC_PREFIX.length));
+        const metric = findMetric(
+          metricCatalogKey ?? bucketKey,
+          columnId.slice(METRIC_PREFIX.length)
+        );
         if (!metric) return '—';
         const statId = inventoryGridStatForMetric(metric);
         const reading = resolveMetricReading(
@@ -1128,7 +1180,7 @@ export const EntityDataGridSection = ({
       }
       return null;
     },
-    [sortedRows, onSelectEntity, onSelectEntityAlerts, bucketKey, euiTheme]
+    [sortedRows, onSelectEntity, onSelectEntityAlerts, bucketKey, metricCatalogKey, euiTheme]
   );
 
   const descriptor = getCategoryDescriptor(category);

@@ -1487,12 +1487,15 @@ const CATALOG: Readonly<Record<BucketKey, readonly MetricDescriptor[]>> = {
   'cloud:aws lambda function': CLOUD_AWS_LAMBDA_METRICS,
   'cloud:aws s3 bucket': CLOUD_AWS_S3_METRICS,
   // Functions category — Lambda / Azure Function / GCP Cloud Function
-  // land here when grouped under the Functions nav entry instead of Cloud.
+  // share one catalog. The category key is what a mixed Functions group
+  // (group by Entity category) uses for Color by.
+  functions: CLOUD_AWS_LAMBDA_METRICS,
   'functions:aws lambda function': CLOUD_AWS_LAMBDA_METRICS,
   'functions:azure function': CLOUD_AWS_LAMBDA_METRICS,
   'functions:gcp cloud function': CLOUD_AWS_LAMBDA_METRICS,
-  // Storage category — S3 / Blob / GCS land here when grouped under
-  // the Storage nav entry instead of Cloud.
+  // Storage category — S3 / Blob / GCS share one catalog. Same reason
+  // as Functions: a mixed Storage group colors by these metrics.
+  storage: CLOUD_AWS_S3_METRICS,
   'storage:aws s3 bucket': CLOUD_AWS_S3_METRICS,
   'storage:azure blob storage': CLOUD_AWS_S3_METRICS,
   'storage:gcp cloud storage bucket': CLOUD_AWS_S3_METRICS,
@@ -1745,6 +1748,25 @@ export const getPlausibleFields = (bucketKey: BucketKey): readonly string[] => {
 
 const customMetricsStorageKey = (bucketKey: BucketKey): string =>
   `elasticOn_customMetrics_${bucketKey}`;
+
+/**
+ * Built-in metric ids for a bucket, ignoring health, alerts, and custom
+ * metrics saved on that bucket alone. Two types share a metric set when
+ * these signatures match — Hosts and Functions subtypes do, Kubernetes
+ * subtypes do not.
+ */
+export const builtInMetricSignature = (bucketKey: BucketKey): string => {
+  const customIds = new Set(loadCustomMetrics(bucketKey).map((metric) => metric.id));
+  return getBucketMetrics(bucketKey)
+    .filter(
+      (metric) =>
+        !customIds.has(metric.id) &&
+        metric.id !== ENTITY_HEALTH_METRIC_ID &&
+        metric.id !== ENTITY_ALERTS_METRIC_ID
+    )
+    .map((metric) => metric.id)
+    .join('\0');
+};
 
 export const loadCustomMetrics = (bucketKey: BucketKey): readonly CustomMetricDefinition[] => {
   try {
@@ -2173,10 +2195,7 @@ const POD_PHASE_REASONS: Record<string, readonly string[]> = {
  * Metadata value for a pod: the same phase as the header badge, plus the
  * container reason when there is one. Example: `Failed (OOMKilled)`.
  */
-export const podPhaseWithReason = (
-  entityName: string,
-  entityHealth?: EntityHealthHint
-): string => {
+export const podPhaseWithReason = (entityName: string, entityHealth?: EntityHealthHint): string => {
   const reading = resolvePodPhaseForEntity(entityName, entityHealth);
   const reasons = POD_PHASE_REASONS[reading.categoryId ?? ''] ?? [];
   if (reasons.length === 0) {
