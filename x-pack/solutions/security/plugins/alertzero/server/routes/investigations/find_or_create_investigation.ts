@@ -7,7 +7,10 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
-import type { FindOrCreateWorkerInvestigationResponse } from '@kbn/alertzero-common';
+import type {
+  FindOrCreateWorkerInvestigationRequestBody as RequestBody,
+  FindOrCreateWorkerInvestigationResponse,
+} from '@kbn/alertzero-common';
 import {
   ALERTZERO_FIND_OR_CREATE_INVESTIGATION_URL,
   API_VERSIONS,
@@ -31,7 +34,7 @@ import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 /** The review workflow each Worker runs, which is the only caller whose reopen counts. */
-const REVIEW_WORKFLOW_ID_BY_WORKER: Record<string, string> = {
+const REVIEW_WORKFLOW_ID_BY_WORKER: Record<RequestBody['workerId'], string> = {
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
 };
@@ -59,24 +62,22 @@ export const registerFindOrCreateWorkerInvestigationRoute = ({
     workflowExecutionId,
     spaceId,
     request,
-  }: {
-    workerId: string;
-    workflowExecutionId: string | undefined;
+  }: Pick<RequestBody, 'workerId' | 'workflowExecutionId'> & {
     spaceId: string;
     request: KibanaRequest;
   }): Promise<boolean> => {
-    const management = getWorkflowsManagement();
-    if (management === undefined || workflowExecutionId === undefined) {
-      return false;
-    }
-    const execution = await management.getWorkflowExecution(workflowExecutionId, spaceId, request);
-    if (execution === null) {
-      return false;
-    }
-    const reviewWorkflowId = REVIEW_WORKFLOW_ID_BY_WORKER[workerId];
-    return (
-      execution.workflowId === reviewWorkflowId ||
-      execution.originManagedWorkflowId === reviewWorkflowId
+    // No execution id, no workflows management or no such execution all read as "not a
+    // review": `execution` is then nullish and neither of its ids can match.
+    const execution =
+      workflowExecutionId === undefined
+        ? undefined
+        : await getWorkflowsManagement()?.getWorkflowExecution(
+            workflowExecutionId,
+            spaceId,
+            request
+          );
+    return [execution?.workflowId, execution?.originManagedWorkflowId].includes(
+      REVIEW_WORKFLOW_ID_BY_WORKER[workerId]
     );
   };
 
