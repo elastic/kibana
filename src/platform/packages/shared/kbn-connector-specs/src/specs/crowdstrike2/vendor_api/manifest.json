@@ -712,9 +712,10 @@
   "sources": {
     "falcon": {
       "apiVersion": "2026-11-20T00:00:07Z",
+      "captured": true,
       "fetchedAt": "2026-11-20T12:57:00.000Z",
       "format": "swagger",
-      "note": "Exported from the Falcon console's API documentation (Swagger 2.0, 'CrowdStrike API Specification', US-2 cloud), which is login-gated and has no public URL, so the source URL is a placeholder and the drift check cannot refetch it. The export was normalised before trimming: 896 references to response, parameter and schema objects the export does not define (all in operations the connector does not call) were removed, and 15 regular expressions that JavaScript cannot parse were dropped. Every Falcon cloud serves the same API from its own host; overlay.yaml lists them. A trimmed snapshot was requested by the Kibana reviewers.",
+      "note": "Exported from the Falcon console's API documentation while logged in (Swagger 2.0, 'CrowdStrike API Specification', US-2 cloud); the page is login-gated and has no public URL. The export was normalised before capture: 896 references to response, parameter and schema objects the export does not define (all in operations the connector does not call) were removed, and 15 regular expressions that JavaScript cannot parse were dropped. Every Falcon cloud serves the same API from its own host; overlay.yaml lists them.",
       "url": "https://assets.falcon.us-2.crowdstrike.com/support/api/swagger-us2.json"
     }
   }
