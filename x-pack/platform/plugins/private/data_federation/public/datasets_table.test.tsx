@@ -13,7 +13,7 @@ import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import type { DataSetWithName } from '../common';
-import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
+import { CREATE_DATASET_PATH, getCloneDatasetPath, getEditDatasetPath } from './app_paths';
 import type { DataSetListRow } from './datasets_table';
 import { DatasetsTable } from './datasets_table';
 import { docLinksMock } from './doc_links_mock';
@@ -155,6 +155,14 @@ describe('DatasetsTable', () => {
     fireEvent.click(getAllByTestId('dataSetsSetsActionsButton')[0]);
     fireEvent.click(getByTestId('dataSetsSetsEditButton'));
     expect(history.location.pathname).toBe(getEditDatasetPath('set1'));
+  });
+
+  it('navigates to the clone wizard from the row actions menu', async () => {
+    const { getAllByTestId, getByTestId, history } = renderTable({ items: twoRows });
+
+    fireEvent.click(getAllByTestId('dataSetsSetsActionsButton')[1]);
+    fireEvent.click(getByTestId('dataSetsSetsCloneButton'));
+    expect(history.location.pathname).toBe(getCloneDatasetPath('set2'));
   });
 
   it('calls onDelete from the row actions menu', async () => {

@@ -137,6 +137,45 @@ describe('CreateDatasetWizardPage', () => {
     return { ...view, history, add, remove, loadDataSets, reportUiCounter };
   };
 
+  const renderCloneWizard = (
+    cloneFromDataSet: DataSetWithName,
+    existingDataSetNames: readonly string[] = [cloneFromDataSet.name]
+  ) => {
+    const history = createMemoryHistory({
+      initialEntries: [`/datasets/clone/${cloneFromDataSet.name}`],
+    });
+    const add = jest.fn().mockResolvedValue(undefined);
+    const loadDataSets = jest.fn().mockResolvedValue(undefined);
+    const reportUiCounter = jest.fn();
+    const view = render(
+      <EuiProvider>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <Router history={history}>
+              <KibanaContextProvider
+                services={{
+                  docLinks: docLinksMock,
+                  datasetsClient: { add },
+                  dataSourcesClient: { add: jest.fn() },
+                  reportUiCounter,
+                }}
+              >
+                <CreateDatasetWizardPage
+                  dataSources={dataSources}
+                  existingDataSetNames={existingDataSetNames}
+                  loadDataSets={loadDataSets}
+                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                  cloneFromDataSet={cloneFromDataSet}
+                />
+              </KibanaContextProvider>
+            </Router>
+          </MockAppHeaderProvider>
+        </I18nProvider>
+      </EuiProvider>
+    );
+    return { ...view, history, add, loadDataSets, reportUiCounter };
+  };
+
   it('auto-selects format from resource extension', async () => {
     const { getByTestId, findByTestId } = renderWizard();
 
@@ -961,6 +1000,72 @@ describe('CreateDatasetWizardPage', () => {
 
     expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
     expect(queryByTestId('createDatasetWizardAdditionalStep')).toBeNull();
+  });
+
+  describe('clone mode', () => {
+    const sourceDataSet: DataSetWithName = {
+      name: 'logs-dataset',
+      data_source: 'source-1',
+      resource: 's3://bucket/*',
+      description: 'Source description',
+      settings: { format: 'csv', delimiter: ';', target_split_size: '64mb' },
+    };
+
+    it('prefills a new dataset from the source with "-copy" appended to the name and saves it', async () => {
+      const { getByTestId, history, add, reportUiCounter } = renderCloneWizard(sourceDataSet);
+
+      expect(getByTestId('appHeaderTitle')).toHaveTextContent(createDatasetWizardStrings.pageTitle);
+      expect(getByTestId('createDatasetName')).toHaveValue('logs-dataset-copy');
+      expect(getByTestId('createDatasetName')).not.toHaveAttribute('readonly');
+      expect(getByTestId('createDatasetResource')).toHaveValue('s3://bucket/*');
+      expect(getByTestId('createDatasetDescription')).toHaveValue('Source description');
+
+      await clickStep(getByTestId, 'review');
+      expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
+      expect(getByTestId('nextButton')).toHaveTextContent(
+        createDatasetWizardStrings.addDatasetButton
+      );
+      await clickNext(getByTestId);
+
+      await waitFor(() => {
+        expect(add).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'logs-dataset-copy',
+            data_source: 'source-1',
+            resource: 's3://bucket/*',
+            description: 'Source description',
+            settings: expect.objectContaining({
+              format: 'csv',
+              delimiter: ';',
+              target_split_size: '64mb',
+            }),
+          })
+        );
+        expect(history.location.pathname).toBe(DATASETS_PATH);
+      });
+      expect(reportUiCounter).toHaveBeenCalledWith(['dataset_create', 'dataset_create_csv']);
+    });
+
+    it('validates the copied name against existing dataset names', async () => {
+      const { getByTestId, queryByTestId, add } = renderCloneWizard(sourceDataSet, [
+        'logs-dataset',
+        'logs-dataset-copy',
+      ]);
+
+      await clickNext(getByTestId);
+      expect(queryByTestId('createDatasetWizardAdditionalStep')).toBeNull();
+      expect(getByTestId('createDatasetName')).toHaveAttribute('aria-invalid', 'true');
+
+      fireEvent.change(getByTestId('createDatasetName'), {
+        target: { value: 'logs-dataset-copy-2' },
+      });
+      await waitFor(() => expect(getByTestId('nextButton')).toBeEnabled());
+      await clickNext(getByTestId);
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+      ).toBeInTheDocument();
+      expect(add).not.toHaveBeenCalled();
+    });
   });
 
   describe('create mode step navigation', () => {

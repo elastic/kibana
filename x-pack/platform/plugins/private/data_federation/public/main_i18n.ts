@@ -113,6 +113,9 @@ export const mainTranslations = {
       editAction: i18n.translate('xpack.dataFederation.setsTable.editAction', {
         defaultMessage: 'Edit',
       }),
+      cloneAction: i18n.translate('xpack.dataFederation.setsTable.cloneAction', {
+        defaultMessage: 'Clone',
+      }),
       deleteAction: i18n.translate('xpack.dataFederation.setsTable.deleteAction', {
         defaultMessage: 'Delete',
       }),

@@ -31,7 +31,11 @@ import { buildDatasetPayload } from './build_dataset_payload';
 import { TIMESTAMP_FIELD_ID, TIMESTAMP_LOGICAL_FIELD_NAME } from './constants';
 import { type CreateDatasetFormValues } from './create_dataset_form_state';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
-import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_initial_values';
+import {
+  cloneDataSetToFormValues,
+  dataSetToFormValues,
+  emptyDatasetFormValues,
+} from './dataset_form_initial_values';
 import { StepAdditional } from './options_step/step_additional';
 import { StepDataset } from './define_step/step_dataset';
 import { StepMapping } from './mapping_step/step_mapping';
@@ -70,25 +74,29 @@ export function CreateDatasetWizardPage({
   loadDataSets,
   loadDataSources,
   initialDataSet,
+  cloneFromDataSet,
 }: {
   dataSources: DataSource[];
   existingDataSetNames: readonly string[];
   loadDataSets: () => Promise<void>;
   loadDataSources: () => Promise<void>;
   initialDataSet?: DataSetWithName;
+  /** Saved dataset whose values prefill a new dataset; ignored when `initialDataSet` is set. */
+  cloneFromDataSet?: DataSetWithName;
 }) {
   const history = useHistory();
   const {
     services: { datasetsClient, toasts, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
   const isEditMode = initialDataSet !== undefined;
+  const isCloneMode = !isEditMode && cloneFromDataSet !== undefined;
   const [saveError, setSaveError] = useState<SaveError | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const formDefaultValues = useMemo(
-    (): CreateDatasetFormValues =>
-      initialDataSet ? dataSetToFormValues(initialDataSet) : emptyDatasetFormValues(),
-    [initialDataSet]
-  );
+  const formDefaultValues = useMemo((): CreateDatasetFormValues => {
+    if (initialDataSet) return dataSetToFormValues(initialDataSet);
+    if (cloneFromDataSet) return cloneDataSetToFormValues(cloneFromDataSet);
+    return emptyDatasetFormValues();
+  }, [initialDataSet, cloneFromDataSet]);
   const methods = useForm<CreateDatasetFormValues>({
     defaultValues: formDefaultValues,
   });
@@ -97,10 +105,11 @@ export function CreateDatasetWizardPage({
   const [stepContent, setStepContent] = useState(INITIAL_STEP_CONTENT);
   // Field rules only run while their step is mounted, so a step can only be skipped over once it
   // has passed validation, and its result is re-recorded whenever it is left in either direction.
-  // A saved dataset's steps start out validated when its values pass them; a new dataset's
-  // optional steps hold defaults that always pass, while its required steps must be visited.
+  // A saved (or cloned) dataset's steps start out validated when its values pass them; a new
+  // dataset's optional steps hold defaults that always pass, while its required steps must be visited.
   const [validatedStepIds, setValidatedStepIds] = useState<ReadonlySet<DatasetWizardStepId>>(
-    () => new Set(isEditMode ? getValidStepIds(formDefaultValues) : OPTIONAL_STEP_IDS)
+    () =>
+      new Set(isEditMode || isCloneMode ? getValidStepIds(formDefaultValues) : OPTIONAL_STEP_IDS)
   );
 
   // Rules can depend on values from other steps (e.g. CSV character defaults on the format), so a

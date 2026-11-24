@@ -22,6 +22,7 @@ import type { DataFederationKibanaServices } from './types';
 import { useLoadList } from './use_load_list';
 
 import {
+  CLONE_DATASET_PATH,
   CREATE_DATASET_PATH,
   DATASETS_PATH,
   DATA_SOURCES_PATH,
@@ -140,6 +141,30 @@ export const Main: FunctionComponent = () => {
               <CreateDatasetWizardPage
                 key={initialDataSet.name}
                 initialDataSet={initialDataSet}
+                dataSources={dataSources}
+                existingDataSetNames={dataSets.map((ds) => ds.name)}
+                loadDataSets={reloadDataSets}
+                loadDataSources={reloadDataSources}
+              />
+            );
+          }}
+        />
+        <Route
+          exact
+          path={CLONE_DATASET_PATH}
+          render={({ match }) => {
+            const datasetName = decodeURIComponent(match.params.datasetName);
+            const sourceDataSet = dataSets.find((dataSet) => dataSet.name === datasetName);
+            if (!hasLoadedDataSets) {
+              return null;
+            }
+            if (!sourceDataSet) {
+              return <Redirect to={DATASETS_PATH} />;
+            }
+            return (
+              <CreateDatasetWizardPage
+                key={sourceDataSet.name}
+                cloneFromDataSet={sourceDataSet}
                 dataSources={dataSources}
                 existingDataSetNames={dataSets.map((ds) => ds.name)}
                 loadDataSets={reloadDataSets}
