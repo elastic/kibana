@@ -30,7 +30,7 @@ const isUnset = (value: unknown): value is null | undefined =>
  * The unit of a batch. With none set it uses the unit of the queue, but a batch can not count
  * requests: it counts items.
  */
-export const getOtlpBatchSizer = (batchSizer: string | undefined, queueSizer: string) =>
+export const getOtlpBatchSizer = (batchSizer: string | null | undefined, queueSizer: string) =>
   batchSizer || (queueSizer === 'requests' ? 'items' : queueSizer);
 
 const withManagedBatchDefaults = (

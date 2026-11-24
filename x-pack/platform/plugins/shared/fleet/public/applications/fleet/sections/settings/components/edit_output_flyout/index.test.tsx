@@ -2540,6 +2540,24 @@ describe('EditOutputFlyout', () => {
           expect(blockOnOverflow()).not.toBeChecked();
         });
 
+        it('should load the null settings of a stored queue as the defaults of the endpoint', () => {
+          mockStartServices(false, MANAGED_URL);
+          const { utils } = renderFlyout({
+            ...otlpOutput,
+            otlp_exporter: {
+              protocol: 'grpc',
+              endpoint: 'managed.example.com:443',
+              sending_queue: { enabled: null, sizer: null, block_on_overflow: null, batch: null },
+            },
+          } as Output);
+
+          expect(value(utils, 'otlpQueueSizerInput')).toBe('bytes');
+          expect(utils.getByTestId('settingsOutputsFlyout.otlpQueueEnabledInput')).toBeChecked();
+          expect(
+            utils.getByTestId('settingsOutputsFlyout.otlpQueueBlockOnOverflowInput')
+          ).toBeChecked();
+        });
+
         it('should keep a stored queue that opts out of the defaults of the managed endpoint', async () => {
           mockStartServices(false, MANAGED_URL);
           const { utils } = renderFlyout({

@@ -141,7 +141,7 @@ export const getOtlpQueueDefaults = ({
  * is selected, so it follows the endpoint.
  */
 const useDefaultedSelectInput = (
-  initialValue: string | undefined,
+  initialValue: string | null | undefined,
   defaultValue: string,
   disabled: boolean
 ) => {
@@ -155,11 +155,15 @@ const useDefaultedSelectInput = (
  * until it is switched, so it follows the endpoint.
  */
 const useDefaultedSwitchInput = (
-  initialValue: boolean | undefined,
+  initialValue: boolean | null | undefined,
   defaultValue: boolean,
   disabled: boolean
 ) => {
-  const input = useInput(initialValue === undefined ? '' : `${initialValue}`, undefined, disabled);
+  const input = useInput(
+    initialValue === undefined || initialValue === null ? '' : `${initialValue}`,
+    undefined,
+    disabled
+  );
   const value = input.value ? input.value === 'true' : defaultValue;
   const setValue = (newValue: SetStateAction<boolean>) =>
     input.setValue(`${typeof newValue === 'function' ? newValue(value) : newValue}`);

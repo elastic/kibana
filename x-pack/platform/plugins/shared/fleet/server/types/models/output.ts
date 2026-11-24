@@ -583,15 +583,22 @@ const OtlpExporterTlsSchema = schema.object({
   ),
 });
 
+// The settings that an update can not merge into the stored ones are written as `null`, so every
+// setting of the sending queue accepts it.
 const OtlpExporterSendingQueueSchema = schema.object({
-  enabled: schema.maybe(schema.boolean()),
+  enabled: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
   num_consumers: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
   queue_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
   sizer: schema.maybe(
-    schema.oneOf([schema.literal('requests'), schema.literal('items'), schema.literal('bytes')])
+    schema.oneOf([
+      schema.literal(null),
+      schema.literal('requests'),
+      schema.literal('items'),
+      schema.literal('bytes'),
+    ])
   ),
-  wait_for_result: schema.maybe(schema.boolean()),
-  block_on_overflow: schema.maybe(schema.boolean()),
+  wait_for_result: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
+  block_on_overflow: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
   batch: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -601,7 +608,9 @@ const OtlpExporterSendingQueueSchema = schema.object({
         ),
         min_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
         max_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
-        sizer: schema.maybe(schema.oneOf([schema.literal('items'), schema.literal('bytes')])),
+        sizer: schema.maybe(
+          schema.oneOf([schema.literal(null), schema.literal('items'), schema.literal('bytes')])
+        ),
         partition: schema.maybe(
           schema.oneOf([
             schema.literal(null),
