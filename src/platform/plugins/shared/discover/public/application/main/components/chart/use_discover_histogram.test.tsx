@@ -564,7 +564,7 @@ describe('useDiscoverHistogram', () => {
         });
       };
 
-      return { hook, main$, documents$, totalHits$, fetchAbortController, setChartState };
+      return { toolkit, hook, main$, documents$, totalHits$, fetchAbortController, setChartState };
     };
 
     it('should set main$ to PARTIAL and stop the chart loading when the chart completes with results', async () => {
@@ -584,6 +584,19 @@ describe('useDiscoverHistogram', () => {
       setChartState(UnifiedHistogramFetchStatus.complete, 5);
       expect(main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
       expect(hook.result.current.isChartLoading).toBe(true);
+    });
+
+    it('should ignore a chart which was hidden in the meantime', async () => {
+      const { toolkit, main$, setChartState } = await setupEsqlChart();
+      act(() => {
+        toolkit.internalState.dispatch(
+          toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+            appState: { hideChart: true },
+          })
+        );
+      });
+      setChartState(UnifiedHistogramFetchStatus.complete, 5);
+      expect(main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     });
 
     it('should ignore a chart without results', async () => {

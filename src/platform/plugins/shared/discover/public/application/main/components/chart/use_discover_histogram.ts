@@ -118,10 +118,14 @@ export const useDiscoverHistogram = (
     documentsState?.fetchStatus === FetchStatus.LOADING &&
     chartLoadedFor !== getAbortController();
 
+  const chartHidden = useAppStateSelector((state) => state.hideChart);
+
   const onChartLoaded = useCallback(
     (fetchAbortController: AbortController | undefined) => {
-      // ignore charts of an older or aborted fetch, they must not reveal the results of the current one
+      // ignore a hidden chart and charts of an older or aborted fetch, they must not reveal the
+      // results of the current one
       if (
+        chartHidden ||
         !fetchAbortController ||
         fetchAbortController.signal.aborted ||
         fetchAbortController !== getAbortController()
@@ -138,7 +142,7 @@ export const useDiscoverHistogram = (
         sendCompleteMsg(main$);
       }
     },
-    [getAbortController, main$, documents$]
+    [chartHidden, getAbortController, main$, documents$]
   );
 
   /**
@@ -146,7 +150,6 @@ export const useDiscoverHistogram = (
    */
 
   const [unifiedHistogramApi, setUnifiedHistogramApi] = useState<UnifiedHistogramApi>();
-  const chartHidden = useAppStateSelector((state) => state.hideChart);
 
   /**
    * Sync Unified Histogram state with Discover state
