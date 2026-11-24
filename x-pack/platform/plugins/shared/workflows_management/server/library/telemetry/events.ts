@@ -23,7 +23,7 @@ export interface TemplateInstalledEvent {
   templateVersion?: string;
   solutions?: string[];
   formFieldCount?: number;
-  requiredConnectorTypes?: string[];
+  connectorTypes?: string[];
   workflowId?: string;
   workflowValid?: boolean;
   errorType?: LibraryErrorType;
@@ -94,14 +94,15 @@ const templateInstalledSchema: RootSchema<TemplateInstalledEvent> = {
       optional: true,
     },
   },
-  requiredConnectorTypes: {
+  connectorTypes: {
     type: 'array',
     items: {
       type: 'keyword',
-      _meta: { description: 'Connector type the catalog template install form asks for' },
+      _meta: { description: 'Connector type of a connector field in the install form' },
     },
     _meta: {
-      description: 'Connector types the install form asks for (install only)',
+      description:
+        'Connector types of the install form connector fields, required or optional (install only)',
       optional: true,
     },
   },

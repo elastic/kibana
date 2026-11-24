@@ -86,7 +86,7 @@ describe('registerLibraryEventTypes', () => {
 
 describe('LibraryTelemetry', () => {
   describe('reportTemplateInstalled', () => {
-    it('reports a catalog install with its solutions, form size and connector types', () => {
+    it('reports a catalog install with its solutions, form size and the connector types of required and optional fields', () => {
       const { analytics, telemetry } = setup();
 
       telemetry.reportTemplateInstalled(catalogInstall, { id: 'workflow-1', valid: true });
@@ -99,7 +99,7 @@ describe('LibraryTelemetry', () => {
         templateVersion: '1.2.0',
         solutions: ['security'],
         formFieldCount: 4,
-        requiredConnectorTypes: ['.slack', '.cases'],
+        connectorTypes: ['.slack', '.cases'],
         workflowId: 'workflow-1',
         workflowValid: true,
       });

@@ -57,7 +57,8 @@ const findCatalogTemplate = (
 ): Template | undefined =>
   slug === undefined ? undefined : templates?.find((template) => template.slug === slug);
 
-const getRequiredConnectorTypes = (form: InstallFormField[]): string[] => [
+/** Connector types of every connector field in the form, required or optional. */
+const getConnectorTypes = (form: InstallFormField[]): string[] => [
   ...new Set(
     form.flatMap((field) => (field.inputType === 'connector' ? [field.connectorType] : []))
   ),
@@ -105,9 +106,7 @@ const buildTemplateInstalledEvent = (
     ...(templateVersion ? { templateVersion } : {}),
     ...(catalogTemplate ? { solutions: catalogTemplate.solutions ?? [] } : {}),
     ...(installForm ? { formFieldCount: installForm.length } : {}),
-    ...(describeForm && installForm
-      ? { requiredConnectorTypes: getRequiredConnectorTypes(installForm) }
-      : {}),
+    ...(describeForm && installForm ? { connectorTypes: getConnectorTypes(installForm) } : {}),
     ...('workflow' in outcome
       ? { workflowId: outcome.workflow.id, workflowValid: outcome.workflow.valid }
       : getFailureFields(outcome.error, describeForm)),

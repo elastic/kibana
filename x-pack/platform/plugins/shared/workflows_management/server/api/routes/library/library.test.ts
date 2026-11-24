@@ -654,7 +654,7 @@ describe('Library Routes', () => {
         templateVersion: '1.0.0',
         solutions: ['security'],
         formFieldCount: 1,
-        requiredConnectorTypes: ['.demo'],
+        connectorTypes: ['.demo'],
         workflowId: 'wf-1',
         workflowValid: true,
       });
