@@ -148,7 +148,7 @@ describe('createAttachmentPanelResolver', () => {
 
     expect(resolve('att-1')).toMatchObject({
       type: 'failure',
-      error: expect.stringContaining('only visualization attachments'),
+      error: expect.stringContaining('only visualization and platform.dashboard.panel attachments'),
     });
   });
 
@@ -166,5 +166,80 @@ describe('createAttachmentPanelResolver', () => {
       type: 'failure',
       error: expect.stringContaining('no readable visualization data'),
     });
+  });
+});
+
+describe('createAttachmentPanelResolver with dashboard panel pointers', () => {
+  const pointerId = 'platform.dashboard.panel-dashboard-1-panel-1';
+  const dashboardPanel = {
+    type: 'lens',
+    id: 'panel-1',
+    grid: { x: 0, y: 0, w: 24, h: 15 },
+    config: { type: 'xy', title: 'Top paths', layers: [] },
+  };
+
+  const pointer = (dashboardAttachmentId = 'dashboard-1', panelId = 'panel-1') => ({
+    id: pointerId,
+    type: 'platform.dashboard.panel',
+    current_version: 1,
+    versions: [
+      {
+        version: 1,
+        data: {
+          dashboard_attachment_id: dashboardAttachmentId,
+          panel_id: panelId,
+          label: 'Top paths',
+          panel_type: 'lens',
+          editable: true,
+        },
+      },
+    ],
+  });
+
+  const dashboard = (panels: unknown[] = [dashboardPanel]) => ({
+    id: 'dashboard-1',
+    type: 'platform.dashboard.dashboard_state',
+    current_version: 1,
+    versions: [{ version: 1, data: { title: 'Dashboard', panels } }],
+  });
+
+  const makeStore = (records: Record<string, unknown>): AttachmentStateManager =>
+    ({
+      getAttachmentRecord: jest.fn((id: string) => records[id]),
+    } as unknown as AttachmentStateManager);
+
+  const failureError = (attempt: ReturnType<ReturnType<typeof createAttachmentPanelResolver>>) => {
+    if (attempt.type !== 'failure') {
+      throw new Error('expected a failure attempt');
+    }
+    return attempt.error;
+  };
+
+  it('copies the pointed panel type and config verbatim', () => {
+    const resolve = createAttachmentPanelResolver({
+      attachments: makeStore({ [pointerId]: pointer(), 'dashboard-1': dashboard() }),
+    });
+
+    expect(resolve(pointerId)).toEqual({
+      type: 'success',
+      panelContent: { type: 'lens', config: dashboardPanel.config },
+    });
+  });
+
+  it.each([
+    [
+      'the pointed dashboard is not in the conversation',
+      { [pointerId]: pointer('missing-dashboard') },
+      'missing-dashboard',
+    ],
+    [
+      'the pointed panel no longer exists',
+      { [pointerId]: pointer(), 'dashboard-1': dashboard([]) },
+      'no longer exists',
+    ],
+  ])('fails when %s', (_, records, expected) => {
+    const resolve = createAttachmentPanelResolver({ attachments: makeStore(records) });
+
+    expect(failureError(resolve(pointerId))).toContain(expected);
   });
 });

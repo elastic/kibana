@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { parseVegaSpec } from './vis';
+export { parseVegaSpec } from '@kbn/agent-builder-dashboards-common';
 export type { VisPanelResolutionRequest } from './vis';
 export type {
   CustomContentPanelAddRequest,
@@ -16,10 +16,12 @@ export {
   buildConfigPanelContent,
   createPanelContentResolver,
   findPanelKind,
+  getConfigPanelContentType,
   getConfigPanelReferences,
-  getRequestPanelEmbeddableType,
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
+  getRequestPanelContentType,
+  getRequestPanelEmbeddableType,
   isRequestPanelType,
   requiresRegisteredSchema,
   upsertPanelContentSchema,

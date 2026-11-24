@@ -189,6 +189,10 @@ export type DashboardDatasetExample = Example<
     screenContext?: ScreenContextAttachmentData;
     /** Visualizations the agent created earlier in the conversation, sent as attachments. */
     visualizations?: readonly VisualizationAttachment[];
+    /** Seeded dashboard panels the opening turn points at, attached as panel pointers. */
+    panelPointerAttachments?: readonly string[];
+    /** A later message, sent in its own turn without attachments. */
+    laterMessage?: string;
   },
   {
     route?: DashboardRoute;
@@ -206,6 +210,8 @@ export type DashboardDatasetExample = Example<
     unavailableRequests?: readonly UnavailableRequestGold[];
     /** Nothing in the request can be built, so the turn must end without a dashboard. */
     noDashboard?: boolean;
+    /** The later message is not about the pointed panels, so its turn must not write the dashboard. */
+    laterMessageKeepsDashboard?: boolean;
     /**
      * Panel types the prompt asks for whose config schema is only in a skill reference. The agent
      * reads each type's reference before writing a panel of it.
@@ -228,8 +234,12 @@ export interface DashboardAgentTaskOutput {
   /** One agent trace per converse turn, in order; `agentTraceId` is the last. */
   agentTraceIds?: string[];
   traceId?: string;
-  /** Number of converse turns the task ran (2 when it answered the mode question). */
+  /** Number of converse turns the task ran (2 when it answered the mode question or sent a later message). */
   turns?: number;
+  /** Steps of the later message turn alone. */
+  laterMessageSteps?: Array<Record<string, unknown>>;
+  /** The dashboard attachment the later message turn changed, if any. */
+  laterMessageChangedDashboardId?: string;
   /** Structured prompts the agent raised on the opening turn. */
   openingPrompts?: unknown[];
   /** Tool ids the agent called on the opening turn. */

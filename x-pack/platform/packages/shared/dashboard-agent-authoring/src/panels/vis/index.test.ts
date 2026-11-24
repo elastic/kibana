@@ -6,10 +6,13 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import {
+  readsDataVegaEditsCannotKeep,
+  type AttachmentPanel,
+} from '@kbn/agent-builder-dashboards-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { lensPanelContentSchema, readsDataVegaEditsCannotKeep, vegaPanelContentSchema } from '.';
+import { lensPanelContentSchema, vegaPanelContentSchema } from '.';
 
 const baseRequest = {
   type: 'vis' as const,

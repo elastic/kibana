@@ -37,7 +37,13 @@ describe('AgentBuilderDashboardsPlugin', () => {
   it('registers the dashboard attachment type, skill, and SML type', () => {
     const { registerAttachmentType, registerSkill, registerSmlType } = setupPlugin();
 
-    expect(registerAttachmentType).toHaveBeenCalledTimes(1);
+    expect(registerAttachmentType).toHaveBeenCalledTimes(2);
+    expect(registerAttachmentType).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'platform.dashboard.dashboard_state' })
+    );
+    expect(registerAttachmentType).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'platform.dashboard.panel', isReadonly: true })
+    );
     expect(registerSkill).toHaveBeenCalledTimes(1);
     expect(registerSkill).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));
     expect(registerSmlType).toHaveBeenCalledTimes(1);

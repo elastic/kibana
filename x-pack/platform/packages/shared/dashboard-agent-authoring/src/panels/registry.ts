@@ -204,6 +204,14 @@ type PanelKind = (typeof PANEL_KINDS)[number];
 export const findPanelKind = (embeddableType: string): PanelKind | undefined =>
   PANEL_KINDS.find((kind) => kind.embeddableType === embeddableType);
 
+/** The request content `type` that edits panels of this embeddable type, if any. */
+export const getRequestPanelContentType = (embeddableType: string): string | undefined =>
+  REQUEST_PANEL_KINDS.find((kind) => kind.embeddableType === embeddableType)?.type;
+
+/** The by-value content `type` that edits panels of this embeddable type, if any. */
+export const getConfigPanelContentType = (embeddableType: string): string | undefined =>
+  CONFIG_PANEL_KINDS.find((kind) => kind.embeddableType === embeddableType)?.type;
+
 /**
  * Whether panels of the given embeddable type need its registered schema, so a missing one means the
  * panel type is not available in the deployment (see `schemaAlwaysRegistered`).

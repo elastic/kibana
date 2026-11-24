@@ -24,9 +24,12 @@ export type { DashboardValidationIssue, DashboardValidator } from './src/validat
 
 export {
   createPanelContentResolver,
+  findPanelKind,
+  getConfigPanelContentType,
   getConfigPanelReferences,
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
+  getRequestPanelContentType,
   getRequestPanelEmbeddableType,
   isRequestPanelType,
   parseVegaSpec,

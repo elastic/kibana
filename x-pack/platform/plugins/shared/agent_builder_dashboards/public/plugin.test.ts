@@ -10,19 +10,24 @@ import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
+import { ADD_TO_CHAT_ACTION_ID } from '@kbn/embeddable-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
 jest.mock('./attachment_types', () => ({
   registerDashboardAttachmentUiDefinition: jest.fn(() => jest.fn()),
+  registerDashboardPanelAttachmentUiDefinition: jest.fn(),
   createIdGenerator: () => ({
     current: 'draft-id',
     next: jest.fn(),
   }),
+  createStagedDashboards: jest.fn(() => ({})),
 }));
 
 describe('AgentBuilderDashboardsPlugin', () => {
   const registerActionAsync = jest.fn();
+  const attachAction = jest.fn();
   const openChat = jest.fn();
 
   const createCoreStart = (showAgentBuilder: boolean) =>
@@ -33,6 +38,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
           dashboard_v2: { showWriteControls: true },
         },
       },
+      analytics: {},
       chrome: {},
       notifications: { toasts: {} },
     } as unknown as CoreStart);
@@ -53,15 +59,17 @@ describe('AgentBuilderDashboardsPlugin', () => {
       },
       uiActions: {
         registerActionAsync,
+        attachAction,
       },
     } as unknown as AgentBuilderDashboardsPluginPublicStartDependencies);
 
   beforeEach(() => {
     registerActionAsync.mockClear();
+    attachAction.mockClear();
     openChat.mockClear();
   });
 
-  it('registers the lazy chat and enhance actions when Agent Builder is available', async () => {
+  it('registers the lazy chat and enhance actions and the Add to chat action when Agent Builder is available', async () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
     plugin.start(createCoreStart(true), createStartDependencies());
@@ -74,6 +82,8 @@ describe('AgentBuilderDashboardsPlugin', () => {
       ENHANCE_DASHBOARD_ACTION_ID,
       expect.any(Function)
     );
+    expect(registerActionAsync).toHaveBeenCalledWith(ADD_TO_CHAT_ACTION_ID, expect.any(Function));
+    expect(attachAction).toHaveBeenCalledWith(ON_OPEN_PANEL_MENU, ADD_TO_CHAT_ACTION_ID);
 
     const openChatAction = await registerActionAsync.mock.calls[0][1]();
     expect(openChatAction.id).toBe(OPEN_DASHBOARD_CHAT_ACTION_ID);
@@ -90,5 +100,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
     plugin.start(createCoreStart(false), createStartDependencies());
 
     expect(registerActionAsync).not.toHaveBeenCalled();
+    expect(attachAction).not.toHaveBeenCalled();
   });
 });

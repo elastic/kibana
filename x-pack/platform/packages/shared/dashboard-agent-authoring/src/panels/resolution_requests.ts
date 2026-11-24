@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import { isAgentEditablePanel, type AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { PanelContent } from '../resolve_panel';
 import {
   buildConfigPanelContent,
@@ -18,7 +18,7 @@ import {
 
 /**
  * Error for content that cannot edit the existing panel: it targets another kind or is an
- * attachment, or the panel is one its kind cannot edit (`canEdit`) or of an unknown type, which are
+ * attachment, or the panel is one the agent cannot edit (`isAgentEditablePanel`) or of an unknown type, which are
  * replaced only after the user confirms. Undefined when the content can edit the panel.
  */
 const getPanelEditError = (
@@ -29,7 +29,7 @@ const getPanelEditError = (
   const replaceHint = `To replace it with another kind of panel, remove "${id}" and add the new panel with a new id in the same call.`;
   const confirmReplaceHint = `Tell the user it cannot be edited, and replace it only after they confirm: then remove "${id}" and add the new panel with a new id in the same call.`;
   const kind = findPanelKind(type);
-  if (kind?.canEdit && !kind.canEdit(existingPanel)) {
+  if (kind && !isAgentEditablePanel(existingPanel)) {
     return `Panel "${id}" is a ${
       kind.uneditableDescription ?? `${kind.label} panel`
     }, so it cannot be edited. ${confirmReplaceHint}`;
