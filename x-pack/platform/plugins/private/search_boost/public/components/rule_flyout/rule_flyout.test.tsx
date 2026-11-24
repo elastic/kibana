@@ -520,6 +520,17 @@ describe('RuleFlyout', () => {
       );
     });
 
+    it("asks for a profile when the rule's profile isn't among the profiles", async () => {
+      const { onSave } = renderFlyout({ rule: { ...indicesRule, boost_profile: 'missing' } });
+
+      expect(getProfileInput()).toHaveValue('');
+
+      await save();
+
+      expect(await screen.findByText('Select a boost profile.')).toBeInTheDocument();
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
     it('opens the profile flyout with the type fixed', async () => {
       const onCreateProfile = jest.fn().mockResolvedValue(undefined);
       renderFlyout({ rule: indicesRule, onCreateProfile });

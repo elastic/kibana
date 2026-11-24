@@ -151,7 +151,8 @@ export const RuleFlyout = ({
     control,
     name: 'profileName',
     rules: {
-      validate: (profileName) => (profileName ? true : PROFILE_REQUIRED_ERROR),
+      validate: (profileName) =>
+        profiles.some(({ name }) => name === profileName) ? true : PROFILE_REQUIRED_ERROR,
       deps: ['priority'],
     },
   });
