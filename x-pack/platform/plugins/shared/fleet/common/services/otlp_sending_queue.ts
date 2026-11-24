@@ -68,6 +68,28 @@ const withManagedBatchDefaults = (
 };
 
 /**
+ * The size of a queue of the managed endpoint that is not set. The recommended size is in bytes, so
+ * a queue that counts requests or items keeps the spec default, unless a batch in the same unit
+ * does not fit in it: the queue then holds one batch of the minimum size.
+ */
+const getManagedQueueSize = (queue: OtlpSendingQueue | undefined, sizer: string) => {
+  if (!isUnset(queue?.queue_size)) {
+    return queue?.queue_size;
+  }
+  if (sizer === MANAGED_QUEUE.sizer) {
+    return MANAGED_QUEUE.queue_size;
+  }
+  const batch = queue?.batch;
+  if (batch && (batch.sizer ?? MANAGED_QUEUE.batch.sizer) === sizer) {
+    const minSize = batch.min_size ?? OTLP_QUEUE_SPEC_DEFAULTS.minSize;
+    if (minSize > OTLP_QUEUE_SPEC_DEFAULTS.queueSize) {
+      return minSize;
+    }
+  }
+  return queue?.queue_size;
+};
+
+/**
  * Fills the settings of a sending queue of the managed OTLP endpoint that are not set, left out or
  * `null`, with the ones that Elastic recommends. The settings that are set are kept, and a `null`
  * batch is kept: it turns batching off.
@@ -79,10 +101,7 @@ export const withManagedOtlpQueueDefaults = (
   queue: OtlpSendingQueue | undefined
 ): OtlpSendingQueue => {
   const sizer = queue?.sizer ?? MANAGED_QUEUE.sizer;
-  const queueSize =
-    sizer === MANAGED_QUEUE.sizer && isUnset(queue?.queue_size)
-      ? MANAGED_QUEUE.queue_size
-      : queue?.queue_size;
+  const queueSize = getManagedQueueSize(queue, sizer);
   return {
     ...queue,
     enabled: queue?.enabled ?? MANAGED_QUEUE.enabled,
@@ -91,4 +110,54 @@ export const withManagedOtlpQueueDefaults = (
     block_on_overflow: queue?.block_on_overflow ?? MANAGED_QUEUE.block_on_overflow,
     batch: queue?.batch === null ? null : withManagedBatchDefaults(queue?.batch, sizer, queueSize),
   };
+};
+
+/**
+ * Merges an update of a sending queue into the stored one, as a saved object update does: a
+ * setting that is left out keeps its stored value, and `null` removes it.
+ */
+export const mergeOtlpSendingQueue = (
+  stored: OtlpSendingQueue | null | undefined,
+  update: OtlpSendingQueue | null | undefined
+): OtlpSendingQueue | null | undefined => {
+  if (update === undefined) {
+    return stored;
+  }
+  if (update === null || !stored) {
+    return update;
+  }
+  const definedEntries = <T extends object>(value: T) =>
+    Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as Partial<T>;
+  const batch =
+    update.batch === undefined
+      ? stored.batch
+      : update.batch === null || !stored.batch
+      ? update.batch
+      : { ...stored.batch, ...definedEntries(update.batch) };
+  return { ...stored, ...definedEntries(update), batch };
+};
+
+/**
+ * The error of the sizes of a sending queue that the collector rejects, with the spec defaults for
+ * the sizes that are not set: a minimum batch size that does not fit in the queue when both use the
+ * same unit, or a maximum batch size below the minimum.
+ */
+export const getOtlpSendingQueueSizeError = (
+  queue: OtlpSendingQueue | null | undefined
+): string | undefined => {
+  const batch = queue?.batch;
+  // the collector does not check a queue that is off, nor a queue without batching
+  if (!queue || queue.enabled === false || !batch) {
+    return;
+  }
+  const queueSizer = queue.sizer ?? OTLP_QUEUE_SPEC_DEFAULTS.sizer;
+  const queueSize = queue.queue_size ?? OTLP_QUEUE_SPEC_DEFAULTS.queueSize;
+  const minSize = batch.min_size ?? OTLP_QUEUE_SPEC_DEFAULTS.minSize;
+  const maxSize = batch.max_size ?? OTLP_QUEUE_SPEC_DEFAULTS.maxSize;
+  if (getOtlpBatchSizer(batch.sizer, queueSizer) === queueSizer && minSize > queueSize) {
+    return `sending_queue.batch.min_size (${minSize}) can not be more than sending_queue.queue_size (${queueSize}) when both use the same unit`;
+  }
+  if (maxSize !== 0 && maxSize < minSize) {
+    return `sending_queue.batch.max_size (${maxSize}) can not be less than sending_queue.batch.min_size (${minSize}), unless it is 0`;
+  }
 };

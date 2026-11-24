@@ -2225,6 +2225,29 @@ describe('Output Service', () => {
           );
         });
 
+        it('rejects a sending queue whose sizes the collector rejects', async () => {
+          await expect(
+            outputService.create(
+              getMockedSoClient(),
+              esClientMock,
+              {
+                is_default: false,
+                is_default_monitoring: false,
+                name: 'OTLP batch too big',
+                type: 'otlp',
+                otlp_exporter: {
+                  endpoint: 'my-own-collector.example.com:4317',
+                  protocol: 'grpc',
+                  sending_queue: { sizer: 'items', queue_size: 100, batch: { sizer: 'items' } },
+                },
+              },
+              { id: 'output-test' }
+            )
+          ).rejects.toThrow(
+            /min_size \(8192\) can not be more than sending_queue.queue_size \(100\)/
+          );
+        });
+
         it('does not apply defaults for a non-managed OTLP endpoint', async () => {
           const soClient = getMockedSoClient();
 

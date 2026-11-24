@@ -132,7 +132,7 @@ import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
-import { applyManagedOtlpDefaults } from './utils/managed_otlp';
+import { applyManagedOtlpDefaults, validateOtlpSendingQueueSizes } from './utils/managed_otlp';
 import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
@@ -950,6 +950,10 @@ class OutputService {
 
     if (output.type === outputType.Otlp && data.type === outputType.Otlp) {
       data.otlp_exporter = applyManagedOtlpDefaults(data.otlp_exporter);
+      validateOtlpSendingQueueSizes({
+        update: data.otlp_exporter.sending_queue,
+        fromPreconfiguration: !!options?.fromPreconfiguration,
+      });
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -1622,6 +1626,14 @@ class OutputService {
 
     if (isOtlpOutput(updateData) && updateData.otlp_exporter) {
       updateData.otlp_exporter = applyManagedOtlpDefaults(updateData.otlp_exporter);
+      // the update is merged into the stored output, so the sizes are checked once merged
+      validateOtlpSendingQueueSizes({
+        update: updateData.otlp_exporter.sending_queue,
+        stored: isOtlpOutput(originalOutput)
+          ? originalOutput.otlp_exporter?.sending_queue
+          : undefined,
+        fromPreconfiguration,
+      });
     }
 
     if (isBeatsOutput(updateData) && isBeatsOutput(typedFullUpdateData)) {

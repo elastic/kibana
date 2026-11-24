@@ -7,7 +7,13 @@
 
 import type { OtlpExporterConfig } from '../../../common/types';
 import { isManagedOtlpEndpointUrl } from '../../../common/services/managed_otlp_endpoint';
-import { withManagedOtlpQueueDefaults } from '../../../common/services/otlp_sending_queue';
+import {
+  getOtlpSendingQueueSizeError,
+  mergeOtlpSendingQueue,
+  withManagedOtlpQueueDefaults,
+} from '../../../common/services/otlp_sending_queue';
+import type { OtlpSendingQueue } from '../../../common/services/otlp_sending_queue';
+import { OutputInvalidError } from '../../errors';
 
 import { appContextService } from '..';
 
@@ -37,4 +43,31 @@ export const applyManagedOtlpDefaults = (exporter: OtlpExporterConfig): OtlpExpo
     ...exporter,
     sending_queue: withManagedOtlpQueueDefaults(exporter.sending_queue),
   } as OtlpExporterConfig;
+};
+
+/**
+ * Checks the sizes of the sending queue that an output gets once it is saved: the stored queue with
+ * the update merged into it. Sizes that the collector rejects are an error, except for a
+ * preconfigured output, which only logs a warning so that it does not stop the Fleet setup.
+ */
+export const validateOtlpSendingQueueSizes = ({
+  update,
+  stored,
+  fromPreconfiguration,
+}: {
+  update: OtlpSendingQueue | null | undefined;
+  stored?: OtlpSendingQueue | null;
+  fromPreconfiguration: boolean;
+}) => {
+  const error = getOtlpSendingQueueSizeError(mergeOtlpSendingQueue(stored, update));
+  if (!error) {
+    return;
+  }
+  if (fromPreconfiguration) {
+    appContextService
+      .getLogger()
+      .warn(`The OTLP output has a sending queue that the collector rejects: ${error}`);
+    return;
+  }
+  throw new OutputInvalidError(error);
 };

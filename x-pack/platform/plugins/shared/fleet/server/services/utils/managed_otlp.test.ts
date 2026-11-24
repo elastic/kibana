@@ -7,10 +7,13 @@
 
 import { appContextService } from '../app_context';
 
+import { OutputInvalidError } from '../../errors';
+
 import {
   applyManagedOtlpDefaults,
   getManagedOtlpEndpoint,
   isManagedOtlpEndpoint,
+  validateOtlpSendingQueueSizes,
 } from './managed_otlp';
 
 jest.mock('../app_context');
@@ -182,8 +185,7 @@ describe('applyManagedOtlpDefaults', () => {
     ).toEqual({ flush_timeout: '1s', sizer: 'bytes', max_size: 4_000_000 });
   });
 
-  it('does not set a queue size for a queue that does not count bytes', () => {
-    // the flyout checks that the sizes fit, the API saves them as they are
+  it('sizes a queue that does not count bytes to hold a batch in the same unit', () => {
     expect(
       applyManagedOtlpDefaults(
         exporter({ sizer: 'items', batch: { sizer: 'items', min_size: 2000 } })
@@ -191,13 +193,100 @@ describe('applyManagedOtlpDefaults', () => {
     ).toEqual({
       enabled: true,
       sizer: 'items',
+      queue_size: 2000,
       block_on_overflow: true,
       batch: { flush_timeout: '1s', sizer: 'items', min_size: 2000 },
     });
+    // the default minimum of 8192 items does not fit in the default queue of 1000 items
+    expect(
+      applyManagedOtlpDefaults(exporter({ sizer: 'items', batch: { sizer: 'items' } }))
+        .sending_queue?.queue_size
+    ).toBe(8192);
+    // a batch that fits keeps the spec default queue size
+    expect(
+      applyManagedOtlpDefaults(
+        exporter({ sizer: 'items', batch: { sizer: 'items', min_size: 500 } })
+      ).sending_queue?.queue_size
+    ).toBeUndefined();
   });
 
   it('does not change the queue of an endpoint that is not managed', () => {
     const otherExporter = { ...exporter({ queue_size: null }), endpoint: 'collector.example.com' };
     expect(applyManagedOtlpDefaults(otherExporter)).toBe(otherExporter);
+  });
+});
+
+describe('validateOtlpSendingQueueSizes', () => {
+  const warn = jest.fn();
+
+  beforeEach(() => {
+    mockedAppContextService.getLogger.mockReturnValue({ warn } as any);
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('rejects a minimum batch size that does not fit in the queue', () => {
+    expect(() =>
+      validateOtlpSendingQueueSizes({
+        update: { sizer: 'items', batch: { sizer: 'items' } },
+        fromPreconfiguration: false,
+      })
+    ).toThrow(OutputInvalidError);
+  });
+
+  it('rejects a maximum batch size below the minimum', () => {
+    expect(() =>
+      validateOtlpSendingQueueSizes({
+        update: {
+          sizer: 'bytes',
+          queue_size: 50_000_000,
+          batch: { min_size: 2000, max_size: 1000 },
+        },
+        fromPreconfiguration: false,
+      })
+    ).toThrow(/max_size \(1000\) can not be less than/);
+  });
+
+  it('accepts sizes that fit, a queue that is off, and a queue without batching', () => {
+    [
+      { sizer: 'items' as const, queue_size: 10_000, batch: { sizer: 'items' as const } },
+      { enabled: false, sizer: 'items' as const, batch: { sizer: 'items' as const } },
+      { sizer: 'items' as const, batch: null },
+      null,
+      undefined,
+    ].forEach((update) =>
+      expect(() =>
+        validateOtlpSendingQueueSizes({ update, fromPreconfiguration: false })
+      ).not.toThrow()
+    );
+  });
+
+  it('checks the update merged into the stored queue', () => {
+    // the stored queue size holds the batch that the update sets
+    expect(() =>
+      validateOtlpSendingQueueSizes({
+        update: { sizer: 'items', batch: { sizer: 'items' } },
+        stored: { sizer: 'items', queue_size: 100_000 },
+        fromPreconfiguration: false,
+      })
+    ).not.toThrow();
+    // the stored batch does not fit in the queue size of the update
+    expect(() =>
+      validateOtlpSendingQueueSizes({
+        update: { queue_size: 500 },
+        stored: { sizer: 'items', queue_size: 100_000, batch: { sizer: 'items', min_size: 2000 } },
+        fromPreconfiguration: false,
+      })
+    ).toThrow(OutputInvalidError);
+  });
+
+  it('only warns for a preconfigured output', () => {
+    expect(() =>
+      validateOtlpSendingQueueSizes({
+        update: { sizer: 'items', batch: { sizer: 'items' } },
+        fromPreconfiguration: true,
+      })
+    ).not.toThrow();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('min_size (8192)'));
   });
 });
