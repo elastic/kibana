@@ -2039,6 +2039,19 @@ describe('Fleet integrations', () => {
       } as const;
       // Not literals at the call sites, so the extra `credentials` key needs no cast
       const providerWithCredentials = { ...provider, credentials: { account_key: 'key' } };
+      // `set()` with an array path writes a literal (dotted) key instead of expanding it
+      const dottedKeyCases: Array<[string, string[], unknown]> = [
+        [
+          'windows.response_actions',
+          ['windows.response_actions'],
+          { export_providers: [provider] },
+        ],
+        [
+          'response_actions.export_providers',
+          ['mac', 'response_actions.export_providers'],
+          [provider],
+        ],
+      ];
 
       const runUpdate = async (policy: PolicyConfig): Promise<PolicyConfig> => {
         const callback = getPackagePolicyUpdateCallback(
@@ -2114,6 +2127,16 @@ describe('Fleet integrations', () => {
 
           expect(policy.windows).not.toHaveProperty('response_actions');
         });
+
+        it.each(dottedKeyCases)(
+          'should remove the dotted key %s without an error',
+          async (_key, path, value) => {
+            const policy = await runUpdate(set(policyFactory(), path, value));
+
+            expect(policy).not.toHaveProperty(path);
+            expect(policy.windows.malware).toEqual(policyFactory().windows.malware);
+          }
+        );
       });
 
       it('should save valid export providers on every OS', async () => {
@@ -2155,35 +2178,11 @@ describe('Fleet integrations', () => {
         });
       });
 
-      describe.each([
-        ['on', true],
-        ['off', false],
-      ])('when the feature flag is %s', (_, flagEnabled) => {
-        beforeEach(() => {
-          experimentalFeatures = {
-            ...experimentalFeatures,
-            responseActionsEndpointFileExport: flagEnabled,
-          };
-        });
-
-        // `set()` with an array path writes a literal (dotted) key instead of expanding it
-        it.each([
-          [
-            'windows.response_actions',
-            ['windows.response_actions'],
-            { export_providers: [provider] },
-          ],
-          [
-            'response_actions.export_providers',
-            ['mac', 'response_actions.export_providers'],
-            [provider],
-          ],
-        ])('should reject the dotted key %s', async (key, path, value) => {
-          await expect(runUpdate(set(policyFactory(), path, value))).rejects.toMatchObject({
-            statusCode: 400,
-            apiPassThrough: true,
-            message: `response_actions can't be set with a dotted key ("${key}")`,
-          });
+      it.each(dottedKeyCases)('should reject the dotted key %s', async (key, path, value) => {
+        await expect(runUpdate(set(policyFactory(), path, value))).rejects.toMatchObject({
+          statusCode: 400,
+          apiPassThrough: true,
+          message: `response_actions can't be set with a dotted key ("${key}")`,
         });
       });
     });

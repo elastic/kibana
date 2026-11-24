@@ -40,6 +40,7 @@ import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
+  removeDottedResponseActionsKeys,
   validateExportProviders,
   validateNoDottedResponseActionsKeys,
 } from './handlers/validate_export_providers';
@@ -369,7 +370,9 @@ export const getPackagePolicyUpdateCallback = (
         endpointIntegrationData.inputs?.[0]?.config?.policy?.value
       ) {
         endpointIntegrationData.inputs[0].config.policy.value = removeExportProviders(
-          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+          removeDottedResponseActionsKeys(
+            endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+          )
         );
       }
 
@@ -388,7 +391,6 @@ export const getPackagePolicyUpdateCallback = (
       validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
 
       if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
-        // Runs whatever the feature flag: `removeExportProviders()` doesn't remove dotted keys
         validateNoDottedResponseActionsKeys(
           endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
         );
