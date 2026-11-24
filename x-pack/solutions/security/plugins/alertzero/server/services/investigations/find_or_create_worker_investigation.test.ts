@@ -35,7 +35,7 @@ const buildClient = (
   overrides: Partial<FindOrCreateWorkerInvestigationConversationClient> = {}
 ): FindOrCreateWorkerInvestigationConversationClient => ({
   create: jest.fn().mockResolvedValue(undefined),
-  get: jest.fn().mockResolvedValue({ id: conversationId }),
+  get: jest.fn().mockResolvedValue({ id: conversationId, template_id: TEMPLATE_ID_INVESTIGATION }),
   // Agent Builder reports the fields the write changed.
   patchMetadata: jest.fn().mockResolvedValue({ changedFields: ['status'] }),
   ...overrides,
@@ -48,7 +48,9 @@ const buildRerunClient = (
 ): FindOrCreateWorkerInvestigationConversationClient =>
   buildClient({
     create: jest.fn().mockRejectedValue(createConversationAlreadyExistsError({ conversationId })),
-    get: jest.fn().mockResolvedValue({ id: conversationId, metadata }),
+    get: jest
+      .fn()
+      .mockResolvedValue({ id: conversationId, template_id: TEMPLATE_ID_INVESTIGATION, metadata }),
     ...overrides,
   });
 
@@ -189,6 +191,23 @@ describe('runFindOrCreateWorkerInvestigation', () => {
         { access: 'converse' }
       );
     });
+
+    it.each([
+      ['another template', 'some-chat-template'],
+      ['no template', undefined],
+    ])(
+      'refuses to review on a conversation at the id that carries %s, without writing to it',
+      async (_scenario, templateId) => {
+        const conversationClient = buildRerunClient(undefined, {
+          get: jest.fn().mockResolvedValue({ id: conversationId, template_id: templateId }),
+        });
+
+        await expect(
+          runFindOrCreateWorkerInvestigation(input, { conversationClient })
+        ).rejects.toThrow(/exists but is not an Investigation/);
+        expect(conversationClient.patchMetadata).not.toHaveBeenCalled();
+      }
+    );
 
     it('rethrows when the verify-read fails after a 409', async () => {
       const conversationClient = buildRerunClient(undefined, {

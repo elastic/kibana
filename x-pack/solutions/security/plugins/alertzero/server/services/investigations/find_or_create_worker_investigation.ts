@@ -33,7 +33,10 @@ export interface FindOrCreateWorkerInvestigationConversationClient {
     accessControl: { access_mode: ConversationAccessControlMode; entries: never[] };
     metadata?: Record<string, MetadataFieldValue>;
   }) => Promise<ConversationWithPermissions>;
-  get: (conversationId: string) => Promise<{ metadata?: Record<string, MetadataFieldValue> }>;
+  get: (conversationId: string) => Promise<{
+    metadata?: Record<string, MetadataFieldValue>;
+    template_id?: string;
+  }>;
   patchMetadata: (
     conversationId: string,
     updates: Record<string, MetadataFieldValue>,
@@ -55,9 +58,9 @@ export interface RunFindOrCreateWorkerInvestigationDeps {
   logger?: Logger;
   /**
    * Told once this call has reopened a closed Investigation, for telemetry. Best-effort: an
-   * error it throws is logged and never fails the find-or-create.
+   * error it throws or rejects with is logged and never fails the find-or-create.
    */
-  onReopened?: (investigationConversationId: string) => void;
+  onReopened?: (investigationConversationId: string) => void | Promise<void>;
 }
 
 const readExecutionIds = (metadata: Record<string, MetadataFieldValue> | undefined): string[] => {
@@ -159,6 +162,19 @@ export const runFindOrCreateWorkerInvestigation = async (
     }
     created = false;
     const existing = await conversationClient.get(investigationConversationId);
+    // Agent Builder lets any caller create a conversation under an id of their choosing, so
+    // an existing conversation at the derived id is not by itself one of this Worker's. A
+    // conversation on another template was not minted here and is never reviewed on: the
+    // review would put its proposals and evidence into a conversation someone else owns.
+    // This does not tell a planted Investigation from a real one; that needs a binding
+    // Agent Builder holds, which it has no API for yet.
+    if (existing.template_id !== TEMPLATE_ID_INVESTIGATION) {
+      throw new Error(
+        `findOrCreateWorkerInvestigation: conversation ${investigationConversationId} exists but is not an Investigation (template: ${
+          existing.template_id ?? 'none'
+        }); refusing to review ${workerId} subject ${subjectId} on it`
+      );
+    }
     // Deliberately not swallowed. Without an Investigation id the review has nowhere to
     // propose, so a failure here fails the review and leaves the subject for the next sweep.
     // Continuing instead would propose on an Investigation this call knows is closed.
@@ -176,7 +192,7 @@ export const runFindOrCreateWorkerInvestigation = async (
         `findOrCreateWorkerInvestigation: reopened Investigation ${investigationConversationId} for ${workerId} subject ${subjectId}, which an earlier review had closed.`
       );
       try {
-        onReopened?.(investigationConversationId);
+        await onReopened?.(investigationConversationId);
       } catch (reportError) {
         logger?.debug(
           `findOrCreateWorkerInvestigation: could not report the reopen of ${investigationConversationId}: ${

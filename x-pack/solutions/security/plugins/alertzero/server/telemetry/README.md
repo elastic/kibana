@@ -162,7 +162,7 @@ Agent Builder's `agent_builder_conversation_fields_changed` counts every close, 
 
 Emitted when a Worker reopens an Investigation a previous run closed, so a new run on the same subject records into active work: the Hunt Worker on a threat report, the Rule Coverage Worker on a detection gap, the Rule Tuning Worker on a rule.
 
-- The find-or-create routes (`routes/hunt/find_or_create_investigation.ts` for Hunt, `routes/investigations/find_or_create_investigation.ts` for the Detection Watch reviews) reopen it in TypeScript, not YAML, so the route reports it once the reopen succeeds. Reporting never fails the find-or-create.
+- The find-or-create routes (`routes/hunt/find_or_create_investigation.ts` for Hunt, `routes/investigations/find_or_create_investigation.ts` for the Detection Watch reviews) reopen it in TypeScript, not YAML, so the route reports it once the reopen succeeds. Reporting never fails the find-or-create. The Detection Watch route reports it only when the `workflowExecutionId` in its body is an execution of the named Worker's review workflow, so `worker_id` on this event is the Worker that really reopened, not a value a caller claimed.
 - It has no run envelope and no `run_id`, because the routes don't verify which run called them. The Hunt route is only called by the Hunt Worker's find-or-create step; the Detection Watch route takes the Worker id in its body (an enum of the two review Workers) and attributes the event to it.
 
 | Field | Type | Required | Description |

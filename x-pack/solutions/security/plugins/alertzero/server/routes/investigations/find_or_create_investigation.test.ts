@@ -27,13 +27,23 @@ const output: FindOrCreateWorkerInvestigationResponse = {
   reopened: false,
 };
 
-const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
+const makeDeps = ({
+  spaceId = 'default',
+  execution = { workflowId: 'system-security-rule-tuning-review' },
+  workflowsManagement = true,
+}: {
+  spaceId?: string;
+  /** What the workflows client returns for the execution the body names. */
+  execution?: { workflowId?: string; originManagedWorkflowId?: string } | null;
+  workflowsManagement?: boolean;
+} = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
   const conversationClient = { create: jest.fn(), get: jest.fn(), patchMetadata: jest.fn() };
   const getScopedClient = jest.fn().mockResolvedValue(conversationClient);
   const reportTelemetryEvent = jest.fn().mockReturnValue(true);
+  const getWorkflowExecution = jest.fn().mockResolvedValue(execution);
 
   registerFindOrCreateWorkerInvestigationRoute({
     router: router as unknown as RouteDependencies['router'],
@@ -43,6 +53,12 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
       ({ getScopedClient } as unknown as ReturnType<
         RouteDependencies['getAgentBuilderConversations']
       >),
+    getWorkflowsManagement: () =>
+      workflowsManagement
+        ? ({ getWorkflowExecution } as unknown as ReturnType<
+            RouteDependencies['getWorkflowsManagement']
+          >)
+        : undefined,
     reportTelemetryEvent,
   } as unknown as RouteDependencies);
 
@@ -69,6 +85,7 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     conversationClient,
     logger,
     reportTelemetryEvent,
+    getWorkflowExecution,
   };
 };
 
@@ -93,9 +110,12 @@ describe('registerFindOrCreateWorkerInvestigationRoute', () => {
     expect(routeConfig.path).toBe('/internal/alertzero/investigations/find_or_create');
   });
 
-  it('requires write privilege, because it mints an Investigation conversation', () => {
+  it('requires write privilege and Agent Builder access, because it mints a public Investigation conversation', () => {
     const { routeConfig } = makeDeps();
-    expect(routeConfig.security.authz.requiredPrivileges).toEqual(['alertzero_write']);
+    expect(routeConfig.security.authz.requiredPrivileges).toEqual([
+      'alertzero_write',
+      'agentBuilder:read',
+    ]);
   });
 
   it('is an internal route', () => {
@@ -142,17 +162,17 @@ describe('registerFindOrCreateWorkerInvestigationRoute', () => {
     );
   });
 
-  it('reports a reopen as the Worker the body names reopening its own Investigation', async () => {
-    const { handler, context, reportTelemetryEvent } = makeDeps({ spaceId: 'soc' });
+  it("reports a reopen as the Worker the body names once its execution is one of that Worker's reviews", async () => {
+    const { handler, context, reportTelemetryEvent, getWorkflowExecution } = makeDeps({
+      spaceId: 'soc',
+    });
 
-    await handler(
-      context,
-      requestFor({ workerId: 'system-security-detection-rule-tuning' }),
-      httpServerMock.createResponseFactory()
-    );
+    const request = requestFor({ workerId: 'system-security-detection-rule-tuning' });
+    await handler(context, request, httpServerMock.createResponseFactory());
     const { onReopened } = runFindOrCreateWorkerInvestigationMock.mock.calls[0][1];
-    onReopened?.('3f1c2b4a-5d6e-5f70-8a9b-0c1d2e3f4a5b');
+    await onReopened?.('3f1c2b4a-5d6e-5f70-8a9b-0c1d2e3f4a5b');
 
+    expect(getWorkflowExecution).toHaveBeenCalledWith('run-1', 'soc', request);
     expect(reportTelemetryEvent.mock.calls).toEqual([
       [
         'alertzero_worker_investigation_reopened',
@@ -164,6 +184,62 @@ describe('registerFindOrCreateWorkerInvestigationRoute', () => {
         },
       ],
     ]);
+  });
+
+  it('counts a managed run of the review by its origin workflow id too', async () => {
+    const { handler, context, reportTelemetryEvent } = makeDeps({
+      execution: {
+        workflowId: 'some-installed-copy',
+        originManagedWorkflowId: 'system-security-coverage-review',
+      },
+    });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+    await runFindOrCreateWorkerInvestigationMock.mock.calls[0][1].onReopened?.('inv-1');
+
+    expect(reportTelemetryEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['the execution belongs to another workflow', { workflowId: 'system-security-journal-note' }],
+    [
+      "the execution belongs to the other Worker's review",
+      { workflowId: 'system-security-rule-tuning-review' },
+    ],
+    ['no execution exists under that id', null],
+  ])("does not count a reopen as the Worker's when %s", async (_scenario, execution) => {
+    const { handler, context, reportTelemetryEvent, logger } = makeDeps({ execution });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+    await runFindOrCreateWorkerInvestigationMock.mock.calls[0][1].onReopened?.('inv-1');
+
+    expect(reportTelemetryEvent).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('not a system-security-detection-rule-coverage review')
+    );
+  });
+
+  it('does not count a reopen the body ties to no execution, without looking one up', async () => {
+    const { handler, context, reportTelemetryEvent, getWorkflowExecution } = makeDeps();
+
+    await handler(
+      context,
+      requestFor({ workflowExecutionId: undefined }),
+      httpServerMock.createResponseFactory()
+    );
+    await runFindOrCreateWorkerInvestigationMock.mock.calls[0][1].onReopened?.('inv-1');
+
+    expect(getWorkflowExecution).not.toHaveBeenCalled();
+    expect(reportTelemetryEvent).not.toHaveBeenCalled();
+  });
+
+  it('does not count a reopen when workflows management is unavailable', async () => {
+    const { handler, context, reportTelemetryEvent } = makeDeps({ workflowsManagement: false });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+    await runFindOrCreateWorkerInvestigationMock.mock.calls[0][1].onReopened?.('inv-1');
+
+    expect(reportTelemetryEvent).not.toHaveBeenCalled();
   });
 
   it('reports nothing when the find-or-create reopened nothing', async () => {

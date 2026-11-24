@@ -528,7 +528,7 @@ describe('detection rule workflows', () => {
       ).toEqual([
         ['propose_query'],
         ['propose_risk_score'],
-        ['attach_exception', 'propose_exception'],
+        ['attach_exception', 'resume_exception_attachment', 'propose_exception'],
         ['incomplete_threshold_output', 'propose_threshold'],
         ['propose_schedule'],
       ]);

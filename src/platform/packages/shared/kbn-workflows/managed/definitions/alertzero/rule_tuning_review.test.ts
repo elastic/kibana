@@ -167,6 +167,25 @@ describe('rule_tuning_review exception name', () => {
     expect(actionInput).toBe(NAME_OUTPUT);
   });
 
+  // A resumed review finds the earlier review's card under the fixed id. The add then
+  // reports it as existing, and this review's exception is written as a new version of
+  // it, with the same name and entries the action input carries.
+  it("writes the exception over the earlier review's card when the add finds it", () => {
+    const attach = stepByName('attach_exception');
+    const resume = stepByName('resume_exception_attachment');
+    const index = (name: string) => allSteps.findIndex((step) => step.name === name);
+
+    expect(resume?.type).toBe('ai.attachment.update');
+    expect(resume?.if).toContain('steps.find_or_create_investigation.output.created != true');
+    expect(resume?.if).toContain('steps.attach_exception.error != null');
+    expect(resume?.if).toContain("steps.attach_exception.error.message contains 'already exists'");
+    expect(resume?.with?.attachment_id).toBe(attach?.with?.id);
+    expect(resume?.with?.conversation_id).toBe(attach?.with?.conversation_id);
+    expect(resume?.with?.data).toEqual(attach?.with?.data);
+    expect(index('attach_exception') + 1).toBe(index('resume_exception_attachment'));
+    expect(index('resume_exception_attachment')).toBeLessThan(index('propose_exception'));
+  });
+
   describe('name template', () => {
     it('uses the descriptive name from the agent', () => {
       expect(renderName('Known non-threat hosts excluded from indicator match')).toBe(

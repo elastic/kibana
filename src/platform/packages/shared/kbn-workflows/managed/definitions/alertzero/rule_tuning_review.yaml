@@ -1524,6 +1524,27 @@ steps:
               render_inline: true
             on-failure:
               continue: true
+          # A resumed review finds the earlier review's exception card under this id, so
+          # the add reports it as existing. Write this review's exception as a new
+          # version of it instead: the card must show the entries approving creates,
+          # not the ones an expired proposal would have.
+          - name: resume_exception_attachment
+            type: ai.attachment.update
+            if: >-
+              ${{ steps.find_or_create_investigation.output.created != true
+                and steps.attach_exception.error != null
+                and steps.attach_exception.error.message contains 'already exists' }}
+            with:
+              conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+              attachment_id: proposed-exception
+              data:
+                name: "{{ steps.build_exception_name.output.name }}"
+                description: "Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
+                entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
+              description: "Proposed exception for rule: {{ steps.fetch_rule.output.name }}"
+              render_inline: true
+            on-failure:
+              continue: true
           - name: propose_exception
             type: workflow.execute
             with:
