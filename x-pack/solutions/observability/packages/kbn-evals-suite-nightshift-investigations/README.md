@@ -465,15 +465,21 @@ workflow.
 ### Sandbox egress
 
 The sandbox reaches only its connectors' hosts and the space's sandbox egress rules (Nightshift
-settings, `PUT /internal/nightshift/sandbox_allowlist`). Next to its custom context, the eval
-replaces the default space's rules with the ones the dataset needs
+settings, `PUT /internal/nightshift/sandbox_allowlist`). Space setup adds `GET,POST` prefix rules
+for the three repositories below, which connector probes and the other evals run with. Investigation
+datasets replace them, next to their custom context, with the rules the dataset needs
 ([`sandbox_allowlist.ts`](evals/investigation/sandbox_allowlist.ts)): git smart HTTP to the
 repositories that context points at, `elastic/kibana` and `elastic/elasticsearch` for Customer-0
-and `open-telemetry/opentelemetry-demo` for ORCA. Only `git clone` and `git fetch` get through,
-so the rest of github.com, including issues and pull requests, stays blocked. Other datasets run
-with no rules. The reinforcement micro-eval restores the previous rules when it ends. ORCA checks
-out the demo's pinned commit; the Customer-0 retrospective guardrail has the agent check out the
-last commit before the alert, so it doesn't read code fixed after the incident.
+and recovery cases and `open-telemetry/opentelemetry-demo` for ORCA. Only `git clone` and
+`git fetch` get through, so the rest of github.com, including issues and pull requests, stays
+blocked. Other investigation datasets run with no rules. Investigation runs and the reinforcement
+micro-eval snapshot the space's rules before setup and restore them when they end, so a run on an
+existing stack leaves its rules as it found them.
+
+ORCA checks out the demo's pinned commit. The Customer-0 and recovery guardrails have the agent
+check out main's last commit before the alert or the recovery and drop every newer ref and reflog
+entry, so `git log --all` can't reach code fixed after the incident. An agent that fetches again
+can still see later commits; the guardrail rules out using them.
 
 Every investigation records `sandbox_egress_denied`, the number of sandbox commands the firewall
 refused: `CONNECT tunnel failed, response 403`, a `sandbox_egress_denied` response, or a 403 from

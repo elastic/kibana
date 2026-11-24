@@ -21,12 +21,20 @@ export const CUSTOMER0_CUSTOM_CONTEXT: readonly string[] = [
 ];
 
 /**
+ * Source code as it was at a past moment: the last main commit before it, with every ref and reflog
+ * entry dropped so `git log --all` can't reach later commits. Objects stay fetchable on demand.
+ */
+const historicalCheckout = (moment: string): string =>
+  `Read source code as it was at the ${moment}, not today's: instead of a shallow clone, clone the week before it, check out main's last commit before it and drop the newer refs, e.g. \`git clone --filter=blob:none --no-checkout --shallow-since=<${moment} date minus 7 days> https://github.com/elastic/kibana && git -C kibana checkout --detach $(git -C kibana rev-list -1 --first-parent --before=<${moment} timestamp> HEAD) && git -C kibana for-each-ref --format='%(refname)' | xargs -n1 git -C kibana update-ref --no-deref -d && git -C kibana reflog expire --expire=now --all\`.`;
+
+/**
  * Customer0 cases are past, resolved incidents, so unlike production the investigation could read
  * the humans' diagnosis or the fix. This eval-only snippet keeps it to evidence that existed when
  * the alert fired; `rca_anti_leakage` still scores what it actually accessed.
  */
 export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
-  "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game. Read source code as it was when the alert fired, not today's: instead of a shallow clone, clone the week before the alert and check out its last commit before the alert, e.g. `git clone --filter=blob:none --no-checkout --shallow-since=<alert date minus 7 days> https://github.com/elastic/kibana && git -C kibana checkout $(git -C kibana rev-list -1 --first-parent --before=<alert timestamp> HEAD)`.";
+  "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game. " +
+  historicalCheckout('alert');
 
 /**
  * Recovery cases replay the round that follows an alert's recovery. The recovery is in the past, so
@@ -34,7 +42,8 @@ export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
  * re-fire or fix out of the verdict while leaving the alert's whole lifetime in reach.
  */
 export const RECOVERY_GUARDRAIL_CONTEXT =
-  "Evaluation guardrail: this alert recovered in the past. Treat the recovery's timestamp as the present, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the recovery; the alert's whole earlier lifetime stays readable. Do not read human discussion of this incident (Slack or chat threads, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the recovery. Code, commits, deploys and config changes from before the recovery are fair game.";
+  "Evaluation guardrail: this alert recovered in the past. Treat the recovery's timestamp as the present, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the recovery; the alert's whole earlier lifetime stays readable. Do not read human discussion of this incident (Slack or chat threads, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the recovery. Code, commits, deploys and config changes from before the recovery are fair game. " +
+  historicalCheckout('recovery');
 
 /** ORCA's environment is built on the upstream demo at this commit (paper, Appendix I). */
 export const ORCA_DEMO_COMMIT = 'fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733';

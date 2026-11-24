@@ -223,11 +223,13 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
         dataset.examples.length * repetitions * (CUSTOMER0_REINFORCEMENT_TIMEOUT_MS + 5 * 60_000) +
           SETUP_TIMEOUT_MS
       );
-      await setup([NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID]);
-      await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: false });
-      const previousCustomContext = await readCustomContext(fetch);
+      // Snapshot the egress rules before setup, which adds repository rules of its own.
       const previousSandboxAllowlist = await readSandboxAllowlist(fetch);
+      let previousCustomContext: string[] | undefined;
       try {
+        await setup([NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID]);
+        await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: false });
+        previousCustomContext = await readCustomContext(fetch);
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         await replaceSandboxAllowlist(fetch, getDatasetSandboxAllowlist(dataset));
         const [experiment] = await executorClient.runExperiment(
@@ -254,8 +256,17 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
           repetitions,
         });
       } finally {
-        await replaceCustomContext(fetch, previousCustomContext);
-        await replaceSandboxAllowlist(fetch, previousSandboxAllowlist);
+        // Independent, so a failed custom-context restore can't leave the eval's rules in place.
+        const savedContext = previousCustomContext;
+        const restored = await Promise.allSettled([
+          savedContext ? replaceCustomContext(fetch, savedContext) : Promise.resolve(),
+          replaceSandboxAllowlist(fetch, previousSandboxAllowlist),
+        ]);
+        for (const result of restored) {
+          if (result.status === 'rejected') {
+            log.error(`Restoring the space's settings failed: ${String(result.reason)}`);
+          }
+        }
       }
     }
   );
