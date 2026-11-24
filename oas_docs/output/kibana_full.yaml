@@ -186399,10 +186399,14 @@ components:
                   enum:
                     - items
                     - bytes
+                    - null
+                  nullable: true
                   type: string
             block_on_overflow:
+              nullable: true
               type: boolean
             enabled:
+              nullable: true
               type: boolean
             num_consumers:
               nullable: true
@@ -186415,8 +186419,11 @@ components:
                 - requests
                 - items
                 - bytes
+                - null
+              nullable: true
               type: string
             wait_for_result:
+              nullable: true
               type: boolean
         timeout:
           maxLength: 64
@@ -186659,10 +186666,14 @@ components:
                   enum:
                     - items
                     - bytes
+                    - null
+                  nullable: true
                   type: string
             block_on_overflow:
+              nullable: true
               type: boolean
             enabled:
+              nullable: true
               type: boolean
             num_consumers:
               nullable: true
@@ -186675,8 +186686,11 @@ components:
                 - requests
                 - items
                 - bytes
+                - null
+              nullable: true
               type: string
             wait_for_result:
+              nullable: true
               type: boolean
         timeout:
           maxLength: 64
@@ -186882,10 +186896,14 @@ components:
                   enum:
                     - items
                     - bytes
+                    - null
+                  nullable: true
                   type: string
             block_on_overflow:
+              nullable: true
               type: boolean
             enabled:
+              nullable: true
               type: boolean
             num_consumers:
               nullable: true
@@ -186898,8 +186916,11 @@ components:
                 - requests
                 - items
                 - bytes
+                - null
+              nullable: true
               type: string
             wait_for_result:
+              nullable: true
               type: boolean
         timeout:
           maxLength: 64
@@ -187142,10 +187163,14 @@ components:
                   enum:
                     - items
                     - bytes
+                    - null
+                  nullable: true
                   type: string
             block_on_overflow:
+              nullable: true
               type: boolean
             enabled:
+              nullable: true
               type: boolean
             num_consumers:
               nullable: true
@@ -187158,8 +187183,11 @@ components:
                 - requests
                 - items
                 - bytes
+                - null
+              nullable: true
               type: string
             wait_for_result:
+              nullable: true
               type: boolean
         timeout:
           maxLength: 64
