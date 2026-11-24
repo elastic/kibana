@@ -11,7 +11,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { OutputFormInputsType } from './use_output_form';
-import { hasOtlpQueueSettings, hasOtlpRetrySettings } from './use_otlp_inputs';
+import {
+  getOtlpQueueDefaults,
+  getOtlpQueueDefaultsOfInputs,
+  hasOtlpQueueSettings,
+  hasOtlpRetrySettings,
+} from './use_otlp_inputs';
 import { OtlpDefaultHint } from './otlp_spec';
 import {
   OtlpSelectSetting,
@@ -33,104 +38,131 @@ const BATCH_SAME_AS_QUEUE_OPTION = {
     defaultMessage: 'Same as the queue',
   }),
 };
+const BATCH_MANAGED_DEFAULT_OPTION = {
+  value: '',
+  text: i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpBatchSizerManagedDefault', {
+    defaultMessage: 'Default (bytes)',
+  }),
+};
 
-const OtlpBatchFields: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ inputs }) => (
-  <>
-    <OtlpTextSetting
-      label={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.otlpBatchFlushTimeoutLabel"
-          defaultMessage="Flush timeout (optional)"
-        />
-      }
-      helpText={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.otlpBatchFlushTimeoutHelpText"
-          defaultMessage="Time after which a batch is sent, whatever its size. {defaultHint}"
-          values={{ defaultHint: <OtlpDefaultHint defaultValue="200ms" /> }}
-        />
-      }
-      input={inputs.otlpBatchFlushTimeoutInput}
-      testSubj="otlpBatchFlushTimeoutInput"
-      placeholder="200ms"
-    />
-    <OtlpTextSetting
-      label={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.otlpBatchMinSizeLabel"
-          defaultMessage="Minimum batch size (optional)"
-        />
-      }
-      helpText={<OtlpDefaultHint defaultValue="8192" />}
-      input={inputs.otlpBatchMinSizeInput}
-      testSubj="otlpBatchMinSizeInput"
-      placeholder="8192"
-    />
-    <OtlpTextSetting
-      label={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.otlpBatchMaxSizeLabel"
-          defaultMessage="Maximum batch size (optional)"
-        />
-      }
-      helpText={
-        <OtlpDefaultHint
-          defaultText={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.otlpBatchMaxSizeDefault"
-              defaultMessage="0, there is no maximum size"
+const getBatchSizerOptions = (inputs: OutputFormInputsType, isManaged: boolean) => {
+  // a unit that is stored can not be unset
+  if (inputs.otlpBatchSizerInput.hasStoredValue) {
+    return BATCH_UNIT_OPTIONS;
+  }
+  // the server gives a batch of the managed endpoint that has no unit the bytes
+  if (isManaged) {
+    return [BATCH_MANAGED_DEFAULT_OPTION, ...BATCH_UNIT_OPTIONS];
+  }
+  // a batch can not use the requests of the queue
+  return inputs.otlpQueueSizerInput.value === 'requests'
+    ? BATCH_UNIT_OPTIONS
+    : [BATCH_SAME_AS_QUEUE_OPTION, ...BATCH_UNIT_OPTIONS];
+};
+
+const OtlpBatchFields: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ inputs }) => {
+  const defaults = getOtlpQueueDefaultsOfInputs(inputs);
+  return (
+    <>
+      <OtlpTextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpBatchFlushTimeoutLabel"
+            defaultMessage="Flush timeout (optional)"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpBatchFlushTimeoutHelpText"
+            defaultMessage="Time after which a batch is sent, whatever its size. {defaultHint}"
+            values={{ defaultHint: <OtlpDefaultHint defaultValue={defaults.flushTimeout} /> }}
+          />
+        }
+        input={inputs.otlpBatchFlushTimeoutInput}
+        testSubj="otlpBatchFlushTimeoutInput"
+        placeholder={defaults.flushTimeout}
+      />
+      <OtlpTextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpBatchMinSizeLabel"
+            defaultMessage="Minimum batch size (optional)"
+          />
+        }
+        helpText={<OtlpDefaultHint defaultValue={`${defaults.minSize}`} />}
+        input={inputs.otlpBatchMinSizeInput}
+        testSubj="otlpBatchMinSizeInput"
+        placeholder={`${defaults.minSize}`}
+      />
+      <OtlpTextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpBatchMaxSizeLabel"
+            defaultMessage="Maximum batch size (optional)"
+          />
+        }
+        helpText={
+          defaults.maxSize ? (
+            <OtlpDefaultHint defaultValue={`${defaults.maxSize}`} />
+          ) : (
+            <OtlpDefaultHint
+              defaultText={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.otlpBatchMaxSizeDefault"
+                  defaultMessage="0, there is no maximum size"
+                />
+              }
             />
-          }
-        />
-      }
-      input={inputs.otlpBatchMaxSizeInput}
-      testSubj="otlpBatchMaxSizeInput"
-      placeholder="0"
-    />
-    <OtlpSelectSetting
-      label={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.otlpBatchSizerLabel"
-          defaultMessage="Batch size unit"
-        />
-      }
-      helpText={
-        <OtlpDefaultHint
-          defaultText={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.otlpBatchSizerDefault"
-              defaultMessage="the unit of the queue size, or items if it is not set"
+          )
+        }
+        input={inputs.otlpBatchMaxSizeInput}
+        testSubj="otlpBatchMaxSizeInput"
+        placeholder={`${defaults.maxSize}`}
+      />
+      <OtlpSelectSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpBatchSizerLabel"
+            defaultMessage="Batch size unit"
+          />
+        }
+        helpText={
+          defaults.isManaged ? (
+            <OtlpDefaultHint defaultValue="bytes" />
+          ) : (
+            <OtlpDefaultHint
+              defaultText={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.otlpBatchSizerDefault"
+                  defaultMessage="the unit of the queue size, or items if it is not set"
+                />
+              }
             />
-          }
-        />
-      }
-      input={inputs.otlpBatchSizerInput}
-      testSubj="otlpBatchSizerInput"
-      // a batch can not use the requests of the queue, and a unit that is stored can not be unset
-      options={
-        inputs.otlpQueueSizerInput.value === 'requests' || inputs.otlpBatchSizerInput.hasStoredValue
-          ? BATCH_UNIT_OPTIONS
-          : [BATCH_SAME_AS_QUEUE_OPTION, ...BATCH_UNIT_OPTIONS]
-      }
-    />
-    <OtlpTextSetting
-      label={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.otlpBatchMetadataKeysLabel"
-          defaultMessage="Partition by metadata keys (optional)"
-        />
-      }
-      helpText={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.otlpBatchMetadataKeysHelpText"
-          defaultMessage="Client metadata keys, separated by commas, used to batch data separately. Default: none."
-        />
-      }
-      input={inputs.otlpBatchMetadataKeysInput}
-      testSubj="otlpBatchMetadataKeysInput"
-    />
-  </>
-);
+          )
+        }
+        input={inputs.otlpBatchSizerInput}
+        testSubj="otlpBatchSizerInput"
+        options={getBatchSizerOptions(inputs, defaults.isManaged)}
+      />
+      <OtlpTextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpBatchMetadataKeysLabel"
+            defaultMessage="Partition by metadata keys (optional)"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpBatchMetadataKeysHelpText"
+            defaultMessage="Client metadata keys, separated by commas, used to batch data separately. Default: none."
+          />
+        }
+        input={inputs.otlpBatchMetadataKeysInput}
+        testSubj="otlpBatchMetadataKeysInput"
+      />
+    </>
+  );
+};
 
 const OtlpBatchSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
   inputs,
@@ -169,6 +201,7 @@ export const OtlpSendingQueueSettings: React.FunctionComponent<{
 }> = ({ inputs }) => {
   // collapsed unless the output has queue settings of its own, whatever is edited afterwards
   const [initialIsOpen] = useState(() => hasOtlpQueueSettings(inputs));
+  const defaults = getOtlpQueueDefaultsOfInputs(inputs);
 
   return (
     <EuiAccordion
@@ -227,12 +260,12 @@ export const OtlpSendingQueueSettings: React.FunctionComponent<{
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.otlpQueueSizeHelpText"
               defaultMessage="Maximum size of the queue, in the unit below. {defaultHint}"
-              values={{ defaultHint: <OtlpDefaultHint defaultValue="1000" /> }}
+              values={{ defaultHint: <OtlpDefaultHint defaultValue={`${defaults.queueSize}`} /> }}
             />
           }
           input={inputs.otlpQueueSizeInput}
           testSubj="otlpQueueSizeInput"
-          placeholder="1000"
+          placeholder={`${defaults.queueSize}`}
         />
         <OtlpSelectSetting
           label={
@@ -241,7 +274,17 @@ export const OtlpSendingQueueSettings: React.FunctionComponent<{
               defaultMessage="Queue size unit"
             />
           }
-          helpText={<OtlpDefaultHint defaultValue="requests" />}
+          helpText={
+            <OtlpDefaultHint
+              defaultValue={
+                getOtlpQueueDefaults({
+                  isManaged: defaults.isManaged,
+                  queueSizer: '',
+                  batchSizer: '',
+                }).sizer
+              }
+            />
+          }
           input={inputs.otlpQueueSizerInput}
           testSubj="otlpQueueSizerInput"
           options={QUEUE_SIZER_OPTIONS}
@@ -268,7 +311,9 @@ export const OtlpSendingQueueSettings: React.FunctionComponent<{
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.otlpQueueBlockOnOverflowHelpText"
               defaultMessage="Otherwise data is rejected when the queue is full. {defaultHint}"
-              values={{ defaultHint: <OtlpDefaultHint defaultValue="false" /> }}
+              values={{
+                defaultHint: <OtlpDefaultHint defaultValue={`${defaults.blockOnOverflow}`} />,
+              }}
             />
           }
           input={inputs.otlpQueueBlockOnOverflowInput}

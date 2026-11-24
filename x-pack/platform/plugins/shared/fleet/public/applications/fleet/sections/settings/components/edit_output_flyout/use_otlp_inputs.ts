@@ -6,6 +6,8 @@
  */
 
 import { useEffect } from 'react';
+import type { SetStateAction } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type {
@@ -51,24 +53,102 @@ export const OTLP_HTTP_DEFAULT_ENCODING: OtlpHttpEncoding = 'proto';
 // the spec enables it by default, so the switch is on unless an output turned it off
 const OTLP_HTTP_DEFAULT_FORCE_ATTEMPT_HTTP2 = true;
 
-// The sending queue is prefilled with the settings that Elastic recommends, for a new output. The
-// other settings of the sending queue and the retry have no value, so the spec defaults apply.
+// The server fills the empty settings of the sending queue of the managed endpoint with the ones
+// that Elastic recommends. On any other endpoint, the spec defaults apply.
 const QUEUE_DEFAULTS = MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue;
 
-/** The spec defaults of the settings that have a switch or a select, so they can not be empty. */
+/** The spec defaults of the sending queue and the retry. */
 export const OTLP_QUEUE_SPEC_DEFAULT_SIZER = 'requests';
 const OTLP_QUEUE_SPEC_DEFAULT_SIZE = 1000;
+const OTLP_QUEUE_SPEC_DEFAULT_BLOCK_ON_OVERFLOW = false;
+const OTLP_BATCH_SPEC_DEFAULT_FLUSH_TIMEOUT = '200ms';
 const OTLP_BATCH_SPEC_DEFAULT_MIN_SIZE = 8192;
+const OTLP_BATCH_SPEC_DEFAULT_MAX_SIZE = 0;
 const OTLP_RETRY_SPEC_DEFAULT_INITIAL_INTERVAL = '5s';
 const OTLP_RETRY_SPEC_DEFAULT_MAX_INTERVAL = '30s';
 const OTLP_RETRY_SPEC_DEFAULT_MAX_ELAPSED_TIME = '5m';
 
 /**
- * The unit of a batch. With none set it uses the unit of the queue, but a batch can not count
- * requests: it counts items.
+ * The defaults that apply to the empty settings of the sending queue: the ones that the server sets
+ * on the managed endpoint, or the spec defaults. The sizes that Elastic recommends are in bytes,
+ * so they only apply to a queue or a batch that counts bytes.
  */
-const getEffectiveBatchSizer = (batchSizer: string, queueSizer: string) =>
-  batchSizer || (queueSizer === 'requests' ? 'items' : queueSizer);
+export const getOtlpQueueDefaults = ({
+  isManaged,
+  queueSizer,
+  batchSizer,
+}: {
+  isManaged: boolean;
+  /** The unit of the queue, empty for the default one. */
+  queueSizer: string;
+  /** The unit of the batch, empty for the default one. */
+  batchSizer: string;
+}) => {
+  const sizer: string =
+    queueSizer || (isManaged ? QUEUE_DEFAULTS.sizer : OTLP_QUEUE_SPEC_DEFAULT_SIZER);
+  // with no unit, a batch uses the one of the queue, but it can not count requests: it counts items
+  const effectiveBatchSizer: string =
+    batchSizer || (isManaged ? QUEUE_DEFAULTS.batch.sizer : sizer === 'requests' ? 'items' : sizer);
+  const managedBatchSize = isManaged && effectiveBatchSizer === QUEUE_DEFAULTS.batch.sizer;
+  return {
+    isManaged,
+    sizer,
+    queueSize:
+      isManaged && sizer === QUEUE_DEFAULTS.sizer
+        ? QUEUE_DEFAULTS.queue_size
+        : OTLP_QUEUE_SPEC_DEFAULT_SIZE,
+    blockOnOverflow: isManaged
+      ? QUEUE_DEFAULTS.block_on_overflow
+      : OTLP_QUEUE_SPEC_DEFAULT_BLOCK_ON_OVERFLOW,
+    flushTimeout: isManaged
+      ? QUEUE_DEFAULTS.batch.flush_timeout
+      : OTLP_BATCH_SPEC_DEFAULT_FLUSH_TIMEOUT,
+    batchSizer: effectiveBatchSizer,
+    minSize: managedBatchSize ? QUEUE_DEFAULTS.batch.min_size : OTLP_BATCH_SPEC_DEFAULT_MIN_SIZE,
+    maxSize: managedBatchSize ? QUEUE_DEFAULTS.batch.max_size : OTLP_BATCH_SPEC_DEFAULT_MAX_SIZE,
+  };
+};
+
+/**
+ * A select whose empty value is the default of the endpoint: its value is the default until one
+ * is selected, so it follows the endpoint.
+ */
+const useDefaultedSelectInput = (
+  initialValue: string | undefined,
+  defaultValue: string,
+  disabled: boolean
+) => {
+  const input = useInput(initialValue ?? '', undefined, disabled);
+  const value = input.value || defaultValue;
+  return { ...input, value, props: { ...input.props, value } };
+};
+
+/**
+ * A switch whose unset value is the default of the endpoint: it is on or off as the default is,
+ * until it is switched, so it follows the endpoint.
+ */
+const useDefaultedSwitchInput = (
+  initialValue: boolean | undefined,
+  defaultValue: boolean,
+  disabled: boolean
+) => {
+  const input = useInput(initialValue === undefined ? '' : `${initialValue}`, undefined, disabled);
+  const value = input.value ? input.value === 'true' : defaultValue;
+  const setValue = (newValue: SetStateAction<boolean>) =>
+    input.setValue(`${typeof newValue === 'function' ? newValue(value) : newValue}`);
+  return {
+    value,
+    props: {
+      onChange: (e: EuiSwitchEvent) => setValue(e.target.checked),
+      checked: value,
+      disabled,
+    },
+    validate: () => true as const,
+    formRowProps: {},
+    setValue,
+    hasChanged: input.hasChanged,
+  };
+};
 
 /** Re-validates an input that shows an error when what its check depends on changes. */
 const useRevalidateWhenChanged = (
@@ -119,11 +199,16 @@ export function useOtlpInputs(
   // a new output uses gRPC
   const otlpProtocolInput = useInput(exporter?.protocol ?? otlpProtocol.Grpc, undefined, disabled);
 
-  const otlpEndpointInput = useInput(
-    exporter?.endpoint ?? '',
-    validateIfSelected(getOtlpEndpointValidator(otlpProtocolInput.value)),
-    disabled
+  const otlpEndpointInput = Object.assign(
+    useInput(
+      exporter?.endpoint ?? '',
+      validateIfSelected(getOtlpEndpointValidator(otlpProtocolInput.value)),
+      disabled
+    ),
+    // the defaults of the sending queue depend on whether the endpoint is the managed one
+    { managedOtlpUrl }
   );
+  const isManaged = isManagedOtlpEndpointUrl(otlpEndpointInput.value.trim(), managedOtlpUrl);
   const otlpCompressionInput = useInput(
     exporter?.compression ?? otlpCompressionType.Gzip,
     undefined,
@@ -268,9 +353,7 @@ export function useOtlpInputs(
   const otlpCookiesEnabledInput = useSwitchInput(http?.cookies?.enabled ?? false, disabled);
 
   // sending queue and retry, shared by both protocols
-  const queue = exporter?.sending_queue;
-  // a new output starts with the recommended queue, an existing one with what it has stored
-  const queueInitial: OtlpQueueConfig | null | undefined = otlpOutput ? queue : QUEUE_DEFAULTS;
+  const queueInitial: OtlpQueueConfig | null | undefined = exporter?.sending_queue;
   const batchInitial = queueInitial?.batch;
   const otlpQueueEnabledInput = useSwitchInput(queueInitial?.enabled ?? true, disabled);
   // the collector does not check a queue that is off: it only has to be a number
@@ -286,22 +369,25 @@ export function useOtlpInputs(
     validateIfSelected(validateQueueCount),
     disabled
   );
-  const otlpQueueSizerInput = useInput(
-    queueInitial?.sizer ?? OTLP_QUEUE_SPEC_DEFAULT_SIZER,
-    undefined,
+  // an empty unit is the default of the endpoint
+  const otlpQueueSizerInput = useDefaultedSelectInput(
+    queueInitial?.sizer,
+    isManaged ? QUEUE_DEFAULTS.sizer : OTLP_QUEUE_SPEC_DEFAULT_SIZER,
     disabled
   );
   const otlpQueueWaitForResultInput = useSwitchInput(
     queueInitial?.wait_for_result ?? false,
     disabled
   );
-  const otlpQueueBlockOnOverflowInput = useSwitchInput(
-    queueInitial?.block_on_overflow ?? false,
+  const otlpQueueBlockOnOverflowInput = useDefaultedSwitchInput(
+    queueInitial?.block_on_overflow,
+    isManaged ? QUEUE_DEFAULTS.block_on_overflow : OTLP_QUEUE_SPEC_DEFAULT_BLOCK_ON_OVERFLOW,
     disabled
   );
 
-  // `batch: {}` enables batching with the defaults, so whether the output batches is its own setting
-  const otlpBatchEnabledInput = useSwitchInput(!!batchInitial, disabled);
+  // `batch: {}` enables batching with the defaults, so whether the output batches is its own
+  // setting. A new output batches.
+  const otlpBatchEnabledInput = useSwitchInput(otlpOutput ? !!batchInitial : true, disabled);
   const validateIfBatching = <T>(validator: T) =>
     isSelected && otlpBatchEnabledInput.value ? validator : undefined;
   const otlpBatchFlushTimeoutInput = useInput(
@@ -309,12 +395,18 @@ export function useOtlpInputs(
     validateIfBatching(validateOtlpPositiveDuration),
     disabled
   );
-  // an empty unit is the spec default, the unit of the queue: a stored batch without one keeps it
+  // an empty unit is the default: the unit of the queue, or bytes on the managed endpoint
   const otlpBatchSizerInput = Object.assign(
     useInput(batchInitial?.sizer ?? '', undefined, disabled),
-    // the schema can not unset a stored unit, so it can not go back to the unit of the queue
+    // the schema can not unset a stored unit, so it can not go back to the default
     { hasStoredValue: !!(otlpOutput && batchInitial?.sizer) }
   );
+  const getQueueDefaults = () =>
+    getOtlpQueueDefaults({
+      isManaged,
+      queueSizer: otlpQueueSizerInput.value,
+      batchSizer: otlpBatchSizerInput.value,
+    });
   const otlpBatchMinSizeInput = useInput(
     toInputValue(batchInitial?.min_size),
     validateIfBatching((value: string) => {
@@ -322,18 +414,13 @@ export function useOtlpInputs(
       if (error || !otlpQueueEnabledInput.value) {
         return error;
       }
-      // the sizes are compared when both use the same unit, and a blank minimum is the spec default
-      // Fleet gives a batch of the managed endpoint that has no unit the bytes
-      const batchSizer =
-        !otlpBatchSizerInput.value &&
-        isManagedOtlpEndpointUrl(otlpEndpointInput.value.trim(), managedOtlpUrl)
-          ? 'bytes'
-          : getEffectiveBatchSizer(otlpBatchSizerInput.value, otlpQueueSizerInput.value);
+      // the sizes are compared when both use the same unit, and a blank size is the default
+      const defaults = getQueueDefaults();
       const queueSize = otlpQueueSizeInput.value.trim()
         ? Number(otlpQueueSizeInput.value)
-        : OTLP_QUEUE_SPEC_DEFAULT_SIZE;
-      const minSize = value.trim() ? Number(value) : OTLP_BATCH_SPEC_DEFAULT_MIN_SIZE;
-      if (batchSizer === otlpQueueSizerInput.value && minSize > queueSize) {
+        : defaults.queueSize;
+      const minSize = value.trim() ? Number(value) : defaults.minSize;
+      if (defaults.batchSizer === otlpQueueSizerInput.value && minSize > queueSize) {
         return [
           i18n.translate('xpack.fleet.settings.outputForm.otlpBatchMinSizeTooBig', {
             defaultMessage:
@@ -349,14 +436,19 @@ export function useOtlpInputs(
     toInputValue(batchInitial?.max_size),
     validateIfBatching((value: string) => {
       const error = validateOtlpCount(value);
-      if (error || !value.trim() || Number(value) === 0) {
+      if (error) {
         return error;
       }
-      // a blank minimum is the spec default
+      // a blank size is the default
+      const defaults = getQueueDefaults();
+      const maxSize = value.trim() ? Number(value) : defaults.maxSize;
+      if (maxSize === 0) {
+        return;
+      }
       const minSize = otlpBatchMinSizeInput.value.trim()
         ? Number(otlpBatchMinSizeInput.value)
-        : OTLP_BATCH_SPEC_DEFAULT_MIN_SIZE;
-      if (Number(value) < minSize) {
+        : defaults.minSize;
+      if (maxSize < minSize) {
         return [
           i18n.translate('xpack.fleet.settings.outputForm.otlpBatchMaxSizeTooSmall', {
             defaultMessage:
@@ -382,7 +474,12 @@ export function useOtlpInputs(
     otlpBatchSizerInput.value,
     otlpEndpointInput.value,
   ]);
-  useRevalidateWhenChanged(otlpBatchMaxSizeInput, [otlpBatchMinSizeInput.value]);
+  useRevalidateWhenChanged(otlpBatchMaxSizeInput, [
+    otlpBatchMinSizeInput.value,
+    otlpQueueSizerInput.value,
+    otlpBatchSizerInput.value,
+    otlpEndpointInput.value,
+  ]);
   useRevalidateWhenChanged(otlpQueueNumConsumersInput, [otlpQueueEnabledInput.value]);
   useRevalidateWhenChanged(otlpQueueSizeInput, [otlpQueueEnabledInput.value]);
   // the errors of the batch settings do not apply when batching is off
@@ -617,9 +714,40 @@ const isQueueRecommended = (inputs: OtlpInputs) =>
   inputs.otlpBatchSizerInput.value === QUEUE_DEFAULTS.batch.sizer &&
   !inputs.otlpBatchMetadataKeysInput.value.trim();
 
-/** Whether the sending queue has a setting that is neither empty nor the recommended default. */
+const isManagedEndpoint = (inputs: OtlpInputs) =>
+  isManagedOtlpEndpointUrl(
+    inputs.otlpEndpointInput.value.trim(),
+    inputs.otlpEndpointInput.managedOtlpUrl
+  );
+
+/** The defaults that apply to the empty settings of the sending queue of the form. */
+export const getOtlpQueueDefaultsOfInputs = (inputs: OtlpInputs) =>
+  getOtlpQueueDefaults({
+    isManaged: isManagedEndpoint(inputs),
+    queueSizer: inputs.otlpQueueSizerInput.value,
+    batchSizer: inputs.otlpBatchSizerInput.value,
+  });
+
+/** Whether the settings of the sending queue are empty or at the defaults of the endpoint. */
+const isQueueAtDefaults = (inputs: OtlpInputs) => {
+  const isManaged = isManagedEndpoint(inputs);
+  const endpointDefaults = getOtlpQueueDefaults({ isManaged, queueSizer: '', batchSizer: '' });
+  const defaults = getOtlpQueueDefaultsOfInputs(inputs);
+  return (
+    queueTextInputs(inputs).every((input) => !input.value.trim()) &&
+    inputs.otlpQueueEnabledInput.value &&
+    !inputs.otlpQueueWaitForResultInput.value &&
+    inputs.otlpQueueBlockOnOverflowInput.value === endpointDefaults.blockOnOverflow &&
+    inputs.otlpQueueSizerInput.value === endpointDefaults.sizer &&
+    (!inputs.otlpBatchSizerInput.value ||
+      getOtlpQueueDefaults({ isManaged, queueSizer: defaults.sizer, batchSizer: '' }).batchSizer ===
+        inputs.otlpBatchSizerInput.value)
+  );
+};
+
+/** Whether the sending queue has a setting that is neither a default nor the recommended one. */
 export const hasOtlpQueueSettings = (inputs: OtlpInputs) =>
-  !isQueueUnset(inputs) && !isQueueRecommended(inputs);
+  !isQueueAtDefaults(inputs) && !isQueueRecommended(inputs);
 
 /** Whether the retry has a setting. */
 export const hasOtlpRetrySettings = (inputs: OtlpInputs) => !isRetryUnset(inputs);
@@ -707,15 +835,11 @@ function buildOtlpQueueAndRetry(inputs: OtlpInputs) {
         flush_timeout: text(inputs.otlpBatchFlushTimeoutInput),
         min_size: integer(inputs.otlpBatchMinSizeInput),
         max_size: integer(inputs.otlpBatchMaxSizeInput),
-        // no unit is the unit of the queue, and the schema can not unset one: it is left out. A queue
-        // that counts requests has no unit for a batch to inherit
-        ...(inputs.otlpBatchSizerInput.value || inputs.otlpQueueSizerInput.value === 'requests'
-          ? {
-              sizer: getEffectiveBatchSizer(
-                inputs.otlpBatchSizerInput.value,
-                inputs.otlpQueueSizerInput.value
-              ) as OtlpBatchSizer,
-            }
+        // no unit is the default, and the schema can not unset one: it is left out. Off the managed
+        // endpoint, a queue that counts requests has no unit for a batch to inherit
+        ...(inputs.otlpBatchSizerInput.value ||
+        (!isManagedEndpoint(inputs) && inputs.otlpQueueSizerInput.value === 'requests')
+          ? { sizer: getOtlpQueueDefaultsOfInputs(inputs).batchSizer as OtlpBatchSizer }
           : {}),
         partition: metadataKeys(inputs.otlpBatchMetadataKeysInput)
           ? { metadata_keys: metadataKeys(inputs.otlpBatchMetadataKeysInput) }

@@ -2026,19 +2026,20 @@ describe('EditOutputFlyout', () => {
       max_interval: '1m',
       max_elapsed_time: '10m',
     };
-    // what the form sends for a queue and a retry that are left as the recommended defaults
-    const recommendedQueuePayload = {
+    // what the form sends for the queue of a new output that is not on the managed endpoint: the
+    // defaults, with batching on
+    const newQueuePayload = {
       enabled: true,
       num_consumers: null,
-      queue_size: 50000000,
-      sizer: 'bytes',
+      queue_size: null,
+      sizer: 'requests',
       wait_for_result: false,
-      block_on_overflow: true,
+      block_on_overflow: false,
       batch: {
-        flush_timeout: '1s',
-        min_size: 1000000,
-        max_size: 4000000,
-        sizer: 'bytes',
+        flush_timeout: null,
+        min_size: null,
+        max_size: null,
+        sizer: 'items',
         partition: null,
       },
     };
@@ -2253,7 +2254,7 @@ describe('EditOutputFlyout', () => {
             wait_for_ready: false,
             user_agent: null,
             authority: null,
-            sending_queue: recommendedQueuePayload,
+            sending_queue: newQueuePayload,
             retry_on_failure: null,
           },
         });
@@ -2406,23 +2407,138 @@ describe('EditOutputFlyout', () => {
         expect(value(utils, 'otlpQueueSizeInput')).toBe('');
       });
 
-      it('should prefill the recommended queue settings for a new output, and no retry settings', () => {
+      it('should leave the settings of a new output empty, with batching on', () => {
         const { utils } = renderFlyout();
         selectOtlpType(utils);
 
-        expect(value(utils, 'otlpQueueSizeInput')).toBe('50000000');
-        expect(value(utils, 'otlpQueueSizerInput')).toBe('bytes');
-        expect(value(utils, 'otlpBatchFlushTimeoutInput')).toBe('1s');
-        expect(value(utils, 'otlpBatchMinSizeInput')).toBe('1000000');
-        expect(value(utils, 'otlpBatchMaxSizeInput')).toBe('4000000');
-        expect(value(utils, 'otlpBatchSizerInput')).toBe('bytes');
-        expect(value(utils, 'otlpQueueNumConsumersInput')).toBe('');
+        QUEUE_TEXT_FIELDS.forEach((testSubj) => expect(value(utils, testSubj)).toBe(''));
+        expect(value(utils, 'otlpQueueSizerInput')).toBe('requests');
         expect(utils.getByTestId('settingsOutputsFlyout.otlpQueueEnabledInput')).toBeChecked();
         expect(
           utils.getByTestId('settingsOutputsFlyout.otlpQueueBlockOnOverflowInput')
-        ).toBeChecked();
+        ).not.toBeChecked();
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpBatchEnabledInput')).toBeChecked();
         RETRY_TEXT_FIELDS.forEach((testSubj) => expect(value(utils, testSubj)).toBe(''));
         expect(utils.getByTestId('settingsOutputsFlyout.otlpRetryEnabledInput')).toBeChecked();
+        expect(isExpanded(utils, 'otlpSendingQueueSettings')).toBe(false);
+      });
+
+      describe('defaults of the managed endpoint', () => {
+        const MANAGED_URL = 'https://managed.example.com';
+        const queueSettings = (utils: ReturnType<typeof renderFlyout>['utils']) =>
+          utils.getByTestId('settingsOutputsFlyout.otlpSendingQueueSettings');
+
+        it('should show the spec defaults for an endpoint that is not managed', () => {
+          mockStartServices(false, MANAGED_URL);
+          const { utils } = renderFlyout();
+          selectOtlpType(utils);
+          setValue(utils, 'otlpEndpointInput', 'collector.example.com:4317');
+
+          const queue = within(queueSettings(utils));
+          ['1000', 'requests', 'false', '200ms', '8192'].forEach((defaultValue) =>
+            expect(queue.getAllByText(defaultValue).length).toBeGreaterThan(0)
+          );
+        });
+
+        it('should show the defaults that the server applies on the managed endpoint', async () => {
+          mockStartServices(false, MANAGED_URL);
+          const { utils } = renderFlyout();
+          selectOtlpType(utils);
+          setValue(utils, 'otlpEndpointInput', 'managed.example.com:443');
+
+          await waitFor(() => {
+            expect(value(utils, 'otlpQueueSizerInput')).toBe('bytes');
+          });
+          expect(
+            utils.getByTestId('settingsOutputsFlyout.otlpQueueBlockOnOverflowInput')
+          ).toBeChecked();
+          const queue = within(queueSettings(utils));
+          ['50000000', '1s', '1000000', '4000000'].forEach((defaultValue) =>
+            expect(queue.getByText(defaultValue)).toBeInTheDocument()
+          );
+          expect(queue.getByText('Default (bytes)')).toBeInTheDocument();
+          QUEUE_TEXT_FIELDS.forEach((testSubj) => expect(value(utils, testSubj)).toBe(''));
+        });
+
+        it('should show the spec size for a queue of the managed endpoint that does not count bytes', async () => {
+          mockStartServices(false, MANAGED_URL);
+          const { utils } = renderFlyout();
+          selectOtlpType(utils);
+          setValue(utils, 'otlpEndpointInput', 'managed.example.com:443');
+          setValue(utils, 'otlpQueueSizerInput', 'items');
+
+          await waitFor(() => {
+            expect(utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput')).toHaveAttribute(
+              'placeholder',
+              '1000'
+            );
+          });
+        });
+
+        it('should send the empty settings of the managed endpoint as null for the server to fill', async () => {
+          mockStartServices(false, MANAGED_URL);
+          const { utils } = renderFlyout();
+          selectOtlpType(utils);
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+            target: { value: 'managed otlp' },
+          });
+          setValue(utils, 'otlpEndpointInput', 'managed.example.com:443');
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => {
+            expect(mockSendPostOutput).toHaveBeenCalledWith(
+              expect.objectContaining({
+                otlp_exporter: expect.objectContaining({
+                  sending_queue: {
+                    enabled: true,
+                    num_consumers: null,
+                    queue_size: null,
+                    sizer: 'bytes',
+                    wait_for_result: false,
+                    block_on_overflow: true,
+                    batch: { flush_timeout: null, min_size: null, max_size: null, partition: null },
+                  },
+                }),
+              })
+            );
+          });
+        });
+
+        it('should keep a switch that was switched when the endpoint changes', async () => {
+          mockStartServices(false, MANAGED_URL);
+          const { utils } = renderFlyout();
+          selectOtlpType(utils);
+          click(utils, 'otlpQueueBlockOnOverflowInput');
+          setValue(utils, 'otlpEndpointInput', 'managed.example.com:443');
+          await waitFor(() => {
+            expect(value(utils, 'otlpQueueSizerInput')).toBe('bytes');
+          });
+
+          expect(
+            utils.getByTestId('settingsOutputsFlyout.otlpQueueBlockOnOverflowInput')
+          ).toBeChecked();
+          click(utils, 'otlpQueueBlockOnOverflowInput');
+          expect(
+            utils.getByTestId('settingsOutputsFlyout.otlpQueueBlockOnOverflowInput')
+          ).not.toBeChecked();
+        });
+
+        it('should compare a blank maximum batch size of the managed endpoint with the minimum', async () => {
+          mockStartServices(false, MANAGED_URL);
+          const { utils } = renderFlyout();
+          selectOtlpType(utils);
+          setValue(utils, 'otlpEndpointInput', 'managed.example.com:443');
+          setValue(utils, 'otlpBatchMinSizeInput', '5000000');
+          fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMaxSizeInput'));
+
+          await waitFor(() => {
+            expect(
+              utils.getByText(
+                'The maximum size can not be less than the minimum size (5000000), unless it is 0'
+              )
+            ).toBeInTheDocument();
+          });
+        });
       });
 
       it('should show the stored settings', () => {
@@ -2713,14 +2829,13 @@ describe('EditOutputFlyout', () => {
       it('should require a minimum batch size that fits in the queue when both use the same unit', async () => {
         const { utils } = renderFlyout();
         selectOtlpType(utils);
-        setValue(utils, 'otlpQueueSizeInput', '500000');
+        setValue(utils, 'otlpQueueSizerInput', 'bytes');
+        setValue(utils, 'otlpQueueSizeInput', '5000');
         fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput'));
         fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput'));
 
-        // 1000000 bytes of the recommended minimum do not fit in 500000 bytes
-        expect(
-          utils.getByText(/can not be more than the queue size \(500000\)/)
-        ).toBeInTheDocument();
+        // 8192 bytes of the default minimum do not fit in 5000 bytes
+        expect(utils.getByText(/can not be more than the queue size \(5000\)/)).toBeInTheDocument();
 
         // another unit for the batch is not compared
         setValue(utils, 'otlpBatchSizerInput', 'items');
@@ -2785,6 +2900,7 @@ describe('EditOutputFlyout', () => {
       it('should offer the unit of the queue for a new batch', () => {
         const { utils } = renderFlyout();
         selectOtlpType(utils);
+        setValue(utils, 'otlpQueueSizerInput', 'bytes');
 
         expect(
           within(utils.getByTestId('settingsOutputsFlyout.otlpBatchSizerInput')).getByText(
@@ -3217,7 +3333,7 @@ describe('EditOutputFlyout', () => {
               force_attempt_http2: false,
               compression_params: { level: -1 },
               cookies: { enabled: true },
-              sending_queue: recommendedQueuePayload,
+              sending_queue: newQueuePayload,
               retry_on_failure: null,
             },
           });
