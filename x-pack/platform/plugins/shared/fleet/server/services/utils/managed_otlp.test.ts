@@ -154,7 +154,8 @@ describe('applyManagedOtlpDefaults', () => {
 
   it('fills the recommended settings whatever the units, leaving the sizes to the validation', () => {
     expect(
-      applyManagedOtlpDefaults(exporter({ sizer: 'items', batch: { sizer: 'items' } })).sending_queue
+      applyManagedOtlpDefaults(exporter({ sizer: 'items', batch: { sizer: 'items' } }))
+        .sending_queue
     ).toEqual({
       enabled: true,
       sizer: 'items',
