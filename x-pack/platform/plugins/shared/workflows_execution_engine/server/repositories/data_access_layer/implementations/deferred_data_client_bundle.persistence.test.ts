@@ -24,19 +24,20 @@ describe('DeferredDataClientBundle persistence', () => {
     esClient.indices.exists.mockResolvedValue(true as never);
     esClient.indices.putSettings.mockResolvedValue({ acknowledged: true } as never);
     esClient.indices.putMapping.mockResolvedValue({ acknowledged: true } as never);
-    esClient.indices.getDataStream.mockImplementation(async (params: { name: string }) => {
+    esClient.indices.getDataStream.mockImplementation(async (params) => {
+      const requestedName = Array.isArray(params?.name) ? params.name[0] : params?.name;
       return {
         data_streams: [
           {
-            name: params.name,
+            name: requestedName,
             lifecycle: { data_retention: '90d' },
-            indices: [{ index_name: `.ds-${params.name}-000001` }],
+            indices: [{ index_name: `.ds-${requestedName}-000001` }],
           },
         ],
       } as never;
     });
-    esClient.bulk.mockImplementation(async (request: { operations?: unknown[] }) => {
-      const action = request.operations?.[0] as { create?: { _id?: string; _index?: string } };
+    esClient.bulk.mockImplementation(async (request) => {
+      const action = request?.operations?.[0] as { create?: { _id?: string; _index?: string } };
       return {
         errors: false,
         took: 1,
