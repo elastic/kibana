@@ -134,18 +134,36 @@ async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3, idempotent = 
       }
       lastError = err;
       if (attempt < maxAttempts - 1) {
-        // Honor Retry-After header on 429 when present, otherwise use
-        // full-jitter backoff: random(0, min(30000, 1000 * 2^attempt))
+        // Full-jitter backoff: random(0, min(cap, 1000 * 2^attempt)).
+        // On 429, honor the Retry-After header (seconds or HTTP-date).
+        // If the server asks to wait longer than the cap, surface the
+        // rate-limit error immediately instead of retrying too early.
         const cap = 30_000;
+        const base = 1_000 * Math.pow(2, attempt);
         let delay: number;
         if (status === 429) {
           const retryAfter = axiosErr?.response?.headers?.['retry-after'];
-          const retryAfterSec = retryAfter ? Number(retryAfter) : NaN;
-          delay = Number.isFinite(retryAfterSec)
-            ? Math.min(cap, retryAfterSec * 1_000)
-            : Math.min(cap, 1_000 * Math.pow(2, attempt));
+          let waitMs = NaN;
+          if (retryAfter) {
+            const asNum = Number(retryAfter);
+            if (Number.isFinite(asNum)) {
+              waitMs = asNum * 1_000;
+            } else {
+              // Try HTTP-date format (RFC 7231)
+              const date = Date.parse(retryAfter);
+              if (!Number.isNaN(date)) {
+                waitMs = Math.max(0, date - Date.now());
+              }
+            }
+          }
+          if (Number.isFinite(waitMs) && waitMs > cap) {
+            // Server wants us to wait longer than our budget — stop retrying
+            throw err;
+          }
+          delay = Number.isFinite(waitMs)
+            ? waitMs
+            : Math.random() * Math.min(cap, base);
         } else {
-          const base = 1_000 * Math.pow(2, attempt);
           delay = Math.random() * Math.min(cap, base);
         }
         await sleep(delay);

@@ -390,6 +390,25 @@ describe('input schemas', () => {
     it('rejects pageSize above 1000', () => {
       expect(ListDetectionsInputSchema.safeParse({ pageSize: 1001 }).success).toBe(false);
     });
+
+    it('rejects a malformed runId (path traversal)', () => {
+      expect(ListDetectionsInputSchema.safeParse({ runId: '../../../etc/passwd' }).success).toBe(
+        false
+      );
+    });
+
+    it('rejects a runId with spaces or special characters', () => {
+      expect(ListDetectionsInputSchema.safeParse({ runId: 'run id with spaces' }).success).toBe(
+        false
+      );
+      expect(ListDetectionsInputSchema.safeParse({ runId: 'run;drop' }).success).toBe(false);
+    });
+
+    it('accepts a valid UUID-style runId', () => {
+      expect(
+        ListDetectionsInputSchema.safeParse({ runId: 'abc-123-def-456' }).success
+      ).toBe(true);
+    });
   });
 });
 
