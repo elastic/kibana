@@ -26,7 +26,6 @@ import {
   LIQUID_MEMORY_LIMIT_MAX,
   LIQUID_PARSE_LIMIT_MAX,
   LIQUID_RENDER_LIMIT_MAX,
-  MergeStepSchema,
   PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE,
   PARALLEL_MODE_REFINEMENT_MESSAGE,
   ParallelStepSchema,
@@ -1304,16 +1303,6 @@ describe('`if` condition on step schemas', () => {
         type: 'parallel',
         foreach: '{{ items }}',
         steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
-      },
-    },
-    {
-      name: 'merge',
-      schema: MergeStepSchema,
-      step: {
-        name: 's',
-        type: 'merge',
-        sources: ['a', 'b'],
-        steps: [{ name: 'after', type: 'console', with: { message: 'hi' } }],
       },
     },
     {

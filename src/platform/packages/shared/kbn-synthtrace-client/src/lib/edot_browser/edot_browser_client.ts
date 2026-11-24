@@ -10,15 +10,15 @@
 import type { OtelScope } from '../otel_logs';
 import { generateLongId, generateShortId } from '../utils/generate_id';
 import {
-  LOGS_INDEX,
+  BROWSER_LOGS_INDEX,
+  BROWSER_TRACES_INDEX,
   REPLAY_INDEX,
   SEVERITY_ERROR,
   SEVERITY_INFO,
-  TRACES_INDEX,
 } from '../edot_shared/constants';
 import { EdotLog } from '../edot_shared/edot_log';
 import { EdotSpan } from '../edot_shared/edot_span';
-import { asFloat } from './as_float';
+import { asFloat } from '../edot_shared/as_float';
 import type { EdotBrowserSpan, EdotBrowserSpanDocument } from './edot_browser_span';
 import { getWebVitalRating, type WebVitalName } from './health_profiles';
 
@@ -30,6 +30,18 @@ const SCOPE_VERSION = '0.8.2';
 
 const HTTP_PORT_FROM_PROTOCOL: Readonly<Record<string, number>> = { 'http:': 80, 'https:': 443 };
 
+export type EdotBrowserFrustrationKind = 'rage_click' | 'dead_click' | 'error_click';
+
+/** The signed-in user, as an app passes it to EDOT Browser's `setUser()`. */
+export interface EdotBrowserUser {
+  id: string;
+  email?: string;
+  /** Written as `user.full_name`, which `setUser()` takes as `name`. */
+  fullName?: string;
+  /** The user's organization or tenant, written as `elastic.user.account`. */
+  account?: string;
+}
+
 export interface EdotBrowserClientOptions {
   /** Written as `attributes.session.id` on every log and span when set. */
   sessionId?: string;
@@ -40,6 +52,11 @@ export interface EdotBrowserClientOptions {
    * without `sessionId` too, like the telemetry of a tab whose session expired.
    */
   tabId?: string;
+  /**
+   * Written as `attributes.user.*` on every log and span, like EDOT Browser's `setUser()` does. It
+   * isn't tied to the session, so a tab whose session expired keeps it.
+   */
+  user?: EdotBrowserUser;
   /**
    * Writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, like the
    * experimental `includeRawAttribution` option of the web-vitals instrumentation. Off by default.
@@ -126,25 +143,48 @@ export class EdotBrowserClient {
 
   /**
    * The JavaScript engine, which decides how the browser writes stack traces. A browser that isn't
-   * Chromium or Firefox is taken for Safari, the other one that is still around.
+   * Chromium or Firefox is taken for Safari, the other one that is still around. One that EDOT
+   * Browser can't identify still runs an engine, which its user agent tells.
    */
   public get browserEngine(): 'chromium' | 'firefox' | 'webkit' {
     if (this.isChromium) {
       return 'chromium';
     }
-    return this.resourceAttributes['browser.name'] === 'Firefox' ? 'firefox' : 'webkit';
+    const name = this.resourceAttributes['browser.name'];
+    if (name === undefined) {
+      const userAgent = String(this.resourceAttributes['user_agent.original'] ?? '');
+      if (/Firefox\//.test(userAgent)) {
+        return 'firefox';
+      }
+      return /Chrome\/|Edg\//.test(userAgent) ? 'chromium' : 'webkit';
+    }
+    return name === 'Firefox' ? 'firefox' : 'webkit';
   }
 
   public get hasSession(): boolean {
     return Boolean(this.options.sessionId);
   }
 
-  private get sessionAttributes(): Record<string, string> {
-    const { sessionId, previousSessionId, tabId } = this.options;
+  /** The same browser once the app has called `setUser()`, or `clearUser()` without a user. */
+  public withUser(user?: EdotBrowserUser): EdotBrowserClient {
+    return new EdotBrowserClient(this.resourceAttributes, { ...this.options, user });
+  }
+
+  /** What EDOT Browser's span and log processors add to every record: the session and the user. */
+  private get processorAttributes(): Record<string, string> {
+    const { sessionId, previousSessionId, tabId, user } = this.options;
     return {
       ...(sessionId ? { 'session.id': sessionId } : {}),
       ...(sessionId && previousSessionId ? { 'session.previous_id': previousSessionId } : {}),
       ...(tabId ? { 'browser.tab.id': tabId } : {}),
+      ...(user
+        ? {
+            'user.id': user.id,
+            ...(user.email ? { 'user.email': user.email } : {}),
+            ...(user.fullName ? { 'user.full_name': user.fullName } : {}),
+            ...(user.account ? { 'elastic.user.account': user.account } : {}),
+          }
+        : {}),
     };
   }
 
@@ -154,12 +194,12 @@ export class EdotBrowserClient {
     attributes: Record<string, unknown>,
     severityNumber: number = SEVERITY_INFO
   ): EdotLog {
-    return new EdotLog({ _index: LOGS_INDEX })
+    return new EdotLog({ _index: BROWSER_LOGS_INDEX })
       .eventName(eventName)
       .severity(severityNumber)
       .scope(scope)
       .addResourceAttributes({ ...this.resourceAttributes })
-      .addAttributes({ ...attributes, ...this.sessionAttributes });
+      .addAttributes({ ...attributes, ...this.processorAttributes });
   }
 
   private log(
@@ -178,7 +218,8 @@ export class EdotBrowserClient {
 
   /**
    * A record of the replay logger. Its scope version is the version of EDOT Browser, it has no
-   * severity and, like every record of the SDK, the session attributes of the log processor.
+   * severity and, like every record of the SDK, the session and user attributes of the log
+   * processors.
    */
   private replayLog(eventName: string, attributes: Record<string, unknown>): EdotLog {
     const distroVersion = this.resourceAttributes['telemetry.distro.version'];
@@ -189,7 +230,7 @@ export class EdotBrowserClient {
         ...(typeof distroVersion === 'string' ? { version: distroVersion } : {}),
       })
       .addResourceAttributes({ ...this.resourceAttributes })
-      .addAttributes({ ...attributes, ...this.sessionAttributes });
+      .addAttributes({ ...attributes, ...this.processorAttributes });
   }
 
   /**
@@ -390,6 +431,53 @@ export class EdotBrowserClient {
   }
 
   /**
+   * A rage, dead or error click, which EDOT Browser's frustration detection reports with the
+   * distro's logger, without a severity. Its timestamp is the one of the first click.
+   */
+  frustration({
+    kind,
+    pageX,
+    pageY,
+    tagName,
+    cssSelector,
+    url,
+    clickCount,
+    exception,
+  }: {
+    kind: EdotBrowserFrustrationKind;
+    pageX: number;
+    pageY: number;
+    tagName: string;
+    cssSelector?: string;
+    /** The page URL when the user clicked. */
+    url: string;
+    /** Rage clicks only: the number of clicks in the burst. */
+    clickCount?: number;
+    /** Error clicks only: the first uncaught exception after the click. */
+    exception?: { type?: string; message: string };
+  }) {
+    const distroVersion = this.resourceAttributes['telemetry.distro.version'];
+    return new EdotLog({ _index: BROWSER_LOGS_INDEX })
+      .eventName(`browser.frustration.${kind}`)
+      .scope({
+        name: DISTRO_SCOPE_NAME,
+        ...(typeof distroVersion === 'string' ? { version: distroVersion } : {}),
+      })
+      .addResourceAttributes({ ...this.resourceAttributes })
+      .addAttributes({
+        ...(cssSelector !== undefined ? { 'browser.css_selector': cssSelector } : {}),
+        'browser.tag_name': tagName,
+        'browser.page.x': Math.round(pageX),
+        'browser.page.y': Math.round(pageY),
+        'url.full': url,
+        ...(clickCount !== undefined ? { 'browser.frustration.click_count': clickCount } : {}),
+        ...(exception?.type ? { 'exception.type': exception.type } : {}),
+        ...(exception ? { 'exception.message': exception.message } : {}),
+        ...this.processorAttributes,
+      });
+  }
+
+  /**
    * An uncaught exception. Only errors have a type and a stack trace: a thrown string or a rejected
    * promise with a plain value has a message and nothing else.
    */
@@ -445,7 +533,7 @@ export class EdotBrowserClient {
       errorType ?? (statusCode !== undefined ? String(statusCode) : undefined);
 
     return new EdotSpan<EdotBrowserSpanDocument>({
-      _index: TRACES_INDEX,
+      _index: BROWSER_TRACES_INDEX,
       trace_id: traceId,
       span_id: spanId,
       name: method,
@@ -461,7 +549,7 @@ export class EdotBrowserClient {
         ...(requestBodySize !== undefined ? { 'http.request.body.size': requestBodySize } : {}),
         ...(statusCode !== undefined ? { 'http.response.status_code': statusCode } : {}),
         ...(isError && resolvedErrorType ? { 'error.type': resolvedErrorType } : {}),
-        ...this.sessionAttributes,
+        ...this.processorAttributes,
       },
     });
   }

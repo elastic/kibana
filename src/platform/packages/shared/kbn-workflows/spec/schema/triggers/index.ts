@@ -18,6 +18,7 @@ export { AlertRuleTriggerSchema } from './alert_trigger_schema';
 export { ManualTriggerSchema } from './manual_trigger_schema';
 export {
   DEFAULT_PAGE_TRIGGER_ID,
+  getPageTriggerId,
   isPageTrigger,
   PageTriggerSchema,
   validatePageTriggers,

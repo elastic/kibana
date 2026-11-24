@@ -157,6 +157,25 @@ describe('ServiceFlyoutApmCharts', () => {
     );
   });
 
+  it('keeps the latency header on a single row so the three charts stay aligned', () => {
+    renderCharts();
+
+    expect(mockLatencyChart).toHaveBeenCalledWith(expect.objectContaining({ compactHeader: true }));
+  });
+
+  it('lays out the three charts in a single grid row', () => {
+    renderCharts();
+
+    const grid = screen.getByTestId('serviceFlyoutApmCharts');
+    // Emotion serializes the rule without the spaces after commas.
+    expect(grid).toHaveStyleRule('grid-template-columns', 'repeat(auto-fit,minmax(200px,1fr))');
+    expect(Array.from(grid.children).map((child) => child.getAttribute('data-test-subj'))).toEqual([
+      'latencyChartMock',
+      'failedTransactionChartMock',
+      'throughputChartMock',
+    ]);
+  });
+
   it('translates chart brushes into the flyout time range instead of a URL change', () => {
     renderCharts();
 

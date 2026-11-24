@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { DetectionStatusBadge } from './detection_status_badge';
 import { MetricCell, type MetricCellProps } from './metric_cell';
 import {
@@ -30,8 +30,10 @@ import {
   OVERVIEW_RETRY_LABEL,
 } from './translations';
 
-/** Hairline before every metric except the first (no leading separator). */
-const METRIC_SEPARATOR_BEFORE_INDEX = 1;
+/** Cap at three metrics per row (six slots over two rows with five metrics). */
+const OVERVIEW_MAX_COLUMNS = 3;
+/** Same floor as the previous flex basis — wraps to 1–2 columns when the row is narrow. */
+const OVERVIEW_METRIC_MIN_WIDTH_BASE = 12;
 
 export interface DetectionOverviewCounts {
   entities: number;
@@ -63,6 +65,11 @@ export const DetectionOverview = ({
   compact = false,
 }: DetectionOverviewProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const metricMinWidthPx = euiTheme.base * OVERVIEW_METRIC_MIN_WIDTH_BASE;
+  // Match auto-fill breakpoints: N columns need N*minWidth + (N-1)*gap.
+  const twoColumnMaxWidthPx =
+    OVERVIEW_MAX_COLUMNS * metricMinWidthPx + (OVERVIEW_MAX_COLUMNS - 1) * euiTheme.base - 1;
+  const oneColumnMaxWidthPx = 2 * metricMinWidthPx + euiTheme.base - 1;
   const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
     {
       icon: 'chartTagCloud',
@@ -146,41 +153,83 @@ export const DetectionOverview = ({
               }}
             />
           ) : (
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="none"
-              wrap
-              responsive={false}
-              css={{ gap: euiTheme.size.base }}
+            <div
+              css={{
+                containerType: 'inline-size',
+                display: 'grid',
+                // auto-fill keeps empty tracks so a short last row does not stretch.
+                // Track min is max(floor, 1/3 of the row) so we never exceed three columns,
+                // and still drop to one or two when the banner is narrow or zoomed.
+                gridTemplateColumns: `repeat(
+                  auto-fill,
+                  minmax(
+                    max(
+                      ${metricMinWidthPx}px,
+                      calc(
+                        (100% - ${(OVERVIEW_MAX_COLUMNS - 1).toString()} * ${euiTheme.size.base}) /
+                          ${OVERVIEW_MAX_COLUMNS}
+                      )
+                    ),
+                    1fr
+                  )
+                )`,
+                gap: euiTheme.size.base,
+                alignItems: 'center',
+                // Hide hairlines on each row start for the current column count.
+                [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                  display: 'none',
+                },
+                [`@container (max-width: ${twoColumnMaxWidthPx}px)`]: {
+                  [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                    display: 'block',
+                  },
+                  '& > *:nth-child(2n + 1) [data-metric-separator]': {
+                    display: 'none',
+                  },
+                },
+                [`@container (max-width: ${oneColumnMaxWidthPx}px)`]: {
+                  // Match the two-column reset's specificity so `display: block` does not win.
+                  [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                    display: 'none',
+                  },
+                  '& > *:nth-child(2n + 1) [data-metric-separator]': {
+                    display: 'none',
+                  },
+                  '& > * [data-metric-separator]': {
+                    display: 'none',
+                  },
+                },
+              }}
             >
               {metrics.map((metric, index) => (
-                <Fragment key={metric.testSubject}>
-                  {index >= METRIC_SEPARATOR_BEFORE_INDEX ? (
-                    <EuiFlexItem grow={false}>
-                      <div
-                        aria-hidden
-                        css={{
-                          width: euiTheme.border.width.thin,
-                          // Match EuiAvatar size="l".
-                          height: euiTheme.size.xxl,
-                          backgroundColor: euiTheme.colors.borderBaseSubdued,
-                        }}
-                      />
-                    </EuiFlexItem>
+                <div
+                  key={metric.testSubject}
+                  css={{
+                    minWidth: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: euiTheme.size.base,
+                  }}
+                >
+                  {index > 0 ? (
+                    <div
+                      aria-hidden
+                      data-metric-separator
+                      css={{
+                        flexShrink: 0,
+                        width: euiTheme.border.width.thin,
+                        // Match EuiAvatar size="l".
+                        height: euiTheme.size.xxl,
+                        backgroundColor: euiTheme.colors.borderBaseSubdued,
+                      }}
+                    />
                   ) : null}
-                  <EuiFlexItem
-                    grow={1}
-                    css={{
-                      // Wrap before labels crush into neighbors at narrow widths / zoom.
-                      flex: `1 1 ${euiTheme.base * 12}px`,
-                      minWidth: 0,
-                    }}
-                  >
+                  <div css={{ minWidth: 0, flex: '1 1 auto' }}>
                     <MetricCell {...metric} isLoading={isCountsLoading} />
-                  </EuiFlexItem>
-                </Fragment>
+                  </div>
+                </div>
               ))}
-            </EuiFlexGroup>
+            </div>
           )}
         </>
       )}

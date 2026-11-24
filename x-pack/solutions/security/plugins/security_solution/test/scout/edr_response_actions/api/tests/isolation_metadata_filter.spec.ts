@@ -14,6 +14,7 @@ import {
 import { getResponseActionsAccessRole } from '../../common/response_actions_access_role';
 import { apiTest, tags } from '../fixtures';
 import { seedEndpointHosts, type SeededEndpointHosts } from '../../common/seed_endpoint_hosts';
+import { runCleanups } from '../../common/run_cleanups';
 
 interface MetadataListBody {
   data: Array<{ metadata: { agent: { id: string } } }>;
@@ -75,20 +76,10 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async () => {
-      const failures: unknown[] = [];
-      for (const seeded of [unisolatedHosts, isolatedHosts]) {
-        try {
-          await seeded?.cleanup();
-        } catch (error) {
-          failures.push(error);
-        }
-      }
-      if (failures.length === 1) {
-        throw failures[0];
-      }
-      if (failures.length > 1) {
-        throw new AggregateError(failures, 'Failed to clean up seeded endpoint hosts');
-      }
+      await runCleanups(
+        [() => unisolatedHosts?.cleanup(), () => isolatedHosts?.cleanup()],
+        'Failed to clean up seeded endpoint hosts'
+      );
     });
 
     apiTest(

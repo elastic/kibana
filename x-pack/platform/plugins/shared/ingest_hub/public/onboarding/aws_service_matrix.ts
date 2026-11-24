@@ -251,6 +251,10 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
   },
   {
+    id: 'eks',
+    packageName: 'aws',
+  },
+  {
     id: 'emr',
     packageName: 'aws',
   },
@@ -832,6 +836,8 @@ export function applyDeploymentMethodView(
     dataStreams: ecf.dataStreams,
     inputs: ecf.inputs,
     defaultEnabledInputs: ecf.defaultEnabledInputs,
+    // ECF collects only the trigger ARN, so a source selector would hide it with nothing to replace it.
+    varGroupsByInput: undefined,
     settingsScope: 'ecf',
   };
 }
@@ -1161,7 +1167,7 @@ export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsSer
     requiredConfig: isEcfOnly ? service.requiredConfig : dsInfo.requiredConfig,
     optionalConfig: isEcfOnly ? service.optionalConfig : dsInfo.optionalConfig,
     varDefsByInput: dsInfo.varDefsByInput,
-    varGroupsByInput: dsInfo.varGroupsByInput,
+    varGroupsByInput: isEcfOnly ? undefined : dsInfo.varGroupsByInput,
     varDefsByDataStream: { [dsId]: dsInfo },
   };
 }
