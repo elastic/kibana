@@ -574,6 +574,55 @@ describe('ServiceAccountFakeRequests', () => {
       expect(mintToken).toHaveBeenCalledTimes(2);
     });
 
+    describe('an exchange that was not sent', () => {
+      const notSentError = () =>
+        new ServiceAccountTokenExchangeError(new Error('connect timeout'), {
+          retryable: true,
+          notSent: true,
+        });
+
+      it('is tried once more, through the interceptor again', async () => {
+        const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => await mint());
+        mintToken.mockRejectedValueOnce(notSentError());
+
+        const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
+
+        expect(mintInterceptor).toHaveBeenCalledTimes(2);
+        expect(mintToken).toHaveBeenCalledTimes(2);
+        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
+
+      it('is not tried again when the interceptor refuses the retry', async () => {
+        let calls = 0;
+        const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => {
+          if (++calls > 1) {
+            throw Boom.forbidden('the workload was bound to a different service account');
+          }
+          return await mint();
+        });
+        mintToken.mockRejectedValueOnce(notSentError());
+
+        await expect(
+          fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor })
+        ).rejects.toThrow('the workload was bound to a different service account');
+        expect(mintToken).toHaveBeenCalledTimes(1);
+      });
+
+      it('is the only exchange failure tried again right away', async () => {
+        const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => await mint());
+        const error = new ServiceAccountTokenExchangeError(new Error('socket closed'), {
+          retryable: true,
+        });
+        mintToken.mockRejectedValueOnce(error);
+
+        await expect(
+          fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor })
+        ).rejects.toBe(error);
+        expect(mintInterceptor).toHaveBeenCalledTimes(1);
+        expect(mintToken).toHaveBeenCalledTimes(1);
+      });
+    });
+
     it('deduplicates concurrent refreshes into a single interceptor invocation', async () => {
       const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => await mint());
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });

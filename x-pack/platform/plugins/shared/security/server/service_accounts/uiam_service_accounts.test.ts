@@ -1321,19 +1321,19 @@ describe('UiamServiceAccounts', () => {
       });
 
       it.each([
-        'ECONNREFUSED',
-        'ECONNRESET',
-        'ECONNABORTED',
-        'EPIPE',
-        'EAI_AGAIN',
-        'ETIMEDOUT',
-        'ENETUNREACH',
-        'EHOSTUNREACH',
-        'UND_ERR_CONNECT_TIMEOUT',
-        'UND_ERR_HEADERS_TIMEOUT',
-        'UND_ERR_BODY_TIMEOUT',
-        'UND_ERR_SOCKET',
-      ])('retries transport failure %s from fetch', async (code) => {
+        ['ECONNREFUSED', true],
+        ['EAI_AGAIN', true],
+        ['ENETUNREACH', true],
+        ['EHOSTUNREACH', true],
+        ['UND_ERR_CONNECT_TIMEOUT', true],
+        ['ECONNRESET', false],
+        ['ECONNABORTED', false],
+        ['EPIPE', false],
+        ['ETIMEDOUT', false],
+        ['UND_ERR_HEADERS_TIMEOUT', false],
+        ['UND_ERR_BODY_TIMEOUT', false],
+        ['UND_ERR_SOCKET', false],
+      ])('retries transport failure %s from fetch (not sent: %s)', async (code, notSent) => {
         const cause = new TypeError('fetch failed', {
           cause: Object.assign(new Error('transport failure'), { code }),
         });
@@ -1343,16 +1343,17 @@ describe('UiamServiceAccounts', () => {
         ).rejects.toMatchObject({
           cause,
           retryable: true,
+          notSent,
           statusCode: undefined,
           message: 'Error occurred during service account token exchange.',
         });
-        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(2);
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(notSent ? 2 : 1);
       });
 
-      it('recovers from a transport failure with one immediate retry', async () => {
+      it('recovers from a connection failure with one immediate retry', async () => {
         mockUiam.exchangeServiceAccountToken.mockRejectedValueOnce(
           new TypeError('fetch failed', {
-            cause: Object.assign(new Error('socket closed'), { code: 'UND_ERR_SOCKET' }),
+            cause: Object.assign(new Error('connect timeout'), { code: 'UND_ERR_CONNECT_TIMEOUT' }),
           })
         );
 

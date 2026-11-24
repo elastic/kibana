@@ -507,17 +507,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     );
     let result: { token: string; expires_in?: string };
     try {
-      // A call can fail on our side when Kibana was busy (for example, a blocked event loop), and a
-      // retry on a fresh connection usually works. Asking for a token again is safe.
-      result = await this.uiam.exchangeServiceAccountToken(serviceAccountId).catch((e) => {
-        if (!isRetryableTransportFailure(e)) {
-          throw e;
-        }
-        this.logger.debug(
-          `Retrying the token exchange for service account ${serviceAccountId} after a transport failure`
-        );
-        return this.uiam.exchangeServiceAccountToken(serviceAccountId);
-      });
+      result = await this.uiam.exchangeServiceAccountToken(serviceAccountId);
     } catch (e) {
       const cause =
         e instanceof Error ? e : new Error('Unknown token exchange failure.', { cause: e });
@@ -533,6 +523,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         retryAfterMs: retryDelay ?? 0,
         statusCode: Boom.isBoom(cause) ? cause.output.statusCode : undefined,
         errorCode: getUiamErrorCode(cause),
+        notSent: hasTransportCode(cause, CONNECT_FAILURE_CODES),
       });
     }
 
@@ -621,6 +612,14 @@ const RETRYABLE_TRANSPORT_CODES = new Set([
   'UND_ERR_BODY_TIMEOUT',
   'UND_ERR_SOCKET',
 ]);
+/** The transport failures that happen before the request is sent, so UIAM never saw it. */
+const CONNECT_FAILURE_CODES = new Set([
+  'ECONNREFUSED',
+  'EAI_AGAIN',
+  'ENETUNREACH',
+  'EHOSTUNREACH',
+  'UND_ERR_CONNECT_TIMEOUT',
+]);
 
 /**
  * Rewords a UIAM create refusal listed in {@link CREATE_REFUSALS} as a 400 the caller can act on,
@@ -659,9 +658,8 @@ const getUiamErrorCode = (error: Error): string | undefined => {
   return parsed.success ? parsed.data.error.code : undefined;
 };
 
-/** Whether the exchange failed before UIAM answered, for example on a dropped or timed out socket. */
-const isRetryableTransportFailure = (error: unknown): boolean =>
-  error instanceof Error &&
+/** Whether a transport failure carries one of the given socket error codes. */
+const hasTransportCode = (error: Error, codes: ReadonlySet<string>): boolean =>
   // Native fetch wraps transport failures in a TypeError with the socket error as its cause.
   [error, error.cause].some(
     (cause) =>
@@ -669,7 +667,7 @@ const isRetryableTransportFailure = (error: unknown): boolean =>
       cause !== null &&
       'code' in cause &&
       typeof cause.code === 'string' &&
-      RETRYABLE_TRANSPORT_CODES.has(cause.code)
+      codes.has(cause.code)
   );
 
 const getExchangeRetryDelay = (error: Error): number | null => {
@@ -694,5 +692,5 @@ const getExchangeRetryDelay = (error: Error): number | null => {
     return Number.isFinite(delay) && delay > 0 ? delay : 0;
   }
 
-  return isRetryableTransportFailure(error) ? 0 : null;
+  return hasTransportCode(error, RETRYABLE_TRANSPORT_CODES) ? 0 : null;
 };

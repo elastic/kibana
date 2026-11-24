@@ -472,7 +472,19 @@ export class ServiceAccountFakeRequests {
       }
     };
 
-    const token = await (mintInterceptor ? mintInterceptor(mint) : mint());
+    const attempt = () => (mintInterceptor ? mintInterceptor(mint) : mint());
+    // A connection that Kibana could not open, for example after a blocked event loop, usually
+    // works on a second try. The retry goes through the interceptor again, so a binding that
+    // changed in the meantime is still checked.
+    const token = await attempt().catch((error) => {
+      if (!(error instanceof ServiceAccountTokenExchangeError && error.notSent)) {
+        throw error;
+      }
+      this.logger.debug(
+        `Retrying the token exchange for service account ${serviceAccountId} that was not sent`
+      );
+      return attempt();
+    });
     return { token, expiresAt: token === minted?.token ? minted.expiresAt : undefined };
   }
 
