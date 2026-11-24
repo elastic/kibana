@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { AGENT_POLICY_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -24,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const fleetAndAgents = getService('fleetAndAgents');
+  const retry = getService('retry');
 
   describe('agent policy overrides', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -165,6 +167,73 @@ export default function (providerContext: FtrProviderContext) {
           .send({ name: policyName, namespace: 'default', description: 'updated' })
           .expect(200);
         expect(body.item.description).to.be('updated');
+      });
+    });
+
+    // Must run last: setup cleans every stored policy, including the one seeded above.
+    describe('Fleet setup', () => {
+      let policyId: string;
+      let staleRevision: number;
+
+      async function getLatestDeployedPolicy(agentPolicyId: string) {
+        const res = await es.search({
+          index: AGENT_POLICY_INDEX,
+          query: { term: { policy_id: agentPolicyId } },
+          sort: [{ revision_idx: { order: 'desc' } }],
+          size: 1,
+        });
+        return res.hits.hits[0] as { _id: string; _source: any };
+      }
+
+      before(async () => {
+        const policy = await createAgentPolicy(ALLOWED_OVERRIDES);
+        policyId = policy.id;
+        await setStoredOverrides(policyId, { ...ALLOWED_OVERRIDES, ...DENIED_OVERRIDES });
+
+        // Make the deployed policy look like one built before the keys were stripped: that is
+        // what agents keep reading until the policy is deployed again.
+        const deployed = await getLatestDeployedPolicy(policyId);
+        staleRevision = deployed._source.revision_idx;
+        await es.index({
+          index: AGENT_POLICY_INDEX,
+          id: deployed._id,
+          document: {
+            ...deployed._source,
+            data: { ...deployed._source.data, receivers: { otlp: {} } },
+          },
+          refresh: 'wait_for',
+        });
+
+        // The cleanup is non-fatal for setup, so the tests below assert its result on the stored
+        // and the deployed policy instead.
+        await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
+      });
+
+      it('should remove the denied keys from the stored policy', async () => {
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${policyId}`).expect(200);
+        expect(body.item.overrides).to.eql(ALLOWED_OVERRIDES);
+        expect(body.item.revision).to.be.greaterThan(staleRevision);
+      });
+
+      it('should deploy a policy without the denied keys to agents', async () => {
+        await retry.try(async () => {
+          const deployed = await getLatestDeployedPolicy(policyId);
+          expect(deployed._source.revision_idx).to.be.greaterThan(staleRevision);
+          expect(deployed._source.data).not.to.have.property('receivers');
+          expect(deployed._source.data).not.to.have.property('extensions');
+          expect(deployed._source.data.agent.logging.level).to.be('debug');
+        });
+      });
+
+      it('should not redeploy the policy on the next setup', async () => {
+        const { body: beforeSetup } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}`)
+          .expect(200);
+        await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
+        const { body: afterSetup } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}`)
+          .expect(200);
+        expect(afterSetup.item.revision).to.be(beforeSetup.item.revision);
       });
     });
   });

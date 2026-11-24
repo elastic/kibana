@@ -35,7 +35,7 @@ const customContentPanel = (config: Record<string, unknown>): AttachmentPanel =>
 const addRequest = (
   overrides: Partial<CustomContentPanelAddRequest> = {}
 ): CustomContentPanelAddRequest => ({
-  renderer: 'custom_content',
+  type: 'custom_content',
   nlQuery: 'Show KPI',
   ...overrides,
 });
@@ -44,7 +44,7 @@ const editRequest = (
   existingPanel: AttachmentPanel,
   overrides: Partial<CustomContentPanelEditRequest> = {}
 ): CustomContentPanelEditRequest => ({
-  renderer: 'custom_content',
+  type: 'custom_content',
   existingPanel,
   ...overrides,
 });

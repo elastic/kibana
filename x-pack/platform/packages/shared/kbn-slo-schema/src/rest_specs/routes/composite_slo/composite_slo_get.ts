@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   compositeSloDefinitionResponseSchema,
-  compositeSloIdSchema,
   compositeSloWithSummaryResponseSchema,
 } from '../../../schema/composite_slo';
+import { sloIdSchema } from '../../../schema/slo';
 
-const getCompositeSLODefinitionParamsSchema = z.object({
-  path: z.object({
-    id: compositeSloIdSchema,
-  }),
-});
+const getCompositeSLODefinitionParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: sloIdSchema,
+    }),
+  })
+);
 
 const getCompositeSLOResponseSchema = compositeSloWithSummaryResponseSchema;
 
@@ -23,8 +25,8 @@ const getCompositeSLOParamsSchema = getCompositeSLODefinitionParamsSchema;
 
 const getCompositeSLODefinitionResponseSchema = compositeSloDefinitionResponseSchema;
 
-type GetCompositeSLOResponse = z.output<typeof getCompositeSLOResponseSchema>;
-type GetCompositeSLODefinitionResponse = z.output<typeof getCompositeSLODefinitionResponseSchema>;
+type GetCompositeSLOResponse = z.input<typeof getCompositeSLOResponseSchema>;
+type GetCompositeSLODefinitionResponse = z.input<typeof getCompositeSLODefinitionResponseSchema>;
 
 export {
   getCompositeSLOParamsSchema,

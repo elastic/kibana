@@ -6,10 +6,10 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
+import { getTimelineFieldsDataFromHit } from '../../../../../common/utils/get_timeline_fields_data_from_hit';
 import { getTimelineEventsDetailsFromRecord } from './get_timeline_events_details_from_record';
 
-jest.mock('@kbn/timelines-plugin/common', () => ({
+jest.mock('../../../../../common/utils/get_timeline_fields_data_from_hit', () => ({
   getTimelineFieldsDataFromHit: jest.fn(),
 }));
 

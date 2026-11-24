@@ -31,6 +31,13 @@ export interface HealthProfile {
   networkErrorRate: number;
   /** Probability of an uncaught JS exception per page view. */
   jsErrorRate: number;
+  /**
+   * Share of the clicks that work that the user repeats in a burst anyway. Slow responses,
+   * failures and dead clicks make it much more likely.
+   */
+  rageClickRate: number;
+  /** Share of the clicks on elements that don't react by themselves that get no reaction. */
+  deadClickRate: number;
 }
 
 // https://web.dev/articles/defining-core-web-vitals-thresholds, as used by the web-vitals library
@@ -64,6 +71,8 @@ export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>>
     httpFailureRate: 0.005,
     networkErrorRate: 0.001,
     jsErrorRate: 0.005,
+    rageClickRate: 0.004,
+    deadClickRate: 0.01,
   },
   slow: {
     name: 'slow',
@@ -78,6 +87,8 @@ export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>>
     httpFailureRate: 0.01,
     networkErrorRate: 0.003,
     jsErrorRate: 0.01,
+    rageClickRate: 0.015,
+    deadClickRate: 0.03,
   },
   erroring: {
     name: 'erroring',
@@ -92,6 +103,8 @@ export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>>
     httpFailureRate: 0.05,
     networkErrorRate: 0.02,
     jsErrorRate: 0.12,
+    rageClickRate: 0.012,
+    deadClickRate: 0.05,
   },
   critical: {
     name: 'critical',
@@ -106,5 +119,7 @@ export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>>
     httpFailureRate: 0.25,
     networkErrorRate: 0.05,
     jsErrorRate: 0.3,
+    rageClickRate: 0.03,
+    deadClickRate: 0.08,
   },
 };

@@ -71,6 +71,7 @@ export const registerUpdateWorkerRoute = ({
   logger,
   getSpaceId,
   getWorkersService,
+  isCpsEnabled,
 }: RouteDependencies) => {
   router.versioned
     .patch({
@@ -124,7 +125,8 @@ export const registerUpdateWorkerRoute = ({
             request.body,
             getSpaceId(request),
             request,
-            () => resolveHuntUniverse(context, logger)
+            () =>
+              resolveHuntUniverse(context, logger, isCpsEnabled()).then(({ patterns }) => patterns)
           );
 
           switch (result.outcome) {

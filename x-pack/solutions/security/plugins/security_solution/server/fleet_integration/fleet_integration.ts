@@ -51,9 +51,7 @@ import { removeExportProviders } from '../../common/endpoint/models/export_provi
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
-  isAiDataCollectionEnabled,
   isBillablePolicy,
-  isLinuxRansomwareProtectionEnabled,
   removeAiDataCollection,
   removeCustomYaraSignatures,
   removeDeviceControl,
@@ -325,7 +323,7 @@ export const getPackagePolicyUpdateCallback = (
       // Stripped before product-feature and license validation so deployments with the feature
       // gated off never get an error about a field they cannot set.
       if (
-        !isLinuxRansomwareProtectionEnabled(experimentalFeatures) &&
+        !experimentalFeatures.linuxRansomwareProtection &&
         endpointIntegrationData.inputs?.[0]?.config?.policy?.value
       ) {
         endpointIntegrationData.inputs[0].config.policy.value = removeLinuxRansomware(
@@ -333,10 +331,10 @@ export const getPackagePolicyUpdateCallback = (
         );
       }
 
-      // The AI Data Collection card only exists behind its flags, so deployments with it off
+      // The AI Data Collection card only exists behind its flag, so deployments with it off
       // (e.g. Serverless before Endpoint 9.6 is GA) never persist the setting via the API.
       if (
-        !isAiDataCollectionEnabled(experimentalFeatures) &&
+        !experimentalFeatures.endpointAiDataCollection &&
         endpointIntegrationData.inputs?.[0]?.config?.policy?.value
       ) {
         endpointIntegrationData.inputs[0].config.policy.value = removeAiDataCollection(

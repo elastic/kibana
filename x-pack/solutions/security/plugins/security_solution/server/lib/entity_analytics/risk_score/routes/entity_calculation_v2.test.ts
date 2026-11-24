@@ -23,9 +23,9 @@ import type {
 import { configMock } from '../../../../config.mock';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreEntityCalculationRouteV2 } from './entity_calculation_v2';
-import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
+import { riskEnginePrivilegesMock } from './risk_engine_privileges.mock';
 import { getLookupIndexName } from '../maintainer/lookup/lookup_index';
-import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
+import { getConfiguration } from '../configuration/saved_object_configuration';
 import { scoreBaseEntities } from '../maintainer/steps/score_base_entities';
 import { runResolutionScoringStep } from '../maintainer/steps/run_resolution_scoring_step';
 import { fetchWatchlistConfigs } from '../maintainer/utils/fetch_watchlist_configs';
@@ -47,7 +47,7 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
     .getBuiltInEntityDefinition,
 }));
 jest.mock('../get_risk_inputs_index');
-jest.mock('../../risk_engine/utils/saved_object_configuration');
+jest.mock('../configuration/saved_object_configuration');
 jest.mock('../maintainer/steps/score_base_entities');
 jest.mock('../maintainer/steps/run_resolution_scoring_step');
 jest.mock('../maintainer/utils/fetch_watchlist_configs');
