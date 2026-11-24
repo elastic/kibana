@@ -10,7 +10,7 @@ description: >-
   Consumers also need:
     permissions       - id-token: write, and copilot-requests: write for threat detection
     engine.env        - ANTHROPIC_BASE_URL (the /anthropic path), ANTHROPIC_API_KEY
-                        ("Bearer " + the agent-router-auth step's id_token output, with a
+                        (env.ANTHROPIC_API_KEY, which the steps below export, with a
                         literal fallback for the activation job's key check),
                         AWF_ANTHROPIC_AUTH_HEADER: Authorization, and gateway model IDs
                         in ANTHROPIC_DEFAULT_*_MODEL
@@ -31,6 +31,17 @@ pre-agent-steps:
       # only the id_token output is used; write no credentials file or env vars the agent could read
       create_credentials_file: false
       export_environment_variables: false
+  # engine.env reads the key from env, not steps: gh-aw copies it into the activation job's key
+  # check, where this step doesn't exist. gh-aw keeps ANTHROPIC_API_KEY out of the agent sandbox.
+  - name: Export the Agent Router key
+    env:
+      ID_TOKEN: ${{ steps.agent-router-auth.outputs.id_token }}
+    run: |
+      if [[ ! "$ID_TOKEN" =~ ^[A-Za-z0-9._-]+$ ]]; then
+        echo "::error::Agent Router returned no ID token, or an unexpected one" >&2
+        exit 1
+      fi
+      printf 'ANTHROPIC_API_KEY=Bearer %s\n' "$ID_TOKEN" >> "$GITHUB_ENV"
 network:
   allowed:
     - llm.idea.elastichosting.ai

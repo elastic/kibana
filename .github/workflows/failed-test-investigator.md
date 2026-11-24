@@ -102,8 +102,9 @@ engine:
   env:
     BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
     ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
-    # The gateway reads only `Authorization: Bearer`. The fallback passes the activation job's key check.
-    ANTHROPIC_API_KEY: Bearer ${{ steps.agent-router-auth.outputs.id_token || 'agent-router' }}
+    # `Bearer <token>`, exported by shared/agent-router.md. The fallback passes the activation job's key check.
+    ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
+    # the gateway reads only `Authorization: Bearer`
     AWF_ANTHROPIC_AUTH_HEADER: Authorization
     ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5
     ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-4-5
