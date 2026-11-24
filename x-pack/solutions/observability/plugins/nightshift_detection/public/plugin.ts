@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { DETECTION_INSPECTOR_APP_ID } from '../common/constants';
 
 /**
@@ -14,6 +19,8 @@ import { DETECTION_INSPECTOR_APP_ID } from '../common/constants';
  * and search, so it is reached by URL only.
  */
 export class NightshiftDetectionPlugin implements Plugin<void, void> {
+  constructor(private readonly context: PluginInitializerContext) {}
+
   public setup(core: CoreSetup): void {
     core.application.register({
       id: DETECTION_INSPECTOR_APP_ID,
@@ -25,7 +32,11 @@ export class NightshiftDetectionPlugin implements Plugin<void, void> {
           core.getStartServices(),
           import('./application/render_inspector'),
         ]);
-        return renderInspector({ coreStart, element });
+        return renderInspector({
+          coreStart,
+          element,
+          isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',
+        });
       },
     });
   }

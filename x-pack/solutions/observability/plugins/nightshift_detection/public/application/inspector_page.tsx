@@ -20,35 +20,86 @@ import {
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core/public';
 import { KbnInfoCallout } from '@kbn/ui-callout';
+import {
+  createHttpServiceAccountsApi,
+  ensureNightshiftServiceAccount,
+} from '@kbn/nightshift-shared';
 import { DETECTION_ENGINE_API_PATH } from '../../common/constants';
+import type { DetectionEngineEnableBody } from '../../common/service_account';
 
-/** One engine route the inspector can call, with the body it sends. */
+/** One thing the inspector can do; `run` returns what it shows. */
 interface EngineAction {
   id: string;
   label: string;
-  path: string;
-  body?: Record<string, unknown>;
+  run: (http: HttpStart) => Promise<unknown>;
 }
 
-const ENGINE_ACTIONS: EngineAction[] = [
-  {
-    id: 'tick',
-    label: 'Tick',
-    path: `${DETECTION_ENGINE_API_PATH}/_tick`,
-    body: { skip_backlog: false },
-  },
-  {
-    id: 'tick_skip_backlog',
-    label: 'Tick, skip backlog',
-    path: `${DETECTION_ENGINE_API_PATH}/_tick`,
-    body: { skip_backlog: true },
-  },
-  {
-    id: 'reconcile',
-    label: 'Reconcile rules',
-    path: `${DETECTION_ENGINE_API_PATH}/_reconcile`,
-  },
-];
+function getEngineActions({ isServerless }: { isServerless: boolean }): EngineAction[] {
+  return [
+    {
+      id: 'service_account_status',
+      label: 'Service account status',
+      run: (http) => http.get(`${DETECTION_ENGINE_API_PATH}/service_account`),
+    },
+    {
+      id: 'set_up_space',
+      label: 'Set up this space',
+      run: (http) => setUpSpace({ http, isServerless }),
+    },
+    {
+      id: 'tick',
+      label: 'Tick',
+      run: (http) =>
+        http.post(`${DETECTION_ENGINE_API_PATH}/_tick`, {
+          body: JSON.stringify({ skip_backlog: false }),
+        }),
+    },
+    {
+      id: 'tick_skip_backlog',
+      label: 'Tick, skip backlog',
+      run: (http) =>
+        http.post(`${DETECTION_ENGINE_API_PATH}/_tick`, {
+          body: JSON.stringify({ skip_backlog: true }),
+        }),
+    },
+    {
+      id: 'reconcile',
+      label: 'Reconcile rules',
+      run: (http) => http.post(`${DETECTION_ENGINE_API_PATH}/_reconcile`),
+    },
+  ];
+}
+
+/**
+ * Finds or creates the deployment's detection service account as the current user, then binds
+ * this space to it, the same steps the Scout setup takes. The account's role must already exist.
+ */
+async function setUpSpace({
+  http,
+  isServerless,
+}: {
+  http: HttpStart;
+  isServerless: boolean;
+}): Promise<unknown> {
+  const serviceAccountId = await ensureNightshiftServiceAccount(
+    createHttpServiceAccountsApi({
+      request: (path, { method, query, body, version }) =>
+        http.fetch(path, { method, query, body, version }),
+      getStatus: (error) =>
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        error.response instanceof Response
+          ? error.response.status
+          : undefined,
+    }),
+    { kind: 'detection', isServerless }
+  );
+  const body: DetectionEngineEnableBody = { serviceAccountId };
+  return http.post(`${DETECTION_ENGINE_API_PATH}/service_account/_enable`, {
+    body: JSON.stringify(body),
+  });
+}
 
 /** What one call returned, kept for the session so consecutive runs can be compared. */
 interface ActionResult {
@@ -70,10 +121,12 @@ function toErrorResponse(error: unknown): unknown {
 
 interface InspectorPageProps {
   http: HttpStart;
+  isServerless: boolean;
 }
 
 /** The engine inspector: calls the engine's routes in the current space and shows what they return. */
-export function InspectorPage({ http }: InspectorPageProps) {
+export function InspectorPage({ http, isServerless }: InspectorPageProps) {
+  const engineActions = getEngineActions({ isServerless });
   const [runningActionId, setRunningActionId] = useState<string | null>(null);
   const [results, setResults] = useState<ActionResult[]>([]);
 
@@ -94,10 +147,7 @@ export function InspectorPage({ http }: InspectorPageProps) {
       ]);
 
     try {
-      const response = await http.post(action.path, {
-        body: action.body ? JSON.stringify(action.body) : undefined,
-      });
-      record(true, response);
+      record(true, await action.run(http));
     } catch (error) {
       record(false, toErrorResponse(error));
     } finally {
@@ -111,11 +161,11 @@ export function InspectorPage({ http }: InspectorPageProps) {
       <EuiPageTemplate.Section>
         <KbnInfoCallout
           size="s"
-          title="Temporary page for the engine's developers. It runs as this space's detection service account and is deleted before the engine ships on."
+          title="Temporary page for the engine's developers. Ticks and reconciles run as this space's detection service account; the page is deleted before the engine ships on."
         />
         <EuiSpacer />
         <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-          {ENGINE_ACTIONS.map((action) => (
+          {engineActions.map((action) => (
             <EuiFlexItem grow={false} key={action.id}>
               <EuiButton
                 data-test-subj={`nightshiftDetectionInspectorAction-${action.id}`}

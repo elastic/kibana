@@ -6,7 +6,9 @@ what they find as detection signals. The server is built with Kibana DI (`server
 ## Inspector
 
 `public/` holds one hidden page for the engine's developers, `/app/nightshiftDetectionDebug`. It
-calls `_tick` and `_reconcile` in the current space and shows what they return. It has no nav link
+calls `_tick` and `_reconcile` in the current space and shows what they return. **Set up this
+space** finds or creates the `nightshift_detection` service account as the current user and calls
+`_enable` with it; on stateful the account's role must exist first (`ensureNightshiftServiceAccountRoles`). It has no nav link
 and no gate besides the plugin being enabled, so it is deleted, with `public/` and the
 `nightshiftDetection` entry in `packages/kbn-rspack-optimizer/limits.yml`, before the plugin is
 turned on in any shipped config.

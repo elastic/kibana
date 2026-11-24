@@ -9,4 +9,5 @@ import type { PluginInitializer } from '@kbn/core/public';
 import { NightshiftDetectionPlugin } from './plugin';
 
 /** Browser entry point. It only hosts the engine inspector, deleted before the plugin ships on. */
-export const plugin: PluginInitializer<void, void> = () => new NightshiftDetectionPlugin();
+export const plugin: PluginInitializer<void, void> = (context) =>
+  new NightshiftDetectionPlugin(context);
