@@ -35,17 +35,6 @@ const REGISTRY_SPEC_MAX_VERSION = '3.7';
 
 export const DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS = 60 * 1000;
 
-const REMOVED_EXPERIMENTAL_FEATURES: Record<string, string> = {
-  newBrowseIntegrationUx: 'The new browse integrations page is always enabled.',
-};
-
-const getInvalidExperimentalValueMessage = (key: string, configPath: string) => {
-  const removedReason = REMOVED_EXPERIMENTAL_FEATURES[key];
-  return removedReason
-    ? `[${key}] has been removed from [${configPath}]. ${removedReason}`
-    : `[${key}] is not a valid fleet experimental feature [${configPath}].`;
-};
-
 export const config: PluginConfigDescriptor = {
   dynamicConfig: {
     experimentalFeatures: true, // To allow to be changed for tests
@@ -147,7 +136,7 @@ export const config: PluginConfigDescriptor = {
         if (!isValidExperimentalValue(key)) {
           addDeprecation({
             configPath: 'xpack.fleet.enableExperimental',
-            message: getInvalidExperimentalValueMessage(key, 'xpack.fleet.enableExperimental'),
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.enableExperimental].`,
             correctiveActions: {
               manualSteps: [
                 `Use [xpack.fleet.enableExperimental] with an array of valid experimental features.`,
@@ -181,7 +170,7 @@ export const config: PluginConfigDescriptor = {
         if (!isValidExperimentalValue(key)) {
           addDeprecation({
             configPath: 'xpack.fleet.experimentalFeatures',
-            message: getInvalidExperimentalValueMessage(key, 'xpack.fleet.experimentalFeatures'),
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.experimentalFeatures].`,
             correctiveActions: {
               manualSteps: [
                 `Use [xpack.fleet.experimentalFeatures] with an object containing valid experimental features.`,
