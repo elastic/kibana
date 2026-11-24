@@ -168,10 +168,8 @@ describe('AlertZeroPublicPlugin app registration', () => {
       plugin.start(coreStart, { licensing: createLicensing(), spaces: createSpaces('security') });
       const update = await nextUpdate;
       expect(update?.status).toBe(AppStatus.accessible);
-      expect(update?.visibleIn).toEqual(
-        canRead ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : []
-      );
-      expect(update?.deepLinks?.length).toBe(canRead ? 2 : 0);
+      expect(update?.visibleIn).toEqual(canRead ? ['projectSideNav', 'globalSearch'] : []);
+      expect(update?.deepLinks?.length).toBe(canRead ? 3 : 0);
       plugin.stop();
     }
   );
@@ -204,10 +202,10 @@ describe('AlertZeroPublicPlugin app registration', () => {
       license$.next(licensingMock.createLicense({ license }));
       expect(onUpdate).toHaveBeenLastCalledWith({
         status: AppStatus.accessible,
-        visibleIn: license.visible ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
+        visibleIn: license.visible ? ['projectSideNav', 'globalSearch'] : [],
         deepLinks: license.visible ? expect.any(Array) : [],
       });
-      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
+      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
     }
     subscription.unsubscribe();
     plugin.stop();
@@ -236,10 +234,10 @@ describe('AlertZeroPublicPlugin app registration', () => {
     contract.setServerlessTierAvailable(true);
     expect(onUpdate).toHaveBeenLastCalledWith({
       status: AppStatus.accessible,
-      visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+      visibleIn: ['projectSideNav', 'globalSearch'],
       deepLinks: expect.any(Array),
     });
-    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
+    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
     contract.setServerlessTierAvailable(false);
     expect(onUpdate).toHaveBeenLastCalledWith({
       status: AppStatus.accessible,
@@ -294,10 +292,10 @@ describe('AlertZeroPublicPlugin app registration', () => {
 
       expect(onUpdate).toHaveBeenLastCalledWith({
         status: AppStatus.accessible,
-        visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+        visibleIn: ['projectSideNav', 'globalSearch'],
         deepLinks: expect.any(Array),
       });
-      expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
+      expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
       subscription.unsubscribe();
       plugin.stop();
     }
@@ -374,10 +372,10 @@ describe('AlertZeroPublicPlugin workflow step registration', () => {
     return workflowsExtensions;
   };
 
-  it('registers the reportWorkerOutcome step so the workflows editor knows it', () => {
+  it('registers the AlertZero steps so the workflows editor knows them', () => {
     const { registerStepDefinition } = setupPlugin(true);
 
-    expect(registerStepDefinition).toHaveBeenCalledTimes(1);
+    expect(registerStepDefinition).toHaveBeenCalledTimes(4);
   });
 
   it('registers no step when the deployment kill switch is off', () => {
