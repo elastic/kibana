@@ -433,6 +433,13 @@ const FIELD_ERROR_MESSAGES: Readonly<
       'xpack.securitySolution.endpoint.policy.storageProviders.flyout.serviceUrlNotHttpsErrorMessage',
       { defaultMessage: 'Use a URL that starts with https://.' }
     ),
+    not_azure_blob_host: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.storageProviders.flyout.serviceUrlNotAzureBlobHostErrorMessage',
+      {
+        defaultMessage:
+          'Use an Azure Blob Storage endpoint: an address ending in .blob.core.windows.net, .blob.core.usgovcloudapi.net or .blob.core.chinacloudapi.cn.',
+      }
+    ),
   },
 };
 

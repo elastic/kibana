@@ -195,9 +195,6 @@ export const getExportProviderFieldErrors = (
   return errors;
 };
 
-/** The credential types an export provider can reference. */
-export const EXPORT_PROVIDER_CREDENTIAL_TYPES = ['account_key'] as const;
-
 /** Upper bound for the `account_key` the key route accepts; real keys are 88 characters. */
 export const EXPORT_PROVIDER_ACCOUNT_KEY_MAX_LENGTH = 256;
 

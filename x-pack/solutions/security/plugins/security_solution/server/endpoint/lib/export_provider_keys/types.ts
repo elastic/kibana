@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AuditLogger } from '@kbn/core/server';
 import type { ExportProvider } from '../../../../common/endpoint/types';
 
 /** Attributes of an `EXPORT_PROVIDER_KEY_SAVED_OBJECT_TYPE` object. The object is never updated. */
@@ -65,14 +66,24 @@ export interface ExportProviderKeyClientInterface extends ExportProviderKeyServi
   findAllKeys(options?: { perPage?: number }): AsyncGenerator<ExportProviderKeyMetadata[]>;
 
   /**
-   * Deletes the given key objects one by one and audits each delete without a request
-   * (`endpoint_export_provider_key_delete`). Never throws: a failure is audited and logged at warn,
-   * and the rest continue. An object that is already gone counts as deleted. Returns the deleted ids.
+   * Deletes the given key objects one by one and audits each delete
+   * (`endpoint_export_provider_key_delete`) with `options.auditLogger`, or without a request when it
+   * isn't given. Never throws: a failure is audited and logged at warn, and the rest continue. An
+   * object that is already gone counts as deleted. Returns the deleted ids.
    */
   deleteKeys(
-    keys: ReadonlyArray<Pick<ExportProviderKeyMetadata, 'id' | 'package_policy_id'>>
+    keys: ReadonlyArray<Pick<ExportProviderKeyMetadata, 'id' | 'package_policy_id'>>,
+    options?: ExportProviderKeyDeleteOptions
   ): Promise<string[]>;
 
   /** Finds and deletes (as `deleteKeys`) every key object owned by these package policies. Never throws. */
-  deleteKeysForPackagePolicies(packagePolicyIds: readonly string[]): Promise<void>;
+  deleteKeysForPackagePolicies(
+    packagePolicyIds: readonly string[],
+    options?: ExportProviderKeyDeleteOptions
+  ): Promise<void>;
+}
+
+export interface ExportProviderKeyDeleteOptions {
+  /** Audits the deletes for this logger's user, e.g. `security.audit.asScoped(request)` */
+  auditLogger?: AuditLogger;
 }

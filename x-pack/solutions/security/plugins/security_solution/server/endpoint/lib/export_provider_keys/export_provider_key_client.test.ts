@@ -420,6 +420,36 @@ describe('ExportProviderKeyClient', () => {
         `Failed to delete export provider key [id=key-2] of Elastic Defend policy [id=${PACKAGE_POLICY_ID}]: delete failed`
       );
     });
+
+    it('audits success and failure with the given audit logger instead of its own', async () => {
+      const requestAuditLogger = auditLoggerMock.create();
+      soClient.delete.mockImplementation(async (_, id) => {
+        if (id === 'key-2') {
+          throw new Error('delete failed');
+        }
+
+        return {};
+      });
+
+      await createClient().deleteKeys(
+        [
+          { id: 'key-1', package_policy_id: PACKAGE_POLICY_ID },
+          { id: 'key-2', package_policy_id: PACKAGE_POLICY_ID },
+        ],
+        { auditLogger: requestAuditLogger }
+      );
+
+      expect(
+        requestAuditLogger.log.mock.calls.map(([event]) => [
+          event?.kibana?.saved_object?.id,
+          event?.event?.outcome,
+        ])
+      ).toEqual([
+        ['key-1', 'success'],
+        ['key-2', 'failure'],
+      ]);
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
   });
 
   describe('#deleteKeysForPackagePolicies()', () => {
@@ -478,6 +508,27 @@ describe('ExportProviderKeyClient', () => {
         EXPORT_PROVIDER_KEY_SAVED_OBJECT_TYPE,
         'key-100'
       );
+    });
+
+    it('audits the deletes with the given audit logger', async () => {
+      const requestAuditLogger = auditLoggerMock.create();
+      soClient.find.mockResolvedValueOnce(createFindResponse([createKeyObject(KEY_ID)], 1, 1));
+      soClient.delete.mockResolvedValue({});
+
+      await createClient().deleteKeysForPackagePolicies([PACKAGE_POLICY_ID], {
+        auditLogger: requestAuditLogger,
+      });
+
+      expect(requestAuditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'endpoint_export_provider_key_delete',
+            outcome: 'success',
+          }),
+          kibana: { saved_object: { type: EXPORT_PROVIDER_KEY_SAVED_OBJECT_TYPE, id: KEY_ID } },
+        })
+      );
+      expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
     it('never throws', async () => {

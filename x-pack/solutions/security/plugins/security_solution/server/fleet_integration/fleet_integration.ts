@@ -163,12 +163,13 @@ export const getPackagePolicyCreateCallback = (
     context,
     request
   ): Promise<NewPackagePolicy> => {
-    // The plaintext key must never reach the policy, and overrides and dotted `response_actions`
-    // keys bypass every other check, so all are rejected before the early return below, even when
-    // there is no request to attach an audit trail to.
-    const incomingPolicyValue = newPackagePolicy.inputs?.[0]?.config?.policy?.value;
+    // Checked first, even without a request: the early return below keeps the incoming policy as it
+    // is, overrides and dotted keys bypass every other check, and the plaintext key must never
+    // reach the policy.
     if (isEndpointPackagePolicy(newPackagePolicy)) {
       rejectResponseActionsInOverrides(newPackagePolicy);
+
+      const incomingPolicyValue = newPackagePolicy.inputs?.[0]?.config?.policy?.value;
       if (incomingPolicyValue) {
         validateNoDottedResponseActionsKeys(incomingPolicyValue as PolicyConfig);
       }
@@ -674,7 +675,7 @@ export const getPackagePolicyDeleteCallback = (
   const exceptionsClient = endpointServices.getExceptionListsClient();
   const logger = endpointServices.createLogger('endpointPolicyDeleteCallback');
 
-  return async (deletePackagePolicy): Promise<void> => {
+  return async (deletePackagePolicy, _soClient, _esClient, _context, request): Promise<void> => {
     const policiesToRemove: Array<Promise<void>> = [];
     const deletedEndpointPolicyIds: string[] = [];
 
@@ -698,12 +699,15 @@ export const getPackagePolicyDeleteCallback = (
     );
 
     // The owner is gone, so every key of these policies can go too; cleanup would get to them
-    // eventually, but there is no reason to wait.
+    // eventually, but there is no reason to wait. The deletes are audited for the user who deleted
+    // the policies, when Fleet passes the request.
     if (deletedEndpointPolicyIds.length > 0) {
       policiesToRemove.push(
         endpointServices
           .getExportProviderKeyClient()
-          .deleteKeysForPackagePolicies(deletedEndpointPolicyIds)
+          .deleteKeysForPackagePolicies(deletedEndpointPolicyIds, {
+            auditLogger: request ? endpointServices.security?.audit.asScoped(request) : undefined,
+          })
           .catch((error) => {
             logger.warn(
               `Failed to delete export provider keys of deleted policies [${deletedEndpointPolicyIds.join(

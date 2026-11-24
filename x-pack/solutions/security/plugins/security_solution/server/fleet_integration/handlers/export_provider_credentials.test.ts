@@ -467,7 +467,7 @@ describe('filterExportProviderKeyReferences()', () => {
 
   it.each<[string, Partial<ExportProvider>]>([
     ['container', { container: 'other-container' }],
-    ['service_url', { service_url: 'https://acct.blob.core.example.com' }],
+    ['service_url', { service_url: 'https://acct.blob.core.usgovcloudapi.net' }],
   ])('keeps a reference when only the %s changes', async (_, overrides) => {
     const changedProvider = {
       ...buildProvider(overrides),
