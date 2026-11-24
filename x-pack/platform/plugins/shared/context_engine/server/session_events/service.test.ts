@@ -308,7 +308,7 @@ describe('createSessionEventsService', () => {
     expect(esClient.bulk).not.toHaveBeenCalled();
   });
 
-  describe('readTurns', () => {
+  describe('reading events', () => {
     const stored = (
       id: string,
       overrides: Partial<StoredSessionEvent> & { type?: 'user' | 'assistant' } = {}
@@ -347,90 +347,94 @@ describe('createSessionEventsService', () => {
       esClient.search.mockReset();
     });
 
-    it('finds the events saved in the window, then reads each turn they belong to whole', async () => {
-      esClient.search
-        .mockResolvedValueOnce(searchResponseOf([stored('e-2')]))
-        .mockResolvedValueOnce(
-          searchResponseOf([
-            stored('e-1', { '@timestamp': '2026-11-16T08:00:00.000Z' }),
-            stored('e-2'),
-          ])
-        );
+    describe('listEvents', () => {
+      it('lists the events saved in the window, oldest first, with their positions', async () => {
+        esClient.search.mockResolvedValueOnce(searchResponseOf([stored('e-2')]));
 
-      const { positions, turns, full } = await service.readTurns(input);
+        const positions = await service.listEvents(input);
 
-      expect(esClient.search.mock.calls[0][0]).toEqual(
-        expect.objectContaining({
-          index: SESSION_EVENTS_DATA_STREAM,
-          sort: [{ '@timestamp': 'asc' }, { session_id: 'asc' }, { id: 'asc' }],
-          size: 100,
-          query: {
-            bool: {
-              filter: [
-                { term: { space: 'default' } },
-                { term: { ai_index_id: 'ops-memory' } },
-                { range: { '@timestamp': { gt: input.since, lte: input.until } } },
-              ],
+        expect(esClient.search.mock.calls[0][0]).toEqual(
+          expect.objectContaining({
+            index: SESSION_EVENTS_DATA_STREAM,
+            sort: [{ '@timestamp': 'asc' }, { session_id: 'asc' }, { id: 'asc' }],
+            size: 100,
+            query: {
+              bool: {
+                filter: [
+                  { term: { space: 'default' } },
+                  { term: { ai_index_id: 'ops-memory' } },
+                  { range: { '@timestamp': { gt: input.since, lte: input.until } } },
+                ],
+              },
             },
+          })
+        );
+        expect(esClient.search.mock.calls[0][0]).not.toHaveProperty('search_after');
+        expect(positions).toEqual([
+          {
+            savedAt: '2026-11-16T09:00:00.000Z',
+            sessionId: 'session-1',
+            eventId: 'e-2',
+            turnId: 'turn-1',
           },
-        })
-      );
-      expect(esClient.search.mock.calls[0][0]).not.toHaveProperty('search_after');
-      expect(esClient.search.mock.calls[1][0]?.query).toEqual({
-        bool: {
-          filter: [
-            { term: { space: 'default' } },
-            { term: { ai_index_id: 'ops-memory' } },
-            { term: { session_id: 'session-1' } },
-            { term: { turn_id: 'turn-1' } },
-          ],
-        },
-      });
-      expect(positions).toEqual([
-        {
-          savedAt: '2026-11-16T09:00:00.000Z',
-          sessionId: 'session-1',
-          eventId: 'e-2',
-          turnId: 'turn-1',
-        },
-      ]);
-      expect(turns).toEqual([
-        expect.objectContaining({
-          sessionId: 'session-1',
-          turnId: 'turn-1',
-          endedAt: '2026-11-16T09:00:00.000Z',
-          events: [expect.objectContaining({ id: 'e-1' }), expect.objectContaining({ id: 'e-2' })],
-        }),
-      ]);
-      expect(full).toBe(false);
-    });
-
-    it('continues after the last event read, and says when the read is full', async () => {
-      esClient.search
-        .mockResolvedValueOnce(searchResponseOf([stored('e-3'), stored('e-4')]))
-        .mockResolvedValueOnce(searchResponseOf([stored('e-3'), stored('e-4')]));
-
-      const { full } = await service.readTurns({
-        ...input,
-        size: 2,
-        after: { sessionId: 'session-1', eventId: 'e-2' },
+        ]);
       });
 
-      expect(esClient.search.mock.calls[0][0]).toEqual(
-        expect.objectContaining({
-          search_after: [Date.parse(input.since), 'session-1', 'e-2'],
-        })
-      );
-      expect(JSON.stringify(esClient.search.mock.calls[0][0]?.query)).toContain(
-        JSON.stringify({ range: { '@timestamp': { gte: input.since, lte: input.until } } })
-      );
-      expect(full).toBe(true);
+      it('continues after the last event listed at the same time', async () => {
+        esClient.search.mockResolvedValueOnce(searchResponseOf([]));
+
+        await service.listEvents({
+          ...input,
+          after: { sessionId: 'session-1', eventId: 'e-2' },
+        });
+
+        expect(esClient.search.mock.calls[0][0]).toEqual(
+          expect.objectContaining({ search_after: [Date.parse(input.since), 'session-1', 'e-2'] })
+        );
+        expect(JSON.stringify(esClient.search.mock.calls[0][0]?.query)).toContain(
+          JSON.stringify({ range: { '@timestamp': { gte: input.since, lte: input.until } } })
+        );
+      });
+
+      it('requires a space', async () => {
+        await expect(service.listEvents({ ...input, space: '' })).rejects.toThrow('space');
+      });
     });
 
-    it('orders a turn by seq, else by when the agent created the events, and drops resent copies', async () => {
-      esClient.search
-        .mockResolvedValueOnce(searchResponseOf([stored('late')]))
-        .mockResolvedValueOnce(
+    describe('getTurn', () => {
+      const turn = {
+        space: 'default',
+        aiIndexId: 'ops-memory',
+        sessionId: 'session-1',
+        turnId: 'turn-1',
+        limit: 1000,
+      };
+
+      it('reads the events of one session and turn', async () => {
+        esClient.search.mockResolvedValueOnce(searchResponseOf([stored('e-1')]));
+
+        await service.getTurn(turn);
+
+        expect(esClient.search.mock.calls[0][0]).toEqual(
+          expect.objectContaining({
+            index: SESSION_EVENTS_DATA_STREAM,
+            size: 1000,
+            query: {
+              bool: {
+                filter: [
+                  { term: { space: 'default' } },
+                  { term: { ai_index_id: 'ops-memory' } },
+                  { term: { session_id: 'session-1' } },
+                  { term: { turn_id: 'turn-1' } },
+                ],
+              },
+            },
+          })
+        );
+      });
+
+      it('orders by seq, and drops resent copies', async () => {
+        esClient.search.mockResolvedValueOnce(
           searchResponseOf([
             stored('late', { seq: 2 }),
             stored('early', { seq: 1, '@timestamp': '2026-11-16T09:01:00.000Z' }),
@@ -438,84 +442,27 @@ describe('createSessionEventsService', () => {
           ])
         );
 
-      const { turns } = await service.readTurns(input);
+        const events = await service.getTurn(turn);
 
-      expect(turns[0].events.map(({ id }) => id)).toEqual(['early', 'late']);
-      expect(turns[0].endedAt).toBe('2026-11-16T09:02:00.000Z');
-    });
-
-    it('keeps turns of different sessions apart, reading each by its session and turn', async () => {
-      esClient.search
-        .mockResolvedValueOnce(
-          searchResponseOf([stored('a-1'), stored('b-1', { session_id: 'session-2' })])
-        )
-        .mockResolvedValueOnce(searchResponseOf([stored('a-1')]))
-        .mockResolvedValueOnce(searchResponseOf([stored('b-1', { session_id: 'session-2' })]));
-
-      const { turns } = await service.readTurns(input);
-
-      expect(turns.map(({ sessionId, events }) => [sessionId, events.map(({ id }) => id)])).toEqual(
-        [
-          ['session-1', ['a-1']],
-          ['session-2', ['b-1']],
-        ]
-      );
-      expect(esClient.search.mock.calls[2][0]?.query).toEqual({
-        bool: {
-          filter: [
-            { term: { space: 'default' } },
-            { term: { ai_index_id: 'ops-memory' } },
-            { term: { session_id: 'session-2' } },
-            { term: { turn_id: 'turn-1' } },
-          ],
-        },
+        expect(events.map(({ id }) => id)).toEqual(['early', 'late']);
       });
-    });
 
-    it('leaves a turn with events saved after the settle time for a later read', async () => {
-      esClient.search
-        .mockResolvedValueOnce(searchResponseOf([stored('e-1')]))
-        .mockResolvedValueOnce(
-          searchResponseOf([
-            stored('e-1'),
-            stored('e-2', { '@timestamp': '2026-11-16T09:58:00.000Z' }),
-          ])
-        );
-
-      const { turns, positions } = await service.readTurns(input);
-
-      expect(turns).toEqual([]);
-      expect(positions).toHaveLength(1);
-    });
-
-    it('orders by seq only when every event has one, else by when the agent created them', async () => {
-      esClient.search
-        .mockResolvedValueOnce(searchResponseOf([stored('a')]))
-        .mockResolvedValueOnce(
+      it('orders by seq only when every event has one, else by when the agent created them', async () => {
+        esClient.search.mockResolvedValueOnce(
           searchResponseOf([
             stored('a', { seq: 5, event_at: '2026-11-16T08:00:00.000Z' }),
             stored('b', { event_at: '2026-11-16T07:00:00.000Z' }),
           ])
         );
 
-      const { turns } = await service.readTurns(input);
+        const events = await service.getTurn(turn);
 
-      expect(turns[0].events.map(({ id }) => id)).toEqual(['b', 'a']);
-    });
-
-    it('reads nothing more when no events were saved in the window', async () => {
-      esClient.search.mockResolvedValueOnce(searchResponseOf([]));
-
-      await expect(service.readTurns(input)).resolves.toEqual({
-        positions: [],
-        turns: [],
-        full: false,
+        expect(events.map(({ id }) => id)).toEqual(['b', 'a']);
       });
-      expect(esClient.search).toHaveBeenCalledTimes(1);
-    });
 
-    it('requires a space', async () => {
-      await expect(service.readTurns({ ...input, space: '' })).rejects.toThrow('space');
+      it('requires a space', async () => {
+        await expect(service.getTurn({ ...turn, space: ' ' })).rejects.toThrow('space');
+      });
     });
   });
 });

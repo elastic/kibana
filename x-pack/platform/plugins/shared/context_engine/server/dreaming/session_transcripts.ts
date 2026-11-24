@@ -9,7 +9,6 @@ import type { DreamingMemory } from '../../common/step_types/dreaming_memory';
 import type {
   SessionEventPosition,
   SessionEventsService,
-  SessionTurn,
   StoredSessionEvent,
 } from '../session_events/types';
 import { SESSION_TURN_ID_PREFIX } from './ids';
@@ -23,6 +22,18 @@ import {
 } from './transcript_text';
 
 export const SESSION_TURN_TYPE = 'session.turn';
+
+const TURN_LOAD_CONCURRENCY = 10;
+const MAX_TURN_EVENTS = 1000;
+
+interface SessionTurn {
+  sessionId: string;
+  turnId: string;
+  endedAt: string;
+  events: StoredSessionEvent[];
+}
+
+const turnKey = (sessionId: string, turnId: string): string => `${sessionId}\u0000${turnId}`;
 
 const asText = (value: unknown): string =>
   typeof value === 'string' ? value : value === undefined ? '' : JSON.stringify(value);
@@ -105,6 +116,58 @@ export const decodeAfter = (after: string): { sessionId: string; eventId: string
 };
 
 /**
+ * Loads the whole turn of each listed event, up to its first 1000 events. A turn with an event
+ * saved after `until` may still be running, so it is left for a later read, which finds that event.
+ */
+const loadSettledTurns = async (
+  sessionEvents: SessionEventsService,
+  space: string,
+  aiIndexId: string,
+  positions: SessionEventPosition[],
+  until: string
+): Promise<SessionTurn[]> => {
+  const pairs = new Map<string, { sessionId: string; turnId: string }>();
+  for (const { sessionId, turnId } of positions) {
+    pairs.set(turnKey(sessionId, turnId), { sessionId, turnId });
+  }
+  const refs = [...pairs.values()];
+  const untilMs = Date.parse(until);
+  const turns: SessionTurn[] = [];
+  for (let start = 0; start < refs.length; start += TURN_LOAD_CONCURRENCY) {
+    const loaded = await Promise.all(
+      refs.slice(start, start + TURN_LOAD_CONCURRENCY).map(async ({ sessionId, turnId }) => ({
+        sessionId,
+        turnId,
+        events: await sessionEvents.getTurn({
+          space,
+          aiIndexId,
+          sessionId,
+          turnId,
+          limit: MAX_TURN_EVENTS,
+        }),
+      }))
+    );
+    for (const { sessionId, turnId, events } of loaded) {
+      if (
+        events.length > 0 &&
+        events.every((event) => Date.parse(event['@timestamp']) <= untilMs)
+      ) {
+        turns.push({
+          sessionId,
+          turnId,
+          endedAt: events.reduce(
+            (latest, event) => (event['@timestamp'] > latest ? event['@timestamp'] : latest),
+            events[0]['@timestamp']
+          ),
+          events,
+        });
+      }
+    }
+  }
+  return turns;
+};
+
+/**
  * Reads the turns of an AI index's session events since the cursor as transcripts, oldest first.
  * When `size` or `maxTokens` cuts the read, the cursor stops before the first event of a turn
  * left out, so the next read starts there.
@@ -140,7 +203,7 @@ export const readSessionTranscripts = async ({
     return { memories: [], resume_from: since, ...(after && { resume_after: after }), skipped: 0 };
   }
 
-  const { positions, turns, full } = await sessionEvents.readTurns({
+  const positions = await sessionEvents.listEvents({
     space: spaceId,
     aiIndexId,
     since,
@@ -148,6 +211,8 @@ export const readSessionTranscripts = async ({
     until,
     size,
   });
+  const full = positions.length === size;
+  const turns = await loadSettledTurns(sessionEvents, spaceId, aiIndexId, positions, until);
 
   const memories: DreamingMemory[] = [];
   const left = new Set<string>();

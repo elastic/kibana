@@ -12,12 +12,10 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SESSION_EVENTS_DATA_STREAM } from './data_streams';
 import type {
-  ReadSessionTurnsResult,
   SaveEventResult,
   SessionEventInput,
   SessionEventsScope,
   SessionEventsService,
-  SessionTurn,
   StoredSessionEvent,
   StoredSessionEventTypeFields,
 } from './types';
@@ -69,10 +67,16 @@ const toResult = (id: string, item: BulkResponseItem | undefined): SaveEventResu
   return { id, status: 'failed', error: cause ? `${reason}: ${cause}` : reason };
 };
 
-const TURNS_LOAD_CONCURRENCY = 10;
-const MAX_TURN_EVENTS_LOADED = 1000;
+const assertSpace = (space: string): void => {
+  if (space.trim() === '') {
+    throw new Error('Reading session events requires a non-empty space');
+  }
+};
 
-const turnKey = (sessionId: string, turnId: string): string => `${sessionId}\u0000${turnId}`;
+const indexFilter = (space: string, aiIndexId: string): QueryDslQueryContainer[] => [
+  { term: { space } },
+  { term: { ai_index_id: aiIndexId } },
+];
 
 const sortEvents = (events: StoredSessionEvent[]): StoredSessionEvent[] =>
   events.every(({ seq }) => seq !== undefined)
@@ -132,14 +136,8 @@ export const createSessionEventsService = (
     };
   },
 
-  readTurns: async ({ space, aiIndexId, since, after, until, size }) => {
-    if (space.trim() === '') {
-      throw new Error('Reading session events requires a non-empty space');
-    }
-    const ownedFilter: QueryDslQueryContainer[] = [
-      { term: { space } },
-      { term: { ai_index_id: aiIndexId } },
-    ];
+  listEvents: async ({ space, aiIndexId, since, after, until, size }) => {
+    assertSpace(space);
     const found = await esClient.search<StoredSessionEvent>({
       index: SESSION_EVENTS_DATA_STREAM,
       ignore_unavailable: true,
@@ -151,7 +149,7 @@ export const createSessionEventsService = (
       query: {
         bool: {
           filter: [
-            ...ownedFilter,
+            ...indexFilter(space, aiIndexId),
             {
               range: {
                 '@timestamp': after ? { gte: since, lte: until } : { gt: since, lte: until },
@@ -161,7 +159,7 @@ export const createSessionEventsService = (
         },
       },
     });
-    const positions = found.hits.hits.flatMap(({ _source }) =>
+    return found.hits.hits.flatMap(({ _source }) =>
       _source
         ? [
             {
@@ -173,56 +171,26 @@ export const createSessionEventsService = (
           ]
         : []
     );
+  },
 
-    const turnPairs = new Map<string, { sessionId: string; turnId: string }>();
-    for (const { sessionId, turnId } of positions) {
-      turnPairs.set(turnKey(sessionId, turnId), { sessionId, turnId });
-    }
-    const pairs = [...turnPairs.values()];
-    const untilMs = Date.parse(until);
-    const turns: SessionTurn[] = [];
-    for (let start = 0; start < pairs.length; start += TURNS_LOAD_CONCURRENCY) {
-      const loaded = await Promise.all(
-        pairs.slice(start, start + TURNS_LOAD_CONCURRENCY).map(async ({ sessionId, turnId }) => {
-          const response = await esClient.search<StoredSessionEvent>({
-            index: SESSION_EVENTS_DATA_STREAM,
-            ignore_unavailable: true,
-            allow_partial_search_results: false,
-            size: MAX_TURN_EVENTS_LOADED,
-            sort: [{ '@timestamp': 'asc' }],
-            query: {
-              bool: {
-                filter: [
-                  ...ownedFilter,
-                  { term: { session_id: sessionId } },
-                  { term: { turn_id: turnId } },
-                ],
-              },
-            },
-          });
-          return {
-            sessionId,
-            turnId,
-            stored: response.hits.hits.flatMap(({ _source }) => _source ?? []),
-          };
-        })
-      );
-      for (const { sessionId, turnId, stored } of loaded) {
-        const settled = stored.every((event) => Date.parse(event['@timestamp']) <= untilMs);
-        if (stored.length > 0 && settled) {
-          turns.push({
-            sessionId,
-            turnId,
-            endedAt: stored.reduce(
-              (latest, event) => (event['@timestamp'] > latest ? event['@timestamp'] : latest),
-              stored[0]['@timestamp']
-            ),
-            events: sortEvents(withoutResent(stored)),
-          });
-        }
-      }
-    }
-    const result: ReadSessionTurnsResult = { positions, turns, full: positions.length === size };
-    return result;
+  getTurn: async ({ space, aiIndexId, sessionId, turnId, limit }) => {
+    assertSpace(space);
+    const response = await esClient.search<StoredSessionEvent>({
+      index: SESSION_EVENTS_DATA_STREAM,
+      ignore_unavailable: true,
+      allow_partial_search_results: false,
+      size: limit,
+      sort: [{ '@timestamp': 'asc' }],
+      query: {
+        bool: {
+          filter: [
+            ...indexFilter(space, aiIndexId),
+            { term: { session_id: sessionId } },
+            { term: { turn_id: turnId } },
+          ],
+        },
+      },
+    });
+    return sortEvents(withoutResent(response.hits.hits.flatMap(({ _source }) => _source ?? [])));
   },
 });

@@ -106,31 +106,21 @@ export interface SaveEventsInput {
 
 export type SaveEventResult = SaveSessionEventResult;
 
-export interface ReadSessionTurnsInput {
+export interface ListSessionEventsInput {
   space: string;
   /** Only events that list this AI index in `ai_index_id`. */
   aiIndexId: string;
-  /** ISO date: reads the events saved after it. */
+  /** ISO date: lists the events saved after it. */
   since: string;
-  /** The last event read at `since`: continues after it. */
+  /** The last event listed at `since`: continues after it. */
   after?: { sessionId: string; eventId: string };
-  /** ISO date: leaves the events saved after it, which may belong to a turn still running. */
+  /** ISO date: leaves out the events saved after it. */
   until: string;
-  /** The most events one read looks at. */
+  /** The most events one call lists. */
   size: number;
 }
 
-/** One turn of a session, with every event saved for it. */
-export interface SessionTurn {
-  sessionId: string;
-  turnId: string;
-  /** When the last of the turn's events was saved. */
-  endedAt: string;
-  /** In the order the agent created them, without resent duplicates. */
-  events: StoredSessionEvent[];
-}
-
-/** Where an event the read looked at sits, to resume the read after it. */
+/** Where a stored event sits in the order events are listed. */
 export interface SessionEventPosition {
   savedAt: string;
   sessionId: string;
@@ -138,13 +128,14 @@ export interface SessionEventPosition {
   turnId: string;
 }
 
-export interface ReadSessionTurnsResult {
-  /** The events the read looked at, oldest first. */
-  positions: SessionEventPosition[];
-  /** The turns those events belong to, in order of their first event, each read whole. */
-  turns: SessionTurn[];
-  /** Whether the read looked at `size` events, so more may follow. */
-  full: boolean;
+export interface GetSessionTurnInput {
+  space: string;
+  /** Only events that list this AI index in `ai_index_id`. */
+  aiIndexId: string;
+  sessionId: string;
+  turnId: string;
+  /** The most events one call returns, oldest saved first. */
+  limit: number;
 }
 
 export interface SessionEventsService {
@@ -154,9 +145,13 @@ export interface SessionEventsService {
    */
   saveEvents(scope: SessionEventsScope, input: SaveEventsInput): Promise<SaveSessionEventsResponse>;
   /**
-   * Reads the turns that got events since a time, across all users of a space, for dreaming. A
-   * turn is read whole, up to its first 1000 events, and only once none of its events is newer than
-   * `until`. A turn that continues after the read is read again with its later events.
+   * Lists the events saved in a time window, across all users of a space, oldest first. Events of
+   * one save share a time, so the session and event id order them.
    */
-  readTurns(input: ReadSessionTurnsInput): Promise<ReadSessionTurnsResult>;
+  listEvents(input: ListSessionEventsInput): Promise<SessionEventPosition[]>;
+  /**
+   * Returns the events of one turn across all users of a space, without resent duplicates, in the
+   * order the agent created them: by `seq` when every event has one, else by `event_at`.
+   */
+  getTurn(input: GetSessionTurnInput): Promise<StoredSessionEvent[]>;
 }

@@ -10,7 +10,6 @@ import { readSessionTranscriptsInputSchema } from '../../common/step_types/read_
 import type {
   SessionEventInput,
   SessionEventsService,
-  SessionTurn,
   StoredSessionEvent,
 } from '../session_events/types';
 import {
@@ -31,6 +30,13 @@ const event = (raw: SessionEventInput): StoredSessionEvent =>
   } as unknown as StoredSessionEvent);
 
 const base = { turn_id: 'turn-1', event_at: '2026-11-16T08:59:00.000Z' };
+
+interface SessionTurn {
+  sessionId: string;
+  turnId: string;
+  endedAt: string;
+  events: StoredSessionEvent[];
+}
 
 const turnOf = (
   turnId: string,
@@ -148,8 +154,20 @@ describe('the read cursor', () => {
 });
 
 describe('readSessionTranscripts', () => {
-  const readTurns = jest.fn();
-  const sessionEvents = { readTurns } as unknown as SessionEventsService;
+  const listEvents = jest.fn();
+  const getTurn = jest.fn();
+  const sessionEvents = { listEvents, getTurn } as unknown as SessionEventsService;
+  const given = (
+    positions: ReturnType<typeof position>[],
+    turns: SessionTurn[],
+    eventsOf: (turn: SessionTurn) => StoredSessionEvent[] = (turn) => turn.events
+  ) => {
+    listEvents.mockResolvedValue(positions);
+    getTurn.mockImplementation(async ({ turnId }) => {
+      const turn = turns.find((candidate) => candidate.turnId === turnId);
+      return turn ? eventsOf(turn) : [];
+    });
+  };
   const params = {
     sessionEvents,
     spaceId: 'team-a',
@@ -160,22 +178,22 @@ describe('readSessionTranscripts', () => {
   };
 
   beforeEach(() => {
-    readTurns.mockReset();
+    listEvents.mockReset();
+    getTurn.mockReset();
   });
 
   it('reads each turn as a transcript memory visible in the space, and resumes at the end of the window', async () => {
-    readTurns.mockResolvedValue({
-      positions: [position('turn-1', 'turn-1-u'), position('turn-1', 'turn-1-a')],
-      turns: [answered('turn-1', 'I always want vegetarian meals.')],
-      full: false,
-    });
+    given(
+      [position('turn-1', 'turn-1-u'), position('turn-1', 'turn-1-a')],
+      [answered('turn-1', 'I always want vegetarian meals.')]
+    );
 
     const result = await readSessionTranscripts({
       ...params,
       after: encodeAfter({ sessionId: 'session-1', eventId: 'e-0' }),
     });
 
-    expect(readTurns).toHaveBeenCalledWith({
+    expect(listEvents).toHaveBeenCalledWith({
       space: 'team-a',
       aiIndexId: 'support',
       since: params.since,
@@ -201,11 +219,7 @@ describe('readSessionTranscripts', () => {
   });
 
   it('counts turns nobody spoke in as skipped', async () => {
-    readTurns.mockResolvedValue({
-      positions: [position('turn-1', 'turn-1-u')],
-      turns: [{ ...turnOf('turn-1', ' ') }],
-      full: false,
-    });
+    given([position('turn-1', 'turn-1-u')], [{ ...turnOf('turn-1', ' ') }]);
 
     const result = await readSessionTranscripts(params);
 
@@ -213,16 +227,15 @@ describe('readSessionTranscripts', () => {
   });
 
   it('resumes after the last event it looked at when the read was full', async () => {
-    readTurns.mockResolvedValue({
-      positions: [
+    given(
+      [
         position('turn-1', 'turn-1-u', '2026-11-16T09:00:00.000Z'),
         position('turn-1', 'turn-1-a', '2026-11-16T09:01:00.000Z'),
       ],
-      turns: [answered('turn-1', 'hello')],
-      full: true,
-    });
+      [answered('turn-1', 'hello')]
+    );
 
-    const result = await readSessionTranscripts(params);
+    const result = await readSessionTranscripts({ ...params, size: 2 });
 
     expect(result.resume_from).toBe('2026-11-16T09:01:00.000Z');
     expect(decodeAfter(result.resume_after ?? '')).toEqual({
@@ -232,15 +245,14 @@ describe('readSessionTranscripts', () => {
   });
 
   it('stops before the first event of a turn the token budget left out, and always reads one turn', async () => {
-    readTurns.mockResolvedValue({
-      positions: [
+    given(
+      [
         position('turn-1', 'turn-1-u', '2026-11-16T09:00:00.000Z'),
         position('turn-2', 'turn-2-u', '2026-11-16T09:02:00.000Z'),
         position('turn-1', 'turn-1-a', '2026-11-16T09:03:00.000Z'),
       ],
-      turns: [answered('turn-1', 'x'.repeat(400)), answered('turn-2', 'y'.repeat(400))],
-      full: false,
-    });
+      [answered('turn-1', 'x'.repeat(400)), answered('turn-2', 'y'.repeat(400))]
+    );
 
     const result = await readSessionTranscripts({ ...params, maxTokens: 1 });
 
@@ -250,6 +262,33 @@ describe('readSessionTranscripts', () => {
       sessionId: 'session-1',
       eventId: 'turn-1-u',
     });
+  });
+
+  it('reads each listed turn whole, up to 1000 events', async () => {
+    given([position('turn-1', 'turn-1-u')], [answered('turn-1', 'hello')]);
+
+    await readSessionTranscripts(params);
+
+    expect(getTurn).toHaveBeenCalledTimes(1);
+    expect(getTurn).toHaveBeenCalledWith({
+      space: 'team-a',
+      aiIndexId: 'support',
+      sessionId: 'session-1',
+      turnId: 'turn-1',
+      limit: 1000,
+    });
+  });
+
+  it('leaves a turn with events saved after the settle time for a later read', async () => {
+    const turn = answered('turn-1', 'hello');
+    given([position('turn-1', 'turn-1-u')], [turn], ({ events }) => [
+      events[0],
+      { ...events[1], '@timestamp': '2026-11-16T09:58:00.000Z' },
+    ]);
+
+    const result = await readSessionTranscripts(params);
+
+    expect(result).toEqual({ memories: [], resume_from: params.until, skipped: 0 });
   });
 
   it('reads nothing, keeping the cursor, when the window is empty', async () => {
@@ -263,6 +302,6 @@ describe('readSessionTranscripts', () => {
       resume_after: after,
       skipped: 0,
     });
-    expect(readTurns).not.toHaveBeenCalled();
+    expect(listEvents).not.toHaveBeenCalled();
   });
 });

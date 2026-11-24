@@ -94,9 +94,8 @@ export interface SessionMemoryService {
    */
   forget(scope: SessionMemoryScope, ids: readonly string[]): Promise<ForgetResult[]>;
   /**
-   * Reads what was remembered or revised since a time, oldest first, across all users of a space,
-   * for dreaming. A memory whose latest revision no longer lists the AI index, or is a
-   * tombstone, is left out.
+   * Reads what was remembered or revised since a time, oldest first, across all users of a space.
+   * A memory whose latest revision no longer lists the AI index, or is a tombstone, is left out.
    */
   readRevised(input: ReadSessionMemoriesInput): Promise<ReadSessionMemoriesResult>;
 }
