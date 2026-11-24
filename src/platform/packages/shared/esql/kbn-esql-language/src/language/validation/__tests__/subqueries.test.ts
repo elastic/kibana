@@ -11,3 +11,12 @@ import { setup } from './helpers';
 import { runSubqueriesValidationSuite } from './subqueries_suite';
 
 runSubqueriesValidationSuite(setup);
+
+it('does not count the unmapped fields of a nested IN subquery as outer columns', async () => {
+  const { expectErrors } = await setup();
+
+  await expectErrors(
+    'SET unmapped_fields = "LOAD"; FROM index | WHERE keywordField IN (ROW keywordField = "a" | WHERE keywordField IN (FROM index | KEEP innerOnly))',
+    []
+  );
+});

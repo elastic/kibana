@@ -12,6 +12,15 @@ import { runNamedSubqueriesValidationSuite } from './named_subqueries_suite';
 
 runNamedSubqueriesValidationSuite(setup);
 
+it('keeps SET unmapped_fields for the columns of an IN subquery in a LET body', async () => {
+  const { expectErrors } = await setup();
+
+  await expectErrors(
+    'SET unmapped_fields = "LOAD"; LET a = (FROM index | WHERE (keywordField, unmapped) IN (FROM other_index | KEEP keywordField, unmapped)); FROM a',
+    []
+  );
+});
+
 // The integration cluster uses a Basic license, which cannot run FUSE.
 it('reports missing METADATA on FUSE even when it inherits it from a LET', async () => {
   const { expectErrors } = await setup();

@@ -177,9 +177,6 @@ async function validateAst(
     ? (minimumLicenseRequired: LicenseType) => license.hasAtLeast(minimumLicenseRequired)
     : undefined;
 
-  // An IN subquery can read the LET bindings of the header.
-  const letCommands = namedSubqueries.map(({ command }) => command);
-
   const isRootTimeseries = isTimeseriesSourceCommand(rootCommands);
 
   // Validate the header commands
@@ -216,10 +213,11 @@ async function validateAst(
     getSubqueriesToValidate(commands, header).map((subquery) => ({
       subquery,
       pipelineCommands: commands,
+      pipelineHeader: header,
     }))
   );
 
-  for (const { subquery, pipelineCommands } of subqueries) {
+  for (const { subquery, pipelineCommands, pipelineHeader } of subqueries) {
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
     const subqueryForColumns =
@@ -279,10 +277,11 @@ async function validateAst(
     ) {
       // We need the columns the subquery returns, which nothing has computed yet.
       // Cheap anyway: its source columns were already cached earlier in this loop.
+      // The pipeline header keeps SET settings such as unmapped_fields and the LETs it can read.
       const rightColumns = await Promise.all(
         inSubqueries.map(({ query }) =>
           new QueryColumns(
-            { ...query, header: letCommands },
+            { ...query, header: pipelineHeader },
             queryString,
             callbacks,
             options
