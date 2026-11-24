@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, isObject, isPlainObject, omit } from 'lodash';
-import type { ExportProvider, PolicyConfig } from '../types';
+import type { ExportProvider, ExportProviderCredentials, PolicyConfig } from '../types';
 
 type PolicyOsConfig = PolicyConfig['windows'] | PolicyConfig['mac'] | PolicyConfig['linux'];
 
@@ -91,3 +91,32 @@ export const hasExportProviders = (policy: PolicyConfig): boolean =>
   hasNonEmptyExportProvidersArray(policy.windows) ||
   hasNonEmptyExportProvidersArray(policy.mac) ||
   hasNonEmptyExportProvidersArray(policy.linux);
+
+/**
+ * Every `credentials.key_id` referenced by a provider of any OS. Tolerates malformed input, so a
+ * caller deciding whether a stored key is still in use never misses a reference.
+ */
+export const getExportProviderKeyIds = (policy: PolicyConfig): Set<string> => {
+  const keyIds = new Set<string>();
+
+  for (const os of [policy.windows, policy.mac, policy.linux]) {
+    const exportProviders: unknown = isObject(os) ? os.response_actions?.export_providers : [];
+
+    if (Array.isArray(exportProviders)) {
+      for (const provider of exportProviders as unknown[]) {
+        const credentials: unknown = isObject(provider)
+          ? (provider as Partial<ExportProvider>).credentials
+          : undefined;
+        const keyId: unknown = isObject(credentials)
+          ? (credentials as Partial<ExportProviderCredentials>).key_id
+          : undefined;
+
+        if (typeof keyId === 'string' && keyId !== '') {
+          keyIds.add(keyId);
+        }
+      }
+    }
+  }
+
+  return keyIds;
+};

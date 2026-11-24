@@ -15,6 +15,7 @@ import {
   DELETE_MODAL_CONFIRM_BUTTON_LABEL,
   DELETE_MODAL_DESCRIPTION,
   getDeleteModalTitle,
+  KEY_REVOCATION_NOTICE,
 } from './translations';
 
 export interface DeleteStorageProviderModalProps {
@@ -64,6 +65,18 @@ export const DeleteStorageProviderModal = memo<DeleteStorageProviderModalProps>(
         <EuiText size="s">
           <p>{DELETE_MODAL_DESCRIPTION}</p>
         </EuiText>
+        {provider.credentials && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText
+              size="s"
+              color="subdued"
+              data-test-subj="deleteStorageProviderModal-keyRevocationNotice"
+            >
+              <p>{KEY_REVOCATION_NOTICE}</p>
+            </EuiText>
+          </>
+        )}
       </EuiConfirmModal>
     );
   }

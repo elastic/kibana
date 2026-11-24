@@ -38,6 +38,8 @@ import type {
 } from '../pages/policy/types';
 import { FleetAgentPolicyGenerator } from '../../../common/endpoint/data_generators/fleet_agent_policy_generator';
 import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { EXPORT_PROVIDER_KEY_ROUTE } from '../../../common/endpoint/constants';
+import type { SetExportProviderKeyResponse } from '../../../common/api/endpoint';
 
 interface KqlArgumentType {
   type: string;
@@ -445,6 +447,22 @@ export const fleetPutEndpointPackagePolicyHttpMock =
           item: updatedPolicy,
         };
       },
+    },
+  ]);
+
+export type SetExportProviderKeyHttpMockInterface = ResponseProvidersInterface<{
+  setExportProviderKey: (options: HttpFetchOptionsWithPath) => SetExportProviderKeyResponse;
+}>;
+/** Each test overrides the response with the policy it expects the key route to return */
+export const setExportProviderKeyHttpMock =
+  httpHandlerMockFactory<SetExportProviderKeyHttpMockInterface>([
+    {
+      id: 'setExportProviderKey',
+      path: EXPORT_PROVIDER_KEY_ROUTE,
+      method: 'put',
+      handler: () => ({
+        item: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy(),
+      }),
     },
   ]);
 

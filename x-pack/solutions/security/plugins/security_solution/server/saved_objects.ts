@@ -14,6 +14,10 @@ import { scriptsLibrarySavedObjectType } from './endpoint/lib/scripts_library';
 import type { ExperimentalFeatures } from '../common';
 import { trialCompanionNBASavedObjectType } from './lib/trial_companion/saved_objects';
 import { referenceDataSavedObjectType } from './endpoint/lib/reference_data';
+import {
+  exportProviderKeyEncryptionParams,
+  exportProviderKeySavedObjectType,
+} from './endpoint/lib/export_provider_keys';
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
@@ -44,6 +48,11 @@ const typesTiedToFeatureFlags: Array<{
   feature: keyof ExperimentalFeatures;
   soType: SavedObjectsType;
 }> = [{ feature: 'responseActionsScriptLibraryManagement', soType: scriptsLibrarySavedObjectType }];
+
+// Registered on their own and always: not in `types`, which feeds `savedObjectTypes` and so the
+// feature privileges (nobody gets access to these through a feature), and not behind a feature flag,
+// because a type that comes and goes with a flag leaves its documents unreadable.
+const internalTypes: SavedObjectsType[] = [exportProviderKeySavedObjectType];
 
 const types = [
   noteType,
@@ -85,6 +94,11 @@ export const initSavedObjects = (
     savedObjects.registerType(type);
   });
 
+  internalTypes.forEach((type) => {
+    logger.debug(`Registering SavedObject type [${type.name}]`);
+    savedObjects.registerType(type);
+  });
+
   typesTiedToFeatureFlags.forEach(({ feature, soType }) => {
     if (!experimentalFeatures[feature]) {
       logger.debug(
@@ -111,4 +125,5 @@ export const initEncryptedSavedObjects = ({
   }
   encryptedSavedObjects.registerType(PrivilegeMonitoringApiKeyEncryptionParams);
   encryptedSavedObjects.registerType(WatchlistEntitySourceApiKeyEncryptionParams);
+  encryptedSavedObjects.registerType(exportProviderKeyEncryptionParams);
 };

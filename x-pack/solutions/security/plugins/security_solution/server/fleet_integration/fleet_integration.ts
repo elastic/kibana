@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   PostPackagePolicyCreateCallback,
@@ -40,6 +41,12 @@ import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import { validateExportProviders } from './handlers/validate_export_providers';
+import {
+  filterExportProviderKeyReferences,
+  rejectExportProviderCredentialsOnCreate,
+  rejectResponseActionsInOverrides,
+  validateExportProviderCredentials,
+} from './handlers/export_provider_credentials';
 import { removeExportProviders } from '../../common/endpoint/models/export_providers';
 import {
   isPolicySetToEventCollectionOnly,
@@ -155,6 +162,13 @@ export const getPackagePolicyCreateCallback = (
     context,
     request
   ): Promise<NewPackagePolicy> => {
+    // The plaintext key must never reach the policy, and overrides bypass every other check, so
+    // both are rejected even when there is no request to attach an audit trail to.
+    if (isEndpointPackagePolicy(newPackagePolicy)) {
+      rejectResponseActionsInOverrides(newPackagePolicy);
+      rejectExportProviderCredentialsOnCreate(newPackagePolicy.inputs?.[0]?.config?.policy?.value);
+    }
+
     // callback is called outside request context
     if (!context || !request) {
       logger.debug('PackagePolicyCreateCallback called outside request context. Skipping...');
@@ -296,6 +310,9 @@ export const getPackagePolicyUpdateCallback = (
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
 
     try {
+      // overrides are merged into the agent policy after every other check in this callback
+      rejectResponseActionsInOverrides(newPackagePolicy);
+
       // The advanced settings UI may delete mac.ransomware.mode when cleared;
       // restore the default before validation so the typed field is never missing.
       const policyValue = endpointIntegrationData.inputs?.[0]?.config?.policy?.value as
@@ -381,9 +398,36 @@ export const getPackagePolicyUpdateCallback = (
       validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
 
       if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
-        validateExportProviders(
-          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
-        );
+        const policyConfig = endpointIntegrationData.inputs[0].config.policy;
+        const packagePolicyId = endpointIntegrationData.id as string;
+        const exportProvidersPolicyValue = policyConfig.value as PolicyConfig;
+
+        // Reject a plaintext key or a malformed reference before deciding which references to keep
+        validateExportProviderCredentials(exportProvidersPolicyValue);
+
+        // Drop references this package policy may not keep (foreign, missing or retired keys)
+        const filteredPolicyValue = await filterExportProviderKeyReferences({
+          policy: exportProvidersPolicyValue,
+          packagePolicyId,
+          getStoredPolicy: () =>
+            endpointServices
+              .getInternalFleetServices()
+              .packagePolicy.get(soClient, packagePolicyId)
+              .then((storedPolicy) => storedPolicy ?? undefined)
+              .catch((error) => {
+                if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+                  return undefined;
+                }
+                throw error;
+              }),
+          keyClient: endpointServices.getExportProviderKeyClient(),
+          logger,
+          now: Date.now(),
+        });
+
+        policyConfig.value = filteredPolicyValue;
+
+        validateExportProviders(filteredPolicyValue);
       }
     } catch (error) {
       // Fleet swallows callback errors lacking `apiPassThrough` and persists the payload unvalidated,
@@ -623,6 +667,7 @@ export const getPackagePolicyDeleteCallback = (
 
   return async (deletePackagePolicy): Promise<void> => {
     const policiesToRemove: Array<Promise<void>> = [];
+    const deletedEndpointPolicyIds: string[] = [];
 
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {
@@ -630,6 +675,10 @@ export const getPackagePolicyDeleteCallback = (
 
         policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy, logger));
         policiesToRemove.push(removeProtectionUpdatesNote(endpointServices, policy));
+
+        if (policy.success === true) {
+          deletedEndpointPolicyIds.push(policy.id);
+        }
       }
     }
 
@@ -638,6 +687,23 @@ export const getPackagePolicyDeleteCallback = (
     policiesToRemove.push(
       updateDeletedPolicyResponseActions(endpointServices, deletePackagePolicy)
     );
+
+    // The owner is gone, so every key of these policies can go too; cleanup would get to them
+    // eventually, but there is no reason to wait.
+    if (deletedEndpointPolicyIds.length > 0) {
+      policiesToRemove.push(
+        endpointServices
+          .getExportProviderKeyClient()
+          .deleteKeysForPackagePolicies(deletedEndpointPolicyIds)
+          .catch((error) => {
+            logger.warn(
+              `Failed to delete export provider keys of deleted policies [${deletedEndpointPolicyIds.join(
+                ', '
+              )}]: ${error instanceof Error ? error.message : String(error)}`
+            );
+          })
+      );
+    }
 
     await Promise.all(policiesToRemove);
 

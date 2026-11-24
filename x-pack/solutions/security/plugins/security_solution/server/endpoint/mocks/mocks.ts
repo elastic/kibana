@@ -56,8 +56,10 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { ScriptsLibraryMock } from '../services/scripts_library/mocks';
 import { referenceDataMocks } from '../lib/reference_data/mocks';
+import { exportProviderKeyMocks } from '../lib/export_provider_keys/mocks';
 import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
 import { createSavedObjectsClientFactoryMock } from '../services/saved_objects/saved_objects_client_factory.mocks';
 import { EndpointMetadataService } from '../services/metadata';
@@ -142,6 +144,7 @@ export const createMockEndpointAppContextService = (
   const licenseServiceMock = createLicenseServiceMock();
   const telemetryServiceMock = analyticsServiceMock.createAnalyticsServiceSetup();
   const scriptsClient = ScriptsLibraryMock.getMockedClient();
+  const exportProviderKeyClient = exportProviderKeyMocks.createClient();
   const isCpsActive = jest.fn().mockResolvedValue(false);
   // Hoisted so `asScoped` can delegate to the same mocks the service exposes directly. A test that
   // overrides one of these changes what the scoped instance answers too, so the two cannot disagree.
@@ -232,6 +235,8 @@ export const createMockEndpointAppContextService = (
     getReferenceDataClient: jest.fn().mockReturnValue(referenceDataMocks.createClient()),
     getServerConfigValue: jest.fn(),
     getScriptsLibraryClient: jest.fn().mockReturnValue(scriptsClient),
+    getExportProviderKeyClient: jest.fn().mockReturnValue(exportProviderKeyClient),
+    getExportProviderKeyService: jest.fn().mockReturnValue(exportProviderKeyClient),
     getAgentBuilder: jest.fn(),
     getScopedEndpointArtifactClient: jest.fn(),
     isEndpointExceptionsPerPolicyEnabled: jest.fn().mockResolvedValue(true),
@@ -357,6 +362,8 @@ export const createMockEndpointAppContextServiceStartContract =
       spacesService,
       agentBuilder: agentBuilderMocks.createStart(),
       getExceptionListClient: jest.fn().mockReturnValue(listMock.getExceptionListClient()),
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+      canEncryptSavedObjects: true,
     };
 
     return startContract;

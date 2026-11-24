@@ -6,7 +6,11 @@
  */
 
 import { isEqual, isPlainObject } from 'lodash';
-import type { ExportProvider, PolicyConfig } from '../../../common/endpoint/types';
+import type {
+  ExportProvider,
+  ExportProviderAccountKeyReference,
+  PolicyConfig,
+} from '../../../common/endpoint/types';
 import type {
   ExportProviderFieldError,
   ExportProviderFieldName,
@@ -18,9 +22,16 @@ import {
   MAX_EXPORT_PROVIDERS_PER_POLICY,
   getExportProviderFieldErrors,
 } from '../../../common/endpoint/service/response_actions/export_providers';
+import { EXPORT_PROVIDER_KEY_ROUTE } from '../../../common/endpoint/constants';
 import { EndpointIntegrationFleetError } from './errors';
 
-const POLICY_OPERATING_SYSTEMS = ['windows', 'mac', 'linux'] as const;
+export const POLICY_OPERATING_SYSTEMS = ['windows', 'mac', 'linux'] as const;
+
+/**
+ * `credentials.key_id` is the id of a `security:endpoint-export-provider-key` object (a UUID).
+ * Bounded to id-safe characters, so a hand-written value can't break the saved object lookup.
+ */
+const EXPORT_PROVIDER_KEY_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 
 /** Field order used for the error messages */
 const PROVIDER_FIELDS: readonly ExportProviderFieldName[] = [
@@ -33,7 +44,6 @@ const PROVIDER_FIELDS: readonly ExportProviderFieldName[] = [
 
 /** Keys that the contract defines but Kibana does not accept yet */
 const NOT_YET_SUPPORTED_KEY_MESSAGES: Readonly<Record<string, string>> = {
-  credentials: 'credentials are not supported yet',
   ssl: 'ssl is not supported yet',
 };
 
@@ -79,10 +89,34 @@ const quoteForMessage = (value: string): string =>
       : value
   );
 
-const getProviderLabel = (index: number, id: unknown): string =>
+export const getProviderLabel = (index: number, id: unknown): string =>
   typeof id === 'string' && id !== ''
     ? `export_providers[${index}] ${quoteForMessage(id)}`
     : `export_providers[${index}]`;
+
+/**
+ * Exactly `{ type: 'account_key', key_id: <1-64 letters, digits, "_" and "-"> }`, no other
+ * keys. Single source so the policy update pre-check and this validator never disagree.
+ */
+export const isExportProviderCredentialsReference = (
+  value: unknown
+): value is ExportProviderAccountKeyReference => {
+  if (!isPlainObject(value) || Object.keys(value as object).length !== 2) {
+    return false;
+  }
+
+  const { type, key_id: keyId } = value as Record<string, unknown>;
+
+  return (
+    type === 'account_key' &&
+    typeof keyId === 'string' &&
+    EXPORT_PROVIDER_KEY_ID_PATTERN.test(keyId)
+  );
+};
+
+/** Single source for the message shown when `credentials` isn't exactly a key reference */
+export const getExportProviderCredentialsReferenceMessage = (label: string): string =>
+  `${label}: credentials must be a key reference; set the key with PUT ${EXPORT_PROVIDER_KEY_ROUTE}`;
 
 const getProviderErrors = (
   provider: Record<string, unknown>,
@@ -93,7 +127,11 @@ const getProviderErrors = (
   const errors: string[] = [];
 
   for (const key of Object.keys(provider)) {
-    if (!(PROVIDER_FIELDS as readonly string[]).includes(key)) {
+    if (key === 'credentials') {
+      if (!isExportProviderCredentialsReference(provider.credentials)) {
+        errors.push(getExportProviderCredentialsReferenceMessage(label));
+      }
+    } else if (!(PROVIDER_FIELDS as readonly string[]).includes(key)) {
       // Own-property check: keys such as `constructor` or `__proto__` must not hit the prototype
       const message = Object.hasOwn(NOT_YET_SUPPORTED_KEY_MESSAGES, key)
         ? NOT_YET_SUPPORTED_KEY_MESSAGES[key]

@@ -11,6 +11,7 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +23,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTextColor,
   EuiTitle,
   useGeneratedHtmlId,
@@ -31,28 +33,43 @@ import { isEqual } from 'lodash';
 import type { ExportProviderFieldName } from '../../../../../../common/endpoint/service/response_actions/export_providers';
 import {
   EXPORT_PROVIDER_TYPES,
+  getExportProviderAccountKeyError,
   getExportProviderFieldErrors,
 } from '../../../../../../common/endpoint/service/response_actions/export_providers';
-import type { ExportProvider, ExportProviderType } from '../../../../../../common/endpoint/types';
+import type {
+  ExportProvider,
+  ExportProviderCredentials,
+  ExportProviderType,
+} from '../../../../../../common/endpoint/types';
 import {
+  ACCOUNT_KEY_CREDENTIAL_TYPE_LABEL,
+  ACCOUNT_KEY_FIELD_HELP_TEXT,
+  ACCOUNT_KEY_FIELD_LABEL,
   ACCOUNT_NAME_FIELD_LABEL,
   ADVANCED_SETTINGS_LABEL,
   CANCEL_BUTTON_LABEL,
   CONTAINER_FIELD_LABEL,
   CREATE_FLYOUT_TITLE,
   CREATE_SUBMIT_BUTTON_LABEL,
+  CREDENTIAL_TYPE_FIELD_LABEL,
+  CREDENTIALS_SECTION_TITLE,
   DESTINATION_CHANGED_WARNING,
   EDIT_FLYOUT_TITLE,
   EDIT_SUBMIT_BUTTON_LABEL,
   EXPORT_PROVIDER_TYPE_LABELS,
+  getAccountKeyErrorMessage,
   getFieldErrorMessage,
+  KEY_REVOCATION_NOTICE,
   NAME_CHANGED_WARNING,
   NAME_FIELD_HELP_TEXT,
   NAME_FIELD_LABEL,
+  REPLACE_KEY_BUTTON_LABEL,
   SAVE_ERROR_TITLE,
   SERVICE_URL_FIELD_HELP_TEXT,
   SERVICE_URL_FIELD_LABEL,
   SERVICE_URL_FIELD_PLACEHOLDER,
+  STORED_KEY_HIDDEN_TEXT,
+  KEY_SAVE_ERROR_TITLE,
   TYPE_FIELD_LABEL,
 } from './translations';
 
@@ -64,6 +81,15 @@ interface StorageProviderFormValues {
   container: string;
   /** `''` means "not set": the key is left out of the saved provider */
   service_url: string;
+  /** Reference to the stored key, carried through unchanged; never a plaintext key */
+  credentials?: ExportProviderCredentials;
+}
+
+/** The provider fields plus the plaintext key the admin entered, if any */
+export interface StorageProviderSaveInput {
+  provider: ExportProvider;
+  /** Trimmed; present only when the admin entered a new key */
+  accountKey?: string;
 }
 
 const TYPE_OPTIONS = EXPORT_PROVIDER_TYPES.map((type) => ({
@@ -71,8 +97,21 @@ const TYPE_OPTIONS = EXPORT_PROVIDER_TYPES.map((type) => ({
   text: EXPORT_PROVIDER_TYPE_LABELS[type],
 }));
 
+const CREDENTIAL_TYPE_OPTIONS = [{ value: 'account_key', text: ACCOUNT_KEY_CREDENTIAL_TYPE_LABEL }];
+
 const isExportProviderType = (value: string): value is ExportProviderType =>
   (EXPORT_PROVIDER_TYPES as readonly string[]).includes(value);
+
+/** The key is required on add; on edit an empty value means "leave the stored key as is". */
+const getAccountKeyValidationError = (
+  isEdit: boolean,
+  trimmedAccountKey: string
+): 'required' | 'invalid_format' | undefined => {
+  if (isEdit && trimmedAccountKey === '') {
+    return undefined;
+  }
+  return getExportProviderAccountKeyError(trimmedAccountKey);
+};
 
 const toFormValues = (provider?: ExportProvider): StorageProviderFormValues => ({
   type: provider?.type ?? EXPORT_PROVIDER_TYPES[0],
@@ -80,15 +119,19 @@ const toFormValues = (provider?: ExportProvider): StorageProviderFormValues => (
   account_name: provider?.account_name ?? '',
   container: provider?.container ?? '',
   service_url: provider?.service_url ?? '',
+  credentials: provider?.credentials,
 });
 
 const toExportProvider = ({
   service_url: serviceUrl,
+  credentials,
   ...values
 }: StorageProviderFormValues): ExportProvider => ({
   ...values,
   // The server rejects `''`, so an empty field means "use the default"
   ...(serviceUrl !== '' ? { service_url: serviceUrl } : {}),
+  // Left out entirely when absent, so it compares equal to a provider with no reference
+  ...(credentials ? { credentials } : {}),
 });
 
 /** A field's help text, followed by `warning` (if any) on its own line in the warning colour */
@@ -114,18 +157,35 @@ export interface StorageProviderFlyoutProps {
   /** The `id`s of the policy's other providers, for the uniqueness check */
   otherIds: readonly string[];
   isSaving: boolean;
-  /** The server's message when the last policy update failed */
+  /** The server's message when the last provider field save failed */
   errorMessage?: string;
-  onSave: (provider: ExportProvider) => void;
+  /** The server's message when the key save failed, after the provider's fields were saved */
+  keyErrorMessage?: string;
+  /**
+   * True once the provider's fields are already saved and only the key can still be retried; the
+   * fields become read-only and the only possible save retries the key.
+   */
+  isKeyOnlyRetry?: boolean;
+  onSave: (input: StorageProviderSaveInput) => void;
   onClose: () => void;
 }
 
 /**
  * Add or edit one storage provider. Renaming changes the `id` in place; the type can't be changed
- * once the provider exists.
+ * once the provider exists. The storage account key is kept in local state only, trimmed before
+ * validation, and never written into the provider object sent to the parent until Save.
  */
 export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
-  ({ provider, otherIds, isSaving, errorMessage, onSave, onClose }) => {
+  ({
+    provider,
+    otherIds,
+    isSaving,
+    errorMessage,
+    keyErrorMessage,
+    isKeyOnlyRetry = false,
+    onSave,
+    onClose,
+  }) => {
     const isEdit = provider !== undefined;
     const titleId = useGeneratedHtmlId();
     const advancedSettingsId = useGeneratedHtmlId();
@@ -133,26 +193,45 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
     const [values, setValues] = useState<StorageProviderFormValues>(() => toFormValues(provider));
     // Field errors show once the user has left the field
     const [touched, setTouched] = useState<Partial<Record<ExportProviderFieldName, boolean>>>({});
+    const [accountKeyInput, setAccountKeyInput] = useState('');
+    const [isKeyTouched, setIsKeyTouched] = useState(false);
+    // Revealed by the "Replace key" button when the provider already has a key reference
+    const [isReplacingKey, setIsReplacingKey] = useState(false);
+
+    const fieldsDisabled = isSaving || isKeyOnlyRetry;
+    const hasKeyReference = isEdit && Boolean(provider?.credentials);
+    const showKeyInput = isKeyOnlyRetry || !hasKeyReference || isReplacingKey;
+    const trimmedAccountKey = accountKeyInput.trim();
+    const hasKeyEntered = showKeyInput && trimmedAccountKey !== '';
 
     const updatedProvider = useMemo(() => toExportProvider(values), [values]);
     const fieldErrors = useMemo(
       () => getExportProviderFieldErrors(updatedProvider, otherIds),
       [otherIds, updatedProvider]
     );
-    const isValid = Object.keys(fieldErrors).length === 0;
-    const isChanged = !isEdit || !isEqual(updatedProvider, provider);
+    const keyError = showKeyInput
+      ? getAccountKeyValidationError(isEdit, trimmedAccountKey)
+      : undefined;
+    const isValid = Object.keys(fieldErrors).length === 0 && !keyError;
+    // Fields are read-only during a key-only retry, so they can never account for a change there
+    const isFieldsChanged = isKeyOnlyRetry ? false : !isEdit || !isEqual(updatedProvider, provider);
+    const isChanged = isFieldsChanged || hasKeyEntered;
     const canSave = isValid && isChanged && !isSaving;
-    const isRenamed = isEdit && values.id !== provider.id;
+    const isRenamed = isEdit && !isKeyOnlyRetry && values.id !== provider.id;
     // Account, container and service URL are where exports to this name go; a change also
     // redirects exports that haven't reached a host yet
-    const isAccountNameChanged = isEdit && values.account_name !== provider.account_name;
-    const isContainerChanged = isEdit && values.container !== provider.container;
-    const isServiceUrlChanged = isEdit && values.service_url !== (provider.service_url ?? '');
+    const isAccountNameChanged =
+      isEdit && !isKeyOnlyRetry && values.account_name !== provider.account_name;
+    const isContainerChanged = isEdit && !isKeyOnlyRetry && values.container !== provider.container;
+    const isServiceUrlChanged =
+      isEdit && !isKeyOnlyRetry && values.service_url !== (provider.service_url ?? '');
 
     const getVisibleError = (field: ExportProviderFieldName): string | undefined => {
       const error = fieldErrors[field];
       return touched[field] && error ? getFieldErrorMessage(field, error) : undefined;
     };
+    const visibleKeyError =
+      isKeyTouched && keyError ? getAccountKeyErrorMessage(keyError) : undefined;
 
     const handleTextChange = useCallback(
       (field: Exclude<ExportProviderFieldName, 'type'>) =>
@@ -178,11 +257,35 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
       []
     );
 
+    const handleAccountKeyChange = useCallback(
+      ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+        setAccountKeyInput(value);
+      },
+      []
+    );
+
+    const handleKeyBlur = useCallback(() => {
+      setIsKeyTouched(true);
+    }, []);
+
+    const handleReplaceKey = useCallback(() => {
+      setIsReplacingKey(true);
+    }, []);
+
+    const handleCancelReplaceKey = useCallback(() => {
+      setIsReplacingKey(false);
+      setAccountKeyInput('');
+      setIsKeyTouched(false);
+    }, []);
+
     const handleSave = useCallback(() => {
       if (canSave) {
-        onSave(updatedProvider);
+        onSave({
+          provider: updatedProvider,
+          ...(hasKeyEntered ? { accountKey: trimmedAccountKey } : {}),
+        });
       }
-    }, [canSave, onSave, updatedProvider]);
+    }, [canSave, hasKeyEntered, onSave, trimmedAccountKey, updatedProvider]);
 
     const handleClose = useCallback(() => {
       if (!isSaving) {
@@ -222,6 +325,18 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
               <EuiSpacer size="m" />
             </>
           )}
+          {keyErrorMessage && (
+            <>
+              <KbnDangerCallout
+                announceOnMount
+                size="s"
+                title={KEY_SAVE_ERROR_TITLE}
+                text={keyErrorMessage}
+                data-test-subj="storageProviderFlyout-keySaveError"
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiForm>
             <EuiFormRow
               label={TYPE_FIELD_LABEL}
@@ -234,7 +349,7 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
                 value={values.type}
                 onChange={handleTypeChange}
                 onBlur={handleBlur('type')}
-                disabled={isEdit || isSaving}
+                disabled={isEdit || fieldsDisabled}
                 isInvalid={Boolean(typeError)}
                 fullWidth
                 data-test-subj="storageProviderFlyout-typeSelect"
@@ -255,7 +370,7 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
                 value={values.id}
                 onChange={handleTextChange('id')}
                 onBlur={handleBlur('id')}
-                disabled={isSaving}
+                disabled={fieldsDisabled}
                 isInvalid={Boolean(nameError)}
                 fullWidth
                 data-test-subj="storageProviderFlyout-nameInput"
@@ -277,7 +392,7 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
                 value={values.account_name}
                 onChange={handleTextChange('account_name')}
                 onBlur={handleBlur('account_name')}
-                disabled={isSaving}
+                disabled={fieldsDisabled}
                 isInvalid={Boolean(accountNameError)}
                 fullWidth
                 data-test-subj="storageProviderFlyout-accountNameInput"
@@ -299,12 +414,85 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
                 value={values.container}
                 onChange={handleTextChange('container')}
                 onBlur={handleBlur('container')}
-                disabled={isSaving}
+                disabled={fieldsDisabled}
                 isInvalid={Boolean(containerError)}
                 fullWidth
                 data-test-subj="storageProviderFlyout-containerInput"
               />
             </EuiFormRow>
+            <EuiSpacer size="m" />
+            <EuiTitle size="xs">
+              <h3>{CREDENTIALS_SECTION_TITLE}</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiFormRow label={CREDENTIAL_TYPE_FIELD_LABEL} fullWidth>
+              <EuiSelect
+                options={CREDENTIAL_TYPE_OPTIONS}
+                value="account_key"
+                // Disabled: one option today, ready for more credential types later
+                onChange={() => {}}
+                disabled
+                fullWidth
+                data-test-subj="storageProviderFlyout-credentialTypeSelect"
+              />
+            </EuiFormRow>
+            {showKeyInput ? (
+              <EuiFormRow
+                label={ACCOUNT_KEY_FIELD_LABEL}
+                helpText={ACCOUNT_KEY_FIELD_HELP_TEXT}
+                isInvalid={Boolean(visibleKeyError)}
+                error={visibleKeyError}
+                fullWidth
+              >
+                <EuiFieldPassword
+                  value={accountKeyInput}
+                  onChange={handleAccountKeyChange}
+                  onBlur={handleKeyBlur}
+                  disabled={isSaving}
+                  isInvalid={Boolean(visibleKeyError)}
+                  fullWidth
+                  data-test-subj="storageProviderFlyout-accountKeyInput"
+                />
+              </EuiFormRow>
+            ) : (
+              <EuiFormRow fullWidth>
+                <div>
+                  <EuiText size="s" data-test-subj="storageProviderFlyout-storedKey">
+                    <p>{STORED_KEY_HIDDEN_TEXT}</p>
+                  </EuiText>
+                  <EuiSpacer size="xs" />
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="left"
+                    onClick={handleReplaceKey}
+                    disabled={isSaving}
+                    data-test-subj="storageProviderFlyout-replaceKeyButton"
+                  >
+                    {REPLACE_KEY_BUTTON_LABEL}
+                  </EuiButtonEmpty>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs" color="subdued">
+                    <p>{KEY_REVOCATION_NOTICE}</p>
+                  </EuiText>
+                </div>
+              </EuiFormRow>
+            )}
+            {isReplacingKey && !isKeyOnlyRetry && (
+              <>
+                <EuiText size="xs" color="subdued">
+                  <p>{KEY_REVOCATION_NOTICE}</p>
+                </EuiText>
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="left"
+                  onClick={handleCancelReplaceKey}
+                  disabled={isSaving}
+                  data-test-subj="storageProviderFlyout-cancelReplaceKeyButton"
+                >
+                  {CANCEL_BUTTON_LABEL}
+                </EuiButtonEmpty>
+              </>
+            )}
             <EuiSpacer size="m" />
             <EuiAccordion
               id={advancedSettingsId}
@@ -333,7 +521,7 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
                   placeholder={SERVICE_URL_FIELD_PLACEHOLDER}
                   onChange={handleTextChange('service_url')}
                   onBlur={handleBlur('service_url')}
-                  disabled={isSaving}
+                  disabled={fieldsDisabled}
                   isInvalid={Boolean(serviceUrlError)}
                   fullWidth
                   data-test-subj="storageProviderFlyout-serviceUrlInput"

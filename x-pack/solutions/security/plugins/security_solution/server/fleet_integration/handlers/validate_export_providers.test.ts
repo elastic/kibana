@@ -11,6 +11,7 @@ import { EndpointIntegrationFleetError } from './errors';
 import { policyFactory } from '../../../common/endpoint/models/policy_config';
 import { setExportProviders } from '../../../common/endpoint/models/export_providers';
 import type { ExportProvider, PolicyConfig } from '../../../common/endpoint/types';
+import { EXPORT_PROVIDER_KEY_ROUTE } from '../../../common/endpoint/constants';
 
 const buildProvider = (overrides: Partial<ExportProvider> = {}): ExportProvider => ({
   id: 'azure-1',
@@ -119,12 +120,35 @@ describe('validateExportProviders()', () => {
       );
     });
 
-    it('should reject credentials', () => {
-      const policy = buildPolicy([{ ...buildProvider(), credentials: { account_key: 'key' } }]);
+    it('should accept a valid credentials key reference', () => {
+      const policy = buildPolicy([
+        { ...buildProvider(), credentials: { type: 'account_key', key_id: 'key-1' } },
+      ]);
 
-      expect(getError(policy).message).toBe(
-        'export_providers[0] "azure-1": credentials are not supported yet'
+      expect(() => validateExportProviders(policy)).not.toThrow();
+    });
+
+    it.each<[string, unknown]>([
+      ['a plaintext key', { type: 'account_key', account_key: 'secret-value' }],
+      ['account_key alongside key_id', { type: 'account_key', key_id: 'key-1', account_key: 'x' }],
+      ['an unknown type', { type: 'sas', key_id: 'key-1' }],
+      ['a missing type', { key_id: 'key-1' }],
+      ['an empty key_id', { type: 'account_key', key_id: '' }],
+      ['a missing key_id', { type: 'account_key' }],
+      ['a non-string key_id', { type: 'account_key', key_id: 1 }],
+      ['a key_id over 64 characters', { type: 'account_key', key_id: 'a'.repeat(65) }],
+      ['a key_id with characters outside an id', { type: 'account_key', key_id: 'key/../1' }],
+      ['a non-object value', 'key-1'],
+      ['an empty object', {}],
+    ])('should reject credentials that are %s', (_, credentials) => {
+      const policy = buildPolicy([{ ...buildProvider(), credentials }]);
+
+      const { message } = getError(policy);
+
+      expect(message).toBe(
+        `export_providers[0] "azure-1": credentials must be a key reference; set the key with PUT ${EXPORT_PROVIDER_KEY_ROUTE}`
       );
+      expect(message).not.toContain('secret-value');
     });
 
     it('should reject ssl', () => {
@@ -260,7 +284,7 @@ describe('validateExportProviders()', () => {
       ]);
 
       expect(getError(policy).message).toBe(
-        'export_providers[0] "azure-1": credentials are not supported yet; ' +
+        `export_providers[0] "azure-1": credentials must be a key reference; set the key with PUT ${EXPORT_PROVIDER_KEY_ROUTE}; ` +
           'export_providers[0] "azure-1": account_name must be 3-24 lowercase letters and digits; ' +
           'export_providers[1] "azure-2": type must be one of: azure_blob; ' +
           'export_providers[1] "azure-2": container is required'

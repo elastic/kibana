@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 28 as const;
+export const ESO_TYPES_COUNT = 29 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -82,6 +82,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
         "oauth_state": "b01289e5c133db9d4d802a2b838e43cce4a8399566dedb21de551da57c88894a",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
+        "security:endpoint-export-provider-key": "237fd40cec9b52f7752d8c838b98fd71b83ee80c9c1170b2e2e8420743a8f215",
         "service-account-credential": "5d9f328d92718249b324fbd5d01332bcef80be980003d510a3bd24af230244ff",
         "service-account-workload-binding": "bdac5e0e6513a9644fcd9e2195d0fe3a105629dd798f2b23fe7d8b33d2d41d2b",
         "synthetics-monitor": "de18413761b36881d871e677c248336a70c90f0508e58f4162ee4cd579be2148",
@@ -185,6 +186,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|10",
         "ingest-outputs|1",
         "oauth_state|1",
+        "security:endpoint-export-provider-key|1",
         "service-account-credential|1",
         "service-account-workload-binding|2",
         "service-account-workload-binding|1",

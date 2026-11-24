@@ -41,6 +41,7 @@ import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
   ScriptsLibraryClient,
   type ScriptsLibraryClientInterface,
@@ -91,6 +92,12 @@ import { ScopedEndpointArtifactListClient } from './services/scoped_endpoint_art
 import { SimpleMemCache } from './lib/simple_mem_cache';
 import { hasConnectedRemoteClusters } from './utils/ccs_utils';
 import { setYaraLogger } from './lib/libyara';
+import {
+  EXPORT_PROVIDER_KEY_SAVED_OBJECT_TYPE,
+  ExportProviderKeyClient,
+  type ExportProviderKeyClientInterface,
+  type ExportProviderKeyService,
+} from './lib/export_provider_keys';
 
 /** Time-to-live (seconds) for the cached connected-remote-clusters check backing `isCcsEnabled` */
 const CCS_CACHE_TTL_SECONDS = 60;
@@ -134,6 +141,10 @@ export interface EndpointAppContextServiceStartContract {
   spacesService: SpacesServiceStart | undefined;
   agentBuilder?: AgentBuilderPluginStart;
   getExceptionListClient?: ListPluginSetup['getExceptionListClient'];
+  /** Absent when the encryptedSavedObjects plugin is disabled */
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  /** `canEncrypt` of the encryptedSavedObjects setup contract: `false` without an encryption key */
+  canEncryptSavedObjects: boolean;
 }
 
 /**
@@ -193,6 +204,7 @@ export class EndpointAppContextService {
   private startDependencies: EndpointAppContextServiceStartContract | null = null;
   private fleetServicesFactory: EndpointFleetServicesFactoryInterface | null = null;
   private savedObjectsFactoryService: SavedObjectsClientFactory | null = null;
+  private exportProviderKeyClient: ExportProviderKeyClient | null = null;
   private readonly ccsCache = new SimpleMemCache({ ttl: CCS_CACHE_TTL_SECONDS });
 
   public security: SecurityServiceStart | undefined;
@@ -218,11 +230,15 @@ export class EndpointAppContextService {
       SavedObjectsClientFactory.addSavedObjectHiddenType(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE);
     }
 
+    // Always: the key cleanup task runs regardless of feature flags
+    SavedObjectsClientFactory.addSavedObjectHiddenType(EXPORT_PROVIDER_KEY_SAVED_OBJECT_TYPE);
+
     const savedObjectsFactory = new SavedObjectsClientFactory(
       dependencies.savedObjectsServiceStart
     );
 
     this.savedObjectsFactoryService = savedObjectsFactory;
+    this.exportProviderKeyClient = null;
     this.fleetServicesFactory = new EndpointFleetServicesFactory(
       dependencies.fleetStartServices,
       savedObjectsFactory,
@@ -824,5 +840,29 @@ export class EndpointAppContextService {
       endpointService: this,
       rulesClient,
     });
+  }
+
+  /** Server-internal access to the stored export provider keys */
+  public getExportProviderKeyClient(): ExportProviderKeyClientInterface {
+    if (!this.startDependencies) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    if (!this.exportProviderKeyClient) {
+      this.exportProviderKeyClient = new ExportProviderKeyClient({
+        savedObjects: this.savedObjects,
+        encryptedSavedObjects: this.startDependencies.encryptedSavedObjects,
+        canEncrypt: this.startDependencies.canEncryptSavedObjects,
+        auditLogger: this.security?.audit.withoutRequest,
+        logger: this.createLogger('ExportProviderKeyClient'),
+      });
+    }
+
+    return this.exportProviderKeyClient;
+  }
+
+  /** Read side of the stored export provider keys (decrypted account keys) */
+  public getExportProviderKeyService(): ExportProviderKeyService {
+    return this.getExportProviderKeyClient();
   }
 }

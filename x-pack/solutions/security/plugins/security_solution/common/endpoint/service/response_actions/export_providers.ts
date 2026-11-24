@@ -176,3 +176,25 @@ export const getExportProviderFieldErrors = (
 
   return errors;
 };
+
+/** The credential types an export provider can reference. */
+export const EXPORT_PROVIDER_CREDENTIAL_TYPES = ['account_key'] as const;
+
+/** Upper bound for the `account_key` the key route accepts; real keys are 88 characters. */
+export const EXPORT_PROVIDER_ACCOUNT_KEY_MAX_LENGTH = 256;
+
+/** 64 bytes, base64-encoded with padding: 86 base64 characters followed by `==`. */
+const AZURE_STORAGE_ACCOUNT_KEY_PATTERN = /^[A-Za-z0-9+/]{86}==$/;
+
+/** Azure storage account keys are 64 random bytes, base64-encoded (88 characters). */
+export const getExportProviderAccountKeyError = (
+  key: unknown
+): 'required' | 'invalid_format' | undefined => {
+  if (key === undefined || key === null || key === '') {
+    return 'required';
+  }
+  if (typeof key !== 'string' || !AZURE_STORAGE_ACCOUNT_KEY_PATTERN.test(key)) {
+    return 'invalid_format';
+  }
+  return undefined;
+};

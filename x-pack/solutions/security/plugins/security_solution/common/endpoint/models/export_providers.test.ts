@@ -13,6 +13,7 @@ import {
   setExportProviders,
   removeExportProviders,
   hasExportProviders,
+  getExportProviderKeyIds,
 } from './export_providers';
 
 const AZURE_PROVIDER: ExportProvider = {
@@ -204,5 +205,72 @@ describe('hasExportProviders', () => {
     set(policy, 'windows', 'not-an-object');
 
     expect(hasExportProviders(policy)).toBe(false);
+  });
+});
+
+describe('getExportProviderKeyIds', () => {
+  const withKeyId = (keyId: unknown): ExportProvider =>
+    ({ ...AZURE_PROVIDER, credentials: { type: 'account_key', key_id: keyId } } as ExportProvider);
+
+  it('returns an empty set for a policy without export providers', () => {
+    expect(getExportProviderKeyIds(policyFactory())).toEqual(new Set());
+  });
+
+  it.each(['windows', 'mac', 'linux'] as const)('collects the key_id from %s', (os) => {
+    const policy = policyFactory();
+    set(policy, `${os}.response_actions`, { export_providers: [withKeyId('key-1')] });
+
+    expect(getExportProviderKeyIds(policy)).toEqual(new Set(['key-1']));
+  });
+
+  it('collects key_ids from every OS and dedupes them', () => {
+    const policy = policyFactory();
+    set(policy, 'windows.response_actions', { export_providers: [withKeyId('key-1')] });
+    set(policy, 'mac.response_actions', { export_providers: [withKeyId('key-1')] });
+    set(policy, 'linux.response_actions', { export_providers: [withKeyId('key-2')] });
+
+    expect(getExportProviderKeyIds(policy)).toEqual(new Set(['key-1', 'key-2']));
+  });
+
+  it('ignores a provider with no credentials', () => {
+    const policy = policyFactory();
+    set(policy, 'windows.response_actions', { export_providers: [AZURE_PROVIDER] });
+
+    expect(getExportProviderKeyIds(policy)).toEqual(new Set());
+  });
+
+  it.each([
+    ['undefined', undefined],
+    ['null', null],
+    ['empty string', ''],
+    ['a number', 1],
+    ['an object', {}],
+  ])('ignores a key_id that is %s', (_desc, keyId) => {
+    const policy = policyFactory();
+    set(policy, 'windows.response_actions', { export_providers: [withKeyId(keyId)] });
+
+    expect(getExportProviderKeyIds(policy)).toEqual(new Set());
+  });
+
+  it('ignores a provider that is not an object', () => {
+    const policy = policyFactory();
+    set(policy, 'windows.response_actions', { export_providers: ['not-an-object'] });
+
+    expect(getExportProviderKeyIds(policy)).toEqual(new Set());
+  });
+
+  it('ignores an export_providers list that is not an array', () => {
+    const policy = policyFactory();
+    set(policy, 'windows.response_actions', { export_providers: 'not-an-array' });
+
+    expect(getExportProviderKeyIds(policy)).toEqual(new Set());
+  });
+
+  it('tolerates an OS branch that is not an object', () => {
+    const policy = policyFactory();
+    set(policy, 'windows', 'not-an-object');
+    set(policy, 'mac.response_actions', { export_providers: [withKeyId('key-1')] });
+
+    expect(getExportProviderKeyIds(policy)).toEqual(new Set(['key-1']));
   });
 });

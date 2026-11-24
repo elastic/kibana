@@ -35,6 +35,7 @@ import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
+import { ExportProviderKeyCleanupTask } from './endpoint/lib/export_provider_keys';
 import { registerAgentRoutes } from './endpoint/routes/agent';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
@@ -229,6 +230,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private manifestTask: ManifestTask | undefined;
   private completeExternalResponseActionsTask: CompleteExternalResponseActionsTask;
+  private exportProviderKeyCleanupTask: ExportProviderKeyCleanupTask;
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
@@ -244,6 +246,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private platformCpsEnabled = false;
   /** The `defendCrossProjectSearch` experimental flag; AND-ed with `cps.isCpsActive` per request */
   private defendCpsFeatureFlagEnabled = false;
+  /** `canEncrypt` of the encryptedSavedObjects setup contract, captured in `setup()` for `start()` */
+  private canEncryptSavedObjects = false;
 
   /** Cross-lifecycle state for the threat-intel supply pipeline. */
   private threatIntelRuntime: ThreatIntelRuntime = createThreatIntelRuntime();
@@ -290,6 +294,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures: this.config.experimentalFeatures,
     };
     this.completeExternalResponseActionsTask = new CompleteExternalResponseActionsTask({
+      endpointAppContext: this.endpointContext,
+    });
+    this.exportProviderKeyCleanupTask = new ExportProviderKeyCleanupTask({
       endpointAppContext: this.endpointContext,
     });
     this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
@@ -384,6 +391,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     this.defendCpsFeatureFlagEnabled = experimentalFeatures.defendCrossProjectSearch;
+    this.canEncryptSavedObjects = plugins.encryptedSavedObjects?.canEncrypt === true;
 
     initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
@@ -767,6 +775,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.taskManager) {
       this.completeExternalResponseActionsTask.setup({ taskManager: plugins.taskManager });
+      this.exportProviderKeyCleanupTask.setup({ taskManager: plugins.taskManager });
     }
 
     core
@@ -1086,6 +1095,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       spacesService: plugins.spaces?.spacesService,
       agentBuilder: plugins.agentBuilder,
       getExceptionListClient: this.lists?.getExceptionListClient,
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+      canEncryptSavedObjects: this.canEncryptSavedObjects,
     });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
@@ -1152,6 +1163,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           esClient: core.elasticsearch.client.asInternalUser,
         })
         .catch(() => {}); // it shouldn't refuse, but just in case
+      this.exportProviderKeyCleanupTask.start({ taskManager: plugins.taskManager }).catch(() => {}); // it shouldn't refuse, but just in case
     }
 
     const uiSettingsClient = core.uiSettings.asScopedToClient(
@@ -1338,6 +1350,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryWatcher?.stop();
     this.endpointAppContextService.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
+    this.exportProviderKeyCleanupTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();

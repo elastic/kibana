@@ -8,6 +8,7 @@
 import { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
 import type { EndpointAppContext } from '../../types';
 import { getHostPolicyResponseHandler } from './handlers';
+import { registerSetExportProviderKeyRoute } from './export_provider_key';
 import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type { SecuritySolutionPluginRouter } from '../../../types';
@@ -43,4 +44,6 @@ export function registerPolicyRoutes(
         getHostPolicyResponseHandler(endpointAppContext.service)
       )
     );
+
+  registerSetExportProviderKeyRoute(router, endpointAppContext);
 }

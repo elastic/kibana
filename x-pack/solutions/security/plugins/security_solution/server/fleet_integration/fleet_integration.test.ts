@@ -51,7 +51,7 @@ import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
-import type { PolicyConfig, PolicyData } from '../../common/endpoint/types';
+import type { ExportProvider, PolicyConfig, PolicyData } from '../../common/endpoint/types';
 import {
   AntivirusRegistrationModes,
   DeviceControlAccessLevel,
@@ -102,7 +102,9 @@ import { createTelemetryConfigProviderMock } from '../../common/telemetry_config
 import { FleetPackagePolicyGenerator } from '../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../common/endpoint/service/response_actions/constants';
 import { merge, pick } from 'lodash';
-import { ENDPOINT_ACTIONS_INDEX } from '../../common/endpoint/constants';
+import { ENDPOINT_ACTIONS_INDEX, EXPORT_PROVIDER_KEY_ROUTE } from '../../common/endpoint/constants';
+import { EXPORT_PROVIDER_KEY_MIN_AGE_MS } from '../endpoint/lib/export_provider_keys';
+import type { ExportProviderKeyMetadata } from '../endpoint/lib/export_provider_keys';
 import type { ExperimentalFeatures } from '../../common';
 import type { IRequestContextFactory } from '../request_context_factory';
 import { installEndpointSecurityPrebuiltRule as _installEndpointSecurityPrebuiltRule } from '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule';
@@ -237,6 +239,91 @@ describe('Fleet integrations', () => {
       );
       (reqContextMock.getEndpointService as jest.Mock).mockReturnValue(endpointServicesMock);
       securitySolutionRequestContextFactory.create.mockReturnValue(Promise.resolve(reqContextMock));
+    });
+
+    describe('export provider and overrides pre-checks', () => {
+      const provider = {
+        id: 'azure-1',
+        type: 'azure_blob',
+        account_name: 'acct',
+        container: 'dumps',
+      } as const;
+
+      const buildCallback = () =>
+        getPackagePolicyCreateCallback(
+          logger,
+          buildManifestManagerMock(),
+          securitySolutionRequestContextFactory,
+          endpointAppContextStartContract.alerting,
+          licenseService,
+          cloudService,
+          productFeaturesService,
+          telemetryConfigProviderMock,
+          experimentalFeatures
+        );
+
+      it.each<[string, boolean]>([
+        ['with a request', true],
+        ['without a request', false],
+      ])('rejects response_actions in overrides, %s', async (_, withRequest) => {
+        const newPackagePolicy = {
+          ...createNewPackagePolicyMock(),
+          overrides: { inputs: { endpoint: { policy: { windows: { response_actions: {} } } } } },
+        };
+
+        await expect(
+          buildCallback()(
+            newPackagePolicy,
+            soClient,
+            esClient,
+            withRequest ? requestContextMock.convertContext(ctx) : undefined,
+            withRequest ? req : undefined
+          )
+        ).rejects.toMatchObject({
+          statusCode: 400,
+          apiPassThrough: true,
+          message: `Package policy overrides can't set response_actions`,
+        });
+      });
+
+      it.each<[string, boolean]>([
+        ['with a request', true],
+        ['without a request', false],
+      ])('rejects credentials on a provider, %s', async (_, withRequest) => {
+        const newPackagePolicy = {
+          ...createNewPackagePolicyMock(),
+          inputs: [
+            {
+              type: 'endpoint',
+              enabled: true,
+              streams: [],
+              config: {
+                policy: {
+                  value: setExportProviders(policyFactory(), [
+                    { ...provider, credentials: { type: 'account_key', key_id: 'key-1' } },
+                  ]),
+                },
+              },
+            },
+          ],
+        };
+
+        await expect(
+          buildCallback()(
+            newPackagePolicy,
+            soClient,
+            esClient,
+            withRequest ? requestContextMock.convertContext(ctx) : undefined,
+            withRequest ? req : undefined
+          )
+        ).rejects.toMatchObject({
+          statusCode: 400,
+          apiPassThrough: true,
+          message:
+            `export_providers[0] "azure-1": credentials can't be set when the policy is created; ` +
+            `set the key with PUT ${EXPORT_PROVIDER_KEY_ROUTE}`,
+        });
+      });
     });
 
     describe('SIEM rule install', () => {
@@ -2005,8 +2092,12 @@ describe('Fleet integrations', () => {
         account_name: 'acct',
         container: 'dumps',
       } as const;
-      // Not literals at the call sites, so the extra `credentials` key needs no cast
-      const providerWithCredentials = { ...provider, credentials: { account_key: 'key' } };
+      // A plaintext key, not a `{ type: 'account_key', key_id }` reference; cast since the shape
+      // is deliberately wrong for the "credentials must be a key reference" tests below
+      const providerWithCredentials: ExportProvider = {
+        ...provider,
+        credentials: { account_key: 'key' } as unknown as ExportProvider['credentials'],
+      };
 
       const runUpdate = async (policy: PolicyConfig): Promise<PolicyConfig> => {
         const callback = getPackagePolicyUpdateCallback(
@@ -2092,13 +2183,237 @@ describe('Fleet integrations', () => {
         }
       });
 
-      it('should reject export providers with credentials', async () => {
+      it('should reject a plaintext key in credentials', async () => {
         const policy = setExportProviders(policyFactory(), [providerWithCredentials]);
 
         await expect(runUpdate(policy)).rejects.toMatchObject({
           statusCode: 400,
           apiPassThrough: true,
-          message: 'export_providers[0] "azure-1": credentials are not supported yet',
+          message:
+            `export_providers[0] "azure-1": credentials must be a key reference; set the key ` +
+            `with PUT ${EXPORT_PROVIDER_KEY_ROUTE}`,
+        });
+      });
+
+      it('should reject response_actions in overrides', async () => {
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = policyFactory();
+        policyConfig.overrides = {
+          inputs: { endpoint: { policy: { mac: { response_actions: {} } } } },
+        };
+
+        await expect(
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).rejects.toMatchObject({
+          statusCode: 400,
+          apiPassThrough: true,
+          message: `Package policy overrides can't set response_actions`,
+        });
+      });
+
+      describe('credentials key references', () => {
+        const PACKAGE_POLICY_ID = 'export-provider-owner-policy';
+        const NOW = Date.parse('2025-06-01T00:00:00.000Z');
+        const providerWithKey = {
+          ...provider,
+          credentials: { type: 'account_key' as const, key_id: 'key-1' },
+        };
+
+        const buildMetadata = (
+          overrides: Partial<ExportProviderKeyMetadata> = {}
+        ): ExportProviderKeyMetadata => ({
+          id: 'key-1',
+          package_policy_id: PACKAGE_POLICY_ID,
+          created_at: new Date(NOW).toISOString(),
+          ...overrides,
+        });
+
+        const runUpdateWithId = async (policy: PolicyConfig): Promise<PolicyConfig> => {
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.id = PACKAGE_POLICY_ID;
+          policyConfig.inputs[0]!.config!.policy.value = policy;
+
+          const updated = await callback(
+            policyConfig,
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+
+          return updated.inputs[0]!.config!.policy.value;
+        };
+
+        beforeEach(() => {
+          jest.useFakeTimers().setSystemTime(NOW);
+        });
+
+        afterEach(() => {
+          jest.useRealTimers();
+        });
+
+        it('rejects two providers that reference the same key_id', async () => {
+          const policy = setExportProviders(policyFactory(), [
+            { ...provider, credentials: { type: 'account_key' as const, key_id: 'shared-key' } },
+            {
+              ...provider,
+              id: 'azure-2',
+              credentials: { type: 'account_key' as const, key_id: 'shared-key' },
+            },
+          ]);
+
+          await expect(runUpdateWithId(policy)).rejects.toMatchObject({
+            statusCode: 400,
+            apiPassThrough: true,
+            message:
+              'export_providers[0] "azure-1": credentials.key_id must be unique within the policy; ' +
+              'export_providers[1] "azure-2": credentials.key_id must be unique within the policy',
+          });
+        });
+
+        it('keeps a reference that is owned and already referenced by the stored policy, even if old', async () => {
+          const policy = setExportProviders(policyFactory(), [providerWithKey]);
+          const keyClient = endpointAppContextServiceMock.getExportProviderKeyClient();
+
+          (keyClient.getKeyMetadata as jest.Mock).mockResolvedValue(
+            new Map([
+              [
+                'key-1',
+                buildMetadata({
+                  created_at: new Date(NOW - EXPORT_PROVIDER_KEY_MIN_AGE_MS * 10).toISOString(),
+                }),
+              ],
+            ])
+          );
+          (
+            endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as jest.Mock
+          ).mockResolvedValue({ inputs: [{ config: { policy: { value: policy } } }] });
+
+          const result = await runUpdateWithId(policy);
+
+          for (const os of ['windows', 'mac', 'linux'] as const) {
+            expect(result[os].response_actions?.export_providers?.[0]).toEqual(providerWithKey);
+          }
+        });
+
+        it('keeps a reference that is owned, new, and not yet referenced by the stored policy', async () => {
+          const policy = setExportProviders(policyFactory(), [providerWithKey]);
+          const keyClient = endpointAppContextServiceMock.getExportProviderKeyClient();
+
+          (keyClient.getKeyMetadata as jest.Mock).mockResolvedValue(
+            new Map([['key-1', buildMetadata({ created_at: new Date(NOW - 1000).toISOString() })]])
+          );
+          (
+            endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as jest.Mock
+          ).mockResolvedValue(createMockPolicyData());
+
+          const result = await runUpdateWithId(policy);
+
+          for (const os of ['windows', 'mac', 'linux'] as const) {
+            expect(result[os].response_actions?.export_providers?.[0]).toEqual(providerWithKey);
+          }
+        });
+
+        it('drops a reference owned by another package policy, on every OS', async () => {
+          const policy = setExportProviders(policyFactory(), [providerWithKey]);
+          const keyClient = endpointAppContextServiceMock.getExportProviderKeyClient();
+
+          (keyClient.getKeyMetadata as jest.Mock).mockResolvedValue(
+            new Map([['key-1', buildMetadata({ package_policy_id: 'another-package-policy' })]])
+          );
+          (
+            endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as jest.Mock
+          ).mockResolvedValue({ inputs: [{ config: { policy: { value: policy } } }] });
+
+          const result = await runUpdateWithId(policy);
+
+          for (const os of ['windows', 'mac', 'linux'] as const) {
+            const [resultProvider] = result[os].response_actions!.export_providers!;
+            expect(resultProvider).not.toHaveProperty('credentials');
+            expect(resultProvider).toEqual(provider);
+          }
+        });
+
+        it('drops a reference whose key object no longer exists', async () => {
+          const policy = setExportProviders(policyFactory(), [providerWithKey]);
+          const keyClient = endpointAppContextServiceMock.getExportProviderKeyClient();
+
+          (keyClient.getKeyMetadata as jest.Mock).mockResolvedValue(new Map());
+
+          const result = await runUpdateWithId(policy);
+
+          expect(result.windows.response_actions!.export_providers![0]).not.toHaveProperty(
+            'credentials'
+          );
+        });
+
+        it('drops a retired reference: owned, not yet referenced by the stored policy, and older than the minimum age', async () => {
+          const policy = setExportProviders(policyFactory(), [providerWithKey]);
+          const keyClient = endpointAppContextServiceMock.getExportProviderKeyClient();
+
+          (keyClient.getKeyMetadata as jest.Mock).mockResolvedValue(
+            new Map([
+              [
+                'key-1',
+                buildMetadata({
+                  created_at: new Date(NOW - EXPORT_PROVIDER_KEY_MIN_AGE_MS - 1).toISOString(),
+                }),
+              ],
+            ])
+          );
+          (
+            endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as jest.Mock
+          ).mockResolvedValue(createMockPolicyData());
+
+          const result = await runUpdateWithId(policy);
+
+          for (const os of ['windows', 'mac', 'linux'] as const) {
+            expect(result[os].response_actions!.export_providers![0]).not.toHaveProperty(
+              'credentials'
+            );
+          }
+        });
+
+        it('does not read key metadata when no provider references a key', async () => {
+          const policy = setExportProviders(policyFactory(), [provider]);
+          const keyClient = endpointAppContextServiceMock.getExportProviderKeyClient();
+          const packagePolicyGet = endpointAppContextServiceMock.getInternalFleetServices()
+            .packagePolicy.get as jest.Mock;
+          packagePolicyGet.mockClear();
+
+          await runUpdateWithId(policy);
+
+          expect(keyClient.getKeyMetadata).not.toHaveBeenCalled();
+          // Only the existing `notifyProtectionFeatureUsage` read happens; the key-reference
+          // check itself never reads anything when there is nothing to check.
+          expect(packagePolicyGet).toHaveBeenCalledTimes(1);
+        });
+
+        it('wraps a metadata read failure in a 500 EndpointIntegrationFleetError', async () => {
+          const policy = setExportProviders(policyFactory(), [providerWithKey]);
+          const keyClient = endpointAppContextServiceMock.getExportProviderKeyClient();
+
+          (keyClient.getKeyMetadata as jest.Mock).mockRejectedValue(
+            new Error('saved objects are unavailable')
+          );
+
+          await expect(runUpdateWithId(policy)).rejects.toMatchObject({
+            statusCode: 500,
+            apiPassThrough: true,
+            message: 'Unable to check the export provider key references; try again',
+          });
         });
       });
 
@@ -2634,6 +2949,51 @@ if (ctx._source.containsKey('tags')) {
 `,
           },
         });
+      });
+    });
+
+    describe('export provider key cleanup', () => {
+      const endpointPackage = { name: 'endpoint', title: '', version: '1' };
+
+      it('deletes export provider keys only for successfully deleted Endpoint policies', async () => {
+        removedPolicies = [
+          { id: 'endpoint-policy-1', success: true, package: endpointPackage },
+          { id: 'endpoint-policy-2', success: false, package: endpointPackage },
+          {
+            id: 'other-policy-1',
+            success: true,
+            package: { name: 'other', title: '', version: '1' },
+          },
+        ];
+
+        await invokeDeleteCallback();
+
+        expect(
+          endpointServicesMock.getExportProviderKeyClient().deleteKeysForPackagePolicies
+        ).toHaveBeenCalledWith(['endpoint-policy-1']);
+      });
+
+      it('does not call deleteKeysForPackagePolicies when no Endpoint policy was deleted successfully', async () => {
+        removedPolicies = [{ id: 'endpoint-policy-1', success: false, package: endpointPackage }];
+
+        await invokeDeleteCallback();
+
+        expect(
+          endpointServicesMock.getExportProviderKeyClient().deleteKeysForPackagePolicies
+        ).not.toHaveBeenCalled();
+      });
+
+      it('does not fail the callback when deleteKeysForPackagePolicies rejects', async () => {
+        (
+          endpointServicesMock.getExportProviderKeyClient()
+            .deleteKeysForPackagePolicies as jest.Mock
+        ).mockRejectedValue(new Error('saved objects are unavailable'));
+
+        await expect(invokeDeleteCallback()).resolves.toBeUndefined();
+
+        expect(
+          endpointServicesMock.createLogger('endpointPolicyDeleteCallback').warn
+        ).toHaveBeenCalled();
       });
     });
   });

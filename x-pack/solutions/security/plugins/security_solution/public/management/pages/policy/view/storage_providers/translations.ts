@@ -90,6 +90,35 @@ export const SERVICE_URL_COLUMN_LABEL = i18n.translate(
   { defaultMessage: 'Service URL' }
 );
 
+export const KEY_COLUMN_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.keyColumnLabel',
+  { defaultMessage: 'Key' }
+);
+
+export const KEY_STORED_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.keyStoredLabel',
+  { defaultMessage: 'Stored' }
+);
+
+export const KEY_MISSING_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.keyMissingLabel',
+  { defaultMessage: 'Missing' }
+);
+
+export const KEY_MISSING_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.keyMissingTooltip',
+  { defaultMessage: 'Exports to this provider fail until you add a key' }
+);
+
+/** D23, D25: shown in the delete modal and next to the flyout's Replace key button */
+export const KEY_REVOCATION_NOTICE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.keyRevocationNotice',
+  {
+    defaultMessage:
+      "Removing or replacing the key here doesn't revoke it. To revoke access, regenerate the key in Azure. Exports already sent keep working until they expire (up to 2 weeks), unless you regenerate the key.",
+  }
+);
+
 export const DEFAULT_SERVICE_URL_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.storageProviders.defaultServiceUrlLabel',
   { defaultMessage: 'Default' }
@@ -242,6 +271,79 @@ export const EDIT_SUBMIT_BUTTON_LABEL = i18n.translate(
 export const SAVE_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.storageProviders.flyout.saveErrorTitle',
   { defaultMessage: "Couldn't save the storage provider" }
+);
+
+export const CREDENTIALS_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.credentialsSectionTitle',
+  { defaultMessage: 'Credentials' }
+);
+
+export const CREDENTIAL_TYPE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.credentialTypeLabel',
+  { defaultMessage: 'Credential type' }
+);
+
+export const ACCOUNT_KEY_CREDENTIAL_TYPE_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.accountKeyCredentialTypeLabel',
+  { defaultMessage: 'Storage account key' }
+);
+
+export const ACCOUNT_KEY_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.accountKeyLabel',
+  { defaultMessage: 'Storage account key' }
+);
+
+export const ACCOUNT_KEY_FIELD_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.accountKeyHelpDescription',
+  { defaultMessage: "Stored encrypted in Kibana. You can't view it again." }
+);
+
+export const STORED_KEY_HIDDEN_TEXT = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.storedKeyHiddenDescription',
+  { defaultMessage: 'The saved key is hidden. You can only replace it.' }
+);
+
+export const REPLACE_KEY_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.replaceKeyButtonLabel',
+  { defaultMessage: 'Replace key' }
+);
+
+export const ACCOUNT_KEY_REQUIRED_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.accountKeyRequiredErrorMessage',
+  { defaultMessage: 'Enter the storage account key.' }
+);
+
+export const ACCOUNT_KEY_INVALID_FORMAT_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.accountKeyInvalidFormatErrorMessage',
+  { defaultMessage: "Enter the storage account's access key: 88 characters, base64." }
+);
+
+/** The message shown under the key field for an error code from `getExportProviderAccountKeyError`. */
+export const getAccountKeyErrorMessage = (error: 'required' | 'invalid_format'): string =>
+  error === 'required'
+    ? ACCOUNT_KEY_REQUIRED_ERROR_MESSAGE
+    : ACCOUNT_KEY_INVALID_FORMAT_ERROR_MESSAGE;
+
+export const KEY_SAVE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.keySaveErrorTitle',
+  { defaultMessage: 'Key not saved' }
+);
+
+export const getKeySaveErrorMessage = (error: string): string =>
+  i18n.translate(
+    'xpack.securitySolution.endpoint.policy.storageProviders.flyout.keySaveErrorMessage',
+    {
+      defaultMessage: "The storage provider was saved, but the key wasn't: {error}",
+      values: { error },
+    }
+  );
+
+export const KEY_SAVE_CONFLICT_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.keySaveConflictErrorMessage',
+  {
+    defaultMessage:
+      "The storage provider was saved, but the key wasn't. The policy changed in the meantime: close this flyout, reload the page and enter the key again.",
+  }
 );
 
 // --- Field errors (codes from `getExportProviderFieldErrors`) ---

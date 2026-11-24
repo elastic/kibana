@@ -6,7 +6,10 @@
  */
 
 import type { ExportProvider } from '../../types';
-import { getExportProviderFieldErrors as getFieldErrors } from './export_providers';
+import {
+  getExportProviderFieldErrors as getFieldErrors,
+  getExportProviderAccountKeyError,
+} from './export_providers';
 
 /** The server passes unvalidated JSON, so the tests pass values of any type */
 const getExportProviderFieldErrors = (
@@ -313,5 +316,43 @@ describe('getExportProviderFieldErrors', () => {
         getExportProviderFieldErrors({ ...validProvider, service_url: serviceUrl }, [])
       ).toEqual({ service_url: 'too_long' });
     });
+  });
+});
+
+describe('getExportProviderAccountKeyError', () => {
+  // 64 random bytes, base64-encoded: a realistic Azure storage account key
+  const REALISTIC_ACCOUNT_KEY =
+    'BwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v/Aw==';
+
+  it.each([
+    ['undefined', undefined],
+    ['null', null],
+    ['empty string', ''],
+  ])('is required when %s', (_desc, key) => {
+    expect(getExportProviderAccountKeyError(key)).toBe('required');
+  });
+
+  it('is invalid_format when not a string', () => {
+    expect(getExportProviderAccountKeyError(1234)).toBe('invalid_format');
+  });
+
+  it.each([
+    ['86 same-character base64 characters padded with ==', `${'A'.repeat(86)}==`],
+    ['a realistic mixed-character key', REALISTIC_ACCOUNT_KEY],
+  ])('is valid for %s', (_desc, key) => {
+    expect(getExportProviderAccountKeyError(key)).toBeUndefined();
+  });
+
+  it.each([
+    ['87 characters', `${'A'.repeat(85)}==`],
+    ['89 characters', `${'A'.repeat(87)}==`],
+    ['missing padding', `${'A'.repeat(88)}`],
+    ['a single trailing =', `${'A'.repeat(87)}=`],
+    ['a leading space', ` ${'A'.repeat(85)}==`],
+    ['a trailing newline', `${'A'.repeat(86)}==\n`],
+    ['a URL-safe base64 "-" character', `${'A'.repeat(85)}-==`],
+    ['a URL-safe base64 "_" character', `${'A'.repeat(85)}_==`],
+  ])('is invalid_format for %s', (_desc, key) => {
+    expect(getExportProviderAccountKeyError(key)).toBe('invalid_format');
   });
 });

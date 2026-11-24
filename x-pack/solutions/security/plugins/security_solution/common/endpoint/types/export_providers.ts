@@ -9,6 +9,19 @@ import type { EXPORT_PROVIDER_TYPES } from '../service/response_actions/export_p
 
 export type ExportProviderType = (typeof EXPORT_PROVIDER_TYPES)[number];
 
+/**
+ * Points at the stored storage account key of an export provider. The key itself never goes into
+ * the policy; set it with `PUT EXPORT_PROVIDER_KEY_ROUTE`.
+ */
+export interface ExportProviderAccountKeyReference {
+  type: 'account_key';
+  /** Id of the `security:endpoint-export-provider-key` saved object. Not secret. */
+  key_id: string;
+}
+
+/** Kibana-only; Endpoint ignores it (D22). Union grows later (O19: identity federation). */
+export type ExportProviderCredentials = ExportProviderAccountKeyReference;
+
 /** An export provider backed by an Azure Blob Storage container. */
 export interface AzureBlobExportProvider {
   /** Name the admin chose; what `--export <id>` uses. Renaming a provider changes it in place */
@@ -18,6 +31,8 @@ export interface AzureBlobExportProvider {
   container: string;
   /** Optional; Endpoint defaults to https://<account_name>.blob.core.windows.net */
   service_url?: string;
+  /** Reference to the stored storage account key; absent until a key is set */
+  credentials?: ExportProviderCredentials;
 }
 
 // The union grows with S3 support (elastic/security-team#20836).
