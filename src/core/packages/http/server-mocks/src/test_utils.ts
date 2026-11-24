@@ -26,6 +26,7 @@ import {
   type CspConfigType,
   HttpService,
   config,
+  cspConfig,
 } from '@kbn/core-http-server-internal';
 import { lazyObject } from '@kbn/lazy-object';
 
@@ -91,12 +92,14 @@ export const createConfigService = ({
       } as any);
     }
     if (path === 'csp') {
-      return new BehaviorSubject({
-        strict: false,
-        disableEmbedding: false,
-        warnLegacyBrowsers: true,
-        ...csp,
-      });
+      // validates through the schema so the fixture gets the same defaults as a real config
+      return new BehaviorSubject(
+        cspConfig.schema.validate({
+          strict: false,
+          disableUnsafeEval: false,
+          ...csp,
+        })
+      );
     }
     if (path === 'permissionsPolicy') {
       return new BehaviorSubject({
