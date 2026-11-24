@@ -26,6 +26,10 @@ import {
   type SourceClassificationResult,
 } from './classify_sources';
 import { reconcileSourceCatalog } from '../reconcile_source_catalog';
+import {
+  selectSampleableCandidates,
+  type UnsampleableSource,
+} from './select_sampleable_candidates';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
@@ -34,6 +38,8 @@ export interface EligibleStreamsResponse {
   alreadyRunning: SourceClassificationResult['alreadyRunning'];
   upToDate: SourceCandidate[];
   unsupported: string[];
+  /** Candidates left out because feature identification could not sample them. */
+  unsampleable: UnsampleableSource[];
   skipped: SourceCandidate[];
   disabled: SourceClassificationResult['disabled'];
   settings: {
@@ -65,7 +71,7 @@ const eligibleStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'List sources eligible for KI extraction',
     description:
-      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, skipped, and disabled buckets based on extraction settings and workflow execution state.',
+      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, unsampleable, skipped, and disabled buckets based on extraction settings, workflow execution state, and whether the source can be sampled.',
   },
   security: {
     authz: {
@@ -86,6 +92,7 @@ const eligibleStreamsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
     workflowClients,
     maintenanceService,
   }): Promise<EligibleStreamsResponse> => {
@@ -96,6 +103,7 @@ const eligibleStreamsRoute = createServerRoute({
 
     const {
       sourcesClient,
+      streamDataEsClient,
       uiSettingsClient,
       licensing,
       getKnowledgeIndicatorClient,
@@ -147,8 +155,13 @@ const eligibleStreamsRoute = createServerRoute({
     });
 
     const availableSlots = Math.max(0, maxStreams - alreadyRunning.length);
-    const toSchedule = candidates.slice(0, availableSlots);
-    const skipped = candidates.slice(availableSlots);
+    const { toSchedule, skipped, unsampleable } = await selectSampleableCandidates({
+      candidates,
+      availableSlots,
+      viewNames: new Map(sources.map(({ id, view_name: viewName }) => [id, viewName])),
+      esClient: streamDataEsClient,
+      logger: logger.get('continuous_onboarding', 'eligible'),
+    });
 
     const now = Date.now();
     const start = now - lookbackHours * 3_600_000;
@@ -165,6 +178,7 @@ const eligibleStreamsRoute = createServerRoute({
       alreadyRunning,
       upToDate,
       unsupported,
+      unsampleable,
       skipped,
       disabled,
       settings: {
