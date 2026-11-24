@@ -82,6 +82,7 @@ describe('Dashboard search sessions', () => {
     jest.mocked(session.getSessionId).mockReturnValue(undefined);
     jest.mocked(session.isCurrentSession).mockReturnValue(false);
     jest.mocked(session.isRestore).mockReturnValue(false);
+    jest.mocked(session.getSearchOptions).mockReturnValue(null);
     jest.mocked(session.start).mockImplementation(() => {
       jest.mocked(session.resolveTimeRange).mockReturnValue(freshTimeRange);
       return 'fresh-session';
@@ -129,6 +130,24 @@ describe('Dashboard search sessions', () => {
     const { api } = setup({ skipReplay: true });
 
     expect(replayCache.get).not.toHaveBeenCalled();
+    expect(api.searchSessionId$.value).toBe('fresh-session');
+    expect(api.replayCacheLastFetched$.value).toBeUndefined();
+    expect(replayCache.set).toHaveBeenCalledWith(
+      'dashboard:dashboard-id',
+      expect.objectContaining({ sessionId: 'fresh-session' })
+    );
+  });
+
+  test('starts and registers a new session instead of continuing one sent to background', () => {
+    jest.mocked(replayCache.get).mockReturnValue(replay);
+    jest.mocked(session.getSearchOptions).mockReturnValue({
+      sessionId: 'cached-session',
+      isRestore: false,
+      isStored: true,
+    });
+    const { api } = setup();
+
+    expect(session.continue).not.toHaveBeenCalled();
     expect(api.searchSessionId$.value).toBe('fresh-session');
     expect(api.replayCacheLastFetched$.value).toBeUndefined();
     expect(replayCache.set).toHaveBeenCalledWith(

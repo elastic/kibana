@@ -115,7 +115,8 @@ export function initializeSearchSessionManager(
       return continuedSessionId;
     }
 
-    if (replay.hit) {
+    // Continuing a session sent to background would add new searches to it.
+    if (replay.hit && !session.getSearchOptions(replay.sessionId)?.isStored) {
       if (!session.isCurrentSession(replay.sessionId)) {
         session.continue(replay.sessionId);
       }
