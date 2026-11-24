@@ -155,6 +155,34 @@ export const withRemovedStoredSettings = (value: unknown, stored: unknown): unkn
   return result;
 };
 
+const withoutNullKeys = <T extends object>(value: T, keys: Array<keyof T>): T =>
+  Object.fromEntries(
+    Object.entries(value).filter(([key, v]) => !(keys.includes(key as keyof T) && v === null))
+  ) as T;
+
+/**
+ * A stored sending queue without the `null` that an update writes to remove a setting that only
+ * takes a value, so that a setting that is not set is left out of the output, as it was before
+ * the update. The `null` of a block is kept: it is an opt-out.
+ */
+export const omitRemovedOtlpQueueSettings = <T extends OtlpSendingQueue | null | undefined>(
+  queue: T
+): T => {
+  if (!queue) {
+    return queue;
+  }
+  const result = withoutNullKeys(queue as OtlpSendingQueue, [
+    'enabled',
+    'sizer',
+    'wait_for_result',
+    'block_on_overflow',
+  ]);
+  if (result.batch) {
+    result.batch = withoutNullKeys(result.batch, ['sizer']);
+  }
+  return result as T;
+};
+
 /**
  * The error of the sizes of a sending queue that the collector rejects, with the spec defaults for
  * the sizes that are not set: a minimum batch size that does not fit in the queue when both use the

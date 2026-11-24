@@ -6326,6 +6326,39 @@ describe('Output Service', () => {
   });
 
   describe('outputSavedObjectToOutput', () => {
+    it('should leave out the OTLP queue settings that an update removed, but keep the opt-outs', () => {
+      const so = mockOutputSO('output-test', {
+        type: 'otlp',
+        otlp_exporter: {
+          protocol: 'grpc',
+          endpoint: 'collector.example.com:4317',
+          sending_queue: {
+            enabled: null,
+            sizer: null,
+            wait_for_result: null,
+            block_on_overflow: null,
+            queue_size: null,
+            batch: { sizer: null, min_size: null },
+          },
+        },
+      } as any);
+
+      expect((outputSavedObjectToOutput(so) as any).otlp_exporter.sending_queue).toEqual({
+        queue_size: null,
+        batch: { min_size: null },
+      });
+
+      const optedOut = mockOutputSO('output-test', {
+        type: 'otlp',
+        otlp_exporter: {
+          protocol: 'grpc',
+          endpoint: 'collector.example.com:4317',
+          sending_queue: null,
+        },
+      } as any);
+      expect((outputSavedObjectToOutput(optedOut) as any).otlp_exporter.sending_queue).toBeNull();
+    });
+
     it('should return output object with parsed SSL when SSL is a valid JSON string', () => {
       const so = mockOutputSO('output-test', {
         type: 'elasticsearch',

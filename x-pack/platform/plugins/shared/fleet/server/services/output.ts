@@ -79,6 +79,7 @@ import {
 
 import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
+import { omitRemovedOtlpQueueSettings } from '../../common/services/otlp_sending_queue';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
@@ -202,6 +203,20 @@ function omitRemovedOtlpHeaders(
   return { ...exporter, headers: storedHeaders };
 }
 
+// the settings that an update removed are kept as `null` by the saved object update
+function omitRemovedOtlpQueueSettingsOfExporter<T extends { sending_queue?: unknown }>(
+  exporter: T
+): T {
+  return exporter.sending_queue
+    ? {
+        ...exporter,
+        sending_queue: omitRemovedOtlpQueueSettings(
+          exporter.sending_queue as Parameters<typeof omitRemovedOtlpQueueSettings>[0]
+        ),
+      }
+    : exporter;
+}
+
 export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
   const logger = appContextService.getLogger();
   // the references of the secrets an update removed are kept as `null` by the saved object update
@@ -235,7 +250,9 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     return {
       ...attributes,
       ...(attributes.otlp_exporter && {
-        otlp_exporter: omitRemovedOtlpHeaders(attributes.otlp_exporter),
+        otlp_exporter: omitRemovedOtlpQueueSettingsOfExporter(
+          omitRemovedOtlpHeaders(attributes.otlp_exporter)
+        ),
       }),
       id: outputId ?? so.id,
     };
