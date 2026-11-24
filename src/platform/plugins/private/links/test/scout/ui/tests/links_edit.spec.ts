@@ -26,12 +26,7 @@ test.describe('Links panel - edit', { tag: ['@local-stateful-classic'] }, () => 
   });
 
   test('can reorder, edit and delete links in an existing panel', async ({ page, pageObjects }) => {
-    const { dashboard, linksPanel } = pageObjects;
-
-    const openPanelEditor = async () => {
-      await dashboard.clickPanelAction('embeddablePanelAction-editPanel', 'a few horizontal links');
-      await expect(linksPanel.panelEditorFlyout).toBeVisible();
-    };
+    const { linksPanel } = pageObjects;
 
     await test.step('reorder links', async () => {
       // strip the screen reader suffix of external links
@@ -40,7 +35,7 @@ test.describe('Links panel - edit', { tag: ['@local-stateful-classic'] }, () => 
       );
       expect(original[2]).toBe('links 003 - external');
 
-      await openPanelEditor();
+      await linksPanel.openPanelEditor('a few horizontal links');
       // Move the third link up one step
       await linksPanel.moveLinkUp('links 003 - external', 1);
       await linksPanel.savePanelEditor();
@@ -52,7 +47,7 @@ test.describe('Links panel - edit', { tag: ['@local-stateful-classic'] }, () => 
     });
 
     await test.step('edit a link', async () => {
-      await openPanelEditor();
+      await linksPanel.openPanelEditor('a few horizontal links');
       await linksPanel.editLink('links 005');
       await page.testSubj.fill('links--linkEditor--linkLabel--input', 'renamed link');
       await linksPanel.saveLinkEditor();
@@ -63,7 +58,7 @@ test.describe('Links panel - edit', { tag: ['@local-stateful-classic'] }, () => 
     });
 
     await test.step('delete a link', async () => {
-      await openPanelEditor();
+      await linksPanel.openPanelEditor('a few horizontal links');
       await expect(linksPanel.getEditorLinks()).toHaveCount(5);
       await linksPanel.deleteLink('links 001 - filters');
       await linksPanel.savePanelEditor();

@@ -10,8 +10,14 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "entityInventoryApp"],
-    "requiredPlugins": ["observabilityShared"],
+    "requiredPlugins": [
+      "dataViews",
+      "entityInventory",
+      "observabilityShared",
+      "share",
+      "unifiedSearch"
+    ],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": ["kibanaReact", "kibanaUtils"]
   }
 }

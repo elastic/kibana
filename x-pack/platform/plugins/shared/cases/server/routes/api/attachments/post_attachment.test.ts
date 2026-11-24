@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { createCasesClientMock } from '../../../client/mocks';
 import type { CaseError } from '../../../common/error';
 import { mockCaseUnifiedAttachments } from '../../../mocks';
@@ -42,19 +43,17 @@ describe('postAttachmentRoute', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('returns the created attachment', async () => {
-    casesClientMock.attachments.add.mockImplementation(
-      async ({ id }) =>
-        ({
-          comments: [{ id, version: '1', ...attachmentSO.attributes }],
-        } as never)
-    );
+  it('returns the attachment from the client', async () => {
+    const attachment = { id: attachmentSO.id, version: '1', ...attachmentSO.attributes };
+    casesClientMock.attachments.add.mockResolvedValue(attachment as never);
 
     await callHandler();
 
-    expect(response.created).toHaveBeenCalledWith({
-      body: expect.objectContaining({ type: 'comment', data: { content: 'test' } }),
+    expect(casesClientMock.attachments.add).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      comment: request.body,
     });
+    expect(response.created).toHaveBeenCalledWith({ body: attachment });
     expect(incrementAttachmentTypeCounters).toHaveBeenCalledWith(['comment']);
   });
 
@@ -78,15 +77,12 @@ describe('postAttachmentRoute', () => {
     expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
   });
 
-  it('throws a 500 when the created attachment is missing from the case', async () => {
-    casesClientMock.attachments.add.mockResolvedValue({ comments: [] } as never);
+  it('keeps the status code of a client error', async () => {
+    casesClientMock.attachments.add.mockRejectedValue(Boom.notFound('missing'));
 
     const error = await getHandlerError();
 
-    expect(error.wrappedError?.message).toMatch(
-      /^Failed to locate created attachment .+ on case case-1$/
-    );
-    expect(error.boomify().output.statusCode).toBe(500);
+    expect(error.boomify().output.statusCode).toBe(404);
     expect(response.created).not.toHaveBeenCalled();
     expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
   });

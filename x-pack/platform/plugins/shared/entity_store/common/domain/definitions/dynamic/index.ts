@@ -14,6 +14,7 @@ export {
   MAX_FILTER_LENGTH,
   MAX_INDEX_PATTERN_LENGTH,
   MAX_SOURCES,
+  MAX_SUGGESTED_FILTERS,
   MAX_VALUE_LABEL_LENGTH,
   MAX_VALUE_LABELS,
   dynamicAttributeSchema,
@@ -31,7 +32,9 @@ export type {
 } from './dynamic_block_schema';
 export {
   MAX_DYNAMIC_IDENTITY_FIELDS,
+  SUGGESTED_FILTER_RULE,
   assertDynamicDefinitionRules,
+  getIdentityCompositions,
   getIdentityFields,
   getPresenceFilter,
 } from './dynamic_definition_rules';

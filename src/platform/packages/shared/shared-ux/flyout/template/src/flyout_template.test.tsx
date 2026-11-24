@@ -27,7 +27,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-// eslint-disable-next-line import/order
+// eslint-disable-next-line @kbn/compat/import-order
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
@@ -149,7 +149,7 @@ describe('FlyoutTemplate', () => {
     expect(warn).toHaveBeenCalledWith(
       '[FlyoutTemplate] Multiple <FlyoutTemplate.Header> zones provided; rendering only the first.'
     );
-    expect(screen.getByRole('heading', { level: 3, name: 'First title' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'First title' })).toBeInTheDocument();
     expect(screen.queryByText('Second title')).not.toBeInTheDocument();
     warn.mockRestore();
   });

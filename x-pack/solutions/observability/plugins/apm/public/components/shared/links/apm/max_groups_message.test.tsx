@@ -14,16 +14,29 @@ import {
 import { MaxGroupsMessage } from './max_groups_message';
 
 describe('MaxGroupsMessage', () => {
-  it('resolves the troubleshooting docs link through the doc links service', () => {
+  it('resolves the transactions troubleshooting docs link through the doc links service', () => {
     render(
       <MockApmPluginContextWrapper>
-        <MaxGroupsMessage />
+        <MaxGroupsMessage type="transactions" />
       </MockApmPluginContextWrapper>
     );
 
     expect(screen.getByTestId('apmMaxGroupsMessageDocsLink')).toHaveAttribute(
       'href',
       mockApmPluginContextValue.core.docLinks.links.apm.troubleshootingTooManyTransactions
+    );
+  });
+
+  it('resolves the services troubleshooting docs link through the doc links service', () => {
+    render(
+      <MockApmPluginContextWrapper>
+        <MaxGroupsMessage type="services" />
+      </MockApmPluginContextWrapper>
+    );
+
+    expect(screen.getByTestId('apmMaxGroupsMessageDocsLink')).toHaveAttribute(
+      'href',
+      mockApmPluginContextValue.core.docLinks.links.apm.troubleshootingTooManyServices
     );
   });
 });

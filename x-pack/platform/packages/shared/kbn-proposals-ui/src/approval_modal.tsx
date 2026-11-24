@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiModal, useGeneratedHtmlId } from '@elastic/eui';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { ApprovalContent } from './approval_content';
 import type { DeclineParams, AlwaysAllowOption, ApprovalProposal } from './types';
 
@@ -33,11 +34,13 @@ export interface ApprovalModalProps {
    * reopened mid-submission.
    */
   isSubmitting?: 'applying' | 'declining';
-  /** Who's approving, for the "Applying"/"Declining" caption before the server confirms a decider. */
+  /** Who's approving, for the "Applying"/"Declining" banner before the server confirms a decider. */
   currentActorName?: string;
   /** See `ApprovalContentProps.onReopen`. */
   onReopen?: () => Promise<void>;
   isReopening?: boolean;
+  /** See `ApprovalContentProps.basePath`. */
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
@@ -66,16 +69,16 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     currentActorName,
     onReopen,
     isReopening,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
-    const { euiTheme } = useEuiTheme();
     const titleId = useGeneratedHtmlId({ prefix: 'ApprovalModal' });
 
     return (
       <EuiModal
         aria-labelledby={titleId}
         onClose={onClose}
-        css={css({ maxWidth: 640, width: '100%', borderRadius: euiTheme.size.xs })}
+        css={css({ maxWidth: 640, width: '100%' })}
         data-test-subj={dataTestSubj}
       >
         <ApprovalContent
@@ -90,6 +93,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           onDismiss={onDismiss}
           onReopen={onReopen}
           isReopening={isReopening}
+          basePath={basePath}
         />
       </EuiModal>
     );

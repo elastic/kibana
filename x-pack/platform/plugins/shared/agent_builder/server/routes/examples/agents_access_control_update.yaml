@@ -47,6 +47,7 @@ responses:
               error: "Bad Request"
               message: "The default agent (elastic-ai-agent) does not support custom access controls."
               attributes:
+                code: "badRequest"
                 trace_id: "8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e"
           tooManyEntriesResponseExample:
             description: "Request body exceeds the 100-entry maximum."
@@ -65,6 +66,7 @@ responses:
               error: "Not Found"
               message: "Agent custom-agent-id not found"
               attributes:
+                code: "agentNotFound"
                 trace_id: "8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e"
 x-codeSamples:
   - lang: curl

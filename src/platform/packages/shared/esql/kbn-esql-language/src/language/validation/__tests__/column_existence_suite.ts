@@ -100,6 +100,48 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
       await expectErrors('from conflict_index | sort conflictingField', [message]);
     });
 
+    it('accepts a key written under a flattened field', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM index | WHERE flattenedField.env == "prod"', []);
+      await expectErrors('FROM index | KEEP flattenedField.env', []);
+      await expectErrors(
+        'FROM index | WHERE flattenedField.env == "prod" | KEEP flattenedField.env',
+        []
+      );
+      await expectErrors(
+        'FROM index | KEEP flattenedField.env | WHERE flattenedField.env == "staging"',
+        []
+      );
+      await expectErrors('FROM index | STATS COUNT(*) BY flattenedField.nested.region', []);
+      await expectErrors(
+        'FROM (FROM index | KEEP flattenedField.env) | KEEP flattenedField.env',
+        []
+      );
+      await expectErrors(
+        'FROM index | FORK (KEEP flattenedField.env) (KEEP flattenedField.env) | WHERE flattenedField.env == "prod"',
+        []
+      );
+    });
+
+    it('still reports an unknown column under a field that is not flattened', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM index | WHERE keywordField.env == "prod"', [
+        'Unknown column "keywordField.env"',
+      ]);
+      await expectErrors('FROM index | WHERE kubernetes.something.something.extra == 1', [
+        'Unknown column "kubernetes.something.something.extra"',
+      ]);
+    });
+
+    it('does not treat a flattened key as an unmapped field when unmapped fields are loaded', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'SET unmapped_fields = "LOAD"; FROM index | WHERE flattenedField.env == "prod" | KEEP flattenedField.env',
+        [],
+        []
+      );
+    });
+
     it('returns one warning for each instance of the same unmapped column', async () => {
       const { expectErrors } = await setup();
       await expectErrors(

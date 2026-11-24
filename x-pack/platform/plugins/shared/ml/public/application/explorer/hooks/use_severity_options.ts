@@ -7,7 +7,8 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
-import { ML_ANOMALY_THRESHOLD, getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 import { i18n } from '@kbn/i18n';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { getSeverityRangeDisplay } from '../../../../common/util/severity_threshold';

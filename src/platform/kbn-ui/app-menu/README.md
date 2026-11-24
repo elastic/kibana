@@ -40,7 +40,8 @@ placeholder plus a primary-action rectangle; `buttonCount` is clamped to `APP_ME
 ```
 
 Collapsed breakpoints show only the overflow placeholder (the primary action lives inside that
-menu). Minimal shows overflow + primary. Expanded shows `buttonCount` icon placeholders + primary.
+menu). Minimal shows primary + overflow. Expanded shows `buttonCount - 1` icon placeholders, then
+primary, then overflow.
 
 ## Strict props
 
@@ -54,3 +55,9 @@ Do not pass `FormattedMessage` or other nodes.
 ## Compatibility
 
 `@kbn/core-chrome-app-menu-components` re-exports this package for existing consumers.
+
+## Standalone package
+
+This package is also built as a standalone npm package for applications outside Kibana (e.g. Cloud UI, design prototypes), so they can use the real app menu instead of re-creating it. The publish pipeline builds and publishes it to the internal Artifactory registry on merge to `main` whenever this package changes.
+
+See [packaging/README.md](./packaging/README.md) for how it is built, its peer dependencies, and how to use it.

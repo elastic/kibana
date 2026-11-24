@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiText, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -42,50 +42,70 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
     color: ${hasErrorResult ? euiTheme.colors.textDanger : euiTheme.colors.textDisabled};
   `;
 
+  const intentStyles = css`
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  `;
+
+  const badgeItemStyles = css`
+    display: block;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  `;
+
   const toolBadge = (
-    <EuiBadge color={hasErrorResult ? 'danger' : 'default'}>
-      <strong
-        css={css`
-          font-weight: ${euiTheme.font.weight.bold};
-        `}
-      >
-        {toolBadgeToolLabel}
-      </strong>
-      : {step.tool_id}
+    <EuiBadge
+      color={hasErrorResult ? 'danger' : 'default'}
+      title={`${toolBadgeToolLabel}: ${step.tool_id}`}
+      data-test-subj="agentBuilderToolCallBadge"
+    >
+      <span css={badgeItemStyles}>
+        <strong
+          css={css`
+            font-weight: ${euiTheme.font.weight.bold};
+          `}
+        >
+          {toolBadgeToolLabel}
+        </strong>
+        : {step.tool_id}
+      </span>
     </EuiBadge>
   );
 
+  const shouldAppendStatus = hasErrorResult || (isAborted && !hasResults);
+
   return (
-    <>
-      <EuiFlexGroup
-        responsive={false}
-        gutterSize="xs"
-        alignItems="baseline"
-        role="status"
-        aria-label={toolCallAriaLabel}
-      >
-        <EuiFlexItem grow={false}>{toolBadge}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <span css={suffixStyles}>
-            {hasResults ? (
+    <EuiText
+      size="s"
+      color="inherit"
+      css={intentStyles}
+      role="status"
+      aria-label={toolCallAriaLabel}
+    >
+      {step.intent?.trim() ? (
+        <span data-test-subj="agentBuilderToolCallIntent">{step.intent}</span>
+      ) : (
+        toolBadge
+      )}
+      {shouldAppendStatus && (
+        <span css={suffixStyles}>
+          {' — '}
+          <span>
+            {hasErrorResult ? (
               <FormattedMessage
-                id="xpack.agentBuilder.eventSteps.steps.toolCall.ran"
-                defaultMessage="ran"
+                id="xpack.agentBuilder.eventSteps.steps.toolCall.failedLabel"
+                defaultMessage="failed"
               />
-            ) : isAborted ? (
+            ) : (
               <FormattedMessage
                 id="xpack.agentBuilder.eventSteps.steps.toolCall.stopped"
                 defaultMessage="stopped"
               />
-            ) : (
-              <FormattedMessage
-                id="xpack.agentBuilder.eventSteps.steps.toolCall.running"
-                defaultMessage="running…"
-              />
             )}
           </span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+        </span>
+      )}
+    </EuiText>
   );
 };

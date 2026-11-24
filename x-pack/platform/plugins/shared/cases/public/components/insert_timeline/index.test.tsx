@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { TestProviders } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
@@ -35,14 +34,12 @@ describe('InsertTimeline ', () => {
   });
 
   it('it should not call useInsertTimeline without timeline context', async () => {
-    mount(
-      <TestProviders>
-        <CasesTimelineIntegrationProvider>
-          <Form form={formHookMock as unknown as FormHook}>
-            <InsertTimeline fieldName="comment" />
-          </Form>
-        </CasesTimelineIntegrationProvider>
-      </TestProviders>
+    renderWithTestingProviders(
+      <CasesTimelineIntegrationProvider>
+        <Form form={formHookMock as unknown as FormHook}>
+          <InsertTimeline fieldName="comment" />
+        </Form>
+      </CasesTimelineIntegrationProvider>
     );
 
     await waitFor(() => {
@@ -57,14 +54,12 @@ describe('InsertTimeline ', () => {
     mockTimelineIntegration.hooks.useInsertTimeline = useInsertTimelineMock;
     useTimelineContextMock.mockImplementation(() => ({ ...mockTimelineIntegration }));
 
-    mount(
-      <TestProviders>
-        <CasesTimelineIntegrationProvider timelineIntegration={mockTimelineIntegration}>
-          <Form form={formHookMock as unknown as FormHook}>
-            <InsertTimeline fieldName="comment" />
-          </Form>
-        </CasesTimelineIntegrationProvider>
-      </TestProviders>
+    renderWithTestingProviders(
+      <CasesTimelineIntegrationProvider timelineIntegration={mockTimelineIntegration}>
+        <Form form={formHookMock as unknown as FormHook}>
+          <InsertTimeline fieldName="comment" />
+        </Form>
+      </CasesTimelineIntegrationProvider>
     );
 
     await waitFor(() => {

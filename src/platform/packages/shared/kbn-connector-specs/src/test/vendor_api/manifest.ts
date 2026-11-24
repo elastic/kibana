@@ -8,19 +8,158 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { PaginationDescriptor } from '@kbn/connector-emulate';
 import { toStableJson } from './stable_json';
+
+/** Markdown API references with an `llms.txt` index, by the template their pages follow. */
+export const markdownSourceFormatSchema = z.enum(['databricks-markdown', 'brave-markdown']);
+
+export const isMarkdownFormat = (
+  format: string | undefined
+): format is z.infer<typeof markdownSourceFormatSchema> =>
+  markdownSourceFormatSchema.safeParse(format).success;
+
+/** Protocols whose operations go by name, with snapshots of their own format. */
+export const protocolSourceFormatSchema = z.enum(['graphql', 'mcp']);
+
+export const isProtocolFormat = (
+  format: string | undefined
+): format is z.infer<typeof protocolSourceFormatSchema> =>
+  protocolSourceFormatSchema.safeParse(format).success;
 
 const sourceSchema = z
   .object({
-    /** The format the vendor publishes; snapshots are always OpenAPI 3.x JSON. */
-    format: z.enum(['openapi', 'swagger', 'discovery']),
+    /**
+     * The format the vendor publishes. Snapshots are OpenAPI 3.x JSON, except for GraphQL (SDL) and
+     * MCP (a `tools/list` result).
+     */
+    format: z.union([
+      z.enum(['openapi', 'swagger', 'discovery', 'smithy']),
+      markdownSourceFormatSchema,
+      protocolSourceFormatSchema,
+    ]),
+    /**
+     * The spec, or for Markdown references, their `llms.txt` index. For GraphQL, a document with
+     * SDL or an introspection result; for MCP, one with a `tools/list` result.
+     */
     url: z.url(),
+    /** GraphQL and MCP only: the URLs the connector calls, as the spec's URL can't tell. */
+    endpoints: z.array(z.url()).min(1).optional(),
+    /**
+     * MCP only: the tool documents the server's tools are assembled from, as URLs absolute or
+     * relative to `url`, for a vendor that publishes a document per tool rather than a
+     * `tools/list` result. Without them, `url` itself serves the tool list.
+     */
+    tools: z.array(z.string().min(1)).min(1).optional(),
+    /**
+     * Markdown references only: URL prefixes, absolute or relative to the index, of the pages
+     * to fetch, such as the folders of the API groups the connector calls.
+     */
+    pages: z.array(z.string().min(1)).min(1).optional(),
+    /**
+     * Set when the vendor only serves this spec to a request carrying credentials, so it was
+     * captured once and committed as the snapshot. It is never fetched again: `--refresh` and
+     * `--drift` read the snapshot, and drift reports the source as pinned rather than unreachable.
+     * Refreshing it means capturing it again, by hand, with credentials. Needs a `note` saying
+     * what the capture took.
+     */
+    captured: z.literal(true).optional(),
     /** The spec's `info.version`, when it has one. */
     apiVersion: z.string().optional(),
     /** When the snapshot last changed, as an ISO date-time. */
     fetchedAt: z.iso.datetime(),
+    /** Written by hand, e.g. to explain an unusual source such as a vendor test fixture. */
+    note: z.string().min(1).optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    ({ format, pages }) =>
+      pages === undefined || markdownSourceFormatSchema.safeParse(format).success,
+    { message: '"pages" only applies to Markdown references', path: ['pages'] }
+  )
+  .refine(({ format, endpoints }) => isProtocolFormat(format) === (endpoints !== undefined), {
+    message: 'GraphQL and MCP sources need "endpoints", and other sources have none',
+    path: ['endpoints'],
+  })
+  .refine(({ format, tools }) => tools === undefined || format === 'mcp', {
+    message: '"tools" only applies to MCP sources',
+    path: ['tools'],
+  })
+  .refine(({ captured, note }) => captured === undefined || note !== undefined, {
+    message: 'A captured source needs a "note" saying what capturing it took',
+    path: ['note'],
+  });
+
+const located = { in: z.enum(['query', 'body', 'header']).optional() };
+const size = { sizeParam: z.string().min(1).optional() };
+const cursorRequest = { cursorParam: z.string().min(1), ...size };
+const offsetRequest = { offsetParam: z.string().min(1), ...size };
+const pageRequest = {
+  pageParam: z.string().min(1),
+  ...size,
+  firstPage: z.number().int().nonnegative().optional(),
+};
+const nextUrlRequestSchema = z.union([
+  z.object(cursorRequest).strict(),
+  z.object(offsetRequest).strict(),
+  z.object(pageRequest).strict(),
+]);
+const defaultSize = { defaultSize: z.number().int().positive().optional() };
+const itemsPath = z.string();
+const totalResponseSchema = z.object({ itemsPath, totalPath: z.string().optional() }).strict();
+
+const paginationSchema = z.discriminatedUnion('style', [
+  z
+    .object({
+      style: z.literal('cursor'),
+      request: z.object({ ...cursorRequest, ...located }).strict(),
+      response: z
+        .object({
+          in: z.enum(['body', 'header']).optional(),
+          itemsPath,
+          nextPath: z.string().min(1),
+          hasMorePath: z.string().optional(),
+        })
+        .strict(),
+      end: z.enum(['empty_string', 'null', 'missing']).optional(),
+      ...defaultSize,
+    })
+    .strict(),
+  z
+    .object({
+      style: z.literal('offset'),
+      request: z.object({ ...offsetRequest, ...located }).strict(),
+      response: totalResponseSchema,
+      ...defaultSize,
+    })
+    .strict(),
+  z
+    .object({
+      style: z.literal('page'),
+      request: z.object({ ...pageRequest, ...located }).strict(),
+      response: totalResponseSchema,
+      ...defaultSize,
+    })
+    .strict(),
+  z
+    .object({
+      style: z.literal('link'),
+      request: nextUrlRequestSchema,
+      response: z.object({ itemsPath }).strict(),
+      ...defaultSize,
+    })
+    .strict(),
+  z
+    .object({
+      style: z.literal('next_url'),
+      /** Omitted when the next URL is opaque (Azure's `nextLink`); the mock pages it itself. */
+      request: nextUrlRequestSchema.optional(),
+      response: z.object({ itemsPath, nextPath: z.string().min(1) }).strict(),
+      end: z.enum(['null', 'missing']).optional(),
+      ...defaultSize,
+    })
+    .strict(),
+]);
 
 const operationSchema = z
   .object({
@@ -29,25 +168,48 @@ const operationSchema = z
     method: z.string(),
     /** The path template, as in the spec. */
     path: z.string(),
+    /**
+     * How the operation pages, for the contract mock; `none` for list-like operations that
+     * return everything in one response.
+     */
+    pagination: z.union([z.literal('none'), paginationSchema]).optional(),
+  })
+  .strict();
+
+/** A GraphQL root field (`query boards`) or MCP tool, as the contract mock names it. */
+const namedOperationSchema = z
+  .object({
+    source: z.string(),
+    name: z.string(),
   })
   .strict();
 
 const unmatchedSchema = z
   .object({
     method: z.string(),
-    /** The URL path the action requested, which matches no operation of any source. */
+    /**
+     * The URL path the action requested, which matches no operation of any source. A `{name}`
+     * segment matches any value, e.g. `/monitor/{monitor_id}/mute`.
+     */
     path: z.string(),
     /** Why this is expected, e.g. an endpoint the vendor spec omits, with a link to follow up. */
     reason: z.string().min(1),
   })
   .strict();
 
+/** A source name is lowercase snake_case, since its snapshot file takes the name. */
+export const SOURCE_NAME_PATTERN = /^[a-z0-9]+(_[a-z0-9]+)*$/;
+
+const sourceNameSchema = z
+  .string()
+  .regex(SOURCE_NAME_PATTERN, 'A source name is lowercase snake_case, such as v2 or users_v1');
+
 /** `vendor_api/manifest.json`: the vendor specs a connector depends on and what it calls. */
 export const vendorApiManifestSchema = z
   .object({
-    sources: z.record(z.string(), sourceSchema),
+    sources: z.record(sourceNameSchema, sourceSchema),
     /** Per action, the vendor operations it calls, sorted. */
-    operations: z.record(z.string(), z.array(operationSchema)),
+    operations: z.record(z.string(), z.array(z.union([operationSchema, namedOperationSchema]))),
     /** Per action, acknowledged requests that match no vendor operation. */
     unmatched: z.record(z.string(), z.array(unmatchedSchema)).optional(),
   })
@@ -55,8 +217,30 @@ export const vendorApiManifestSchema = z
 
 export type VendorApiManifest = z.infer<typeof vendorApiManifestSchema>;
 export type ManifestOperation = z.infer<typeof operationSchema>;
+export type ManifestNamedOperation = z.infer<typeof namedOperationSchema>;
+export type ManifestCall = ManifestOperation | ManifestNamedOperation;
 export type ManifestSource = z.infer<typeof sourceSchema>;
+export type MarkdownSourceFormat = z.infer<typeof markdownSourceFormatSchema>;
+export type ProtocolFormat = z.infer<typeof protocolSourceFormatSchema>;
 export type UnmatchedRequest = z.infer<typeof unmatchedSchema>;
+export type ManifestPagination = NonNullable<ManifestOperation['pagination']>;
+
+export const isNamedCall = (call: ManifestCall): call is ManifestNamedOperation => 'name' in call;
+
+/** A manifest descriptor, as the contract mock takes it; fails to compile if the two diverge. */
+export const toPaginationDescriptor = (
+  pagination: Exclude<ManifestPagination, 'none'>
+): PaginationDescriptor => pagination;
+
+/** Whether a request path fits a path template, where a `{name}` segment matches any segment. */
+export const matchesPathTemplate = (template: string, requestPath: string): boolean => {
+  const expected = template.split('/');
+  const actual = requestPath.split('/');
+  return (
+    expected.length === actual.length &&
+    expected.every((segment, index) => segment === actual[index] || /^\{[^/{}]+\}$/.test(segment))
+  );
+};
 
 export const parseManifest = (json: string): VendorApiManifest =>
   vendorApiManifestSchema.parse(JSON.parse(json));

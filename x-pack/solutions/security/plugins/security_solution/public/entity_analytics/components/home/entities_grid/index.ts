@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export {
-  TIME_RANGE_OPTIONS,
-  useEntityAnalyticsUrlState,
-} from './hooks/use_entity_analytics_url_state';
-export type { Row, TimeRange, RowsMode } from './common';
+export { useEntityAnalyticsUrlState } from './hooks/use_entity_analytics_url_state';
+export type { Row, RowsMode } from './common';
 export { EMPTY_ENTITY_FILTERS } from './common';
 export type { EntityFilters } from './common';
 export { EntitiesGrid } from './components/entities_grid';
@@ -18,6 +15,12 @@ export type { CellHandlers } from './components/entities_cell_renderer';
 export type { RowActions } from './components/cells/row_actions_cell';
 export { RESOLVED_ROWS_COLUMNS, INDIVIDUAL_ROWS_COLUMNS } from './grid_columns';
 export type { ReadAccess } from './grid_columns';
-export { ENTITY_TYPE_FIELD, getEntityId, getString } from './common';
+export {
+  ENTITY_TYPE_FIELD,
+  RISK_SCORE_NORM_FIELD,
+  getEntityId,
+  getNumber,
+  getString,
+} from './common';
 export { buildEntityFilterClauses } from './queries/entity_filters';
 export { useSearchBarExpression } from './hooks/use_search_bar_expression';

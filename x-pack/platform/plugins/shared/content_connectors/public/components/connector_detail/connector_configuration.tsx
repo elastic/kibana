@@ -22,7 +22,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorConfigurationComponent } from '@kbn/search-connectors/components';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { hasNonEmptyAdvancedSnippet } from '../../utils/connector_helpers';

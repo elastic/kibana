@@ -7,8 +7,11 @@
 
 import React, { memo } from 'react';
 import { RiskScoreCell } from '../../../entities_table/risk_score_cell';
+import { alignEndCss } from './styles';
 
 export const RiskScoreValueCell = memo(({ value }: { value: unknown }) => (
-  <RiskScoreCell riskScore={typeof value === 'number' ? value : undefined} />
+  <div css={alignEndCss}>
+    <RiskScoreCell riskScore={typeof value === 'number' ? value : undefined} />
+  </div>
 ));
 RiskScoreValueCell.displayName = 'RiskScoreValueCell';

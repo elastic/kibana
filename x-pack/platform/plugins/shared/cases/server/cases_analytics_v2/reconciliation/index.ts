@@ -18,6 +18,7 @@ import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 import { runReconciliation } from './runner';
 import { runActivityReconciliation } from './activity_runner';
 import { runAttachmentsReconciliation } from './attachments_runner';
+import { runIncrementalIdBackfill } from '../incremental_id_backfill/runner';
 import { sweepDeletedSpaces } from './deleted_spaces_sweep';
 
 /**
@@ -38,6 +39,14 @@ export const RECONCILIATION_TASK_TYPE = 'cases.analyticsV2.reconciliation';
  */
 export const RECONCILIATION_TASK_ID = 'cases-analyticsV2-reconciliation';
 
+/**
+ * How long into a tick the incremental id backfill may start new pages.
+ * This task runs under Task Manager's default 5m timeout, and a timed-out
+ * run's returned state is discarded, so the backfill stops well short of it
+ * to keep the surface cursors this tick advanced. Exported for tests.
+ */
+export const INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS = 3 * 60 * 1000;
+
 interface RegisterReconciliationTaskArgs {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -57,9 +66,21 @@ interface RegisterReconciliationTaskArgs {
     writer: CasesAnalyticsV2WriterContract;
     activityWriter: CasesActivityV2WriterContract;
     attachmentsWriter: CasesAttachmentsV2WriterContract;
+    /**
+     * False when `.cases` bootstrap failed and `writer` is the no-op. The
+     * backfill is skipped then; otherwise it would report repairs that were
+     * never written.
+     */
+    casesWriterEnabled: boolean;
     /** False when the Spaces plugin is disabled, so there are no `space` SOs to compare against. */
     deletedSpacesSweepEnabled: boolean;
   }>;
+  /**
+   * Resolved value of `xpack.cases.incrementalId.enabled`. Without it no
+   * case is ever numbered, so the incremental id backfill would re-read
+   * every case and repair nothing.
+   */
+  incrementalIdBackfillEnabled: boolean;
 }
 
 /**
@@ -75,6 +96,11 @@ interface ReconciliationTaskState {
   activity_last_run_at?: string;
   /** Attachments-surface cursor (from `runAttachmentsReconciliation`). */
   attachments_last_run_at?: string;
+  /**
+   * `case.id` where an unfinished `runIncrementalIdBackfill` pass resumes.
+   * Unset once a pass completes, so the next tick starts a fresh pass.
+   */
+  incremental_id_backfill_resume_after?: string;
 }
 
 /**
@@ -86,6 +112,7 @@ export function registerReconciliationTask({
   taskManager,
   logger,
   getRunnerDeps,
+  incrementalIdBackfillEnabled,
 }: RegisterReconciliationTaskArgs): void {
   taskManager.registerTaskDefinitions({
     [RECONCILIATION_TASK_TYPE]: {
@@ -102,6 +129,7 @@ export function registerReconciliationTask({
       maxAttempts: 1,
       createTaskRunner: ({ taskInstance, signal }) => ({
         run: async () => {
+          const tickStartedAt = Date.now();
           const previousState = (taskInstance.state ?? {}) as ReconciliationTaskState;
           const casesLastRunAt = clampCursorToNotFuture(previousState.cases_last_run_at, logger);
           const activityLastRunAt = clampCursorToNotFuture(
@@ -122,6 +150,13 @@ export function registerReconciliationTask({
             activity_last_run_at: activityLastRunAt,
             attachments_last_run_at: attachmentsLastRunAt,
           };
+          const incrementalIdBackfillResumeAfter =
+            typeof previousState.incremental_id_backfill_resume_after === 'string'
+              ? previousState.incremental_id_backfill_resume_after
+              : undefined;
+          if (incrementalIdBackfillResumeAfter != null) {
+            nextState.incremental_id_backfill_resume_after = incrementalIdBackfillResumeAfter;
+          }
 
           const deps = await getRunnerDeps();
 
@@ -227,6 +262,39 @@ export function registerReconciliationTask({
             }
           }
 
+          // Backstop for the incremental-id task's best-effort mirror, run
+          // last so it never delays the cursor walks. Runs every tick: when
+          // nothing is missing an id it's a single empty search. A pass that
+          // hits the time budget resumes after its last `case.id` next tick;
+          // a failed pass keeps the previous resume point.
+          let incrementalIdBackfillError: unknown;
+          if (incrementalIdBackfillEnabled && deps.casesWriterEnabled && !signal.aborted) {
+            try {
+              const { completed, resumeAfter } = await runIncrementalIdBackfill({
+                esClient: deps.esClient,
+                savedObjectsClient: deps.savedObjectsClient,
+                writer: deps.writer,
+                logger,
+                signal,
+                deadline: tickStartedAt + INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS,
+                startAfter: incrementalIdBackfillResumeAfter,
+              });
+              if (completed || resumeAfter == null) {
+                delete nextState.incremental_id_backfill_resume_after;
+              } else {
+                nextState.incremental_id_backfill_resume_after = resumeAfter;
+              }
+            } catch (err) {
+              incrementalIdBackfillError = err;
+              logger.error(
+                `cases-analyticsV2: incremental id backfill failed: ${
+                  err instanceof Error ? err.message : String(err)
+                }. Retrying on the next tick.`,
+                { error: err }
+              );
+            }
+          }
+
           // If the tick was cancelled mid-flight, log it once so the
           // skipped surfaces are visible in the task log rather than
           // looking like a silent no-op.
@@ -244,7 +312,8 @@ export function registerReconciliationTask({
             casesError != null ||
             activityError != null ||
             attachmentsError != null ||
-            deletedSpacesError != null
+            deletedSpacesError != null ||
+            incrementalIdBackfillError != null
           ) {
             // Surface the failure via Task Manager's `taskRunError` so
             // task metrics reflect the per-tick outcome. Return rather
@@ -256,6 +325,7 @@ export function registerReconciliationTask({
               activity: activityError,
               attachments: attachmentsError,
               deletedSpaces: deletedSpacesError,
+              incrementalIdBackfill: incrementalIdBackfillError,
             });
             return {
               state: nextState,
@@ -432,6 +502,7 @@ function composeReconciliationError(errors: {
   activity?: unknown;
   attachments?: unknown;
   deletedSpaces?: unknown;
+  incrementalIdBackfill?: unknown;
 }): Error {
   const failing: string[] = [];
   if (errors.cases != null) failing.push(`cases (${asMessage(errors.cases)})`);
@@ -439,6 +510,9 @@ function composeReconciliationError(errors: {
   if (errors.attachments != null) failing.push(`attachments (${asMessage(errors.attachments)})`);
   if (errors.deletedSpaces != null)
     failing.push(`deleted spaces (${asMessage(errors.deletedSpaces)})`);
+  if (errors.incrementalIdBackfill != null) {
+    failing.push(`incremental id backfill (${asMessage(errors.incrementalIdBackfill)})`);
+  }
   return new Error(`${failing.join(' AND ')} reconciliation failed`);
 }
 

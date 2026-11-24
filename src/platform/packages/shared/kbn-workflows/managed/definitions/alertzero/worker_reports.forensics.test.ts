@@ -304,6 +304,7 @@ describe('Endpoint Analysis outcome reports', () => {
         resolve_finding_presence: { output: { iocs: attached, timeline: attached } },
         resolve_host: { output: { host_name: host } },
         resolve_prior_assessment: { output: { count: priorCount } },
+        resolve_proposal_counts: { output: { new_count: dispatched + dispatchFailed } },
         resolve_proposal_dispatch: { output: { failed: dispatchFailed } },
         resolve_proposals: { output: { proposals_lost: dispatchFailed > 0 } },
         resolve_request: { output: { has_request: request } },
@@ -431,27 +432,5 @@ describe('Endpoint Analysis outcome reports', () => {
         /\{\{ steps\.resolve_host\.output\.host_name \}\}|rationale|actionId|actionInput|investigation_id/
       );
     });
-  });
-});
-
-describe('Endpoint Analysis managed versions', () => {
-  it.each([
-    [
-      ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW.id,
-      ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW.version,
-      6,
-    ],
-    [
-      ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.id,
-      ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.version,
-      15,
-    ],
-    [
-      ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.id,
-      ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.version,
-      5,
-    ],
-  ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
-    expect(version).toBe(expected);
   });
 });

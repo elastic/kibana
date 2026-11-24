@@ -80,11 +80,12 @@ describe('floor_alert_triage — the scheduled sweep', () => {
   });
 
   describe('order', () => {
-    it('checks analysis, then headroom, then plans, then starts batches, then reports', () => {
+    it('checks analysis, then headroom, then matches decisions, then plans, then starts batches, then reports', () => {
       expect(rendered.steps.map(({ name }) => name)).toEqual([
         'fetch_analysis_runtime_config',
         'require_analysis_enabled',
         'read_headroom',
+        'match_fp_decisions',
         'plan_sweep',
         'start_batches',
         'emit_result',
@@ -105,6 +106,37 @@ describe('floor_alert_triage — the scheduled sweep', () => {
           headroom: '${{ steps.read_headroom.output }}',
         })
       );
+    });
+  });
+
+  describe('decision matching', () => {
+    it('never fails the sweep: a failed match leaves every alert for analysis', () => {
+      expect(stepByName('match_fp_decisions')['on-failure']).toEqual({ continue: true });
+    });
+
+    it('reads the same scope settings as the planner, so it matches only what triage would look at', () => {
+      const { with: matchInputs } = stepByName('match_fp_decisions');
+      const { with: planInputs } = stepByName('plan_sweep');
+      for (const key of [
+        'lookback_hours',
+        'min_severity',
+        'exclude_building_blocks',
+        'excluded_rule_tags',
+        'analysis_tag_prefix',
+      ]) {
+        expect(matchInputs?.[key]).toBe(planInputs?.[key]);
+      }
+    });
+
+    it('skips when Task Manager is not keeping up, so it adds no reads to a struggling cluster', () => {
+      expect(stepByName('match_fp_decisions').if).toBe(
+        "${{ steps.read_headroom.output.status == 'ok' }}"
+      );
+    });
+
+    it('runs before the planner, so a matched alert is never planned first', () => {
+      const names = rendered.steps.map(({ name }) => name);
+      expect(names.indexOf('match_fp_decisions')).toBeLessThan(names.indexOf('plan_sweep'));
     });
   });
 

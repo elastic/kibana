@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import type { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
 
 export const EmbeddableExpressionType = 'embeddable';
@@ -18,6 +19,10 @@ export interface EmbeddableExpression {
    * The input to be passed to the embeddable
    */
   input: Record<string, unknown>;
+  /**
+   * The workpad filters the embeddable inherits from Canvas, kept apart from its own `input.filters`
+   */
+  filters: Filter[];
   /**
    * The type of embeddable
    */

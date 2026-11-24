@@ -18,7 +18,6 @@ import {
   withSandboxOutputRedaction,
 } from './sandbox_output_redaction';
 
-const STORED_SECRET = 'stored-sandbox-secret';
 const CONNECTOR_SECRET = 'connector-api-key-123';
 const SAVED_CONNECTOR_ID = 'saved-1';
 const SAVED_CONNECTOR_TOKEN = 'saved-connector-token-value';
@@ -27,18 +26,16 @@ const SAVED_CONNECTOR_AUTHORIZATION = `Bearer ${SAVED_CONNECTOR_TOKEN}`;
 const schema = z.object({});
 
 const setup = ({
-  getRedactionValues = jest.fn().mockResolvedValue([STORED_SECRET]),
   handlerReturn = {
     results: [
       {
         type: ToolResultType.other,
-        data: { stdout: `a ${STORED_SECRET}`, nested: { stderr: `b ${CONNECTOR_SECRET}` } },
+        data: { stdout: `a ${CONNECTOR_SECRET}`, nested: { stderr: `b ${CONNECTOR_SECRET}` } },
       },
     ],
   },
   allowedConnectorIds = [],
 }: {
-  getRedactionValues?: jest.Mock;
   handlerReturn?: unknown;
   allowedConnectorIds?: string[];
 } = {}) => {
@@ -54,6 +51,7 @@ const setup = ({
       actionTypeId: '.http',
       config: { url: 'https://api.example.com' },
       headers: { Authorization: SAVED_CONNECTOR_AUTHORIZATION },
+      hosts: ['api.example.com'],
     };
   });
   actionsClient.getAll.mockImplementation(
@@ -71,7 +69,8 @@ const setup = ({
   const logger = loggingSystemMock.createLogger();
   const wrapped = withSandboxOutputRedaction(tool, {
     getOutputRedactor: createSandboxOutputRedactorProvider({
-      getDeps: () => ({ actions, sandboxSecretsClient: { getRedactionValues } }),
+      getDeps: () => ({ actions }),
+      logger,
     }),
     logger,
   });
@@ -83,7 +82,7 @@ const setup = ({
       { request, agentConfiguration: { connector_ids: allowedConnectorIds } }
     );
 
-  return { run, handler, getRedactionValues, logger, request, actionsClient, actions };
+  return { run, handler, logger, request, actionsClient, actions };
 };
 
 const resultWithStdout = (stdout: string) => ({
@@ -91,8 +90,8 @@ const resultWithStdout = (stdout: string) => ({
 });
 
 describe('withSandboxOutputRedaction', () => {
-  it('redacts stored sandbox secrets and connector secrets anywhere in the results', async () => {
-    const { run, getRedactionValues, request } = setup();
+  it('redacts connector secrets anywhere in the results', async () => {
+    const { run } = setup();
 
     await expect(run()).resolves.toEqual({
       results: [
@@ -105,7 +104,6 @@ describe('withSandboxOutputRedaction', () => {
         },
       ],
     });
-    expect(getRedactionValues).toHaveBeenCalledWith(request);
   });
 
   it('redacts the bare API key derived from a connector Authorization header', async () => {
@@ -131,10 +129,8 @@ describe('withSandboxOutputRedaction', () => {
     const logger = loggingSystemMock.createLogger();
     const wrapped = withSandboxOutputRedaction(tool, {
       getOutputRedactor: createSandboxOutputRedactorProvider({
-        getDeps: () => ({
-          actions,
-          sandboxSecretsClient: { getRedactionValues: jest.fn().mockResolvedValue([]) },
-        }),
+        getDeps: () => ({ actions }),
+        logger,
       }),
       logger,
     });
@@ -206,21 +202,22 @@ describe('withSandboxOutputRedaction', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('does not run the tool when a sandbox capable connector cannot be resolved', async () => {
-    const { run, handler, logger } = setup({ allowedConnectorIds: ['broken-1'] });
-
-    await expect(run()).resolves.toEqual({
-      results: [
-        {
-          type: ToolResultType.error,
-          data: { message: expect.stringContaining("connector 'broken-1' assigned to this agent") },
-        },
-      ],
+  it('skips a sandbox capable connector that cannot be resolved and still runs the tool', async () => {
+    const { run, handler, logger, actionsClient } = setup({
+      allowedConnectorIds: ['broken-1', SAVED_CONNECTOR_ID],
+      handlerReturn: resultWithStdout(SAVED_CONNECTOR_TOKEN),
     });
-    expect(handler).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledTimes(1);
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Resolving connector credentials for output redaction failed')
+
+    await expect(run()).resolves.toEqual(resultWithStdout(REDACTED_PLACEHOLDER));
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: 'broken-1' });
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Connector 'broken-1' assigned to this agent cannot be resolved, so its credentials cannot be injected into sandbox commands: Unauthorized to execute connector broken-1"
+      )
     );
   });
 
@@ -280,6 +277,7 @@ describe('withSandboxOutputRedaction', () => {
       actionTypeId: '.http',
       config: { url: 'https://api.example.com' },
       headers: { Authorization: `Basic ${basicToken}` },
+      hosts: ['api.example.com'],
     });
 
     // A call that injected nothing reads the header value back from a file.
@@ -290,23 +288,6 @@ describe('withSandboxOutputRedaction', () => {
     await expect(run()).resolves.toEqual(
       resultWithStdout(`header.txt: ${REDACTED_PLACEHOLDER}\ntoken.txt: ${REDACTED_PLACEHOLDER}`)
     );
-  });
-
-  it('does not run the tool when stored secrets cannot be loaded', async () => {
-    const { run, handler, logger } = setup({
-      getRedactionValues: jest.fn().mockRejectedValue(new Error('Unable to decrypt')),
-    });
-
-    await expect(run()).resolves.toEqual({
-      results: [
-        {
-          type: ToolResultType.error,
-          data: { message: expect.stringContaining('Sandbox tools are unavailable') },
-        },
-      ],
-    });
-    expect(handler).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Unable to decrypt'));
   });
 
   it('passes non-standard returns through unchanged', async () => {

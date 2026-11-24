@@ -38,4 +38,68 @@ describe('resolveConfiguration', () => {
     expect(resolved.aiIndices).toEqual([agentBuilderDefaultAiIndexId, 'custom-index']);
     expect(resolved.aiIndexCatalog).toBeUndefined();
   });
+
+  describe('capabilities.attachmentTools', () => {
+    describe.each([true, false])('with AI indices enabled: %s', (aiIndicesEnabled) => {
+      it.each([
+        ['no capabilities', {}],
+        ['empty capabilities', { capabilities: {} }],
+        ['an empty attachment_tools key', { capabilities: { attachment_tools: {} } }],
+        ['enabled: true', { capabilities: { attachment_tools: { enabled: true } } }],
+      ])('is on for %s', async (_label, extra) => {
+        const resolved = await resolveConfiguration(
+          { ...configuration, ...extra },
+          { aiIndicesEnabled, request }
+        );
+
+        expect(resolved.capabilities).toEqual({
+          attachmentTools: true,
+          apiTools: true,
+          bashTool: true,
+        });
+      });
+
+      it('is off only for enabled: false', async () => {
+        const resolved = await resolveConfiguration(
+          { ...configuration, capabilities: { attachment_tools: { enabled: false } } },
+          { aiIndicesEnabled, request }
+        );
+
+        expect(resolved.capabilities).toEqual({
+          attachmentTools: false,
+          apiTools: true,
+          bashTool: true,
+        });
+      });
+    });
+  });
+
+  describe('capabilities.bashTool', () => {
+    it.each([
+      ['no capabilities', {}],
+      ['empty capabilities', { capabilities: {} }],
+      ['an empty bash_tool key', { capabilities: { bash_tool: {} } }],
+      ['enabled: true', { capabilities: { bash_tool: { enabled: true } } }],
+    ])('is on for %s', async (_label, extra) => {
+      const resolved = await resolveConfiguration(
+        { ...configuration, ...extra },
+        { aiIndicesEnabled: false, request }
+      );
+
+      expect(resolved.capabilities.bashTool).toBe(true);
+    });
+
+    it('is off only for enabled: false, leaving the other capabilities on', async () => {
+      const resolved = await resolveConfiguration(
+        { ...configuration, capabilities: { bash_tool: { enabled: false } } },
+        { aiIndicesEnabled: false, request }
+      );
+
+      expect(resolved.capabilities).toEqual({
+        attachmentTools: true,
+        apiTools: true,
+        bashTool: false,
+      });
+    });
+  });
 });

@@ -31,6 +31,7 @@ import {
   type SimplifiedPackagePolicy,
   simplifiedPackagePolicytoNewPackagePolicy,
 } from '../../common/services/simplified_package_policy_helper';
+import { sanitizeAgentPolicyOverrides } from '../../common/services/agent_policy_overrides';
 
 import { FleetError } from '../errors';
 
@@ -151,10 +152,29 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   // packages that are stuck in the installing state.
   await ensurePackagesCompletedInstall(defaultSoClient, esClient);
 
+  // kibana.yml still accepts the denied override keys so that Kibana keeps starting after an upgrade.
+  // Never store them: the stored policy would keep differing from the config, and every start would
+  // write them back and bump the policy revision.
+  const policiesWithAllowedOverrides = policies.map((policy) => {
+    if (!policy.overrides) {
+      return policy;
+    }
+    const { overrides, removedKeys } = sanitizeAgentPolicyOverrides(policy.overrides);
+    if (removedKeys.length === 0) {
+      return policy;
+    }
+    logger.warn(
+      `Ignoring disallowed overrides [${removedKeys.join(', ')}] of preconfigured agent policy [${
+        policy.id ?? policy.name
+      }]; remove them from xpack.fleet.agentPolicies in kibana.yml`
+    );
+    return { ...policy, overrides };
+  });
+
   // Create policies specified in Kibana config
   logger.debug(`Creating preconfigured policies`);
   const preconfiguredPolicies = await Promise.allSettled(
-    policies.map(async (preconfiguredAgentPolicy) => {
+    policiesWithAllowedOverrides.map(async (preconfiguredAgentPolicy) => {
       if (preconfiguredAgentPolicy.id) {
         // Check to see if a preconfigured policy with the same preconfiguration id was already deleted by the user
         const preconfigurationId = preconfiguredAgentPolicy.id.toString();

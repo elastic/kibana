@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { diffLines } from 'diff';
 import equal from 'fast-deep-equal';
-import * as jsondiffpatch from 'jsondiffpatch';
-import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
 import { omit } from 'lodash';
 
 import type { ObjectChange } from '@kbn/change-history';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
+  AuthenticatedUser,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandlerContext,
@@ -31,6 +31,31 @@ import { logger, securityService, spacesService } from '../kibana_services';
 import { getChangeHistoryClient } from './change_history_service';
 
 export const INITIAL_HISTORY_SEQUENCE = 1;
+
+const toDiffText = (value: object): string => JSON.stringify(value, null, 2);
+
+// Max edit length (added + removed lines) before the line diff gives up
+const MAX_DIFF_EDIT_LENGTH = 1000;
+
+/**
+ * Number of changed line blocks between two pretty-printed JSON snapshots, matching the history
+ * diff navigator. Undefined if the line diff is too expensive to compute.
+ */
+export const countChangedLineBlocks = (previous: object, current: object): number | undefined => {
+  const changes = diffLines(toDiffText(previous), toDiffText(current), {
+    maxEditLength: MAX_DIFF_EDIT_LENGTH,
+  });
+  if (!changes) return undefined;
+
+  let blocks = 0;
+  let inChangedBlock = false;
+  for (const { added, removed } of changes) {
+    const isChanged = Boolean(added || removed);
+    if (isChanged && !inChangedBlock) blocks++;
+    inChangedBlock = isChanged;
+  }
+  return blocks;
+};
 
 // Granted by both `all` and `minimal_all`, so editors with customized sub-feature privileges
 // (e.g. without short URLs or search sessions) are not rejected.
@@ -126,7 +151,7 @@ export const getNextHistorySequence = async ({
     : (await getHistorySequences({ spaceId, dashboardId })).next;
 
 export const addToHistory = async ({
-  ctx,
+  user,
   spaceId = 'default',
   dashboardId,
   snapshot,
@@ -136,7 +161,8 @@ export const addToHistory = async ({
   restoredFrom,
   type = 'update',
 }: {
-  ctx: RequestHandlerContext;
+  /** Null when security is disabled; the change is then recorded without an actor. */
+  user: Pick<AuthenticatedUser, 'username' | 'profile_uid'> | null;
   spaceId: string | undefined;
   dashboardId: string;
   snapshot: DashboardState;
@@ -147,9 +173,6 @@ export const addToHistory = async ({
   restoredFrom?: number;
   type?: 'update' | 'create' | 'delete';
 }) => {
-  const core = await ctx.core;
-  // getCurrentUser() returns null when security is disabled; attribute those changes to the system actor
-  const user = core.security.authc.getCurrentUser();
   let client;
   try {
     client = await getChangeHistoryClient();
@@ -169,7 +192,7 @@ export const addToHistory = async ({
     // Diffed against the pre-update saved object, not the latest history event, which may not be
     // searchable yet. Stored with the event so listing history doesn't need to diff every snapshot.
     const changeCount = previousSnapshot
-      ? jsonpatchFormatter.format(jsondiffpatch.diff(previousSnapshot, snapshot)).length
+      ? countChangedLineBlocks(previousSnapshot, snapshot)
       : undefined;
 
     await client.log(change, {

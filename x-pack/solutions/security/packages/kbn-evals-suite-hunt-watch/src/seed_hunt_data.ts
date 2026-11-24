@@ -175,8 +175,9 @@ const iocDumpAddresses = (): string[] =>
 /**
  * A blocklist-style report with one more searchable IOC than a hunt accepts. The coordinator hunts
  * the first `MAX_HUNT_REPORT_IOCS` and records the rest as an `input_truncated` gap, which is
- * deterministic (`incomplete_final`): the run ends `partial` at the `hunt` stage, evidence is
- * written as incomplete rather than clean, and the report retires. The body names no technique
+ * deterministic (`incomplete_final`): the hunt child emits `retired_incomplete`, evidence is
+ * written as incomplete rather than clean, packaging closes the Investigation as `other` with the
+ * retired summary, and the report retires. The body names no technique
  * and no principal, so Tier 2 has nothing to derive and the row stays about the IOC bound.
  */
 export const buildIocDumpReportDoc = (timestamp: string) => ({
@@ -190,17 +191,19 @@ export const buildIocDumpReportDoc = (timestamp: string) => ({
     adapter_id: 'rss:hunt-eval-blocklist',
   },
   content: {
-    title: `Bulk indicator feed: ${IOC_DUMP_IOC_COUNT} scanning addresses`,
+    title: `Bulk indicator feed: ${IOC_DUMP_IOC_COUNT} addresses`,
+    // No activity prose: a technique Tier 2 extracts can leave a retryable gap, which ends the
+    // row `partial` instead of `retired_incomplete` (see README).
     body_text:
-      `This feed lists ${IOC_DUMP_IOC_COUNT} IPv4 addresses observed scanning exposed services ` +
-      'over the past week. Defenders should block or monitor traffic from the listed addresses. ' +
-      'No specific intrusion activity, tooling, or affected organization is described.',
+      `This feed lists ${IOC_DUMP_IOC_COUNT} IPv4 addresses added to a blocklist over the past ` +
+      'week. Entries carry no description of the activity behind them. No intrusion activity, ' +
+      'tooling, or affected organization is described.',
     language: 'en',
     published_at: timestamp,
   },
   severity: { level: 'medium', score: 40 },
   extracted: {
-    categories: ['scanning'],
+    categories: [],
     ttps: { techniques: [] },
     iocs: iocDumpAddresses().map((value) => ({
       type: 'ip',

@@ -34,7 +34,7 @@ const ColorThemeToggle = ({ isDarkMode, onToggle }: Props) => (
 /**
  * Toolbar item that reflects and toggles the color theme. It subscribes to the
  * core theme contract so the badge updates live when the theme flips, and calls
- * the dev-only `setDarkMode` to switch without a page reload. The change is
+ * the internal `setDarkMode` to switch without a page reload. The change is
  * session-only: a reload restores the server-resolved theme.
  */
 export const LiveColorThemeToggle = ({ theme }: { theme: InternalThemeServiceStart }) => {
