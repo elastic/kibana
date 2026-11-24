@@ -250,9 +250,11 @@ export const completeHostIsolationAction = async ({
   await withMetadataTransformLock(
     async () => {
       await completeHostAction({ esClient, config, action });
-      // sendEndpointMetadataUpdate does not refresh: refreshing here narrows, but does not close,
-      // the window in which the metadata transform's next checkpoint can move past the isolation
-      // document (a few tens of ms remain). A Flaky Test Runner run is the gate for this.
+      // sendEndpointMetadataUpdate does not refresh, and completeHostAction returns only once the
+      // Fleet check-in it sends alongside is searchable. Under this lock that should be safe: every
+      // successful holder releases it only after the transform has consumed its documents, so no
+      // other change should make the transform checkpoint past this one before it is searchable.
+      // The refresh only makes it searchable sooner.
       await esClient.indices.refresh({ index: METADATA_DATASTREAM });
       await pollHostIsolation({ kbnClient, esClient, spaceId, agentId, isolated });
     },
