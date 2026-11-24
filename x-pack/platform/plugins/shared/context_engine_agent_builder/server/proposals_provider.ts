@@ -7,7 +7,7 @@
 
 import type { ProposalsProvider } from '@kbn/context-engine-plugin/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { ProposalAlreadyExistsError, ProposalNotFoundError } from '@kbn/proposals-plugin/server';
+import { ProposalAlreadyExistsError } from '@kbn/proposals-plugin/server';
 
 /**
  * Creates a Context Engine proposals provider backed by the proposals plugin. An improvement is
@@ -45,36 +45,41 @@ export const createProposalsProvider = (
     }
   },
 
-  async getOutcome({ proposalId, spaceId, request }) {
+  async list({ conversationId, size, spaceId, request }) {
     const { getProposalsService } = await getProposals();
-    let proposal;
-    try {
-      proposal = await getProposalsService().get(proposalId, spaceId, request);
-    } catch (error) {
-      if (error instanceof ProposalNotFoundError) {
-        return null;
-      }
-      throw error;
-    }
+    const { proposals, total } = await getProposalsService().list(
+      {
+        origin: 'context_engine',
+        conversationId,
+        order: 'newest',
+        excludeSuperseded: false,
+        excludeExpired: false,
+        size,
+        from: 0,
+      },
+      spaceId,
+      request
+    );
 
-    const by = proposal.decidedBy?.username ?? undefined;
-    switch (proposal.status) {
-      case 'succeeded':
-        return { state: 'applied', ...(by ? { by } : {}) };
-      case 'failed':
+    return {
+      total,
+      items: proposals.map((proposal) => {
+        const reason = [
+          proposal.dismissReason !== 'no_reason' ? proposal.dismissReason : undefined,
+          proposal.rationale,
+        ]
+          .filter(Boolean)
+          .join(': ');
         return {
-          state: 'failed',
-          ...(by ? { by } : {}),
+          id: proposal.id,
+          title: proposal.title,
+          actionWorkflowId: proposal.actionWorkflowId,
+          actionInput: proposal.actionInput,
+          status: proposal.status,
+          ...(reason ? { reason } : {}),
           ...(proposal.executionError ? { error: proposal.executionError } : {}),
         };
-      case 'no_action':
-        return {
-          state: 'rejected',
-          ...(by ? { by } : {}),
-          ...(proposal.rationale ? { reason: proposal.rationale } : {}),
-        };
-      default:
-        return { state: 'open' };
-    }
+      }),
+    };
   },
 });

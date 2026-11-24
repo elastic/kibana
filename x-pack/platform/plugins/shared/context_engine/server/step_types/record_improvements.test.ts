@@ -11,7 +11,6 @@ import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import type { RecordImprovementsResponse } from '../../common/http_api/improvements';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
-import type { ImprovementsServiceApi } from '../improvements/service';
 import { recordImprovements } from '../feedback_analysis/record_improvements';
 import { getRecordImprovementsStepDefinition } from './record_improvements';
 import { createMockStepContext, mockKiStepTelemetry } from './test_utils';
@@ -33,8 +32,6 @@ const INPUT = {
   improvements: [{ action: 'add_ki', title: 'Add a KI for refunds' }],
 };
 
-const improvementsService = {} as ImprovementsServiceApi;
-
 const buildStep = ({
   aiIndex = { id: 'orders' } as Awaited<ReturnType<AiIndexService['get']>>,
   auditLogger,
@@ -51,7 +48,6 @@ const buildStep = ({
   const get = jest.fn().mockResolvedValue(aiIndex);
   const definition = getRecordImprovementsStepDefinition({
     getAiIndexService: () => ({ get } as unknown as AiIndexService),
-    getImprovementsService: () => improvementsService,
     getProposalsProvider: () => proposalsProvider,
     getAuditLogger: async () => auditLogger,
     isContextEngineEnabled: async () => contextEngineEnabled,
@@ -69,7 +65,7 @@ beforeEach(() => {
 
 const proposalsProvider = {
   create: jest.fn(async () => true),
-  getOutcome: jest.fn(async () => null),
+  list: jest.fn(async () => ({ items: [], total: 0 })),
 };
 
 describe('getRecordImprovementsStepDefinition', () => {
@@ -122,7 +118,7 @@ describe('getRecordImprovementsStepDefinition', () => {
     );
   });
 
-  it('writes as the workflow owner and carries the run provenance through', async () => {
+  it('proposes as the workflow owner, in the workflow space', async () => {
     const esClient = { bulk: jest.fn() };
     const context = createMockStepContext({ input: INPUT, esClient });
 
@@ -131,12 +127,12 @@ describe('getRecordImprovementsStepDefinition', () => {
     expect(recordImprovementsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         aiIndexId: 'orders',
-        agentRunId: 'execution-1',
-        signalWindow: INPUT.signal_window,
-        signalSpaces: ['default'],
         proposals: INPUT.improvements,
-        improvementsService,
         spaceId: 'default',
+        review: expect.objectContaining({
+          provider: proposalsProvider,
+          context: expect.objectContaining({ spaceId: 'default' }),
+        }),
       })
     );
   });
@@ -175,7 +171,6 @@ describe('getRecordImprovementsStepDefinition', () => {
     const definition = getRecordImprovementsStepDefinition({
       getAiIndexService: () =>
         ({ get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('orders')) } as never),
-      getImprovementsService: () => improvementsService,
       getProposalsProvider: () => proposalsProvider,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled: async () => true,
@@ -217,17 +212,15 @@ describe('getRecordImprovementsStepDefinition', () => {
     expect(recordImprovementsMock).not.toHaveBeenCalled();
   });
 
-  it('uses the workflow space for the feature flag, privilege check, AI index lookup, and improvements service', async () => {
+  it('uses the workflow space for the feature flag, privilege check, and AI index lookup', async () => {
     const esClient = { bulk: jest.fn() };
     const context = createMockStepContext({ input: INPUT, esClient, spaceId: 'marketing' });
     const isContextEngineEnabled = jest.fn().mockResolvedValue(true);
     const checkWritePrivilege = jest.fn().mockResolvedValue(true);
-    const getImprovementsService = jest.fn().mockReturnValue(improvementsService);
     const get = jest.fn().mockResolvedValue({ id: 'orders' });
 
     const { handler } = getRecordImprovementsStepDefinition({
       getAiIndexService: () => ({ get } as never),
-      getImprovementsService,
       getProposalsProvider: () => proposalsProvider,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled,
@@ -240,7 +233,6 @@ describe('getRecordImprovementsStepDefinition', () => {
     expect(isContextEngineEnabled).toHaveBeenCalledWith('marketing');
     expect(checkWritePrivilege).toHaveBeenCalledWith(expect.anything(), 'marketing');
     expect(get).toHaveBeenCalledWith('orders', 'marketing');
-    expect(getImprovementsService).toHaveBeenCalledWith(esClient, 'marketing');
     expect(recordImprovementsMock).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'marketing' })
     );

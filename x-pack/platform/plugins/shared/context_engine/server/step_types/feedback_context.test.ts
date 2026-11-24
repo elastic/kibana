@@ -8,7 +8,6 @@
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
-import type { ImprovementsServiceApi } from '../improvements/service';
 import { buildFeedbackContext } from '../feedback_analysis/context';
 import { InvalidSignalWindowError } from '../feedback_analysis/errors';
 import { getFeedbackContextStepDefinition } from './feedback_context';
@@ -32,7 +31,6 @@ const CONTEXT = {
 };
 
 const aiIndexService = {} as AiIndexService;
-const improvementsService = {} as ImprovementsServiceApi;
 
 const buildStep = ({
   contextEngineEnabled = true,
@@ -40,7 +38,6 @@ const buildStep = ({
 }: { contextEngineEnabled?: boolean; feedbackLoopEnabled?: boolean } = {}) =>
   getFeedbackContextStepDefinition({
     getAiIndexService: () => aiIndexService,
-    getImprovementsService: () => improvementsService,
     getProposalsProvider: () => proposalsProvider,
     getAuditLogger: async () => undefined,
     isContextEngineEnabled: async () => contextEngineEnabled,
@@ -56,7 +53,7 @@ beforeEach(() => {
 
 const proposalsProvider = {
   create: jest.fn(async () => true),
-  getOutcome: jest.fn(async () => null),
+  list: jest.fn(async () => ({ items: [], total: 0 })),
 };
 
 describe('getFeedbackContextStepDefinition', () => {
@@ -163,7 +160,7 @@ describe('getFeedbackContextStepDefinition', () => {
     expect(buildFeedbackContextMock).not.toHaveBeenCalled();
   });
 
-  it('uses the workflow space for the feature flag, improvements service, and feedback context', async () => {
+  it('uses the workflow space for the feature flag and the feedback context', async () => {
     const esClient = { search: jest.fn() };
     const context = createMockStepContext({
       input: { ai_index_id: 'orders' },
@@ -171,11 +168,9 @@ describe('getFeedbackContextStepDefinition', () => {
       spaceId: 'marketing',
     });
     const isContextEngineEnabled = jest.fn().mockResolvedValue(true);
-    const getImprovementsService = jest.fn().mockReturnValue(improvementsService);
 
     const { handler } = getFeedbackContextStepDefinition({
       getAiIndexService: () => aiIndexService,
-      getImprovementsService,
       getProposalsProvider: () => proposalsProvider,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled,
@@ -186,11 +181,34 @@ describe('getFeedbackContextStepDefinition', () => {
     await handler(context);
 
     expect(isContextEngineEnabled).toHaveBeenCalledWith('marketing');
-    expect(getImprovementsService).toHaveBeenCalledWith(esClient, 'marketing');
     expect(buildFeedbackContextMock).toHaveBeenCalledWith(
       'orders',
       'marketing',
-      expect.objectContaining({ esClient, aiIndexService, improvementsService })
+      expect.objectContaining({
+        esClient,
+        aiIndexService,
+        proposals: {
+          provider: proposalsProvider,
+          context: expect.objectContaining({ spaceId: 'marketing' }),
+        },
+      })
     );
+  });
+
+  it('fails when the proposals plugin is not available', async () => {
+    const { handler } = getFeedbackContextStepDefinition({
+      getAiIndexService: () => aiIndexService,
+      getProposalsProvider: () => undefined,
+      getAuditLogger: async () => undefined,
+      isContextEngineEnabled: async () => true,
+      isFeedbackLoopEnabled: async () => true,
+      checkWritePrivilege: async () => true,
+      ...mockKiStepTelemetry(),
+    });
+
+    await expect(
+      handler(createMockStepContext({ input: { ai_index_id: 'orders' }, esClient: {} }))
+    ).rejects.toThrow('proposals plugin');
+    expect(buildFeedbackContextMock).not.toHaveBeenCalled();
   });
 });

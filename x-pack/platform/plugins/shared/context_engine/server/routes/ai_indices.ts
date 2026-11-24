@@ -8,13 +8,7 @@
 import path from 'node:path';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type {
-  ElasticsearchClient,
-  IRouter,
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-} from '@kbn/core/server';
+import type { IRouter, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -86,7 +80,6 @@ import {
   deleteBackingStoreResource,
 } from '../ai_indices/delete_resources';
 import type { AiIndexChangeField, AiIndexChangeNotifier } from '../ai_indices/changes';
-import type { ImprovementsServiceApi } from '../improvements/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
 import { getKiGroups, getKis } from '../ai_indices/ki_list';
@@ -231,7 +224,6 @@ export const registerAiIndexRoutes = ({
   logger,
   getAiIndexService,
   getAiIndexDataReadService,
-  getImprovementsService,
   aiIndexChanges,
   isMemoryEnabled,
   getActions,
@@ -244,10 +236,6 @@ export const registerAiIndexRoutes = ({
   logger: Logger;
   getAiIndexService: () => AiIndexService;
   getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
-  getImprovementsService: (
-    esClient: ElasticsearchClient,
-    spaceId: string
-  ) => ImprovementsServiceApi;
   aiIndexChanges: Pick<AiIndexChangeNotifier, 'notify'>;
   isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
   getActions: () => Promise<ActionsPluginStart>;
@@ -1368,21 +1356,6 @@ export const registerAiIndexRoutes = ({
               })
             );
           }
-
-          // The improvements store is keyed by AI Index id, so revisions left behind would
-          // resurface if an AI Index were later recreated under the same id. Best-effort: the store
-          // is a user-owned index and the caller may well have no privileges on it, and reporting a
-          // failure for an index that is already gone would only send them to retry a delete that
-          // now 404s. What is left behind is inert until an id is reused.
-          await getImprovementsService(core.elasticsearch.client.asCurrentUser, spaceId)
-            .deleteByAiIndex(aiIndexId)
-            .catch((error) => {
-              logger.warn(
-                `Deleted AI index '${aiIndexId}', but failed to clear its improvements: ${
-                  error instanceof Error ? error.message : String(error)
-                }`
-              );
-            });
 
           const body: DeleteAiIndexResponse = { acknowledged: true, errors };
           return response.ok({ body });

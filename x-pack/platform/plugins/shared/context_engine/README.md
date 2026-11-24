@@ -520,39 +520,50 @@ background write errors, `not_found`, `failed`, and Elasticsearch errors as fail
 ## Improvements
 
 An **improvement** is a proposed change to one AI index's KI pipeline, derived
-from that index's signals. They live in the single global
-`context-engine-improvements` index, exposed to the server as
-`ContextEnginePluginStart.getImprovementsService(esClient)` and written by an
-analysis run (see [Feedback analysis runs](#feedback-analysis-runs)).
+from that index's signals. Context Engine keeps no record of improvements or of
+what reviewers decided about them: each one is put up as a
+[proposal](../proposals/README.md), and the proposal is the record.
 
 ### Reviewing them
 
-Suggestions are shown in the panel whose part of the AI index they would change
-— source proposals under **Sources**, automation proposals under
-**Automations** — rather than in a queue of their own. A proposal to add a
-source is a question about the sources, and answering it means looking at what
-is already configured. Each panel filters one cached list client-side, so the
-panels between them cost a single request, and a panel with nothing to review
-renders with no trace of the feature.
+Improvements are reviewed as proposals, so the feedback loop is unavailable
+where the proposals plugin is off: the run route returns 404 and the workflow
+steps fail.
 
-Improvements are reviewed as [proposals](../proposals/README.md), so the
-feedback loop is unavailable where the proposals plugin is off: the routes below
-return 404 and the workflow steps fail. Each KI improvement is put up as a
-gateless proposal under the id `context-engine-<improvement_id>`, which runs a
-Context Engine action workflow as the approver, so an approval can never effect
-something the reviewer could not do themselves. A proposal does not notify its
-producer of a decision, so the list route, and the start of each analysis run,
-read the outcome of every open improvement's proposal and record it in the store:
-a dismissal's rationale lands on `resolution.reason`, which is what later runs
-read to avoid re-proposing the same thing.
+Each KI improvement becomes a gateless proposal that runs a Context Engine
+action workflow as the approver, so an approval can never effect something the
+reviewer could not do themselves. A proposal carries:
 
-The panels are backed by two internal routes, all gated by the
-`contextEngine:feedbackLoopEnabled` setting on top of `contextEngine:enabled`:
+- the id `context-engine-<improvement_id>`, where `improvement_id` is
+  `hash(space + ai_index_id + change_fingerprint)`. The fingerprint describes the
+  proposed fix (for example `remove_ki:<ki_id>`) and contains no free text, so a
+  re-run over the same latent problem derives the same id. The space is part of
+  the hash because a proposal id is unique across spaces, not within one;
+- the anchor `context-engine:<ai_index_id>` as its conversation id, which is how
+  the proposals of one AI index are listed together. It is not a real
+  conversation;
+- the agent's rationale as its comment, and the action workflow and its single
+  `actionInput`.
 
-| Method | Path                                                                    | Description                                        |
-| ------ | ----------------------------------------------------------------------- | -------------------------------------------------- |
-| `GET`  | `/internal/context_engine/ai_index/{id}/improvements`                   | Open suggestions for an AI index, paginated        |
-| `POST` | `/internal/context_engine/ai_index/{id}/feedback_analysis/_run`         | Start one analysis run off-schedule                |
+| Improvement action | Action workflow                          |
+| ------------------ | ---------------------------------------- |
+| `add_ki`           | `system-context-engine-action-add-ki`    |
+| `edit_ki`          | `system-context-engine-action-edit-ki`   |
+| `remove_ki`        | `system-context-engine-action-remove-ki` |
+
+Only KI improvements can be proposed so far, because they are the only ones with
+an action workflow; a run skips the others as `action_not_allowed`. An added KI is
+created under the id `improvement-<improvement_id>`, which is known before the
+action runs.
+
+A change is proposed once. The id is deterministic, so proposing a change that
+already has a proposal, whatever became of it, is refused as a `duplicate`. A
+failed gateless proposal is final and keeps its id, so the same improvement is not
+proposed again.
+
+The only route is `POST /internal/context_engine/ai_index/{id}/feedback_analysis/_run`,
+which starts one analysis run off-schedule. It is gated by the
+`contextEngine:feedbackLoopEnabled` setting on top of `contextEngine:enabled`.
 
 One run analyzes an index at a time. The workflow declares
 `concurrency: { key: <per index>, strategy: drop, max: 1 }`, so the engine
@@ -562,84 +573,29 @@ id is still returned, only marked `skipped`. `_run` therefore reads the
 execution back — an mget by id, so the skip is visible immediately — and answers
 `409` rather than reporting a run that was thrown away.
 
-Only KI improvements (`add_ki`, `edit_ki`, `remove_ki`) can be proposed so far,
-because they are the only ones with an action workflow; a run skips the others
-as `action_not_allowed`.
-
-Unlike signals, the store is **global rather than per-space**: an improvement
-targets an AI index's KI pipeline, and the AI index registry has no space
-dimension. Two consequences are accepted deliberately — the analysis reads
-signals across all spaces, so an improvement's rationale can cite evidence from
-a space the reviewer cannot open; and a single index means one
-`deleteByAiIndex` cleans up completely when an AI index is deleted.
-
-The lifecycle is an **append log** rather than a mutable status field, so the
-record of what the loop did to a user's index survives every transition:
-
-- `improvement_id` is the stable lineage key, derived idempotently from
-  `hash(ai_index_id + change_fingerprint)`. The fingerprint describes the
-  proposed fix (e.g. `remove_workflow:<workflow_id>`) and contains no free text,
-  so a re-run over the same latent problem appends a revision instead of
-  creating a near-duplicate row.
-- `revision_id` is the ES `_id`; every write, including a recorded decision, appends
-  a revision carrying `previous_revision_id`.
-- `latest: true` marks the head of each lineage, and `list`/`get` filter on it.
-  A boolean flag rather than `collapse`, because `collapse` makes
-  `track_total_hits` count hits instead of groups and the review UI needs an
-  exact total to paginate.
-- Transitions are serialized by retiring the current head under
-  `if_seq_no`/`if_primary_term` before appending. A reviewer who loses that race
-  appends nothing and gets a conflict, so the log can never hold both an
-  `applied` and a `rejected` head for the same improvement.
-- A batch `write` skips only the lineages that lost that race, rather than
-  abandoning the batch. A bulk applies each operation independently, so the
-  other heads are already retired by then; dropping them would leave those
-  lineages with no `latest` revision at all.
-- OCC only guards a lineage that already has a head. The first revision of a
-  brand-new `improvement_id` has nothing to guard it, so two runs writing the
-  same new improvement concurrently can both append a head. Analysis runs for
-  one AI index are therefore expected to be serialized. Should it happen anyway,
-  it is self-healing rather than permanent: a head lookup returns every head of
-  a lineage and the next `write` or `transition` retires all of them, so the
-  lineage converges back to a single head.
-- `failed` is a status, not an error return: an approved proposal whose action
-  failed is recorded with the reason on `resolution.error`. A failed gateless
-  proposal is final and keeps its id, so the same improvement is not proposed again.
-- A rejection keeps the reviewer's rationale on `resolution.reason`, so the next
-  run knows a fix was considered and turned down rather than re-proposing it.
-
 ### Privileges
 
-`context-engine-improvements` is a **user-owned index**, and needs no grant on
-the `kibana_system` role. The work is split so that no single actor needs both
-halves:
+The run's identity needs `manage_proposals` as well as the Context Engine write
+privilege, because creating a proposal asserts it. An approver needs
+`manage_proposals` and whatever the action workflow's steps check as them: the KI
+write privilege for the three KI actions.
 
-- **Kibana** installs the `context-engine-improvements` index template at start,
-  which needs only the cluster-level `manage_index_templates` it already holds.
-- **The caller** creates the index on the first write, and Elasticsearch applies
-  the template's mappings to it. Every subsequent read and write is authorized
-  against that caller too, so `getImprovementsService` takes the client to act
-  through and callers pass a request-scoped one.
-
-This is what keeps the store off the internal user. Applying mappings lazily per
-operation instead — the usual storage-adapter pattern — would need `manage` on
-the index from whoever performed it, including anyone merely reading the review
-UI. Writers need `create_index` plus `write`; readers need `read`.
+Proposals for an AI index are not removed when it is deleted.
 
 ## Feedback analysis runs
 
 A **run** is one pass of the loop over a single AI index: read that index's
-signals, work out what would make it serve agents better, and record the
-proposals in the improvements store. Runs are scheduled per AI index by
+signals, work out what would make it serve agents better, and put what
+it finds up for review as proposals. Runs are scheduled per AI index by
 `feedback_analysis` (see [Feedback analysis configuration](#feedback-analysis-configuration)).
 
 | Step                                | Description              |
 | ----------------------------------- | ------------------------ |
 | `context-engine.getFeedbackContext` | Everything one run reads |
-| `context-engine.recordImprovements` | Record what a run proposed |
+| `context-engine.recordImprovements` | Put what a run proposed up for review |
 
 Both are workflow steps, not HTTP routes, and both reach plugin services
-directly: the signal selection code and the improvements service, whose write is
+directly: the signal selection code and the proposals provider, whose creation is
 a read-modify-write under optimistic concurrency control.
 
 Both steps require the `context_engine:feedbackLoop` advanced setting and act as
@@ -663,22 +619,20 @@ nothing, a source nothing covers are all visible without a failed retrieval, and
 an index nobody has queried yet is when a bad setup is cheapest to fix. The
 briefing says which kind of run it is, and asks for grounding either way — signal
 ids when there are groups, and what was actually read when there are not, which
-is why `signal_ids` is optional on a proposal and its provenance can be empty.
+is why `signal_ids` is optional on a proposal.
 The agent is skipped only for `can_analyze: false`: an index with no signals, no
 indicators, no sources and no automations, where there is nothing to read at all.
 
-The briefing does not carry prior proposals, only how many there are and where
-they stand. A run cannot be handed the history that matters to it, because until
-it has read the signals it does not know what it is about to suggest, and an
-index accumulates more targets than fit in a prompt. So the briefing hands over
-an ES|QL query instead: once the run knows what it wants to change, it reads that
-target's lineage out of `context-engine-improvements` itself, filtering
-`ai_index_id` and `latest`, then `target.ki_id`, `target.workflow_id` or
-`target.subject`. This is why `resolution` is mapped where `payload` is not —
-ES|QL can only select mapped fields, and a rejection without `resolution.reason`
-tells the run nothing it can act on. The query lives in the briefing rather than
-only in the skill because the briefing is the one part of a run that cannot be
-replaced by configuring a different agent.
+The briefing lists the AI index's earlier proposals, most recent first, up to 50:
+what each was, where it stands, and the reviewer's reason or the action's error.
+They are read from the proposals plugin, listed under the index's anchor. A run
+that finds more than fit is told how many are not shown. Since a proposal can
+only be made once, the run is told that proposing a listed change again is
+refused as a duplicate, and that it should read a reviewer's reason rather than
+assume the change was wrong. This is server-side rather than a query the agent
+runs, so the agent does not depend on how the proposals plugin stores its data;
+the cost is that the briefing carries a fixed page of history instead of the
+history of the one target the run settles on.
 
 The `platform.context_engine.ai_index` attachment is not used: it carries the
 install and save tools and the authority to write to the index, which belong to
@@ -742,8 +696,8 @@ with no restriction by signal type. A signal's type governs how it is
    keyed on fields it does not have.
 
 **Every space is read**, because an AI index is global while signals are
-per-space. The spaces a run drew from are recorded on each improvement's
-`provenance.signal_spaces`.
+per-space. The briefing names the spaces a run drew from; they are not
+recorded on the proposals it makes.
 
 Signals are folded into ranked patterns — grouped by tag, target index and tool,
 and scored by frequency weighted by tag. The grouping is a `multi_terms`
@@ -772,6 +726,6 @@ The server derives each `improvement_id` from the action and its target; a run
 cannot name its own.
 
 A bad proposal is skipped, not fatal. Every rejection comes back as a `skipped`
-entry with a reason: `invalid`, `action_not_allowed`, `duplicate`, `conflict`,
-or `limit_exceeded`.
+entry with a reason: `invalid`, `action_not_allowed`, `duplicate`,
+`limit_exceeded` or `proposal_failed`.
 

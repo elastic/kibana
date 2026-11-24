@@ -27,19 +27,41 @@ export interface ImprovementProposal {
   confidence?: string;
 }
 
-/** Where a proposal stands, in the terms the improvements store records. */
-export type ProposalOutcome =
-  | { state: 'open' }
-  | { state: 'applied'; by?: string }
-  | { state: 'rejected'; by?: string; reason?: string }
-  | { state: 'failed'; by?: string; error?: string };
+export type ProposalHistoryStatus =
+  | 'pending'
+  | 'executing'
+  | 'succeeded'
+  | 'failed'
+  | 'expired'
+  | 'no_action'
+  | 'superseded';
+
+/** A proposal as an analysis run reads it: what was proposed and what became of it. */
+export interface ProposalHistoryItem {
+  id: string;
+  title: string;
+  actionWorkflowId?: string;
+  actionInput?: Record<string, unknown>;
+  status: ProposalHistoryStatus;
+  /** The reviewer's reason for dismissing it, in their words where they gave any. */
+  reason?: string;
+  /** Why the approved action failed. */
+  error?: string;
+}
+
+export interface ProposalHistory {
+  /** Most recent first. */
+  items: ProposalHistoryItem[];
+  /** Every proposal under the anchor, which may be more than `items`. */
+  total: number;
+}
 
 /** Proposal operations Context Engine uses to put improvements up for review. */
 export interface ProposalsProvider {
   /** Resolves `false` when a proposal already exists under the id. */
   create(args: ProposalsProviderContext & { proposal: ImprovementProposal }): Promise<boolean>;
-  /** Resolves `null` when no proposal exists under the id. */
-  getOutcome(
-    args: ProposalsProviderContext & { proposalId: string }
-  ): Promise<ProposalOutcome | null>;
+  /** The proposals listed under a conversation anchor, newest first. */
+  list(
+    args: ProposalsProviderContext & { conversationId: string; size: number }
+  ): Promise<ProposalHistory>;
 }

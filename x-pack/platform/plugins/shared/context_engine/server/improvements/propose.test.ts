@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import type { Improvement } from '../../common/http_api/improvements';
+import type { ProposedChange } from './propose';
 import {
   addedKiIdFor,
+  improvementActionOf,
   isProposable,
   proposalAnchorFor,
   proposalIdFor,
   toProposal,
 } from './propose';
 
-const improvement = (overrides: Partial<Improvement> = {}): Improvement =>
-  ({
-    improvement_id: 'abc',
-    ai_index_id: 'orders',
+const change = (proposal: Record<string, unknown> = {}): ProposedChange => ({
+  improvementId: 'abc',
+  aiIndexId: 'orders',
+  proposal: {
     action: 'add_ki',
     title: 'Add a KI',
     rationale: 'Because.',
     payload: { ki: { type: 'document', title: 'T' } },
-    ...overrides,
-  } as Improvement);
+    ...proposal,
+  } as ProposedChange['proposal'],
+});
 
 describe('improvement proposals', () => {
   it('can propose the KI actions and no others', () => {
@@ -47,8 +49,11 @@ describe('improvement proposals', () => {
   });
 
   it('names the KI an add creates, so the approval target is known before it runs', () => {
-    expect(toProposal(improvement())).toEqual(
+    expect(toProposal(change())).toEqual(
       expect.objectContaining({
+        id: 'context-engine-abc',
+        conversationId: 'context-engine:orders',
+        comment: 'Because.',
         actionWorkflowId: 'system-context-engine-action-add-ki',
         actionInput: {
           ai_index_id: 'orders',
@@ -62,7 +67,7 @@ describe('improvement proposals', () => {
   it('carries the target and patch of an edit', () => {
     expect(
       toProposal(
-        improvement({
+        change({
           action: 'edit_ki',
           target: { ki_id: 'ki-1' },
           payload: { ki_patch: { title: 'New' } },
@@ -73,12 +78,17 @@ describe('improvement proposals', () => {
 
   it('carries only the target of a removal', () => {
     expect(
-      toProposal(improvement({ action: 'remove_ki', target: { ki_id: 'ki-1' }, payload: {} }))
+      toProposal(change({ action: 'remove_ki', target: { ki_id: 'ki-1' }, payload: {} }))
         ?.actionInput
     ).toEqual({ ai_index_id: 'orders', ki_id: 'ki-1' });
   });
 
   it('proposes nothing for an action without an action workflow', () => {
-    expect(toProposal(improvement({ action: 'add_source' }))).toBeUndefined();
+    expect(toProposal(change({ action: 'add_source' }))).toBeUndefined();
+  });
+
+  it('maps an action workflow back to the improvement action it carries out', () => {
+    expect(improvementActionOf('system-context-engine-action-remove-ki')).toBe('remove_ki');
+    expect(improvementActionOf('system-alertzero-action-x')).toBeUndefined();
   });
 });

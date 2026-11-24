@@ -23,7 +23,6 @@ import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { WorkflowsManagementPort } from './feedback_analysis/schedule';
-import type { ImprovementsServiceApi } from './improvements/service';
 import type { SessionMemoryService } from './session_memory/types';
 import type { SessionEventsService } from './session_events/types';
 import type { SignalsServiceApi } from './signals/service';
@@ -48,14 +47,6 @@ export interface ContextEnginePluginStart {
   getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
   /** The signals store. */
   getSignalsService: () => SignalsServiceApi;
-  /**
-   * The improvements store for one space, bound to the caller's Elasticsearch client.
-   * Pass a request-scoped client: the store is a user-owned index, so Elasticsearch authorizes each read and write.
-   */
-  getImprovementsService: (
-    esClient: ElasticsearchClient,
-    spaceId: string
-  ) => ImprovementsServiceApi;
   /**
    * Reads and writes as the internal user, so callers check privileges before using it. The
    * user in each call is the end user the memory is about, and is never checked against the

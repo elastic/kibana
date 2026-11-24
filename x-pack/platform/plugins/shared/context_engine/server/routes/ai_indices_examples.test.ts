@@ -69,7 +69,6 @@ registerAiIndexRoutes({
   analyticsService: { reportKiWrite: jest.fn() } as never,
   getAiIndexService: jest.fn(),
   getAiIndexDataReadService: jest.fn(),
-  getImprovementsService: jest.fn(),
   aiIndexChanges: { notify: jest.fn() },
   isMemoryEnabled: async () => false,
   getActions: jest.fn(),

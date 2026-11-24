@@ -11,7 +11,7 @@ import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import type { SignalTag } from '../../common/http_api/signals';
 import type { AiIndexService } from '../ai_indices/service';
-import type { ImprovementsServiceApi } from '../improvements/service';
+import type { ProposalsProvider } from '../proposals/provider';
 import { buildFeedbackContext } from './context';
 import { getKis } from '../ai_indices/ki_list';
 import type { SignalPatternCandidate } from './group_signals';
@@ -45,14 +45,17 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
 describe('buildFeedbackContext', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let aiIndexService: jest.Mocked<Pick<AiIndexService, 'get'>>;
-  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'historySummaryFor'>>;
+  let proposals: jest.Mocked<Pick<ProposalsProvider, 'create' | 'list'>>;
 
   const build = (aiIndex: AiIndexHttpItem = buildAiIndex(), spaceId = 'default') => {
     aiIndexService.get.mockResolvedValue(aiIndex);
     return buildFeedbackContext('orders', spaceId, {
       esClient,
       aiIndexService: aiIndexService as unknown as AiIndexService,
-      improvementsService: improvementsService as unknown as ImprovementsServiceApi,
+      proposals: {
+        provider: proposals as unknown as ProposalsProvider,
+        context: { spaceId, request: {} as never },
+      },
     });
   };
 
@@ -60,9 +63,7 @@ describe('buildFeedbackContext', () => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     aiIndexService = { get: jest.fn() };
-    improvementsService = {
-      historySummaryFor: jest.fn().mockResolvedValue({ total: 0, by_status: {} }),
-    };
+    proposals = { create: jest.fn(), list: jest.fn().mockResolvedValue({ items: [], total: 0 }) };
     selectSignalsMock.mockResolvedValue({
       patterns: [buildPattern('coverage_gap', 12)],
       spaces: ['default'],
@@ -234,17 +235,30 @@ describe('buildFeedbackContext', () => {
     });
   });
 
-  it('carries the shape of prior improvements into the briefing, and the query to read them', async () => {
-    improvementsService.historySummaryFor.mockResolvedValue({
-      total: 7,
-      by_status: { rejected: 7 },
+  it('lists what was proposed before in the briefing, read from the index’s proposals', async () => {
+    proposals.list.mockResolvedValue({
+      total: 1,
+      items: [
+        {
+          id: 'context-engine-abc',
+          title: 'Remove a stale KI',
+          actionWorkflowId: 'system-context-engine-action-remove-ki',
+          actionInput: { ai_index_id: 'orders', ki_id: 'ki-1' },
+          status: 'no_action',
+          reason: 'duplicate: already covered',
+        },
+      ],
     });
 
     const { briefing } = await build();
 
-    expect(improvementsService.historySummaryFor).toHaveBeenCalledWith('orders');
-    expect(briefing).toContain('7 proposal(s) for this index — 7 rejected.');
-    expect(briefing).toContain('FROM context-engine-improvements');
+    expect(proposals.list).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: 'context-engine:orders', size: 50 })
+    );
+    expect(briefing).toContain('1 proposal(s) for this index.');
+    expect(briefing).toContain('**rejected**: Remove a stale KI (remove_ki, ki_id `ki-1`)');
+    expect(briefing).toContain('reviewer: duplicate: already covered');
+    expect(briefing).not.toContain('context-engine-improvements');
   });
 
   it('looks up the AI index in the given space', async () => {

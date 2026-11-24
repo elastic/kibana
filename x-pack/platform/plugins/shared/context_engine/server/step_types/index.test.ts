@@ -7,7 +7,6 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexService } from '../ai_indices/service';
-import type { ImprovementsServiceApi } from '../improvements/service';
 import { registerStepDefinitions } from '.';
 import { mockKiStepTelemetry } from './test_utils';
 
@@ -29,7 +28,6 @@ describe('registerStepDefinitions', () => {
       verifyKi: jest.fn(),
       feedbackAnalysis: {
         getAiIndexService: () => ({} as AiIndexService),
-        getImprovementsService: () => ({} as ImprovementsServiceApi),
         getProposalsProvider: () => undefined,
         getAuditLogger: async () => undefined,
         isContextEngineEnabled: async () => true,

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { ImprovementNotFoundError } from './improvement_not_found_error';
-export { ImprovementConflictError } from './improvement_conflict_error';
 export { InvalidImprovementError } from './invalid_improvement_error';

@@ -41,7 +41,7 @@ const render = (overrides: Partial<Parameters<typeof renderBriefing>[0]> = {}) =
     run: RUN,
     groups: [GROUP],
     kiSummary: KI_SUMMARY,
-    history: { total: 0, by_status: {} },
+    history: { total: 0, items: [] },
     allowedActions: ['add_ki', 'edit_ki'],
     ...overrides,
   });
@@ -158,41 +158,74 @@ describe('renderBriefing', () => {
     expect(render({ allowedActions: [] })).toContain('Load the `analyze-and-improve` skill');
   });
 
-  it('says how much history there is and where it stands', () => {
+  it('lists what was proposed before and what became of each', () => {
     const briefing = render({
-      history: { total: 9, by_status: { rejected: 4, suggested: 3, applied: 2 } },
+      history: {
+        total: 3,
+        items: [
+          {
+            id: 'a',
+            title: 'Edit the refund KI',
+            actionWorkflowId: 'system-context-engine-action-edit-ki',
+            actionInput: { ki_id: 'ki-7' },
+            status: 'pending',
+          },
+          {
+            id: 'b',
+            title: 'Add a returns KI',
+            actionWorkflowId: 'system-context-engine-action-add-ki',
+            actionInput: { ki_id: 'improvement-b' },
+            status: 'succeeded',
+          },
+          {
+            id: 'c',
+            title: 'Remove the old KI',
+            actionWorkflowId: 'system-context-engine-action-remove-ki',
+            actionInput: { ki_id: 'ki-2' },
+            status: 'no_action',
+            reason: 'duplicate: kept on purpose',
+          },
+        ],
+      },
     });
 
+    expect(briefing).toContain('3 proposal(s) for this index.');
+    expect(briefing).toContain('**awaiting review**: Edit the refund KI (edit_ki, ki_id `ki-7`)');
+    expect(briefing).toContain('**approved and applied**: Add a returns KI (add_ki)');
+    expect(briefing).not.toContain('improvement-b');
     expect(briefing).toContain(
-      '9 proposal(s) for this index — 3 suggested (awaiting review), 2 applied, 4 rejected.'
+      '**rejected**: Remove the old KI (remove_ki, ki_id `ki-2`) — reviewer: duplicate: kept on purpose'
     );
   });
 
-  it('hands over the query rather than the proposals, which do not fit and mostly do not apply', () => {
-    const briefing = render({ history: { total: 400, by_status: { rejected: 400 } } });
+  it('says how many are not listed when the history is longer than what was read', () => {
+    const briefing = render({
+      history: {
+        total: 400,
+        items: [{ id: 'a', title: 'Edit the refund KI', status: 'pending' }],
+      },
+    });
 
-    expect(briefing).toContain('FROM context-engine-improvements');
-    expect(briefing).toContain('| WHERE ai_index_id == "orders" AND latest == true');
-    expect(briefing).toContain('resolution.reason');
-    expect(briefing).toContain('platform.core.execute_esql');
+    expect(briefing).toContain('400 proposal(s) for this index; the 1 most recent are listed.');
   });
 
-  it('names the field that identifies each kind of target, since the query filters on one', () => {
-    const briefing = render({ history: { total: 1, by_status: { rejected: 1 } } });
+  it('warns that proposing a listed change again is refused as a duplicate', () => {
+    const briefing = render({
+      history: { total: 1, items: [{ id: 'a', title: 'T', status: 'failed', error: 'denied' }] },
+    });
 
-    expect(briefing).toContain('`target.ki_id`');
-    expect(briefing).toContain('`target.workflow_id`');
-    expect(briefing).toContain('`target.subject`');
+    expect(briefing).toContain('refused as a duplicate');
+    expect(briefing).toContain('error: denied');
   });
 
-  it('tells the run to look its own conclusion up before proposing it', () => {
-    expect(render()).toContain('Check the target’s history once you know what you want to change');
+  it('tells the run to check the list before proposing', () => {
+    expect(render()).toContain('Check what was proposed before');
   });
 
-  it('says so when there is no history yet, without a query to run against nothing', () => {
+  it('says so when there is no history yet, without a list', () => {
     const briefing = render();
 
     expect(briefing).toContain('Nothing has been proposed for this index yet');
-    expect(briefing).not.toContain('FROM context-engine-improvements');
+    expect(briefing).not.toContain('context-engine-improvements');
   });
 });

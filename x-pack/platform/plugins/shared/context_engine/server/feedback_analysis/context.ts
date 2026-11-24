@@ -6,14 +6,19 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { CONTEXT_ENGINE_SETUP_AGENT_ID, KI_SUMMARY_PAGE_SIZE } from '../../common/constants';
+import {
+  CONTEXT_ENGINE_SETUP_AGENT_ID,
+  KI_SUMMARY_PAGE_SIZE,
+  MAX_PROPOSAL_HISTORY,
+} from '../../common/constants';
 import type { FeedbackAnalysisContext } from '../../common/http_api/feedback_context';
 import type { ImprovementAction } from '../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import { buildImprovementsJsonSchema } from '../../common/http_api/improvements_output_schema';
 import { getKis } from '../ai_indices/ki_list';
 import type { AiIndexService } from '../ai_indices/service';
-import type { ImprovementsServiceApi } from '../improvements/service';
+import { proposalAnchorFor } from '../improvements/propose';
+import type { ProposalsProvider, ProposalsProviderContext } from '../proposals/provider';
 import { renderBriefing } from './briefing';
 import { rankPatterns } from './group_signals';
 import { selectSignals } from './select_signals';
@@ -22,14 +27,15 @@ export interface BuildFeedbackContextDeps {
   /** Request-scoped client, authorized against the caller. */
   esClient: ElasticsearchClient;
   aiIndexService: AiIndexService;
-  improvementsService: ImprovementsServiceApi;
+  /** Where the run's earlier proposals are read from. */
+  proposals: { provider: ProposalsProvider; context: ProposalsProviderContext };
 }
 
 /** Assembles everything one analysis run reads. */
 export const buildFeedbackContext = async (
   aiIndexId: string,
   spaceId: string,
-  { esClient, aiIndexService, improvementsService }: BuildFeedbackContextDeps,
+  { esClient, aiIndexService, proposals }: BuildFeedbackContextDeps,
   { now }: { now?: Date } = {}
 ): Promise<FeedbackAnalysisContext> => {
   const aiIndex = await aiIndexService.get(aiIndexId, spaceId);
@@ -51,7 +57,11 @@ export const buildFeedbackContext = async (
       ...(now ? { now } : {}),
     }),
     getKis(esClient, { dest: aiIndex.dest, size: KI_SUMMARY_PAGE_SIZE }),
-    improvementsService.historySummaryFor(aiIndexId),
+    proposals.provider.list({
+      ...proposals.context,
+      conversationId: proposalAnchorFor(aiIndexId),
+      size: MAX_PROPOSAL_HISTORY,
+    }),
   ]);
 
   const groups = rankPatterns(selection.patterns);

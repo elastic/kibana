@@ -74,7 +74,6 @@ import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/sched
 import { createFeedbackAnalysisChangeHandler } from '../feedback_analysis/change_handler';
 import { AiIndexChangeNotifier } from '../ai_indices/changes';
 import type { AiIndexChangeEvent } from '../ai_indices/changes';
-import type { ImprovementsServiceApi } from '../improvements/service';
 import type { DeleteWorkflowsApi } from '../types';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 
@@ -142,7 +141,6 @@ describe('ai indices routes', () => {
       'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis' | 'setDreaming'
     >
   >;
-  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
   let workflowsManagementApi: jest.Mocked<DeleteWorkflowsApi>;
   let scheduleService: jest.Mocked<FeedbackAnalysisScheduleService>;
   const onAiIndexChange = jest.fn<Promise<void>, [AiIndexChangeEvent]>();
@@ -161,8 +159,6 @@ describe('ai indices routes', () => {
   let esDeleteIndex: jest.Mock;
   let esInternalSearch: jest.Mock;
   let spacesStart: ReturnType<typeof spacesMock.createStart>;
-  let improvementsClients: unknown[];
-  let improvementsSpaceIds: string[];
   let getSpaces: jest.Mock;
   let getAgentBuilder: jest.Mock;
   let esResolveIndex: jest.Mock;
@@ -260,12 +256,9 @@ describe('ai indices routes', () => {
       setFeedbackAnalysis: jest.fn(),
       setDreaming: jest.fn(),
     };
-    improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
     workflowsManagementApi = {
       deleteWorkflows: jest.fn().mockResolvedValue({ failures: [] }),
     };
-    improvementsClients = [];
-    improvementsSpaceIds = [];
     getSpaces = jest.fn().mockResolvedValue(spacesStart);
     getAgentBuilder = jest.fn().mockResolvedValue(undefined);
     analyticsService = { reportKiWrite: jest.fn() };
@@ -315,11 +308,6 @@ describe('ai indices routes', () => {
       getAiIndexDataReadService: (params) => {
         readServiceParams.push(params);
         return readService;
-      },
-      getImprovementsService: (esClient, spaceId) => {
-        improvementsClients.push(esClient);
-        improvementsSpaceIds.push(spaceId);
-        return improvementsService as unknown as ImprovementsServiceApi;
       },
       aiIndexChanges: createAiIndexChanges(),
       isMemoryEnabled: async () => memoryFlagEnabled,
@@ -2198,52 +2186,6 @@ describe('ai indices routes', () => {
       });
     });
 
-    it('clears the improvements for the AI Index, so they cannot resurface under a reused id', async () => {
-      aiIndexService.delete.mockResolvedValue(undefined);
-
-      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
-        params: { aiIndexId: 'customer_support' },
-      });
-
-      expect(improvementsService.deleteByAiIndex).toHaveBeenCalledWith('customer_support');
-      expect(improvementsSpaceIds).toEqual([defaultSpaceId]);
-    });
-
-    it('audits the deletion even when the improvements cleanup fails afterwards', async () => {
-      aiIndexService.delete.mockResolvedValue(undefined);
-      improvementsService.deleteByAiIndex.mockRejectedValue(new Error('security_exception'));
-
-      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
-        params: { aiIndexId: 'customer_support' },
-      });
-
-      // The index is gone either way, so the audit record is owed and the caller is not sent to
-      // retry a delete that would now 404.
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
-      );
-      expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('security_exception'));
-    });
-
-    it("deletes the improvements as the request's user, since the store is a user index", async () => {
-      aiIndexService.delete.mockResolvedValue(undefined);
-
-      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
-        params: { aiIndexId: 'customer_support' },
-      });
-
-      expect(improvementsClients).toEqual([expect.objectContaining({ search: esSearch })]);
-    });
-
-    it('leaves the improvements alone when the AI Index cannot be deleted', async () => {
-      aiIndexService.delete.mockRejectedValue(new AiIndexNotFoundError('missing'));
-
-      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'missing' } });
-
-      expect(improvementsService.deleteByAiIndex).not.toHaveBeenCalled();
-    });
-
     it('returns 404 when the AI Index does not exist', async () => {
       aiIndexService.delete.mockRejectedValue(new AiIndexNotFoundError('missing'));
 
@@ -2459,7 +2401,6 @@ describe('ai indices routes', () => {
           analyticsService: analyticsService as unknown as ContextEngineAnalyticsService,
           getAiIndexService: () => aiIndexService as unknown as AiIndexService,
           getAiIndexDataReadService: () => readService,
-          getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
           aiIndexChanges: createAiIndexChanges(),
           isMemoryEnabled: async () => memoryFlagEnabled,
           getActions: async () => actions,
@@ -2809,7 +2750,7 @@ describe('ai indices routes', () => {
       });
     });
 
-    it('removes the schedule and improvements from the request space', async () => {
+    it('removes the schedule from the request space', async () => {
       const spaces = spacesMock.createStart();
       spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
       getSpaces.mockResolvedValue(spaces);
@@ -2821,7 +2762,6 @@ describe('ai indices routes', () => {
         aiIndexId: 'customer_support',
         spaceId: 'marketing',
       });
-      expect(improvementsSpaceIds).toEqual(['marketing']);
     });
   });
 

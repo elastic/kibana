@@ -22,7 +22,6 @@ import {
 /** Records what an analysis run proposed. */
 export const getRecordImprovementsStepDefinition = ({
   getAiIndexService,
-  getImprovementsService,
   getProposalsProvider,
   getAuditLogger,
   isContextEngineEnabled,
@@ -46,15 +45,8 @@ export const getRecordImprovementsStepDefinition = ({
         });
       }
 
-      const {
-        ai_index_id: aiIndexId,
-        agent_run_id: agentRunId,
-        signal_window: signalWindow,
-        signal_spaces: signalSpaces,
-        improvements,
-      } = context.input;
+      const { ai_index_id: aiIndexId, agent_run_id: agentRunId, improvements } = context.input;
 
-      const esClient = context.contextManager.getScopedEsClient();
       const auditLogger = await getAuditLogger(request);
 
       try {
@@ -67,12 +59,8 @@ export const getRecordImprovementsStepDefinition = ({
         const result = await recordImprovements({
           aiIndexId,
           spaceId,
-          agentRunId,
-          signalWindow,
-          signalSpaces,
           allowedActions,
           proposals: improvements,
-          improvementsService: getImprovementsService(esClient, spaceId),
           review: { provider: proposalsProvider, context: { spaceId, request }, logger },
         });
 

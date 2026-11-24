@@ -84,22 +84,14 @@ export const MAX_SIGNAL_GROUPS = 100;
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
 
-/** Routes for listing, approving, and rejecting an AI index's improvements. */
-export const aiIndexImprovementsPath = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/improvements`;
 /** Route that starts a feedback analysis run on demand. */
 export const aiIndexFeedbackAnalysisRunPath = `${AI_INDEX_FEEDBACK_ANALYSIS_PATH}/_run`;
 
-/** Version of the internal Improvements API. */
+/** Version of the internal feedback analysis API. */
 export const IMPROVEMENTS_INTERNAL_API_VERSION = '1';
 
-/** Default and maximum page size when listing improvements (one entry per improvement lineage). */
-export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
-export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
-
-/** Maximum `from + size` when paginating improvements. */
-export const MAX_IMPROVEMENTS_RESULT_WINDOW = 10000;
-
-/** Maximum length of the reason given when rejecting an improvement. */
+/** How many of an AI index's earlier proposals the briefing of a run lists. */
+export const MAX_PROPOSAL_HISTORY = 50;
 
 /**
  * Version of the public AI index API, shared between the server route

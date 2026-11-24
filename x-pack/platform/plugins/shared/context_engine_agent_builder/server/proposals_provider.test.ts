@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProposalAlreadyExistsError, ProposalNotFoundError } from '@kbn/proposals-plugin/server';
+import { ProposalAlreadyExistsError } from '@kbn/proposals-plugin/server';
 import { createProposalsProvider } from './proposals_provider';
 
 const request = {} as never;
@@ -20,9 +20,9 @@ const proposal = {
 
 describe('createProposalsProvider', () => {
   const createProposal = jest.fn();
-  const get = jest.fn();
+  const getList = jest.fn();
   const provider = createProposalsProvider(
-    async () => ({ createProposal, getProposalsService: () => ({ get }) } as never)
+    async () => ({ createProposal, getProposalsService: () => ({ list: getList }) } as never)
   );
 
   beforeEach(() => jest.resetAllMocks());
@@ -61,32 +61,68 @@ describe('createProposalsProvider', () => {
     });
   });
 
-  describe('getOutcome', () => {
-    const outcome = (proposalStatus: Record<string, unknown>) => {
-      get.mockResolvedValue(proposalStatus);
-      return provider.getOutcome({ proposalId: 'p', spaceId: 'default', request });
+  describe('list', () => {
+    const list = (proposals: Array<Record<string, unknown>>, total = proposals.length) => {
+      getList.mockResolvedValue({ proposals, total });
+      return provider.list({
+        conversationId: 'context-engine:orders',
+        size: 50,
+        spaceId: 'default',
+        request,
+      });
     };
 
-    it('reads a missing proposal as null', async () => {
-      get.mockRejectedValue(new ProposalNotFoundError('p'));
+    it('reads the newest proposals Context Engine put under the anchor, whatever became of them', async () => {
+      await list([]);
 
-      await expect(
-        provider.getOutcome({ proposalId: 'p', spaceId: 'default', request })
-      ).resolves.toBeNull();
+      expect(getList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          origin: 'context_engine',
+          conversationId: 'context-engine:orders',
+          order: 'newest',
+          excludeSuperseded: false,
+          excludeExpired: false,
+          size: 50,
+        }),
+        'default',
+        request
+      );
     });
 
-    it('maps what the proposal went through to what the store records', async () => {
-      await expect(outcome({ status: 'pending' })).resolves.toEqual({ state: 'open' });
-      await expect(outcome({ status: 'executing' })).resolves.toEqual({ state: 'open' });
+    it('maps what the proposal went through to what a run reads', async () => {
       await expect(
-        outcome({ status: 'succeeded', decidedBy: { username: 'ana' } })
-      ).resolves.toEqual({ state: 'applied', by: 'ana' });
-      await expect(
-        outcome({ status: 'no_action', decidedBy: { username: 'ana' }, rationale: 'dup' })
-      ).resolves.toEqual({ state: 'rejected', by: 'ana', reason: 'dup' });
-      await expect(outcome({ status: 'failed', executionError: 'denied' })).resolves.toEqual({
-        state: 'failed',
-        error: 'denied',
+        list(
+          [
+            { id: 'a', title: 'A', status: 'pending' },
+            {
+              id: 'b',
+              title: 'B',
+              status: 'no_action',
+              dismissReason: 'duplicate',
+              rationale: 'kept on purpose',
+              actionWorkflowId: 'wf',
+              actionInput: { ki_id: 'k' },
+            },
+            { id: 'c', title: 'C', status: 'failed', executionError: 'denied' },
+            { id: 'd', title: 'D', status: 'no_action', dismissReason: 'no_reason' },
+          ],
+          9
+        )
+      ).resolves.toEqual({
+        total: 9,
+        items: [
+          { id: 'a', title: 'A', status: 'pending' },
+          {
+            id: 'b',
+            title: 'B',
+            status: 'no_action',
+            reason: 'duplicate: kept on purpose',
+            actionWorkflowId: 'wf',
+            actionInput: { ki_id: 'k' },
+          },
+          { id: 'c', title: 'C', status: 'failed', error: 'denied' },
+          { id: 'd', title: 'D', status: 'no_action' },
+        ],
       });
     });
   });

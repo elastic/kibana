@@ -16,7 +16,8 @@ import type {
 export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
 export type {
   ImprovementProposal,
-  ProposalOutcome,
+  ProposalHistory,
+  ProposalHistoryItem,
   ProposalsProvider,
   ProposalsProviderContext,
 } from './proposals/provider';

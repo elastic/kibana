@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-export { ImprovementsService } from './service';
-export type { ImprovementsServiceApi, ListImprovementsOptions } from './service';
 export { buildChangeFingerprint, buildImprovementId } from './identity';
-export {
-  ImprovementConflictError,
-  ImprovementNotFoundError,
-  InvalidImprovementError,
-} from './errors';
+export { InvalidImprovementError } from './errors';

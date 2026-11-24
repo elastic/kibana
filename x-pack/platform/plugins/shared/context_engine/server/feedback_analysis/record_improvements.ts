@@ -8,42 +8,32 @@
 import type { Logger } from '@kbn/core/server';
 import { MAX_IMPROVEMENTS_PER_RUN } from '../../common/constants';
 import type { ImprovementAction } from '../../common/http_api/improvement_actions';
-import type {
-  ImprovementRevisionInput,
-  RecordImprovementsResponse,
-} from '../../common/http_api/improvements';
+import type { RecordImprovementsResponse } from '../../common/http_api/improvements';
 import type { ProposedImprovement } from '../../common/http_api/improvements_output_schema';
 import { proposedImprovementSchema } from '../../common/http_api/improvements_output_schema';
 import { InvalidImprovementError } from '../improvements/errors';
 import { buildImprovementId } from '../improvements/identity';
 import { isProposable, toProposal } from '../improvements/propose';
-import type { ImprovementsServiceApi } from '../improvements/service';
 import type { ProposalsProvider, ProposalsProviderContext } from '../proposals/provider';
 
 export interface RecordImprovementsOptions {
   aiIndexId: string;
   spaceId: string;
-  agentRunId: string;
-  signalWindow: { from: string; to: string };
-  signalSpaces: string[];
   /** The actions the AI index permits; an empty list is observe-only. */
   allowedActions: ImprovementAction[];
   /** Straight off the agent, unvalidated. */
   proposals: unknown[];
-  improvementsService: ImprovementsServiceApi;
   /** Where an improvement is put up for review. */
   review: {
     provider: ProposalsProvider;
     context: ProposalsProviderContext;
     logger: Logger;
   };
-  suggestedAt?: string;
 }
 
 interface Candidate {
   improvementId: string;
   proposal: ProposedImprovement;
-  input: ImprovementRevisionInput;
 }
 
 const missingRequiredField = (proposal: ProposedImprovement): string | undefined => {
@@ -69,18 +59,13 @@ const describe = (proposal: unknown): { action?: string; title?: string } => {
   };
 };
 
-/** Turns what an analysis run proposed into revisions of the improvements store. */
+/** Puts what an analysis run proposed up for review, as one proposal per change. */
 export const recordImprovements = async ({
   aiIndexId,
   spaceId,
-  agentRunId,
-  signalWindow,
-  signalSpaces,
   allowedActions,
   proposals,
-  improvementsService,
   review,
-  suggestedAt,
 }: RecordImprovementsOptions): Promise<RecordImprovementsResponse> => {
   const skipped: RecordImprovementsResponse['skipped'] = [];
   const candidates: Candidate[] = [];
@@ -177,79 +162,42 @@ export const recordImprovements = async ({
     }
     seen.add(improvementId);
 
-    candidates.push({
-      improvementId,
-      proposal,
-      input: {
-        improvement_id: improvementId,
-        ai_index_id: aiIndexId,
-        status: 'suggested',
-        ...(suggestedAt ? { suggested_at: suggestedAt } : {}),
-        title: proposal.title,
-        rationale: proposal.rationale,
-        action: proposal.action,
-        ...(proposal.target ? { target: proposal.target } : {}),
-        payload: proposal.payload ?? {},
-        provenance: {
-          agent_run_id: agentRunId,
-          signal_ids: proposal.signal_ids ?? [],
-          signal_spaces: signalSpaces,
-          signal_window: signalWindow,
-          signal_count: proposal.signal_ids?.length ?? 0,
-          ...(proposal.signal_tags ? { tags: proposal.signal_tags } : {}),
-        },
-      },
-    });
-  }
-
-  const written = await improvementsService.write(candidates.map(({ input }) => input));
-  const writtenIds = new Set(written.map(({ improvement_id: id }) => id));
-
-  const proposalFailures = new Map<string, string>();
-  for (const improvement of written) {
-    const proposal = toProposal(improvement);
-    if (!proposal) {
-      continue;
-    }
-    try {
-      await review.provider.create({ ...review.context, proposal });
-    } catch (error) {
-      const detail = error instanceof Error ? error.message : String(error);
-      review.logger.warn(
-        `Could not propose improvement [${improvement.improvement_id}] for review: ${detail}`
-      );
-      proposalFailures.set(improvement.improvement_id, detail);
-    }
+    candidates.push({ improvementId, proposal });
   }
 
   const recorded: RecordImprovementsResponse['recorded'] = [];
-  for (const candidate of candidates) {
-    if (proposalFailures.has(candidate.improvementId)) {
-      skipped.push({
-        action: candidate.proposal.action,
-        title: candidate.proposal.title,
-        reason: 'proposal_failed',
-        detail: `It was recorded but could not be put up for review: ${proposalFailures.get(
-          candidate.improvementId
-        )}`,
-      });
+  for (const { improvementId, proposal } of candidates) {
+    const change = toProposal({ improvementId, aiIndexId, proposal });
+    if (!change) {
       continue;
     }
-    if (writtenIds.has(candidate.improvementId)) {
+    try {
+      const created = await review.provider.create({ ...review.context, proposal: change });
+      if (!created) {
+        skipped.push({
+          action: proposal.action,
+          title: proposal.title,
+          reason: 'duplicate',
+          detail:
+            'This change was already proposed, and it is either awaiting review or has been decided.',
+        });
+        continue;
+      }
       recorded.push({
-        improvement_id: candidate.improvementId,
-        action: candidate.proposal.action,
-        title: candidate.proposal.title,
+        improvement_id: improvementId,
+        action: proposal.action,
+        title: proposal.title,
       });
-      continue;
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      review.logger.warn(`Could not propose improvement [${improvementId}] for review: ${detail}`);
+      skipped.push({
+        action: proposal.action,
+        title: proposal.title,
+        reason: 'proposal_failed',
+        detail: `It could not be put up for review: ${detail}`,
+      });
     }
-    skipped.push({
-      action: candidate.proposal.action,
-      title: candidate.proposal.title,
-      reason: 'conflict',
-      detail:
-        'Another writer changed this improvement while the run was in flight; it was left as it stands.',
-    });
   }
 
   return { recorded, skipped };

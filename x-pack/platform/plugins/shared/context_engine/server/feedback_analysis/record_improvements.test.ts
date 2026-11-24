@@ -7,10 +7,8 @@
 
 import { MAX_IMPROVEMENTS_PER_RUN } from '../../common/constants';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
-import type { ImprovementsServiceApi } from '../improvements/service';
+import type { ProposalsProvider } from '../proposals/provider';
 import { recordImprovements } from './record_improvements';
-
-const SIGNAL_WINDOW = { from: '2026-08-25T12:00:00.000Z', to: '2026-09-01T12:00:00.000Z' };
 
 const buildProposal = (overrides: Record<string, unknown> = {}) => ({
   action: 'add_ki',
@@ -22,83 +20,64 @@ const buildProposal = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const defaultReview = () => ({
-  provider: { create: jest.fn(async () => true), getOutcome: jest.fn() } as never,
-  context: { spaceId: 'default', request: {} as never },
-  logger: { warn: jest.fn() } as never,
-});
-
 describe('recordImprovements', () => {
-  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'write'>>;
+  const request = {} as never;
+  const logger = { warn: jest.fn() };
+  let provider: jest.Mocked<Pick<ProposalsProvider, 'create' | 'list'>>;
 
   const run = (overrides: Partial<Parameters<typeof recordImprovements>[0]> = {}) =>
     recordImprovements({
       aiIndexId: 'orders',
       spaceId: 'default',
-      agentRunId: 'run-1',
-      signalWindow: SIGNAL_WINDOW,
-      signalSpaces: ['default'],
       allowedActions: [...IMPROVEMENT_ACTIONS],
       proposals: [buildProposal()],
-      improvementsService: improvementsService as unknown as ImprovementsServiceApi,
-      review: defaultReview(),
+      review: {
+        provider: provider as unknown as ProposalsProvider,
+        context: { spaceId: 'default', request },
+        logger: logger as never,
+      },
       ...overrides,
     });
 
   beforeEach(() => {
-    improvementsService = {
-      write: jest.fn(async (inputs) => inputs.map((input) => ({ ...input } as never))),
-    };
+    jest.clearAllMocks();
+    provider = { create: jest.fn().mockResolvedValue(true), list: jest.fn() };
   });
 
-  it('records a valid proposal and reports its derived id', async () => {
+  it('puts a valid KI improvement up as a gateless-proposal request under a deterministic id', async () => {
     const result = await run();
 
     expect(result.skipped).toEqual([]);
+    const { improvement_id: improvementId } = result.recorded[0];
     expect(result.recorded).toEqual([
-      {
-        improvement_id: expect.any(String),
-        action: 'add_ki',
-        title: 'Add a KI for failed logins',
-      },
+      { improvement_id: expect.any(String), action: 'add_ki', title: 'Add a KI for failed logins' },
     ]);
-  });
-
-  it('writes the run provenance so a proposal can be traced back to its evidence', async () => {
-    await run({ suggestedAt: '2026-09-01T12:00:00.000Z' });
-
-    expect(improvementsService.write).toHaveBeenCalledWith([
-      expect.objectContaining({
-        ai_index_id: 'orders',
-        status: 'suggested',
-        suggested_at: '2026-09-01T12:00:00.000Z',
-        provenance: {
-          agent_run_id: 'run-1',
-          signal_ids: ['trace-1:span-1'],
-          signal_spaces: ['default'],
-          signal_window: SIGNAL_WINDOW,
-          signal_count: 1,
+    expect(provider.create).toHaveBeenCalledWith({
+      spaceId: 'default',
+      request,
+      proposal: expect.objectContaining({
+        id: `context-engine-${improvementId}`,
+        conversationId: 'context-engine:orders',
+        title: 'Add a KI for failed logins',
+        comment: 'Agents fell back to raw logs six times.',
+        actionWorkflowId: 'system-context-engine-action-add-ki',
+        actionInput: {
+          ai_index_id: 'orders',
+          ki_id: `improvement-${improvementId}`,
+          ki: { type: 'document', title: 'Failed logins' },
         },
       }),
-    ]);
-  });
-
-  it('derives the improvement id itself rather than taking one from the run', async () => {
-    const result = await run({
-      proposals: [buildProposal({ improvement_id: 'run-chosen-id' })],
     });
-
-    expect(result.recorded[0].improvement_id).not.toBe('run-chosen-id');
   });
 
   it('gives the same id to the same change proposed in two different runs', async () => {
     const first = await run();
-    const second = await run({ agentRunId: 'run-2' });
+    const second = await run();
 
     expect(second.recorded[0].improvement_id).toBe(first.recorded[0].improvement_id);
   });
 
-  it('scopes the derived id to the space so the same change in two spaces is two improvements', async () => {
+  it('scopes the derived id to the space so the same change in two spaces is two proposals', async () => {
     const first = await run({ spaceId: 'default' });
     const second = await run({ spaceId: 'marketing' });
 
@@ -117,13 +96,25 @@ describe('recordImprovements', () => {
     ]);
   });
 
-  it('records nothing for an observe-only index', async () => {
+  it('proposes nothing for an observe-only index', async () => {
     const result = await run({ allowedActions: [] });
 
     expect(result.recorded).toEqual([]);
     expect(result.skipped[0]).toMatchObject({ reason: 'action_not_allowed' });
     expect(result.skipped[0].detail).toContain('observation only');
-    expect(improvementsService.write).toHaveBeenCalledWith([]);
+    expect(provider.create).not.toHaveBeenCalled();
+  });
+
+  it('skips an action that has no action workflow yet instead of leaving it undecidable', async () => {
+    const result = await run({
+      proposals: [buildProposal({ action: 'add_workflow', payload: { workflow_yaml: 'name: x' } })],
+    });
+
+    expect(result.recorded).toEqual([]);
+    expect(result.skipped).toEqual([
+      expect.objectContaining({ action: 'add_workflow', reason: 'action_not_allowed' }),
+    ]);
+    expect(provider.create).not.toHaveBeenCalled();
   });
 
   it('skips a malformed proposal with the reason, rather than failing the batch', async () => {
@@ -154,17 +145,39 @@ describe('recordImprovements', () => {
     expect(result.skipped).toEqual([
       expect.objectContaining({ reason: 'duplicate', title: 'The same thing, said again' }),
     ]);
+    expect(provider.create).toHaveBeenCalledTimes(1);
   });
 
-  it('reports the ones the store refused as conflicts, not as recorded', async () => {
-    improvementsService.write.mockResolvedValue([]);
+  it('reports a change that was already proposed as a duplicate, whatever became of it', async () => {
+    provider.create.mockResolvedValue(false);
 
     const result = await run();
 
     expect(result.recorded).toEqual([]);
     expect(result.skipped).toEqual([
-      expect.objectContaining({ action: 'add_ki', reason: 'conflict' }),
+      expect.objectContaining({
+        action: 'add_ki',
+        reason: 'duplicate',
+        detail: expect.stringContaining('already proposed'),
+      }),
     ]);
+  });
+
+  it('reports a change that could not be put up for review, and carries on', async () => {
+    provider.create.mockRejectedValueOnce(new Error('workflow [x] is disabled'));
+
+    const result = await run({
+      proposals: [buildProposal(), buildProposal({ target: { subject: 'orders' } })],
+    });
+
+    expect(result.recorded).toHaveLength(1);
+    expect(result.skipped).toEqual([
+      expect.objectContaining({
+        reason: 'proposal_failed',
+        detail: expect.stringContaining('workflow [x] is disabled'),
+      }),
+    ]);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('workflow [x] is disabled'));
   });
 
   it('caps how much one run may record', async () => {
@@ -197,86 +210,5 @@ describe('recordImprovements', () => {
     expect(result.recorded).toEqual([]);
     expect(result.skipped).toHaveLength(2);
     expect(result.skipped.every(({ reason }) => reason === 'invalid')).toBe(true);
-  });
-
-  describe('when proposals are available', () => {
-    const request = {} as never;
-    let provider: { create: jest.Mock; getOutcome: jest.Mock };
-    const logger = { warn: jest.fn() } as never;
-
-    const review = () => ({
-      provider: provider as never,
-      context: { spaceId: 'default', request },
-      logger,
-    });
-
-    beforeEach(() => {
-      provider = { create: jest.fn(async () => true), getOutcome: jest.fn() };
-    });
-
-    it('puts a recorded KI improvement up as a proposal under a deterministic id', async () => {
-      const result = await run({ review: review() });
-
-      expect(result.skipped).toEqual([]);
-      const { improvement_id: improvementId } = result.recorded[0];
-      expect(provider.create).toHaveBeenCalledTimes(1);
-      expect(provider.create).toHaveBeenCalledWith({
-        spaceId: 'default',
-        request,
-        proposal: expect.objectContaining({
-          id: `context-engine-${improvementId}`,
-          conversationId: 'context-engine:orders',
-          title: 'Add a KI for failed logins',
-          actionWorkflowId: 'system-context-engine-action-add-ki',
-          actionInput: {
-            ai_index_id: 'orders',
-            ki_id: `improvement-${improvementId}`,
-            ki: { type: 'document', title: 'Failed logins' },
-          },
-        }),
-      });
-    });
-
-    it('skips an action that has no action workflow instead of leaving it unreviewable', async () => {
-      const result = await run({
-        review: review(),
-        proposals: [
-          buildProposal({
-            action: 'add_workflow',
-            payload: { workflow_yaml: 'name: x' },
-          }),
-        ],
-      });
-
-      expect(result.recorded).toEqual([]);
-      expect(result.skipped).toEqual([
-        expect.objectContaining({ action: 'add_workflow', reason: 'action_not_allowed' }),
-      ]);
-      expect(improvementsService.write).toHaveBeenCalledWith([]);
-      expect(provider.create).not.toHaveBeenCalled();
-    });
-
-    it('reports an improvement that was recorded but could not be proposed', async () => {
-      provider.create.mockRejectedValue(new Error('workflow [x] is disabled'));
-
-      const result = await run({ review: review() });
-
-      expect(result.recorded).toEqual([]);
-      expect(result.skipped).toEqual([
-        expect.objectContaining({
-          reason: 'proposal_failed',
-          detail: expect.stringContaining('workflow [x] is disabled'),
-        }),
-      ]);
-    });
-
-    it('treats a proposal that already exists as proposed', async () => {
-      provider.create.mockResolvedValue(false);
-
-      const result = await run({ review: review() });
-
-      expect(result.skipped).toEqual([]);
-      expect(result.recorded).toHaveLength(1);
-    });
   });
 });

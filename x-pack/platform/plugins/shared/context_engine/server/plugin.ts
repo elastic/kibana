@@ -50,8 +50,6 @@ import { AiIndexChangeNotifier } from './ai_indices/changes';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
-import { ImprovementsService } from './improvements/service';
-import { installImprovementsIndexTemplate } from './improvements/storage';
 import { createSessionMemoryService } from './session_memory/service';
 import { createSessionEventsService } from './session_events/service';
 import { SignalsService } from './signals/service';
@@ -79,10 +77,6 @@ export class ContextEnginePlugin
   private logger: Logger;
   private aiIndexService?: AiIndexService;
   private signalsService?: SignalsService;
-  private createImprovementsService?: (
-    esClient: ElasticsearchClient,
-    spaceId: string
-  ) => ImprovementsService;
   private createAiIndexDataReadService?: (
     params: GetAiIndexDataReadServiceParams
   ) => AiIndexDataReadService;
@@ -224,13 +218,6 @@ export class ContextEnginePlugin
       return this.aiIndexService;
     };
 
-    const getImprovementsService = (esClient: ElasticsearchClient, spaceId: string) => {
-      if (!this.createImprovementsService) {
-        throw new Error('Improvements service not available — plugin has not started');
-      }
-      return this.createImprovementsService(esClient, spaceId);
-    };
-
     const getScheduleService = () => {
       if (!this.scheduleService) {
         throw new Error('Schedule service not available — plugin has not started');
@@ -272,7 +259,6 @@ export class ContextEnginePlugin
       router,
       logger: this.logger.get('routes'),
       getAiIndexService,
-      getImprovementsService,
       aiIndexChanges: this.aiIndexChanges,
       isMemoryEnabled,
       getAiIndexDataReadService: (params) => {
@@ -328,7 +314,6 @@ export class ContextEnginePlugin
       verifyKi,
       feedbackAnalysis: {
         getAiIndexService,
-        getImprovementsService,
         getProposalsProvider: () => this.proposalsProvider,
         getAuditLogger: async (request) => {
           const [coreStart] = await coreSetup.getStartServices();
@@ -363,12 +348,10 @@ export class ContextEnginePlugin
     registerImprovementRoutes({
       router,
       getAiIndexService,
-      getImprovementsService,
       getProposalsProvider: () => this.proposalsProvider,
       getScheduleService,
       getSpaces,
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
-      logger: this.logger.get('routes'),
     });
 
     registerSessionEventsRoutes({
@@ -479,11 +462,6 @@ export class ContextEnginePlugin
     const sessionMemoryService = createSessionMemoryService(this.esClient);
     const sessionEventsService = createSessionEventsService(this.esClient);
 
-    const improvementsLogger = this.logger.get('improvements');
-    this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
-      new ImprovementsService({ esClient, logger: improvementsLogger, space: spaceId });
-    const createImprovementsService = this.createImprovementsService;
-
     const globalSettingsFor = (request: KibanaRequest) =>
       coreStart.uiSettings.globalAsScopedToClient(coreStart.savedObjects.getScopedClient(request));
     this.createAiIndexDataReadService = ({ esClient, request }) =>
@@ -499,19 +477,6 @@ export class ContextEnginePlugin
           )) ?? false,
       });
     const createAiIndexDataReadService = this.createAiIndexDataReadService;
-
-    // Installed as Kibana, with the cluster privilege it already holds. The index is left for the
-    // first user write to create from it, so the store needs no grant on the internal user.
-    installImprovementsIndexTemplate({
-      esClient: this.esClient,
-      logger: improvementsLogger,
-    }).catch((err) => {
-      improvementsLogger.warn(
-        `Failed to install the improvements index template: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    });
 
     this.scheduleService = createFeedbackAnalysisScheduleService({
       logger: this.logger,
@@ -553,7 +518,6 @@ export class ContextEnginePlugin
       },
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
-      getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
       getSessionMemoryService: () => sessionMemoryService,
       getSessionEventsService: () => sessionEventsService,
     };

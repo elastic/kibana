@@ -11,7 +11,7 @@ import {
   CONTEXT_ENGINE_ACTION_REMOVE_KI_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { ImprovementAction } from '../../common/http_api/improvement_actions';
-import type { Improvement } from '../../common/http_api/improvements';
+import type { ProposedImprovement } from '../../common/http_api/improvements_output_schema';
 import type { ImprovementProposal } from '../proposals/provider';
 
 /** The action workflow that carries out each improvement action once a person approves it. */
@@ -40,34 +40,50 @@ export const proposalIdFor = (improvementId: string): string => `context-engine-
 /** The id a KI added by an improvement is created under, so the approval's target is known up front. */
 export const addedKiIdFor = (improvementId: string): string => `improvement-${improvementId}`;
 
-const actionInputFor = (improvement: Improvement): Record<string, unknown> => {
-  const { action, ai_index_id: aiIndexId, payload, target } = improvement;
+/** The improvement action a proposal's action workflow carries out. */
+export const improvementActionOf = (actionWorkflowId: string): ImprovementAction | undefined =>
+  (Object.keys(ACTION_WORKFLOW_BY_IMPROVEMENT_ACTION) as ImprovementAction[]).find(
+    (action) => ACTION_WORKFLOW_BY_IMPROVEMENT_ACTION[action] === actionWorkflowId
+  );
+
+export interface ProposedChange {
+  improvementId: string;
+  aiIndexId: string;
+  proposal: ProposedImprovement;
+}
+
+const actionInputFor = ({
+  improvementId,
+  aiIndexId,
+  proposal: { action, payload, target },
+}: ProposedChange): Record<string, unknown> => {
   switch (action) {
     case 'add_ki':
       return {
         ai_index_id: aiIndexId,
-        ki_id: addedKiIdFor(improvement.improvement_id),
-        ki: payload.ki,
+        ki_id: addedKiIdFor(improvementId),
+        ki: payload?.ki,
       };
     case 'edit_ki':
-      return { ai_index_id: aiIndexId, ki_id: target?.ki_id, ki_patch: payload.ki_patch };
+      return { ai_index_id: aiIndexId, ki_id: target?.ki_id, ki_patch: payload?.ki_patch };
     default:
       return { ai_index_id: aiIndexId, ki_id: target?.ki_id };
   }
 };
 
-/** The proposal that puts an improvement up for review, or `undefined` when it has no action workflow. */
-export const toProposal = (improvement: Improvement): ImprovementProposal | undefined => {
-  const actionWorkflowId = ACTION_WORKFLOW_BY_IMPROVEMENT_ACTION[improvement.action];
+/** The proposal that puts a change up for review, or `undefined` when it has no action workflow. */
+export const toProposal = (change: ProposedChange): ImprovementProposal | undefined => {
+  const { improvementId, aiIndexId, proposal } = change;
+  const actionWorkflowId = ACTION_WORKFLOW_BY_IMPROVEMENT_ACTION[proposal.action];
   if (actionWorkflowId === undefined) {
     return undefined;
   }
   return {
-    id: proposalIdFor(improvement.improvement_id),
-    conversationId: proposalAnchorFor(improvement.ai_index_id),
-    title: improvement.title,
-    comment: improvement.rationale,
+    id: proposalIdFor(improvementId),
+    conversationId: proposalAnchorFor(aiIndexId),
+    title: proposal.title,
+    comment: proposal.rationale,
     actionWorkflowId,
-    actionInput: actionInputFor(improvement),
+    actionInput: actionInputFor(change),
   };
 };

@@ -6,7 +6,7 @@
  */
 
 import type { AuditLogger } from '@kbn/core/server';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { StepContext } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -24,7 +24,6 @@ import {
   AiIndexNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
-import type { ImprovementsServiceApi } from '../improvements/service';
 import type { ProposalsProvider } from '../proposals/provider';
 import type { KiVerificationSummary } from '../ki_verification';
 import { WORKFLOW_VERIFIER_ID_PREFIX } from '../ki_verification';
@@ -61,10 +60,6 @@ export interface DreamingStepDependencies {
 /** Dependencies injected into the feedback analysis step definition factories. */
 export interface FeedbackAnalysisStepDependencies {
   getAiIndexService: () => AiIndexService;
-  getImprovementsService: (
-    esClient: ElasticsearchClient,
-    spaceId: string
-  ) => ImprovementsServiceApi;
   /** The registered proposals operations, or `undefined` when no provider is registered. */
   getProposalsProvider: () => ProposalsProvider | undefined;
   getAuditLogger: (request: KibanaRequest) => Promise<AuditLogger | undefined>;

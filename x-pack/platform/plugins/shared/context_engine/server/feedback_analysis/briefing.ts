@@ -12,16 +12,20 @@ import type {
   SignalPatternGroup,
 } from '../../common/http_api/feedback_context';
 import type { ImprovementAction } from '../../common/http_api/improvement_actions';
-import type { ImprovementHistorySummary } from '../../common/http_api/improvements';
-import { IMPROVEMENT_STATUSES, IMPROVEMENTS_INDEX } from '../../common/http_api/improvements';
 import type { ListKisResponse } from '../../common/http_api/knowledge_indicators';
+import { improvementActionOf } from '../improvements/propose';
+import type {
+  ProposalHistory,
+  ProposalHistoryItem,
+  ProposalHistoryStatus,
+} from '../proposals/provider';
 
 export interface BriefingInput {
   aiIndex: AiIndexHttpItem;
   run: FeedbackAnalysisRunContext;
   groups: SignalPatternGroup[];
   kiSummary: ListKisResponse['summary'];
-  history: ImprovementHistorySummary;
+  history: ProposalHistory;
   allowedActions: ImprovementAction[];
 }
 
@@ -106,17 +110,37 @@ const renderGroups = (groups: SignalPatternGroup[], run: FeedbackAnalysisRunCont
   return [header, '', ...groups.map((group, index) => renderGroup(group, index + 1))].join('\n\n');
 };
 
-const countByStatus = ({ by_status: byStatus }: ImprovementHistorySummary): string =>
-  IMPROVEMENT_STATUSES.map((status) => ({ status, count: byStatus[status] ?? 0 }))
-    .filter(({ count }) => count > 0)
-    .map(
-      ({ status, count }) =>
-        `${count} ${status}${status === 'suggested' ? ' (awaiting review)' : ''}`
-    )
-    .join(', ');
+const HISTORY_STATUS_LABEL: Record<ProposalHistoryStatus, string> = {
+  pending: 'awaiting review',
+  executing: 'approved, being applied',
+  succeeded: 'approved and applied',
+  failed: 'approved, but applying it failed',
+  no_action: 'rejected',
+  expired: 'expired',
+  superseded: 'replaced by a newer proposal',
+};
 
-const renderHistory = (aiIndexId: string, history: ImprovementHistorySummary): string => {
-  if (history.total === 0) {
+const MAX_HISTORY_REASON_LENGTH = 300;
+
+const renderHistoryItem = (item: ProposalHistoryItem): string => {
+  const action = item.actionWorkflowId ? improvementActionOf(item.actionWorkflowId) : undefined;
+  const kiId = typeof item.actionInput?.ki_id === 'string' ? item.actionInput.ki_id : undefined;
+  // An `add_ki` names the KI it will create, which means nothing to the reader before it exists.
+  const where = [action, action !== 'add_ki' && kiId ? `ki_id \`${kiId}\`` : undefined]
+    .filter(Boolean)
+    .join(', ');
+  const detail = item.reason
+    ? ` — reviewer: ${truncate(item.reason, MAX_HISTORY_REASON_LENGTH)}`
+    : item.error
+    ? ` — error: ${truncate(item.error, MAX_HISTORY_REASON_LENGTH)}`
+    : '';
+  return `- **${HISTORY_STATUS_LABEL[item.status]}**: ${item.title}${
+    where ? ` (${where})` : ''
+  }${detail}`;
+};
+
+const renderHistory = ({ items, total }: ProposalHistory): string => {
+  if (total === 0) {
     return [
       '## What was proposed before',
       '',
@@ -127,22 +151,13 @@ const renderHistory = (aiIndexId: string, history: ImprovementHistorySummary): s
   return [
     '## What was proposed before',
     '',
-    `${history.total} proposal(s) for this index — ${countByStatus(history)}.`,
+    total > items.length
+      ? `${total} proposal(s) for this index; the ${items.length} most recent are listed.`
+      : `${total} proposal(s) for this index.`,
     '',
-    'They are not listed here: which of them matter depends on what you decide to propose, which you do not know yet. **Once you know what you want to change, read that target’s history before proposing it**, with `platform.core.execute_esql`:',
+    ...items.map(renderHistoryItem),
     '',
-    '```esql',
-    `FROM ${IMPROVEMENTS_INDEX}`,
-    `| WHERE ai_index_id == "${aiIndexId}" AND latest == true`,
-    '| WHERE target.workflow_id == "<the workflow you would change>"',
-    '| KEEP @timestamp, status, action, title, rationale, resolution.reason, resolution.error',
-    '| SORT @timestamp DESC',
-    '| LIMIT 20',
-    '```',
-    '',
-    'Swap the second `WHERE` for what your proposal targets: `target.ki_id` for a knowledge indicator, `target.workflow_id` for an automation, `target.subject` for an `add_*` action, which names what the addition would cover rather than an object that exists yet. To see everything a reviewer has turned down here, drop that line and filter `status == "rejected"` instead.',
-    '',
-    'A rejection is a decision that has already been made: re-proposing it wastes a reviewer’s time, and it will be de-duplicated onto the same record anyway. Read `resolution.reason` rather than assuming the change was wrong — a proposal can be turned down as a duplicate, as poorly evidenced, or as badly timed, and each points somewhere different. A target already carrying suggestions awaiting review does not need another.',
+    'Check this list before you propose anything. Each change is proposed once: proposing one that is already here, whether it is awaiting review, applied, rejected or failed, is refused as a duplicate, so only propose what this list does not already cover. Read a reviewer’s reason rather than assuming the change was wrong — a proposal can be turned down as a duplicate, as poorly evidenced, or as badly timed, and each points somewhere different. A target already carrying a suggestion awaiting review does not need another.',
   ].join('\n');
 };
 
@@ -185,7 +200,7 @@ const renderTask = (allowedActions: ImprovementAction[], hasGroups: boolean): st
       .map((action) => `\`${action}\``)
       .join(', ')}. Anything else is rejected on write.`,
     ...groundingRules(hasGroups),
-    '- **Check the target’s history once you know what you want to change.** Run the query under "What was proposed before" against it. Reviewers have already ruled on some of these, and their reasons apply to your proposal as much as to the one they rejected.',
+    '- **Check what was proposed before.** The list under "What was proposed before" is every change already put up for this index. Reviewers have already ruled on some of them, and their reasons apply to your proposal as much as to the one they rejected.',
     '- **Propose nothing rather than something weak.** An empty list is a valid, useful answer when the evidence does not point anywhere. Padding the list costs a reviewer more than it gains.',
     '- **One proposal per distinct problem.** Two findings with the same underlying cause are one fix.',
     '',
@@ -211,7 +226,7 @@ export const renderBriefing = ({
     '',
     renderGroups(groups, run),
     '',
-    renderHistory(aiIndex.id, history),
+    renderHistory(history),
     '',
     renderTask(allowedActions, groups.length > 0),
   ].join('\n');

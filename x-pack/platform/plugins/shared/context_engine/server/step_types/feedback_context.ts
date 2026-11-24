@@ -11,9 +11,6 @@ import { feedbackContextStepCommonDefinition } from '../../common/step_types/fee
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { buildFeedbackContext } from '../feedback_analysis/context';
 import { InvalidSignalWindowError } from '../feedback_analysis/errors';
-import { reconcileImprovements } from '../improvements/reconcile';
-import { OPEN_IMPROVEMENT_STATUSES } from '../../common/http_api/improvements';
-import { MAX_IMPROVEMENTS_PAGE_SIZE } from '../../common/constants';
 import type { FeedbackAnalysisStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
@@ -24,7 +21,6 @@ import {
 /** Assembles everything one analysis run reads. */
 export const getFeedbackContextStepDefinition = ({
   getAiIndexService,
-  getImprovementsService,
   getProposalsProvider,
   isContextEngineEnabled,
   isFeedbackLoopEnabled,
@@ -41,30 +37,6 @@ export const getFeedbackContextStepDefinition = ({
       const esClient = context.contextManager.getScopedEsClient();
 
       const proposalsProvider = requireProposalsProvider(getProposalsProvider);
-      // A decision made on a proposal reaches the store only here or on a list, and the run
-      // reads its history from the store.
-      try {
-        const improvements = getImprovementsService(esClient, spaceId);
-        const { items } = await improvements.list({
-          aiIndexId,
-          status: [...OPEN_IMPROVEMENT_STATUSES],
-          size: MAX_IMPROVEMENTS_PAGE_SIZE,
-        });
-        await reconcileImprovements({
-          improvements: items,
-          improvementsService: improvements,
-          proposals: proposalsProvider,
-          context: { spaceId, request: context.contextManager.getFakeRequest() },
-          logger,
-        });
-      } catch (error) {
-        logger.warn(
-          `Could not reconcile improvements for AI index '${aiIndexId}' before the run: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
-
       try {
         const {
           agent_id: agentId,
@@ -76,7 +48,10 @@ export const getFeedbackContextStepDefinition = ({
         } = await buildFeedbackContext(aiIndexId, spaceId, {
           esClient,
           aiIndexService: getAiIndexService(),
-          improvementsService: getImprovementsService(esClient, spaceId),
+          proposals: {
+            provider: proposalsProvider,
+            context: { spaceId, request: context.contextManager.getFakeRequest() },
+          },
         });
 
         logger.debug(
