@@ -75,7 +75,7 @@ test.describe('Image embeddable', { tag: '@local-stateful-classic' }, () => {
       await expect(
         page.testSubj
           .locator('embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN')
-          .locator('.euiNotificationBadge')
+          .getByText(/^\d+$/)
       ).toHaveText('1');
       await page.keyboard.press('Escape');
 

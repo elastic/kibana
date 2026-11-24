@@ -442,7 +442,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     // Status badge starts at 0 (no filters active)
     const statusBadge = page.testSubj
       .locator('eventLogStatusFilterButton')
-      .locator('.euiNotificationBadge');
+      .getByText(/^\d+$/);
     await expect(statusBadge).toHaveText('0');
 
     // Enable "success" filter
