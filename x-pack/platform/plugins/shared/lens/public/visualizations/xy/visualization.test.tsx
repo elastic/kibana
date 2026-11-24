@@ -4544,7 +4544,7 @@ describe('xy_visualization', () => {
         ).toEqual({ data: true, appearance: false });
       });
 
-      it('should expose no data settings for an annotation layer on an ES|QL chart', () => {
+      it('should expose data settings for an annotation layer on an ES|QL chart', () => {
         const baseState = exampleState();
         expect(
           xyVisualization.hasLayerSettings?.({
@@ -4568,7 +4568,7 @@ describe('xy_visualization', () => {
             }),
             layerId: 'annotation',
           })
-        ).toEqual({ data: false, appearance: false });
+        ).toEqual({ data: true, appearance: false });
       });
     });
   });

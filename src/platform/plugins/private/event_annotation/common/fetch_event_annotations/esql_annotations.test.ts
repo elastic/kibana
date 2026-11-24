@@ -9,7 +9,12 @@
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { EsqlEventAnnotationOutput } from '../esql_event_annotation';
-import { mergeAnnotationDatatables, toEsqlAnnotationDatatable } from './esql_annotations';
+import type { ExpressionValueSearchContext } from '@kbn/data-plugin/common';
+import {
+  fetchEsqlAnnotationDatatables,
+  mergeAnnotationDatatables,
+  toEsqlAnnotationDatatable,
+} from './esql_annotations';
 
 const annotation: EsqlEventAnnotationOutput = {
   type: 'esql_event_annotation',
@@ -308,5 +313,46 @@ describe('toEsqlAnnotationDatatable', () => {
     expect(merged.rows).toContainEqual(
       expect.objectContaining({ 'field:["maintenance","count"]': 'two' })
     );
+  });
+});
+
+describe('fetchEsqlAnnotationDatatables global filters', () => {
+  const filters = [{ meta: { index: 'logs' }, query: { match_all: {} } }];
+  const query = { language: 'kuery', query: 'service.name: "api"' };
+  const input = {
+    type: 'kibana_context',
+    filters,
+    query,
+    timeRange: options.timeRange,
+  } as unknown as ExpressionValueSearchContext;
+
+  const fetchWith = async (ignoreGlobalFilters: boolean) => {
+    const esql = jest.fn().mockResolvedValue({ datatable });
+    await fetchEsqlAnnotationDatatables({
+      annotations: [{ annotation, ignoreGlobalFilters }],
+      esql,
+      input,
+      interval: '1h',
+      timezone: 'UTC',
+      timeRange: options.timeRange,
+      abortSignal: new AbortController().signal,
+      inspectorAdapters: {},
+      searchSessionId: undefined,
+      executionContext: undefined,
+    });
+    return esql.mock.calls[0][0].kibanaQueryContext;
+  };
+
+  it('applies dashboard filters and the query bar when the layer does not ignore global filters', async () => {
+    expect(await fetchWith(false)).toEqual(
+      expect.objectContaining({ kibanaFilters: filters, kqlQuery: query })
+    );
+  });
+
+  it('skips dashboard filters and the query bar but keeps the time range when the layer ignores global filters', async () => {
+    const context = await fetchWith(true);
+    expect(context.kibanaFilters).toBeUndefined();
+    expect(context.kqlQuery).toBeUndefined();
+    expect(context.timeRange).toEqual(options.timeRange);
   });
 });

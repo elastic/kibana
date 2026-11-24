@@ -88,10 +88,15 @@ export const requestEventAnnotations = (
     }
 
     const esqlAnnotations = args.groups.flatMap((group) =>
-      group.annotations.filter(
-        (annotation): annotation is EsqlEventAnnotationOutput =>
-          annotation.type === 'esql_event_annotation' && !annotation.isHidden
-      )
+      group.annotations
+        .filter(
+          (annotation): annotation is EsqlEventAnnotationOutput =>
+            annotation.type === 'esql_event_annotation' && !annotation.isHidden
+        )
+        .map((annotation) => ({
+          annotation,
+          ignoreGlobalFilters: Boolean(group.ignoreGlobalFilters),
+        }))
     );
     const timezone = getTimeZone(uiSettings);
     // Split into an async chunk: most charts have no ES|QL annotations, so keep the ES|QL fetch

@@ -218,7 +218,10 @@ export const fetchEsqlAnnotationDatatables = ({
   searchSessionId,
   executionContext,
 }: {
-  annotations: EsqlEventAnnotationOutput[];
+  annotations: Array<{
+    annotation: EsqlEventAnnotationOutput;
+    ignoreGlobalFilters: boolean;
+  }>;
   esql: ISearchMethods['esql'];
   input: ExpressionValueSearchContext;
   interval: string;
@@ -230,7 +233,7 @@ export const fetchEsqlAnnotationDatatables = ({
   executionContext: ReturnType<ExecutionContext['getExecutionContext']>;
 }): Promise<Datatable[]> =>
   Promise.all(
-    annotations.map(async (annotation) => {
+    annotations.map(async ({ annotation, ignoreGlobalFilters }) => {
       const { datatable } = await esql(
         {
           query: annotation.query,
@@ -238,6 +241,8 @@ export const fetchEsqlAnnotationDatatables = ({
           kibanaQueryContext: {
             timeRange,
             timeField: annotation.timeField,
+            kibanaFilters: ignoreGlobalFilters ? undefined : input.filters,
+            kqlQuery: ignoreGlobalFilters ? undefined : input.query,
             esqlVariables: input.esqlVariables,
           },
           approximation: input.isApproximate,

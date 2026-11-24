@@ -690,6 +690,27 @@ describe('XY', () => {
           });
         });
 
+        it.each([true, false])(
+          'should round-trip ignore_global_filters=%s on an ES|QL annotation layer',
+          (ignoreGlobalFilters) => {
+            const config = {
+              type: 'xy' as const,
+              title: 'ES|QL chart with ES|QL annotations',
+              layers: [
+                esqlDataLayer,
+                { ...esqlAnnotationLayer, ignore_global_filters: ignoreGlobalFilters },
+              ],
+            };
+            validator.xy.fromApi(config);
+
+            const state = new LensConfigBuilder(undefined, true).fromAPIFormat(config);
+            const annotationLayer = (state.state.visualization as XYVisualizationState).layers.find(
+              ({ layerType }) => layerType === 'annotations'
+            );
+            expect(annotationLayer).toEqual(expect.objectContaining({ ignoreGlobalFilters }));
+          }
+        );
+
         it('should round-trip ES|QL annotation state through the API', () => {
           const builder = new LensConfigBuilder(undefined, true);
           const state = builder.fromAPIFormat({
