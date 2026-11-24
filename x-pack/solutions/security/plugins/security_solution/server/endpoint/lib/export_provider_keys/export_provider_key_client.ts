@@ -28,6 +28,7 @@ import {
 import type {
   ExportProviderKeyAttributes,
   ExportProviderKeyClientInterface,
+  ExportProviderKeyDeleteOptions,
   ExportProviderKeyMetadata,
 } from './types';
 
@@ -218,16 +219,18 @@ export class ExportProviderKeyClient implements ExportProviderKeyClientInterface
     }
   }
 
-  public async deleteKeys(keys: readonly KeyToDelete[]): Promise<string[]> {
+  public async deleteKeys(
+    keys: readonly KeyToDelete[],
+    options?: ExportProviderKeyDeleteOptions
+  ): Promise<string[]> {
+    const auditLogger = options?.auditLogger ?? this.auditLogger;
     const deletedIds: string[] = [];
 
     for (const { id, package_policy_id: packagePolicyId } of keys) {
       try {
         await this.soClient.delete(EXPORT_PROVIDER_KEY_SAVED_OBJECT_TYPE, id);
         deletedIds.push(id);
-        this.auditLogger?.log(
-          this.createDeleteAuditEvent({ id, packagePolicyId, outcome: 'success' })
-        );
+        auditLogger?.log(this.createDeleteAuditEvent({ id, packagePolicyId, outcome: 'success' }));
       } catch (error) {
         if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
           deletedIds.push(id);
@@ -235,7 +238,7 @@ export class ExportProviderKeyClient implements ExportProviderKeyClientInterface
             `Export provider key [id=${id}] of Elastic Defend policy [id=${packagePolicyId}] was already deleted`
           );
         } else {
-          this.auditLogger?.log(
+          auditLogger?.log(
             this.createDeleteAuditEvent({ id, packagePolicyId, outcome: 'failure', error })
           );
           this.logger.warn(
@@ -248,7 +251,10 @@ export class ExportProviderKeyClient implements ExportProviderKeyClientInterface
     return deletedIds;
   }
 
-  public async deleteKeysForPackagePolicies(packagePolicyIds: readonly string[]): Promise<void> {
+  public async deleteKeysForPackagePolicies(
+    packagePolicyIds: readonly string[],
+    options?: ExportProviderKeyDeleteOptions
+  ): Promise<void> {
     if (packagePolicyIds.length === 0) {
       return;
     }
@@ -280,7 +286,7 @@ export class ExportProviderKeyClient implements ExportProviderKeyClientInterface
         }
       }
 
-      await this.deleteKeys(keys);
+      await this.deleteKeys(keys, options);
     } catch (error) {
       this.logger.warn(
         `Failed to delete the export provider keys of Elastic Defend policies [${packagePolicyIds.join(

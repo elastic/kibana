@@ -675,7 +675,7 @@ export const getPackagePolicyDeleteCallback = (
   const exceptionsClient = endpointServices.getExceptionListsClient();
   const logger = endpointServices.createLogger('endpointPolicyDeleteCallback');
 
-  return async (deletePackagePolicy): Promise<void> => {
+  return async (deletePackagePolicy, _soClient, _esClient, _context, request): Promise<void> => {
     const policiesToRemove: Array<Promise<void>> = [];
     const deletedEndpointPolicyIds: string[] = [];
 
@@ -699,12 +699,15 @@ export const getPackagePolicyDeleteCallback = (
     );
 
     // The owner is gone, so every key of these policies can go too; cleanup would get to them
-    // eventually, but there is no reason to wait.
+    // eventually, but there is no reason to wait. The deletes are audited for the user who deleted
+    // the policies, when Fleet passes the request.
     if (deletedEndpointPolicyIds.length > 0) {
       policiesToRemove.push(
         endpointServices
           .getExportProviderKeyClient()
-          .deleteKeysForPackagePolicies(deletedEndpointPolicyIds)
+          .deleteKeysForPackagePolicies(deletedEndpointPolicyIds, {
+            auditLogger: request ? endpointServices.security?.audit.asScoped(request) : undefined,
+          })
           .catch((error) => {
             logger.warn(
               `Failed to delete export provider keys of deleted policies [${deletedEndpointPolicyIds.join(

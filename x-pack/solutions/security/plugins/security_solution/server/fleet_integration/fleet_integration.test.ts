@@ -13,6 +13,7 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   savedObjectsClientMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
 import {
   createNewPackagePolicyMock,
@@ -2831,12 +2832,14 @@ describe('Fleet integrations', () => {
     let policyId: string;
     let fakeArtifact: ExceptionListSchema;
 
-    const invokeDeleteCallback = async (): Promise<void> => {
+    const invokeDeleteCallback = async (request?: KibanaRequest): Promise<void> => {
       const callback = getPackagePolicyDeleteCallback(endpointServicesMock);
       await callback(
         removedPolicies,
         endpointServicesMock.savedObjects.createInternalScopedSoClient(),
-        endpointServicesMock.getInternalEsClient()
+        endpointServicesMock.getInternalEsClient(),
+        undefined,
+        request
       );
     };
 
@@ -3094,7 +3097,22 @@ if (ctx._source.containsKey('tags')) {
 
         expect(
           endpointServicesMock.getExportProviderKeyClient().deleteKeysForPackagePolicies
-        ).toHaveBeenCalledWith(['endpoint-policy-1']);
+        ).toHaveBeenCalledWith(['endpoint-policy-1'], { auditLogger: undefined });
+      });
+
+      it("audits the key deletes for the request's user", async () => {
+        const security = securityServiceMock.createStart();
+        endpointServicesMock.security = security;
+        removedPolicies = [{ id: 'endpoint-policy-1', success: true, package: endpointPackage }];
+
+        await invokeDeleteCallback(req);
+
+        expect(security.audit.asScoped).toHaveBeenCalledWith(req);
+        expect(
+          endpointServicesMock.getExportProviderKeyClient().deleteKeysForPackagePolicies
+        ).toHaveBeenCalledWith(['endpoint-policy-1'], {
+          auditLogger: security.audit.asScoped(req),
+        });
       });
 
       it('does not call deleteKeysForPackagePolicies when no Endpoint policy was deleted successfully', async () => {
