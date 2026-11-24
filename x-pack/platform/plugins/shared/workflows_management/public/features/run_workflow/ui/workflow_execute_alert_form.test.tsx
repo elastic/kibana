@@ -6,7 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { fetchAlertsIndexNames } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
@@ -248,6 +248,52 @@ describe('WorkflowExecuteAlertForm', () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     expect(mockSearchSource.fetch$.mock.calls.length).toBe(initialFetchCount);
+  });
+
+  it('keeps the submitted query as the search bar baseline and applies drafts on time change', async () => {
+    const SearchBarSpy = jest.fn(MockSearchBar);
+    const kibana = mockUseKibana();
+    mockUseKibana.mockReturnValue({
+      ...kibana,
+      services: { ...kibana.services, unifiedSearch: { ui: { SearchBar: SearchBarSpy } } },
+    } as any);
+    const latestProps = () => SearchBarSpy.mock.calls[SearchBarSpy.mock.calls.length - 1][0] as any;
+
+    render(
+      <TestWrapper>
+        <WorkflowExecuteAlertForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(mockSearchSource.fetch$).toHaveBeenCalled();
+    });
+    expect(latestProps().disableSubscribingToGlobalDataServices).toBe(true);
+
+    const draft = { query: 'kibana.alert.rule.name: "Alpha"', language: 'kuery' };
+    act(() => {
+      latestProps().onQueryChange({ query: draft, dateRange: { from: 'now-15m', to: 'now' } });
+    });
+    expect(latestProps().query).toEqual({ query: '', language: 'kuery' });
+
+    act(() => {
+      latestProps().onQuerySubmit({ query: draft, dateRange: { from: 'now-24h', to: 'now' } });
+    });
+
+    await waitFor(() => {
+      expect(mockSearchSource.setField).toHaveBeenCalledWith(
+        'query',
+        expect.objectContaining({ query: draft.query })
+      );
+    });
+    expect(latestProps()).toEqual(
+      expect.objectContaining({ query: draft, dateRangeFrom: 'now-24h', dateRangeTo: 'now' })
+    );
   });
 
   it('calls setValue when an alert row is selected', async () => {
