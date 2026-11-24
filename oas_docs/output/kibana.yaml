@@ -30728,6 +30728,7 @@ paths:
           required: false
           schema:
             type: string
+            x-kibana-planned-max-length: 256
         - description: Sort order, ascending or descending
           in: query
           name: sortOrder
