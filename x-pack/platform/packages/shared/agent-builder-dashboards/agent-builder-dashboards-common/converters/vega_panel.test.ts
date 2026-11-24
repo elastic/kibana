@@ -17,7 +17,6 @@ const SPEC = JSON.stringify(
   null,
   2
 );
-const MINIFIED_SPEC = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json","mark":"bar"}';
 const grid = { x: 0, y: 0, w: 24, h: 15 };
 
 const panelSettings = {
@@ -68,7 +67,7 @@ describe('Vega dashboard panel conversion', () => {
     ]);
   });
 
-  it('to_attachment reads a by-value legacy-vis Vega panel as a native `vega` panel, re-indenting a compact spec', () => {
+  it('to_attachment reads a by-value legacy-vis Vega panel as a native `vega` panel with a new id', () => {
     const state = {
       panels: [
         {
@@ -76,8 +75,9 @@ describe('Vega dashboard panel conversion', () => {
           id: 'p1',
           grid,
           config: {
+            title: undefined,
             savedVis: buildVegaSavedVis({
-              spec: MINIFIED_SPEC,
+              spec: SPEC,
               title: 'Chart',
               description: 'Desc',
             }),
@@ -91,7 +91,7 @@ describe('Vega dashboard panel conversion', () => {
     expect(attachmentData.panels).toEqual([
       {
         type: VEGA_VIS_TYPE,
-        id: 'p1',
+        id: 'p1-vega',
         grid,
         config: { spec: { format: 'hjson', value: SPEC }, title: 'Chart', description: 'Desc' },
       },
@@ -108,7 +108,7 @@ describe('Vega dashboard panel conversion', () => {
           config: {
             ...panelSettings,
             savedVis: buildVegaSavedVis({
-              spec: MINIFIED_SPEC,
+              spec: SPEC,
               title: 'Original savedVis title',
               description: 'Original savedVis description',
             }),
@@ -122,7 +122,7 @@ describe('Vega dashboard panel conversion', () => {
     expect(attachmentData.panels).toEqual([
       {
         type: VEGA_VIS_TYPE,
-        id: 'p1',
+        id: 'p1-vega',
         grid,
         config: { ...panelSettings, spec: { format: 'hjson', value: SPEC } },
       },

@@ -18,7 +18,13 @@ const mockGetTransforms = jest.fn();
 beforeEach(() => {
   mockGetTransforms.mockReset();
   mockGetTransforms.mockImplementation((type: string) =>
-    type === 'markdown' || type === 'lens-dashboard-app' || type === 'vega'
+    type === 'vega'
+      ? {
+          schema: z
+            .object({ spec: z.object({ format: z.literal('hjson'), value: z.string().min(1) }) })
+            .strict(),
+        }
+      : type === 'markdown' || type === 'lens-dashboard-app'
       ? { schema: z.object({ content: z.string() }).strict() }
       : undefined
   );
@@ -104,8 +110,11 @@ describe('createDashboardAppStateValidator', () => {
     });
 
     it('validates vega panels with the vega schema', () => {
-      expect(validatePanel({ content: 1 }, 'vega')).toEqual([
-        'config.content: Invalid input: expected string, received number',
+      expect(validatePanel({ spec: { format: 'hjson', value: '{mark: bar}' } }, 'vega')).toEqual(
+        []
+      );
+      expect(validatePanel({ spec: '{mark: bar}' }, 'vega')).toEqual([
+        expect.stringMatching(/^config\.spec: /),
       ]);
     });
 

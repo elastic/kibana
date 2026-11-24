@@ -71,22 +71,13 @@ export const normalizeVegaConfig = (input: unknown): VegaConfig | undefined => {
   return config;
 };
 
-export const prettyPrintVegaSpec = (spec: string): string => {
-  try {
-    const parsed = JSON.parse(spec);
-    if (parsed && typeof parsed === 'object') {
-      return JSON.stringify(parsed, null, 2);
-    }
-  } catch {
-    // fall through
-  }
-  return spec;
-};
+/** The longest spec a native `vega` panel accepts. */
+const MAX_NATIVE_VEGA_SPEC_LENGTH = 1_000_000;
 
 /**
  * Read the serialized Vega spec out of a legacy-vis (`visualization`) panel's
  * by-value `config`, i.e. `config.savedVis.params.spec`. Returns `undefined` when
- * the config is not a Vega legacy-vis panel.
+ * the config is not a Vega legacy-vis panel, or its spec does not fit a native `vega` panel.
  */
 export const extractVegaSpecFromSavedVis = (
   config: unknown
@@ -98,11 +89,11 @@ export const extractVegaSpecFromSavedVis = (
     return undefined;
   }
   const spec = savedVis.params?.spec;
-  if (typeof spec !== 'string' || spec.length === 0) {
+  if (typeof spec !== 'string' || spec.length === 0 || spec.length > MAX_NATIVE_VEGA_SPEC_LENGTH) {
     return undefined;
   }
   return {
-    spec: prettyPrintVegaSpec(spec),
+    spec,
     title: typeof savedVis.title === 'string' ? savedVis.title : '',
     description: typeof savedVis.description === 'string' ? savedVis.description : '',
   };

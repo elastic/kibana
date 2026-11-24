@@ -46,18 +46,24 @@ export const isLensAttributesPanel = (
  */
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
   // Read a by-value legacy-vis (`visualization`) Vega panel as a native `vega` panel,
-  // until the dashboard migrates these panels on read.
+  // until the dashboard migrates these panels on read. The panel gets a new id because the
+  // dashboard keeps the mounted embeddable of a panel id when only its type changes.
   if (panel.type === VISUALIZE_EMBEDDABLE_TYPE) {
     const vega = extractVegaSpecFromSavedVis(panel.config);
     if (vega) {
-      const { savedVis: _savedVis, ...restConfig } = panel.config as Record<string, unknown>;
+      const {
+        savedVis: _savedVis,
+        title,
+        description,
+        ...restConfig
+      } = panel.config as Record<string, unknown>;
       return {
         type: VEGA_VIS_TYPE,
-        id: panel.id ?? '',
+        id: panel.id ? `${panel.id}-vega` : '',
         config: {
-          title: vega.title,
-          description: vega.description,
           ...restConfig,
+          title: typeof title === 'string' ? title : vega.title,
+          description: typeof description === 'string' ? description : vega.description,
           spec: { format: 'hjson', value: vega.spec },
         },
         grid: panel.grid,
