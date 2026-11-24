@@ -214,6 +214,13 @@ export const TemplateForm = ({
     async (wizardData: WizardContent) => {
       const template = buildTemplateObject(indexTemplate)(wizardData);
 
+      // The server's request schema doesn't accept `data_stream_options`. On edit the server
+      // re-reads and persists the existing options itself, so don't send them in the payload.
+      if (template.template) {
+        const { data_stream_options: _omitted, ...templateWithoutOptions } = template.template;
+        template.template = templateWithoutOptions;
+      }
+
       // We need to strip empty string, otherwise if the "order" or "version"
       // are not set, they will be empty string and ES expect a number for those parameters.
       onSave(

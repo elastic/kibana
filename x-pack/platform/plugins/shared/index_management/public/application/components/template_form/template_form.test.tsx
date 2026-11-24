@@ -378,6 +378,63 @@ describe('TemplateForm wizard integration', () => {
     });
   });
 
+  describe('WHEN saving a template that has data_stream_options', () => {
+    const templateWithFailureStore: TemplateDeserialized = {
+      name: 'test-fs',
+      indexPatterns: ['test-fs-*'],
+      dataStream: {},
+      template: {
+        settings: { index: { number_of_replicas: 1 } },
+        data_stream_options: { failure_store: { enabled: true } },
+      },
+      _kbnMeta: { type: 'default', hasDatastream: true, isLegacy: false },
+    };
+
+    beforeEach(() => {
+      mockLogisticsData = {
+        name: 'test-fs',
+        indexPatterns: ['test-fs-*'],
+        dataStream: {},
+      };
+      mockComponentsData = [];
+      mockSettingsData = { index: { number_of_replicas: 1 } };
+      mockMappingsData = undefined;
+      mockAliasesData = undefined;
+    });
+
+    it.each([
+      ['editing', true],
+      ['cloning', false],
+    ])(
+      'SHOULD NOT send data_stream_options in the save payload when %s',
+      async (_mode, isEditing) => {
+        mockIsEditing = isEditing;
+        const onSave = jest.fn();
+        renderTemplateForm({ onSave, isEditing, defaultValue: templateWithFailureStore });
+
+        clickNextButton();
+        await screen.findByTestId('mockStepComponents');
+        clickNextButton();
+        await screen.findByTestId('mockStepSettings');
+        clickNextButton();
+        await screen.findByTestId('mockStepMappings');
+        clickNextButton();
+        await screen.findByTestId('mockStepAliases');
+        clickNextButton();
+        await screen.findByTestId('mockStepReview');
+        clickNextButton();
+
+        await waitFor(() => {
+          expect(onSave).toHaveBeenCalledTimes(1);
+        });
+
+        const savedTemplate = onSave.mock.calls[0][0] as TemplateDeserialized;
+        expect(savedTemplate.template).not.toHaveProperty('data_stream_options');
+        expect(savedTemplate.template?.settings).toEqual({ index: { number_of_replicas: 1 } });
+      }
+    );
+  });
+
   describe('WHEN cloning a template', () => {
     const originalTemplate: TemplateDeserialized = {
       name: 'original-copy',
