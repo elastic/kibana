@@ -29,6 +29,12 @@ export interface BulkCreateWorkflowsResponse {
   failed: Array<{ index: number; id: string; error: string }>;
 }
 
+export interface BulkDeleteWorkflowsResponse {
+  total: number;
+  deleted: number;
+  failures: Array<{ id: string; error: string }>;
+}
+
 export interface CreateWorkflowParams {
   [key: string]: unknown;
 }

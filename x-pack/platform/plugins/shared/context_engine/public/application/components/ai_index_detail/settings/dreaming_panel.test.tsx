@@ -200,6 +200,84 @@ describe('DreamingPanel', () => {
     expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
   });
 
+  it('turns maintenance on with its defaults, reporting only', async () => {
+    renderPanel(aiIndexWith(factsOnly));
+
+    expect(screen.queryByTestId('contextAiIndexMaintenanceMode')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexMaintenanceEnabled'));
+    expect(screen.getByTestId('contextAiIndexMaintenanceMode')).toHaveValue('report');
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          maintenance: {
+            enabled: true,
+            mode: 'report',
+            schedule: { interval: '24h' },
+            neighbors: 5,
+            sweep_size: 200,
+          },
+        }),
+      })
+    );
+  });
+
+  it('saves the maintenance mode and interval', async () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMode'), {
+      target: { value: 'apply' },
+    });
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceInterval'), {
+      target: { value: '12h' },
+    });
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          maintenance: expect.objectContaining({
+            mode: 'apply',
+            schedule: { interval: '12h' },
+          }),
+        }),
+      })
+    );
+  });
+
+  it('does not save maintenance settings out of bounds', () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceNeighbors'), {
+      target: { value: '50' },
+    });
+
+    expect(screen.getByText('Must be a whole number from 1 to 20.')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
+  });
+
+  it('keeps the saved maintenance settings when it turns maintenance off', async () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceNeighbors'), {
+      target: { value: '50' },
+    });
+    fireEvent.click(screen.getByTestId('contextAiIndexMaintenanceEnabled'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          maintenance: expect.objectContaining({ enabled: false, neighbors: 5 }),
+        }),
+      })
+    );
+  });
+
   it('discards edits', () => {
     renderPanel(aiIndexWith(factsOnly));
 

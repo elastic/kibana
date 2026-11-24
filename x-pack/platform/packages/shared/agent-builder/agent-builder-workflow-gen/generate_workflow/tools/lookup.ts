@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { lookupTriggerDefinitionsForAgent } from '@kbn/workflows-management-plugin/common/build_trigger_definitions_for_agent';
 import { builtInStepDefinitions } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
-import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
+import { getAllConnectors, getStepExposure } from '@kbn/workflows-management-plugin/common/schema';
 import {
   categorizeConnectorType,
   formatBuiltInStep,
@@ -39,7 +39,8 @@ const buildDynamicConnectorStepEntries = async (
         : [baseType];
 
     for (const stepType of stepTypes) {
-      if (knownIds.has(stepType)) continue;
+      // A dynamic connector of the same type must not bring back a managed-only step.
+      if (knownIds.has(stepType) || getStepExposure(stepType) === 'managed_only') continue;
       out.push({
         id: stepType,
         label: info.displayName ?? stepType,
@@ -58,7 +59,10 @@ export const lookupStepDefinitions = async (
   const builtInIds = new Set(builtInStepDefinitions.map((s) => s.id));
   const builtIns = builtInStepDefinitions.map(formatBuiltInStep);
 
-  const allConnectors = getAllConnectors().filter((c) => !builtInIds.has(c.type) && !c.deprecation);
+  // Managed-only steps are left out: generated workflows aren't managed, so they can't use them.
+  const allConnectors = getAllConnectors().filter(
+    (c) => !builtInIds.has(c.type) && !c.deprecation && getStepExposure(c.type) !== 'managed_only'
+  );
   const allConnectorEntries = allConnectors.map(formatConnectorStep);
 
   const knownIds = new Set<string>(builtInIds);

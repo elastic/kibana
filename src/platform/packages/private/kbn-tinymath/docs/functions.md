@@ -93,7 +93,7 @@ clamp(1, 2, 3) // returns 2
 clamp([10, 20, 30, 40], 15, 25) // returns [15, 20, 25, 25]
 clamp(10, [15, 2, 4, 20], 25) // returns [15, 10, 10, 20]
 clamp(35, 10, [20, 30, 40, 50]) // returns [20, 30, 35, 35]
-clamp([1, 9], 3, [4, 5]) // returns [clamp([1, 3, 4]), clamp([9, 3, 5])] = [3, 5]
+clamp([1, 9], 3, [4, 5]) // returns [clamp(1, 3, 4), clamp(9, 3, 5)] = [3, 5]
 ```
 ***
 ## _eq(_ _a_,  _b_ _)_
@@ -331,7 +331,7 @@ Divides two numbers. If at least one array of numbers is passed into the functio
 | Param | Type | Description |
 | --- | --- | --- |
 | a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | dividend, a number or an array of numbers |
-| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | divisor, a number or an array of numbers, `b` != 0 |
+| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | divisor, a number or an array of numbers, `b` can't be 0 |
 
 **Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The quotient of `a` and `b` if both are numbers. Returns an array with the quotients applied index-wise to each element if `a` or `b` is an array.  
 **Throws**:
@@ -448,7 +448,7 @@ log([2, 4, 8, 16, 32], 2) // returns [1, 2, 3, 4, 5]
 ```
 ***
 ## _log10(_ _a_ _)_
-Calculates the base 10 logarithm of a number. For arrays, the function will be applied index-wise to each element. Expressions don&#x27;t accept the name `log10`, because function names can&#x27;t contain digits. To calculate a base 10 logarithm, use `log` with a base of 10, as in the examples.
+Deprecated. Call `log(a, 10)` instead. Expressions can&#x27;t call `log10`, because function names can&#x27;t contain digits.
 
 
 | Param | Type | Description |
@@ -550,13 +550,13 @@ min([1, 9], 4, [3, 5]) // returns [min([1, 4, 3]), min([9, 4, 5])] = [1, 4]
 ```
 ***
 ## _mod(_ _a_,  _b_ _)_
-Remainder after dividing two numbers. If at least one array of numbers is passed into the function, the function will be applied index-wise to each element.
+Calculates the remainder after dividing two numbers. If at least one array of numbers is passed into the function, the function will be applied index-wise to each element.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | dividend, a number or an array of numbers |
-| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | divisor, a number or an array of numbers, `b` != 0 |
+| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | divisor, a number or an array of numbers, `b` can't be 0 |
 
 **Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The remainder of `a` divided by `b` if both are numbers. Returns an array with the remainders applied index-wise to each element if `a` or `b` is an array. If `a` is a number and `b` is an array that contains 0, the result for that element is `NaN`.  
 **Throws**:

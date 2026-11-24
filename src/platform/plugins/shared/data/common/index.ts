@@ -23,7 +23,7 @@ export type { SerializedField, SerializedValue } from './serialize_utils';
 export { SerializableType, deserializeField, serializeField } from './serialize_utils';
 export type { ValueSuggestionsMethod } from './constants';
 export { DatatableUtilitiesService } from './datatable_utilities';
-export { getEsQueryConfig } from './es_query';
+export { getEsQueryConfig, getEsQueryConfigAsync } from './es_query';
 export { KbnFieldType } from './kbn_field_types';
 export {
   calculateBounds,
