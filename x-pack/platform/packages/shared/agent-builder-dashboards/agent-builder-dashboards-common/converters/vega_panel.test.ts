@@ -17,6 +17,7 @@ const SPEC = JSON.stringify(
   null,
   2
 );
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const grid = { x: 0, y: 0, w: 24, h: 15 };
 
 const panelSettings = {
@@ -91,7 +92,7 @@ describe('Vega dashboard panel conversion', () => {
     expect(attachmentData.panels).toEqual([
       {
         type: VEGA_VIS_TYPE,
-        id: 'p1-vega',
+        id: expect.stringMatching(UUID),
         grid,
         config: { spec: { format: 'hjson', value: SPEC }, title: 'Chart', description: 'Desc' },
       },
@@ -122,7 +123,7 @@ describe('Vega dashboard panel conversion', () => {
     expect(attachmentData.panels).toEqual([
       {
         type: VEGA_VIS_TYPE,
-        id: 'p1-vega',
+        id: expect.stringMatching(UUID),
         grid,
         config: { ...panelSettings, spec: { format: 'hjson', value: SPEC } },
       },

@@ -10,6 +10,7 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/as-code-dashboard-schema';
+import { v5 as uuidv5 } from 'uuid';
 import { LensConfigBuilder, type LensAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
@@ -40,6 +41,8 @@ export const isLensAttributesPanel = (
   );
 };
 
+const LEGACY_VEGA_PANEL_ID_NAMESPACE = '013a085a-2f4c-4afa-8ef8-4b43384e6ddf';
+
 /**
  * Converts a DashboardPanel to an AttachmentPanel.
  * For Lens panels with internal attributes format, converts to API format.
@@ -47,7 +50,8 @@ export const isLensAttributesPanel = (
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
   // Read a by-value legacy-vis (`visualization`) Vega panel as a native `vega` panel,
   // until the dashboard migrates these panels on read. The panel gets a new id because the
-  // dashboard keeps the mounted embeddable of a panel id when only its type changes.
+  // dashboard keeps the mounted embeddable of a panel id when only its type changes. The id is
+  // derived from the legacy one, so reading the same dashboard again gives the same id.
   if (panel.type === VISUALIZE_EMBEDDABLE_TYPE) {
     const vega = extractVegaSpecFromSavedVis(panel.config);
     if (vega) {
@@ -59,7 +63,7 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
       } = panel.config as Record<string, unknown>;
       return {
         type: VEGA_VIS_TYPE,
-        id: panel.id ? `${panel.id}-vega` : '',
+        id: panel.id ? uuidv5(panel.id, LEGACY_VEGA_PANEL_ID_NAMESPACE) : '',
         config: {
           ...restConfig,
           title: typeof title === 'string' ? title : vega.title,
