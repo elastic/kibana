@@ -272,6 +272,12 @@ describe('aggregateEsqlProfile operator time', () => {
       { collect_nanos: 4_000, emit_nanos: 1_000, rows_received: 10 },
       4_000 + 1_000,
     ],
+    [
+      'a fetch operator, which groups the documents and then appends the fetched columns',
+      'FetchOperator',
+      { plan_nanos: 3_000, gather_nanos: 2_000, rows_received: 10, documents: 10 },
+      3_000 + 2_000,
+    ],
   ])('counts every phase of %s', (_, operator, status, expectedNanos) => {
     const { operators } = aggregateEsqlProfile({
       drivers: [{ description: 'data', operators: [{ operator, status }] }],
