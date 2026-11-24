@@ -71,10 +71,10 @@ spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () =
 
   spaceTest('no column is sorted by default', async ({ page, pageObjects }) => {
     const { endpointList } = pageObjects;
-    const listResponse = waitForEndpointList(page, { onPageLoad: true });
-    await endpointList.goto();
-
-    const response = await listResponse;
+    const [response] = await Promise.all([
+      waitForEndpointList(page, { onPageLoad: true }),
+      endpointList.goto(),
+    ]);
     expect(response.status()).toBe(200);
     // Without a sort in the URL the page sends none, and the server applies and echoes its default (enrolled_at desc).
     const { searchParams } = new URL(response.url());
@@ -106,9 +106,11 @@ spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () =
           ['asc', 'ascending'],
           ['desc', 'descending'],
         ] as const) {
-          const listResponse = waitForEndpointList(page, { sort: { field, direction } });
-          await header.click();
-          expect((await listResponse).status()).toBe(200);
+          const [response] = await Promise.all([
+            waitForEndpointList(page, { sort: { field, direction } }),
+            header.click(),
+          ]);
+          expect(response.status()).toBe(200);
           await expect(header).toHaveAttribute('aria-sort', ariaSort);
           // Set by the same response as aria-sort, so this is the sorted response's total.
           await expect(endpointList.total).toHaveText('Showing 3 endpoints');
@@ -120,10 +122,11 @@ spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () =
   spaceTest('applies the sort passed in the URL', async ({ page, pageObjects }) => {
     const { endpointList } = pageObjects;
     const sort = { field: EndpointSortableField.HOST_STATUS, direction: 'desc' } as const;
-    const listResponse = waitForEndpointList(page, { sort, onPageLoad: true });
-    await endpointList.goto({ sortField: sort.field, sortDirection: sort.direction });
-
-    expect((await listResponse).status()).toBe(200);
+    const [response] = await Promise.all([
+      waitForEndpointList(page, { sort, onPageLoad: true }),
+      endpointList.goto({ sortField: sort.field, sortDirection: sort.direction }),
+    ]);
+    expect(response.status()).toBe(200);
     await expect(endpointList.sortableHeader(sort.field)).toHaveAttribute(
       'aria-sort',
       'descending'
