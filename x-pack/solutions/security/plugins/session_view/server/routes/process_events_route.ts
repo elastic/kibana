@@ -210,6 +210,7 @@ export const fetchEventsAndScopedAlerts = async (
 
     let range;
     let alertsRange;
+    let gapRange;
 
     if (firstEvent?.['@timestamp'] && lastEvent?.['@timestamp']) {
       range = [firstEvent['@timestamp'], lastEvent['@timestamp']];
@@ -217,18 +218,32 @@ export const fetchEventsAndScopedAlerts = async (
       // An alert is raised after the process event that caused it, so it can be newer than every event of its
       // session. Nothing bounds the alerts from above on the last page of the session (a short forward page),
       // and a backward page holds the events up to its cursor, so it covers the alerts up to its cursor, which
-      // can be newer than its last event. A forward page starts at its cursor, so it also covers the alerts
-      // between its cursor and its first event.
+      // can be newer than its last event.
       if (forward && events.length < size) {
-        alertsRange = [alertsCursor ?? range[0]];
-      } else if (forward && alertsCursor) {
-        alertsRange = [alertsCursor, range[1]];
+        alertsRange = [range[0]];
       } else if (!forward && alertsCursor) {
         alertsRange = [range[0], alertsCursor];
       } else {
         alertsRange = range;
       }
+
+      // A forward page starts at its cursor, so it also covers the alerts between its cursor and its first
+      // event. That gap only exists when Session View opens from an alert. It has its own query so that its
+      // alerts cannot take the result slots of the alerts inside the page.
+      if (forward && alertsCursor && cursorTime < Date.parse(range[0])) {
+        gapRange = [alertsCursor, range[0]];
+      }
     }
+
+    const gapAlertsBody = gapRange
+      ? await searchAlerts(
+          alertsClient,
+          sessionEntityId,
+          ALERTS_PER_PROCESS_EVENTS_PAGE,
+          undefined,
+          gapRange
+        )
+      : undefined;
 
     const alertsBody = await searchAlerts(
       alertsClient,
@@ -247,6 +262,7 @@ export const fetchEventsAndScopedAlerts = async (
 
     events = [
       ...events,
+      ...(gapAlertsBody?.events ?? []).map(normalizeToSearchHit),
       ...alertsBody.events.map(normalizeToSearchHit),
       ...processesWithIOEvents.map(normalizeToSearchHit),
     ];

@@ -117,7 +117,7 @@ describe('process_events_route.ts', () => {
       const firstTimestamp = mockEvents[0]['@timestamp'];
       const lastTimestamp = mockEvents[mockEvents.length - 1]['@timestamp'];
 
-      const fetchAndGetAlertsRange = async (
+      const fetchAndGetAlertsRanges = async (
         cursor: string | undefined,
         forward: boolean,
         pageSize?: number
@@ -138,11 +138,23 @@ describe('process_events_route.ts', () => {
           pageSize
         );
 
-        expect(find).toHaveBeenCalledTimes(1);
-        const { query } = find.mock.calls[0][0];
-        const { must } = (query as { bool: { must: RangeClause[] } }).bool;
+        return find.mock.calls.map(([{ query }]) => {
+          const { must } = (query as { bool: { must: RangeClause[] } }).bool;
 
-        return must.find((clause) => clause.range)?.range?.[ALERT_ORIGINAL_TIME_PROPERTY];
+          return must.find((clause) => clause.range)?.range?.[ALERT_ORIGINAL_TIME_PROPERTY];
+        });
+      };
+
+      const fetchAndGetAlertsRange = async (
+        cursor: string | undefined,
+        forward: boolean,
+        pageSize?: number
+      ) => {
+        const ranges = await fetchAndGetAlertsRanges(cursor, forward, pageSize);
+
+        expect(ranges).toHaveLength(1);
+
+        return ranges[0];
       };
 
       it('leaves the range open on the last page of the session', async () => {
@@ -168,19 +180,30 @@ describe('process_events_route.ts', () => {
         expect(range).toEqual({ gte: firstTimestamp, lte: cursor });
       });
 
-      it('starts a forward page at its cursor', async () => {
-        // a forward page holds the events from its cursor on, so the cursor is not after its first event
+      it('searches the alerts between the cursor and the first event of a forward page on their own', async () => {
+        // a forward page holds the events from its cursor on, so the cursor is not after its first event. The
+        // gap has its own query, so its alerts cannot take the result slots of the alerts inside the page.
         const cursor = '2021-11-23T15:25:00.000Z';
-        const range = await fetchAndGetAlertsRange(cursor, true, mockEvents.length);
+        const ranges = await fetchAndGetAlertsRanges(cursor, true, mockEvents.length);
 
-        expect(range).toEqual({ gte: cursor, lte: lastTimestamp });
+        expect(ranges).toEqual([
+          { gte: cursor, lte: firstTimestamp },
+          { gte: firstTimestamp, lte: lastTimestamp },
+        ]);
       });
 
-      it('leaves the range open from the cursor on a short forward page', async () => {
-        const cursor = '2021-11-23T15:25:06.510Z';
-        const range = await fetchAndGetAlertsRange(cursor, true);
+      it('leaves the range of the page open on a short forward page after the gap', async () => {
+        const cursor = '2021-11-23T15:25:00.000Z';
+        const ranges = await fetchAndGetAlertsRanges(cursor, true);
 
-        expect(range).toEqual({ gte: cursor });
+        expect(ranges).toEqual([{ gte: cursor, lte: firstTimestamp }, { gte: firstTimestamp }]);
+      });
+
+      it('does not search a gap when the first event is at the cursor', async () => {
+        // normal paging: the cursor is the time of the last event of the previous page
+        const range = await fetchAndGetAlertsRange(firstTimestamp, true, mockEvents.length);
+
+        expect(range).toEqual({ gte: firstTimestamp, lte: lastTimestamp });
       });
 
       it('searches alerts from the cursor when no process event follows it', async () => {
@@ -235,9 +258,9 @@ describe('process_events_route.ts', () => {
       // Elasticsearch reject the range, so the alerts of a valid page would all be dropped.
       describe('with a cursor that is not a date', () => {
         it('sends a date that Elasticsearch can parse for a date that only JavaScript parses', async () => {
-          const range = await fetchAndGetAlertsRange('Sun, 08 May 2022 13:46:40 GMT', true);
+          const ranges = await fetchAndGetAlertsRanges('Tue, 23 Nov 2021 15:25:00 GMT', true);
 
-          expect(range).toEqual({ gte: '2022-05-08T13:46:40.000Z' });
+          expect(ranges[0]).toEqual({ gte: '2021-11-23T15:25:00.000Z', lte: firstTimestamp });
         });
 
         it('ignores it on a short forward page', async () => {
