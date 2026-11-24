@@ -160,4 +160,293 @@ describe('converse_task', () => {
       ]);
     });
   });
+
+  describe('follow-up turns in the same conversation', () => {
+    const secondPrompt = {
+      type: 'confirmation',
+      id: 'tools.endpoint-response-actions.isolate_host.confirmation.call-2',
+    };
+    const secondStep = {
+      type: 'tool_call',
+      tool_id: 'endpoint-response-actions.isolate_host',
+      tool_call_id: 'call-2',
+      params: { hostName: 'eval-host-release' },
+    };
+
+    const sequentialClient = (): AgentBuilderClient => ({
+      createConversation: jest.fn(),
+      getConversation: jest.fn(),
+      converse: jest
+        .fn()
+        .mockResolvedValueOnce({
+          message: '',
+          steps: [isolateStep],
+          traceId: 'trace-1',
+          conversationId: 'conv-1',
+          prompts: [confirmationPrompt],
+        })
+        .mockResolvedValueOnce({
+          message: 'Next: eval-host-release.',
+          steps: [secondStep],
+          traceId: 'trace-2',
+          conversationId: 'conv-1',
+          prompts: [secondPrompt],
+        }),
+    });
+
+    it('answers the pending confirmation by prompt id in the same conversation and accumulates both turns', async () => {
+      const client = sequentialClient();
+
+      const result = await converseQuestionToTaskOutput(client, 'isolate both', {
+        includePendingConfirmations: true,
+        followUps: [{ confirm: true }],
+      });
+
+      expect(client.converse).toHaveBeenNthCalledWith(2, {
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conv-1',
+        promptResponses: { [confirmationPrompt.id]: { allow: true } },
+      });
+      expect(result.steps).toEqual([isolateStep, secondStep]);
+      expect(result.pending_confirmations).toEqual([
+        { tool_id: 'endpoint-response-actions.isolate_host', tool_call_id: 'call-1' },
+        { tool_id: 'endpoint-response-actions.isolate_host', tool_call_id: 'call-2' },
+      ]);
+      expect(result.confirmation_decisions).toEqual([
+        {
+          tool_id: 'endpoint-response-actions.isolate_host',
+          tool_call_id: 'call-1',
+          allow: true,
+        },
+      ]);
+      expect(result.traceId).toBe('trace-2');
+      expect(result.errors).toEqual([]);
+    });
+
+    it('keeps one, resolved copy of the paused call when the resume returns the whole round', async () => {
+      const resolvedIsolateStep = {
+        ...isolateStep,
+        results: [{ type: 'other', data: { ok: true } }],
+      };
+      const client: AgentBuilderClient = {
+        createConversation: jest.fn(),
+        getConversation: jest.fn(),
+        converse: jest
+          .fn()
+          .mockResolvedValueOnce({
+            message: '',
+            steps: [isolateStep],
+            traceId: 'trace-1',
+            conversationId: 'conv-1',
+            prompts: [confirmationPrompt],
+          })
+          .mockResolvedValueOnce({
+            message: 'Next: eval-host-release.',
+            steps: [resolvedIsolateStep, secondStep],
+            traceId: 'trace-2',
+            conversationId: 'conv-1',
+            prompts: [secondPrompt],
+          }),
+      };
+
+      const result = await converseQuestionToTaskOutput(client, 'isolate both', {
+        includePendingConfirmations: true,
+        followUps: [{ confirm: true }],
+      });
+
+      expect(result.steps).toEqual([resolvedIsolateStep, secondStep]);
+    });
+
+    it('does not let a repeated tool-call id replace a call from an earlier round', async () => {
+      // Round 1's call finished. The message follow-up starts round 2, which pauses on a
+      // confirmation; the server reuses the tool-call id 'call-1' for the new call. Merging
+      // the resume must rewrite round 2's paused copy only, never round 1's evidence.
+      const round1Call = {
+        ...isolateStep,
+        results: [{ type: 'other', data: { round: 1 } }],
+      };
+      const round2Paused = {
+        ...isolateStep,
+        tool_call_id: 'call-1',
+        params: { hostName: 'eval-host-release' },
+      };
+      const round2Resolved = {
+        ...round2Paused,
+        results: [{ type: 'other', data: { round: 2 } }],
+      };
+      const client: AgentBuilderClient = {
+        createConversation: jest.fn(),
+        getConversation: jest.fn(),
+        converse: jest
+          .fn()
+          .mockResolvedValueOnce({
+            message: 'First host handled.',
+            steps: [round1Call],
+            traceId: 'trace-1',
+            conversationId: 'conv-1',
+            prompts: [],
+          })
+          .mockResolvedValueOnce({
+            message: '',
+            steps: [round2Paused],
+            traceId: 'trace-2',
+            conversationId: 'conv-1',
+            prompts: [confirmationPrompt],
+          })
+          .mockResolvedValueOnce({
+            message: 'Done.',
+            steps: [round2Resolved],
+            traceId: 'trace-3',
+            conversationId: 'conv-1',
+            prompts: [],
+          }),
+      };
+
+      const result = await converseQuestionToTaskOutput(client, 'isolate eval-host-isolate', {
+        includePendingConfirmations: true,
+        followUps: [{ message: 'Now isolate eval-host-release.' }, { confirm: true }],
+      });
+
+      expect(result.steps).toEqual([round1Call, round2Resolved]);
+    });
+
+    it('keeps a step that genuinely repeats within a resumed round', async () => {
+      // A reasoning step that appears both before the paused call and again in the
+      // resumed replay is two real occurrences, not a duplicate to collapse.
+      const reasoning = { type: 'reasoning', reasoning: 'Resolving the host first.' };
+      const resolvedIsolateStep = {
+        ...isolateStep,
+        results: [{ type: 'other', data: { ok: true } }],
+      };
+      const client: AgentBuilderClient = {
+        createConversation: jest.fn(),
+        getConversation: jest.fn(),
+        converse: jest
+          .fn()
+          .mockResolvedValueOnce({
+            message: '',
+            steps: [reasoning, isolateStep],
+            traceId: 'trace-1',
+            conversationId: 'conv-1',
+            prompts: [confirmationPrompt],
+          })
+          .mockResolvedValueOnce({
+            message: 'Done.',
+            steps: [reasoning, resolvedIsolateStep, reasoning],
+            traceId: 'trace-2',
+            conversationId: 'conv-1',
+            prompts: [],
+          }),
+      };
+
+      const result = await converseQuestionToTaskOutput(client, 'isolate it', {
+        includePendingConfirmations: true,
+        followUps: [{ confirm: true }],
+      });
+
+      expect(result.steps).toEqual([reasoning, resolvedIsolateStep, reasoning]);
+    });
+
+    it('keeps both copies when the same id-less step appears twice in the resume only', async () => {
+      // The replay carries two occurrences the recorded round never had: the first is
+      // appended, and the second must not be absorbed by the first.
+      const reasoning = { type: 'reasoning', reasoning: 'Isolating the host.' };
+      const resolvedIsolateStep = {
+        ...isolateStep,
+        results: [{ type: 'other', data: { ok: true } }],
+      };
+      const client: AgentBuilderClient = {
+        createConversation: jest.fn(),
+        getConversation: jest.fn(),
+        converse: jest
+          .fn()
+          .mockResolvedValueOnce({
+            message: '',
+            steps: [isolateStep],
+            traceId: 'trace-1',
+            conversationId: 'conv-1',
+            prompts: [confirmationPrompt],
+          })
+          .mockResolvedValueOnce({
+            message: 'Done.',
+            steps: [resolvedIsolateStep, reasoning, reasoning],
+            traceId: 'trace-2',
+            conversationId: 'conv-1',
+            prompts: [],
+          }),
+      };
+
+      const result = await converseQuestionToTaskOutput(client, 'isolate it', {
+        includePendingConfirmations: true,
+        followUps: [{ confirm: true }],
+      });
+
+      expect(result.steps).toEqual([resolvedIsolateStep, reasoning, reasoning]);
+    });
+
+    it('sends allow: false for a decline', async () => {
+      const client = sequentialClient();
+
+      const result = await converseQuestionToTaskOutput(client, 'isolate both', {
+        includePendingConfirmations: true,
+        followUps: [{ confirm: false }],
+      });
+
+      expect(client.converse).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ promptResponses: { [confirmationPrompt.id]: { allow: false } } })
+      );
+      expect(result.confirmation_decisions).toEqual([
+        expect.objectContaining({ tool_call_id: 'call-1', allow: false }),
+      ]);
+    });
+
+    it('sends a message follow-up as input on the same conversation', async () => {
+      const client = createClient({
+        message: 'patient zero is WKSTN-RECV01',
+        steps: [],
+        traceId: 'trace-1',
+        conversationId: 'conv-9',
+        prompts: [],
+      });
+
+      await converseQuestionToTaskOutput(client, 'who is patient zero?', {
+        followUps: [{ message: 'Isolate that host.' }],
+      });
+
+      expect(client.converse).toHaveBeenNthCalledWith(2, {
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conv-9',
+        input: 'Isolate that host.',
+      });
+    });
+
+    it('records an error instead of sending when there is nothing to confirm', async () => {
+      const client = createClient({
+        message: 'ok',
+        steps: [],
+        traceId: 'trace-1',
+        conversationId: 'conv-1',
+        prompts: [],
+      });
+
+      const result = await converseQuestionToTaskOutput(client, 'q', {
+        followUps: [{ confirm: true }],
+      });
+
+      expect(client.converse).toHaveBeenCalledTimes(1);
+      expect(result.errors).toHaveLength(1);
+    });
+
+    it('records an error when the first turn returned no conversation id', async () => {
+      const client = createClient({ message: 'ok', steps: [], traceId: 't', prompts: [] });
+
+      const result = await converseQuestionToTaskOutput(client, 'q', {
+        followUps: [{ message: 'more' }],
+      });
+
+      expect(client.converse).toHaveBeenCalledTimes(1);
+      expect(result.errors).toHaveLength(1);
+    });
+  });
 });
