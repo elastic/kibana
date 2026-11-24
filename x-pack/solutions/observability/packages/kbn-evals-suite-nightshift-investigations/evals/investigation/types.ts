@@ -85,4 +85,13 @@ export interface InvestigationTaskOutput {
   /** Counted before `tool_call_trajectory` is bounded, so it can exceed that list's length. */
   tool_call_count?: number;
   usage?: InvestigationUsage;
+  /**
+   * ORCA only: the four-section `report.md` the model under test wrote from the finished
+   * investigation, which ORCA's graders read. Empty when it concluded that no incident occurred.
+   */
+  orca_report_md?: string;
+  /** ORCA only: `orca_report_md` was cut at its length bound. */
+  orca_report_truncated?: boolean;
+  /** ORCA only: why `orca_report_md` could not be written. */
+  orca_report_error?: string;
 }

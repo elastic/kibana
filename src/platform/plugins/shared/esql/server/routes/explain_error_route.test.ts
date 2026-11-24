@@ -21,7 +21,14 @@ jest.mock('./helpers', () => ({
 
 const { resolveConnectorId, createScopedModel } = jest.requireMock('./helpers');
 
-function buildMocks({ deployment }: { deployment?: DeploymentInfo } = {}) {
+function buildMocks(
+  options: {
+    deployment?: DeploymentInfo;
+    /** Pass `null` to simulate a missing optional inference plugin. */
+    inference?: object | null;
+  } = {}
+) {
+  const { deployment, inference = {} } = options;
   const handler = jest.fn();
   const router = {
     post: jest.fn((_, h) => {
@@ -34,7 +41,8 @@ function buildMocks({ deployment }: { deployment?: DeploymentInfo } = {}) {
     forbidden: jest.fn((r) => ({ status: 403, ...r })),
     customError: jest.fn((r) => ({ status: r?.statusCode ?? 500, ...r })),
   };
-  const getStartServices = jest.fn().mockResolvedValue([{}, { inference: {} }]);
+  const startPlugins = inference === null ? {} : { inference };
+  const getStartServices = jest.fn().mockResolvedValue([{}, startPlugins]);
   const context = { logger: { get: () => ({ error: jest.fn() }) } };
 
   registerExplainErrorRoute(
@@ -136,6 +144,20 @@ describe('registerExplainErrorRoute', () => {
     expect(response.badRequest).toHaveBeenCalledWith({
       body: expect.objectContaining({ attributes: { code: NO_AI_CONNECTOR_ERROR_CODE } }),
     });
+  });
+
+  it('returns 503 when the inference plugin is unavailable', async () => {
+    const { handler, requestHandlerContext, request, response } = buildMocks({
+      inference: null,
+    });
+
+    await handler(requestHandlerContext, request, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 503,
+      body: { message: 'Inference plugin is unavailable.' },
+    });
+    expect(resolveConnectorId).not.toHaveBeenCalled();
   });
 
   it('answers forbidden for a license error', async () => {

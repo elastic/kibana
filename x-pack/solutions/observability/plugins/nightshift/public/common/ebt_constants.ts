@@ -112,7 +112,6 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   SEVERITY_TILES: 'nightshiftSeverityTiles',
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
   START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',
-  STATUS_SUMMARY: 'nightshiftStatusSummary',
   TOPOLOGY: 'nightshiftTopology',
 } as const;
 

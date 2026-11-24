@@ -161,6 +161,26 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).toThrow(/not supported inside a parallel branch/);
   });
 
+  it('compiles a workflow.awaitExecutions step inside a branch body', () => {
+    expect(() =>
+      buildGraph({
+        ...baseParallel,
+        steps: [
+          {
+            name: 'start',
+            type: 'workflow.executeAsync',
+            with: { 'workflow-id': 'child' },
+          } as unknown as ConnectorStep,
+          {
+            name: 'join',
+            type: 'workflow.awaitExecutions',
+            with: { 'from-steps': ['start'] },
+          } as unknown as ConnectorStep,
+        ],
+      })
+    ).not.toThrow();
+  });
+
   it('compiles a workflow.fail step inside a dynamic branch body', () => {
     // `workflow.output` / `workflow.fail` are allowed inside a branch body; the
     // terminator node is compiled into the branch chain like any other step.
