@@ -19,25 +19,26 @@ export const validateSlackChannelsBound = async ({
   request,
   checker,
   logger,
+  storedDestinations = new Set<string>(),
 }: {
   automation: Pick<NightshiftAutomationAttributes, 'completions'>;
   request: KibanaRequest;
   checker: SlackChannelBindingChecker | undefined;
   logger: Logger;
+  storedDestinations?: ReadonlySet<string>;
 }): Promise<void> => {
   const channels = new Set<string>();
   for (const { action, targetMode, destination, connectorId } of automation.completions) {
     const isElasticApp =
       (connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID) === ELASTIC_APPS_SLACK_CONNECTOR_ID;
     const channel = destination?.trim();
-    if (
-      action === 'post_to_slack' &&
-      targetMode === 'channel' &&
-      isElasticApp &&
-      channel &&
-      SLACK_CHANNEL_ID_PATTERN.test(channel)
-    ) {
+    if (action !== 'post_to_slack' || targetMode !== 'channel' || !isElasticApp || !channel) {
+      continue;
+    }
+    if (SLACK_CHANNEL_ID_PATTERN.test(channel)) {
       channels.add(channel);
+    } else if (!storedDestinations.has(channel)) {
+      throw badRequest('Slack destinations must be a channel ID, not a channel name.');
     }
   }
   if (channels.size === 0) return;

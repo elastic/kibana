@@ -450,3 +450,35 @@ it('does not re-check the saved Slack destination when the update leaves it alon
   expect(checkChannelBound).not.toHaveBeenCalled();
   expect(soClient.update).toHaveBeenCalled();
 });
+
+it('keeps a stored channel name that the update leaves in place', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' }],
+    },
+  });
+
+  await call({
+    completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' }],
+  });
+
+  expect(checkChannelBound).not.toHaveBeenCalled();
+  expect(soClient.update).toHaveBeenCalled();
+});
+
+it('re-checks the saved channel when a paused automation is enabled', async () => {
+  checkChannelBound.mockResolvedValue(false);
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      isEnabled: false,
+      completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: 'C012ABCDEF' }],
+    },
+  });
+
+  await expect(call({ isEnabled: true })).rejects.toMatchObject({
+    output: { statusCode: 400 },
+  });
+  expect(soClient.update).not.toHaveBeenCalled();
+});

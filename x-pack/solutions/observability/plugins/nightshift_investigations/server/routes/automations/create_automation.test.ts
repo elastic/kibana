@@ -98,7 +98,7 @@ it('stores tags and the requested enabled state', async () => {
 });
 
 it('turns the UI channel action into an investigation lifecycle destination', async () => {
-  const completion = { action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' };
+  const completion = { action: 'post_to_slack', targetMode: 'channel', destination: 'C012ABCDEF' };
   const result = await call({ completions: [completion] });
   expect(result.completions).toEqual([completion]);
   const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
@@ -106,7 +106,7 @@ it('turns the UI channel action into an investigation lifecycle destination', as
     {
       type: 'slack',
       connector_id: 'elastic-apps-slack',
-      params: { channel: '#oncall' },
+      params: { channel: 'C012ABCDEF' },
       automation_id: 'automation-1',
       automation_name: 'Triage',
     },
@@ -290,11 +290,12 @@ describe('Slack destinations', () => {
     expect(soClient.create).not.toHaveBeenCalled();
   });
 
-  it('saves a legacy channel name without checking its binding', async () => {
-    await call({ completions: [channelCompletion({ destination: '#oncall' })] });
-
+  it('rejects a new channel name before any write', async () => {
+    await expect(
+      call({ completions: [channelCompletion({ destination: '#oncall' })] })
+    ).rejects.toMatchObject({ output: { statusCode: 400 } });
     expect(checkChannelBound).not.toHaveBeenCalled();
-    expect(soClient.create).toHaveBeenCalled();
+    expect(soClient.create).not.toHaveBeenCalled();
   });
 
   it('does not check a channel posted through a custom connector', async () => {

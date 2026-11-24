@@ -123,13 +123,19 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       if (!completions.success) throw badRequest(completions.error.message);
       merged.completions = completions.data;
       validateScheduledAutomation(merged);
-      if (body.completions !== undefined || body.trigger !== undefined) {
+      const isBeingEnabled = body.isEnabled === true && !existing.attributes.isEnabled;
+      if (body.completions !== undefined || body.trigger !== undefined || isBeingEnabled) {
         validateThreadCompletion(merged);
         await validateSlackChannelsBound({
           automation: merged,
           request,
           checker: getSlackChannelBindingChecker(),
           logger,
+          storedDestinations: new Set(
+            existing.attributes.completions.flatMap(({ destination }) =>
+              destination ? [destination.trim()] : []
+            )
+          ),
         });
       }
     }
