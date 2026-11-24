@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { getESQLResults } from '@kbn/esql-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { ES_AGGREGATION, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import {
   escapeEsqlIdentifier,
@@ -19,7 +17,7 @@ import {
   type EsqlRequest,
 } from '../../../../../../common/util/esql_metric_query';
 
-export type EsqlSearch = DataPublicPluginStart['search']['search'];
+export type EsqlSearch = Pick<DataPublicPluginStart['search'], 'esql'>;
 
 export interface EsqlChartSource {
   readonly search: EsqlSearch;
@@ -42,20 +40,16 @@ export interface EsqlChartPoint {
 
 const runEsqlRequest = async (
   { search, projectRouting }: EsqlChartSource,
-  { query, params = [] }: Pick<EsqlRequest, 'query'> & Partial<EsqlRequest>,
+  { query, params }: Pick<EsqlRequest, 'query'> & Partial<EsqlRequest>,
   timeRange?: { from: string; to: string }
 ) => {
-  const variables: ESQLControlVariable[] = params.flatMap((param) =>
-    Object.entries(param).map(([key, value]) => ({ key, value, type: ESQLVariableType.VALUES }))
-  );
-  const { response } = await getESQLResults({
-    esqlQuery: query,
-    search,
-    variables,
-    timeRange,
+  const { rawResponse } = await search.esql({
+    query,
+    params: params?.length ? [...params] : undefined,
     projectRouting,
+    kibanaQueryContext: { timeRange },
   });
-  return response;
+  return rawResponse;
 };
 
 /**

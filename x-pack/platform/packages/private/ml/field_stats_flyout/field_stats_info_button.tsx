@@ -19,6 +19,7 @@ import { FieldIcon } from '@kbn/react-field';
 import { type Field } from '@kbn/ml-anomaly-utils';
 
 import { getKbnFieldIconType } from './get_kbn_field_icon_types';
+import { useFieldStatsFlyoutContext } from './use_field_stats_flyout_context';
 
 /**
  * Represents a field used for statistics.
@@ -77,6 +78,7 @@ export interface FieldStatsInfoButtonProps {
 export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
   const { field, label, onButtonClick, disabled, isEmpty, hideTrigger } = props;
   const { euiTheme } = useEuiTheme();
+  const { hideFieldStatsButtons } = useFieldStatsFlyoutContext();
 
   const emptyFieldMessage = isEmpty
     ? ' ' +
@@ -88,7 +90,7 @@ export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
-        {!hideTrigger ? (
+        {!hideTrigger && !hideFieldStatsButtons ? (
           <EuiToolTip
             content={
               i18n.translate(

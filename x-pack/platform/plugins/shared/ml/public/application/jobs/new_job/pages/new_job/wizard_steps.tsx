@@ -96,6 +96,12 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
     ? jobCreator.dataView
     : dataSourceContext.selectedDataView;
 
+  // ES|QL fields are the query's output columns, which the source index does not have,
+  // so they are all treated as having data rather than looked up in the index.
+  const pickFieldsPopulatedFields = isEsqlJobCreator(jobCreator)
+    ? new Set(jobCreator.newJobCapsService.fields.map(({ name }) => name))
+    : undefined;
+
   const pickFieldsStep = (
     <>
       <EuiFlexGroup gutterSize="s">
@@ -169,6 +175,9 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
               fieldStatsServices={fieldStatsServices}
               timeRangeMs={timeRangeMs}
               dslQuery={jobCreator.query}
+              populatedFields={pickFieldsPopulatedFields}
+              // the field stats come from the source data view, which lacks the query's columns
+              hideFieldStatsButtons={isEsqlJobCreator(jobCreator)}
             >
               {pickFieldsStep}
             </FieldStatsFlyoutProvider>

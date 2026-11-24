@@ -9,13 +9,17 @@ import type { FC } from 'react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -47,6 +51,8 @@ import { TimeRangePicker } from '../../../common/components';
 import { useEsqlTimeField } from './use_esql_time_field';
 import { extractSourceQuery } from './extract_source_query';
 import { getEsqlSummaryCountField } from './get_esql_summary_count_field';
+import { validateEsqlQuery, type EsqlQueryProblem } from './validate_esql_query';
+import { getEsqlBucketSpan, getEsqlColumnFunctions } from './esql_stats_columns';
 import { useEsqlQueryExecution } from './use_esql_query_execution';
 import { EsqlResultsTable } from './esql_results_table';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -55,12 +61,51 @@ import { useToastNotificationService } from '../../../../../services/toast_notif
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 
+const QueryProblemMessage: FC<{ problem: EsqlQueryProblem }> = ({ problem }) => {
+  const expression = <EuiCode>{problem.expression}</EuiCode>;
+  switch (problem.type) {
+    case 'unnamedColumn':
+      return (
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.esqlQueryStep.unnamedColumnProblem"
+          defaultMessage="Name the column created by {expression}, for example {example}."
+          values={{
+            expression,
+            example: <EuiCode>{`my_column = ${problem.expression}`}</EuiCode>,
+          }}
+        />
+      );
+    case 'unsupportedStatsColumn':
+      return (
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.esqlQueryStep.unsupportedStatsColumnProblem"
+          defaultMessage="{expression} is not supported. Each column of the last {stats} command must be {count} or a single {functions}, with no filter."
+          values={{
+            expression,
+            stats: <EuiCode>STATS</EuiCode>,
+            count: <EuiCode>COUNT(*)</EuiCode>,
+            functions: <EuiCode>AVG, MAX, MEDIAN, MIN, SUM</EuiCode>,
+          }}
+        />
+      );
+    case 'changedAfterStats':
+      return (
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.esqlQueryStep.changedAfterStatsProblem"
+          defaultMessage="Remove {expression}, or move it before the last {stats} command. Its columns cannot be changed afterwards."
+          values={{ expression, stats: <EuiCode>STATS</EuiCode> }}
+        />
+      );
+  }
+};
+
 export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const {
     services: { data, http },
   } = useMlKibana();
   const { displayErrorToast } = useToastNotificationService();
-  const { jobCreator, jobCreatorUpdate, chartLoader } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, chartLoader, chartInterval } =
+    useContext(JobCreatorContext);
   const [isCreatingDataView, setIsCreatingDataView] = useState(false);
 
   const [query, setQuery] = useState<AggregateQuery>({
@@ -85,6 +130,12 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     },
     [jobCreator, jobCreatorUpdate]
   );
+
+  // This step replaces the time range step, so it sets the chart interval's bounds. Without them
+  // the interval is zero, which breaks the results charts when the job runs.
+  useEffect(() => {
+    chartInterval.setBounds({ min: moment(timeRange.start), max: moment(timeRange.end) });
+  }, [chartInterval, timeRange]);
 
   const onTimeFieldChange = useCallback(
     (value: string) => {
@@ -163,6 +214,8 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     [onTimeRangeChange]
   );
 
+  const queryProblems = useMemo(() => validateEsqlQuery(query.esql), [query.esql]);
+
   const execution = useEsqlQueryExecution();
   const { run, isLoading } = execution;
 
@@ -187,6 +240,8 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       jobCreator.esqlQuery = query.esql;
       // a query that aggregates with STATS returns one row per group, with its document count
       jobCreator.summaryCountFieldName = getEsqlSummaryCountField(query.esql);
+      // the job's buckets must match the query's, e.g. 1h for BUCKET(@timestamp, 1 hour)
+      jobCreator.setBucketSpanFromQuery(getEsqlBucketSpan(query.esql, timeField));
       const dataView = await getESQLAdHocDataview({
         dataViewsService: data.dataViews,
         query: query.esql,
@@ -198,7 +253,7 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       }
       jobCreator.indexPattern = dataView;
       chartLoader.setDataView(dataView);
-      chartLoader.setEsqlQuery(query.esql, data.search.search, jobCreator.summaryCountFieldName);
+      chartLoader.setEsqlQuery(query.esql, data.search, jobCreator.summaryCountFieldName);
       // The field and aggregation lists in the Choose fields step come from this service,
       // so fill it with the query's output columns rather than the source index's fields.
       const columns = await getESQLQueryColumnsRaw({
@@ -206,7 +261,12 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         search: data.search.search,
         projectRouting,
       });
-      jobCreator.newJobCapsService.initializeFromEsqlColumns(columns);
+      // a column created by an aggregation only allows the ML functions that match it,
+      // e.g. mean, high_mean and low_mean for AVG
+      jobCreator.newJobCapsService.initializeFromEsqlColumns(
+        columns,
+        getEsqlColumnFunctions(query.esql)
+      );
       jobCreatorUpdate();
       setCurrentStep(WIZARD_STEPS.PICK_FIELDS);
     } catch (error) {
@@ -224,7 +284,7 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     chartLoader,
     query.esql,
     data.dataViews,
-    data.search.search,
+    data.search,
     http,
     projectRouting,
     timeField,
@@ -261,7 +321,6 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             hasNoInitialSelection={!currentTimeFieldIsOption}
             isInvalid={hasSourceQuery && !currentTimeFieldIsOption}
             onChange={(e) => onTimeFieldChange(e.target.value)}
-            compressed
             prepend={i18n.translate('xpack.ml.newJob.wizard.esqlQueryStep.timeFieldLabel', {
               defaultMessage: 'Time field',
             })}
@@ -279,7 +338,6 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             })}
           >
             <EuiButton
-              size="s"
               iconType="magnify"
               onClick={runQuery}
               isLoading={isLoading}
@@ -303,10 +361,33 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         isLoading={isLoading}
         dataTestSubj="mlJobWizardEsqlQueryEditor"
       />
+      {queryProblems.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <KbnWarningCallout
+            size="s"
+            title={i18n.translate('xpack.ml.newJob.wizard.esqlQueryStep.queryProblemsTitle', {
+              defaultMessage: 'This query cannot be used for an anomaly detection job',
+            })}
+            data-test-subj="mlEsqlQueryProblemsCallout"
+          >
+            <ul>
+              {queryProblems.map((problem, index) => (
+                <li key={index}>
+                  <QueryProblemMessage problem={problem} />
+                </li>
+              ))}
+            </ul>
+          </KbnWarningCallout>
+        </>
+      )}
       <EuiSpacer />
-      <EsqlResultsTable execution={execution} runShortcutLabel={RUN_SHORTCUT_LABEL} />
+      <EsqlResultsTable execution={execution} />
       <EuiSpacer />
-      <WizardNav next={onNext} nextActive={query.esql.trim() !== '' && !isCreatingDataView} />
+      <WizardNav
+        next={onNext}
+        nextActive={query.esql.trim() !== '' && queryProblems.length === 0 && !isCreatingDataView}
+      />
     </>
   );
 };

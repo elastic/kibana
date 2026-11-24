@@ -27,10 +27,10 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 interface Props {
   execution: EsqlQueryExecution;
-  runShortcutLabel: string;
 }
 
-export const EsqlResultsTable: FC<Props> = ({ execution, runShortcutLabel }) => {
+/** Shows the results of the last query run, and nothing until a query has run. */
+export const EsqlResultsTable: FC<Props> = ({ execution }) => {
   const { columns, rows, isLoading, error, hasRun } = execution;
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
@@ -69,32 +69,7 @@ export const EsqlResultsTable: FC<Props> = ({ execution, runShortcutLabel }) => 
   }
 
   if (!hasRun) {
-    return (
-      <EuiEmptyPrompt
-        iconType="play"
-        data-test-subj="mlEsqlQueryResultsRunPrompt"
-        title={
-          <h4>
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.esqlQueryStep.runPromptTitle"
-              defaultMessage="Run your query to see results"
-            />
-          </h4>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.esqlQueryStep.runPromptDescription"
-              defaultMessage="Click <strong>Search</strong> or press <strong>{shortcut}</strong> to run the query."
-              values={{
-                shortcut: runShortcutLabel,
-                strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
-              }}
-            />
-          </p>
-        }
-      />
-    );
+    return null;
   }
 
   if (error !== null) {

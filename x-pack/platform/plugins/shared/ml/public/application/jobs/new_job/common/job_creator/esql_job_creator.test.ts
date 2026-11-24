@@ -5,50 +5,44 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import {
-  EVENT_RATE_FIELD_ID,
-  ML_JOB_AGGREGATION,
-  type Aggregation,
-  type Field,
-} from '@kbn/ml-anomaly-utils';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { EsqlJobCreator } from './esql_job_creator';
 
-const field = (id: string): Field => ({
-  id,
-  name: id,
-  type: ES_FIELD_TYPES.DOUBLE,
-  aggregatable: true,
-  counter: false,
-});
-
-const agg = (id: ML_JOB_AGGREGATION): Aggregation =>
-  ({ id, title: id, kibanaName: null, dslName: null, type: 'metrics' } as Aggregation);
-
 const createJobCreator = () => new EsqlJobCreator({} as MlApi, {} as NewJobCapsService);
 
 describe('EsqlJobCreator', () => {
-  it('turns off the delayed data check when there is no count detector', () => {
+  it('turns on the delayed data check when the query has a count column', () => {
     const jobCreator = createJobCreator();
-    jobCreator.addDetector(agg(ML_JOB_AGGREGATION.MEAN), field('responsetime'));
+    jobCreator.summaryCountFieldName = 'event_count';
 
+    expect(jobCreator.jobConfig.analysis_config.summary_count_field_name).toBe('event_count');
+    expect(jobCreator.datafeedConfig.delayed_data_check_config).toEqual({ enabled: true });
+  });
+
+  it('turns off the delayed data check without a count column', () => {
+    const jobCreator = createJobCreator();
+    expect(jobCreator.datafeedConfig.delayed_data_check_config).toEqual({ enabled: false });
+
+    jobCreator.summaryCountFieldName = 'event_count';
+    jobCreator.summaryCountFieldName = null;
+
+    expect(jobCreator.jobConfig.analysis_config.summary_count_field_name).toBeUndefined();
     expect(jobCreator.datafeedConfig.delayed_data_check_config).toEqual({ enabled: false });
   });
 
-  it('leaves the delayed data check on while there is a count detector', () => {
+  it('locks the bucket span to the query interval until the query has none', () => {
     const jobCreator = createJobCreator();
-    jobCreator.addDetector(agg(ML_JOB_AGGREGATION.MEAN), field('responsetime'));
-    jobCreator.addDetector(agg(ML_JOB_AGGREGATION.HIGH_COUNT), field(EVENT_RATE_FIELD_ID));
+    expect(jobCreator.isBucketSpanFromQuery).toBe(false);
 
-    expect(jobCreator.datafeedConfig.delayed_data_check_config).toBeUndefined();
+    jobCreator.setBucketSpanFromQuery('1h');
+    expect(jobCreator.isBucketSpanFromQuery).toBe(true);
+    expect(jobCreator.bucketSpan).toBe('1h');
+    expect(jobCreator.datafeedConfig.grouping_interval).toBe('1h');
 
-    jobCreator.removeDetector(1);
-    expect(jobCreator.datafeedConfig.delayed_data_check_config).toEqual({ enabled: false });
-
-    jobCreator.editDetector(agg(ML_JOB_AGGREGATION.COUNT), field(EVENT_RATE_FIELD_ID), 0);
-    expect(jobCreator.datafeedConfig.delayed_data_check_config).toBeUndefined();
+    jobCreator.setBucketSpanFromQuery(null);
+    expect(jobCreator.isBucketSpanFromQuery).toBe(false);
+    expect(jobCreator.bucketSpan).toBe('1h');
   });
 
   it('has no DSL query or indices in its datafeed', () => {

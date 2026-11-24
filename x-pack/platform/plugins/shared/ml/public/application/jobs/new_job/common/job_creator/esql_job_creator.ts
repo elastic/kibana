@@ -7,7 +7,6 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  ML_JOB_AGGREGATION,
   type Field,
   type Aggregation,
   type SplitField,
@@ -22,21 +21,13 @@ import { JobCreator } from './job_creator';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 
-const COUNT_FUNCTIONS: readonly string[] = [
-  ML_JOB_AGGREGATION.COUNT,
-  ML_JOB_AGGREGATION.HIGH_COUNT,
-  ML_JOB_AGGREGATION.LOW_COUNT,
-  ML_JOB_AGGREGATION.NON_ZERO_COUNT,
-  ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT,
-  ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT,
-];
-
 /** Job creator for the ES|QL wizard, which starts without a data view. */
 export class EsqlJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.ESQL;
   private _indexPattern: DataView | null = null;
   // like a multi-metric job, an optional partition field shared by all detectors
   private _splitField: SplitField = null;
+  private _isBucketSpanFromQuery = false;
 
   constructor(mlApi: MlApi, newJobCapsService: NewJobCapsService) {
     super(mlApi, newJobCapsService);
@@ -44,6 +35,7 @@ export class EsqlJobCreator extends JobCreator {
     // ES|QL datafeeds read data with esql_query, so they have no DSL query or indices
     delete this._datafeed_config.query;
     delete (this._datafeed_config as Partial<Datafeed>).indices;
+    this.summaryCountFieldName = null;
     this._wizardInitialized$.next(true);
   }
 
@@ -77,6 +69,19 @@ export class EsqlJobCreator extends JobCreator {
     }
   }
 
+  /** Whether the bucket span is set by the query's BUCKET interval, so it cannot be edited. */
+  public get isBucketSpanFromQuery(): boolean {
+    return this._isBucketSpanFromQuery;
+  }
+
+  /** Sets the bucket span to the query's BUCKET interval, or unlocks it when the query has none. */
+  public setBucketSpanFromQuery(bucketSpan: string | null) {
+    this._isBucketSpanFromQuery = bucketSpan !== null;
+    if (bucketSpan !== null) {
+      this.bucketSpan = bucketSpan;
+    }
+  }
+
   public get timeFieldName(): string {
     return super.timeFieldName;
   }
@@ -89,6 +94,19 @@ export class EsqlJobCreator extends JobCreator {
     } else {
       this._datafeed_config.source_time_field = fieldName;
     }
+  }
+
+  public get summaryCountFieldName(): string | null {
+    return super.summaryCountFieldName;
+  }
+
+  /**
+   * Sets the query's document count column. The datafeed's delayed data check needs this column,
+   * so it is turned on with one and off without one.
+   */
+  public set summaryCountFieldName(fieldName: string | null) {
+    super.summaryCountFieldName = fieldName;
+    this._datafeed_config.delayed_data_check_config = { enabled: fieldName !== null };
   }
 
   public get dataView(): DataView | null {
@@ -128,17 +146,14 @@ export class EsqlJobCreator extends JobCreator {
 
   public addDetector(agg: Aggregation, field: Field) {
     this._addDetector(this._createDetector(agg, field), agg, field);
-    this._updateDelayedDataCheck();
   }
 
   public editDetector(agg: Aggregation, field: Field, index: number) {
     this._editDetector(this._createDetector(agg, field), agg, field, index);
-    this._updateDelayedDataCheck();
   }
 
   public removeDetector(index: number) {
     this._removeDetector(index);
-    this._updateDelayedDataCheck();
   }
 
   public get aggFieldPairs(): AggFieldPair[] {
@@ -154,18 +169,6 @@ export class EsqlJobCreator extends JobCreator {
       detector.partition_field_name = this._splitField.id;
     }
     return detector;
-  }
-
-  // The delayed data check needs a count detector for ES|QL datafeeds, so turn it off without one.
-  private _updateDelayedDataCheck() {
-    const hasCountDetector = this._detectors.some(
-      ({ function: fn }) => fn !== undefined && COUNT_FUNCTIONS.includes(fn)
-    );
-    if (hasCountDetector) {
-      delete (this._datafeed_config as Partial<Datafeed>).delayed_data_check_config;
-    } else {
-      this._datafeed_config.delayed_data_check_config = { enabled: false };
-    }
   }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {

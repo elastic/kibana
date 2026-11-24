@@ -80,9 +80,14 @@ export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
     }
   }
 
-  /** Loads the fields and aggregations from the output columns of an ES|QL query. */
+  /**
+   * Loads the fields and aggregations from the output columns of an ES|QL query.
+   * `columnFunctions` limits the ML functions of the listed columns, e.g. to the mean functions
+   * for a column created by AVG. Other columns get every function their type supports.
+   */
   public initializeFromEsqlColumns(
     columns: readonly EsqlColumn[],
+    columnFunctions: Readonly<Record<string, readonly string[]>> = {},
     includeEventRateField = true,
     removeTextFields = true
   ) {
@@ -91,6 +96,16 @@ export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
 
     const aggs = cloneDeep([...mlJobAggregations, ...mlJobAggregationsWithoutEsEquivalent]);
     const { fields } = combineFieldsAndAggs(esqlColumnsToFields(columns), aggs, {});
+
+    const isAllowed = (fieldId: string, aggId: string) =>
+      columnFunctions[fieldId]?.includes(aggId) ?? true;
+    for (const field of fields) {
+      field.aggs = field.aggs?.filter(({ id }) => isAllowed(field.id, id));
+    }
+    for (const agg of aggs) {
+      agg.fields = agg.fields?.filter(({ id }) => isAllowed(id, agg.id));
+    }
+
     this._setFieldsAndAggs(fields, aggs);
   }
 

@@ -103,9 +103,31 @@ describe('new_job_capabilities_service', () => {
       expect(newJobCapsService.catFields.map(({ id }) => id)).toEqual(['host', 'message']);
     });
 
+    it('limits the functions of the listed columns', () => {
+      const newJobCapsService = mlJobCapsServiceFactory(mlApiServicesMock);
+      newJobCapsService.initializeFromEsqlColumns(columns, {
+        bytes_kb: ['mean', 'high_mean', 'low_mean'],
+        host: [],
+      });
+      const { fields, aggs } = newJobCapsService.newJobCaps;
+
+      const aggIds = (id: string) =>
+        (fields.find((f) => f.id === id)?.aggs ?? []).map((agg) => agg.id);
+      expect(aggIds('bytes_kb')).toEqual(['mean', 'high_mean', 'low_mean']);
+      expect(aggIds('host')).toEqual([]);
+      expect(aggIds('requests')).toEqual(expect.arrayContaining(['sum', 'max']));
+
+      const fieldIds = (id: string) =>
+        (aggs.find((agg) => agg.id === id)?.fields ?? []).map((field) => field.id);
+      expect(fieldIds('mean')).toContain('bytes_kb');
+      expect(fieldIds('sum')).not.toContain('bytes_kb');
+      expect(fieldIds('distinct_count')).not.toContain('host');
+      expect(newJobCapsService.catFields.map(({ id }) => id)).toEqual(['host', 'message']);
+    });
+
     it('can exclude the event rate field', () => {
       const newJobCapsService = mlJobCapsServiceFactory(mlApiServicesMock);
-      newJobCapsService.initializeFromEsqlColumns(columns, false);
+      newJobCapsService.initializeFromEsqlColumns(columns, {}, false);
 
       expect(newJobCapsService.fields.map(({ id }) => id)).not.toContain('__ml_event_rate_count__');
     });

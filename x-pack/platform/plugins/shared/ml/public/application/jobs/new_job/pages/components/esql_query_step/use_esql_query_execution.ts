@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getESQLResults } from '@kbn/esql-utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { appendTimeFilter } from './extract_source_query';
 
@@ -71,14 +70,15 @@ export const useEsqlQueryExecution = (): EsqlQueryExecution => {
       setError(null);
 
       try {
-        const { response } = await getESQLResults({
-          esqlQuery: timeField ? appendTimeFilter(trimmed, timeField) : trimmed,
-          search: data.search.search,
-          signal: abortController.signal,
-          dropNullColumns: true,
-          timeRange,
-          projectRouting,
-        });
+        const { rawResponse: response } = await data.search.esql(
+          {
+            query: timeField ? appendTimeFilter(trimmed, timeField) : trimmed,
+            dropNullColumns: true,
+            projectRouting,
+            kibanaQueryContext: { timeRange },
+          },
+          { abortSignal: abortController.signal }
+        );
         if (abortController.signal.aborted) {
           return;
         }
@@ -106,7 +106,7 @@ export const useEsqlQueryExecution = (): EsqlQueryExecution => {
       }
       setIsLoading(false);
     },
-    [data.search.search]
+    [data.search]
   );
 
   return { columns, rows, isLoading, error, hasRun, run };

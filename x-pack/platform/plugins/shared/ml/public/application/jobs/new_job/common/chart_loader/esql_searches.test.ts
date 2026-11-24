@@ -5,33 +5,27 @@
  * 2.0.
  */
 
-import { getESQLResults } from '@kbn/esql-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { loadEsqlFieldValues, loadEsqlLineCharts, type EsqlSearch } from './esql_searches';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: jest.fn(),
-}));
-
-const getESQLResultsMock = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
+const esqlMock = jest.fn();
 
 const HOUR = 60 * 60 * 1000;
 const source = {
-  search: jest.fn() as unknown as EsqlSearch,
+  search: { esql: esqlMock } as unknown as EsqlSearch,
   esqlQuery: 'FROM logs | EVAL bytes_kb = bytes / 1024',
   timeField: '@timestamp',
   projectRouting: '_alias:_origin',
 };
 
 const mockResponse = (columns: string[], values: unknown[][]) =>
-  getESQLResultsMock.mockResolvedValueOnce({
-    response: { columns: columns.map((name) => ({ name, type: 'keyword' })), values },
-    params: { query: '' },
-  } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+  esqlMock.mockResolvedValueOnce({
+    rawResponse: { columns: columns.map((name) => ({ name, type: 'keyword' })), values },
+  });
 
 describe('esql_searches', () => {
   beforeEach(() => {
-    getESQLResultsMock.mockReset();
+    esqlMock.mockReset();
   });
 
   describe('loadEsqlLineCharts', () => {
@@ -63,20 +57,20 @@ describe('esql_searches', () => {
         ],
       });
 
-      const [[avgRequest], [countRequest]] = getESQLResultsMock.mock.calls;
-      expect(avgRequest.esqlQuery).toContain('| WHERE TO_STRING(`host`) == ?ml_entity_0');
-      expect(avgRequest.esqlQuery).toContain('AVG(`bytes_kb`)');
-      expect(avgRequest.variables).toEqual([{ key: 'ml_entity_0', value: 'a', type: 'values' }]);
-      expect(avgRequest.esqlQuery).toContain(
+      const [[avgRequest], [countRequest]] = esqlMock.mock.calls;
+      expect(avgRequest.query).toContain('| WHERE TO_STRING(`host`) == ?ml_entity_0');
+      expect(avgRequest.query).toContain('AVG(`bytes_kb`)');
+      expect(avgRequest.params).toEqual([{ ml_entity_0: 'a' }]);
+      expect(avgRequest.query).toContain(
         '| WHERE `@timestamp` >= ?_tstart AND `@timestamp` <= ?_tend'
       );
-      expect(avgRequest.timeRange).toEqual({
+      expect(avgRequest.kibanaQueryContext.timeRange).toEqual({
         from: new Date(0).toISOString(),
         to: new Date(HOUR).toISOString(),
       });
       expect(avgRequest.filter).toBeUndefined();
       expect(avgRequest.projectRouting).toBe('_alias:_origin');
-      expect(countRequest.esqlQuery).toContain('COUNT(*)');
+      expect(countRequest.query).toContain('COUNT(*)');
     });
 
     it('sums the count column for counts on an aggregated query', async () => {
@@ -104,10 +98,10 @@ describe('esql_searches', () => {
         { time: 0, value: 3 },
         { time: HOUR, value: null },
       ]);
-      const [[countRequest], [maxRequest]] = getESQLResultsMock.mock.calls;
-      expect(countRequest.esqlQuery).toContain('SUM(`event_count`)');
-      expect(countRequest.esqlQuery).not.toContain('COUNT(*)');
-      expect(maxRequest.esqlQuery).toContain('MAX(`bytes_kb`)');
+      const [[countRequest], [maxRequest]] = esqlMock.mock.calls;
+      expect(countRequest.query).toContain('SUM(`event_count`)');
+      expect(countRequest.query).not.toContain('COUNT(*)');
+      expect(maxRequest.query).toContain('MAX(`bytes_kb`)');
     });
 
     it('returns an empty series for metrics ES|QL cannot chart', async () => {
@@ -122,7 +116,7 @@ describe('esql_searches', () => {
       );
 
       expect(results).toEqual({ 0: [] });
-      expect(getESQLResultsMock).not.toHaveBeenCalled();
+      expect(esqlMock).not.toHaveBeenCalled();
     });
   });
 
@@ -137,7 +131,7 @@ describe('esql_searches', () => {
       );
 
       await expect(loadEsqlFieldValues(source, 'host', 10)).resolves.toEqual(['a', 'b']);
-      expect(getESQLResultsMock.mock.calls[0][0].esqlQuery).toContain('| LIMIT 10');
+      expect(esqlMock.mock.calls[0][0].query).toContain('| LIMIT 10');
     });
   });
 });
