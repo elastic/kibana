@@ -265,6 +265,33 @@ describe('Config schema', () => {
       `);
     });
 
+    it('should add a removal deprecation when setting a removed experimental feature with experimentalFeatures', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          newBrowseIntegrationUx: false,
+        },
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`
+        Array [
+          "[newBrowseIntegrationUx] has been removed from [xpack.fleet.experimentalFeatures]. The new browse integrations page is always enabled.",
+        ]
+      `);
+    });
+
+    it('should add a removal deprecation when setting a removed experimental feature with enableExperimental', () => {
+      const res = applyConfigDeprecations({
+        enableExperimental: ['newBrowseIntegrationUx'],
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`
+        Array [
+          "[newBrowseIntegrationUx] has been removed from [xpack.fleet.enableExperimental]. The new browse integrations page is always enabled.",
+          "Config key [xpack.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.experimentalFeatures] instead.",
+        ]
+      `);
+    });
+
     it('should not add a deprecation when enabling an existing experimental feature with experimentalFeatures', () => {
       const res = applyConfigDeprecations({
         experimentalFeatures: {
