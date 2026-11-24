@@ -22,9 +22,12 @@ import { MemoryPageView } from './page_view';
 import { MemorySidebar } from './sidebar';
 import { useMemoryPages } from './use_memory';
 import type { MemoryFilter, MemorySidebarSelection } from './types';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
+import { getSplitLayoutStyles } from '../split_layout_styles';
 
 export function MemoryTab() {
   const { euiTheme } = useEuiTheme();
+  const styles = getSplitLayoutStyles(useIsMobile());
   const [filter, setFilter] = useState<MemoryFilter>('active');
   const [search, setSearch] = useState('');
   const [selection, setSelection] = useState<MemorySidebarSelection>({ kind: 'home' });
@@ -82,28 +85,11 @@ export function MemoryTab() {
     <EuiFlexGroup
       gutterSize="l"
       alignItems="stretch"
-      className={css`
-        min-height: 520px;
-        height: calc(100vh - 220px);
-      `}
+      className={styles.group}
       data-test-subj="nightshiftMemoryTab"
     >
-      <EuiFlexItem
-        grow={false}
-        className={css`
-          width: 280px;
-        `}
-      >
-        <EuiPanel
-          hasBorder
-          hasShadow={false}
-          paddingSize="m"
-          className={css`
-            height: 100%;
-            min-height: 0;
-            overflow: hidden;
-          `}
-        >
+      <EuiFlexItem grow={false} className={styles.sidebarItem}>
+        <EuiPanel hasBorder hasShadow={false} paddingSize="m" className={styles.sidebarPanel}>
           <MemorySidebar
             filter={filter}
             onFilterChange={setFilter}
@@ -120,16 +106,7 @@ export function MemoryTab() {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel
-          hasBorder
-          hasShadow={false}
-          paddingSize="none"
-          className={css`
-            height: 100%;
-            min-height: 0;
-            overflow: hidden;
-          `}
-        >
+        <EuiPanel hasBorder hasShadow={false} paddingSize="none" className={styles.contentPanel}>
           <div
             className={css`
               height: 100%;
