@@ -103,6 +103,8 @@ export interface ActionTypeExecutorOptions<
   authMode?: AuthMode;
   profileUid?: string;
   connectorVersion?: string;
+  /** Exact spec version this execution runs. Only set for types with `specVersions`. */
+  specVersion?: string;
 }
 
 export type ActionResult = Connector;
@@ -136,11 +138,22 @@ export type ExecutorType<
 type Validator<T> = Pick<z4.ZodType, 'parse'>;
 export interface ValidatorType<T> {
   schema: Validator<T>;
+  /** Returns the schema for this call. Used instead of `schema` when present. */
+  resolveSchema?: (validatorServices: ValidatorServices) => Validator<T>;
   customValidator?: (value: T, validatorServices: ValidatorServices) => void;
 }
 
 export interface ValidatorServices {
   configurationUtilities: ActionsConfigurationUtilities;
+  /** Exact spec version to validate against. Only set for types with `specVersions`. */
+  specVersion?: string;
+}
+
+export interface SpecVersionsContract {
+  /** Latest accepted exact version per major, for example { '1': '1.3', '2': '2.0' }. */
+  getLatestVersions(): Record<string, string>;
+  /** Exact version a connector executes: the pin, or the newest accepted 1.y without a pin. Throws when it cannot be served. */
+  resolveExecutionVersion(pin?: string): string;
 }
 
 export interface ActionValidationService {
@@ -245,6 +258,11 @@ export interface ActionTypeCoreFields<
    */
   spec?: ConnectorSpec;
   specs?: Map<string, ConnectorSpec>; // <specVersion, full spec>
+  /**
+   * Set by types that serve several spec versions of one id. The executor asks it which
+   * version a connector runs and passes that version to the validators and the executor.
+   */
+  specVersions?: SpecVersionsContract;
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**

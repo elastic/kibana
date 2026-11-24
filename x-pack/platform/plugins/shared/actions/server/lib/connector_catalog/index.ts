@@ -7,6 +7,8 @@
 
 export { createConnectorCatalogStorage } from './connector_catalog_storage';
 export { loadCatalogConnectorTypes } from './load_catalog_connector_types';
+export { createVersionedConnectorType } from './versioned_connector_type';
+export type { BuiltSpecVersion, VersionedConnectorType } from './versioned_connector_type';
 export { buildTypeFromStoredSpec } from './build_type_from_stored_spec';
 export type { BuildTypeFromStoredSpec } from './build_type_from_stored_spec';
 export {

@@ -10,6 +10,7 @@ import type { ActionTypeExecutorResult } from '../../types';
 export enum ActionExecutionErrorReason {
   Validation = 'validation',
   Authorization = 'authorization',
+  SpecVersion = 'spec_version',
 }
 
 export class ActionExecutionError extends Error {

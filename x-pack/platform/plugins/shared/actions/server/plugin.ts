@@ -308,6 +308,7 @@ export class ActionsPlugin
     Plugin<PluginSetupContract, PluginStartContract, ActionsPluginsSetup, ActionsPluginsStart>
 {
   private readonly logger: Logger;
+  private readonly kibanaVersion: string;
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
@@ -337,6 +338,7 @@ export class ActionsPlugin
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
+    this.kibanaVersion = initContext.env.packageInfo.version;
     this.clientLeasePool = new LeasePool<unknown>(this.logger);
     this.actionsConfig = getValidatedConfig(
       this.logger,
@@ -879,6 +881,7 @@ export class ActionsPlugin
       },
       analyticsService: core.analytics,
       getCurrentUserProfileIdFromAPIKey,
+      kibanaVersion: this.kibanaVersion,
     });
 
     taskRunnerFactory!.initialize({

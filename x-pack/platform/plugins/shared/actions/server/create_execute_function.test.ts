@@ -1371,6 +1371,65 @@ describe('bulkExecute()', () => {
     `);
   });
 
+  test('does not validate params or resolve a schema when enqueueing', async () => {
+    const parse = jest.fn();
+    const resolveSchema = jest.fn();
+    const customValidator = jest.fn();
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    actionTypeRegistry.get.mockReturnValue({
+      id: 'mock-action',
+      name: 'Mock',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: { parse } },
+        secrets: { schema: { parse } },
+        params: { schema: { parse }, resolveSchema, customValidator },
+      },
+      executor: jest.fn(),
+    });
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry,
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: { actionTypeId: 'mock-action', specVersion: '1.0' },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        { id: '234', type: 'action_task_params', attributes: { actionId: '123' }, references: [] },
+      ],
+    });
+
+    await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        params: { baz: false },
+        spaceId: DEFAULT_SPACE_ID,
+        executionId: '123abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
+      },
+    ]);
+
+    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    expect(parse).not.toHaveBeenCalled();
+    expect(resolveSchema).not.toHaveBeenCalled();
+    expect(customValidator).not.toHaveBeenCalled();
+  });
+
   test('uses apiKeyId if specified', async () => {
     mockTaskManager.aggregate.mockResolvedValue({
       took: 1,

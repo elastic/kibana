@@ -15,3 +15,5 @@ export function isErrorThatHandlesItsOwnResponse(
 
 export type { ActionTypeDisabledReason } from './action_type_disabled';
 export { ActionTypeDisabledError } from './action_type_disabled';
+export type { SpecVersionUnavailableReason } from './spec_version_unavailable_error';
+export { SpecVersionUnavailableError } from './spec_version_unavailable_error';
