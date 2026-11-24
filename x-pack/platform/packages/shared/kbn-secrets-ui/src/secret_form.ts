@@ -118,12 +118,17 @@ export const getSecretFormErrors = ({
           'Use letters, digits and underscores, starting with a letter or an underscore, up to {max} characters.',
         values: { max: SECRET_NAME_MAX_LENGTH },
       });
-    } else if (
-      existingNames.some((existing) => normalizeSecretName(existing) === normalizeSecretName(name))
-    ) {
-      errors.name = i18n.translate('xpack.secretsUi.form.nameTaken', {
-        defaultMessage: 'A secret with this name already exists. Names are not case sensitive.',
-      });
+    } else {
+      const takenName = existingNames.find(
+        (existing) => normalizeSecretName(existing) === normalizeSecretName(name)
+      );
+      if (takenName !== undefined) {
+        errors.name = i18n.translate('xpack.secretsUi.form.nameTaken', {
+          defaultMessage:
+            'A secret named "{takenName}" already exists. Two names cannot differ only by letter case.',
+          values: { takenName },
+        });
+      }
     }
   }
 

@@ -25,8 +25,11 @@ import type { SecretConnector, SecretMetadata } from '@kbn/secrets';
 
 interface SecretsTableProps {
   secrets: SecretMetadata[];
-  /** Lets the source of a connector secret show the name of its connector. */
-  connectors: readonly SecretConnector[];
+  /**
+   * The connectors the user may access, to show the name of the connector of a secret.
+   * Undefined until they are known, so that no connector is reported as unavailable too early.
+   */
+  connectors?: readonly SecretConnector[];
   /** How the consumer refers to a secret by its name, for the copy button. */
   getSecretReference: (name: string) => string;
   /** The secret that is being tested, so that it cannot be tested twice at once. */
@@ -48,7 +51,7 @@ export const SecretsTable = ({
   onCreate,
 }: SecretsTableProps) => {
   const connectorsById = useMemo(
-    () => new Map(connectors.map((connector) => [connector.id, connector])),
+    () => connectors && new Map(connectors.map((connector) => [connector.id, connector])),
     [connectors]
   );
 
@@ -105,8 +108,31 @@ export const SecretsTable = ({
             </EuiBadge>
           );
         }
-        const connector = connectorsById.get(secret.connectorId);
-        return <EuiText size="s">{connector?.name ?? secret.connectorId}</EuiText>;
+        const connector = connectorsById?.get(secret.connectorId);
+        if (connector || !connectorsById) {
+          return <EuiText size="s">{connector?.name ?? secret.connectorId}</EuiText>;
+        }
+        // The browser cannot tell a deleted connector from one the user may not access.
+        return (
+          <EuiToolTip
+            content={i18n.translate('xpack.secretsUi.table.connectorUnavailableTooltip', {
+              defaultMessage:
+                'The connector {connectorId} was deleted, or you do not have access to it. Test the secret to check that its value can still be read.',
+              values: { connectorId: secret.connectorId },
+            })}
+          >
+            <EuiBadge
+              color="warning"
+              iconType="warning"
+              tabIndex={0}
+              data-test-subj="secretConnectorUnavailable"
+            >
+              {i18n.translate('xpack.secretsUi.table.connectorUnavailable', {
+                defaultMessage: 'Connector unavailable',
+              })}
+            </EuiBadge>
+          </EuiToolTip>
+        );
       },
     },
     {

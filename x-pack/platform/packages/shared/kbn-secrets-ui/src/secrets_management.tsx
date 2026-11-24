@@ -127,7 +127,7 @@ export const SecretsManagement = ({
       ) : (
         <SecretsTable
           secrets={secrets}
-          connectors={connectors}
+          connectors={connectorsData?.connectors}
           getSecretReference={getSecretReference}
           testingSecretName={testSecret.isLoading ? testSecret.variables?.name : undefined}
           onTest={({ name }) => testSecret.mutate({ name })}
