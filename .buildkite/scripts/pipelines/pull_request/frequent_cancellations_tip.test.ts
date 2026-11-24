@@ -30,7 +30,7 @@ const PR = '1234';
 const NOW = Date.UTC(2026, 10, 6, 12, 0);
 const minutesAgo = (value: number) => new Date(NOW - value * 60 * 1000).toISOString();
 
-const BOT_FIX_MESSAGE = 'Changes from node scripts/eslint --fix';
+const BOT_FIX_MESSAGE = 'Changes from node scripts/lint.js --quiet --fix && node scripts/oxfmt';
 
 const build = ({
   createdMinutesAgo = 60,

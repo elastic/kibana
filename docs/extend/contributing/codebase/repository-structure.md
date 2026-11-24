@@ -35,7 +35,7 @@ We used to write RFCs in `md` format and keep them in the repository, but the RF
 
 ## [licenses](https://github.com/elastic/kibana/tree/main/licenses)
 
-Contains our two license header texts, one for the Elastic license and one for the Elastic+SSPL license. All code files inside x-pack should have the Elastic license text at the top, all code files outside x-pack should contain the other. If you have your environment set up to auto-fix on save, eslint should take care of adding it for you. If you don't have it, ci will fail. Can be ignored for the most part, this rarely changes.
+Contains our two license header texts, one for the Elastic license and one for the Elastic+SSPL license. All code files inside x-pack should have the Elastic license text at the top, all code files outside x-pack should contain the other. If you have your environment set up to auto-fix on save, oxlint should take care of adding it for you. If you don't have it, ci will fail. Can be ignored for the most part, this rarely changes.
 
 ## [oas_docs](https://github.com/elastic/kibana/tree/main/oas_docs)
 

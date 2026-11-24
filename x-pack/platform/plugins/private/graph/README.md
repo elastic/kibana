@@ -10,7 +10,7 @@ Set `xpack.graph.enabled: false` in `kibana.yml` to disable the plugin in a stat
 
 * Run tests `pnpm test:jest x-pack/platform/plugins/private/graph --watch`
 * Run type check `node scripts/type_check --project x-pack/platform/plugins/private/graph/tsconfig.json`
-* Run linter `node scripts/eslint.js x-pack/platform/plugins/private/graph`
+* Run linter `node scripts/lint x-pack/platform/plugins/private/graph`
 * Run Scout tests locally (make sure to stop dev server)
   * UI: `node scripts/scout.js run-tests --arch stateful --domain classic --config x-pack/platform/plugins/private/graph/test/scout/ui/playwright.config.ts`
   * API: `node scripts/scout.js run-tests --arch stateful --domain classic --config x-pack/platform/plugins/private/graph/test/scout/api/playwright.config.ts`

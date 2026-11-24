@@ -19,7 +19,7 @@ import { rspack } from '../rspack_runtime';
  * re-minification.
  *
  * This is intentionally NOT the same as the triple-license source file header
- * (`TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER` in `.eslintrc.js`) or the
+ * (`TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER` in `.oxlint/license_headers.mts`) or the
  * multi-line `ELV2_LICENSE_HEADER` — those are for source files and have
  * different formatting and, in the triple case, different license scope.
  */

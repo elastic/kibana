@@ -6,7 +6,7 @@ These principles apply to every Kibana accessibility decision — when **writing
 
 1. Task-specific user or system instruction
 2. This document
-3. Component guide (`components/*.md`) or ESLint table (`eslint.md`)
+3. Component guide (`components/*.md`) or lint rule table (`eslint.md`)
 
 ## Standards
 

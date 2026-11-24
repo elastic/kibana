@@ -26,7 +26,7 @@ Use `apiServices.core.settings()` to toggle feature flags while the server is ru
 ::::::{note}
 Feature flag overrides are **server-wide**: they apply to the entire Kibana instance, not to a single space or worker. In [parallel suites](./parallelism.md) all workers share the same server, so a flag set by one worker is visible to every other worker. For parallel tests, enable flags in the **[global setup hook](./global-setup-hook.md)** so they are set once before any worker starts.
 
-The `@kbn/eslint/scout_no_core_settings_in_space_test` ESLint rule warns when `apiServices.core.settings(...)` is called inside `spaceTest` scope (directly, in `spaceTest.describe`/`beforeAll`/`afterAll`/`step`, etc.), since that scope runs in parallel across spaces sharing the same server.
+The `@kbn/eslint/scout_no_core_settings_in_space_test` lint rule warns when `apiServices.core.settings(...)` is called inside `spaceTest` scope (directly, in `spaceTest.describe`/`beforeAll`/`afterAll`/`step`, etc.), since that scope runs in parallel across spaces sharing the same server.
 ::::::
 
 Scout CI lanes run multiple Playwright configs against the same Kibana and Elasticsearch servers. A feature-flag override left behind by one config can affect tests in the next. Always restore the expected configuration in teardown.

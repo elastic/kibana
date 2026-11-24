@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/core-user-settings-types'
   - '@kbn/picomatcher'
   - '@kbn/repo-packages'
+  - '@kbn/oxfmt'
 tags:
   - shared-common
   - package

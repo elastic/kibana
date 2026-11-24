@@ -6,7 +6,7 @@ Shared server-side business logic for Attack Discovery and Defend Insights.
 
 `@kbn/discoveries` extracts shared server-side logic out of `elastic_assistant` so both `elastic_assistant` and the `discoveries` plugin can consume the same code without duplication. It is the canonical home for the LangGraph generation pipeline, the event-log writer, the anonymization helpers, hallucination detection, and the EBT telemetry event definitions and reporters.
 
-This package is **server-only** (`"type": "shared-server"` in `kibana.jsonc`). It cannot be imported by browser code; the `kbn/imports` ESLint rule enforces this at build time.
+This package is **server-only** (`"type": "shared-server"` in `kibana.jsonc`). It cannot be imported by browser code; the `kbn/imports` lint rule enforces this at build time.
 
 For the full architectural context — the four entry points, five workflow steps, anonymization boundary, security surfaces — see the canonical [discoveries plugin README](../../plugins/discoveries/README.md).
 

@@ -29,7 +29,7 @@ describe('oxlint pickFilesToLint', () => {
   });
 
   it('skips files ignored by .eslintignore', async () => {
-    const ignored = new File(resolve(REPO_ROOT, 'packages/kbn-eslint-config/react.js'));
+    const ignored = new File(resolve(REPO_ROOT, 'packages/kbn-generate/templates/foo.js'));
     const linted = new File(resolve(REPO_ROOT, 'packages/kbn-eslint-plugin-eslint/index.js'));
     expect(await pickFilesToLint(log, [ignored, linted])).toEqual([linted]);
   });

@@ -15,7 +15,6 @@ node_modules
 target
 snapshots.js
 
-!/.eslintrc.js
 !.storybook
 !.buildkite
 !.github
@@ -29,7 +28,6 @@ snapshots.js
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/libyara/wasm/dist/**
 
 # package overrides
-/packages/kbn-eslint-config
 /packages/kbn-plugin-generator/template
 /packages/kbn-generate/templates
 /src/platform/packages/shared/kbn-test/src/functional_test_runner/__tests__/fixtures/

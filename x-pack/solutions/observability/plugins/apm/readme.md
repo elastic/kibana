@@ -7,7 +7,7 @@ This plugin provides access to App Monitoring features provided by Elastic. It a
 ### Getting started
 - [Local setup](./dev_docs/local_setup.md)
 - [Testing (unit, api, e2e, storybook)](./dev_docs/testing.md)
-- [Linting (typescript, eslint, prettier)](./dev_docs/linting.md)
+- [Linting (typescript, oxlint, oxfmt)](./dev_docs/linting.md)
 
 ### APM concepts
 - [Queries and data model](./dev_docs/apm_queries.md)

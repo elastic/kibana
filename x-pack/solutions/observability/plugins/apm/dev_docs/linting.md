@@ -14,10 +14,10 @@ node scripts/type_check.js --project x-pack/solutions/observability/plugins/apm/
 node scripts/oxfmt x-pack/solutions/observability/plugins/apm
 ```
 
-### ESLint
+### Oxlint
 
 ```
-node scripts/eslint.js x-pack/solutions/observability/plugins/apm
+node scripts/lint x-pack/solutions/observability/plugins/apm
 ```
 
 ## Install pre-commit hook (optional)

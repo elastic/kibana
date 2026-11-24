@@ -19,6 +19,6 @@ export { generateOutputSchemaString, getResponseSchemaName } from './generate_ou
 export { getSchemaNamePrefix, camelToSnake, toSnakeCase } from './get_schema_name_prefix';
 export { formatDuration } from './format_duration';
 export { getLicenseHeader } from './get_license_header';
-export { eslintFixGeneratedCode } from './eslint_fix_generated_code';
+export { formatGeneratedCode } from './format_generated_code';
 export { createRemoveServerDefaults } from './oas_remove_server_defaults';
 export { getStabilityFromXState } from './get_stability_from_x_state';

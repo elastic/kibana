@@ -102,7 +102,8 @@ Use `noop` when **any** of these is true (non-exhaustive; apply judgment):
 3. Validate using these exact commands (scope paths to changed packages/plugins):
 
 ```bash
-node scripts/eslint --fix $(git diff --name-only)
+node scripts/lint --fix $(git diff --name-only)
+node scripts/oxfmt $(git diff --name-only)
 node scripts/type_check --project <path/to/tsconfig.json>
 node scripts/jest <path/to/affected.test.ts>
 node scripts/check_changes.ts

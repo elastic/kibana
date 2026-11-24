@@ -91,10 +91,10 @@ Run **TypeScript**:
 node scripts/type_check.js --project=x-pack/solutions/security/plugins/cloud_security_posture/tsconfig.json
 ```
 
-Run **ESLint**:
+Run **oxlint**:
 
 ```bash
-pnpm lint:es x-pack/solutions/security/plugins/cloud_security_posture
+node scripts/lint x-pack/solutions/security/plugins/cloud_security_posture
 ```
 
 Run **i18n check**:

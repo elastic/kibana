@@ -1,4 +1,4 @@
-# `@elastic/eui` accessibility ESLint rules
+# `@elastic/eui` accessibility lint rules
 
 Secondary path: when starting from a rule id, jump to the canonical **component guide** that explains the pattern. Read **`shared_principles.md`** first; the manual-review column lists shapes the rule cannot resolve automatically.
 

@@ -5,7 +5,7 @@
 - **Severity**: Error (security-severity 7.5)
 - **Description**: Detects a dynamically-built string (template literal, `+` concatenation, `+=` accumulation or `join(sep)` over an array) that flows into the path of a browser `http.*` request without `buildPath()` (`@kbn/core-http-browser`) or `encodeURIComponent()`. Unencoded path parameters allow path traversal / IDOR.
 
-This is the data-flow companion to the `@kbn/eslint/no_unsafe_dynamic_http_path` ESLint rule. The ESLint rule only checks the inline path expression at the call site; this query follows the value across variables, helper-function returns, and files.
+This is the data-flow companion to the `@kbn/eslint/no_unsafe_dynamic_http_path` lint rule. The lint rule only checks the inline path expression at the call site; this query follows the value across variables, helper-function returns, and files.
 
 - **Fix**: encode path parameters with `buildPath()`:
   ```typescript
@@ -27,7 +27,7 @@ This is the data-flow companion to the `@kbn/eslint/no_unsafe_dynamic_http_path`
 
 ## Notes
 
-- Kibana's CodeQL analysis runs with `CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES`, so the `http` receiver and path argument are matched syntactically (identifier `http`, or any property access ending in `.http`), mirroring the ESLint rule.
+- Kibana's CodeQL analysis runs with `CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES`, so the `http` receiver and path argument are matched syntactically (identifier `http`, or any property access ending in `.http`), mirroring the lint rule.
 - `buildPath()` and `encodeURIComponent()` results break the flow and are not reported, whether called inline or assigned to a variable first. Non-`http` receivers (e.g. `client.delete(...)`) are not matched.
 - Both sanitizers are **resolved, not matched by name**. `buildPath()` must be the one imported from `@kbn/core-http-browser`, so the unrelated local helpers of that name elsewhere in Kibana are not trusted; `encodeURIComponent` must be the global builtin, so a local pass-through that shadows it is not either. A member callee (`window.encodeURIComponent(x)`) still counts.
 - `buildPath()` only counts as an encoder when its route template cannot itself carry a dynamic segment (a literal, a constant reference, or a template built only from those). It URI-encodes the values it substitutes for `{param}` placeholders and returns the template otherwise unchanged, so `buildPath(id)` returns `id` verbatim and still reports. For the same reason `map(buildPath)` is not an encoding callback, while `map(encodeURIComponent)` is.
@@ -38,7 +38,7 @@ This is the data-flow companion to the `@kbn/eslint/no_unsafe_dynamic_http_path`
 - The object overload is tracked through spread composition, so `const opts = { path: ... }; http.fetch({ ...opts, method })` reports. The alert lands on the `path` property write rather than on the `fetch` call, since that is where the fix belongs.
 - A `join()` separator lands between every pair of elements, so it is checked too: `[BASE, 'status'].join(id)` is reported even though both elements are constant. A separator that is a literal, a constant reference, or a variable that only ever holds one of those is safe, and a no-argument `join()` (which defaults to `,`) is safe.
 - `+=` accumulation reports on the same terms as `+`: `let p = '/api/things/'; p += id;` is reported, matching `'/api/things/' + id`, while appending a literal or an encoded segment is not.
-- Literal segments are safe, so `` `/api/x/${1}` `` is not reported, matching the ESLint rule's handling of literals.
+- Literal segments are safe, so `` `/api/x/${1}` `` is not reported, matching the lint rule's handling of literals.
 - Known gap: a path whose only dynamic part is a bare variable that was never constructed (`http.get(props.href)`) is not reported.
 - Known gap: a value introduced by a callback or by a later mutation of a `concat` argument is not reported. `[BASE].map(() => id).join('/')` is missed, and so is `const extra = []; extra.push(id); [BASE].concat(extra).join('/')`, because both arrays hold only safe elements when they are created.
 - Known gap: `+=` carries the appended value, not the value already in the variable. ``let p = `/api/${id}`; p += '/status';`` is not reported, while the reverse order is.

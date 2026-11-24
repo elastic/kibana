@@ -475,7 +475,7 @@ Report documentation issues alongside code issues.
   the PR description
 - **TypeScript** (touched files): Use strict equality (`===` / `!==`), follow repo style (early returns, explicit
   types, no `any`)
-- **Lint**: Run `node scripts/eslint <touched files>` and treat any reported error as a must-fix. This is
+- **Lint**: Run `node scripts/lint <touched files>` and treat any reported error as a must-fix. This is
   fast, requires no running Kibana/Elasticsearch, and catches mechanical rule violations (e.g. a forbidden
   non-null assertion, `@typescript-eslint/no-non-null-assertion`, in a freshly-written test file) that a
   manual reading pass can miss and that would otherwise only surface once CI's lint step fails.

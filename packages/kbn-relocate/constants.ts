@@ -86,11 +86,11 @@ This PR aims at relocating some of the Kibana modules (plugins and packages) int
 > [!IMPORTANT]
 > * We kindly ask you to:
 >   * Manually fix the errors in the error section below (if there are any).
->   * Search for the \`packages[\/\\]\` and \`plugins[\/\\]\` patterns in the source code (Babel and Eslint config files), and update them appropriately.
+>   * Search for the \`packages[\/\\]\` and \`plugins[\/\\]\` patterns in the source code (Babel and oxlint config files), and update them appropriately.
 >   * Manually review \`.buildkite/scripts/pipelines/pull_request/pipeline.ts\` to ensure that any CI pipeline customizations continue to be correctly applied after the changed path names
 >   * Review all of the updated files, specially the \`.ts\` and \`.js\` files listed in the sections below, as some of them contain relative paths that have been updated.
 >   * Think of potential impact of the move, including tooling and configuration files that can be pointing to the relocated modules. E.g.:
->     * customised eslint rules
+>     * customised lint rules (\`.oxlint/\`)
 >     * docs pointing to source code
 
 > [!NOTE]

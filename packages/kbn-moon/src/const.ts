@@ -24,7 +24,6 @@ export const MOON_CONST = {
   MOON_CONFIG_FILE_NAME: 'moon.yml',
   TEMPLATE_FILE_NAME: 'moon.template.yml',
   EXTENSION_FILE_NAME: 'moon.extend.yml',
-  ESLINT_CONFIG_FILES: ['.eslintrc.js', '.eslintrc.json'],
   PROJECT_LAYER_UNKNOWN: 'unknown',
   DEFAULT_TOOLCHAIN: 'node',
   TAG_JEST_UNIT: 'jest-unit-tests',

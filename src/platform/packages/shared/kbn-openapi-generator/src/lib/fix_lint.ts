@@ -11,19 +11,18 @@ import execa from 'execa';
 import { globby } from 'globby';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-export async function fixEslint(pattern: string) {
+export async function fixLint(pattern: string) {
   // Oxlint does not expand globs, so pass it the generated files explicitly.
   const files = await globby([pattern]);
   if (files.length === 0) {
     return;
   }
 
-  // `scripts/eslint` applies Oxlint fixes (e.g. license headers) before ESLint fixes.
-  await execa(process.execPath, ['scripts/eslint', '--fix', ...files], {
-    // Need to run eslint from the Kibana root directory, otherwise it will not
+  const options = {
+    // Need to run the linter from the Kibana root directory, otherwise it will not
     // be able to pick up the right config
     cwd: REPO_ROOT,
-    // The generator is invoking eslint in a deliberate "apply auto-fixes"
+    // The generator is invoking the linter in a deliberate "apply auto-fixes"
     // post-process step. Some rules (e.g. @kbn/imports/no_unused_imports) gate
     // fix-vs-suggest on whether they detect an editor env (VSCODE_CWD, JetBrains,
     // etc.). Setting IS_KIBANA_PRECOMIT_HOOK forces the non-editor branch so the
@@ -31,5 +30,12 @@ export async function fixEslint(pattern: string) {
     // otherwise running `pnpm openapi:generate` from a VSCode/Cursor terminal
     // leaves dead imports the fix-step can't remove.
     env: { ...process.env, IS_KIBANA_PRECOMIT_HOOK: '1' },
-  });
+  };
+  const args = ['scripts/lint', '--fix', ...files];
+
+  // Oxlint applies fixes in a single pass and skips overlapping ones (e.g. adding the required
+  // license header and removing the template's disallowed one), so the first pass may still
+  // report errors the second pass fixes.
+  await execa(process.execPath, args, { ...options, reject: false });
+  await execa(process.execPath, args, options);
 }

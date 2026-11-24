@@ -55,6 +55,6 @@ it('has no detectable a11y violations on load', () => {
 
 ### 3. Ready check (execute before commit)
 - Favor EUI components and honor their accessibility playbook
-- Zero tolerance for a11y ESLint warnings
+- Zero tolerance for a11y lint warnings
 - No new axe violations in updated components — keep it clean
 - VoiceOver sanity check: new or modified interactive areas should clearly announce their purpose

@@ -55,7 +55,7 @@ export const typescriptRules: DummyRuleMap = {
   // ],
 };
 
-/** `@kbn/eslint-config`'s TypeScript-only rules. */
+/** TypeScript-only rules, ported from the former `@kbn/eslint-config`. */
 export const typescriptOverrides: OxlintOverride[] = [
   {
     files: ['**/*.{ts,tsx}'],

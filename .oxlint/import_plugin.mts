@@ -35,7 +35,7 @@ const IMPORT_PLUGIN_RULES = [
 ] as const;
 
 export const importPluginOverrides: OxlintOverride[] = [
-  // @kbn/eslint-config javascript.js
+  // Ported from the former @kbn/eslint-config javascript.js
   {
     files: ['**/*.{js,mjs}'],
     rules: {
@@ -49,7 +49,7 @@ export const importPluginOverrides: OxlintOverride[] = [
       'import/no-dynamic-require': 'error',
     },
   },
-  // @kbn/eslint-config typescript.js
+  // Ported from the former @kbn/eslint-config typescript.js
   {
     files: ['**/*.{ts,tsx}'],
     rules: {
@@ -122,7 +122,6 @@ export const importPluginOverrides: OxlintOverride[] = [
   {
     // Files that run AFTER node version check and are not also transpiled with babel
     files: [
-      '**/.eslintrc.js',
       'packages/kbn-eslint-plugin-eslint/**/*',
       'x-pack/gulpfile.js',
       'x-pack/scripts/*.js',

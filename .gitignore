@@ -73,7 +73,6 @@ config_sets/bug_fixer/
 /x-pack/**/test/serverless/functional/test_suites/*/*/reporting/reports/failure
 
 /html_docs
-.eslintcache
 /plugins/
 /data
 disabledPlugins

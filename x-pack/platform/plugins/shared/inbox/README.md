@@ -73,10 +73,11 @@ cd x-pack/platform/packages/shared/kbn-inbox-common
 pnpm openapi:generate
 ```
 
-After regenerating, run eslint over the generated files to clean up any unused imports:
+After regenerating, run oxlint and oxfmt over the generated files to clean up any unused imports:
 
 ```bash
-node scripts/eslint --fix x-pack/platform/packages/shared/kbn-inbox-common/impl/schemas/**/*.gen.ts
+node scripts/lint --fix x-pack/platform/packages/shared/kbn-inbox-common/impl/schemas
+node scripts/oxfmt x-pack/platform/packages/shared/kbn-inbox-common/impl/schemas
 ```
 
 ## RBAC

@@ -120,10 +120,16 @@ files.forEach((file) => {
 
 changedFiles.forEach((file) => file.saveSync());
 
-const root = Path.join(__dirname, '../../../../../..');
+const changedFilePaths = [...new Set(changedFiles.map((file) => file.getFilePath()))].join(' ');
 
-// run ESLint on the changed files
-execSync(`node scripts/eslint ${glob} --fix`, {
-  cwd: root,
-  stdio: 'inherit',
-});
+// apply lint fixes to the changed files, then format them
+if (changedFilePaths) {
+  execSync(`node scripts/lint --fix ${changedFilePaths}`, {
+    cwd: REPO_ROOT,
+    stdio: 'inherit',
+  });
+  execSync(`node scripts/oxfmt ${changedFilePaths}`, {
+    cwd: REPO_ROOT,
+    stdio: 'inherit',
+  });
+}

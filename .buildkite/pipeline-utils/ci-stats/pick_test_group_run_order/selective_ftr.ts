@@ -48,7 +48,6 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/dependency-ownership',
 
   // Lint
-  '@kbn/eslint-config',
   '@kbn/eslint-plugin-alerting-v2',
   '@kbn/eslint-plugin-disable',
   '@kbn/eslint-plugin-eslint',
@@ -94,7 +93,6 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/CODEOWNERS',
   'OWNERS',
   '**/OWNERS',
-  '**/.eslintrc*',
   '**/.oxfmtrc*',
   '.mise.toml',
   '.river/**',

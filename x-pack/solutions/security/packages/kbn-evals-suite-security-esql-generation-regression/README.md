@@ -243,5 +243,6 @@ node scripts/type_check --project x-pack/solutions/security/packages/kbn-evals-s
 ### Lint
 
 ```bash
-node scripts/eslint --fix x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression
+node scripts/lint --fix x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression
+node scripts/oxfmt x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression
 ```

@@ -71,7 +71,7 @@ export const RESTRICTED_GLOBALS = [
   'top',
 ];
 
-/** Rules `@kbn/eslint-config` applied to every file. */
+/** Rules applied to every file, ported from the former `@kbn/eslint-config`. */
 export const kbnConfigRules: DummyRuleMap = {
   'no-new-func': 'error',
   'no-implied-eval': 'error',
@@ -113,7 +113,7 @@ export const javascriptRules: DummyRuleMap = {
   // 'yoda': 'off',
 };
 
-/** `@kbn/eslint-config`'s JavaScript-only rules. */
+/** JavaScript-only rules, ported from the former `@kbn/eslint-config`. */
 export const javascriptOverrides: OxlintOverride[] = [
   {
     files: ['**/*.js', '**/*.mjs'],

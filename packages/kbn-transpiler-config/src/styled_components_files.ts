@@ -10,11 +10,11 @@
 /**
  * Re-export styled-components file patterns from @kbn/babel-preset.
  * The original list in @kbn/babel-preset/styled_components_files.js is the
- * single source of truth, maintained there for ESLint compatibility.
+ * single source of truth.
  *
  * This list is used by:
  * - @kbn/babel-preset (for applying styled-components Babel plugin)
- * - @kbn/eslint-config (for linting rules)
+ * - .oxlint/module_migration.mts (for linting rules)
  *
  * Note: With SWC, we don't use a separate styled-components plugin.
  * styled-components works at runtime without build-time optimizations.

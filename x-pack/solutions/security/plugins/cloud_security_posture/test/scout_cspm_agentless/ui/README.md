@@ -113,7 +113,7 @@ expect(capturedRequestBody!.cloud_connector).toBeDefined();
 expect(capturedRequestBody!.cloud_connector!.enabled).toBe(true);
 ```
 
-> **Note:** Assertions are placed outside the route handler to avoid ESLint's "Avoid calling `expect` conditionally" error.
+> **Note:** Assertions are placed outside the route handler to avoid the "Avoid calling `expect` conditionally" lint error.
 
 ### Expected Request Shape
 
