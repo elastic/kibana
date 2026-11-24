@@ -15,6 +15,7 @@ import {
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
   SIEM_MIGRATIONS_RULES_PATH,
+  SIEM_MIGRATIONS_WORKFLOWS_PATH,
   SIEM_MIGRATIONS_MANAGE_PATH,
   SecurityPageName,
 } from '../../common/constants';
@@ -76,6 +77,24 @@ const subLinks: LinkItem[] = [
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
     experimentalKey: 'automaticDashboardsMigration',
   },
+  {
+    id: SecurityPageName.siemMigrationsWorkflows,
+    title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrationWorkflows.title', {
+      defaultMessage: 'Translated workflows',
+    }),
+    description: i18n.translate(
+      'xpack.securitySolution.appLinks.siemMigrationsWorkflows.description',
+      {
+        defaultMessage: 'Migrate your workflows to Elastic using AI powered Automatic migration.',
+      }
+    ),
+    landingIcon: 'branch',
+    path: SIEM_MIGRATIONS_WORKFLOWS_PATH,
+    capabilities: [[RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    skipUrlState: true,
+    hideTimeline: true,
+    hideWhenExperimentalKey: 'siemMigrationsDisabled',
+  },
 ];
 
 export const links: LinkItem = {
@@ -107,6 +126,7 @@ export const links: LinkItem = {
         SecurityPageName.siemMigrationsManage,
         SecurityPageName.siemMigrationsRules,
         SecurityPageName.siemMigrationsDashboards,
+        SecurityPageName.siemMigrationsWorkflows,
       ],
     },
   ],

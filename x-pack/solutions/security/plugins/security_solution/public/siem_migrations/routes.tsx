@@ -15,10 +15,12 @@ import {
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
   SIEM_MIGRATIONS_RULES_PATH,
+  SIEM_MIGRATIONS_WORKFLOWS_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { MigrationDashboardsPage } from './dashboards/pages';
 import { MigrationRulesPage } from './rules/pages';
+import { MigrationWorkflowsPage } from './workflows/pages';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { MigrationsLandingPage } from './landing';
@@ -78,6 +80,18 @@ const SiemMigrationsDashboardsRoutes = () => {
   );
 };
 
+const SiemMigrationsWorkflowsRoutes = () => {
+  return (
+    <PluginTemplateWrapper>
+      <SecurityRoutePageWrapper pageName={SecurityPageName.siemMigrationsWorkflows}>
+        <Routes>
+          <Route path={SIEM_MIGRATIONS_WORKFLOWS_PATH} component={MigrationWorkflowsPage} />
+        </Routes>
+      </SecurityRoutePageWrapper>
+    </PluginTemplateWrapper>
+  );
+};
+
 export const getSiemMigrationsRoutes = (
   experimentalFeatures: ExperimentalFeatures
 ): SecuritySubPluginRoutes => {
@@ -97,6 +111,10 @@ export const getSiemMigrationsRoutes = (
           {
             path: SIEM_MIGRATIONS_RULES_PATH,
             component: SiemMigrationsRulesRoutes,
+          },
+          {
+            path: SIEM_MIGRATIONS_WORKFLOWS_PATH,
+            component: SiemMigrationsWorkflowsRoutes,
           },
         ]
       : []),
