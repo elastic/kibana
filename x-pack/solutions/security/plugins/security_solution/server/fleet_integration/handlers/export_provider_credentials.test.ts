@@ -214,6 +214,7 @@ describe('filterExportProviderKeyReferences()', () => {
   ): ExportProviderKeyMetadata => ({
     id: 'key-1',
     package_policy_id: PACKAGE_POLICY_ID,
+    account_name: 'acct',
     created_at: new Date(NOW).toISOString(),
     ...overrides,
   });
@@ -344,6 +345,91 @@ describe('filterExportProviderKeyReferences()', () => {
 
     expect(result.windows.response_actions!.export_providers![0]).not.toHaveProperty('credentials');
     expect(logger.debug).toHaveBeenCalled();
+  });
+
+  describe('when the provider account_name differs from the key object account_name', () => {
+    const providerWithKey = {
+      ...buildProvider(),
+      credentials: { type: 'account_key', key_id: 'key-1' },
+    };
+
+    it('drops a stored, owned reference on every OS and keeps the rest of the provider', async () => {
+      const policy = buildPolicy([providerWithKey]);
+      const metadata = buildMetadata({
+        account_name: 'previous-account',
+        created_at: new Date(NOW - EXPORT_PROVIDER_KEY_MIN_AGE_MS * 10).toISOString(),
+      });
+
+      const result = await run(policy, {
+        metadata: new Map([['key-1', metadata]]),
+        storedPolicy: buildStoredPolicy(policy),
+      });
+
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        expect(result[os].response_actions?.export_providers?.[0]).toEqual(buildProvider());
+      }
+      expect(logger.debug).toHaveBeenCalled();
+    });
+
+    it('drops a young, owned reference', async () => {
+      const policy = buildPolicy([providerWithKey]);
+      const metadata = buildMetadata({
+        account_name: 'previous-account',
+        created_at: new Date(NOW - 1000).toISOString(),
+      });
+
+      const result = await run(policy, {
+        metadata: new Map([['key-1', metadata]]),
+        storedPolicy: buildStoredPolicy(buildPolicy([buildProvider()])),
+      });
+
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        expect(result[os].response_actions?.export_providers?.[0]).toEqual(buildProvider());
+      }
+    });
+
+    it('drops the reference when a provider has a non-string account_name', async () => {
+      const policy = buildPolicy([{ ...providerWithKey, account_name: 42 }]);
+
+      const result = await run(policy, {
+        metadata: new Map([['key-1', buildMetadata()]]),
+        storedPolicy: buildStoredPolicy(policy),
+      });
+
+      expect(result.windows.response_actions!.export_providers![0]).not.toHaveProperty(
+        'credentials'
+      );
+    });
+  });
+
+  it.each<[string, Partial<ExportProvider>]>([
+    ['container', { container: 'other-container' }],
+    ['service_url', { service_url: 'https://acct.blob.core.example.com' }],
+  ])('keeps a reference when only the %s changes', async (_, overrides) => {
+    const changedProvider = {
+      ...buildProvider(overrides),
+      credentials: { type: 'account_key', key_id: 'key-1' },
+    };
+    const policy = buildPolicy([changedProvider]);
+    const storedPolicy = buildStoredPolicy(
+      buildPolicy([{ ...buildProvider(), credentials: { type: 'account_key', key_id: 'key-1' } }])
+    );
+
+    const result = await run(policy, {
+      metadata: new Map([
+        [
+          'key-1',
+          buildMetadata({
+            created_at: new Date(NOW - EXPORT_PROVIDER_KEY_MIN_AGE_MS * 10).toISOString(),
+          }),
+        ],
+      ]),
+      storedPolicy,
+    });
+
+    for (const os of ['windows', 'mac', 'linux'] as const) {
+      expect(result[os].response_actions?.export_providers?.[0]).toEqual(changedProvider);
+    }
   });
 
   it('treats a missing stored policy as referencing nothing', async () => {

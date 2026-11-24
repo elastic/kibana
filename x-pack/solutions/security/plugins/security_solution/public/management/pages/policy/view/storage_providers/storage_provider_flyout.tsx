@@ -42,6 +42,7 @@ import type {
   ExportProviderType,
 } from '../../../../../../common/endpoint/types';
 import {
+  ACCOUNT_KEY_ACCOUNT_CHANGED_HELP_TEXT,
   ACCOUNT_KEY_CREDENTIAL_TYPE_LABEL,
   ACCOUNT_KEY_FIELD_HELP_TEXT,
   ACCOUNT_KEY_FIELD_LABEL,
@@ -102,12 +103,16 @@ const CREDENTIAL_TYPE_OPTIONS = [{ value: 'account_key', text: ACCOUNT_KEY_CREDE
 const isExportProviderType = (value: string): value is ExportProviderType =>
   (EXPORT_PROVIDER_TYPES as readonly string[]).includes(value);
 
-/** The key is required on add; on edit an empty value means "leave the stored key as is". */
+/**
+ * The key is required on add, and on edit once the storage account name changed (the server drops
+ * the old account's key reference); otherwise an empty value on edit means
+ * "leave the stored key as is".
+ */
 const getAccountKeyValidationError = (
-  isEdit: boolean,
+  isKeyRequired: boolean,
   trimmedAccountKey: string
 ): 'required' | 'invalid_format' | undefined => {
-  if (isEdit && trimmedAccountKey === '') {
+  if (!isKeyRequired && trimmedAccountKey === '') {
     return undefined;
   }
   return getExportProviderAccountKeyError(trimmedAccountKey);
@@ -200,7 +205,12 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
 
     const fieldsDisabled = isSaving || isKeyOnlyRetry;
     const hasKeyReference = isEdit && Boolean(provider?.credentials);
-    const showKeyInput = isKeyOnlyRetry || !hasKeyReference || isReplacingKey;
+    // Changing the account points exports at a new destination (the warning below) and makes the
+    // key required: the server drops the old account's key reference
+    const isAccountNameChanged =
+      isEdit && !isKeyOnlyRetry && values.account_name !== provider.account_name;
+    const showKeyInput =
+      isKeyOnlyRetry || !hasKeyReference || isReplacingKey || isAccountNameChanged;
     const trimmedAccountKey = accountKeyInput.trim();
     const hasKeyEntered = showKeyInput && trimmedAccountKey !== '';
 
@@ -210,7 +220,7 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
       [otherIds, updatedProvider]
     );
     const keyError = showKeyInput
-      ? getAccountKeyValidationError(isEdit, trimmedAccountKey)
+      ? getAccountKeyValidationError(!isEdit || isAccountNameChanged, trimmedAccountKey)
       : undefined;
     const isValid = Object.keys(fieldErrors).length === 0 && !keyError;
     // Fields are read-only during a key-only retry, so they can never account for a change there
@@ -218,10 +228,8 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
     const isChanged = isFieldsChanged || hasKeyEntered;
     const canSave = isValid && isChanged && !isSaving;
     const isRenamed = isEdit && !isKeyOnlyRetry && values.id !== provider.id;
-    // Account, container and service URL are where exports to this name go; a change also
-    // redirects exports that haven't reached a host yet
-    const isAccountNameChanged =
-      isEdit && !isKeyOnlyRetry && values.account_name !== provider.account_name;
+    // Container and service URL are where exports to this name go; a change also redirects
+    // exports that haven't reached a host yet
     const isContainerChanged = isEdit && !isKeyOnlyRetry && values.container !== provider.container;
     const isServiceUrlChanged =
       isEdit && !isKeyOnlyRetry && values.service_url !== (provider.service_url ?? '');
@@ -439,7 +447,11 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
             {showKeyInput ? (
               <EuiFormRow
                 label={ACCOUNT_KEY_FIELD_LABEL}
-                helpText={ACCOUNT_KEY_FIELD_HELP_TEXT}
+                helpText={
+                  isAccountNameChanged
+                    ? ACCOUNT_KEY_ACCOUNT_CHANGED_HELP_TEXT
+                    : ACCOUNT_KEY_FIELD_HELP_TEXT
+                }
                 isInvalid={Boolean(visibleKeyError)}
                 error={visibleKeyError}
                 fullWidth

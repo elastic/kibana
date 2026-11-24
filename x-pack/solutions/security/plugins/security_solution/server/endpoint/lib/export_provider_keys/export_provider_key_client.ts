@@ -46,10 +46,15 @@ const FIND_PER_PAGE = 100;
 
 const toMetadata = ({
   id,
-  attributes: { package_policy_id: packagePolicyId, created_at: createdAt },
+  attributes: {
+    package_policy_id: packagePolicyId,
+    account_name: accountName,
+    created_at: createdAt,
+  },
 }: SavedObject<ExportProviderKeyAttributes>): ExportProviderKeyMetadata => ({
   id,
   package_policy_id: packagePolicyId,
+  account_name: accountName,
   created_at: createdAt,
 });
 

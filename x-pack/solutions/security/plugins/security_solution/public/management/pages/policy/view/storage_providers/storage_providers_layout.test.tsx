@@ -473,7 +473,7 @@ describe('When rendering the StorageProvidersLayout', () => {
     it('should warn under a destination field that exports will go to the new destination only while it is changed', async () => {
       await render([createProvider('azure-1', { service_url: 'https://acct1.blob.example.com' })]);
       const warning =
-        "Exports to this provider, including ones that haven't reached a host yet, will go to the new destination.";
+        "Exports that haven't uploaded yet will use the new destination. If the storage account or container changed, they'll fail and need to be run again.";
       const destinationFields = {
         accountName: ['storageProviderFlyout-accountNameInput', 'acct2', 'acct1'],
         container: ['storageProviderFlyout-containerInput', 'other-dumps', 'dumps'],
@@ -511,6 +511,109 @@ describe('When rendering the StorageProvidersLayout', () => {
       }
     });
 
+    it('should require a new key when the account name changes, then save the Fleet update (still carrying the old reference) before the key with its returned version', async () => {
+      const existing = createProvider('azure-1', {
+        credentials: { type: 'account_key', key_id: 'key-1' },
+      });
+      await render([existing], 'policy-version-10');
+
+      await clickRowAction('azure-1', 'storageProvidersEditAction');
+      await renderResult.findByTestId('storageProviderFlyout');
+      expect(renderResult.getByTestId('storageProviderFlyout-storedKey')).toBeInTheDocument();
+      expect(
+        renderResult.getByTestId('storageProviderFlyout-replaceKeyButton')
+      ).toBeInTheDocument();
+      const saveButton = renderResult.getByTestId('storageProviderFlyout-saveButton');
+
+      await setFieldValue('storageProviderFlyout-accountNameInput', 'acct2');
+
+      // The stored-key text and Replace key toggle are gone; the key field and its help text show
+      expect(renderResult.queryByTestId('storageProviderFlyout-storedKey')).not.toBeInTheDocument();
+      expect(
+        renderResult.queryByTestId('storageProviderFlyout-replaceKeyButton')
+      ).not.toBeInTheDocument();
+      expect(renderResult.getByTestId('storageProviderFlyout-accountKeyInput')).toHaveValue('');
+      expect(renderResult.getByTestId('storageProviderFlyout')).toHaveTextContent(
+        'A different storage account needs its own key.'
+      );
+      // The account changed, but no key was entered yet: Save stays disabled
+      expect(saveButton).toBeDisabled();
+
+      // The request still carries the old reference; the server drops it (item 1), so the
+      // mocked response below comes back without it
+      const requestProvider = { ...existing, account_name: 'acct2' };
+      const droppedProvider = createProvider('azure-1', { account_name: 'acct2' });
+      mockPolicyUpdateResponse([droppedProvider], 'policy-version-11');
+      const savedWithKey = {
+        ...droppedProvider,
+        credentials: { type: 'account_key' as const, key_id: 'key-2' },
+      };
+      mockKeyRouteResponse([savedWithKey]);
+
+      await setFieldValue('storageProviderFlyout-accountKeyInput', VALID_ACCOUNT_KEY);
+      expect(saveButton).toBeEnabled();
+
+      await userEvent.click(saveButton);
+      await waitForUpdateRequest();
+      await waitForKeyRequest();
+
+      expect(getSentProviders()).toEqual([requestProvider]);
+      expect(getSentKeyRequest()).toEqual({
+        packagePolicyId: policy.id,
+        providerId: 'azure-1',
+        packagePolicyVersion: 'policy-version-11',
+        accountKey: VALID_ACCOUNT_KEY,
+      });
+    });
+
+    it('should restore the stored key and Replace key toggle, and disable Save, when the account name is changed back', async () => {
+      const existing = createProvider('azure-1', {
+        credentials: { type: 'account_key', key_id: 'key-1' },
+      });
+      await render([existing]);
+
+      await clickRowAction('azure-1', 'storageProvidersEditAction');
+      const saveButton = await renderResult.findByTestId('storageProviderFlyout-saveButton');
+      expect(saveButton).toBeDisabled();
+
+      await setFieldValue('storageProviderFlyout-accountNameInput', 'acct2');
+      expect(renderResult.queryByTestId('storageProviderFlyout-storedKey')).not.toBeInTheDocument();
+
+      await setFieldValue('storageProviderFlyout-accountNameInput', 'acct1');
+
+      expect(renderResult.getByTestId('storageProviderFlyout-storedKey')).toHaveTextContent(
+        'The saved key is hidden. You can only replace it.'
+      );
+      expect(
+        renderResult.getByTestId('storageProviderFlyout-replaceKeyButton')
+      ).toBeInTheDocument();
+      expect(
+        renderResult.queryByTestId('storageProviderFlyout-accountKeyInput')
+      ).not.toBeInTheDocument();
+      // Nothing changed: Save is disabled again
+      expect(saveButton).toBeDisabled();
+    });
+
+    it('should also require a key when the account name is changed on a provider with no stored key reference', async () => {
+      await render([createProvider('azure-1')]);
+
+      await clickRowAction('azure-1', 'storageProvidersEditAction');
+      const saveButton = await renderResult.findByTestId('storageProviderFlyout-saveButton');
+      // No reference: the key field already shows, and an empty key is fine until it changes
+      expect(renderResult.getByTestId('storageProviderFlyout-accountKeyInput')).toHaveValue('');
+      expect(saveButton).toBeDisabled();
+
+      await setFieldValue('storageProviderFlyout-accountNameInput', 'acct2');
+
+      expect(renderResult.getByTestId('storageProviderFlyout')).toHaveTextContent(
+        'A different storage account needs its own key.'
+      );
+      expect(saveButton).toBeDisabled();
+
+      await setFieldValue('storageProviderFlyout-accountKeyInput', VALID_ACCOUNT_KEY);
+      expect(saveButton).toBeEnabled();
+    });
+
     it('should not save an edit when the provider was changed since the flyout opened', async () => {
       const first = createProvider('azure-1');
       await render([first]);
@@ -532,7 +635,8 @@ describe('When rendering the StorageProvidersLayout', () => {
       const first = createProvider('azure-1');
       await render([first]);
       await clickRowAction('azure-1', 'storageProvidersEditAction');
-      await setFieldValue('storageProviderFlyout-accountNameInput', 'acct2');
+      // Not the account name: that would also require a new key before Save is enabled
+      await setFieldValue('storageProviderFlyout-containerInput', 'other-container');
 
       // An earlier save of this provider (same name, other container) finishes now
       setStorePolicy(createPolicy(policy.id, [{ ...first, container: 'changed-elsewhere' }]));

@@ -289,6 +289,7 @@ describe('ExportProviderKeyClient', () => {
             {
               id: 'key-1',
               package_policy_id: PACKAGE_POLICY_ID,
+              account_name: 'mystorageaccount',
               created_at: CREATED_AT,
             },
           ],
@@ -334,8 +335,22 @@ describe('ExportProviderKeyClient', () => {
         perPage: 1,
       });
       expect(batches).toEqual([
-        [{ id: 'key-1', package_policy_id: PACKAGE_POLICY_ID, created_at: CREATED_AT }],
-        [{ id: 'key-2', package_policy_id: 'package-policy-2', created_at: CREATED_AT }],
+        [
+          {
+            id: 'key-1',
+            package_policy_id: PACKAGE_POLICY_ID,
+            account_name: 'mystorageaccount',
+            created_at: CREATED_AT,
+          },
+        ],
+        [
+          {
+            id: 'key-2',
+            package_policy_id: 'package-policy-2',
+            account_name: 'mystorageaccount',
+            created_at: CREATED_AT,
+          },
+        ],
       ]);
       expect(close).toHaveBeenCalled();
     });

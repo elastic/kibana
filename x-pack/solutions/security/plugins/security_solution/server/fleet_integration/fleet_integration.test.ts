@@ -2230,6 +2230,7 @@ describe('Fleet integrations', () => {
         ): ExportProviderKeyMetadata => ({
           id: 'key-1',
           package_policy_id: PACKAGE_POLICY_ID,
+          account_name: 'acct',
           created_at: new Date(NOW).toISOString(),
           ...overrides,
         });
@@ -2343,6 +2344,24 @@ describe('Fleet integrations', () => {
             const [resultProvider] = result[os].response_actions!.export_providers!;
             expect(resultProvider).not.toHaveProperty('credentials');
             expect(resultProvider).toEqual(provider);
+          }
+        });
+
+        it('drops a reference whose key object was saved for another storage account, on every OS', async () => {
+          const policy = setExportProviders(policyFactory(), [providerWithKey]);
+          const keyClient = endpointAppContextServiceMock.getExportProviderKeyClient();
+
+          (keyClient.getKeyMetadata as jest.Mock).mockResolvedValue(
+            new Map([['key-1', buildMetadata({ account_name: 'previous-account' })]])
+          );
+          (
+            endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as jest.Mock
+          ).mockResolvedValue({ inputs: [{ config: { policy: { value: policy } } }] });
+
+          const result = await runUpdateWithId(policy);
+
+          for (const os of ['windows', 'mac', 'linux'] as const) {
+            expect(result[os].response_actions!.export_providers![0]).toEqual(provider);
           }
         });
 

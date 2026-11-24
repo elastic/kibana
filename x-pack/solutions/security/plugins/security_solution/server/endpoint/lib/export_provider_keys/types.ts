@@ -25,6 +25,8 @@ export interface ExportProviderKeyAttributes {
 export interface ExportProviderKeyMetadata {
   id: string;
   package_policy_id: string;
+  /** The storage account the key was saved for (in AAD, so stored in clear) */
+  account_name: string;
   created_at: string;
 }
 

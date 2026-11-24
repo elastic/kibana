@@ -39,6 +39,7 @@ const createKeyMetadata = (
 ): ExportProviderKeyMetadata => ({
   id: KEY_ID,
   package_policy_id: PACKAGE_POLICY_ID,
+  account_name: 'mystorageaccount',
   created_at: OLD_ENOUGH_CREATED_AT,
   ...overrides,
 });

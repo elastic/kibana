@@ -229,6 +229,31 @@ const dropExportProviderKeyReferences = (
   linux: dropExportProviderKeyReferencesFromOs(policy.linux, keyIdsToDrop),
 });
 
+/**
+ * Whether any provider (on any OS list) that references `keyId` has an `account_name` other than
+ * `accountName`. A non-string `account_name` counts as different.
+ */
+const isReferencedForAnotherAccount = (
+  policy: PolicyConfig,
+  keyId: string,
+  accountName: string
+): boolean =>
+  POLICY_OPERATING_SYSTEMS.some((os) =>
+    getOsExportProviders(policy[os]).some((provider) => {
+      if (!isPlainObject(provider)) {
+        return false;
+      }
+
+      const record = provider as Record<string, unknown>;
+      const credentials = record.credentials;
+      const referencedKeyId = isPlainObject(credentials)
+        ? (credentials as Record<string, unknown>).key_id
+        : undefined;
+
+      return referencedKeyId === keyId && record.account_name !== accountName;
+    })
+  );
+
 export interface FilterExportProviderKeyReferencesOptions {
   policy: PolicyConfig;
   packagePolicyId: string;
@@ -243,7 +268,8 @@ export interface FilterExportProviderKeyReferencesOptions {
 /**
  * Drops an export provider `credentials` reference this package policy may not keep: the key
  * object must exist, belong to this package policy, and either already be referenced by the stored
- * policy or be new enough that the key route could have just created it. Everything else about the
+ * policy or be new enough that the key route could have just created it, and have been saved for the
+ * `account_name` of every provider that references it. Everything else about the
  * provider is kept. Returns `policy` unchanged, without reading anything, when it references no key.
  */
 export const filterExportProviderKeyReferences = async ({
@@ -291,10 +317,13 @@ export const filterExportProviderKeyReferences = async ({
   for (const keyId of keyIds) {
     const metadata = keyMetadata.get(keyId);
     const isOwned = metadata !== undefined && metadata.package_policy_id === packagePolicyId;
-    const isKept =
+    const isStoredOrYoung =
       isOwned &&
       (storedKeyIds.has(keyId) ||
         now - Date.parse(metadata.created_at) < EXPORT_PROVIDER_KEY_MIN_AGE_MS);
+    const isForAnotherAccount =
+      isStoredOrYoung && isReferencedForAnotherAccount(policy, keyId, metadata.account_name);
+    const isKept = isStoredOrYoung && !isForAnotherAccount;
 
     if (!isKept) {
       keyIdsToDrop.add(keyId);
@@ -305,6 +334,8 @@ export const filterExportProviderKeyReferences = async ({
               ? 'key object not found'
               : !isOwned
               ? 'key object belongs to another package policy'
+              : isForAnotherAccount
+              ? 'key object was saved for another storage account'
               : 'reference is not yet in the stored policy and the key is older than the minimum age'
           }`
       );

@@ -209,7 +209,7 @@ export const DESTINATION_CHANGED_WARNING = i18n.translate(
   'xpack.securitySolution.endpoint.policy.storageProviders.flyout.destinationChangedWarningDescription',
   {
     defaultMessage:
-      "Exports to this provider, including ones that haven't reached a host yet, will go to the new destination.",
+      "Exports that haven't uploaded yet will use the new destination. If the storage account or container changed, they'll fail and need to be run again.",
   }
 );
 
@@ -296,6 +296,12 @@ export const ACCOUNT_KEY_FIELD_LABEL = i18n.translate(
 export const ACCOUNT_KEY_FIELD_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.endpoint.policy.storageProviders.flyout.accountKeyHelpDescription',
   { defaultMessage: "Stored encrypted in Kibana. You can't view it again." }
+);
+
+/** Shown instead of `ACCOUNT_KEY_FIELD_HELP_TEXT` while the storage account name is changed */
+export const ACCOUNT_KEY_ACCOUNT_CHANGED_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.accountKeyAccountChangedHelpDescription',
+  { defaultMessage: 'A different storage account needs its own key.' }
 );
 
 export const STORED_KEY_HIDDEN_TEXT = i18n.translate(
