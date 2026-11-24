@@ -133,6 +133,9 @@ ENV PATH=/usr/share/kibana/bin:$PATH
 COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 {{#serverless}}
 ENV PROFILER_SIGNAL=SIGUSR1
+# TEMPORARY (OLS PoC): serverless projects pass their own config instead of kibana.yml, so the
+# setting goes into serverless.yml, which every serverless project loads.
+RUN /bin/echo -e '\nxpack.security.authz.ols.enabled: true' >> config/serverless.yml
 {{/serverless}}
 {{#fips}}
 
