@@ -35,6 +35,7 @@ spaceTest.describe('ES|QL change point panels on dashboard', { tag: tags.statefu
     async ({ page, pageObjects, scoutSpace }) => {
       const dashboardTitle = `ESQL change point ${scoutSpace.id} ${Date.now()}`;
       const initialChartTitle = 'Change point: avg(products.discount_amount)';
+      const tableTitle = 'Change point: avg(products.taxful_price)';
       const editedChartTitle =
         'Change point: avg(products.discount_amount) split by "geoip.city_name"';
 
@@ -69,7 +70,7 @@ spaceTest.describe('ES|QL change point panels on dashboard', { tag: tags.statefu
         await pageObjects.changePointChart.openInitializer();
         await pageObjects.changePointChart.selectViewType('Table');
         await pageObjects.changePointChart.selectEmbeddableDataView('ft_ecommerce');
-        await pageObjects.changePointChart.selectMetricField('products.discount_amount');
+        await pageObjects.changePointChart.selectMetricField('products.taxful_price');
 
         await expect(pageObjects.changePointChart.previewReady).toBeVisible({
           timeout: PANEL_RENDER_TIMEOUT,
@@ -77,10 +78,13 @@ spaceTest.describe('ES|QL change point panels on dashboard', { tag: tags.statefu
         await expect(pageObjects.changePointChart.confirmButton).toBeEnabled();
 
         await pageObjects.changePointChart.confirmInitializer();
-        await expect(page.testSubj.locator('unifiedDataTable')).toBeVisible({
+        await expect(
+          pageObjects.dashboard.getPanelTitlesLocator().filter({ hasText: tableTitle })
+        ).toBeVisible();
+        await expect(page.testSubj.locator('embeddedSavedSearchDocTable')).toBeVisible({
           timeout: PANEL_RENDER_TIMEOUT,
         });
-        expect(await pageObjects.dashboard.getPanelCount()).toBe(2);
+        await pageObjects.dashboard.expectPanelCount(2);
       });
 
       await spaceTest.step(
@@ -113,7 +117,10 @@ spaceTest.describe('ES|QL change point panels on dashboard', { tag: tags.statefu
           await expect(
             pageObjects.dashboard.getPanelTitlesLocator().filter({ hasText: editedChartTitle })
           ).toBeVisible();
-          expect(await pageObjects.dashboard.getPanelCount()).toBe(2);
+          await expect(
+            pageObjects.dashboard.getPanelTitlesLocator().filter({ hasText: tableTitle })
+          ).toBeVisible();
+          await pageObjects.dashboard.expectPanelCount(2);
         }
       );
     }

@@ -10,7 +10,7 @@
 import { buildChangePointCards } from '@kbn/change-point-chart-viewer';
 import { fetch$ } from '@kbn/presentation-publishing';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, type Observable, Subject } from 'rxjs';
 import { fetchEsql } from '../../application/main/data_fetching/fetch_esql';
 import { resolveEsqlSource } from '../../application/main/data_fetching/resolve_esql_source';
 import type { DiscoverServices } from '../../build_services';
@@ -75,7 +75,10 @@ describe('initializeChangePointGridFetch', () => {
     );
   });
 
-  const start = (panelState: ChangePointGridEmbeddableState = state) => {
+  const start = (
+    panelState: ChangePointGridEmbeddableState = state,
+    esqlQuery$?: Observable<string>
+  ) => {
     const setDataLoading = jest.fn();
     const setDataViews = jest.fn();
     const setSearchError = jest.fn();
@@ -93,6 +96,7 @@ describe('initializeChangePointGridFetch', () => {
     const { cleanup, cancelRequests } = initializeChangePointGridFetch({
       api: {},
       state: panelState as never,
+      ...(esqlQuery$ ? { esqlQuery$ } : {}),
       discoverServices,
       cards$,
       searchContext$,
@@ -316,29 +320,7 @@ describe('initializeChangePointGridFetch', () => {
     jest.mocked(fetchEsql).mockClear();
     jest.mocked(resolveEsqlSource).mockClear();
     const esqlQuery$ = new BehaviorSubject<string>(state.esql);
-    const discoverServices = {
-      profilesManager: {
-        createScopedProfilesManager: jest.fn().mockReturnValue({}),
-      },
-      ebtManager: { createScopedEBTManager: jest.fn() },
-      data: {},
-      dataSourceService: { unregisterEsqlSource: jest.fn() },
-    } as unknown as DiscoverServices;
-
-    const { cleanup } = initializeChangePointGridFetch({
-      api: {},
-      state: { ...state, apply_dashboard_context: false },
-      esqlQuery$,
-      discoverServices,
-      cards$,
-      searchContext$,
-      onCardsUpdated: jest.fn(),
-      setDataLoading: jest.fn(),
-      setDataViews: jest.fn(),
-      setSearchError: jest.fn(),
-      setApproximationApplied: jest.fn(),
-    });
-    cleanupFetch = cleanup;
+    start({ ...state, apply_dashboard_context: false }, esqlQuery$);
 
     fetchContext$.next(dashboardContext);
     await Promise.resolve();

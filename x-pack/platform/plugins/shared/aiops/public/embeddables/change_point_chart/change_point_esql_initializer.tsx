@@ -212,6 +212,7 @@ export const ChangePointEsqlInitializer: FC<ChangePointEsqlInitializerProps> = (
   );
 
   const [directEsql, setDirectEsql] = useState(() => (initialMode === 'esql' ? initialEsql : ''));
+  const [seededEsql, setSeededEsql] = useState<string | undefined>(undefined);
   const [submittedEsql, setSubmittedEsql] = useState<string | undefined>(undefined);
 
   const [previewState, setPreviewState] = useState<ChangePointPreviewStateUpdate>({
@@ -305,12 +306,17 @@ export const ChangePointEsqlInitializer: FC<ChangePointEsqlInitializerProps> = (
   const handleChangeInputMode = useCallback(
     (nextModeId: string) => {
       const nextMode = nextModeId === 'esql' ? 'esql' : 'form';
-      if (nextMode === 'esql' && !directEsql.trim() && generatedEsql) {
+      if (
+        nextMode === 'esql' &&
+        generatedEsql &&
+        (!directEsql.trim() || directEsql === seededEsql)
+      ) {
         setDirectEsql(generatedEsql);
+        setSeededEsql(generatedEsql);
       }
       setInputMode(nextMode);
     },
-    [directEsql, generatedEsql]
+    [directEsql, generatedEsql, seededEsql]
   );
 
   const handleSubmitDirectQuery = useCallback(

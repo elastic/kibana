@@ -14,7 +14,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ViewTypeSelector } from '../../components/change_point_detection/view_type_selector';
-import { buildChangePointEsql } from './build_change_point_esql';
+import { buildChangePointEsql, type BuildChangePointEsqlParams } from './build_change_point_esql';
 import {
   ChangePointEsqlInitializer,
   isEsqlCompatibleField,
@@ -22,39 +22,36 @@ import {
 } from './change_point_esql_initializer';
 import type { ChangePointPreviewStateUpdate } from './change_point_preview';
 
-let latestEditorProps: {
+interface MockEsqlEditorProps {
   query: { esql: string };
   isDisabled?: boolean;
   hideRunQueryButton?: boolean;
   onTextLangQueryChange: (q: { esql: string }) => void;
   onTextLangQuerySubmit: (q?: { esql: string }) => Promise<void>;
-};
+}
 
 jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: (props: typeof latestEditorProps) => {
-    latestEditorProps = props;
-    return (
-      <div>
-        <textarea
-          data-test-subj="aiopsChangePointEsqlEditor"
-          disabled={props.isDisabled}
-          value={props.query.esql}
-          onChange={(e) => props.onTextLangQueryChange({ esql: e.target.value })}
-        />
-        {!props.hideRunQueryButton ? (
-          <button
-            type="button"
-            data-test-subj="mockRunEsqlQueryButton"
-            onClick={() => {
-              void props.onTextLangQuerySubmit({ esql: props.query.esql });
-            }}
-          >
-            Run
-          </button>
-        ) : null}
-      </div>
-    );
-  },
+  ESQLLangEditor: (props: MockEsqlEditorProps) => (
+    <div>
+      <textarea
+        data-test-subj="aiopsChangePointEsqlEditor"
+        disabled={props.isDisabled}
+        value={props.query.esql}
+        onChange={(e) => props.onTextLangQueryChange({ esql: e.target.value })}
+      />
+      {!props.hideRunQueryButton ? (
+        <button
+          type="button"
+          data-test-subj="mockRunEsqlQueryButton"
+          onClick={() => {
+            void props.onTextLangQuerySubmit({ esql: props.query.esql });
+          }}
+        >
+          Run
+        </button>
+      ) : null}
+    </div>
+  ),
 }));
 
 let latestPreviewProps: {
@@ -76,6 +73,30 @@ jest.mock('./change_point_preview', () => ({
     );
   },
 }));
+
+const LOGS_FORM_CONFIGURATION = {
+  mode: 'form',
+  data_view_id: 'logs-dv',
+  aggregation_function: 'avg',
+  metric_field: 'bytes',
+} as const;
+
+const buildLogsEsql = (overrides: Partial<BuildChangePointEsqlParams> = {}): string => {
+  const esql = buildChangePointEsql({
+    indexPattern: 'logs-*',
+    timeField: '@timestamp',
+    aggregationFunction: 'avg',
+    metricField: 'bytes',
+    ...overrides,
+  });
+  if (!esql) {
+    throw new Error('Expected buildLogsEsql fixture to produce a query');
+  }
+  return esql;
+};
+
+const getEsqlEditor = (): HTMLTextAreaElement =>
+  screen.getByTestId('aiopsChangePointEsqlEditor') as HTMLTextAreaElement;
 
 const createMockDataView = (
   overrides?: Partial<{ fields: DataViewField[]; timeFieldName?: string }>
@@ -234,12 +255,7 @@ describe('ChangePointEsqlInitializer', () => {
       target: { value: 'logs-dv' },
     });
 
-    const expectedEsql = buildChangePointEsql({
-      indexPattern: 'logs-*',
-      timeField: '@timestamp',
-      aggregationFunction: 'avg',
-      metricField: 'bytes',
-    })!;
+    const expectedEsql = buildLogsEsql();
 
     await waitFor(() => {
       expect(latestPreviewProps.previewKey).toContain(expectedEsql);
@@ -273,20 +289,10 @@ describe('ChangePointEsqlInitializer', () => {
   it('switches cleanly between form and query modes, preserves both states, validates CHANGE_POINT queries, and runs immediate preview on submit', async () => {
     const { onConfirm } = renderInitializer({
       initialMode: 'form',
-      initialFormConfiguration: {
-        mode: 'form',
-        data_view_id: 'logs-dv',
-        aggregation_function: 'avg',
-        metric_field: 'bytes',
-      },
+      initialFormConfiguration: LOGS_FORM_CONFIGURATION,
     });
 
-    const generatedQuery = buildChangePointEsql({
-      indexPattern: 'logs-*',
-      timeField: '@timestamp',
-      aggregationFunction: 'avg',
-      metricField: 'bytes',
-    })!;
+    const generatedQuery = buildLogsEsql();
 
     await waitFor(() => {
       expect(latestPreviewProps.previewKey).toContain(generatedQuery);
@@ -296,7 +302,7 @@ describe('ChangePointEsqlInitializer', () => {
     // Switch to query mode -> seeds empty editor with generated query and hides form controls
     fireEvent.click(screen.getByText('Write a query'));
     expect(screen.queryByTestId('aiopsChangePointChartEmbeddableDataViewSelector')).toBeNull();
-    const editor = screen.getByTestId('aiopsChangePointEsqlEditor') as HTMLTextAreaElement;
+    const editor = getEsqlEditor();
     expect(editor.disabled).toBe(false);
     expect(editor.value).toBe(generatedQuery);
 
@@ -331,7 +337,7 @@ describe('ChangePointEsqlInitializer', () => {
     expect(latestPreviewProps.previewKey).toContain(generatedQuery);
 
     fireEvent.click(screen.getByText('Write a query'));
-    const reopenedEditor = screen.getByTestId('aiopsChangePointEsqlEditor') as HTMLTextAreaElement;
+    const reopenedEditor = getEsqlEditor();
     expect(reopenedEditor.value).toBe(updatedCustomQuery);
 
     // Preview ready -> Confirm submits esql mode
@@ -361,19 +367,14 @@ describe('ChangePointEsqlInitializer', () => {
       initialEsql: savedCustomQuery,
     });
 
-    const customEditor = screen.getByTestId('aiopsChangePointEsqlEditor') as HTMLTextAreaElement;
+    const customEditor = getEsqlEditor();
     expect(customEditor.value).toBe(savedCustomQuery);
     expect(screen.queryByTestId('aiopsChangePointChartEmbeddableDataViewSelector')).toBeNull();
     esqlEditView.unmount();
 
     // Form-mode edit passes stale initialEsql alongside initialFormConfiguration; switching to query after
     // changing the form must seed from the updated form rather than the stale saved query.
-    const staleSavedQuery = buildChangePointEsql({
-      indexPattern: 'logs-*',
-      timeField: '@timestamp',
-      aggregationFunction: 'avg',
-      metricField: 'bytes',
-    })!;
+    const staleSavedQuery = buildLogsEsql();
     const metricsDataView = {
       ...createMockDataView({
         fields: [
@@ -395,12 +396,7 @@ describe('ChangePointEsqlInitializer', () => {
     const { dataViewsGet } = renderInitializer({
       isEditing: true,
       initialMode: 'form',
-      initialFormConfiguration: {
-        mode: 'form',
-        data_view_id: 'logs-dv',
-        aggregation_function: 'avg',
-        metric_field: 'bytes',
-      },
+      initialFormConfiguration: LOGS_FORM_CONFIGURATION,
       initialEsql: staleSavedQuery,
     });
     dataViewsGet.mockImplementation(async (id: string) =>
@@ -425,7 +421,7 @@ describe('ChangePointEsqlInitializer', () => {
     });
 
     fireEvent.click(screen.getByText('Write a query'));
-    const seededEditor = screen.getByTestId('aiopsChangePointEsqlEditor') as HTMLTextAreaElement;
+    const seededEditor = getEsqlEditor();
     expect(seededEditor.value).toBe(updatedGeneratedQuery);
   });
 
@@ -519,27 +515,11 @@ describe('ChangePointEsqlInitializer', () => {
   it('shows the detected-only switch only for Table form mode, keeps Charts unfiltered, and submits the filtered query for Table', async () => {
     const { onConfirm } = renderInitializer({
       initialMode: 'form',
-      initialFormConfiguration: {
-        mode: 'form',
-        data_view_id: 'logs-dv',
-        aggregation_function: 'avg',
-        metric_field: 'bytes',
-      },
+      initialFormConfiguration: LOGS_FORM_CONFIGURATION,
     });
 
-    const unfilteredEsql = buildChangePointEsql({
-      indexPattern: 'logs-*',
-      timeField: '@timestamp',
-      aggregationFunction: 'avg',
-      metricField: 'bytes',
-    })!;
-    const filteredEsql = buildChangePointEsql({
-      indexPattern: 'logs-*',
-      timeField: '@timestamp',
-      aggregationFunction: 'avg',
-      metricField: 'bytes',
-      onlyChangePoints: true,
-    })!;
+    const unfilteredEsql = buildLogsEsql();
+    const filteredEsql = buildLogsEsql({ onlyChangePoints: true });
 
     await waitFor(() => {
       expect(latestPreviewProps.previewKey).toContain(unfilteredEsql);
@@ -581,7 +561,7 @@ describe('ChangePointEsqlInitializer', () => {
     // Switching to query mode hides the switch and seeds the empty editor with the filtered Table query
     fireEvent.click(screen.getByText('Write a query'));
     expect(screen.queryByTestId('aiopsChangePointOnlyDetectedSwitch')).toBeNull();
-    const editor = screen.getByTestId('aiopsChangePointEsqlEditor') as HTMLTextAreaElement;
+    const editor = getEsqlEditor();
     expect(editor.value).toBe(filteredEsql);
 
     // Return to Build with form and confirm Table submission
@@ -605,5 +585,42 @@ describe('ChangePointEsqlInitializer', () => {
       aggregationFunction: 'avg',
       metricField: 'bytes',
     });
+  });
+
+  it('refreshes an unedited query after subsequent form changes and preserves user-edited queries', async () => {
+    renderInitializer({
+      initialMode: 'form',
+      initialFormConfiguration: LOGS_FORM_CONFIGURATION,
+    });
+
+    const unfilteredEsql = buildLogsEsql();
+    const filteredEsql = buildLogsEsql({ onlyChangePoints: true });
+
+    await waitFor(() => {
+      expect(latestPreviewProps.previewKey).toContain(unfilteredEsql);
+    });
+
+    // Initial switch seeds the empty editor from the form
+    fireEvent.click(screen.getByText('Write a query'));
+    expect(getEsqlEditor().value).toBe(unfilteredEsql);
+
+    // Return to the form, change a query-producing input, and switch back -> untouched query refreshes
+    fireEvent.click(screen.getByText('Build with form'));
+    fireEvent.click(screen.getByText('Table'));
+    fireEvent.click(screen.getByTestId('aiopsChangePointOnlyDetectedSwitch'));
+
+    fireEvent.click(screen.getByText('Write a query'));
+    const refreshedEditor = getEsqlEditor();
+    expect(refreshedEditor.value).toBe(filteredEsql);
+
+    // Edit the query, change the form again, and switch back -> user edit is preserved
+    const editedEsql = `${filteredEsql}\n| LIMIT 25`;
+    fireEvent.change(refreshedEditor, { target: { value: editedEsql } });
+
+    fireEvent.click(screen.getByText('Build with form'));
+    fireEvent.click(screen.getByTestId('aiopsChangePointOnlyDetectedSwitch'));
+
+    fireEvent.click(screen.getByText('Write a query'));
+    expect(getEsqlEditor().value).toBe(editedEsql);
   });
 });
