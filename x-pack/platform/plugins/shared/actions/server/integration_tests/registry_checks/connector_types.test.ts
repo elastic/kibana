@@ -7,16 +7,16 @@
 
 import { z, setLazySchemaDisabled } from '@kbn/zod';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { ActionTypeRegistry } from '../action_type_registry';
-import { setupTestServers } from './lib';
-import { connectorTypes } from './mocks/connector_types';
-import { actionsConfigMock } from '../actions_config.mock';
+import type { ActionTypeRegistry } from '../../action_type_registry';
+import { setupTestServers } from '../lib';
+import { connectorTypes } from '../mocks/connector_types';
+import { actionsConfigMock } from '../../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ActionTypeConfig, Services } from '../types';
+import type { ActionTypeConfig, Services } from '../../types';
 import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 
-jest.mock('../action_type_registry', () => {
-  const actual = jest.requireActual('../action_type_registry');
+jest.mock('../../action_type_registry', () => {
+  const actual = jest.requireActual('../../action_type_registry');
   return {
     ...actual,
     ActionTypeRegistry: jest.fn().mockImplementation((opts) => {
@@ -54,7 +54,7 @@ describe('Connector type config checks', () => {
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
 
-    const mockedActionTypeRegistry = jest.requireMock('../action_type_registry');
+    const mockedActionTypeRegistry = jest.requireMock('../../action_type_registry');
     expect(mockedActionTypeRegistry.ActionTypeRegistry).toHaveBeenCalledTimes(1);
     actionTypeRegistry = mockedActionTypeRegistry.ActionTypeRegistry.mock.results[0].value;
   });

@@ -9,12 +9,12 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import type { TaskDefinition, TaskPriority } from '../task';
-import { retry, setupTestServers } from './lib';
-import type { TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskDefinition, TaskPriority } from '../../task';
+import { retry, setupTestServers } from '../lib';
+import type { TaskTypeDictionary } from '../../task_type_dictionary';
 
-jest.mock('../task_type_dictionary', () => {
-  const actual = jest.requireActual('../task_type_dictionary');
+jest.mock('../../task_type_dictionary', () => {
+  const actual = jest.requireActual('../../task_type_dictionary');
   return {
     ...actual,
     TaskTypeDictionary: jest.fn().mockImplementation((opts) => {
@@ -34,7 +34,7 @@ describe('Task priority checks', () => {
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
 
-    const mockedTaskTypeDictionary = jest.requireMock('../task_type_dictionary');
+    const mockedTaskTypeDictionary = jest.requireMock('../../task_type_dictionary');
     expect(mockedTaskTypeDictionary.TaskTypeDictionary).toHaveBeenCalledTimes(1);
     taskTypeDictionary = mockedTaskTypeDictionary.TaskTypeDictionary.mock.results[0].value;
   });
