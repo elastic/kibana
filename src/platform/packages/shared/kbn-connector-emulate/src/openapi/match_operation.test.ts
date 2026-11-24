@@ -86,6 +86,102 @@ describe('createOperationMatcher', () => {
     expect(match(scoped(false), 'GET', url)).toMatchObject({ status: 404 });
   });
 
+  it('prefers templates without parameters spanning segments over a catch-all', () => {
+    const resourceId = {
+      name: 'resourceId',
+      in: 'path',
+      required: true,
+      schema: { type: 'string' },
+      'x-ms-skip-url-encoding': true,
+    };
+    const matcher = createOperationMatcher(
+      loadOperations({
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1' },
+        servers: [{ url: 'https://management.azure.com' }],
+        paths: {
+          '/{resourceId}': {
+            get: { operationId: 'getById', parameters: [resourceId], responses: ok },
+          },
+          '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}':
+            { get: { operationId: 'getCluster', responses: ok } },
+        },
+      })
+    );
+
+    expect(
+      match(
+        matcher,
+        'GET',
+        'https://management.azure.com/subscriptions/s1/resourceGroups/rg/providers/Microsoft.ContainerService/managedClusters/c1'
+      )
+    ).toMatchObject({ operation: 'getCluster' });
+    expect(
+      match(matcher, 'GET', 'https://management.azure.com/subscriptions/s1/resourceGroups/rg')
+    ).toEqual({
+      operation: 'getById',
+      pathParameters: { resourceId: 'subscriptions/s1/resourceGroups/rg' },
+    });
+  });
+
+  it('prefers the operations it is told to of those two sources describe', () => {
+    const spec = (title: string) => ({
+      openapi: '3.0.3',
+      info: { title, version: '1' },
+      servers: [{ url: 'https://api.example.com' }],
+      paths: { '/items': { get: { operationId: `${title}List`, responses: ok } } },
+    });
+    const operations = [
+      ...loadOperations(spec('first'), 'first'),
+      ...loadOperations(spec('second'), 'second'),
+    ];
+    const url = 'https://api.example.com/items';
+
+    expect(match(createOperationMatcher(operations), 'GET', url)).toMatchObject({
+      operation: 'firstList',
+    });
+    expect(
+      match(
+        createOperationMatcher(operations, {
+          isPreferred: ({ spec: { source } }) => source === 'second',
+        }),
+        'GET',
+        url
+      )
+    ).toMatchObject({ operation: 'secondList' });
+  });
+
+  it('treats a trailing slash as optional, unless the spec spells both', () => {
+    const matcher = (paths: string[]) =>
+      createOperationMatcher(
+        loadOperations({
+          openapi: '3.0.3',
+          info: { title: 'Test', version: '1' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: Object.fromEntries(
+            paths.map((path) => [path, { get: { operationId: path, responses: ok } }])
+          ),
+        })
+      );
+    const scan = matcher(['/scan', '/items/{id}/']);
+
+    expect(match(scan, 'GET', 'https://api.example.com/scan/')).toMatchObject({
+      operation: '/scan',
+    });
+    expect(match(scan, 'GET', 'https://api.example.com/items/a')).toEqual({
+      operation: '/items/{id}/',
+      pathParameters: { id: 'a' },
+    });
+
+    const both = matcher(['/scan', '/scan/']);
+    expect(match(both, 'GET', 'https://api.example.com/scan')).toMatchObject({
+      operation: '/scan',
+    });
+    expect(match(both, 'GET', 'https://api.example.com/scan/')).toMatchObject({
+      operation: '/scan/',
+    });
+  });
+
   it('matches server URL variables by their enum values', () => {
     const matcher = createMatcher([
       {

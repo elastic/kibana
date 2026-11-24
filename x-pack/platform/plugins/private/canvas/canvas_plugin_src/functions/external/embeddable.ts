@@ -93,8 +93,8 @@ export function embeddableFunctionFactory({
           input: {
             ...baseEmbeddableInput,
             ...embeddableInput,
-            filters: getQueryFilters(filters),
           },
+          filters: getQueryFilters(filters),
           generatedAt: Date.now(),
           embeddableType: args.type,
         };

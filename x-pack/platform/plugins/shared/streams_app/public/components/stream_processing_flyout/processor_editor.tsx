@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -45,6 +45,7 @@ import {
 } from '../component_definition_form';
 import { getSignalLabel } from '../streams_layout/destinations/destination_type_config';
 import { CheckOutcomeCallout, type CheckOutcome } from './check_outcome_callout';
+import { toProcessorHelp } from './processor_help';
 import {
   deleteProcessorPromptOptions,
   discardProcessorChangesPromptOptions,
@@ -118,6 +119,7 @@ interface ProcessorEditorProps {
   /** `unchecked` when the configuration service could not be reached to check the processor. */
   onCommit: (processor: DraftProcessor, options?: { unchecked?: boolean }) => void;
   onCancel: () => void;
+  onChange: () => void;
   /** Deletes the step being edited; omitted when creating a processor. */
   onDelete?: () => void;
 }
@@ -160,19 +162,33 @@ export function ProcessorEditor({
   componentIds,
   onCommit,
   onCancel,
+  onChange,
   onDelete,
 }: ProcessorEditorProps) {
   const form = useProcessorForm({ catalogue, step, telemetry });
+  useEffect(() => {
+    if (form.isDirty) {
+      onChange();
+    }
+  }, [form.isDirty, onChange]);
   const { type, component, definition, signals, doesNotFit } = form;
   const check = useComponentCheck(checkComponent);
   const [outcome, setOutcome] = useState<CheckOutcome>();
   // The processor the warnings were about; "Continue anyway" commits exactly that.
   const [warnedProcessor, setWarnedProcessor] = useState<DraftProcessor>();
-  const clearWarnings = () => {
-    if (warnedProcessor) {
-      setWarnedProcessor(undefined);
-      setOutcome(undefined);
-    }
+  const clearOutcome = () => {
+    setWarnedProcessor(undefined);
+    setOutcome(undefined);
+  };
+  // An edit takes the service's errors off the fields, but what no field could show has no other
+  // place, so it stays until the processor is checked again.
+  const clearOutcomeOnEdit = () => {
+    setWarnedProcessor(undefined);
+    setOutcome((current) =>
+      current?.kind === 'rejected' && current.unmatched.length > 0
+        ? { ...current, highlightedCount: 0 }
+        : undefined
+    );
   };
 
   const confirmCancel = useDiscardConfirm(onCancel, {
@@ -279,11 +295,7 @@ export function ProcessorEditor({
             {check.isChecking ? <BlockDisableOverlay /> : null}
             <fieldset disabled={check.isChecking} css={disabledFormStyles}>
               <EuiForm fullWidth>
-                <EuiFormRow
-                  fullWidth
-                  label={processorLabel}
-                  helpText={definition?.help?.summary ?? definition?.description}
-                >
+                <EuiFormRow fullWidth label={processorLabel} helpText={toProcessorHelp(definition)}>
                   <EuiComboBox
                     aria-label={processorLabel}
                     fullWidth
@@ -295,7 +307,7 @@ export function ProcessorEditor({
                     onChange={([selected]) => {
                       setIsSelectionCleared(selected?.value === undefined);
                       if (selected?.value !== undefined && selected.value !== type) {
-                        clearWarnings();
+                        clearOutcome();
                         form.changeType(selected.value);
                       }
                     }}
@@ -359,7 +371,7 @@ export function ProcessorEditor({
                       selected={signals}
                       error={form.signalsError}
                       onChange={(next) => {
-                        clearWarnings();
+                        clearOutcomeOnEdit();
                         form.setSignals(
                           form.signalOptions.filter((signal) => next.includes(signal))
                         );
@@ -393,7 +405,7 @@ export function ProcessorEditor({
                     errors={form.errors}
                     componentRefs={componentRefs}
                     onChange={(values) => {
-                      clearWarnings();
+                      clearOutcomeOnEdit();
                       form.setValues(values);
                     }}
                     onUnparsedInputChange={form.setHasUnparsedInput}

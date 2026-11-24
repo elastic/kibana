@@ -31,7 +31,7 @@ permissions:
 # - a failed-test issue was labeled `failure:fix-did-not-hold` by the investigator.
 # - a manual run naming one of the two.
 if: >-
-  !github.event.repository.fork &&
+  github.repository == 'elastic/kibana' &&
   (
     (
       github.event_name == 'workflow_dispatch' &&

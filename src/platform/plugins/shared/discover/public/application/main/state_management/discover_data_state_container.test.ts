@@ -347,6 +347,95 @@ describe('test getDataStateContainer', () => {
     resolveSpy.mockRestore();
   });
 
+  test('publishes the fetched EsqlSource with its empty columns as the tab source', async () => {
+    const services = createDiscoverServicesMock();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true, services });
+    const { esqlSource } = await createResolvedMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setDataSource)({
+        dataSource: esqlSource,
+      })
+    );
+    const { currentDataSource$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
+    const fetchedSource = esqlSource.withColumns([
+      { id: 'host', name: 'host', meta: { type: 'string' }, isNull: false },
+      { id: 'empty', name: 'empty', meta: { type: 'string' }, isNull: true },
+    ]);
+    mockFetchEsql.mockResolvedValueOnce({ records: [], dataSource: fetchedSource });
+    stateContainer.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: stateContainer.getCurrentTab().id,
+        appState: { query: { esql: 'FROM logs-*' } },
+      })
+    );
+
+    services.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+      return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+    });
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer, services);
+    const unsubscribe = dataState.subscribe();
+
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe('complete');
+    });
+
+    expect(mockFetchEsql).toHaveBeenCalled();
+    expect(currentDataSource$.getValue()).toBe(fetchedSource);
+
+    unsubscribe();
+  });
+
+  test('publishes the fetched EsqlSource even when the profile defaults were reset during the fetch', async () => {
+    const services = createDiscoverServicesMock();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true, services });
+    const { esqlSource } = await createResolvedMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setDataSource)({
+        dataSource: esqlSource,
+      })
+    );
+    const { currentDataSource$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
+    const fetchedSource = esqlSource.withColumns([
+      { id: 'empty', name: 'empty', meta: { type: 'string' }, isNull: true },
+    ]);
+    mockFetchEsql.mockImplementationOnce(async () => {
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(
+          internalStateActions.setProfileAppStateDefaultFieldsToReset
+        )({ fieldsToReset: 'none' })
+      );
+      return { records: [], dataSource: fetchedSource };
+    });
+    stateContainer.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: stateContainer.getCurrentTab().id,
+        appState: { query: { esql: 'FROM logs-*' } },
+      })
+    );
+
+    services.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+      return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+    });
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer, services);
+    const unsubscribe = dataState.subscribe();
+
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe('complete');
+    });
+
+    expect(currentDataSource$.getValue()).toBe(fetchedSource);
+
+    unsubscribe();
+  });
+
   test('does not reset warning callout dismiss on fetch more', async () => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
 
