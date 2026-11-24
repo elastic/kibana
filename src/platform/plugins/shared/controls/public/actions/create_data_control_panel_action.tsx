@@ -28,11 +28,7 @@ import { dataViewsService } from '../services/kibana_services';
 
 let lastUsedDataViewId: string | undefined;
 
-/**
- * The id of the first saved data view that the embeddable publishes, if any.
- * Controls can only suggest saved data views. Ad hoc data views and ES|QL sources
- * are not in the data view list, so suggesting one leaves the editor with an invalid selection.
- */
+/** The id of the first persisted data view published by the embeddable (skips ad hoc and ES|QL). */
 export const getPublishedDataViewId = (embeddable: unknown): string | undefined =>
   apiPublishesDataSources(embeddable)
     ? embeddable.dataSources$.value?.find(
