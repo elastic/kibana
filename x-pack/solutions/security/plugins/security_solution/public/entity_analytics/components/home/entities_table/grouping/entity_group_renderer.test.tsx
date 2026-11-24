@@ -487,9 +487,14 @@ describe('createGroupToggleAriaLabelGetter', () => {
     ).toBe('Expand entity row for unknown-id');
   });
 
-  it('returns undefined for other group types', () => {
+  it('names entity type and custom-field group toggles by the group value', () => {
     const getLabel = createGroupToggleAriaLabelGetter(metadata);
 
-    expect(getLabel(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, createMockBucket())).toBeUndefined();
+    expect(getLabel(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, createMockBucket({ key: 'host' }))).toBe(
+      'Expand group host'
+    );
+    expect(
+      getLabel('some.custom.field', createMockBucket({ key: 'k', key_as_string: 'value-1' }))
+    ).toBe('Expand group value-1');
   });
 });

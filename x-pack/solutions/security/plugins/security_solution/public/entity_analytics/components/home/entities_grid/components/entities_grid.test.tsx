@@ -139,7 +139,7 @@ describe('EntitiesGrid', () => {
     renderGrid();
 
     const expanders = screen.getAllByRole('button', {
-      name: 'Show records resolved to this entity',
+      name: 'Show records resolved to alpha',
     });
     expect(expanders).toHaveLength(1);
 
@@ -212,7 +212,7 @@ describe('EntitiesGrid', () => {
     renderGrid({ rowsMode: 'individual', columns: INDIVIDUAL_ROWS_COLUMNS });
 
     expect(
-      screen.queryByRole('button', { name: 'Show records resolved to this entity' })
+      screen.queryByRole('button', { name: 'Show records resolved to alpha' })
     ).not.toBeInTheDocument();
   });
 

@@ -120,13 +120,23 @@ const ResolutionGroupPanel = ({
   );
 };
 
+const getGroupToggleLabel = (groupValue: string) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.group.expandGroup', {
+    defaultMessage: 'Expand group {groupValue}',
+    values: { groupValue },
+  });
+
 export const createGroupToggleAriaLabelGetter =
   (targetMetadata: TargetMetadataMap) =>
   (selectedGroup: string, bucket: RawBucket<EntitiesGroupingAggregation>): string | undefined => {
-    if (selectedGroup !== ENTITY_GROUPING_OPTIONS.RESOLUTION) return undefined;
+    const groupValue = String(bucket.key_as_string ?? bucket.key);
 
-    const entityId = String(bucket.key_as_string ?? bucket.key);
-    return getResolutionGroupToggleLabel(targetMetadata.get(entityId)?.name ?? entityId);
+    if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
+      return getResolutionGroupToggleLabel(targetMetadata.get(groupValue)?.name ?? groupValue);
+    }
+
+    // Entity type and custom-field groups: name the toggle by the group value
+    return getGroupToggleLabel(groupValue);
   };
 
 export const createGroupPanelRenderer = (
