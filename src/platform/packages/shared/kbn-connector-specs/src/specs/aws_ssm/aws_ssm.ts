@@ -31,6 +31,9 @@ import { stopAutomationExecution } from './tools/stop_automation_execution';
 // other domains than the `amazonaws.com` one callSsmApi sends requests to.
 const REGION_PATTERN = /^(?!cn-)(?![a-z]{2}-iso)[a-z]{2}(-[a-z]+)+-\d$/;
 
+const hasValue = (output: unknown): output is { value: unknown } =>
+  typeof output === 'object' && output !== null && 'value' in output;
+
 /** AWS Systems Manager connector, authenticated with SigV4-signed AWS credentials. */
 export const AwsSsmConnector: ConnectorSpec = {
   metadata: {
@@ -76,6 +79,15 @@ export const AwsSsmConnector: ConnectorSpec = {
         }),
     })
   ),
+
+  secretManager: {
+    action: 'getParameter',
+    referenceFormat: 'the name of a Parameter Store parameter, for example /myapp/prod/db-host',
+    toInput: (reference) => ({ name: reference }),
+    // getParameter never decrypts: a SecureString parameter has no value here.
+    getValue: (output) =>
+      hasValue(output) && typeof output.value === 'string' ? output.value : undefined,
+  },
 
   actions: {
     describeInstanceInformation,

@@ -21,6 +21,9 @@ jest.mock(
   })
 );
 const mockLookupServiceAccount = jest.fn();
+jest.mock('../../../entities/secrets/model/use_secret_names', () => ({
+  useSecretNames: () => undefined,
+}));
 jest.mock('../../../entities/service_accounts', () => ({
   useServiceAccountDirectory: () => ({ lookup: mockLookupServiceAccount }),
 }));

@@ -175,6 +175,23 @@ export class WorkflowRepository {
     }
   }
 
+  /** Whether the workflow is stored in the global space, shared by every space. Reads the current state. */
+  async isGlobalWorkflowRealtime(workflowId: string): Promise<boolean> {
+    try {
+      const response = await this.options.esClient.get<{ spaceId?: string }>({
+        index: this.options.indexName,
+        id: workflowId,
+        _source_includes: ['spaceId'],
+        realtime: true,
+      });
+      return response._source?.spaceId === GLOBAL_WORKFLOW_SPACE_ID;
+    } catch (error) {
+      // An unsaved workflow, such as a test run from the editor, is not stored anywhere.
+      if (error.statusCode === 404) return false;
+      throw error;
+    }
+  }
+
   /** Checks managed child eligibility in the execution space or global catalog without comparing revisions. */
   async isManagedChildAdmissibleRealtime(workflowId: string, spaceId: string): Promise<boolean> {
     try {

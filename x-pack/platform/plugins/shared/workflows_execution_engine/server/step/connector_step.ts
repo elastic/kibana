@@ -89,10 +89,18 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
     super(step, stepExecutionRuntime, connectorExecutor, workflowState);
   }
 
-  public getInput() {
-    return this.stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync(
-      this.step.with || {}
-    );
+  public getInput(secrets?: Record<string, string>) {
+    const { contextManager } = this.stepExecutionRuntime;
+    const template = this.step.with || {};
+    return secrets
+      ? contextManager.renderObjectAccordingToContextAsync(template, { secrets })
+      : contextManager.renderObjectAccordingToContextAsync(template);
+  }
+
+  // HTTP and connector steps accept secrets. `console` runs here too, but it writes its
+  // input to the logs, so it accepts none.
+  protected getSecretsTemplate(): unknown {
+    return this.step.type === 'console' ? undefined : this.step.with;
   }
 
   public async _run(withInputs: Record<string, unknown>): Promise<RunStepResult> {

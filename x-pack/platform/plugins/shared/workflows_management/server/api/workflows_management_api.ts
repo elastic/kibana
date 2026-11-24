@@ -18,6 +18,7 @@ import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/serv
 import type { CustomRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AccessControlInput } from '@kbn/entity-access-control';
 import { i18n } from '@kbn/i18n';
+import type { SecretUsageCountsResponse, SecretUsageResponse } from '@kbn/secrets';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
@@ -150,6 +151,12 @@ export interface GetWorkflowsParams {
   _full?: boolean;
   sortField?: WorkflowSortField;
   sortOrder?: 'asc' | 'desc';
+}
+
+/** What the requester may read, to hide the workflows that use a secret from those who can't. */
+export interface SecretUsageReadAccess {
+  canReadWorkflows: boolean;
+  canReadManagedWorkflows: boolean;
 }
 
 export interface GetWorkflowAggsOptions {
@@ -742,6 +749,49 @@ export class WorkflowsManagementApi {
       ids,
       await this.getDependentsLookup(spaceId, request, allowManagedWorkflowRead)
     );
+  }
+
+  /** Counts the workflows that use each secret of the space, apart from those the user can't read. */
+  public async getSecretUsageCounts(
+    spaceId: string,
+    request: KibanaRequest,
+    readAccess: SecretUsageReadAccess
+  ): Promise<SecretUsageCountsResponse> {
+    const counts = await this.workflowsService.getSecretUsageCounts(
+      spaceId,
+      await this.getSecretUsageOptions(request, readAccess)
+    );
+    return { counts };
+  }
+
+  /** Lists the workflows that use one secret, apart from those the user can't read. */
+  public async getSecretUsage(
+    secretName: string,
+    spaceId: string,
+    request: KibanaRequest,
+    readAccess: SecretUsageReadAccess
+  ): Promise<SecretUsageResponse> {
+    return this.workflowsService.findWorkflowsUsingSecret(
+      secretName,
+      spaceId,
+      await this.getSecretUsageOptions(request, readAccess)
+    );
+  }
+
+  // Managing secrets doesn't need the privilege to read workflows, so a manager without it
+  // can see that a secret is in use but not by which workflows.
+  private async getSecretUsageOptions(
+    request: KibanaRequest,
+    { canReadWorkflows, canReadManagedWorkflows }: SecretUsageReadAccess
+  ): Promise<{
+    accessControlFilter: estypes.QueryDslQueryContainer;
+    allowManagedRead: boolean;
+  }> {
+    const access = await this.workflowsService.getAccessControl();
+    return {
+      accessControlFilter: canReadWorkflows ? await access.readFilter(request) : { match_none: {} },
+      allowManagedRead: canReadManagedWorkflows,
+    };
   }
 
   // Workflows saved before saving stored the workflows they run are read and walked by every

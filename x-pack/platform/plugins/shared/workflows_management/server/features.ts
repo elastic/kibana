@@ -7,7 +7,11 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import type { KibanaFeatureConfig, SubFeaturePrivilegeConfig } from '@kbn/features-plugin/common';
+import type {
+  KibanaFeatureConfig,
+  SubFeatureConfig,
+  SubFeaturePrivilegeConfig,
+} from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
   WORKFLOWS_MANAGEMENT_FEATURE_ID,
@@ -180,23 +184,14 @@ const workflowPageManagePrivilege: SubFeaturePrivilegeConfig = {
   ui: [WorkflowsManagementUiActions.managePages],
 };
 
-/**
- * Returns the feature config, with the page privilege only while `workflowsManagement.pages.enabled`
- * is on. A shipped privilege id is hard to remove, so it waits for pages to graduate.
- * TODO: merge the privilege into `WorkflowsManagementFeatureConfig` when pages graduate.
- */
-export const getWorkflowsManagementFeatureConfig = ({
-  pagesEnabled,
-}: {
-  pagesEnabled: boolean;
-}): KibanaFeatureConfig => {
-  const [actions, ...otherSubFeatures] = WorkflowsManagementFeatureConfig.subFeatures ?? [];
-  if (!pagesEnabled || !actions) {
-    return WorkflowsManagementFeatureConfig;
+const withPagePrivilege = (feature: KibanaFeatureConfig): KibanaFeatureConfig => {
+  const [actions, ...otherSubFeatures] = feature.subFeatures ?? [];
+  if (!actions) {
+    return feature;
   }
   const [group, ...otherGroups] = actions.privilegeGroups;
   return {
-    ...WorkflowsManagementFeatureConfig,
+    ...feature,
     subFeatures: [
       {
         ...actions,
@@ -208,4 +203,26 @@ export const getWorkflowsManagementFeatureConfig = ({
       ...otherSubFeatures,
     ],
   };
+};
+
+/**
+ * Returns the feature config, with the page privilege only while `workflowsManagement.pages.enabled`
+ * is on. A shipped privilege id is hard to remove, so it waits for pages to graduate.
+ * `additionalSubFeatures` are the sub-features of other features that are still behind a flag.
+ * TODO: merge the privilege into `WorkflowsManagementFeatureConfig` when pages graduate.
+ */
+export const getWorkflowsManagementFeatureConfig = ({
+  pagesEnabled,
+  additionalSubFeatures = [],
+}: {
+  pagesEnabled: boolean;
+  additionalSubFeatures?: SubFeatureConfig[];
+}): KibanaFeatureConfig => {
+  const feature = pagesEnabled
+    ? withPagePrivilege(WorkflowsManagementFeatureConfig)
+    : WorkflowsManagementFeatureConfig;
+  if (additionalSubFeatures.length === 0) {
+    return feature;
+  }
+  return { ...feature, subFeatures: [...(feature.subFeatures ?? []), ...additionalSubFeatures] };
 };

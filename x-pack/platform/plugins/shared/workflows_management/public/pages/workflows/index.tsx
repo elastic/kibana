@@ -31,6 +31,7 @@ import {
   serializeWorkflowsUrlSearchParams,
 } from './url_search_params';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
+import { useSecretsMenuItem } from '../../entities/secrets/model/use_secrets_menu_item';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { ImportWorkflowsFlyout } from '../../features/import_workflows/ui/import_workflows_flyout';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
@@ -94,6 +95,7 @@ export function WorkflowsPage() {
   const isManagedWorkflowsSettingEnabled = useShowManagedWorkflowsSetting();
   const { canCreateWorkflow, canReadWorkflow, canReadManagedWorkflow, canUpdateWorkflow } =
     useWorkflowsCapabilities();
+  const secretsMenuItem = useSecretsMenuItem();
   const showManagedWorkflowsFilter = Boolean(
     isManagedWorkflowsSettingEnabled && canReadWorkflow && canReadManagedWorkflow
   );
@@ -165,6 +167,9 @@ export function WorkflowsPage() {
     if (addConnectorsMenuItem) {
       items.push(addConnectorsMenuItem);
     }
+    if (secretsMenuItem) {
+      items.push(secretsMenuItem);
+    }
 
     return {
       // The empty state already offers its own creation entry points, so the header
@@ -189,6 +194,7 @@ export function WorkflowsPage() {
     canImportWorkflows,
     isLoadingWorkflows,
     navigateToCreateWorkflow,
+    secretsMenuItem,
     shouldShowEmptyState,
   ]);
 

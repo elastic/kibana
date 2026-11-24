@@ -12,6 +12,9 @@
  */
 export const WORKFLOWS_MANAGEMENT_FEATURE_ID = 'workflowsManagement';
 
+/** The id Workflows gives to the secrets plugin, to use the secrets that allow it. */
+export const WORKFLOWS_SECRETS_CONSUMER_ID = 'workflows';
+
 export const WORKFLOW_RUN_NAME_MAX_LENGTH = 1024;
 
 /**

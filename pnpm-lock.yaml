@@ -3440,6 +3440,15 @@ importers:
       '@kbn/searchprofiler-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/searchprofiler
+      '@kbn/secrets':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-secrets
+      '@kbn/secrets-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/secrets
+      '@kbn/secrets-ui':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-secrets-ui
       '@kbn/security-ai-prompts':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/security-ai-prompts
@@ -9276,6 +9285,10 @@ importers:
 
   x-pack/platform/packages/shared/kbn-search-index-documents: {}
 
+  x-pack/platform/packages/shared/kbn-secrets: {}
+
+  x-pack/platform/packages/shared/kbn-secrets-ui: {}
+
   x-pack/platform/packages/shared/kbn-shared-components: {}
 
   x-pack/platform/packages/shared/kbn-significant-events-schema: {}
@@ -9627,6 +9640,8 @@ importers:
   x-pack/platform/plugins/shared/search_inference_endpoints: {}
 
   x-pack/platform/plugins/shared/searchprofiler: {}
+
+  x-pack/platform/plugins/shared/secrets: {}
 
   x-pack/platform/plugins/shared/security: {}
 

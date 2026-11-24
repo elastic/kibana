@@ -14,6 +14,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import type { SecretUsageCount, SecretUsageResponse } from '@kbn/secrets';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   CreateWorkflowCommand,
@@ -615,6 +616,20 @@ export class WorkflowsService {
   ): Promise<WorkflowLookupItem[]> {
     await this.ensureInitialized();
     return this.searchService.findWorkflowsCalling(workflowIds, spaceId, options);
+  }
+
+  public async getSecretUsageCounts(
+    ...args: Parameters<WorkflowSearchService['getSecretUsageCounts']>
+  ): Promise<Record<string, SecretUsageCount>> {
+    await this.ensureInitialized();
+    return this.searchService.getSecretUsageCounts(...args);
+  }
+
+  public async findWorkflowsUsingSecret(
+    ...args: Parameters<WorkflowSearchService['findWorkflowsUsingSecret']>
+  ): Promise<SecretUsageResponse> {
+    await this.ensureInitialized();
+    return this.searchService.findWorkflowsUsingSecret(...args);
   }
 
   public async getWorkflows(

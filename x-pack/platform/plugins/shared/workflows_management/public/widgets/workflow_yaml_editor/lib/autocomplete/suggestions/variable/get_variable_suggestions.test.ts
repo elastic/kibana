@@ -89,12 +89,10 @@ describe('getVariableSuggestions', () => {
       const suggestions = getVariableSuggestions(context);
 
       const apiUrlSuggestion = suggestions.find((s) => s.label === 'apiUrl');
-      expect(apiUrlSuggestion?.detail).toBe('string // The API URL: The API URL');
+      expect(apiUrlSuggestion?.detail).toBe('string: The API URL');
 
       const timeoutSuggestion = suggestions.find((s) => s.label === 'timeout');
-      expect(timeoutSuggestion?.detail).toBe(
-        'number // Request timeout in seconds: Request timeout in seconds'
-      );
+      expect(timeoutSuggestion?.detail).toBe('number: Request timeout in seconds');
     });
 
     it('should filter suggestions based on lastPathSegment', () => {

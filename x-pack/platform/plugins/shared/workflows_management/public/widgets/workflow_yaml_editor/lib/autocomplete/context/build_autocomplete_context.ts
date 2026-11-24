@@ -14,8 +14,12 @@ import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { LineParseResult, WorkflowContextRegistry } from '@kbn/workflows-yaml';
-import { getContextSchemaForPath, parseLineForCompletion } from '@kbn/workflows-yaml';
-import type { z } from '@kbn/zod/v4';
+import {
+  getContextSchemaForPath,
+  isSecretAllowedAtPath,
+  parseLineForCompletion,
+} from '@kbn/workflows-yaml';
+import { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
@@ -53,6 +57,19 @@ function buildCompletionInsertRange(
   };
 }
 
+// One string per secret, described by the description of the secret when it has one.
+const getSecretsSchema = (
+  secretDescriptions: ReadonlyMap<string, string | undefined>
+): z.ZodObject =>
+  z.object(
+    Object.fromEntries(
+      [...secretDescriptions].map(([name, description]) => [
+        name,
+        description ? z.string().describe(description) : z.string(),
+      ])
+    )
+  );
+
 function resolveContextSchemaForAutocomplete(
   registry: WorkflowContextRegistry,
   workflowDefinition: WorkflowYaml | null | undefined,
@@ -61,13 +78,14 @@ function resolveContextSchemaForAutocomplete(
   yamlDocument: Document,
   absoluteOffset: number,
   lineParseResult: LineParseResult | null,
-  yamlSource: string
+  yamlSource: string,
+  secretDescriptions: ReadonlyMap<string, string | undefined> | undefined
 ): { contextSchema: z.ZodType; contextScopedToPath: string | null } {
   let contextSchema: z.ZodType = DynamicStepContextSchema;
   let contextScopedToPath: string | null = null;
 
   if (workflowDefinition && workflowGraph) {
-    contextSchema = getContextSchemaForPath(
+    const pathSchema = getContextSchemaForPath(
       registry,
       workflowDefinition,
       workflowGraph,
@@ -76,6 +94,13 @@ function resolveContextSchemaForAutocomplete(
       absoluteOffset,
       yamlSource
     );
+    // Secrets are only suggested where they can be used, so that a suggestion is never an error.
+    const canUseSecrets =
+      secretDescriptions !== undefined &&
+      isSecretAllowedAtPath({ workflowDefinition, workflowGraph, path });
+    contextSchema = canUseSecrets
+      ? pathSchema.extend({ secrets: getSecretsSchema(secretDescriptions) })
+      : pathSchema;
   }
 
   if (lineParseResult?.fullKey) {
@@ -110,6 +135,8 @@ export interface BuildAutocompleteContextParams {
   model: monaco.editor.ITextModel;
   position: monaco.Position;
   completionContext: monaco.languages.CompletionContext;
+  /** The description of each secret of the space, by name, when they could be listed. */
+  secretDescriptions?: ReadonlyMap<string, string | undefined>;
 }
 
 export function buildAutocompleteContext({
@@ -118,6 +145,7 @@ export function buildAutocompleteContext({
   model,
   position,
   completionContext,
+  secretDescriptions,
 }: BuildAutocompleteContextParams): AutocompleteContext | null {
   // derived from workflow state
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
@@ -161,7 +189,8 @@ export function buildAutocompleteContext({
     yamlDocument,
     absoluteOffset,
     parseResult,
-    yamlSource
+    yamlSource,
+    secretDescriptions
   );
 
   // Check if we're actually inside a liquid block

@@ -20,6 +20,8 @@ import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import { createSecretScrubber } from '../secrets/secret_scrubber';
+import type { SecretScrubber } from '../secrets/secret_scrubber';
 import { STEP_SIZE_LIMIT_EXCEEDED, toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
 import { extractConnectorId, extractTokenUsage, parseDuration, renderDuration } from '../utils';
@@ -107,6 +109,8 @@ export class StepExecutionRuntime {
 
     return this.node.stepId;
   }
+
+  private secretScrubber?: SecretScrubber;
 
   constructor(stepExecutionRuntimeInit: StepExecutionRuntimeInit) {
     this.runtimeGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
@@ -281,7 +285,8 @@ export class StepExecutionRuntime {
    *   forwarded to the IO service for eviction/telemetry. Omit when the
    *   step has no output to size.
    */
-  public finishStep(stepOutput?: unknown, sizeBytes?: number): void {
+  public finishStep(output?: unknown, sizeBytes?: number): void {
+    const stepOutput = this.secretScrubber ? this.secretScrubber.scrub(output) : output;
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const finishedAt = new Date().toISOString();
     const executionTimeMs = startedStepExecution?.startedAt
@@ -311,6 +316,14 @@ export class StepExecutionRuntime {
   }
 
   /**
+   * Declares the secret values this step uses. From then on, `finishStep` and `failStep`
+   * replace them with a mask in the output and the error they save and log.
+   */
+  public protectSecretValues(values: readonly string[]): void {
+    this.secretScrubber = createSecretScrubber({ values });
+  }
+
+  /**
    * Marks the step as FAILED.
    *
    * Same lifecycle/IO split as {@link finishStep}: status / error /
@@ -326,7 +339,8 @@ export class StepExecutionRuntime {
    *   `steps.x.output.metadata.usage`, and any reported token usage is rolled
    *   into the per-execution total.
    */
-  public failStep(error: Error, partialOutput?: unknown): void {
+  public failStep(error: Error, output?: unknown): void {
+    const partialOutput = this.secretScrubber ? this.secretScrubber.scrub(output) : output;
     // Guardrail: this is the single choke point where a thrown error becomes the persisted
     // error for both the step and the workflow execution. The persisted shape is constrained by
     // `BaseSerializedErrorSchema` (`type` / `message` / optional `details` / optional `retryable`)
@@ -335,7 +349,10 @@ export class StepExecutionRuntime {
     // parsed HTTP response — are never written to ES; only what an error explicitly puts in
     // `details` is persisted (`KibanaApiCallError` deliberately limits this to the safe `status`).
     // (Covered by `step_execution_runtime.test.ts` > failStep > "persists status in details ...".)
-    const executionError = toExecutionError(error);
+    const unscrubbedError = toExecutionError(error);
+    const executionError = this.secretScrubber
+      ? this.secretScrubber.scrubError(unscrubbedError)
+      : unscrubbedError;
 
     this.workflowExecutionState.setLastFailedStepContext({
       stepId: this.node.stepId,

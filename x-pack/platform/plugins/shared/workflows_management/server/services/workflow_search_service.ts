@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SecretUsageCount, SecretUsageResponse } from '@kbn/secrets';
 import type {
   EsWorkflowExecution,
   WorkflowAggsDto,
@@ -73,6 +74,60 @@ type WorkflowAggsResponse = Record<
   string,
   estypes.AggregationsMultiBucketAggregateBase<WorkflowAggBucket>
 >;
+
+/** The most workflows that are listed as using one secret. */
+const SECRET_USAGE_LIST_SIZE = 100;
+
+/** The most distinct secrets that are counted at once. */
+const SECRET_USAGE_MAX_SECRETS = 1000;
+
+interface SecretUsageOptions {
+  /** Limits what the requester can see. Leave out to let them see everything. */
+  accessControlFilter?: estypes.QueryDslQueryContainer;
+  /** Whether the requester can see managed workflows. */
+  allowManagedRead: boolean;
+}
+
+/**
+ * Secrets belong to one space and global workflows cannot use them, so only the workflows of
+ * the space itself are searched. `inSpace` matches every one of them, and `visibleToRequester`
+ * narrows those down to the ones the requester can see.
+ */
+const buildSecretUsageQueries = (
+  spaceId: string,
+  { accessControlFilter, allowManagedRead }: SecretUsageOptions
+): {
+  inSpace: estypes.QueryDslQueryContainer;
+  visibleToRequester: estypes.QueryDslQueryContainer;
+} => {
+  const { must_not: managedOutOfReach } = buildWorkflowFilters({
+    managed: allowManagedRead ? 'all' : 'unmanaged',
+  });
+  return {
+    inSpace: { bool: buildWorkflowFilters({ space: { id: spaceId }, deleted: 'not_deleted' }) },
+    visibleToRequester: {
+      bool: {
+        must: accessControlFilter ? [accessControlFilter] : [],
+        must_not: managedOutOfReach,
+      },
+    },
+  };
+};
+
+const getBuckets = (
+  aggregation: estypes.AggregationsMultiBucketAggregateBase<WorkflowAggBucket> | undefined
+): WorkflowAggBucket[] => (Array.isArray(aggregation?.buckets) ? aggregation.buckets : []);
+
+const getDocCount = (aggregation: unknown): number =>
+  typeof aggregation === 'object' &&
+  aggregation !== null &&
+  'doc_count' in aggregation &&
+  typeof aggregation.doc_count === 'number'
+    ? aggregation.doc_count
+    : 0;
+
+const getTotalHits = (total: number | estypes.SearchTotalHits | undefined): number =>
+  typeof total === 'number' ? total : total?.value ?? 0;
 
 export class WorkflowSearchService {
   constructor(private readonly deps: WorkflowSearchDeps) {}
@@ -244,6 +299,91 @@ export class WorkflowSearchService {
       } catch (closeErr) {
         logger.warn(`Failed to close PIT ${pitId}: ${closeErr}`);
       }
+    }
+  }
+
+  /**
+   * Counts the workflows that use each secret in the space, split by whether the requester can
+   * see them. Workflows in the trash are not counted. Keys are secret names.
+   */
+  async getSecretUsageCounts(
+    spaceId: string,
+    options: SecretUsageOptions
+  ): Promise<Record<string, SecretUsageCount>> {
+    const { inSpace, visibleToRequester } = buildSecretUsageQueries(spaceId, options);
+    const bySecret = { terms: { field: 'secretNames', size: SECRET_USAGE_MAX_SECRETS } };
+
+    try {
+      const { aggregations } = await this.deps.workflowStorage.getClient().search({
+        size: 0,
+        track_total_hits: false,
+        query: inSpace,
+        aggs: {
+          bySecret,
+          visibleToRequester: { filter: visibleToRequester, aggs: { bySecret } },
+        },
+      });
+
+      const visibleBySecret = new Map(
+        getBuckets(aggregations?.visibleToRequester?.bySecret).map(
+          ({ key, doc_count: visibleCount }) => [String(key), visibleCount]
+        )
+      );
+      return Object.fromEntries(
+        getBuckets(aggregations?.bySecret).map(({ key, doc_count: total }) => {
+          const name = String(key);
+          const visibleCount = visibleBySecret.get(name) ?? 0;
+          return [name, { visibleCount, hiddenCount: total - visibleCount }];
+        })
+      );
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return {};
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Lists the workflows in the space that use one secret, by name. It lists at most
+   * `SECRET_USAGE_LIST_SIZE` of the workflows the requester can see, and only counts the others.
+   * Workflows in the trash are not included.
+   */
+  async findWorkflowsUsingSecret(
+    secretName: string,
+    spaceId: string,
+    options: SecretUsageOptions
+  ): Promise<SecretUsageResponse> {
+    const { inSpace, visibleToRequester } = buildSecretUsageQueries(spaceId, options);
+
+    try {
+      // The post filter narrows the hits and their total to what the requester can see, while
+      // the aggregation still counts every workflow that uses the secret, in the same request.
+      const { hits, aggregations } = await this.deps.workflowStorage.getClient().search({
+        size: SECRET_USAGE_LIST_SIZE,
+        track_total_hits: true,
+        _source: ['name', 'enabled'],
+        sort: [{ 'name.keyword': { order: 'asc' } }, { updated_at: { order: 'desc' } }],
+        query: { bool: { must: [inSpace, { term: { secretNames: secretName } }] } },
+        post_filter: visibleToRequester,
+        aggs: { usingSecret: { filter: { term: { secretNames: secretName } } } },
+      });
+
+      const visibleCount = getTotalHits(hits.total);
+      return {
+        visibleCount,
+        hiddenCount: getDocCount(aggregations?.usingSecret) - visibleCount,
+        items: hits.hits.flatMap(({ _id: id, _source: source }) =>
+          id === undefined || !source
+            ? []
+            : [{ id, name: source.name, enabled: source.enabled === true }]
+        ),
+      };
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return { visibleCount: 0, hiddenCount: 0, items: [] };
+      }
+      throw error;
     }
   }
 

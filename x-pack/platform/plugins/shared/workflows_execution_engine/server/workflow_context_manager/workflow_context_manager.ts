@@ -26,6 +26,7 @@ import {
   type CallKibanaApiParams,
   type CallKibanaApiResult,
 } from '../lib/call_kibana_api';
+import { findReferencedSecretNames } from '../secrets/find_referenced_secret_names';
 import { evaluateCondition } from '../step/evaluate_condition';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId, isTemplateExpression } from '../utils';
@@ -226,9 +227,21 @@ export class WorkflowContextManager {
    * The context is read synchronously, before the first yield.
    */
   public renderObjectAccordingToContextAsync(
-    obj: Record<string, unknown>
+    obj: Record<string, unknown>,
+    additionalContext?: Record<string, unknown>
   ): Promise<Record<string, unknown>> {
-    return this.templateEngine.renderAsync(obj, this.getRenderingContext(obj));
+    return this.templateEngine.renderAsync(obj, {
+      ...this.getRenderingContext(obj),
+      ...additionalContext,
+    });
+  }
+
+  /** Returns the names referenced as `secrets.<name>` in the templates of a step. */
+  public getReferencedSecretNames(template: unknown): string[] {
+    return findReferencedSecretNames({
+      template,
+      variablePaths: this.templateEngine.extractGlobalVariableSegments(template),
+    });
   }
 
   public renderValueWithContext<T>(

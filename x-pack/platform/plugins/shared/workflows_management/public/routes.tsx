@@ -20,6 +20,7 @@ import {
   LibraryTemplateDetailPage,
   LibraryTemplateImportPage,
 } from './pages/library';
+import { SecretsPage } from './pages/secrets';
 import { WorkflowDetailPage } from './pages/workflow_detail';
 import { WorkflowsPage } from './pages/workflows';
 
@@ -50,6 +51,8 @@ export const WorkflowsRoutes = React.memo<WorkflowsAppDeps>(({ history }) => (
               <Route path="/library/import" exact component={LibraryTemplateImportPage} />
               <Route path="/library/:slug" exact component={LibraryTemplateDetailPage} />
               <Route path="/library" exact component={LibraryCatalogBrowserPage} />
+              {/* Must be registered before `/:id` below, or it resolves as a workflow id. */}
+              <Route path="/secrets" exact component={SecretsPage} />
               <Route path={['/create', '/:id']} component={WorkflowDetailPageRoute} />
               <Route path="/" exact component={WorkflowsPage} />
             </Routes>
