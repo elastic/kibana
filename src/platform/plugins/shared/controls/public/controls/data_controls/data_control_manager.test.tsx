@@ -398,6 +398,32 @@ describe('initializeDataControlManager', () => {
       expect(dataControlManager.api.dataViewId$.value).toBe('');
     });
 
+    it('does not wait forever for the initial filter when the column query fails after the source resolved', async () => {
+      // the data source resolves in microtasks, so it is ready before this query fails
+      mockGetESQLSingleColumnValues.mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ errors: [new Error('Unknown column')] }), 0)
+          )
+      );
+      const { data_view_id: _dataViewId, field_name: _fieldName, ...savedState } = esqlState;
+      const getInitialFilter = jest.fn();
+
+      const dataControlManager = await initializeDataControlManager({
+        controlId: 'esqlControl',
+        controlType: 'esql',
+        state: savedState,
+        editorStateManager: initializeStateManager({}, {}),
+        parentApi: {},
+        typeDisplayName: 'ES|QL Control',
+        willHaveInitialFilter: true,
+        getInitialFilter,
+      });
+
+      expect(dataControlManager.api.blockingError$.value?.message).toBe('Unknown column');
+      expect(getInitialFilter).not.toHaveBeenCalled();
+    });
+
     it('keeps the error of a query whose column cannot be derived, without looking up the previous column', async () => {
       mockGetESQLSingleColumnValues.mockResolvedValue({
         values: ['US'],

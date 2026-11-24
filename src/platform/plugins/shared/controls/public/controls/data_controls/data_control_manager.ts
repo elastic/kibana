@@ -301,12 +301,23 @@ export const initializeDataControlManager = async <EditorState extends object = 
   let initialFilter: Filter | undefined;
   if (willHaveInitialFilter && getInitialFilter) {
     try {
-      // the field of an ES|QL control is only known once its query has run
+      // the field of an ES|QL control is only known once its query has run, or has failed
+      const initialFieldNamePromise = firstValueFrom(
+        merge(
+          fieldName$.pipe(filter((fieldName): fieldName is string => fieldName !== undefined)),
+          blockingError$.pipe(
+            filter((error): error is Error => error !== undefined),
+            map((error) => {
+              throw error;
+            })
+          )
+        )
+      );
       const [initialDataSource, initialFieldName] = await Promise.all([
         initialDataSourcePromise,
-        firstValueFrom(fieldName$.pipe(filter((fieldName) => fieldName !== undefined))),
+        initialFieldNamePromise,
       ]);
-      initialFilter = getInitialFilter(initialDataSource, initialFieldName ?? '');
+      initialFilter = getInitialFilter(initialDataSource, initialFieldName);
     } catch (e) {
       setBlockingError(e);
     }
