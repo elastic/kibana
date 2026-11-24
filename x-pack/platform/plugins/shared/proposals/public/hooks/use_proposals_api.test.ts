@@ -518,6 +518,44 @@ describe('useProposal', () => {
       expect(fetchesOfReplaced).toHaveLength(1);
     });
 
+    it('refetches an earlier revision that is marked replaced only by supersededBy', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'no_action' },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const earlier = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.data?.status).toBe('no_action'));
+
+      proposals['p-1'] = { ...proposals['p-1'], supersededBy: 'p-2' };
+      renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(earlier.result.current.data?.supersededBy).toBe('p-2'));
+    });
+
+    it('refreshes all earlier revisions in one call that joins a fetch already in flight', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+        'p-3': { id: 'p-3', rootProposalId: 'p-1', revision: 3, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper, queryClient } = createWrapper();
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      const second = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
+      await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+
+      const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(1));
+      expect(invalidateSpy).toHaveBeenCalledWith(expect.any(Object), { cancelRefetch: false });
+    });
+
     it('refetches an earlier revision whose card shows a load error, even if its old data reads as replaced', async () => {
       const replaced = {
         id: 'p-1',
