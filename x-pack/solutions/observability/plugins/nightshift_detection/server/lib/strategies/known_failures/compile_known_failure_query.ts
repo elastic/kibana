@@ -35,7 +35,8 @@ function getFilterCommands(esql: string): { commands: string[] } | { reason: str
     return { reason: 'does not parse as ES|QL' };
   }
   if (root.header?.length) {
-    return { reason: 'starts with a SET header' };
+    const headers = uniq(root.header.map(({ name }) => name.toUpperCase()));
+    return { reason: `starts with a ${headers.join(', ')} header` };
   }
 
   const [from] = root.commands;
