@@ -601,12 +601,12 @@ export async function getFleetServerHostsForAgentPolicy(
     return decryptedDefault;
   }
 
-  // The host was deleted after it was looked up, so resolve the default host again.
+  // The host was deleted after it was looked up, so resolve the default host again, once. It can
+  // have the same id, since a host can be created again with the id of a deleted one.
   const currentDefault = await fleetServerHostService.getDefaultFleetServerHost();
-  const decryptedCurrentDefault =
-    currentDefault && currentDefault.id !== defaultFleetServerHost.id
-      ? await getDecryptedDefaultFleetServerHost(currentDefault)
-      : undefined;
+  const decryptedCurrentDefault = currentDefault
+    ? await getDecryptedDefaultFleetServerHost(currentDefault)
+    : undefined;
   if (!decryptedCurrentDefault) {
     throw new FleetServerHostNotFoundError('Default Fleet Server host is not setup');
   }
