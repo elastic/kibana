@@ -377,7 +377,11 @@ export function NightshiftApp({
       reportedSearchQuery.current = undefined;
       return;
     }
-    if (isFetching || hasUnloadableSection || reportedSearchQuery.current === query) {
+    if (reportedSearchQuery.current === query) {
+      return;
+    }
+    reportedSearchQuery.current = undefined;
+    if (isFetching || hasUnloadableSection) {
       return;
     }
     reportedSearchQuery.current = query;
