@@ -36300,6 +36300,26 @@ paths:
                           $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEntitySource'
                         type: array
           description: Watchlist created successfully
+        '409':
+          content:
+            application/json:
+              examples:
+                DuplicateWatchlistName:
+                  summary: Name already used
+                  value:
+                    message: A watchlist named "High Risk Vendors" already exists
+                    status_code: 409
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: integer
+                required:
+                  - status_code
+                  - message
+          description: Conflict. Another watchlist in the current space already has this name, or the name is reserved for a system watchlist.
       summary: Create a new watchlist
       tags:
         - Security Entity Analytics API
@@ -36358,7 +36378,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
+        Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist. Optionally also sets its rule-based data sources in the same request
       operationId: UpdateWatchlist
       parameters:
         - description: The ID of the watchlist to update
@@ -36379,6 +36399,16 @@ paths:
                   managed: false
                   name: High Risk Vendors
                   riskModifier: 1.5
+              UpdateWatchlistWithSourcesRequest:
+                summary: Update watchlist and replace its data source
+                value:
+                  description: High risk vendor watchlist
+                  entitySources:
+                    - name: High Risk Vendors-store
+                      queryRule: 'entity.attributes.watchlists: *'
+                      type: store
+                  name: High Risk Vendors
+                  riskModifier: 1.5
             schema:
               type: object
               properties:
@@ -36386,6 +36416,40 @@ paths:
                   description: Description of the watchlist
                   maxLength: 1000
                   type: string
+                entitySources:
+                  description: The rule-based data sources (entity store or index) the watchlist should have after the update, at most one of each type. Omit it to leave the data sources as they are; an empty array removes them. A watchlist that is not managed can have only one data source. Integration and managed data sources are not changed.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      identifierField:
+                        description: Field used to query the entity store for index-type sources
+                        maxLength: 256
+                        type: string
+                      indexPattern:
+                        maxLength: 1000
+                        type: string
+                      name:
+                        maxLength: 256
+                        type: string
+                      queryRule:
+                        description: KQL query used to filter data from the provided index patterns
+                        maxLength: 4096
+                        type: string
+                      range:
+                        $ref: '#/components/schemas/Security_Entity_Analytics_API_DateRange'
+                      type:
+                        enum:
+                          - index
+                          - store
+                        type: string
+                    required:
+                      - type
+                      - name
+                  maxItems: 2
+                  type: array
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
@@ -36420,6 +36484,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_WatchlistObject'
           description: Watchlist updated successfully
+        '409':
+          content:
+            application/json:
+              examples:
+                DuplicateWatchlistName:
+                  summary: Name already used
+                  value:
+                    message: A watchlist named "High Risk Vendors" already exists
+                    status_code: 409
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: integer
+                required:
+                  - status_code
+                  - message
+          description: Conflict. Another watchlist in the current space already has the new name, the name is reserved for a system watchlist, or a data source name is already used.
       summary: Update an existing watchlist
       tags:
         - Security Entity Analytics API
