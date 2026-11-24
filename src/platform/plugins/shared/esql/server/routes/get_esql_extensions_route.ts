@@ -57,7 +57,7 @@ export const registerESQLExtensionsRoute = (
               defaultValue: 'oblt', // Default to 'oblt' if no solutionId is provided
             }
           ),
-          query: schema.string(),
+          query: schema.string({ maxLength: 10000 }),
         }),
       },
     },
