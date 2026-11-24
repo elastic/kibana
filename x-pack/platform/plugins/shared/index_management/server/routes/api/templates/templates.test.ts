@@ -98,6 +98,37 @@ describe('Component templates API', () => {
         body: true,
       });
     });
+    it('saves data_stream_options from the request body over the stored ones', async () => {
+      transportRequest.mockResolvedValue({
+        index_templates: [
+          {
+            name: 'test-template',
+            index_template: {
+              template: { data_stream_options: { failure_store: { enabled: false } } },
+            },
+          },
+        ],
+      });
+
+      indexTemplateExists.mockResolvedValue({ acknowledged: true });
+      updateIndexTemplate.mockResolvedValue(true);
+
+      await router.runRequest({
+        ...mockRequest,
+        body: {
+          ...mockRequest.body,
+          template: { data_stream_options: { failure_store: { enabled: true } } },
+        },
+      });
+
+      expect(updateIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          template: expect.objectContaining({
+            data_stream_options: { failure_store: { enabled: true } },
+          }),
+        })
+      );
+    });
     it('updates a component template without data_stream_options successfully', async () => {
       transportRequest.mockResolvedValue({
         index_templates: [

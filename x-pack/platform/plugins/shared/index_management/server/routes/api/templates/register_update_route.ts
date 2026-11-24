@@ -47,11 +47,13 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
           return response.notFound();
         }
 
-        const dataStreamOptions = await getTemplateDataStreamOptions({
-          name,
-          client,
-          isLegacy,
-        });
+        const dataStreamOptions =
+          template.template?.data_stream_options ??
+          (await getTemplateDataStreamOptions({
+            name,
+            client,
+            isLegacy,
+          }));
 
         // Next, update index template
         const responseBody = await saveTemplate({
