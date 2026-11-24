@@ -129,7 +129,7 @@ const countOutputFetches = (spy: jest.SpyInstance): number =>
 const leafStepsNamed = (
   fixture: WorkflowRunFixture,
   prefix: string
-): Array<{ stepId: string; status: string; output?: unknown }> =>
+): Array<{ id: string; stepId: string; status: string; output?: unknown }> =>
   Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).filter((step) =>
     step.stepId.startsWith(prefix)
   );
