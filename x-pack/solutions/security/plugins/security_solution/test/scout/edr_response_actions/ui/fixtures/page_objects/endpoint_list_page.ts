@@ -65,6 +65,19 @@ export class EndpointListPage {
     await this.table.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
+  /** Pauses the list's 10s auto-refresh so no later poll can overwrite a newer sorted response. */
+  async pauseAutoRefresh(): Promise<void> {
+    // The read-only "Auto refresh" field has the same accessible name; the role picks its prepend button.
+    await this.page.getByRole('button', { name: 'Auto refresh' }).click();
+    const refreshToggle = this.page.testSubj.locator('superDatePickerToggleRefreshButton');
+    if ((await refreshToggle.getAttribute('aria-checked')) === 'true') {
+      await refreshToggle.click();
+    }
+    await refreshToggle.and(this.page.getByRole('switch', { checked: false })).waitFor();
+    await this.page.keyboard.press('Escape');
+    await refreshToggle.waitFor({ state: 'hidden' });
+  }
+
   /** The table row whose hostname cell links to `hostname`. */
   rowFor(hostname: string): Locator {
     return this.table.getByRole('row').filter({

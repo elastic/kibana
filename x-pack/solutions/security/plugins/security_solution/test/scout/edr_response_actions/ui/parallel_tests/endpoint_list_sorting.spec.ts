@@ -97,6 +97,7 @@ spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () =
     const { endpointList } = pageObjects;
     await endpointList.goto();
     await expect(endpointList.total).toHaveText('Showing 3 endpoints');
+    await endpointList.pauseAutoRefresh();
 
     for (const field of SORTABLE_COLUMNS) {
       await spaceTest.step(`sort by ${field}`, async () => {
