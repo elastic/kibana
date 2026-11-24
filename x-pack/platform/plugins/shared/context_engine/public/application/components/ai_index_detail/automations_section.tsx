@@ -34,6 +34,8 @@ interface AutomationsSectionProps {
   aiIndexId: string;
   onSaved: () => void;
   isUnlocked: boolean;
+  /** A section above is still loading, so the `#automations` scroll target can still move. */
+  isContentAboveLoading?: boolean;
   headerAction?: ReactNode;
 }
 
@@ -44,16 +46,18 @@ export const AutomationsSection = ({
   onSaved,
   isUnlocked,
   headerAction,
+  isContentAboveLoading = false,
 }: AutomationsSectionProps) => {
   const { hash, key: locationKey } = useLocation();
   const isAutomationsLinkTarget = hash === AUTOMATIONS_HASH;
 
-  // Wait for the AI index, so the sections above have their height before we scroll.
+  // Wait until the sections above have their height, or the scroll lands too high.
+  const canScroll = !isLoading && !isContentAboveLoading;
   useEffect(() => {
-    if (isAutomationsLinkTarget && !isLoading) {
+    if (isAutomationsLinkTarget && canScroll) {
       goToAutomations();
     }
-  }, [isAutomationsLinkTarget, isLoading, locationKey]);
+  }, [isAutomationsLinkTarget, canScroll, locationKey]);
 
   return isUnlocked ? (
     <AutomationsPanel

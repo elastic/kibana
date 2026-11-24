@@ -11,11 +11,16 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
 import { useMemoryEnabled } from '../../../hooks/use_memory_enabled';
 import { SettingsTab } from './settings_tab';
 
 jest.mock('../../../hooks/use_memory_enabled', () => ({
   useMemoryEnabled: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_ai_index_dreaming', () => ({
+  useAiIndexDreaming: jest.fn(),
 }));
 
 jest.mock('../../../hooks/use_navigation', () => ({
@@ -54,13 +59,14 @@ const aiIndex: GetAiIndexResponse = {
 
 const renderTab = (
   props: Partial<React.ComponentProps<typeof SettingsTab>> = {},
-  memoryEnabled: boolean = false
+  memoryEnabled: boolean = false,
+  pathname: string = '/ai_index/tickets/settings'
 ) => {
   jest.mocked(useMemoryEnabled).mockReturnValue(memoryEnabled);
   return render(
     <I18nProvider>
       <EuiProvider>
-        <MemoryRouter>
+        <MemoryRouter initialEntries={[pathname]}>
           <SettingsTab
             isLoading={false}
             aiIndex={undefined}
@@ -79,6 +85,7 @@ const renderTab = (
 describe('SettingsTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useAiIndexDreaming).mockReturnValue({ dreaming: undefined, isLoading: false });
   });
 
   it('always renders the General section', () => {
@@ -130,5 +137,27 @@ describe('SettingsTab', () => {
 
     expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAutomationsPanelStub')).toBeInTheDocument();
+  });
+  describe('when a link targets #automations', () => {
+    const scrollIntoView = jest.fn();
+    const automationsPath = '/ai_index/tickets/settings#automations';
+
+    beforeEach(() => {
+      Element.prototype.scrollIntoView = scrollIntoView;
+    });
+
+    it('does not scroll while Dreaming is still loading', () => {
+      jest.mocked(useAiIndexDreaming).mockReturnValue({ dreaming: undefined, isLoading: true });
+
+      renderTab({ aiIndex }, true, automationsPath);
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it('scrolls to Automations once Dreaming has loaded', () => {
+      renderTab({ aiIndex }, true, automationsPath);
+
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+    });
   });
 });

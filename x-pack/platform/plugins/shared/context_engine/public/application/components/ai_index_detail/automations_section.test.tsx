@@ -101,5 +101,26 @@ describe('AutomationsSection', () => {
 
       expect(scrollIntoView).not.toHaveBeenCalled();
     });
+
+    it('waits while a section above is still loading', () => {
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <MemoryRouter initialEntries={[automationsPath]}>
+              <AutomationsSection
+                isLoading={false}
+                aiIndex={aiIndex}
+                aiIndexId="tickets"
+                onSaved={jest.fn()}
+                isUnlocked={false}
+                isContentAboveLoading={true}
+              />
+            </MemoryRouter>
+          </EuiProvider>
+        </I18nProvider>
+      );
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
   });
 });
