@@ -273,6 +273,7 @@ export const WorkflowExecuteAlertForm = ({
             appName={WORKFLOW_EXECUTE_ALERT_SEARCH_APP_NAME}
             useDefaultBehaviors={true}
             disableSubscribingToGlobalDataServices={true}
+            isAutoRefreshDisabled={true}
             onQueryChange={handleQueryChange}
             onQuerySubmit={handleQuerySubmit}
             query={query}

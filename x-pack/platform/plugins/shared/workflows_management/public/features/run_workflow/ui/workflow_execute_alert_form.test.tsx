@@ -274,6 +274,7 @@ describe('WorkflowExecuteAlertForm', () => {
       expect(mockSearchSource.fetch$).toHaveBeenCalled();
     });
     expect(latestProps().disableSubscribingToGlobalDataServices).toBe(true);
+    expect(latestProps().isAutoRefreshDisabled).toBe(true);
 
     const draft = { query: 'kibana.alert.rule.name: "Alpha"', language: 'kuery' };
     act(() => {

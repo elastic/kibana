@@ -317,6 +317,7 @@ export const WorkflowExecuteIndexForm = ({
                 appName="workflow_management"
                 useDefaultBehaviors={true}
                 disableSubscribingToGlobalDataServices={true}
+                isAutoRefreshDisabled={true}
                 onQueryChange={handleQueryChange}
                 onQuerySubmit={handleQuerySubmit}
                 query={query}
