@@ -28,7 +28,7 @@ import { readDecisionStatus, type DecisionStatus } from './match_fp_decisions/de
 import { findDecisionsWithConflictingVerdicts } from './match_fp_decisions/decisions_with_verdicts';
 import { createNoteQueue } from './match_fp_decisions/note_queue';
 import { tagSkippedChunk } from './match_fp_decisions/skip_chunk';
-import { countClosedByDecision, tagAlerts } from './ports';
+import { countClosedByDecision, findAlertsClosedAsFalsePositive, tagAlerts } from './ports';
 
 export const NOTHING = {
   candidates: 0,
@@ -320,6 +320,22 @@ export const createDecisionSweep = ({
   };
 
   /**
+   * Which of the alerts of a close whose outcome is unknown were closed, so that they get their
+   * notes. When that cannot be read they count as alerts with no note. `closed` is not changed: it
+   * counts what the close route reported.
+   */
+  const closedAmong = async (unknownIds: string[]): Promise<string[]> => {
+    if (unknownIds.length === 0) return [];
+    try {
+      return await findAlertsClosedAsFalsePositive(contextManager, unknownIds);
+    } catch (error) {
+      totals.notes_missing += unknownIds.length;
+      warn('Could not read which alerts of a failed close were closed; they get no note', error);
+      return [];
+    }
+  };
+
+  /**
    * Called after the closes: reads the decision again. If a revoke landed meanwhile, the closes
    * are undone: the alerts the sweep confirmed as closed, and the ones whose close is unknown. A
    * close that threw part way may have closed alerts it did not report, and when a revoke already
@@ -330,7 +346,8 @@ export const createDecisionSweep = ({
   const settleClosed = async (id: string, tagged: string[], progress: CloseProgress) => {
     const { closedIds, unknownIds, counted } = progress;
     if ((await statusAfterWrite(id, 'closed its alerts')) !== 'gone') {
-      if (closedIds.length > 0) queueNotes(id, closedIds, 'closed');
+      const noted = [...closedIds, ...(await closedAmong(unknownIds))];
+      if (noted.length > 0) queueNotes(id, noted, 'closed');
       return;
     }
     try {

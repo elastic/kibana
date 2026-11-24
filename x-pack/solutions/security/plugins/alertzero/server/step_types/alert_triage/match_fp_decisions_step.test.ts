@@ -146,6 +146,15 @@ const setup = ({
             },
           };
         }
+        // The check of which alerts are closed as a false positive, after a close of unknown outcome.
+        if (body?.query?.bool?.filter?.[1]?.term?.['kibana.alert.workflow_status'] === 'closed') {
+          const ids: string[] = body.query.bool.filter[0].ids.values;
+          return {
+            body: {
+              hits: { hits: ids.filter((_id) => !movedOn.includes(_id)).map((_id) => ({ _id })) },
+            },
+          };
+        }
         if (body?.query?.bool?.filter?.[0]?.ids) {
           const open = closeError ? body.query.bool.filter[0].ids.values : movedOn;
           return { body: { hits: { hits: open.map((_id: string) => ({ _id })) } } };
@@ -1170,6 +1179,73 @@ describe('triage match decisions step in on mode', () => {
       expect(output).toEqual(
         expect.objectContaining({ close_failures: 0, unsettled_decisions: 1 })
       );
+    });
+
+    describe('a close that worked and is followed by a step that fails', () => {
+      // The close of `a` works and `b` was moved on, so the close reports 1 of 2. The read that
+      // releases `b` then fails, and the sweep does not know which of the two it closed.
+      const failingRelease = (callKibanaApi: jest.Mock, alsoFailLookup = false) => {
+        const inner = callKibanaApi.getMockImplementation()!;
+        callKibanaApi.mockImplementation(
+          async (params: { path: string; body?: Record<string, any> }) => {
+            const filter = params.body?.query?.bool?.filter;
+            // The release read looks at given ids and leaves out the closed false positives.
+            if (
+              params.path.endsWith('/signals/search') &&
+              filter?.[0]?.ids &&
+              params.body?.query?.bool?.must_not
+            ) {
+              throw new Error('release failed');
+            }
+            if (
+              alsoFailLookup &&
+              params.path.endsWith('/signals/search') &&
+              filter?.[1]?.term?.['kibana.alert.workflow_status'] === 'closed'
+            ) {
+              throw new Error('lookup failed');
+            }
+            return inner(params);
+          }
+        );
+      };
+
+      it('writes a note only for the alerts that were closed', async () => {
+        const { run, callKibanaApi, notes } = setup({
+          mode: 'on',
+          movedOn: ['b'],
+          alerts: [
+            ['a', source('C:\\x.exe')],
+            ['b', source('C:\\x.exe')],
+          ],
+          decisions: approved('C:\\x.exe'),
+        });
+        failingRelease(callKibanaApi);
+
+        const { output } = await run();
+
+        expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+        expect(output).toEqual(
+          expect.objectContaining({ closed: 1, close_failures: 1, notes_missing: 0 })
+        );
+      });
+
+      it('counts the alerts as missing a note when it cannot tell which were closed', async () => {
+        const { run, callKibanaApi, notes } = setup({
+          mode: 'on',
+          movedOn: ['b'],
+          alerts: [
+            ['a', source('C:\\x.exe')],
+            ['b', source('C:\\x.exe')],
+          ],
+          decisions: approved('C:\\x.exe'),
+        });
+        failingRelease(callKibanaApi, true);
+
+        const { output } = await run();
+
+        expect(notes()).toEqual([]);
+        expect(output).toEqual(expect.objectContaining({ close_failures: 1, notes_missing: 2 }));
+      });
     });
 
     it('puts back the alerts a failed close may have closed when the decision was revoked, since nothing else can find them', async () => {

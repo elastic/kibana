@@ -16,6 +16,7 @@ import {
   fetchTriageAlerts,
   findAlertIdsByTag,
   findAlertsClosedWithoutFalsePositiveReason,
+  findAlertsClosedAsFalsePositive,
   findAlertsNotClosedAsFalsePositive,
   findKeyTagsWithVerdicts,
   findAlertIdsWithTag,
@@ -822,6 +823,7 @@ describe('helpers that drive a write, on a partial search result', () => {
     ['findOpenAlertIds', (api) => findOpenAlertIds(api, ['a'])],
     ['findStillOpenAlertIds', (api) => findStillOpenAlertIds(api, ['a'])],
     ['findAlertIdsWithTag', (api) => findAlertIdsWithTag(api, ['a'], 'az:skipped_by_decision:x')],
+    ['findAlertsClosedAsFalsePositive', (api) => findAlertsClosedAsFalsePositive(api, ['a'])],
     ['findAlertsNotClosedAsFalsePositive', (api) => findAlertsNotClosedAsFalsePositive(api, ['a'])],
     [
       'fetchDecisionCandidates',

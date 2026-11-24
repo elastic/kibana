@@ -538,6 +538,36 @@ export const findAlertIdsWithTag = async (
 };
 
 /**
+ * Which of the given alerts are closed as a false positive. Used to find out which alerts a close
+ * whose outcome is unknown did close. A partial result throws: an alert missed would read as not
+ * closed and get no note.
+ */
+export const findAlertsClosedAsFalsePositive = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: alertIds.length,
+      _source: false,
+      query: {
+        bool: {
+          filter: [
+            { ids: { values: [...alertIds] } },
+            { term: { [ALERT_FIELDS.status]: 'closed' } },
+            { term: { [ALERT_FIELDS.reason]: 'false_positive' } },
+          ],
+        },
+      },
+    },
+  });
+  assertCompleteSearch(body);
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
+/**
  * Which of the given alerts are not closed as a false positive: still open or acknowledged, or
  * closed by an analyst for another reason. Used to take a tag off alerts the close did not close.
  */
