@@ -8,8 +8,8 @@
 import type { SecretEntry, SecretMetadata } from './types';
 
 /**
- * Persistence for the secrets of one space. Implementations treat names as equal
- * regardless of case, and never return a value from `list`.
+ * Persistence for the secrets of one space. Implementations never return a value
+ * from `list`.
  */
 export interface SecretsStorage {
   list(): Promise<SecretMetadata[]>;

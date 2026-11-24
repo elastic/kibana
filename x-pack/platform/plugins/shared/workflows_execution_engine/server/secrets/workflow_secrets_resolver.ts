@@ -96,7 +96,7 @@ export const createWorkflowSecretsResolver = ({
         if (resolved.missing.length > 0) {
           throw new WorkflowSecretsError(
             `Secrets not found in this space: ${quote(resolved.missing)}. ` +
-              `Create them, or check the spelling and the casing of the names.`
+              `Create them, or check the spelling of the names.`
           );
         }
         if (resolved.failed.length > 0) {

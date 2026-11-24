@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import {
   isValidSecretName,
-  normalizeSecretName,
   SECRET_NAME_MAX_LENGTH,
   SECRET_PROVIDER_TYPE,
   SECRET_REFERENCE_MAX_LENGTH,
@@ -115,18 +114,14 @@ export const getSecretFormErrors = ({
     } else if (name.length > SECRET_NAME_MAX_LENGTH || !isValidSecretName(name)) {
       errors.name = i18n.translate('xpack.secretsUi.form.nameInvalid', {
         defaultMessage:
-          'Use letters, digits and underscores, starting with a letter or an underscore, up to {max} characters.',
+          'Use lowercase letters, digits and underscores, starting with a letter or an underscore, up to {max} characters.',
         values: { max: SECRET_NAME_MAX_LENGTH },
       });
     } else {
-      const takenName = existingNames.find(
-        (existing) => normalizeSecretName(existing) === normalizeSecretName(name)
-      );
-      if (takenName !== undefined) {
+      if (existingNames.includes(name)) {
         errors.name = i18n.translate('xpack.secretsUi.form.nameTaken', {
-          defaultMessage:
-            'A secret named "{takenName}" already exists. Two names cannot differ only by letter case.',
-          values: { takenName },
+          defaultMessage: 'A secret named "{name}" already exists.',
+          values: { name },
         });
       }
     }

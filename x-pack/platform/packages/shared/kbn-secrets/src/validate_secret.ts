@@ -57,7 +57,7 @@ export const validateSecret = async ({
 }): Promise<void> => {
   if (!isValidSecretName(name)) {
     throw new SecretValidationError(
-      'A secret name starts with a letter or an underscore and contains only letters, digits and underscores'
+      'A secret name starts with a lowercase letter or an underscore and contains only lowercase letters, digits and underscores'
     );
   }
   if (description !== undefined && description.length > SECRET_DESCRIPTION_MAX_LENGTH) {

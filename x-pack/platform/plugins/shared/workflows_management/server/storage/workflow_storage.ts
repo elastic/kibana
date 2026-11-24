@@ -93,7 +93,7 @@ export interface WorkflowProperties extends WorkflowAccessSubject {
   /** True once `calledWorkflowIds` is set, including when the workflow runs no other workflow. */
   calledWorkflowIdsIndexed?: boolean;
   /**
-   * The normalized names of the secrets that the workflow references. Empty unless the workflow
+   * The names of the secrets that the workflow references. Empty unless the workflow
    * is valid and can run. Missing on documents saved before it existed, which use none.
    */
   secretNames?: string[];

@@ -11,7 +11,6 @@ import type { Type, TypeOf } from '@kbn/config-schema';
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
-  normalizeSecretName,
   SECRET_DESCRIPTION_MAX_LENGTH,
   SECRET_NAME_MAX_LENGTH,
   SECRET_PROVIDER_TYPE,
@@ -98,7 +97,7 @@ const SECRET_ID_NAMESPACE = '5f0c1c7e-8a3d-4b52-9e7a-2c6d4f1b9a30';
 
 /**
  * ESO accepts only UUID ids for encrypted types, so the id is a UUIDv5 of the space and the
- * name. This makes a name unique in its space, regardless of case, as a storage guarantee.
+ * name. This makes a name unique in its space, as a storage guarantee.
  */
 export const getSecretSavedObjectId = ({
   spaceId,
@@ -106,7 +105,7 @@ export const getSecretSavedObjectId = ({
 }: {
   spaceId: string;
   name: string;
-}): string => uuidv5(`${spaceId}:${normalizeSecretName(name)}`, SECRET_ID_NAMESPACE);
+}): string => uuidv5(`${spaceId}:${name}`, SECRET_ID_NAMESPACE);
 
 export const registerSecretType = ({
   savedObjects,

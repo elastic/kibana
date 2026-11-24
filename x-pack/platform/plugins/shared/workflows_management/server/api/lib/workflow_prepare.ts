@@ -14,11 +14,14 @@ import {
 } from '@kbn/workflows';
 import type { EsWorkflow, EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import { InvalidYamlSchemaError, parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
+import {
+  getReferencedSecretNames,
+  InvalidYamlSchemaError,
+  parseYamlToJSONWithoutValidation,
+} from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 
 import { generateWorkflowId } from '../../../common/lib/import';
-import { getWorkflowSecretNames } from '../../../common/lib/secrets/get_workflow_secret_names';
 import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml';
 import { getCalledWorkflowIds } from '../../../common/lib/workflow_dependents/find_call_sites';
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
@@ -179,7 +182,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
     calledWorkflowIds: getCalledWorkflowIds(workflowToCreate.definition),
     calledWorkflowIdsIndexed: true,
-    secretNames: getWorkflowSecretNames(workflowToCreate.definition),
+    secretNames: getReferencedSecretNames(workflowToCreate.definition),
     yaml,
     definition: workflowToCreate.definition ?? null,
     createdBy: authenticatedUser,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/** A secret with this name, compared regardless of case, already exists in the space. */
+/** A secret with this name already exists in the space. */
 export class SecretAlreadyExistsError extends Error {
   constructor(public readonly secretName: string) {
     super(`A secret named "${secretName}" already exists`);

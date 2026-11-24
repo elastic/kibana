@@ -20,7 +20,7 @@ export {
   SecretValidationError,
 } from './src/errors';
 export { createKibanaSecretProvider } from './src/providers/kibana_secret_provider';
-export { isValidSecretName, normalizeSecretName } from './src/secret_name';
+export { isValidSecretName } from './src/secret_name';
 export { createSecretsClient } from './src/secrets_client';
 export type { CreateSecretsClientParams } from './src/secrets_client';
 export type { SecretsStorage } from './src/storage';

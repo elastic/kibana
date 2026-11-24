@@ -7,7 +7,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core/server';
-import { normalizeSecretName } from '@kbn/secrets';
 import type { SecretUsageCount, SecretUsageResponse } from '@kbn/secrets';
 import type {
   EsWorkflowExecution,
@@ -305,7 +304,7 @@ export class WorkflowSearchService {
 
   /**
    * Counts the workflows that use each secret in the space, split by whether the requester can
-   * see them. Workflows in the trash are not counted. Keys are normalized secret names.
+   * see them. Workflows in the trash are not counted. Keys are secret names.
    */
   async getSecretUsageCounts(
     spaceId: string,
@@ -356,7 +355,6 @@ export class WorkflowSearchService {
     options: SecretUsageOptions
   ): Promise<SecretUsageResponse> {
     const { inSpace, visibleToRequester } = buildSecretUsageQueries(spaceId, options);
-    const normalizedName = normalizeSecretName(secretName);
 
     try {
       // The post filter narrows the hits and their total to what the requester can see, while
@@ -366,9 +364,9 @@ export class WorkflowSearchService {
         track_total_hits: true,
         _source: ['name', 'enabled'],
         sort: [{ 'name.keyword': { order: 'asc' } }, { updated_at: { order: 'desc' } }],
-        query: { bool: { must: [inSpace, { term: { secretNames: normalizedName } }] } },
+        query: { bool: { must: [inSpace, { term: { secretNames: secretName } }] } },
         post_filter: visibleToRequester,
-        aggs: { usingSecret: { filter: { term: { secretNames: normalizedName } } } },
+        aggs: { usingSecret: { filter: { term: { secretNames: secretName } } } },
       });
 
       const visibleCount = getTotalHits(hits.total);

@@ -28,7 +28,7 @@ export type SecretSource = KibanaSecretSource | ConnectorSecretSource;
 
 /** What every secret has, whatever its source. */
 export interface SecretDetails {
-  /** Unique per space, regardless of case. Immutable, because consumers reference it. */
+  /** Unique per space and lowercase. Immutable, because consumers reference it. */
   readonly name: string;
   readonly description?: string;
   /**
@@ -68,7 +68,7 @@ export interface SecretUsageCount {
 
 /** What a consumer's route that counts the items using each secret returns. */
 export interface SecretUsageCountsResponse {
-  /** The usage of each secret that is in use, by lowercased secret name. */
+  /** The usage of each secret that is in use, by secret name. */
   readonly counts: Record<string, SecretUsageCount>;
 }
 

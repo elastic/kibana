@@ -40,7 +40,11 @@ import type { ManagedFilter } from '@kbn/workflows/server';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
-import { InvalidYamlSchemaError, WorkflowConflictError } from '@kbn/workflows-yaml';
+import {
+  getReferencedSecretNames,
+  InvalidYamlSchemaError,
+  WorkflowConflictError,
+} from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
 import {
@@ -67,7 +71,6 @@ import {
   ensureWorkflowServiceAccountMutationAuthorized,
   withWorkflowBindingChange,
 } from './workflow_service_account_binding';
-import { getWorkflowSecretNames } from '../../common/lib/secrets/get_workflow_secret_names';
 import {
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   WorkflowChangeHistoryAction,
@@ -1261,7 +1264,7 @@ export class WorkflowCrudService {
         merged.calledWorkflowIds = getCalledWorkflowIds(merged.definition);
         merged.calledWorkflowIdsIndexed = true;
         // An invalid save stores no definition, so it clears the secrets that the workflow used.
-        merged.secretNames = getWorkflowSecretNames(merged.definition);
+        merged.secretNames = getReferencedSecretNames(merged.definition);
         previousVersion = existingSource.version;
         assertNoSecretsInGlobalWorkflow(merged);
         return merged;

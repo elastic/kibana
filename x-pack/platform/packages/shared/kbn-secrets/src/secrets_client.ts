@@ -45,11 +45,10 @@ export const createSecretsClient = ({
 }: CreateSecretsClientParams): SecretsClient => {
   const isUsable = (secret: SecretMetadata): boolean => secret.allowedConsumers.includes(consumer);
 
-  /** Returns the secret stored under exactly this name, if this consumer may use it. */
+  /** Returns the secret stored under this name, if this consumer may use it. */
   const find = async (name: string): Promise<SecretEntry | undefined> => {
     const entry = await storage.get({ name });
-    // Storage matches names regardless of case. A reference must use the exact name.
-    return entry && entry.name === name && isUsable(entry) ? entry : undefined;
+    return entry && isUsable(entry) ? entry : undefined;
   };
 
   const findOrThrow = async (name: string): Promise<SecretEntry> => {

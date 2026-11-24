@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { normalizeSecretName } from '@kbn/secrets';
 import type { SecretUsageCount, SecretUsageResponse } from '@kbn/secrets';
 import type { SecretsApi } from './api';
 import { useSecretUsage } from './use_secrets';
@@ -143,7 +142,7 @@ const SecretUsagePopover = ({ api, name, totalCount, getItemHref }: SecretUsageP
 interface SecretUsedByProps extends Pick<SecretUsageListProps, 'getItemHref'> {
   api: SecretsApi;
   name: string;
-  /** How many items use each secret, by lowercased secret name. Undefined until they are known. */
+  /** How many items use each secret, by secret name. Undefined until they are known. */
   counts: Record<string, SecretUsageCount> | undefined;
 }
 
@@ -152,9 +151,8 @@ export const SecretUsedBy = ({ api, name, counts, getItemHref }: SecretUsedByPro
   if (!counts) {
     return null;
   }
-  const key = normalizeSecretName(name);
   // A secret can be named like a built-in property of objects, such as `constructor`.
-  const count = Object.hasOwn(counts, key) ? counts[key] : undefined;
+  const count = Object.hasOwn(counts, name) ? counts[name] : undefined;
   const totalCount = count ? count.visibleCount + count.hiddenCount : 0;
   if (totalCount === 0) {
     return (
