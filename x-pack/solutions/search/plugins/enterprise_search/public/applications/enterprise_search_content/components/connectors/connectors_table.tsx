@@ -141,17 +141,25 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
     {
       actions: [
         {
-          description: 'Delete this content crawler',
+          description: isCrawler ? 'Delete this crawler' : 'Delete this content crawler',
           icon: 'trash',
           isPrimary: false,
           name: (connector) =>
-            i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.connectorTable.column.actions.deleteIndex',
-              {
-                defaultMessage: 'Delete content crawler {connectorName}',
-                values: { connectorName: connector.name },
-              }
-            ),
+            isCrawler
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.content.connectors.connectorTable.column.actions.deleteCrawler',
+                  {
+                    defaultMessage: 'Delete crawler {connectorName}',
+                    values: { connectorName: connector.name },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.content.connectors.connectorTable.column.actions.deleteIndex',
+                  {
+                    defaultMessage: 'Delete content crawler {connectorName}',
+                    values: { connectorName: connector.name },
+                  }
+                ),
           onClick: (connector) => {
             onDelete(connector.name, connector.id, connector.index_name);
           },
@@ -217,16 +225,30 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           columns={columns}
           onChange={onChange}
           tableLayout="fixed"
-          tableCaption={i18n.translate(
-            'xpack.enterpriseSearch.connectorsTable.table.availableConnectorsTableCaption',
-            { defaultMessage: 'Available content crawlers table' }
-          )}
+          tableCaption={
+            isCrawler
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.connectorsTable.table.availableCrawlersTableCaption',
+                  { defaultMessage: 'Available crawlers table' }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.connectorsTable.table.availableConnectorsTableCaption',
+                  { defaultMessage: 'Available content crawlers table' }
+                )
+          }
           loading={isLoading}
           noItemsMessage={
             <EuiText aria-live="polite" size="s">
-              {i18n.translate('xpack.enterpriseSearch.connectorsTable.table.noResultsMessage', {
-                defaultMessage: 'No content crawlers found',
-              })}
+              {isCrawler
+                ? i18n.translate(
+                    'xpack.enterpriseSearch.connectorsTable.table.noCrawlersResultsMessage',
+                    {
+                      defaultMessage: 'No crawlers found',
+                    }
+                  )
+                : i18n.translate('xpack.enterpriseSearch.connectorsTable.table.noResultsMessage', {
+                    defaultMessage: 'No content crawlers found',
+                  })}
             </EuiText>
           }
           pagination={{

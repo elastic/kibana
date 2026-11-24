@@ -182,7 +182,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               'xpack.contentConnectors.content.connectors.overview.nativeCloudCallout.title',
               {
                 defaultMessage:
-                  'Elastic managed content crawlers (formerly native content crawlers) are no longer supported outside Elastic Cloud',
+                  'Elastic managed content crawlers (formerly native connectors) are no longer supported outside Elastic Cloud',
               }
             )}
             text={
