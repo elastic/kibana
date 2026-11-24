@@ -18,7 +18,10 @@ import { validateConfig, validateConnector, validateSecrets } from '../../../../
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
-import { resolveConnectorSpecVersion } from '../../../../lib/resolve_connector_spec_version';
+import {
+  parseSpecVersion,
+  resolveConnectorSpecVersion,
+} from '../../../../lib/resolve_connector_spec_version';
 import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
@@ -132,13 +135,16 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
 
   const registeredActionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
+
   // Without a requested version, a versioned connector keeps its major and takes the latest minor.
-  const [pinnedMajor] = registeredActionType.specs ? attributes.specVersion?.split('.') ?? [] : [];
+  const { major: pinnedMajor } = parseSpecVersion(attributes.specVersion ?? '') ?? {};
+  const specVersion = requestedSpecVersion ?? (!!pinnedMajor ? String(pinnedMajor) : undefined);
   const { resolvedSpecVersion, actionTypeForValidation: actionType } = resolveConnectorSpecVersion({
     actionType: registeredActionType,
-    specVersion: requestedSpecVersion ?? pinnedMajor,
+    specVersion,
     configurationUtilities,
   });
+
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
   });
