@@ -12,7 +12,919 @@
     "title": "Common API"
   },
   "openapi": "3.0.0",
-  "paths": {},
+  "paths": {
+    "/alerts": {
+      "get": {
+        "operationId": "getAlerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "groupKey",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "format": "datetime",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "format": "datetime",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "items": {
+                "pattern": "(^[^:]+$)|(^[^:]+:([aA]|[dD][eE])[sS][cC]$)",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "product",
+            "schema": {
+              "items": {
+                "enum": [
+                  "other",
+                  "endpoint",
+                  "server",
+                  "mobile",
+                  "encryption",
+                  "emailGateway",
+                  "webGateway",
+                  "phishThreat",
+                  "wireless",
+                  "firewall",
+                  "ztna",
+                  "cswitch",
+                  "secureWebservice"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "items": {
+                "enum": [
+                  "adSync",
+                  "applicationControl",
+                  "appReputation",
+                  "azure",
+                  "blockListed",
+                  "connectivity",
+                  "credentialManager",
+                  "criticalAttackWarning",
+                  "cswitch",
+                  "cwg",
+                  "denc",
+                  "deviceAndPlatformHealth",
+                  "dnsProtectionLocation",
+                  "downloadReputation",
+                  "endpointFirewall",
+                  "fenc",
+                  "forensicSnapshot",
+                  "general",
+                  "integrations",
+                  "isolation",
+                  "malware",
+                  "mobiles",
+                  "mtr",
+                  "policy",
+                  "protection",
+                  "pua",
+                  "runtimeDetections",
+                  "security",
+                  "smc",
+                  "systemHealth",
+                  "uav",
+                  "uncategorized",
+                  "updating",
+                  "utm",
+                  "virt",
+                  "wireless",
+                  "xgEmail",
+                  "ztnaAuthentication",
+                  "ztnaGateway",
+                  "ztnaResource"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "severity",
+            "schema": {
+              "items": {
+                "enum": [
+                  "high",
+                  "medium",
+                  "low"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "ids",
+            "schema": {
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageFromKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageTotal",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "allowedActions": {
+                            "items": {
+                              "enum": [
+                                "acknowledge",
+                                "cleanPua",
+                                "cleanVirus",
+                                "authPua",
+                                "clearThreat",
+                                "clearHmpa",
+                                "sendMsgPua",
+                                "sendMsgThreat"
+                              ],
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "category": {
+                            "enum": [
+                              "adSync",
+                              "applicationControl",
+                              "appReputation",
+                              "azure",
+                              "blockListed",
+                              "connectivity",
+                              "credentialManager",
+                              "criticalAttackWarning",
+                              "cswitch",
+                              "cwg",
+                              "denc",
+                              "deviceAndPlatformHealth",
+                              "dnsProtectionLocation",
+                              "downloadReputation",
+                              "endpointFirewall",
+                              "fenc",
+                              "forensicSnapshot",
+                              "general",
+                              "integrations",
+                              "isolation",
+                              "malware",
+                              "mobiles",
+                              "mtr",
+                              "policy",
+                              "protection",
+                              "pua",
+                              "runtimeDetections",
+                              "security",
+                              "smc",
+                              "systemHealth",
+                              "uav",
+                              "uncategorized",
+                              "updating",
+                              "utm",
+                              "virt",
+                              "wireless",
+                              "xgEmail",
+                              "ztnaAuthentication",
+                              "ztnaGateway",
+                              "ztnaResource"
+                            ],
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "groupKey": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "managedAgent": {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "enum": [
+                                  "mobile",
+                                  "computer",
+                                  "server",
+                                  "securityVm",
+                                  "utm",
+                                  "accessPoint",
+                                  "wirelessNetwork",
+                                  "mailbox",
+                                  "slec",
+                                  "xgFirewall",
+                                  "ztnaGateway",
+                                  "sensor"
+                                ],
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "type"
+                            ],
+                            "type": "object"
+                          },
+                          "person": {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "product": {
+                            "enum": [
+                              "other",
+                              "endpoint",
+                              "server",
+                              "mobile",
+                              "encryption",
+                              "emailGateway",
+                              "webGateway",
+                              "phishThreat",
+                              "wireless",
+                              "firewall",
+                              "ztna",
+                              "cswitch",
+                              "secureWebservice"
+                            ],
+                            "type": "string"
+                          },
+                          "raisedAt": {
+                            "format": "datetime",
+                            "type": "string"
+                          },
+                          "severity": {
+                            "enum": [
+                              "high",
+                              "medium",
+                              "low"
+                            ],
+                            "type": "string"
+                          },
+                          "tenant": {
+                            "properties": {
+                              "dataRegion": {
+                                "enum": [
+                                  "eu01",
+                                  "eu02",
+                                  "us01",
+                                  "us02",
+                                  "us03",
+                                  "ca01",
+                                  "au01",
+                                  "jp01",
+                                  "in01",
+                                  "br01",
+                                  "ae01"
+                                ],
+                                "type": "string"
+                              },
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "type": "object"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 100,
+                      "type": "array"
+                    },
+                    "pages": {
+                      "properties": {
+                        "fromKey": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "type": "integer"
+                        },
+                        "maxSize": {
+                          "type": "integer"
+                        },
+                        "nextKey": {
+                          "type": "string"
+                        },
+                        "size": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "maxSize",
+                        "size"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "pages"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "headers": {
+              "Last-Modified": {
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts/{alertId}": {
+      "get": {
+        "operationId": "getAlertById",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "allowedActions": {
+                      "items": {
+                        "enum": [
+                          "acknowledge",
+                          "cleanPua",
+                          "cleanVirus",
+                          "authPua",
+                          "clearThreat",
+                          "clearHmpa",
+                          "sendMsgPua",
+                          "sendMsgThreat"
+                        ],
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "category": {
+                      "enum": [
+                        "adSync",
+                        "applicationControl",
+                        "appReputation",
+                        "azure",
+                        "blockListed",
+                        "connectivity",
+                        "credentialManager",
+                        "criticalAttackWarning",
+                        "cswitch",
+                        "cwg",
+                        "denc",
+                        "deviceAndPlatformHealth",
+                        "dnsProtectionLocation",
+                        "downloadReputation",
+                        "endpointFirewall",
+                        "fenc",
+                        "forensicSnapshot",
+                        "general",
+                        "integrations",
+                        "isolation",
+                        "malware",
+                        "mobiles",
+                        "mtr",
+                        "policy",
+                        "protection",
+                        "pua",
+                        "runtimeDetections",
+                        "security",
+                        "smc",
+                        "systemHealth",
+                        "uav",
+                        "uncategorized",
+                        "updating",
+                        "utm",
+                        "virt",
+                        "wireless",
+                        "xgEmail",
+                        "ztnaAuthentication",
+                        "ztnaGateway",
+                        "ztnaResource"
+                      ],
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "groupKey": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "managedAgent": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "enum": [
+                            "mobile",
+                            "computer",
+                            "server",
+                            "securityVm",
+                            "utm",
+                            "accessPoint",
+                            "wirelessNetwork",
+                            "mailbox",
+                            "slec",
+                            "xgFirewall",
+                            "ztnaGateway",
+                            "sensor"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type"
+                      ],
+                      "type": "object"
+                    },
+                    "person": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "product": {
+                      "enum": [
+                        "other",
+                        "endpoint",
+                        "server",
+                        "mobile",
+                        "encryption",
+                        "emailGateway",
+                        "webGateway",
+                        "phishThreat",
+                        "wireless",
+                        "firewall",
+                        "ztna",
+                        "cswitch",
+                        "secureWebservice"
+                      ],
+                      "type": "string"
+                    },
+                    "raisedAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "severity": {
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low"
+                      ],
+                      "type": "string"
+                    },
+                    "tenant": {
+                      "properties": {
+                        "dataRegion": {
+                          "enum": [
+                            "eu01",
+                            "eu02",
+                            "us01",
+                            "us02",
+                            "us03",
+                            "ca01",
+                            "au01",
+                            "jp01",
+                            "in01",
+                            "br01",
+                            "ae01"
+                          ],
+                          "type": "string"
+                        },
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ],
+                      "type": "object"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts/{alertId}/actions": {
+      "post": {
+        "operationId": "takeAlertActions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "enum": [
+                      "acknowledge",
+                      "cleanPua",
+                      "cleanVirus",
+                      "authPua",
+                      "clearThreat",
+                      "clearHmpa",
+                      "sendMsgPua",
+                      "sendMsgThreat"
+                    ],
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "action"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "action": {
+                      "enum": [
+                        "acknowledge",
+                        "cleanPua",
+                        "cleanVirus",
+                        "authPua",
+                        "clearThreat",
+                        "clearHmpa",
+                        "sendMsgPua",
+                        "sendMsgThreat"
+                      ],
+                      "type": "string"
+                    },
+                    "alertId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "completedAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "requestedAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "string"
+                    },
+                    "startedAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "started",
+                        "completed"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "alertId",
+                    "action",
+                    "status",
+                    "requestedAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "security": [
     {
       "bearerAuth": []

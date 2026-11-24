@@ -759,6 +759,10 @@ export const SophosCentral: ConnectorSpec = {
           ]);
           const pollTimeoutMs = 90_000;
           const pollIntervalMs = 5_000;
+          // Minimum remaining budget required to attempt a poll request.
+          // Prevents passing timeout: 0 to Axios (which means "no timeout") and avoids
+          // raw "timeout of Nms exceeded" Axios errors from a 1-few ms budget.
+          const MIN_POLL_TIMEOUT_MS = 500;
           const deadline = Date.now() + pollTimeoutMs;
 
           let runState = '';
@@ -770,7 +774,8 @@ export const SophosCentral: ConnectorSpec = {
               );
             }
             await sleep(Math.min(pollIntervalMs, remaining));
-            if (Date.now() > deadline) {
+            const afterSleep = deadline - Date.now();
+            if (afterSleep < MIN_POLL_TIMEOUT_MS) {
               throw new Error(
                 'Sophos Central listDetections: query run did not complete within 90 seconds'
               );
@@ -779,7 +784,7 @@ export const SophosCentral: ConnectorSpec = {
               ctx,
               'GET',
               `/detections/v1/queries/detections/${encodeURIComponent(runId)}`,
-              { tenantId, dataRegion, timeout: Math.min(30_000, deadline - Date.now()) }
+              { tenantId, dataRegion, timeout: Math.min(30_000, afterSleep) }
             );
             runState = pollRes?.result ?? pollRes?.status ?? '';
           }

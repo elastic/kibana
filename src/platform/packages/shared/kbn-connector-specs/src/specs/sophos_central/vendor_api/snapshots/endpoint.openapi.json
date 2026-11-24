@@ -12,7 +12,3645 @@
     "title": "Endpoint API"
   },
   "openapi": "3.0.0",
-  "paths": {},
+  "paths": {
+    "/endpoints": {
+      "get": {
+        "operationId": "listEndpointsByTenantId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageFromKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageTotal",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "items": {
+                "pattern": "(^[^:]+$)|(^[^:]+:(asc|desc)$)",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "healthStatus",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "bad",
+                  "good",
+                  "suspicious",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "computer",
+                  "server",
+                  "securityVm"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "tamperProtectionEnabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tamperProtectionSupported",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "lockdownStatus",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "creatingWhitelist",
+                  "installing",
+                  "locked",
+                  "notInstalled",
+                  "registering",
+                  "starting",
+                  "stopping",
+                  "unavailable",
+                  "uninstalled",
+                  "unlocked"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "overallEncryptionStatus",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "notEncrypted",
+                  "encrypted",
+                  "encrypting",
+                  "notSupported",
+                  "suspended",
+                  "notAvailable",
+                  "unmanaged"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "lastSeenBefore",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lastSeenAfter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lastOsUpdateBefore",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lastOsUpdateAfter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "isolationStatus",
+            "required": false,
+            "schema": {
+              "enum": [
+                "isolated",
+                "notIsolated"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hostnameContains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "serialNumberContains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "associatedPersonContains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "groupNameContains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "searchFields",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "hostname",
+                  "groupName",
+                  "associatedPersonName",
+                  "ipAddresses",
+                  "osName",
+                  "serialNumber",
+                  "tags"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "ipAddresses",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "online",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cloud",
+            "required": false,
+            "schema": {
+              "items": {
+                "pattern": "^(aws|azure|gcp)|((aws|azure|gcp):([0-9a-zA-Z-_]{1,64}))|([0-9a-zA-Z-_]{1,64})$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "view",
+            "required": false,
+            "schema": {
+              "enum": [
+                "basic",
+                "summary",
+                "full"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "assignedToGroup",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "groupIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "maxItems": 50,
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "macAddresses",
+            "required": false,
+            "schema": {
+              "items": {
+                "pattern": "^([0-9a-fA-F:\\-\\.]){10,32}$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "includeTags",
+            "required": false,
+            "schema": {
+              "items": {
+                "pattern": "^[^:]{1,40}(:[^:]{0,40})?$",
+                "type": "string"
+              },
+              "maxItems": 5,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "excludeTags",
+            "required": false,
+            "schema": {
+              "items": {
+                "pattern": "^[^:]{1,40}(:[^:]{0,40})?$",
+                "type": "string"
+              },
+              "maxItems": 5,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hasTags",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lastAgentUpdateBefore",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lastAgentUpdateAfter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "assignedProducts": {
+                            "items": {
+                              "properties": {
+                                "code": {
+                                  "enum": [
+                                    "coreAgent",
+                                    "interceptX",
+                                    "xdr",
+                                    "endpointProtection",
+                                    "deviceEncryption",
+                                    "mtr",
+                                    "ztna"
+                                  ],
+                                  "type": "string"
+                                },
+                                "status": {
+                                  "enum": [
+                                    "installed",
+                                    "notInstalled"
+                                  ],
+                                  "type": "string"
+                                },
+                                "version": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "code",
+                                "version"
+                              ],
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "associatedPerson": {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "viaLogin": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "cloned": {
+                            "type": "boolean"
+                          },
+                          "cloud": {
+                            "properties": {
+                              "instanceId": {
+                                "pattern": "^([0-9a-zA-Z-_]{1,64})",
+                                "type": "string"
+                              },
+                              "provider": {
+                                "enum": [
+                                  "aws",
+                                  "azure"
+                                ],
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "provider",
+                              "instanceId"
+                            ],
+                            "type": "object"
+                          },
+                          "deviceSoftware": {
+                            "properties": {
+                              "encryption": {
+                                "properties": {
+                                  "assignedId": {
+                                    "type": "string"
+                                  },
+                                  "available": {
+                                    "items": {
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "type": "array"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "enum": [
+                                      "assigned",
+                                      "unassigned",
+                                      "unlicensed",
+                                      "unsupported",
+                                      "upgradable"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "protection": {
+                                "properties": {
+                                  "assignedId": {
+                                    "type": "string"
+                                  },
+                                  "available": {
+                                    "items": {
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "type": "array"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "enum": [
+                                      "assigned",
+                                      "unassigned",
+                                      "unlicensed",
+                                      "unsupported",
+                                      "upgradable"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "ztna": {
+                                "properties": {
+                                  "assignedId": {
+                                    "type": "string"
+                                  },
+                                  "available": {
+                                    "items": {
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "type": "array"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "enum": [
+                                      "assigned",
+                                      "unassigned",
+                                      "unlicensed",
+                                      "unsupported",
+                                      "upgradable"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "encryption": {
+                            "properties": {
+                              "overallStatus": {
+                                "enum": [
+                                  "notEncrypted",
+                                  "encrypted",
+                                  "encrypting",
+                                  "notSupported",
+                                  "suspended",
+                                  "notAvailable",
+                                  "unmanaged"
+                                ],
+                                "type": "string"
+                              },
+                              "volumes": {
+                                "items": {
+                                  "properties": {
+                                    "status": {
+                                      "enum": [
+                                        "notEncrypted",
+                                        "encrypted",
+                                        "encrypting",
+                                        "notSupported",
+                                        "suspended",
+                                        "unknown"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "volumeId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "volumeId",
+                                    "status"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "required": [
+                              "volumes"
+                            ],
+                            "type": "object"
+                          },
+                          "group": {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "groupHierarchy": {
+                            "items": {
+                              "properties": {
+                                "id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "parentId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "id"
+                              ],
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "health": {
+                            "properties": {
+                              "overall": {
+                                "enum": [
+                                  "good",
+                                  "suspicious",
+                                  "bad",
+                                  "unknown"
+                                ],
+                                "type": "string"
+                              },
+                              "services": {
+                                "properties": {
+                                  "serviceDetails": {
+                                    "items": {
+                                      "properties": {
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "status": {
+                                          "enum": [
+                                            "running",
+                                            "stopped",
+                                            "missing"
+                                          ],
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "name",
+                                        "status"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "type": "array"
+                                  },
+                                  "status": {
+                                    "enum": [
+                                      "good",
+                                      "suspicious",
+                                      "bad",
+                                      "unknown"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "status",
+                                  "serviceDetails"
+                                ],
+                                "type": "object"
+                              },
+                              "threats": {
+                                "properties": {
+                                  "status": {
+                                    "enum": [
+                                      "good",
+                                      "suspicious",
+                                      "bad",
+                                      "unknown"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "status"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "overall",
+                              "threats",
+                              "services"
+                            ],
+                            "type": "object"
+                          },
+                          "hostname": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "ipv4Addresses": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "ipv6Addresses": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "isolation": {
+                            "properties": {
+                              "adminIsolated": {
+                                "type": "boolean"
+                              },
+                              "selfIsolated": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "enum": [
+                                  "isolated",
+                                  "notIsolated"
+                                ],
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ],
+                            "type": "object"
+                          },
+                          "lastAgentUpdateAt": {
+                            "type": "string"
+                          },
+                          "lastOsUpdateAt": {
+                            "type": "string"
+                          },
+                          "lastSeenAt": {
+                            "type": "string"
+                          },
+                          "lockdown": {
+                            "properties": {
+                              "status": {
+                                "enum": [
+                                  "creatingWhitelist",
+                                  "installing",
+                                  "locked",
+                                  "notInstalled",
+                                  "registering",
+                                  "starting",
+                                  "stopping",
+                                  "unavailable",
+                                  "uninstalled",
+                                  "unlocked",
+                                  "locking"
+                                ],
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ],
+                            "type": "object"
+                          },
+                          "macAddresses": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "online": {
+                            "type": "boolean"
+                          },
+                          "os": {
+                            "properties": {
+                              "build": {
+                                "type": "integer"
+                              },
+                              "isServer": {
+                                "type": "boolean"
+                              },
+                              "majorVersion": {
+                                "type": "integer"
+                              },
+                              "minorVersion": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "platform": {
+                                "enum": [
+                                  "windows",
+                                  "linux",
+                                  "macOS"
+                                ],
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "platform",
+                              "name"
+                            ],
+                            "type": "object"
+                          },
+                          "packages": {
+                            "properties": {
+                              "encryption": {
+                                "properties": {
+                                  "assignedId": {
+                                    "type": "string"
+                                  },
+                                  "available": {
+                                    "items": {
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "type": "array"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "enum": [
+                                      "assigned",
+                                      "unassigned",
+                                      "unlicensed",
+                                      "unsupported",
+                                      "upgradable"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "protection": {
+                                "properties": {
+                                  "assignedId": {
+                                    "type": "string"
+                                  },
+                                  "available": {
+                                    "items": {
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "type": "array"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "enum": [
+                                      "assigned",
+                                      "unassigned",
+                                      "unlicensed",
+                                      "unsupported",
+                                      "upgradable"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "ztna": {
+                                "properties": {
+                                  "assignedId": {
+                                    "type": "string"
+                                  },
+                                  "available": {
+                                    "items": {
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "type": "array"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "enum": [
+                                      "assigned",
+                                      "unassigned",
+                                      "unlicensed",
+                                      "unsupported",
+                                      "upgradable"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "serialNumber": {
+                            "type": "string"
+                          },
+                          "tags": {
+                            "items": {
+                              "properties": {
+                                "displayString": {
+                                  "pattern": "^([^:]{1,40}):([^:]{0,40})$",
+                                  "type": "string"
+                                },
+                                "key": {
+                                  "pattern": "^[^:]{1,40}$",
+                                  "type": "string"
+                                },
+                                "tagOrigin": {
+                                  "readOnly": true,
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "pattern": "^[^:]{0,40}$",
+                                  "type": "string"
+                                },
+                                "vendorName": {
+                                  "readOnly": true,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "key",
+                                "value"
+                              ],
+                              "type": "object"
+                            },
+                            "maxItems": 15,
+                            "type": "array"
+                          },
+                          "tamperProtectionEnabled": {
+                            "type": "boolean"
+                          },
+                          "tamperProtectionSupported": {
+                            "type": "boolean"
+                          },
+                          "tenant": {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": {
+                            "enum": [
+                              "computer",
+                              "server",
+                              "securityVm"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "hostname",
+                          "os"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "pages": {
+                      "properties": {
+                        "fromKey": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "type": "integer"
+                        },
+                        "maxSize": {
+                          "type": "integer"
+                        },
+                        "nextKey": {
+                          "type": "string"
+                        },
+                        "size": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "maxSize",
+                        "size"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "pages"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {},
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints/isolation": {
+      "post": {
+        "operationId": "bulkUpdateEndpointIsolation",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "comment": {
+                    "maxLength": 400,
+                    "type": "string"
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "ids": {
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "maxItems": 500,
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "enabled",
+                  "ids"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "errors": {
+                      "items": {
+                        "properties": {
+                          "endpointErrorCode": {
+                            "type": "string"
+                          },
+                          "errorCode": {
+                            "enum": [
+                              "notFound",
+                              "notSupported",
+                              "conflict",
+                              "permissionDenied",
+                              "internalError"
+                            ],
+                            "type": "string"
+                          },
+                          "errorMessage": {
+                            "maxLength": 250,
+                            "type": "string"
+                          },
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "errorCode",
+                          "errorMessage"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "isolation": {
+                            "properties": {
+                              "comment": {
+                                "maxLength": 400,
+                                "type": "string"
+                              },
+                              "enabled": {
+                                "type": "boolean"
+                              },
+                              "lastDisabledAt": {
+                                "format": "datetime",
+                                "type": "string"
+                              },
+                              "lastDisabledBy": {
+                                "properties": {
+                                  "accountId": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "accountType": {
+                                    "enum": [
+                                      "partner",
+                                      "tenant",
+                                      "organization"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "enum": [
+                                      "user",
+                                      "service",
+                                      "system"
+                                    ],
+                                    "format": "enum",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ],
+                                "type": "object"
+                              },
+                              "lastEnabledAt": {
+                                "format": "datetime",
+                                "type": "string"
+                              },
+                              "lastEnabledBy": {
+                                "properties": {
+                                  "accountId": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "accountType": {
+                                    "enum": [
+                                      "partner",
+                                      "tenant",
+                                      "organization"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "enum": [
+                                      "user",
+                                      "service",
+                                      "system"
+                                    ],
+                                    "format": "enum",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "enabled"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints/scans": {
+      "post": {
+        "operationId": "bulkRequestEndpointScan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "ids": {
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "maxItems": 500,
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "ids"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "errors": {
+                      "items": {
+                        "properties": {
+                          "endpointErrorCode": {
+                            "type": "string"
+                          },
+                          "errorCode": {
+                            "enum": [
+                              "notFound",
+                              "notSupported",
+                              "conflict",
+                              "permissionDenied",
+                              "internalError"
+                            ],
+                            "type": "string"
+                          },
+                          "errorMessage": {
+                            "maxLength": 250,
+                            "type": "string"
+                          },
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "errorCode",
+                          "errorMessage"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "requestedAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "status": {
+                            "enum": [
+                              "requested"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "status",
+                          "requestedAt"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints/{endpointId}": {
+      "get": {
+        "operationId": "getEndpointById",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "endpointId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "view",
+            "required": false,
+            "schema": {
+              "enum": [
+                "basic",
+                "summary",
+                "full"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "assignedProducts": {
+                      "items": {
+                        "properties": {
+                          "code": {
+                            "enum": [
+                              "coreAgent",
+                              "interceptX",
+                              "xdr",
+                              "endpointProtection",
+                              "deviceEncryption",
+                              "mtr",
+                              "ztna"
+                            ],
+                            "type": "string"
+                          },
+                          "status": {
+                            "enum": [
+                              "installed",
+                              "notInstalled"
+                            ],
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "version"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "associatedPerson": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "viaLogin": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "cloned": {
+                      "type": "boolean"
+                    },
+                    "cloud": {
+                      "properties": {
+                        "instanceId": {
+                          "pattern": "^([0-9a-zA-Z-_]{1,64})",
+                          "type": "string"
+                        },
+                        "provider": {
+                          "enum": [
+                            "aws",
+                            "azure"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "provider",
+                        "instanceId"
+                      ],
+                      "type": "object"
+                    },
+                    "deviceSoftware": {
+                      "properties": {
+                        "encryption": {
+                          "properties": {
+                            "assignedId": {
+                              "type": "string"
+                            },
+                            "available": {
+                              "items": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "enum": [
+                                "assigned",
+                                "unassigned",
+                                "unlicensed",
+                                "unsupported",
+                                "upgradable"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "protection": {
+                          "properties": {
+                            "assignedId": {
+                              "type": "string"
+                            },
+                            "available": {
+                              "items": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "enum": [
+                                "assigned",
+                                "unassigned",
+                                "unlicensed",
+                                "unsupported",
+                                "upgradable"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "ztna": {
+                          "properties": {
+                            "assignedId": {
+                              "type": "string"
+                            },
+                            "available": {
+                              "items": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "enum": [
+                                "assigned",
+                                "unassigned",
+                                "unlicensed",
+                                "unsupported",
+                                "upgradable"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "encryption": {
+                      "properties": {
+                        "overallStatus": {
+                          "enum": [
+                            "notEncrypted",
+                            "encrypted",
+                            "encrypting",
+                            "notSupported",
+                            "suspended",
+                            "notAvailable",
+                            "unmanaged"
+                          ],
+                          "type": "string"
+                        },
+                        "volumes": {
+                          "items": {
+                            "properties": {
+                              "status": {
+                                "enum": [
+                                  "notEncrypted",
+                                  "encrypted",
+                                  "encrypting",
+                                  "notSupported",
+                                  "suspended",
+                                  "unknown"
+                                ],
+                                "type": "string"
+                              },
+                              "volumeId": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "volumeId",
+                              "status"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "required": [
+                        "volumes"
+                      ],
+                      "type": "object"
+                    },
+                    "group": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "groupHierarchy": {
+                      "items": {
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "parentId": {
+                            "format": "uuid",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "id"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "health": {
+                      "properties": {
+                        "overall": {
+                          "enum": [
+                            "good",
+                            "suspicious",
+                            "bad",
+                            "unknown"
+                          ],
+                          "type": "string"
+                        },
+                        "services": {
+                          "properties": {
+                            "serviceDetails": {
+                              "items": {
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "enum": [
+                                      "running",
+                                      "stopped",
+                                      "missing"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "status"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "status": {
+                              "enum": [
+                                "good",
+                                "suspicious",
+                                "bad",
+                                "unknown"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "serviceDetails"
+                          ],
+                          "type": "object"
+                        },
+                        "threats": {
+                          "properties": {
+                            "status": {
+                              "enum": [
+                                "good",
+                                "suspicious",
+                                "bad",
+                                "unknown"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "status"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "overall",
+                        "threats",
+                        "services"
+                      ],
+                      "type": "object"
+                    },
+                    "hostname": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "ipv4Addresses": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "ipv6Addresses": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "isolation": {
+                      "properties": {
+                        "adminIsolated": {
+                          "type": "boolean"
+                        },
+                        "selfIsolated": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "enum": [
+                            "isolated",
+                            "notIsolated"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "type": "object"
+                    },
+                    "lastAgentUpdateAt": {
+                      "type": "string"
+                    },
+                    "lastOsUpdateAt": {
+                      "type": "string"
+                    },
+                    "lastSeenAt": {
+                      "type": "string"
+                    },
+                    "lockdown": {
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "creatingWhitelist",
+                            "installing",
+                            "locked",
+                            "notInstalled",
+                            "registering",
+                            "starting",
+                            "stopping",
+                            "unavailable",
+                            "uninstalled",
+                            "unlocked",
+                            "locking"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "type": "object"
+                    },
+                    "macAddresses": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "online": {
+                      "type": "boolean"
+                    },
+                    "os": {
+                      "properties": {
+                        "build": {
+                          "type": "integer"
+                        },
+                        "isServer": {
+                          "type": "boolean"
+                        },
+                        "majorVersion": {
+                          "type": "integer"
+                        },
+                        "minorVersion": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "platform": {
+                          "enum": [
+                            "windows",
+                            "linux",
+                            "macOS"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "platform",
+                        "name"
+                      ],
+                      "type": "object"
+                    },
+                    "packages": {
+                      "properties": {
+                        "encryption": {
+                          "properties": {
+                            "assignedId": {
+                              "type": "string"
+                            },
+                            "available": {
+                              "items": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "enum": [
+                                "assigned",
+                                "unassigned",
+                                "unlicensed",
+                                "unsupported",
+                                "upgradable"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "protection": {
+                          "properties": {
+                            "assignedId": {
+                              "type": "string"
+                            },
+                            "available": {
+                              "items": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "enum": [
+                                "assigned",
+                                "unassigned",
+                                "unlicensed",
+                                "unsupported",
+                                "upgradable"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "ztna": {
+                          "properties": {
+                            "assignedId": {
+                              "type": "string"
+                            },
+                            "available": {
+                              "items": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "enum": [
+                                "assigned",
+                                "unassigned",
+                                "unlicensed",
+                                "unsupported",
+                                "upgradable"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "serialNumber": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "items": {
+                        "properties": {
+                          "displayString": {
+                            "pattern": "^([^:]{1,40}):([^:]{0,40})$",
+                            "type": "string"
+                          },
+                          "key": {
+                            "pattern": "^[^:]{1,40}$",
+                            "type": "string"
+                          },
+                          "tagOrigin": {
+                            "readOnly": true,
+                            "type": "string"
+                          },
+                          "value": {
+                            "pattern": "^[^:]{0,40}$",
+                            "type": "string"
+                          },
+                          "vendorName": {
+                            "readOnly": true,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "key",
+                          "value"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 15,
+                      "type": "array"
+                    },
+                    "tamperProtectionEnabled": {
+                      "type": "boolean"
+                    },
+                    "tamperProtectionSupported": {
+                      "type": "boolean"
+                    },
+                    "tenant": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": {
+                      "enum": [
+                        "computer",
+                        "server",
+                        "securityVm"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "hostname",
+                    "os"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints/{endpointId}/tamper-protection": {
+      "get": {
+        "operationId": "getEndpointTamperProtectionSettings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "endpointId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "password": {
+                      "type": "string"
+                    },
+                    "previousPasswords": {
+                      "items": {
+                        "properties": {
+                          "invalidatedAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "password": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "password",
+                          "invalidatedAt"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "password"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "updateEndpointTamperProtectionSettings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "endpointId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "regeneratePassword": {
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "password": {
+                      "type": "string"
+                    },
+                    "previousPasswords": {
+                      "items": {
+                        "properties": {
+                          "invalidatedAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "password": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "password",
+                          "invalidatedAt"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "password"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/allowed-items": {
+      "post": {
+        "operationId": "postAllowedItemById",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "originEndpointId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "originPersonId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "properties": {
+                    "properties": {
+                      "certificateSigner": {
+                        "type": "string"
+                      },
+                      "fileName": {
+                        "type": "string"
+                      },
+                      "path": {
+                        "type": "string"
+                      },
+                      "sha256": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": {
+                    "enum": [
+                      "path",
+                      "sha256",
+                      "certificateSigner",
+                      "posixPath"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "properties",
+                  "comment"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "comment": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "createdBy": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "originEndpoint": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "originPerson": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "properties": {
+                      "properties": {
+                        "certificateSigner": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "sha256": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": {
+                      "enum": [
+                        "path",
+                        "sha256",
+                        "certificateSigner",
+                        "posixPath"
+                      ],
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "createdAt",
+                    "comment",
+                    "type",
+                    "properties"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/blocked-items": {
+      "get": {
+        "operationId": "getBlockedItems",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageTotal",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "comment": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "createdBy": {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "originEndpoint": {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "originPerson": {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "properties": {
+                            "properties": {
+                              "certificateSigner": {
+                                "type": "string"
+                              },
+                              "fileName": {
+                                "type": "string"
+                              },
+                              "path": {
+                                "type": "string"
+                              },
+                              "sha256": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": {
+                            "enum": [
+                              "sha256"
+                            ],
+                            "type": "string"
+                          },
+                          "updatedAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "createdAt",
+                          "comment",
+                          "type",
+                          "properties"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "pages": {
+                      "properties": {
+                        "current": {
+                          "type": "integer"
+                        },
+                        "items": {
+                          "type": "integer"
+                        },
+                        "maxSize": {
+                          "type": "integer"
+                        },
+                        "size": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "current",
+                        "size",
+                        "maxSize"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "pages"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "postBlockedItemById",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "properties": {
+                    "properties": {
+                      "certificateSigner": {
+                        "type": "string"
+                      },
+                      "fileName": {
+                        "type": "string"
+                      },
+                      "path": {
+                        "type": "string"
+                      },
+                      "sha256": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": {
+                    "enum": [
+                      "sha256"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "properties",
+                  "comment"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "comment": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "createdBy": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "originEndpoint": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "originPerson": {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "properties": {
+                      "properties": {
+                        "certificateSigner": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "sha256": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": {
+                      "enum": [
+                        "sha256"
+                      ],
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "createdAt",
+                    "comment",
+                    "type",
+                    "properties"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/blocked-items/{blockedItemId}": {
+      "delete": {
+        "operationId": "deleteBlockedItemById",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "blockedItemId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "deleted": {
+                      "default": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "security": [
     {
       "bearerAuth": []

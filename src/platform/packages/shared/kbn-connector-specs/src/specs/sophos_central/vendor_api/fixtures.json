@@ -2,19 +2,69 @@
   "listAlerts": {
     "input": {
       "severity": ["high"],
+      "product": ["endpoint"],
+      "category": ["malware"],
       "pageSize": 10
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "getAlert": {
     "input": {
       "alertId": "00000000-0000-0000-0000-000000000001"
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "actOnAlert": {
     "input": {
       "alertId": "00000000-0000-0000-0000-000000000001",
       "action": "acknowledge"
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "actOnAlertsBulk": {
     "input": {
@@ -23,57 +73,217 @@
         "00000000-0000-0000-0000-000000000002"
       ],
       "action": "acknowledge"
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "listEndpoints": {
     "input": {
       "pageSize": 10
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "getEndpoint": {
     "input": {
       "endpointId": "00000000-0000-0000-0000-000000000001"
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "isolateEndpoint": {
     "input": {
       "ids": ["00000000-0000-0000-0000-000000000001"],
       "comment": "Isolating for investigation"
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "deisolateEndpoint": {
     "input": {
       "ids": ["00000000-0000-0000-0000-000000000001"],
       "comment": "Investigation complete"
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "scanEndpoint": {
     "input": {
       "ids": ["00000000-0000-0000-0000-000000000001"]
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "getTamperProtection": {
     "input": {
       "endpointId": "00000000-0000-0000-0000-000000000001"
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "updateTamperProtection": {
     "input": {
       "endpointId": "00000000-0000-0000-0000-000000000001",
       "enabled": true
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "listBlockedItems": {
     "input": {
       "page": 1,
       "pageSize": 50
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "addBlockedItem": {
     "input": {
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "comment": "Known malicious file"
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "addAllowedItem": {
     "input": {
@@ -82,18 +292,90 @@
         "path": "C:\\Program Files\\Example\\app.exe"
       },
       "comment": "Approved application"
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "deleteBlockedItem": {
     "input": {
       "blockedItemId": "00000000-0000-0000-0000-000000000001"
-    }
+    },
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      }
+    ]
   },
   "listDetections": {
     "input": {
       "severity": [8],
       "page": 1,
       "pageSize": 50
-    }
+    },
+    "queries": [
+      { "source": "detections", "method": "POST", "path": "/queries/detections" }
+    ],
+    "responses": [
+      {
+        "source": "global",
+        "method": "GET",
+        "path": "/whoami/v1",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "idType": "tenant",
+          "apiHosts": {
+            "dataRegion": "https://api-eu01.central.sophos.com"
+          }
+        }
+      },
+      {
+        "source": "detections",
+        "method": "POST",
+        "path": "/queries/detections",
+        "status": 201,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "99998888-7777-6666-5555-444433332222"
+        }
+      },
+      {
+        "source": "detections",
+        "method": "GET",
+        "path": "/queries/detections/{runId}",
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": {
+          "id": "99998888-7777-6666-5555-444433332222",
+          "result": "succeeded"
+        }
+      }
+    ]
   }
 }
