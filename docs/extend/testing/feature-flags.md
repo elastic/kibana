@@ -73,11 +73,11 @@ For sequential suites you can enable flags in `beforeAll` and reset them in `aft
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('Discover with ES|QL as the default query mode', { tag: tags.stateful.classic }, () => {
+test.describe('Fleet OTLP output', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'discover.isEsqlDefault': true,
+        'fleet.enableOtlpOutput': true,
       },
     });
   });
@@ -85,15 +85,14 @@ test.describe('Discover with ES|QL as the default query mode', { tag: tags.state
   test.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'discover.isEsqlDefault': false,
+        'fleet.enableOtlpOutput': false,
       },
     });
   });
 
-  test('opens Discover in ES|QL mode', async ({ page, pageObjects, browserAuth }) => {
-    await browserAuth.loginAsViewer();
-    await page.gotoApp('discover');
-    await pageObjects.discover.waitUntilTabIsLoaded();
+  test('can create an OTLP output', async ({ page, browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('fleet');
     // ...
   });
 });
