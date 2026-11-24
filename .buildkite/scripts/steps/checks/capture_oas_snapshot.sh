@@ -30,6 +30,7 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/discover_sessions \
   --include-path /api/markdowns \
   --include-path /api/links \
+  --include-path /api/vega \
   --include-path /api/tags \
   --include-path /api/security/entity_store \
   --include-path /api/profiling \

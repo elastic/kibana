@@ -10,6 +10,16 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { getUiamClientAuthentication } from './get_client_authentication';
 
 describe('getUiamClientAuthentication', () => {
+  it('reads the client secret from stored credentials without a full request', () => {
+    const headers = {
+      authorization: 'Bearer essu_renewed',
+      'x-client-authentication': 'renewed-token-secret',
+    };
+    expect(getUiamClientAuthentication({ headers })).toEqual({
+      sharedSecret: 'renewed-token-secret',
+    });
+  });
+
   it.each(['Bearer', 'bearer'])(
     'forwards supplied client authentication for %s tokens',
     (scheme) => {

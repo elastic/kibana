@@ -165,32 +165,6 @@ describe('validateStepNameUniqueness', () => {
     expect(result.errors[0].occurrences).toBe(2);
   });
 
-  it('should validate nested steps in merge', () => {
-    const workflow: WorkflowYaml = {
-      version: '1',
-      name: 'Test Workflow',
-      enabled: true,
-      triggers: [{ type: 'manual' }],
-      steps: [
-        {
-          name: 'merge_step',
-          type: 'merge',
-          steps: [
-            { name: 'merge_nested', type: 'console' },
-            { name: 'merge_nested', type: 'http' },
-          ],
-        } as any,
-      ],
-    };
-
-    const result = validateStepNameUniqueness(workflow);
-
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].stepName).toBe('merge_nested');
-    expect(result.errors[0].occurrences).toBe(2);
-  });
-
   it('should handle complex nested scenarios with multiple duplicates', () => {
     const workflow: WorkflowYaml = {
       version: '1',

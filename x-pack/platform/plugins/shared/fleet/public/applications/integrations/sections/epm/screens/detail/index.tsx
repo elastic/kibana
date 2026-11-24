@@ -34,6 +34,7 @@ import { appendReturnParams } from '../../components/return_params';
 import {
   ADD_INTEGRATION_CONFIGURABLE_PACKAGES,
   isAssetOnlyIntegrationPackage,
+  isPackageFipsIncompatible,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
@@ -184,6 +185,7 @@ export function Detail() {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isCustomPackage, setIsCustomPackage] = useState(false);
+  const [isFipsIncompatiblePackage, setIsFipsIncompatiblePackage] = useState(false);
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -234,6 +236,8 @@ export function Detail() {
       ? missingSecurityConfiguration
         ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
         : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
+      : isFipsIncompatiblePackage
+      ? AddIntegrationButtonDisabledReason.FIPS_INCOMPATIBLE
       : undefined;
 
   // A preselected agent policy stays on the Fleet wizard, which is the only flow that can
@@ -382,6 +386,11 @@ export function Detail() {
             }
           : packageInfoResponse;
       setPackageInfo(filteredPackageInfo);
+      // computed on the unfiltered response: the filter above strips the non FIPS templates
+      setIsFipsIncompatiblePackage(
+        !!isFipsEnabled &&
+          isPackageFipsIncompatible(packageInfoResponse.policy_templates, packageInfoResponse.name)
+      );
       setIsCustomPackage(
         (packageInfoResponse?.installationInfo?.install_source &&
           CUSTOM_INTEGRATION_SOURCES.includes(
@@ -1025,12 +1034,42 @@ export function Detail() {
     </>
   ) : undefined;
 
+  const fipsCallout = isFipsIncompatiblePackage ? (
+    <>
+      <KbnWarningCallout
+        announceOnMount
+        title={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsFipsIncompatibleCalloutTitle"
+            defaultMessage="This integration is not FIPS compliant"
+          />
+        }
+        text={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsFipsIncompatibleCalloutDescription"
+            defaultMessage="It cannot be added on a FIPS-enabled deployment. Existing integration policies will fail to deploy and can be deleted."
+          />
+        }
+        data-test-subj="fipsIncompatibleCallout"
+      />
+      <EuiSpacer />
+    </>
+  ) : undefined;
+
+  const topContent =
+    securityCallout || fipsCallout ? (
+      <>
+        {securityCallout}
+        {fipsCallout}
+      </>
+    ) : undefined;
+
   return (
     <WithHeaderLayout
       leftColumn={headerLeftContent}
       rightColumn={headerRightContent}
       rightColumnGrow={false}
-      topContent={securityCallout}
+      topContent={topContent}
       tabs={headerTabs}
       tabsCss={`
         margin-left: calc(${getIconPanelWidth(theme.euiTheme.size.base, theme.euiTheme.size.xl)}px +

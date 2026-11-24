@@ -16,11 +16,13 @@ const setup = ({
   isWorkflowsAvailable = true,
   assertCanManage = jest.fn().mockResolvedValue(undefined),
   findByWorkflowExecutionId = jest.fn().mockResolvedValue(proposal),
+  assertActionProposable = jest.fn().mockResolvedValue(undefined),
 } = {}) => {
   const executeWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
   const createDirectly = jest.fn().mockResolvedValue(proposal);
   const { create, assertAvailable } = createProposalCreator({
-    getProposalsService: () => ({ findByWorkflowExecutionId, create: createDirectly } as never),
+    getProposalsService: () =>
+      ({ findByWorkflowExecutionId, create: createDirectly, assertActionProposable } as never),
     getWorkflowsApi: () => ({ isWorkflowsAvailable, executeWorkflow } as never),
     privileges: { assertCanManage } as never,
     wait: { timeoutMs: 20, intervalMs: 5 },
@@ -32,6 +34,7 @@ const setup = ({
     assertCanManage,
     findByWorkflowExecutionId,
     createDirectly,
+    assertActionProposable,
   };
 };
 
@@ -62,6 +65,7 @@ describe('createProposalCreator', () => {
         comment: 'Re-create them.',
         origin: 'nightshift',
       },
+      triggeredBy: 'proposals',
       waitForCompletion: false,
     });
   });
@@ -142,6 +146,74 @@ describe('createProposalCreator', () => {
     expect(params.confidence).toBe('medium');
   });
 
+  it('writes a gateless action proposal directly when asked for no gate', async () => {
+    const { create, executeWorkflow, createDirectly, assertCanManage } = setup();
+
+    await expect(
+      create({
+        ...input,
+        proposal: {
+          ...input.proposal,
+          gate: 'none',
+          category: 'tune',
+          actionWorkflowId: 'system-context-engine-apply-improvement',
+          actionInput: { improvementId: 'improvement-1' },
+          id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+        },
+      })
+    ).resolves.toEqual({ proposal });
+
+    expect(executeWorkflow).not.toHaveBeenCalled();
+    // Approving it starts a workflow, so Workflows has to be there for it.
+    expect(assertCanManage).toHaveBeenCalledWith(request);
+    expect(createDirectly).toHaveBeenCalledWith(
+      expect.objectContaining({
+        gate: 'none',
+        category: 'tune',
+        actionWorkflowId: 'system-context-engine-apply-improvement',
+        actionInput: { improvementId: 'improvement-1' },
+        id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      }),
+      { spaceId: 'default', request }
+    );
+  });
+
+  it('does not write a gateless action proposal when workflows are unavailable', async () => {
+    const { create, createDirectly } = setup({ isWorkflowsAvailable: false });
+
+    await expect(
+      create({
+        ...input,
+        proposal: {
+          ...input.proposal,
+          gate: 'none',
+          actionWorkflowId: 'system-context-engine-apply-improvement',
+        },
+      })
+    ).rejects.toThrow('Workflows are not available');
+    expect(createDirectly).not.toHaveBeenCalled();
+  });
+
+  it('passes an action and a caller-supplied id to the gate workflow', async () => {
+    const { create, executeWorkflow } = setup();
+
+    await create({
+      ...input,
+      proposal: {
+        ...input.proposal,
+        actionWorkflowId: 'system-alertzero-action-isolate',
+        actionInput: { hostId: 'host-1' },
+        id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      },
+    });
+
+    expect(executeWorkflow.mock.calls[0][0].inputs).toMatchObject({
+      actionWorkflowId: 'system-alertzero-action-isolate',
+      actionInput: { hostId: 'host-1' },
+      proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+    });
+  });
+
   it('creates a to-do for a user without Workflows available', async () => {
     const { create, createDirectly } = setup({ isWorkflowsAvailable: false });
 
@@ -173,5 +245,68 @@ describe('createProposalCreator', () => {
 
     await expect(create(input)).rejects.toThrow('Forbidden');
     expect(executeWorkflow).not.toHaveBeenCalled();
+  });
+
+  describe('with an action workflow', () => {
+    const withAction = {
+      ...input,
+      proposal: {
+        ...input.proposal,
+        actionWorkflowId: 'workflow-open-issue',
+        actionInput: { repo: 'kibana', title: 'Fix it' },
+      },
+    };
+
+    it('checks the action, then passes it to the gate', async () => {
+      const { create, executeWorkflow, assertActionProposable } = setup();
+
+      await create(withAction);
+
+      expect(assertActionProposable).toHaveBeenCalledWith(
+        'workflow-open-issue',
+        { repo: 'kibana', title: 'Fix it' },
+        'default',
+        request
+      );
+      expect(executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
+          inputs: expect.objectContaining({
+            actionWorkflowId: 'workflow-open-issue',
+            actionInput: { repo: 'kibana', title: 'Fix it' },
+          }),
+        })
+      );
+    });
+
+    it('starts no gate for an action the proposal could not run', async () => {
+      const { create, executeWorkflow } = setup({
+        assertActionProposable: jest.fn().mockRejectedValue(new Error('actionInput is invalid')),
+      });
+
+      await expect(create(withAction)).rejects.toThrow('actionInput is invalid');
+      expect(executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('refuses an action on a to-do, which the analyst carries out themselves', async () => {
+      const { create, executeWorkflow, createDirectly } = setup();
+
+      await expect(
+        create({ ...withAction, proposal: { ...withAction.proposal, category: 'todo' } })
+      ).rejects.toThrow('cannot run action workflow [workflow-open-issue]');
+      expect(executeWorkflow).not.toHaveBeenCalled();
+      expect(createDirectly).not.toHaveBeenCalled();
+    });
+
+    it('passes no action fields for a proposal without one', async () => {
+      const { create, executeWorkflow, assertActionProposable } = setup();
+
+      await create(input);
+
+      expect(assertActionProposable).not.toHaveBeenCalled();
+      const [{ inputs }] = executeWorkflow.mock.calls[0];
+      expect(inputs).not.toHaveProperty('actionWorkflowId');
+      expect(inputs).not.toHaveProperty('actionInput');
+    });
   });
 });

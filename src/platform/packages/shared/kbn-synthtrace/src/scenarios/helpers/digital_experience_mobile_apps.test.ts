@@ -8,17 +8,26 @@
  */
 
 import {
+  EVENT_APP_START,
+  EVENT_SESSION_START,
+  SPAN_SCREEN_LOAD,
+  edotReactNative,
   timerange,
+  type DeviceProfileId,
   type EdotReactNativeDocument,
   type EdotReactNativeSpanDocument,
   type OtelLogDocument,
   type Timerange,
 } from '@kbn/synthtrace-client';
-import { getDefaultSeed } from './digital_experience_apps';
+import { getDefaultSeed, sessionTimeOf } from './digital_experience_apps';
 import {
   DIGITAL_EXPERIENCE_MOBILE_APPS,
+  DIGITAL_EXPERIENCE_NATIVE_APPS,
+  MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION,
+  generateEdotNativeSessions,
   generateEdotReactNativeSessions,
   parseDigitalExperienceMobileScenarioOpts,
+  parseDigitalExperienceNativeScenarioOpts,
   type DigitalExperienceMobileApp,
   type DigitalExperienceMobileScenarioOpts,
 } from './digital_experience_mobile_apps';
@@ -58,8 +67,16 @@ const logsOf = (docs: EdotReactNativeDocument[]): OtelLogDocument[] =>
 const serviceOf = (doc: EdotReactNativeDocument) =>
   (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['service.name'];
 
+const PLATFORM_BY_OS_NAME: Readonly<Record<string, string>> = {
+  Android: 'android',
+  iOS: 'ios',
+  iPadOS: 'ios',
+};
+
 const platformOf = (doc: EdotReactNativeDocument) =>
-  (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['telemetry.sdk.name'];
+  PLATFORM_BY_OS_NAME[
+    String((isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['os.name'])
+  ];
 
 describe('digital experience mobile apps', () => {
   // A 30-minute run is enough for every app to show every signal, and shared by the tests
@@ -131,12 +148,12 @@ describe('digital experience mobile apps', () => {
 
     it('writes data of both platforms, and never as EDOT Browser', () => {
       const platforms = new Set(docs.map(platformOf));
-      expect([...platforms].sort()).toEqual(['android', 'iOS']);
+      expect([...platforms].sort()).toEqual(['android', 'ios']);
       docs.forEach((doc) => {
-        const language = (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.[
-          'telemetry.sdk.language'
-        ];
-        expect(language).not.toBe('webjs');
+        const resource = isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes;
+        expect(resource?.['telemetry.sdk.name']).toBe('opentelemetry');
+        expect(resource?.['telemetry.distro.name']).toBe('elastic');
+        expect(resource?.['telemetry.sdk.language']).not.toBe('webjs');
       });
     });
 
@@ -171,7 +188,7 @@ describe('digital experience mobile apps', () => {
 
     it('generates only one platform when asked to', () => {
       const iosDocs = collect({ platform: 'ios' });
-      expect(new Set(iosDocs.map(platformOf))).toEqual(new Set(['iOS']));
+      expect(new Set(iosDocs.map(platformOf))).toEqual(new Set(['ios']));
       // field-service-mobile is Android only
       expect(iosDocs.some((doc) => serviceOf(doc) === 'field-service-mobile')).toBe(false);
     });
@@ -317,6 +334,29 @@ describe('digital experience mobile apps', () => {
       expect(installationIds.size).toBe(1);
     });
 
+    it("takes the cellular rate of the installation's version", () => {
+      const weatherDemo = DIGITAL_EXPERIENCE_MOBILE_APPS.find(
+        ({ serviceName }) => serviceName === 'weather-demo-react-native'
+      );
+      if (!weatherDemo) {
+        throw new Error('weather-demo-react-native is missing');
+      }
+      const allCellular = {
+        ...weatherDemo,
+        versions: weatherDemo.versions.map((version) => ({
+          ...version,
+          health: { ...version.health, cellularRate: 1 },
+        })),
+      };
+      // Every log has the network type, except the `exception` span events
+      const networkTypes = new Set(
+        logsOf(collect({ apps: [allCellular] }))
+          .filter(({ event_name: eventName }) => eventName !== 'exception')
+          .map(({ attributes }) => attributes?.['network.connection.type'])
+      );
+      expect(networkTypes).toEqual(new Set(['cell']));
+    });
+
     it('keeps everything within the range', () => {
       const from = range.from.getTime();
       const to = range.to.getTime();
@@ -347,6 +387,332 @@ describe('digital experience mobile apps', () => {
       ];
       const sortKey = (doc: EdotReactNativeDocument) => JSON.stringify(doc);
       expect(split.map(sortKey).sort()).toEqual(whole.map(sortKey).sort());
+    });
+  });
+
+  describe('native apps', () => {
+    const collectNative = (timeRange: Timerange = range, scale = 1, from?: number) =>
+      generateEdotNativeSessions(timeRange, {
+        environment: 'test',
+        from: from ?? timeRange.from.getTime(),
+        scale,
+        platform: 'both',
+        seed: 'digital-experience-native-test',
+      }).flatMap((generator) =>
+        Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+      );
+
+    it('has an Android app, an iOS app and an app on both platforms, with three versions each', () => {
+      const platformsOf = ({ deviceWeights = {} }: DigitalExperienceMobileApp) => {
+        const left = Object.entries(deviceWeights)
+          .filter(([, weight]) => weight === 0)
+          .map(([id]) => edotReactNative.deviceProfiles[id as DeviceProfileId].platform);
+        return { android: !left.includes('android'), ios: !left.includes('ios') };
+      };
+      const platforms = DIGITAL_EXPERIENCE_NATIVE_APPS.map(platformsOf);
+      expect(platforms).toContainEqual({ android: true, ios: false });
+      expect(platforms).toContainEqual({ android: false, ios: true });
+      expect(platforms).toContainEqual({ android: true, ios: true });
+
+      DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ versions, native }) => {
+        expect(native).toBe(true);
+        expect(versions.length).toBeGreaterThanOrEqual(3);
+        const [newest, previous] = versions;
+        expect(Number(newest.health?.crashRate)).toBeGreaterThan(
+          Number(previous.health?.crashRate)
+        );
+        expect(Number(newest.health?.coldLaunch?.median)).toBeGreaterThan(
+          Number(previous.health?.coldLaunch?.median)
+        );
+      });
+    });
+
+    it('names a backend for the requests of every app', () => {
+      DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ model }) => {
+        const requests = model.screens.flatMap(
+          ({ requests: screenRequests = [], widgets = [] }) => [
+            ...screenRequests,
+            ...widgets.flatMap(({ request }) => (request ? [request] : [])),
+          ]
+        );
+        expect(requests.length).toBeGreaterThan(0);
+        requests.forEach(({ backend }) => expect(backend).toEqual(expect.any(String)));
+      });
+    });
+
+    it('only writes the proposed signals for the native apps', () => {
+      const nativeDocs = collectNative();
+      const eventNames = new Set(logsOf(nativeDocs).map(({ event_name: eventName }) => eventName));
+      expect(eventNames).toContain(EVENT_SESSION_START);
+      expect(eventNames).toContain(EVENT_APP_START);
+
+      const json = JSON.stringify(docs);
+      expect(json).not.toContain(EVENT_SESSION_START);
+      expect(json).not.toContain(SPAN_SCREEN_LOAD);
+    });
+
+    it('writes every session that starts in the run, from its start, the long ones included', () => {
+      const nativeDocs = collectNative();
+      const starts = logsOf(nativeDocs).filter(
+        ({ event_name: eventName }) => eventName === EVENT_SESSION_START
+      );
+      const minutes = (range.to.getTime() - FROM) / 60_000;
+      DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ serviceName, sessionsPerMinute }) => {
+        const ofApp = starts.filter((doc) => serviceOf(doc) === serviceName);
+        expect(ofApp).toHaveLength(sessionsPerMinute * minutes);
+      });
+      nativeDocs.forEach((doc) => {
+        expect(Number(doc['@timestamp'])).toBeGreaterThanOrEqual(FROM);
+        expect(Number(doc['@timestamp'])).toBeLessThan(range.to.getTime());
+      });
+    });
+
+    it('writes every document in live mode once the SDK sends it, crashes on the next launch', () => {
+      const start = range.from.getTime();
+      const end = start + 20 * 60_000;
+      const batchMs = 60_000;
+      const sentAt = (doc: EdotReactNativeDocument) =>
+        isSpan(doc)
+          ? Number(doc['@timestamp']) + (doc.duration ?? 0) / 1_000_000
+          : Math.max(Number(doc['@timestamp']), Number(doc.observed_timestamp ?? 0));
+      const batches = Array.from({ length: (end - start) / batchMs }, (_, i) => {
+        const batch = timerange(new Date(start + i * batchMs), new Date(start + (i + 1) * batchMs));
+        return { from: start + i * batchMs, docs: collectNative(batch, 1, start) };
+      });
+
+      const crashes = batches.flatMap(({ docs: batchDocs }) =>
+        logsOf(batchDocs).filter(({ event_name: eventName }) => eventName === 'app.crash')
+      );
+      expect(crashes.length).toBeGreaterThan(0);
+      batches.forEach(({ from, docs: batchDocs }) =>
+        batchDocs.forEach((doc) => {
+          expect(sentAt(doc)).toBeGreaterThanOrEqual(from);
+          expect(sentAt(doc)).toBeLessThan(from + batchMs);
+        })
+      );
+    });
+
+    it('keeps the end of every native session that has time to end within the run', () => {
+      // Native sessions last less than 2 hours, so the ones of the first 15 minutes of a
+      // 2-hour run end in it
+      const twoHours = timerange(range.from, new Date(FROM + 2 * 60 * 60_000));
+      const nativeLogs = logsOf(collectNative(twoHours, 0.5));
+      const sessionsWith = (name: string) =>
+        nativeLogs
+          .filter(({ event_name: eventName }) => eventName === name)
+          .map(({ attributes, '@timestamp': time }) => ({
+            sessionId: attributes?.['session.id'],
+            time: Number(time),
+          }));
+      const ended = new Set(sessionsWith('session.end').map(({ sessionId }) => sessionId));
+      const early = sessionsWith(EVENT_SESSION_START).filter(
+        ({ time }) => time < FROM + 15 * 60_000
+      );
+
+      expect(early.length).toBeGreaterThan(0);
+      early.forEach(({ sessionId }) => expect(ended).toContain(sessionId));
+    });
+
+    it('generates the apps it is given as native apps', () => {
+      const [reactNativeApp] = DIGITAL_EXPERIENCE_MOBILE_APPS;
+      expect(reactNativeApp.native).toBeUndefined();
+      const appDocs = generateEdotNativeSessions(range, {
+        environment: 'test',
+        from: FROM,
+        scale: 1,
+        platform: 'both',
+        seed: 'digital-experience-native-test',
+        apps: [reactNativeApp],
+      }).flatMap((generator) =>
+        Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+      );
+
+      expect(appDocs.length).toBeGreaterThan(0);
+      appDocs.forEach(({ scope }) => expect(scope?.name ?? '').not.toContain('react-native'));
+      expect(
+        appDocs.filter((doc) => isSpan(doc) && doc.name.startsWith('UIViewController'))
+      ).toEqual([]);
+    });
+
+    it('rolls the newest version of every app out over the run, without downgrades', () => {
+      const hours = 6;
+      // One full cycle of the installations after the rollout's deadline, so every one opens the app
+      const cycleHours = MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION / 60;
+      const run = timerange(range.from, new Date(FROM + (hours + cycleHours) * 60 * 60_000));
+      const starts = logsOf(collectNative(run, 0.25)).filter(
+        ({ event_name: eventName }) => eventName === EVENT_SESSION_START
+      );
+      DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ serviceName, versions }) => {
+        const [newest] = versions;
+        const ofApp = starts.filter((doc) => serviceOf(doc) === serviceName);
+        const newestShare = (fromHour: number, toHour: number) => {
+          const inWindow = ofApp.filter((doc) => {
+            const hour = (Number(doc['@timestamp']) - FROM) / (60 * 60_000);
+            return hour >= fromHour && hour < toHour;
+          });
+          const onNewest = inWindow.filter(
+            ({ resource }) => resource?.attributes?.['service.version'] === newest.serviceVersion
+          );
+          return onNewest.length / inWindow.length;
+        };
+        // Every installation takes part in the rollout, from its initial adoption to all of them
+        const initialAdoption = newest.rollout?.initialAdoption ?? 0;
+        expect(newestShare(0, 0.5)).toBeGreaterThan(initialAdoption - 0.15);
+        expect(newestShare(0, 0.5)).toBeLessThan(initialAdoption + 0.2);
+        expect(newestShare(5.5, hours)).toBeGreaterThan(0.85);
+        expect(newestShare(hours, hours + cycleHours)).toBe(1);
+
+        // An installation never goes back to an older version
+        const versionsByInstallation = new Map<unknown, string[]>();
+        [...ofApp]
+          .sort((a, b) => Number(a['@timestamp']) - Number(b['@timestamp']))
+          .forEach(({ resource }) => {
+            const installationId = resource?.attributes?.['app.installation.id'];
+            const seen = versionsByInstallation.get(installationId) ?? [];
+            versionsByInstallation.set(installationId, [
+              ...seen,
+              String(resource?.attributes?.['service.version']),
+            ]);
+          });
+        const order = versions.map(({ serviceVersion }) => serviceVersion);
+        versionsByInstallation.forEach((installed) => {
+          const indexes = installed.map((version) => order.indexOf(version));
+          indexes.slice(1).forEach((index, i) => expect(index).toBeLessThanOrEqual(indexes[i]));
+        });
+      });
+    });
+
+    it("points session.previous_id to the installation's previous session in the run", () => {
+      // Longer than an installation cycle, so that the installations come back
+      const run = timerange(range.from, new Date(FROM + 2 * 60 * 60_000));
+      const starts = logsOf(collectNative(run, 0.25))
+        .filter(({ event_name: eventName }) => eventName === EVENT_SESSION_START)
+        .sort((a, b) => Number(a['@timestamp']) - Number(b['@timestamp']));
+      const startsByInstallation = new Map<unknown, OtelLogDocument[]>();
+      starts.forEach((start) => {
+        const installationId = start.resource?.attributes?.['app.installation.id'];
+        startsByInstallation.set(installationId, [
+          ...(startsByInstallation.get(installationId) ?? []),
+          start,
+        ]);
+      });
+
+      const returning = [...startsByInstallation.values()].filter(({ length }) => length > 1);
+      expect(returning.length).toBeGreaterThan(0);
+      startsByInstallation.forEach(([first, ...later]) => {
+        // The run doesn't have the session before an installation's first one
+        expect(first.attributes).not.toHaveProperty('session.previous_id');
+        later.forEach((start, i) => {
+          const previousSessionId = (i === 0 ? first : later[i - 1]).attributes?.['session.id'];
+          expect(previousSessionId).toEqual(expect.stringMatching(/.+/));
+          expect(start.attributes?.['session.previous_id']).toBe(previousSessionId);
+        });
+      });
+    });
+
+    it('runs the newest version everywhere for a rollout without hours', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, ...older] = app.versions;
+      const immediate = {
+        ...app,
+        versions: [{ ...newest, rollout: { initialAdoption: 0, hours: 0 } }, ...older],
+      };
+      // The run starts on the tick of a session, which therefore starts with the rollout
+      const perMinute = app.sessionsPerMinute;
+      const from = sessionTimeOf(Math.ceil((perMinute * FROM) / 60_000), perMinute);
+      const immediateLogs = logsOf(
+        generateEdotNativeSessions(timerange(new Date(from), range.to), {
+          environment: 'test',
+          from,
+          scale: 1,
+          platform: 'both',
+          seed: 'digital-experience-native-test',
+          apps: [immediate],
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+        )
+      );
+
+      const timesOfStarts = immediateLogs
+        .filter(({ event_name: eventName }) => eventName === EVENT_SESSION_START)
+        .map((doc) => Number(doc['@timestamp']));
+      expect(timesOfStarts).toContain(from);
+      expect(
+        new Set(immediateLogs.map(({ resource }) => resource?.attributes?.['service.version']))
+      ).toEqual(new Set([newest.serviceVersion]));
+    });
+
+    it('keeps the sessions in progress of apps that share a service name apart', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const withVersion = (serviceVersion: string, appId: string) => ({
+        ...app,
+        appId,
+        versions: [{ ...app.versions[0], serviceVersion, rollout: undefined }],
+      });
+      const first = withVersion('9.1.0', 'com.example.first');
+      const second = withVersion('9.2.0', 'com.example.second');
+      // Two batches that follow each other, as in live mode
+      const run = (environment: string, apps: DigitalExperienceMobileApp[]) =>
+        [FROM, FROM + 5 * 60_000].flatMap((batchFrom) =>
+          logsOf(
+            generateEdotNativeSessions(
+              timerange(new Date(batchFrom), new Date(batchFrom + 5 * 60_000)),
+              {
+                environment,
+                from: FROM,
+                scale: 1,
+                platform: 'both',
+                seed: 'digital-experience-native-shared-name',
+                apps,
+              }
+            ).flatMap((generator) =>
+              Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+            )
+          )
+        );
+      const describeLogs = (runLogs: OtelLogDocument[], serviceVersion: string) =>
+        runLogs
+          .filter(({ resource }) => resource?.attributes?.['service.version'] === serviceVersion)
+          .map((doc) => `${doc['@timestamp']}:${doc.event_name}`)
+          .sort();
+
+      const together = run('together', [first, second]);
+      expect(describeLogs(together, '9.1.0')).toEqual(describeLogs(run('first', [first]), '9.1.0'));
+      expect(describeLogs(together, '9.2.0')).toEqual(
+        describeLogs(run('second', [second]), '9.2.0')
+      );
+    });
+
+    it('rejects a rollout of a version other than the newest', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, previous, ...older] = app.versions;
+      const olderRollout = {
+        ...app,
+        versions: [
+          { ...newest, rollout: undefined },
+          { ...previous, rollout: { initialAdoption: 0.5, hours: 1 } },
+          ...older,
+        ],
+      };
+      expect(() =>
+        generateEdotNativeSessions(range, {
+          environment: 'test',
+          from: FROM,
+          scale: 1,
+          platform: 'both',
+          seed: 'digital-experience-native-test',
+          apps: [olderRollout],
+        })
+      ).toThrow(`${app.serviceName}: only the newest version can roll out`);
+    });
+
+    it('parses platform, scale and seed only', () => {
+      expect(
+        parseDigitalExperienceNativeScenarioOpts({ platform: 'ios', scale: '2', seed: 7 }, FROM)
+      ).toMatchObject({ platform: 'ios', scale: 2, seed: '7' });
+      expect(() =>
+        parseDigitalExperienceNativeScenarioOpts({ withManualSpans: true }, FROM)
+      ).toThrow('Unknown scenarioOpts: withManualSpans');
     });
   });
 });

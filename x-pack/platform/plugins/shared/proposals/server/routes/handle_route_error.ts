@@ -11,6 +11,7 @@ import {
   ProposalForbiddenError,
   ProposalInvalidActionInputError,
   ProposalInvalidGateError,
+  ProposalInvalidIdError,
   ProposalNotFoundError,
 } from '../services/errors';
 
@@ -33,7 +34,8 @@ export const handleRouteError = (
   }
   if (
     error instanceof ProposalInvalidActionInputError ||
-    error instanceof ProposalInvalidGateError
+    error instanceof ProposalInvalidGateError ||
+    error instanceof ProposalInvalidIdError
   ) {
     return response.badRequest({ body: { message: error.message } });
   }

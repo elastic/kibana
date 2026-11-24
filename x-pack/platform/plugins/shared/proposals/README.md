@@ -62,7 +62,7 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 ### Model
 
 - A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-proposals` and points at the conversation it belongs to.
-- An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
+- An **action proposal** additionally references an **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow. The workflow is usually a managed install, but can also be one the space's users wrote: the gate is a managed run, and a managed parent may execute the space's own workflows.
 - A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
 - Every proposal declares an **`origin`**: which feature produced it, so that feature's queue can show it and another's cannot. It is a closed enum, required, and fixed for the whole revision chain. See "Origin is a closed routing key" below.
 - Every proposal carries a **`title`**: a short plain-text label, distinct from the markdown `comment`. Required on the record and resolved on write — the caller's own title, else the action's name, else the `DEFAULT_PROPOSAL_TITLE` constant — so a reader renders the field rather than re-deriving a fallback chain. Deliberately untranslated, like the `comment` beside it: both are stored English.
@@ -134,10 +134,22 @@ An analyst who marked one by mistake can take it back with **Mark as not applied
 A to-do runs nothing and nobody waits on its outcome, so it carries no gate workflow at all. `ProposalsService` writes it and decides it directly.
 
 - **`gate: 'workflow' | 'none'` on the document** says which lifecycle owns the proposal. It is set once by `create()` and never changes, no request body accepts it, and only an explicit `'none'` is read as gateless — a document written before the field existed, like anything else, takes the gated path. Gatelessness is never inferred from `category`, `actionWorkflowId` or a missing `workflowExecutionId`: a gated proposal without its execution id stays a fail-closed error.
-- **The creator picks it.** `create_proposal.ts` — behind the start contract's `createProposal` and the `proposals.create` tool — sends `category: 'todo'` down the direct path and everything else through `system-create-proposal` as before. `create()` refuses the combinations that would strand a record: a gated proposal without an execution id, and a gateless one carrying an action, an execution id, a deadline or any other category.
-- **`releaseGate()` keeps its name and branches inside.** For a gateless proposal it writes `decision`, `status: no_action`, `decidedBy` (resolved from the request), `decisionMode: manual` and the annotations in a single sequence-number-guarded write, with no resume and no `gateReleasedAt`. The first writer wins; the second gets a 409. In-process callers such as `InvestigationStatusService.setStatus` therefore dismiss a pending to-do exactly as they do a gated proposal.
-- **Workflow steps cannot touch one.** `update()` — the entry point behind `proposals.updateProposal` and `proposals.settleIncompleteProposal` — refuses a gateless proposal; the direct path writes through the private `applyUpdate()` instead.
+- **The creator picks it.** `create_proposal.ts` — behind the start contract's `createProposal` and the `proposals.create` tool — takes an optional `gate`. Omitted, it sends `category: 'todo'` down the direct path and everything else through `system-create-proposal` as before; `gate: 'none'` sends any proposal down the direct path (see [Gateless proposals may carry an action](#gateless-proposals-may-carry-an-action)). The `proposals.createProposal` step takes the same `gate` input, and with `none` records no execution on the proposal. `create()` refuses the combinations that would strand a record: a gated proposal without an execution id, and a gateless one carrying an execution id or a deadline. A `todo` still refuses an action, gated or not.
+- **`releaseGate()` keeps its name and branches inside.** For a gateless proposal with nothing to run — every dismissal, and the approval of a proposal with no action — it writes `decision`, `status: no_action`, `decidedBy` (resolved from the request), `decisionMode: manual` and the annotations in a single sequence-number-guarded write, with no resume and no `gateReleasedAt`. The first writer wins; the second gets a 409. In-process callers such as `InvestigationStatusService.setStatus` therefore dismiss a pending to-do exactly as they do a gated proposal.
+- **Workflow steps cannot touch one.** `update()` — the entry point behind `proposals.updateProposal` and `proposals.settleIncompleteProposal` — refuses a gateless proposal; the direct path writes through the private `applyUpdate()` instead. The one exception is the resolve run a gateless action proposal's approval started, below. Both steps pass the calling execution, which is how `update()` tells that run from any other workflow: the release mark alone says an approval happened, not who is writing, and `settleIncompleteProposal` skips `manage_proposals`.
 - **Consequences.** A to-do has no deadline, so it stays `pending` until someone decides it or its investigation is closed; it does not appear in the platform Inbox, which lists parked `waitForApproval` steps; deciding it needs only `manage_proposals`, not Workflows `execute`; and it emits no workflows HITL audit events. To-dos created before this change keep their gate and deadline.
+
+#### Gateless proposals may carry an action
+
+A producer that does not want an execution parked per proposal — Context Engine's feedback loop, which can raise many per run — creates the proposal with `gate: 'none'` and an `actionWorkflowId`. `create()` refuses it unless the action could run, with the same `ProposalsService.assertActionProposable` the creator runs before starting a gate: a workflow the space does not have or cannot read, a disabled one, one with no valid `consts.actionMetadata`, and an input its manual trigger does not accept are all refused. A gated proposal tolerates an unreadable workflow (it is gated for it, and the gate fails if the action cannot start); approving a gateless one starts the action directly, so nothing would catch it later.
+
+The rule does not change: **an action always runs inside `system-resolve-proposal`, as the decider, after the privilege check.** Only what starts that workflow does. Behind a gate, the gate starts it once it is answered; for a gateless proposal, `releaseGate()` starts it directly when the proposal is approved:
+
+1. **Mark.** After the same refusals as the gated path (undecided, `pending`, the shown `actionInput` still matches, an approver the decision can be attributed to), plus one for a superseded revision (with no shared gate, the decision would land on a row nothing reads), `gateReleasedAt` and the rationale are written under the loaded sequence number, so the first approver wins and `revise()` is refused from then on.
+2. **Dispatch.** `system-resolve-proposal` is started with `executeWorkflow`, as the approver's request and with `triggeredBy: 'proposals'` (so its inputs stay literal), with `approved: true` and the approver's username as `decidedBy`. It is the same workflow, unchanged: it checks the approver's privileges, adopts the live revision, writes `approved` + `executing`, runs the action and settles `succeeded` or `failed`. If the dispatch throws, the mark is reverted and the error surfaces, since nothing would ever decide the proposal otherwise.
+3. **Record.** The run's id is stored as `resolveExecutionId`, so settle-on-read can follow it. The run writes to the same record and either write can land first — Task Manager can claim the run before this write's refresh completes, and started from inside Task Manager the run executes inline and has already finished. So this write reloads and retries on a conflict, and `update()` re-applies the run's write when the record write is the only thing that landed under it, rather than failing the run. Both reloads wait, with a short backoff, until the write that won is searchable: `load()` searches, and a search can return the very version that just conflicted until the index refreshes. The record is skipped once the mark it belongs to is gone. Best effort — an unrecorded run still decides the proposal, and a read lifts the mark of one still undecided five minutes after the approval, since no run is on record to follow up.
+
+The approval answers before the decision lands, as it does behind a gate. While the mark is set, `update()` accepts writes only from the resolve run — the recorded `resolveExecutionId`, or, until it is recorded, the run of `system-resolve-proposal` that this plugin started (`triggeredBy: 'proposals'`, which no route lets a user set) with this mark as its `releasedAt` input, so a run a user started and a late run of an earlier, lifted approval are both refused. The run's first accepted write records it as `resolveExecutionId` if the approval has not, so from then on only that run can write, and settle-on-read can follow it even when the approval's own record gave up. `releaseGate()` refuses every other decision — a second approval would start a second run, and a dismissal would race the first one's decision. What the gated path does on a failed action — clone the proposal and park again — has no gateless counterpart yet: a gateless action proposal that fails stays `approved` + `failed`, and `clone()` refuses it.
 
 Note the consequence for an undecided proposal: `expired` is its *only* terminal status, since every execution state requires an approval. A malfunction before anyone decided therefore settles as "no decision was reached" rather than as a failure.
 
@@ -202,8 +214,8 @@ executed, exactly as one landing at any point during the park would be. Those
 surfaces answer an execution rather than a revision, so there is no shown
 revision to hold them to.
 
-Every stored proposal carries `rootProposalId` and `revision`. The plugin is
-unshipped, so legacy records without these fields are not supported.
+Every stored proposal carries `rootProposalId` and `revision`, which `create()`
+writes from the first version.
 
 `getLatestRevisions` is the same read for many chains at once, for an in-process
 caller that already holds many root ids, such as AlertZero's Alert Triage. It
@@ -218,8 +230,11 @@ free would create a duplicate.
 
 ### Caller-supplied ids
 
-`create()` takes an optional `id`, and a UUID is required. Without one it mints a
-random id, exactly as before. With one, the proposal is created under that id with
+`create()` takes an optional `id`: any id the routes can reach (1 to 256 characters,
+and not `.` or `..`, which a browser resolves away as path segments). The
+`proposals.createProposal` step's `proposalId` takes only a UUID. Without one it mints a
+random id, exactly as before. An id is unique across spaces, not within one, so a caller
+that derives it should derive it from the space too. With one, the proposal is created under that id with
 `op_type: 'create'`, so two callers that derive the same id from the same thing meet
 at the same document and Elasticsearch decides which one creates it, with no
 check-then-create window in application code.
@@ -285,7 +300,7 @@ flowchart TB
     resolve -->|"workflow.execute"| catalog
 ```
 
-Three boundaries are worth stating outright. `ProposalsService` is the **only** writer of the index — the steps and the routes both go through it, and there is no second path. The solution plugin owns no storage: it contributes a Worker and a UI, and reaches the record only through the HTTP API. And **the gate workflow is the only writer of a decision for a gated proposal**: the routes release the gate, and the child it resolves each answer in records what was decided. A gateless proposal — a to-do, see [To-dos are gateless](#to-dos-are-gateless) — has no gate to funnel through, so the service writes its decision itself, synchronously, in the same `releaseGate()` call.
+Three boundaries are worth stating outright. `ProposalsService` is the **only** writer of the index — the steps and the routes both go through it, and there is no second path. The solution plugin owns no storage: it contributes a Worker and a UI, and reaches the record only through the HTTP API. And **the gate workflow is the only writer of a decision for a gated proposal**: the routes release the gate, and the child it resolves each answer in records what was decided. A gateless proposal — see [To-dos are gateless](#to-dos-are-gateless) — has no gate to funnel through. With nothing to run, the service writes its decision itself, synchronously, in the same `releaseGate()` call; an approved action starts the same child directly, which records the decision as it would behind a gate. Either way, **an action always runs inside `system-resolve-proposal`, as the decider, after the privilege check.**
 
 That last one is the point of the design. Every resume surface — this API, the platform's own resume route, the Inbox, Agent Builder — funnels through the same parked gate, so a check and a write placed behind it cover all of them at once. Writing the decision in the approve route instead would mean only that one route ever recorded it.
 
@@ -326,10 +341,15 @@ sequenceDiagram
     Note over AW: Runs under the analyst's API key,<br/>so the result is attributed to them.
     AW-->>R: output
     R->>S: proposals.updateProposal(succeeded)
+    S->>I: status=succeeded, actionExecutionId=<the action's run>
     R-->>G: resolution: settled
 ```
 
 Dismissal follows the same shape down the gate's negative branch, so no action runs, and settles at `dismissed` + `no_action`.
+
+**`actionExecutionId` links what actually ran.** When the resolve run settles an action as `succeeded` or `failed`, `proposals.updateProposal` passes its own execution id, and the service stamps the newest child of that run whose workflow is the proposal's `actionWorkflowId`. The read runs as the resolve run's identity (the approver, or the Worker under autonomy). It is best-effort: if the run cannot be read, the settle is still written and only the link is missing. A cloned retry starts without one; the failed original keeps the link to its own run.
+
+`ApprovalContent` (`@kbn/proposals-ui`) shows every action proposal's workflow as a link to the Workflows app, its `actionInput` as collapsed JSON under **Input parameters**, and, once `actionExecutionId` is set, a **View execution** link. So the approver sees which workflow runs and with what input, and afterwards where to look for what it did.
 
 **The decision is asynchronous.** The resume call returns before the post-gate steps run, so the route's response body still describes an undecided proposal. Callers must invalidate and refetch rather than trust it — `useApproveProposal` and `useDismissProposal` both do.
 
@@ -370,7 +390,7 @@ Conditions use a single `and` or a single comparison throughout. Liquid has no o
 | `proposals.cloneProposal` | manage | Fails the step |
 | `proposals.checkDecidePrivileges` | manage | **Returns `false`** |
 
-`settleIncompleteProposal` deliberately skips `manage_proposals`: gate expiry, attempt-budget exhaustion, and the workflow-level fallback may run under a denied resumer's API key, and `updateProposal` would fail the settle. It adopts the live head, then writes `failed` or `expired` (explicit status, or discriminated from whether the record already has a decision).
+`settleIncompleteProposal` deliberately skips `manage_proposals`: gate expiry, attempt-budget exhaustion, and the workflow-level fallback may run under a denied resumer's API key, and `updateProposal` would fail the settle. In exchange it settles only a proposal its own run owns: a gated proposal whose `workflowExecutionId` is the calling execution (revisions and retries carry their gate's), or a gateless one from its resolve run. `updateProposal`, which checks the privilege, may write to any gated proposal in the space, which is how a Worker expires proposals it raised in an earlier run. It adopts the live head, then writes `failed` or `expired` (explicit status, or discriminated from whether the record already has a decision).
 
 Each failure mode gets its own `ExecutionError.type` (`PermissionError`, `ConflictError`, `ExpiredError`, `NotFoundError`, `ValidationError`, `ApiError`), because the type is the only part of an error a workflow can branch on — `ExecutionError` carries just `{ type, message, details? }`, and all three timeout sources already share `TimeoutError`.
 
@@ -435,9 +455,9 @@ Omitting an optional input is safe. A Liquid template for an absent input still 
 
 ### How an agent creates a proposal
 
-The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`; the `proposals` tool namespace is reserved for built-in tools in `@kbn/agent-builder-common`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, and `category`. It takes no `actionWorkflowId`: the analyst carries the action out and approves or dismisses it — or, for a `todo` proposal, marks it as applied (see [To-do proposals](#to-do-proposals)).
+The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`; the `proposals` tool namespace is reserved for built-in tools in `@kbn/agent-builder-common`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, `category`, `actionWorkflowId` and `actionInput`. Without `actionWorkflowId` the analyst carries the action out and approves or dismisses it — or, for a `todo` proposal, marks it as applied (see [To-do proposals](#to-do-proposals)). With it, approving runs that action workflow as the approver; the workflow and its input are checked (`ProposalsService.assertActionProposable`) before the gate starts, so a workflow the space does not have or an input it refuses fails the call instead of the gate. A `todo` cannot carry an action.
 
-- **It goes through the gate like any Worker, unless it is a to-do.** For any category other than `todo` the tool starts `system-create-proposal` with `workflowsManagement.management.executeWorkflow`, as the caller's request, with the conversation id of the innermost agent on the run stack — a decision that executes an action is only ever recorded behind its gate. A `todo` is written straight through `ProposalsService.create` with `gate: 'none'` and answered synchronously, so the tool returns the proposal id with no `workflow_execution_id`.
+- **It goes through the gate like any Worker, unless it is a to-do.** For any category other than `todo` the tool starts `system-create-proposal` with `workflowsManagement.management.executeWorkflow`, as the caller's request, with the conversation id of the innermost agent on the run stack. The tool takes no `gate`, so it cannot create a gateless action proposal. A `todo` is written straight through `ProposalsService.create` with `gate: 'none'` and answered synchronously, so the tool returns the proposal id with no `workflow_execution_id`.
 - **The card is attached by the gate's create step**, through the public attachment client (`render_inline: true`), not through the run's attachment state. That write needs the caller to own the conversation, which holds for an investigation run started by its owner; otherwise the proposal is still created and only the card is missing, as for any Worker. Because the attachment is written out of band, the agent does not see its id in the same turn; the card is shown to the analyst all the same.
 - **It waits briefly for the proposal.** It polls `findByWorkflowExecutionId` for up to 5 seconds and returns `{ acknowledged, proposal_id, title, status, workflow_execution_id }`. If the create step has not run by then, it returns `{ acknowledged, workflow_execution_id, note }` and tells the agent not to create the proposal again.
 - **Cost:** each gated call leaves one gate execution parked (52-week sentinel timeout) until the analyst decides or the proposal expires (72h default), the same as every Worker proposal. A to-do parks nothing.
@@ -456,6 +476,14 @@ An action workflow is an ordinary managed workflow that:
 Rule 3 is the non-obvious one and the easiest to get wrong: the gate passes exactly one key, `actionInput`. An action that declares `name`, `query` and `index` as top-level inputs will receive none of them. Declare them as properties of `actionInput` instead, and mark the ones that define the action's scope `required` — a default that matches everything is a demo shortcut, not a catalog entry.
 
 See `definitions/alertzero/actions/action_create_detection_rule.yaml` for a worked example.
+
+A user can author one too, in the Workflows app: the same four rules apply, and the workflow lives in their space instead of the global one. Declare `approvalPolicy: always-gate` so it never runs without a person approving it; Nightshift's findings recorder only lists user-authored actions that do. Keep user-authored actions to low-harm ones (opening a case or an issue, paging someone) for now: the workflow and its input are validated when the proposal is created, not again when it is approved, and nothing deduplicates the same action proposed from two conversations.
+
+### The action catalog
+
+`ProposalsPluginStart.listActions(spaceId, request, { categories?, managedFilter? })` lists the action workflows a space can propose — every workflow tagged `action` with a valid `consts.actionMetadata` — as `ActionCatalogEntry` (`@kbn/proposals-common`): the workflow id, its metadata, and the JSON Schema of its manual trigger inputs, so an agent can fill `actionInput` without reading the YAML. It reads as the request's user, so it lists only what they can read. Definitions with invalid metadata are skipped with a warning.
+
+`managedFilter` picks which workflows: `managed` (the default) for the actions solutions install, `unmanaged` for the ones the space's users wrote, `all` for both. AlertZero lists the managed ones; Nightshift's findings recorder lists only the unmanaged ones that declare `approvalPolicy: always-gate`, so it never proposes another solution's actions, nor one that could run unapproved.
 
 ### API
 
@@ -484,7 +512,7 @@ A recently expired proposal *does* reach a closed queue, through `decidedWithinH
 
 They do make **one narrow write**, because `waitForApproval` reconstructs its resume payload and discards everything but the boolean:
 
-```214:220:src/platform/plugins/shared/workflows_execution_engine/server/step/wait_for_approval_step/wait_for_approval_step.ts
+```214:220:x-pack/platform/plugins/shared/workflows_execution_engine/server/step/wait_for_approval_step/wait_for_approval_step.ts
       transformResumeInput: (input, respondedBy) => {
         const approved = input?.approved;
         return {
@@ -508,6 +536,7 @@ A cancelled or timed-out gate execution runs no handler, so nothing in the workf
 - **The deadline alone never settles.** A live gate expires its own proposal at the deadline, and a decision released just before the deadline may still be on its way to the gate, whose write would conflict with an `expired` written first and lose an approval the route already answered. `releaseGate` refuses a decision past the deadline before reading the gate, but writes nothing.
 - **A gate that cannot be read is left alone.** An execution that is missing, or that the caller cannot read, settles nothing.
 - **It is best effort.** Every settle goes through `update()`, so its guards decide a race, and a lost race or a failed lookup is logged rather than thrown. A read never fails because of a settle.
+- **A gateless action proposal is followed through its resolve run.** Its `resolveExecutionId` is read in the same bulk read. That run never parks, so ending is not itself the problem — only ending with the proposal unsettled is. An `executing` proposal is settled as `failed`. A `pending` one, which the run refused or crashed before deciding, has its mark, rationale and `resolveExecutionId` cleared so it can be decided again, keeping the mark as `liftedGateReleasedAt` so the approver's UI can tell this read from one that predates its approval (a later approval's mark is always stamped after it, whatever the instance's clock says); it is never expired, since nothing else would expire a gateless proposal. A mark naming a different run belongs to a later approval and is left alone. A `pending` proposal whose mark names no run at all — recording gave up — has its mark lifted the same way once it is five minutes old; a run that turns up after that does not carry the current mark, if there is one, and is refused. `releaseGate()` runs this settle first on a marked gateless proposal, so a refused approver's mark does not turn the next one away.
 
 What follows from settling on read:
 
@@ -519,7 +548,8 @@ What follows from settling on read:
 ### Invariants worth preserving
 
 - **A gated proposal's decision is written behind the gate, by the child that runs as the decider.** Every resume surface funnels through the gate, so one write there covers them all; a write in the approve route would only ever cover that route. Written by the gate itself, it would check and attribute the gate's identity, which may be the caller's service account.
-- **A gateless proposal's decision is one guarded write in `releaseGate()`.** No workflow writes it: `update()` refuses a gateless proposal, and the service goes through the same `applyUpdate()` guards the gate's writes pass. There is no gate to funnel through, so the single in-service branch is what covers every surface.
+- **A gateless proposal's decision is one guarded write in `releaseGate()`, unless there is an action to run.** No other workflow writes it: `update()` refuses a gateless proposal, and the service goes through the same `applyUpdate()` guards the gate's writes pass. There is no gate to funnel through, so the single in-service branch is what covers every surface. An approved action is the exception, and only so that it keeps the gated path's guarantees: the decision is written by the `system-resolve-proposal` run `releaseGate()` started as the approver, and `update()` accepts it only while the release mark says that run owns the proposal.
+- **An action always runs inside `system-resolve-proposal`, as the decider, after the privilege check.** Gated or not, nothing else starts one.
 - **No decision is written before the resume, on the gated path.** What is written is the release mark, which `revise()` refuses, and the dismiss reason and rationale, which the gate cannot carry; all three are reverted when the engine turns the resume away. The one other write is settling a proposal whose gate is gone, which is refused rather than resumed.
 - **The privilege check precedes every read and write on the answered path.** The chain resolve reads the proposal on the resumer's behalf, so it waits for the check too; an unauthorized resumer is re-parked before anything is read for it. Gate timeout, attempt-budget exhaustion, and the workflow-level fallback settle through `settleIncompleteProposal`, which skips the privilege check so a denied resumer's API key cannot strand the record. On the answered path, a write that failed before the check would leave the gate spent and the proposal stranded.
 - **A settled status cannot move and a decision cannot be overwritten.** Two independent guards, because the two axes settle independently.

@@ -12,7 +12,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { AvailabilityService } from './availability_service';
 
-interface IScenario {
+interface Scenario {
   flagEnabled?: boolean;
   projectType?: 'observability' | 'security';
   tierAvailable?: boolean;
@@ -26,7 +26,7 @@ function createService({
   tierAvailable = true,
   hasEnterpriseLicense = true,
   licenseActive = true,
-}: IScenario = {}) {
+}: Scenario = {}) {
   const core = coreMock.createStart();
   core.featureFlags.getBooleanValue$.mockReturnValue(of(flagEnabled));
   core.pricing.isFeatureAvailable.mockReturnValue(tierAvailable);

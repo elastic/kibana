@@ -23,3 +23,23 @@ services:
     ready: |
       until curl -sf -o /dev/null http://localhost:5601/api/status; do sleep 5; done
       curl -sf -o /dev/null http://localhost:5601/login
+
+# River repairs failures of these checks on pull requests labelled
+# `river:babysit`.
+babysit:
+  checks:
+    - kibana-ci
+
+network:
+  allowed:
+    - cdn.cypress.io
+    - cdn.playwright.dev
+    - download.cypress.io
+    - epr.elastic.co
+    - github.com
+    - googlechromelabs.github.io
+    - playwright.download.prss.microsoft.com
+    - raw.githubusercontent.com
+    - registry.npmjs.org
+    - release-assets.githubusercontent.com
+    - storage.googleapis.com

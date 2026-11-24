@@ -190,6 +190,14 @@ export const proposalSchema = lazySchema(() =>
     actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
     /** Inputs for the action workflow. Frozen once the proposal is decided. */
     actionInput: boundedActionInput.optional(),
+    /**
+     * The action workflow's own execution, stamped when the run that executed
+     * it settles the proposal as `succeeded` or `failed`, so a reader can link
+     * to what actually ran. Absent until then, on a proposal with no action,
+     * and whenever that run could not be read back — best-effort, never a
+     * reason to fail the settle.
+     */
+    actionExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
 
     status: proposalStatusSchema,
     /** Absent while the proposal is still awaiting a human. */
@@ -264,6 +272,19 @@ export const proposalSchema = lazySchema(() =>
      * about who decided or how.
      */
     gateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    /**
+     * The `system-resolve-proposal` run that approving a gateless action proposal
+     * started, so a run that ends without settling the proposal can be followed
+     * up on read. Absent on a gated proposal, whose gate starts that run itself.
+     */
+    resolveExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
+     * The `gateReleasedAt` of the last gateless approval whose resolve run
+     * ended without deciding the proposal, and whose mark was lifted so it can
+     * be decided again. Lets the approver tell its own approval was lifted
+     * apart from a read that predates it.
+     */
+    liftedGateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
     createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
     createdBy: proposalUserSchema.optional(),
