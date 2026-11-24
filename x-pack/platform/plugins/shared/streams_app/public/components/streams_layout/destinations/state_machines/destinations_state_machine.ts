@@ -368,9 +368,11 @@ export const destinationsStateMachine = setup({
       }
       enqueue.assign({ destinationDetailRefs, destinationDetailViewerIds });
     }),
+    // The previous indices are of another range or unit, so they aren't kept past a failed reload.
     storeResolvedIndicesError: assign(({ event }) =>
       event.type === 'xstate.error.actor.loadResolvedIndices'
         ? {
+            resolvedIndicesByDestination: new Map(),
             resolvedIndicesError: {
               message: getFormattedError(event.error).message,
               forbidden: isHttpFetchError(event.error) && event.error.body?.statusCode === 403,

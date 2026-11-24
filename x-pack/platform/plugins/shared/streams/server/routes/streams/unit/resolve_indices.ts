@@ -7,6 +7,7 @@
 
 import { notFound } from '@hapi/boom';
 import { isNotFoundError } from '@kbn/es-errors';
+import { bytePartition } from '@kbn/std';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import {
   isEnabledFailureStore,
@@ -62,13 +63,15 @@ const toResolvedIndexHealth = (
   return health === 'green' || health === 'yellow' || health === 'red' ? health : undefined;
 };
 
-const chunkNames = (names: string[]): string[][] => {
-  const chunks: string[][] = [];
-  for (let index = 0; index < names.length; index += MAX_RESOLVE_INDEX_PATTERNS) {
-    chunks.push(names.slice(index, index + MAX_RESOLVE_INDEX_PATTERNS));
-  }
-  return chunks;
-};
+// The names go in the request line, so a chunk is bounded by its length as well as its count.
+const chunkNames = (names: string[]): string[][] =>
+  bytePartition(names).flatMap((byteChunk) => {
+    const chunks: string[][] = [];
+    for (let index = 0; index < byteChunk.length; index += MAX_RESOLVE_INDEX_PATTERNS) {
+      chunks.push(byteChunk.slice(index, index + MAX_RESOLVE_INDEX_PATTERNS));
+    }
+    return chunks;
+  });
 
 export const resolveUnitIndicesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/unit/{id}/_resolve_indices',

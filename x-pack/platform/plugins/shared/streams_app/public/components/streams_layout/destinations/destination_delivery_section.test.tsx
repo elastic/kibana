@@ -374,6 +374,18 @@ describe('DestinationDeliveryView', () => {
       expect(documents.querySelector('[role="progressbar"]')).toBeInTheDocument();
     });
 
+    it('show the peak rate as loading while the series reloads, as the one shown is of the previous range', () => {
+      renderView({
+        loading: true,
+        value: entryWith({ ...noFailures, series: twoBuckets }),
+        totals: { documents: written },
+      });
+
+      const peak = screen.getByTestId('streamsDestinationPeakDeliveryRate');
+      expect(peak).not.toHaveTextContent('docs/sec');
+      expect(peak.querySelector('[role="progressbar"]')).toBeInTheDocument();
+    });
+
     it('are unknown, not zero, when not known', () => {
       renderView({
         value: entryWith(noFailures),

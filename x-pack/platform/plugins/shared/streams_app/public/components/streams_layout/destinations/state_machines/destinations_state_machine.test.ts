@@ -282,6 +282,24 @@ describe('destinationsStateMachine', () => {
     expect(actor.getSnapshot().context.resolvedIndicesByDestination.size).toBe(0);
   });
 
+  it('drops the previous indices when the reload fails, as they are of another range', async () => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    fetch.mockResolvedValueOnce({
+      destinations: {
+        'es-1': { indices: [{ name: 'logs-old', is_data_stream: false }] },
+      },
+    });
+    actor.send({ type: 'resolvedIndices.reload' });
+    await waitFor(actor, (snapshot) => snapshot.context.resolvedIndicesByDestination.has('es-1'));
+
+    fetch.mockRejectedValueOnce(new Error('timed out'));
+    actor.send({ type: 'resolvedIndices.reload' });
+
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'unavailable' }));
+    expect(actor.getSnapshot().context.resolvedIndicesByDestination.size).toBe(0);
+    expect(actor.getSnapshot().context.resolvedIndicesError?.message).toContain('timed out');
+  });
+
   it('creates an S3 destination without minting an API key and sends the secrets to the parent', () => {
     createS3Destination();
     expect(apiKeyCalls()).toEqual([]);

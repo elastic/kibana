@@ -187,7 +187,7 @@ The create form enforces those shapes. The unit `PUT` rejects (400) a new or cha
 - The key covers the targets at the time the destination is created.
 - `_resolve_indices`, and the indices table and index count built on it, list only the indices the destination wrote to in the page time range, not every index its targets match. They come from `streams.destination.items` grouped by `db.collection.name`, and an index is listed when its `success` items less its `failure_store: used` items are above zero. `metrics-streams.otel-default` is never listed.
 - Each listed index carries that difference as `documents`, and `ingestion_rate` as `documents` per second over the range. The table's Docs written and Ingestion columns show them, so other writers to a shared data stream, such as another destination, aren't counted. Storage, quality, health and retention are of the whole index.
-- The flyout of a local Elasticsearch destination shows its delivery from the same metrics, as for S3 and remote Elasticsearch: docs delivered and peak rate from the delivery series, and the storage of the listed indices.
+- The flyout of a local Elasticsearch destination shows its delivery from the same metrics, as for S3 and remote Elasticsearch, with totals above it. Docs written is the sum of the listed indices' `documents`, so it adds up with the table. It can be lower than the delivery chart, because an index that was deleted since, or that the user can't see, isn't listed. Peak delivery rate is the busiest bucket of the delivery series. Storage size is of the listed indices.
 
 ### Non-admin V2 managers
 

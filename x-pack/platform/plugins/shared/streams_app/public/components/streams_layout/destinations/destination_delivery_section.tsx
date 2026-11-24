@@ -164,10 +164,13 @@ const peakDeliveryRate = (series: DeliverySeriesView | undefined): number | unde
  */
 function DeliveryTotals({
   series,
+  seriesLoading,
   documents,
   storage,
 }: {
   series: DeliverySeriesView | undefined;
+  /** The series shown is of the previous range until the new one arrives. */
+  seriesLoading: boolean;
   documents: DeliveryTotalsInput['documents'];
   storage: DeliveryTotalsInput['storage'];
 }) {
@@ -205,10 +208,22 @@ function DeliveryTotals({
           title={i18n.translate('xpack.streams.destinations.delivery.peakRateLabel', {
             defaultMessage: 'Peak delivery rate',
           })}
-          value={peakRate === undefined ? UNKNOWN_STAT_VALUE : formatDocsPerSec(peakRate)}
-          unit={i18n.translate('xpack.streams.destinations.delivery.peakRateUnit', {
-            defaultMessage: 'docs/sec',
-          })}
+          value={
+            seriesLoading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : peakRate === undefined ? (
+              UNKNOWN_STAT_VALUE
+            ) : (
+              formatDocsPerSec(peakRate)
+            )
+          }
+          unit={
+            seriesLoading
+              ? undefined
+              : i18n.translate('xpack.streams.destinations.delivery.peakRateUnit', {
+                  defaultMessage: 'docs/sec',
+                })
+          }
         />
         {storage && (
           <StatCell
@@ -473,6 +488,7 @@ export function DestinationDeliveryView({
         {totals && (
           <DeliveryTotals
             series={failed.series}
+            seriesLoading={loading}
             documents={totals.documents}
             storage={totals.storage}
           />

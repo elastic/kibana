@@ -150,6 +150,26 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
     ]);
   });
 
+  it('resolves long names in batches that fit the request line', async () => {
+    getUnitOrEmpty.mockResolvedValue(mixedDestinationUnit);
+    const names = Array.from(
+      { length: 20 },
+      (_, index) => `logs-${'a'.repeat(240)}-${String(index).padStart(2, '0')}`
+    );
+    const resolveIndex = jest.fn().mockResolvedValue({ data_streams: [], indices: [] });
+
+    await callHandler({
+      resolveIndex,
+      getDataStream: jest.fn(),
+      collectionsByDestination: { 'es-mixed': names },
+    });
+
+    const batches = resolveIndex.mock.calls.map(([{ name }]: [{ name: string }]) => name);
+    expect(batches.length).toBeGreaterThan(1);
+    expect(batches.every((batch) => batch.length <= 4096 * 0.75 + names.length)).toBe(true);
+    expect(batches.flatMap((batch) => batch.split(','))).toEqual(names);
+  });
+
   it('gives each index the documents the destination wrote to it, and their rate over the time range', async () => {
     getUnitOrEmpty.mockResolvedValue(mixedDestinationUnit);
     const resolveIndex = jest.fn().mockResolvedValue({
