@@ -34,18 +34,6 @@ const UID_UNAVAILABLE = {
 };
 const UID_UNAVAILABLE_PER_OTEL_PLAN = [UID_UNAVAILABLE, UID_UNAVAILABLE];
 
-/**
- * ECS restarts are `sum_rate` on a FROM-only `state_container` source: the generator omits the
- * rate under FROM and reports it here. OTel still fills the column with `last`.
- */
-const RESTARTS_UNSUPPORTED_ON_FROM = {
-  indexPattern: STATE_CONTAINER_PATTERN,
-  engine: 'FROM',
-  column: 'k8s.container.restarts',
-  field: 'kubernetes.container.status.restarts',
-  agg: 'sum_rate',
-};
-
 type QueryDiagnostic = ListResponse['queries'][number];
 
 const summarizeQueries = (
@@ -143,7 +131,6 @@ apiTest.describe(
         // the Agent source, whose plan is listed first.
         expect(body.provenance[CART_API_ID]).toStrictEqual({
           'k8s.cluster.name': STATE_PATTERN,
-          'k8s.deployment.desired': STATE_PATTERN,
           'k8s.deployment.paused': STATE_PATTERN,
           'k8s.deployment.label.app': STATE_PATTERN,
         });
@@ -210,21 +197,25 @@ apiTest.describe(
           { name: 'kubernetes.namespace', kind: 'identity' },
           { name: 'kubernetes.deployment.name', kind: 'identity' },
           { name: 'k8s.cluster.name', kind: 'attribute' },
-          { name: 'k8s.deployment.desired', kind: 'attribute' },
           { name: 'k8s.deployment.paused', kind: 'attribute' },
           { name: 'k8s.deployment.label.app', kind: 'attribute' },
           { name: 'k8s.deployment.uid', kind: 'attribute' },
           {
             name: 'k8s.deployment.available',
             kind: 'metric',
-            agg: 'last',
+            agg: 'max',
+            unit: 'count',
+          },
+          {
+            name: 'k8s.deployment.desired',
+            kind: 'metric',
+            agg: 'max',
             unit: 'count',
           },
           {
             name: 'k8s.container.restarts',
             kind: 'metric',
-            // Canonical from the first source (ECS `sum_rate`); OTel still declares `last`.
-            agg: 'sum_rate',
+            agg: 'max',
             unit: 'count',
           },
           { name: 'last_seen', kind: 'last_seen' },
@@ -407,56 +398,62 @@ apiTest.describe(
       }
     );
 
+    // Scenarios: scout-metrics-test-scenarios.md (M1–M5) — available/desired/restarts use max.
     apiTest.describe('metrics', () => {
       apiTest(
-        'returns archive available and restarts for the Nov-1 deployments',
+        'returns archive max available, desired and restarts when deployment.name is present',
         async ({ apiClient }) => {
           const response = await postList(apiClient, WINDOW);
 
           expect(response).toHaveStatusCode(200);
-          const { rows }: ListResponse = response.body;
+          const { rows, columns, unsupportedMetrics }: ListResponse = response.body;
+
+          expect(unsupportedMetrics).toStrictEqual([]);
+          expect(columns.find(({ name }) => name === 'k8s.deployment.available')).toStrictEqual({
+            name: 'k8s.deployment.available',
+            kind: 'metric',
+            agg: 'max',
+            unit: 'count',
+          });
+          expect(columns.find(({ name }) => name === 'k8s.deployment.desired')).toStrictEqual({
+            name: 'k8s.deployment.desired',
+            kind: 'metric',
+            agg: 'max',
+            unit: 'count',
+          });
+          expect(columns.find(({ name }) => name === 'k8s.container.restarts')).toStrictEqual({
+            name: 'k8s.container.restarts',
+            kind: 'metric',
+            agg: 'max',
+            unit: 'count',
+          });
 
           const cartApi = rows.find((row) => row['entity.id'] === CART_API_ID);
+          expect(cartApi?.['kubernetes.deployment.name']).toBe('cart-api');
           expect(cartApi?.['k8s.deployment.available']).toBe(3);
+          expect(cartApi?.['k8s.deployment.desired']).toBe(3);
           expect(cartApi?.['k8s.container.restarts']).toBe(5);
 
           const payments = rows.find(
             (row) => row['entity.id'] === 'k8s.deployment:checkout/payments'
           );
+          expect(payments?.['kubernetes.deployment.name']).toBe('payments');
           expect(payments?.['k8s.deployment.available']).toBe(2);
+          expect(payments?.['k8s.deployment.desired']).toBe(3);
           expect(payments?.['k8s.container.restarts']).toBe(1);
 
           const ingress = rows.find(
             (row) => row['entity.id'] === 'k8s.deployment:platform/ingress'
           );
+          expect(ingress?.['kubernetes.deployment.name']).toBe('ingress');
           expect(ingress?.['k8s.deployment.available']).toBe(1);
+          expect(ingress?.['k8s.deployment.desired']).toBe(1);
           expect(ingress?.['k8s.container.restarts']).toBe(0);
         }
       );
 
       apiTest(
-        'lists FROM sum_rate in unsupportedMetrics while OTel still fills restarts',
-        async ({ apiClient }) => {
-          const response = await postList(apiClient, WINDOW);
-
-          expect(response).toHaveStatusCode(200);
-          const { rows, unsupportedMetrics, columns }: ListResponse = response.body;
-
-          expect(unsupportedMetrics).toStrictEqual([RESTARTS_UNSUPPORTED_ON_FROM]);
-          expect(columns.find(({ name }) => name === 'k8s.container.restarts')).toStrictEqual({
-            name: 'k8s.container.restarts',
-            kind: 'metric',
-            agg: 'sum_rate',
-            unit: 'count',
-          });
-          expect(
-            rows.find((row) => row['entity.id'] === CART_API_ID)?.['k8s.container.restarts']
-          ).toBe(5);
-        }
-      );
-
-      apiTest(
-        'uses the newest sample inside the window for cart-api metrics',
+        'uses the max sample inside the window for cart-api metrics',
         async ({ apiClient }) => {
           const through1000 = await postList(apiClient, {
             from: '2026-11-01T09:00:00.000Z',
@@ -471,12 +468,14 @@ apiTest.describe(
             (row: Record<string, unknown>) => row['entity.id'] === CART_API_ID
           );
           expect(earlier?.['k8s.deployment.available']).toBe(3);
+          expect(earlier?.['k8s.deployment.desired']).toBe(3);
           expect(earlier?.['k8s.container.restarts']).toBe(4);
 
           const later = through1001.body.rows.find(
             (row: Record<string, unknown>) => row['entity.id'] === CART_API_ID
           );
           expect(later?.['k8s.deployment.available']).toBe(3);
+          expect(later?.['k8s.deployment.desired']).toBe(3);
           expect(later?.['k8s.container.restarts']).toBe(5);
         }
       );
@@ -494,8 +493,9 @@ apiTest.describe(
           (row) => row['entity.id'] === 'k8s.deployment:timeseries/ts-window'
         );
         expect(tsWindow?.['k8s.deployment.available']).toBe(2);
+        expect(tsWindow?.['k8s.deployment.desired']).toBe(2);
         expect(tsWindow?.['k8s.container.restarts']).toBe(8);
-        expect(unsupportedMetrics).toStrictEqual([RESTARTS_UNSUPPORTED_ON_FROM]);
+        expect(unsupportedMetrics).toStrictEqual([]);
       });
 
       apiTest(
@@ -514,18 +514,21 @@ apiTest.describe(
             (row) => row['entity.id'] === 'k8s.deployment:streaming/tsds-shared'
           );
           expect(shared?.['k8s.deployment.available']).toBe(5);
+          expect(shared?.['k8s.deployment.desired']).toBe(5);
           expect(shared?.['k8s.container.restarts']).toBe(12);
 
           const standardOnly = rows.find(
             (row) => row['entity.id'] === 'k8s.deployment:streaming/standard-only'
           );
           expect(standardOnly?.['k8s.deployment.available']).toBe(1);
+          expect(standardOnly?.['k8s.deployment.desired']).toBe(5);
           expect(standardOnly?.['k8s.container.restarts']).toBe(3);
 
           const tsdsOnly = rows.find(
             (row) => row['entity.id'] === 'k8s.deployment:streaming/tsds-only'
           );
           expect(tsdsOnly?.['k8s.deployment.available']).toBe(2);
+          expect(tsdsOnly?.['k8s.deployment.desired']).toBe(5);
           expect(tsdsOnly?.['k8s.container.restarts']).toBe(7);
         }
       );
@@ -545,12 +548,14 @@ apiTest.describe(
             (row) => row['entity.id'] === 'k8s.deployment:aliased/kept-standard'
           );
           expect(keptStandard?.['k8s.deployment.available']).toBe(1);
+          expect(keptStandard?.['k8s.deployment.desired']).toBe(1);
           expect(keptStandard?.['k8s.container.restarts']).toBe(9);
 
           const keptTsds = rows.find(
             (row) => row['entity.id'] === 'k8s.deployment:aliased/kept-tsds'
           );
           expect(keptTsds?.['k8s.deployment.available']).toBe(2);
+          expect(keptTsds?.['k8s.deployment.desired']).toBe(2);
           expect(keptTsds?.['k8s.container.restarts']).toBe(11);
         }
       );

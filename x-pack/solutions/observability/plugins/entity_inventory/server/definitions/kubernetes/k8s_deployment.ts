@@ -15,9 +15,9 @@ import { MANAGED_BY } from '../constants';
  * serves both sources. The same namespace and name in two clusters land on one id; the cluster is
  * an attribute.
  *
- * Metrics: available replicas (`last`) from `state_deployment` / OTel. Restarts share one column:
- * ECS counter uses `sum_rate`, OTel gauge uses `last` (same `cumulative_count` measurement). No
- * deployment uptime duration field exists in that integration, so uptime is not declared.
+ * Metrics: available, desired, and restarts all use `max` from `state_deployment` /
+ * `state_container` (ECS) and OTel. No deployment uptime duration field exists in that
+ * integration, so uptime is not declared.
  */
 export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
   type: 'k8s.deployment',
@@ -44,11 +44,10 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
   dynamic: {
     sources: [
       {
-        indexPattern: 'metrics-kubernetes.state_deployment-*',
-        filter: 'metricset.name == "state_deployment"',
+        indexPattern: 'metrics-kubernetes.*',
+        filter: 'metricset.name == "state_deployment" OR metricset.name == "state_container"',
         attributes: [
           { name: 'k8s.cluster.name', field: 'orchestrator.cluster.name' },
-          { name: 'k8s.deployment.desired', field: 'kubernetes.deployment.replicas.desired' },
           { name: 'k8s.deployment.paused', field: 'kubernetes.deployment.paused' },
           { name: 'k8s.deployment.label.app', field: 'kubernetes.labels.app' },
         ],
@@ -56,19 +55,19 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
           {
             name: 'k8s.deployment.available',
             field: 'kubernetes.deployment.replicas.available',
-            agg: 'last',
+            agg: 'max',
             unit: 'count',
           },
-        ],
-      },
-      {
-        indexPattern: 'metrics-kubernetes.state_container-*',
-        filter: 'metricset.name == "state_container"',
-        metrics: [
+          {
+            name: 'k8s.deployment.desired',
+            field: 'kubernetes.deployment.replicas.desired',
+            agg: 'max',
+            unit: 'count',
+          },
           {
             name: 'k8s.container.restarts',
             field: 'kubernetes.container.status.restarts',
-            agg: 'sum_rate',
+            agg: 'max_rate',
             unit: 'count',
           },
         ],
@@ -77,20 +76,25 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
         indexPattern: 'metrics-k8sclusterreceiver.otel-*',
         attributes: [
           { name: 'k8s.cluster.name', field: 'orchestrator.cluster.name' },
-          { name: 'k8s.deployment.desired', field: 'k8s.deployment.desired' },
           { name: 'k8s.deployment.uid', field: 'k8s.deployment.uid' },
         ],
         metrics: [
           {
             name: 'k8s.deployment.available',
             field: 'k8s.deployment.available',
-            agg: 'last',
+            agg: 'max',
+            unit: 'count',
+          },
+          {
+            name: 'k8s.deployment.desired',
+            field: 'k8s.deployment.desired',
+            agg: 'max',
             unit: 'count',
           },
           {
             name: 'k8s.container.restarts',
             field: 'k8s.container.restarts',
-            agg: 'last',
+            agg: 'max_rate',
             unit: 'count',
           },
         ],
