@@ -1269,6 +1269,8 @@ class AgentPolicyService {
           {
             ...options,
             bumpRevision: false,
+            // The new agent policy has no agents yet, so none can stop collecting data
+            acknowledgeAgentVersionIncompatibility: true,
           }
         );
       }
@@ -1281,7 +1283,10 @@ class AgentPolicyService {
           ...packagePolicy,
           policy_ids: [...packagePolicy.policy_ids, newAgentPolicy.id],
         }));
-        await packagePolicyService.bulkUpdate(soClient, esClient, updatedSharedPackagePolicies);
+        await packagePolicyService.bulkUpdate(soClient, esClient, updatedSharedPackagePolicies, {
+          // The new agent policy has no agents yet, so none can stop collecting data
+          acknowledgeAgentVersionIncompatibility: true,
+        });
       }
     }
 

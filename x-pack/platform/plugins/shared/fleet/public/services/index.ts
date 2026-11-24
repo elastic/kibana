@@ -49,6 +49,7 @@ export {
 export {
   isPackageUnverified,
   isVerificationError,
+  getAgentVersionBlockFromError,
   isBreakingChangesNotAcknowledgedError,
 } from './package_verification';
 export { isPackageUpdatable } from './is_package_updatable';

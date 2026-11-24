@@ -7,7 +7,12 @@
 
 import type { BreakingChangesLog } from '../../services/changelog_utils';
 
-export type FleetErrorType = 'verification_failed' | 'breaking_changes_not_acknowledged';
+import type { AgentVersionBlock } from './package_policy';
+
+export type FleetErrorType =
+  | 'verification_failed'
+  | 'breaking_changes_not_acknowledged'
+  | 'agent_version_incompatible';
 
 export interface FleetErrorResponse {
   message: string;
@@ -15,5 +20,6 @@ export interface FleetErrorResponse {
   attributes?: {
     type?: FleetErrorType;
     breaking_changes?: BreakingChangesLog;
+    agent_version_block?: AgentVersionBlock;
   };
 }

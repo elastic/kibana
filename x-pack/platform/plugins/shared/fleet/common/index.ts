@@ -111,6 +111,8 @@ export {
   removeVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,
+  agentSatisfiesPackageVersionCondition,
+  getAgentVersionBlockers,
 } from './services';
 
 export type {
@@ -160,6 +162,7 @@ export type {
   UpgradePackagePolicyResponseItem,
   UpgradePackagePolicyBaseResponse,
   UpgradePackagePolicyDryRunResponseItem,
+  AgentVersionBlock,
   BulkGetPackagePoliciesResponse,
   BulkGetAgentPoliciesResponse,
   GetBulkAssetsResponse,
