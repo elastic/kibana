@@ -1040,8 +1040,8 @@ components:
 
         * `esql_output_columns`: the rows that the query of an ES|QL rule
         outputs, tested on the output columns of the query. Every entry of such
-        an item needs a `value_type`. Only ES|QL rules apply these items, and
-        no other rule type does.
+        an item needs a `value_type`. Only ES|QL rules apply these items, and no
+        other rule type does.
       enum:
         - source_documents
         - esql_output_columns
@@ -1098,8 +1098,6 @@ components:
     ExceptionListItemEntryExists:
       type: object
       properties:
-        value_type:
-          $ref: '#/components/schemas/EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/NonEmptyString'
         operator:
@@ -1108,6 +1106,8 @@ components:
           enum:
             - exists
           type: string
+        value_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
       required:
         - type
         - field
@@ -1141,8 +1141,6 @@ components:
     ExceptionListItemEntryMatch:
       type: object
       properties:
-        value_type:
-          $ref: '#/components/schemas/EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/NonEmptyString'
         operator:
@@ -1153,6 +1151,8 @@ components:
           type: string
         value:
           $ref: '#/components/schemas/NonEmptyString'
+        value_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
       required:
         - type
         - field
@@ -1161,8 +1161,6 @@ components:
     ExceptionListItemEntryMatchAny:
       type: object
       properties:
-        value_type:
-          $ref: '#/components/schemas/EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/NonEmptyString'
         operator:
@@ -1176,6 +1174,8 @@ components:
             $ref: '#/components/schemas/NonEmptyString'
           minItems: 1
           type: array
+        value_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
       required:
         - type
         - field
@@ -1184,8 +1184,6 @@ components:
     ExceptionListItemEntryMatchWildcard:
       type: object
       properties:
-        value_type:
-          $ref: '#/components/schemas/EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/NonEmptyString'
         operator:
@@ -1196,6 +1194,8 @@ components:
           type: string
         value:
           $ref: '#/components/schemas/NonEmptyString'
+        value_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
       required:
         - type
         - field
