@@ -535,6 +535,140 @@ describe('useKeyboardNavigation', () => {
     });
   });
 
+  describe('open groups', () => {
+    const closedGroup = {
+      ...createNode('shop', 0, 0, 'shop'),
+      type: 'serviceGroup',
+      data: { id: 'shop', label: 'shop', isService: false, isServiceGroup: true },
+    } as ServiceMapNode;
+    const box = {
+      ...createNode('shop', 0, 0, 'shop'),
+      type: 'serviceGroupBox',
+      data: { id: 'shop', label: 'shop', isService: false, isServiceGroupBox: true },
+    } as ServiceMapNode;
+    const member = { ...createNode('cart', 24, 72, 'cart'), parentId: 'shop' } as ServiceMapNode;
+
+    let focusedElement: HTMLDivElement;
+
+    const focusNode = (id: string) => {
+      focusedElement = document.createElement('div');
+      focusedElement.setAttribute('data-id', id);
+      focusedElement.tabIndex = 0;
+      document.body.appendChild(focusedElement);
+      focusedElement.focus();
+    };
+
+    const press = (key: string) =>
+      act(() => {
+        const event = new KeyboardEvent('keydown', {
+          key,
+          bubbles: true,
+          cancelable: true,
+        });
+        document.dispatchEvent(event);
+      });
+
+    afterEach(() => {
+      focusedElement?.remove();
+    });
+
+    it('closes the group on Escape when its box has the focus', () => {
+      const onNodeSelect = jest.fn();
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: [box, member], onNodeSelect })
+      );
+      focusNode('shop');
+
+      press('Escape');
+
+      expect(onNodeSelect).toHaveBeenCalledWith(box);
+      expect(result.current.screenReaderAnnouncement).toBe('Closed group shop.');
+    });
+
+    it('closes the group on Escape when one of its members has the focus', () => {
+      const onNodeSelect = jest.fn();
+      renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: [box, member], onNodeSelect })
+      );
+      focusNode('cart');
+
+      press('Escape');
+
+      expect(onNodeSelect).toHaveBeenCalledWith(box);
+    });
+
+    it('leaves Escape to what is open for a selected member', () => {
+      const onNodeSelect = jest.fn();
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes: [box, member],
+          selectedNodeId: 'cart',
+          onNodeSelect,
+        })
+      );
+      focusNode('cart');
+
+      press('Escape');
+
+      expect(onNodeSelect).not.toHaveBeenCalled();
+    });
+
+    it('does nothing on Escape for a closed group or a node outside any group', () => {
+      const onNodeSelect = jest.fn();
+      const outside = createNode('outside', 500, 0);
+      renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: [closedGroup, outside], onNodeSelect })
+      );
+
+      focusNode('shop');
+      press('Escape');
+      focusedElement.remove();
+      focusNode('outside');
+      press('Escape');
+
+      expect(onNodeSelect).not.toHaveBeenCalled();
+    });
+
+    it('claims the Escape, so the map does not leave fullscreen with it', () => {
+      renderHook(() => useKeyboardNavigation({ ...defaultProps, nodes: [box, member] }));
+      focusNode('shop');
+      const event = new KeyboardEvent('keydown', {
+        key: 'Escape',
+        bubbles: true,
+        cancelable: true,
+      });
+
+      act(() => {
+        document.dispatchEvent(event);
+      });
+
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it('announces an opened group instead of a selection when Enter is pressed on it', () => {
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: [closedGroup] })
+      );
+      focusNode('shop');
+
+      press('Enter');
+
+      expect(result.current.screenReaderAnnouncement).toBe(
+        'Opened group shop. Press Enter or Escape on it to close.'
+      );
+    });
+
+    it('announces a closed group when Enter is pressed on its box', () => {
+      const { result } = renderHook(() => useKeyboardNavigation({ ...defaultProps, nodes: [box] }));
+      focusNode('shop');
+
+      press('Enter');
+
+      expect(result.current.screenReaderAnnouncement).toBe('Closed group shop.');
+    });
+  });
+
   describe('Enter/Space on node elements', () => {
     let nodeElement: HTMLDivElement;
 

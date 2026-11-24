@@ -92,7 +92,12 @@ export function groupServiceNodes(
       // A parent must come before its children in the node list
       groupNodes.push(
         createServiceGroupBoxNode(group, memberNodes),
-        ...memberNodes.map((member) => ({ ...member, parentId: group.id }))
+        // `extent` keeps a dragged member inside its box
+        ...memberNodes.map((member) => ({
+          ...member,
+          parentId: group.id,
+          extent: 'parent' as const,
+        }))
       );
       for (const member of memberNodes) {
         openedServiceIds.add(member.id);

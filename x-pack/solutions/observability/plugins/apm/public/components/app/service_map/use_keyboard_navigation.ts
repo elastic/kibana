@@ -7,7 +7,12 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
+import {
+  isServiceGroupBoxNode,
+  isServiceGroupNode,
+  type ServiceMapNode,
+  type ServiceMapEdge,
+} from '../../../../common/service_map';
 import { DIRECTION_THRESHOLD } from './constants';
 
 type ArrowDirection = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight';
@@ -30,13 +35,28 @@ interface UseKeyboardNavigationResult {
   findNodeInDirection: (currentNodeId: string, direction: ArrowDirection) => ServiceMapNode | null;
 }
 
+/** The box of the open group a node is the box of, or a member of. */
+const getOpenGroupBox = (
+  node: ServiceMapNode,
+  nodes: ServiceMapNode[]
+): ServiceMapNode | undefined =>
+  isServiceGroupBoxNode(node)
+    ? node
+    : nodes.find((candidate) => candidate.id === node.parentId && isServiceGroupBoxNode(candidate));
+
+const getGroupClosedAnnouncement = (box: ServiceMapNode): string =>
+  i18n.translate('xpack.apm.serviceMap.groupClosed', {
+    defaultMessage: 'Closed group {groupLabel}.',
+    values: { groupLabel: box.data.label || box.id },
+  });
+
 /**
  * Hook that provides keyboard navigation for the service map.
  *
  * Supports:
  * - Arrow keys: Spatial navigation between nodes
- * - Enter/Space: Open popover for focused node
- * - Escape: Close popover
+ * - Enter/Space: Open popover for focused node; open a group, or close an open one
+ * - Escape: Close popover; close the open group the focus is in
  *
  * Also manages screen reader announcements for navigation events.
  */
@@ -106,6 +126,19 @@ export function useKeyboardNavigation({
         );
         return;
       }
+      // Escape on the box of an open group, or on one of its members, closes the group. Not while a
+      // node is selected: then Escape is for what is open for it (a flyout closes itself on Escape).
+      if (event.key === 'Escape' && !selectedNodeId) {
+        const focusedNodeId = document.activeElement?.closest('[data-id]')?.getAttribute('data-id');
+        const focusedNode = nodes?.find((n) => n.id === focusedNodeId);
+        const box = focusedNode && getOpenGroupBox(focusedNode, nodes);
+        if (box) {
+          event.preventDefault();
+          onNodeSelect(box);
+          setScreenReaderAnnouncement(getGroupClosedAnnouncement(box));
+          return;
+        }
+      }
       if (event.key === 'Enter' || event.key === ' ') {
         const activeElement = document.activeElement;
         const edgeElement = activeElement?.closest('.react-flow__edge');
@@ -142,6 +175,18 @@ export function useKeyboardNavigation({
 
           if (selectedNodeId === nodeId) {
             onPopoverClose();
+          } else if (isServiceGroupNode(focusedNode) || isServiceGroupBoxNode(focusedNode)) {
+            // Groups open and close instead of being selected.
+            onNodeSelect(focusedNode);
+            setScreenReaderAnnouncement(
+              isServiceGroupNode(focusedNode)
+                ? i18n.translate('xpack.apm.serviceMap.groupOpened', {
+                    defaultMessage:
+                      'Opened group {groupLabel}. Press Enter or Escape on it to close.',
+                    values: { groupLabel: focusedNode.data.label || nodeId },
+                  })
+                : getGroupClosedAnnouncement(focusedNode)
+            );
           } else {
             onNodeSelect(focusedNode);
             setScreenReaderAnnouncement(

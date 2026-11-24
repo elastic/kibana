@@ -452,6 +452,7 @@ describe('groupServiceNodes', () => {
       const members = nextNodes.filter((n) => n.parentId === SHOP);
       expect(members.map((n) => n.id).sort()).toEqual(['cart', 'checkout', 'frontend']);
       expect(members.every((n) => isServiceNodeData(n.data))).toBe(true);
+      expect(members.every((n) => n.extent === 'parent')).toBe(true);
       expect(members.every((n) => nextNodes.indexOf(n) > boxIndex)).toBe(true);
 
       // the other groups stay closed, so each service is on the map exactly once

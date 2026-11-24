@@ -32,31 +32,23 @@ import { HighlightWrapper } from './highlight_wrapper';
 type ServiceGroupNodeType = Node<ServiceGroupNodeData, 'serviceGroup'>;
 
 /**
- * Closed service-group node (2+ services). Enter/Space selects only; opening is #300587.
+ * Closed service-group node (2+ services). Clicking it, or pressing Enter/Space, opens the group in
+ * place (handled by the graph).
  */
 export const ServiceGroupNode = memo(
-  ({ data, selected, sourcePosition, targetPosition }: NodeProps<ServiceGroupNodeType>) => {
+  ({ data, sourcePosition, targetPosition }: NodeProps<ServiceGroupNodeType>) => {
     const { euiTheme } = useEuiTheme();
     const apmPluginContext = useApmPluginContext();
     const canReadSlos = !!apmPluginContext?.core?.application?.capabilities?.slo?.read;
     const isInteractive = useServiceMapInteractivity();
     const showStats = data.stats !== undefined;
 
-    const { borderColor, borderWidth } = useMemo(() => {
+    // A group is never selected: activating it opens it, which replaces this node with a box.
+    const borderColor = useMemo(() => {
       const score = data.serviceAnomalyStats?.anomalyScore;
-      const hasScore = score !== undefined;
-
-      return {
-        borderColor: hasScore
-          ? getSeverityColor(score)
-          : selected
-          ? euiTheme.colors.primary
-          : euiTheme.colors.mediumShade,
-        borderWidth: selected
-          ? `${NODE_BORDER_WIDTH_SELECTED}px`
-          : `${NODE_BORDER_WIDTH_DEFAULT}px`,
-      };
-    }, [data.serviceAnomalyStats, selected, euiTheme]);
+      return score !== undefined ? getSeverityColor(score) : euiTheme.colors.mediumShade;
+    }, [data.serviceAnomalyStats, euiTheme]);
+    const borderWidth = `${NODE_BORDER_WIDTH_DEFAULT}px`;
 
     const ariaLabel = useMemo(() => {
       const parts = [
@@ -195,7 +187,7 @@ export const ServiceGroupNode = memo(
               role={isInteractive ? 'button' : undefined}
               tabIndex={isInteractive ? 0 : -1}
               aria-label={ariaLabel}
-              aria-pressed={isInteractive ? selected : undefined}
+              aria-expanded={isInteractive ? false : undefined}
             >
               {showStats ? (
                 <FailureRing
@@ -243,7 +235,7 @@ export const ServiceGroupNode = memo(
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
-          <NodeLabel label={data.label} selected={selected} />
+          <NodeLabel label={data.label} />
           <EuiFlexItem grow={false}>
             <EuiText css={memberCountLabelStyles} data-test-subj="serviceMapNodeServiceGroupCount">
               {memberCountLabel}
