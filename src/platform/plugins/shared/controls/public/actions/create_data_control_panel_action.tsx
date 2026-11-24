@@ -9,7 +9,7 @@
 
 import { apiHasEditorConfig } from '@kbn/control-group-renderer';
 import type { DataControlState } from '@kbn/controls-schemas';
-import { isEsqlFilterableSource, type FilterableSource } from '@kbn/data-source';
+import { isEsqlFilterableSource } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanAddNewPanel,
@@ -29,12 +29,18 @@ import { dataViewsService } from '../services/kibana_services';
 let lastUsedDataViewId: string | undefined;
 
 /**
+ * The id of the first saved data view that the embeddable publishes, if any.
  * Controls can only suggest saved data views. Ad hoc data views and ES|QL sources
  * are not in the data view list, so suggesting one leaves the editor with an invalid selection.
  */
-const isPersistedDataView = (source: FilterableSource) =>
-  !isEsqlFilterableSource(source) &&
-  (source as { isPersisted?: () => boolean }).isPersisted?.() === true;
+export const getPublishedDataViewId = (embeddable: unknown): string | undefined =>
+  apiPublishesDataSources(embeddable)
+    ? embeddable.dataSources$.value?.find(
+        (source) =>
+          !isEsqlFilterableSource(source) &&
+          (source as { isPersisted?: () => boolean }).isPersisted?.() === true
+      )?.id
+    : undefined;
 
 export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_CONTROL,
@@ -47,13 +53,10 @@ export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiCo
     const defaultDataViewId = apiHasEditorConfig(embeddable)
       ? embeddable.getEditorConfig()?.defaultDataViewId
       : undefined;
-    const publishedDataViewId = apiPublishesDataSources(embeddable)
-      ? embeddable.dataSources$.value?.find(isPersistedDataView)?.id
-      : undefined;
     const parentDataViewId =
       defaultDataViewId ??
       lastUsedDataViewId ??
-      publishedDataViewId ??
+      getPublishedDataViewId(embeddable) ??
       (await dataViewsService.getDefaultDataView())?.id;
 
     openDataControlEditor({
