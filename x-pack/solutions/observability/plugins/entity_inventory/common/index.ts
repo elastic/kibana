@@ -10,6 +10,9 @@ import type { estypes } from '@elastic/elasticsearch';
 /** The most rows one list request may ask for, and the route's default `limit`. */
 export const MAX_LIST_LIMIT = 9_999;
 
+/** The longest text the values route accepts as a filter value, and so the longest it offers. */
+export const MAX_FILTER_VALUE_LENGTH = 256;
+
 /** One ES|QL cell: a scalar, or an array when the column is multi-valued. */
 export type ESQLValue = estypes.FieldValue | estypes.FieldValue[];
 
@@ -60,6 +63,8 @@ export interface InventoryType {
   /** The identity plan's grouping fields. */
   identityFields: string[];
   columns: InventoryTypeColumn[];
+  /** The definition's `dynamic.suggestedFilters`, in display order; empty when it suggests none. */
+  suggestedFilters: string[];
   /** The definition's `dynamic.sources`, in source order. */
   sources: InventoryTypeSource[];
 }
@@ -194,5 +199,16 @@ export interface PlanResponse {
   /** One entry per plan query `_list` would send, in plan order; a source whose probe failed has none. */
   queries: PlanQuery[];
   /** One entry per source whose probe failed. */
+  errors: SourceError[];
+}
+
+/** The values a dropdown can offer, merged across the sources of the types in scope. */
+export interface AttributeValuesResponse {
+  /** The distinct values as the list shows them, sorted, at most the limit. */
+  values: string[];
+  /** The selected values that are not among the values offered. */
+  invalidSelections: string[];
+  /** True only when the limit left values out; a failed source is reported in `errors`. */
+  truncated: boolean;
   errors: SourceError[];
 }
