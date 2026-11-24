@@ -10,7 +10,6 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,7 +41,7 @@ import { CANCEL_BUTTON_LABEL, SAVE_CHANGES_BUTTON_LABEL } from '../../translatio
 import { AppliesToFooter } from '../applies_to_footer/applies_to_footer';
 import { IndexPatternField } from './index_pattern_field';
 import { PriorityField, parsePriority } from './priority_field';
-import { getProfileOptions, getSelectedProfileOptions } from './profile_options';
+import { ProfilePicker } from './profile_picker';
 import { findTiedRule } from './rule_ties';
 import { TargetList } from './target_list';
 import { matchTargets } from './target_matches';
@@ -59,7 +58,6 @@ import {
   PRIORITY_LABEL,
   PROFILE_HELP_TEXT,
   PROFILE_LABEL,
-  PROFILE_NO_MATCH,
   PROFILE_REQUIRED_ERROR,
   SELECT_PROFILE_FIRST_TOOLTIP,
   getEditTitle,
@@ -192,10 +190,6 @@ export const RuleFlyout = ({
 
   const selectedProfile = profiles.find(({ name }) => name === profileField.value);
   const type = selectedProfile?.type;
-  const profileOptions = useMemo(
-    () => getProfileOptions(profiles, lockedType),
-    [profiles, lockedType]
-  );
 
   const matchedTargets = useMemo(
     () => (type ? matchTargets(indexPatternField.value, targets[type]) : []),
@@ -278,26 +272,15 @@ export const RuleFlyout = ({
           isInvalid={Boolean(profileState.error)}
           error={profileState.error?.message}
         >
-          <EuiComboBox
-            fullWidth
-            singleSelection={{ asPlainText: true }}
-            isClearable={false}
-            options={profileOptions}
-            selectedOptions={getSelectedProfileOptions(selectedProfile)}
-            isInvalid={Boolean(profileState.error)}
+          <ProfilePicker
+            profiles={profiles}
+            lockedType={lockedType}
+            value={profileField.value}
             isDisabled={isSaving}
+            isInvalid={Boolean(profileState.error)}
             inputRef={profileField.ref}
-            onChange={([option]) => {
-              if (option) {
-                profileField.onChange(option.label);
-              }
-            }}
-            // Creating nothing makes EuiComboBox drop text that matches no profile on blur or
-            // Enter, which restores the selected profile.
-            onCreateOption={() => {}}
-            customOptionText={PROFILE_NO_MATCH}
+            onChange={profileField.onChange}
             onBlur={profileField.onBlur}
-            data-test-subj="searchBoostRuleFlyoutProfile"
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
