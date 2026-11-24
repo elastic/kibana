@@ -24,9 +24,9 @@ import {
 
 import type { Filter } from '@kbn/es-query';
 import {
-  combineCompatibleChildrenApis,
   apiAppliesFilters,
   apiPublishesAwaitingRequiredFilters,
+  combineCompatibleChildrenApis,
   type AppliesFilters,
   type PublishesAwaitingRequiredFilters,
 } from '@kbn/presentation-publishing';
@@ -69,11 +69,12 @@ export const initializeFiltersManager = (
       return values.some((awaitingRequired) => awaitingRequired);
     }
   ).subscribe((a) => {
+    console.log('[DBG] awaitingRequiredFilters$', a);
     awaitingRequiredFilters$.next(a);
   });
 
   /** `true` while any child is still computing its filters */
-  const childrenComputingFilters$ = combineCompatibleChildrenApis<AppliesFilters, boolean>(
+  const childFiltersLoading$ = combineCompatibleChildrenApis<AppliesFilters, boolean>(
     { children$: layoutManager.api.children$ },
     'filtersLoading$',
     apiAppliesFilters,
@@ -83,14 +84,11 @@ export const initializeFiltersManager = (
     }
   );
 
-  /** also `true` while awaiting required filters, so that panels do not fetch without them */
-  const childFiltersLoading$ = awaitingRequiredFilters$.pipe(
-    combineLatestWith(childrenComputingFilters$),
-    map(([awaitingRequiredFilters, filtersLoading]) => awaitingRequiredFilters || filtersLoading),
-    distinctUntilChanged()
-  );
-
-  const childFilters$ = combineCompatibleChildrenApis<AppliesFilters, Filter[] | undefined>(
+  /** push filters to `unpublishedChildFilters$` once children are done computing their filters */
+  const unpublishedFiltersSubscription = combineCompatibleChildrenApis<
+    AppliesFilters,
+    Filter[] | undefined
+  >(
     { children$: layoutManager.api.children$ },
     'appliedFilters$',
     apiAppliesFilters,
@@ -101,20 +99,15 @@ export const initializeFiltersManager = (
       ) as Filter[][];
       return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : undefined;
     }
-  ).pipe(distinctUntilChanged(deepEqual));
-
-  /**
-   * Don't push filters to `unpublishedFilters$` until all children have their filters ready. Awaiting
-   * required filters must not gate this: required controls need to publish their filters while the
-   * grid waits, so that other controls can be narrowed by them and the grid can be released.
-   */
-  const filterManagerSubscription = combineLatest([childrenComputingFilters$, childFilters$])
+  )
     .pipe(
+      distinctUntilChanged(deepEqual),
+      combineLatestWith(childFiltersLoading$),
       skip(1),
       debounceTime(0),
-      filter(([loading, allChildFilters]) => !loading)
+      filter(([, loading]) => !loading)
     )
-    .subscribe(([, allChildFilters]) => {
+    .subscribe(([allChildFilters]) => {
       unpublishedChildFilters$.next(allChildFilters);
     });
 
@@ -125,6 +118,15 @@ export const initializeFiltersManager = (
       publishedChildFilters$.next(unpublished);
     }
   };
+
+  /** `true` while the unpublished child filters differ from the published ones */
+  const hasUnpublishedFilters$ = combineLatest([
+    publishedChildFilters$,
+    unpublishedChildFilters$,
+  ]).pipe(
+    map(([published, unpublished]) => !deepEqual(published ?? [], unpublished ?? [])),
+    distinctUntilChanged()
+  );
 
   /** when auto-apply is `true`, push filters from `unpublishedFilters$` directly to published */
   const autoPublishFiltersSubscription = unpublishedChildFilters$
@@ -157,33 +159,33 @@ export const initializeFiltersManager = (
     });
 
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  filterManagerSubscription.add(
-    publishedChildFilters$
-      .pipe(
-        combineLatestWith(unifiedSearchManager.internalApi.unifiedSearchFilters$),
-        map(([childFilters, unifiedSearchFilters]) => {
-          return [...(childFilters ?? []), ...(unifiedSearchFilters ?? [])];
-        })
-      )
-      .subscribe((allFilters) => {
-        filters$.next(allFilters);
+  const filtersSubscription = publishedChildFilters$
+    .pipe(
+      combineLatestWith(unifiedSearchManager.internalApi.unifiedSearchFilters$),
+      map(([childFilters, unifiedSearchFilters]) => {
+        return [...(childFilters ?? []), ...(unifiedSearchFilters ?? [])];
       })
-  );
+    )
+    .subscribe((allFilters) => {
+      filters$.next(allFilters);
+    });
 
   return {
     api: {
       filters$,
       publishedChildFilters$,
       unpublishedChildFilters$,
+      hasUnpublishedFilters$,
       childFiltersLoading$,
       publishFilters,
       awaitingRequiredFilters$,
     },
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();
-      requiredFiltersSubscription.unsubscribe();
-      filterManagerSubscription.unsubscribe();
+      unpublishedFiltersSubscription.unsubscribe();
+      filtersSubscription.unsubscribe();
       forcePublishSubscription.unsubscribe();
+      requiredFiltersSubscription.unsubscribe();
     },
   };
 };
