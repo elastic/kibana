@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ContentListWrapper } from '@kbn/scout';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { UI_SLOW_RENDER_TIMEOUT_MS } from '../../../constants';
 import type { AlertingMountConfig } from './alerting_mount_config';
@@ -16,15 +17,14 @@ export class RulesListPage {
   public readonly bulkActionsButton: Locator;
   public readonly bulkDisableMenuItem: Locator;
   public readonly rulesListTable: Locator;
-  public readonly rulesListShowingLabel: Locator;
   public readonly ruleSummaryFlyout: Locator;
+  public readonly contentList: ContentListWrapper;
   /** Header "Create rule" split button; hidden for read-only users. */
   public readonly createRuleButton: Locator;
   /** Heading tab linking to the classic (v1) Rules page; hidden without v1 read access. */
   public readonly v1RulesTab: Locator;
   /** Heading tab for this (v2) Rules page; hidden alongside v1RulesTab when only one would show. */
   public readonly v2RulesTab: Locator;
-  private readonly searchBox: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.tagsFilterButton = this.page.testSubj.locator('rulesListTagsFilter');
@@ -33,12 +33,11 @@ export class RulesListPage {
     this.bulkActionsButton = this.page.testSubj.locator('bulkActionsButton');
     this.bulkDisableMenuItem = this.page.testSubj.locator('bulkDisableRules');
     this.rulesListTable = this.page.testSubj.locator('rulesListTable');
-    this.rulesListShowingLabel = this.page.testSubj.locator('rulesListShowingLabel');
     this.ruleSummaryFlyout = this.page.testSubj.locator('ruleSummaryFlyout');
+    this.contentList = new ContentListWrapper(this.page);
     this.createRuleButton = this.page.testSubj.locator('createRuleButton');
     this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');
     this.v2RulesTab = this.page.testSubj.locator('v2RulesTab');
-    this.searchBox = this.page.testSubj.locator('contentListToolbar-searchBox');
   }
 
   async goto() {
@@ -48,11 +47,6 @@ export class RulesListPage {
   async scrollRulesListBy(deltaY: number): Promise<void> {
     await this.rulesListTable.hover();
     await this.page.mouse.wheel(0, deltaY);
-  }
-
-  async search(value: string): Promise<void> {
-    await this.searchBox.fill(value);
-    await this.searchBox.press('Enter');
   }
 
   tagsFilterOption(tag: string) {

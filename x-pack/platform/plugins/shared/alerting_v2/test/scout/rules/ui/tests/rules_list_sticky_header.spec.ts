@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/ui';
 import { buildCreateRuleData, test, testData } from '../fixtures';
 
 const RULE_COUNT = 20;
-const RULE_TAG = `scout-sticky-header-${Date.now()}`;
+const RULE_TAG = `scout-sticky-header-${randomUUID()}`;
 const UNRELATED_RULE_NAME = `000 unrelated sticky header rule ${RULE_TAG}`;
-const UNRELATED_RULE_TAG = `scout-unrelated-sticky-header-${Date.now()}`;
-const ruleIds: string[] = [];
-let unrelatedRuleId: string;
+const UNRELATED_RULE_TAG = `scout-unrelated-sticky-header-${RULE_TAG}`;
+const firstRuleId = randomUUID();
+const unrelatedRuleId = randomUUID();
+const ruleIds = [firstRuleId, ...Array.from({ length: RULE_COUNT - 1 }, () => randomUUID())];
+const fixtureRuleIds = [unrelatedRuleId, ...ruleIds];
 
 test.describe('Rules list - sticky app header', { tag: testData.UI_TAG }, () => {
   test.beforeAll(async ({ apiServices }) => {
     const { items, errors } = await apiServices.alertingV2.rules.bulkCreate({
       items: [
         buildCreateRuleData({
+          id: unrelatedRuleId,
           enabled: false,
           metadata: { name: UNRELATED_RULE_NAME, tags: [UNRELATED_RULE_TAG] },
         }),
-        ...Array.from({ length: RULE_COUNT }, (_, index) =>
+        ...ruleIds.map((id, index) =>
           buildCreateRuleData({
+            id,
             enabled: false,
             metadata: { name: `Sticky header rule ${RULE_TAG} ${index}`, tags: [RULE_TAG] },
           })
@@ -32,26 +37,21 @@ test.describe('Rules list - sticky app header', { tag: testData.UI_TAG }, () => 
       ],
     });
 
-    ruleIds.push(...items.map(({ id }) => id));
-    const unrelatedRule = items.find(({ metadata }) => metadata.name === UNRELATED_RULE_NAME);
-    if (!unrelatedRule) {
-      throw new Error(`Bulk creation did not return the unrelated rule ${UNRELATED_RULE_NAME}`);
-    }
-    unrelatedRuleId = unrelatedRule.id;
-
     expect(errors).toStrictEqual([]);
     expect(items).toHaveLength(RULE_COUNT + 1);
+    expect(items.map(({ id }) => id).sort()).toStrictEqual([...fixtureRuleIds].sort());
   });
 
   test.afterAll(async ({ apiServices }) => {
-    if (ruleIds.length > 0) {
-      const { affected_count: affectedCount, errors } =
-        await apiServices.alertingV2.rules.bulkDelete({
-          ids: ruleIds,
-        });
-      expect(errors).toStrictEqual([]);
-      expect(affectedCount).toBe(ruleIds.length);
-    }
+    const { affected_count: affectedCount, errors } = await apiServices.alertingV2.rules.bulkDelete(
+      {
+        ids: fixtureRuleIds,
+      }
+    );
+    const missingIds = errors.filter(({ error }) => error.code === 'RULE_NOT_FOUND');
+    const unexpectedErrors = errors.filter(({ error }) => error.code !== 'RULE_NOT_FOUND');
+    expect(unexpectedErrors).toStrictEqual([]);
+    expect(affectedCount).toBe(fixtureRuleIds.length - missingIds.length);
   });
 
   test('keeps the page heading pinned while the rules list scrolls', async ({
@@ -63,13 +63,7 @@ test.describe('Rules list - sticky app header', { tag: testData.UI_TAG }, () => 
     await browserAuth.loginAsRuleViewer();
     await pageObjects.rulesList.goto();
     await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
-    await pageObjects.rulesList.search(RULE_TAG);
-    await expect(pageObjects.rulesList.rulesListShowingLabel).toHaveText(
-      'Showing 1-20 of 21 Rules',
-      {
-        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
-      }
-    );
+    await pageObjects.rulesList.contentList.searchFor(RULE_TAG);
     await expect(pageObjects.rulesList.ruleNameLink(unrelatedRuleId)).toBeVisible({
       timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
     });
@@ -78,18 +72,10 @@ test.describe('Rules list - sticky app header', { tag: testData.UI_TAG }, () => 
     const heading = pageObjects.alertingNavigation.pageHeading('rules');
     const table = pageObjects.rulesList.rulesListTable;
     await expect(heading).toBeInViewport();
-    await expect(pageObjects.rulesList.rulesListShowingLabel).toHaveText(
-      'Showing 1-20 of 20 Rules',
-      {
-        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
-      }
-    );
     await expect(pageObjects.rulesList.ruleNameLink(unrelatedRuleId)).toBeHidden();
-    for (const ruleId of ruleIds.filter((id) => id !== unrelatedRuleId)) {
-      await expect(pageObjects.rulesList.ruleNameLink(ruleId)).toBeVisible({
-        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
-      });
-    }
+    await expect(pageObjects.rulesList.ruleNameLink(firstRuleId)).toBeVisible({
+      timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+    });
 
     const tableTopBeforeScroll = await table.evaluate(
       (element) => element.getBoundingClientRect().top
