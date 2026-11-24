@@ -325,6 +325,8 @@ export class ServiceAccountFakeRequests {
         onExchangeFailure: (error) => {
           exchangeFailure = { error };
         },
+        // A workload that ended while the first try was out needs no new credential.
+        canRetry: () => this.registry.get(request) === entry,
       }
     )
       .then(({ token, expiresAt }) => {
@@ -453,7 +455,10 @@ export class ServiceAccountFakeRequests {
     serviceAccountId: string,
     options: ServiceAccountMintOptions,
     mintInterceptor?: ServiceAccountMintInterceptor,
-    { onExchangeFailure }: { onExchangeFailure?: (error: unknown) => void } = {}
+    {
+      onExchangeFailure,
+      canRetry = () => true,
+    }: { onExchangeFailure?: (error: unknown) => void; canRetry?: () => boolean } = {}
   ): Promise<{ token: string; expiresAt?: number }> {
     // The interceptor contract deals in plain tokens, so the expiry of the one it returns is kept
     // aside rather than threaded through it.
@@ -477,7 +482,7 @@ export class ServiceAccountFakeRequests {
     // works on a second try. The retry goes through the interceptor again, so a binding that
     // changed in the meantime is still checked.
     const token = await attempt().catch((error) => {
-      if (!(error instanceof ServiceAccountTokenExchangeError && error.notSent)) {
+      if (!(error instanceof ServiceAccountTokenExchangeError && error.notSent && canRetry())) {
         throw error;
       }
       this.logger.debug(

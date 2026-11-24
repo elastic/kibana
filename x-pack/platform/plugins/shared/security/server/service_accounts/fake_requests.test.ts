@@ -608,6 +608,26 @@ describe('ServiceAccountFakeRequests', () => {
         expect(mintToken).toHaveBeenCalledTimes(1);
       });
 
+      it('is not tried again for a request released while the first try was out', async () => {
+        const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => await mint());
+        const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
+        mintInterceptor.mockClear();
+        mintToken.mockClear();
+        let rejectMint!: (error: Error) => void;
+        mintToken.mockImplementationOnce(
+          () => new Promise<string>((_resolve, reject) => (rejectMint = reject))
+        );
+
+        jest.advanceTimersByTime(MAX_AGE_MS);
+        const refresh = fakeRequests.ensureFreshToken(request, MAX_AGE_MS, 'reauthenticate');
+        fakeRequests.release(request);
+        rejectMint(notSentError());
+
+        await expect(refresh).rejects.toMatchObject({ notSent: true });
+        expect(mintInterceptor).toHaveBeenCalledTimes(1);
+        expect(mintToken).toHaveBeenCalledTimes(1);
+      });
+
       it('is the only exchange failure tried again right away', async () => {
         const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => await mint());
         const error = new ServiceAccountTokenExchangeError(new Error('socket closed'), {
