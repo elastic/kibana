@@ -1,8 +1,15 @@
 # Nightshift detection
 
 The detection engine of Nightshift. It runs detection strategies per space on a schedule and stores
-what they find as detection signals. This plugin is server-only and built with Kibana DI
-(`server/setup/`).
+what they find as detection signals. The server is built with Kibana DI (`server/setup/`).
+
+## Inspector
+
+`public/` holds one hidden page for the engine's developers, `/app/nightshiftDetectionDebug`. It
+calls `_tick` and `_reconcile` in the current space and shows what they return. It has no nav link
+and no gate besides the plugin being enabled, so it is deleted, with `public/` and the
+`nightshiftDetection` entry in `packages/kbn-rspack-optimizer/limits.yml`, before the plugin is
+turned on in any shipped config.
 
 ## Availability
 
