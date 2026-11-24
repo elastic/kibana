@@ -112,8 +112,15 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         const foundPolicyByName = policyName
           ? agentPolicies?.filter((policy) =>
               policy.name.toLowerCase().includes(policyName.toLowerCase())
-            )
+            ) ?? []
           : [];
+
+        // `policy_name` is not an agent field, and Fleet rejects unmapped kuery fields, so the
+        // clause is replaced by the policy ids it resolved to. `buildAgentSearchKuery` emits it
+        // last and escapes its value, which may contain spaces, so it runs to the end.
+        const remainingSearchKuery = policyName
+          ? searchKuery.replace(/(?:^|\s+or\s+)policy_name:.*$/, '').trim()
+          : searchKuery;
 
         // `searchKuery` is free-form text from the wire. Unbalanced input (`a) or (b`) would
         // otherwise rebalance the parentheses below and lift branches out of the policy scope,
@@ -126,22 +133,22 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         let composedKuery: string;
 
         try {
-          if (searchKuery) {
-            fromKueryExpression(searchKuery);
+          if (remainingSearchKuery) {
+            fromKueryExpression(remainingSearchKuery);
           }
 
           const scopeClause = `(${policyScope})`;
 
           let searchClause: string | undefined;
-          if (foundPolicyByName?.length) {
-            // Keep the raw search terms alongside the resolved policy ids so version-suffixed
-            // agents (`<id>#<major.minor>`) still match.
+          if (policyName) {
+            // Keep the other search terms alongside the resolved policy ids so version-suffixed
+            // agents (`<id>#<major.minor>`) still match. No match yields a match-nothing clause.
             const policyNameScope = buildPolicyIdKuery(foundPolicyByName.map((p) => p.id));
-            searchClause = searchKuery
-              ? `((${searchKuery}) or (${policyNameScope}))`
+            searchClause = remainingSearchKuery
+              ? `((${remainingSearchKuery}) or (${policyNameScope}))`
               : `(${policyNameScope})`;
-          } else if (searchKuery) {
-            searchClause = `(${searchKuery})`;
+          } else if (remainingSearchKuery) {
+            searchClause = `(${remainingSearchKuery})`;
           }
 
           composedKuery = searchClause ? `${searchClause} and ${scopeClause}` : scopeClause;

@@ -325,6 +325,29 @@ describe('Agents CRUD test', () => {
       expect(searchMock).toHaveBeenCalled();
     });
 
+    it('allows the agent search kuery the Osquery agent picker sends', async () => {
+      // Composed by `/internal/osquery/fleet_wrapper/agents` from `buildAgentSearchKuery('web')`,
+      // once its `policy_name` clause is resolved to policy ids.
+      const policyScope = 'policy_id:("policy-1" or policy-1#*)';
+      const kuery = [
+        '((local_metadata.host.hostname.keyword:*web* or local_metadata.host.hostname.keyword:*WEB*',
+        'or local_metadata.host.name.keyword:*web* or local_metadata.host.hostname:*web*',
+        'or local_metadata.host.hostname:"web" or local_metadata.elastic.agent.id:*web*',
+        `or policy_id: *web* or local_metadata.os.platform: *web*) or (${policyScope}))`,
+        `and (${policyScope})`,
+      ].join(' ');
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online'));
+
+      await expect(
+        getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+          kuery,
+        })
+      ).resolves.toBeDefined();
+      expect(searchMock).toHaveBeenCalled();
+    });
+
     it('should roll forward PIT id from search responses', async () => {
       searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online', () => ({}), 'pit-2'));
 
