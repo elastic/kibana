@@ -122,7 +122,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                 content={
                   <FormattedMessage
                     id="searchConnectors.index.syncJobs.documents.upserted.tooltip"
-                    defaultMessage="Number of {index} operations the connector sent to the Elasticsearch _bulk API, including updates to existing documents. Note that the number of documents upserted and the number of documents in the index may differ."
+                    defaultMessage="Number of {index} operations the content crawler sent to the Elasticsearch _bulk API, including updates to existing documents. Note that the number of documents upserted and the number of documents in the index may differ."
                     values={{ index: <EuiCode>index</EuiCode> }}
                   />
                 }
@@ -151,7 +151,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                 content={
                   <FormattedMessage
                     id="searchConnectors.index.syncJobs.documents.deleted.tooltip"
-                    defaultMessage="Number of {delete} operations the connector sent to the Elasticsearch _bulk API. May include documents dropped by Sync Rules. Does not include documents dropped by ingest processors. Documents are deleted when the connector determines they are no longer present in the third-party source."
+                    defaultMessage="Number of {delete} operations the content crawler sent to the Elasticsearch _bulk API. May include documents dropped by Sync Rules. Does not include documents dropped by ingest processors. Documents are deleted when the content crawler determines they are no longer present in the third-party source."
                     values={{ delete: <EuiCode>delete</EuiCode> }}
                   />
                 }
@@ -274,7 +274,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
           defaultMessage: 'Content crawler sync jobs',
         })
       : i18n.translate('searchConnectors.syncJobsTable.accessControlTableCaption', {
-          defaultMessage: 'Access control connector sync jobs',
+          defaultMessage: 'Access control content crawler sync jobs',
         });
 
   return (

@@ -18,7 +18,7 @@ export const ConnectorError: React.FC = () => {
         color="warning"
         iconType="warning"
         title={i18n.translate('searchConnectors.content.indices.connectorScheduling.error.title', {
-          defaultMessage: 'Review your connector configuration for reported errors.',
+          defaultMessage: 'Review your content crawler configuration for reported errors.',
         })}
       />
       <EuiSpacer size="l" />

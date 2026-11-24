@@ -750,7 +750,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: false,
     keywords: ['custom', 'connector', 'code'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.customConnector.name', {
-      defaultMessage: 'Customized connector',
+      defaultMessage: 'Customized content crawler',
     }),
     serviceType: '',
   },

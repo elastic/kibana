@@ -160,7 +160,7 @@ export const ConnectorConfigurationComponent: FC<
                 'searchConnectors.configurationConnector.config.noConfigCallout.description',
                 {
                   defaultMessage:
-                    'This connector has no configuration fields. Has your connector connected successfully to Elasticsearch and set its configuration?',
+                    'This content crawler has no configuration fields. Has your content crawler connected successfully to Elasticsearch and set its configuration?',
                 }
               )}
             </EuiCallOut>
@@ -239,7 +239,7 @@ export const ConnectorConfigurationComponent: FC<
               announceOnMount
               color="danger"
               title={i18n.translate('searchConnectors.configurationConnector.config.error.title', {
-                defaultMessage: 'Connector error',
+                defaultMessage: 'Content crawler error',
               })}
             >
               <EuiText size="s">{error}</EuiText>
