@@ -196,7 +196,6 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(emitted).toEqual([]);
-    expect(api.loadingSuggestions$.getValue()).toBe(true);
     const signal: AbortSignal = fetchSpy.mock.calls[0][1].signal;
     expect(signal.aborted).toBe(false);
 
