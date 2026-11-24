@@ -23,6 +23,10 @@ import {
   findSloDefinitionsResponseSchema,
 } from './find_definition';
 import { getSLOParamsSchema, getSLOResponseSchema } from './get';
+import {
+  getSLOGlobalSettingsResponseSchema,
+  putSLOGlobalSettingsParamsSchema,
+} from './global_settings';
 import { resetSLOResponseSchema } from './reset';
 import {
   bulkSnapshotParamsSchema,
@@ -254,6 +258,16 @@ describe('SLO public route request bodies are documented', () => {
       ])
     );
   });
+
+  it('update global SLO settings', async () => {
+    expectEveryPropertyDescribed(
+      await getBodyPropertyDescriptions(putSLOGlobalSettingsParamsSchema.shape.body, [
+        'sliRetention',
+        'sliRetention.enabled',
+        'sliRetention.periodDays',
+      ])
+    );
+  });
 });
 
 describe('SLO public route responses are documented', () => {
@@ -278,6 +292,7 @@ describe('SLO public route responses are documented', () => {
     ['bulk delete status', 'SLOBulkDeleteStatusResponse', bulkDeleteStatusResponseSchema],
     ['bulk purge rollup data', 'SLOBulkPurgeRollupResponse', bulkPurgeRollupResponseSchema],
     ['snapshot', 'SLOSnapshotResponse', snapshotResponseSchema],
+    ['global SLO settings', 'SLOGlobalSettingsResponse', getSLOGlobalSettingsResponseSchema],
   ])('%s references the open %s component', async (_, id, response) => {
     const { schema, components } = await generateResponse(response);
     expect(schema).toEqual({ $ref: `#/components/schemas/${id}` });

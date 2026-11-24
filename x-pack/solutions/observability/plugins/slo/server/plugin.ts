@@ -39,6 +39,7 @@ import {
   sloGlobalSettings,
   sloSettings,
   SO_SLO_COMPOSITE_TYPE,
+  SO_SLO_GLOBAL_SETTINGS_TYPE,
   SO_SLO_SETTINGS_TYPE,
   SO_SLO_TEMPLATE_TYPE,
   SO_SLO_TYPE,
@@ -50,6 +51,7 @@ import {
   DefaultTransformManager,
 } from './services';
 import { DefaultCompositeSLORepository } from './services/composites/composite_slo_repository';
+import { DefaultSLOGlobalSettingsRepository } from './services/global_settings';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
@@ -122,7 +124,7 @@ export class SLOPlugin
           catalogue: [sloFeatureId, 'observability'],
           api: ['slo_write', 'slo_read', 'rac'],
           savedObject: {
-            all: savedObjectTypes,
+            all: [...savedObjectTypes, SO_SLO_GLOBAL_SETTINGS_TYPE],
             read: [],
           },
           alerting: {
@@ -217,6 +219,7 @@ export class SLOPlugin
           isServerless: this.isServerless,
           isCpsEnabled: this.isCpsEnabled,
           compositeSloSummaryTaskEnabled: this.config.compositeSloSummaryTaskEnabled,
+          sliRetention: this.config.sliRetention,
         },
         getScopedClients: async ({ request, logger }) => {
           const [coreStart, pluginsStart] = await core.getStartServices();
@@ -226,7 +229,11 @@ export class SLOPlugin
           );
 
           const soClient = coreStart.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [SO_SLO_TEMPLATE_TYPE, SO_SLO_COMPOSITE_TYPE],
+            includedHiddenTypes: [
+              SO_SLO_TEMPLATE_TYPE,
+              SO_SLO_COMPOSITE_TYPE,
+              SO_SLO_GLOBAL_SETTINGS_TYPE,
+            ],
           });
           const rawScopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
@@ -254,6 +261,7 @@ export class SLOPlugin
           const repository = new DefaultSLODefinitionRepository(soClient, logger);
           const compositeRepository = new DefaultCompositeSLORepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
+          const globalSettingsRepository = new DefaultSLOGlobalSettingsRepository(soClient, logger);
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
@@ -280,6 +288,7 @@ export class SLOPlugin
             repository,
             compositeRepository,
             settingsRepository,
+            globalSettingsRepository,
             templateRepository,
             transformManager,
             summaryTransformManager,

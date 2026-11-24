@@ -106,6 +106,8 @@ const EXPECTED_QUERY_PARAM_EXAMPLES: Record<string, string[]> = {
 // 4xx and 5xx codes documented per route, from `handleSLOError` and the handlers:
 // 400 request validation or SLOError, 401/403 security, 404 SLONotFound (`findById`, `SnapshotService`),
 // 409 SLOIdConflict (create), 503 SLOOperationTimeout (`withDeadline`: create, update and reset).
+// The global settings routes return 403 when the user lacks the SLO privilege in some space, and
+// the PUT returns 400 when the setting is set in kibana.yml (IllegalArgumentError).
 const EXPECTED_ERROR_STATUS_CODES: Record<string, string[]> = {
   'POST /api/observability/slos 2023-10-31': ['400', '401', '403', '409', '503'],
   'GET /api/observability/slos 2023-10-31': ['400', '401', '403'],
@@ -122,6 +124,8 @@ const EXPECTED_ERROR_STATUS_CODES: Record<string, string[]> = {
   'GET /api/observability/slos/_bulk_delete/{taskId} 2023-10-31': ['401', '403'],
   'POST /api/observability/slos/_bulk_snapshot 2023-10-31': ['400', '401', '403'],
   'GET /api/observability/slos/{id}/_snapshot 2023-10-31': ['400', '401', '403', '404'],
+  'GET /api/observability/slos/_global_settings 2023-10-31': ['401', '403'],
+  'PUT /api/observability/slos/_global_settings 2023-10-31': ['400', '401', '403'],
 };
 
 describe('SLO routes OpenAPI examples', () => {

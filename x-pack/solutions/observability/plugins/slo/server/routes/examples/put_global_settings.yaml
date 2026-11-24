@@ -1,0 +1,84 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        enableSliRetention:
+          summary: Enable SLI retention for one year
+          value:
+            sliRetention:
+              enabled: true
+              periodDays: 365
+responses:
+  '200':
+    content:
+      application/json:
+        examples:
+          updateGlobalSettingsResponse:
+            summary: Saved global SLO settings
+            value:
+              sliRetention:
+                enabled: true
+                periodDays: 365
+                updatedAt: '2026-11-24T10:00:00.000Z'
+                effective:
+                  enabled: true
+                  periodDays: 365
+                  source: settings
+  '400':
+    description: Bad request
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/400_response
+        examples:
+          configOverrideExample:
+            summary: SLI retention is set in kibana.yml
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: SLI retention is set by xpack.slo.sliRetention in kibana.yml and cannot be changed through the API
+          invalidPeriodExample:
+            summary: Retention period below the minimum
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: |-
+                [
+                  {
+                    "origin": "number",
+                    "code": "too_small",
+                    "minimum": 180,
+                    "inclusive": true,
+                    "path": [
+                      "sliRetention",
+                      "periodDays"
+                    ],
+                    "message": "Too small: expected number to be >=180"
+                  }
+                ]
+  '401':
+    description: Unauthorized response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/401_response
+        examples:
+          unauthorizedExample:
+            summary: Unauthorized
+            value:
+              statusCode: 401
+              error: Unauthorized
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+  '403':
+    description: Forbidden response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/403_response
+        examples:
+          forbiddenExample:
+            summary: Missing the SLO privilege in some spaces
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: 'Global SLO settings require the SLO "All" privilege in all spaces'

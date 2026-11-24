@@ -29,6 +29,7 @@ import { findSLOGroupsRoute } from './find_groups';
 import { findSLOInstancesRoute } from './find_instances';
 import { findSLORoute } from './find_slo';
 import { getDiagnosisRoute } from './get_diagnosis';
+import { getSLOGlobalSettingsRoute, updateSLOGlobalSettingsRoute } from './global_settings';
 import { getSLOGroupedStatsRoute } from './get_grouped_stats';
 import { getPreviewData } from './get_preview_data';
 import { getSLORoute } from './get_slo';
@@ -62,6 +63,8 @@ export const getSloRouteRepository = ({ isServerless }: RouteRepositoryOptions =
     ...fetchSloHealthRoute,
     ...getSloSettingsRoute,
     ...updateSloSettings(isServerless),
+    ...getSLOGlobalSettingsRoute,
+    ...updateSLOGlobalSettingsRoute,
     ...createSLORoute,
     ...inspectSLORoute,
     ...deleteSLORoute,

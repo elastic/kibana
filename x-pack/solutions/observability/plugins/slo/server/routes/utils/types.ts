@@ -17,7 +17,12 @@ import type { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_c
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { SLODefinitionRepository, TransformManager } from '../../services';
 import type { CompositeSLORepository } from '../../services/composites/composite_slo_repository';
-import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../types';
+import type {
+  SLOConfig,
+  SLOPluginSetupDependencies,
+  SLOPluginStartDependencies,
+} from '../../types';
+import type { SLOGlobalSettingsRepository } from '../../services/global_settings';
 import type { SLOSettingsRepository } from '../../services/slo_settings_repository';
 import type { SLOTemplateRepository } from '../../services/slo_template_repository';
 import type { SloTelemetryReporter } from '../../lib/telemetry';
@@ -42,6 +47,7 @@ export interface RouteHandlerScopedClients {
   repository: SLODefinitionRepository;
   compositeRepository: CompositeSLORepository;
   settingsRepository: SLOSettingsRepository;
+  globalSettingsRepository: SLOGlobalSettingsRepository;
   templateRepository: SLOTemplateRepository;
   transformManager: TransformManager;
   summaryTransformManager: TransformManager;
@@ -65,6 +71,7 @@ export interface SLORoutesDependencies {
     isServerless: boolean;
     isCpsEnabled: boolean;
     compositeSloSummaryTaskEnabled: boolean;
+    sliRetention?: SLOConfig['sliRetention'];
   };
 }
 
