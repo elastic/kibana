@@ -18,6 +18,7 @@ export default function connectorNotFoundTests({ getService }: FtrProviderContex
     const retry = getService('retry');
     const es = getService('es');
     const esTestIndexTool = new ESTestIndexTool(es, retry);
+    let deletedConnectorId: string | undefined;
 
     const createConnector = async (name: string): Promise<string> => {
       const { body } = await supertest
@@ -40,13 +41,21 @@ export default function connectorNotFoundTests({ getService }: FtrProviderContex
 
     afterEach(async () => {
       await objectRemover.removeAll();
+      // The test deletes this connector itself, so a 404 is expected unless it failed midway.
+      if (deletedConnectorId) {
+        const { status } = await supertest
+          .delete(`/api/actions/connector/${deletedConnectorId}`)
+          .set('kbn-xsrf', 'foo');
+        expect([204, 404]).to.contain(status);
+        deletedConnectorId = undefined;
+      }
       await esTestIndexTool.destroy();
     });
 
     it('runs the actions of the other connectors and reports a warning', async () => {
       const existingConnectorId = await createConnector('Existing connector');
       objectRemover.add('default', existingConnectorId, 'connector', 'actions');
-      const deletedConnectorId = await createConnector('Deleted connector');
+      deletedConnectorId = await createConnector('Deleted connector');
 
       const [existingConnectorAction, deletedConnectorAction] = [
         { id: existingConnectorId, reference: 'existing-connector' },
