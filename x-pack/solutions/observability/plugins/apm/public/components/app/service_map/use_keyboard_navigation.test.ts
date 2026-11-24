@@ -669,6 +669,127 @@ describe('useKeyboardNavigation', () => {
     });
   });
 
+  describe('arrow keys with an open group', () => {
+    // The members are placed relative to the box: `cart` is at (524, 72) and `pay` at (760, 72)
+    // on the map. `left` and `right` are outside the group.
+    const box = {
+      ...createNode('shop', 500, 0, 'shop'),
+      type: 'serviceGroupBox',
+      width: 400,
+      height: 300,
+      data: { id: 'shop', label: 'shop', isService: false, isServiceGroupBox: true },
+    } as ServiceMapNode;
+    const cart = { ...createNode('cart', 24, 72, 'cart'), parentId: 'shop' } as ServiceMapNode;
+    const pay = { ...createNode('pay', 260, 72, 'pay'), parentId: 'shop' } as ServiceMapNode;
+    const left = createNode('left', 100, 72);
+    const right = createNode('right', 1200, 72);
+    const nodes = [box, cart, pay, left, right];
+
+    const findNext = (
+      currentNodeId: string,
+      direction: 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight',
+      mapNodes: ServiceMapNode[] = nodes
+    ) => {
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: mapNodes })
+      );
+      return result.current.findNodeInDirection(currentNodeId, direction)?.id;
+    };
+
+    it('moves between the members of the group', () => {
+      expect(findNext('cart', 'ArrowRight')).toBe('pay');
+      expect(findNext('pay', 'ArrowLeft')).toBe('cart');
+    });
+
+    it('moves from a member to a node outside the group, on either side', () => {
+      expect(findNext('cart', 'ArrowLeft')).toBe('left');
+      expect(findNext('pay', 'ArrowRight')).toBe('right');
+    });
+
+    it('moves from a node outside the group to the member next to it', () => {
+      expect(findNext('left', 'ArrowRight')).toBe('cart');
+      expect(findNext('right', 'ArrowLeft')).toBe('pay');
+    });
+
+    it('does not stop on the box', () => {
+      expect(findNext('left', 'ArrowRight')).not.toBe('shop');
+      expect(findNext('cart', 'ArrowUp')).toBeUndefined();
+    });
+
+    it('goes into the group from its box', () => {
+      expect(findNext('shop', 'ArrowRight')).toBe('pay');
+      expect(findNext('shop', 'ArrowLeft')).toBe('cart');
+    });
+
+    it('skips a hidden member', () => {
+      const hiddenCart = { ...cart, hidden: true };
+
+      expect(findNext('left', 'ArrowRight', [box, hiddenCart, pay, left, right])).toBe('pay');
+    });
+
+    it('moves between members of two open groups', () => {
+      const otherBox = {
+        ...box,
+        id: 'other',
+        position: { x: 500, y: 600 },
+        data: { ...box.data, id: 'other', label: 'other' },
+      } as ServiceMapNode;
+      const stock = {
+        ...createNode('stock', 24, 72, 'stock'),
+        parentId: 'other',
+      } as ServiceMapNode;
+
+      expect(findNext('cart', 'ArrowDown', [...nodes, otherBox, stock])).toBe('stock');
+      expect(findNext('stock', 'ArrowUp', [...nodes, otherBox, stock])).toBe('cart');
+    });
+
+    describe('with the focus on a node', () => {
+      const elements: HTMLDivElement[] = [];
+
+      const addElement = (id: string) => {
+        const element = document.createElement('div');
+        element.setAttribute('data-id', id);
+        element.tabIndex = 0;
+        document.body.appendChild(element);
+        elements.push(element);
+        return element;
+      };
+
+      afterEach(() => {
+        elements.splice(0).forEach((element) => element.remove());
+      });
+
+      const pressArrowRight = () =>
+        act(() => {
+          document.dispatchEvent(
+            new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
+          );
+        });
+
+      it('focuses the next member and says which group it is in', () => {
+        const { result } = renderHook(() => useKeyboardNavigation({ ...defaultProps, nodes }));
+        addElement('cart').focus();
+        const payElement = addElement('pay');
+
+        pressArrowRight();
+
+        expect(document.activeElement).toBe(payElement);
+        expect(result.current.screenReaderAnnouncement).toBe('Focused on pay, in group shop');
+      });
+
+      it('does not mention a group for a node outside it', () => {
+        const { result } = renderHook(() => useKeyboardNavigation({ ...defaultProps, nodes }));
+        addElement('pay').focus();
+        const rightElement = addElement('right');
+
+        pressArrowRight();
+
+        expect(document.activeElement).toBe(rightElement);
+        expect(result.current.screenReaderAnnouncement).toBe('Focused on right');
+      });
+    });
+  });
+
   describe('Enter/Space on node elements', () => {
     let nodeElement: HTMLDivElement;
 

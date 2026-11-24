@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import type { ServiceGroupBoxNodeData } from '../../../../common/service_map';
 import { ServiceGroupBoxNode } from './service_group_box_node';
 import { ServiceMapInteractivityProvider } from './service_map_interactivity_context';
 import { ServiceMapGroupActionsProvider } from './service_map_group_actions_context';
+import { ServiceMapHighlightProvider, useServiceMapHighlight } from './service_map_search_context';
 
 const defaultNodeProps = {
   id: 'service.namespace:shop',
@@ -98,5 +99,40 @@ describe('ServiceGroupBoxNode', () => {
     renderBox();
 
     expect(screen.queryByTestId('serviceMapNodeServiceGroupBoxClose')).not.toBeInTheDocument();
+  });
+
+  describe('find in page', () => {
+    function SetActiveMatch({ activeMatchNodeId }: { activeMatchNodeId: string | null }) {
+      const { setSearchHighlight } = useServiceMapHighlight();
+      useEffect(() => {
+        setSearchHighlight({
+          matchNodeIds: new Set(activeMatchNodeId ? [activeMatchNodeId] : []),
+          activeMatchNodeId,
+        });
+      }, [activeMatchNodeId, setSearchHighlight]);
+      return null;
+    }
+
+    const renderWithActiveMatch = (activeMatchNodeId: string | null) =>
+      render(
+        <ReactFlowProvider>
+          <ServiceMapHighlightProvider>
+            <SetActiveMatch activeMatchNodeId={activeMatchNodeId} />
+            <ServiceGroupBoxNode {...defaultNodeProps} data={data} />
+          </ServiceMapHighlightProvider>
+        </ReactFlowProvider>
+      );
+
+    it('marks the box when it is the active match', () => {
+      renderWithActiveMatch(data.id);
+
+      expect(screen.getByRole('group')).toHaveAttribute('data-search-active-match', 'true');
+    });
+
+    it('does not mark the box when another node is the active match', () => {
+      renderWithActiveMatch('frontend');
+
+      expect(screen.getByRole('group')).not.toHaveAttribute('data-search-active-match');
+    });
   });
 });

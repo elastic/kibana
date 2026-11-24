@@ -13,7 +13,8 @@ import {
   type ServiceMapNode,
   type ServiceMapEdge,
 } from '../../../../common/service_map';
-import { DIRECTION_THRESHOLD } from './constants';
+import { DIRECTION_THRESHOLD, NODE_HEIGHT, NODE_WIDTH } from './constants';
+import { getAbsoluteNodePosition } from './get_absolute_node_position';
 
 type ArrowDirection = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight';
 
@@ -75,20 +76,28 @@ export function useKeyboardNavigation({
 
   /**
    * Find the closest node in a given direction from the current node.
-   * Uses spatial positioning and distance calculation.
+   * Uses spatial positioning and distance calculation, from the centre of each node on the map
+   * (members of an open group are placed relative to their box). Hidden nodes and boxes are not
+   * targets: a box is reached with Tab, and its members are the nodes inside it.
    */
   const findNodeInDirection = useCallback(
     (currentNodeId: string, direction: ArrowDirection): ServiceMapNode | null => {
       const currentNode = nodes?.find((n) => n.id === currentNodeId);
       if (!currentNode) return null;
 
-      const current = currentNode.position;
+      const nodesById = new Map(nodes.map((node) => [node.id, node] as const));
+      const getCentre = (node: ServiceMapNode): { x: number; y: number } => {
+        const { x, y } = getAbsoluteNodePosition(node, nodesById);
+        return { x: x + (node.width ?? NODE_WIDTH) / 2, y: y + (node.height ?? NODE_HEIGHT) / 2 };
+      };
+
+      const current = getCentre(currentNode);
       const candidates: Array<{ node: ServiceMapNode; distance: number }> = [];
 
       nodes.forEach((node) => {
-        if (node.id === currentNodeId) return;
+        if (node.id === currentNodeId || node.hidden || isServiceGroupBoxNode(node)) return;
 
-        const pos = node.position;
+        const pos = getCentre(node);
         const dx = pos.x - current.x;
         const dy = pos.y - current.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -213,11 +222,22 @@ export function useKeyboardNavigation({
           const nextElement = document.querySelector(`[data-id="${nextNode.id}"]`);
           if (nextElement instanceof HTMLElement) {
             nextElement.focus();
+            const nextNodeLabel = nextNode.data.label || nextNode.id;
+            const nextNodeBox = getOpenGroupBox(nextNode, nodes);
+            // A member is not inside its box in the page, so say which group it belongs to.
             setScreenReaderAnnouncement(
-              i18n.translate('xpack.apm.serviceMap.nodeFocused', {
-                defaultMessage: 'Focused on {nodeLabel}',
-                values: { nodeLabel: nextNode.data.label || nextNode.id },
-              })
+              nextNodeBox
+                ? i18n.translate('xpack.apm.serviceMap.nodeFocusedInGroup', {
+                    defaultMessage: 'Focused on {nodeLabel}, in group {groupLabel}',
+                    values: {
+                      nodeLabel: nextNodeLabel,
+                      groupLabel: nextNodeBox.data.label || nextNodeBox.id,
+                    },
+                  })
+                : i18n.translate('xpack.apm.serviceMap.nodeFocused', {
+                    defaultMessage: 'Focused on {nodeLabel}',
+                    values: { nodeLabel: nextNodeLabel },
+                  })
             );
           }
         }

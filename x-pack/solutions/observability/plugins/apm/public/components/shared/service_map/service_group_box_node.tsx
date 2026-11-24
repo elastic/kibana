@@ -14,6 +14,7 @@ import type { ServiceGroupBoxNodeData } from '../../../../common/service_map';
 import { GROUP_BOX_HEADER_HEIGHT } from '../../../../common/service_map/constants';
 import { useServiceMapInteractivity } from './service_map_interactivity_context';
 import { useServiceMapCloseGroup } from './service_map_group_actions_context';
+import { useServiceMapSearchHighlight } from './service_map_search_context';
 
 type ServiceGroupBoxNodeType = Node<ServiceGroupBoxNodeData, 'serviceGroupBox'>;
 
@@ -26,6 +27,7 @@ export const ServiceGroupBoxNode = memo(({ data }: NodeProps<ServiceGroupBoxNode
   const isInteractive = useServiceMapInteractivity();
   const closeGroup = useServiceMapCloseGroup();
   const { id, label, memberCount } = data;
+  const { isActiveSearchMatch } = useServiceMapSearchHighlight(id);
 
   const handleClose = useCallback(() => closeGroup?.(id), [closeGroup, id]);
 
@@ -53,6 +55,12 @@ export const ServiceGroupBoxNode = memo(({ data }: NodeProps<ServiceGroupBoxNode
     border-radius: ${euiTheme.border.radius.medium};
     background: ${euiTheme.colors.backgroundBaseSubdued};
     pointer-events: all;
+    ${isActiveSearchMatch
+      ? `
+      outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.textSubdued};
+      outline-offset: -${euiTheme.border.width.thick};
+    `
+      : ''}
   `;
 
   const headerStyles = css`
@@ -78,6 +86,7 @@ export const ServiceGroupBoxNode = memo(({ data }: NodeProps<ServiceGroupBoxNode
       aria-label={ariaLabel}
       css={boxStyles}
       data-test-subj={`serviceMapNode-serviceGroupBox-${id}`}
+      data-search-active-match={isActiveSearchMatch || undefined}
     >
       <div css={headerStyles}>
         <EuiText size="s" css={titleStyles} data-test-subj="serviceMapNodeServiceGroupBoxLabel">
