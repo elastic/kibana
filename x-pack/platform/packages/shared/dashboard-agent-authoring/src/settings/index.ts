@@ -6,3 +6,4 @@
  */
 
 export { revertRefreshIntervalWithoutTimeRange } from './refresh_interval';
+export { planSyncOptions } from './sync_options';

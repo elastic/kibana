@@ -321,6 +321,58 @@ describe('executeDashboardUpsert', () => {
 
       expect(result.dashboardData).toEqual({ ...dashboardWithSettings, title: 'Renamed' });
     });
+
+    it('leaves out tooltip sync turned on while cursor sync is off', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: dashboardWithSettings,
+        upsert: { options: { sync_tooltips: true } },
+        logger,
+      });
+
+      expect(result.dashboardData).toEqual(dashboardWithSettings);
+      expect(result.dashboardData.options).not.toHaveProperty('sync_tooltips');
+      expect(result.failures).toEqual([
+        expect.objectContaining({ kind: 'dashboard', identifier: 'options.sync_tooltips' }),
+      ]);
+    });
+
+    it('turns tooltip sync off when the call turns cursor sync off', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: {
+          ...dashboardWithSettings,
+          options: { sync_cursor: true, sync_tooltips: true },
+        },
+        upsert: { options: { sync_cursor: false } },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.options).toEqual({ sync_cursor: false, sync_tooltips: false });
+    });
+
+    it('applies neither sync option when the call turns cursor sync off and tooltip sync on', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: {
+          ...dashboardWithSettings,
+          options: { sync_cursor: true, sync_tooltips: true },
+        },
+        upsert: { options: { sync_cursor: false, sync_tooltips: true, hide_panel_titles: true } },
+        logger,
+      });
+
+      expect(result.dashboardData.options).toEqual({
+        sync_cursor: true,
+        sync_tooltips: true,
+        hide_panel_titles: true,
+      });
+      expect(result.failures).toEqual([
+        expect.objectContaining({
+          kind: 'dashboard',
+          identifier: 'options.sync_tooltips',
+          error: expect.stringContaining('because they conflict'),
+        }),
+      ]);
+    });
   });
 
   it('starts from an empty dashboard when no dashboard data is given', async () => {
