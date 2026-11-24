@@ -46,6 +46,7 @@ import {
   policyHasEndpointSecurity,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
+  sanitizeAgentPolicyOverrides,
   validateFleetSavedObjectId,
 } from '../../common/services';
 
@@ -1210,31 +1211,41 @@ class AgentPolicyService {
       }
     }
 
+    const copiedAttributes = pick(baseAgentPolicy, [
+      'namespace',
+      'monitoring_enabled',
+      'inactivity_timeout',
+      'unenroll_timeout',
+      'agent_features',
+      'overrides',
+      'data_output_id',
+      'monitoring_output_id',
+      'download_source_id',
+      'download_source_ids',
+      'fleet_server_host_id',
+      'supports_agentless',
+      'global_data_tags',
+      'agentless',
+      'monitoring_pprof_enabled',
+      'monitoring_http',
+      'monitoring_diagnostics',
+    ]);
+    // Policies saved before the OpenTelemetry collector keys were denied may still hold them in
+    // `overrides`: do not carry them into the new policy.
+    if (copiedAttributes.overrides) {
+      const { overrides, removedKeys } = sanitizeAgentPolicyOverrides(copiedAttributes.overrides);
+      if (removedKeys.length > 0) {
+        logger.warn(
+          `Not copying disallowed overrides [${removedKeys.join(', ')}] of agent policy [${id}]`
+        );
+      }
+      copiedAttributes.overrides = overrides;
+    }
+
     const newAgentPolicy = await this.create(
       soClient,
       esClient,
-      {
-        ...pick(baseAgentPolicy, [
-          'namespace',
-          'monitoring_enabled',
-          'inactivity_timeout',
-          'unenroll_timeout',
-          'agent_features',
-          'overrides',
-          'data_output_id',
-          'monitoring_output_id',
-          'download_source_id',
-          'download_source_ids',
-          'fleet_server_host_id',
-          'supports_agentless',
-          'global_data_tags',
-          'agentless',
-          'monitoring_pprof_enabled',
-          'monitoring_http',
-          'monitoring_diagnostics',
-        ]),
-        ...newAgentPolicyProps,
-      },
+      { ...copiedAttributes, ...newAgentPolicyProps },
       options
     );
 

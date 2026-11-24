@@ -80,6 +80,13 @@ const assertNoConcurrentBump = async () => {
       // Step 5: Reconcile labels
       pipeline.push('  - wait # before reconcile labels');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
+
+      // X.Y.0 has shipped, so the n-2 minor no longer needs CI on its release branch.
+      if (process.env.NEW_VERSION?.split('.')[2] === '1') {
+        pipeline.push(
+          getPipeline('.buildkite/pipelines/version_bump/prune_pipeline_resource_definitions.yml')
+        );
+      }
     }
 
     if (BUMP_TYPE === 'minor') {

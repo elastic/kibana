@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { deleteItemIdx, findItem } from './helpers';
 import { emptyColumnRenderer } from './empty_column_renderer';
@@ -20,13 +19,12 @@ jest.mock('../../../../../common/lib/kibana');
 describe('empty_column_renderer', () => {
   let mockDatum: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;
-  const mount = useMountAppended();
 
   beforeEach(() => {
     mockDatum = cloneDeep(mockTimelineData[0].data);
   });
 
-  test('renders correctly against snapshot', () => {
+  test('renders the empty value when the field is missing', () => {
     mockDatum = deleteItemIdx(mockDatum, findItem(mockDatum, 'source.ip'));
     const sourceObj = mockDatum.find((d) => d.field === 'source.ip');
     const emptyColumn = emptyColumnRenderer.renderColumn({
@@ -36,8 +34,8 @@ describe('empty_column_renderer', () => {
       field: defaultHeaders.find((h) => h.id === 'source.ip')!,
       scopeId: 'test',
     });
-    const wrapper = shallow(<span>{emptyColumn}</span>);
-    expect(wrapper).toMatchSnapshot();
+    render(<span>{emptyColumn}</span>);
+    expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
   });
 
   test('should return isInstance true if source is empty', () => {
@@ -67,12 +65,12 @@ describe('empty_column_renderer', () => {
       field: defaultHeaders.find((h) => h.id === 'source.ip')!,
       scopeId: 'test',
     });
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <span>{emptyColumn}</span>
       </TestProviders>
     );
 
-    expect(wrapper.text()).toEqual(getEmptyValue());
+    expect(container).toHaveTextContent(new RegExp(`^${getEmptyValue()}$`));
   });
 });

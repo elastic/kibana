@@ -25,8 +25,8 @@ import type { IVectorLayer } from '../../../layers/vector_layer';
 
 const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mockField) => {
   const defaultOptions: IconDynamicOptions = {
-    iconPaletteId: null,
-    fieldMetaOptions: { isEnabled: false },
+    icon_palette_id: null,
+    field_meta_options: { is_enabled: false },
   };
   const mockVectorLayer = new MockLayer() as unknown as IVectorLayer;
   return new DynamicIconProperty(
@@ -43,11 +43,11 @@ const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mock
 describe('getNumberOfCategories', () => {
   test('should derive category number from palettes', async () => {
     const filled = makeProperty({
-      iconPaletteId: 'filledShapes',
+      icon_palette_id: 'filledShapes',
     });
     expect(filled.getNumberOfCategories()).toEqual(6);
     const hollow = makeProperty({
-      iconPaletteId: 'hollowShapes',
+      icon_palette_id: 'hollowShapes',
     });
     expect(hollow.getNumberOfCategories()).toEqual(5);
   });
@@ -56,7 +56,7 @@ describe('getNumberOfCategories', () => {
 describe('renderLegendDetailRow', () => {
   test('Should render categorical legend with breaks', async () => {
     const iconStyle = makeProperty({
-      iconPaletteId: 'filledShapes',
+      icon_palette_id: 'filledShapes',
     });
     const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
     const component = shallow(legendRow);
@@ -68,17 +68,17 @@ describe('renderLegendDetailRow', () => {
 
   test('Should render categorical legend with custom icons in breaks', async () => {
     const iconStyle = makeProperty({
-      useCustomIconMap: true,
-      customIconStops: [
+      use_custom_icon_map: true,
+      custom_icon_stops: [
         {
           stop: null,
           icon: 'kbn__custom_icon_sdf__foobar',
-          iconSource: ICON_SOURCE.CUSTOM,
+          icon_source: ICON_SOURCE.CUSTOM,
         },
         {
           stop: 'MX',
           icon: 'marker',
-          iconSource: ICON_SOURCE.MAKI,
+          icon_source: ICON_SOURCE.MAKI,
         },
       ],
     });
@@ -95,7 +95,7 @@ describe('get mapbox icon-image expression (via internal _getMbIconImageExpressi
   describe('categorical icon palette', () => {
     test('should return mapbox expression for pre-defined icon palette', async () => {
       const iconStyle = makeProperty({
-        iconPaletteId: 'filledShapes',
+        icon_palette_id: 'filledShapes',
       });
       expect(iconStyle._getMbIconImageExpression()).toEqual([
         'match',
@@ -110,17 +110,17 @@ describe('get mapbox icon-image expression (via internal _getMbIconImageExpressi
 
     test('should return mapbox expression for custom icon palette', async () => {
       const iconStyle = makeProperty({
-        useCustomIconMap: true,
-        customIconStops: [
+        use_custom_icon_map: true,
+        custom_icon_stops: [
           {
             stop: null,
             icon: 'circle',
-            iconSource: ICON_SOURCE.MAKI,
+            icon_source: ICON_SOURCE.MAKI,
           },
           {
             stop: 'MX',
             icon: 'marker',
-            iconSource: ICON_SOURCE.MAKI,
+            icon_source: ICON_SOURCE.MAKI,
           },
         ],
       });

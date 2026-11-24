@@ -21,11 +21,13 @@ export interface UiamClientAuthentication {
 }
 
 /**
- * Client authentication that rode in with a UIAM bearer token, or `undefined` when the caller
- * supplied none and Kibana's own assertion should be used instead.
+ * Reads the client authentication paired with a UIAM bearer token, or returns `undefined` if
+ * absent. Accepts stored authentication headers as well as request headers, so a renewed token uses
+ * its own client authentication. This function does not decide when to attach Kibana's own
+ * assertion.
  */
 export const getUiamClientAuthentication = (
-  request: KibanaRequest
+  request: Pick<KibanaRequest, 'headers'>
 ): UiamClientAuthentication | undefined => {
   const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
   if (!authorization || !isUiamBearerCredential(authorization)) {

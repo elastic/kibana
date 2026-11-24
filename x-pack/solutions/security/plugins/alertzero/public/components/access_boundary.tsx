@@ -85,7 +85,7 @@ export const AccessBoundary = ({
   children,
 }: React.PropsWithChildren<{
   availability$: Observable<SubscriptionAvailability>;
-  /** Emits `false` when the active space does not use the Security solution view. */
+  /** Emits `false` when the active space uses a solution view other than Security or Classic. */
   spaceSupported$: Observable<boolean>;
   /**
    * From core security, read before the Kibana context replaces `security` with the
@@ -129,7 +129,7 @@ export const AccessBoundary = ({
           <p>
             <FormattedMessage
               id="xpack.alertzero.access.unsupportedSpaceDescription"
-              defaultMessage="AlertZero, Escalations, and Watches are available only in a Security solution space."
+              defaultMessage="AlertZero, Escalations, and Watches are available only in Security solution and Classic spaces."
             />
           </p>
         }

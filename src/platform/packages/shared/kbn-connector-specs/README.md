@@ -366,22 +366,15 @@ The hub accepts JSON and `application/x-www-form-urlencoded`. A form webhook may
 
 ### Declaring events
 
-Put definitions and `handleEvents` in `src/specs/<connector>/events.ts` and assign the export to `events` on the spec, next to `actions`. Each definition key becomes a public event id through `buildEventId(metadata.id, key)`: `.github` + `issues` → `github.issues`. The definition's `eventId` must equal that value. `title` and `description` go through `i18n.translate`. `eventSchema` is a `z.object` wrapped in `lazySchema()`.
+Define the event in `@kbn/connector-topics` first (`src/events/<connector>.ts`, exported from the package index). The export is `{ name, eventSchema }`. `name` is the public event id and equals `buildEventId(metadata.id, definitionKey)`: `.github` + `issues` → `github.issues`. `eventSchema` is the spoke payload, a `z.object` wrapped in `lazySchema()`, with `.describe()` on each field. Leave `title`, `description`, and the hub fields off it.
+
+In `src/specs/<connector>/events.ts`, build the spec event with `toConnectorSpecEvent` from that export. `title` and `description` stay on the spec and go through `i18n.translate`. Assign the export to `events` on the spec, next to `actions`. `handleEvents` emits `name`. Do not keep a second schema or a second event id on the spec.
 
 Keep the payload flat. The hub rejects more than 32 keys, an `eventId` or `correlationKey` over 128 characters, more than 25 events per request by default (cap 250), or payloads over `xpack.actions.inboundEvents.maxBodyBytes` (default 1mb). The hub also adds `connectorId`, `connectorTypeId`, `spaceId`, and `correlationKey` onto the workflow trigger schema, so leave those off `eventSchema`.
 
 ```typescript
-import { i18n } from '@kbn/i18n';
-import { z, lazySchema } from '@kbn/zod/v4';
-import type {
-  ConnectorIngressContext,
-  ConnectorSpecEvents,
-  HandleEventsResult,
-} from '../../connector_spec_events';
-import { buildEventId } from '../../event_type_id';
-
-const ITEM_CREATED_KEY = 'item_created' as const;
-const ITEM_CREATED_EVENT_ID = buildEventId('.my_connector', ITEM_CREATED_KEY);
+// @kbn/connector-topics src/events/my_connector.ts
+import { lazySchema, z } from '@kbn/zod/v4';
 
 const ItemCreatedEventSchema = lazySchema(() =>
   z.object({
@@ -390,21 +383,36 @@ const ItemCreatedEventSchema = lazySchema(() =>
   })
 );
 
+export const myConnectorItemCreated = {
+  name: 'my_connector.item_created' as const,
+  eventSchema: ItemCreatedEventSchema,
+};
+```
+
+```typescript
+// src/specs/my_connector/events.ts
+import { i18n } from '@kbn/i18n';
+import { myConnectorItemCreated } from '@kbn/connector-topics';
+import {
+  toConnectorSpecEvent,
+  type ConnectorIngressContext,
+  type ConnectorSpecEvents,
+  type HandleEventsResult,
+} from '../../connector_spec_events';
+
 export const myConnectorEvents: ConnectorSpecEvents = {
   definitions: {
-    [ITEM_CREATED_KEY]: {
-      eventId: ITEM_CREATED_EVENT_ID,
+    item_created: toConnectorSpecEvent(myConnectorItemCreated, {
       title: i18n.translate('connectorSpecs.myConnector.events.itemCreated.title', {
         defaultMessage: 'Item created',
       }),
       description: i18n.translate('connectorSpecs.myConnector.events.itemCreated.description', {
         defaultMessage: 'An item was created.',
       }),
-      eventSchema: ItemCreatedEventSchema,
-    },
+    }),
   },
   handleEvents: async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => {
-    const parsed = ItemCreatedEventSchema.safeParse(ctx.rawBody);
+    const parsed = myConnectorItemCreated.eventSchema.safeParse(ctx.rawBody);
     if (!parsed.success) {
       return { type: 'emit', events: [] };
     }
@@ -412,7 +420,7 @@ export const myConnectorEvents: ConnectorSpecEvents = {
       type: 'emit',
       events: [
         {
-          eventId: ITEM_CREATED_EVENT_ID,
+          eventId: myConnectorItemCreated.name,
           correlationKey: parsed.data.id,
           payload: parsed.data,
         },
@@ -442,7 +450,7 @@ An emit may also set `httpResponse` when the vendor requires a specific response
 `events.test.ts` should cover:
 
 - the connector id is in `SPECS_ALLOWED_EVENTS`
-- every `eventId` equals `buildEventId(metadata.id, key)`
+- every `eventId` is the `@kbn/connector-topics` `name`, which equals `buildEventId(metadata.id, key)`
 - a recognized body emits that id and `validateEmittedEvents` accepts it
 - an unrecognized body emits no events
 - a handshake, when you have one, returns `type: 'http'` and does not emit
@@ -690,10 +698,10 @@ import type {
 
 ## Contract Tests
 
-`createContractContext` (in `src/test`) runs actions offline against the vendor's OpenAPI spec, using [`@kbn/connector-emulate`](../kbn-connector-emulate/README.md). The handler gets a real axios client, authenticated by the connector's own auth type, whose requests are validated and answered by the mock:
+`createContractContext` (in `src/test/vendor_api`) runs actions offline against the vendor's OpenAPI spec, using [`@kbn/connector-emulate`](../kbn-connector-emulate/README.md). The handler gets a real axios client, authenticated by the connector's own auth type, whose requests are validated and answered by the mock:
 
 ```typescript
-import { createContractContext } from '../../test/create_contract_context';
+import { createContractContext } from '../../test/vendor_api/create_contract_context';
 
 const { runAction, mock } = await createContractContext({
   connector: FirecrawlConnector,
@@ -752,12 +760,13 @@ The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
 - `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`, or from an AWS Smithy model, such as the files in [`aws/api-models-aws`](https://github.com/aws/api-models-aws), pinned to a commit; `awsJson1_0` and `awsJson1_1` services, such as CloudWatch, become an operation per `POST /<Operation>`, marked `x-amz-json` so the mock serves them by `X-Amz-Target`) and cut down to the recorded operations (under `paths`, or AutoRest's `x-ms-paths` for specs such as Azure Blob Storage's) and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination`, `x-ms-pageable` and `x-ms-skip-url-encoding` (which marks a path parameter that spans segments, such as Azure's `{scope}`), and the routing that converted Smithy models carry (`x-path-parameter` for S3's virtual-hosted buckets, `x-optional-fixed-query` for its `x-id`) are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them, but they keep the components its updates reference.
+- `snapshots/<source>.graphql` and `snapshots/<source>.mcp.json`: for GraphQL and MCP sources, the root fields or tools the actions call and what they reach, without documentation. See [GraphQL and MCP sources](#graphql-and-mcp-sources).
 - `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that matches nothing in specs fetched from the vendor (`--refresh`, `--drift`) is reported, as the vendor may have fixed the spec. Offline runs (`--check`) don't report it: a snapshot only has the operations the connector calls, so the action may still be needed.
 - `fixtures.json` (optional): see below.
 
 Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults. They run under each auth type in `auth.types`, with placeholder secrets, and the manifest lists the operations reached under any of them, so an action that only some auth types allow (such as Gmail's write actions, which Elastic-managed OAuth refuses) is still recorded.
 
-Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `vendor_api_exemptions.json` at the package root, by `metadata.id` with a reason. Existing connectors without a `vendor_api` folder are simply not recorded yet; [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
+Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `src/test/vendor_api/vendor_api_exemptions.json`, by `metadata.id` with a reason. Existing connectors without a `vendor_api` folder are simply not recorded yet; [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
 
 Recording checks each action's `scope`. A `read` action may only send `GET`, `HEAD` or `OPTIONS`, or call the operations its fixture lists in `queries`, so other tools (such as live verification) can rely on `scope: 'read'` meaning the action changes no vendor state.
 
@@ -845,6 +854,40 @@ Per action:
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec, and a `when` (`path`, `query` and `headers` by value, and the `body` fields it lists) to the requests with those values. Overrides that break the spec, or name an operation it lacks, are reported.
 
 `vendorApiFixturesSchema` is the schema.
+
+### GraphQL and MCP sources
+
+Connectors that call a GraphQL API or an MCP server have no paths to record, so their operations go by name: `{ "source": "main", "name": "query boards" }` for a GraphQL root field, and `tools/call search` for an MCP tool. A connector can mix them with OpenAPI sources. Name the format, and the URLs the connector calls, as the spec's URL doesn't tell:
+
+```bash
+node scripts/connector_vendor_api --connector monday_com \
+  --source main=https://example.com/schema.graphql --format main=graphql \
+  --endpoint main=https://api.monday.com/v2
+```
+
+- A `graphql` source's URL serves SDL or an introspection result, and an `mcp` source's serves a `tools/list` result, wrapped in JSON-RPC or not. The URL is only read with `GET`, so a server that needs an introspection request or an MCP session, or credentials, is captured once and served from a file.
+- Where an MCP server's own `tools/list` needs a session or credentials but its vendor publishes a document per tool, `--tool name=url` pins those instead, as URLs absolute or relative to the source's URL. GitHub's server is an example: its repository publishes a definition per tool. This excerpt lists two of them, and a real source lists every tool the connector's actions call, as recording runs them all:
+
+  ```bash
+  node scripts/connector_vendor_api --connector github \
+    --source mcp=https://raw.githubusercontent.com/github/github-mcp-server/main/pkg/github/__toolsnaps__/ \
+    --format mcp=mcp --endpoint mcp=https://api.githubcopilot.com/mcp/ \
+    --tool mcp=get_me.snap --tool mcp=search_code.snap
+  ```
+
+  Every listed document must be fetched, so a tool the vendor stops publishing fails the source rather than leaving the snapshot quietly short of it. The source's own URL is then never read, and the tools are kept in the order they are listed.
+- Where the vendor publishes nothing at all and only serves the spec to a request carrying credentials, the source is **captured** once and committed as the snapshot. Fetch the document yourself, with credentials, save it to a file, and record against it with `--capture`, plus a `--note` saying what capturing it took:
+
+  ```bash
+  node scripts/connector_vendor_api --connector box \
+    --source mcp=https://mcp.box.com --format mcp=mcp --endpoint mcp=https://mcp.box.com \
+    --capture mcp=box_tools.json --note mcp="tools/list of mcp.box.com, called with a developer token"
+  ```
+
+  The file has to be the whole document, as the URL serves it: it is the only thing read, so a spec that `$ref`s other files fails, and a Markdown reference, read from an index and the pages it links to, can't be captured. A first capture needs `--note`; a capture again keeps the note unless `--note` replaces it. The source is marked `"captured": true` and is never fetched again: `--refresh` keeps the snapshot, and `--drift` reports the source as `pinned` instead of trying to fetch it, which would only answer 401 and open an issue every week. To refresh it, capture it again the same way; the new capture replaces the snapshot, and can also change the source's URL, format or endpoints. Without `--capture`, `--source`, `--format`, `--pages`, `--endpoint` and `--tool` can't change a captured source, as its snapshot was taken from the URL the manifest names. A server such as Box's, whose `tools/list` only answers to credentials, is pinned this way.
+- `--inspect` skips GraphQL and MCP sources, as it reads OpenAPI operations, and captured sources, as the vendor wouldn't serve them to a plain fetch.
+- A `read` action may call GraphQL queries and MCP tools annotated `readOnlyHint`. Anything else needs a `{ "name": "..." }` entry in the action's `queries` in `fixtures.json`, which says it changes no vendor state.
+- `--drift` classifies changes to the operations the connector calls, as `oasdiff` does for OpenAPI. A response that widens is breaking, as a connector reading it may not handle the new value: for GraphQL a new value of an enum a response can hold, or a new union member (`findSchemaChanges`), and for MCP a new output enum value. New optional input is non-breaking, as is a new value of an enum only requests send. An MCP tool losing its `readOnlyHint` is breaking, as read actions may only call read-only tools. Any other change to an MCP schema, such as a tighter bound, is treated as breaking.
 
 ### Drift detection
 

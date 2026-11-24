@@ -9,6 +9,7 @@ import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
@@ -35,6 +36,7 @@ const createPlugin = (memoryEnabled = false) =>
 const createSetupDeps = () =>
   ({
     share: { url: new MockUrlService() },
+    taskManager: taskManagerMock.createSetup(),
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
@@ -123,6 +125,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_investigation_process@1.0.0',
         'nightshift_conclusion_quality@1.0.0',
         'nightshift_missing_data@1.0.0',
+        'nightshift_tool_call_health@1.0.0',
         'nightshift_alert_outcome_rca_accuracy@1.1.0',
         'nightshift_alert_outcome_benign_classification@1.0.0',
         'nightshift_alert_outcome_rca_reporting_gap@1.0.0',

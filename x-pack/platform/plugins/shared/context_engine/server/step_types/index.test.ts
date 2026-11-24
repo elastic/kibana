@@ -54,6 +54,9 @@ describe('registerStepDefinitions', () => {
       'context-engine.readTraceTranscripts',
       'context-engine.applyDreamChanges',
       'context-engine.applyDreamRelationships',
+      'context-engine.gatherMaintenance',
+      'context-engine.applyMaintenanceChanges',
+      'context-engine.recordMaintenanceRun',
     ]);
   });
 });

@@ -83,44 +83,224 @@ describe('WorkloadBindingStore', () => {
     });
   });
 
-  describe('#set', () => {
-    it('writes the whole document under the derived ID, replacing any existing binding', async () => {
-      const written = attributes();
-      const binding = await store.set(written);
+  describe('#bulkSet', () => {
+    const OTHER_COORDINATES = { ...COORDINATES, workloadId: 'other-rule-id' };
 
-      expect(client.create).toHaveBeenCalledWith(
-        SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
-        // The binding key is the saved object ID, so the cleanup can page in a stable order.
-        { ...written, bindingKey: getWorkloadBindingId(COORDINATES) },
-        {
-          id: getWorkloadBindingId(COORDINATES),
-          // The binding lives in the workload's space, which is what retires it with that space.
-          namespace: 'default',
-          overwrite: true,
-          refresh: 'wait_for',
-        }
+    beforeEach(() => {
+      client.bulkCreate.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ type, id, attributes: written }) => ({
+          type,
+          id: id ?? '',
+          attributes: written,
+          references: [],
+        })),
+      }));
+    });
+
+    it('writes whole documents under their derived IDs in one request, replacing any existing bindings', async () => {
+      const first = attributes();
+      const second = attributes({ ...OTHER_COORDINATES, serviceAccountId: 'other-account-id' });
+
+      const outcomes = await store.bulkSet([first, second]);
+
+      expect(client.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(client.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+            id: getWorkloadBindingId(COORDINATES),
+            // The binding key is the saved object ID, so the cleanup can page in a stable order.
+            attributes: { ...first, bindingKey: getWorkloadBindingId(COORDINATES) },
+          },
+          {
+            type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+            id: getWorkloadBindingId(OTHER_COORDINATES),
+            attributes: { ...second, bindingKey: getWorkloadBindingId(OTHER_COORDINATES) },
+          },
+        ],
+        // The bindings live in the workloads' space, which is what retires them with that space.
+        { namespace: 'default', overwrite: true, refresh: 'wait_for' }
       );
       // Never `update`: a partial write would not re-derive the canary's authentication.
       expect(client.update).not.toHaveBeenCalled();
+      expect(client.bulkUpdate).not.toHaveBeenCalled();
 
-      expect(binding).toEqual({
-        ...COORDINATES,
-        serviceAccountId: 'service-account-id',
-        boundBy: { type: 'user', userProfileId: 'profile-uid', username: 'elastic' },
-        boundAt: '2026-08-21T00:00:00.000Z',
-      });
+      expect(outcomes).toEqual([
+        {
+          ok: true,
+          value: {
+            ...COORDINATES,
+            serviceAccountId: 'service-account-id',
+            boundBy: { type: 'user', userProfileId: 'profile-uid', username: 'elastic' },
+            boundAt: '2026-08-21T00:00:00.000Z',
+          },
+        },
+        {
+          ok: true,
+          value: expect.objectContaining({
+            ...OTHER_COORDINATES,
+            serviceAccountId: 'other-account-id',
+          }),
+        },
+      ]);
       // The canary is an implementation detail of integrity and never surfaces to callers.
-      expect(binding).not.toHaveProperty('canary');
+      expect(outcomes[0]).not.toHaveProperty('value.canary');
     });
 
-    it('writes into the workload’s own space, not the client’s', async () => {
-      await store.set(attributes({ spaceId: 'marketing' }));
+    it('writes into the workloads’ own space, not the client’s', async () => {
+      await store.bulkSet([attributes({ spaceId: 'marketing' })]);
 
-      expect(client.create).toHaveBeenCalledWith(
-        SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
-        expect.objectContaining({ spaceId: 'marketing' }),
+      expect(client.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            attributes: expect.objectContaining({ spaceId: 'marketing' }),
+          }),
+        ],
         expect.objectContaining({ namespace: 'marketing' })
       );
+    });
+
+    it('reports a binding that could not be written without failing the others', async () => {
+      client.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+            id: getWorkloadBindingId(COORDINATES),
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          },
+          {
+            type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+            id: getWorkloadBindingId(OTHER_COORDINATES),
+            attributes: attributes(OTHER_COORDINATES),
+            references: [],
+          },
+        ],
+      } as never);
+
+      const [failed, written] = await store.bulkSet([attributes(), attributes(OTHER_COORDINATES)]);
+
+      expect(failed).toMatchObject({
+        ok: false,
+        error: { message: 'version conflict', output: { statusCode: 409 } },
+      });
+      expect(written).toMatchObject({ ok: true, value: OTHER_COORDINATES });
+    });
+
+    it('keeps a per-item error the bulk API reports as the original error', async () => {
+      // A failed create schema validation is reported as the error itself, not as its content.
+      const invalid = SavedObjectsErrorHelpers.createBadRequestError('invalid attributes');
+      client.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+            id: getWorkloadBindingId(COORDINATES),
+            error: invalid,
+          },
+        ],
+      } as never);
+
+      const [outcome] = await store.bulkSet([attributes()]);
+
+      if (outcome.ok) {
+        throw new Error('Expected the write to fail.');
+      }
+      expect(outcome.error).toBe(invalid);
+      expect(SavedObjectsErrorHelpers.isBadRequestError(outcome.error)).toBe(true);
+      expect(outcome.error.output.statusCode).toBe(400);
+    });
+
+    it('refuses to write bindings of more than one space in one request', async () => {
+      await expect(
+        store.bulkSet([attributes(), attributes({ spaceId: 'marketing' })])
+      ).rejects.toThrow('A bulk write of workload bindings must address a single space.');
+      expect(client.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('sends nothing when there is nothing to write', async () => {
+      await expect(store.bulkSet([])).resolves.toEqual([]);
+      expect(client.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('propagates a failure of the whole write', async () => {
+      client.bulkCreate.mockRejectedValue(new Error('cluster unavailable'));
+      await expect(store.bulkSet([attributes()])).rejects.toThrow('cluster unavailable');
+    });
+  });
+
+  describe('#bulkDelete', () => {
+    const OTHER_COORDINATES = { ...COORDINATES, workloadId: 'other-rule-id' };
+    const status = (
+      coordinates: typeof COORDINATES,
+      rest: { success: boolean; error?: { error: string; message: string; statusCode: number } }
+    ) => ({
+      type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+      id: getWorkloadBindingId(coordinates),
+      ...rest,
+    });
+
+    it('removes the bindings in one request, from the workloads’ own space', async () => {
+      const marketing = { ...COORDINATES, spaceId: 'marketing' };
+      client.bulkDelete.mockResolvedValue({ statuses: [status(marketing, { success: true })] });
+
+      await expect(store.bulkDelete([marketing])).resolves.toEqual([{ ok: true, value: true }]);
+      expect(client.bulkDelete).toHaveBeenCalledWith(
+        [{ type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE, id: getWorkloadBindingId(marketing) }],
+        { namespace: 'marketing', refresh: 'wait_for' }
+      );
+    });
+
+    it('treats a missing binding as removed, so unbinding twice is not an error', async () => {
+      client.bulkDelete.mockResolvedValue({
+        statuses: [
+          status(COORDINATES, {
+            success: false,
+            error: { error: 'Not Found', message: 'Not found', statusCode: 404 },
+          }),
+          status(OTHER_COORDINATES, { success: true }),
+        ],
+      });
+
+      await expect(store.bulkDelete([COORDINATES, OTHER_COORDINATES])).resolves.toEqual([
+        { ok: true, value: false },
+        { ok: true, value: true },
+      ]);
+    });
+
+    it('reports any other failure for its binding alone', async () => {
+      client.bulkDelete.mockResolvedValue({
+        statuses: [
+          status(COORDINATES, {
+            success: false,
+            error: { error: 'Service Unavailable', message: 'unavailable', statusCode: 503 },
+          }),
+          status(OTHER_COORDINATES, { success: true }),
+        ],
+      });
+
+      const [failed, removed] = await store.bulkDelete([COORDINATES, OTHER_COORDINATES]);
+
+      expect(failed).toMatchObject({
+        ok: false,
+        error: { message: 'unavailable', output: { statusCode: 503 } },
+      });
+      expect(removed).toEqual({ ok: true, value: true });
+    });
+
+    it('refuses to remove bindings of more than one space in one request', async () => {
+      await expect(
+        store.bulkDelete([COORDINATES, { ...COORDINATES, spaceId: 'marketing' }])
+      ).rejects.toThrow('A bulk write of workload bindings must address a single space.');
+      expect(client.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('sends nothing when there is nothing to remove', async () => {
+      await expect(store.bulkDelete([])).resolves.toEqual([]);
+      expect(client.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('propagates a failure of the whole delete', async () => {
+      client.bulkDelete.mockRejectedValue(new Error('cluster unavailable'));
+      await expect(store.bulkDelete([COORDINATES])).rejects.toThrow('cluster unavailable');
     });
   });
 
@@ -158,7 +338,7 @@ describe('WorkloadBindingStore', () => {
 
     it('propagates any other failure', async () => {
       client.delete.mockRejectedValue(new Error('cluster unavailable'));
-      await expect(store.delete(COORDINATES)).rejects.toThrowError('cluster unavailable');
+      await expect(store.delete(COORDINATES)).rejects.toThrow('cluster unavailable');
     });
   });
 
@@ -300,7 +480,7 @@ describe('WorkloadBindingStore', () => {
       encryptedClient.getDecryptedAsInternalUser.mockRejectedValue(
         new Error('cluster unavailable')
       );
-      await expect(store.getVerified(COORDINATES)).rejects.toThrowError('cluster unavailable');
+      await expect(store.getVerified(COORDINATES)).rejects.toThrow('cluster unavailable');
     });
   });
 
@@ -341,7 +521,7 @@ describe('WorkloadBindingStore', () => {
         close,
       } as never);
 
-      await expect(store.findByServiceAccountId('service-account-id')).rejects.toThrowError(
+      await expect(store.findByServiceAccountId('service-account-id')).rejects.toThrow(
         'search failed'
       );
       expect(close).toHaveBeenCalledTimes(1);
@@ -580,9 +760,126 @@ describe('WorkloadBindingStore', () => {
     it('propagates a failed search', async () => {
       client.find.mockRejectedValue(new Error('search failed'));
 
-      await expect(store.countByServiceAccountIds(['first-account'])).rejects.toThrowError(
+      await expect(store.countByServiceAccountIds(['first-account'])).rejects.toThrow(
         'search failed'
       );
+    });
+  });
+
+  describe('#summarize', () => {
+    const field = (attribute: string) =>
+      `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.${attribute}`;
+
+    const mockAggregations = (aggregations: Record<string, unknown>) =>
+      client.find.mockResolvedValue({
+        saved_objects: [],
+        total: 10_000,
+        page: 1,
+        per_page: 0,
+        aggregations,
+      } as never);
+
+    it('summarizes every binding with one aggregation across every space', async () => {
+      mockAggregations({
+        byPlugin: {
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'workflowsExecutionEngine',
+              doc_count: 3,
+              byWorkloadType: { buckets: [{ key: 'workflow', doc_count: 3 }] },
+            },
+            {
+              key: 'alerting',
+              doc_count: 2,
+              byWorkloadType: {
+                buckets: [
+                  { key: 'rule', doc_count: 1 },
+                  { key: 'action', doc_count: 1 },
+                ],
+              },
+            },
+          ],
+        },
+        byBinderType: {
+          buckets: [
+            { key: 'user', doc_count: 4 },
+            { key: 'service_account', doc_count: 1 },
+          ],
+        },
+        serviceAccounts: { value: 2 },
+      });
+
+      await expect(store.summarize()).resolves.toEqual({
+        total: 5,
+        serviceAccounts: 2,
+        byWorkload: [
+          { pluginId: 'workflowsExecutionEngine', workloadType: 'workflow', count: 3 },
+          { pluginId: 'alerting', workloadType: 'rule', count: 1 },
+          { pluginId: 'alerting', workloadType: 'action', count: 1 },
+        ],
+        byBinderType: { user: 4, api_key: 0, service_account: 1 },
+      });
+      expect(client.find).toHaveBeenCalledTimes(1);
+      expect(client.find).toHaveBeenCalledWith({
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        perPage: 0,
+        namespaces: ['*'],
+        aggs: {
+          byPlugin: {
+            terms: { field: field('pluginId'), size: 100 },
+            aggs: { byWorkloadType: { terms: { field: field('workloadType'), size: 100 } } },
+          },
+          byBinderType: { terms: { field: field('boundBy.type'), size: 100 } },
+          serviceAccounts: {
+            cardinality: { field: field('serviceAccountId'), precision_threshold: 40_000 },
+          },
+        },
+      });
+    });
+
+    it('counts bindings outside the returned plugin buckets in the total', async () => {
+      mockAggregations({
+        byPlugin: {
+          sum_other_doc_count: 7,
+          buckets: [
+            { key: 'workflowsExecutionEngine', doc_count: 3, byWorkloadType: { buckets: [] } },
+          ],
+        },
+        byBinderType: { buckets: [] },
+        serviceAccounts: { value: 1 },
+      });
+
+      const { total } = await store.summarize();
+      expect(total).toBe(10);
+    });
+
+    it('ignores binder types it does not know', async () => {
+      mockAggregations({
+        byPlugin: { buckets: [] },
+        byBinderType: { buckets: [{ key: 'something_new', doc_count: 1 }] },
+        serviceAccounts: { value: 0 },
+      });
+
+      const { byBinderType } = await store.summarize();
+      expect(byBinderType).toEqual({ user: 0, api_key: 0, service_account: 0 });
+    });
+
+    it('summarizes nothing when the search returns no aggregations', async () => {
+      client.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 0 });
+
+      await expect(store.summarize()).resolves.toEqual({
+        total: 0,
+        serviceAccounts: 0,
+        byWorkload: [],
+        byBinderType: { user: 0, api_key: 0, service_account: 0 },
+      });
+    });
+
+    it('propagates a failed search', async () => {
+      client.find.mockRejectedValue(new Error('search failed'));
+
+      await expect(store.summarize()).rejects.toThrow('search failed');
     });
   });
 

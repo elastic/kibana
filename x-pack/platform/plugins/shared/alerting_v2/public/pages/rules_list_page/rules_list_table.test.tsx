@@ -12,6 +12,7 @@ import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
 import { RulesListTable, type RulesListTableProps } from './rules_list_table';
+import { DEFAULT_VISIBLE_COLUMN_IDS } from './rules_list_columns';
 
 const mockRules = [
   {
@@ -107,6 +108,8 @@ const defaultProps: RulesListTableProps = {
   onUpdateApiKey: jest.fn(),
   onRun: jest.fn(),
   onTableChange: jest.fn(),
+  visibleColumnIds: [...DEFAULT_VISIBLE_COLUMN_IDS],
+  onVisibleColumnIdsChange: jest.fn(),
 };
 
 const renderTable = (overrides: Partial<RulesListTableProps> = {}) => {
@@ -740,6 +743,76 @@ describe('RulesListTable', () => {
 
       expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
       expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('column visibility', () => {
+    const openColumnSelector = async () => {
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+      await screen.findByTestId('dataGridColumnSelectorSearch');
+    };
+
+    it('does not render headers for hidden columns', () => {
+      renderTable({ visibleColumnIds: ['kind'] });
+
+      expect(screen.queryByRole('columnheader', { name: /Source/ })).not.toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: /Outcome/ })).toBeInTheDocument();
+    });
+
+    it('renders optional columns in visibleColumnIds order', () => {
+      renderTable({ visibleColumnIds: ['kind', 'source'] });
+
+      const headerTexts = screen
+        .getAllByRole('columnheader')
+        .map((header) => header.textContent ?? '');
+      const indexOf = (label: string) => headerTexts.findIndex((text) => text.includes(label));
+
+      expect(indexOf('Outcome')).toBeLessThan(indexOf('Source'));
+    });
+
+    it('always renders the selection, name, and actions columns', () => {
+      renderTable({ visibleColumnIds: [] });
+
+      expect(screen.getByTestId('selectAllRulesOnPage')).toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: /Name/ })).toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: /Actions/ })).toBeInTheDocument();
+    });
+
+    it('lists every optional column in the selector, but not Name', async () => {
+      renderTable();
+      await openColumnSelector();
+
+      DEFAULT_VISIBLE_COLUMN_IDS.forEach((id) => {
+        expect(screen.getByTestId(`dataGridColumnSelectorColumnItem-${id}`)).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('dataGridColumnSelectorColumnItem-name')).not.toBeInTheDocument();
+    });
+
+    it('reports the remaining ids when a column is toggled off', async () => {
+      const onVisibleColumnIdsChange = jest.fn();
+      renderTable({ onVisibleColumnIdsChange });
+      await openColumnSelector();
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorToggleColumnVisibility-kind'));
+
+      expect(onVisibleColumnIdsChange).toHaveBeenCalledWith([
+        'source',
+        'tags',
+        'routingTags',
+        'enabled',
+      ]);
+    });
+
+    it('reports every id on Show all and none on Hide all', async () => {
+      const onVisibleColumnIdsChange = jest.fn();
+      renderTable({ visibleColumnIds: ['tags'], onVisibleColumnIdsChange });
+      await openColumnSelector();
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorShowAllButton'));
+      expect(onVisibleColumnIdsChange).toHaveBeenLastCalledWith([...DEFAULT_VISIBLE_COLUMN_IDS]);
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorHideAllButton'));
+      expect(onVisibleColumnIdsChange).toHaveBeenLastCalledWith([]);
     });
   });
 });

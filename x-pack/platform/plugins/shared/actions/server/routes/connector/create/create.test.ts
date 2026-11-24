@@ -31,11 +31,12 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-const setupRoute = ({ inboundEventsFeatureEnabled = false } = {}) => {
+const setupRoute = ({ inboundEventsFeatureEnabled = false, catalogEnabled = false } = {}) => {
   const licenseState = licenseStateMock.create();
   const router = httpServiceMock.createRouter();
   const actionsConfigUtils = actionsConfigMock.create();
   actionsConfigUtils.isInboundEventsEnabled.mockReturnValue(inboundEventsFeatureEnabled);
+  actionsConfigUtils.isCatalogEnabled.mockReturnValue(catalogEnabled);
   createConnectorRoute(router, licenseState, actionsConfigUtils);
   const [config, handler] = router.post.mock.calls[0];
   return { licenseState, router, config, handler };
@@ -109,6 +110,91 @@ describe('createConnectorRoute', () => {
     expect(res.ok).toHaveBeenCalledWith({
       body: createApiResult,
     });
+  });
+
+  it.each(['1', '1.3'])(
+    'forwards spec_version %s and returns the exact version from the application',
+    async (specVersion) => {
+      const { handler } = setupRoute({ catalogEnabled: true });
+      const actionsClient = actionsClientMock.create();
+      actionsClient.create.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
+
+      const body = createConnectorRequestBodySchemaV1.validate({
+        name: 'Versioned connector',
+        connector_type_id: '.test-connector-type',
+        config: {},
+        secrets: {},
+        spec_version: specVersion,
+      });
+      const [context, req, res] = mockHandlerArguments(
+        { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(true) },
+        { body, params: { id: 'custom-id' } },
+        ['ok']
+      );
+
+      await handler(context, req, res);
+
+      expect(actionsClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: {
+            actionTypeId: '.test-connector-type',
+            name: 'Versioned connector',
+            config: {},
+            secrets: {},
+            specVersion,
+          },
+        })
+      );
+      expect(res.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ spec_version: '1.3' }),
+      });
+    }
+  );
+
+  it('sets a default spec_version when it is not sent and catalog connectors are enabled', async () => {
+    const { handler } = setupRoute({ catalogEnabled: true });
+    const actionsClient = actionsClientMock.create();
+    actionsClient.create.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
+    const body = createConnectorRequestBodySchemaV1.validate({
+      name: 'Versioned connector',
+      connector_type_id: '.test-connector-type',
+      config: {},
+      secrets: {},
+    });
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(true) },
+      { body },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: {
+          actionTypeId: '.test-connector-type',
+          name: 'Versioned connector',
+          config: {},
+          secrets: {},
+        },
+        options: undefined,
+      })
+    );
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ spec_version: '1.3' }),
+    });
+  });
+
+  it('rejects a spec_version past the max length', () => {
+    expect(() =>
+      createConnectorRequestBodySchemaV1.validate({
+        name: 'Versioned connector',
+        connector_type_id: '.test-connector-type',
+        config: {},
+        secrets: {},
+        spec_version: '1'.repeat(17),
+      })
+    ).toThrow('[spec_version]: value has length [17] but it must have a maximum length of [16].');
   });
 
   it('Returns error message to kibana on error', async () => {
@@ -264,7 +350,7 @@ describe('createConnectorRoute', () => {
 
   it('rejects is_inbound_events_enabled as unknown when the inbound events flag is off', () => {
     expect(() =>
-      getCreateConnectorRequestBodySchemaV1(false).validate({
+      getCreateConnectorRequestBodySchemaV1(false, false).validate({
         name: 'Datadog prod',
         connector_type_id: '.dual',
         config: {},

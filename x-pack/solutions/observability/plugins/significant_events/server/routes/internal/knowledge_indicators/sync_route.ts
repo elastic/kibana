@@ -141,7 +141,7 @@ const reconcileSourceRoute = createServerRoute({
       }
       return { reconciled: true };
     }
-    await reconcileSourceRevision({
+    const scheduleOnboarding = await reconcileSourceRevision({
       source,
       sourcesClient,
       kiClient,
@@ -160,6 +160,7 @@ const reconcileSourceRoute = createServerRoute({
       getMaintenanceState: () => maintenanceService.getState({ request }),
       request,
     });
+    await scheduleOnboarding?.();
     return { reconciled: true };
   },
 });

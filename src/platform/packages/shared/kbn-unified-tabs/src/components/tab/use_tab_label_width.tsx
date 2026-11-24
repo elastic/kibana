@@ -16,10 +16,13 @@ export const useTabLabelWidth = ({
   item,
   tabsSizeConfig,
   fontWeight,
+  isUnsaved = false,
 }: {
   item: TabItem;
   tabsSizeConfig: TabsSizeConfig;
   fontWeight: CSSProperties['fontWeight'];
+  /** Whether the unsaved changes indicator is rendered next to the label */
+  isUnsaved?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const tabLabelRef = useRef<HTMLDivElement | null>(null);
@@ -33,7 +36,8 @@ export const useTabLabelWidth = ({
     textUtils.setTextToCheck(item.label);
 
     const textWidth = Math.ceil(textUtils.textWidth);
-    const indicatorWidth = euiTheme.base * 1.25;
+    // only reserve space for the indicator when it is actually rendered
+    const indicatorWidth = isUnsaved ? euiTheme.base * 1.25 : 0;
     const textWithIndicatorWidth = textWidth + indicatorWidth;
     const tabPaddingWidth = euiTheme.base;
     const maxLabelWidth = tabsSizeConfig.regularTabMaxWidth - tabPaddingWidth;
@@ -49,6 +53,7 @@ export const useTabLabelWidth = ({
     };
   }, [
     euiTheme.base,
+    isUnsaved,
     item.label,
     tabsSizeConfig.regularTabMaxWidth,
     tabsSizeConfig.regularTabMinWidth,

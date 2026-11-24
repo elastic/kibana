@@ -187,7 +187,7 @@ describe('CasesConnector', () => {
       autoPushCase,
     });
 
-    expect(CasesConnectorExecutorMock).toBeCalledWith(
+    expect(CasesConnectorExecutorMock).toHaveBeenCalledWith(
       expect.objectContaining({ isAtLeastPlatinum })
     );
   });

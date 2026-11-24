@@ -18,6 +18,7 @@ export const uiamServiceMock = {
     })),
     getClientAuthentication: jest.fn(),
     isOwnClientAuthentication: jest.fn().mockReturnValue(false),
+    getApiKeyCreator: jest.fn().mockResolvedValue(undefined),
     getInternalCallerAttestationHeaders: jest.fn().mockReturnValue({
       [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'some-internal-caller-attestation',
     }),
@@ -54,6 +55,7 @@ export const uiamServiceMock = {
       role_assignments: {},
       assumable_by: [],
     }),
+    checkAuthorization: jest.fn().mockResolvedValue({ permitted: false, checks: [] }),
     listServiceAccounts: jest.fn().mockResolvedValue({ service_accounts: [] }),
     getServiceAccount: jest.fn().mockResolvedValue({
       id: 'mock-service-account-id',

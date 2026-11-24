@@ -13,16 +13,24 @@ import {
   isCustomContentVisualization,
   readAttachmentQueries,
   type VisualizationAttachmentData,
+  type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
 import {
+  getRequestPanelEmbeddableType,
   type PanelContent,
   type PanelContentAttempt,
-  getRendererEmbeddableType,
+  type RequestPanelType,
 } from '@kbn/dashboard-agent-authoring';
+
+const PANEL_TYPE_BY_RENDERER: Readonly<Record<VisualizationRenderer, RequestPanelType>> = {
+  lens: 'vis',
+  vega: 'vega',
+  custom_content: 'custom_content',
+};
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
-  const type = getRendererEmbeddableType(getEffectiveRenderer(data));
+  const type = getRequestPanelEmbeddableType(PANEL_TYPE_BY_RENDERER[getEffectiveRenderer(data)]);
 
   // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
@@ -70,6 +78,10 @@ export const createAttachmentPanelResolver = ({
       return fail(`Attachment "${attachmentId}" has no readable visualization data.`);
     }
 
-    return { type: 'success', panelContent: toPanelContent(data) };
+    return {
+      type: 'success',
+      panelContent: toPanelContent(data),
+      ...(isCustomContentVisualization(data) ? { heightHint: data.visualization.height } : {}),
+    };
   };
 };

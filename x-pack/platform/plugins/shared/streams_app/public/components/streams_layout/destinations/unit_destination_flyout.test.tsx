@@ -11,6 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { REMOTE_ELASTICSEARCH_TYPE, type RemoteElasticsearchDestinationViewModel } from './types';
 import { UnitDestinationFlyout } from './unit_destination_flyout';
 
+// This test is about the details of a destination. The failures section reads the page's services,
+// the unit of the route and the time filter, none of which it sets up, and it has tests of its own.
+jest.mock('./destination_delivery_section', () => ({ DestinationDeliverySection: () => null }));
+
 const renderFlyout = (destination: RemoteElasticsearchDestinationViewModel) =>
   render(
     <I18nProvider>
@@ -18,6 +22,7 @@ const renderFlyout = (destination: RemoteElasticsearchDestinationViewModel) =>
         destination={destination}
         indices={[]}
         indicesStatus="ready"
+        hasConnectedSource={false}
         onShowDestinationDetail={jest.fn()}
         onHideDestinationDetail={jest.fn()}
         onClose={jest.fn()}
@@ -45,6 +50,7 @@ describe('UnitDestinationFlyout', () => {
     const flyout = within(screen.getByTestId('streamsUnitDestinationFlyout'));
     expect(flyout.getByRole('heading', { name: 'Backup' })).toBeInTheDocument();
     expect(flyout.getByText('Long-term copy')).toBeInTheDocument();
+    expect(flyout.getByRole('heading', { name: 'Configuration' })).toBeInTheDocument();
     const details = within(flyout.getByTestId('streamsRemoteElasticsearchDestinationDetails'));
     expect(details.getByText('https://my-cluster.es.example.com')).toBeInTheDocument();
     expect(details.getByText('remote-logs')).toBeInTheDocument();

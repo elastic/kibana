@@ -19,6 +19,7 @@ export {
 export { createUiamAssertionSigner } from './assertion_signer';
 export type { UiamAssertionSigner, UiamAssertionSignerParams } from './assertion_signer';
 export type { UiamProjectType } from './project_type';
+export type { CoreUiamAuthorizationService } from './authorization';
 export { markExternalUiamCredential, isExternalUiamCredential } from './external_credential';
 export { resolveUiamClientAuthentication } from './client_authentication';
 export type {
