@@ -24,7 +24,7 @@ import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attr
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
-  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../../common/saved_object_types';
 import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
@@ -34,7 +34,7 @@ export {
   RULE_SAVED_OBJECT_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
-  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
 };
 
 export const ActionPolicyAttributesToEncrypt = ['apiKey'];
@@ -132,11 +132,11 @@ export function registerSavedObjects({
   });
 
   registerType({
-    resource: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+    resource: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
     logger,
     register: () => {
       savedObjects.registerType({
-        name: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        name: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
         hidden: true,
         namespaceType: 'multiple-isolated',

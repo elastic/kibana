@@ -12,7 +12,7 @@ import { createLoggerService } from '../lib/services/logger_service/logger_servi
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
-  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   registerSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
@@ -50,7 +50,7 @@ describe('registerSavedObjects', () => {
       expect.objectContaining({ name: ACTION_POLICY_SAVED_OBJECT_TYPE })
     );
     expect(savedObjects.registerType).toHaveBeenCalledWith(
-      expect.objectContaining({ name: IMPORT_CONFIG_SAVED_OBJECT_TYPE })
+      expect.objectContaining({ name: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE })
     );
     expect(savedObjects.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ name: API_KEY_PENDING_INVALIDATION_TYPE })
@@ -67,7 +67,7 @@ describe('registerSavedObjects', () => {
 
     expect(savedObjects.registerType).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        name: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         hidden: true,
         namespaceType: 'multiple-isolated',
         mappings: importConfigMappings,

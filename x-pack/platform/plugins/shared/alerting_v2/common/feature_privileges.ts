@@ -20,7 +20,7 @@ import {
 import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
-  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_object_types';
@@ -186,7 +186,7 @@ export const ALERTING_V2_FEATURES = {
         ui: [ALERTING_V2_UI_CAPABILITIES.alerts.all, ALERTING_V2_UI_CAPABILITIES.alerts.read],
         savedObject: {
           // Alert imports configure how alerts are written into the system from 3rd parties, so they require alerts access.
-          all: [IMPORT_CONFIG_SAVED_OBJECT_TYPE],
+          all: [EXTERNAL_SOURCE_SAVED_OBJECT_TYPE],
           read: [],
         },
       },
@@ -196,7 +196,7 @@ export const ALERTING_V2_FEATURES = {
         ui: [ALERTING_V2_UI_CAPABILITIES.alerts.read],
         savedObject: {
           all: [],
-          read: [IMPORT_CONFIG_SAVED_OBJECT_TYPE],
+          read: [EXTERNAL_SOURCE_SAVED_OBJECT_TYPE],
         },
       },
     },

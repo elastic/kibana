@@ -8,12 +8,12 @@
 import type { ObjectType } from '@kbn/config-schema';
 import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
-import { IMPORT_CONFIG_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
+import { EXTERNAL_SOURCE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { importConfigMappings } from '../import_config_mappings';
 import { importConfigModelVersions } from './import_config_model_versions';
 
 const importConfigType: SavedObjectsType = {
-  name: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  name: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   hidden: true,
   namespaceType: 'multiple-isolated',
   mappings: importConfigMappings,
@@ -22,7 +22,7 @@ const importConfigType: SavedObjectsType = {
 
 const createImportConfigDocument = (overrides: Record<string, unknown> = {}): SavedObject => ({
   id: 'import-1',
-  type: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+  type: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   attributes: {
     type: 'datadog',
     kind: 'alert',

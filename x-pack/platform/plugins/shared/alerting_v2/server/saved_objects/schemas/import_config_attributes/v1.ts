@@ -46,6 +46,6 @@ export const importConfigAttributesSchemaV1 = schema.object({
   version: schema.number(),
   createdBy: actorSchema,
   updatedBy: actorSchema,
-  createdAt: schema.string(),
-  updatedAt: schema.string(),
+  createdAt: schema.string({ maxLength: 64 }),
+  updatedAt: schema.string({ maxLength: 64 }),
 });

@@ -79,12 +79,12 @@ describe('registerFeaturePrivileges', () => {
     const alertsFeature = getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id);
 
     expect(alertsFeature.privileges?.all.savedObject).toEqual({
-      all: ['alerting_import_config'],
+      all: ['alerting_external_source'],
       read: [],
     });
     expect(alertsFeature.privileges?.read.savedObject).toEqual({
       all: [],
-      read: ['alerting_import_config'],
+      read: ['alerting_external_source'],
     });
   });
 
