@@ -94,6 +94,10 @@ export class DigitalExperiencePage {
   public readonly mobileTab: Locator;
   public readonly mobileApplicationsTable: EuiBasicTableObject;
   public readonly mobileKpis: Locator;
+  public readonly mobileReleaseHealth: Locator;
+  public readonly mobileReleaseTable: Locator;
+  public readonly mobileReleaseErrorRateChart: Locator;
+  public readonly mobileReleaseAdoptionChart: Locator;
   public readonly mobilePagePlatforms: Locator;
   public readonly mobileOsFilter: Locator;
   public readonly mobileCompareToggle: Locator;
@@ -171,6 +175,14 @@ export class DigitalExperiencePage {
       'digitalExperienceMobileApplicationsTable'
     );
     this.mobileKpis = page.getByTestId('digitalExperienceMobileKpis');
+    this.mobileReleaseHealth = page.getByTestId('digitalExperienceMobileReleaseHealth');
+    this.mobileReleaseTable = page.getByTestId('digitalExperienceMobileReleaseTable');
+    this.mobileReleaseErrorRateChart = page.getByTestId(
+      'digitalExperienceMobileReleaseErrorRateChart'
+    );
+    this.mobileReleaseAdoptionChart = page.getByTestId(
+      'digitalExperienceMobileReleaseAdoptionChart'
+    );
     // The header's badges, one per platform the application reported on.
     this.mobilePagePlatforms = page.getByTestId(/^digitalExperienceMobilePlatformBadge-/);
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');

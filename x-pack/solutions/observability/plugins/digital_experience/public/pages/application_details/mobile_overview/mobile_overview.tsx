@@ -26,6 +26,8 @@ import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { MOBILE_ERROR_RATE_DESCRIPTION, MOBILE_USERS_DESCRIPTION } from '../../../labels';
 import { MobilePanel } from './mobile_panel';
 import type { MobilePanelProps } from './mobile_panel';
+import { ReleaseHealth } from './release_health/release_health';
+import type { MobileReleasesState } from './release_health/use_mobile_releases';
 import type { MobileKpisState } from './use_mobile_kpis';
 
 const OS_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.os', {
@@ -133,15 +135,22 @@ const ClearFiltersButton = ({ onClear }: { onClear: () => void }) => (
 
 /**
  * The body of a mobile application's page, all its platforms: the toolbar its tabs share, with the
- * OS and release filters, and the KPI row. The sibling issues add their sections below it as they
- * fill them.
+ * OS and release filters, the KPI row and the release health. The sibling issues add their
+ * sections below it as they fill them.
  */
 export function MobileOverview({
-  kpisState: { kpis, currentKpis, isLoading, error, refresh },
+  kpisState: { kpis, currentKpis, isLoading, error, refresh: refreshKpis },
+  releasesState,
 }: {
   /** Fetched by the page, whose header shows its platforms. */
   kpisState: MobileKpisState;
+  /** Fetched by the page, so the toolbar's refresh reloads it with the KPIs. */
+  releasesState: MobileReleasesState;
 }) {
+  const refresh = () => {
+    refreshKpis();
+    releasesState.refresh();
+  };
   const { environment } = useEnvironment();
   const formatters = useFormatters();
   const { formatNumber } = formatters;
@@ -241,18 +250,22 @@ export function MobileOverview({
             />
           )
         ) : (
-          <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
-            {MOBILE_KPIS.map(({ kpi, ...panel }) => (
-              <MobilePanel
-                key={kpi}
-                {...panel}
-                value={currentKpis?.[kpi]}
-                formatValue={formatNumber}
-                isComparing={isComparing}
-                isLoading={isLoading}
-              />
-            ))}
-          </EuiFlexGroup>
+          <>
+            <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
+              {MOBILE_KPIS.map(({ kpi, ...panel }) => (
+                <MobilePanel
+                  key={kpi}
+                  {...panel}
+                  value={currentKpis?.[kpi]}
+                  formatValue={formatNumber}
+                  isComparing={isComparing}
+                  isLoading={isLoading}
+                />
+              ))}
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <ReleaseHealth releasesState={releasesState} />
+          </>
         ))}
     </>
   );

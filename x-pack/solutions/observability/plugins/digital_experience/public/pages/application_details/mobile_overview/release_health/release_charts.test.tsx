@@ -1,0 +1,133 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
+import type { AreaSeriesProps, LineAnnotationProps, LineSeriesProps } from '@elastic/charts';
+import type { MobileReleaseRow, MobileReleaseSeries } from '../../../../../common/types/mobile';
+import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
+import { ReleaseAdoptionChart, ReleaseErrorRateChart } from './release_charts';
+import { getReleaseColors } from './release_colors';
+import { TEST_VIS_COLORS } from './release_colors.test_helpers';
+
+const mockLines: LineSeriesProps[] = [];
+const mockAreas: AreaSeriesProps[] = [];
+const mockAnnotations: LineAnnotationProps[] = [];
+
+// jsdom draws no canvas, so the test reads the series and annotations the charts are given.
+jest.mock('@elastic/charts', () => {
+  const actual = jest.requireActual('@elastic/charts');
+  return {
+    ...actual,
+    LineSeries: (props: LineSeriesProps) => {
+      mockLines.push(props);
+      return null;
+    },
+    AreaSeries: (props: AreaSeriesProps) => {
+      mockAreas.push(props);
+      return null;
+    },
+    LineAnnotation: (props: LineAnnotationProps) => {
+      mockAnnotations.push(props);
+      return null;
+    },
+  };
+});
+
+jest.mock('../../../../hooks/use_kibana_services');
+
+const RELEASES: MobileReleaseRow[] = [
+  { release: '2.0.0', isOther: false, sessions: 300, users: 10, errorRate: 0.1 },
+  { release: '1.0.0', isOther: false, sessions: 50, users: 5, errorRate: null },
+  { release: '', isOther: true, sessions: 200, users: 8, errorRate: 0.2 },
+];
+
+const point = (timestamp: number) => ({ timestamp, sessions: 10, errorRate: 0.1 });
+
+const SERIES: MobileReleaseSeries[] = RELEASES.map(({ release, isOther }) => ({
+  release,
+  isOther,
+  points: [point(0), point(3_600_000)],
+}));
+
+const props = {
+  series: SERIES,
+  markers: [{ release: '2.0.0', firstSeen: 3_600_000 }],
+  histogram: { interval: { value: 3600, unit: 's' as const }, start: 0, end: 7_200_000 },
+  colors: getReleaseColors(RELEASES, TEST_VIS_COLORS),
+};
+
+const renderWithTheme = (ui: React.ReactElement) => render(ui, { wrapper: EuiProvider });
+
+beforeEach(() => {
+  mockLines.length = 0;
+  mockAreas.length = 0;
+  mockAnnotations.length = 0;
+  jest.mocked(useKibanaServices).mockReturnValue({
+    uiSettings: createUiSettingsMock(),
+  } as unknown as ReturnType<typeof useKibanaServices>);
+});
+
+describe('release charts', () => {
+  it('draws the error rate as a line per release with enough sessions, none for the others', () => {
+    renderWithTheme(<ReleaseErrorRateChart releases={RELEASES} {...props} />);
+
+    expect(mockLines.map(({ id }) => id)).toEqual(['errorRate-2.0.0', 'errorRate-']);
+    expect(mockLines.map(({ name }) => name)).toEqual(['2.0.0', 'Other']);
+  });
+
+  it('stacks the sessions of every release, "Other" included, in the adoption chart', () => {
+    renderWithTheme(<ReleaseAdoptionChart {...props} />);
+
+    expect(mockAreas.map(({ id }) => id)).toEqual([
+      'adoption-2.0.0',
+      'adoption-1.0.0',
+      'adoption-',
+    ]);
+    expect(mockAreas.every(({ stackAccessors }) => stackAccessors?.[0] === 'timestamp')).toBe(true);
+  });
+
+  it('marks where a release first appears in both charts, in its colour', () => {
+    renderWithTheme(
+      <>
+        <ReleaseErrorRateChart releases={RELEASES} {...props} />
+        <ReleaseAdoptionChart {...props} />
+      </>
+    );
+
+    expect(mockAnnotations).toHaveLength(2);
+    mockAnnotations.forEach((annotation) => {
+      expect(annotation.dataValues).toEqual([{ dataValue: 3_600_000, details: '2.0.0' }]);
+      expect(annotation.style?.line?.stroke).toBe(props.colors.get('2.0.0'));
+    });
+  });
+
+  it('gives a release the same colour in both charts', () => {
+    renderWithTheme(
+      <>
+        <ReleaseErrorRateChart releases={RELEASES} {...props} />
+        <ReleaseAdoptionChart {...props} />
+      </>
+    );
+
+    expect(mockLines[0].color).toBe(props.colors.get('2.0.0'));
+    expect(mockAreas[0].color).toBe(props.colors.get('2.0.0'));
+  });
+
+  it('says so when no release has enough sessions for an error rate', () => {
+    const { getByText } = renderWithTheme(
+      <ReleaseErrorRateChart
+        releases={RELEASES.map((release) => ({ ...release, errorRate: null }))}
+        {...props}
+      />
+    );
+
+    expect(getByText('No release has enough sessions to show an error rate')).toBeInTheDocument();
+  });
+});

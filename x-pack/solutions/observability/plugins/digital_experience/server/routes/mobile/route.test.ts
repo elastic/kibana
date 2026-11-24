@@ -10,9 +10,11 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MobileKpisResponse } from '../../../common/types/mobile';
 import { hasPartialReadAccess } from '../applications/get_partial_access';
 import { getMobileKpis } from './get_mobile_kpis';
-import { MOBILE_KPIS_ENDPOINT, mobileRouteRepository } from './route';
+import { getMobileReleases } from './get_mobile_releases';
+import { MOBILE_KPIS_ENDPOINT, MOBILE_RELEASES_ENDPOINT, mobileRouteRepository } from './route';
 
 jest.mock('./get_mobile_kpis');
+jest.mock('./get_mobile_releases');
 jest.mock('../applications/get_partial_access');
 
 const START = '2021-01-18T12:00:00.000Z';
@@ -119,5 +121,67 @@ describe('mobile KPIs route', () => {
       expect(isValid({ osName: 'x'.repeat(65) })).toBe(false);
       expect(isValid({ release: 'x'.repeat(1025) })).toBe(false);
     });
+  });
+});
+
+describe('mobile releases route', () => {
+  const { params, handler } = mobileRouteRepository[MOBILE_RELEASES_ENDPOINT];
+  const schema = params as unknown as {
+    shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+  };
+  const isValid = (query: Record<string, string>) =>
+    schema.shape.query.safeParse({ start: START, end: END, ...query }).success;
+
+  it('takes the same params as the KPI route', () => {
+    expect(isValid({})).toBe(true);
+    expect(isValid({ osName: 'iPadOS', release: '1.2.3' })).toBe(true);
+    expect(isValid({ start: END, end: START })).toBe(false);
+    expect(isValid({ osName: '' })).toBe(false);
+    expect(isValid({ release: 'x'.repeat(1025) })).toBe(false);
+    expect(mobileRouteRepository[MOBILE_RELEASES_ENDPOINT].options).toEqual(
+      mobileRouteRepository[MOBILE_KPIS_ENDPOINT].options
+    );
+    expect(mobileRouteRepository[MOBILE_RELEASES_ENDPOINT].security).toEqual(
+      mobileRouteRepository[MOBILE_KPIS_ENDPOINT].security
+    );
+  });
+
+  it('queries the releases with the filters and the time range', async () => {
+    const releases = { histogram: { interval: { value: 1, unit: 's' }, start: 0, end: 1 } };
+    jest.mocked(getMobileReleases).mockResolvedValue(releases as never);
+
+    const response = await (handler as unknown as (resources: unknown) => Promise<unknown>)({
+      params: {
+        path: { serviceName: 'shop-mobile' },
+        query: {
+          start: START,
+          end: END,
+          environment: 'production',
+          osName: 'iOS',
+          release: '1.2.3',
+        },
+      },
+      context: {
+        core: Promise.resolve({
+          elasticsearch: { client: { asCurrentUser: esClient, asInternalUser: internalEsClient } },
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      },
+      request: { events: { aborted$: NEVER } },
+      plugins: {},
+      isServerless: false,
+      isUxEnabled: true,
+      logger: loggingSystemMock.createLogger(),
+    });
+
+    expect(response).toBe(releases);
+    expect(jest.mocked(getMobileReleases)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: { serviceName: 'shop-mobile', osName: 'iOS', release: '1.2.3' },
+        start: Date.parse(START),
+        end: Date.parse(END),
+        environment: 'production',
+      })
+    );
   });
 });

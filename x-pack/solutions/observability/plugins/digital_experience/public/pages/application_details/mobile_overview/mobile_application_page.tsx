@@ -26,6 +26,7 @@ import {
   PLATFORM_LABELS,
 } from '../../../labels';
 import { MobileOverview } from './mobile_overview';
+import { useMobileReleases } from './release_health/use_mobile_releases';
 import { useMobileDiscoverHref } from './use_mobile_discover_href';
 import { useMobileKpis } from './use_mobile_kpis';
 
@@ -47,7 +48,7 @@ const platformBadges = (platforms: MobilePlatform[]): AppHeaderBadge[] =>
 /**
  * A mobile application's page, all its platforms: its header, with its platforms as badges and
  * Compare and Open in Discover as actions, as the Session page has them, and its Overview, its only
- * tab, which shows the KPIs the page fetches.
+ * tab, which shows the KPIs and the release health the page fetches.
  */
 export function MobileApplicationPage({
   serviceName,
@@ -62,6 +63,7 @@ export function MobileApplicationPage({
   const shareAction = useShareAction({ serviceName, source: SOURCE, tab: 'overview' });
   const discoverHref = useMobileDiscoverHref(serviceName);
   const kpisState = useMobileKpis(serviceName);
+  const releasesState = useMobileReleases(serviceName);
   // In the URL, so a reload or Share keeps it.
   const { value: compare, setValue: setCompare } = useQueryParam('compare');
   const isComparing = compare === 'true';
@@ -125,7 +127,7 @@ export function MobileApplicationPage({
       />
       {isOverview && (
         <EuiPageSection paddingSize="m" restrictWidth={false}>
-          <MobileOverview kpisState={kpisState} />
+          <MobileOverview kpisState={kpisState} releasesState={releasesState} />
         </EuiPageSection>
       )}
     </>

@@ -131,6 +131,19 @@ on serverless and stateful.
   optional `osName` and `release`. It also lists, for the pickers, the OS names (whatever the OS
   and release filters) and releases (on the selected OS), each with its sessions, and the
   platforms and environments.
+- **Release health** (`mobile_overview/release_health/`), below the KPI row and only when it
+  shows: a table of sessions, users and error rate (exceptions per session, as the KPI row) per
+  release, the error rate over time by release, and the release adoption (sessions per release,
+  stacked), the charts with a marker where each release first appears. Releases are grouped as the
+  **top 5 by sessions** in the range, and **Other** for the rest (last in the table, left out when
+  nothing falls outside the top 5; with a release filter there is one group). A release needs
+  **100 sessions** (`MIN_RELEASE_SESSIONS`) in the range for an error rate: below it the table
+  shows "Not enough data" and the error rate chart leaves the release out. A release **first
+  appears** at its first document with that `service.version` in the selected environment, looked
+  up 30 days before the range; one first seen before the range start gets no marker. The section
+  loads apart from the KPIs (`GET .../mobile_applications/{serviceName}/releases`, same params as
+  the KPI route) and has its own error state with a retry; the toolbar's refresh reloads both.
+  The crash rate (#64) and the cold start (#68) join the table's columns and the charts later.
 
 ## Pages
 

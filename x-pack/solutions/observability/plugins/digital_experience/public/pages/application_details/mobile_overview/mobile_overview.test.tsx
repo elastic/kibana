@@ -20,8 +20,12 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
 import { MobileOverview } from './mobile_overview';
+import type { MobileReleasesState } from './release_health/use_mobile_releases';
 import { useMobileKpis } from './use_mobile_kpis';
 
+jest.mock('./release_health/release_health', () => ({
+  ReleaseHealth: () => <div data-test-subj="digitalExperienceMobileReleaseHealth" />,
+}));
 jest.mock('../../../hooks/use_api_client');
 jest.mock('../../../hooks/use_digital_experience_params');
 jest.mock('../../../hooks/use_environment');
@@ -31,7 +35,11 @@ jest.mock('../../../hooks/use_formatters', () => ({
 }));
 jest.mock('../../../hooks/use_time_range');
 jest.mock('../../../hooks/use_update_url_query');
-jest.mock('../../../components/time_range_picker', () => ({ TimeRangePicker: () => null }));
+jest.mock('../../../components/time_range_picker', () => ({
+  TimeRangePicker: ({ onRefresh }: { onRefresh: () => void }) => (
+    <button data-test-subj="timeRangeRefresh" onClick={onRefresh} />
+  ),
+}));
 jest.mock('../../../components/environment_filter', () => ({
   EnvironmentFilter: jest.fn(() => null),
 }));
@@ -81,7 +89,16 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 // The page fetches the KPIs and hands them to the Overview, as this does.
-const Overview = () => <MobileOverview kpisState={useMobileKpis('shop-mobile')} />;
+const RELEASES_STATE: MobileReleasesState = {
+  releases: undefined,
+  isLoading: true,
+  error: undefined,
+  refresh: jest.fn(),
+};
+
+const Overview = () => (
+  <MobileOverview kpisState={useMobileKpis('shop-mobile')} releasesState={RELEASES_STATE} />
+);
 
 const renderPage = () => render(<Overview />, { wrapper: Wrapper });
 
@@ -371,6 +388,34 @@ describe('MobileOverview', () => {
 
     expect(await screen.findByTestId('digitalExperienceMobileKpis')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceMobileKpisError')).toBeNull();
+  });
+
+  it('shows the release health below the KPIs, and only with them', async () => {
+    renderPage();
+
+    const kpis = await screen.findByTestId('digitalExperienceMobileKpis');
+    const releaseHealth = screen.getByTestId('digitalExperienceMobileReleaseHealth');
+    expect(kpis.compareDocumentPosition(releaseHealth)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it.each([
+    ['fail', () => fetch.mockRejectedValue(new Error('Internal Server Error'))],
+    ['have no data', () => fetch.mockResolvedValue({ ...KPIS, hasData: false })],
+  ])('hides the release health when the KPIs %s', async (_, arrange) => {
+    arrange();
+    renderPage();
+
+    await waitFor(() => expect(screen.queryByTestId('digitalExperienceMobileKpis')).toBeNull());
+    expect(screen.queryByTestId('digitalExperienceMobileReleaseHealth')).toBeNull();
+  });
+
+  it('refreshes the release health with the KPIs from the toolbar', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    fireEvent.click(screen.getByTestId('timeRangeRefresh'));
+
+    expect(RELEASES_STATE.refresh).toHaveBeenCalled();
   });
 
   it('links to the EDOT Android and iOS docs without mobile data', async () => {

@@ -17,6 +17,8 @@ import { useQueryParam } from '../../../hooks/use_query_param';
 import { useShareAction } from '../../../hooks/use_share_action';
 import { MobileApplicationPage } from './mobile_application_page';
 import { MobileOverview } from './mobile_overview';
+import { useMobileReleases } from './release_health/use_mobile_releases';
+import type { MobileReleasesState } from './release_health/use_mobile_releases';
 import { useMobileDiscoverHref } from './use_mobile_discover_href';
 import { useMobileKpis } from './use_mobile_kpis';
 import type { MobileKpisState } from './use_mobile_kpis';
@@ -34,6 +36,7 @@ jest.mock('../../../hooks/use_application_links');
 jest.mock('../../../hooks/use_share_action');
 jest.mock('./use_mobile_discover_href');
 jest.mock('./use_mobile_kpis');
+jest.mock('./release_health/use_mobile_releases');
 jest.mock('../../../hooks/use_query_param');
 jest.mock('./mobile_overview', () => ({
   MobileOverview: jest.fn(() => <div data-test-subj="mobileOverview" />),
@@ -69,6 +72,13 @@ const KPIS_STATE: MobileKpisState = {
   refresh: jest.fn(),
 };
 
+const RELEASES_STATE: MobileReleasesState = {
+  releases: undefined,
+  isLoading: true,
+  error: undefined,
+  refresh: jest.fn(),
+};
+
 const setCompare = jest.fn();
 const mockCompare = (compare?: 'true') =>
   jest.mocked(useQueryParam).mockReturnValue({ value: compare, setValue: setCompare });
@@ -86,6 +96,7 @@ beforeEach(() => {
   });
   jest.mocked(useMobileDiscoverHref).mockReturnValue(DISCOVER_HREF);
   jest.mocked(useMobileKpis).mockReturnValue(KPIS_STATE);
+  jest.mocked(useMobileReleases).mockReturnValue(RELEASES_STATE);
   mockCompare();
 });
 
@@ -206,9 +217,13 @@ describe('MobileApplicationPage', () => {
     expect(setCompare).toHaveBeenCalledWith(undefined);
   });
 
-  it('gives the Overview the KPIs the page fetched', () => {
+  it('gives the Overview the KPIs and the release health the page fetched', () => {
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
 
-    expect(jest.mocked(MobileOverview).mock.calls.at(-1)?.[0]).toEqual({ kpisState: KPIS_STATE });
+    expect(jest.mocked(MobileOverview).mock.calls.at(-1)?.[0]).toEqual({
+      kpisState: KPIS_STATE,
+      releasesState: RELEASES_STATE,
+    });
+    expect(useMobileReleases).toHaveBeenCalledWith('shop-mobile');
   });
 });
