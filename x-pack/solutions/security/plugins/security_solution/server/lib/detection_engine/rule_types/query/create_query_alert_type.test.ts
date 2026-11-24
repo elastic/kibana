@@ -19,6 +19,7 @@ import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
+import type { IRuleDataWriter } from '@kbn/rule-registry-plugin/server';
 import { fromKueryExpression } from '@kbn/es-query';
 import { hasTimestampFields } from '../utils/utils';
 import { getFilter } from '../utils/get_filter';
@@ -224,15 +225,17 @@ describe('Custom Query Alerts', () => {
       'were not queried between this rule execution and the last execution'
     );
 
+    // The execution logger buffers metrics and the last written gap wins, so the gap the
+    // framework will see is the one from the last `logMetrics` call.
     const getLastLoggedGap = () => {
-      const metrics = mockedStatusLogger.logMetrics.mock.calls.at(-1)?.[0];
+      const metrics = mockedStatusLogger.logMetrics.mock.lastCall?.[0];
       if (metrics?.gap_range == null) {
         throw new Error('Expected a gap to be logged with the last metrics');
       }
       return { ...metrics, gap_range: metrics.gap_range };
     };
 
-    const registerAndRun = async (previousStartedAt?: Date) => {
+    const registerAndRun = async (previousStartedAt?: Date, rule?: { lastEnabledAt?: Date }) => {
       const queryAlertType = securityRuleTypeWrapper(
         createQueryAlertType({
           id: QUERY_RULE_TYPE_ID,
@@ -242,7 +245,7 @@ describe('Custom Query Alerts', () => {
 
       alerting.registerType(queryAlertType);
 
-      return executor({ params: getQueryRuleParams(), previousStartedAt });
+      return executor({ params: getQueryRuleParams(), previousStartedAt, rule });
     };
 
     const mockEmptySearch = () =>
@@ -325,6 +328,62 @@ describe('Custom Query Alerts', () => {
       const gapMetrics = getLastLoggedGap();
       expect(gapMetrics.gap_range.gte).toEqual(previousStartedAt.toISOString());
       expect(Math.abs(Date.now() - Date.parse(gapMetrics.gap_range.lte))).toBeLessThan(10 * 1000);
+      expect(gapMetrics.gap_reason).toEqual({ type: 'rule_did_not_run' });
+    });
+
+    it('keeps the `rule_disabled` reason of the drift gap when the search also fails', async () => {
+      services.scopedClusterClient.asCurrentUser.search.mockRejectedValue(
+        new Error('no_shard_available_action_exception')
+      );
+      // The rule was re-enabled just before this run, so the drift gap is attributed to the rule
+      // having been disabled. Auto fill excludes that reason by default, and merging the failed
+      // window into the gap must not turn it into a `rule_did_not_run` gap.
+      const previousStartedAt = new Date(Date.now() - 60 * 60 * 1000);
+      const lastEnabledAt = new Date(Date.now() - 60 * 1000);
+
+      await registerAndRun(previousStartedAt, { lastEnabledAt });
+
+      const gapMetrics = getLastLoggedGap();
+      expect(gapMetrics.gap_range.gte).toEqual(previousStartedAt.toISOString());
+      expect(gapMetrics.gap_reason).toEqual({ type: 'rule_disabled' });
+    });
+
+    it('records a gap when the search succeeds but indexing the alerts fails', async () => {
+      // `success` is false for any failed tuple, not only for failed searches, so a window whose
+      // alerts could not be indexed is also treated as uncovered and left for gap fill to retry.
+      services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+        hits: {
+          hits: [sampleDocNoSortId()],
+          total: { relation: 'eq', value: 1 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: { failed: 0, skipped: 0, successful: 1, total: 1 },
+      });
+      jest.mocked((await ruleDataClient.getWriter()).bulk).mockResolvedValueOnce({
+        body: {
+          errors: true,
+          took: 1,
+          items: [
+            {
+              create: {
+                _index: '.alerts-security.alerts-default',
+                status: 500,
+                error: { type: 'es_rejected_execution_exception', reason: 'queue full' },
+              },
+            },
+          ],
+        },
+      } as unknown as Awaited<ReturnType<IRuleDataWriter['bulk']>>);
+
+      await registerAndRun();
+
+      expect(mockedStatusLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('queue full'),
+        expect.anything()
+      );
+      const gapMetrics = getLastLoggedGap();
+      expect(gapMetrics.gap_duration_s).toEqual(6 * 60);
       expect(gapMetrics.gap_reason).toEqual({ type: 'rule_did_not_run' });
     });
   });

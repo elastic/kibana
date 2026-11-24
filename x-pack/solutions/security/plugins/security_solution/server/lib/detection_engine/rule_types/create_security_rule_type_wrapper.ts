@@ -560,26 +560,35 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               userError: checkErrorDetails(error).isUserError,
             });
           } finally {
-            // The anchor still advances for this run, so record the windows it did not cover as a
-            // gap (merged with the drift gap detected above) to keep them visible and fillable.
-            const uncoveredTuples = skipExecution
-              ? []
-              : tuples.filter((tuple) => !coveredTuples.has(tuple));
-            if (uncoveredTuples.length > 0) {
-              const uncoveredGap = getUncoveredGapRange({ driftGap: gap, uncoveredTuples });
-              if (uncoveredGap) {
-                ruleExecutionLogger.logMetrics({
-                  gap_duration_s: Math.round(
-                    (Date.parse(uncoveredGap.lte) - Date.parse(uncoveredGap.gte)) / 1000
-                  ),
-                  gap_range: uncoveredGap,
-                  gap_reason: experimentalFeatures.gapReasonDetectionEnabled
-                    ? { type: gapReasonType.RULE_DID_NOT_RUN }
-                    : undefined,
-                });
+            try {
+              // The anchor still advances for this run, so record the windows it did not cover as
+              // a gap (merged with the drift gap detected above) to keep them visible and fillable.
+              const uncoveredTuples = skipExecution
+                ? []
+                : tuples.filter((tuple) => !coveredTuples.has(tuple));
+              if (uncoveredTuples.length > 0) {
+                const uncoveredGap = getUncoveredGapRange({ driftGap: gap, uncoveredTuples });
+                if (uncoveredGap) {
+                  ruleExecutionLogger.logMetrics({
+                    gap_duration_s: Math.round(
+                      (Date.parse(uncoveredGap.lte) - Date.parse(uncoveredGap.gte)) / 1000
+                    ),
+                    gap_range: uncoveredGap,
+                    // Keep the reason detected for the drift gap (it can be `rule_disabled`, which
+                    // auto fill excludes by default) and only fall back to `rule_did_not_run` when
+                    // the uncovered window comes solely from this run's failed tuples.
+                    gap_reason: experimentalFeatures.gapReasonDetectionEnabled
+                      ? gapReason ?? { type: gapReasonType.RULE_DID_NOT_RUN }
+                      : undefined,
+                  });
+                }
               }
+            } catch (gapError) {
+              // Never let gap bookkeeping prevent the execution status from being written.
+              logger.warn(`Failed to record uncovered gap range: ${gapError}`);
+            } finally {
+              await ruleExecutionLogger.close();
             }
-            await ruleExecutionLogger.close();
           }
 
           if (!isPreview && analytics) {
