@@ -68,7 +68,7 @@ describe('Vega dashboard panel conversion', () => {
     ]);
   });
 
-  it('to_attachment reads a by-value legacy-vis Vega panel as a native `vega` panel with a new id', () => {
+  it('to_attachment reads a by-value legacy-vis Vega panel as a native `vega` panel with a new, stable id', () => {
     const state = {
       panels: [
         {
@@ -97,6 +97,7 @@ describe('Vega dashboard panel conversion', () => {
         config: { spec: { format: 'hjson', value: SPEC }, title: 'Chart', description: 'Desc' },
       },
     ]);
+    expect(dashboardStateToAttachmentData(state).panels[0].id).toBe(attachmentData.panels[0].id);
   });
 
   it('to_attachment preserves panel-level settings (title, description, hide_*, drilldowns) over savedVis values', () => {
