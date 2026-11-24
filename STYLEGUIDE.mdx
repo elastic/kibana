@@ -34,10 +34,11 @@ remove it, don't simply comment it out.
 ### Formatting and Linting
 
 All JavaScript and TypeScript code is formatted with [oxfmt](https://oxc.rs/docs/guide/usage/formatter),
-configured in `.oxfmtrc.json`. Run `node scripts/oxfmt [paths...]` to format files
-(`--check` only reports) and `node scripts/eslint --fix` to fix linting issues. We recommend
-enabling the oxfmt editor extension (format on save) and running ESLint via your IDE; ESLint no
-longer formats code.
+configured in `.oxfmtrc.json`, and linted with [oxlint](https://oxc.rs/docs/guide/usage/linter),
+configured in `.oxlint/`. Run `node scripts/lint --fix [paths...]` to fix linting issues, then
+`node scripts/oxfmt [paths...]` to format files (`--check` only reports). We recommend enabling the
+[Oxc editor extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode) for
+lint feedback and format on save.
 
 Whenever possible we are trying to use the formatter and linting, instead of maintaining a set of written style guide rules.
 Consider every linting rule and every formatting rule to be also part of our style guide
@@ -212,7 +213,7 @@ less likely to introduce bugs in the future due to insufficient types.
 
 If you’re not having `any` in your plugin or are starting a new plugin, you should enable the
 [`@typescript-eslint/no-explicit-any`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md)
-linting rule for your plugin via the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/main/.eslintrc.js) config.
+linting rule for your plugin in [`.oxlint/team_overrides.mts`](https://github.com/elastic/kibana/blob/main/.oxlint/team_overrides.mts).
 
 ### Avoid non-null assertions
 
@@ -231,7 +232,7 @@ assertion would now wrongly disable proper type checking for us.
 
 If you’re not using non-null assertions in your plugin or are starting a new plugin, consider enabling the
 [`@typescript-eslint/no-non-null-assertion`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md)
-linting rule for you plugin in the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/main/.eslintrc.js) config.
+linting rule for you plugin in [`.oxlint/team_overrides.mts`](https://github.com/elastic/kibana/blob/main/.oxlint/team_overrides.mts).
 
 ### Return/throw early from functions
 

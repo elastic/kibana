@@ -95,7 +95,6 @@ export const teamOverrides: OxlintOverride[] = [
    */
   {
     files: [
-      '**/.eslintrc.js',
       'packages/kbn-eslint-plugin-eslint/**/*',
       'x-pack/gulpfile.js',
       'x-pack/scripts/*.js',

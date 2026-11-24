@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/human-readable-id'
   - '@kbn/std'
+  - '@kbn/oxfmt'
 tags:
   - shared-common
   - package

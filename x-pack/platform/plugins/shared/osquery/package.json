@@ -6,7 +6,7 @@
   "license": "Elastic License 2.0",
   "scripts": {
     "test:jest": "node ../../../../../scripts/jest --config jest.config.js",
-    "test:eslint": "node ../../../../../scripts/eslint --fix .",
+    "test:lint": "node ../../../../../scripts/lint --fix . && node ../../../../../scripts/oxfmt .",
     "test:type_check": "node ../../../../../scripts/type_check --project tsconfig.type_check.json",
     "cypress:burn": "pnpm cypress:run --env burn=2 --headed",
     "cypress:changed-specs-only": "pnpm cypress:run --changed-specs-only --env burn=2",

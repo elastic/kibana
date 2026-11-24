@@ -14,7 +14,7 @@ import chalk from 'chalk';
 import fs from 'fs/promises';
 import { globby } from 'globby';
 import { resolve } from 'path';
-import { fixEslint } from './lib/fix_eslint';
+import { fixLint } from './lib/fix_lint';
 import { formatOutput } from './lib/format_output';
 import { getGeneratedFilePath } from './lib/get_generated_file_path';
 import { removeGenArtifacts } from './lib/remove_gen_artifacts';
@@ -133,12 +133,12 @@ export const generate = async (config: GeneratorConfig) => {
     );
   }
 
-  // The generator produces unformatted code. Format it before running eslint --fix so its
+  // The generator produces unformatted code. Format it before running `lint --fix` so its
   // autofixes (e.g. removing unused imports) operate on normalized code, then format again
-  // because eslint fixes are not formatting-aware.
+  // because lint fixes are not formatting-aware.
   console.log(`💅  Formatting output`);
   const target = bundle ? bundle.outFile : resolve(rootDir, './**/*.gen.ts');
   await formatOutput(target);
-  await fixEslint(target);
+  await fixLint(target);
   await formatOutput(target);
 };

@@ -25,7 +25,7 @@ import { File } from './file';
 export interface ResolveLintTargetsOptions {
   baseContext: ValidationBaseContext;
   log: ToolingLog;
-  /** Linter name used in log messages and the reproduction command, e.g. `eslint`. */
+  /** Linter name used in log messages and the reproduction command, e.g. `oxlint`. */
   runner: string;
   pickFilesToLint: (log: ToolingLog, files: File[]) => Promise<File[]>;
 }
