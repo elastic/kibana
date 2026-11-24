@@ -10,7 +10,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 // Subpaths: the endpoint Jest config maps `@kbn/task-manager-plugin/server` to a mock without these
-import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import { TaskCost } from '@kbn/task-manager-plugin/server/task';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import type { Logger } from '@kbn/logging';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -186,7 +186,6 @@ export class ExportProviderKeyCleanupTask {
         description: EXPORT_PROVIDER_KEY_CLEANUP_TASK_DESCRIPTION,
         timeout: TASK_TIMEOUT,
         cost: TaskCost.Normal,
-        priority: TaskPriority.Maintenance,
         // One-off transient failures (e.g. a Fleet read error) get a few retries within the hour;
         // the recurring schedule picks the work back up regardless at the next run.
         maxAttempts: 3,

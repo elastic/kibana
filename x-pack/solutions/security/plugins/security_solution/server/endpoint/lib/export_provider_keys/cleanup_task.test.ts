@@ -6,7 +6,7 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import { TaskCost } from '@kbn/task-manager-plugin/server/task';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -83,7 +83,6 @@ describe('ExportProviderKeyCleanupTask class', () => {
           description: EXPORT_PROVIDER_KEY_CLEANUP_TASK_DESCRIPTION,
           timeout: '5m',
           cost: TaskCost.Normal,
-          priority: TaskPriority.Maintenance,
           maxAttempts: 3,
           createTaskRunner: expect.any(Function),
         },
