@@ -203,6 +203,57 @@ describe('parseMsrcCvrf', () => {
     expect(result.cves[0].cvss).toBeUndefined();
   });
 
+  it('reduces every vulnerability of a document that spans many batches and chunks', async () => {
+    const count = 120;
+    const document = {
+      DocumentTracking: { Identification: { ID: { Value: '2026-Jan' } } },
+      ProductTree: {
+        FullProductName: [
+          { ProductID: '12097', Value: 'Windows 10 Version 22H2 for x64-based Systems' },
+          { ProductID: '11923', Value: 'Windows Server 2022' },
+        ],
+      },
+      Vulnerability: Array.from({ length: count }, (_, index) => ({
+        CVE: `CVE-2026-${String(index + 1).padStart(5, '0')}`,
+        Title: { Value: `Windows Component ${index + 1} Elevation of Privilege Vulnerability` },
+        CVSSScoreSets: [
+          {
+            BaseScore: '7.8',
+            Vector: 'CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H',
+            ProductID: ['12097', '11923'],
+          },
+        ],
+        Remediations: [
+          ...['12097', '11923'].flatMap((productId) =>
+            [1, 2, 3].map((n) => ({
+              Type: 2,
+              ProductID: [productId],
+              FixedBuild: `10.0.19045.${index + n}`,
+              Description: { Value: `${5000000 + n}` },
+              Supercedence: '5000000',
+            }))
+          ),
+          { Type: 3, ProductID: ['12097'], Description: { Value: 'Known issue text' } },
+        ],
+      })),
+    };
+    const bytes = Buffer.from(JSON.stringify(document));
+    for (const size of [512, 1024]) {
+      const result = await parseMsrcCvrf(sliced(bytes, size));
+      expect(result.skipped.vulnerability_missing_cve).toBeUndefined();
+      expect(result.cves).toHaveLength(count);
+      expect(result.rows).toHaveLength(count * 6);
+      for (const [index, cve] of result.cves.entries()) {
+        expect(cve.id).toBe(`CVE-2026-${String(index + 1).padStart(5, '0')}`);
+        expect(cve.title).toBe(
+          `Windows Component ${index + 1} Elevation of Privilege Vulnerability`
+        );
+        expect(cve.cvss?.score).toBe(7.8);
+        expect(result.rows.filter((row) => row.cve === cve.id)).toHaveLength(6);
+      }
+    }
+  });
+
   it('counts and drops rows with a bad KB or a Windows-less product list', async () => {
     const document = {
       DocumentTracking: { Identification: { ID: { Value: '2026-Jan' } } },

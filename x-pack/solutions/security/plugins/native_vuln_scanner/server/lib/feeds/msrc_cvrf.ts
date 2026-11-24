@@ -404,12 +404,21 @@ export const parseMsrcCvrf = async (
       JSONLoader,
       { json: { jsonpaths: ['$.Vulnerability'] }, metadata: true, batchSize: 50 }
     );
+    // The parser adds an array element to a batch when it opens, so a batch is yielded while its
+    // last element is still being filled. It is complete once the next batch arrives.
+    let pending: unknown;
+    const reducePending = () => {
+      if (!products) return;
+      for (const vulnerability of asArray(pending)) {
+        reduceVulnerability(vulnerability, products, rows, cves, skipped);
+      }
+      pending = undefined;
+    };
     for await (const batch of batches) {
+      reducePending();
       if (batch.batchType === 'data') {
         if (!products) throw new Error(PRODUCT_TREE_LAST);
-        for (const vulnerability of asArray(batch.data)) {
-          reduceVulnerability(vulnerability, products, rows, cves, skipped);
-        }
+        pending = batch.data;
         continue;
       }
       const container = asObject(batch.container);
@@ -426,6 +435,7 @@ export const parseMsrcCvrf = async (
         products ?? (container.ProductTree ? buildProducts(container.ProductTree) : undefined);
       tracking = asObject(container.DocumentTracking) ?? tracking;
     }
+    reducePending();
   } catch (error) {
     if (!(error instanceof Error)) throw error;
     // The streaming parser's own errors carry a multi-line position dump.
