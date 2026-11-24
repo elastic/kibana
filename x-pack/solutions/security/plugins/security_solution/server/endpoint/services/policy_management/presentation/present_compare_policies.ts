@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { POLICY_COMPARISON_ABSENT_SIDES } from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 import type { PolicyDiffEntry } from '../domain/diff_policy_config';
 import { describePathWritability } from '../domain/field_registry';
 import type { PathNotWritableReason } from '../domain/field_registry';
@@ -31,6 +32,8 @@ import {
 export const COMPARE_POLICIES_MAX_RESULT_TOKENS = 12_000;
 const COMPARE_DIFF_DISPLAY_CAP = 50;
 
+type PolicyComparisonAbsentSide = (typeof POLICY_COMPARISON_ABSENT_SIDES)[number];
+
 type PresentedBaselineSideReference = Readonly<{
   preset: EndpointPolicyBaseline['preset'];
   environment: PolicyBaselineEnvironment;
@@ -56,7 +59,7 @@ type PresentedDiffEntry = Pick<PolicyDiffEntry, 'path'> &
     | Readonly<{ writable: true }>
     | Readonly<{ writable: false; not_writable_reason: CompareRowNotWritableReason }>
   ) &
-  Readonly<{ absent_side?: 'from' | 'to' }>;
+  Readonly<{ absent_side?: PolicyComparisonAbsentSide }>;
 
 type PresentedComparison = Readonly<{
   from: PresentedComparisonSide;
@@ -88,7 +91,7 @@ const presentComparisonSide = (side: EndpointPolicyComparisonSide): PresentedCom
   };
 };
 
-const absentSideOf = (entry: PolicyDiffEntry): 'from' | 'to' | undefined => {
+const absentSideOf = (entry: PolicyDiffEntry): PolicyComparisonAbsentSide | undefined => {
   const fromAbsent = entry.from === undefined || entry.from === null;
   const toAbsent = entry.to === undefined || entry.to === null;
 
@@ -100,7 +103,7 @@ const absentSideOf = (entry: PolicyDiffEntry): 'from' | 'to' | undefined => {
 
 const writableDeviceControlEnabledSibling = (
   entry: PolicyDiffEntry,
-  absentSide: 'from' | 'to',
+  absentSide: PolicyComparisonAbsentSide,
   diffs: readonly PolicyDiffEntry[]
 ): boolean => {
   if (!isDeviceControlUsbPath(entry.path)) {
@@ -123,7 +126,7 @@ const writableDeviceControlEnabledSibling = (
 
 const rowWritability = (
   entry: PolicyDiffEntry,
-  absentSide: 'from' | 'to' | undefined,
+  absentSide: PolicyComparisonAbsentSide | undefined,
   diffs: readonly PolicyDiffEntry[]
 ): { writable: true } | { writable: false; reason: CompareRowNotWritableReason } => {
   const writability = describePathWritability(entry.path);

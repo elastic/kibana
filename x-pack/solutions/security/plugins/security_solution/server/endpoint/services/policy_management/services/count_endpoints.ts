@@ -6,13 +6,17 @@
  */
 
 import { AgentStatusKueryHelper } from '@kbn/fleet-plugin/common/services';
+import type {
+  ENDPOINT_COUNT_SOURCES,
+  ENDPOINT_COUNT_POPULATION,
+} from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 import type { PolicyAccessContext } from './access_context';
 import { uniqueAgentPolicyIds } from './policy_lookup';
 
-export type EndpointCountSource = 'fleet_status_aggregation' | 'no_agent_policy_assignments';
+export type EndpointCountSource = (typeof ENDPOINT_COUNT_SOURCES)[number];
 
 export type EndpointCountResult = Readonly<{
-  population: 'enrolled_agents';
+  population: typeof ENDPOINT_COUNT_POPULATION;
   source: EndpointCountSource;
   status: Readonly<Record<string, number>>;
 }>;

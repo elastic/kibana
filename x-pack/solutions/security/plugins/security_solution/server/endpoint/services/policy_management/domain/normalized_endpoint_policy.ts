@@ -6,12 +6,13 @@
  */
 
 import type { PolicyConfig } from '../../../../../common/endpoint/types';
+import type { POLICY_BASELINE_UNRESOLVED_TELEMETRY } from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 import { ProtectionModes } from '../../../../../common/endpoint/types';
 import { hashPolicyConfig } from './hash_policy_config';
 import type { EndpointPolicySnapshot } from './endpoint_policy_snapshot';
 import type { NormalizedPolicyConfig } from './normalized_policy_config';
 import { normalize } from './normalize_policy_config';
-import type { PolicyCreateEndpointConfig } from '../../../../fleet_integration/types';
+import type { EndpointPolicyPreset } from '../../../../../common/endpoint/constants';
 
 export type EndpointPolicySummary = Readonly<{
   windowsProtectionModes: Readonly<{
@@ -40,17 +41,15 @@ export type NormalizedEndpointPolicy = Readonly<{
   summary: EndpointPolicySummary;
 }>;
 
-export type EndpointPolicyBaselinePreset = PolicyCreateEndpointConfig['endpointConfig']['preset'];
-
 export type PolicyBaselineEnvironment = Readonly<{
   license: string;
   cloud: boolean;
-  telemetryOptedIn: boolean | 'unresolved';
+  telemetryOptedIn: boolean | typeof POLICY_BASELINE_UNRESOLVED_TELEMETRY;
 }>;
 
 export type EndpointPolicyBaseline = Readonly<{
   kind: 'baseline';
-  preset: EndpointPolicyBaselinePreset;
+  preset: EndpointPolicyPreset;
   environment: PolicyBaselineEnvironment;
   normalizedConfig: NormalizedPolicyConfig;
   normalizedHash: string;

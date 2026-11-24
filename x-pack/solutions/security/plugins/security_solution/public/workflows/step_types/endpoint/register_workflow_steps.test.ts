@@ -7,56 +7,48 @@
 
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
-import {
-  registerEndpointWorkflowSteps,
-  type RegisterEndpointWorkflowStepsDeps,
-} from './register_workflow_steps';
-import {
-  finalizeTroubleshootingDiagnosisPublicStepDefinition,
-  findEndpointArtifactsPublicStepDefinition,
-  getEndpointHostDiagnosticsPublicStepDefinition,
-  getEndpointInventoryCountsPublicStepDefinition,
-  getEndpointPackageStatusPublicStepDefinition,
-  resolveEndpointHostsPublicStepDefinition,
-  searchIntegrationKnowledgePublicStepDefinition,
-} from './steps';
+import { registerEndpointWorkflowSteps } from './register_workflow_steps';
 
-type StepLoader = () => Promise<PublicStepDefinition | undefined>;
-
-const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
+const sharedIds = ['security.searchIntegrationKnowledge'];
+const atIds = [
+  'security.findEndpointArtifacts',
+  'security.resolveEndpointHosts',
+  'security.getEndpointHostDiagnostics',
+  'security.getEndpointPackageStatus',
+  'security.getEndpointInventoryCounts',
+  'security.finalizeTroubleshootingDiagnosis',
+];
+const pmIds = [
+  'security.getEndpointPolicyFieldReference',
+  'security.listEndpointPolicies',
+  'security.getEndpointPolicy',
+  'security.getEndpointPolicyBaseline',
+  'security.compareEndpointPolicies',
+  'security.getEndpointPolicyRolloutStatus',
+  'security.assessEndpointPolicyChange',
+];
 
 describe('registerEndpointWorkflowSteps (public)', () => {
-  const createDeps = (
-    automaticTroubleshootingUniversalSkill: boolean
-  ): RegisterEndpointWorkflowStepsDeps => ({
-    experimentalFeatures: {
-      automaticTroubleshootingUniversalSkill,
-    },
-  });
-
-  it('registers no steps when the universal flag is off', () => {
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerEndpointWorkflowSteps(workflowsExtensions, createDeps(false));
-
-    expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalled();
-  });
-
-  it('registers the shared and defend steps with async loaders when the universal flag is on', async () => {
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerEndpointWorkflowSteps(workflowsExtensions, createDeps(true));
-
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
-    const [loader1, loader2, loader3, loader4, loader5, loader6, loader7] =
-      workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
-
-    await expect(loader1()).resolves.toBe(findEndpointArtifactsPublicStepDefinition);
-    await expect(loader2()).resolves.toBe(searchIntegrationKnowledgePublicStepDefinition);
-    await expect(loader3()).resolves.toBe(resolveEndpointHostsPublicStepDefinition);
-    await expect(loader4()).resolves.toBe(getEndpointHostDiagnosticsPublicStepDefinition);
-    await expect(loader5()).resolves.toBe(getEndpointPackageStatusPublicStepDefinition);
-    await expect(loader6()).resolves.toBe(getEndpointInventoryCountsPublicStepDefinition);
-    await expect(loader7()).resolves.toBe(finalizeTroubleshootingDiagnosisPublicStepDefinition);
+  it.each([
+    { at: false, pm: false, expected: [] },
+    { at: true, pm: false, expected: [...sharedIds, ...atIds] },
+    { at: false, pm: true, expected: [...sharedIds, ...pmIds] },
+    { at: true, pm: true, expected: [...sharedIds, ...pmIds, ...atIds] },
+  ])('registers consumer groups once with AT=$at PM=$pm', async ({ at, pm, expected }) => {
+    const extensions = workflowsExtensionsMock.createSetup();
+    registerEndpointWorkflowSteps(extensions, {
+      experimentalFeatures: {
+        automaticTroubleshootingUniversalSkill: at,
+        elasticDefendPolicyManagementUniversalSkill: pm,
+      },
+    });
+    const definitions = await Promise.all(
+      extensions.registerStepDefinition.mock.calls.map(([loader]) =>
+        (loader as () => Promise<PublicStepDefinition>)()
+      )
+    );
+    const ids = definitions.map(({ id }) => id);
+    expect(ids).toEqual(expected);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });

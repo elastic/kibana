@@ -27,18 +27,18 @@ import {
   type EndpointPolicySnapshot,
 } from '../domain/endpoint_policy_snapshot';
 import type { PolicyIdentity } from './read_policy';
+import {
+  ROLLOUT_COVERAGE_POPULATION,
+  ROLLOUT_RESPONSE_POPULATION,
+} from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
+import type {
+  ROLLOUT_COVERAGE_SOURCES,
+  ROLLOUT_RESPONSE_SOURCES,
+} from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 
-export type RevisionCoverageSource =
-  | 'united_metadata_tuple_aggregation'
-  | 'no_agent_policy_assignments'
-  | 'united_index_missing';
+export type RevisionCoverageSource = (typeof ROLLOUT_COVERAGE_SOURCES)[number];
 
-export type CurrentRevisionResponsesSource =
-  | 'policy_response_latest_per_agent'
-  | 'policy_response_index_missing'
-  | 'no_agent_policy_assignments'
-  | 'united_index_missing'
-  | 'united_agent_id_set_empty';
+export type CurrentRevisionResponsesSource = (typeof ROLLOUT_RESPONSE_SOURCES)[number];
 
 export type RevisionCoverage = Readonly<{
   outOfDateHosts: number;
@@ -47,7 +47,7 @@ export type RevisionCoverage = Readonly<{
   unclassifiedOverflowHosts: number;
   truncated: boolean;
   source: RevisionCoverageSource;
-  population: 'readable_united_endpoint_hosts_canonical_assignment_matches_target_agent_policy_ids';
+  population: typeof ROLLOUT_COVERAGE_POPULATION;
 }>;
 
 export type CurrentRevisionResponses = Readonly<{
@@ -57,7 +57,7 @@ export type CurrentRevisionResponses = Readonly<{
   upstreamUnclassifiedHosts: number;
   truncated: boolean;
   source: CurrentRevisionResponsesSource;
-  population: 'latest_policy_responses_for_assignment_matched_agents_at_current_package_revision';
+  population: typeof ROLLOUT_RESPONSE_POPULATION;
   responseCoverageIncomplete: boolean;
 }>;
 
@@ -73,11 +73,6 @@ type CurrentPolicyResponseClassification =
   | 'no_attention'
   | 'undetermined'
   | 'excluded';
-
-const ROLLOUT_COVERAGE_POPULATION =
-  'readable_united_endpoint_hosts_canonical_assignment_matches_target_agent_policy_ids' as const;
-const ROLLOUT_RESPONSE_POPULATION =
-  'latest_policy_responses_for_assignment_matched_agents_at_current_package_revision' as const;
 
 const POLICY_ROLLOUT_POLICY_RESPONSE_SOURCE_FIELDS = [
   '_id',

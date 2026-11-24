@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import type { FIELD_REFERENCE_MATCH_MODES } from '../../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
+
 import {
   POLICY_EVENT_COLLECTION_LABELS,
   POLICY_PROTECTION_UPDATES_LABEL,
 } from '../../../../../../common/endpoint/models/policy_settings_ui_labels';
-import type { PolicyOperatingSystem } from '../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem } from '../../../../../../common/endpoint/types';
 import { getFieldRegistry, getFieldRegistryEntry } from './derive_field_registry';
 import { describePathWritability, type PathNotWritableReason } from './path_writability';
 
-const RESULT_LIMIT = 10;
-const EVENT_COLLECTION_OSES = ['windows', 'mac', 'linux'] as const;
-
-type SearchOperatingSystem = 'windows' | 'mac' | 'linux';
+import { RESULT_LIMIT } from '../../../../../../common/workflows/step_types/endpoint/policies/field_reference';
+type SearchOperatingSystem = `${PolicyOperatingSystem}`;
 
 export type PolicyFieldSearchHit = {
   readonly path: string;
@@ -29,7 +29,7 @@ export type PolicyFieldSearchHit = {
 
 export interface PolicyFieldSearchResult {
   readonly found: boolean;
-  readonly match: 'search';
+  readonly match: typeof FIELD_REFERENCE_MATCH_MODES.search;
   readonly keywords: readonly string[];
   readonly os?: SearchOperatingSystem;
   readonly results: readonly PolicyFieldSearchHit[];
@@ -58,7 +58,7 @@ interface SharedLabel {
 
 const sharedLabelsByPath = (): ReadonlyMap<string, SharedLabel> => {
   const labels = new Map<string, SharedLabel>();
-  for (const os of EVENT_COLLECTION_OSES) {
+  for (const os of Object.values(PolicyOperatingSystem)) {
     for (const { field, label, englishLabel } of POLICY_EVENT_COLLECTION_LABELS[os]) {
       const path = `${os}.events.${field}`;
       requireLabelRegistryEntry(path);

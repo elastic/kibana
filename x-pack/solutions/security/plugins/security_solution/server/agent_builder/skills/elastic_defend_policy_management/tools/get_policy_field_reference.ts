@@ -8,7 +8,12 @@
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import { policyFieldReferenceSelectorInputSchema } from '../../../../../common/workflows/step_types/endpoint/policies/field_reference';
+import {
+  createPolicyFieldReferenceSelectorSchema,
+  policyFieldKeywordsInputSchema,
+  policyFieldOsInputSchema,
+} from '../../../../../common/workflows/step_types/endpoint/policies/field_reference';
+import { policyPathInputSchema } from '../../../../../common/workflows/step_types/endpoint/policies/input_schemas';
 import { type FieldReferenceResult } from '../../../../endpoint/services/policy_management/services/field_reference';
 import { createPolicyTool } from './create_policy_tool';
 
@@ -30,23 +35,17 @@ export const GET_POLICY_FIELD_REFERENCE_TOOL_ID =
   'security.policy_management.get_policy_field_reference';
 
 export const getPolicyFieldReferenceSchema = lazySchema(() => {
-  const [pathSelectorSchema, keywordsSelectorSchema] =
-    policyFieldReferenceSelectorInputSchema.options;
-  const selectorSchema = z.union([
-    pathSelectorSchema.extend({
-      path: pathSelectorSchema.shape.path.describe(
-        'Exact registry path, protection key, or supported OS-less remainder, such as linux.events.dns, malware.mode, or behavior_protection.reputation_service. UI setting words belong in a keywords selector; never invent a path from memory. Valid: {"selector":{"path":"windows.events.dns"}}. Do not send null, an empty string, or placeholder text.'
-      ),
-    }),
-    keywordsSelectorSchema.extend({
-      keywords: keywordsSelectorSchema.shape.keywords.describe(
-        'One to five single words naming a setting the way the policy UI names it, such as antivirus, credential, dns, or blocklist. Each keyword is one word; do not include the desired value or state.'
-      ),
-      os: keywordsSelectorSchema.shape.os.describe(
-        'Optional operating-system filter. Use only with keywords.'
-      ),
-    }),
-  ]);
+  const selectorSchema = createPolicyFieldReferenceSelectorSchema({
+    path: policyPathInputSchema.describe(
+      'Exact registry path, protection key, or supported OS-less remainder, such as linux.events.dns, malware.mode, or behavior_protection.reputation_service. UI setting words belong in a keywords selector; never invent a path from memory. Valid: {"selector":{"path":"windows.events.dns"}}. Do not send null, an empty string, or placeholder text.'
+    ),
+    keywords: policyFieldKeywordsInputSchema.describe(
+      'One to five single words naming a setting the way the policy UI names it, such as antivirus, credential, dns, or blocklist. Each keyword is one word; do not include the desired value or state.'
+    ),
+    os: policyFieldOsInputSchema
+      .optional()
+      .describe('Optional operating-system filter. Use only with keywords.'),
+  });
 
   return z
     .object({

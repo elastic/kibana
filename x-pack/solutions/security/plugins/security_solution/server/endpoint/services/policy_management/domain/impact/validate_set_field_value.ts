@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
+import type { SetFieldValueDomain } from '../../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 import {
   AntivirusRegistrationModes,
   DeviceControlAccessLevel,
@@ -35,17 +36,7 @@ import { describePathWritability, getFieldRegistryEntry } from '../field_registr
 import { PolicyChangeRejectedError } from './policy_operation_rejection';
 import type { PolicyChangeOperation } from '../../../../../../common/workflows/step_types/endpoint/policies/policy_change_operation';
 
-export type SetFieldValueDomain =
-  | { readonly type: 'enum'; readonly values: readonly string[] }
-  | { readonly type: 'boolean' }
-  | {
-      readonly type: 'manifest_version';
-      readonly keywords: readonly ['latest'];
-      readonly earliest: string;
-      readonly latest: string;
-    }
-  | { readonly type: 'string' }
-  | { readonly type: 'number' };
+export type { SetFieldValueDomain } from '../../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 type PolicyOsKey = keyof UIPolicyConfig;
 interface RuleMatch {
   readonly os?: PolicyOsKey;

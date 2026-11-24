@@ -6,56 +6,50 @@
  */
 
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
-import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import {
-  registerEndpointWorkflowSteps,
-  type RegisterEndpointWorkflowStepsDeps,
-} from './register_workflow_steps';
+import { registerEndpointWorkflowSteps } from './register_workflow_steps';
+import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 
-const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
+const sharedIds = ['security.searchIntegrationKnowledge'];
+const atIds = [
+  'security.findEndpointArtifacts',
+  'security.resolveEndpointHosts',
+  'security.getEndpointHostDiagnostics',
+  'security.getEndpointPackageStatus',
+  'security.getEndpointInventoryCounts',
+  'security.finalizeTroubleshootingDiagnosis',
+];
+const pmIds = [
+  'security.getEndpointPolicyFieldReference',
+  'security.listEndpointPolicies',
+  'security.getEndpointPolicy',
+  'security.getEndpointPolicyBaseline',
+  'security.compareEndpointPolicies',
+  'security.getEndpointPolicyRolloutStatus',
+  'security.assessEndpointPolicyChange',
+];
 
 describe('registerEndpointWorkflowSteps (server)', () => {
-  const createDeps = (
-    automaticTroubleshootingUniversalSkill: boolean
-  ): RegisterEndpointWorkflowStepsDeps => ({
-    experimentalFeatures: {
-      automaticTroubleshootingUniversalSkill,
-    },
-    analytics: { reportEvent: jest.fn() },
-    getInternalEsClient: jest.fn(),
-    endpointAppContextService: {
-      isServerless: jest.fn().mockReturnValue(false),
-    } as unknown as EndpointAppContextService,
-  });
-
-  it('registers no steps when the universal flag is off', () => {
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerEndpointWorkflowSteps(workflowsExtensions, createDeps(false));
-
-    expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalled();
-  });
-
-  it('registers the shared and defend steps when the universal flag is on', () => {
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerEndpointWorkflowSteps(workflowsExtensions, createDeps(true));
-
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
-    const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(([stepDef]) => {
-      if (typeof stepDef === 'function') {
-        throw new Error('expected a step definition');
-      }
-      return stepDef.id;
+  it.each([
+    { at: false, pm: false, expected: [] },
+    { at: true, pm: false, expected: [...sharedIds, ...atIds] },
+    { at: false, pm: true, expected: [...sharedIds, ...pmIds] },
+    { at: true, pm: true, expected: [...sharedIds, ...pmIds, ...atIds] },
+  ])('registers consumer groups once with AT=$at PM=$pm', async ({ at, pm, expected }) => {
+    const extensions = workflowsExtensionsMock.createSetup();
+    registerEndpointWorkflowSteps(extensions, {
+      experimentalFeatures: {
+        automaticTroubleshootingUniversalSkill: at,
+        elasticDefendPolicyManagementUniversalSkill: pm,
+      },
+      analytics: { reportEvent: jest.fn() },
+      getInternalEsClient: jest.fn(),
+      endpointAppContextService: createMockEndpointAppContextService(),
     });
-    expect(registeredIds).toEqual([
-      'security.findEndpointArtifacts',
-      'security.searchIntegrationKnowledge',
-      'security.resolveEndpointHosts',
-      'security.getEndpointHostDiagnostics',
-      'security.getEndpointPackageStatus',
-      'security.getEndpointInventoryCounts',
-      'security.finalizeTroubleshootingDiagnosis',
-    ]);
+    const ids = extensions.registerStepDefinition.mock.calls.map(([definition]) => {
+      if (typeof definition === 'function') throw new Error('expected server definition');
+      return definition.id;
+    });
+    expect(ids).toEqual(expected);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });

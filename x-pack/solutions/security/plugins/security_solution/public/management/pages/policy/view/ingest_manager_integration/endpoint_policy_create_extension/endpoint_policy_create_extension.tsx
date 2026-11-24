@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import type { EndpointPreset } from './constants';
+import { ENDPOINT_POLICY_PRESET } from '../../../../../../../common/endpoint/constants';
+import type { EndpointPolicyPreset } from '../../../../../../../common/endpoint/constants';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY, endpointPresetsMapping } from './constants';
 import { HelpTextWithPadding } from './components/help_text_with_padding';
 import { EndpointEventCollectionPreset } from './components/endpoint_event_collection_preset';
@@ -64,15 +65,19 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     const isEnterprise = useLicense().isEnterprise();
     const showEndpointEventCollectionOnlyPreset = Boolean(useGetProtectionsUnavailableComponent());
 
-    const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('EDRComplete');
+    const [endpointPreset, setEndpointPreset] = useState<EndpointPolicyPreset>(
+      ENDPOINT_POLICY_PRESET.EDR_COMPLETE
+    );
     const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('INTERACTIVE_ONLY');
     const [selectedEnvironment, setSelectedEnvironment] = useState<Environment>('endpoint');
 
     // Show NGAV license note when Gold and below
     // Show EDR licenses note when Platinum and Below
     const showNote =
-      (endpointPreset === 'NGAV' && !isPlatinumPlus) ||
-      (['EDREssential', 'EDRComplete'].includes(endpointPreset) && !isEnterprise);
+      (endpointPreset === ENDPOINT_POLICY_PRESET.NGAV && !isPlatinumPlus) ||
+      ((endpointPreset === ENDPOINT_POLICY_PRESET.EDR_ESSENTIAL ||
+        endpointPreset === ENDPOINT_POLICY_PRESET.EDR_COMPLETE) &&
+        !isEnterprise);
 
     // Fleet will initialize the create form with a default name for the integrating policy, however,
     // for endpoint security, we want the user to explicitly type in a name, so we blank it out
@@ -101,7 +106,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                       value: {
                         type: 'endpoint',
                         endpointConfig: {
-                          preset: 'NGAV',
+                          preset: ENDPOINT_POLICY_PRESET.NGAV,
                         },
                       },
                     },
@@ -158,11 +163,11 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
       setSelectedCloudEvent(e.target.value as CloudEvent);
     }, []);
     const onChangeEndpointPreset = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      setEndpointPreset(e.target.value as EndpointPreset);
+      setEndpointPreset(e.target.value as EndpointPolicyPreset);
     }, []);
 
     const getEndpointPresetsProps = useCallback(
-      (preset: EndpointPreset) => ({
+      (preset: EndpointPolicyPreset) => ({
         id: `${PREFIX}_endpoint_preset_${preset}`,
         label: endpointPresetsMapping[preset].label,
         value: preset,
@@ -240,7 +245,10 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 fullWidth
                 helpText={<HelpTextWithPadding>{DATA_COLLECTION_HELP_TEXT}</HelpTextWithPadding>}
               >
-                <EuiRadio name="endpointPreset" {...getEndpointPresetsProps('DataCollection')} />
+                <EuiRadio
+                  name="endpointPreset"
+                  {...getEndpointPresetsProps(ENDPOINT_POLICY_PRESET.DATA_COLLECTION)}
+                />
               </EuiFormRow>
               <EuiSpacer size="s" />
               <EuiFormRow
@@ -254,7 +262,10 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   </HelpTextWithPadding>
                 }
               >
-                <EuiRadio name="endpointPreset" {...getEndpointPresetsProps('NGAV')} />
+                <EuiRadio
+                  name="endpointPreset"
+                  {...getEndpointPresetsProps(ENDPOINT_POLICY_PRESET.NGAV)}
+                />
               </EuiFormRow>
               <EuiSpacer size="s" />
               <EuiFormRow
@@ -268,7 +279,10 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   </HelpTextWithPadding>
                 }
               >
-                <EuiRadio name="endpointPreset" {...getEndpointPresetsProps('EDREssential')} />
+                <EuiRadio
+                  name="endpointPreset"
+                  {...getEndpointPresetsProps(ENDPOINT_POLICY_PRESET.EDR_ESSENTIAL)}
+                />
               </EuiFormRow>
               <EuiSpacer size="s" />
               <EuiFormRow
@@ -282,7 +296,10 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   </HelpTextWithPadding>
                 }
               >
-                <EuiRadio name="endpointPreset" {...getEndpointPresetsProps('EDRComplete')} />
+                <EuiRadio
+                  name="endpointPreset"
+                  {...getEndpointPresetsProps(ENDPOINT_POLICY_PRESET.EDR_COMPLETE)}
+                />
               </EuiFormRow>
 
               {showNote && (

@@ -23,8 +23,8 @@ export interface PolicyRolloutStatusResult extends Record<string, unknown> {
     undetermined_hosts: number;
     unclassified_overflow_hosts: number;
     truncated: boolean;
-    source: string;
-    population: string;
+    source: PolicyRolloutStatus['revisionCoverage']['source'];
+    population: PolicyRolloutStatus['revisionCoverage']['population'];
   };
   current_revision_responses: {
     needs_attention_hosts: number;
@@ -32,8 +32,8 @@ export interface PolicyRolloutStatusResult extends Record<string, unknown> {
     undetermined_hosts: number;
     upstream_unclassified_hosts: number;
     truncated: boolean;
-    source: string;
-    population: string;
+    source: PolicyRolloutStatus['currentRevisionResponses']['source'];
+    population: PolicyRolloutStatus['currentRevisionResponses']['population'];
     response_coverage_incomplete: boolean;
   };
 }

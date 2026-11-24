@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { EndpointPolicyPreset } from '../../common/endpoint/constants';
+
 export interface PolicyCreateEndpointConfig {
   type: 'endpoint';
   endpointConfig: {
-    preset: 'NGAV' | 'EDREssential' | 'EDRComplete' | 'DataCollection';
+    preset: EndpointPolicyPreset;
   };
 }
 

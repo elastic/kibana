@@ -10,16 +10,14 @@ import type { EndpointAppContextService } from '../../../endpoint_app_context_se
 import { createDefaultPolicy } from '../../../../fleet_integration/handlers/create_default_policy';
 import { hashPolicyConfig } from '../domain/hash_policy_config';
 import { normalize } from '../domain/normalize_policy_config';
-import type {
-  EndpointPolicyBaseline,
-  EndpointPolicyBaselinePreset,
-} from '../domain/normalized_endpoint_policy';
+import type { EndpointPolicyBaseline } from '../domain/normalized_endpoint_policy';
+import type { EndpointPolicyPreset } from '../../../../../common/endpoint/constants';
 import { summarizeEndpointPolicy } from '../domain/normalized_endpoint_policy';
 import { resolveDefaultPolicyEnvironment } from './resolve_default_policy_environment';
 
 export const readPolicyBaseline = (
   endpointAppContextService: EndpointAppContextService,
-  args: Readonly<{ preset: EndpointPolicyBaselinePreset }>
+  args: Readonly<{ preset: EndpointPolicyPreset }>
 ): EndpointPolicyBaseline => {
   const environment = resolveDefaultPolicyEnvironment(endpointAppContextService);
 

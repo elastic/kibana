@@ -15,6 +15,15 @@ import {
 } from '../../../../common/workflows/step_types/endpoint/hosts';
 import { getEndpointPackageStatusStepCommonDefinition } from '../../../../common/workflows/step_types/endpoint/package';
 import { finalizeTroubleshootingDiagnosisStepCommonDefinition } from '../../../../common/workflows/step_types/endpoint/configuration_troubleshooting';
+import {
+  getEndpointPolicyFieldReferenceStepCommonDefinition,
+  listEndpointPoliciesStepCommonDefinition,
+  getEndpointPolicyStepCommonDefinition,
+  getEndpointPolicyBaselineStepCommonDefinition,
+  compareEndpointPoliciesStepCommonDefinition,
+  getEndpointPolicyRolloutStatusStepCommonDefinition,
+  assessEndpointPolicyChangeStepCommonDefinition,
+} from '../../../../common/workflows/step_types/endpoint/policies/steps';
 
 export const findEndpointArtifactsPublicStepDefinition = createPublicStepDefinition({
   ...findEndpointArtifactsStepCommonDefinition,
@@ -42,4 +51,26 @@ export const getEndpointInventoryCountsPublicStepDefinition = createPublicStepDe
 
 export const finalizeTroubleshootingDiagnosisPublicStepDefinition = createPublicStepDefinition({
   ...finalizeTroubleshootingDiagnosisStepCommonDefinition,
+});
+
+export const getEndpointPolicyFieldReferencePublicStepDefinition = createPublicStepDefinition({
+  ...getEndpointPolicyFieldReferenceStepCommonDefinition,
+});
+export const listEndpointPoliciesPublicStepDefinition = createPublicStepDefinition({
+  ...listEndpointPoliciesStepCommonDefinition,
+});
+export const getEndpointPolicyPublicStepDefinition = createPublicStepDefinition({
+  ...getEndpointPolicyStepCommonDefinition,
+});
+export const getEndpointPolicyBaselinePublicStepDefinition = createPublicStepDefinition({
+  ...getEndpointPolicyBaselineStepCommonDefinition,
+});
+export const compareEndpointPoliciesPublicStepDefinition = createPublicStepDefinition({
+  ...compareEndpointPoliciesStepCommonDefinition,
+});
+export const getEndpointPolicyRolloutStatusPublicStepDefinition = createPublicStepDefinition({
+  ...getEndpointPolicyRolloutStatusStepCommonDefinition,
+});
+export const assessEndpointPolicyChangePublicStepDefinition = createPublicStepDefinition({
+  ...assessEndpointPolicyChangeStepCommonDefinition,
 });

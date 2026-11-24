@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EndpointPolicyBaselinePreset } from '../domain/input_schemas';
+import type { EndpointPolicyPreset } from '../../../../../common/endpoint/constants';
 import type {
   EndpointPolicyBaseline,
   EndpointPolicySummary,
@@ -36,7 +36,7 @@ type PresentedGetPolicy = PresentedGetPolicyFallback &
 
 type PresentedBaselineReference = Readonly<{
   type: 'baseline';
-  preset: EndpointPolicyBaselinePreset;
+  preset: EndpointPolicyPreset;
   environment: PolicyBaselineEnvironment;
 }>;
 

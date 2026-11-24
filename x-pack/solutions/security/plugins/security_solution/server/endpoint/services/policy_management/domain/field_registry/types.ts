@@ -8,18 +8,16 @@
 import type { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type { PolicyOperatingSystem } from '../../../../../../common/endpoint/types';
 
-export type FieldRegistryKind =
-  | 'protection'
-  | 'event'
-  | 'popup'
-  | 'advanced'
-  | 'logging'
-  | 'meta'
-  | 'other';
-
-export type FieldRegistryTier = 1 | 2;
-
-export type FieldRegistrySource = 'factory' | 'advanced_schema' | 'both';
+import type {
+  FieldRegistryKind,
+  FieldRegistryTier,
+  FieldRegistrySource,
+} from '../../../../../../common/workflows/step_types/endpoint/policies/field_registry';
+export type {
+  FieldRegistryKind,
+  FieldRegistryTier,
+  FieldRegistrySource,
+} from '../../../../../../common/workflows/step_types/endpoint/policies/field_registry';
 
 export type FieldRegistryProductFeatureGate =
   | ProductFeatureSecurityKey.endpointProtectionUpdates

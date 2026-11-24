@@ -8,13 +8,14 @@
 import { createHash } from 'crypto';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import { createOtherResult } from '@kbn/agent-builder-server';
+import type { TruncationReason } from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 import type { PolicyIdentity } from '../services/read_policy';
 
 const MAX_STRING_LENGTH = 512;
 const MAX_CONTAINER_ENTRIES = 50;
 const MAX_DEPTH = 10;
 const MAX_PRESENTATION_NODES = 500;
-const MAX_SUMMARY_ENTRIES = 50;
+export const MAX_SUMMARY_ENTRIES = 50;
 
 export type TrimLimits = Readonly<{
   maxStringLength: number;
@@ -71,11 +72,7 @@ export const TIGHTER_TRIM_LIMITS: readonly TrimLimits[] = [
   TIGHTEST_TRIM_LIMITS,
 ];
 
-export type TruncationReason =
-  | 'string_truncated'
-  | 'array_truncated'
-  | 'object_truncated'
-  | 'depth_truncated';
+export type { TruncationReason } from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 
 export type TruncationEntry = Readonly<{
   path: string;

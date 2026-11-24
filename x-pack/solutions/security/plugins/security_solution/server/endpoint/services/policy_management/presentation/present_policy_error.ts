@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { POLICY_WRITE_OBSERVATION_AVAILABILITY } from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 import {
   EndpointAuthorizationError,
   EndpointHttpError,
@@ -33,20 +34,9 @@ import {
 } from '../services/policy_errors';
 import { presentBoundedIdentityStrings, type PresentedPolicyIdentity } from './trim_policy_result';
 
-export type PolicyToolErrorClass =
-  | 'not_authorized'
-  | 'not_found'
-  | 'ambiguous_name'
-  | 'invalid_policy'
-  | 'baseline_unavailable'
-  | 'version_conflict'
-  | 'blocked_change'
-  | 'no_change'
-  | 'write_rejected'
-  | 'write_unverified'
-  | 'rejected_operations'
-  | 'invalid_input'
-  | 'unknown_error';
+import type { POLICY_ERROR_IDENTITIES } from '../../../../../common/workflows/step_types/endpoint/policies/policy_errors';
+
+export type PolicyToolErrorClass = (typeof POLICY_ERROR_IDENTITIES)[number];
 
 export const POLICY_TOOL_ERROR_MESSAGES: Readonly<Record<PolicyToolErrorClass, string>> = {
   ...POLICY_ERROR_MESSAGES,
@@ -147,7 +137,7 @@ type PresentedWriteIdentity = PresentedPolicyIdentity<PolicyWriteIdentity>;
 type PolicyToolWriteUnverifiedErrorMetadata = Record<string, unknown> & {
   error: 'write_unverified';
   before: PresentedWriteIdentity;
-  observation: 'available' | 'unavailable';
+  observation: (typeof POLICY_WRITE_OBSERVATION_AVAILABILITY)[number];
   observed?: PresentedWriteIdentity;
 };
 

@@ -9,6 +9,16 @@
 import { getFileDataIndexName, getFileMetadataIndexName } from '@kbn/fleet-plugin/common';
 import { EndpointSortableField } from './types';
 
+export const ENDPOINT_POLICY_PRESET = {
+  EDR_COMPLETE: 'EDRComplete',
+  NGAV: 'NGAV',
+  EDR_ESSENTIAL: 'EDREssential',
+  DATA_COLLECTION: 'DataCollection',
+} as const;
+
+export type EndpointPolicyPreset =
+  (typeof ENDPOINT_POLICY_PRESET)[keyof typeof ENDPOINT_POLICY_PRESET];
+
 /** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
 export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
 export const ENDPOINT_ACTIONS_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;

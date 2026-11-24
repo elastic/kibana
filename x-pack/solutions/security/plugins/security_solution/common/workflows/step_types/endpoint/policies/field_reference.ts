@@ -6,61 +6,53 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { PolicyOperatingSystem } from '../../../../endpoint/types/os';
+
 import { POLICY_IDENTIFIER_MAX_LENGTH, policyPathInputSchema } from './input_schemas';
 
-export const getPolicyFieldReferenceParamsSchema = lazySchema(() =>
+export const RESULT_LIMIT = 10;
+
+export const policyFieldKeywordsInputSchema = lazySchema(() =>
   z
-    .object({
-      path: policyPathInputSchema.optional(),
-      keywords: z
-        .array(
-          z
-            .string()
-            .trim()
-            .min(1)
-            .max(POLICY_IDENTIFIER_MAX_LENGTH)
-            .refine((keyword) => !/\s/.test(keyword), {
-              message:
-                'Keywords are single words; send separate words or one word such as antivirus.',
-            })
-        )
+    .array(
+      z
+        .string()
+        .trim()
         .min(1)
-        .max(5)
-        .optional(),
-      os: z
-        .enum(['windows', 'mac', 'linux'], {
-          message: "os must be one of 'windows', 'mac', or 'linux'; use 'mac' for macOS.",
+        .max(POLICY_IDENTIFIER_MAX_LENGTH)
+        .refine((keyword) => !/\s/.test(keyword), {
+          message: 'Keywords are single words; send separate words or one word such as antivirus.',
         })
-        .optional(),
-    })
-    .strict()
+    )
+    .min(1)
+    .max(5)
 );
 
-export type GetPolicyFieldReferenceSelector = Readonly<
-  { path: string } | { keywords: readonly string[]; os?: 'windows' | 'mac' | 'linux' }
+export const policyFieldOsInputSchema = lazySchema(() =>
+  z.enum(
+    Object.values(PolicyOperatingSystem).map((value) => `${value}` as const),
+    {
+      message: "os must be one of 'windows', 'mac', or 'linux'; use 'mac' for macOS.",
+    }
+  )
+);
+
+export const createPolicyFieldReferenceSelectorSchema = ({
+  path = policyPathInputSchema.describe(
+    'Exact registry path, protection key, or supported OS-less remainder.'
+  ),
+  keywords = policyFieldKeywordsInputSchema.describe(
+    'One to five single-word keywords matched against registry paths or shared UI labels.'
+  ),
+  os = policyFieldOsInputSchema
+    .optional()
+    .describe('Optional operating-system filter for keyword search.'),
+} = {}) => z.union([z.object({ path }).strict(), z.object({ keywords, os }).strict()]);
+
+export const policyFieldReferenceSelectorInputSchema = lazySchema(() =>
+  createPolicyFieldReferenceSelectorSchema()
+);
+
+export type GetPolicyFieldReferenceSelector = z.infer<
+  typeof policyFieldReferenceSelectorInputSchema
 >;
-
-export const policyFieldReferenceSelectorInputSchema = lazySchema(() => {
-  const fieldReferencePathSelectorSchema = z
-    .object({
-      path: getPolicyFieldReferenceParamsSchema.shape.path
-        .unwrap()
-        .describe('Exact registry path, protection key, or supported OS-less remainder.'),
-    })
-    .strict();
-
-  const fieldReferenceKeywordsSelectorSchema = z
-    .object({
-      keywords: getPolicyFieldReferenceParamsSchema.shape.keywords
-        .unwrap()
-        .describe(
-          'One to five single-word keywords matched against registry paths or shared UI labels.'
-        ),
-      os: getPolicyFieldReferenceParamsSchema.shape.os
-        .optional()
-        .describe('Optional operating-system filter for keyword search.'),
-    })
-    .strict();
-
-  return z.union([fieldReferencePathSelectorSchema, fieldReferenceKeywordsSelectorSchema]);
-});
