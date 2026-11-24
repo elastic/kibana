@@ -118,7 +118,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       'xpack.contentConnectors.createConnector.finishUpStep.euiCard.exploreYourDataDescription',
                       {
                         defaultMessage:
-                          'See your content crawler documents or make a data view to explore them',
+                          'See the documents synced by your content crawler or make a data view to explore them',
                       }
                     )}
                     footer={

@@ -47,7 +47,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       'xpack.observabilityAiAssistantManagement.settingsPage.searchConnectorIndexPatternDescription',
       {
         defaultMessage:
-          'Index pattern used by the AI Assistant when querying content crawler indices (part of the knowledge base). By default the index for every content crawler will be queried',
+          'Index pattern used by the AI Assistant when querying indices of content crawlers (part of the knowledge base). By default the index for every content crawler will be queried',
       }
     ),
     schema: schema.string(),

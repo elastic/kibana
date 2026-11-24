@@ -151,7 +151,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                             'xpack.contentConnectors.createConnector.connectorDescriptionBadge.isOnlySelfManagedAvailableTitle',
                             {
                               defaultMessage:
-                                'This content crawler is not available as an Elastic-managed Content Crawler',
+                                'This content crawler is not available as an Elastic-managed content crawler',
                             }
                           )
                         : i18n.translate(
@@ -178,7 +178,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                   title={i18n.translate(
                     'xpack.contentConnectors.createConnector.connectorDescriptionBadge.elasticManagedDiscontinuedTitle',
                     {
-                      defaultMessage: 'Elastic managed Content Crawlers are no longer supported',
+                      defaultMessage: 'Elastic managed content crawlers are no longer supported',
                     }
                   )}
                   size="s"

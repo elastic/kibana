@@ -214,7 +214,7 @@ export const ConnectorDeployment: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.runConnector.title',
                     {
-                      defaultMessage: 'Run content crawler service',
+                      defaultMessage: 'Run content crawler',
                     }
                   ),
                   titleSize: 'xs',

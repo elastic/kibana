@@ -27,7 +27,7 @@ export function ContentConnectorTab() {
           'xpack.observabilityAiAssistantManagement.searchConnectorTab.searchConnectorsEnablesYouTextLabel',
           {
             defaultMessage:
-              'Content crawlers enable you to index content from external sources thereby making it available for the AI Assistant. This can greatly improve the relevance of the AI Assistant’s responses.',
+              'Content crawlers sync data from external sources, making it available for the AI Assistant. This can greatly improve the relevance of the AI Assistant’s responses.',
           }
         )}
       </EuiText>

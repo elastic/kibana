@@ -126,7 +126,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               'xpack.contentConnectors.content.connectors.overview.connectorNoIndexCallOut.description',
               {
                 defaultMessage:
-                  "You won't be able to start syncing content until your content crawler is attached to an index.",
+                  "You won't be able to start syncing until your content crawler is attached to an index.",
               }
             )}
           >

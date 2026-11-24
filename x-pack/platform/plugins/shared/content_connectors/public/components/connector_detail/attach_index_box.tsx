@@ -267,7 +267,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                     'xpack.contentConnectors.attachIndexBox.euiFormRow.associatedManagedConnectorIndexHelpTextLabel',
                     {
                       defaultMessage:
-                        'Managed content crawler indices must be prefixed. Use an existing index or create a new one.',
+                        'Indices for managed content crawlers must be prefixed. Use an existing index or create a new one.',
                     }
                   )
                 : i18n.translate(

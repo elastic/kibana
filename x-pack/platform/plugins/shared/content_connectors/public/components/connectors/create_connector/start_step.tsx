@@ -330,7 +330,7 @@ const StartStep: React.FC<StartStepProps> = ({
                     'xpack.contentConnectors.createConnector.startStep.p.thisProcessWillCreateLabel',
                     {
                       defaultMessage:
-                        'This process will create a new index, API key, and a Content Crawler ID. Optionally you can bring your own configuration as well.',
+                        'This process will create a new index, API key, and a content crawler ID. Optionally you can bring your own configuration as well.',
                     }
                   )}
                 </p>

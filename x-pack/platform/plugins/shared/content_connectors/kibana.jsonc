@@ -4,7 +4,7 @@
   "owner": "@elastic/search-ml-ux",
   "group": "platform",
   "visibility": "shared",
-  "description": "Plugin hosting shared features for connectors",
+  "description": "Plugin hosting shared features for content crawlers",
   "plugin": {
     "id": "contentConnectors",
     "server": true,

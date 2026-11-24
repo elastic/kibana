@@ -58,7 +58,7 @@ export function connectorStatusToText(connector: Connector): string {
   if (isLastSeenOld(connector) || connectorStatus === ConnectorStatus.ERROR) {
     return i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.connectorStatus.connectorFailure.label',
-      { defaultMessage: 'Content Crawler Failure' }
+      { defaultMessage: 'Content crawler failure' }
     );
   }
   if (!hasIndexName) {

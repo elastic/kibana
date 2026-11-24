@@ -176,7 +176,7 @@ export const getIdleJobsTooltip = (idleCount: number) => (
   <EuiText size="xs">
     <FormattedMessage
       id="xpack.contentConnectors.connectorStats.idleTooltip"
-      defaultMessage="{idleCount} {idleCountText} - Number of sync jobs which are still running but have not seen any update from the backend content crawler for more than 1 minute"
+      defaultMessage="{idleCount} {idleCountText} - Number of sync jobs which are still running but have not seen any update from the backend for more than 1 minute"
       values={{
         idleCount: <b>{idleCount}</b>,
         idleCountText: (

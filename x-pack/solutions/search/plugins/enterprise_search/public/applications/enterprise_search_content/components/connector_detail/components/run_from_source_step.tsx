@@ -65,7 +65,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
           <EuiText size="m">
             <h5>
               {i18n.translate('xpack.enterpriseSearch.connectorDeployment.runFromSourceTitle', {
-                defaultMessage: 'Run content crawler service from source',
+                defaultMessage: 'Run content crawler from source',
               })}
             </h5>
           </EuiText>
@@ -194,14 +194,14 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         <EuiText size="s">
           <h5>
             {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.compileAndRunTitle', {
-              defaultMessage: 'Run the content crawler service',
+              defaultMessage: 'Run the content crawler',
             })}
           </h5>
           <p>
             {i18n.translate(
               'xpack.enterpriseSearch.connectorDeployment.p.compileAndRunInstructions',
               {
-                defaultMessage: 'Finally, compile and run the content crawler service source code:',
+                defaultMessage: 'Finally, compile and run the content crawler source code:',
               }
             )}
           </p>

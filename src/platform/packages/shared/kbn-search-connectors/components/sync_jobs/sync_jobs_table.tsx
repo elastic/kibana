@@ -274,7 +274,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
           defaultMessage: 'Content crawler sync jobs',
         })
       : i18n.translate('searchConnectors.syncJobsTable.accessControlTableCaption', {
-          defaultMessage: 'Access control content crawler sync jobs',
+          defaultMessage: 'Access control sync jobs',
         });
 
   return (
