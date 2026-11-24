@@ -1188,6 +1188,28 @@ describe('listDetections', () => {
     await jest.runAllTimersAsync();
     await expectation;
   });
+
+  it('throws when the polling deadline expires before a terminal state', async () => {
+    jest.useFakeTimers();
+    const client = makeClient();
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
+    });
+    // submit succeeds; every poll returns 'running' so the loop never exits normally
+    client.request
+      .mockResolvedValueOnce({ data: { runId: RUN_ID } })
+      .mockResolvedValue({ data: { status: 'running' } });
+
+    const ctx = makeCtx(client);
+    const expectation = expect(
+      SophosCentral.actions.listDetections.handler(ctx as never, {})
+    ).rejects.toThrow('did not complete within 90 seconds');
+
+    // Advance past the 90 s deadline (18 × 5 s sleeps = 90 s, then afterSleep < MIN_POLL_TIMEOUT_MS).
+    // No request with timeout: 0 (or below the minimum) should ever be attempted.
+    await jest.advanceTimersByTimeAsync(90_001);
+    await expectation;
+  });
 });
 
 // ---------------------------------------------------------------------------

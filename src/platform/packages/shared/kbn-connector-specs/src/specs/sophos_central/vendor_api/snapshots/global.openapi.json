@@ -25,15 +25,18 @@
                     "apiHosts": {
                       "properties": {
                         "dataRegion": {
+                          "const": "https://api-eu01.central.sophos.com",
                           "type": "string"
                         }
                       },
                       "type": "object"
                     },
                     "id": {
+                      "const": "00000000-0000-0000-0000-000000000001",
                       "type": "string"
                     },
                     "idType": {
+                      "const": "tenant",
                       "type": "string"
                     }
                   },
