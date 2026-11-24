@@ -178,6 +178,7 @@ export const WorkflowExecuteAlertForm = ({
 
   const {
     query,
+    draftQuery,
     timeRange,
     handleQueryChange,
     handleQuerySubmit,
@@ -274,9 +275,12 @@ export const WorkflowExecuteAlertForm = ({
             key={dataView?.id ?? 'no-alert-dataview'}
             appName={WORKFLOW_EXECUTE_ALERT_SEARCH_APP_NAME}
             useDefaultBehaviors={true}
+            disableSubscribingToGlobalDataServices={true}
+            isAutoRefreshDisabled={true}
             onQueryChange={handleQueryChange}
             onQuerySubmit={handleQuerySubmit}
             query={query}
+            draft={{ query: draftQuery }}
             indexPatterns={dataView ? [dataView] : []}
             showDatePicker={true}
             dateRangeFrom={timeRange.from}
