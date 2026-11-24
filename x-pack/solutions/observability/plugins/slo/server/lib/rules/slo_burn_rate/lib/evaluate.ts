@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { chunk, get } from 'lodash';
+import { get } from 'lodash';
 import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { BURN_RATE_EXECUTOR_SPAN_NAMES } from '../constants';
 import type { SLODefinition } from '../../../../domain/models';
@@ -18,7 +18,6 @@ import type { EvaluationAfterKey } from './build_query';
 import {
   buildCandidatesQuery,
   buildQuery,
-  EVALUATION_PAGE_SIZE,
   generateAboveThresholdKey,
   generateBurnRateKey,
   generateWindowId,
@@ -74,6 +73,25 @@ interface InstancesAggResults<TBucket> {
     buckets: TBucket[];
   };
 }
+
+interface CandidatesAggResults {
+  instances?: {
+    after_key?: EvaluationAfterKey;
+    buckets?: Array<Pick<EvaluationBucket, 'key'>>;
+  };
+}
+
+export type BurnRateEvaluationResult = ReturnType<typeof transformBucketToResults>[number];
+
+interface EvaluateOptions {
+  maxResults?: number;
+}
+
+export interface EvaluationResult {
+  results: BurnRateEvaluationResult[];
+  hasReachedLimit: boolean;
+}
+
 type SpanName = (typeof BURN_RATE_EXECUTOR_SPAN_NAMES)[keyof typeof BURN_RATE_EXECUTOR_SPAN_NAMES];
 
 interface EvaluationContext {
@@ -101,52 +119,72 @@ async function searchInstances<TBucket>(
   return results.aggregations.instances;
 }
 
-async function searchAllPages<TBucket>(
+async function* searchPages<TBucket>(
   context: EvaluationContext,
   spanName: SpanName,
   buildRequest: (afterKey?: EvaluationAfterKey) => Omit<SearchRequest, 'index'>
-): Promise<TBucket[]> {
-  const buckets: TBucket[] = [];
+): AsyncGenerator<TBucket[]> {
   let afterKey: EvaluationAfterKey | undefined;
   do {
     const instances = await searchInstances<TBucket>(context, spanName, buildRequest(afterKey));
-    buckets.push(...instances.buckets);
+    yield instances.buckets;
     afterKey = instances.after_key;
   } while (afterKey);
-
-  return buckets;
 }
 
-async function evaluateCandidates(context: EvaluationContext): Promise<EvaluationBucket[]> {
-  const { slo, params, startedAt } = context;
-  const candidates = await searchAllPages<Pick<EvaluationBucket, 'key'>>(
-    context,
-    BURN_RATE_EXECUTOR_SPAN_NAMES.CANDIDATES_QUERY,
-    (afterKey) => buildCandidatesQuery(startedAt, slo, params, afterKey)
+async function searchCandidates(
+  { esClient, slo, params, startedAt }: EvaluationContext,
+  afterKey?: EvaluationAfterKey
+): Promise<{ instanceIds: string[]; afterKey?: EvaluationAfterKey }> {
+  const results = await withSpan(
+    { name: BURN_RATE_EXECUTOR_SPAN_NAMES.CANDIDATES_QUERY, type: 'rule' },
+    () =>
+      esClient.search<undefined, CandidatesAggResults>({
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        ...buildCandidatesQuery(startedAt, slo, params, afterKey),
+      })
   );
-  const candidateIds = candidates.map(({ key }) => key.instanceId);
-  const buckets: EvaluationBucket[] = [];
-  // Chunks match the composite page size, so each chunk is evaluated in a single page.
-  for (const instanceIds of chunk(candidateIds, EVALUATION_PAGE_SIZE)) {
-    const instances = await searchInstances<EvaluationBucket>(
-      context,
-      BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY,
-      buildQuery(startedAt, slo, params, undefined, instanceIds)
-    );
-    buckets.push(...instances.buckets);
-  }
 
-  return buckets;
+  // The filter_path drops the empty objects, so an empty page can come without its buckets or aggregations.
+  const instances = results.aggregations?.instances;
+  return {
+    instanceIds: (instances?.buckets ?? []).map(({ key }) => key.instanceId),
+    afterKey: instances?.after_key,
+  };
 }
 
+async function* evaluateCandidatePages(
+  context: EvaluationContext
+): AsyncGenerator<EvaluationBucket[]> {
+  const { slo, params, startedAt } = context;
+  let afterKey: EvaluationAfterKey | undefined;
+  do {
+    const candidates = await searchCandidates(context, afterKey);
+    if (candidates.instanceIds.length > 0) {
+      // Candidates pages match the composite page size, so each page is evaluated in a single query.
+      const instances = await searchInstances<EvaluationBucket>(
+        context,
+        BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY,
+        buildQuery(startedAt, slo, params, undefined, candidates.instanceIds)
+      );
+      yield instances.buckets;
+    }
+    afterKey = candidates.afterKey;
+  } while (afterKey);
+}
+
+/**
+ * Evaluates the SLO instances breaching the burn rate windows, stopping once more than `maxResults` breach.
+ */
 export async function evaluate(
   esClient: ElasticsearchClient,
   slo: SLODefinition,
   params: BurnRateRuleParams,
-  startedAt: Date
-) {
+  startedAt: Date,
+  { maxResults = Number.POSITIVE_INFINITY }: EvaluateOptions = {}
+): Promise<EvaluationResult> {
   if (params.windows.length === 0) {
-    return [];
+    return { results: [], hasReachedLimit: false };
   }
 
   const context: EvaluationContext = { esClient, slo, params, startedAt };
@@ -154,14 +192,24 @@ export async function evaluate(
   const canPrefilterCandidates = params.windows.every(
     ({ burnRateThreshold }) => burnRateThreshold > 0
   );
-  const buckets = canPrefilterCandidates
-    ? await evaluateCandidates(context)
-    : await searchAllPages<EvaluationBucket>(
-        context,
-        BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY,
-        (afterKey) => buildQuery(startedAt, slo, params, afterKey)
+  const pages = canPrefilterCandidates
+    ? evaluateCandidatePages(context)
+    : searchPages<EvaluationBucket>(context, BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY, (afterKey) =>
+        buildQuery(startedAt, slo, params, afterKey)
       );
-  return transformBucketToResults(buckets, params);
+
+  const results: BurnRateEvaluationResult[] = [];
+  for await (const buckets of pages) {
+    results.push(...transformBucketToResults(buckets, params));
+    if (results.length > maxResults) {
+      break;
+    }
+  }
+
+  return {
+    results: results.slice(0, maxResults),
+    hasReachedLimit: results.length > maxResults,
+  };
 }
 
 function transformBucketToResults(buckets: EvaluationBucket[], params: BurnRateRuleParams) {
