@@ -58939,7 +58939,6 @@
     "xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModalSearch": "Buscar nome de campo",
     "xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModalTitle": "Campos",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.entityId": "ID da entidade: {entityId}",
-    "xpack.securitySolution.entityAnalytics.entitiesTable.group.openEntityFlyout": "Abrir detalhes da entidade",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.entities": "Entidades:",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.riskScore": "Pontuação de risco:",
     "xpack.securitySolution.entityAnalytics.entitiesTable.groupBy": "Agrupe entidades por",

@@ -58932,7 +58932,6 @@
     "xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModalSearch": "検索フィールド名",
     "xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModalTitle": "フィールド",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.entityId": "エンティティID：{entityId}",
-    "xpack.securitySolution.entityAnalytics.entitiesTable.group.openEntityFlyout": "エンティティの詳細を開く",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.entities": "エンティティ：",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.riskScore": "リスクスコア：",
     "xpack.securitySolution.entityAnalytics.entitiesTable.groupBy": "次でエンティティをグループ化",

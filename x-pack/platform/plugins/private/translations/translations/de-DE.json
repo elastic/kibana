@@ -58770,7 +58770,6 @@
     "xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModalSearch": "Name des Suchfelds",
     "xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModalTitle": "Felder",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.entityId": "Entitäts-ID: {entityId}",
-    "xpack.securitySolution.entityAnalytics.entitiesTable.group.openEntityFlyout": "Entitätsdetails öffnen",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.entities": "Entitäten:",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.riskScore": "Risiko-Score:",
     "xpack.securitySolution.entityAnalytics.entitiesTable.groupBy": "Entitäten gruppieren nach",

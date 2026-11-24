@@ -39,10 +39,18 @@ const riskScoreLabel = i18n.translate(
   { defaultMessage: 'Risk score:' }
 );
 
-const openEntityFlyoutLabel = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.entitiesTable.group.openEntityFlyout',
-  { defaultMessage: 'Open entity details' }
-);
+const getOpenEntityFlyoutLabel = (entityName: string) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.group.openEntityFlyout', {
+    defaultMessage: 'View details for {entityName}',
+    values: { entityName },
+  });
+
+/** Accessible name for the group's expand/collapse toggle, distinct from the flyout button nested in it. */
+export const getResolutionGroupToggleLabel = (entityName: string) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.group.expandEntityRow', {
+    defaultMessage: 'Expand entity row for {entityName}',
+    values: { entityName },
+  });
 
 const ResolutionGroupPanel = ({
   bucket,
@@ -63,6 +71,7 @@ const ResolutionGroupPanel = ({
   const entityType = metadata?.type;
 
   const canOpenFlyout = Boolean(targetEntityName && entityType);
+  const openEntityFlyoutLabel = getOpenEntityFlyoutLabel(displayName);
 
   const handleOpenFlyout = useCallback(
     (e: React.MouseEvent) => {
@@ -110,6 +119,15 @@ const ResolutionGroupPanel = ({
     </EuiFlexGroup>
   );
 };
+
+export const createGroupToggleAriaLabelGetter =
+  (targetMetadata: TargetMetadataMap) =>
+  (selectedGroup: string, bucket: RawBucket<EntitiesGroupingAggregation>): string | undefined => {
+    if (selectedGroup !== ENTITY_GROUPING_OPTIONS.RESOLUTION) return undefined;
+
+    const entityId = String(bucket.key_as_string ?? bucket.key);
+    return getResolutionGroupToggleLabel(targetMetadata.get(entityId)?.name ?? entityId);
+  };
 
 export const createGroupPanelRenderer = (
   targetMetadata: TargetMetadataMap,
