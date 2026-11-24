@@ -67,11 +67,11 @@ const getTitle = (type: BoostProfileType, pattern: string, targets: readonly Mat
   if (pattern.length === 0) {
     return TARGET_LIST_PROMPTS[type];
   }
-  const exactCount = targets.filter(({ match }) => match === 'exact').length;
+  const exactCount = targets.filter(({ matchType }) => matchType === 'exact').length;
   if (exactCount > 0) {
     return getExactMatchesCount(exactCount);
   }
-  const partialCount = targets.filter(({ match }) => match === 'partial').length;
+  const partialCount = targets.filter(({ matchType }) => matchType === 'partial').length;
   return partialCount > 0 ? getPartialMatchesCount(partialCount) : NO_MATCHES_COUNT;
 };
 
@@ -123,13 +123,13 @@ const ListOptionSwitch = ({
 
 const TargetName = ({ target }: { target: MatchedTarget }) => {
   const { euiTheme } = useEuiTheme();
-  const { nameParts, match, outrankedByRuleName } = target;
+  const { nameParts, matchType, outrankedByRuleName } = target;
 
   const getColor = () => {
     if (outrankedByRuleName) {
       return euiTheme.colors.textDisabled;
     }
-    return match === 'exact' ? euiTheme.colors.textPrimary : undefined;
+    return matchType === 'exact' ? euiTheme.colors.textPrimary : undefined;
   };
 
   return (
@@ -190,7 +190,7 @@ export const TargetList = ({ type, pattern, targets, isDisabled, onSelect }: Tar
   const hasHidden = targets.some(({ isHidden }) => isHidden);
   const visibleTargets = targets
     .filter(({ isHidden }) => showsHidden || !isHidden)
-    .filter(({ match }) => !hasPattern || showsUnmatched || match)
+    .filter(({ matchType }) => !hasPattern || showsUnmatched || matchType)
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
@@ -259,17 +259,17 @@ export const TargetList = ({ type, pattern, targets, isDisabled, onSelect }: Tar
         <div css={getListStyles(euiTheme)}>
           <EuiListGroup maxWidth={false} ariaLabelledby={titleId}>
             {visibleTargets.map((target) => {
-              const { name, match, outrankedByRuleName } = target;
+              const { name, matchType, outrankedByRuleName } = target;
               return (
                 <EuiListGroupItem
                   key={name}
                   wrapText
                   label={<TargetLabel target={target} />}
                   icon={
-                    match ? (
+                    matchType ? (
                       <EuiIcon
-                        type={MATCH_ICONS[match]}
-                        aria-label={MATCH_LABELS[match]}
+                        type={MATCH_ICONS[matchType]}
+                        aria-label={MATCH_LABELS[matchType]}
                         color={outrankedByRuleName ? euiTheme.colors.textDisabled : undefined}
                       />
                     ) : (

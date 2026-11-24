@@ -7,7 +7,7 @@
 
 import type { BoostRuleMatch } from '../../../common/types';
 
-export type TargetMatch = 'exact' | 'partial';
+export type TargetMatchType = 'exact' | 'partial';
 
 export interface NamePart {
   text: string;
@@ -16,25 +16,54 @@ export interface NamePart {
 }
 
 export interface MatchedTarget extends BoostRuleMatch {
-  match?: TargetMatch;
+  matchType?: TargetMatchType;
   nameParts: NamePart[];
 }
 
-const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+type Range = readonly [start: number, end: number];
 
-// Each literal part of the pattern becomes an even capture group, and each `*` an odd one.
-const toMatcher = (pattern: string): RegExp =>
-  new RegExp(
-    `^${pattern
-      .split('*')
-      .map((part) => `(${escapeRegExp(part)})`)
-      .join('(.*?)')}$`
-  );
+// A regular expression with a group per `*` can backtrack combinatorially on several wildcards.
+// With `*` as the only wildcard, taking each literal part at its earliest position is enough, so
+// this takes at most one search per part.
+const matchGlob = (pattern: string, name: string): Range[] | undefined => {
+  const parts = pattern.split('*');
+  if (parts.length === 1) {
+    return pattern === name ? [[0, name.length]] : undefined;
+  }
+  const first = parts[0];
+  const last = parts[parts.length - 1];
+  const suffixStart = name.length - last.length;
+  if (suffixStart < first.length || !name.startsWith(first) || !name.endsWith(last)) {
+    return undefined;
+  }
 
-const toNameParts = ([, ...groups]: RegExpExecArray): NamePart[] =>
-  groups
-    .map((text, index) => ({ text, isTyped: index % 2 === 0 }))
-    .filter(({ text }) => text.length > 0);
+  const ranges: Range[] = [[0, first.length]];
+  let position = first.length;
+  for (const part of parts.slice(1, -1)) {
+    const start = name.indexOf(part, position);
+    if (start === -1 || start + part.length > suffixStart) {
+      return undefined;
+    }
+    ranges.push([start, start + part.length]);
+    position = start + part.length;
+  }
+  ranges.push([suffixStart, name.length]);
+  return ranges;
+};
+
+const toNameParts = (name: string, typedRanges: readonly Range[]): NamePart[] => {
+  const parts: NamePart[] = [];
+  let position = 0;
+  for (const [start, end] of typedRanges) {
+    parts.push(
+      { text: name.slice(position, start), isTyped: false },
+      { text: name.slice(start, end), isTyped: true }
+    );
+    position = end;
+  }
+  parts.push({ text: name.slice(position), isTyped: false });
+  return parts.filter(({ text }) => text.length > 0);
+};
 
 const unmatched = (target: BoostRuleMatch): MatchedTarget => ({
   ...target,
@@ -52,17 +81,16 @@ export const matchTargets = (
   if (pattern.length === 0) {
     return targets.map(unmatched);
   }
-  const exactMatcher = toMatcher(pattern);
-  const partialMatcher = toMatcher(`*${pattern}*`);
 
   return targets.map((target) => {
-    const exact = exactMatcher.exec(target.name);
+    const { name } = target;
+    const exact = matchGlob(pattern, name);
     if (exact) {
-      return { ...target, match: 'exact', nameParts: toNameParts(exact) };
+      return { ...target, matchType: 'exact', nameParts: toNameParts(name, exact) };
     }
-    const partial = partialMatcher.exec(target.name);
+    const partial = matchGlob(`*${pattern}*`, name);
     return partial
-      ? { ...target, match: 'partial', nameParts: toNameParts(partial) }
+      ? { ...target, matchType: 'partial', nameParts: toNameParts(name, partial) }
       : unmatched(target);
   });
 };

@@ -195,7 +195,7 @@ export const RuleFlyout = ({
     () => (type ? matchTargets(indexPatternField.value, targets[type]) : []),
     [type, indexPatternField.value, targets]
   );
-  const exactMatches = matchedTargets.filter(({ match }) => match === 'exact');
+  const exactMatches = matchedTargets.filter(({ matchType }) => matchType === 'exact');
   const appliedMatches = exactMatches.filter(({ outrankedByRuleName }) => !outrankedByRuleName);
   const appliedSizeInBytes = appliedMatches.reduce(
     (total, { storageSizeInBytes = 0 }) => total + storageSizeInBytes,

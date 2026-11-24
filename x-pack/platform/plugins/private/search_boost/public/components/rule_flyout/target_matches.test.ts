@@ -16,11 +16,13 @@ const targets: BoostRuleMatch[] = [
 ];
 
 const matchOf = (pattern: string) =>
-  Object.fromEntries(matchTargets(pattern, targets).map(({ name, match }) => [name, match]));
+  Object.fromEntries(
+    matchTargets(pattern, targets).map(({ name, matchType }) => [name, matchType])
+  );
 
 describe('matchTargets', () => {
   it('leaves every target unmatched before anything is typed', () => {
-    expect(matchTargets('', targets).map(({ match }) => match)).toEqual([
+    expect(matchTargets('', targets).map(({ matchType }) => matchType)).toEqual([
       undefined,
       undefined,
       undefined,
@@ -79,10 +81,29 @@ describe('matchTargets', () => {
     ]);
   });
 
+  it('matches patterns with several wildcards', () => {
+    const matchTypeOf = (pattern: string, name: string) =>
+      matchTargets(pattern, [{ name, isHidden: false }])[0].matchType;
+
+    expect(matchTypeOf('logs-*-*-default', 'logs-nginx-access-default')).toBe('exact');
+    expect(matchTypeOf('a*b*c', 'axxbyyc')).toBe('exact');
+    expect(matchTypeOf('a**c', 'abc')).toBe('exact');
+    expect(matchTypeOf('a*a', 'a')).toBeUndefined();
+    expect(matchTypeOf('x*z', 'axyzb')).toBe('partial');
+  });
+
+  it('rules out a pattern with many wildcards without freezing', () => {
+    const [target] = matchTargets(`${'a*'.repeat(30)}b`, [
+      { name: 'a'.repeat(255), isHidden: false },
+    ]);
+
+    expect(target.matchType).toBeUndefined();
+  });
+
   it('keeps the rest of each target', () => {
     const [outranked] = matchTargets('archive-*', [
       { name: 'archive-2024', isHidden: false, outrankedByRuleName: 'archives' },
     ]);
-    expect(outranked).toMatchObject({ match: 'exact', outrankedByRuleName: 'archives' });
+    expect(outranked).toMatchObject({ matchType: 'exact', outrankedByRuleName: 'archives' });
   });
 });
