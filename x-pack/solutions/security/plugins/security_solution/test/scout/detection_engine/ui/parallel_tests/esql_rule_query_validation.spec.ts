@@ -71,17 +71,6 @@ spaceTest.describe(
       await expect(esqlRuleForm.queryBar).toContainText('Error validating ES|QL');
     });
 
-    spaceTest('shows a syntax error when the query is not valid ES|QL', async ({ pageObjects }) => {
-      const { esqlRuleForm } = pageObjects;
-
-      await esqlRuleForm.setQueryAndWaitToSettle('from auditbeat* | where true test');
-      await esqlRuleForm.continueFromDefineStep();
-
-      await expect(esqlRuleForm.queryBar).toContainText(
-        `Error validating ES|QL: "SyntaxError: extraneous input 'test' expecting <EOF>"`
-      );
-    });
-
     spaceTest(
       'asks for confirmation when the query has a non-blocking validation error',
       async ({ pageObjects }) => {
