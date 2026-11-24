@@ -7,6 +7,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import {
+  SLI_RETENTION_DEFAULT_PERIOD_DAYS,
+  SLI_RETENTION_MAX_PERIOD_DAYS,
+  SLI_RETENTION_MIN_PERIOD_DAYS,
+} from '@kbn/slo-constants';
 
 export const configSchema = schema.object({
   sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),
@@ -15,6 +20,17 @@ export const configSchema = schema.object({
   staleInstancesCleanupTaskEnabled: schema.boolean({ defaultValue: false }),
   compositeSloSummaryTaskEnabled: schema.boolean({ defaultValue: true }),
   enabled: schema.boolean({ defaultValue: true }),
+  sliRetention: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      periodDays: schema.number({
+        min: SLI_RETENTION_MIN_PERIOD_DAYS,
+        max: SLI_RETENTION_MAX_PERIOD_DAYS,
+        defaultValue: SLI_RETENTION_DEFAULT_PERIOD_DAYS,
+        validate: (value) => (Number.isInteger(value) ? undefined : 'must be an integer'),
+      }),
+    })
+  ),
   experimental: schema.maybe(
     schema.object({
       ruleFormV2: schema.object({
