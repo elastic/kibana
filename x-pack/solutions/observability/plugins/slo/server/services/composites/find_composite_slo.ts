@@ -7,13 +7,10 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  CompositeSLOWithSummaryResponse,
-  FindCompositeSLOParams,
-  Paginated,
-} from '@kbn/slo-schema';
+import type { FindCompositeSLOParams, FindCompositeSLOResponse } from '@kbn/slo-schema';
+import { findCompositeSLOResponseSchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
-import type { CompositeSLODefinition } from '../../domain/models';
+import type { CompositeSLODefinition, CompositeSLOWithSummary } from '../../domain/models';
 import { buildNoDataSummary, toMemberWithSummary } from './compute_composite_summary';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import {
@@ -30,7 +27,7 @@ interface Dependencies {
 function toWithSummaryResponse(
   definition: CompositeSLODefinition,
   persisted: PersistedCompositeSummary | undefined
-): CompositeSLOWithSummaryResponse {
+): CompositeSLOWithSummary {
   return {
     ...definition,
     summary: persisted?.summary ?? buildNoDataSummary(),
@@ -49,7 +46,7 @@ export async function findCompositeSlo(
     perPage = 25,
   }: FindCompositeSLOParams,
   { spaceId, compositeRepository, esClient }: Dependencies
-): Promise<Paginated<CompositeSLOWithSummaryResponse>> {
+): Promise<FindCompositeSLOResponse> {
   const filters: QueryDslQueryContainer[] = [{ term: { spaceId } }];
   if (search) {
     filters.push({
@@ -91,7 +88,7 @@ export async function findCompositeSlo(
     .filter((id): id is string => typeof id === 'string');
 
   if (compositeIds.length === 0) {
-    return { page, perPage, total, results: [] };
+    return findCompositeSLOResponseSchema.encode({ page, perPage, total, results: [] });
   }
 
   const [definitions, persistedSummaryById] = await Promise.all([
@@ -108,5 +105,5 @@ export async function findCompositeSlo(
       toWithSummaryResponse(definition, persistedSummaryById.get(definition.id))
     );
 
-  return { page, perPage, total, results };
+  return findCompositeSLOResponseSchema.encode({ page, perPage, total, results });
 }

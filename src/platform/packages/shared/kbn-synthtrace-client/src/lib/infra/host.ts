@@ -149,6 +149,44 @@ export class Host extends Entity<HostDocument> {
     });
   }
 
+  process(fields: {
+    'process.pid': number;
+    'process.command_line': string;
+    'user.name': string;
+    'system.process.state': string;
+    'system.process.cpu.total.pct': number;
+    'system.process.memory.rss.pct': number;
+    // epoch millis, works with and without the System integration mappings
+    'system.process.cpu.start_time': number;
+  }) {
+    return new HostMetrics({
+      ...this.fields,
+      ...fields,
+      'event.dataset': 'system.process',
+      'metricset.period': 10000,
+      'metricset.name': 'process',
+    });
+  }
+
+  processSummary(fields: {
+    'system.process.summary.total': number;
+    'system.process.summary.running'?: number;
+    'system.process.summary.sleeping'?: number;
+    'system.process.summary.idle'?: number;
+    'system.process.summary.stopped'?: number;
+    'system.process.summary.zombie'?: number;
+    'system.process.summary.dead'?: number;
+    'system.process.summary.unknown'?: number;
+  }) {
+    return new HostMetrics({
+      ...this.fields,
+      ...fields,
+      'event.dataset': 'system.process.summary',
+      'metricset.period': 10000,
+      'metricset.name': 'process_summary',
+    });
+  }
+
   pod(uid: string) {
     return pod(uid, this.fields['host.hostname']);
   }
@@ -191,6 +229,21 @@ export interface HostMetricsDocument extends HostDocument {
   'system.core.softirq.pct'?: number;
   'system.core.steal.pct'?: number;
   'system.cpu.nice.pct'?: number;
+  'process.pid'?: number;
+  'process.command_line'?: string;
+  'user.name'?: string;
+  'system.process.state'?: string;
+  'system.process.cpu.total.pct'?: number;
+  'system.process.memory.rss.pct'?: number;
+  'system.process.cpu.start_time'?: number;
+  'system.process.summary.total'?: number;
+  'system.process.summary.running'?: number;
+  'system.process.summary.sleeping'?: number;
+  'system.process.summary.idle'?: number;
+  'system.process.summary.stopped'?: number;
+  'system.process.summary.zombie'?: number;
+  'system.process.summary.dead'?: number;
+  'system.process.summary.unknown'?: number;
 }
 
 class HostMetrics extends Serializable<HostMetricsDocument> {}

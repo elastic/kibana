@@ -50,7 +50,12 @@ const NIGHTSHIFT_OPERATOR_ROLE: KibanaRole = {
 
 const CLASSIFY_STEP = 'classify_for_online_evals';
 const SCORE_STEP = 'score_reference_free';
-const REFERENCE_FREE_JUDGE_COUNT = 3;
+const REFERENCE_FREE_JUDGE_COUNT = 5;
+/**
+ * The stub investigation answers in text and calls no tools, so the tool call health judge has
+ * nothing to grade and is skipped, not run.
+ */
+const SKIPPED_JUDGE_COUNT = 1;
 /**
  * Every test waits on at most two runs, each up to the poll timeout, so a slow run fails on the
  * poll's message with the runs it last saw rather than on the test timeout.
@@ -152,6 +157,7 @@ apiTest.describe('Nightshift online evals', { tag: tags.stateful.classic }, () =
         scored: true,
         evaluator_count: REFERENCE_FREE_JUDGE_COUNT,
         failed_count: 0,
+        skipped_count: SKIPPED_JUDGE_COUNT,
       });
     }
   );
@@ -197,10 +203,13 @@ apiTest.describe('Nightshift online evals', { tag: tags.stateful.classic }, () =
         expect(await getStepOutput(kbnClient, scoringRun.id, SCORE_STEP)).toMatchObject({
           scored: true,
           evaluator_count: REFERENCE_FREE_JUDGE_COUNT,
-          failed_count: REFERENCE_FREE_JUDGE_COUNT,
+          failed_count: REFERENCE_FREE_JUDGE_COUNT - SKIPPED_JUDGE_COUNT,
+          skipped_count: SKIPPED_JUDGE_COUNT,
         });
         // The judges failed on the rejected calls, not before reaching the model.
-        expect(failingLlm.rejectedJudgeCalls()).toBeGreaterThanOrEqual(REFERENCE_FREE_JUDGE_COUNT);
+        expect(failingLlm.rejectedJudgeCalls()).toBeGreaterThanOrEqual(
+          REFERENCE_FREE_JUDGE_COUNT - SKIPPED_JUDGE_COUNT
+        );
       } finally {
         llm.close();
         llm = await startAnsweringLlm();

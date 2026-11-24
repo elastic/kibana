@@ -14,6 +14,7 @@ import { apiTargets } from '@kbn/agent-builder-common';
 export const targetSchema = z.enum(apiTargets);
 
 export const BODY_ROOT_KEY = 'x-body-root';
+export const ROUTING_LOCATION_KEY = 'x-found-in';
 
 export type { ApiRegistry, ApiRegistryMeta };
 export type LoadedApi = Awaited<ReturnType<ApiRegistry['loadApi']>>;

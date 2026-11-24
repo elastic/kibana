@@ -28,7 +28,7 @@ import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { getServiceGroups } from '../service_groups/get_service_groups';
-import type { ServiceMapGrouping } from './get_service_map';
+import type { ServiceMapGroupingOptions } from './get_service_map';
 import { getServiceMap } from './get_service_map';
 import type { ServiceStatsSource } from './get_enhanced_service_stats';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
@@ -116,7 +116,7 @@ const serviceMapRoute = createApmServerRoute({
       ]);
 
     // Before any search, so a request with the flag on but without a source fails fast
-    const grouping: ServiceMapGrouping = groupingEnabled
+    const grouping: ServiceMapGroupingOptions = groupingEnabled
       ? {
           enabled: true,
           source: getDocumentSource({ documentType, rollupInterval, useDurationSummary }),

@@ -1,0 +1,330 @@
+{
+  "sha1": "b08d482bebdb074a583f6b7139a522ef78bd2138",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a9f21f6f581d93e-d4d233c40c351ad",
+      "title": "External credentials with a session cookie (ES grant) an expired external bearer never falls back to the accompanying session cookie (grants)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/es_external_credentials.spec.ts",
+        "line": 21,
+        "column": 54
+      }
+    },
+    {
+      "id": "a9f21f6f581d93e-815ce3da7a9fead",
+      "title": "External credentials with a session cookie (ES grant) an expired external bearer never falls back to the accompanying session cookie (scoped)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/es_external_credentials.spec.ts",
+        "line": 21,
+        "column": 54
+      }
+    },
+    {
+      "id": "d0c1d55079a998b-586fc04905445a6",
+      "title": "Session credential recovery (ES grant) grants: preserves identity and shared headers across expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/es_recovery.spec.ts",
+        "line": 20,
+        "column": 12
+      }
+    },
+    {
+      "id": "d0c1d55079a998b-1a9ef0a31fc3706",
+      "title": "Session credential recovery (ES grant) concurrent_grants: preserves identity and shared headers across expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/es_recovery.spec.ts",
+        "line": 20,
+        "column": 12
+      }
+    },
+    {
+      "id": "d0c1d55079a998b-9b9b525da557b00",
+      "title": "Session credential recovery (ES grant) scoped: preserves identity and shared headers across expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/es_recovery.spec.ts",
+        "line": 20,
+        "column": 12
+      }
+    },
+    {
+      "id": "d0c1d55079a998b-327932268242427",
+      "title": "Session credential recovery (ES grant) mixed: preserves identity and shared headers across expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/es_recovery.spec.ts",
+        "line": 20,
+        "column": 12
+      }
+    },
+    {
+      "id": "d0c1d55079a998b-bcbd651d33b9474",
+      "title": "Session credential recovery (ES grant) late: preserves identity and shared headers across expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/es_recovery.spec.ts",
+        "line": 20,
+        "column": 12
+      }
+    },
+    {
+      "id": "d0c1d55079a998b-21c70f8b549b122",
+      "title": "Session credential recovery (ES grant) concurrent incoming requests can refresh the same session independently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/es_recovery.spec.ts",
+        "line": 43,
+        "column": 82
+      }
+    },
+    {
+      "id": "e3dbdfe1208159b-a492435f5b77c2d",
+      "title": "Repeated session credential expiry (ES grant) twice: renews the session twice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/es_repeated_expiry.spec.ts",
+        "line": 21,
+        "column": 54
+      }
+    },
+    {
+      "id": "e3dbdfe1208159b-027fd647bb4591a",
+      "title": "Repeated session credential expiry (ES grant) stale_first_after_second_expiry: renews the session twice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/es_repeated_expiry.spec.ts",
+        "line": 21,
+        "column": 54
+      }
+    },
+    {
+      "id": "d4f0578d894c1e3-a5dbe0fd34176bb",
+      "title": "Task scheduling with an expired session access token renews the caller session for one grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/task_api_key_grants.spec.ts",
+        "line": 30,
+        "column": 49
+      }
+    },
+    {
+      "id": "d4f0578d894c1e3-618ebc4ebaa18d7",
+      "title": "Task scheduling with an expired session access token renews the caller session for sequential grants",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/task_api_key_grants.spec.ts",
+        "line": 30,
+        "column": 49
+      }
+    },
+    {
+      "id": "d4f0578d894c1e3-b9a7eba43a05451",
+      "title": "Task scheduling with an expired session access token renews the caller session for concurrent grants",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/task_api_key_grants.spec.ts",
+        "line": 30,
+        "column": 49
+      }
+    },
+    {
+      "id": "d4f0578d894c1e3-d63fe5b1d0770bb",
+      "title": "Task scheduling with an expired session access token renews the caller session for a scoped refresh followed by grants",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/task_api_key_grants.spec.ts",
+        "line": 30,
+        "column": 49
+      }
+    },
+    {
+      "id": "2ade1d6f4f091fb-d3b40a640b6d9e0",
+      "title": "Direct session credential recovery (UIAM grant) direct UIAM grants recover without an Elasticsearch expiry probe",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/uiam_direct_grants.spec.ts",
+        "line": 19,
+        "column": 9
+      }
+    },
+    {
+      "id": "254a2788b464421-6dbea56677ce021",
+      "title": "External credentials with a session cookie (UIAM grant) an expired external bearer never falls back to the accompanying session cookie (grants)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/uiam_external_credentials.spec.ts",
+        "line": 17,
+        "column": 9
+      }
+    },
+    {
+      "id": "e96a31a6f0ed194-1eccea1dbd45570",
+      "title": "Session credential recovery (UIAM grant) grants: preserves identity and shared headers across expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/uiam_recovery.spec.ts",
+        "line": 18,
+        "column": 28
+      }
+    },
+    {
+      "id": "e96a31a6f0ed194-94b8b87ed622602",
+      "title": "Session credential recovery (UIAM grant) concurrent_grants: preserves identity and shared headers across expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/uiam_recovery.spec.ts",
+        "line": 18,
+        "column": 28
+      }
+    },
+    {
+      "id": "e96a31a6f0ed194-6abfd515cba525b",
+      "title": "Session credential recovery (UIAM grant) scoped: preserves identity and shared headers across expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/uiam_recovery.spec.ts",
+        "line": 18,
+        "column": 28
+      }
+    },
+    {
+      "id": "e96a31a6f0ed194-d6c39de2f2a0e03",
+      "title": "Session credential recovery (UIAM grant) mixed: preserves identity and shared headers across expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/uiam_recovery.spec.ts",
+        "line": 18,
+        "column": 28
+      }
+    },
+    {
+      "id": "e96a31a6f0ed194-a0898755e145c84",
+      "title": "Session credential recovery (UIAM grant) late: preserves identity and shared headers across expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/uiam_recovery.spec.ts",
+        "line": 18,
+        "column": 28
+      }
+    },
+    {
+      "id": "e96a31a6f0ed194-f9530cd3049c51f",
+      "title": "Session credential recovery (UIAM grant) concurrent incoming requests can refresh the same session independently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/uiam_recovery.spec.ts",
+        "line": 43,
+        "column": 66
+      }
+    },
+    {
+      "id": "d868eeac66c690d-c9efcfc71148049",
+      "title": "Repeated session credential expiry (UIAM grant) twice: renews the session twice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/uiam_repeated_expiry.spec.ts",
+        "line": 21,
+        "column": 29
+      }
+    },
+    {
+      "id": "d868eeac66c690d-14a526bc6ff1265",
+      "title": "Repeated session credential expiry (UIAM grant) stale_first_after_second_expiry: renews the session twice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/tests/uiam_repeated_expiry.spec.ts",
+        "line": 21,
+        "column": 29
+      }
+    }
+  ]
+}

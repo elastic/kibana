@@ -80,7 +80,10 @@ export const PresentationPanelHoverActionsWrapper = (
       css={containerStyles}
     >
       {OverriddenHoverActionsComponent && (
-        <div className="embPanel__hoverActions" css={customActionsStyles}>
+        <div
+          className="embPanel__hoverActions embPanel__hoverActions--overridden"
+          css={customActionsStyles}
+        >
           <OverriddenHoverActionsComponent />
         </div>
       )}

@@ -10,6 +10,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
+import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
+
 import type {
   LiveHistoryRow,
   ScheduledHistoryRow,
@@ -41,10 +45,16 @@ const createTestQueryClient = () =>
     },
   });
 
-export const TestProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const TestProviders: React.FC<{
+  children: React.ReactNode;
+  /** Defaults to the plugin's shipped defaults (every experimental feature off). */
+  experimentalFeatures?: ExperimentalFeatures;
+}> = ({ children, experimentalFeatures = allowedExperimentalValues }) => (
   <EuiProvider>
     <IntlProvider locale="en">
-      <QueryClientProvider client={createTestQueryClient()}>{children}</QueryClientProvider>
+      <ExperimentalFeaturesProvider value={experimentalFeatures}>
+        <QueryClientProvider client={createTestQueryClient()}>{children}</QueryClientProvider>
+      </ExperimentalFeaturesProvider>
     </IntlProvider>
   </EuiProvider>
 );
@@ -123,6 +133,9 @@ export const createMockPackLiveRow = (overrides?: Partial<LiveHistoryRow>): Live
 
 export const createMockRuleRow = (overrides?: Partial<LiveHistoryRow>): LiveHistoryRow =>
   createMockLiveRow({ source: 'Rule', userId: undefined, userProfileUid: undefined, ...overrides });
+
+export const createMockWorkflowRow = (overrides?: Partial<LiveHistoryRow>): LiveHistoryRow =>
+  createMockLiveRow({ source: 'Workflow', ...overrides });
 
 export const createMockScheduledRow = (
   overrides?: Partial<ScheduledHistoryRow>

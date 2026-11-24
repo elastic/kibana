@@ -235,6 +235,19 @@ export const ALERTING_LOG_CODES = {
   HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW:
     'HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   /**
+   * Hydrate alert data step: a single alert's `data` exceeded the hydration
+   * response size cap on its own, so it cannot be split further. The alert is
+   * dispatched without `data`; matchers and payloads that read it see nothing.
+   */
+  HYDRATE_ALERT_DATA_STEP_OVERSIZED_DATA_SKIPPED: 'HYDRATE_ALERT_DATA_STEP_OVERSIZED_DATA_SKIPPED',
+  /**
+   * Hydrate alert data step: the tick's `data` budget was reached, so the
+   * remaining series were deferred to the next tick and the watermark stops
+   * before them. Sustained occurrences mean alert data is too wide for the
+   * dispatcher to drain at the rate it is written.
+   */
+  HYDRATE_ALERT_DATA_STEP_TICK_BUDGET_REACHED: 'HYDRATE_ALERT_DATA_STEP_TICK_BUDGET_REACHED',
+  /**
    * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
    * limit, so rows past it were dropped. Alerts whose ack, snooze or
    * deactivate state was in the dropped rows may be dispatched.
@@ -508,6 +521,13 @@ export const ALERTING_LOG_CODES = {
    * Logged once per Kibana start; remove the override after the incident.
    */
   DISPATCHER_PAUSED: 'DISPATCHER_PAUSED',
+  /**
+   * The alert scan returned `xpack.alerting_v2.dispatcher.run.alerts.max` rows,
+   * so a tail of alerts was deferred to the next tick and the watermark advances
+   * only to the truncation edge. Logged on every truncated tick; a sustained rate
+   * means the dispatcher is falling behind.
+   */
+  DISPATCHER_ALERT_SCAN_TRUNCATED: 'DISPATCHER_ALERT_SCAN_TRUNCATED',
 
   // ────────────────────────────── Director ───────────────────────────
   /**
@@ -713,6 +733,11 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED: 'AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
+  /** `link_rule_and_action_policy` tool failed; returns an error result. */
+  AGENT_BUILDER_LINK_RULE_AND_ACTION_POLICY_FAILED:
+    'AGENT_BUILDER_LINK_RULE_AND_ACTION_POLICY_FAILED',
+  /** `link_rule_and_action_policy` could not restore the rule attachment after the policy update failed; the rule keeps the new routing tag. */
+  AGENT_BUILDER_LINK_ROLLBACK_FAILED: 'AGENT_BUILDER_LINK_ROLLBACK_FAILED',
   /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
   AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED:
     'AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED',

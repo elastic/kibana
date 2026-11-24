@@ -207,7 +207,7 @@ const signalBaseSchema = lazySchema(() =>
       .max(MAX_TEXT_LENGTH)
       .describe(
         dedent`
-      What this signal's queries observed and what it affects, as written by grounding. Keep it exactly as grounding wrote it: never shorten, merge, or reword it, and never add what the queries did not observe.
+      What this signal's queries observed and what it affects, as written by grounding. Keep it exactly as grounding wrote it, its paragraphs (a blank line between them) included: never shorten, merge, or reword it, and never add what the queries did not observe.
       ${NO_RAW_SENSITIVE_VALUES_RULE}
     `
       ),
@@ -340,13 +340,13 @@ export const SEVERITY_OPTIONS = [
  * with its own rubric. Order of `SEVERITY_OPTIONS` is part of this contract (most-severe first).
  */
 export const SEVERITY_CONTRACT_RULE = dedent`
-    Severity rates the situation the grounding evidence confirms.
+    Severity rates the situation the grounding evidence confirms. Recovery changes the event's status, not its severity: a recovering or inactive event keeps the severity of the incident it records.
 
     Decide in order and stop at the first match:
     - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once; a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
     - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset, as the evidence measures it. An error signature on the operation's path with no signals showing the operation failing to complete is not enough: that is "medium".
     - "medium": minor confirmed degradation with limited reach, signals say the operation is slow, or cannot say whether it is failing or completing.
-    - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
+    - "low": confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
     Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and for how long. A signal's evidence that could not be collected (a query that timed out or returned nothing) is no evidence, not ambiguous evidence: it adds nothing to the rating. Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail), never by adding shares across signals or taking the highest of differently scoped ones.
     A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.
@@ -411,7 +411,7 @@ export const significantEventBaseSchema = lazySchema(() =>
       Stable incident label. Format: "<Affected scope> — <observed condition>".
       Choose the narrowest stable affected scope that this event's assigned signals directly evidence: operation, then unique service/entity, then flow, then domain. Use flow or domain only when multiple distinct services or operations are grouped in this same event. A single-detection or single-service event must not use a customer journey, product flow, or domain label when a narrower service or operation is confirmed. Never use a generic source name.
       The observed condition names the concrete failure, degradation, or exposure shown in grounding — a specific operation, endpoint, error class, or connection path. Do not use broad umbrellas such as "backend connection failures", "transaction flows", or "submission flows" when evidence names a narrower mechanism. Do not state lifecycle or tense (e.g. "continues", "detected", "active", "resolved").
-      Preserve the title verbatim across continuation and recovery when no new detection rule UUIDs are introduced; a continuation that adds related rules may update title and symptom_hypothesis. Exclude IPs, counts, measurements, and current-cycle-only details.
+      Preserve the title verbatim across continuation and recovery, except when a rule the event held as off-topic now confirms: the stored title then describes a sampled error and is rewritten from the confirming evidence. Exclude IPs, counts, measurements, and current-cycle-only details.
 
       Examples: "API gateway — upstream connection refused"; "Indexer — database pool exhausted"; "Platform tier — connection refused across worker, scheduler, and API services" (multi-service cascade grouped in one event).
     `
@@ -427,7 +427,7 @@ export const significantEventBaseSchema = lazySchema(() =>
         ${SYMPTOM_HYPOTHESIS_ROLE_RULE}
         Good: "inventory-db refuses connections on port 5432, so checkout stock reads fail." Bad: "A backend connectivity issue is impacting multiple flows."
         Do not use generic terms such as "backend unavailability" or "dependency failure" when the evidence identifies a component, resource, endpoint, protocol, or error signature.
-        On a continuation, extend the stored hypothesis: keep its existing wording for the mechanism it already establishes and add only what the new evidence supports; leave it unchanged when nothing new is evidenced. A single healthy or unrelated signal never replaces a mechanism that other signals on the event still confirm.
+        On a continuation, extend the stored hypothesis: keep its existing wording for the mechanism it already establishes and add only what the new evidence supports, rephrasing only to stay within three sentences; leave it unchanged when nothing new is evidenced. A single healthy or unrelated signal never replaces a mechanism that other signals on the event still confirm.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `
       ),
@@ -438,8 +438,13 @@ export const significantEventBaseSchema = lazySchema(() =>
         dedent`
         Objective, self-contained account of the observed state and potential impact.
         ${SUMMARY_ROLE_RULE}
-        Good: "\`inventory-db\` refuses connections on port 5432 (SQLState 08001), failing \`checkout\` stock reads. Impact is confirmed for 18.5% of the operation's log lines; first seen at 09:20 and still present in the latest hour." Bad: "The verification returned no rows, so a backend connectivity issue is probably causing instability."
-        On a continuation, build on the stored summary: keep its existing wording, including its opening sentence, for the signatures and paths it already covers (rephrase only to stay within three sentences), add sentences only for what is newly confirmed, and never rewrite it; leave it unchanged when nothing new matters to an operator. Counts and timestamps change every cycle, so keep them out of it. A single healthy or unrelated signal never replaces what other signals on the event still confirm.
+        Good (three short paragraphs): "The \`export-renderer\` job fails with \`error = timed out\` when it calls \`storage\`, and its exports do not complete. Impact is confirmed, with 18.5% of the job's log lines failing in the 09:00 UTC hour.
+
+        \`storage\` timed out first and \`export-renderer\` retries followed: the signals show that order and leave open whether the retries are a consequence of the timeouts.
+
+        First seen 03-07 09:20 UTC."
+        Bad: "The verification returned no rows, so a backend connectivity issue is probably causing instability."
+        On a continuation, build on the stored summary: keep what it already says and add what is new in the part it belongs to (a further problem in part 1, a relation or chain between problems in part 2). Replace a statement when newer confirming evidence supersedes it, so the account does not contradict itself. When a rule the event held as off-topic now confirms, the stored summary described a sampled error: rewrite it from the confirming evidence. When the stored summary has reached this field's limit, compact it while retaining the current incident, impact, and grounded causal account. A single healthy or unrelated signal leaves what other signals on the event still confirm in place.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
       ),

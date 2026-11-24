@@ -13,6 +13,9 @@ on:
   # listen for new "new failure" comment
   issue_comment:
     types: [created]
+  # the daily flaky test report files and comments with the pipeline's short-lived GitHub App
+  # token, whose bot has no repository role
+  bots: ['elastic-vault-github-plugin-prod[bot]']
 
 permissions:
   contents: read
@@ -104,6 +107,10 @@ engine:
 tools:
   github:
     toolsets: [default, actions, search]
+    # the default for a public repository; issues by authors with no repository role are hidden
+    # from the agent, so the daily flaky test report's bot has to be trusted for its suite issues
+    min-integrity: approved
+    trusted-users: ['elastic-vault-github-plugin-prod[bot]']
   web-fetch:
   bash: true
 

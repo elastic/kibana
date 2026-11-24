@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiText,
   EuiTextColor,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type {
@@ -47,7 +48,9 @@ const SORT_FIELDS = {
   durationMs: 'duration_ms',
   pageViewCount: 'page_view_count',
   clickCount: 'click_count',
-  errorCount: 'error_count',
+  jsErrorCount: 'js_error_count',
+  failedRequestCount: 'http_failed_request_count',
+  frustration: 'frustration_count',
 } as const satisfies Partial<Record<keyof SessionSummary, SessionSortField>>;
 
 type SortableColumn = keyof typeof SORT_FIELDS;
@@ -63,7 +66,10 @@ export type SessionsOptionalColumnId =
   | 'duration'
   | 'pages'
   | 'clicks'
-  | 'errors'
+  | 'jsErrors'
+  | 'failedRequests'
+  | 'frustration'
+  | 'environment'
   | 'location'
   | 'entryPage'
   | 'exitPage'
@@ -81,15 +87,24 @@ const COLUMN_LABELS: Record<SessionsOptionalColumnId, string> = {
   duration: i18n.translate('xpack.digitalExperience.sessions.table.durationColumn', {
     defaultMessage: 'Duration',
   }),
-  // As the session page calls them.
+  // Page views, not page loads: in-app navigations count too.
   pages: i18n.translate('xpack.digitalExperience.sessions.table.pageViewsColumn', {
     defaultMessage: 'Page views',
   }),
   clicks: i18n.translate('xpack.digitalExperience.sessions.table.clicksColumn', {
     defaultMessage: 'Clicks',
   }),
-  errors: i18n.translate('xpack.digitalExperience.sessions.table.errorsColumn', {
-    defaultMessage: 'Errors',
+  jsErrors: i18n.translate('xpack.digitalExperience.sessions.table.jsErrorsColumn', {
+    defaultMessage: 'JS errors',
+  }),
+  failedRequests: i18n.translate('xpack.digitalExperience.sessions.table.failedRequestsColumn', {
+    defaultMessage: 'Failed requests',
+  }),
+  frustration: i18n.translate('xpack.digitalExperience.sessions.table.frustrationColumn', {
+    defaultMessage: 'Frustration',
+  }),
+  environment: i18n.translate('xpack.digitalExperience.sessions.table.environmentColumn', {
+    defaultMessage: 'Environment',
   }),
   location: i18n.translate('xpack.digitalExperience.sessions.table.locationColumn', {
     defaultMessage: 'Location',
@@ -128,7 +143,10 @@ export const SESSIONS_OPTIONAL_COLUMNS: ReadonlyArray<{
     'duration',
     'pages',
     'clicks',
-    'errors',
+    'jsErrors',
+    'failedRequests',
+    'frustration',
+    'environment',
     'location',
     'entryPage',
     'exitPage',
@@ -143,8 +161,13 @@ export const SESSIONS_OPTIONAL_COLUMNS: ReadonlyArray<{
 
 export const SESSIONS_OPTIONAL_COLUMN_IDS = SESSIONS_OPTIONAL_COLUMNS.map(({ id }) => id);
 
-/** Shown until the user picks columns: the summary's counts, not the details. */
+/**
+ * Shown until the user picks columns: the summary's counts, not the details. Failed requests have
+ * their own filter and KPI, so the table keeps its width.
+ */
 export const SESSIONS_HIDDEN_BY_DEFAULT: readonly SessionsOptionalColumnId[] = [
+  'failedRequests',
+  'environment',
   'location',
   'entryPage',
   'exitPage',
@@ -279,6 +302,15 @@ export function SessionsTable({
     ];
 
     const renderCount = (count: number) => formatNumber(count);
+    const renderProblemCount = (testSubj: string) => (count: number) =>
+      count > 0 ? (
+        <EuiBadge color="danger" data-test-subj={testSubj}>
+          {formatNumber(count)}
+        </EuiBadge>
+      ) : (
+        formatNumber(count)
+      );
+    const renderFrustrationCount = renderProblemCount('digitalExperienceSessionFrustration');
     const optionalColumns: Record<SessionsOptionalColumnId, EuiBasicTableColumn<SessionSummary>> = {
       journey: {
         field: 'journey',
@@ -297,6 +329,12 @@ export function SessionsTable({
       pages: {
         field: 'pageViewCount',
         name: COLUMN_LABELS.pages,
+        nameTooltip: {
+          content: i18n.translate('xpack.digitalExperience.sessions.table.pageViewsTooltip', {
+            defaultMessage:
+              'Page loads and in-app navigations. The applications list counts page loads only.',
+          }),
+        },
         sortable: true,
         ...numberColumn(),
         render: renderCount,
@@ -308,19 +346,56 @@ export function SessionsTable({
         ...numberColumn(),
         render: renderCount,
       },
-      errors: {
-        field: 'errorCount',
-        name: COLUMN_LABELS.errors,
+      jsErrors: {
+        field: 'jsErrorCount',
+        name: COLUMN_LABELS.jsErrors,
         sortable: true,
         ...numberColumn(),
-        render: (count: number) =>
-          count > 0 ? (
-            <EuiBadge color="danger" data-test-subj="digitalExperienceSessionErrors">
-              {formatNumber(count)}
-            </EuiBadge>
+        render: renderProblemCount('digitalExperienceSessionJsErrors'),
+      },
+      failedRequests: {
+        field: 'failedRequestCount',
+        name: COLUMN_LABELS.failedRequests,
+        sortable: true,
+        ...numberColumn(),
+        render: renderProblemCount('digitalExperienceSessionFailedRequests'),
+      },
+      frustration: {
+        field: 'frustration',
+        name: COLUMN_LABELS.frustration,
+        sortable: true,
+        ...numberColumn(),
+        render: ({
+          rageClicks,
+          deadClicks,
+          errorClicks,
+          total: frustratedClicks,
+        }: SessionSummary['frustration']) =>
+          frustratedClicks > 0 ? (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.digitalExperience.sessions.table.frustrationBreakdown',
+                {
+                  defaultMessage: '{rage} rage, {dead} dead, {error} error clicks',
+                  values: {
+                    rage: formatNumber(rageClicks),
+                    dead: formatNumber(deadClicks),
+                    error: formatNumber(errorClicks),
+                  },
+                }
+              )}
+            >
+              <span tabIndex={0}>{renderFrustrationCount(frustratedClicks)}</span>
+            </EuiToolTip>
           ) : (
-            formatNumber(count)
+            renderFrustrationCount(frustratedClicks)
           ),
+      },
+      environment: {
+        field: 'environment',
+        name: COLUMN_LABELS.environment,
+        width: '10em',
+        render: renderText,
       },
       location: {
         field: 'geo',

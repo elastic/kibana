@@ -11,6 +11,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadBinding,
+  ServiceAccountWorkloadBindingChange,
+  ServiceAccountWorkloadBindingChangeResult,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
@@ -19,6 +21,7 @@ import type {
 
 import type { CoreAuditService } from './audit';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
+import type { CoreAuthorizationService } from './authz';
 import type { CoreServiceAccountsService } from './service_accounts';
 
 /**
@@ -29,6 +32,7 @@ import type { CoreServiceAccountsService } from './service_accounts';
  */
 export interface CoreSecurityDelegateContract {
   authc: AuthenticationServiceContract;
+  authz: AuthorizationServiceContract;
   audit: AuditServiceContract;
   serviceAccounts: ServiceAccountsServiceContract;
   /**
@@ -51,6 +55,8 @@ export interface CoreSecurityDelegateContract {
  * @public
  */
 export type AuthenticationServiceContract = CoreAuthenticationService;
+
+export type AuthorizationServiceContract = CoreAuthorizationService;
 
 export type AuditServiceContract = CoreAuditService;
 
@@ -93,6 +99,20 @@ export interface ServiceAccountsServiceContract
     request: KibanaRequest,
     params: ServiceAccountWorkloadRef
   ): Promise<boolean>;
+
+  /**
+   * Binds and unbinds many workloads, in the space of the request.
+   * @param pluginId - The id of the plugin that owns the workloads.
+   * @param request - The request, whose space the bindings are changed in.
+   * @param changes - The changes. Core has already checked them, so they are well formed, within
+   * the limit, and name no workload twice.
+   * @returns One result per change, in the order given.
+   */
+  bulkUpdateWorkloadBindings(
+    pluginId: string,
+    request: KibanaRequest,
+    changes: readonly ServiceAccountWorkloadBindingChange[]
+  ): Promise<ServiceAccountWorkloadBindingChangeResult[]>;
 
   /**
    * Retrieves a workload binding.

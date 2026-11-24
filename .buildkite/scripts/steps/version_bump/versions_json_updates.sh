@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# versions.json and .backportrc.json updates for the version bump. Source-only: reads NEW_VERSION
-# and BRANCH, edits files in the current directory.
+# versions.json, .backportrc.json and pipeline resource definition updates for the version bump.
+# Source-only: reads NEW_VERSION and BRANCH, edits files in the current directory.
 
 update_patch_versions_json() {
   echo "Patch bump: updating version for branch '$BRANCH' to '$NEW_VERSION'"
@@ -29,6 +29,57 @@ prune_superseded_minors() {
       (.branchType == "release" and (.branch | startswith($major + ".")) and ((.branch | split(".")[1] | tonumber) < $minMinor)) | not
     ))' \
     versions.json > versions.json.tmp && mv versions.json.tmp versions.json
+}
+
+# Drops the same release branches as prune_superseded_minors from the branch_configuration and
+# schedules of the given pipeline resource definitions. The version bump runs it on X.Y.1 only.
+prune_superseded_minor_branches() {
+  local major minor patch file
+  IFS=. read -r major minor patch <<< "$NEW_VERSION"
+
+  echo "Removing ${major}.x branches older than ${major}.$((minor - 1)) from pipeline resource definitions"
+
+  for file in "$@"; do
+    awk -v major="$major" -v min_minor="$((minor - 1))" -v quote="'" '
+      function superseded(branch,   parts) {
+        return split(branch, parts, ".") == 2 && parts[1] == major && parts[2] + 0 < min_minor
+      }
+      # Prints the buffered schedule entry unless it targets a superseded branch.
+      function flush() {
+        if (!drop) printf "%s", entry
+        entry = ""
+        drop = 0
+      }
+      match($0, /^ *branch_configuration:/) {
+        flush()
+        line = substr($0, 1, RLENGTH)
+        count = split(substr($0, RLENGTH + 1), branches, " ")
+        for (i = 1; i <= count; i++) if (!superseded(branches[i])) line = line " " branches[i]
+        print line
+        next
+      }
+      # Schedule entries are keys indented 8 spaces with their fields nested below.
+      /^        [^ ]/ {
+        flush()
+        entry = $0 "\n"
+        next
+      }
+      entry != "" && /^          / {
+        entry = entry $0 "\n"
+        if ($1 == "branch:") {
+          branch = $2
+          gsub(quote, "", branch)
+          if (superseded(branch)) drop = 1
+        }
+        next
+      }
+      {
+        flush()
+        print
+      }
+      END { flush() }
+    ' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
+  done
 }
 
 update_minor_versions_json() {
