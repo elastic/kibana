@@ -128,7 +128,12 @@ const Lane = ({
               <span
                 key={`${index}-${wait.left}-${wait.width}`}
                 css={styles.laneWait}
-                style={{ left: `${wait.left}%`, width: `${wait.width}%` }}
+                style={
+                  {
+                    '--wait-left': `${wait.left}%`,
+                    '--wait-width': `${wait.width}%`,
+                  } as React.CSSProperties
+                }
                 data-test-subj="esqlQueryProfileLaneWait"
               />
             ))}

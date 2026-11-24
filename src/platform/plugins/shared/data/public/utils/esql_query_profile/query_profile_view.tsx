@@ -87,12 +87,20 @@ const useQueryProfile = (
   const [loaded, setLoaded] = useState<LoadedProfile | undefined>();
   const latestRequest = useRef(request);
   latestRequest.current = request;
-  const needsRun = Boolean(request?.json) && loaded?.runKey !== runKey;
+  // Once a request was logged this stays true. A refetch of the inspected panel empties the adapter
+  // for a moment, and that must not cancel the run that is going on, nor start another one.
+  const [hasSeenRequest, setHasSeenRequest] = useState(Boolean(request?.json));
+  const hasRequest = Boolean(request?.json);
+  useEffect(() => {
+    if (hasRequest) {
+      setHasSeenRequest(true);
+    }
+  }, [hasRequest]);
 
   useEffect(() => {
     const target = latestRequest.current;
     const requestJson = target?.json;
-    if (!needsRun || !target || !requestJson) {
+    if (!hasSeenRequest || !target || !requestJson) {
       return;
     }
 
@@ -122,7 +130,7 @@ const useQueryProfile = (
     return () => {
       controller.abort();
     };
-  }, [needsRun, runKey, search]);
+  }, [hasSeenRequest, runKey, search]);
 
   // What was loaded for another run is not shown, not even for a moment.
   const current = loaded?.runKey === runKey ? loaded : undefined;
@@ -130,7 +138,7 @@ const useQueryProfile = (
     view: current?.view,
     error: current?.error,
     profiledRequest: current?.request,
-    loading: needsRun,
+    loading: hasSeenRequest && loaded?.runKey !== runKey,
   };
 };
 
@@ -218,18 +226,26 @@ export const QueryProfileView = ({
   search: Pick<ISearchStart, 'esql'>;
 }) => {
   const requests = useEsqlRequests(adapters);
-  const [selectedId, setSelectedId] = useState<string | undefined>();
+  // A refetch logs the requests again with new ids but the same names, so the pick is kept by both.
+  const [picked, setPicked] = useState<{ id: string; name: string } | undefined>();
   const selected = useMemo(
-    () => requests.find((request) => request.id === selectedId) ?? requests[0],
-    [requests, selectedId]
+    () =>
+      requests.find((request) => request.id === picked?.id) ??
+      requests.find((request) => request.name === picked?.name) ??
+      requests[0],
+    [requests, picked]
   );
   const [reloadKey, setReloadKey] = useState(0);
   const { view, error, profiledRequest, loading } = useQueryProfile(
     search,
     selected,
-    `${selectedId ?? ''}:${reloadKey}`
+    `${picked?.id ?? ''}:${reloadKey}`
   );
-  const completedTime = completedRequestTime(profiledRequest);
+  // The request that was profiled can still be pending when the profile starts, so its time is read
+  // from the latest copy of it while it is logged, and from the one taken once it is not.
+  const completedTime = completedRequestTime(
+    requests.find((request) => request.json === profiledRequest?.json) ?? profiledRequest
+  );
   // The inspected panel fetched again since the profile was taken, or its request is gone.
   const hasRequestChanged = Boolean(profiledRequest && selected?.json !== profiledRequest.json);
 
@@ -256,7 +272,7 @@ export const QueryProfileView = ({
           <EuiButtonEmpty
             size="xs"
             iconType="refresh"
-            isDisabled={loading}
+            isDisabled={loading || !selected?.json}
             onClick={() => setReloadKey((key) => key + 1)}
             data-test-subj="esqlQueryProfileRunAgain"
           >
@@ -272,10 +288,17 @@ export const QueryProfileView = ({
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued" data-test-subj="esqlQueryProfileRequestChanged">
             <p>
-              <FormattedMessage
-                id="data.inspector.queryProfile.requestChangedDescription"
-                defaultMessage="The request has changed since this profile was taken. Profile again to see the new one."
-              />
+              {selected?.json ? (
+                <FormattedMessage
+                  id="data.inspector.queryProfile.requestChangedDescription"
+                  defaultMessage="The request has changed since this profile was taken. Profile again to see the new one."
+                />
+              ) : (
+                <FormattedMessage
+                  id="data.inspector.queryProfile.requestGoneDescription"
+                  defaultMessage="The request is no longer available. This is the last profile that was taken."
+                />
+              )}
             </p>
           </EuiText>
         </>
@@ -286,7 +309,7 @@ export const QueryProfileView = ({
           <RequestPicker
             requests={requests}
             selected={selected}
-            onSelect={(request) => setSelectedId(request.id)}
+            onSelect={(request) => setPicked({ id: request.id, name: request.name })}
           />
         </>
       ) : null}

@@ -151,6 +151,12 @@ export const useTimelineStyles = () => {
         position: absolute;
         top: 0;
         bottom: 0;
+        /*
+         * A wait is a share of its driver's bar, which can be a few pixels wide, so it has a width of
+         * its own to be seen, and it is moved in from the end so that this width stays inside the bar.
+         */
+        left: min(var(--wait-left), calc(100% - ${euiTheme.size.xxs}));
+        width: max(var(--wait-width), ${euiTheme.size.xxs});
         opacity: 0.85;
         pointer-events: none;
         background: repeating-linear-gradient(
