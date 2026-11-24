@@ -24,6 +24,10 @@ permissions:
   actions: read
   checks: read
   models: read
+  # Agent Router token for the agent (see shared/agent-router.md)
+  id-token: write
+  # threat detection runs on Copilot
+  copilot-requests: write
 
 # run for one of three triggers:
 # - manual dispatch with an issue number
@@ -88,6 +92,7 @@ env:
 imports:
   - .github/workflows/buildkite-cli-setup.md
   - .github/workflows/shared/app-dex-agents-otel.md
+  - .github/workflows/shared/agent-router.md
 
 engine:
   id: claude
@@ -96,11 +101,13 @@ engine:
   max-turns: 120
   env:
     BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
-    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-    ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
+    ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
+    # The gateway reads only `Authorization: Bearer`. The fallback passes the activation job's key check.
+    ANTHROPIC_API_KEY: Bearer ${{ steps.agent-router-auth.outputs.id_token || 'agent-router' }}
+    AWF_ANTHROPIC_AUTH_HEADER: Authorization
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-4-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -123,18 +130,21 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - openrouter.ai
     - elastic.co
 sandbox:
   agent: awf # Migrated from deprecated network setting
 
 safe-outputs:
   threat-detection:
+    # The detection job can't request an OIDC token, so it runs on Copilot. It inherits the
+    # main engine's env: blank the secrets it must not receive.
     engine:
-      id: claude
-      version: '2.1.165'
+      id: copilot
+      model: sonnet
       env:
         BUILDKITE_API_TOKEN: ${{ '' }}
+        ANTHROPIC_API_KEY: ${{ '' }}
+        AWF_ANTHROPIC_AUTH_HEADER: ${{ '' }}
   noop:
     report-as-issue: false
   activation-comments: false
