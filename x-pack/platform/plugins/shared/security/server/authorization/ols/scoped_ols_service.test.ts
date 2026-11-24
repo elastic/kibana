@@ -146,9 +146,6 @@ describe('ScopedOlsService', () => {
 
   const getEventActions = (events: AuditEvent[]) => events.map(({ event }) => event?.action);
 
-  const primeRecovery = (olsService: OlsService, spaceIds: string[], granted: boolean) =>
-    olsService.prepareRecovery(request, [VIEW_ACTION]).prime(TYPE, spaceIds, granted);
-
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
 
@@ -346,7 +343,7 @@ describe('ScopedOlsService', () => {
 
       it('uses a primed answer instead of a privilege request', async () => {
         const olsService = createOlsService();
-        primeRecovery(olsService, ['default'], true);
+        olsService.primeRecovery(request, TYPE, ['default'], true);
 
         await expect(authorize('view', PRIVATE_ACL, olsService)).resolves.toEqual(
           new Map([['widget-1', { status: 'allowed' }]])
@@ -428,41 +425,11 @@ describe('ScopedOlsService', () => {
     });
   });
 
-  describe('#prepareRecovery', () => {
-    it('drops an answer that arrives after the request credential changed', async () => {
-      asPrincipal(STRANGER);
-      const getAuthenticatedPrincipal = jest
-        .fn()
-        .mockReturnValue({ type: 'service_account', serviceAccountId: 'sa', variant: 'stack' });
-      const olsService = createOlsService({ getAuthenticatedPrincipal });
-      const { prime } = olsService.prepareRecovery(request, [VIEW_ACTION]);
-
-      // The service-account request is released while the privilege check runs.
-      getAuthenticatedPrincipal.mockReturnValue(null);
-      prime(TYPE, ['default'], true);
-
-      await olsService.asScoped(request).authorizeObjectAccess({
-        type: TYPE,
-        spaceId: 'default',
-        operation: 'view',
-        objects: [{ id: 'widget-1', acl: PRIVATE_ACL }],
-      });
-      expect(checkPrivileges.atSpace).toHaveBeenCalledWith('default', {
-        kibana: [RECOVERY_ACTION],
-      });
-    });
-
-    it('prepares nothing for a check that asks about no protected type', () => {
-      const { actions } = createOlsService().prepareRecovery(request, [USE_ACTION]);
-      expect(actions.size).toBe(0);
-    });
-  });
-
   describe('#primeRecovery', () => {
     it('answers for the default space from a global check when Spaces is disabled', async () => {
       asPrincipal(STRANGER);
       const olsService = createOlsService({ spacesEnabled: false });
-      primeRecovery(olsService, ['*'], true);
+      olsService.primeRecovery(request, TYPE, ['*'], true);
       const scoped = olsService.asScoped(request);
 
       await expect(
@@ -479,7 +446,7 @@ describe('ScopedOlsService', () => {
     it('keeps a global answer apart from the default space when Spaces is enabled', async () => {
       asPrincipal(STRANGER);
       const olsService = createOlsService();
-      primeRecovery(olsService, ['*'], true);
+      olsService.primeRecovery(request, TYPE, ['*'], true);
 
       await olsService.asScoped(request).authorizeObjectAccess({
         type: TYPE,
@@ -706,6 +673,34 @@ describe('ScopedOlsService', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({ kibana: { space_id: 'space-a' } })
       );
+    });
+
+    it('makes no principal lookup when recovery covers every space', async () => {
+      checkPrivileges.atSpaces.mockImplementation(async (spaceIds: string[], { kibana }) => ({
+        hasAllRequested: true,
+        username: 'user',
+        privileges: {
+          kibana: spaceIds.flatMap((spaceId) =>
+            kibana.map((privilege: string) => ({ resource: spaceId, privilege, authorized: true }))
+          ),
+          elasticsearch: { cluster: [], index: {} },
+        },
+      }));
+
+      const filter = await createOlsService()
+        .asScoped(request)
+        .getReadFilter({ type: TYPE, spaceIds: ['space-a', 'space-b'] });
+
+      expect(filter).toEqual(
+        buildAclReadFilter({
+          policy: POLICY,
+          access: 'view',
+          recoverySpaces: ['space-a', 'space-b'],
+          ordinarySpaces: [],
+        })
+      );
+      expect(userProfiles.getCurrentProfileId).not.toHaveBeenCalled();
+      expect(userProfiles.getApiKeyProfileId).not.toHaveBeenCalled();
     });
 
     it('checks recovery globally for a search across all spaces', async () => {

@@ -2905,12 +2905,11 @@ describe('#checkPrivilegesWithRequest with recovery', () => {
       application: { [application]: applicationResponse },
       ...esResponse,
     });
-    const prime = jest.fn();
     const recovery = {
-      prepareRecovery: jest
-        .fn()
-        .mockReturnValue({ actions: new Map([[RECOVERY_ACTION, 'action']]), prime }),
+      getRecoveryActions: jest.fn().mockReturnValue(new Map([[RECOVERY_ACTION, 'action']])),
+      primeRecovery: jest.fn(),
     };
+    const prime = recovery.primeRecovery;
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
@@ -2967,7 +2966,7 @@ describe('#checkPrivilegesWithRequest with recovery', () => {
 
     const result = await checkPrivileges.atSpaces(['space_1', 'space_2'], { kibana: GET_ACTION });
 
-    expect(recovery.prepareRecovery).toHaveBeenCalledWith(request, [GET_ACTION]);
+    expect(recovery.getRecoveryActions).toHaveBeenCalledWith([GET_ACTION]);
     expect(hasPrivileges).toHaveBeenCalledTimes(1);
     expect(hasPrivileges.mock.calls[0][0]).toMatchObject({
       application: [{ privileges: [mockActions.login, GET_ACTION, RECOVERY_ACTION] }],
@@ -2978,18 +2977,18 @@ describe('#checkPrivilegesWithRequest with recovery', () => {
       { resource: 'space_2', privilege: GET_ACTION, authorized: true },
     ]);
     expect(prime).toHaveBeenCalledTimes(2);
-    expect(prime).toHaveBeenCalledWith('action', ['space_1'], false);
-    expect(prime).toHaveBeenCalledWith('action', ['space_2'], true);
+    expect(prime).toHaveBeenCalledWith(request, 'action', ['space_1'], false);
+    expect(prime).toHaveBeenCalledWith(request, 'action', ['space_2'], true);
   });
 
   test('answers recovery as missing in a space without the login action', async () => {
-    const { checkPrivileges, prime } = setup({
+    const { checkPrivileges, prime, request } = setup({
       'space:space_1': { [mockActions.login]: false, [GET_ACTION]: true, [RECOVERY_ACTION]: true },
     });
 
     await checkPrivileges.atSpace('space_1', { kibana: [GET_ACTION] });
 
-    expect(prime).toHaveBeenCalledWith('action', ['space_1'], false);
+    expect(prime).toHaveBeenCalledWith(request, 'action', ['space_1'], false);
   });
 
   test('answers no recovery for a check that does not ask for the login action', async () => {
@@ -3003,20 +3002,20 @@ describe('#checkPrivilegesWithRequest with recovery', () => {
       { requireLoginAction: false }
     );
 
-    expect(recovery.prepareRecovery).not.toHaveBeenCalled();
+    expect(recovery.getRecoveryActions).not.toHaveBeenCalled();
     expect(hasPrivileges.mock.calls[0][0]).toMatchObject({
       application: [{ privileges: [GET_ACTION] }],
     });
   });
 
   test('primes recovery for all spaces from a global check', async () => {
-    const { checkPrivileges, prime } = setup({
+    const { checkPrivileges, prime, request } = setup({
       [GLOBAL_RESOURCE]: { [mockActions.login]: true, [GET_ACTION]: true, [RECOVERY_ACTION]: true },
     });
 
     await checkPrivileges.globally({ kibana: [GET_ACTION] });
 
-    expect(prime).toHaveBeenCalledWith('action', ['*'], true);
+    expect(prime).toHaveBeenCalledWith(request, 'action', ['*'], true);
   });
 
   test('still reports a missing requested privilege', async () => {

@@ -223,15 +223,6 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
   }
 
   /**
-   * Returns the credential the request carries now, to bind a privilege check's answers to it.
-   *
-   * @returns An opaque value that changes when the request's credential changes.
-   */
-  public getCredential(): string {
-    return this.syncCredential();
-  }
-
-  /**
    * Stores a recovery answer that a privilege check already has, so that no second privilege
    * request is needed. Every request-scoped privilege check primes it, see
    * `checkPrivilegesFactory`.
@@ -239,19 +230,9 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
    * @param type The object type.
    * @param spaceIds The spaces the answer is for. `*` means the check ran globally.
    * @param granted Whether the request holds recovery authority.
-   * @param checkedCredential The credential the check ran with, from {@link getCredential}.
    */
-  public primeRecovery(
-    type: string,
-    spaceIds: string[],
-    granted: boolean,
-    checkedCredential: string
-  ): void {
-    // An answer for a credential the request no longer carries, as when a service-account request
-    // is released while the check runs, says nothing about the request now.
-    if (this.syncCredential() !== checkedCredential) {
-      return;
-    }
+  public primeRecovery(type: string, spaceIds: string[], granted: boolean): void {
+    this.syncCredential();
 
     for (const spaceId of spaceIds) {
       this.state.recovery.set(getRecoveryKey(type, spaceId), Promise.resolve(granted));
@@ -294,9 +275,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
       ])
     );
 
-    // Recovery counts only with the login action, as in every other recovery check. The answer
-    // belongs to the credential the check runs with.
-    const credential = this.syncCredential();
+    // Recovery counts only with the login action, as in every other recovery check.
     const { privileges } = await this.params.authz
       .checkPrivilegesWithRequest(this.request)
       .atSpace(spaceId, {
@@ -314,7 +293,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
     let decision: AclDecision;
     if (enabled) {
       const recovery = granted.has(recoveryAction) && granted.has(authzActions.login);
-      this.primeRecovery(type, [spaceId], recovery, credential);
+      this.primeRecovery(type, [spaceId], recovery);
       decision = evaluateAcl({ policy, acl, principal: await this.getPrincipal(), recovery });
     } else {
       decision = {
@@ -496,21 +475,21 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
       return;
     }
 
-    const recoverySpaces: string[] = [];
-    const ordinarySpaces: string[] = [];
     this.checkRecoveryAtSpaces(type, spaceIds);
-    const [principal, recovery] = await Promise.all([
-      this.getPrincipal(),
-      Promise.all(spaceIds.map((spaceId) => this.hasRecovery(type, spaceId))),
-    ]);
-    spaceIds.forEach((spaceId, index) => {
-      if (recovery[index]) {
-        recoverySpaces.push(spaceId);
-        this.audit({ action: 'ols_admin_override', type, spaceId, operation: 'find', principal });
-      } else {
-        ordinarySpaces.push(spaceId);
-      }
-    });
+    const recovery = await Promise.all(spaceIds.map((spaceId) => this.hasRecovery(type, spaceId)));
+    const recoverySpaces = spaceIds.filter((_, index) => recovery[index]);
+    const ordinarySpaces = spaceIds.filter((_, index) => !recovery[index]);
+
+    // Only the spaces without recovery need the principal, and so does the audit event of a request
+    // without an authenticated user. So a search that recovery covers completely makes no principal
+    // lookup, and can't fail on one.
+    const principal =
+      ordinarySpaces.length > 0 || this.request.isFakeRequest
+        ? await this.getPrincipal()
+        : undefined;
+    for (const spaceId of recoverySpaces) {
+      this.audit({ action: 'ols_admin_override', type, spaceId, operation: 'find', principal });
+    }
 
     return buildAclReadFilter({
       policy,
@@ -776,7 +755,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
   }
 
   private syncCredential() {
-    return syncCredential(this.state, this.request, this.params.getAuthenticatedPrincipal);
+    syncCredential(this.state, this.request, this.params.getAuthenticatedPrincipal);
   }
 
   /**

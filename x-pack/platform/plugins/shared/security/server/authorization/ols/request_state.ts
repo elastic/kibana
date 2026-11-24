@@ -42,14 +42,12 @@ export const createRequestState = (): RequestState => ({
 /**
  * Drops the principal and recovery answers once the request carries another credential, as a
  * released service-account request does. A renewed token of the same account keeps them.
- *
- * @returns The credential the request carries now.
  */
 export const syncCredential = (
   state: RequestState,
   request: KibanaRequest,
   getAuthenticatedPrincipal: (request: KibanaRequest) => AuthenticatedPrincipal | null
-): string => {
+) => {
   const credential = JSON.stringify([
     getAuthenticatedPrincipal(request),
     extractApiKeyIdFromAuthzHeader(request.headers.authorization),
@@ -59,5 +57,4 @@ export const syncCredential = (
     state.recovery.clear();
   }
   state.credential = credential;
-  return credential;
 };
