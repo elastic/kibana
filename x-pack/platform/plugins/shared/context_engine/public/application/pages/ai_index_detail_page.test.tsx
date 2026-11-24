@@ -35,6 +35,7 @@ import { AiIndexDetailPage } from './ai_index_detail_page';
 import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
+import type { LatestWorkflowExecution } from '../hooks/use_latest_workflow_execution';
 
 const AI_INDEX_DETAIL_ROUTE_PATHS = [
   CONTEXT_ENGINE_PATHS.detail,
@@ -127,15 +128,17 @@ jest.mock('../hooks/use_ai_index_dreaming', () => ({
   useAiIndexDreaming: jest.fn(),
 }));
 
+const mockDefaultLatestWorkflowExecution = (): LatestWorkflowExecution => ({
+  executions: undefined,
+  unavailableWorkflowIds: [],
+  isRunning: false,
+  activeExecutionId: undefined,
+  isError: false,
+  isLoading: false,
+});
+
 jest.mock('../hooks/use_latest_workflow_execution', () => ({
-  useLatestWorkflowExecution: jest.fn(() => ({
-    execution: null,
-    workflowId: undefined,
-    isRunning: false,
-    activeExecutionId: undefined,
-    isError: false,
-    isLoading: false,
-  })),
+  useLatestWorkflowExecution: jest.fn(() => mockDefaultLatestWorkflowExecution()),
 }));
 
 jest.mock('../hooks/use_agent_builder_agents', () => ({

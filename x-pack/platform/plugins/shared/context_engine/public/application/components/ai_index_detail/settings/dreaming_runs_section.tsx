@@ -40,14 +40,15 @@ export const DreamingRunsSection = ({
   onStarted,
 }: DreamingRunsSectionProps) => {
   const canWrite = useCanWriteContextEngine();
-  const { canExecuteWorkflow, canReadWorkflowExecution, canReadManagedWorkflowExecution } =
-    useWorkflowsCapabilities();
+  const {
+    canExecuteWorkflow,
+    canReadWorkflow,
+    canReadWorkflowExecution,
+    canReadManagedWorkflowExecution,
+  } = useWorkflowsCapabilities();
   const { runDreaming, isLoading: isRunLoading } = useRunDreaming({
-    onStarted: (response) => {
-      if (canReadWorkflowExecution) {
-        onStarted(response.executions.map(({ execution_id: executionId }) => executionId));
-      }
-    },
+    onStarted: (response) =>
+      onStarted(response.executions.map(({ execution_id: executionId }) => executionId)),
   });
 
   const isRunning = isRunLoading || latestIsRunning;
@@ -74,11 +75,12 @@ export const DreamingRunsSection = ({
         }
       );
     }
-    if (!canReadWorkflowExecution || !canReadManagedWorkflowExecution) {
+    if (!canReadWorkflow || !canReadWorkflowExecution || !canReadManagedWorkflowExecution) {
       return i18n.translate(
         'xpack.contextEngine.aiIndexDetail.dreaming.runs.disabledNoReadExecutionPermission',
         {
-          defaultMessage: 'You need permission to read managed workflow executions to run',
+          defaultMessage:
+            'You need permission to read managed workflows and their executions to run',
         }
       );
     }

@@ -156,17 +156,17 @@ export const DreamingLastRunStatus = ({
     return byId;
   }, [executions]);
 
-  if (executions === undefined && unavailableWorkflowIds.length === 0) {
+  if (executions === undefined) {
     return null;
   }
 
-  if (executions !== undefined && executions.length === 0) {
+  if (executions.length === 0 && unavailableWorkflowIds.length === 0) {
     return (
       <WorkflowLastExecution hasExecution={false} data-test-subj="contextAiIndexDreamingLastRun" />
     );
   }
 
-  const worst = executions ? getWorstExecution(executions) : undefined;
+  const worst = getWorstExecution(executions);
   const worstStatusDisplay = worst
     ? getWorkflowExecutionStatusDisplay(worst.execution.status)
     : undefined;

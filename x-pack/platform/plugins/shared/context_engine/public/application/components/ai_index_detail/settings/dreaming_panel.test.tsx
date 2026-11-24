@@ -11,21 +11,40 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexDreamingConfig } from '../../../../../common/dreaming';
 import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
 import { useDreamingTemplates } from '../../../hooks/use_dreaming_templates';
+import type { LatestWorkflowExecution } from '../../../hooks/use_latest_workflow_execution';
 import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
 import { DreamingPanel } from './dreaming_panel';
 
 jest.mock('../../../hooks/use_ai_index_dreaming', () => ({ useAiIndexDreaming: jest.fn() }));
-jest.mock('../../../hooks/use_latest_workflow_execution', () => ({
-  useLatestWorkflowExecution: jest.fn(() => ({
+const mockUseLatestWorkflowExecution = jest.fn(
+  (
+    _workflowIds: readonly string[],
+    _options?: {
+      enabled?: boolean;
+      awaitedExecutionIds?: readonly string[];
+      onAwaitedObserved?: () => void;
+    }
+  ): LatestWorkflowExecution => ({
     executions: [],
     unavailableWorkflowIds: [],
     isRunning: false,
     activeExecutionId: undefined,
     isError: false,
     isLoading: false,
-  })),
+  })
+);
+jest.mock('../../../hooks/use_latest_workflow_execution', () => ({
+  useLatestWorkflowExecution: (
+    workflowIds: string[],
+    options?: {
+      enabled?: boolean;
+      awaitedExecutionIds?: readonly string[];
+      onAwaitedObserved?: () => void;
+    }
+  ) => mockUseLatestWorkflowExecution(workflowIds, options),
 }));
 jest.mock('../../../hooks/use_workflow_summaries', () => ({
   useWorkflowSummaries: () => ({
@@ -39,9 +58,11 @@ jest.mock('../../../hooks/use_dreaming_templates', () => ({ useDreamingTemplates
 jest.mock('../../../hooks/use_run_dreaming', () => ({
   useRunDreaming: () => ({ runDreaming: jest.fn(), isLoading: false }),
 }));
+const mockUseWorkflowsCapabilities = jest.fn(() => createMockWorkflowsCapabilities());
+
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: () => ({ canExecuteWorkflow: true }),
+  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
 }));
 const navigateToContextEngine = jest.fn();
 jest.mock('../../../hooks/use_navigation', () => ({
@@ -85,7 +106,7 @@ const renderPanel = (
 ) => {
   jest.mocked(useAiIndexDreaming).mockReturnValue({
     dreaming,
-    workflowIds: dreaming ? ['wf-dreaming'] : [],
+    workflowIds: dreaming?.enabled ? ['wf-dreaming'] : [],
     isLoading,
   });
   return render(
@@ -100,6 +121,7 @@ const renderPanel = (
 describe('DreamingPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
     saveConfig.mockResolvedValue(true);
     jest.mocked(useSaveDreamingConfig).mockReturnValue({ saveConfig, isSaving: false });
     jest.mocked(useDreamingTemplates).mockReturnValue({
@@ -349,5 +371,18 @@ describe('DreamingPanel', () => {
       'readonly'
     );
     expect(screen.getByTestId('contextDreamingConfigFact-policy-delete')).toBeInTheDocument();
+  });
+
+  it('does not look up workflow runs without execution read privileges', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...createMockWorkflowsCapabilities(),
+      canReadWorkflowExecution: false,
+    });
+    renderPanel(aiIndexWith(factsOnly));
+
+    expect(mockUseLatestWorkflowExecution).toHaveBeenCalledWith(
+      ['wf-dreaming'],
+      expect.objectContaining({ enabled: false })
+    );
   });
 });

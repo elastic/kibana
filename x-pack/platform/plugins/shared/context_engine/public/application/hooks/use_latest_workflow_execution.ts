@@ -29,7 +29,7 @@ export interface WorkflowLatestExecution {
 }
 
 export interface LatestWorkflowExecution {
-  /** Latest run per workflow that has one, in `workflowIds` order; `undefined` while loading or when no query succeeded with data. */
+  /** Latest run per workflow that has one; `undefined` only while any lookup is still pending. */
   executions: readonly WorkflowLatestExecution[] | undefined;
   /** Workflows whose history lookup failed and has no cached result. */
   unavailableWorkflowIds: readonly string[];
@@ -147,18 +147,13 @@ export const useLatestWorkflowExecution = (
   if (hasPending) {
     executions = undefined;
   } else {
-    const built = queries.flatMap(({ data }, index) => {
+    executions = queries.flatMap(({ data }, index) => {
       if (data === undefined) {
         return [];
       }
       const run = data.execution;
       return run !== null ? [{ workflowId: workflowIds[index], execution: run }] : [];
     });
-    if (isError && built.length === 0) {
-      executions = undefined;
-    } else {
-      executions = built;
-    }
   }
 
   const activeExecutionId = queries

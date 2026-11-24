@@ -199,7 +199,8 @@ describe('useLatestWorkflowExecution', () => {
     const { result } = renderLatest();
 
     await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(result.current.executions).toBeUndefined();
+    expect(result.current.executions).toEqual([]);
+    expect(result.current.unavailableWorkflowIds).toEqual(['wf-1']);
     expect(result.current.isRunning).toBe(false);
   });
 
@@ -331,13 +332,29 @@ describe('useLatestWorkflowExecution', () => {
       ]);
     });
 
-    it('leaves executions undefined when every query failed', async () => {
+    it('returns an empty executions list when every query failed', async () => {
       mockGetWorkflowExecutions.mockRejectedValue(new Error('lookup failed'));
 
       const { result } = renderLatest(['wf-first', 'wf-second']);
 
       await waitFor(() => expect(result.current.isError).toBe(true));
+      expect(result.current.executions).toEqual([]);
+      expect(result.current.unavailableWorkflowIds).toEqual(['wf-first', 'wf-second']);
+    });
+
+    it('leaves executions undefined when one query failed and another is still pending', async () => {
+      mockGetWorkflowExecutions.mockImplementation((workflowId) => {
+        if (workflowId === 'wf-first') {
+          return Promise.reject(new Error('lookup failed'));
+        }
+        return new Promise(() => {});
+      });
+
+      const { result } = renderLatest(['wf-first', 'wf-second']);
+
+      await waitFor(() => expect(result.current.isError).toBe(true));
       expect(result.current.executions).toBeUndefined();
+      expect(result.current.unavailableWorkflowIds).toEqual(['wf-first']);
     });
 
     it('leaves executions undefined while any query is still pending', async () => {

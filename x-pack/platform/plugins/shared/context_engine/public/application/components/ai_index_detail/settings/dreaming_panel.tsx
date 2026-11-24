@@ -31,6 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout } from '@kbn/ui-callout';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { isEqual } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -404,8 +405,12 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
   } = useAiIndexDreaming(aiIndex.id, { enabled: true });
   const [startedExecutionIds, setStartedExecutionIds] = useState<string[]>();
   const clearStartedExecutionIds = useCallback(() => setStartedExecutionIds(undefined), []);
+  const { canReadWorkflow, canReadWorkflowExecution, canReadManagedWorkflowExecution } =
+    useWorkflowsCapabilities();
+  const canReadRunHistory =
+    canReadWorkflow && canReadWorkflowExecution && canReadManagedWorkflowExecution;
   const latestExecution = useLatestWorkflowExecution(workflowIds, {
-    enabled: workflowIds.length > 0,
+    enabled: workflowIds.length > 0 && canReadRunHistory,
     awaitedExecutionIds: startedExecutionIds,
     onAwaitedObserved: clearStartedExecutionIds,
   });

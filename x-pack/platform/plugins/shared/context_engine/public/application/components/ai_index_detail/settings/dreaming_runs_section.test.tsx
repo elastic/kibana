@@ -43,6 +43,7 @@ jest.mock('../../../hooks/use_can_write_context_engine', () => ({
 
 const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canExecuteWorkflow: true,
+  canReadWorkflow: true,
   canReadWorkflowExecution: true,
   canReadManagedWorkflowExecution: true,
 }));
@@ -85,6 +86,7 @@ describe('DreamingRunsSection', () => {
     mockUseCanWriteContextEngine.mockReturnValue(true);
     mockUseWorkflowsCapabilities.mockReturnValue({
       canExecuteWorkflow: true,
+      canReadWorkflow: true,
       canReadWorkflowExecution: true,
       canReadManagedWorkflowExecution: true,
     });
@@ -144,15 +146,33 @@ describe('DreamingRunsSection', () => {
       screen.queryByText('You do not have permission to run workflows')
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByText('You need permission to read managed workflow executions to run')
+      screen.queryByText(
+        'You need permission to read managed workflows and their executions to run'
+      )
     ).not.toBeInTheDocument();
     expect(screen.queryByText('Add fact or entity types to run')).not.toBeInTheDocument();
     expect(screen.queryByText('Turn on the schedule to run')).not.toBeInTheDocument();
   });
 
+  it('disables Run now without workflow read permission', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      canExecuteWorkflow: true,
+      canReadWorkflow: false,
+      canReadWorkflowExecution: true,
+      canReadManagedWorkflowExecution: true,
+    });
+    renderSection();
+
+    expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeDisabled();
+    expect(
+      screen.getByText('You need permission to read managed workflows and their executions to run')
+    ).toBeInTheDocument();
+  });
+
   it('disables Run now without workflow execution read permission', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       canExecuteWorkflow: true,
+      canReadWorkflow: true,
       canReadWorkflowExecution: false,
       canReadManagedWorkflowExecution: true,
     });
@@ -160,13 +180,14 @@ describe('DreamingRunsSection', () => {
 
     expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeDisabled();
     expect(
-      screen.getByText('You need permission to read managed workflow executions to run')
+      screen.getByText('You need permission to read managed workflows and their executions to run')
     ).toBeInTheDocument();
   });
 
   it('disables Run now without managed workflow execution read permission', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       canExecuteWorkflow: true,
+      canReadWorkflow: true,
       canReadWorkflowExecution: true,
       canReadManagedWorkflowExecution: false,
     });
@@ -174,13 +195,14 @@ describe('DreamingRunsSection', () => {
 
     expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeDisabled();
     expect(
-      screen.getByText('You need permission to read managed workflow executions to run')
+      screen.getByText('You need permission to read managed workflows and their executions to run')
     ).toBeInTheDocument();
   });
 
   it('disables Run now without workflow execute permission', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       canExecuteWorkflow: false,
+      canReadWorkflow: true,
       canReadWorkflowExecution: true,
       canReadManagedWorkflowExecution: true,
     });
@@ -212,25 +234,5 @@ describe('DreamingRunsSection', () => {
     });
 
     expect(onStarted).toHaveBeenCalledWith(['exec-1', 'exec-2']);
-  });
-
-  it('does not call onStarted when workflow execution history cannot be read', () => {
-    mockUseWorkflowsCapabilities.mockReturnValue({
-      canExecuteWorkflow: true,
-      canReadWorkflowExecution: false,
-      canReadManagedWorkflowExecution: true,
-    });
-    const onStarted = jest.fn();
-    renderSection({ onStarted });
-
-    capturedUseRunDreamingOptions?.onStarted?.({
-      executions: [
-        { workflow_id: 'system-context-engine-dreaming-tickets', execution_id: 'exec-1' },
-      ],
-      failed: [],
-      skipped: [],
-    });
-
-    expect(onStarted).not.toHaveBeenCalled();
   });
 });

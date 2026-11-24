@@ -3095,6 +3095,26 @@ describe('ai indices routes', () => {
         );
       });
 
+      it('includes workflow ids from the schedule service', async () => {
+        const workflowIds = [
+          'system-context-engine-dreaming-customer_support',
+          'system-context-engine-trace-dreaming-customer_support',
+        ];
+        aiIndexService.setDreaming.mockResolvedValue(dreaming);
+        dreamingScheduleService.getWorkflowIds.mockReturnValue(workflowIds);
+
+        await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+          body: dreaming,
+        });
+
+        expect(response.ok).toHaveBeenCalledWith({ body: { dreaming, workflow_ids: workflowIds } });
+        expect(dreamingScheduleService.getWorkflowIds).toHaveBeenCalledWith({
+          aiIndex: expect.objectContaining({ dreaming }),
+          spaceId: defaultSpaceId,
+        });
+      });
+
       it('tells change handlers what changed, naming dreaming as the field it saved', async () => {
         const updated = { ...aiIndexItem, dreaming };
         aiIndexService.get.mockResolvedValueOnce(aiIndexItem).mockResolvedValueOnce(updated);

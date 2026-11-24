@@ -20,8 +20,9 @@ export const MAX_DREAMING_ENTITY_TYPES = 50;
 export const MAX_DREAMING_ENTITY_ATTRIBUTES = 50;
 export const MAX_DREAMING_RELATIONSHIP_TYPES = 50;
 export const MAX_DREAMING_CONNECTOR_ID_LENGTH = 256;
-/** Max length of a managed dreaming workflow id returned by the run API. */
+/** Max length of managed dreaming workflow ids in run, GET, and PUT responses. */
 export const MAX_DREAMING_WORKFLOW_ID_LENGTH = 1024;
+
 /** Type prefixes of the KIs dreaming writes: `fact.<fact type>` and `entity.<entity type>`. */
 export const FACT_TYPE_PREFIX = 'fact.';
 export const ENTITY_TYPE_PREFIX = 'entity.';

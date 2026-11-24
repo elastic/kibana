@@ -106,10 +106,22 @@ describe('DreamingLastRunStatus', () => {
     expect(screen.queryByText('Never run')).not.toBeInTheDocument();
   });
 
-  it('shows status unavailable when execution history could not be loaded', () => {
+  it('renders nothing while loading even when some workflow lookups already failed', () => {
     renderLastRunStatus({
       workflowIds: [DREAMING_WORKFLOW_ID, RELATIONSHIPS_WORKFLOW_ID],
       executions: undefined,
+      unavailableWorkflowIds: [DREAMING_WORKFLOW_ID],
+    });
+
+    expect(screen.queryByTestId('contextAiIndexDreamingLastRun')).not.toBeInTheDocument();
+    expect(screen.queryByText('Never run')).not.toBeInTheDocument();
+    expect(screen.queryByText('Status unavailable')).not.toBeInTheDocument();
+  });
+
+  it('shows status unavailable when execution history could not be loaded', () => {
+    renderLastRunStatus({
+      workflowIds: [DREAMING_WORKFLOW_ID, RELATIONSHIPS_WORKFLOW_ID],
+      executions: [],
       unavailableWorkflowIds: [DREAMING_WORKFLOW_ID, RELATIONSHIPS_WORKFLOW_ID],
     });
 
@@ -125,6 +137,24 @@ describe('DreamingLastRunStatus', () => {
     expect(rows).toHaveLength(2);
     expect(rows[0]).toHaveTextContent('Status unavailable');
     expect(rows[1]).toHaveTextContent('Status unavailable');
+  });
+
+  it('shows status unavailable summary when lookups failed and other workflows never ran', () => {
+    renderLastRunStatus({
+      workflowIds: [DREAMING_WORKFLOW_ID, RELATIONSHIPS_WORKFLOW_ID],
+      executions: [],
+      unavailableWorkflowIds: [DREAMING_WORKFLOW_ID],
+    });
+
+    expect(screen.getByTestId('contextAiIndexDreamingLastRunPopoverButton')).toHaveTextContent(
+      'Status unavailable'
+    );
+
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingLastRunPopoverButton'));
+
+    const rows = screen.getAllByTestId('contextAiIndexDreamingLastRunPopoverRow');
+    expect(rows[0]).toHaveTextContent('Status unavailable');
+    expect(rows[1]).toHaveTextContent('Never run');
   });
 
   it('shows never run when execution history has no runs', () => {
