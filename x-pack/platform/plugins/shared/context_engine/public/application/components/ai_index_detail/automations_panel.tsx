@@ -250,14 +250,9 @@ export const AutomationsPanel = ({
           </EuiTitle>
           <AiIndexDetailPanelDescription>{panelDescription}</AiIndexDetailPanelDescription>
         </EuiFlexItem>
-        {headerAction !== undefined ? (
-          <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>
-        ) : (
-          showAddAutomation &&
-          !isLoading &&
-          hasAutomations && (
-            <EuiFlexItem grow={false}>{renderAddAutomationButton({ fill: false })}</EuiFlexItem>
-          )
+        {headerAction !== undefined && <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>}
+        {showAddAutomation && !isLoading && hasAutomations && (
+          <EuiFlexItem grow={false}>{renderAddAutomationButton({ fill: false })}</EuiFlexItem>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />

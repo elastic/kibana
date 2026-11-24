@@ -17,7 +17,10 @@ import { AUTOMATIONS_HEADING_ID, AUTOMATIONS_PANEL_ID } from './automations_pane
 import { FailedAutomationRunsCallout } from './failed_automation_runs_callout';
 
 jest.mock('../../hooks/use_failed_automation_runs');
-jest.mock('../../hooks/use_workflow_summaries');
+jest.mock('../../hooks/use_workflow_summaries', () => ({
+  ...jest.requireActual('../../hooks/use_workflow_summaries'),
+  useWorkflowSummaries: jest.fn(),
+}));
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {

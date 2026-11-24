@@ -37,6 +37,7 @@ jest.mock('../../hooks/use_suggest_automation', () => ({
 }));
 
 jest.mock('../../hooks/use_workflow_summaries', () => ({
+  ...jest.requireActual('../../hooks/use_workflow_summaries'),
   useWorkflowSummaries: jest.fn(),
 }));
 

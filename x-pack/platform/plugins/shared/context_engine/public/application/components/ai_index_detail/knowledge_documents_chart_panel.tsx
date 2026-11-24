@@ -14,7 +14,7 @@ import { KI_HISTOGRAM_DAYS } from '../../../../common/constants';
 import { useKiHistogram } from '../../hooks/use_ki_histogram';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 
-export const KNOWLEDGE_DOCUMENTS_CHART_HEIGHT = 200;
+const KNOWLEDGE_DOCUMENTS_CHART_HEIGHT = 200;
 const EMPTY_COUNT_DOMAIN = { min: 0, max: 1 };
 
 const titleLabel = i18n.translate(

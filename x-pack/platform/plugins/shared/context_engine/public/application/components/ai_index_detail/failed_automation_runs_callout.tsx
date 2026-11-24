@@ -14,7 +14,7 @@ import React, { useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useFailedAutomationRuns } from '../../hooks/use_failed_automation_runs';
 import { useKibana } from '../../hooks/use_kibana';
-import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
+import { hasReadableWorkflow, useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getWorkflowExecutionPath } from '../../utils/get_workflow_execution_path';
 import { goToAutomations } from './automations_panel_id';
 
@@ -29,9 +29,8 @@ export const FailedAutomationRunsCallout = ({ workflowIds }: FailedAutomationRun
     services: { application },
   } = useKibana();
   const { summaries } = useWorkflowSummaries(workflowIds);
-  // Same rule as the automation rows: only workflows we can read (and that still exist) have runs to check.
   const readableWorkflowIds = useMemo(
-    () => workflowIds.filter((id) => summaries.get(id)?.definition != null),
+    () => workflowIds.filter((id) => hasReadableWorkflow(summaries.get(id))),
     [summaries, workflowIds]
   );
   const failedRuns = useFailedAutomationRuns(readableWorkflowIds);

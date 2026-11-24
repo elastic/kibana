@@ -17,6 +17,10 @@ export interface WorkflowSummary {
   definition?: WorkflowYaml | null;
 }
 
+/** True when the user can read the workflow and it still exists, so its runs can be read too. */
+export const hasReadableWorkflow = (summary: WorkflowSummary | undefined): boolean =>
+  summary?.definition != null;
+
 const is403 = (error: unknown): boolean => {
   if (error instanceof Error && 'response' in error) {
     return (error as Error & { response?: Response }).response?.status === 403;

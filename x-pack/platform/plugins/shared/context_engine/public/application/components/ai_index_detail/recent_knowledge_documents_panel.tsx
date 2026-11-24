@@ -8,6 +8,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -36,7 +37,18 @@ export const RECENT_KNOWLEDGE_DOCUMENTS_SIZE = 5;
 
 const badgeItemCss = css({ minWidth: 0, maxWidth: '40%' });
 
-const RecentKnowledgeDocumentRow = ({ aiIndexId, ki }: { aiIndexId: string; ki: KiListItem }) => {
+interface RecentKnowledgeDocumentRowProps {
+  aiIndexId: string;
+  ki: KiListItem;
+  /** Draws a line above the row. Every row but the first has one. */
+  hasDivider: boolean;
+}
+
+const RecentKnowledgeDocumentRow = ({
+  aiIndexId,
+  ki,
+  hasDivider,
+}: RecentKnowledgeDocumentRowProps) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { path, params } = getKnowledgeDocumentLocation(aiIndexId, ki);
   const { href, onClick } = getRouterLinkProps({
@@ -46,42 +58,39 @@ const RecentKnowledgeDocumentRow = ({ aiIndexId, ki }: { aiIndexId: string; ki: 
   const { title, type, updated_at: updatedAt } = ki;
 
   return (
-    <EuiFlexGroup
-      component="li"
-      alignItems="center"
-      gutterSize="m"
-      responsive={false}
-      data-test-subj="contextOverviewRecentDocumentRow"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="document" color="subdued" aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem className="eui-textTruncate">
-        <EuiLink
-          href={href}
-          onClick={onClick}
-          className="eui-textTruncate"
-          data-test-subj="contextOverviewRecentDocumentTitle"
-          {...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
-            action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_RECENT_DOCUMENT,
-          })}
-        >
-          {getKiDisplayTitle(title)}
-        </EuiLink>
-      </EuiFlexItem>
-      {/* A long type name must not push the title out: the badge cuts its text with "…". */}
-      <EuiFlexItem grow={false} css={badgeItemCss}>
-        <KiTypeDisplay as="badge" type={type} />
-      </EuiFlexItem>
-      {updatedAt ? (
-        <EuiFlexItem grow={false} className="eui-textNoWrap">
-          <EuiText size="xs" color="subdued">
-            <KiFormattedDate value={updatedAt} />
-          </EuiText>
+    <li data-test-subj="contextOverviewRecentDocumentRow">
+      {hasDivider ? <EuiHorizontalRule margin="s" /> : null}
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="document" color="subdued" aria-hidden={true} />
         </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
+        <EuiFlexItem className="eui-textTruncate">
+          <EuiLink
+            href={href}
+            onClick={onClick}
+            className="eui-textTruncate"
+            data-test-subj="contextOverviewRecentDocumentTitle"
+            {...getEbtProps({
+              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
+              action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_RECENT_DOCUMENT,
+            })}
+          >
+            {getKiDisplayTitle(title)}
+          </EuiLink>
+        </EuiFlexItem>
+        {/* A long type name must not push the title out: the badge cuts its text with "…". */}
+        <EuiFlexItem grow={false} css={badgeItemCss}>
+          <KiTypeDisplay as="badge" type={type} />
+        </EuiFlexItem>
+        {updatedAt ? (
+          <EuiFlexItem grow={false} className="eui-textNoWrap">
+            <EuiText size="xs" color="subdued">
+              <KiFormattedDate value={updatedAt} />
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    </li>
   );
 };
 
@@ -139,6 +148,56 @@ export const RecentKnowledgeDocumentsPanel = ({
   });
   const hasDocuments = kis.length > 0;
 
+  const renderBody = () => {
+    if (isLoading) {
+      return (
+        <>
+          <EuiSpacer size="m" />
+          <EuiSkeletonText lines={3} data-test-subj="contextOverviewRecentDocumentsLoading" />
+        </>
+      );
+    }
+    if (error && !hasDocuments) {
+      return (
+        <AiIndexDetailPanelDescription data-test-subj="contextOverviewRecentDocumentsError">
+          {i18n.translate('xpack.contextEngine.aiIndexDetail.overview.recentDocuments.loadError', {
+            defaultMessage: 'Unable to load recent knowledge documents.',
+          })}
+        </AiIndexDetailPanelDescription>
+      );
+    }
+    if (!hasDocuments) {
+      return (
+        <AiIndexDetailPanelDescription data-test-subj="contextOverviewRecentDocumentsEmpty">
+          {getEmptyText({ isManaged, isMemoryEnabled })}
+        </AiIndexDetailPanelDescription>
+      );
+    }
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup
+          component="ul"
+          direction="column"
+          gutterSize="none"
+          aria-label={i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.listAriaLabel',
+            { defaultMessage: 'Recent knowledge documents' }
+          )}
+        >
+          {kis.map((ki, index) => (
+            <RecentKnowledgeDocumentRow
+              key={`${ki.index}/${ki.id}`}
+              aiIndexId={aiIndexId}
+              ki={ki}
+              hasDivider={index > 0}
+            />
+          ))}
+        </EuiFlexGroup>
+      </>
+    );
+  };
+
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextOverviewRecentDocuments">
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -169,43 +228,7 @@ export const RecentKnowledgeDocumentsPanel = ({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-      {isLoading ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiSkeletonText lines={3} data-test-subj="contextOverviewRecentDocumentsLoading" />
-        </>
-      ) : error && !hasDocuments ? (
-        <AiIndexDetailPanelDescription data-test-subj="contextOverviewRecentDocumentsError">
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.overview.recentDocuments.loadError', {
-            defaultMessage: 'Unable to load recent knowledge documents.',
-          })}
-        </AiIndexDetailPanelDescription>
-      ) : hasDocuments ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup
-            component="ul"
-            direction="column"
-            gutterSize="s"
-            aria-label={i18n.translate(
-              'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.listAriaLabel',
-              { defaultMessage: 'Recent knowledge documents' }
-            )}
-          >
-            {kis.map((ki) => (
-              <RecentKnowledgeDocumentRow
-                key={`${ki.index}/${ki.id}`}
-                aiIndexId={aiIndexId}
-                ki={ki}
-              />
-            ))}
-          </EuiFlexGroup>
-        </>
-      ) : (
-        <AiIndexDetailPanelDescription data-test-subj="contextOverviewRecentDocumentsEmpty">
-          {getEmptyText({ isManaged, isMemoryEnabled })}
-        </AiIndexDetailPanelDescription>
-      )}
+      {renderBody()}
     </EuiPanel>
   );
 };

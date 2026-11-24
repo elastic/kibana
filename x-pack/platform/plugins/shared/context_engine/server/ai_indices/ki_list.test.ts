@@ -7,6 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   getKiGroups,
   getKiHistogram,
@@ -1269,8 +1270,8 @@ describe('latestRevisionPipeline', () => {
 });
 
 describe('getKiHistogram', () => {
-  const query = jest.fn();
-  const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const { query } = esClient.esql;
   const NOW = new Date('2026-11-20T10:00:00.000Z');
   const histogramResponse = (rows: Array<[number, string]>) => ({
     columns: [{ name: 'count' }, { name: 'day' }],
@@ -1351,8 +1352,8 @@ describe('getKiHistogram', () => {
 });
 
 describe('getKiHistogram without updated_at', () => {
-  const query = jest.fn();
-  const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const { query } = esClient.esql;
 
   it('uses the first revision timestamp alone', async () => {
     query
