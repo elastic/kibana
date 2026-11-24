@@ -13,6 +13,7 @@ import { seedHostWithAlert, type SeededHostAlert } from '../../common/seed_endpo
 import {
   completeHostAction,
   deleteSubmittedHostActions,
+  HOST_ISOLATION_WAIT_MS,
   waitForHostIsolation,
 } from '../../common/complete_host_action';
 import { runCleanups } from '../../common/run_cleanups';
@@ -25,7 +26,7 @@ spaceTest.describe(
   },
   () => {
     // Isolate, release, and the agent-status poll do not fit in the default 60s.
-    spaceTest.setTimeout(240_000);
+    spaceTest.setTimeout(HOST_ISOLATION_WAIT_MS + 120_000);
 
     let seeded: (SeededHostAlert & { cleanup: () => Promise<void> }) | undefined;
     let caseId: string | undefined;
@@ -114,6 +115,7 @@ spaceTest.describe(
           await expect(activity).toContainText(isolateComment);
           await completeHostAction({ esClient, config, action });
           await waitForHostIsolation({
+            esClient,
             kbnClient,
             spaceId: scoutSpace.id,
             agentId: host.agentId,

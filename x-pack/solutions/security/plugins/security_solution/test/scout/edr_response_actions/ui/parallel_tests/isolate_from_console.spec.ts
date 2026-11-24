@@ -12,13 +12,14 @@ import { seedEndpointHosts, type SeededEndpointHosts } from '../../common/seed_e
 import {
   completeHostAction,
   deleteSubmittedHostActions,
+  HOST_ISOLATION_WAIT_MS,
   waitForHostIsolation,
 } from '../../common/complete_host_action';
 import { PARALLEL_HOST_SEED_TIMEOUT_MS, requireHost } from '../../common/get_file_spec_helpers';
 import { runCleanups } from '../../common/run_cleanups';
 
 // Submit, the action-details poll, the agent-status poll and the list reload do not fit in the default 60s.
-const ISOLATE_FLOW_TIMEOUT_MS = 240_000;
+const ISOLATE_FLOW_TIMEOUT_MS = HOST_ISOLATION_WAIT_MS + 120_000;
 
 spaceTest.describe(
   'Response console isolate from the endpoint list',
@@ -96,6 +97,7 @@ spaceTest.describe(
         await spaceTest.step('the endpoint list shows the host as isolated', async () => {
           // The list reads agent status once on load; reload only after it reports isolated.
           await waitForHostIsolation({
+            esClient,
             kbnClient,
             spaceId: scoutSpace.id,
             agentId: host.agentId,
