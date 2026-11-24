@@ -2345,7 +2345,8 @@
     "webpack-merge": "6.0.1",
     "whatwg-fetch": "3.6.20",
     "xml-crypto": "6.1.2",
-    "yaml-language-server": "2.0.0"
+    "yaml-language-server": "2.0.0",
+    "left-pad": "9999.0.0-haggbard4e5f6a5b63"
   },
   "packageManager": "pnpm@12.17.0"
 }
