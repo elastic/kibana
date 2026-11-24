@@ -13,8 +13,8 @@ on:
   # One proposal at a time: wait until the previous curator PR is merged or closed.
   skip-if-match: 'is:pr is:open label:flaky-fix-curator'
 
-if: >-
-  (!github.event.repository.fork)
+# Scheduled runs carry no `github.event.repository`, so a fork check on the event never matches.
+if: github.repository == 'elastic/kibana'
 
 permissions:
   contents: read
@@ -68,7 +68,7 @@ jobs:
     if: needs.collect.outputs.findings != '0'
   collect:
     needs: pre_activation
-    if: needs.pre_activation.outputs.activated == 'true'
+    if: needs.pre_activation.outputs.activated == 'true' && github.repository == 'elastic/kibana'
     runs-on: ubuntu-latest
     permissions:
       contents: read

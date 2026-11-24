@@ -27,6 +27,7 @@ import {
   OverviewStatCards,
   RecentKnowledgeDocumentsPanel,
   SourcesPanel,
+  SpendPanel,
 } from '../components/ai_index_detail';
 import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
 import { SettingsTab } from '../components/ai_index_detail/settings';
@@ -348,6 +349,12 @@ export const AiIndexDetailPage = () => {
           hideEditControls ? undefined : <ManageAutomationsLink aiIndexId={resolvedAiIndexId} />
         }
       />
+      {showAutomationsPanel && (
+        <>
+          <EuiSpacer size="l" />
+          <SpendPanel aiIndexId={aiIndex?.id} />
+        </>
+      )}
       {aiIndex && !isManaged && (
         <>
           <EuiSpacer size="l" />

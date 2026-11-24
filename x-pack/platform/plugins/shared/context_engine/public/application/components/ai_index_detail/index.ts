@@ -20,4 +20,5 @@ export { OverviewStatCards } from './overview_stat_cards';
 export { RecentKnowledgeDocumentsPanel } from './recent_knowledge_documents_panel';
 export { SignalsPanel } from './signals_panel';
 export { SourcesPanel } from './sources/sources_panel';
+export { SpendPanel } from './spend_panel';
 export { TracesPanel } from './traces_panel';
