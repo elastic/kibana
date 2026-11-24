@@ -11,7 +11,6 @@ import { OVERVIEW_PERCENTILES } from '../../../common/overview_filters';
 import { readOverviewFilters } from '../../../common/overview_filters_param';
 import type { ApplicationOverviewResponse } from '../../../common/types/overview';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
-import { MAX_SERVICE_NAME_LENGTH } from '../../lib/constants';
 import { kueryToQuery } from '../../lib/helpers/kuery';
 import { getHistogramInterval } from '../../lib/helpers/time_series';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
@@ -19,6 +18,7 @@ import {
   START_AFTER_END_ISSUE,
   filteredTimeRangeShape,
   isStartBeforeEnd,
+  serviceNameParam,
   timeZoneShape,
 } from '../params';
 import { getOtelOverview } from './otel/get_otel_overview';
@@ -36,7 +36,7 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string().min(1).max(MAX_SERVICE_NAME_LENGTH),
+        serviceName: serviceNameParam(),
       }),
       query: z
         .object({
