@@ -119,17 +119,17 @@ interface OtlpExporterTlsConfig {
 }
 
 interface OtlpExporterSendingQueueConfig {
-  enabled?: boolean | null;
+  enabled?: boolean;
   num_consumers?: number | null;
   queue_size?: number | null;
-  sizer?: 'requests' | 'items' | 'bytes' | null;
-  wait_for_result?: boolean | null;
-  block_on_overflow?: boolean | null;
+  sizer?: 'requests' | 'items' | 'bytes';
+  wait_for_result?: boolean;
+  block_on_overflow?: boolean;
   batch?: {
     flush_timeout?: string | null;
     min_size?: number | null;
     max_size?: number | null;
-    sizer?: 'items' | 'bytes' | null;
+    sizer?: 'items' | 'bytes';
     partition?: {
       metadata_keys?: string[] | null;
     } | null;

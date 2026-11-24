@@ -16,7 +16,6 @@ import {
   LogstashSchema,
   KafkaSchema,
   RemoteElasticSearchSchema,
-  OutputSchema,
   UpdateOutputSchema,
 } from './output';
 
@@ -544,49 +543,6 @@ describe('Output model', () => {
           secrets: { ssl: { key: null } },
         })
       ).toThrow();
-    });
-  });
-
-  describe('OTLP sending queue', () => {
-    // an update writes null for the stored settings that the merged queue no longer has
-    const nullQueue = {
-      enabled: null,
-      num_consumers: null,
-      queue_size: null,
-      sizer: null,
-      wait_for_result: null,
-      block_on_overflow: null,
-      batch: { flush_timeout: null, min_size: null, max_size: null, sizer: null, partition: null },
-    };
-
-    it('accepts null for every setting of a stored output, so it can be read and sent back', () => {
-      expect(() =>
-        OutputSchema.validate({
-          id: 'otlp',
-          name: 'otlp',
-          type: 'otlp',
-          is_default: false,
-          is_default_monitoring: false,
-          otlp_exporter: {
-            protocol: 'grpc',
-            endpoint: 'collector.example.com:4317',
-            sending_queue: nullQueue,
-          },
-        })
-      ).not.toThrow();
-    });
-
-    it('accepts null for every setting in an update', () => {
-      expect(() =>
-        UpdateOutputSchema.validate({
-          type: 'otlp',
-          otlp_exporter: {
-            protocol: 'grpc',
-            endpoint: 'collector.example.com:4317',
-            sending_queue: nullQueue,
-          },
-        })
-      ).not.toThrow();
     });
   });
 });

@@ -584,15 +584,15 @@ const OtlpExporterTlsSchema = schema.object({
   ),
 });
 
-// The settings that an update can not merge into the stored ones are written as `null`, so every
-// setting of the sending queue accepts it.
+// A setting that takes a value, or `null` to remove a stored value.
 const nullable = <T>(type: Type<T>, description: string) =>
   schema.maybe(schema.oneOf([schema.literal(null), type], { meta: { description } }));
 
 const OtlpExporterSendingQueueSchema = schema.object({
-  enabled: nullable(
-    schema.boolean(),
-    'Whether the exporter uses a sending queue. Default: `true`.'
+  enabled: schema.maybe(
+    schema.boolean({
+      meta: { description: 'Whether the exporter uses a sending queue. Default: `true`.' },
+    })
   ),
   num_consumers: nullable(
     schema.number(),
@@ -602,17 +602,29 @@ const OtlpExporterSendingQueueSchema = schema.object({
     schema.number(),
     'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint.'
   ),
-  sizer: nullable(
-    schema.oneOf([schema.literal('requests'), schema.literal('items'), schema.literal('bytes')]),
-    'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.'
+  sizer: schema.maybe(
+    schema.oneOf([schema.literal('requests'), schema.literal('items'), schema.literal('bytes')], {
+      meta: {
+        description:
+          'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.',
+      },
+    })
   ),
-  wait_for_result: nullable(
-    schema.boolean(),
-    'Whether incoming requests are blocked until they are processed. Default: `false`.'
+  wait_for_result: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether incoming requests are blocked until they are processed. Default: `false`.',
+      },
+    })
   ),
-  block_on_overflow: nullable(
-    schema.boolean(),
-    'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
+  block_on_overflow: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.',
+      },
+    })
   ),
   batch: nullable(
     schema.object({
@@ -628,9 +640,13 @@ const OtlpExporterSendingQueueSchema = schema.object({
         schema.number(),
         'Maximum size of a batch, `0` for no maximum. Default: `0`, or `4000000` on the managed OTLP endpoint.'
       ),
-      sizer: nullable(
-        schema.oneOf([schema.literal('items'), schema.literal('bytes')]),
-        'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.'
+      sizer: schema.maybe(
+        schema.oneOf([schema.literal('items'), schema.literal('bytes')], {
+          meta: {
+            description:
+              'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.',
+          },
+        })
       ),
       partition: nullable(
         schema.object({
