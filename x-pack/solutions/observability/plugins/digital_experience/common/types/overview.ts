@@ -6,7 +6,7 @@
  */
 
 import type { OverviewFilterOptions, OverviewPercentile } from '../overview_filters';
-import type { ComparedValue, HistogramBuckets, HttpRequests, WebVitals } from './applications';
+import type { ComparedValue, HistogramBuckets, WebVitals } from './applications';
 
 /** One bucket of the Overview trend; both charts read the same buckets. */
 export interface OverviewTrendPoint {
@@ -21,19 +21,18 @@ export interface OverviewTrendPoint {
 export interface LoadTime {
   /** The requested percentile in milliseconds, `null` without a timed page load. */
   percentileMs: number | null;
-  /** Page loads that reported a load event, which the percentile is taken over. */
-  sampleCount: number;
 }
 
-/** One EDOT Browser application over the requested time range and environment. */
+/**
+ * One EDOT Browser application's vitals and trend over the requested time range and environment.
+ * The KPI row has a route of its own (`ApplicationOverviewKpisResponse`).
+ */
 export interface ApplicationOverview {
   serviceName: string;
   /** The percentile of the load time and its trend, 75 unless the request asked for another. */
   percentile: OverviewPercentile;
   pageLoads: { count: number };
   loadTime: LoadTime;
-  jsErrors: { count: number };
-  httpRequests: HttpRequests;
   webVitals: WebVitals;
   /** The same buckets over the whole time range; empty ones included. */
   trend: OverviewTrendPoint[];

@@ -147,9 +147,7 @@ const response = (pageLoads: number): ApplicationOverviewResponse => ({
     serviceName: 'shop',
     percentile: 75,
     pageLoads: { count: pageLoads },
-    loadTime: { percentileMs: 2412.5, sampleCount: pageLoads },
-    jsErrors: { count: 3 },
-    httpRequests: { count: 8, failedCount: 2, failedRatio: 0.25 },
+    loadTime: { percentileMs: 2412.5 },
     webVitals: {
       lcp: { p75Ms: 2412.5, sampleCount: 2, ratings: { good: 1, needsImprovement: 0, poor: 0 } },
       inp: NO_VITAL,

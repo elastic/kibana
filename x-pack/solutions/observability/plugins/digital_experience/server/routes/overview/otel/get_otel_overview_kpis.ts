@@ -25,6 +25,14 @@ const NANOSECONDS_PER_MILLISECOND = 1_000_000;
 /** A ratio, `null` without anything to divide by. */
 const ratioOf = (count: number, total: number): number | null => (total > 0 ? count / total : null);
 
+/**
+ * The share of the sessions without an error. Both counts are `COUNT_DISTINCT` estimates, so above
+ * a few thousand sessions the sessions with errors can come out higher than all of them: kept
+ * within 0 and 1 rather than shown as a negative share.
+ */
+const errorFreeShareOf = (sessions: number, sessionsWithErrors: number): number =>
+  1 - Math.min(sessionsWithErrors, sessions) / sessions;
+
 /** The KPIs of one period's row; a missing row or column has no data. */
 const toKpis = (row: OverviewKpisRow | undefined) => {
   const sessions = row?.sessions ?? 0;
@@ -35,7 +43,7 @@ const toKpis = (row: OverviewKpisRow | undefined) => {
   return {
     sessions,
     sessionsWithErrors,
-    errorFreeSessions: sessions > 0 ? 1 - sessionsWithErrors / sessions : null,
+    errorFreeSessions: sessions > 0 ? errorFreeShareOf(sessions, sessionsWithErrors) : null,
     pageLoads: row?.page_loads ?? 0,
     loadTime: row?.load_time ?? null,
     loadTimeSamples: row?.load_time_samples ?? 0,

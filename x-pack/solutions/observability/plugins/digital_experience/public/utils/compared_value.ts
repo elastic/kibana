@@ -33,6 +33,13 @@ export interface FormattedChange {
 export const NEGLIGIBLE_RELATIVE_CHANGE = 0.02;
 export const NEGLIGIBLE_PERCENTAGE_POINTS = 0.5;
 
+// Subtracting shares is inexact, e.g. 0.105 - 0.1 is 0.004999…, so a change right at a cutoff
+// would count as noise: the cutoffs allow for that much error.
+const FLOAT_TOLERANCE = 1e-9;
+
+const isBelow = (change: number, cutoff: number): boolean =>
+  Math.abs(change) < cutoff - FLOAT_TOLERANCE;
+
 type SignedFormatters = Pick<Formatters, 'formatSignedNumber' | 'formatSignedPercent'>;
 
 /** The change as `format` shows it, and its direction: none when it shows as 0, as its color. */
@@ -66,7 +73,7 @@ export const formatChange = (
     return {
       label: percentagePointsLabel(text),
       direction,
-      isNegligible: Math.abs(points) < NEGLIGIBLE_PERCENTAGE_POINTS,
+      isNegligible: isBelow(points, NEGLIGIBLE_PERCENTAGE_POINTS),
     };
   }
   const change = relativeChange(compared);
@@ -77,6 +84,6 @@ export const formatChange = (
   return {
     label: text,
     direction,
-    isNegligible: Math.abs(change) < NEGLIGIBLE_RELATIVE_CHANGE,
+    isNegligible: isBelow(change, NEGLIGIBLE_RELATIVE_CHANGE),
   };
 };

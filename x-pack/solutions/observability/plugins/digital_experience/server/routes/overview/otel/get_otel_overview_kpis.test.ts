@@ -130,6 +130,23 @@ describe('getOtelOverviewKpis', () => {
     expect(kpis.requestLatency.value).toBeNull();
   });
 
+  it('keeps error-free sessions within 0 and 100% when the estimates overlap', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    // COUNT_DISTINCT estimates: more sessions with errors than sessions in all.
+    client.esql.query.mockResolvedValue(
+      esqlResponse([{ ...CURRENT_ROW, sessions: 5000, sessions_with_errors: 5012 }])
+    );
+
+    const kpis = await getOtelOverviewKpis({
+      esClient,
+      serviceName: 'storefront-web',
+      start: HOUR,
+      end: 2 * HOUR,
+    });
+
+    expect(kpis.errorFreeSessions.value).toBe(0);
+  });
+
   it('has no data when the OTel indices do not exist', async () => {
     const { client, esClient } = createTracedEsClientMock();
     client.esql.query.mockRejectedValue(

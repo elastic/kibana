@@ -122,6 +122,17 @@ describe('formatChange', () => {
     }
   );
 
+  it.each([
+    ['10% to 10.5%', 0.105, 0.1, 'percentagePoints'],
+    ['100 to 102', 102, 100, 'relative'],
+  ] as const)(
+    'calls a change right at the cutoff, as %s, not noise, despite floating-point error',
+    (_, value, previous, unit) => {
+      const change = formatChange({ value, previous, delta: value - previous }, unit, formatters);
+      expect(change?.isNegligible).toBe(false);
+    }
+  );
+
   it('is unknown without a previous value, or against 0', () => {
     expect(
       formatChange({ value: 12, previous: null, delta: null }, 'relative', formatters)

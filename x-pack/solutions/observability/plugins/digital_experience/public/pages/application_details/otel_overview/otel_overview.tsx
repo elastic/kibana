@@ -112,9 +112,7 @@ const emptyOverview = (
   serviceName,
   percentile,
   pageLoads: { count: 0 },
-  loadTime: { percentileMs: null, sampleCount: 0 },
-  jsErrors: { count: 0 },
-  httpRequests: { count: 0, failedCount: 0, failedRatio: null },
+  loadTime: { percentileMs: null },
   webVitals: NO_WEB_VITALS,
   trend: [],
 });
