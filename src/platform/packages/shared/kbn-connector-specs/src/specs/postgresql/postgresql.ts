@@ -392,7 +392,7 @@ export const PostgresqlConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Search for rows in a PostgreSQL table by matching a text value against one or more columns using ILIKE (case-insensitive partial match; non-text columns are compared on their text representation). Returns up to maxRows results (default 100). Use describeTable first to discover searchable column names. Prefer query (SQL SELECT) for structured filtering; use searchRows for broad text discovery across known columns.',
+        'Search for rows in a PostgreSQL table by matching a text value against one or more columns using ILIKE (case-insensitive partial match; non-text columns are compared on their text representation). Returns up to maxRows results (default 100). Use describeTable first to discover searchable column names. Requires SELECT on every column of the table; if the role has only column-level grants, use query with explicit columns instead. Prefer query (SQL SELECT) for structured filtering; use searchRows for broad text discovery across known columns.',
       input: SearchRowsInputSchema,
       handler: async (ctx, input: SearchRowsInput) => {
         const schema = input.schema ?? DEFAULT_SCHEMA;

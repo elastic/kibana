@@ -946,7 +946,7 @@ describe('PostgresqlConnector', () => {
       };
       const { pool, client } = makePool();
       let driverRows: Row[] = [];
-      let callbackRan = false;
+      let releasesBeforeCompletion = -1;
       client.query.mockImplementationOnce(async (query) => {
         const submitted = query as SubmittedQuery;
         const result = { command: 'SELECT', rowCount: 3, rows: [] as Row[] };
@@ -955,9 +955,9 @@ describe('PostgresqlConnector', () => {
           result.rows.push(row);
         });
         driverRows = result.rows;
-        // The connection must still be open until the server reports the end of the batch.
-        expect(client.release).not.toHaveBeenCalled();
-        callbackRan = true;
+        // Let the event loop turn, as it would while the server is still running the rest of the batch.
+        await new Promise((resolve) => setImmediate(resolve));
+        releasesBeforeCompletion = client.release.mock.calls.length;
         submitted.callback(null, result);
         return submitted;
       });
@@ -968,7 +968,8 @@ describe('PostgresqlConnector', () => {
         'The statements completed, but a result row could not be returned: Invalid string length'
       );
 
-      expect(callbackRan).toBe(true);
+      // The connection stays checked out until the server reports the end of the batch.
+      expect(releasesBeforeCompletion).toBe(0);
       // Rows after the failure are still dropped from the driver's copy.
       expect(driverRows).toHaveLength(1);
       expect(client.release).toHaveBeenCalledWith(true);
