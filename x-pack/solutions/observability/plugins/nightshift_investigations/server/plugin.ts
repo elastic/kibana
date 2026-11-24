@@ -68,6 +68,7 @@ import { createShouldIncludeExplanations } from './online_evals/should_include_e
 import {
   alertOutcomeJudges,
   memoryJudges,
+  recoveryDueDiligenceJudges,
   referenceFreeJudges,
   wikiJudges,
 } from './online_evals/judges';
@@ -281,6 +282,7 @@ export class NightshiftInvestigationsPlugin
     for (const judge of [
       ...referenceFreeJudges,
       ...alertOutcomeJudges,
+      ...recoveryDueDiligenceJudges,
       ...wikiJudges,
       ...memoryJudges,
     ]) {

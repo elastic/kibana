@@ -4494,8 +4494,8 @@ importers:
         specifier: 6.0.0
         version: 6.0.0(@hapi/hapi@21.4.13)
       byte-size:
-        specifier: 9.0.1
-        version: 9.0.1
+        specifier: 9.0.2
+        version: 9.0.2
       cacheable-lookup:
         specifier: 6.1.0
         version: 6.1.0
@@ -6134,7 +6134,7 @@ importers:
         version: link:packages/kbn-yarn-lock-validator
       '@msw/serve':
         specifier: 0.11.0
-        version: 0.11.0(express@5.2.1(supports-color@10.2.2))(hono@4.13.19)(msw@3.0.1(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3))
+        version: 0.11.0(express@5.2.1(supports-color@10.2.2))(hono@4.13.19)(msw@3.0.4(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3))
       '@octokit/rest':
         specifier: 22.0.1
         version: 22.0.1
@@ -6799,8 +6799,8 @@ importers:
         specifier: 5.5.0
         version: 5.5.0
       msw:
-        specifier: 3.0.1
-        version: 3.0.1(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3)
+        specifier: 3.0.4
+        version: 3.0.4(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3)
       nock:
         specifier: 14.0.17
         version: 14.0.17
@@ -16355,8 +16355,8 @@ packages:
     resolution: {integrity: sha512-DdH81/zPLVS11EUgWq3tEu/xn+EzljlMYooDNdzWEnFha3R3NBMpMV1UqYIpjYHV/SgpFKMIX1Oh7o06SjM/oA==}
     engines: {node: '>=18'}
 
-  byte-size@9.0.1:
-    resolution: {integrity: sha512-YLe9x3rabBrcI0cueCdLS2l5ONUKywcRpTs02B8KP9/Cimhj7o3ZccGrPnRvcbyHMbb7W79/3MUJl7iGgTXKEw==}
+  byte-size@9.0.2:
+    resolution: {integrity: sha512-awINQonvLawPPCIWKIoYwPlUJc2ysiRsYIIJfJoIyWMbqdceKHhhZsT3226exJYoDqpuI6sInkEo1B5Rrjbs+g==}
     engines: {node: '>=12.17'}
     peerDependencies:
       '@75lb/nature': latest
@@ -21119,8 +21119,8 @@ packages:
     engines: {node: '>=18.19.0'}
     hasBin: true
 
-  msw@3.0.1:
-    resolution: {integrity: sha512-gZvA8aJe8t5Ajnt5G91v19zdjCDSf8jmWO3I9krN+2PFdVgg90Mrl4lWkjP3bivMRAmyI+G2eEIzrcPko8laEg==}
+  msw@3.0.4:
+    resolution: {integrity: sha512-lrILj+WEoJ4pp3SZHdEDnnZvP6jfWrNua+v2jgXz82RAaATAVqOqMNMxj2n2TUMNR9JP/eWG5tBry3mKnxPNbA==}
     engines: {node: '>=22.12.0'}
     hasBin: true
     peerDependencies:
@@ -28742,9 +28742,9 @@ snapshots:
   '@moonrepo/core-windows-x64-msvc@2.6.2':
     optional: true
 
-  '@msw/serve@0.11.0(express@5.2.1(supports-color@10.2.2))(hono@4.13.19)(msw@3.0.1(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3))':
+  '@msw/serve@0.11.0(express@5.2.1(supports-color@10.2.2))(hono@4.13.19)(msw@3.0.4(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3))':
     dependencies:
-      msw: 3.0.1(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3)
+      msw: 3.0.4(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3)
       ws: 8.23.0
     optionalDependencies:
       express: 5.2.1(supports-color@10.2.2)
@@ -32603,7 +32603,7 @@ snapshots:
     dependencies:
       run-applescript: 7.1.0
 
-  byte-size@9.0.1: {}
+  byte-size@9.0.2: {}
 
   bytes@3.1.2: {}
 
@@ -38437,7 +38437,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  msw@3.0.1(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3):
+  msw@3.0.4(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3):
     dependencies:
       '@inquirer/confirm': 6.3.2(@types/node@24.10.13)
       '@msw/url': 0.1.3
