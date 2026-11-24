@@ -45,20 +45,26 @@ export function buildKnownFailureRule({
   query,
   cpsEnabled,
 }: {
-  query: Pick<StreamQuery, 'title' | 'esql'>;
+  query: Pick<StreamQuery, 'id' | 'title' | 'esql'>;
   cpsEnabled: boolean;
 }): AlertingRuleResource['data'] {
+  const { window_minutes: windowMinutes, rule_every_minutes: everyMinutes } =
+    KNOWN_FAILURES_SETTINGS;
   return {
     kind: 'signal',
-    metadata: { name: query.title },
+    metadata: {
+      name: query.title,
+      // For whoever finds the rule in the rules list: it raises nothing on its own. Left out of the
+      // rule id, like the name, so rewording it replaces no rule.
+      description: `Measures how often knowledge indicator ${query.id} matches, per minute over the last ${windowMinutes} minutes, every ${everyMinutes} minutes. Each run writes one row: the newest minutes, the normal level of the hour before them, and the latest step or trend change. Nightshift detection judges these rows; the rule raises nothing by itself. Managed by Nightshift detection: change the knowledge indicator, not this rule.`,
+    },
     time_field: '@timestamp',
     schedule: {
-      every: `${KNOWN_FAILURES_SETTINGS.rule_every_minutes}m`,
-      // The window, the margin and the minute still open when the rule runs. Derived, so tuning
-      // the window cannot leave a lookback that cuts its first minutes off.
-      lookback: `${
-        KNOWN_FAILURES_SETTINGS.window_minutes + KNOWN_FAILURES_SETTINGS.end_margin_minutes + 1
-      }m`,
+      every: `${everyMinutes}m`,
+      // The window, the margin, the minute still open when the rule runs, and one more for a
+      // Kibana clock ahead of the Elasticsearch one. Derived, so tuning the window cannot leave a
+      // lookback that cuts its first minutes off.
+      lookback: `${windowMinutes + KNOWN_FAILURES_SETTINGS.end_margin_minutes + 2}m`,
     },
     // No grouping: the query returns one row per run, all of one series.
     query: {
