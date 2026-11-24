@@ -10,6 +10,7 @@
 import {
   getFederatedDefaultEsqlQuery,
   isGeneratedEsqlDefault,
+  isGeneratedOpeningEsql,
   isGeneratedTimeSortedEsql,
 } from './get_federated_default_esql_query';
 
@@ -76,5 +77,23 @@ describe('isGeneratedTimeSortedEsql', () => {
 
   it('does not match a query that only starts with FROM', () => {
     expect(isGeneratedTimeSortedEsql('FROM btc_blocks | STATS COUNT(*)')).toBe(false);
+  });
+});
+
+describe('isGeneratedOpeningEsql', () => {
+  it('matches the default query of each solution', () => {
+    expect(isGeneratedOpeningEsql('FROM logs*,-logstash*,filebeat-*')).toBe(true);
+    expect(
+      isGeneratedOpeningEsql('FROM .alerts-security.alerts-security,logs-* | SORT @timestamp DESC')
+    ).toBe(true);
+    expect(
+      isGeneratedOpeningEsql(
+        'FROM .workflows-executions-data-stream,.workflows-executions | SORT startedAt DESC | WHERE startedAt >= ?_tstart AND startedAt <= ?_tend'
+      )
+    ).toBe(true);
+  });
+
+  it('does not match a query the user wrote', () => {
+    expect(isGeneratedOpeningEsql('FROM btc_blocks | STATS COUNT(*)')).toBe(false);
   });
 });

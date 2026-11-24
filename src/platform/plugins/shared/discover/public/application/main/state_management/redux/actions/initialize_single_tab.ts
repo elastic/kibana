@@ -53,8 +53,7 @@ import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
 import {
   getFederatedDefaultEsqlQuery,
-  isGeneratedEsqlDefault,
-  isGeneratedTimeSortedEsql,
+  isGeneratedOpeningEsql,
 } from '../../utils/get_federated_default_esql_query';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
@@ -282,16 +281,18 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dataView: DataView;
       esqlSource?: EsqlSource;
     }> => {
-      // The logs default, including its @timestamp sort, names columns a dataset does not have.
-      // A saved search or a query the user wrote stays. The generated default does not.
+      // Each solution generates its own FROM. None of those name a dataset, and a
+      // dataset has no @timestamp or startedAt column. A query the user wrote stays.
+      const profileQuery = defaultProfileEsqlQuery?.query;
+      const savedEsql = isOfAggregateQueryType(persistedTab?.serializedSearchSource.query)
+        ? persistedTab?.serializedSearchSource.query.esql
+        : undefined;
       const urlQuery = urlAppState?.query;
       const urlEsql = isOfAggregateQueryType(urlQuery) ? urlQuery.esql : undefined;
-      const urlIsGenerated =
-        isGeneratedEsqlDefault(urlEsql, defaultProfileEsqlQuery?.query) ||
-        isGeneratedTimeSortedEsql(urlEsql);
-      const keepExistingQuery =
-        Boolean(persistedTab?.serializedSearchSource.query) ||
-        (Boolean(urlQuery) && !urlIsGenerated);
+      const savedIsUserQuery =
+        Boolean(savedEsql) && !isGeneratedOpeningEsql(savedEsql, profileQuery);
+      const urlIsUserQuery = Boolean(urlEsql) && !isGeneratedOpeningEsql(urlEsql, profileQuery);
+      const keepExistingQuery = savedIsUserQuery || urlIsUserQuery;
       if (esqlEnabled && !keepExistingQuery) {
         const hasLocalOrRemoteESData = await services.dataViews.hasData
           .hasESData()
@@ -373,9 +374,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // in the address bar would replace the query decided above.
     const urlEsql = isOfAggregateQueryType(urlAppState?.query) ? urlAppState.query.esql : undefined;
     const openingEsql = isOfAggregateQueryType(openingQuery) ? openingQuery.esql : undefined;
-    const urlHoldsGeneratedQuery =
-      isGeneratedEsqlDefault(urlEsql, defaultProfileEsqlQuery?.query) ||
-      isGeneratedTimeSortedEsql(urlEsql);
+    const urlHoldsGeneratedQuery = isGeneratedOpeningEsql(urlEsql, defaultProfileEsqlQuery?.query);
     const overrideUrlQuery = blankEditor || (urlHoldsGeneratedQuery && openingEsql !== urlEsql);
     const {
       query: urlQueryToReplace,

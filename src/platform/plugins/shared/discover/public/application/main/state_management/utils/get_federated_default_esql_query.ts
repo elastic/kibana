@@ -53,3 +53,22 @@ export const isGeneratedEsqlDefault = (
  */
 export const isGeneratedTimeSortedEsql = (esql: string | undefined): boolean =>
   /^FROM [^|]+ \| SORT @timestamp DESC$/.test(esql?.trim() ?? '');
+
+const GENERATED_OPENING_ESQL =
+  /^FROM [^|]+(?: \| SORT \S+ DESC)?(?: \| WHERE \S+ >= \?_tstart AND \S+ <= \?_tend)?$/;
+
+/**
+ * True for a solution's generated opening query: a bare FROM, a time sort, or the
+ * time-field filter Discover adds when the field is not @timestamp.
+ */
+export const isGeneratedOpeningEsql = (
+  esql: string | undefined,
+  profileQuery?: string
+): boolean => {
+  const query = esql?.trim();
+  if (!query) {
+    return false;
+  }
+
+  return isGeneratedEsqlDefault(query, profileQuery) || GENERATED_OPENING_ESQL.test(query);
+};

@@ -595,6 +595,43 @@ describe('DiscoverMainRoute', () => {
     }
   });
 
+  test('replaces another solution default when the only data is a dataset', async () => {
+    const getSettingMock = jest.mocked(discoverServiceMock.uiSettings.get);
+    const getSetting = getSettingMock.getMockImplementation();
+    const getIsEsqlDefaultMock = jest.mocked(
+      discoverServiceMock.discoverFeatureFlags.getIsEsqlDefault
+    );
+    const getIsEsqlDefault = getIsEsqlDefaultMock.getMockImplementation();
+
+    getSettingMock.mockImplementation((key, defaultOverride) => {
+      if (key === ENABLE_ESQL) return true;
+      return getSetting?.(key, defaultOverride);
+    });
+    getIsEsqlDefaultMock.mockImplementation(() => true);
+    jest.mocked(DiscoverMainApp).mockImplementation(() => <OpenedWithoutDataProbe />);
+
+    try {
+      const stateStorageContainer = await createUrlStateWithQuery({
+        esql: 'FROM .workflows-executions-data-stream,.workflows-executions | SORT startedAt DESC | WHERE startedAt >= ?_tstart AND startedAt <= ?_tend',
+      });
+      setupComponent({
+        hasESData: false,
+        hasDataView: true,
+        hasESQLDatasets: true,
+        stateStorageContainer,
+      });
+      await waitForLoad();
+
+      expect(screen.getByTestId('discover-main-app')).toHaveAttribute(
+        'data-esql',
+        'FROM fds_dataset'
+      );
+    } finally {
+      getSettingMock.mockImplementation(getSetting);
+      getIsEsqlDefaultMock.mockImplementation(getIsEsqlDefault);
+    }
+  });
+
   test('keeps the local default query when indices exist', async () => {
     const getSettingMock = jest.mocked(discoverServiceMock.uiSettings.get);
     const getSetting = getSettingMock.getMockImplementation();
