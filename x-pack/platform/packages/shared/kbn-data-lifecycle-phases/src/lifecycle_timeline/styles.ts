@@ -61,6 +61,9 @@ export const getTicksStyles = (euiTheme: EuiThemeComputed, grid: LifecycleTimeli
   firstTickLine: css({
     borderLeft: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
   }),
+  openEndTickLine: css({
+    borderRight: 'none',
+  }),
   tickLabels: css({
     paddingBlock: euiTheme.size.xs,
     whiteSpace: 'nowrap',

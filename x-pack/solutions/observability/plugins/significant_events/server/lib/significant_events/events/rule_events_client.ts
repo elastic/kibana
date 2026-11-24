@@ -21,6 +21,7 @@ import {
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
   operatorFallbackAssessmentNote,
+  severitySyncAssessmentNote,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   SEVERITY_OPTIONS,
@@ -77,6 +78,7 @@ import {
 } from './event_status_change_telemetry';
 import type { SignificantEventActor } from '../../telemetry/ebt';
 import { toRuleEvent } from './to_rule_event';
+import { getSignalCollectedAt } from './signal_collected_at';
 
 /** Alerting v2 rejects `activate` / `deactivate` of a superseded episode with this code; it is not exported by a package. */
 const ALERT_NOT_LATEST_CODE = 'ALERT_NOT_LATEST';
@@ -97,6 +99,20 @@ const getAlertActionErrorCode = (error: unknown): string | undefined => {
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
+
+const SYNC_SEVERITY_MAX_RETRIES = 2;
+
+const SORT_RANK_COLUMN = 'sort_rank';
+
+/** ES|QL's maximum result size; an episode lookup that reaches it throws rather than drop pairs. */
+const MAX_EPISODE_PAIRS = 10_000;
+
+const assertEpisodePairsComplete = <T>(rows: T[]): T[] => {
+  if (rows.length >= MAX_EPISODE_PAIRS) {
+    throw new Error(`Episode lookup reached ${MAX_EPISODE_PAIRS} event-episode pairs`);
+  }
+  return rows;
+};
 
 export interface CreateEventResult {
   groupHash: string;
@@ -366,8 +382,6 @@ const withInvestigationState = (
   }
   return query.pipe`EVAL ${stateCol} = ${notStarted}`;
 };
-
-const SORT_RANK_COLUMN = 'sort_rank';
 
 /** Orders the latest revisions for the paginated list; ties fall back to newest first. */
 const applySort = (
@@ -930,7 +944,7 @@ export class RuleEventsClient {
             verdict: signal.verdict,
             esqlQuery: signal.evidence?.esql_query,
             evidenceFound: signal.evidence?.result === 'found',
-            verifiedAt: signal.collected_at,
+            verifiedAt: getSignalCollectedAt(signal),
             createdAt: row.created_at,
             sourceIds: event.source_ids,
             eventTitle: event.title,
@@ -1037,6 +1051,26 @@ export class RuleEventsClient {
   }
 
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {
+    const latest = await this.findLatestWithEpisodeByEventIds(eventIds);
+    return new Map([...latest].map(([eventId, { event }]) => [eventId, event]));
+  }
+
+  /**
+   * The episode (`alert.id`) of each event's latest version: its current episode. An event whose
+   * latest version has no episode id is absent.
+   */
+  async findCurrentEpisodeIdsByEventIds(eventIds: string[]): Promise<Map<string, string>> {
+    const latest = await this.findLatestWithEpisodeByEventIds(eventIds);
+    const episodeIds = new Map<string, string>();
+    latest.forEach(({ episodeId }, eventId) => {
+      if (episodeId) episodeIds.set(eventId, episodeId);
+    });
+    return episodeIds;
+  }
+
+  private async findLatestWithEpisodeByEventIds(
+    eventIds: string[]
+  ): Promise<Map<string, { event: SignificantEvent; episodeId?: string }>> {
     if (!eventIds.length) return new Map();
 
     let query = buildBaseQuery(this.clients.space).where`${eventIdIn(eventIds)}`;
@@ -1049,11 +1083,95 @@ export class RuleEventsClient {
       fields: ['data_json'],
     });
 
-    const map = new Map<string, SignificantEvent>();
-    for (const event of hits.map(decodeSignificantEvent)) {
-      if (event.event_id) map.set(event.event_id, event);
+    const map = new Map<string, { event: SignificantEvent; episodeId?: string }>();
+    for (const row of hits) {
+      const event = decodeSignificantEvent(row);
+      if (event.event_id) {
+        map.set(event.event_id, {
+          event,
+          ...(row.alert?.id !== undefined ? { episodeId: row.alert.id } : {}),
+        });
+      }
     }
     return map;
+  }
+
+  /** The event ids that have carried each episode (`alert.id`). Unknown episodes are absent. */
+  async findEventIdsByEpisodeIds(episodeIds: string[]): Promise<Map<string, string[]>> {
+    const eventIdsByEpisode = new Map<string, string[]>();
+    if (!episodeIds.length) return eventIdsByEpisode;
+
+    const query = buildBaseQuery(this.clients.space).where`${esql.col(
+      'alert.id'
+    )} IN (${episodeIds.map((id) => esql.str(id))})`.pipe`EVAL ${esql.col(
+      'episode_id'
+    )} = ${esql.col('alert.id')}, ${esql.col('event_id')} = FIELD_EXTRACT(${esql.col(
+      'data'
+    )}, ${esql.str('event_id')})`.pipe`STATS n = COUNT(*) BY ${esql.col('episode_id')}, ${esql.col(
+      'event_id'
+    )}`.limit(MAX_EPISODE_PAIRS);
+
+    try {
+      const rows = assertEpisodePairsComplete(
+        esqlToObjects<{ episode_id: string; event_id: string }>(
+          await queryEsql({ esClient: this.clients.esClient, query })
+        )
+      );
+      for (const { episode_id: episodeId, event_id: eventId } of rows) {
+        if (!episodeId || !eventId) continue;
+        eventIdsByEpisode.set(episodeId, [...(eventIdsByEpisode.get(episodeId) ?? []), eventId]);
+      }
+      return eventIdsByEpisode;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) return eventIdsByEpisode;
+      throw error;
+    }
+  }
+
+  /**
+   * Writes a severity as a new version through the head guard, retrying a head moved by another
+   * change. A head whose severity another writer changed is left alone: that writer resolved it later.
+   * A closed event is left alone too: a new version would move its close time and replace its closing
+   * note, which Discovery's reuse of closed series reads. So is an event whose head is on another
+   * episode than the one given.
+   */
+  async syncSeverity({
+    eventId,
+    severity,
+    episodeId,
+  }: {
+    eventId: string;
+    severity: Severity;
+    /** The episode the severity was concluded for; a head on another episode is left alone. */
+    episodeId: string;
+  }): Promise<'updated' | 'unchanged' | 'superseded' | 'not_found' | 'closed'> {
+    let firstSeverity: Severity | undefined;
+    for (let attempt = 0; attempt <= SYNC_SEVERITY_MAX_RETRIES; attempt++) {
+      const head = (await this.findLatestWithEpisodeByEventIds([eventId])).get(eventId);
+      if (!head) return 'not_found';
+      const { event: latest } = head;
+      // A reopen can land between the investigation read and this write: its severity is not ours.
+      if (head.episodeId !== episodeId) return 'superseded';
+      if (latest.severity === severity) return 'unchanged';
+      if (latest.status === ALERT_EPISODE_STATUS.INACTIVE) return 'closed';
+      firstSeverity ??= latest.severity;
+      if (latest.severity !== firstSeverity) return 'superseded';
+      const written = await this.updateEvent({
+        // No workflow writes this version, so it must not keep the prior version's producer.
+        event: {
+          ...latest,
+          '@timestamp': new Date().toISOString(),
+          severity,
+          assessment_note: severitySyncAssessmentNote(severity),
+          workflow_execution_id: undefined,
+        },
+        prior: latest,
+        // The status stays as it is, so the write reports no status change.
+        origin: { actor: 'agent_tool' },
+      });
+      if (written.updated) return 'updated';
+    }
+    return 'superseded';
   }
 
   /** Writes the first version of an event; unguarded, as there is no prior version to compare. */
@@ -1180,7 +1298,7 @@ export class RuleEventsClient {
     assessmentNote?: string;
     origin: WriteOrigin;
   }): Promise<UpdateEventStatusResult> {
-    const { getAlertActionsClient, emitTrigger, telemetry, logger, space } = this.clients;
+    const { getAlertActionsClient, emitTrigger, telemetry, space } = this.clients;
     if (!getAlertActionsClient) {
       throw new Error(
         'RuleEventsClient was created without an alert actions client, so it cannot apply an operator change'
@@ -1222,7 +1340,6 @@ export class RuleEventsClient {
     });
     reportEventStatusChange({
       telemetry,
-      logger,
       event,
       prior: latest,
       origin,
@@ -1240,7 +1357,7 @@ export class RuleEventsClient {
     prior?: SignificantEvent;
     origin: WriteOrigin;
   }): Promise<CreateAlertEventResponse> {
-    const { getAlertEventsClient, emitTrigger, telemetry, logger, space } = this.clients;
+    const { getAlertEventsClient, emitTrigger, telemetry, space } = this.clients;
     if (!getAlertEventsClient) {
       throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
     }
@@ -1253,7 +1370,7 @@ export class RuleEventsClient {
       significantEvent: event,
       priorSignificantEvent: prior,
     });
-    reportEventStatusChange({ telemetry, logger, event, prior, origin, spaceId: space });
+    reportEventStatusChange({ telemetry, event, prior, origin, spaceId: space });
     return response;
   }
 }

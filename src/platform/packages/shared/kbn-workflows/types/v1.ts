@@ -15,8 +15,9 @@ import {
   HUMAN_READABLE_ID_PATTERN,
 } from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
+import { WORKFLOW_TEMPLATE_ORIGINS } from '../common/constants';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
@@ -157,6 +158,11 @@ export interface EsWorkflowExecution {
   billable?: boolean | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
+  /** Workflow document lifetime. Absent for a test run that has no saved workflow. */
+  workflowUid?: string;
   isTestRun: boolean;
   /** Whether the test uses a submitted definition instead of the saved workflow. */
   isEphemeral?: boolean;
@@ -241,6 +247,8 @@ export interface EsWorkflowStepExecution {
   scopeStack: StackFrame[];
   workflowRunId: string;
   workflowId: string;
+  /** Workflow document lifetime copied from the execution. Absent when the run has no saved workflow. */
+  workflowUid?: string;
   status: ExecutionStatus;
   /** Whether this step execution belongs to a test run of the workflow. */
   isTestRun?: boolean;
@@ -382,28 +390,38 @@ export interface WorkflowStepExecutionListDto {
 
 // TODO: convert to actual elastic document spec
 
-export const EsWorkflowSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  enabled: z.boolean(),
-  managed: z.boolean().optional(),
-  managedBy: z.string().nullable().optional(),
-  billable: z.boolean().nullable().optional(),
-  originManagedWorkflowId: z.string().nullable().optional(),
-  managedVersion: z.number().nullable().optional(),
-  tags: z.array(z.string()),
-  createdAt: z.date(),
-  createdBy: z.string(),
-  lastUpdatedAt: z.date(),
-  lastUpdatedBy: z.string(),
-  definition: WorkflowSchema.optional(),
-  deleted_at: z.date().nullable().default(null),
-  yaml: z.string(),
-  valid: z.boolean().readonly(),
-  /** Monotonic workflow document version counter (`_source.version`). */
-  version: z.number().optional(),
-});
+export const WorkflowTemplateOriginSchema = lazySchema(() => z.enum(WORKFLOW_TEMPLATE_ORIGINS));
+export type WorkflowTemplateOrigin = z.infer<typeof WorkflowTemplateOriginSchema>;
+
+export const EsWorkflowSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    enabled: z.boolean(),
+    managed: z.boolean().optional(),
+    managedBy: z.string().nullable().optional(),
+    billable: z.boolean().nullable().optional(),
+    originManagedWorkflowId: z.string().nullable().optional(),
+    managedVersion: z.number().nullable().optional(),
+    /** Workflow Template library slug, or `custom` for a template outside the catalog. */
+    templateSlug: z.string().nullable().optional(),
+    templateVersion: z.string().nullable().optional(),
+    templateOrigin: WorkflowTemplateOriginSchema.nullable().optional(),
+    workflowUid: z.string().optional(),
+    tags: z.array(z.string()),
+    createdAt: z.date(),
+    createdBy: z.string(),
+    lastUpdatedAt: z.date(),
+    lastUpdatedBy: z.string(),
+    definition: WorkflowSchema.optional(),
+    deleted_at: z.date().nullable().default(null),
+    yaml: z.string(),
+    valid: z.boolean().readonly(),
+    /** Monotonic workflow document version counter (`_source.version`). */
+    version: z.number().optional(),
+  })
+);
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
 
@@ -510,6 +528,10 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   definitionHash?: string | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
+  workflowUid?: string;
   lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
   createdBy: string;
@@ -540,6 +562,9 @@ export interface WorkflowListItemDto extends WorkflowAccessSubject {
   enabled: boolean;
   managed?: boolean;
   managedBy?: string | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
   definition: WorkflowYaml | null;
   createdAt: string;
   history?: WorkflowExecutionHistoryModel[];
@@ -566,7 +591,11 @@ export interface WorkflowExecutionEngineModel
     | 'billable'
     | 'originManagedWorkflowId'
     | 'managedVersion'
+    | 'templateSlug'
+    | 'templateVersion'
+    | 'templateOrigin'
     | 'version'
+    | 'workflowUid'
   > {
   isTestRun?: boolean;
   isEphemeral?: boolean;

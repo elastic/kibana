@@ -7,15 +7,15 @@
 
 import { context, propagation } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from './baggage';
 import { isInferenceSpan } from './is_inference_span';
+import type { Span } from '@opentelemetry/sdk-trace';
 
-function createSpan(scopeName: string): tracing.Span {
+function createSpan(scopeName: string): Span {
   const span = {
     instrumentationScope: { name: scopeName },
   };
-  return span as tracing.Span;
+  return span as Span;
 }
 
 describe('isInferenceSpan', () => {

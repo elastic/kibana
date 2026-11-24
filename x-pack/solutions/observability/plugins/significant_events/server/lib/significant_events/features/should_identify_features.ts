@@ -21,6 +21,10 @@ export async function shouldIdentifyFeatures({
   sourceId: string;
   thresholdHours: number;
 }): Promise<ShouldIdentifyFeaturesResult> {
+  if (thresholdHours <= 0) {
+    return { shouldIdentify: true };
+  }
+
   const inferred = await kiClient.getLatestRevisionTimestamp(sourceId, {
     types: [...INFERRED_FEATURE_TYPES],
   });

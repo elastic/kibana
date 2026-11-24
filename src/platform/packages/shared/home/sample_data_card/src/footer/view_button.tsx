@@ -68,7 +68,7 @@ export const ViewButton = ({ id, name, overviewDashboard, appLinks }: Props) => 
   const dashboardAppLink = {
     path: dashboardPath,
     label: dashboardLabel,
-    icon: 'dashboardApp',
+    icon: 'productDashboard',
     order: 0,
     'data-test-subj': `viewSampleDataSet${id}-dashboard`,
   };

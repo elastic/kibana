@@ -19,6 +19,8 @@
       "management",
       "features"
     ],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

@@ -5,47 +5,15 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout-security';
 import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { apiTest, type ProtectedEndpointPolicy } from '../fixtures';
-import { getUninstallToken, readAgent, reassignAgent } from '../fixtures/fleet_agent';
+import { apiTest } from '../fixtures';
+import { getUninstallToken, reassignAgent, waitForAgentOnPolicy } from '../fixtures/fleet_agent';
 import { getElasticInstallState, uninstallAgent } from '../fixtures/host_agent_commands';
 
-const AGENT_POLICY_TIMEOUT_MS = 120_000;
 const TEST_TIMEOUT_MS = 15 * 60 * 1000;
 const INVALID_TOKEN_MESSAGE = 'Invalid uninstall token';
 const UNINSTALLED_MESSAGE = 'Elastic Agent has been uninstalled';
-
-const waitForAgentOnPolicy = async (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>,
-  agentId: string,
-  { agentPolicyId, revision }: ProtectedEndpointPolicy
-): Promise<void> => {
-  await expect
-    .poll(
-      async () => {
-        const { statusCode, body } = await readAgent(apiClient, headers, agentId);
-        if (statusCode !== 200) {
-          return `status ${statusCode}: ${JSON.stringify(body)}`;
-        }
-
-        const { policy_id: policyId, policy_revision: policyRevision, status } = body.item;
-        return {
-          policyId,
-          revisionApplied: (policyRevision ?? 0) >= revision,
-          updating: status === 'updating',
-        };
-      },
-      {
-        message: `agent ${agentId} reports policy ${agentPolicyId} at revision ${revision} or later`,
-        timeout: AGENT_POLICY_TIMEOUT_MS,
-        intervals: [5_000],
-      }
-    )
-    .toStrictEqual({ policyId: agentPolicyId, revisionApplied: true, updating: false });
-};
 
 apiTest.describe(
   'Uninstall an agent moved between two tamper protected policies',
@@ -68,9 +36,9 @@ apiTest.describe(
 
     apiTest(
       'rejects the previous policy uninstall token and accepts the new one',
-      async ({ apiClient, log, protectedPolicies, enrolledHost }) => {
+      async ({ apiClient, log, agentPolicies, enrolledHost }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
-        const { first, second } = protectedPolicies;
+        const { first, second } = agentPolicies;
         const { agentId, hostname } = enrolledHost;
 
         await apiTest.step('the agent applies the first protected policy', async () => {

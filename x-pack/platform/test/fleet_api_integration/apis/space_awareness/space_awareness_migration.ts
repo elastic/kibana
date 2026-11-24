@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/server/constants';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -20,6 +21,9 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
+  // A policy whose `overrides` were saved before the OpenTelemetry collector keys were denied.
+  let policyWithStoredDeniedOverridesId: string;
+  const STORED_DENIED_OVERRIDES = { receivers: { otlp: {} } };
 
   describe('space awareness migration', function () {
     skipIfNoDockerRegistry(providerContext);
@@ -41,11 +45,12 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       // Create agent policies it should create a enrollment key for every keys
-      const [defaultSpacePolicy1, spaceTest1Policy1] = await Promise.all([
-        apiClient.createAgentPolicy(),
-        apiClient.createAgentPolicy(TEST_SPACE_1),
-        apiClient.createAgentPolicy(TEST_SPACE_1),
-      ]);
+      const [defaultSpacePolicy1, spaceTest1Policy1, spaceTest1PolicyWithoutPackages] =
+        await Promise.all([
+          apiClient.createAgentPolicy(),
+          apiClient.createAgentPolicy(TEST_SPACE_1),
+          apiClient.createAgentPolicy(TEST_SPACE_1),
+        ]);
 
       await apiClient.installPackage({
         pkgName: 'nginx',
@@ -73,6 +78,15 @@ export default function (providerContext: FtrProviderContext) {
           version: '1.20.0',
         },
         inputs: {},
+      });
+
+      // The API rejects these keys now, so write them to the legacy saved object directly.
+      policyWithStoredDeniedOverridesId = spaceTest1PolicyWithoutPackages.item.id;
+      await esClient.update({
+        index: INGEST_SAVED_OBJECT_INDEX,
+        id: `ingest-agent-policies:${policyWithStoredDeniedOverridesId}`,
+        doc: { 'ingest-agent-policies': { overrides: STORED_DENIED_OVERRIDES } },
+        refresh: 'wait_for',
       });
 
       await createTestSpace(providerContext, TEST_SPACE_1);
@@ -130,6 +144,17 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(policiesDefaultSpaceIds.length).to.eql(3);
         expect(policiesTestSpaceIds.length).to.eql(0);
+      });
+
+      it('should migrate a policy with overrides saved before OpenTelemetry collector keys were denied', async () => {
+        const settings = await apiClient.getSettings();
+        expect(settings.item.use_space_awareness_migration_status).to.eql('success');
+
+        const policy = await apiClient.getAgentPolicy(policyWithStoredDeniedOverridesId);
+        // The stored value is kept as is. Agents never get it: denied keys are stripped when the full
+        // agent policy is built (covered in apis/agent_policy/agent_policy_overrides.ts, as this
+        // suite has no default output to build one).
+        expect(policy.item.overrides).to.eql(STORED_DENIED_OVERRIDES);
       });
 
       it('enrollment api keys should be available', async () => {

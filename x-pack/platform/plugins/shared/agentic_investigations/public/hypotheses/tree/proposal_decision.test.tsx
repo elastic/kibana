@@ -129,7 +129,10 @@ describe('ProposalDecision', () => {
   it('disables the decision without the decide capability', () => {
     setup({ canDecide: false });
 
-    expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-confirm')).toBeDisabled();
+    expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-confirm')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it('says so when the proposal cannot be read', () => {

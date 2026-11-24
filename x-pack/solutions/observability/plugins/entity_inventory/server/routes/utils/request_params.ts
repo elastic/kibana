@@ -27,3 +27,15 @@ export const dateRangeRefinement = {
   message: 'from must be earlier than to',
   path: ['to'],
 };
+
+// The body of `_list` and `_plan`, shared so the two routes accept exactly the same requests.
+export const listRequestBodySchema = lazySchema(() =>
+  z
+    .object({
+      from: instantParam,
+      to: instantParam,
+      limit: listLimitParam,
+    })
+    .strict()
+    .refine(isFromEarlierThanTo, dateRangeRefinement)
+);

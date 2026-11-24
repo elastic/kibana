@@ -93,6 +93,7 @@ describe('DestinationsGrid', () => {
         resolvedIndicesByDestination={new Map()}
         resolvedIndicesStatus="ready"
         destinationDetailRefs={new Map()}
+        sourceConnectedDestinationIds={new Set()}
         onShowDestinationDetail={jest.fn()}
         onHideDestinationDetail={jest.fn()}
         hasActiveFilters={false}

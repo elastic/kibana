@@ -135,6 +135,48 @@ describe('Top Values Transforms', () => {
       expect(result.params.exclude).toEqual([22, 23, 53]);
     });
 
+    it('should not store includes and excludes with empty values', () => {
+      const result = fromTermsLensApiToLensState(
+        buildTermsApiOperation({
+          includes: { as_regex: true, values: [] },
+          excludes: { as_regex: true, values: [] },
+        }),
+        getMetricColumnIdByIndex
+      );
+      expect(result.params).not.toHaveProperty('include');
+      expect(result.params).not.toHaveProperty('includeIsRegex');
+      expect(result.params).not.toHaveProperty('exclude');
+      expect(result.params).not.toHaveProperty('excludeIsRegex');
+    });
+
+    it('should store includes when excludes has empty values', () => {
+      const onlyIncludes = fromTermsLensApiToLensState(
+        buildTermsApiOperation({
+          includes: { as_regex: true, values: ['active'] },
+          excludes: { as_regex: true, values: [] },
+        }),
+        getMetricColumnIdByIndex
+      );
+      expect(onlyIncludes.params.include).toEqual(['active']);
+      expect(onlyIncludes.params.includeIsRegex).toBe(true);
+      expect(onlyIncludes.params).not.toHaveProperty('exclude');
+      expect(onlyIncludes.params).not.toHaveProperty('excludeIsRegex');
+    });
+
+    it('should store excludes when includes has empty values', () => {
+      const onlyExcludes = fromTermsLensApiToLensState(
+        buildTermsApiOperation({
+          includes: { as_regex: true, values: [] },
+          excludes: { as_regex: false, values: ['inactive'] },
+        }),
+        getMetricColumnIdByIndex
+      );
+      expect(onlyExcludes.params.exclude).toEqual(['inactive']);
+      expect(onlyExcludes.params.excludeIsRegex).toBe(false);
+      expect(onlyExcludes.params).not.toHaveProperty('include');
+      expect(onlyExcludes.params).not.toHaveProperty('includeIsRegex');
+    });
+
     it('should handle orderBy column type', () => {
       const result = fromTermsLensApiToLensState(
         buildTermsApiOperation({ rank_by: { type: 'metric', metric_index: 0, direction: 'desc' } }),

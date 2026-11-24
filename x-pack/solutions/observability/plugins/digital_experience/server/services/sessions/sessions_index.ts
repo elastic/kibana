@@ -10,7 +10,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { CORE_WEB_VITALS, type CoreWebVital } from '../../../common/core_web_vitals';
 import {
-  SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
   SESSIONS_MANAGED_BY,
@@ -18,11 +17,12 @@ import {
 } from '../../../common/sessions';
 
 // `managed` makes the Index Management UI warn before editing or deleting these.
-export const SESSIONS_META = {
+export const sessionsMetaOf = (version: number) => ({
   managed: true,
   managed_by: SESSIONS_MANAGED_BY,
-  version: SESSIONS_VERSION,
-};
+  version,
+});
+export const SESSIONS_META = sessionsMetaOf(SESSIONS_VERSION);
 
 export interface WebVitalSamples {
   count: number;
@@ -46,6 +46,11 @@ export interface SessionDocument {
   click_count: number;
   /** `exception` events, as the applications list counts JS errors. */
   js_error_count: number;
+  /**
+   * The p75 of the page loads' load event end in milliseconds, and how many page loads reported
+   * one, as the Overview's load time reads them.
+   */
+  load_time: { p75: number | null; count: number };
   /** HTTP requests the browser made with a known outcome, and the failed ones. */
   http_request_count: number;
   http_failed_request_count: number;
@@ -84,8 +89,8 @@ export interface SessionDocument {
  */
 const MAX_KEYWORD_LENGTH = 1024;
 
-const keyword = { type: 'keyword', ignore_above: MAX_KEYWORD_LENGTH } as const;
-const count = { type: 'long' } as const;
+export const keyword = { type: 'keyword', ignore_above: MAX_KEYWORD_LENGTH } as const;
+export const count = { type: 'long' } as const;
 
 export const sessionsIndexMappings = {
   dynamic: false,
@@ -100,6 +105,7 @@ export const sessionsIndexMappings = {
     page_load_count: count,
     click_count: count,
     js_error_count: count,
+    load_time: { properties: { p75: { type: 'double' }, count } },
     http_request_count: count,
     http_failed_request_count: count,
     bounced: { type: 'boolean' },
@@ -145,27 +151,36 @@ export const sessionsIndexTemplate: IndicesPutIndexTemplateRequest = {
   },
 };
 
+/** A platform's sessions index of this version, and the template it is created from. */
+export interface SessionsIndex {
+  index: string;
+  indexTemplate: IndicesPutIndexTemplateRequest;
+}
+
 /** Puts the index template. Kibana's internal user owns it, as no user needs to manage templates. */
 export const putSessionsIndexTemplate = async (
   internalClient: ElasticsearchClient,
+  { indexTemplate }: SessionsIndex,
   signal?: AbortSignal
 ): Promise<void> => {
-  await internalClient.indices.putIndexTemplate(sessionsIndexTemplate, { signal });
+  await internalClient.indices.putIndexTemplate(indexTemplate, { signal });
 };
 
 /** Whether the sessions index of this version exists. */
 export const sessionsIndexExists = async (
   client: ElasticsearchClient,
+  { index }: SessionsIndex,
   signal?: AbortSignal
-): Promise<boolean> => client.indices.exists({ index: SESSIONS_INDEX }, { signal });
+): Promise<boolean> => client.indices.exists({ index }, { signal });
 
 /** Creates the sessions index of this version unless it exists; true when it was created. */
 export const createSessionsIndex = async (
   client: ElasticsearchClient,
+  { index }: SessionsIndex,
   signal?: AbortSignal
 ): Promise<boolean> => {
   try {
-    await client.indices.create({ index: SESSIONS_INDEX }, { signal });
+    await client.indices.create({ index }, { signal });
     return true;
   } catch (error) {
     if (isResponseError(error) && error.body?.error?.type === 'resource_already_exists_exception') {

@@ -34,17 +34,18 @@ describe('source_get tool', () => {
     source: string;
   }) => {
     const get = jest.fn().mockResolvedValue({ source: checkout, health: 'view_drift' });
-    const tool = createSourceGetTool({
-      ...createSourceToolDeps({
-        featurePrivilege,
-        sourcesClient: {
-          list: jest.fn().mockResolvedValue({ sources: [checkout], total: 1 }),
-          get,
-        },
-      }),
+    const deps = createSourceToolDeps({
+      featurePrivilege,
+      sourcesClient: {
+        list: jest.fn().mockResolvedValue({ sources: [checkout], total: 1 }),
+        get,
+      },
     });
-    const result = await tool.handler({ source }, createMockToolContext());
-    return { result, get };
+    const tool = createSourceGetTool(deps);
+    const context = createMockToolContext();
+    context.runContext.stack = [{ type: 'agent', agentId: 'acme-prod-oncall' }];
+    const result = await tool.handler({ source }, context);
+    return { result, get, logger: deps.logger, telemetry: deps.telemetry };
   };
 
   beforeEach(() => {
@@ -97,5 +98,27 @@ describe('source_get tool', () => {
         },
       ],
     });
+  });
+
+  it('reports an unknown source as a refused call, not as an error', async () => {
+    const { logger, telemetry } = await getSourceAs({
+      featurePrivilege: 'read',
+      source: 'missing',
+    });
+
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'observability.nightshift.source_get refused the call: unknown_source'
+    );
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool_id: 'observability.nightshift.source_get',
+        error_code: 'unknown_source',
+        input_rejected: true,
+        agent_id: expect.stringMatching(/^custom-[0-9a-f]{16}$/),
+        unresolved_count: 1,
+      }),
+      expect.anything()
+    );
   });
 });
