@@ -18,6 +18,7 @@ import {
 } from '.';
 import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
 import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
+import { DISCOVER_LINK_TOOL_ID } from '../../tools/discover_link/tool';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -71,6 +72,7 @@ describe('Nightshift investigation agent type', () => {
       TIME_CONVERTER_TOOL_ID,
       platformSignificantEventsTools.searchEvent,
       SLACK_READ_TOOL_ID,
+      DISCOVER_LINK_TOOL_ID,
     ]);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeConnectorSubAction);
@@ -216,6 +218,7 @@ describe('Nightshift investigation agent type', () => {
       TIME_CONVERTER_TOOL_ID,
       platformSignificantEventsTools.searchEvent,
       SLACK_READ_TOOL_ID,
+      DISCOVER_LINK_TOOL_ID,
     ]);
   });
 
@@ -240,6 +243,7 @@ describe('Nightshift investigation agent type', () => {
       TIME_CONVERTER_TOOL_ID,
       platformSignificantEventsTools.searchEvent,
       SLACK_READ_TOOL_ID,
+      DISCOVER_LINK_TOOL_ID,
     ]);
   });
 

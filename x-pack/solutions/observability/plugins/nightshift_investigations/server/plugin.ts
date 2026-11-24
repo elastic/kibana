@@ -21,6 +21,7 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
 import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
@@ -113,6 +114,8 @@ import { registerAssistantAgentType } from './agents/assistant';
 import { getInvestigatorConnectorIds } from './agents/assistant/inherited_connectors';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createTimeConverterTool } from './tools/time_converter/tool';
+import type { DiscoverLinkLocatorParams } from './tools/discover_link/tool';
+import { createDiscoverLinkTool } from './tools/discover_link/tool';
 import { createSlackReadTool } from './tools/slack_read/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
@@ -476,6 +479,13 @@ export class NightshiftInvestigationsPlugin
         });
       }
       plugins.agentBuilder.tools.register(createTimeConverterTool());
+      plugins.agentBuilder.tools.register(
+        createDiscoverLinkTool({
+          getDiscoverLocator: () =>
+            plugins.share.url.locators.get<DiscoverLinkLocatorParams>(DISCOVER_APP_LOCATOR),
+          getKibanaUrl: () => core.http.basePath.publicBaseUrl ?? plugins.cloud?.kibanaUrl,
+        })
+      );
       const sandboxToolAvailability = createSandboxToolAvailability({
         getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
       });

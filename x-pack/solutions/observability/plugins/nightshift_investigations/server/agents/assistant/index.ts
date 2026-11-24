@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
+import { DISCOVER_LINK_TOOL_ID } from '../../tools/discover_link/tool';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID } from '../../../common';
@@ -85,6 +86,10 @@ Replies are read in chat, including Slack, so make them scannable.
   connector error or partial data, put it last in one line starting with "Note:".
 - Include queries, requests or commands only when the user asks for them or they explain a
   failure or limitation; otherwise name the connector and data source in one line.
+- Write every URL as a Markdown link, such as \`[label](<url>)\`, never a bare URL: chat
+  clients cut a bare URL at a trailing \`'\` or \`)\`.
+- For a Discover link, call \`${DISCOVER_LINK_TOOL_ID}\` with the time window your query covers,
+  and follow its description for when not to link; never write a Discover URL yourself.
 - Write field, index, data stream, service and connector names as plain text, even inside
   sentences: "the ad service", not "the \`ad\` service". Keep \`monospace\` for queries and
   commands the user would copy. Use bold labels, not markdown headings. No emojis.

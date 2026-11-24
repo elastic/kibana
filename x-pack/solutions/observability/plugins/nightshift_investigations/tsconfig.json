@@ -90,6 +90,7 @@
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
     "@kbn/setup-node-env",
-    "@kbn/user-profile-components"
+    "@kbn/user-profile-components",
+    "@kbn/deeplinks-analytics"
   ]
 }

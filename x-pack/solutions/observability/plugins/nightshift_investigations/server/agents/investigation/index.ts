@@ -29,6 +29,7 @@ import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
 import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
 import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
+import { DISCOVER_LINK_TOOL_ID } from '../../tools/discover_link/tool';
 import knowledgeWikiSection from './instructions/knowledge_wiki.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
@@ -232,6 +233,7 @@ export const buildNightshiftAgentConfiguration = ({
             // No Slack auth type hands credentials to the sandbox, and the Elastic Slack app's
             // token never leaves the Relay, so the agent reads Slack through a tool.
             SLACK_READ_TOOL_ID,
+            DISCOVER_LINK_TOOL_ID,
           ],
         },
       ],

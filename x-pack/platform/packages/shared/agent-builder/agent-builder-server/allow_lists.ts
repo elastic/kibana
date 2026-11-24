@@ -147,6 +147,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Nightshift – Investigation
   'nightshift_time_converter_tool',
+  'nightshift_discover_link',
   `${internalNamespaces.platformNightshift}.slack_read`,
 
   // Nightshift – Decision trees
