@@ -23,7 +23,7 @@ const createStep = (type: string) =>
     description: type,
     paramsSchema: z.object({}),
     outputSchema: z.object({}),
-  } as unknown as ConnectorContractUnion);
+  }) as unknown as ConnectorContractUnion;
 
 const deps = {
   api: {

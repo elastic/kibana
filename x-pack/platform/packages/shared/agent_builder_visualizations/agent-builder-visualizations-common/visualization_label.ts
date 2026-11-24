@@ -21,9 +21,9 @@ const nonEmptyString = (value: unknown): string | undefined =>
 /** The readable name of a dimension: its label, else its ES|QL column alias, else its field. */
 const columnLabel = (reference: unknown): string | undefined =>
   isRecord(reference)
-    ? nonEmptyString(reference.label) ??
+    ? (nonEmptyString(reference.label) ??
       nonEmptyString(reference.column) ??
-      nonEmptyString(reference.field)
+      nonEmptyString(reference.field))
     : undefined;
 
 const firstColumnLabel = (
@@ -56,7 +56,7 @@ export const getLensConfigLabel = (config: UnknownRecord): string | undefined =>
       );
     case 'xy': {
       const layer = firstRecord(config.layers);
-      return layer ? firstColumnLabel(layer.y) ?? columnLabel(layer.x) : undefined;
+      return layer ? (firstColumnLabel(layer.y) ?? columnLabel(layer.x)) : undefined;
     }
     case 'pie':
     case 'treemap':

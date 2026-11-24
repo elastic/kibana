@@ -344,8 +344,8 @@ const createReportFidelityEvaluator = (deps: JudgeDeps): InvestigationEvaluator 
       label: faithful
         ? 'faithful'
         : unsupported.length > 0
-        ? 'unsupported_cause'
-        : 'verdict_changed',
+          ? 'unsupported_cause'
+          : 'verdict_changed',
       explanation: String(result.reasoning ?? ''),
       metadata: { unsupported_causes: unsupported, verdict_preserved: result.verdict_preserved },
     };

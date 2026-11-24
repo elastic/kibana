@@ -189,7 +189,7 @@ describe('getRunningProcessesTool', () => {
       ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
     })) as unknown as EndpointAppContextService['getInternalFleetServices'];
     service.getInternalResponseActionsClient = jest.fn(
-      () => ({ runningProcesses } as never)
+      () => ({ runningProcesses }) as never
     ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
     const result = await getRunningProcessesTool(service).handler(

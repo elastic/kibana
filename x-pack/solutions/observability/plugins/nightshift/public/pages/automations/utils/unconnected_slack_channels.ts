@@ -36,7 +36,7 @@ export const getUnconnectedSlackChannels = (
   rows: TriggerRowLike[],
   connected: UseAllRelayAppBindings
 ): string[] => {
-  const channels = rows.flatMap((row) => (row.kind === 'slack' ? row.channels ?? [] : []));
+  const channels = rows.flatMap((row) => (row.kind === 'slack' ? (row.channels ?? []) : []));
   return [...new Set(findUnconnectedChannels(channels, connected))];
 };
 

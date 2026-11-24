@@ -18,7 +18,7 @@ import type { connectorEventSchema } from './connector_event_schema';
  */
 export interface ConnectorEventTopicDefinition<
   TSchema extends z.ZodObject = z.ZodObject,
-  TName extends string = string
+  TName extends string = string,
 > {
   readonly name: TName;
   readonly eventSchema: TSchema;

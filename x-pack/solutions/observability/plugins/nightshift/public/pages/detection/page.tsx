@@ -255,9 +255,9 @@ export const DetectionPage = ({
               <div
                 css={css`
                   flex: ${view.sourceCreation === 'enabled' ? '0 1 auto' : '1 1 auto'};
-                  max-block-size: ${view.sourceCreation === 'enabled' && !isMobile
-                    ? '40vh'
-                    : 'none'};
+                  max-block-size: ${
+                    view.sourceCreation === 'enabled' && !isMobile ? '40vh' : 'none'
+                  };
                   min-height: 0;
                   ${isMobile ? '' : 'overflow: auto;'}
                   margin-block-end: ${view.sourceCreation === 'enabled' ? euiTheme.size.m : 0};

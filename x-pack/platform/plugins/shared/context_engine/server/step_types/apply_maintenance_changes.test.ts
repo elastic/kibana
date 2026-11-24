@@ -70,7 +70,7 @@ describe('getApplyMaintenanceChangesStepDefinition', () => {
       getAiIndexService: () =>
         ({
           get: jest.fn().mockResolvedValue({ id: 'support', dest, managed: false, dreaming }),
-        } as unknown as AiIndexService),
+        }) as unknown as AiIndexService,
       isContextEngineEnabled: async () => true,
       isDreamingAvailable: async () => dreamingAvailable,
       checkWritePrivilege: async () => true,

@@ -244,14 +244,14 @@ describe('FrustrationPanel', () => {
   });
 
   describe('pagination', () => {
-    const manyElements = Array.from(
-      { length: 7 },
-      (_, index): FrustratedElement => ({ ...ELEMENTS[0], cssSelector: `#button-${index}` })
-    );
-    const manyPages = Array.from(
-      { length: 6 },
-      (_, index): FrustratedPage => ({ ...PAGES[0], page: `/page-${index}` })
-    );
+    const manyElements = Array.from({ length: 7 }, (_, index): FrustratedElement => ({
+      ...ELEMENTS[0],
+      cssSelector: `#button-${index}`,
+    }));
+    const manyPages = Array.from({ length: 6 }, (_, index): FrustratedPage => ({
+      ...PAGES[0],
+      page: `/page-${index}`,
+    }));
     const rows = () =>
       within(screen.getByTestId('digitalExperienceOverviewFrustration'))
         .getAllByRole('listitem')

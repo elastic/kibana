@@ -410,7 +410,7 @@ describe('scanHostTool', () => {
       ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
     })) as unknown as EndpointAppContextService['getInternalFleetServices'];
     service.getInternalResponseActionsClient = jest.fn(
-      () => ({ scan } as never)
+      () => ({ scan }) as never
     ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
     const { result } = await confirmThenHandle(scanHostTool(service), {

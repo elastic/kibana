@@ -55,7 +55,7 @@ describe('automation suggestion routes', () => {
         },
         elasticsearch: { client: { asCurrentUser: {} } },
       }),
-    } as unknown as Parameters<RequestHandler>[0]);
+    }) as unknown as Parameters<RequestHandler>[0];
 
   const getRoute = (): RegisteredRoute => {
     const route = routes[`GET:${AI_INDEX_SUGGEST_AUTOMATION_CONTEXT_PATH}`];

@@ -63,7 +63,7 @@ describe('useSessionsStatusState', () => {
   });
 
   describe('setting sessions up by itself', () => {
-    const notSetUp = (autoEnable: boolean) => ({ installed: false, autoEnable } as SessionsStatus);
+    const notSetUp = (autoEnable: boolean) => ({ installed: false, autoEnable }) as SessionsStatus;
 
     const respondWith = (status: SessionsStatus, enable: () => Promise<SessionsStatus>) =>
       fetch.mockImplementation((endpoint: string) =>

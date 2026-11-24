@@ -16,7 +16,7 @@ type TimeSpanProperty = {
   [Name in keyof SchemaProperties]: SchemaProperties[Name] extends {
     readonly anyOf: readonly [
       { readonly properties: { readonly took_millis: unknown } },
-      ...unknown[]
+      ...unknown[],
     ];
   }
     ? Name

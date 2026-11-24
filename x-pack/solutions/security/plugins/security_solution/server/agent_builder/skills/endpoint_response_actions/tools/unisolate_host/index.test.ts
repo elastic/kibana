@@ -207,7 +207,7 @@ describe('unisolateHostTool', () => {
         packagePolicy: { list: listPackagePolicies },
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
-        () => ({ release } as never)
+        () => ({ release }) as never
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
       const { card, result } = await confirmThenHandle(
@@ -520,7 +520,7 @@ describe('unisolateHostTool', () => {
           }),
         })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
-        () => ({ release } as never)
+        () => ({ release }) as never
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
       const { card, result } = await confirmThenHandle(
@@ -568,7 +568,7 @@ describe('unisolateHostTool', () => {
           }),
         })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
-        () => ({ release } as never)
+        () => ({ release }) as never
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
       const { card, result } = await confirmThenHandle(tool, { hostName: 'my-host' });
@@ -619,7 +619,7 @@ describe('unisolateHostTool', () => {
           }),
         })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
-        () => ({ release } as never)
+        () => ({ release }) as never
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
       confirmationStatus.value = 'unprompted';
@@ -655,7 +655,7 @@ describe('unisolateHostTool', () => {
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
-        () => ({ release } as never)
+        () => ({ release }) as never
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
       const { result } = await confirmThenHandle(tool, { hostName: 'offline-host' });

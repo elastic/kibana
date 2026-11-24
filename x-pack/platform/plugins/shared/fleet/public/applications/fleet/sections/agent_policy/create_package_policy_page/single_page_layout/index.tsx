@@ -461,7 +461,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     addIntegrationFlyoutProps?.updateHasErrors(
       Boolean(
         packageInfo &&
-          (formState === 'INVALID' || hasAgentPolicyError || isAgentVersionAcknowledgementMissing)
+        (formState === 'INVALID' || hasAgentPolicyError || isAgentVersionAcknowledgementMissing)
       )
     );
   }, [

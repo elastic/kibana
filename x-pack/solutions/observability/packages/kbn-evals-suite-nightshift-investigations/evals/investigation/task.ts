@@ -302,8 +302,8 @@ export const runInvestigation = async (
         const waited = !investigation
           ? `Investigation was not created within ${minutes} minutes`
           : agentStillWorking
-          ? `${STILL_IN_PROGRESS_ERROR_PREFIX}${minutes} minutes`
-          : `${MISSING_CONVERSATION_ERROR_PREFIX}${minutes} minutes`;
+            ? `${STILL_IN_PROGRESS_ERROR_PREFIX}${minutes} minutes`
+            : `${MISSING_CONVERSATION_ERROR_PREFIX}${minutes} minutes`;
         throw new Error(
           lastTransient ? `${waited}. Last read failed: ${errorMessage(lastTransient)}` : waited
         );

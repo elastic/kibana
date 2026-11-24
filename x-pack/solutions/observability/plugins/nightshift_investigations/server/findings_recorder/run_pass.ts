@@ -652,10 +652,10 @@ const runTrackedFindingsPass = async (
     }
     // Only the final pass proposes, so only it is shown what is already proposed.
     const existingProposals = final
-      ? (await deps
+      ? ((await deps
           .getProposals?.()
           ?.list({ request, conversationId })
-          .catch(() => [])) ?? []
+          .catch(() => [])) ?? [])
       : [];
     const { byHandle, notice: proposalsNotice } = buildProposalsContext(
       existingProposals,
@@ -668,7 +668,7 @@ const runTrackedFindingsPass = async (
     ];
     // Only the final pass proposes, so only it is told which workflows a proposal can run.
     actions = final
-      ? (await deps
+      ? ((await deps
           .getProposals?.()
           ?.listActions({ request })
           .catch((error) => {
@@ -678,7 +678,7 @@ const runTrackedFindingsPass = async (
               }`
             );
             return [];
-          })) ?? []
+          })) ?? [])
       : [];
 
     // The final pass can read the investigation's workspace. The round's long tool results are

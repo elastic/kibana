@@ -616,7 +616,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
           getYamlDocument: () =>
             ({
               getIn: jest.fn().mockReturnValue(null),
-            } as never),
+            }) as never,
         });
 
         const result = await stepExposureHoverProvider.provideHover(

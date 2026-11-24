@@ -156,7 +156,7 @@ describe('prefetch helpers', () => {
           description: type,
           paramsSchema: {},
           outputSchema: {},
-        } as unknown as ConnectorContractUnion);
+        }) as unknown as ConnectorContractUnion;
 
       getAllConnectorsMock.mockReturnValue([
         createStep('custom.internal'),

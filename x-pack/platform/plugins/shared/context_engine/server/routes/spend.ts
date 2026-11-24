@@ -30,7 +30,7 @@ const handleSpendError = (error: unknown, response: KibanaResponseFactory, logge
   if (error instanceof AiIndexNotFoundError) {
     return response.notFound({ body: { message: error.message } });
   }
-  logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
+  logger.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
   return response.customError({ statusCode: 500, body: { message: formatErrorMessage(error) } });
 };
 

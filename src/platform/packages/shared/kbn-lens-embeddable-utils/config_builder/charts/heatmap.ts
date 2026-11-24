@@ -155,10 +155,10 @@ function withBreakdownFormat(
     // RangeKey objects and need the range wrapper or lens_format_column drops the bounds.
     const parentFormat =
       column.params.type === LENS_RANGE_MODES.Range
-        ? column.params.parentFormat ?? {
+        ? (column.params.parentFormat ?? {
             id: 'range',
             params: { template: 'arrow_right', replaceInfinity: true },
-          }
+          })
         : undefined;
     return {
       ...column,

@@ -197,7 +197,8 @@ export const CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID = 'system-context-engine-mai
 
 /** The part of the dreaming config maintenance reuses, and its own settings. */
 export interface ContextEngineMaintenanceWorkflowTemplateValues
-  extends ManagedWorkflowTemplateValues,
+  extends
+    ManagedWorkflowTemplateValues,
     Pick<
       ContextEngineDreamingWorkflowTemplateValues,
       'aiIndexId' | 'instanceKey' | 'connectorId' | 'instructions'

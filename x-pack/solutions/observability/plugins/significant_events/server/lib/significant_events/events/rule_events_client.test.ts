@@ -53,7 +53,7 @@ const dataJsonResponse = (dataJsonRows: string[]): ESQLSearchResponse =>
   ({
     columns: [{ name: 'data_json', type: 'keyword' }],
     values: dataJsonRows.map((dataJson) => [dataJson]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const countResponse = (total: number): ESQLSearchResponse =>
   ({

@@ -620,7 +620,7 @@ describe('schema - additional coverage', () => {
         inputSchema: z.object({}),
         outputSchema: z.object({}),
         exposure,
-      } as never);
+      }) as never;
 
     const stepDefinitions = new Map([
       ['custom.unset', createStepDefinition('custom.unset')],

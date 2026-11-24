@@ -1004,10 +1004,10 @@ const interactWithPage = (
     const rageRate = slow
       ? SLOW_RESPONSE_RAGE_RATE
       : failed || thrown
-      ? FAILURE_RAGE_RATE
-      : dead
-      ? DEAD_CLICK_RAGE_RATE
-      : health.rageClickRate;
+        ? FAILURE_RAGE_RATE
+        : dead
+          ? DEAD_CLICK_RAGE_RATE
+          : health.rageClickRate;
     const burst = frustrationRandom
       ? rageBurst(frustrationRandom, rageRate * ctx.impatience, clickTime, slotEnd)
       : [clickTime];

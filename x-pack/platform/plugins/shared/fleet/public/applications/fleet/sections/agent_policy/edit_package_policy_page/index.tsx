@@ -280,7 +280,7 @@ export const EditPackagePolicyForm = memo<{
     !hasAgentlessAgentPolicy && (isUpgrade || addedAgentPolicyIds.length > 0);
   const agentPoliciesToCheck = useMemo(() => {
     const addedAgentPolicies = addedAgentPolicyIds.length
-      ? addedAgentPoliciesData?.items ?? []
+      ? (addedAgentPoliciesData?.items ?? [])
       : [];
     if (isUpgrade) {
       return [...selectedExistingPolicies, ...addedAgentPolicies];

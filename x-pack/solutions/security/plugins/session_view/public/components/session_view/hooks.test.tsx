@@ -17,7 +17,7 @@ const getEvent = (kind: 'event' | 'signal', time: number): ProcessEvent =>
   ({
     '@timestamp': new Date(time).toISOString(),
     event: { kind, action: 'exec' },
-  } as ProcessEvent);
+  }) as ProcessEvent;
 
 describe('useFetchSessionViewProcessEvents', () => {
   it('takes the cursor of the next page from process events, not from alerts', async () => {

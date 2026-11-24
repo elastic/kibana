@@ -405,7 +405,7 @@ const EVIDENCE_JSON_SCHEMA = {
  * The tool call is validated against this schema before {@link findingsOutputSchema} reads it, so
  * an optional proposal field the parser accepts as `null` must accept it here too.
  */
-const orNull = <T extends object>(schema: T) => ({ anyOf: [schema, { type: 'null' }] } as const);
+const orNull = <T extends object>(schema: T) => ({ anyOf: [schema, { type: 'null' }] }) as const;
 
 /** The same shape as {@link findingsOutputSchema}, for the inference client. */
 export const FINDINGS_JSON_SCHEMA = {

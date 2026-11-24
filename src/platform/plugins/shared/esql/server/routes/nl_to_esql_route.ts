@@ -84,9 +84,8 @@ export const registerNLtoESQLRoute = (
 
         // Load after the inference guard: @kbn/agent-builder-genai-utils pulls in
         // inference-plugin code and must not run when that package is omitted.
-        const { generateEsql, generateEsqlCompletion } = await import(
-          '@kbn/agent-builder-genai-utils'
-        );
+        const { generateEsql, generateEsqlCompletion } =
+          await import('@kbn/agent-builder-genai-utils');
 
         const connectorId = await resolveConnectorId({
           inference,

@@ -12,7 +12,7 @@ import { scoreContinuationNarrativeEvolution } from './continuation_narrative_ev
 type Signal = NonNullable<SignificantEvent['signals']>[number];
 
 const signal = (ruleUuid: string, verdict: string): Signal =>
-  ({ verdict, metadata: { rule_uuid: ruleUuid } } as unknown as Signal);
+  ({ verdict, metadata: { rule_uuid: ruleUuid } }) as unknown as Signal;
 
 const event = (overrides: Partial<SignificantEvent>): Partial<SignificantEvent> => ({
   event_id: 'event-1',

@@ -32,7 +32,7 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
     automations: [{ type: 'workflow', value: 'wf-1' }],
     traces: [{ type: 'esql', value: 'FROM traces-*', query: 'FROM traces-*' }],
     ...overrides,
-  } as unknown as AiIndexHttpItem);
+  }) as unknown as AiIndexHttpItem;
 
 describe('buildAutomationSuggestionContext', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
