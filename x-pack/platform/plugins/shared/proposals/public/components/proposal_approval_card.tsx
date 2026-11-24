@@ -47,7 +47,7 @@ const toFriendlyError = (error: unknown): Error => {
       return new Error(
         i18n.translate('xpack.proposals.proposalCard.conflictError', {
           defaultMessage:
-            'This proposal was already decided or replaced. The card now shows its current status.',
+            'This proposal changed while you were deciding. Check its current status and try again if it is still open.',
         })
       );
     }

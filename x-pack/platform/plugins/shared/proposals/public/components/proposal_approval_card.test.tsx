@@ -630,7 +630,7 @@ describe('ProposalApprovalCard', () => {
       } as unknown as ReturnType<typeof useApproveProposal>);
       render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
-      await expect(latestOnApprove!()).rejects.toThrow(/already decided or replaced/);
+      await expect(latestOnApprove!()).rejects.toThrow(/changed while you were deciding/);
     });
 
     it('rejects with a permission message for a 403', async () => {
