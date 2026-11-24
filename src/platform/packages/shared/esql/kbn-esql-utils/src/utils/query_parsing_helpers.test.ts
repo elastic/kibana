@@ -386,6 +386,15 @@ describe('esql query helpers', () => {
       const query = convertTimeseriesCommandToFrom('TS index1 | KEEP field1, field2 | SORT field1');
       expect(query).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
     });
+
+    it('should convert the main TS command even if a LET body starts with TS', function () {
+      const query = convertTimeseriesCommandToFrom(
+        'LET a = (TS index2 | KEEP host); TS index1 | WHERE host IN (FROM a)'
+      );
+      expect(query).toEqual(
+        'LET a = (TS index2 | KEEP host); FROM index1 | WHERE host IN (FROM a)'
+      );
+    });
   });
 
   describe('retrieveMetadataColumns', () => {

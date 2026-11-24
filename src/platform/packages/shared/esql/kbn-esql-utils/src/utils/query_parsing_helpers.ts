@@ -208,7 +208,7 @@ export function convertTimeseriesCommandNodeToFrom<T extends ESQLCommand>(cmd: T
  */
 export function convertTimeseriesCommandToFrom(esql?: string): string {
   const { root } = Parser.parse(esql || '');
-  const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
+  const timeseriesCommand = root.commands.find(({ name }) => name === 'ts');
   if (!timeseriesCommand) return esql || '';
 
   const fromCommand = convertTimeseriesCommandNodeToFrom(timeseriesCommand);
