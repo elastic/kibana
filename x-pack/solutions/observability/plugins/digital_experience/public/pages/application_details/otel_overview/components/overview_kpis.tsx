@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import type { ReactNode } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+import { KpiPanel } from '../../../../components/kpi_panel';
 import type { OverviewPercentile } from '../../../../../common/overview_filters';
 import type { ApplicationOverview } from '../../../../../common/types/overview';
 import { useFormatters } from '../../../../hooks/use_formatters';
@@ -38,44 +38,6 @@ const failedHttpHint = (failedCount: number, count: number) =>
     values: { failedCount, count },
   });
 
-/** A KPI panel; the value keeps its place while loading, so the row does not jump. */
-function Kpi({
-  label,
-  hint,
-  value,
-  isLoading,
-  'data-test-subj': dataTestSubj,
-}: {
-  label: string;
-  hint?: string;
-  value: ReactNode;
-  isLoading: boolean;
-  'data-test-subj': string;
-}) {
-  return (
-    <EuiFlexItem>
-      <EuiPanel hasBorder paddingSize="m">
-        <EuiFlexGroup alignItems="flexStart" gutterSize="xs" responsive={false}>
-          <EuiFlexItem>
-            <EuiStat
-              data-test-subj={dataTestSubj}
-              titleSize="m"
-              isLoading={isLoading}
-              title={value}
-              description={label}
-            />
-          </EuiFlexItem>
-          {hint && (
-            <EuiFlexItem grow={false}>
-              <EuiIconTip content={hint} type="info" />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiFlexItem>
-  );
-}
-
 /** The four headline metrics of the Overview, each with its unit. */
 export function OverviewKpis({
   overview,
@@ -92,13 +54,13 @@ export function OverviewKpis({
 
   return (
     <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceOverviewKpis">
-      <Kpi
+      <KpiPanel
         data-test-subj="digitalExperienceOverviewPageLoads"
         label={PAGE_LOADS_LABEL}
         value={formatNumber(pageLoads.count)}
         isLoading={isLoading}
       />
-      <Kpi
+      <KpiPanel
         data-test-subj="digitalExperienceOverviewLoadTime"
         label={loadTimeLabel(percentile)}
         hint={loadTimeHint(loadTime.sampleCount)}
@@ -111,13 +73,13 @@ export function OverviewKpis({
         }
         isLoading={isLoading}
       />
-      <Kpi
+      <KpiPanel
         data-test-subj="digitalExperienceOverviewJsErrors"
         label={JS_ERRORS_LABEL}
         value={formatNumber(jsErrors.count)}
         isLoading={isLoading}
       />
-      <Kpi
+      <KpiPanel
         data-test-subj="digitalExperienceOverviewFailedHttp"
         label={FAILED_HTTP_LABEL}
         hint={failedHttpHint(httpRequests.failedCount, httpRequests.count)}

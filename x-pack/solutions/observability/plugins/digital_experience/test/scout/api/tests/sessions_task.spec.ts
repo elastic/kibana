@@ -91,7 +91,10 @@ const buildEvents = (sessionId: string, startMs: number) => {
   };
   return {
     logs: [
-      log(0, 'browser.navigation_timing', { 'url.full': url('/home?ref=ad') }),
+      log(0, 'browser.navigation_timing', {
+        'url.full': url('/home?ref=ad'),
+        'browser.navigation_timing.load_event_end': 1500,
+      }),
       log(0, 'browser.navigation', { 'url.full': url('/home?ref=ad') }),
       log(2 * SECOND_MS, 'browser.web_vital', {
         'browser.web_vital.name': 'LCP',
@@ -269,6 +272,7 @@ apiTest.describe(
               fcp: noSamples,
               ttfb: noSamples,
             },
+            load_time: { p75: 1500, count: 1 },
             search: [
               SESSION.toLowerCase(),
               'jane@example.com',
