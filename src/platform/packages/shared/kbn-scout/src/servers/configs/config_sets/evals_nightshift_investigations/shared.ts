@@ -93,6 +93,10 @@ const createInvestigationConfig = (
         '--feature_flags.overrides.nightshift.onlineEvals.paused=true',
         ...knowledgeArgs(),
         '--xpack.nightshift_investigations.findings_recorder.enabled=false',
+        // The due-diligence reviewer is off unless the run measures it.
+        `--xpack.nightshift_investigations.due_diligence.enabled=${
+          process.env.NIGHTSHIFT_DUE_DILIGENCE === 'true'
+        }`,
         `--config=${sandboxKibanaConfig}`,
         ...(connectorsConfig ? [`--config=${connectorsConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',

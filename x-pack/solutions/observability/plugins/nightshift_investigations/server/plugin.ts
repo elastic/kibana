@@ -105,6 +105,7 @@ import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import { registerInvestigationAgentType } from './agents/investigation';
+import { registerDueDiligence } from './due_diligence';
 import { registerFindingsRecorder } from './findings_recorder';
 import { createRecorderProposals } from './findings_recorder/proposals_adapter';
 import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
@@ -473,6 +474,20 @@ export class NightshiftInvestigationsPlugin
             logger: this.logger.get('findings_recorder'),
           },
           logger: this.logger.get('findings_recorder'),
+        });
+      }
+      if (config.due_diligence.enabled) {
+        // Reviews the leading hypotheses while the investigation runs and hands the review back
+        // to the investigator. Every dependency is read lazily, as the findings recorder's are.
+        registerDueDiligence({
+          agentBuilder: plugins.agentBuilder,
+          deps: {
+            getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            logger: this.logger.get('due_diligence'),
+          },
         });
       }
       plugins.agentBuilder.tools.register(createTimeConverterTool());

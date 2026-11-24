@@ -175,6 +175,7 @@ export const buildRecorderMessages = ({
   answer,
   notices = [],
   resultPaths = new Map(),
+  instruction,
 }: {
   question?: string;
   steps: readonly ConversationRoundStep[];
@@ -186,6 +187,8 @@ export const buildRecorderMessages = ({
   notices?: readonly string[];
   /** Where the full text of each clipped tool result is, by tool call id. Final pass only. */
   resultPaths?: ReadonlyMap<string, string>;
+  /** What the model is asked at the end, in place of the recorder's own question. */
+  instruction?: string;
 }): Message[] => {
   const agentTurns = groupTurns(steps);
   const messages: Message[] = [
@@ -231,7 +234,10 @@ export const buildRecorderMessages = ({
   }
   // Placed after the part of the conversation that is kept between passes, so they never move it.
   notices.forEach((notice) => messages.push({ role: MessageRole.User, content: notice }));
-  messages.push({ role: MessageRole.User, content: final ? FINAL_INSTRUCTION : LIVE_INSTRUCTION });
+  messages.push({
+    role: MessageRole.User,
+    content: instruction ?? (final ? FINAL_INSTRUCTION : LIVE_INSTRUCTION),
+  });
   return messages;
 };
 

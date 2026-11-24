@@ -30,6 +30,7 @@ const createPlugin = (memoryEnabled = false) =>
       memory: { enabled: memoryEnabled },
       learning: { enabled: true },
       findings_recorder: { enabled: true },
+      due_diligence: { enabled: false },
     })
   );
 
@@ -49,6 +50,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         decision_trees: { enabled: false },
         memory: { enabled: false },
         learning: { enabled: true },
+        due_diligence: { enabled: false },
       })
     );
     plugin.setup(coreMock.createSetup(), {
@@ -75,6 +77,27 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     // Connectors are the ones users assign to the investigator; no setting adds one.
     await expect(connectorsFor('platform.nightshift.investigation-type')).resolves.toEqual([]);
     await expect(connectorsFor('platform.nightshift.assistant-type')).resolves.toEqual([]);
+  });
+
+  it.each([
+    [true, 1],
+    [false, 0],
+  ])('with due diligence enabled=%s registers %d review hooks', (enabled, expected) => {
+    const agentBuilder = agentBuilderMocks.createSetup();
+    const plugin = new NightshiftInvestigationsPlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        wiki: { enabled: false },
+        decision_trees: { enabled: false },
+        memory: { enabled: false },
+        learning: { enabled: true },
+        due_diligence: { enabled },
+      })
+    );
+    plugin.setup(coreMock.createSetup(), { ...createSetupDeps(), agentBuilder });
+
+    const ids = agentBuilder.hooks.registerCycleHook.mock.calls.map(([{ id }]) => id);
+    expect(ids.filter((id) => id === 'nightshift.due_diligence')).toHaveLength(expected);
   });
 
   it('registers the investigation locator on the server', async () => {
@@ -190,6 +213,7 @@ describe('NightshiftInvestigationsPlugin start', () => {
         memory: { enabled: memory },
         learning: { enabled: true },
         findings_recorder: { enabled: false },
+        due_diligence: { enabled: false },
       })
     );
     plugin.setup(coreMock.createSetup(), { ...createSetupDeps(), sandbox: { isAvailable: true } });

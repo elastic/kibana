@@ -196,7 +196,7 @@ interface ConversationEventLike {
   actor?: Parameters<typeof getEventActorDisplayName>[0];
 }
 
-interface ConversationLike {
+export interface ConversationLike {
   /** Set to the investigation template for an investigation. Ask mode has none. */
   template_id?: string;
   /** The rounds already finished. A run that starts with some is a follow-up. */
@@ -205,7 +205,7 @@ interface ConversationLike {
   metadata?: { summary?: unknown; severity?: unknown; verdict?: unknown };
 }
 
-const readConversation = async (
+export const readConversation = async (
   agentBuilder: AgentBuilderPluginStart,
   request: KibanaRequest,
   conversationId: string

@@ -47,6 +47,13 @@ const findingsRecorderConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
+const dueDiligenceConfigSchema = schema.object({
+  // Governs the due-diligence reviewer: a cycle hook that reviews the hypotheses the investigator
+  // holds at 60% confidence or more and hands its thoughts back to the investigator as a note.
+  // Off until its effect on investigations has been measured.
+  enabled: schema.boolean({ defaultValue: false }),
+});
+
 const configSchema = schema.object({
   // Reserved: Core skips loading this plugin entirely when false.
   enabled: schema.boolean({ defaultValue: true }),
@@ -55,6 +62,7 @@ const configSchema = schema.object({
   memory: memoryConfigSchema,
   learning: learningConfigSchema,
   findings_recorder: findingsRecorderConfigSchema,
+  due_diligence: dueDiligenceConfigSchema,
 });
 
 export type NightshiftInvestigationsConfig = TypeOf<typeof configSchema>;

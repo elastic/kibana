@@ -487,6 +487,7 @@ export const AGENT_BUILDER_CYCLE_HOOKS = [
   relevantSkillsHookId,
   // Nightshift
   'nightshift.findings_recorder',
+  'nightshift.due_diligence',
 ] as const;
 
 export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];
