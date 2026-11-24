@@ -8,10 +8,8 @@
 import { isEmpty } from 'lodash';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
-import type { DashboardUpsert } from '../upsert/schema';
 import type { DashboardFailure } from '../utils';
-
-type UpsertOptions = NonNullable<DashboardUpsert['options']>;
+import type { UpsertOptions } from './schema';
 
 const TOOLTIP_SYNC_WITHOUT_CURSOR_SYNC_ERROR =
   'Tooltip sync was not changed because it works only while cursor sync is on, and the dashboard has cursor sync off. Ask the user whether to turn cursor sync on as well.';
@@ -38,8 +36,8 @@ export const planSyncOptions = ({
   requestedOptions,
 }: {
   originalOptions: DashboardAttachmentData['options'];
-  requestedOptions: DashboardUpsert['options'];
-}): { options: DashboardUpsert['options']; failure?: DashboardFailure } => {
+  requestedOptions: UpsertOptions | undefined;
+}): { options: UpsertOptions | undefined; failure?: DashboardFailure } => {
   if (requestedOptions === undefined) {
     return { options: requestedOptions };
   }

@@ -6,4 +6,5 @@
  */
 
 export { revertRefreshIntervalWithoutTimeRange } from './refresh_interval';
+export { upsertOptionsSchema, upsertRefreshIntervalSchema } from './schema';
 export { planSyncOptions } from './sync_options';
