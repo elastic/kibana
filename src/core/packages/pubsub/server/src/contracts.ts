@@ -10,7 +10,9 @@
 import type { Topic } from './topic';
 
 /**
- * Maximum number of characters in a producer-supplied event id. Longer ids are rejected.
+ * Maximum `id.length` of a producer-supplied event id, in UTF-16 code units. Longer ids are
+ * rejected. One emoji outside the basic multilingual plane counts as two units, so 129 of them
+ * exceed this limit.
  *
  * @public
  */
