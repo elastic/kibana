@@ -28,6 +28,8 @@ export interface SelectKiOptions {
 interface UseSelectedKiResult {
   selectedKi: SelectedKi | undefined;
   selectKi: (ki: Pick<KiListItem, 'id' | 'index'>, options?: SelectKiOptions) => void;
+  /** Closes the open document (replaces the history entry). */
+  clearSelectedKi: () => void;
 }
 
 /**
@@ -78,5 +80,9 @@ export const useSelectedKi = (): UseSelectedKiResult => {
     [aiIndexId, history]
   );
 
-  return { selectedKi, selectKi };
+  const clearSelectedKi = useCallback(() => {
+    history.replace({ pathname: getAiIndexKnowledgeDocumentsPath(aiIndexId), search: '' });
+  }, [aiIndexId, history]);
+
+  return { selectedKi, selectKi, clearSelectedKi };
 };

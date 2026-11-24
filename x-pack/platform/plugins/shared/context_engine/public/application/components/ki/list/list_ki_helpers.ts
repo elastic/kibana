@@ -9,10 +9,6 @@ import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-
 import { i18n } from '@kbn/i18n';
 import type { AiIndexDest } from '../../../../../common/http_api/ai_indices';
 import { KI_STATUSES, type KiStatus } from '../../../../../common/ki_lifecycle_status';
-import { formatKiTypeLabel, noneValueLabel } from '../../../utils/ki_display';
-
-export type ListKiTypeFilter = { kind: 'all'; value: 'all' } | { kind: 'type'; value: string };
-export const ALL_TYPE_FILTER: ListKiTypeFilter = { kind: 'all', value: 'all' };
 
 /** Status filter options: one status, or every status. */
 export type ListKiStatusFilterValue = KiStatus | 'all';
@@ -40,13 +36,6 @@ export const getIndexManagementLocatorParams = (
   return { page: 'index_details', indexName: dest.value };
 };
 
-export const getListKiTypeFilterLabel = (type: string): string =>
-  type === ALL_TYPE_FILTER.value
-    ? i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.filterAll', {
-        defaultMessage: 'All',
-      })
-    : formatKiTypeLabel(type);
-
 export const getListKiStatusFilterLabel = (status: ListKiStatusFilterValue): string => {
   switch (status) {
     case 'active':
@@ -72,5 +61,9 @@ export const getListKiStatusFilterLabel = (status: ListKiStatusFilterValue): str
   }
 };
 
+const untitledLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.untitled', {
+  defaultMessage: 'Untitled',
+});
+
 export const getKiDisplayTitle = (title?: string): string =>
-  title !== undefined && title.length > 0 ? title : noneValueLabel;
+  title !== undefined && title.length > 0 ? title : untitledLabel;

@@ -19,7 +19,7 @@ interface ListKiGroupsProps {
   groups: ListKiGroupData[];
   selectedKi?: SelectedKi;
   onSelectKi: (ki: KiListItem) => void;
-  onShowMore: (type: string, loadedCount: number) => void;
+  onShowMore: (key: string, loadedCount: number) => void;
   isRefetching?: boolean;
   discoverHref?: string;
   listCss: SerializedStyles;
@@ -36,15 +36,16 @@ export const ListKiGroups = ({
   listCss,
 }: ListKiGroupsProps) => {
   const prefetchKi = usePrefetchKi(aiIndexId);
-  const [collapsedTypes, setCollapsedTypes] = useState<ReadonlySet<string>>(new Set());
+  // Keyed by section key (`type:<type>` or `other`).
+  const [collapsedKeys, setCollapsedKeys] = useState<ReadonlySet<string>>(new Set());
 
-  const toggleGroup = useCallback((type: string) => {
-    setCollapsedTypes((current) => {
+  const toggleGroup = useCallback((key: string) => {
+    setCollapsedKeys((current) => {
       const next = new Set(current);
-      if (next.has(type)) {
-        next.delete(type);
+      if (next.has(key)) {
+        next.delete(key);
       } else {
-        next.add(type);
+        next.add(key);
       }
       return next;
     });
@@ -70,10 +71,10 @@ export const ListKiGroups = ({
     >
       {groups.map((group, position) => (
         <ListKiGroup
-          key={group.type}
+          key={group.key}
           group={group}
           isFirst={position === 0}
-          isCollapsed={collapsedTypes.has(group.type)}
+          isCollapsed={collapsedKeys.has(group.key)}
           onToggle={toggleGroup}
           isKiSelected={isKiSelected}
           onSelectKi={onSelectKi}

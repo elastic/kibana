@@ -1051,6 +1051,26 @@ export class RuleEventsClient {
   }
 
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {
+    const latest = await this.findLatestWithEpisodeByEventIds(eventIds);
+    return new Map([...latest].map(([eventId, { event }]) => [eventId, event]));
+  }
+
+  /**
+   * The episode (`alert.id`) of each event's latest version: its current episode. An event whose
+   * latest version has no episode id is absent.
+   */
+  async findCurrentEpisodeIdsByEventIds(eventIds: string[]): Promise<Map<string, string>> {
+    const latest = await this.findLatestWithEpisodeByEventIds(eventIds);
+    const episodeIds = new Map<string, string>();
+    latest.forEach(({ episodeId }, eventId) => {
+      if (episodeId) episodeIds.set(eventId, episodeId);
+    });
+    return episodeIds;
+  }
+
+  private async findLatestWithEpisodeByEventIds(
+    eventIds: string[]
+  ): Promise<Map<string, { event: SignificantEvent; episodeId?: string }>> {
     if (!eventIds.length) return new Map();
 
     let query = buildBaseQuery(this.clients.space).where`${eventIdIn(eventIds)}`;
@@ -1063,9 +1083,15 @@ export class RuleEventsClient {
       fields: ['data_json'],
     });
 
-    const map = new Map<string, SignificantEvent>();
-    for (const event of hits.map(decodeSignificantEvent)) {
-      if (event.event_id) map.set(event.event_id, event);
+    const map = new Map<string, { event: SignificantEvent; episodeId?: string }>();
+    for (const row of hits) {
+      const event = decodeSignificantEvent(row);
+      if (event.event_id) {
+        map.set(event.event_id, {
+          event,
+          ...(row.alert?.id !== undefined ? { episodeId: row.alert.id } : {}),
+        });
+      }
     }
     return map;
   }
@@ -1106,19 +1132,26 @@ export class RuleEventsClient {
    * Writes a severity as a new version through the head guard, retrying a head moved by another
    * change. A head whose severity another writer changed is left alone: that writer resolved it later.
    * A closed event is left alone too: a new version would move its close time and replace its closing
-   * note, which Discovery's reuse of closed series reads.
+   * note, which Discovery's reuse of closed series reads. So is an event whose head is on another
+   * episode than the one given.
    */
   async syncSeverity({
     eventId,
     severity,
+    episodeId,
   }: {
     eventId: string;
     severity: Severity;
+    /** The episode the severity was concluded for; a head on another episode is left alone. */
+    episodeId: string;
   }): Promise<'updated' | 'unchanged' | 'superseded' | 'not_found' | 'closed'> {
     let firstSeverity: Severity | undefined;
     for (let attempt = 0; attempt <= SYNC_SEVERITY_MAX_RETRIES; attempt++) {
-      const latest = (await this.findLatestByEventIds([eventId])).get(eventId);
-      if (!latest) return 'not_found';
+      const head = (await this.findLatestWithEpisodeByEventIds([eventId])).get(eventId);
+      if (!head) return 'not_found';
+      const { event: latest } = head;
+      // A reopen can land between the investigation read and this write: its severity is not ours.
+      if (head.episodeId !== episodeId) return 'superseded';
       if (latest.severity === severity) return 'unchanged';
       if (latest.status === ALERT_EPISODE_STATUS.INACTIVE) return 'closed';
       firstSeverity ??= latest.severity;
@@ -1139,35 +1172,6 @@ export class RuleEventsClient {
       if (written.updated) return 'updated';
     }
     return 'superseded';
-  }
-
-  /** Every episode (`alert.id`) each event has carried. An event with none is absent. */
-  async findEpisodeIdsByEventIds(eventIds: string[]): Promise<Map<string, string[]>> {
-    const episodeIdsByEvent = new Map<string, string[]>();
-    if (!eventIds.length) return episodeIdsByEvent;
-
-    const query = buildBaseQuery(this.clients.space).where`${eventIdIn(eventIds)}`
-      .pipe`EVAL ${esql.col('event_id')} = FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
-      'event_id'
-    )}), ${esql.col('episode_id')} = ${esql.col('alert.id')}`.pipe`STATS n = COUNT(*) BY ${esql.col(
-      'event_id'
-    )}, ${esql.col('episode_id')}`.limit(MAX_EPISODE_PAIRS);
-
-    try {
-      const rows = assertEpisodePairsComplete(
-        esqlToObjects<{ episode_id: string | null; event_id: string }>(
-          await queryEsql({ esClient: this.clients.esClient, query })
-        )
-      );
-      for (const { episode_id: episodeId, event_id: eventId } of rows) {
-        if (!episodeId || !eventId) continue;
-        episodeIdsByEvent.set(eventId, [...(episodeIdsByEvent.get(eventId) ?? []), episodeId]);
-      }
-      return episodeIdsByEvent;
-    } catch (error) {
-      if (isIndexNotFoundError(error)) return episodeIdsByEvent;
-      throw error;
-    }
   }
 
   /** Writes the first version of an event; unguarded, as there is no prior version to compare. */

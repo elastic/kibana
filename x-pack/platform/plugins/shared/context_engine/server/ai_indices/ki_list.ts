@@ -54,6 +54,13 @@ export interface GetKisOptions {
 export interface GetKiGroupsOptions {
   dest: AiIndexDest;
   maxGroups: number;
+  /**
+   * When set, exactly these types are the groups (a type with no match is left out) and
+   * `maxGroups` is ignored. Lets a client keep the same groups while the search changes.
+   */
+  types?: string[];
+  /** Leaves out KIs of these types before grouping. KIs without a type stay in. */
+  excludeTypes?: string[];
   previewSize: number;
   query?: string;
   statuses?: KiStatus[];
@@ -81,6 +88,7 @@ const KEEP_FIELDS = [
 const GROUPABLE_TYPE_CONDITION = `type IS NOT NULL AND BYTE_LENGTH(type) <= ${MAX_KI_TYPE_FILTER_LENGTH}`;
 
 const excludeTypeParam = (i: number): string => `excludeType${i}`;
+const groupTypeParam = (i: number): string => `groupType${i}`;
 
 /**
  * KIs outside the given types. `IS NULL` keeps KIs without a type: `NOT IN` on null is null.
@@ -432,29 +440,52 @@ export const getKis = async (
  */
 export const getKiGroups = async (
   esClient: ElasticsearchClient,
-  { dest, maxGroups, previewSize, query, statuses, sort = DEFAULT_KI_LIST_SORT }: GetKiGroupsOptions
+  {
+    dest,
+    maxGroups,
+    types,
+    excludeTypes = [],
+    previewSize,
+    query,
+    statuses,
+    sort = DEFAULT_KI_LIST_SORT,
+  }: GetKiGroupsOptions
 ): Promise<ListKiGroupsResponse> => {
   const context = await prepareCurrentKis(esClient, dest, statuses, query);
   if (context === undefined) {
     return EMPTY_GROUPS;
   }
   const { base } = context;
+  const fixedTypes = types !== undefined && types.length > 0 ? types : undefined;
 
+  // With fixed types only they can be a group; the rest joins the null bucket ("Other").
+  const groupCondition = fixedTypes
+    ? `${GROUPABLE_TYPE_CONDITION} AND type IN (${fixedTypes
+        .map((_, i) => `?${groupTypeParam(i)}`)
+        .join(', ')})`
+    : GROUPABLE_TYPE_CONDITION;
   // Total and top buckets in one query. KIs that can't be a group share the null bucket,
   // sorted last, so the total survives even when no KI has a groupable type.
+  // The excluded types are not part of this answer at all: not in the total, not in "Other".
+  // The group rows below need no such filter: an excluded type can't be a group.
   const bucketsQuery = [
     base,
-    `EVAL group_type = CASE(${GROUPABLE_TYPE_CONDITION}, type, NULL)`,
+    ...(excludeTypes.length > 0 ? [`WHERE ${otherTypesCondition(excludeTypes)}`] : []),
+    `EVAL group_type = CASE(${groupCondition}, type, NULL)`,
     'STATS count = COUNT(*) BY group_type',
     'INLINE STATS total = SUM(count)',
     'EVAL is_other = group_type IS NULL',
     'SORT is_other ASC, count DESC, group_type ASC',
-    `LIMIT ${maxGroups}`,
+    `LIMIT ${fixedTypes ? fixedTypes.length : maxGroups}`,
   ].join('\n| ');
+  const bucketsParams = [
+    ...(listQueryParams({ query, excludeTypes }).params ?? []),
+    ...(fixedTypes ?? []).map((type, i) => ({ [groupTypeParam(i)]: type })),
+  ];
   const buckets = toRecords(
     (await esClient.esql.query({
       query: bucketsQuery,
-      ...listQueryParams({ query }),
+      ...(bucketsParams.length > 0 ? { params: bucketsParams } : {}),
     })) as unknown as ESQLSearchResponse
   );
   const total = Number(buckets[0]?.total ?? 0);

@@ -19,11 +19,20 @@ import {
   type OtelEventFields,
 } from './get_session';
 import type { StoredSessionDocument } from './list_sessions';
+import { SESSION_REQUESTS_SIZE } from './session_requests';
 
 const START = '2026-10-20T10:00:00.000Z';
 const startMs = Date.parse(START);
 const at = (offsetMs: number) => new Date(startMs + offsetMs).toISOString();
 const DAY_MS = 24 * 60 * 60 * 1000;
+const JOURNEY_EVENT_NAMES = [
+  'documentLoad',
+  'browser.navigation',
+  'click',
+  'browser.user_action.click',
+  'exception',
+  'browser.web_vital',
+];
 
 /** Raw events as the `fields` option returns them: arrays of values by dotted name. */
 const events: OtelEventFields[] = [
@@ -108,9 +117,7 @@ describe('buildTimeline', () => {
       { kind: 'page_view', name: 'browser.navigation', offsetMs: 5_000, page: '/cart' },
       { kind: 'error', name: 'TypeError', offsetMs: 6_000, page: '/cart' },
     ]);
-    expect(timeline[0]).toEqual(
-      expect.objectContaining({ durationMs: 850, traceId: 't1', spanId: 's1' })
-    );
+    expect(timeline[0]).toEqual(expect.objectContaining({ traceId: 't1', spanId: 's1' }));
     expect(timeline[1].detail).toBe('1200');
     expect(timeline[2].detail).toBe('button.add');
     expect(timeline[4].detail).toBe('x is undefined');
@@ -137,7 +144,7 @@ describe('buildTimeline', () => {
     );
   });
 
-  it('counts only exceptions as errors, and tells spans from logs by their duration', () => {
+  it('counts only exceptions as errors, and leaves out what the journey does not list', () => {
     const timeline = buildTimeline(
       [
         {
@@ -153,12 +160,9 @@ describe('buildTimeline', () => {
       startMs
     );
 
-    expect(timeline.map(({ kind, name, detail }) => ({ kind, name, detail }))).toEqual([
-      // A failed request stays a span: the summary counts it as a failed request, not a JS error.
-      { kind: 'span', name: 'HTTP GET', detail: null },
-      { kind: 'span', name: 'HTTP GET', detail: null },
-      { kind: 'log', name: 'app.log', detail: null },
-    ]);
+    // A failed request is not a JS error: the summary counts it as a failed request. Nor is it, or
+    // a log, an event of the journey.
+    expect(timeline).toEqual([]);
   });
 });
 
@@ -176,6 +180,7 @@ describe('buildPageVisits', () => {
         clickCount: 1,
         errorCount: 0,
         webVitals: { lcp: 1200, inp: null, cls: null, fcp: null, ttfb: null },
+        load: null,
       },
       {
         page: '/cart',
@@ -186,6 +191,7 @@ describe('buildPageVisits', () => {
         clickCount: 0,
         errorCount: 1,
         webVitals: { lcp: null, inp: null, cls: null, fcp: null, ttfb: null },
+        load: null,
       },
     ]);
   });
@@ -220,6 +226,20 @@ describe('buildPageVisits', () => {
       ['/products', 1900],
       ['/cart', null],
     ]);
+  });
+
+  it('ends the last visit at the newest request when that is newer than the summary and the events', () => {
+    const visits = buildPageVisits(events, startMs, at(10_000), at(12_500));
+
+    expect(visits.at(-1)).toEqual(
+      expect.objectContaining({ endTime: at(12_500), durationMs: 7_500 })
+    );
+  });
+
+  it('keeps the summary end when requests are older than it', () => {
+    const visits = buildPageVisits(events, startMs, at(10_000), at(8_000));
+
+    expect(visits.at(-1)?.endTime).toBe(at(10_000));
   });
 
   it('opens a visit for a page view with no URL, rather than leaving its events on the page before', () => {
@@ -277,7 +297,8 @@ describe('getSession', () => {
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)));
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 
@@ -321,6 +342,16 @@ describe('getSession', () => {
                   },
                 },
               },
+              // Only what the journey shows, so that requests can't push it out.
+              {
+                bool: {
+                  should: [
+                    { terms: { event_name: JOURNEY_EVENT_NAMES } },
+                    { terms: { name: JOURNEY_EVENT_NAMES } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
             ],
           },
         },
@@ -331,7 +362,6 @@ describe('getSession', () => {
         '@timestamp',
         'name',
         'event_name',
-        'duration',
         'trace_id',
         'span_id',
         'attributes.url.full',
@@ -343,16 +373,114 @@ describe('getSession', () => {
     );
   });
 
+  it('loads the requests with a query of their own, and the page load on the visit it started', async () => {
+    client.search
+      .mockResolvedValueOnce(
+        summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
+      )
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(
+        eventsResponse(
+          [
+            {
+              '@timestamp': [at(1_800)],
+              event_name: ['browser.navigation_timing'],
+              'attributes.url.full': ['https://shop.example.com/?ref=ad'],
+              'attributes.browser.resource_timing.fetch_start': [2],
+              'attributes.browser.resource_timing.response_end': [300],
+              'attributes.browser.navigation_timing.load_event_end': [1_800],
+            },
+          ],
+          SESSION_REQUESTS_SIZE + 1
+        )
+      );
+
+    const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
+
+    expect(detail?.requests).toEqual([
+      expect.objectContaining({ initiatorType: 'navigation', startTime: at(2), visitIndex: 0 }),
+    ]);
+    expect(detail?.requestsTruncated).toBe(true);
+    expect(detail?.pageVisits.map(({ load }) => load?.loadMs ?? null)).toEqual([1_800, null]);
+
+    const [requestsRequest] = client.search.mock.calls[2];
+    expect(requestsRequest).toEqual(
+      expect.objectContaining({ size: SESSION_REQUESTS_SIZE, sort: [{ '@timestamp': 'asc' }] })
+    );
+    expect(requestsRequest?.fields).toEqual(
+      expect.arrayContaining(['attributes.browser.resource_timing.fetch_start', 'span_id'])
+    );
+  });
+
   it('flags a timeline cut off at its size', async () => {
     client.search
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), SESSION_TIMELINE_SIZE + 1));
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), SESSION_TIMELINE_SIZE + 1))
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 
     expect(detail?.timelineTruncated).toBe(true);
+  });
+
+  describe('with a timeline cut off at its size', () => {
+    const lateRequest: OtelEventFields = {
+      '@timestamp': [at(20_000)],
+      event_name: ['browser.resource_timing'],
+      'attributes.url.full': ['https://shop.example.com/api/late'],
+      'attributes.browser.resource_timing.initiator_type': ['fetch'],
+      'attributes.browser.resource_timing.fetch_start': [100],
+      'attributes.browser.resource_timing.response_end': [300],
+    };
+    const urlsOf = (detail: Awaited<ReturnType<typeof getSession>>) =>
+      detail?.requests.map(({ url }) => url) ?? [];
+
+    const run = async (timelineTotal: number) => {
+      client.search
+        .mockResolvedValueOnce(
+          summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
+        )
+        .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), timelineTotal))
+        .mockResolvedValueOnce(eventsResponse([lateRequest]));
+      return getSession(client, { serviceName: 'web', sessionId: 'abc' });
+    };
+
+    it('leaves out the requests after its last event, which no visit it holds made', async () => {
+      expect(urlsOf(await run(SESSION_TIMELINE_SIZE + 1))).toEqual([]);
+    });
+
+    it('keeps a request that started on a retained visit but was reported after it', async () => {
+      client.search
+        .mockResolvedValueOnce(
+          summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
+        )
+        .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), SESSION_TIMELINE_SIZE + 1))
+        .mockResolvedValueOnce(
+          eventsResponse([
+            {
+              '@timestamp': [at(8_000)],
+              event_name: ['browser.navigation_timing'],
+              'attributes.url.full': ['https://shop.example.com/?ref=ad'],
+              'attributes.browser.resource_timing.fetch_start': [2],
+              'attributes.browser.resource_timing.response_end': [300],
+              'attributes.browser.navigation_timing.load_event_end': [8_000],
+            },
+          ])
+        );
+
+      const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
+
+      expect(detail?.requests).toEqual([
+        expect.objectContaining({ initiatorType: 'navigation', visitIndex: 0 }),
+      ]);
+      expect(detail?.pageVisits[0].load).not.toBeNull();
+    });
+
+    it('keeps them when the timeline is complete', async () => {
+      expect(urlsOf(await run(5))).toEqual(['https://shop.example.com/api/late']);
+    });
   });
 
   it('skips hits without fields', async () => {
@@ -360,7 +488,8 @@ describe('getSession', () => {
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse([events[0], undefined]));
+      .mockResolvedValueOnce(eventsResponse([events[0], undefined]))
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 
@@ -372,7 +501,8 @@ describe('getSession', () => {
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(3_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)));
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 
@@ -400,7 +530,8 @@ describe('getSession', () => {
       )
       .mockResolvedValueOnce(
         eventsResponse([load(0), lcp(1_000, 1200), load(20_000), lcp(21_000, 2400)])
-      );
+      )
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 
@@ -415,7 +546,8 @@ describe('getSession', () => {
   it('does not throw when the summary has no start or end time', async () => {
     client.search
       .mockResolvedValueOnce(summaryResponse(sessionSource({})))
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)));
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 

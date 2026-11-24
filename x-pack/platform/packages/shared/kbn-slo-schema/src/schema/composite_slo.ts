@@ -6,37 +6,32 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
+import { dateType, errorBudgetSchema, statusSchema } from './common';
+import { durationType } from './duration';
+import { occurrencesBudgetingMethodSchema, sloIdSchema, targetSchema } from './slo';
+import { rollingTimeWindowTypeSchema } from './time_window';
 
 const COMPOSITE_SLO_MIN_MEMBERS = 2;
 const COMPOSITE_SLO_MAX_MEMBERS = 25;
 
-const compositeSloIdSchema = lazySchema(() =>
-  z
-    .string()
-    .min(8)
-    .max(48)
-    .regex(
-      /^[a-z0-9-_]+$/,
-      'Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores'
-    )
-);
-
 const compositeTagsSchema = z.array(z.string()).max(30);
 
-const compositeTargetSchema = z.object({ target: z.number() });
+const compositeRollingTimeWindowSchema = lazySchema(() =>
+  z.object({
+    duration: durationType.describe(
+      'The rolling duration formatted as {duration}{unit}, for example 30d'
+    ),
+    type: rollingTimeWindowTypeSchema,
+  })
+);
 
-const compositeOccurrencesBudgetingMethodSchema = z.literal('occurrences');
-
-const compositeRollingTimeWindowSchema = z.object({
-  duration: z.string(),
-  type: z.literal('rolling'),
-});
-
-const compositeSloMemberSchema = z.object({
-  sloId: compositeSloIdSchema,
-  weight: z.number().int().positive(),
-  instanceId: z.string().optional(),
-});
+const compositeSloMemberSchema = lazySchema(() =>
+  z.object({
+    sloId: sloIdSchema,
+    weight: z.number().int().positive(),
+    instanceId: z.string().optional(),
+  })
+);
 
 const compositeSloMembersSchema = z
   .array(compositeSloMemberSchema)
@@ -52,36 +47,24 @@ const compositeSloMembersSchema = z
 
 const compositeMethodSchema = z.literal('weightedAverage');
 
-const compositeErrorBudgetSchema = z.object({
-  initial: z.number(),
-  consumed: z.number(),
-  remaining: z.number(),
-  isEstimated: z.boolean(),
-});
-
-const compositeStatusSchema = z.union([
-  z.literal('NO_DATA'),
-  z.literal('HEALTHY'),
-  z.literal('DEGRADING'),
-  z.literal('VIOLATED'),
-]);
-
-const compositeSloBaseDefinitionSchema = z.object({
-  id: compositeSloIdSchema,
-  name: z.string(),
-  description: z.string(),
-  compositeMethod: compositeMethodSchema,
-  timeWindow: compositeRollingTimeWindowSchema,
-  budgetingMethod: compositeOccurrencesBudgetingMethodSchema,
-  objective: compositeTargetSchema,
-  tags: compositeTagsSchema,
-  enabled: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-  createdBy: z.string(),
-  updatedBy: z.string(),
-  version: z.number(),
-});
+const compositeSloBaseDefinitionSchema = lazySchema(() =>
+  z.object({
+    id: sloIdSchema,
+    name: z.string(),
+    description: z.string(),
+    compositeMethod: compositeMethodSchema,
+    timeWindow: compositeRollingTimeWindowSchema,
+    budgetingMethod: occurrencesBudgetingMethodSchema,
+    objective: targetSchema,
+    tags: compositeTagsSchema,
+    enabled: z.boolean(),
+    createdAt: dateType,
+    updatedAt: dateType,
+    createdBy: z.string(),
+    updatedBy: z.string(),
+    version: z.number(),
+  })
+);
 
 const compositeSloDefinitionSchema = compositeSloBaseDefinitionSchema.extend({
   members: z
@@ -95,25 +78,29 @@ const storedCompositeSloDefinitionSchema = compositeSloDefinitionSchema;
 // A member summary extends the plain definition member (`sloId`, `weight`, `instanceId`)
 // with the computed per-member health, so a `CompositeSLOMemberWithSummary` is assignable to
 // a `CompositeSLOMember`.
-const compositeSloMemberWithSummarySchema = compositeSloMemberSchema.extend({
-  name: z.string(),
-  normalisedWeight: z.number(),
-  sliValue: z.number(),
-  status: compositeStatusSchema,
-  errorBudget: compositeErrorBudgetSchema.optional(),
-  fiveMinuteBurnRate: z.number().optional(),
-  oneHourBurnRate: z.number().optional(),
-  oneDayBurnRate: z.number().optional(),
-});
+const compositeSloMemberWithSummarySchema = lazySchema(() =>
+  compositeSloMemberSchema.extend({
+    name: z.string(),
+    normalisedWeight: z.number(),
+    sliValue: z.number(),
+    status: statusSchema,
+    errorBudget: errorBudgetSchema.optional(),
+    fiveMinuteBurnRate: z.number().optional(),
+    oneHourBurnRate: z.number().optional(),
+    oneDayBurnRate: z.number().optional(),
+  })
+);
 
-const compositeSloSummarySchema = z.object({
-  sliValue: z.number(),
-  errorBudget: compositeErrorBudgetSchema,
-  status: compositeStatusSchema,
-  fiveMinuteBurnRate: z.number(),
-  oneHourBurnRate: z.number(),
-  oneDayBurnRate: z.number(),
-});
+const compositeSloSummarySchema = lazySchema(() =>
+  z.object({
+    sliValue: z.number(),
+    errorBudget: errorBudgetSchema,
+    status: statusSchema,
+    fiveMinuteBurnRate: z.number(),
+    oneHourBurnRate: z.number(),
+    oneDayBurnRate: z.number(),
+  })
+);
 
 const compositeSloDefinitionResponseSchema = compositeSloDefinitionSchema;
 
@@ -126,8 +113,8 @@ const compositeSloWithSummaryResponseSchema = compositeSloDefinitionSchema.exten
 
 type CompositeSLOMemberWithSummary = z.infer<typeof compositeSloMemberWithSummarySchema>;
 type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
-type CompositeSLODefinitionResponse = z.infer<typeof compositeSloDefinitionResponseSchema>;
-type CompositeSLOWithSummaryResponse = z.infer<typeof compositeSloWithSummaryResponseSchema>;
+type CompositeSLODefinitionResponse = z.input<typeof compositeSloDefinitionResponseSchema>;
+type CompositeSLOWithSummaryResponse = z.input<typeof compositeSloWithSummaryResponseSchema>;
 
 export type {
   CompositeSLOMemberWithSummary,
@@ -139,16 +126,11 @@ export type {
 export {
   COMPOSITE_SLO_MIN_MEMBERS,
   COMPOSITE_SLO_MAX_MEMBERS,
-  compositeSloIdSchema,
   compositeTagsSchema,
-  compositeTargetSchema,
-  compositeOccurrencesBudgetingMethodSchema,
   compositeRollingTimeWindowSchema,
   compositeSloMemberSchema,
   compositeSloMembersSchema,
   compositeMethodSchema,
-  compositeErrorBudgetSchema,
-  compositeStatusSchema,
   compositeSloBaseDefinitionSchema,
   compositeSloDefinitionSchema,
   storedCompositeSloDefinitionSchema,

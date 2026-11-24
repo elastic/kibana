@@ -1,0 +1,194 @@
+{
+  "operations": {
+    "cancelCommand": [
+      {
+        "method": "post",
+        "path": "/CancelCommand",
+        "source": "ssm"
+      }
+    ],
+    "describeInstanceInformation": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "InstanceInformationList",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/DescribeInstanceInformation",
+        "source": "ssm"
+      }
+    ],
+    "findNodesByInventory": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "Entities",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/GetInventory",
+        "source": "ssm"
+      }
+    ],
+    "getAutomationExecution": [
+      {
+        "method": "post",
+        "path": "/GetAutomationExecution",
+        "source": "ssm"
+      }
+    ],
+    "getCommandInvocation": [
+      {
+        "method": "post",
+        "path": "/GetCommandInvocation",
+        "source": "ssm"
+      }
+    ],
+    "getDocument": [
+      {
+        "method": "post",
+        "path": "/GetDocument",
+        "source": "ssm"
+      }
+    ],
+    "getInventory": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "Entries",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/ListInventoryEntries",
+        "source": "ssm"
+      }
+    ],
+    "getParameter": [
+      {
+        "method": "post",
+        "path": "/GetParameter",
+        "source": "ssm"
+      }
+    ],
+    "listAutomationExecutions": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "AutomationExecutionMetadataList",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/DescribeAutomationExecutions",
+        "source": "ssm"
+      }
+    ],
+    "listCommands": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "Commands",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/ListCommands",
+        "source": "ssm"
+      }
+    ],
+    "listDocuments": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "DocumentIdentifiers",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/ListDocuments",
+        "source": "ssm"
+      }
+    ],
+    "putParameter": [
+      {
+        "method": "post",
+        "path": "/GetParameter",
+        "source": "ssm"
+      },
+      {
+        "method": "post",
+        "path": "/PutParameter",
+        "source": "ssm"
+      }
+    ],
+    "sendCommand": [
+      {
+        "method": "post",
+        "path": "/SendCommand",
+        "source": "ssm"
+      }
+    ],
+    "startAutomationExecution": [
+      {
+        "method": "post",
+        "path": "/StartAutomationExecution",
+        "source": "ssm"
+      }
+    ],
+    "stopAutomationExecution": [
+      {
+        "method": "post",
+        "path": "/StopAutomationExecution",
+        "source": "ssm"
+      }
+    ]
+  },
+  "sources": {
+    "ssm": {
+      "apiVersion": "2014-11-06",
+      "fetchedAt": "2026-11-17T10:50:49.641Z",
+      "format": "smithy",
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/main/models/ssm/service/2014-11-06/ssm-2014-11-06.json"
+    }
+  }
+}

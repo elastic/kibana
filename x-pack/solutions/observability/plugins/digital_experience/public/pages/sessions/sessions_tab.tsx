@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
-import { omitBy, isUndefined } from 'lodash';
 import {
   EuiButton,
   EuiCode,
@@ -21,21 +20,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
-import { useAbortableAsync } from '@kbn/react-hooks';
 import { getDateISORange } from '@kbn/timerange';
 import { SESSIONS_LOOKBACK_DAYS, type SessionsStatus } from '../../../common/sessions';
 import type { ApplicationSource } from '../../../common/types/applications';
-import { canManageSessions } from '../../capabilities';
 import { ColumnSelector } from '../../components/column_selector';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../ebt_constants';
-import { useApiClient } from '../../hooks/use_api_client';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useFormatters } from '../../hooks/use_formatters';
-import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useVisibleColumns } from '../../hooks/use_visible_columns';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
@@ -47,15 +42,17 @@ import {
   SessionsRetentionCallout,
   SessionsStatusCallout,
 } from './components/sessions_status_prompts';
+import { TurnOffSessionsButton } from './components/turn_off_sessions_button';
 import {
   SESSIONS_HIDDEN_BY_DEFAULT,
   SESSIONS_OPTIONAL_COLUMNS,
   SESSIONS_OPTIONAL_COLUMN_IDS,
   SessionsTable,
 } from './components/sessions_table';
+import { useSessionsList } from './hooks/sessions_list_request';
 import { useSessionsListQuery } from './hooks/use_sessions_list_query';
-import { useSessionsStatus } from './hooks/use_sessions_status';
-import { DURATION_BUCKETS, pickSessionsListQuery } from '../../utils/sessions_list_query';
+import { useSessionsStatus } from '../../application/sessions_status_provider';
+import { pickSessionsListQuery } from '../../utils/sessions_list_query';
 
 /** The attribute EDOT Browser stamps on every span and log of a session. */
 const SESSION_ID_FIELD = 'session.id';
@@ -65,9 +62,6 @@ const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.sessions.hiddenColum
 const LOADING_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.loadingMessage', {
   defaultMessage: 'Loading sessions',
 });
-
-/** How often the status is checked again while sessions rebuild in the background. */
-const STATUS_REFRESH_MS = 30_000;
 
 const statusLoadingPrompt = (
   <EuiEmptyPrompt
@@ -178,14 +172,16 @@ function SessionsList({
   source,
   status,
   onRefreshStatus,
+  headerAction,
 }: {
   serviceName: string;
   source: ApplicationSource;
   status: SessionsStatus;
   onRefreshStatus: () => void;
+  /** Shown beside how fresh the sessions are. */
+  headerAction?: ReactNode;
 }) {
   const { rebuilding } = status;
-  const apiClient = useApiClient();
   const formatters = useFormatters();
   const { timeRange } = useTimeRange();
   const { environment } = useEnvironment();
@@ -216,52 +212,7 @@ function SessionsList({
     }
   }, [timeRange, environment, state.page, update, history]);
 
-  const {
-    value: response,
-    loading,
-    error,
-    refresh,
-  } = useAbortableAsync(
-    async ({ signal }) => {
-      const { startDate, endDate } = getDateISORange({
-        from: timeRange.rangeFrom,
-        to: timeRange.rangeTo,
-      });
-      const duration = DURATION_BUCKETS.find(({ id }) => id === state.duration);
-      return apiClient.fetch(
-        'GET /internal/digital_experience/applications/{serviceName}/sessions',
-        {
-          signal,
-          params: {
-            path: { serviceName },
-            query: omitBy(
-              {
-                start: startDate,
-                end: endDate,
-                query: state.search,
-                browser: state.browser,
-                os: state.os,
-                country: state.country,
-                entryPage: state.entryPage,
-                environment,
-                withJsErrors: state.withJsErrors ? 'true' : undefined,
-                withFailedRequests: state.withFailedRequests ? 'true' : undefined,
-                minDurationMs: duration?.minDurationMs,
-                maxDurationMs: duration?.maxDurationMs,
-                sortField: state.sortField,
-                sortDirection: state.sortDirection,
-                page: state.page,
-                perPage: state.perPage,
-              },
-              isUndefined
-            ) as { start: string; end: string },
-          },
-        }
-      );
-    },
-    [apiClient, serviceName, timeRange, environment, state],
-    { unsetValueOnError: true }
-  );
+  const { value: response, loading, error, refresh } = useSessionsList({ serviceName, state });
   // Refresh checks the status too, so a finished rebuild shows without reloading.
   const refreshAll = useCallback(() => {
     refresh();
@@ -309,7 +260,12 @@ function SessionsList({
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <SessionsFreshness status={status} formatters={formatters} />
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <SessionsFreshness status={status} formatters={formatters} />
+            </EuiFlexItem>
+            {headerAction && <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TimeRangePicker onRefresh={refreshAll} />
@@ -319,6 +275,7 @@ function SessionsList({
       <SessionsRetentionCallout
         retentionDays={response?.retentionDays ?? status.retentionDays}
         rangeStart={rangeStart}
+        formatters={formatters}
       />
       <SessionsKpis kpis={response?.kpis} isLoading={isLoading} formatters={formatters} />
       <EuiSpacer size="m" />
@@ -373,20 +330,25 @@ export function SessionsTab({
   serviceName: string;
   source: ApplicationSource;
 }) {
-  const { application } = useKibanaServices();
-  const canManage = canManageSessions(application.capabilities);
-  const { status, error, refresh, enable, enabling, enableError } = useSessionsStatus();
-  const enableProps = { canManage, onEnable: enable, enabling, enableError };
-
-  // A rebuild finishes in the background, so check back until it does.
-  const rebuilding = status?.rebuilding === true;
-  useEffect(() => {
-    if (!rebuilding) {
-      return;
-    }
-    const interval = setInterval(refresh, STATUS_REFRESH_MS);
-    return () => clearInterval(interval);
-  }, [rebuilding, refresh]);
+  const {
+    status,
+    error,
+    refresh,
+    enable,
+    enabling,
+    enableError,
+    disable,
+    disabling,
+    disableError,
+  } = useSessionsStatus();
+  const canManage = status?.canManage === true;
+  const enableProps = {
+    canEnable: status?.canEnable === true,
+    canManage,
+    onEnable: enable,
+    enabling,
+    enableError,
+  };
 
   // A failed background refresh keeps the last status.
   if (error && !status) {
@@ -407,7 +369,7 @@ export function SessionsTab({
     return statusLoadingPrompt;
   }
   if (!status.installed) {
-    return <EnableSessionsPrompt {...enableProps} />;
+    return <EnableSessionsPrompt {...enableProps} setUpBlocker={status.setUpBlocker} />;
   }
   return (
     <>
@@ -419,6 +381,15 @@ export function SessionsTab({
         source={source}
         status={status}
         onRefreshStatus={refresh}
+        headerAction={
+          canManage && !status.disabled ? (
+            <TurnOffSessionsButton
+              onDisable={disable}
+              disabling={disabling}
+              disableError={disableError}
+            />
+          ) : undefined
+        }
       />
     </>
   );

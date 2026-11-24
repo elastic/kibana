@@ -203,10 +203,11 @@ export const KiViewer = ({ aiIndexId, selectedKi: { kiId, index } }: KiViewerPro
         alignItems="center"
         gutterSize="none"
         responsive={false}
+        wrap
         css={styles.titleRow}
         data-test-subj="contextKiViewerTitleRow"
       >
-        <EuiFlexItem>
+        <EuiFlexItem css={styles.titleItem}>
           {document ? (
             <EuiTitle size="xs">
               <h3 css={styles.title} data-test-subj="contextKiViewerTitle">

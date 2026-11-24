@@ -58,7 +58,8 @@ export const sessionDocumentId = (serviceName: string, sessionId: string): strin
     .update(JSON.stringify([serviceName, sessionId]))
     .digest('base64url');
 
-const searchValues = (values: Array<string | null>): string[] => [
+/** The lowercased values, without repeats, that a search of the summaries matches. */
+export const searchValues = (values: Array<string | null>): string[] => [
   ...new Set(values.flatMap((value) => (value ? [value.toLowerCase()] : []))),
 ];
 
@@ -98,6 +99,10 @@ export const toSessionDocuments = (rows: EsqlRow[]): SessionDocument[] =>
         page_load_count: numberOr(row.page_load_count, 0),
         click_count: numberOr(row.click_count, 0),
         js_error_count: numberOr(row.js_error_count, 0),
+        load_time: {
+          p75: numberOr(row.load_time_p75, null),
+          count: numberOr(row.load_time_samples, 0),
+        },
         http_request_count: numberOr(row.http_request_count, 0),
         http_failed_request_count: numberOr(row.http_failed_request_count, 0),
         // Bounced when the visit never left the page it landed on: the pages it saw, not the

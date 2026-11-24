@@ -12,24 +12,24 @@ import { ListKiBody } from './list_ki_body';
 import type { ListKiGroup } from './list_ki_groups_helpers';
 import { ListKiPanel } from './list_ki_panel';
 
-const mockUseListKi = jest.fn();
+const mockUseListKiGroups = jest.fn();
 
-jest.mock('../../../hooks/use_list_ki', () => ({
-  useListKi: (...args: unknown[]) => mockUseListKi(...args),
+jest.mock('../../../hooks/use_list_ki_groups', () => ({
+  useListKiGroups: (...args: unknown[]) => mockUseListKiGroups(...args),
 }));
 
 jest.mock('../../../hooks/use_list_ki_by_type', () => ({
   useListKiByType: () => ({}),
 }));
 
-const listResult = (overrides: Record<string, unknown> = {}) => ({
-  kis: [],
+const groupsResult = (overrides: Record<string, unknown> = {}) => ({
+  groups: [],
   total: 0,
-  summary: { total: 0, countsByType: [] },
+  totalOther: 0,
   isLoading: false,
   isFetching: false,
+  isPreviousData: false,
   error: undefined,
-  refetch: jest.fn(),
   ...overrides,
 });
 
@@ -39,14 +39,14 @@ describe('ListKiBody', () => {
   });
 
   it('shows loading skeleton on first load', () => {
-    mockUseListKi.mockReturnValue(listResult({ isLoading: true, isFetching: true }));
+    mockUseListKiGroups.mockReturnValue(groupsResult({ isLoading: true, isFetching: true }));
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     expect(screen.getByTestId('contextListKiLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('contextListKiList')).not.toBeInTheDocument();
   });
 
   it('shows error state', () => {
-    mockUseListKi.mockReturnValue(listResult({ error: new Error('boom') }));
+    mockUseListKiGroups.mockReturnValue(groupsResult({ error: new Error('boom') }));
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     expect(screen.getByTestId('contextListKiError')).toHaveTextContent(
       'Unable to load Knowledge documents.'
@@ -54,11 +54,16 @@ describe('ListKiBody', () => {
   });
 
   it('marks the list busy while refetching results', () => {
-    mockUseListKi.mockReturnValue(
-      listResult({
-        kis: [{ id: 'ki-1', index: 'idx', type: 'playbook', title: 'Refund playbook' }],
+    mockUseListKiGroups.mockReturnValue(
+      groupsResult({
+        groups: [
+          {
+            type: 'playbook',
+            count: 1,
+            kis: [{ id: 'ki-1', index: 'idx', type: 'playbook', title: 'Refund playbook' }],
+          },
+        ],
         total: 1,
-        summary: { total: 1, countsByType: [{ type: 'playbook', count: 1 }] },
         isFetching: true,
       })
     );
@@ -67,16 +72,16 @@ describe('ListKiBody', () => {
   });
 
   it('shows empty state without filters', () => {
-    mockUseListKi.mockReturnValue(listResult());
+    mockUseListKiGroups.mockReturnValue(groupsResult());
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     expect(screen.getByTestId('contextListKiEmpty')).toBeInTheDocument();
     expect(screen.getByTestId('contextListKiSearchBox')).toBeInTheDocument();
-    expect(screen.getByTestId('contextListKiTypeFilters')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiTiles')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextListKiViewerColumn')).not.toBeInTheDocument();
   });
 
   it('shows "Nothing matches" with Clear filters when filters hide everything', () => {
-    mockUseListKi.mockReturnValue(listResult());
+    mockUseListKiGroups.mockReturnValue(groupsResult());
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     fireEvent.change(screen.getByTestId('contextListKiStatusFilter'), {
       target: { value: 'deleted' },
@@ -89,12 +94,14 @@ describe('ListKiBody', () => {
 
     fireEvent.click(screen.getByTestId('contextListKiClearFilters'));
     expect(screen.getByTestId('contextListKiStatusFilter')).toHaveValue('active');
-    expect(mockUseListKi).toHaveBeenLastCalledWith(
-      expect.objectContaining({ status: ['active'], query: undefined, type: undefined })
+    expect(mockUseListKiGroups).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: ['active'], query: undefined })
     );
   });
   describe('with a selected document', () => {
     const group: ListKiGroup = {
+      key: 'type:playbook',
+      kind: 'type',
       type: 'playbook',
       count: 1,
       kis: [

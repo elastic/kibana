@@ -8,7 +8,7 @@
  */
 
 import { of } from 'rxjs';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { IEsqlSearchResult, IKibanaSearchResponse } from '@kbn/search-types';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import { fetchExpandedDoc } from './fetch_expanded_doc';
@@ -23,6 +23,17 @@ const setup = (response: IKibanaSearchResponse) => {
   return {
     data: services.data,
     getSearchParams: () => jest.mocked(services.data.search.search).mock.calls[0][0],
+  };
+};
+
+const setupEsql = (rawResponse: IEsqlSearchResult['rawResponse']) => {
+  const services = createDiscoverServicesMock();
+
+  jest.mocked(services.data.search.esql).mockResolvedValue({ rawResponse });
+
+  return {
+    data: services.data,
+    getEsqlParams: () => jest.mocked(services.data.search.esql).mock.calls[0][0],
   };
 };
 
@@ -76,19 +87,17 @@ describe('fetchExpandedDoc', () => {
   });
 
   describe('ES|QL mode', () => {
-    const esqlResponse: IKibanaSearchResponse = {
-      rawResponse: {
-        columns: [
-          { name: '_index', type: 'keyword' },
-          { name: '_id', type: 'keyword' },
-          { name: 'message', type: 'keyword' },
-        ],
-        values: [[ref.index, ref.id, 'hello']],
-      },
+    const esqlResponse: IEsqlSearchResult['rawResponse'] = {
+      columns: [
+        { name: '_index', type: 'keyword' },
+        { name: '_id', type: 'keyword' },
+        { name: 'message', type: 'keyword' },
+      ],
+      values: [[ref.index, ref.id, 'hello']],
     };
 
     it('preserves the current query pipeline when fetching the document', async () => {
-      const { data, getSearchParams } = setup(esqlResponse);
+      const { data, getEsqlParams } = setupEsql(esqlResponse);
 
       await fetchExpandedDoc({
         ref,
@@ -98,13 +107,13 @@ describe('fetchExpandedDoc', () => {
         abortSignal: new AbortController().signal,
       });
 
-      expect(getSearchParams().params.query).toBe(
+      expect(getEsqlParams().query).toBe(
         `FROM logs-* METADATA _id, _index | WHERE _index == "${ref.index}" AND _id == "${ref.id}" | EVAL derived = message | LIMIT 1`
       );
     });
 
     it('filters a TS query when fetching the document', async () => {
-      const { data, getSearchParams } = setup(esqlResponse);
+      const { data, getEsqlParams } = setupEsql(esqlResponse);
 
       await fetchExpandedDoc({
         ref,
@@ -114,13 +123,13 @@ describe('fetchExpandedDoc', () => {
         abortSignal: new AbortController().signal,
       });
 
-      expect(getSearchParams().params.query).toBe(
+      expect(getEsqlParams().query).toBe(
         `TS metrics-* METADATA _id, _index | WHERE _index == "${ref.index}" AND _id == "${ref.id}" | LIMIT 1`
       );
     });
 
     it('escapes document identifiers when building the query', async () => {
-      const { data, getSearchParams } = setup(esqlResponse);
+      const { data, getEsqlParams } = setupEsql(esqlResponse);
 
       await fetchExpandedDoc({
         ref: { id: 'doc-"1\\path', index: 'logs-"quoted' },
@@ -130,13 +139,13 @@ describe('fetchExpandedDoc', () => {
         abortSignal: new AbortController().signal,
       });
 
-      expect(getSearchParams().params.query).toBe(
+      expect(getEsqlParams().query).toBe(
         'FROM logs-* METADATA _id, _index | WHERE _index == "logs-\\"quoted" AND _id == "doc-\\"1\\\\path" | LIMIT 1'
       );
     });
 
     it('builds a record shaped like the ones the main ES|QL search produces', async () => {
-      const { data } = setup(esqlResponse);
+      const { data } = setupEsql(esqlResponse);
 
       const record = await fetchExpandedDoc({
         ref,
@@ -152,7 +161,7 @@ describe('fetchExpandedDoc', () => {
     });
 
     it('returns undefined when the document no longer exists', async () => {
-      const { data } = setup({ rawResponse: { columns: [], values: [] } });
+      const { data } = setupEsql({ columns: [], values: [] });
 
       const record = await fetchExpandedDoc({
         ref,

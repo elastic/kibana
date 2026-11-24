@@ -13,23 +13,64 @@ import React, { useId } from 'react';
 import { MAX_KI_PAGE_SIZE } from '../../../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import type { KiListItem } from '../../../../../common/http_api/knowledge_indicators';
+import { formatKiTypeLabel } from '../../../utils/ki_display';
 import { kiLabelCapitalizeCss } from '../shared/ki_type_display';
-import { getListKiTypeFilterLabel } from './list_ki_helpers';
 import type { ListKiGroup as ListKiGroupData } from './list_ki_groups_helpers';
 import { useListKiGroupsStyles } from './list_ki_groups_styles';
 import { ListKiRow } from './list_ki_row';
+import { otherTileLabel } from './list_ki_tiles_helpers';
 
 interface ListKiGroupProps {
   group: ListKiGroupData;
   isFirst: boolean;
   isCollapsed: boolean;
-  onToggle: (type: string) => void;
+  onToggle: (key: string) => void;
   isKiSelected: (ki: KiListItem) => boolean;
   onSelectKi: (ki: KiListItem) => void;
   onHoverKi: (ki: KiListItem) => void;
-  onShowMore: (type: string, loadedCount: number) => void;
+  onShowMore: (key: string, loadedCount: number) => void;
   discoverHref?: string;
 }
+
+const DiscoverCapLink = ({ discoverHref }: { discoverHref: string }) => (
+  <EuiLink
+    href={discoverHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    data-test-subj="contextListKiCapReachedDiscoverLink"
+    {...getEbtProps({
+      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+      action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_CAP_REACHED,
+    })}
+  >
+    <FormattedMessage
+      id="xpack.contextEngine.aiIndexDetail.listKi.capReachedDiscoverLink"
+      defaultMessage="Open in Discover"
+    />
+  </EuiLink>
+);
+
+const OtherCapReachedMessage = ({ discoverHref }: { discoverHref?: string }) => (
+  <EuiText size="xs" color="subdued" data-test-subj="contextListKiCapReached">
+    <p>
+      {discoverHref ? (
+        <FormattedMessage
+          id="xpack.contextEngine.aiIndexDetail.listKi.otherCapReachedWithDiscover"
+          defaultMessage="Showing the first {count}. {discoverLink} to view all."
+          values={{
+            count: MAX_KI_PAGE_SIZE,
+            discoverLink: <DiscoverCapLink discoverHref={discoverHref} />,
+          }}
+        />
+      ) : (
+        i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.otherCapReached', {
+          defaultMessage: 'Showing the first {count}.',
+          values: { count: MAX_KI_PAGE_SIZE },
+        })
+      )}
+    </p>
+  </EuiText>
+);
 
 const CapReachedMessage = ({ discoverHref }: { discoverHref?: string }) => (
   <EuiText size="xs" color="subdued" data-test-subj="contextListKiCapReached">
@@ -40,23 +81,7 @@ const CapReachedMessage = ({ discoverHref }: { discoverHref?: string }) => (
           defaultMessage="Showing the first {count} of this type. {discoverLink} to view all Knowledge documents."
           values={{
             count: MAX_KI_PAGE_SIZE,
-            discoverLink: (
-              <EuiLink
-                href={discoverHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-test-subj="contextListKiCapReachedDiscoverLink"
-                {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
-                  action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_CAP_REACHED,
-                })}
-              >
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.listKi.capReachedDiscoverLink"
-                  defaultMessage="Open in Discover"
-                />
-              </EuiLink>
-            ),
+            discoverLink: <DiscoverCapLink discoverHref={discoverHref} />,
           }}
         />
       ) : (
@@ -82,17 +107,22 @@ export const ListKiGroup = ({
 }: ListKiGroupProps) => {
   const styles = useListKiGroupsStyles();
   const headerId = useId();
-  const { type, count, kis, canShowMore, isCapReached, isLoadingMore } = group;
-  const typeLabel = getListKiTypeFilterLabel(type);
+  const { key, kind, type, count, kis, canShowMore, isCapReached, isLoadingMore } = group;
+  const isOther = kind === 'other';
+  const typeLabel = isOther ? otherTileLabel : formatKiTypeLabel(type);
 
   return (
-    <div role="group" aria-labelledby={headerId} data-test-subj={`contextListKiGroup-${type}`}>
+    <div
+      role="group"
+      aria-labelledby={headerId}
+      data-test-subj={isOther ? 'contextListKiGroupOther' : `contextListKiGroup-${type}`}
+    >
       <button
         type="button"
         id={headerId}
         aria-expanded={!isCollapsed}
         css={[styles.groupHeader, isFirst && styles.firstGroupHeader]}
-        onClick={() => onToggle(type)}
+        onClick={() => onToggle(key)}
         data-test-subj="contextListKiGroupHeader"
       >
         <EuiIcon
@@ -122,7 +152,7 @@ export const ListKiGroup = ({
                 <EuiButton
                   size="s"
                   isLoading={isLoadingMore}
-                  onClick={() => onShowMore(type, kis.length)}
+                  onClick={() => onShowMore(key, kis.length)}
                   data-test-subj="contextListKiShowMoreButton"
                   {...getEbtProps({
                     element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
@@ -133,6 +163,8 @@ export const ListKiGroup = ({
                     defaultMessage: 'Show more',
                   })}
                 </EuiButton>
+              ) : isOther ? (
+                <OtherCapReachedMessage discoverHref={discoverHref} />
               ) : (
                 <CapReachedMessage discoverHref={discoverHref} />
               )}

@@ -41,6 +41,8 @@ const summaryRow = (overrides: EsqlRow = {}): EsqlRow => ({
   inp_samples: 0,
   inp_good: 0,
   inp_up_to_needs_improvement: 0,
+  load_time_p75: 1800,
+  load_time_samples: 1,
   ...overrides,
 });
 
@@ -102,6 +104,7 @@ describe('toSessionDocuments', () => {
         fcp: { count: 0, good: 0, needs_improvement: 0, poor: 0 },
         ttfb: { count: 0, good: 0, needs_improvement: 0, poor: 0 },
       },
+      load_time: { p75: 1800, count: 1 },
       search: [
         'session-a',
         'ana@example.com',
@@ -161,6 +164,14 @@ describe('toSessionDocuments', () => {
     ]);
 
     expect(document.journey).toEqual(['/x|y']);
+  });
+
+  it('has no load time without a page load that finished loading', () => {
+    const [document] = toSessionDocuments([
+      summaryRow({ load_time_p75: null, load_time_samples: 0 }),
+    ]);
+
+    expect(document.load_time).toEqual({ p75: null, count: 0 });
   });
 
   it('skips rows without a session, an application or times', () => {

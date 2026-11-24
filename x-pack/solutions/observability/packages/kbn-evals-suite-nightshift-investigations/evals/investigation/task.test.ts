@@ -13,6 +13,7 @@ import {
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import {
   INVESTIGATION_TIMEOUT_MS,
+  STILL_IN_PROGRESS_ERROR_PREFIX,
   UNPERSISTED_CONVERSATION_ERROR,
   runInvestigation,
   waitForInvestigationToEnd,
@@ -467,6 +468,60 @@ it('bounds polling and retains partial conversation evidence when an investigati
       conversation_round_count: 1,
       execution_error: 'Investigation was still in progress after 30 minutes',
     });
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('reports a finished investigation whose conversation never persisted as the harness failure', async () => {
+  const clock = jest
+    .spyOn(Date, 'now')
+    .mockReturnValueOnce(0)
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
+  try {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ investigation_id: 'lost' })
+      .mockResolvedValueOnce(investigation({ id: 'lost', in_progress: false }))
+      .mockResolvedValue({ rounds: [] });
+    const output = await runInvestigation(fetch, example, connector);
+    expect(output.execution_error).toBe(
+      'Investigation finished but its conversation had no rounds after 30 minutes'
+    );
+    // Not the agent-timeout prefix, so ORCA leaves the run unscored rather than scoring it 0.
+    expect(output.execution_error?.startsWith(STILL_IN_PROGRESS_ERROR_PREFIX)).toBe(false);
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('reports an agent failure the recovery read finds, not the provisional missing-conversation error', async () => {
+  const clock = jest
+    .spyOn(Date, 'now')
+    .mockReturnValueOnce(0)
+    .mockReturnValueOnce(0)
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
+  try {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ investigation_id: 'recovered' })
+      .mockResolvedValueOnce(investigation({ id: 'recovered', in_progress: false }))
+      // The last poll fails transiently, so the timeout sees no conversation.
+      .mockRejectedValueOnce(httpError(503, 'conversation index starting'))
+      .mockResolvedValue({
+        rounds: [
+          {
+            steps: [],
+            interruption: {
+              type: 'failed',
+              error: { code: 'internalError', message: 'connector timed out' },
+            },
+          },
+        ],
+      });
+    expect((await runInvestigation(fetch, example, connector)).execution_error).toBe(
+      'Investigation round failed: connector timed out'
+    );
   } finally {
     clock.mockRestore();
   }

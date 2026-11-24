@@ -30,6 +30,26 @@ export const SESSIONS_INDEX_TEMPLATE_NAME = BROWSER_SESSIONS_BASE_NAME;
 export const SESSIONS_TASK_TYPE = 'digital_experience:sessions-summaries';
 export const SESSIONS_TASK_ID = 'digital_experience:sessions-summaries';
 
+/** Bump when the mobile summary document or its mappings change, as `SESSIONS_VERSION`. */
+export const MOBILE_SESSIONS_VERSION = 1;
+const MOBILE_SESSIONS_BASE_NAME = `${SESSIONS_INDEX_PREFIX}mobile`;
+/** The EDOT Android and EDOT iOS session summaries, React Native apps' included. */
+export const MOBILE_SESSIONS_INDEX = `${MOBILE_SESSIONS_BASE_NAME}-${MOBILE_SESSIONS_VERSION}`;
+export const MOBILE_SESSIONS_INDEX_PATTERN = `${MOBILE_SESSIONS_BASE_NAME}-*`;
+export const MOBILE_SESSIONS_INDEX_TEMPLATE_NAME = MOBILE_SESSIONS_BASE_NAME;
+
+export const MOBILE_SESSIONS_TASK_TYPE = 'digital_experience:mobile-sessions-summaries';
+export const MOBILE_SESSIONS_TASK_ID = 'digital_experience:mobile-sessions-summaries';
+
+/**
+ * How often the mobile summaries are rebuilt for the last `MOBILE_SESSIONS_RECONCILE_HOURS`: the
+ * SDKs buffer events on the device and send crashes on the next launch, so events can arrive long
+ * after the regular pass summarized their time.
+ */
+export const MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES = 60;
+/** Events that arrive later than this after their time are not summarized. */
+export const MOBILE_SESSIONS_RECONCILE_HOURS = 24;
+
 /** How often the summaries task runs by default. */
 export const SESSIONS_DEFAULT_FREQUENCY = '1m';
 /**
@@ -88,7 +108,7 @@ export const SESSIONS_LIST_MAX_FACET_LENGTHS = {
 
 export type SessionWebVitals = Record<CoreWebVital, number | null>;
 
-export type SessionsHealth = 'missing' | 'healthy' | 'lagging' | 'degraded';
+export type SessionsHealth = 'missing' | 'disabled' | 'healthy' | 'lagging' | 'degraded';
 
 export interface SessionsSettings {
   /** How often the summaries task runs, as a time value such as `1m`. */
@@ -107,6 +127,11 @@ export interface SessionsRunError {
 export interface SessionsStatus {
   /** True once sessions are enabled: the summaries task is scheduled. */
   installed: boolean;
+  /**
+   * True when a user with the manage sessions privilege turned sessions off: the task no longer
+   * runs, the summaries built so far are kept, and only such a user can turn them back on.
+   */
+  disabled: boolean;
   health: SessionsHealth;
   /** Version of the summaries the task writes, and of this Kibana's. */
   installedVersion: number | null;
@@ -117,8 +142,8 @@ export interface SessionsStatus {
    */
   rebuilding: boolean;
   /**
-   * True when the task's API key was invalidated or expired: it can't run until a user with the
-   * manage sessions privilege enables sessions again.
+   * True when the task's API key was invalidated or expired: it can't run until a user who can set
+   * sessions up enables them again, which the app does by itself.
    */
   apiKeyInvalid: boolean;
   /** How far the summaries are behind, in seconds: every event before `summarizedUntil` is in. */
@@ -132,6 +157,34 @@ export interface SessionsStatus {
   enabledBy: string | null;
   /** Sessions are kept for this many days, so older time ranges have none. */
   retentionDays: number;
+  /**
+   * True when sessions aren't set up, or their API key no longer works, and the current user has
+   * every privilege enabling checks, so they can set them up. Never once they were turned off.
+   */
+  canEnable: boolean;
+  /**
+   * True when the current user can set sessions up, there are EDOT Browser or mobile events to
+   * summarize, and setting them up hasn't failed on this Kibana in the last hour: the app then sets
+   * them up without asking.
+   */
+  autoEnable: boolean;
+  /**
+   * True when the current user manages sessions in all spaces: they can turn sessions off and back
+   * on, and are told who enabled them and why a run failed.
+   */
+  canManage: boolean;
+  /**
+   * Why nobody can set sessions up, when they need setting up: Kibana has no Task Manager to run
+   * the summaries task, or no encryption key to store its API key.
+   */
+  setUpBlocker: SessionsSetUpBlocker | null;
+}
+
+export type SessionsSetUpBlocker = 'taskManager' | 'encryptionKey';
+
+/** The browser sessions status, and that of the mobile sessions, which their own task builds. */
+export interface SessionsStatusResponse extends SessionsStatus {
+  mobile: SessionsStatus;
 }
 
 const TIME_VALUE = /^([1-9][0-9]*)(s|m|h)$/;
@@ -221,24 +274,74 @@ export interface SessionListResponse {
   kpis: SessionListKpis;
 }
 
-export type SessionTimelineEventKind =
-  | 'page_view'
-  | 'click'
-  | 'error'
-  | 'web_vital'
-  | 'span'
-  | 'log';
+/** The events the journey lists; the API leaves out all others, which Discover shows. */
+export type SessionTimelineEventKind = 'page_view' | 'click' | 'error' | 'web_vital';
 
 export interface SessionTimelineEvent {
   kind: SessionTimelineEventKind;
   name: string;
   timestamp: string;
   offsetMs: number;
-  durationMs: number | null;
   page: string | null;
   detail: string | null;
+  /** The stack trace of an error, when the browser reported one. */
+  stacktrace: string | null;
   traceId: string | null;
   spanId: string | null;
+}
+
+/** How long each network phase of a request took, in milliseconds; 0 when it didn't happen. */
+export interface SessionRequestPhases {
+  /** Queued before the DNS lookup or the connection started. */
+  queued: number;
+  dns: number;
+  /** TCP connection, TLS included. */
+  connect: number;
+  tls: number;
+  /** From sending the request to the first byte of the response. */
+  waiting: number;
+  download: number;
+}
+
+/** A network request of the session: the page document, a resource, or a fetch/XHR call. */
+export interface SessionRequest {
+  url: string;
+  /** The W3C `initiatorType`, e.g. `script` or `fetch`; `navigation` for the page document. */
+  initiatorType: string;
+  method: string | null;
+  statusCode: number | null;
+  failed: boolean;
+  /** When the request started, placed from the timings relative to its page's time origin. */
+  startTime: string;
+  durationMs: number;
+  /**
+   * The phases, unless the browser withheld them: a cross-origin resource whose server doesn't
+   * send `Timing-Allow-Origin` only reports when it started and ended.
+   */
+  phases: SessionRequestPhases | null;
+  /** The browser withheld the phases and sizes: `Timing-Allow-Origin` is missing. */
+  timingWithheld: boolean;
+  /** Served from the browser cache, without network transfer. */
+  cached: boolean;
+  /** Bytes over the network, headers included. */
+  transferSize: number | null;
+  /** Bytes of the response body after decompression. */
+  decodedBodySize: number | null;
+  renderBlocking: boolean;
+  protocol: string | null;
+  traceId: string | null;
+  spanId: string | null;
+  /** The index of the page visit the request belongs to, in `pageVisits`. */
+  visitIndex: number;
+}
+
+/** The milestones of a full page load, in milliseconds from the start of its navigation. */
+export interface SessionPageLoad {
+  navigationStart: string;
+  /** Time to first byte. */
+  responseStartMs: number | null;
+  domContentLoadedMs: number | null;
+  loadMs: number | null;
 }
 
 export interface SessionPageVisit {
@@ -251,6 +354,8 @@ export interface SessionPageVisit {
   clickCount: number;
   errorCount: number;
   webVitals: SessionWebVitals;
+  /** Set on a visit that loaded the page document, rather than an in-app navigation. */
+  load: SessionPageLoad | null;
 }
 
 export interface SessionDetailResponse {
@@ -258,6 +363,8 @@ export interface SessionDetailResponse {
   timeline: SessionTimelineEvent[];
   timelineTruncated: boolean;
   pageVisits: SessionPageVisit[];
+  requests: SessionRequest[];
+  requestsTruncated: boolean;
 }
 
 export const emptyWebVitals = (): SessionWebVitals => ({

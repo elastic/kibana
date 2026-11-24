@@ -96,7 +96,7 @@ describe('table', () => {
         rows: [['host-10'], ['host-9'], [null], ['host-1']],
         sort: { column: 0 },
       }).cells.map(([host]) => host)
-    ).toEqual(['Host', 'host-1', 'host-9', 'host-10', '']);
+    ).toEqual(['Host', 'host-1', 'host-9', 'host-10', '—']);
   });
 
   it('renders a native Slack table, numbers aligned right', () => {
@@ -114,7 +114,7 @@ describe('table', () => {
           ],
           [
             { type: 'raw_text', text: 'search' },
-            { type: 'raw_text', text: '' },
+            { type: 'raw_text', text: '—' },
           ],
           [
             { type: 'raw_text', text: 'checkout' },
