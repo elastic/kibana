@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DiscoverSessionApiEmbeddableOverrides } from '@kbn/as-code-discover-schema';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { FilterStateStore, type Filter, type Query } from '@kbn/es-query';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import { fromDiscoverSessionTab, toSessionTabAttributes } from './panel_tab';
+import {
+  fromDiscoverSessionTab,
+  getTableSettingsOverrides,
+  toSessionTabAttributes,
+} from './panel_tab';
 
 const INLINE_DATA_VIEW_ID = 'inline-data-view';
 
@@ -130,5 +135,27 @@ describe('toSessionTabAttributes', () => {
     expect(toSessionTabAttributes(sessionTab)).toMatchObject({
       serializedSearchSource: { filter: [rangeFilter] },
     });
+  });
+});
+
+describe('getTableSettingsOverrides', () => {
+  it('keeps every table setting the panel changes', () => {
+    // Required, so a new table setting cannot be left out of this test
+    const tableSettings: Required<DiscoverSessionApiEmbeddableOverrides> = {
+      column_order: ['message'],
+      column_settings: { message: { width: 100 } },
+      sort: [{ name: '@timestamp', direction: 'asc' }],
+      density: DataGridDensity.COMPACT,
+      header_row_height: 2,
+      row_height: 3,
+      rows_per_page: 25,
+      sample_size: 100,
+      documents_display_mode: 'json',
+      hide_nulls: true,
+      wrap_lines: false,
+      default_rendered_nodes: 50,
+    };
+
+    expect(getTableSettingsOverrides({}, tableSettings)).toEqual(tableSettings);
   });
 });
