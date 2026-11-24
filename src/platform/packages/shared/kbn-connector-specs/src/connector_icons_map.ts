@@ -454,4 +454,14 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.microsoft_sql_server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconmicrosoftsqlserver" */ './specs/microsoft_sql_server/icon'
+        )
+    ),
+  ],
 ]);
