@@ -501,12 +501,13 @@ export const RULE_GROUPS_ROW_ACTION = i18n.translate(
   { defaultMessage: 'Rule sets…' }
 );
 
-export const HIDE_SIDEBAR = i18n.translate('xpack.securitySolution.ruleGroups.sidebar.hide', {
-  defaultMessage: 'Hide rule sets',
+export const RULE_SET_LABEL = i18n.translate('xpack.securitySolution.ruleGroups.switcher.label', {
+  defaultMessage: 'Rule set:',
 });
-export const RULE_GROUPS_SHOW_SIDEBAR = i18n.translate(
-  'xpack.securitySolution.ruleGroups.sidebar.show',
-  { defaultMessage: 'Show rule sets' }
+
+export const CHOOSE_RULE_SET = i18n.translate(
+  'xpack.securitySolution.ruleGroups.switcher.ariaLabel',
+  { defaultMessage: 'Choose a rule set' }
 );
 
 export const STAT_ENABLED = i18n.translate('xpack.securitySolution.ruleGroups.header.statEnabled', {
