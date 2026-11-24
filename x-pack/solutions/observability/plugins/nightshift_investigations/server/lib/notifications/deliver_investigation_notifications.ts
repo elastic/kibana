@@ -8,6 +8,7 @@
 import { randomUUID } from 'crypto';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
+import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { InvestigationNotificationDestination } from '../../../common';
 import { prepareNotificationDelivery } from './notification_delivery';
 import type {
@@ -22,7 +23,7 @@ import type {
   NotificationRouting,
   NotificationDestination,
 } from './notification_routing';
-import { repliesUnderCallerMessage } from './notification_routing';
+import { notificationPhaseSchema } from './notification_routing';
 
 export interface DeliverInvestigationNotificationsResult {
   sent: number;
@@ -39,6 +40,7 @@ interface DeliverInvestigationNotificationsParams {
   notificationDestinations: InvestigationNotificationDestination[];
   investigationUrl: string;
   getExecute: () => Promise<ExecuteConnector>;
+  getIsomerRuntime: () => Promise<KibanaIsomerRuntime>;
   routingClient: NotificationRoutingClient;
   signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
@@ -59,7 +61,9 @@ const countAttempts = (
   const counts = { sent: 0, failed: 0, unconfirmed: 0 };
   for (const attempt of routing?.attempts ?? []) {
     if (attempt.execution_id === executionId && attempt.phase === phase) {
-      counts[attempt.status]++;
+      const status =
+        attempt.status === 'sent' || attempt.status === 'failed' ? attempt.status : 'unconfirmed';
+      counts[status]++;
     }
   }
   return counts;
@@ -79,38 +83,43 @@ const hasDeliveryAttempt = (
   );
 
 /**
- * The message this execution's phase posted or edited under the caller's message. Undefined for
- * other destinations and when that delivery was not confirmed.
+ * The message this execution's phase posted or edited, whether the root post, a reply in the
+ * retained thread, or a reply under the caller's message. Undefined when that delivery was not
+ * confirmed.
  */
 export const getSentMessageTs = (
   routing: NotificationRouting,
   executionId: string,
   destination: NotificationDestination,
   phase: NotificationPhase
-): string | undefined => {
-  if (!repliesUnderCallerMessage(destination)) {
-    return undefined;
-  }
-  return routing.attempts.find(
+): string | undefined =>
+  routing.attempts.find(
     (attempt) =>
       attempt.execution_id === executionId &&
       attempt.destination_id === destination.id &&
       attempt.phase === phase &&
       attempt.status === 'sent'
   )?.message_ts;
-};
 
-/** The thread's single message: the one this execution's started phase posted. */
+/** The execution's single message: the one its started phase posted, edited by the terminal phase. */
 export const getStartedMessageTs = (
   routing: NotificationRouting,
   executionId: string,
   destination: NotificationDestination
-): string | undefined => getSentMessageTs(routing, executionId, destination, 'started');
+): string | undefined =>
+  routing.attempts.find(
+    (attempt) =>
+      attempt.execution_id === executionId &&
+      attempt.destination_id === destination.id &&
+      attempt.phase === 'started' &&
+      attempt.status === 'sent'
+  )?.message_ts;
 
-const prepareDestinationDelivery = (
+const prepareDestinationDelivery = async (
   {
     investigation,
     investigationUrl,
+    getIsomerRuntime,
     executionId,
     phase,
     reason,
@@ -118,20 +127,22 @@ const prepareDestinationDelivery = (
   routing: NotificationRouting,
   destination: NotificationDestination,
   setupError?: string
-): PreparedDestinationDelivery => {
+): Promise<PreparedDestinationDelivery> => {
   const explicitParent = destination.params.thread_ts;
   const threadTs =
     destination.thread?.thread_ts ||
     (typeof explicitParent === 'string' && explicitParent) ||
     undefined;
-  const createsRoot = (phase === 'started' || phase === 'failed') && !threadTs;
+  const createsRoot =
+    (phase === 'started' || phase === 'failed' || phase === 'timed_out') && !threadTs;
   const uncertainRoot =
     !threadTs &&
     routing.attempts.some(
       (attempt) =>
         attempt.destination_id === destination.id &&
         attempt.creates_root &&
-        attempt.status === 'unconfirmed'
+        attempt.status !== 'sent' &&
+        attempt.status !== 'failed'
     );
   let diagnostic = setupError;
   if (uncertainRoot) {
@@ -146,6 +157,7 @@ const prepareDestinationDelivery = (
   let delivery: NotificationDelivery | undefined;
   try {
     delivery = prepareNotificationDelivery({
+      runtime: await getIsomerRuntime(),
       investigation,
       url: investigationUrl,
       phase,
@@ -260,7 +272,7 @@ const deliverToDestination = async (
   if (!destination) {
     throw new Error('Notification destination disappeared');
   }
-  const delivery = prepareDestinationDelivery(params, routing, destination, setupError);
+  const delivery = await prepareDestinationDelivery(params, routing, destination, setupError);
   if (signal.aborted) {
     return;
   }
@@ -296,7 +308,7 @@ const deliverToDestination = async (
  * Delivers one lifecycle phase for an investigation workflow execution and returns its persisted
  * sent, failed, and unconfirmed counts, including attempts encountered on replay.
  *
- * Started and failed phases initialize the execution's participants without changing an existing
+ * Started and unsuccessful phases initialize the execution's participants without changing an existing
  * snapshot; terminal phases select one outcome before posting or emitting lifecycle events.
  *
  * Resolves Actions once, then reads current routing for each destination, skips existing attempts,
@@ -326,10 +338,15 @@ export const deliverInvestigationNotifications = async (
   if (signal.aborted || !(await routingClient.isActive())) {
     return countAttempts(existingRouting, executionId, phase);
   }
-  if (!existingRouting && notificationDestinations.length === 0 && phase !== 'failed') {
+  if (
+    !existingRouting &&
+    notificationDestinations.length === 0 &&
+    phase !== 'failed' &&
+    phase !== 'timed_out'
+  ) {
     return countAttempts(existingRouting, executionId, phase);
   }
-  if (phase === 'failed') {
+  if (phase === 'failed' || phase === 'timed_out') {
     await routingClient.initialize(executionId, workflowId, notificationDestinations);
   }
   const routing =
@@ -340,11 +357,23 @@ export const deliverInvestigationNotifications = async (
   if (!execution || execution.workflow_id !== workflowId) {
     throw new Error('Notification execution was not initialized for this workflow');
   }
+  if (execution.terminal_phase) {
+    // A newer terminal outcome is authoritative even when this version cannot interpret it.
+    const terminalPhase = notificationPhaseSchema.safeParse(execution.terminal_phase);
+    if (!terminalPhase.success || terminalPhase.data === 'started') {
+      return countAttempts(routing, executionId, phase);
+    }
+  }
   if (phase !== 'started' && execution.terminal_phase !== phase) {
     return countAttempts(routing, executionId, phase);
   }
-  if (phase !== 'started' && !signal.aborted) {
-    await params.onTerminalPhaseSelected?.();
+  if (
+    phase !== 'started' &&
+    !signal.aborted &&
+    params.onTerminalPhaseSelected &&
+    (await routingClient.claimTerminalLifecycle(executionId, phase, randomUUID()))
+  ) {
+    await params.onTerminalPhaseSelected();
   }
   const hasEligibleDestinations = execution.destination_ids.some(
     (id) => !hasDeliveryAttempt(routing, executionId, id, phase)

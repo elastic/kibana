@@ -1143,6 +1143,98 @@ describe('policy preconfiguration', () => {
       expect(nonFatalErrorsB.length).toBe(0);
     });
 
+    describe('with disallowed overrides in kibana.yml', () => {
+      const configuredOverrides = {
+        'agent.logging.level': 'debug',
+        receivers: { otlp: {} },
+        'extensions.pprof.save_to_file': '/tmp/x',
+      };
+
+      const runWithPolicy = async (policy: PreconfiguredAgentPolicy) => {
+        const soClient = getPutPreconfiguredPackagesMock();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+        return {
+          soClient,
+          result: await ensurePreconfiguredPackagesAndPolicies(
+            soClient,
+            esClient,
+            [policy],
+            [],
+            mockDefaultOutput,
+            mockDefaultDownloadService,
+            DEFAULT_SPACE_ID
+          ),
+        };
+      };
+
+      it('should not store them when creating the policy', async () => {
+        const { soClient } = await runWithPolicy({
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          package_policies: [],
+          overrides: configuredOverrides,
+        });
+
+        expect(soClient.create).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ overrides: { 'agent.logging.level': 'debug' } }),
+          expect.anything()
+        );
+      });
+
+      it('should remove them from a stored managed policy', async () => {
+        mockConfiguredPolicies.set('test-id', {
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          package_policies: [],
+          is_managed: true,
+          overrides: configuredOverrides,
+        });
+
+        await runWithPolicy({
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          package_policies: [],
+          is_managed: true,
+          overrides: configuredOverrides,
+        });
+
+        expect(spyAgentPolicyServiceUpdate).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          'test-id',
+          expect.objectContaining({ overrides: { 'agent.logging.level': 'debug' } }),
+          { force: true }
+        );
+      });
+
+      it('should not update a managed policy that only differs by them', async () => {
+        mockConfiguredPolicies.set('test-id', {
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          package_policies: [],
+          is_managed: true,
+          overrides: { 'agent.logging.level': 'debug' },
+        });
+
+        await runWithPolicy({
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          package_policies: [],
+          is_managed: true,
+          overrides: configuredOverrides,
+        });
+
+        expect(spyAgentPolicyServiceUpdate).not.toHaveBeenCalled();
+      });
+    });
+
     it('should used a namespaced saved objet client if the agent policy space_id is set', async () => {
       const TEST_NAMESPACE = 'test';
       const namespacedSOClient = getPutPreconfiguredPackagesMock();
@@ -1450,6 +1542,16 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
       basePackagePolicy
     );
     expect(hasChanged).toBe(true);
+  });
+
+  it('should not return hasChanged when cleaned-up overrides are empty on both sides', () => {
+    // A policy whose overrides only held denied keys: the config is sanitized to `{}` and so is
+    // the stored policy after the setup cleanup. Storing `null` instead would bump every start.
+    const { hasChanged } = comparePreconfiguredPolicyToCurrent(
+      { ...baseConfig, overrides: {} },
+      { ...basePackagePolicy, overrides: {} }
+    );
+    expect(hasChanged).toBe(false);
   });
 
   it('should not return hasChanged when no top-level fields change', () => {

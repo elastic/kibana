@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { getESQLTimeField } from '@kbn/esql-utils';
+import { getESQLTimeField, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { resolveTimeField } from '@kbn/alerting-v2-utils';
 import { useDataFields } from '../../form/hooks/use_data_fields';
@@ -31,6 +31,8 @@ interface UseResolveTimeFieldParams {
    * that don't exist as Elasticsearch indices.
    */
   search?: ISearchGeneric;
+  /** CPS project routing the rule runs with, used unless the query sets its own. */
+  projectRouting?: string;
   /** When false, skips field resolution and auto-correction. Defaults to true. */
   enabled?: boolean;
 }
@@ -48,10 +50,16 @@ export const useResolveTimeField = ({
   http,
   dataViews,
   search,
+  projectRouting,
   enabled = true,
 }: UseResolveTimeFieldParams) => {
   const fromSourceQuery = useMemo(() => extractFromSourceQuery(query), [query]);
   const resolutionQuery = enabled ? fromSourceQuery : '';
+  // The source command alone drops any SET project_routing, so read it from the full query
+  const effectiveProjectRouting = useMemo(
+    () => getProjectRoutingFromEsqlQuery(query) ?? projectRouting,
+    [query, projectRouting]
+  );
 
   const {
     data: fieldMap,
@@ -62,6 +70,7 @@ export const useResolveTimeField = ({
     http,
     dataViews,
     search,
+    projectRouting: effectiveProjectRouting,
   });
 
   const dateFields = useMemo(
@@ -77,8 +86,12 @@ export const useResolveTimeField = ({
     enabled && Boolean(fromSourceQuery) && !isLoadingFields && dateFields.length === 0;
 
   const { data: apiTimeField, isLoading: isLoadingApiTimeField } = useQuery({
-    queryKey: ruleFormKeys.composeDiscoverApiTimeField(fromSourceQuery),
-    queryFn: () => getESQLTimeField({ query: fromSourceQuery, http }),
+    queryKey: [
+      ...ruleFormKeys.composeDiscoverApiTimeField(fromSourceQuery),
+      { projectRouting: effectiveProjectRouting },
+    ],
+    queryFn: () =>
+      getESQLTimeField({ query: fromSourceQuery, http, projectRouting: effectiveProjectRouting }),
     enabled: needsApiTimeField,
     refetchOnWindowFocus: false,
     retry: false,

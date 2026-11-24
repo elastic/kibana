@@ -39,6 +39,20 @@ describe('buildEaExecutionContext', () => {
     expect(first).not.toBe(second);
     expect(first).toEqual(second);
   });
+
+  it('appends the variant to the name and leaves the id untouched', () => {
+    expect(
+      buildEaExecutionContext(
+        EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_EXTRACT_TASK,
+        'entity_store:v2:extract_entity_task:host:default',
+        'host'
+      )
+    ).toEqual({
+      type: 'security_solution',
+      name: 'entity_analytics:entity_store_extract_task:host',
+      id: 'entity_store:v2:extract_entity_task:host:default',
+    });
+  });
 });
 
 describe('EA_EXECUTION_CONTEXT_NAMES', () => {

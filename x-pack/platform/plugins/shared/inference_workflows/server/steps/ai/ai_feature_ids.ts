@@ -12,7 +12,7 @@ export const AI_CLASSIFY_FEATURE_ID = 'ai_classify';
 
 /** Recommended endpoints for the workflows_ai feature. */
 export const WORKFLOWS_AI_RECOMMENDED_ENDPOINTS = [
-  '.anthropic-claude-4.6-sonnet-chat_completion',
-  '.anthropic-claude-4.6-opus-chat_completion',
-  '.openai-gpt-5.2-chat_completion',
+  '.anthropic-claude-5-sonnet-chat_completion', // Claude Sonnet 5, GA 2026-07-03
+  '.anthropic-claude-5-opus-chat_completion', // Claude Opus 5, GA 2026-07-24
+  '.openai-gpt-6-astra-chat_completion', // GPT-6 Astra, GA 2026-09-28
 ];

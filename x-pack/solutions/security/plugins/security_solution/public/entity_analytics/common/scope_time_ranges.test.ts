@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIME_RANGE_OPTIONS } from '../components/home/entities_grid/common';
+import { TIME_RANGE_OPTIONS } from '../components/home/queries/time_range';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../components/home/constants';
 import {
   getEntityAnalyticsNewHomeScopeId,

@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import { getFlyoutManagerStore } from '@elastic/eui';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import { ConversationTemplatesService } from '../services/conversation_templates';
 import { openConversationDetailsFlyout } from './open_conversation_details_flyout';
+import {
+  CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+  CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
+  CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
+} from './conversation_details_flyout_width';
 
 describe('openConversationDetailsFlyout', () => {
   const setup = () => {
+    localStorage.clear();
     const core = coreMock.createStart();
+    const conversationTemplatesService = new ConversationTemplatesService();
     const close = jest.fn();
     let resolveClosed: () => void = () => {};
     const onClosed = new Promise<void>((resolve) => {
@@ -25,17 +33,26 @@ describe('openConversationDetailsFlyout', () => {
     const open = ({
       onClose,
       trailingActions,
-    }: { onClose?: () => void; trailingActions?: EuiFlyoutMenuAction[] } = {}) =>
+    }: {
+      onClose?: () => void;
+      trailingActions?: EuiFlyoutMenuAction[];
+    } = {}) =>
       openConversationDetailsFlyout({
         core,
         conversationsService: { get: jest.fn() } as unknown as ConversationsService,
-        conversationTemplatesService: new ConversationTemplatesService(),
+        conversationTemplatesService,
         conversationId: 'conversation',
         onClose,
         trailingActions,
       });
 
-    return { core, close, open, closeFlyout: () => resolveClosed() };
+    return {
+      core,
+      close,
+      open,
+      conversationTemplatesService,
+      closeFlyout: () => resolveClosed(),
+    };
   };
 
   it('opens a managed flyout in the conversation details history group', async () => {
@@ -48,7 +65,7 @@ describe('openConversationDetailsFlyout', () => {
       expect.objectContaining({
         session: 'start',
         historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
-        title: 'Chat info',
+        title: 'Summary',
         type: 'push',
       })
     );
@@ -68,6 +85,51 @@ describe('openConversationDetailsFlyout', () => {
       expect.anything(),
       expect.objectContaining({ flyoutMenuProps: { trailingActions: [copyLink] } })
     );
+  });
+
+  it('opens resizable at the default width, within the shared min/max bounds', async () => {
+    const { core, open } = setup();
+
+    await open();
+
+    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options).toEqual(
+      expect.objectContaining({
+        size: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+        defaultSize: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+        minWidth: CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
+        maxWidth: CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
+        resizable: true,
+      })
+    );
+  });
+
+  it('reopens at the width the user resized it to', async () => {
+    const { core, open } = setup();
+
+    await open();
+    const [[, firstOptions]] = core.overlays.openSystemFlyout.mock.calls;
+    firstOptions?.onResize?.(620);
+
+    await open();
+
+    const [, [, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.size).toBe(620);
+    // A reset still returns to the default, not to the remembered width.
+    expect(options?.defaultSize).toBe(CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH);
+  });
+
+  it('clamps a remembered width to the allowed range', async () => {
+    const { core, open } = setup();
+
+    await open();
+    const [[, firstOptions]] = core.overlays.openSystemFlyout.mock.calls;
+    firstOptions?.onResize?.(2000);
+
+    await open();
+
+    const [, [, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.size).toBe(CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH);
   });
 
   it('renders no menu actions by default', async () => {
@@ -101,5 +163,53 @@ describe('openConversationDetailsFlyout', () => {
     dismiss();
 
     expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  describe('with flyouts stacked on it', () => {
+    const store = getFlyoutManagerStore();
+    const getSessionMainIds = () =>
+      store.getState().sessions.map(({ mainFlyoutId }) => mainFlyoutId);
+
+    afterEach(() => {
+      while (store.getState().sessions.length > 0) {
+        store.closeAllFlyouts();
+      }
+    });
+
+    it('closes them along with it through the handle', async () => {
+      const { core, close, open } = setup();
+
+      const dismiss = await open();
+      const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+      const flyoutId = options?.id;
+      if (!flyoutId) {
+        throw new Error('The flyout was opened without an id');
+      }
+      store.addFlyout(flyoutId, 'Summary', 'main', 'm', CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY);
+      store.addFlyout('entityFlyout', 'Host', 'main', 'm', CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY);
+
+      dismiss();
+
+      // The conversation flyout is the current session again, so closing it closes the group.
+      expect(getSessionMainIds()).toEqual([flyoutId]);
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves flyouts in other history groups alone', async () => {
+      const { core, open } = setup();
+
+      const dismiss = await open();
+      const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+      const flyoutId = options?.id;
+      if (!flyoutId) {
+        throw new Error('The flyout was opened without an id');
+      }
+      store.addFlyout('pageFlyout', 'Page', 'main', 'm', Symbol('page'));
+      store.addFlyout(flyoutId, 'Summary', 'main', 'm', CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY);
+
+      dismiss();
+
+      expect(getSessionMainIds()).toEqual(['pageFlyout', flyoutId]);
+    });
   });
 });

@@ -68,9 +68,16 @@ describe('describeDataset', () => {
       end: 200,
     });
 
+    const timeRange =
+      '@timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z"';
     expect(query.mock.calls[0][0].query).toBe('FROM logs-* | LIMIT 0');
-    expect(query.mock.calls[1][0].query).toBe('FROM logs-* METADATA _id, _source | LIMIT 1000');
-    expect(query.mock.calls[2][0].query).toBe('FROM logs-* | STATS total = COUNT(*)');
+    expect(query.mock.calls[1][0].query).toBe(
+      `FROM logs-* METADATA _id, _source | WHERE ${timeRange} | LIMIT 1000`
+    );
+    expect(query.mock.calls[2][0].query).toBe(
+      `FROM logs-* | WHERE ${timeRange} | STATS total = COUNT(*)`
+    );
+    expect(query.mock.calls[2][0]).not.toHaveProperty('filter');
     expect(analysis.total).toBe(2);
     expect(analysis.sampled).toBe(2);
     expect(analysis.fields).toEqual(

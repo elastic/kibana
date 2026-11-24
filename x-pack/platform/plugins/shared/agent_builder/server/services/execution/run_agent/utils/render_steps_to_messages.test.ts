@@ -18,6 +18,7 @@ import {
   ToolCallInvocation,
   ToolResultType,
   createInjectedContextStep,
+  createModelReasoningStep,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode, ExecutionStatus } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
@@ -129,8 +130,7 @@ describe('renderHistorySteps', () => {
   it('renders a grouped tool call with reasoning and wrapped results', async () => {
     const steps: ConversationRoundStep[] = [
       reasoning('group thought', { tool_call_group_id: 'g' }),
-      reasoning('why a', { tool_call_group_id: 'g', tool_call_id: 'a' }),
-      call('a', { tool_call_group_id: 'g' }),
+      call('a', { tool_call_group_id: 'g', intent: 'Looking up a' }),
       call('b', { tool_call_group_id: 'g' }),
     ];
     const messages = await renderHistorySteps({ steps });
@@ -139,12 +139,41 @@ describe('renderHistorySteps', () => {
     const [ai, toolA, toolB] = messages as [AIMessage, ToolMessage, ToolMessage];
     expect(ai.content).toBe('group thought');
     expect(ai.tool_calls).toEqual([
-      { id: 'a', name: 'my_tool', args: { _reasoning: 'why a', q: 'a' }, type: 'tool_call' },
+      { id: 'a', name: 'my_tool', args: { _intent: 'Looking up a', q: 'a' }, type: 'tool_call' },
       { id: 'b', name: 'my_tool', args: { q: 'b' }, type: 'tool_call' },
     ]);
     expect(toolA.tool_call_id).toBe('a');
     expect(toolA.content).toBe(wrapToolResultContent(JSON.stringify({ results: [other('a')] })));
     expect(toolB.tool_call_id).toBe('b');
+  });
+
+  it('ignores legacy reasoning bound to a tool call', async () => {
+    const steps: ConversationRoundStep[] = [
+      reasoning('legacy why', { tool_call_group_id: 'g', tool_call_id: 'a' }),
+      call('a', { tool_call_group_id: 'g' }),
+    ];
+    const [ai] = (await renderHistorySteps({ steps })) as [AIMessage];
+
+    expect(ai.tool_calls![0].args).toEqual({ q: 'a' });
+    expect(ai.content).toBe('');
+  });
+
+  it('never renders model reasoning, and keeps the tool call group it belongs to whole', async () => {
+    const steps: ConversationRoundStep[] = [
+      createModelReasoningStep({ reasoning: 'provider thoughts', tool_call_group_id: 'g' }),
+      reasoning('group thought', { tool_call_group_id: 'g' }),
+      call('a', { tool_call_group_id: 'g' }),
+      createModelReasoningStep({ reasoning: 'more provider thoughts', tool_call_group_id: 'g' }),
+      call('b', { tool_call_group_id: 'g' }),
+      createModelReasoningStep({ reasoning: 'final provider thoughts' }),
+    ];
+    const messages = await renderHistorySteps({ steps });
+
+    expect(types(messages)).toEqual(['ai', 'tool', 'tool']);
+    const [ai] = messages as [AIMessage];
+    expect(ai.content).toBe('group thought');
+    expect(ai.tool_calls?.map((toolCall) => toolCall.id)).toEqual(['a', 'b']);
+    expect(JSON.stringify(messages)).not.toContain('provider thoughts');
   });
 
   it('passes results through the transformer', async () => {
@@ -208,14 +237,13 @@ describe('renderHistorySteps', () => {
     );
   });
 
-  it('skips unanswered questions, todos, compaction and reasoning without a group', async () => {
+  it('skips unanswered questions, compaction and reasoning without a group', async () => {
     const steps: ConversationRoundStep[] = [
       {
         type: ConversationRoundStepType.askUserQuestion,
         prompt_id: 'p1',
         questions: [],
       },
-      { type: ConversationRoundStepType.updateTodos, todos: [] },
       reasoning('lonely'),
     ];
     expect(await renderHistorySteps({ steps })).toEqual([]);
@@ -242,6 +270,26 @@ describe('renderHistorySteps', () => {
     ];
     const messages = await renderHistorySteps({ steps });
     expect(types(messages)).toEqual(['human', 'human', 'human']);
+  });
+
+  it('renders an interim answer as the AI turn before the message that made the run continue', async () => {
+    const steps: ConversationRoundStep[] = [
+      { type: ConversationRoundStepType.interimAnswer, message: 'first answer' },
+      {
+        type: ConversationRoundStepType.deliveredMessage,
+        event_id: 'e1',
+        author: { type: 'user', id: 'u1' },
+        is_run_owner: true,
+        message: 'use a table',
+        delivered_at: '2026-01-01T00:00:00.000Z',
+        cycle: 1,
+        after_answer: true,
+      } as ConversationRoundStep,
+    ];
+    const messages = await renderHistorySteps({ steps });
+    expect(types(messages)).toEqual(['ai', 'human']);
+    expect(messages[0].content).toBe('first answer');
+    expect(String(messages[1].content)).toContain('while you were writing the answer above');
   });
 
   it('renders workflow model context before relevant skills and never renders workflow state', async () => {
@@ -331,19 +379,15 @@ describe('renderCurrentRun', () => {
     expect((messages[1] as ToolMessage).content).toBe(wrapToolResultContent('{"results":[]}'));
   });
 
-  it('positions research retry notices after the recorded non-todos step count, ignoring todos', async () => {
+  it('positions research retry notices after the recorded step count', async () => {
     const error = createAgentExecutionError('bad', AgentExecutionErrorCode.emptyResponse, {});
     const retryNotices: RetryNotice[] = [
-      { phase: 'research', afterNonTodosStepCount: 0, error },
-      { phase: 'research', afterNonTodosStepCount: 1, error },
-      { phase: 'research', afterNonTodosStepCount: 2, error },
+      { phase: 'research', afterStepCount: 0, error },
+      { phase: 'research', afterStepCount: 1, error },
+      { phase: 'research', afterStepCount: 2, error },
     ];
     const messages = await current(
-      [
-        call('c1'),
-        { type: ConversationRoundStepType.updateTodos, todos: [] },
-        call('c2', { tool_call_group_id: 'g2' }),
-      ],
+      [call('c1'), call('c2', { tool_call_group_id: 'g2' })],
       { ...rendered('c1'), ...rendered('c2', { cycle: 2 }) },
       { retryNotices }
     );
@@ -376,7 +420,7 @@ describe('renderCurrentRun', () => {
 
   it('renders the handover and answer retries only in answer phase', async () => {
     const error = createAgentExecutionError('bad', AgentExecutionErrorCode.emptyResponse, {});
-    const retryNotices: RetryNotice[] = [{ phase: 'answer', afterNonTodosStepCount: 0, error }];
+    const retryNotices: RetryNotice[] = [{ phase: 'answer', afterStepCount: 0, error }];
     const handover = { message: 'here you go', forceful: false };
 
     const answer = await current([], {}, { phase: 'answer', handover, retryNotices });
@@ -511,16 +555,16 @@ describe('renderCurrentRun', () => {
 
     it('drops retry notices within the hidden steps and keeps the one at the range start', async () => {
       const retryNotices: RetryNotice[] = [
-        { phase: 'research', afterNonTodosStepCount: 0, error },
-        { phase: 'research', afterNonTodosStepCount: 1, error },
-        { phase: 'research', afterNonTodosStepCount: 3, error },
+        { phase: 'research', afterStepCount: 0, error },
+        { phase: 'research', afterStepCount: 1, error },
+        { phase: 'research', afterStepCount: 3, error },
       ];
       const messages = await current(steps, renderState, { range: { start: 1 }, retryNotices });
       expect(types(messages)).toEqual(['ai', 'human', 'ai', 'tool', 'ai', 'tool', 'ai', 'human']);
     });
 
     it('leaves the retry notice after the range end to the steps that follow', async () => {
-      const retryNotices: RetryNotice[] = [{ phase: 'research', afterNonTodosStepCount: 2, error }];
+      const retryNotices: RetryNotice[] = [{ phase: 'research', afterStepCount: 2, error }];
       const head = await current(steps, renderState, { range: { start: 0, end: 1 }, retryNotices });
       const tail = await current(steps, renderState, { range: { start: 2 }, retryNotices });
       expect(types(head)).toEqual(['ai', 'tool', 'ai', 'tool']);
@@ -654,8 +698,7 @@ describe('dynamic tool calls', () => {
 
   it('renders a history step as the execute_dynamic_tool call the model made', async () => {
     const steps: ConversationRoundStep[] = [
-      reasoning('why a', { tool_call_group_id: 'g', tool_call_id: 'a' }),
-      dynamicCall('a', { tool_call_group_id: 'g' }),
+      dynamicCall('a', { tool_call_group_id: 'g', intent: 'Looking up a' }),
       call('b', { tool_call_group_id: 'g' }),
     ];
     const [ai, toolA] = (await renderHistorySteps({ steps })) as [AIMessage, ToolMessage];
@@ -664,7 +707,7 @@ describe('dynamic tool calls', () => {
       {
         id: 'a',
         name: internalTools.executeDynamicTool,
-        args: { _reasoning: 'why a', tool_id: 'skill.tool', params: { q: 'a' } },
+        args: { _intent: 'Looking up a', tool_id: 'skill.tool', params: { q: 'a' } },
         type: 'tool_call',
       },
       { id: 'b', name: 'my_tool', args: { q: 'b' }, type: 'tool_call' },

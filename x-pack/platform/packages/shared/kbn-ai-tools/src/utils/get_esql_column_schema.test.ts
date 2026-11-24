@@ -131,6 +131,29 @@ describe('getEsqlColumnSchema', () => {
     ]);
   });
 
+  it('probes only the requested columns and leaves out the unmapped ones', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce({
+      columns: [
+        { name: 'message', type: 'null' },
+        { name: 'body.text', type: 'text' },
+      ],
+      values: [],
+    });
+
+    const schema = await getEsqlColumnSchema({
+      esClient,
+      signal,
+      index: 'logs-*',
+      fields: ['message', 'body.text'],
+    });
+
+    expect(query.mock.calls[0][0].query).toBe(
+      'SET unmapped_fields = "NULLIFY"; FROM logs-* | KEEP message, body.text | LIMIT 0'
+    );
+    expect(schema).toEqual([{ name: 'body.text', type: 'text' }]);
+  });
+
   it('filters the no-fields placeholder column', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce({

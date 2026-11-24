@@ -81,13 +81,17 @@ export const sendUpdatePackagePolicy = async (
   packagePolicyId: string,
   body: UpdatePackagePolicyRequest['body'],
   // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
-  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
+  {
+    onIacPersistError,
+    query,
+  }: CloudConnectorIacPersistOptions & { query?: { onboarding_deployment_id?: string } } = {}
 ) => {
   const response = await sendRequest<UpdatePackagePolicyResponse>({
     path: packagePolicyRouteService.getUpdatePath(packagePolicyId),
     method: 'put',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
+    query,
   });
   if (!response.error) {
     await persistPendingCloudConnectorIac({
@@ -99,12 +103,16 @@ export const sendUpdatePackagePolicy = async (
   return response;
 };
 
-export const sendDeletePackagePolicy = (body: DeletePackagePoliciesRequest['body']) => {
+export const sendDeletePackagePolicy = (
+  body: DeletePackagePoliciesRequest['body'],
+  query?: DeletePackagePoliciesRequest['query']
+) => {
   return sendRequest<PostDeletePackagePoliciesResponse>({
     path: packagePolicyRouteService.getDeletePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
+    query,
   });
 };
 
@@ -250,15 +258,16 @@ export function useUpgradePackagePoliciesMutation() {
   return useMutation<
     UpgradePackagePolicyDryRunResponse,
     RequestError,
-    { packagePolicyIds: string[] }
+    { packagePolicyIds: string[]; acknowledgeBreakingChanges?: boolean }
   >(
-    ({ packagePolicyIds }) =>
+    ({ packagePolicyIds, acknowledgeBreakingChanges }) =>
       sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
         path: packagePolicyRouteService.getUpgradePath(),
         method: 'post',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           packagePolicyIds,
+          ...(acknowledgeBreakingChanges ? { acknowledge_breaking_changes: true } : {}),
         }),
       }),
     {

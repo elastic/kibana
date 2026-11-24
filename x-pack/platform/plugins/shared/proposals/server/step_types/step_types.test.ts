@@ -21,7 +21,9 @@ import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 const EXECUTION_ID = 'exec-1';
 const SPACE_ID = 'space-a';
+const WORKFLOW_ID = 'gate-workflow';
 const FAKE_REQUEST = { fake: true } as never;
+const CALLER = { workflowId: WORKFLOW_ID, executionId: EXECUTION_ID, request: FAKE_REQUEST };
 
 /** The step identifies the actor from the execution's own fake request. */
 const resolvedUser = {
@@ -56,7 +58,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     contextManager: {
       getContext: jest.fn().mockReturnValue({
         execution: { id: EXECUTION_ID, executedBy: 'worker-user' },
-        workflow: { spaceId: SPACE_ID },
+        workflow: { id: WORKFLOW_ID, spaceId: SPACE_ID },
       }),
       getScopedEsClient: jest.fn(),
       getFakeRequest: jest.fn().mockReturnValue(FAKE_REQUEST),
@@ -572,12 +574,26 @@ describe('proposals.updateProposal step', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-1', status: 'succeeded' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
     expect(result.output).toEqual({
       proposalId: 'proposal-1',
       status: 'succeeded',
       decision: undefined,
+    });
+  });
+
+  it('should name its own run, so the service can find the action execution it started', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
+
+    await updateDefinition(update).handler(
+      createContext({ proposalId: 'proposal-1', status: 'succeeded' })
+    );
+
+    expect(update).toHaveBeenCalledWith(expect.anything(), SPACE_ID, CALLER, {
+      linkActionExecution: true,
     });
   });
 
@@ -595,11 +611,13 @@ describe('proposals.updateProposal step', () => {
       })
     );
 
-    // Post-gate the execution runs as the approver, so the request is the
-    // better attribution.
+    // The gate resolves the answer in a child that runs as the approver, so
+    // the request is the better attribution, and any workflow can pass a name.
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: resolvedUser }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -626,8 +644,10 @@ describe('proposals.updateProposal step', () => {
       request: FAKE_REQUEST,
     });
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ decidedBy: workerUser }),
-      SPACE_ID
+      expect.objectContaining({ decidedBy: workerUser, decisionMode: 'auto' }),
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -635,7 +655,7 @@ describe('proposals.updateProposal step', () => {
     const update = jest
       .fn()
       .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
-    // The gate still runs as the Worker's service account, so its request names no person.
+    // A service account's request names no person.
     resolveUser.mockResolvedValueOnce(undefined);
 
     await updateDefinition(update).handler(
@@ -651,8 +671,11 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({
         decidedBy: { username: 'analyst', fullName: null, email: null },
+        decisionMode: 'manual',
       }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -675,7 +698,9 @@ describe('proposals.updateProposal step', () => {
       expect.objectContaining({
         decidedBy: { username: 'analyst', fullName: null, email: null },
       }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -687,8 +712,10 @@ describe('proposals.updateProposal step', () => {
     );
 
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ decidedBy: undefined }),
-      SPACE_ID
+      expect.objectContaining({ decidedBy: undefined, decisionMode: undefined }),
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
     expect(resolveUser).not.toHaveBeenCalled();
     expect(resolveWorkerUser).not.toHaveBeenCalled();
@@ -719,7 +746,9 @@ describe('proposals.updateProposal step', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ executionError: 'action exploded' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -984,7 +1013,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.get).toHaveBeenCalledWith('proposal-2', SPACE_ID, FAKE_REQUEST);
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-2', status: 'expired', executionError: 'timed out' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
     expect(result.output).toEqual({
       proposalId: 'proposal-2',
@@ -1006,7 +1036,8 @@ describe('proposals.settleIncompleteProposal step', () => {
 
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'expired' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 
@@ -1027,7 +1058,8 @@ describe('proposals.settleIncompleteProposal step', () => {
 
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'failed' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
     expect(result.output?.status).toBe('failed');
     expect(result.output?.decision).toBe('approved');
@@ -1048,7 +1080,8 @@ describe('proposals.settleIncompleteProposal step', () => {
 
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'failed' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 

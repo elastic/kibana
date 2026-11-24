@@ -140,6 +140,45 @@ describe('prepareConversation', () => {
     };
   };
 
+  describe('agent messages', () => {
+    const reportActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
+
+    it('attributes the next input of a wake run to the agent, not to the owner author', async () => {
+      const result = await prepareConversationFromTimeline({
+        timeline: [],
+        nextInput: { message: 'report' },
+        nextInputAuthor: { id: 'owner', username: 'owner' },
+        nextInputActor: reportActor,
+        context: mockContext,
+      });
+
+      expect(result.nextInput).toEqual({ message: 'report', attachments: [], actor: reportActor });
+    });
+
+    it('attributes a stored agent message to the agent in history', async () => {
+      const timeline = timelineFromRounds([
+        createRound({ id: 'round-1', input: { message: 'report' } }),
+      ]).map((event) =>
+        event.id === 'round-1::user_message'
+          ? { ...event, type: TimelineEventType.agentMessage, actor: reportActor }
+          : event
+      );
+
+      const result = await prepareConversationFromTimeline({
+        timeline,
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      const message = result.timeline.find((event) => event.id === 'round-1::user_message');
+      expect(message).toMatchObject({
+        type: TimelineEventType.agentMessage,
+        data: { message: 'report', actor: reportActor },
+      });
+      expect(message?.data).not.toHaveProperty('author');
+    });
+  });
+
   describe('with no attachments', () => {
     it('should process a simple nextInput with no attachments', async () => {
       const nextInput: ConverseInput = {
@@ -1124,6 +1163,39 @@ describe('prepareConversation', () => {
         attachments: [],
         author: { id: 'u1', username: 'user1' },
       });
+    });
+  });
+
+  describe('steers', () => {
+    const steer = {
+      id: 'steer-1',
+      type: 'user_message',
+      created_at: '2024-01-02T00:00:00.000Z',
+      actor: { type: 'user', id: 'u1' },
+      data: { message: 'use a table', steer: { execution_id: 'exec-0' } },
+    } as unknown as TimelineEvent;
+    const timeline = [...timelineFromRounds([{ id: 'r0', input: { message: 'first' } }]), steer];
+
+    it('leaves a steer out of history unless it was settled unread', async () => {
+      const result = await prepareConversationFromTimeline({
+        timeline,
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      expect(result.timeline.map((event) => event.id)).not.toContain('steer-1');
+    });
+
+    it('keeps a steer its run never read as history, marked as such', async () => {
+      const result = await prepareConversationFromTimeline({
+        timeline,
+        nextInput: { message: 'next' },
+        context: mockContext,
+        unreadSteerIds: new Set(['steer-1']),
+      });
+
+      const kept = result.timeline.find((event) => event.id === 'steer-1');
+      expect(kept).toMatchObject({ unread_steer: true, data: { message: 'use a table' } });
     });
   });
 

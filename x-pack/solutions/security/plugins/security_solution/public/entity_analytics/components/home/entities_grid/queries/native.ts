@@ -7,6 +7,10 @@
 
 import { escapeStringValue } from '@kbn/esql-utils';
 import {
+  CRITICALITY_LEVELS,
+  getCriticalityRank,
+} from '../../../../../../common/entity_analytics/entity_store/resolution_group_values';
+import {
   CRITICALITY_FIELD,
   ENTITY_ID_FIELD,
   RESOLUTION_RISK_SCORE_FIELD,
@@ -33,11 +37,7 @@ import {
   getSortedPage,
   toList,
 } from './esql';
-import {
-  CRITICALITY_LEVELS,
-  buildResolvedEntityRowSteps,
-  getCriticalitySortRank,
-} from './resolved_entities';
+import { buildResolvedEntityRowSteps } from './resolved_entities';
 import type { ColumnQuerySpec, EsqlRunner, SortPageContext } from './types';
 
 const fetchSortedByField = (args: QueryArgs, { runQuery }: SortPageContext) => {
@@ -145,7 +145,7 @@ const buildResolvedEntitiesWithAliasesQuery = (
 
 /** Criticality sorts by its rank, every other field by its value. */
 const getNativeSortValue = (row: Row, field: string): SortValue =>
-  field === CRITICALITY_FIELD ? getCriticalitySortRank(row[field]) : getSortValue(row, field);
+  field === CRITICALITY_FIELD ? getCriticalityRank(row[field]) : getSortValue(row, field);
 
 /** The resolved entities the search matches, and one more to tell there are too many to read by id. */
 const buildSearchedTargetIdsQuery = (args: QueryArgs): string[] => [

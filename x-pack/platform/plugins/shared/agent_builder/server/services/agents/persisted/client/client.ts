@@ -19,10 +19,12 @@ import {
   chatAgentTypeId,
   createAgentNotFoundError,
   createBadRequestError,
+  createForbiddenError,
   isAgentNotFoundError,
   getAccessControlEntryKey,
   isAgentAccessControlRole,
   isEntryCoveredByOwner,
+  serviceAccountUserId,
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
   AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   type AgentAccessControl,
@@ -49,7 +51,7 @@ import type {
   AgentsUsingToolsResult,
   PersistedAgentDefinitionWithPermissions,
 } from '../types';
-import type { AgentAccess } from '../../agent_source';
+import type { AgentAccess, GetAgentOptions } from '../../agent_source';
 import type { AgentProfileStorage, AgentProperties } from './storage';
 import { createStorage } from './storage';
 import {
@@ -78,6 +80,14 @@ import {
   sourceToOwner,
 } from '../../access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
+import {
+  AGENT_WORKLOAD_TYPE,
+  assertCanConfigureExecutionIdentity,
+  assertCanDeleteBoundAgent,
+  assertCanEditBoundAgent,
+  unbindDeletedAgent,
+  type ServiceAccountBindingDeps,
+} from '../../service_account_binding';
 
 export interface GetAgentAccessControlResult {
   /** Always present; entries[] may be empty for default agents. */
@@ -151,13 +161,18 @@ export interface AgentClient {
   /** Get the agent and assert the caller has at least `access` rights on it. */
   getWithAccess(
     agentId: string,
-    access: AgentAccess
+    options: Required<Pick<GetAgentOptions, 'access'>> & Pick<GetAgentOptions, 'runAs'>
   ): Promise<PersistedAgentDefinitionWithPermissions>;
   create(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions>;
   ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions>;
   update(
     agentId: string,
     profile: AgentUpdateRequest
+  ): Promise<PersistedAgentDefinitionWithPermissions>;
+  /** Binds the agent to a service account, or unbinds it with `null`. */
+  setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
   ): Promise<PersistedAgentDefinitionWithPermissions>;
   getIds(options?: AgentListOptions): Promise<string[]>;
   list(options?: AgentListOptions): Promise<PersistedAgentDefinitionWithPermissions[]>;
@@ -296,6 +311,7 @@ export const createClient = async ({
     space,
     toolsService,
     logger,
+    bindings: { serviceAccounts: security.serviceAccounts },
   });
 };
 
@@ -322,6 +338,7 @@ class AgentClientImpl implements AgentClient {
   private readonly toolsService: ToolsServiceStart;
   private readonly user: CurrentUser;
   private readonly logger: Logger;
+  private readonly bindings: ServiceAccountBindingDeps;
 
   constructor({
     storage,
@@ -330,6 +347,7 @@ class AgentClientImpl implements AgentClient {
     request,
     space,
     logger,
+    bindings,
   }: {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
@@ -337,6 +355,7 @@ class AgentClientImpl implements AgentClient {
     request: KibanaRequest;
     space: string;
     logger: Logger;
+    bindings: ServiceAccountBindingDeps;
   }) {
     this.storage = storage;
     this.toolsService = toolsService;
@@ -344,6 +363,7 @@ class AgentClientImpl implements AgentClient {
     this.user = user;
     this.space = space;
     this.logger = logger;
+    this.bindings = bindings;
   }
 
   async getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult> {
@@ -415,9 +435,9 @@ class AgentClientImpl implements AgentClient {
 
   async getWithAccess(
     agentId: string,
-    access: AgentAccess
+    { access, runAs }: Required<Pick<GetAgentOptions, 'access'>> & Pick<GetAgentOptions, 'runAs'>
   ): Promise<PersistedAgentDefinitionWithPermissions> {
-    const document = await this.getDocumentWithAccess({ agentId, access });
+    const document = await this.getDocumentWithAccess({ agentId, access, runAs });
     return withPermissions({ document, user: this.user });
   }
 
@@ -521,10 +541,7 @@ class AgentClientImpl implements AgentClient {
       nextApprovals: profile.configuration.approvals,
       user: this.user,
     });
-
-    await this.storage.getClient().index({
-      document: attributes,
-    });
+    await this.storage.getClient().index({ document: attributes });
 
     return this.get(profile.id);
   }
@@ -559,6 +576,7 @@ class AgentClientImpl implements AgentClient {
   ): Promise<PersistedAgentDefinitionWithPermissions> {
     const document = await this.getDocumentWithAccess({ agentId, access: 'write' });
     const source = document._source;
+    assertCanEditBoundAgent({ source, user: this.user });
 
     if (
       !validateAccessControlUpdateAccess({
@@ -603,9 +621,49 @@ class AgentClientImpl implements AgentClient {
       user: this.user,
     });
 
+    await this.storage.getClient().index({ id: document._id, document: updatedAgent });
+
+    return this.get(agentId);
+  }
+
+  /**
+   * Core's binding is the authority a run is minted against; the id stored on the agent only
+   * tells the dispatcher and the UI that the agent is bound. A write failing between the two
+   * leaves the agent either not dispatched as the account or refused at mint, never run as an
+   * account it is not bound to, and a retry settles it.
+   */
+  async setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<PersistedAgentDefinitionWithPermissions> {
+    const document = await this.getDocumentWithAccess({ agentId, access: 'write' });
+    const source = document._source;
+    assertCanConfigureExecutionIdentity({ source, user: this.user, bindings: this.bindings });
+
+    const { serviceAccounts } = this.bindings;
+    if (serviceAccountId) {
+      await serviceAccounts.bindWorkload(this.request, {
+        workloadType: AGENT_WORKLOAD_TYPE,
+        workloadId: agentId,
+        serviceAccountId,
+      });
+    } else {
+      await serviceAccounts.unbindWorkload(this.request, {
+        workloadType: AGENT_WORKLOAD_TYPE,
+        workloadId: agentId,
+      });
+    }
+
+    const { service_account_id: _previous, ...rest } = source;
     await this.storage.getClient().index({
       id: document._id,
-      document: updatedAgent,
+      document: {
+        ...rest,
+        ...(serviceAccountId ? { service_account_id: serviceAccountId } : {}),
+        updated_by_id: this.user.id,
+        updated_by_name: this.user.username,
+        updated_at: new Date().toISOString(),
+      },
     });
 
     return this.get(agentId);
@@ -615,8 +673,16 @@ class AgentClientImpl implements AgentClient {
     const { id } = options;
 
     const document = await this.getDocumentWithAccess({ agentId: id, access: 'delete' });
+    const source = document._source;
+    assertCanDeleteBoundAgent({ source, user: this.user });
 
     const deleteResponse = await this.storage.getClient().delete({ id: document._id });
+    await unbindDeletedAgent({
+      bindings: this.bindings,
+      request: this.request,
+      source,
+      logger: this.logger,
+    });
     return deleteResponse.result === 'deleted';
   }
 
@@ -653,6 +719,7 @@ class AgentClientImpl implements AgentClient {
 
     const document = await this.getDocumentWithAccess({ agentId, access: 'manageAccessControl' });
     const source = document._source;
+    assertCanEditBoundAgent({ source, user: this.user });
 
     const currentAccessControl = normalizeAccessControl(source);
 
@@ -672,10 +739,7 @@ class AgentClientImpl implements AgentClient {
       user: this.user,
     });
 
-    await this.storage.getClient().index({
-      id: document._id,
-      document: next,
-    });
+    await this.storage.getClient().index({ id: document._id, document: next });
 
     return nextAccessControl;
   }
@@ -697,9 +761,11 @@ class AgentClientImpl implements AgentClient {
   private async getDocumentWithAccess({
     agentId,
     access,
+    runAs,
   }: {
     agentId: string;
     access: AgentAccess;
+    runAs?: string;
   }): Promise<Required<Document>> {
     const document = await this._get(agentId);
     if (!hasRequiredDocumentFields(document)) {
@@ -707,6 +773,24 @@ class AgentClientImpl implements AgentClient {
     }
 
     const source = document._source;
+    // A run was authorized for its caller when it was dispatched and executes under the account's
+    // credentials, which hold no access to the agent themselves; it only has to be the agent the
+    // account was bound to run. Only a request that actually carries that credential may skip the
+    // access check, so `runAs` cannot be used to borrow an account from a user request.
+    if (runAs !== undefined) {
+      if (this.user.type !== 'service_account' || this.user.id !== serviceAccountUserId(runAs)) {
+        throw createForbiddenError(
+          `Agent "${agentId}" can only be resolved as service account "${runAs}" by a request running as that account.`
+        );
+      }
+      if (source.service_account_id !== runAs) {
+        throw createForbiddenError(
+          `Agent "${agentId}" is no longer bound to service account "${runAs}".`
+        );
+      }
+      return document;
+    }
+
     let allowed = false;
     switch (access) {
       case 'read':

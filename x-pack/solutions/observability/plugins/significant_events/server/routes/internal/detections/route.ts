@@ -232,7 +232,7 @@ const createDetectionsRoute = createServerRoute({
     access: 'internal',
     summary: 'Create detections',
     description:
-      'Appends change-point detections to the current space. Detections are immutable; `@timestamp` is set by the server. Kibana writes as its internal user, so callers need the Nightshift manage privilege but no Elasticsearch privileges on the data stream. Rejected with 409 while Significant Events is paused.',
+      'Appends change-point detections to the current space. Detections are immutable; `@timestamp` is set by the server. Kibana writes as its internal user, so callers need the nightshift manage privilege but no Elasticsearch privileges on the data stream. Rejected with 409 while Significant Events is paused.',
   },
   security: {
     authz: {

@@ -49,6 +49,7 @@ export type {
 } from './tool_provider';
 export type {
   ModelProvider,
+  ModelSource,
   ScopedModel,
   ModelProviderStats,
   ModelCallInfo,
@@ -58,6 +59,7 @@ export type { ToolResultStore, WritableToolResultStore, ToolResultWithMeta } fro
 export type { AttachmentsService } from './attachments_service';
 export type { SkillsService, SkillRegistryListOptions } from './skills_service';
 export type { PluginsService } from './plugins_service';
+export type { ConnectorSkillsService } from './connector_skills_service';
 export type { RenderersService } from './renderers_service';
 export type { ConversationEventTypesService } from './conversation_event_types_service';
 export type { ConversationTemplatesService } from './conversation_templates_service';
@@ -71,8 +73,6 @@ export type {
   AuthorizationInfo,
 } from './prompt_manager';
 export type { ConversationStateManager, ToolStateManager } from './state_manager';
-export type { TodoStateManager } from './todo_state_manager';
-export { createTodoStateManager } from './todo_state_manager';
 export { FileEntryType } from './filestore';
 export type {
   FsEntry,

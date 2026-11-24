@@ -12,6 +12,7 @@ import {
   type ListWorkersResponse,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
+import { resolveHuntUniverse } from '../hunt/resolve_hunt_universe';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import { hasManageSecurity } from './has_manage_security';
@@ -21,6 +22,7 @@ export const registerListWorkersRoute = ({
   logger,
   getSpaceId,
   getWorkersService,
+  isCpsEnabled,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -42,7 +44,9 @@ export const registerListWorkersRoute = ({
       },
       withAlertZeroEnabled(async (context, request, response) => {
         try {
-          const listed = await getWorkersService().list(request, getSpaceId(request));
+          const listed = await getWorkersService().list(request, getSpaceId(request), () =>
+            resolveHuntUniverse(context, logger, isCpsEnabled()).then(({ patterns }) => patterns)
+          );
           const body: ListWorkersResponse = {
             ...listed,
             canModifyWorkers: await hasManageSecurity(context),
