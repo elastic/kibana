@@ -33,6 +33,7 @@ export interface EvalsSuiteSpecModelGroup {
 export interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
+  slackChannel?: string;
   ciLabels?: string[];
   configPath?: string;
   serverConfigSet?: string;
@@ -191,6 +192,233 @@ function toBuildkiteYamlString(value: string): string {
   return JSON.stringify(value).replace(/\$/g, '$$$$');
 }
 
+export interface EvalPipelinePlan {
+  yaml: string;
+  /**
+   * Connector ids of the suites whose fanout is emitted here rather than by a parent
+   * `run_suite.sh` step. That step publishes them as `kbn-evals:connectors:<suite>` meta-data for
+   * the post-comparison and suite-owner-notify steps, so the pipeline generator has to instead.
+   */
+  connectorsBySuite: Record<string, string[]>;
+}
+
+const DEFAULT_FANOUT_CONCURRENCY = 4;
+const DEFAULT_FANOUT_STEP_TIMEOUT_IN_MINUTES = 120;
+const FANOUT_SPOT_ZONES =
+  'asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c';
+
+/**
+ * EIS connector ids for model groups that each name one EIS model, or `null` when any group needs
+ * EIS or OpenRouter discovery to resolve. Connector ids are derived from the model id the same way
+ * `generate_eis_connectors.js` derives them, so they match what the fanout steps provision.
+ */
+function resolveEisConnectorIds(modelGroups: string[]): string[] | null {
+  if (modelGroups.length === 0 || !modelGroups.every((group) => /^eis\/\S+$/.test(group))) {
+    return null;
+  }
+  return [...new Set(modelGroups.map(normalizeEvaluationConnectorId))];
+}
+
+const yamlEnv = (indent: string, env: Record<string, string | undefined>): string[] =>
+  Object.entries(env)
+    .filter((entry): entry is [string, string] => Boolean(entry[1]))
+    .map(([name, value]) => `${indent}${name}: ${toBuildkiteYamlString(value)}`);
+
+const lightAgentYaml = (indent: string): string[] => [
+  `${indent}agents:`,
+  `${indent}  image: family/kibana-ubuntu-2404`,
+  `${indent}  imageProject: elastic-images-prod`,
+  `${indent}  provider: gcp`,
+  `${indent}  machineType: n2-standard-2`,
+  `${indent}  preemptible: true`,
+  `${indent}  spotZones: ${FANOUT_SPOT_ZONES}`,
+];
+
+/**
+ * The fanout `run_suite.sh` uploads from its parent step (one step per connector and shard, then
+ * the suite-owner notify, post-comparison and refresh steps), emitted at pipeline generation so no
+ * parent step has to wait for an agent, bootstrap and discover EIS models first. Keep it in sync
+ * with the fanout in `.buildkite/scripts/steps/evals/run_suite.sh`.
+ */
+function buildDirectFanoutYaml({
+  suite,
+  modelGroups,
+  connectorIds,
+  evaluationConnectorId,
+  preemptible,
+}: {
+  suite: EvalsSuiteMetadataEntry;
+  modelGroups: string[];
+  connectorIds: string[];
+  evaluationConnectorId: string | undefined;
+  preemptible: boolean;
+}): string {
+  const suiteKey = normalizeBuildkiteKey(suite.id);
+  const timeoutInMinutes =
+    Number(process.env.EVAL_STEP_TIMEOUT_IN_MINUTES) ||
+    suite.stepTimeoutInMinutes ||
+    DEFAULT_FANOUT_STEP_TIMEOUT_IN_MINUTES;
+  const concurrency =
+    Number(process.env.EVAL_FANOUT_CONCURRENCY) ||
+    suite.fanoutConcurrency ||
+    DEFAULT_FANOUT_CONCURRENCY;
+  const pullRequest =
+    process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
+      ? process.env.BUILDKITE_PULL_REQUEST
+      : undefined;
+  const prNumber = process.env.GITHUB_PR_NUMBER || pullRequest;
+  const shards: EvalsSuiteShard[] = suite.shards?.length
+    ? suite.shards
+    : [{ id: '', specFiles: [] }];
+
+  const stepKeys: string[] = [];
+  const evalSteps = shards.flatMap((shard) =>
+    connectorIds.map((connectorId) => {
+      const shardKey = normalizeBuildkiteKey(shard.id);
+      const stepKey = [`kbn-evals-${suiteKey}-${normalizeBuildkiteKey(connectorId)}`, shardKey]
+        .filter(Boolean)
+        .join('-');
+      stepKeys.push(stepKey);
+      return [
+        `      - label: ${toBuildkiteYamlString(
+          `LLM Evals: ${suite.id} / ${connectorId}${shard.id ? ` [${shard.id}]` : ''}`
+        )}`,
+        `        key: ${toBuildkiteYamlString(stepKey)}`,
+        `        command: "bash .buildkite/scripts/steps/evals/run_suite.sh"`,
+        `        env:`,
+        ...yamlEnv('          ', {
+          KBN_EVALS: '1',
+          FTR_EIS_CCM: '1',
+          EVAL_INCLUDE_EIS_MODELS: '1',
+          EVAL_MODEL_GROUPS: modelGroups.join(','),
+          // A shard's own judge wins over the suite-wide one, as in run_suite.sh.
+          EVAL_CONNECTOR_ID: shard.judge?.trim() || evaluationConnectorId,
+          EVAL_SUITE_ID: suite.id,
+          EVAL_SUITE_NAME: suite.name,
+          EVAL_SUITE_SLACK_CHANNEL: suite.slackChannel,
+          EVAL_PROJECT: connectorId,
+          EVAL_SHARD_ID: shard.id,
+          EVAL_FANOUT: '0',
+          EVAL_SERVER_CONFIG_SET: suite.serverConfigSet,
+          EVAL_SCOUT_ARCH: suite.scoutArch,
+          EVAL_SCOUT_DOMAIN: suite.scoutDomain,
+          EVAL_SPEC_FILES: shard.specFiles.join(' '),
+        }),
+        `        timeout_in_minutes: ${timeoutInMinutes}`,
+        `        concurrency_group: ${toBuildkiteYamlString(`kbn-evals-${suiteKey}`)}`,
+        `        concurrency: ${concurrency}`,
+        `        agents:`,
+        `          image: family/kibana-ubuntu-2404`,
+        `          imageProject: elastic-images-prod`,
+        `          provider: gcp`,
+        `          machineType: n2-standard-8`,
+        ...(EVAL_AGENT_DISK_SIZE_GB ? [`          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`] : []),
+        ...(preemptible
+          ? [
+              `          preemptible: true`,
+              `          spotZones: ${FANOUT_SPOT_ZONES}`,
+              `        retry:`,
+              `          automatic:`,
+              `            - exit_status: "-1"`,
+              `              limit: 3`,
+            ]
+          : []),
+      ].join('\n');
+    })
+  );
+
+  const dependsOnEvalSteps = [
+    `        depends_on:`,
+    ...stepKeys.map((stepKey) => `          - ${toBuildkiteYamlString(stepKey)}`),
+  ];
+  const notifyStep = prNumber
+    ? [
+        `      - label: ${toBuildkiteYamlString(`LLM Evals: ${suite.id} (suite owner notify)`)}`,
+        `        key: ${toBuildkiteYamlString(`kbn-evals-${suiteKey}-suite-owner-notify`)}`,
+        `        command: "bash .buildkite/scripts/steps/evals/suite_owner_notify.sh"`,
+        `        env:`,
+        ...yamlEnv('          ', {
+          KBN_EVALS: '1',
+          EVAL_SUITE_ID: suite.id,
+          EVAL_SUITE_SLACK_CHANNEL: suite.slackChannel,
+          EVAL_PR_NUMBER: prNumber,
+          EVAL_SUITE_NAME: suite.name,
+          EVAL_FANOUT_STEP_KEYS: stepKeys.join(','),
+        }),
+        ...dependsOnEvalSteps,
+        `        timeout_in_minutes: 10`,
+        `        allow_dependency_failure: true`,
+        `        soft_fail: true`,
+        ...lightAgentYaml('        '),
+      ]
+    : [];
+  const postComparisonKey = `kbn-evals-${suiteKey}-post-comparison`;
+  const postComparisonStep = pullRequest
+    ? [
+        `      - label: ${toBuildkiteYamlString(`LLM Evals: ${suite.id} (post comparison)`)}`,
+        `        key: ${toBuildkiteYamlString(postComparisonKey)}`,
+        `        command: "bash .buildkite/scripts/steps/evals/post_eval_comment.sh"`,
+        `        env:`,
+        ...yamlEnv('          ', {
+          KBN_EVALS: '1',
+          EVAL_SUITE_ID: suite.id,
+          EVAL_SUITE_IDS: suite.id,
+        }),
+        ...dependsOnEvalSteps,
+        `        timeout_in_minutes: 10`,
+        `        allow_dependency_failure: true`,
+        ...lightAgentYaml('        '),
+      ]
+    : [];
+  const suiteDisplayName = suite.name || suite.id;
+  const refreshSteps = pullRequest
+    ? [
+        `  - block: ${toBuildkiteYamlString(`LLM Evals: Refresh ${suiteDisplayName}`)}`,
+        `    key: ${toBuildkiteYamlString(`kbn-evals-${suiteKey}-refresh-block`)}`,
+        `    depends_on:`,
+        `      - ${toBuildkiteYamlString(postComparisonKey)}`,
+        `    allow_dependency_failure: true`,
+        `  - trigger: kibana-evals-on-demand-llm-evals`,
+        `    label: ${toBuildkiteYamlString(`LLM Evals: Refresh ${suiteDisplayName}`)}`,
+        `    key: ${toBuildkiteYamlString(`kbn-evals-${suiteKey}-refresh-trigger`)}`,
+        `    async: true`,
+        `    soft_fail: true`,
+        `    depends_on:`,
+        `      - ${toBuildkiteYamlString(`kbn-evals-${suiteKey}-refresh-block`)}`,
+        `    build:`,
+        `      branch: main`,
+        `      message: ${toBuildkiteYamlString(
+          `Fresh baseline for PR #${pullRequest}: ${suite.id}`
+        )}`,
+        `      env:`,
+        ...yamlEnv('        ', {
+          EVAL_SUITE_ID: suite.id,
+          EVAL_SUITE_IDS: suite.id,
+          FRESH_BASELINE_PR_EXPERIMENT_ID: `bk-${process.env.BUILDKITE_BUILD_ID ?? ''}`,
+          EVAL_PR_NUMBER: pullRequest,
+          EVAL_CONNECTOR_ID: evaluationConnectorId,
+          EVAL_INCLUDE_EIS_MODELS: '1',
+          EVAL_MODEL_GROUPS: modelGroups.join(','),
+          EVAL_SERVER_CONFIG_SET: suite.serverConfigSet,
+          EVAL_SCOUT_ARCH: suite.scoutArch,
+          EVAL_SCOUT_DOMAIN: suite.scoutDomain,
+        }),
+      ]
+    : [];
+
+  return [
+    `  - group: ${toBuildkiteYamlString(`LLM Evals: ${suite.id}`)}`,
+    `    key: ${toBuildkiteYamlString(`kbn-evals-${suiteKey}-fanout`)}`,
+    `    depends_on:`,
+    `      - build`,
+    `    steps:`,
+    ...evalSteps,
+    ...notifyStep,
+    ...postComparisonStep,
+    ...refreshSteps,
+  ].join('\n');
+}
+
 function buildEvalsYaml({
   selectedSuites,
   resolveModelGroups,
@@ -199,9 +427,31 @@ function buildEvalsYaml({
   selectedSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
   resolveJudge: (suite: EvalsSuiteMetadataEntry) => EvalJudge;
-}): string {
+}): EvalPipelinePlan {
   const preemptible = isPreemptibleEnabled();
-  const suiteSteps = selectedSuites
+  const connectorsBySuite: Record<string, string[]> = {};
+  const directFanouts: string[] = [];
+  const parentSuites: EvalsSuiteMetadataEntry[] = [];
+  for (const suite of selectedSuites) {
+    const modelGroups = resolveModelGroups(suite);
+    const connectorIds = resolveEisConnectorIds(modelGroups);
+    if (!connectorIds) {
+      parentSuites.push(suite);
+      continue;
+    }
+    connectorsBySuite[suite.id] = connectorIds;
+    directFanouts.push(
+      buildDirectFanoutYaml({
+        suite,
+        modelGroups,
+        connectorIds,
+        evaluationConnectorId: resolveJudge(suite).evaluationConnectorId,
+        preemptible,
+      })
+    );
+  }
+
+  const suiteSteps = parentSuites
     .map((suite) => {
       const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
       const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
@@ -264,15 +514,21 @@ function buildEvalsYaml({
     })
     .join('\n');
 
-  return [
+  const yaml = [
     // `getPipeline()` strips `steps:` so fragments concatenate under one top-level `steps:`.
-    `  - group: LLM Evals`,
-    `    key: kibana-evals`,
-    `    depends_on:`,
-    `      - build`,
-    `    steps:`,
-    suiteSteps,
+    ...(parentSuites.length > 0
+      ? [
+          `  - group: LLM Evals`,
+          `    key: kibana-evals`,
+          `    depends_on:`,
+          `      - build`,
+          `    steps:`,
+          suiteSteps,
+        ]
+      : []),
+    ...directFanouts,
   ].join('\n');
+  return { yaml, connectorsBySuite };
 }
 
 interface EvalJudge {
@@ -397,8 +653,8 @@ export function shouldRunEvals(githubPrLabels: string): boolean {
   return resolveEvalSelection(githubPrLabels) !== null;
 }
 
-/** Buildkite YAML group for the eval suites matching the PR labels, or `null`. */
-export function getEvalPipeline(githubPrLabels: string): string | null {
+/** Buildkite YAML for the eval suites matching the PR labels and the connectors it fans out to, or `null`. */
+export function getEvalPipelinePlan(githubPrLabels: string): EvalPipelinePlan | null {
   const selection = resolveEvalSelection(githubPrLabels);
   if (!selection) {
     return null;
@@ -409,6 +665,11 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
     resolveModelGroups: selection.resolveModelGroups,
     resolveJudge: selection.resolveJudge,
   });
+}
+
+/** Buildkite YAML for the eval suites matching the PR labels, or `null`. */
+export function getEvalPipeline(githubPrLabels: string): string | null {
+  return getEvalPipelinePlan(githubPrLabels)?.yaml ?? null;
 }
 
 /**

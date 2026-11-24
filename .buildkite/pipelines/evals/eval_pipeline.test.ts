@@ -10,6 +10,7 @@
 import { parse as yamlParse } from 'yaml';
 import {
   getEvalPipeline,
+  getEvalPipelinePlan,
   getEvalTriggerStep,
   getForwardablePrLabels,
   shouldRunEvals,
@@ -43,9 +44,17 @@ const SUITES = {
       name: 'Nightshift Investigations',
       ciLabels: ['evals:nightshift-investigations'],
       configPath: 'x-pack/nightshift-investigations/playwright.config.ts',
+      slackChannel: '#nightshift-alerts',
       serverConfigSet: 'evals_nightshift_investigations',
       scoutArch: 'serverless',
       scoutDomain: 'observability_complete',
+      stepTimeoutInMinutes: 240,
+      fanoutConcurrency: 8,
+      shards: [
+        { id: 'customer0-golden', specFiles: ['evals/stored.spec.ts'] },
+        { id: 'orcabench-1-of-2', judge: 'eis-judge', specFiles: ['evals/orcabench.spec.ts'] },
+        { id: 'orcabench-2-of-2', judge: 'eis-judge', specFiles: ['evals/orcabench.spec.ts'] },
+      ],
     },
     {
       id: 'pinned-judge',
@@ -69,6 +78,10 @@ describe('eval_pipeline', () => {
     jest.resetAllMocks();
     process.env = { ...ORIGINAL_ENV };
     delete process.env.EVAL_PREEMPTIBLE;
+    delete process.env.BUILDKITE_PULL_REQUEST;
+    delete process.env.GITHUB_PR_NUMBER;
+    delete process.env.EVAL_FANOUT_CONCURRENCY;
+    delete process.env.EVAL_STEP_TIMEOUT_IN_MINUTES;
 
     readFileSync.mockReturnValue(JSON.stringify(SUITES));
     // Treat every suite config path as present in the git tree.
@@ -139,7 +152,7 @@ describe('eval_pipeline', () => {
       });
 
       it('leaves EVAL_CONNECTOR_ID to the Vault default for a suite without a pin', () => {
-        const env = suiteEnvs('evals:agent-builder,models:eis/openai-gpt-5.4')[
+        const env = suiteEnvs('evals:agent-builder,models:openrouter/openai-gpt-5.4')[
           'kbn-evals-agent-builder'
         ];
 
@@ -289,7 +302,9 @@ describe('eval_pipeline', () => {
 
   describe('getEvalPipeline preemptible gating', () => {
     it('uses preemptible agents with a lost-worker retry by default', () => {
-      const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
+      const yaml = getEvalPipeline(
+        'evals:agent-builder,models:openrouter/openai-gpt-5.4'
+      ) as string;
 
       expect(yaml).toContain('preemptible: true');
       expect(yaml).toContain("exit_status: '-1'");
@@ -297,7 +312,9 @@ describe('eval_pipeline', () => {
 
     it('drops preemptible + the lost-worker retry when EVAL_PREEMPTIBLE=0', () => {
       process.env.EVAL_PREEMPTIBLE = '0';
-      const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
+      const yaml = getEvalPipeline(
+        'evals:agent-builder,models:openrouter/openai-gpt-5.4'
+      ) as string;
 
       expect(yaml).not.toContain('preemptible: true');
       expect(yaml).not.toContain("exit_status: '-1'");
@@ -327,6 +344,142 @@ describe('eval_pipeline', () => {
 
       expect(yaml).not.toContain('EVAL_SCOUT_ARCH');
       expect(yaml).not.toContain('EVAL_SCOUT_DOMAIN');
+    });
+  });
+  describe('getEvalPipelinePlan direct fanout for explicit EIS models', () => {
+    const LABELS = 'evals:nightshift-investigations,models:eis/anthropic-claude-5.5-sonnet';
+    const parseAll = (yaml: string): Array<Record<string, any>> =>
+      (yamlParse(`steps:\n${yaml}`) as { steps: Array<Record<string, any>> }).steps;
+    const planFor = (labels: string) => {
+      const plan = getEvalPipelinePlan(labels);
+      if (!plan) throw new Error(`No eval plan for ${labels}`);
+      return { ...plan, steps: parseAll(plan.yaml) };
+    };
+
+    it('emits one step per shard and model instead of a parent fanout step', () => {
+      const { steps, connectorsBySuite } = planFor(LABELS);
+
+      expect(steps.map(({ key }) => key)).toEqual(['kbn-evals-nightshift-investigations-fanout']);
+      const [group] = steps;
+      expect(group.depends_on).toEqual(['build']);
+      expect(group.steps.map(({ key }: { key: string }) => key)).toEqual([
+        'kbn-evals-nightshift-investigations-eis-anthropic-claude-5-5-sonnet-customer0-golden',
+        'kbn-evals-nightshift-investigations-eis-anthropic-claude-5-5-sonnet-orcabench-1-of-2',
+        'kbn-evals-nightshift-investigations-eis-anthropic-claude-5-5-sonnet-orcabench-2-of-2',
+      ]);
+      expect(connectorsBySuite).toEqual({
+        'nightshift-investigations': ['eis-anthropic-claude-5-5-sonnet'],
+      });
+    });
+
+    it('gives each step what the run_suite.sh fanout would', () => {
+      const [, orcaStep] = planFor(LABELS).steps[0].steps;
+
+      expect(orcaStep).toEqual(
+        expect.objectContaining({
+          label:
+            'LLM Evals: nightshift-investigations / eis-anthropic-claude-5-5-sonnet [orcabench-1-of-2]',
+          command: 'bash .buildkite/scripts/steps/evals/run_suite.sh',
+          timeout_in_minutes: 240,
+          concurrency_group: 'kbn-evals-nightshift-investigations',
+          concurrency: 8,
+        })
+      );
+      expect(orcaStep.env).toEqual({
+        KBN_EVALS: '1',
+        FTR_EIS_CCM: '1',
+        EVAL_INCLUDE_EIS_MODELS: '1',
+        EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet',
+        EVAL_CONNECTOR_ID: 'eis-judge',
+        EVAL_SUITE_ID: 'nightshift-investigations',
+        EVAL_SUITE_NAME: 'Nightshift Investigations',
+        EVAL_SUITE_SLACK_CHANNEL: '#nightshift-alerts',
+        EVAL_PROJECT: 'eis-anthropic-claude-5-5-sonnet',
+        EVAL_SHARD_ID: 'orcabench-1-of-2',
+        EVAL_FANOUT: '0',
+        EVAL_SERVER_CONFIG_SET: 'evals_nightshift_investigations',
+        EVAL_SCOUT_ARCH: 'serverless',
+        EVAL_SCOUT_DOMAIN: 'observability_complete',
+        EVAL_SPEC_FILES: 'evals/orcabench.spec.ts',
+      });
+    });
+
+    it('lets the suite judge apply to shards without their own', () => {
+      const [goldenStep] = planFor(`${LABELS},models:judge:eis/openai-gpt-5.4`).steps[0].steps;
+
+      expect(goldenStep.env.EVAL_CONNECTOR_ID).toBe('eis-openai-gpt-5-4');
+    });
+
+    it('runs a step per model for each shard', () => {
+      const { steps, connectorsBySuite } = planFor(`${LABELS},models:eis/openai-gpt-5.4`);
+
+      expect(steps[0].steps).toHaveLength(6);
+      expect(connectorsBySuite['nightshift-investigations']).toEqual([
+        'eis-anthropic-claude-5-5-sonnet',
+        'eis-openai-gpt-5-4',
+      ]);
+    });
+
+    it('keeps the parent step when a model needs discovery to resolve', () => {
+      const { steps, connectorsBySuite } = planFor(
+        'evals:nightshift-investigations,models:eis/anthropic-claude-5.5-sonnet,models:openrouter/openai-gpt-5.4'
+      );
+
+      expect(steps.map(({ key }) => key)).toEqual(['kibana-evals']);
+      expect(steps[0].steps[0].env.EVAL_FANOUT).toBe('1');
+      expect(connectorsBySuite).toEqual({});
+    });
+
+    it('adds the notify, comparison and refresh steps on a PR, after every eval step', () => {
+      process.env.BUILDKITE_PULL_REQUEST = '123';
+      process.env.GITHUB_PR_NUMBER = '123';
+      process.env.BUILDKITE_BUILD_ID = 'build-1';
+      const { steps } = planFor(LABELS);
+      const evalKeys = steps[0].steps
+        .filter(({ command }: { command: string }) => command.endsWith('run_suite.sh'))
+        .map(({ key }: { key: string }) => key);
+      const byKey = Object.fromEntries(
+        [...steps[0].steps, ...steps.slice(1)].map((step) => [step.key, step])
+      );
+
+      const notify = byKey['kbn-evals-nightshift-investigations-suite-owner-notify'];
+      expect(notify.depends_on).toEqual(evalKeys);
+      expect(notify.env).toEqual(
+        expect.objectContaining({
+          EVAL_PR_NUMBER: '123',
+          EVAL_FANOUT_STEP_KEYS: evalKeys.join(','),
+        })
+      );
+      expect(byKey['kbn-evals-nightshift-investigations-post-comparison'].depends_on).toEqual(
+        evalKeys
+      );
+      expect(byKey['kbn-evals-nightshift-investigations-refresh-block'].depends_on).toEqual([
+        'kbn-evals-nightshift-investigations-post-comparison',
+      ]);
+      expect(byKey['kbn-evals-nightshift-investigations-refresh-trigger'].build.env).toEqual(
+        expect.objectContaining({
+          FRESH_BASELINE_PR_EXPERIMENT_ID: 'bk-build-1',
+          EVAL_PR_NUMBER: '123',
+          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet',
+        })
+      );
+    });
+
+    it('adds no PR steps outside a PR', () => {
+      const { steps } = planFor(LABELS);
+
+      expect(steps).toHaveLength(1);
+      expect(
+        steps[0].steps.every(({ command }: { command: string }) => command.endsWith('run_suite.sh'))
+      ).toBe(true);
+    });
+
+    it('drops preemptible agents and the lost-worker retry when EVAL_PREEMPTIBLE=0', () => {
+      process.env.EVAL_PREEMPTIBLE = '0';
+      const [step] = planFor(LABELS).steps[0].steps;
+
+      expect(step.agents).not.toHaveProperty('preemptible');
+      expect(step).not.toHaveProperty('retry');
     });
   });
 });

@@ -173,6 +173,15 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
     export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(
       node x-pack/platform/packages/shared/kbn-evals/scripts/ci/merge_ai_connectors.js
     )"
+
+    # The PR pipeline names EIS fanout steps from the model labels without discovering them, so an
+    # unknown model must fail here, before Scout starts, rather than as an unknown Playwright project.
+    if [[ "${EVAL_PROJECT:-}" == eis-* ]] && ! printf '%s' "$KIBANA_TESTING_INFERENCE_ENDPOINTS" \
+      | base64 -d | jq -e --arg id "$EVAL_PROJECT" 'has($id)' >/dev/null; then
+      echo "EIS has no model for connector ${EVAL_PROJECT}. Available connectors:" >&2
+      printf '%s' "$KIBANA_TESTING_INFERENCE_ENDPOINTS" | base64 -d | jq -r 'keys[]' >&2
+      exit 1
+    fi
   fi
 fi
 

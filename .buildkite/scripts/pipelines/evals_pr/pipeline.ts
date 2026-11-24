@@ -15,7 +15,8 @@
             }
         ] */
 
-import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline.ts';
+import { execFileSync } from 'child_process';
+import { getEvalPipelinePlan } from '../../../pipelines/evals/eval_pipeline.ts';
 import { emitPipeline } from '#pipeline-utils';
 import { postBuildSteps, renderSteps } from '#pipeline-utils/step-library';
 
@@ -59,13 +60,13 @@ const preludeSteps = [
 ].join('\n');
 
 // Reuse kibana-pull-request's canonical Post-Build (trailing `wait` + post_build.sh on a light
-// k8s/sparse agent) so it can't drift. The wait must be last — run_suite.sh uploads each suite's
-// fanout as a separate group that inserts before it.
+// k8s/sparse agent) so it can't drift. The wait must be last: suite fanouts are emitted before it,
+// and a suite that still has a parent step uploads its fanout as a group that inserts before it.
 const postludeSteps = renderSteps(postBuildSteps());
 
-const evalsGroup = getEvalPipeline(GITHUB_PR_LABELS);
+const evalsPlan = getEvalPipelinePlan(GITHUB_PR_LABELS);
 
-if (!evalsGroup) {
+if (!evalsPlan) {
   // The trigger shares this gate, so an empty selection means parent/child divergence (e.g. a
   // broken checkout). Fail loudly — a red upload step beats a green `kibana-evals` with zero suites.
   console.error(
@@ -76,6 +77,14 @@ if (!evalsGroup) {
   process.exit(1);
 }
 
+// Suites fanned out here have no parent step to tell the comparison and notify steps which models ran.
+for (const [suiteId, connectorIds] of Object.entries(evalsPlan.connectorsBySuite)) {
+  execFileSync('buildkite-agent', ['meta-data', 'set', `kbn-evals:connectors:${suiteId}`], {
+    input: connectorIds.join(','),
+    stdio: ['pipe', 'ignore', 'inherit'],
+  });
+}
+
 const pipelineEnv = ['env:', `  CI_STATS_DISABLE_PR_REPORT: 'true'`].join('\n');
 
-emitPipeline([pipelineEnv, 'steps:', preludeSteps, evalsGroup, postludeSteps]);
+emitPipeline([pipelineEnv, 'steps:', preludeSteps, evalsPlan.yaml, postludeSteps]);
