@@ -134,7 +134,7 @@ apiTest.describe(
       const callerProfileUid = apiKeys[0]?.profile_uid;
       expect(callerProfileUid).toBeDefined();
 
-      const seededTimestamp = '2026-11-08T09:00:00.000Z';
+      const seededTimestamp = new Date(Date.now() - 60_000).toISOString();
       const seedDocs = [
         { id: OWN_OTHER_SPACE_MEMORY_ID, space: OTHER_SPACE_ID, user_id: callerProfileUid },
         { id: OWN_DEFAULT_SPACE_MEMORY_ID, space: DEFAULT_SPACE_ID, user_id: callerProfileUid },
@@ -152,20 +152,35 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ kbnClient, esClient }) => {
-      if (seedEsClient) {
-        await seedEsClient.deleteByQuery(
-          {
-            index: SESSION_MEMORY_DATA_STREAM,
-            query: { terms: { id: SEEDED_MEMORY_IDS } },
-            refresh: true,
-          },
-          { ignore: [404] }
-        );
-        await seedEsClient.close();
+      try {
+        if (seedEsClient) {
+          try {
+            await seedEsClient.indices.refresh({
+              index: SESSION_MEMORY_DATA_STREAM,
+              ignore_unavailable: true,
+            });
+            await seedEsClient.deleteByQuery(
+              {
+                index: SESSION_MEMORY_DATA_STREAM,
+                query: { terms: { id: SEEDED_MEMORY_IDS } },
+                refresh: true,
+              },
+              { ignore: [404] }
+            );
+          } finally {
+            await seedEsClient.close();
+          }
+        }
+      } finally {
+        await Promise.allSettled([
+          esClient.security
+            .deleteUser({ username: SEED_USERNAME }, { ignore: [404] })
+            .finally(() =>
+              esClient.security.deleteRole({ name: SEED_ROLE_NAME }, { ignore: [404] })
+            ),
+          kbnClient.spaces.delete(OTHER_SPACE_ID),
+        ]);
       }
-      await esClient.security.deleteUser({ username: SEED_USERNAME }, { ignore: [404] });
-      await esClient.security.deleteRole({ name: SEED_ROLE_NAME }, { ignore: [404] });
-      await kbnClient.spaces.delete(OTHER_SPACE_ID);
     });
 
     apiTest('enforces contextEngine:write per space', async ({ apiClient }) => {
@@ -182,6 +197,9 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(403);
+        expect(response.body).toMatchObject({
+          message: expect.stringContaining('contextEngine:write'),
+        });
       });
 
       await apiTest.step(
@@ -194,6 +212,9 @@ apiTest.describe(
           });
 
           expect(response).toHaveStatusCode(403);
+          expect(response.body).toMatchObject({
+            message: expect.stringContaining('contextEngine:write'),
+          });
         }
       );
     });
