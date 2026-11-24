@@ -24,15 +24,11 @@ import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
-import { existingAlertIdentity } from '../alert_identity_telemetry';
-import { trackTelemetryBestEffort } from '../bulk_write';
-import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
+import { reportToolFailure } from '../tool_failure';
 import { updateEventStatusToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
-
-const UNMATCHED_EVENT_ID = 'unknown';
 
 export const eventStatusUpdateSchema = lazySchema(() =>
   significantEventSchema
@@ -99,35 +95,10 @@ export function createEventStatusUpdateTool({
           workflowExecutionId,
         });
 
-        const reason = data.updated === 0 ? data.reason : undefined;
-        const isUnmatched = reason === 'not_found';
-        // An id that matches no event is whatever the model sent, so it stays out of telemetry.
-        const telemetryEventId = isUnmatched ? UNMATCHED_EVENT_ID : toolParams.event_id;
-        trackTelemetryBestEffort({
-          logger,
-          description: 'event_status_update telemetry',
-          track: () =>
-            telemetry.trackAgentToolEventStatusUpdate(
-              {
-                workflow_execution_id: workflowExecutionId,
-                ...existingAlertIdentity({
-                  eventId: telemetryEventId,
-                  spaceId: request.spaceId,
-                }),
-                success:
-                  data.updated === 1 || reason === 'already_in_state' || reason === 'not_a_breach',
-                event_id: telemetryEventId,
-                status: toolParams.status,
-                ...(isUnmatched ? { error_message: 'not_found' } : {}),
-              },
-              request
-            ),
-        });
-
         return { results: [{ type: ToolResultType.other, data }] };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        const failure = reportToolFailure({
+        reportToolFailure({
           error,
           toolId: SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
           errorLogMessage: `Error running event_status_update: ${message}`,
@@ -135,25 +106,6 @@ export function createEventStatusUpdateTool({
           telemetry,
           request,
           runContext: context.runContext,
-        });
-        trackTelemetryBestEffort({
-          logger,
-          description: 'failed event_status_update telemetry',
-          track: () =>
-            telemetry.trackAgentToolEventStatusUpdate(
-              {
-                workflow_execution_id: workflowExecutionId,
-                ...existingAlertIdentity({
-                  eventId: toolParams.event_id,
-                  spaceId: request.spaceId,
-                }),
-                success: false,
-                event_id: toolParams.event_id,
-                status: toolParams.status,
-                error_message: toTelemetryErrorMessage(failure, message),
-              },
-              request
-            ),
         });
         return {
           results: [

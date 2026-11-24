@@ -27,6 +27,7 @@ import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plu
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { registerUserSettings } from './user_settings/register_user_settings';
 
+import { ATTACK_FINGERPRINT_AI_INDEX_ID } from '@kbn/alertzero-plugin/common/ai_indices';
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerCustomYaraSignaturesRoutes } from './endpoint/routes/custom_yara_signatures';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -950,7 +951,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginStart {
     if (plugins.alertzero) {
       const alertzero = plugins.alertzero;
-      setFingerprintCreateAllowed(() => alertzero.attackFingerprintWritesAllowed);
+      setFingerprintCreateAllowed(() =>
+        alertzero.isAiIndexWritable(ATTACK_FINGERPRINT_AI_INDEX_ID)
+      );
     }
 
     const { config, logger, productFeaturesService } = this;
@@ -994,8 +997,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
         threatIntelSupplyEnabled: this.threatIntelSupplyEnabled,
-        automaticTroubleshootingUniversalSkillEnabled:
-          config.experimentalFeatures.automaticTroubleshootingUniversalSkill,
+        experimentalFeatures: config.experimentalFeatures,
         bootstrapReady: this.threatIntelRuntime.bootstrapReady,
         core,
       });

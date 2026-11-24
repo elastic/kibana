@@ -22,7 +22,6 @@ import type { Formatters } from '../../../hooks/use_formatters';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import { clientOf, locationOf } from '../../../utils/describe_session';
 import { WebVitalBadges } from '../../../components/web_vital_badges';
-import { ANONYMOUS_USER } from '../../../labels';
 
 const UNKNOWN = i18n.translate('xpack.digitalExperience.sessionDetail.summary.unknownValue', {
   defaultMessage: 'Unknown',
@@ -86,32 +85,45 @@ export function SessionSummary({
         }
       ),
     },
+    {
+      id: 'frustration',
+      title: formatNumber(session.frustration.total),
+      titleColor: session.frustration.total > 0 ? ('danger' as const) : undefined,
+      description: i18n.translate(
+        'xpack.digitalExperience.sessionDetail.summary.frustrationLabel',
+        {
+          defaultMessage: 'Frustration signals',
+        }
+      ),
+      breakdown:
+        session.frustration.total === 0
+          ? i18n.translate('xpack.digitalExperience.sessionDetail.summary.frustrationHint', {
+              defaultMessage: 'None. Reported by EDOT Browser with frustration detection.',
+            })
+          : i18n.translate('xpack.digitalExperience.sessionDetail.summary.frustrationBreakdown', {
+              defaultMessage: '{rage} rage, {dead} dead, {error} error clicks',
+              values: {
+                rage: formatNumber(session.frustration.rageClicks),
+                dead: formatNumber(session.frustration.deadClicks),
+                error: formatNumber(session.frustration.errorClicks),
+              },
+            }),
+    },
   ];
 
+  // The user, start, environment and outcome are in the page header.
   const metadata = [
     {
-      title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.startTimeLabel', {
-        defaultMessage: 'Started',
+      title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.sessionIdLabel', {
+        defaultMessage: 'Session ID',
       }),
-      description: formatDate(session.startTime),
+      description: session.sessionId,
     },
     {
       title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.endTimeLabel', {
         defaultMessage: 'Last activity',
       }),
       description: formatDate(session.endTime),
-    },
-    {
-      title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.userLabel', {
-        defaultMessage: 'User',
-      }),
-      description: session.user ?? ANONYMOUS_USER,
-    },
-    {
-      title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.environmentLabel', {
-        defaultMessage: 'Environment',
-      }),
-      description: session.environment ?? UNKNOWN,
     },
     {
       title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.clientLabel', {
@@ -136,7 +148,7 @@ export function SessionSummary({
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="digitalExperienceSessionSummary">
       <EuiFlexGroup gutterSize="l" wrap responsive={false}>
-        {stats.map(({ id, title, titleColor, description }) => (
+        {stats.map(({ id, title, titleColor, description, breakdown }) => (
           <EuiFlexItem key={id} grow={false} css={{ minWidth: 120 }}>
             <EuiStat
               data-test-subj={`digitalExperienceSessionStat-${id}`}
@@ -145,6 +157,15 @@ export function SessionSummary({
               titleSize="s"
               description={description}
             />
+            {breakdown && (
+              <EuiText
+                size="xs"
+                color="subdued"
+                data-test-subj={`digitalExperienceSessionStatBreakdown-${id}`}
+              >
+                {breakdown}
+              </EuiText>
+            )}
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

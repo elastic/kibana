@@ -224,7 +224,7 @@ const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 - `LifecycleTimelineContainer`: scrolls its rows sideways when they don't fit; rows with a `narrow` grid respond to its width.
 - `LifecycleTimelineTrack`: the list of period bars, on the grid passed in. Each item can set its `gridColumn`.
-- `LifecycleTimelineTicks`: the boundary labels and the end label, on their own grid, so they can have more columns than the track. A tick with `isInvalid` is shown in the danger color. An end label with `isInfinite` is centered on the last line; others sit inside the end.
+- `LifecycleTimelineTicks`: the boundary labels and the end label, on their own grid, so they can have more columns than the track. A tick with `isInvalid` is shown in the danger color. An end label with `isInfinite` is centered on the last line; others sit inside the end. Without an end label, the end has no label and no line.
 
 Extra rows go between the track and the ticks. Periods (`testSubjects`, for the bar, name and size), ticks and the end label (`data-test-subj`) accept test subjects that replace the default ones, so existing tests keep their selectors. `getLifecycleTimelineLayout` is what `LifecycleTimeline` uses to turn periods into items, ticks and a grid.
 

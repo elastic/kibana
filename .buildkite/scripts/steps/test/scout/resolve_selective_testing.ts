@@ -37,7 +37,10 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
+import {
+  createGitChangedContent,
+  expandWithImplicitConsumers,
+} from './scout_implicit_consumers.ts';
 import type { ScoutLog } from './scout_log.ts';
 import { shouldSkipScoutTests } from './scout_ftr_modules.ts';
 import { SCOUT_MODULE_GRAPH_IGNORE } from './scout_module_graph_ignore.ts';
@@ -96,7 +99,8 @@ if (!mergeBase || !outPath) {
       ignoreUncategorizedChanges: true,
     }),
     changedFiles,
-    log
+    log,
+    createGitChangedContent(mergeBase)
   );
 
   const codeChanges = {

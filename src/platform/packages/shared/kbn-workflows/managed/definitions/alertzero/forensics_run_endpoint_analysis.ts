@@ -26,7 +26,7 @@ export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW = {
   id: ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 17,
+  version: 18,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'forensics_run_endpoint_analysis.yaml');
   },

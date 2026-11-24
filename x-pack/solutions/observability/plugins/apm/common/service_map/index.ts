@@ -20,3 +20,5 @@ export { getPaths } from './get_paths';
 export { transformToReactFlow } from './transform_to_react_flow';
 export { groupResourceNodes } from './group_resource_nodes';
 export { markIdleServices, shouldKeepVisibleDespiteLowTraffic } from './mark_idle_services';
+export { groupServiceNodes } from './group_service_nodes';
+export { formatServiceGroupName } from './format_service_group_name';

@@ -41,7 +41,8 @@ import {
   getEntityId,
   getNumber,
 } from '../common';
-import type { Row, TimeRange } from '../common';
+import type { TimeRange } from '../../queries/time_range';
+import type { Row } from '../common';
 
 const MAX_GROUP_RECORDS = 100;
 

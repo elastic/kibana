@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import * as eventTypes from './events';
 import {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
   agentToolEventSearchEventType,
-  agentToolEventStatusUpdateEventType,
   agentToolEventWriteEventType,
   agentToolFailedEventType,
   agentToolKiIdentificationStartedEventType,
@@ -25,11 +25,36 @@ import {
 const isOptional = (field: { _meta?: { optional?: boolean } }) => field._meta?.optional === true;
 
 describe('EBT event types', () => {
+  it('uses the expected wire names', () => {
+    const wireNames = Object.fromEntries(
+      Object.entries(eventTypes).map(([name, { eventType }]) => [name, eventType])
+    );
+
+    expect(wireNames).toEqual({
+      agentBuilderKnowledgeIndicatorCreatedEventType:
+        'nightshift-agent-builder-knowledge-indicator-created',
+      agentToolEventCreateEventType: 'nightshift-agent-tool-event-create',
+      agentToolEventSearchEventType: 'nightshift-agent-tool-event-search',
+      agentToolEventWriteEventType: 'nightshift-agent-tool-event-write',
+      agentToolFailedEventType: 'nightshift-agent-tool-failed',
+      agentToolKiIdentificationStartedEventType: 'nightshift-agent-tool-ki-identification-started',
+      detectionScanEventType: 'nightshift-detection-scan',
+      discoveryCompletedEventType: 'nightshift-significant-events-discovery-completed',
+      discoveryStartedEventType: 'nightshift-significant-events-discovery-started',
+      discoveryTriggeredEventType: 'nightshift-significant-events-discovery-triggered',
+      eventStatusChangedEventType: 'nightshift-event-status-changed',
+      knowledgeIndicatorEventsGeneratedEventType: 'nightshift-significant-events-queries-generated',
+      knowledgeIndicatorFeaturesIdentifiedEventType: 'nightshift-features-identified',
+      knowledgeIndicatorQueriesGenerationFailedEventType:
+        'nightshift-significant-events-queries-generation-failed',
+      onboardingScheduledEventType: 'nightshift-onboarding-scheduled',
+    });
+  });
+
   it.each([
     agentBuilderKnowledgeIndicatorCreatedEventType,
     agentToolEventCreateEventType,
     agentToolEventSearchEventType,
-    agentToolEventStatusUpdateEventType,
     agentToolEventWriteEventType,
     agentToolFailedEventType,
     agentToolKiIdentificationStartedEventType,
@@ -47,14 +72,15 @@ describe('EBT event types', () => {
     expect(isOptional(schema.target_cluster_ids_complete)).toBe(true);
   });
 
-  it.each([agentToolEventStatusUpdateEventType, eventStatusChangedEventType])(
-    '$eventType requires the full alert identity on an event about an existing alert',
-    ({ schema }) => {
-      const { alert_source: source, fingerprint, space_id: spaceId } = schema;
+  it('event-status-changed requires the full alert identity', () => {
+    const {
+      alert_source: source,
+      fingerprint,
+      space_id: spaceId,
+    } = eventStatusChangedEventType.schema;
 
-      [source, fingerprint, spaceId].forEach((field) => expect(isOptional(field)).toBe(false));
-    }
-  );
+    [source, fingerprint, spaceId].forEach((field) => expect(isOptional(field)).toBe(false));
+  });
 
   it.each([agentToolEventCreateEventType, agentToolEventWriteEventType])(
     '$eventType lets a failed create omit the series identity',

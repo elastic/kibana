@@ -11,6 +11,42 @@ import { SuggestionCategory } from '../utils';
 import { setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
+  describe('FILLNULL value controls', () => {
+    test.each([true, false])(
+      'suggests existing value controls with control creation enabled: %s',
+      async (supportsControls) => {
+        const { suggest } = await setup();
+        const suggestions = await suggest('FROM a | FILLNULL /', {
+          callbacks: {
+            canSuggestVariables: () => supportsControls,
+            getVariables: () => [
+              { key: 'replacement', value: 'unknown', type: ESQLVariableType.VALUES },
+              { key: 'field', value: 'agent.name', type: ESQLVariableType.FIELDS },
+            ],
+          },
+        });
+
+        expect(suggestions).toContainEqual(expect.objectContaining({ text: '?replacement' }));
+        expect(suggestions).not.toContainEqual(expect.objectContaining({ text: '??field' }));
+        const createControl = suggestions.find(
+          ({ command }) => command?.id === 'esql.control.values.create'
+        );
+        if (supportsControls) {
+          expect(createControl).toEqual(
+            expect.objectContaining({
+              label: 'Create control',
+              command: expect.objectContaining({
+                arguments: [{ triggerSource: 'smart_suggestion' }],
+              }),
+            })
+          );
+        } else {
+          expect(createControl).toBeUndefined();
+        }
+      }
+    );
+  });
+
   describe('create control suggestion', () => {
     test('suggests `Create control` option if questionmark is typed', async () => {
       const { suggest } = await setup();

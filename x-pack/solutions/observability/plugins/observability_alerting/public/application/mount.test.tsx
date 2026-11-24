@@ -30,8 +30,10 @@ describe('mountObservabilityAlertingApp', () => {
       RulesPage: () => null,
       RuleLibraryPage: () => null,
       EpisodesPage: () => null,
+      AlertsProvider: ({ children }: { children?: React.ReactNode }) => children ?? null,
       ActionPoliciesPage: () => null,
       ExecutionHistoryPage: () => null,
+      ImportsPage: () => null,
       CreateRuleOptionsFlyout: () => null,
       createAlertingV2HostApp: mockCreateAlertingV2HostApp,
     };

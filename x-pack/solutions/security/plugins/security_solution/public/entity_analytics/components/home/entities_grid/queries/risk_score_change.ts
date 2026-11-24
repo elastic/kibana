@@ -8,10 +8,10 @@
 import { getEntityIds, getEntityId, getNumber, getString, RISK_SCORE_NORM_FIELD } from '../common';
 import type { QueryArgs, Row } from '../common';
 import { IN_VIEW_AGGREGATION, IN_VIEW_FIELD, buildEntitiesInViewBranch } from './entities_in_view';
+import { buildLookback } from '../../queries/time_range';
 import {
   buildEntityAggregations,
   buildJoinedPageSteps,
-  buildLookback,
   buildLookupJoinClause,
   buildRowFieldsSteps,
   buildSortSuffix,

@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
-import { getAccessorByDimension, getFormatByAccessor } from '@kbn/chart-expressions-common';
+import {
+  ChartPosition,
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '@kbn/chart-expressions-common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
@@ -169,26 +172,26 @@ const getDataDescriptors = (
 const getPolicyPosition = (
   groupId: string,
   yAxisConfigs?: YAxisConfig[]
-): typeof Position.Left | typeof Position.Right => {
+): typeof ChartPosition.Left | typeof ChartPosition.Right => {
   if (groupId === RIGHT_AXIS_GROUP_ID) {
-    return Position.Right;
+    return ChartPosition.Right;
   }
   if (groupId === LEFT_AXIS_GROUP_ID) {
-    return Position.Left;
+    return ChartPosition.Left;
   }
   return (yAxisConfigs?.find(({ id }) => id && groupId === `axis-${id}`)?.position ??
-    Position.Left) as typeof Position.Left | typeof Position.Right;
+    ChartPosition.Left) as typeof ChartPosition.Left | typeof ChartPosition.Right;
 };
 
 const getReferencePolicy = (
   policies: AxisFormatPolicy[],
   axisId: string | undefined,
-  position: Position | undefined
+  position: ChartPosition | undefined
 ) =>
   policies.find(
     (policy) =>
       (axisId && policy.groupId === `axis-${axisId}`) ||
-      (!axisId && policy.position === (position ?? Position.Left))
+      (!axisId && policy.position === (position ?? ChartPosition.Left))
   );
 
 const addReferenceMembers = (
@@ -300,7 +303,7 @@ const getPolicyForAxis = (axis: YAxisConfig, policies: AxisFormatPolicy[]) => {
   if (axis.id) {
     return policies.find((policy) => policy.groupId === `axis-${axis.id}`);
   }
-  if (axis.position === Position.Right) {
+  if (axis.position === ChartPosition.Right) {
     return policies.find((policy) => policy.groupId === RIGHT_AXIS_GROUP_ID);
   }
   return policies.find((policy) => policy.groupId === LEFT_AXIS_GROUP_ID);

@@ -330,6 +330,45 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     });
   });
 
+  describe('custom fields', () => {
+    const updateWithFields = async (value: string | undefined) => {
+      mockGetPackageInfo.mockResolvedValue({
+        data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+      });
+      await cleanupManagedIntegrationsPolicies({
+        ...BASE_OPTS,
+        policySettings: value === undefined ? {} : { global_data_tags: value },
+        instances: [instance],
+        servicesMap: new Map([['vpcflow', vpcflow]]),
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      });
+      return mockUpdateAgentless.mock.calls[0][1];
+    };
+
+    it('sends the chosen fields as the list Fleet takes', async () => {
+      expect(
+        (await updateWithFields(JSON.stringify([{ name: 'team', value: 'platform' }])))
+          .global_data_tags
+      ).toEqual([{ name: 'team', value: 'platform' }]);
+    });
+
+    it('sends a value of digits only as a number, as Fleet does', async () => {
+      expect(
+        (await updateWithFields(JSON.stringify([{ name: 'priority', value: '1' }])))
+          .global_data_tags
+      ).toEqual([{ name: 'priority', value: 1 }]);
+    });
+
+    it('clears them with an empty list', async () => {
+      expect((await updateWithFields('[]')).global_data_tags).toEqual([]);
+    });
+
+    it('sends nothing when none were ever set', async () => {
+      expect(await updateWithFields(undefined)).not.toHaveProperty('global_data_tags');
+    });
+  });
+
   describe('proxy URL', () => {
     const updateWithProxy = async (proxyUrl: string | undefined, pkgVars = ['proxy_url']) => {
       mockGetPackageInfo.mockResolvedValue({

@@ -26,3 +26,6 @@ export const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
 
 /** The longest agent condition expression of an integration, input or stream. */
 export const PACKAGE_POLICY_CONDITION_MAX_LENGTH = 10000;
+
+export const ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION =
+  "When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.";

@@ -26,7 +26,7 @@ import {
   resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
-import { trackTelemetryBestEffort } from '../bulk_write';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
