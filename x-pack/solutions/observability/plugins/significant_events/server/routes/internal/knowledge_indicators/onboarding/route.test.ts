@@ -13,10 +13,15 @@ import {
 } from '@kbn/significant-events-schema';
 import { forbidden } from '@hapi/boom';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { assessSourceSampling } from '../../../../lib/significant_events/features/assess_source_sampling';
 import { internalKIOnboardingRoutes } from './route';
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock('../../../../lib/significant_events/features/assess_source_sampling', () => ({
+  assessSourceSampling: jest.fn().mockResolvedValue({ kind: 'supported' }),
 }));
 
 const mockResolveNightshiftModelForRequest = jest.fn(async ({ step }: { step: string }) =>
@@ -153,6 +158,19 @@ it('does not resolve or forward a model for a skipped step', async () => {
       }),
     })
   );
+});
+
+it('maps a refused source to a 400 response', async () => {
+  const { handlerParams, run } = makeHandlerParams();
+  jest
+    .mocked(assessSourceSampling)
+    .mockResolvedValueOnce({ kind: 'unsupported', reason: 'no @timestamp' });
+
+  await expect(route.handler(handlerParams)).rejects.toMatchObject({
+    output: { statusCode: 400 },
+    message: 'Cannot onboard source [logs-test]: no @timestamp',
+  });
+  expect(run).not.toHaveBeenCalled();
 });
 
 it('maps an unknown strict override to a 400 response', async () => {

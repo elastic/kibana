@@ -98,13 +98,14 @@ export const createKiIdentificationStartTool = ({
       sourceId = source.id;
 
       const data = await startKiIdentificationToolHandler({
-        sourceId: source.id,
-        sourceSlug: source.slug,
+        source,
         steps,
         connectors,
         streamsKIsOnboardingClient,
         maintenanceService,
+        esClient: scopedClients.streamDataEsClient,
         request,
+        logger,
       });
 
       trackTelemetryBestEffort({

@@ -28,6 +28,7 @@ import {
   MAX_SOURCES_PER_QUERY,
   type SignificantEventsKIsOnboardingInputs,
 } from '../../../../lib/workflows/onboarding_workflow_client';
+import { startSourceOnboarding } from '../../../../lib/workflows/start_source_onboarding';
 
 const timestampFromString = z
   .string()
@@ -105,6 +106,7 @@ const onboardingExecuteRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
     workflowClients,
     maintenanceService,
   }): Promise<KIsOnboardingStatusResult> => {
@@ -113,7 +115,7 @@ const onboardingExecuteRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, sourcesClient } = await getScopedClients({ request });
+    const { licensing, sourcesClient, streamDataEsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
@@ -167,8 +169,19 @@ const onboardingExecuteRoute = createServerRoute({
         },
       };
 
-      const { executionId } = await streamsKIsOnboardingClient.run({ inputs, request });
+      const result = await startSourceOnboarding({
+        source,
+        inputs,
+        onboardingClient: streamsKIsOnboardingClient,
+        esClient: streamDataEsClient,
+        request,
+        logger,
+      });
+      if (result.kind === 'refused') {
+        throw new StatusError(`Cannot onboard source [${source.slug}]: ${result.reason}`, 400);
+      }
 
+      const { executionId } = result;
       return { status: SignificantEventsWorkflowStatus.InProgress, executionId };
     }
 

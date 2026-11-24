@@ -120,6 +120,7 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
+import { startSourceOnboarding } from './lib/workflows/start_source_onboarding';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
 import { KNOWLEDGE_INDICATORS_CHANGED_TRIGGER_ID } from '../common/workflows/triggers';
@@ -411,8 +412,12 @@ export class SignificantEventsPlugin
             return false;
           }
           const now = Date.now();
-          await streamsKIsOnboardingClient.run({
+          const result = await startSourceOnboarding({
+            source,
+            onboardingClient: streamsKIsOnboardingClient,
+            esClient: streamDataEsClient,
             request,
+            logger: this.logger,
             inputs: {
               sourceId: source.id,
               sourceSlug: source.slug,
@@ -427,6 +432,11 @@ export class SignificantEventsPlugin
               queries: { skip: false },
             },
           });
+          if (result.kind === 'refused') {
+            const { reason } = result;
+            this.logger.debug(() => `Not scheduling onboarding of source ${source.id}: ${reason}`);
+            return false;
+          }
           return true;
         },
         getAlertEventsClient,
