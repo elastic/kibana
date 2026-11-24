@@ -413,7 +413,8 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     actionId: string;
     agentId: string;
   }): Promise<PreparedExport> {
-    const exportProviderId = (actionReq.parameters as { export?: unknown } | undefined)?.export;
+    const { parameters } = actionReq;
+    const exportProviderId = parameters && 'export' in parameters ? parameters.export : undefined;
 
     if (
       (command !== 'get-file' && command !== 'memory-dump') ||

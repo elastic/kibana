@@ -28,6 +28,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { fetchIntegrationPolicy } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 import type TestAgent from 'supertest/lib/agent';
+import type { IndexedHostsAndAlertsResponseExtended } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
@@ -78,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // @skipInServerlessMKI - this test reads the Fleet and Endpoint action indices directly
   describe('@ess @serverless @skipInServerlessMKI Export providers used to dispatch get-file / memory-dump', function () {
-    let indexedData: Awaited<ReturnType<typeof endpointTestResources.loadEndpointData>>;
+    let indexedData: IndexedHostsAndAlertsResponseExtended;
     let agentId = '';
     let packagePolicyId = '';
     let endpointOperationsAnalystSupertest: TestAgent;
