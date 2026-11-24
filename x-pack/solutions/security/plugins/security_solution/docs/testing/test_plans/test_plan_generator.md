@@ -342,7 +342,7 @@ When the owning team has a critical-workflows map, the agent uses it to set each
 
 ### "403 SAML enforcement" error when reading issues
 
-Your GitHub token is not authorized for the Elastic organization. If you logged in to `gh` through the browser, sign in to Elastic's SSO at [github.com/orgs/elastic/sso](https://github.com/orgs/elastic/sso), then run `gh auth login` again and authorize the `elastic` org when prompted (Step 4). If you use a personal access token for the GitHub MCP, go to [github.com/settings/tokens](https://github.com/settings/tokens), find your token, click **"Configure SSO"**, and authorize it for the `elastic` org (Step 1).
+Your GitHub token is not authorized for the Elastic organization. If you logged in to `gh` through the browser, sign in to Elastic's SSO at [github.com/orgs/elastic/sso](https://github.com/orgs/elastic/sso), then run `gh auth login` again and authorize the `elastic` org when prompted (Step 4). If you use a personal access token (for the GitHub MCP, or for `gh` through `GH_TOKEN`), go to [github.com/settings/tokens](https://github.com/settings/tokens), find your token, click **"Configure SSO"**, and authorize it for the `elastic` org (Step 1).
 
 ### GitHub MCP shows as disconnected in Cursor
 
