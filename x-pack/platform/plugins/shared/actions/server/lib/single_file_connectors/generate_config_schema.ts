@@ -13,10 +13,12 @@ import { getAllowedHostsKeysFromShape, validateAllowedHostsKeys } from './allowe
 
 export const generateConfigSchema = (
   schema: ConnectorSpec['schema'],
-  actionNames: readonly string[] = []
+  actionNames: readonly string[] = [],
+  { allowNoSelectedActions = false }: { allowNoSelectedActions?: boolean } = {}
 ): ValidatorType<ActionTypeConfig> => {
   const authType = z.string().optional();
   // null/absent = recommended (isTool) actions; non-empty array = explicit allowlist.
+  // An empty array disables every action. Only opted-in receive-only connectors may save that.
   const selectedActions = z.array(z.string().max(256)).max(500).nullish();
   const configSchema = schema
     ? schema.extend({ authType, selectedActions })
@@ -37,7 +39,7 @@ export const generateConfigSchema = (
       if (!Array.isArray(selected)) {
         return;
       }
-      if (selected.length === 0) {
+      if (selected.length === 0 && !allowNoSelectedActions) {
         throw new Error('selectedActions must include at least one action when set.');
       }
       if (knownActionNames.size === 0) {

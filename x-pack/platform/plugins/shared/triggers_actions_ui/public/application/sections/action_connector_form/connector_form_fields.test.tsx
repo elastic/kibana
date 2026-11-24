@@ -19,7 +19,9 @@ jest.mock('@kbn/connector-specs', () => {
   const actual = jest.requireActual('@kbn/connector-specs');
   return {
     ...actual,
-    connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
+    connectorTypeIsDual: jest.fn(
+      (id: string) => id === '.dual' || actual.connectorTypeIsDual(id)
+    ),
     connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
   };
 });
@@ -185,6 +187,7 @@ describe('ConnectorFormFields', () => {
       expect(result.getByTestId('inbound-events-enabled-switch')).not.toBeChecked();
       expect(result.queryByTestId('custom-settings-content')).not.toBeInTheDocument();
       expect(result.getByTestId('connector-outbound-label')).toBeInTheDocument();
+      expect(result.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
       expect(result.queryByTestId('connector-settings-label')).not.toBeInTheDocument();
       await waitFor(() => {
         expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
@@ -271,6 +274,53 @@ describe('ConnectorFormFields', () => {
       await waitFor(() => {
         expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Datadog receive-only form', () => {
+    const datadogActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.datadog',
+      actionConnectorFields: lazy(() => import('./connector_mock')),
+    });
+
+    beforeEach(() => {
+      appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+      appMockRenderer.coreStart.application.capabilities = {
+        ...appMockRenderer.coreStart.application.capabilities,
+        actions: { save: true, show: true, execute: true },
+      };
+    });
+
+    it('shows the Run actions switch and hides outbound fields when it is turned off', async () => {
+      const result = appMockRenderer.render(
+        <FormTestProvider
+          onSubmit={onSubmit}
+          defaultValue={{
+            id: 'test-id',
+            actionTypeId: '.datadog',
+            isDeprecated: 'false',
+            name: 'Datadog',
+            isInboundEventsEnabled: false,
+          }}
+        >
+          <ConnectorFormFields
+            actionTypeModel={datadogActionTypeModel}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </FormTestProvider>
+      );
+
+      expect(result.getAllByTestId('connector-outbound-label')).toHaveLength(1);
+      expect(result.getByTestId('outbound-actions-enabled-switch')).toBeChecked();
+      await waitFor(() => {
+        expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+
+      await userEvent.click(result.getByTestId('outbound-actions-enabled-switch'));
+
+      expect(result.getByTestId('outbound-actions-enabled-switch')).not.toBeChecked();
+      expect(result.getByTestId('outbound-settings')).not.toBeVisible();
     });
   });
 });

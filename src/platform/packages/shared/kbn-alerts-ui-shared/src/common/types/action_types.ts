@@ -107,6 +107,8 @@ export type ConnectorFormSchema<
 export type InternalConnectorForm = ConnectorFormSchema & {
   __internal__?: {
     headers?: Array<{ key: string; value: string; type: string }>;
+    /** Run actions switch on connector types opted into receive-only mode. */
+    runActions?: boolean;
   };
 };
 

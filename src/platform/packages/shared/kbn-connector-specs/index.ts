@@ -14,6 +14,7 @@ export type { ConnectorActionErrorMeta } from './src/connector_utils';
 export * as authTypeSpecs from './src/all_auth_types';
 export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
 export { RELAY_AUTH_ID } from './src/auth_types/relay';
+export { NO_AUTH_TYPE_ID } from './src/auth_types/none';
 export { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from './src/auth_types/oauth_authorization_code';
 export {
   CERTIFICATE_BINDING_KINDS,
@@ -43,6 +44,13 @@ export {
   connectorTypeIsInboundOnly,
 } from './src/is_inbound_only_connector_spec';
 export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connector_spec';
+export {
+  RECEIVE_ONLY_CONNECTOR_TYPE_IDS,
+  connectorTypeSupportsReceiveOnly,
+} from './src/receive_only_connector_type_ids';
+export type { ReceiveOnlyConnectorTypeId } from './src/receive_only_connector_type_ids';
+export { createReceiveOnlyConnectorValidator } from './src/receive_only_connector_validator';
+export { withReceiveOnlyAuth } from './src/with_receive_only_auth';
 export { connectorTypePublishesKeys } from './src/connector_type_publishes_keys';
 export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
@@ -123,6 +131,7 @@ export type { BaseMetadata } from './src/connector_spec_ui';
 export { fromConnectorSpecSchema } from './src/lib/deserialize_connector_spec';
 export type { ConnectorZodSchema } from './src/lib/deserialize_connector_spec';
 export { narrowSecretsSchemaForAuthMode } from './src/lib/narrow_secrets_schema_for_auth_mode';
+export { hideNoAuthInPicker } from './src/lib/hide_no_auth_in_picker';
 export type {
   ClientTypeSpec,
   BuildContext,

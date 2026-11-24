@@ -7,6 +7,10 @@
 
 import React from 'react';
 import type { z } from '@kbn/zod/v4';
+import type {
+  FormData as HookFormData,
+  ValidationFuncArg,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldsFromSchema, renderField } from './field_builder';
 import { type MetaFunctions, type GetMetaFn, type SetMetaFn } from './meta_types';
 import { getMeta as defaultGetMeta, setMeta as defaultSetMeta } from './schema_connector_metadata';
@@ -15,6 +19,8 @@ export interface FormConfig {
   disabled?: boolean;
   // Indicated wheter we are editing an existing record or creating a new one
   isEdit?: boolean;
+  /** Return true to skip a field's validation, for example while the field is hidden. */
+  shouldSkipValidation?: (path: string, form: ValidationFuncArg<HookFormData>['form']) => boolean;
 }
 
 export interface GenerateFormFieldsParams<TSchema extends z.ZodObject<z.ZodRawShape>> {

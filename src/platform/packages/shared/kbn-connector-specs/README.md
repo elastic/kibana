@@ -320,6 +320,16 @@ return value (including `{}` or optional data) is treated as success. Set `enabl
 after migrating the handler to this contract. An inbound-only spec (events, no actions) keeps
 `enabled: false`: Test is an outbound call.
 
+### Receive-only connectors
+
+`RECEIVE_ONLY_CONNECTOR_TYPE_IDS` lists dual connector types that can receive events with no outbound credentials. An id is added only when all three of the following are ready, and membership turns all three on:
+
+- the framework appends the `none` auth type when the spec does not already list it
+- create, update, and execute reject `authType: 'none'` unless `selectedActions` is `[]`
+- the connector form shows a Run actions switch and hides No authentication
+
+Datadog is the only type in the list. Other dual specs are unchanged. Specs do not declare the auth type or the validator. Inbound-only specs and outbound specs that use `none` as "no credentials" are not in the list and do not get this check.
+
 ### Policies (Optional)
 
 Configure connector behavior:

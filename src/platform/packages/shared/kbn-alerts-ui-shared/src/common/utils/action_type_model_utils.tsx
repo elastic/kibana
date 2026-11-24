@@ -12,7 +12,13 @@ import { i18n } from '@kbn/i18n';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
-import { getConnectorSpec, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
+import {
+  connectorTypeSupportsReceiveOnly,
+  getConnectorSpec,
+  hideNoAuthInPicker,
+  isInboundOnlyConnectorSpec,
+  NO_AUTH_TYPE_ID,
+} from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs';
 import type { ConnectorZodSchema } from '@kbn/connector-specs';
@@ -25,7 +31,13 @@ import type {
   ConnectorSpecWireResponse,
 } from '../apis/fetch_connector_spec';
 import { transformConnectorSpecResponse } from '../apis/fetch_connector_spec';
-import type { ActionConnectorFieldsProps, ActionTypeModel } from '../types/action_types';
+import type {
+  ActionConnectorFieldsProps,
+  ActionTypeModel,
+  ConnectorFormSchema,
+  InternalConnectorForm,
+} from '../types/action_types';
+import { isRunActionsOff } from './run_actions_field';
 
 export type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 
@@ -104,6 +116,15 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
 }
 
 /**
+ * Whether the action selection is an empty custom list the form should reject. With Run actions
+ * off, the serializer saves no actions on purpose.
+ */
+export const isMissingSelectedActions = (
+  selectedActions: unknown,
+  runActionsOff: boolean
+): boolean => !runActionsOff && Array.isArray(selectedActions) && selectedActions.length === 0;
+
+/**
  * Transforms a ConnectorSpecResponse into an ActionTypeModel.
  *
  * This creates a model that can be used by the connector form components,
@@ -115,6 +136,7 @@ export function transformSpecToActionTypeModel(
   uiSettings?: IUiSettingsClient
 ): ActionTypeModel {
   const registeredSpec = getConnectorSpec(spec.metadata.id);
+  const supportsReceiveOnly = connectorTypeSupportsReceiveOnly(spec.metadata.id);
 
   return {
     id: spec.metadata.id,
@@ -138,6 +160,9 @@ export function transformSpecToActionTypeModel(
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       const specActions = spec.actions ?? [];
+      if (supportsReceiveOnly) {
+        hideNoAuthInPicker(connectorZodSchema);
+      }
 
       // Bridges UseField's FieldHook API to ConnectorActionSelector's value/onChange props.
       const ConnectorActionSelectorField = ({
@@ -167,7 +192,12 @@ export function transformSpecToActionTypeModel(
         );
         const configFields = generateFormFields({
           schema: narrowedSchema,
-          formConfig: { disabled: readOnly, isEdit },
+          formConfig: {
+            disabled: readOnly,
+            isEdit,
+            shouldSkipValidation: (path, form) =>
+              supportsReceiveOnly && path.startsWith('secrets.') && isRunActionsOff(form),
+          },
           metaFunctions: { getMeta, setMeta },
         });
 
@@ -184,8 +214,8 @@ export function transformSpecToActionTypeModel(
                 defaultValue: null,
                 validations: [
                   {
-                    validator: ({ value }) =>
-                      Array.isArray(value) && (value as string[]).length === 0
+                    validator: ({ value, form }) =>
+                      isMissingSelectedActions(value, isRunActionsOff(form))
                         ? {
                             message: i18n.translate(
                               'alertsUIShared.connectorActionSelector.emptySelectionError',
@@ -207,24 +237,31 @@ export function transformSpecToActionTypeModel(
     actionParamsFields: lazy(async () => ({ default: () => null })),
     validateParams: async () => ({ errors: {} }),
     connectorForm: {
-      serializer: createConnectorFormSerializer() as unknown as NonNullable<
-        ActionTypeModel['connectorForm']
-      >['serializer'],
-      deserializer: createConnectorFormDeserializer() as unknown as NonNullable<
-        ActionTypeModel['connectorForm']
-      >['deserializer'],
+      serializer: createConnectorFormSerializer(supportsReceiveOnly),
+      deserializer: createConnectorFormDeserializer(supportsReceiveOnly),
       hideSettingsTitle: registeredSpec !== undefined && isInboundOnlyConnectorSpec(registeredSpec),
     },
   };
 }
 
-function createConnectorFormSerializer() {
-  return (formData: Record<string, unknown>) => {
-    const secrets = formData?.secrets as Record<string, unknown> | undefined;
-    const config = formData?.config as Record<string, unknown> | undefined;
+const omitAuthType = (fields: Record<string, unknown> = {}): Record<string, unknown> =>
+  Object.fromEntries(Object.entries(fields).filter(([key]) => key !== 'authType'));
+
+function createConnectorFormSerializer(supportsReceiveOnly: boolean) {
+  return (formData: InternalConnectorForm): ConnectorFormSchema => {
+    const { config, secrets, __internal__: internalFields } = formData;
+
+    // Run actions off: the connector only receives events, so it saves no auth and no actions.
+    if (supportsReceiveOnly && internalFields?.runActions === false) {
+      return {
+        ...formData,
+        secrets: { authType: NO_AUTH_TYPE_ID },
+        config: { ...config, authType: NO_AUTH_TYPE_ID, selectedActions: [] },
+      };
+    }
 
     const updatedConfig: Record<string, unknown> = {
-      ...(config ?? {}),
+      ...config,
       ...(secrets?.authType ? { authType: secrets.authType } : {}),
     };
 
@@ -236,15 +273,25 @@ function createConnectorFormSerializer() {
   };
 }
 
-function createConnectorFormDeserializer() {
-  return (apiData: Record<string, unknown>) => {
-    const config = apiData?.config as Record<string, unknown> | undefined;
-    const secrets = apiData?.secrets as Record<string, unknown> | undefined;
+function createConnectorFormDeserializer(supportsReceiveOnly: boolean) {
+  return (apiData: ConnectorFormSchema): InternalConnectorForm => {
+    const { config, secrets } = apiData;
+
+    // A saved receive-only connector loads with Run actions off. The auth picker falls back to its
+    // default and the action selection to All, ready for when Run actions is turned on.
+    if (supportsReceiveOnly && (config?.authType ?? secrets?.authType) === NO_AUTH_TYPE_ID) {
+      return {
+        ...apiData,
+        config: { ...omitAuthType(config), selectedActions: null },
+        secrets: omitAuthType(secrets),
+        __internal__: { runActions: false },
+      };
+    }
 
     if (!config?.authType || secrets?.authType) {
       return apiData;
     }
 
-    return { ...apiData, secrets: { ...(secrets ?? {}), authType: config.authType } };
+    return { ...apiData, secrets: { ...secrets, authType: config.authType } };
   };
 }

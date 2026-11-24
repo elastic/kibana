@@ -9,8 +9,12 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
   TEST_CONNECTOR_SUB_ACTION,
   connectorSpecHasEvents,
+  connectorTypeSupportsReceiveOnly,
+  createReceiveOnlyConnectorValidator,
   getSandboxHosts,
   getSandboxSupportedAuthTypeIds,
+  isDualConnectorSpec,
+  withReceiveOnlyAuth,
 } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { lazyImmutableGCableObject, z as z4 } from '@kbn/zod/v4';
@@ -56,9 +60,10 @@ const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] =
 };
 
 export const createConnectorTypeFromSpec = (
-  spec: ConnectorSpec,
+  input: ConnectorSpec,
   actions: ActionsPluginSetupContract
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
+  const spec = withReceiveOnlyAuth(input);
   const configUtils = actions.getActionsConfigurationUtilities();
   const networkSettings = createConnectorNetworkSettings(configUtils);
   const platform = createPlatformServices(configUtils);
@@ -107,6 +112,12 @@ export const createConnectorTypeFromSpec = (
   const paramsValidator = hasExecutableActions
     ? lazyImmutableGCableObject(() => generateParamsSchema(executableActions))
     : undefined;
+  // Opted-in dual specs can be saved with no credentials only when every outbound action is off.
+  const receiveOnly =
+    connectorTypeSupportsReceiveOnly(spec.metadata.id) && isDualConnectorSpec(spec);
+  const connectorValidator = receiveOnly
+    ? createReceiveOnlyConnectorValidator(spec.metadata.displayName)
+    : undefined;
 
   return {
     id: spec.metadata.id,
@@ -114,9 +125,14 @@ export const createConnectorTypeFromSpec = (
     name: spec.metadata.displayName,
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
-      config: lazyImmutableGCableObject(() => generateConfigSchema(schemaForConfig, actionNames)),
+      config: lazyImmutableGCableObject(() =>
+        generateConfigSchema(schemaForConfig, actionNames, {
+          allowNoSelectedActions: receiveOnly,
+        })
+      ),
       secrets: lazyImmutableGCableObject(() => generateSecretsSchema(spec.auth, configUtils)),
       ...(paramsValidator ? { params: paramsValidator } : {}),
+      ...(connectorValidator ? { connector: connectorValidator } : {}),
     },
     ...(executor ? { executor } : {}),
     globalAuthHeaders: spec.auth?.headers,

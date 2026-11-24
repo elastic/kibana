@@ -63,7 +63,11 @@ export const getFieldFromSchema = ({
     defaultValue,
     isOptional,
     validate: (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
-      const [{ value, path: formPath }] = args;
+      const [{ value, path: formPath, form }] = args;
+
+      if (formConfig.shouldSkipValidation?.(formPath, form)) {
+        return undefined;
+      }
 
       // Skip validation for optional fields when the value is empty.
       // extractSchemaCore unwraps ZodOptional to get the inner schema, so the
