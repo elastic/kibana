@@ -34,7 +34,7 @@ export interface EligibleStreamsResponse {
   candidates: Array<SourceCandidate & { sourceRevision: string }>;
   alreadyRunning: SourceClassificationResult['alreadyRunning'];
   upToDate: SourceCandidate[];
-  /** Candidates left out because feature identification could not sample them. */
+  /** Probed candidates left out because feature identification could not sample them. */
   unsupported: UnsupportedSource[];
   skipped: SourceCandidate[];
   disabled: SourceClassificationResult['disabled'];
@@ -77,7 +77,7 @@ const eligibleStreamsRoute = createServerRoute({
   params: z.object({
     query: z
       .object({
-        maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
+        maxScheduledStreams: NumberFromString.pipe(z.number().int().positive().optional()),
         extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
         lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
       })

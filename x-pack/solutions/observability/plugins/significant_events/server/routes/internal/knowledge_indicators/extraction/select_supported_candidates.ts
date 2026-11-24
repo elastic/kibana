@@ -14,12 +14,18 @@ import { probeSampleColumns } from '../../../../lib/significant_events/features/
 import type { SourceCandidate } from './classify_sources';
 
 const PROBE_TIMEOUT_MS = 15_000;
+const MAX_CONCURRENT_PROBES = 5;
 
 export interface UnsupportedSource {
   sourceId: string;
   sourceSlug: string;
   reason: string;
 }
+
+type CandidateAssessment =
+  | { kind: 'supported'; candidate: SourceCandidate }
+  | { kind: 'unknown'; candidate: SourceCandidate; error: string }
+  | { kind: 'unsupported'; candidate: SourceCandidate; reason: string };
 
 /**
  * Fills the available slots with the first candidates feature identification can sample, so a
@@ -42,47 +48,61 @@ export const selectSupportedCandidates = async ({
   skipped: SourceCandidate[];
   unsupported: UnsupportedSource[];
 }> => {
+  if (!Number.isInteger(availableSlots) || availableSlots < 0) {
+    throw new Error(`availableSlots must be a non-negative integer, received [${availableSlots}]`);
+  }
+
   const toSchedule: SourceCandidate[] = [];
   const unsupported: UnsupportedSource[] = [];
   let next = 0;
 
   // Probes only as many candidates as there are slots left: the sources past the last slot
-  // wait for a later cycle either way.
+  // wait for a later cycle either way. Fixed-size waves prevent a caller-controlled slot count
+  // from becoming unbounded Elasticsearch concurrency.
   while (toSchedule.length < availableSlots && next < candidates.length) {
-    const batch = candidates.slice(next, next + availableSlots - toSchedule.length);
-    next += batch.length;
-    const reasons = await Promise.all(
-      batch.map(({ sourceId }) =>
-        getUnsupportedReason({ index: viewNames.get(sourceId), esClient, logger })
-      )
+    const batchSize = Math.min(
+      MAX_CONCURRENT_PROBES,
+      availableSlots - toSchedule.length,
+      candidates.length - next
     );
-    batch.forEach((candidate, position) => {
-      const reason = reasons[position];
-      if (reason === undefined) {
-        toSchedule.push(candidate);
-        return;
+    const batch = candidates.slice(next, next + batchSize);
+    next += batch.length;
+    const assessments = await Promise.all(
+      batch.map((candidate) => {
+        const index = viewNames.get(candidate.sourceId);
+        if (index === undefined) {
+          throw new Error(`Missing view name for source [${candidate.sourceId}]`);
+        }
+        return assessCandidate({ candidate, index, esClient, logger });
+      })
+    );
+
+    for (const assessment of assessments) {
+      if (assessment.kind !== 'unsupported') {
+        toSchedule.push(assessment.candidate);
+        continue;
       }
+      const { candidate, reason } = assessment;
       const { sourceId, sourceSlug } = candidate;
       logger.debug(() => `Not scheduling onboarding of source ${sourceId}: ${reason}`);
       unsupported.push({ sourceId, sourceSlug, reason });
-    });
+    }
   }
 
   return { toSchedule, skipped: candidates.slice(next), unsupported };
 };
 
-const getUnsupportedReason = async ({
+const assessCandidate = async ({
+  candidate,
   index,
   esClient,
   logger,
 }: {
-  index: string | undefined;
+  candidate: SourceCandidate;
+  index: string;
   esClient: ElasticsearchClient;
   logger: Logger;
-}): Promise<string | undefined> => {
-  if (index === undefined) {
-    return undefined;
-  }
+}): Promise<CandidateAssessment> => {
   const signal = timeoutSignal(PROBE_TIMEOUT_MS);
   try {
     const probe = await probeSampleColumns({
@@ -92,14 +112,21 @@ const getUnsupportedReason = async ({
       signal,
       samplingTimeoutMs: PROBE_TIMEOUT_MS,
     });
-    return probe.kind === 'unsupported' ? probe.problem : undefined;
+    if (probe.kind === 'unsupported') {
+      return { kind: 'unsupported', candidate, reason: probe.problem };
+    }
+    if (probe.kind === 'supported' && probe.columns === undefined) {
+      return { kind: 'unknown', candidate, error: 'Column probe could not determine the schema' };
+    }
+    return { kind: 'supported', candidate };
   } catch (error) {
     if (error instanceof StatusError) {
-      return error.message;
+      return { kind: 'unsupported', candidate, reason: error.message };
     }
     // A probe that cannot answer rejects nothing: the run decides.
-    logger.debug(() => `Column probe of [${index}] failed: ${parseError(error).message}`);
-    return undefined;
+    const message = parseError(error).message;
+    logger.debug(() => `Column probe of [${index}] failed: ${message}`);
+    return { kind: 'unknown', candidate, error: message };
   } finally {
     signal.dispose();
   }

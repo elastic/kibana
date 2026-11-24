@@ -102,4 +102,44 @@ describe('selectSupportedCandidates', () => {
     expect(ids(toSchedule)).toEqual(['empty', 'slow']);
     expect(unsupported).toEqual([]);
   });
+
+  it('rejects a fractional slot count instead of looping without progress', async () => {
+    await expect(select(['a'], 0.5)).rejects.toThrow(
+      'availableSlots must be a non-negative integer'
+    );
+    expect(getEsqlColumnSchemaMock).not.toHaveBeenCalled();
+  });
+
+  it('bounds concurrent probes independently of the available slot count', async () => {
+    let activeProbes = 0;
+    let maxActiveProbes = 0;
+    getEsqlColumnSchemaMock.mockImplementation(async () => {
+      activeProbes++;
+      maxActiveProbes = Math.max(maxActiveProbes, activeProbes);
+      await Promise.resolve();
+      activeProbes--;
+      return [TIMESTAMP_COLUMN];
+    });
+
+    const sourceIds = Array.from({ length: 12 }, (_, index) => `source-${index}`);
+    const { toSchedule } = await select(sourceIds, sourceIds.length);
+
+    expect(ids(toSchedule)).toEqual(sourceIds);
+    expect(maxActiveProbes).toBe(5);
+  });
+
+  it('fails when a candidate has no corresponding view name', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    await expect(
+      selectSupportedCandidates({
+        candidates: [makeCandidate('orphan')],
+        availableSlots: 1,
+        viewNames: new Map(),
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+      })
+    ).rejects.toThrow('Missing view name for source [orphan]');
+    expect(getEsqlColumnSchemaMock).not.toHaveBeenCalled();
+  });
 });
