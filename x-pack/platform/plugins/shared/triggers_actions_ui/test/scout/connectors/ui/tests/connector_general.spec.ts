@@ -440,9 +440,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await expect(page.testSubj.locator('eventLogStatusFilterButton')).toBeVisible();
 
     // Status badge starts at 0 (no filters active)
-    const statusBadge = page.testSubj
-      .locator('eventLogStatusFilterButton')
-      .getByText(/^\d+$/);
+    const statusBadge = page.testSubj.locator('eventLogStatusFilterButton').getByText(/^\d+$/);
     await expect(statusBadge).toHaveText('0');
 
     // Enable "success" filter

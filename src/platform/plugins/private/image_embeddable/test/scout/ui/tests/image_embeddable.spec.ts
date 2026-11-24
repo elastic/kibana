@@ -73,9 +73,7 @@ test.describe('Image embeddable', { tag: '@local-stateful-classic' }, () => {
     await test.step('verify drilldown count and navigate via image click', async () => {
       await pageObjects.dashboard.openPanelContextMenu();
       await expect(
-        page.testSubj
-          .locator('embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN')
-          .getByText(/^\d+$/)
+        page.testSubj.locator('embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN').getByText(/^\d+$/)
       ).toHaveText('1');
       await page.keyboard.press('Escape');
 
