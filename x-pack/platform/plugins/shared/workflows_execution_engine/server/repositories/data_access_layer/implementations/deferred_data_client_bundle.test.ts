@@ -36,6 +36,13 @@ describe('DeferredDataClientBundle', () => {
     createWorkflowDataClient: jest.Mock;
     createStepDataClient: jest.Mock;
   };
+  let registeredDataStreamBundle: {
+    initSetup: jest.Mock;
+    initStart: jest.Mock;
+    stop: jest.Mock;
+    createWorkflowDataClient: jest.Mock;
+    createStepDataClient: jest.Mock;
+  };
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let bundle: DeferredDataClientBundle;
@@ -48,8 +55,18 @@ describe('DeferredDataClientBundle', () => {
       createWorkflowDataClient: jest.fn().mockReturnValue(createMockWorkflowDataClient()),
       createStepDataClient: jest.fn().mockReturnValue(createMockStepDataClient()),
     };
+    registeredDataStreamBundle = {
+      initSetup: jest.fn().mockResolvedValue(undefined),
+      initStart: jest.fn().mockResolvedValue(undefined),
+      stop: jest.fn().mockResolvedValue(undefined),
+      createWorkflowDataClient: jest.fn().mockReturnValue(createMockWorkflowDataClient()),
+      createStepDataClient: jest.fn().mockReturnValue(createMockStepDataClient()),
+    };
 
     MockBundle.mockImplementation(() => innerBundle as unknown as PlainIndexDataClientBundle);
+    MockDataStreamBundle.mockImplementation(
+      () => registeredDataStreamBundle as unknown as DataStreamDataClientBundle
+    );
 
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
@@ -62,15 +79,14 @@ describe('DeferredDataClientBundle', () => {
   });
 
   describe('initSetup', () => {
-    it('delegates to the inner bundle', async () => {
+    it('registers both backends once when the configured source is plain_index', async () => {
       await bundle.initSetup(coreSetup);
-      expect(innerBundle.initSetup).toHaveBeenCalledWith(coreSetup);
-    });
+      await bundle.initSetup(coreSetup);
 
-    it('is idempotent — inner initSetup called only once', async () => {
-      await bundle.initSetup(coreSetup);
-      await bundle.initSetup(coreSetup);
       expect(innerBundle.initSetup).toHaveBeenCalledTimes(1);
+      expect(innerBundle.initSetup).toHaveBeenCalledWith(coreSetup);
+      expect(registeredDataStreamBundle.initSetup).toHaveBeenCalledTimes(1);
+      expect(registeredDataStreamBundle.initSetup).toHaveBeenCalledWith(coreSetup);
     });
   });
 
@@ -283,6 +299,7 @@ describe('DeferredDataClientBundle', () => {
       );
 
       await bundle.initSetup(coreSetup);
+      dataStreamBundle.initSetup.mockClear();
       await bundle.initStart(coreStart);
 
       const client = bundle.createWorkflowDataClient();
@@ -291,7 +308,7 @@ describe('DeferredDataClientBundle', () => {
       await bundle.switchSource('data_stream');
       await client.search({ query: { match_all: {} } });
 
-      expect(dataStreamBundle.initSetup).toHaveBeenCalledWith(coreSetup);
+      expect(dataStreamBundle.initSetup).not.toHaveBeenCalled();
       expect(dataStreamBundle.initStart).toHaveBeenCalledWith(coreStart);
       expect(innerBundle.stop).toHaveBeenCalledTimes(1);
       expect(plainClient.search).toHaveBeenCalledTimes(1);
@@ -310,13 +327,13 @@ describe('DeferredDataClientBundle', () => {
         () => dataStreamBundle as unknown as DataStreamDataClientBundle
       );
 
+      await bundle.initSetup(coreSetup);
+      await bundle.initStart(coreStart);
+
       const secondPlainBundle = createInnerBundle();
       MockBundle.mockImplementation(
         () => secondPlainBundle as unknown as PlainIndexDataClientBundle
       );
-
-      await bundle.initSetup(coreSetup);
-      await bundle.initStart(coreStart);
 
       const firstSwitch = bundle.switchSource('data_stream');
       const secondSwitch = bundle.switchSource('plain_index');
@@ -329,9 +346,27 @@ describe('DeferredDataClientBundle', () => {
       await firstSwitch;
       await secondSwitch;
 
-      expect(secondPlainBundle.initSetup).toHaveBeenCalledWith(coreSetup);
+      expect(secondPlainBundle.initSetup).not.toHaveBeenCalled();
       expect(secondPlainBundle.initStart).toHaveBeenCalledWith(coreStart);
       expect(dataStreamBundle.stop).toHaveBeenCalledTimes(1);
+    });
+
+    it('starts a returning data_stream bundle without registering it again', async () => {
+      const returning = new DeferredDataClientBundle({
+        source: 'data_stream',
+        dataRetention: '90d',
+        logger: loggerMock.create(),
+      });
+
+      await returning.initSetup(coreSetup);
+      await returning.initStart(coreStart);
+      await returning.switchSource('plain_index');
+      await returning.switchSource('data_stream');
+
+      expect(registeredDataStreamBundle.initSetup).toHaveBeenCalledTimes(1);
+      expect(registeredDataStreamBundle.initSetup).toHaveBeenCalledWith(coreSetup);
+      expect(registeredDataStreamBundle.initStart).toHaveBeenCalledTimes(2);
+      expect(registeredDataStreamBundle.initStart).toHaveBeenCalledWith(coreStart);
     });
   });
 });

@@ -30,7 +30,6 @@ export class DeferredDataClientBundle implements DataClientBundle {
   private switchChain: Promise<void> = Promise.resolve();
   private startPromise: Promise<void> | undefined;
   private setupPromise: Promise<void> | undefined;
-  private coreSetup: CoreSetup | undefined;
   private coreStart: CoreStart | undefined;
 
   constructor(private readonly deps: DeferredDataClientBundleDeps) {
@@ -38,11 +37,15 @@ export class DeferredDataClientBundle implements DataClientBundle {
     this.dataClientBundle = this.createDataClientBundle(deps.source);
   }
 
+  /** Registers both backends once. Later switches only start the selected one. */
   initSetup(coreSetup: CoreSetup): Promise<void> {
-    this.coreSetup = coreSetup;
     if (!this.setupPromise) {
-      const bundle = this.dataClientBundle;
-      this.setupPromise = bundle.initSetup(coreSetup);
+      const plain = new PlainIndexDataClientBundle(this.deps);
+      const dataStream = new DataStreamDataClientBundle(this.deps);
+      this.setupPromise = Promise.all([
+        plain.initSetup(coreSetup),
+        dataStream.initSetup(coreSetup),
+      ]).then(() => undefined);
     }
     return this.setupPromise;
   }
@@ -94,9 +97,6 @@ export class DeferredDataClientBundle implements DataClientBundle {
     }
 
     const next = this.createDataClientBundle(source);
-    if (this.coreSetup) {
-      await next.initSetup(this.coreSetup);
-    }
     if (this.coreStart) {
       await next.initStart(this.coreStart);
     }
