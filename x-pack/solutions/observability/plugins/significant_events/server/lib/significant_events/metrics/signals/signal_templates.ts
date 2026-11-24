@@ -17,7 +17,6 @@ const WORKLOAD_SUBTYPES = [
 const kubernetesOtelRule = (ruleTemplateId: string, adapted?: string): SignalSource => ({
   kind: 'integration_rule_template',
   integration: 'kubernetes_otel',
-  integrationVersion: '2.6.1',
   ruleTemplateId,
   ...(adapted ? { adapted } : {}),
 });
@@ -25,7 +24,6 @@ const kubernetesOtelRule = (ruleTemplateId: string, adapted?: string): SignalSou
 const systemRule = (ruleTemplateId: string): SignalSource => ({
   kind: 'integration_rule_template',
   integration: 'system',
-  integrationVersion: '3.5.0',
   ruleTemplateId,
 });
 
@@ -36,7 +34,6 @@ const nightshiftDefault = (reason: string): SignalSource => ({
 
 // Signal ids are stable API values; add new ids instead of renaming existing ones.
 export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
-  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-container-cpu-throttling.json L32, L40-L41.
   {
     signal: 'k8s.container.cpu_vs_limit',
     subtypes: WORKLOAD_SUBTYPES.slice(0, 3),
@@ -66,7 +63,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
       },
     ],
   },
-  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-container-memory-near-limit.json L31, L39-L40.
   {
     signal: 'k8s.container.memory_vs_limit',
     subtypes: WORKLOAD_SUBTYPES.slice(0, 3),
@@ -94,7 +90,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
       },
     ],
   },
-  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-node-not-ready.json L31, L39-L40.
   {
     signal: 'k8s.node.not_ready',
     subtypes: ['k8s.node'],
@@ -125,7 +120,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
       },
     ],
   },
-  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-node-memory-pressure.json L31, L39-L40.
   {
     signal: 'k8s.node.memory_pressure',
     subtypes: ['k8s.node'],
@@ -154,7 +148,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
       },
     ],
   },
-  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-node-disk-pressure.json L31, L39-L40.
   {
     signal: 'k8s.node.disk_pressure',
     subtypes: ['k8s.node'],
@@ -183,7 +176,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
       },
     ],
   },
-  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-node-filesystem-saturation.json L31, L39-L40.
   {
     signal: 'k8s.node.filesystem_usage',
     subtypes: ['k8s.node'],
@@ -213,7 +205,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
       },
     ],
   },
-  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-persistent-volume-space-low.json L31, L39-L40.
   {
     signal: 'k8s.volume.space_low',
     subtypes: ['k8s.namespace'],
@@ -248,7 +239,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
       },
     ],
   },
-  // system/kibana/alerting_rule_template/system-cpu-utilization.json L15-L18.
   {
     signal: 'host.cpu.utilization',
     subtypes: ['host'],
@@ -285,7 +275,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
       },
     ],
   },
-  // system/kibana/alerting_rule_template/system-memory-utilization.json L15-L18.
   {
     signal: 'host.memory.utilization',
     subtypes: ['host'],

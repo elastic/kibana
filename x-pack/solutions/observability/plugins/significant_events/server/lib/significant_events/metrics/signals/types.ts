@@ -18,7 +18,6 @@ export type SignalSource =
   | {
       kind: 'integration_rule_template';
       integration: string;
-      integrationVersion: string;
       ruleTemplateId: string;
       adapted?: string;
     }
