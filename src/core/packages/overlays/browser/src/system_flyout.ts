@@ -54,6 +54,22 @@ export type OverlaySystemFlyoutOpenOptions = Omit<
 };
 
 /**
+ * Reference to an opened system flyout. Adds the ability to retitle it after open.
+ */
+export interface OverlaySystemFlyoutRef extends OverlayRef {
+  /**
+   * Replaces the flyout's title (also its label in the flyout manager history menu).
+   * Ignored when the flyout was opened with `flyoutMenuProps.title`, which takes precedence.
+   *
+   * WARNING: EUI captures the title when the flyout registers with the flyout manager, so a title
+   * change re-registers it. For a foreground main flyout that closes every session in its history
+   * group (and their children), not just this one. Only call this when the flyout is alone in its
+   * history group and has no child.
+   */
+  setTitle(title: string): void;
+}
+
+/**
  * APIs to open and manage fly-out dialogs.
  *
  * @deprecated Use {@link OverlayFlyoutTemplateStart} via `openFlyoutTemplate` instead.
@@ -70,7 +86,10 @@ export interface OverlaySystemFlyoutStart {
    *
    * @deprecated Use `openFlyoutTemplate` instead.
    */
-  open(content: React.ReactElement, options?: OverlaySystemFlyoutOpenOptions): OverlayRef;
+  open(
+    content: React.ReactElement,
+    options?: OverlaySystemFlyoutOpenOptions
+  ): OverlaySystemFlyoutRef;
 }
 
 /**

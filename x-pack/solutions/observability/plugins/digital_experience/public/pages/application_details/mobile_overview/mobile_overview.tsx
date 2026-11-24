@@ -24,8 +24,8 @@ import { useFormatters } from '../../../hooks/use_formatters';
 import { useQueryParam } from '../../../hooks/use_query_param';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { MOBILE_ERROR_RATE_DESCRIPTION, MOBILE_USERS_DESCRIPTION } from '../../../labels';
-import { MobilePanel } from './mobile_panel';
-import type { MobilePanelProps } from './mobile_panel';
+import { ComparedKpiPanel } from '../../../components/compared_kpi_panel';
+import type { ComparedKpiPanelProps } from '../../../components/compared_kpi_panel';
 import type { MobileKpisState } from './use_mobile_kpis';
 
 const OS_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.os', {
@@ -44,7 +44,7 @@ type MobileKpi = 'sessions' | 'users' | 'errorRate';
  */
 const MOBILE_KPIS: ReadonlyArray<
   Pick<
-    MobilePanelProps,
+    ComparedKpiPanelProps,
     'title' | 'tooltip' | 'changeUnit' | 'higherIsBetter' | 'data-test-subj'
   > & {
     kpi: MobileKpi;
@@ -243,7 +243,7 @@ export function MobileOverview({
         ) : (
           <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
             {MOBILE_KPIS.map(({ kpi, ...panel }) => (
-              <MobilePanel
+              <ComparedKpiPanel
                 key={kpi}
                 {...panel}
                 value={currentKpis?.[kpi]}
