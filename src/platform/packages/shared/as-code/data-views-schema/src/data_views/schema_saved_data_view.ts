@@ -8,6 +8,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
+import { asCodeSpacesSchema } from '@kbn/as-code-shared-schemas';
 import {
   allowHiddenIndicesSchema,
   fieldFiltersSchema,
@@ -24,7 +25,7 @@ import { fieldSettingsWithPopularitySchema } from '../field_settings/schema_fiel
 import { savedScriptedFieldSchema } from '../scripted_fields/schema_saved_scripted_fields';
 
 const spacesSchema = lazySchema(() =>
-  z.array(z.string().min(1).max(256)).max(100).optional().meta({
+  asCodeSpacesSchema.optional().meta({
     id: 'kbn-data-view-spaces-schema',
     title: 'Spaces',
     description:

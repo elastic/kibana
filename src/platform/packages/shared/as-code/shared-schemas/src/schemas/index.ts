@@ -14,4 +14,5 @@ export { asCodeQuerySchema, type AsCodeQuery } from './query';
 export { asCodePaginationParamsSchema, asCodePaginationResponseMetaSchema } from './pagination';
 export { asCodeRelatedItemSchema, type AsCodeRelatedItem } from './related_item';
 export { asCodeSearchRequestSchema, getAsCodeSearchRequestSchema } from './search';
+export { asCodeSpacesSchema } from './spaces';
 export { getAsCodeTagsSchema } from './tags';
