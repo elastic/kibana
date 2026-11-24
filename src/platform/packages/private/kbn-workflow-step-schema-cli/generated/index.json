@@ -878,6 +878,7 @@
     "shodan.searchHosts",
     "significantEvents.classifyDetections",
     "significantEvents.resolveModel",
+    "significantEvents.resolveWrittenDetections",
     "slack",
     "slack2.addReaction",
     "slack2.askQuestion",
@@ -1004,6 +1005,7 @@
     "waitForApproval",
     "waitForInput",
     "while",
+    "workflow.awaitExecutions",
     "workflow.execute",
     "workflow.executeAsync",
     "workflow.fail",
@@ -1113,11 +1115,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "ebde1d45df69d06415f5fb91c1b7a4669663e1086e4ca2b360c5d7a5de7e360f"
+      "sha256": "11b3d087f7db6310f37ca31e6cf5d71ad0d2c41e2c4be6b048c45ede6d5d2f5b"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "4838aac2d8f501558a88aeef9e69a8e2641b846fc29fb310b3b01938e85442e5"
+      "sha256": "68729982e602ae80e0dd6e26c35da17a29ba0fc3111ec9949bd6a0f8fe031c06"
     }
   }
 }
