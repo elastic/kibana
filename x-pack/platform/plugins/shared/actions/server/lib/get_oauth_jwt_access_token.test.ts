@@ -98,6 +98,25 @@ describe('getOAuthJwtAccessToken', () => {
     );
   });
 
+  test('normalizes a stored token with a lowercase bearer scheme', async () => {
+    connectorTokenClient.get.mockResolvedValueOnce({
+      hasErrors: false,
+      connectorToken: {
+        id: '1',
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'bearer cachedtoken',
+        createdAt: new Date('2021-01-01T08:00:00.000Z').toISOString(),
+        expiresAt: new Date('2021-01-02T13:00:00.000Z').toISOString(),
+      },
+    });
+
+    const accessToken = await getOAuthJwtAccessToken(getOAuthJwtAccessTokenOpts);
+
+    expect(accessToken).toEqual('Bearer cachedtoken');
+    expect(requestOAuthJWTToken as jest.Mock).not.toHaveBeenCalled();
+  });
+
   test('creates new assertion if stored access token does not exist', async () => {
     connectorTokenClient.get.mockResolvedValueOnce({
       hasErrors: false,
