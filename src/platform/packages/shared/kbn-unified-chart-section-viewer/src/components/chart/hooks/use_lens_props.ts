@@ -15,7 +15,6 @@ import {
 } from '@kbn/lens-embeddable-utils';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { useStableCallback } from '@kbn/react-hooks';
@@ -78,7 +77,6 @@ export const useLensProps = ({
   error,
   userMessages,
   profileId,
-  executionContext,
 }: {
   chartId: string;
   lensConfig: ChartLensConfig;
@@ -87,7 +85,6 @@ export const useLensProps = ({
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
-  executionContext?: Pick<KibanaExecutionContext, 'type' | 'name'>;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const reportError = useReportChartSectionError();
@@ -137,7 +134,6 @@ export const useLensProps = ({
         userMessages,
         profileId,
         chartId,
-        executionContext,
       });
     },
     [
@@ -150,7 +146,6 @@ export const useLensProps = ({
       userMessages,
       profileId,
       chartId,
-      executionContext,
     ]
   );
 
@@ -261,7 +256,6 @@ const getLensProps = ({
   userMessages,
   profileId,
   chartId,
-  executionContext,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
@@ -273,7 +267,6 @@ const getLensProps = ({
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
   chartId: string;
-  executionContext?: Pick<KibanaExecutionContext, 'type' | 'name'>;
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',
@@ -285,7 +278,6 @@ const getLensProps = ({
   isApproximate,
   searchSessionId,
   executionContext: {
-    ...executionContext,
     description: 'metrics experience chart data',
     meta: {
       profile_id: profileId,

@@ -6,7 +6,11 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { LensXYOverlayMatchContext } from '@kbn/lens-common';
+import type {
+  LensXYOverlayData,
+  LensXYOverlayDatum,
+  LensXYOverlayMatchContext,
+} from '@kbn/lens-common';
 import {
   createExemplarsOverlayProvider,
   getExemplarsQuery,
@@ -18,14 +22,17 @@ const TS_QUERY =
 
 const LENS_CHILD_CONTEXT = { type: 'lens', name: 'lnsXY' };
 const METRICS_GRID_CONTEXT = {
-  type: 'discover',
-  name: 'metrics_grid',
+  type: 'application',
+  name: 'discover',
+  page: 'app',
   description: 'metrics experience chart data',
+  meta: { profile_id: 'metrics-data-source-profile', metric_id: 'chart-1', metric_type: 'lnsXY' },
   child: LENS_CHILD_CONTEXT,
 };
 const DISCOVER_HISTOGRAM_CONTEXT = {
-  type: 'discover',
-  name: 'unified_histogram',
+  type: 'application',
+  name: 'discover',
+  page: 'app',
   child: LENS_CHILD_CONTEXT,
 };
 const DASHBOARD_CONTEXT = {
@@ -100,18 +107,10 @@ describe('createExemplarsOverlayProvider', () => {
 
     it.each([
       ['an unknown surface', { type: 'lens', name: 'lnsXY' }],
-      ['another Discover component', { type: 'discover', name: 'other' }],
+      ['another app', { type: 'application', name: 'lens' }],
       ['no execution context', undefined],
     ])('does not apply to %s', (_, executionContext) => {
       const context = getContext(executionContext);
-      expect(provider.isApplicable(context, context.layers[0])).toBe(false);
-    });
-
-    it('does not apply to a form-based layer', () => {
-      const context: LensXYOverlayMatchContext = {
-        layers: [{ layerId: 'layer1' }],
-        executionContext: DASHBOARD_CONTEXT,
-      };
       expect(provider.isApplicable(context, context.layers[0])).toBe(false);
     });
 
@@ -156,6 +155,8 @@ describe('createExemplarsOverlayProvider', () => {
 
     const overlay = await clickableProvider.fetchOverlay({
       layer: { layerId: 'layer1', esql: TS_QUERY },
+      filters: [],
+      queries: [],
       abortSignal: new AbortController().signal,
       executeEsql,
     });
@@ -167,21 +168,25 @@ describe('createExemplarsOverlayProvider', () => {
     expect(overlay).toEqual({
       type: 'points',
       title: 'Exemplars',
-      points: [{ id: 'exemplar-0', x: Date.parse('2026-11-06T11:24:00.890Z'), y: 0.003 }],
+      data: [table.rows[0]],
+      xAccessor: expect.any(Function),
+      yAccessor: 'value',
     });
+    const { xAccessor, data } = overlay as LensXYOverlayData;
+    expect((xAccessor as (row: LensXYOverlayDatum) => number)(data[0])).toBe(
+      Date.parse('2026-11-06T11:24:00.890Z')
+    );
 
     clickableProvider.onPointClick?.({
       providerId: clickableProvider.id,
       layerId: 'layer1',
-      pointId: 'exemplar-0',
+      datum: data[0],
     });
 
-    expect(onExemplarClick).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'exemplar-0',
-        value: 0.003,
-        fields: expect.objectContaining({ trace_id: 'abc' }),
-      })
-    );
+    expect(onExemplarClick).toHaveBeenCalledWith({
+      timestamp: '2026-11-06T11:24:00.890Z',
+      value: 0.003,
+      fields: expect.objectContaining({ trace_id: 'abc' }),
+    });
   });
 });
