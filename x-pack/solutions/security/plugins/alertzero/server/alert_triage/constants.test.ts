@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { closedByDecisionTag, skippedByDecisionTag, toDecisionAutoCloseMode } from './constants';
+import {
+  DECISION_DAILY_CLOSE_CAP,
+  TAG_CHUNK_SIZE,
+  closedByDecisionTag,
+  skippedByDecisionTag,
+  toDecisionAutoCloseMode,
+} from './constants';
 
 describe('toDecisionAutoCloseMode', () => {
   it.each(['shadow', 'on', 'off'] as const)('reads %s as itself', (mode) => {
@@ -29,5 +35,14 @@ describe('the tags of a decision', () => {
     expect(skippedByDecisionTag('fp-dismissal-0123456789abcdef')).toBe(
       'az:skipped_by_decision:fp-dismissal-0123456789abcdef'
     );
+  });
+});
+
+// The sweep closes the alerts of a decision in chunks and goes on with the next chunk after one
+// times out. That is only safe while a decision has one chunk to close per page. If this fails, read
+// the `shortcut:` note in `closeAlerts` of the match sweep before raising the cap.
+describe('the daily close cap', () => {
+  it('fits in one chunk of a close', () => {
+    expect(DECISION_DAILY_CLOSE_CAP).toBeLessThanOrEqual(TAG_CHUNK_SIZE);
   });
 });

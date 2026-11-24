@@ -268,6 +268,10 @@ export const createDecisionSweep = ({
    */
   const closeAlerts = async (id: string, allowed: string[], progress: CloseProgress) => {
     let timedOut = false;
+    // shortcut: after a chunk times out, the next chunks are still closed, although more closes
+    // against a slow cluster may not help. The daily cap equals the chunk size, so a decision has
+    // one chunk per page and this does not happen. If the cap grows past the chunk size, stop after
+    // a timed-out chunk and take the tag off the chunks not reached: they are tagged but still open.
     for (const chunk of chunked(allowed)) {
       // The attempt counts against today's allowance before it is made: a close that fails half
       // way may have closed alerts, and the next page must not close another full allowance of the
