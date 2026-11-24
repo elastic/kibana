@@ -100,17 +100,28 @@ export class OlsService {
   }
 
   /**
-   * Stores a recovery answer that a request-scoped privilege check already has, so that OLS needs
-   * no second privilege request. Only Security's privilege checks call this, see
+   * Prepares the recovery answers that a request-scoped privilege check collects on the side, so
+   * that OLS needs no second privilege request. Only Security's privilege checks call this, see
    * `checkPrivilegesFactory`.
    *
-   * @param request The request the check ran for.
-   * @param type The object type.
-   * @param spaceIds The spaces the answer is for. `*` means the check ran globally.
-   * @param granted Whether the request holds recovery authority.
+   * @param request The request the check runs for.
+   * @param kibanaPrivileges The Kibana privileges the check asks for.
+   * @returns The recovery actions to add, mapped to their type, and a function that stores the
+   *   answers. Answers that arrive after the request's credential changed are dropped.
    */
-  public primeRecovery(request: KibanaRequest, type: string, spaceIds: string[], granted: boolean) {
-    this.scope(request).primeRecovery(type, spaceIds, granted);
+  public prepareRecovery(request: KibanaRequest, kibanaPrivileges: readonly string[]) {
+    const actions = this.getRecoveryActions(kibanaPrivileges);
+    if (actions.size === 0) {
+      return { actions, prime: () => {} };
+    }
+
+    const scoped = this.scope(request);
+    const credential = scoped.getCredential();
+    return {
+      actions,
+      prime: (type: string, spaceIds: string[], granted: boolean) =>
+        scoped.primeRecovery(type, spaceIds, granted, credential),
+    };
   }
 
   /**

@@ -27,8 +27,8 @@ export type AclWarning =
     }
   | {
       /**
-       * The new owner, who lacks the feature privileges of the `edit` operation that managing
-       * access and transferring the object need.
+       * The new owner, who lacks the feature privileges of the `view` and `edit` operations that
+       * managing access and transferring the object need.
        */
       target: 'owner';
       /** The new owner. */

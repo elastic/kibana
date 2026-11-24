@@ -174,8 +174,7 @@ export interface ScopedOlsServiceContract {
 }
 
 /**
- * Object-level security for one request. `primeRecovery` is for Security's privilege checks only,
- * and is not part of {@link ScopedOlsServiceContract}.
+ * Object-level security for one request.
  */
 export class ScopedOlsService implements ScopedOlsServiceContract {
   private readonly auditLogger: AuditLogger;
@@ -224,6 +223,15 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
   }
 
   /**
+   * Returns the credential the request carries now, to bind a privilege check's answers to it.
+   *
+   * @returns An opaque value that changes when the request's credential changes.
+   */
+  public getCredential(): string {
+    return this.syncCredential();
+  }
+
+  /**
    * Stores a recovery answer that a privilege check already has, so that no second privilege
    * request is needed. Every request-scoped privilege check primes it, see
    * `checkPrivilegesFactory`.
@@ -231,9 +239,19 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
    * @param type The object type.
    * @param spaceIds The spaces the answer is for. `*` means the check ran globally.
    * @param granted Whether the request holds recovery authority.
+   * @param checkedCredential The credential the check ran with, from {@link getCredential}.
    */
-  public primeRecovery(type: string, spaceIds: string[], granted: boolean): void {
-    this.syncCredential();
+  public primeRecovery(
+    type: string,
+    spaceIds: string[],
+    granted: boolean,
+    checkedCredential: string
+  ): void {
+    // An answer for a credential the request no longer carries, as when a service-account request
+    // is released while the check runs, says nothing about the request now.
+    if (this.syncCredential() !== checkedCredential) {
+      return;
+    }
 
     for (const spaceId of spaceIds) {
       this.state.recovery.set(getRecoveryKey(type, spaceId), Promise.resolve(granted));
@@ -267,7 +285,8 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
   }: OlsGetPermissionsParams): Promise<AclDecision> {
     const policy = this.requirePolicy(type);
     const enabled = this.isEnabled();
-    const recoveryAction = getRecoveryAction(this.params.authz.actions, type);
+    const authzActions = this.params.authz.actions;
+    const recoveryAction = getRecoveryAction(authzActions, type);
     const operationActions = new Map(
       Object.entries(policy.operations).map(([name, operation]) => [
         name,
@@ -275,13 +294,16 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
       ])
     );
 
+    // Recovery counts only with the login action, as in every other recovery check. The answer
+    // belongs to the credential the check runs with.
+    const credential = this.syncCredential();
     const { privileges } = await this.params.authz
       .checkPrivilegesWithRequest(this.request)
       .atSpace(spaceId, {
         kibana: [
           ...new Set([
             ...[...operationActions.values()].flat(),
-            ...(enabled ? [recoveryAction] : []),
+            ...(enabled ? [recoveryAction, authzActions.login] : []),
           ]),
         ],
       });
@@ -291,8 +313,8 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
 
     let decision: AclDecision;
     if (enabled) {
-      const recovery = granted.has(recoveryAction);
-      this.primeRecovery(type, [spaceId], recovery);
+      const recovery = granted.has(recoveryAction) && granted.has(authzActions.login);
+      this.primeRecovery(type, [spaceId], recovery, credential);
       decision = evaluateAcl({ policy, acl, principal: await this.getPrincipal(), recovery });
     } else {
       decision = {
@@ -300,7 +322,8 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
         access: 'edit',
         isOwner: false,
         restricted: false,
-        operations: getOperationsAtAccess(policy, 'edit'),
+        // Every operation the type defines, whatever access it needs: only feature privileges apply.
+        operations: new Set(Object.keys(policy.operations)),
         operationsViaRecovery: new Set(),
       };
     }
@@ -431,17 +454,30 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
 
     const principal = await this.getPrincipal();
     const recovery = await this.hasRecovery(type, spaceId);
-    if (recovery) {
+
+    const hiddenIds = new Set<string>();
+    let visibleViaRecovery = false;
+    for (const { id, acl } of restricted) {
+      this.reportInvalidAcl(type, id, acl);
+      const { operations, operationsViaRecovery } = evaluateAcl({
+        policy,
+        acl,
+        principal,
+        recovery,
+      });
+
+      if (!operations.has('view')) {
+        hiddenIds.add(id);
+      } else if (operationsViaRecovery.has('view')) {
+        visibleViaRecovery = true;
+      }
+    }
+
+    // Recovery is audited only when it shows an object that the caller couldn't view otherwise.
+    if (visibleViaRecovery) {
       this.audit({ action: 'ols_admin_override', type, spaceId, operation: 'find', principal });
     }
 
-    const hiddenIds = new Set<string>();
-    for (const { id, acl } of restricted) {
-      this.reportInvalidAcl(type, id, acl);
-      if (!evaluateAcl({ policy, acl, principal, recovery }).operations.has('view')) {
-        hiddenIds.add(id);
-      }
-    }
     return objects.filter(({ id }) => !hiddenIds.has(id));
   }
 
@@ -675,8 +711,8 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
 
   /**
    * Returns a warning for each user whose feature privileges do not allow the access they get: an
-   * entry's operations at its access, and the `edit` operation that a new owner needs to manage
-   * access. The access is stored anyway: it applies as soon as the user gets the privileges.
+   * entry's operations at its access, and the `view` and `edit` operations that a new owner needs
+   * to manage access. The access is stored anyway: it applies as soon as the user gets the privileges.
    */
   private async getRecipientWarnings(
     policy: AccessPolicy,
@@ -707,14 +743,15 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
       }
     }
 
-    // A transfer drops the former owner, so a new owner who can't edit leaves nobody but a recovery
-    // administrator able to manage the object.
+    // A transfer drops the former owner, so a new owner who can't view and edit the object leaves
+    // nobody but a recovery administrator able to manage it. Access changes check `view` first.
     if (change.kind === 'transfer' && acl.owner.type === 'user') {
-      const [ownerId] = await this.findUsersWithoutPrivileges(
-        new Set([acl.owner.id]),
-        spaceId,
-        this.getPrivilegeActions(policy.operations.edit)
-      );
+      const [ownerId] = await this.findUsersWithoutPrivileges(new Set([acl.owner.id]), spaceId, [
+        ...new Set([
+          ...this.getPrivilegeActions(policy.operations.view),
+          ...this.getPrivilegeActions(policy.operations.edit),
+        ]),
+      ]);
       if (ownerId) {
         warnings.push({
           target: 'owner',
@@ -739,7 +776,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
   }
 
   private syncCredential() {
-    syncCredential(this.state, this.request, this.params.getAuthenticatedPrincipal);
+    return syncCredential(this.state, this.request, this.params.getAuthenticatedPrincipal);
   }
 
   /**

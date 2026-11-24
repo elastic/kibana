@@ -306,9 +306,9 @@ other refusal reveals something about the object, such as that it exists or alre
 
 An `AclWarning` names access that a successful change stores but that its principal can't fully use yet. Its
 `target` is `entry` when an entry's principal lacks the feature privileges of the entry's access, and `owner` when a
-new owner lacks the privileges of the `edit` operation, which managing access and transfers need. The access applies
-as soon as the principal gets them. The package only defines the shape: the service that stores the change checks
-privileges and returns warnings.
+new owner lacks the privileges of the `view` and `edit` operations, which managing access and transfers need. The
+access applies as soon as the principal gets them. The package only defines the shape: the service that stores the
+change checks privileges and returns warnings.
 
 `readEditableAcl` reads an object's current access from its stored ACL into an `EditableAcl`, so that it can be shown,
 edited, or written back in the shapes Kibana writes. It keeps only what grants something. An entry with several IDs

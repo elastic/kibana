@@ -1719,6 +1719,22 @@ describe('UserProfileService', () => {
         userProfileService.start(mockStartParams).getApiKeyProfileId(apiKeyRequest())
       ).rejects.toBe(failure);
     });
+
+    it('throws when UIAM fails, while getCurrentProfileId logs it and resolves nothing', async () => {
+      const mockUiam = uiamServiceMock.create();
+      const failure = new Error('UIAM is down');
+      mockUiam.getApiKeyCreator.mockRejectedValue(failure);
+      const startContract = userProfileService.start({ ...mockStartParams, uiam: mockUiam });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_some-uiam-api-key' },
+      });
+
+      await expect(startContract.getApiKeyProfileId(request)).rejects.toBe(failure);
+      await expect(startContract.getCurrentProfileId({ request })).resolves.toBeNull();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to retrieve API key for user profile retrieval')
+      );
+    });
   });
 
   describe('#update', () => {

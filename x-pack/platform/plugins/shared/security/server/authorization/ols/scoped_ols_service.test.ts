@@ -56,6 +56,7 @@ const EDIT_ACTION = `saved_object:${TYPE}/update`;
 const DELETE_ACTION = `saved_object:${TYPE}/delete`;
 const RECOVERY_ACTION = `saved_object:${TYPE}/manage_access_control`;
 const FEATURE_ACTIONS = [VIEW_ACTION, USE_ACTION, EDIT_ACTION, DELETE_ACTION];
+const LOGIN_ACTION = new Actions().login;
 
 const OWNER: Principal = { type: 'user', id: 'u_owner' };
 const GRANTEE: Principal = { type: 'user', id: 'u_grantee' };
@@ -145,10 +146,13 @@ describe('ScopedOlsService', () => {
 
   const getEventActions = (events: AuditEvent[]) => events.map(({ event }) => event?.action);
 
+  const primeRecovery = (olsService: OlsService, spaceIds: string[], granted: boolean) =>
+    olsService.prepareRecovery(request, [VIEW_ACTION]).prime(TYPE, spaceIds, granted);
+
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
 
-    grantedActions = new Set(FEATURE_ACTIONS);
+    grantedActions = new Set([...FEATURE_ACTIONS, LOGIN_ACTION]);
     checkPrivileges = {
       atSpace: jest.fn(async (spaceId: string, { kibana }: { kibana: string[] }) =>
         toPrivilegesResponse(spaceId, kibana)
@@ -342,7 +346,7 @@ describe('ScopedOlsService', () => {
 
       it('uses a primed answer instead of a privilege request', async () => {
         const olsService = createOlsService();
-        olsService.primeRecovery(request, TYPE, ['default'], true);
+        primeRecovery(olsService, ['default'], true);
 
         await expect(authorize('view', PRIVATE_ACL, olsService)).resolves.toEqual(
           new Map([['widget-1', { status: 'allowed' }]])
@@ -424,11 +428,41 @@ describe('ScopedOlsService', () => {
     });
   });
 
+  describe('#prepareRecovery', () => {
+    it('drops an answer that arrives after the request credential changed', async () => {
+      asPrincipal(STRANGER);
+      const getAuthenticatedPrincipal = jest
+        .fn()
+        .mockReturnValue({ type: 'service_account', serviceAccountId: 'sa', variant: 'stack' });
+      const olsService = createOlsService({ getAuthenticatedPrincipal });
+      const { prime } = olsService.prepareRecovery(request, [VIEW_ACTION]);
+
+      // The service-account request is released while the privilege check runs.
+      getAuthenticatedPrincipal.mockReturnValue(null);
+      prime(TYPE, ['default'], true);
+
+      await olsService.asScoped(request).authorizeObjectAccess({
+        type: TYPE,
+        spaceId: 'default',
+        operation: 'view',
+        objects: [{ id: 'widget-1', acl: PRIVATE_ACL }],
+      });
+      expect(checkPrivileges.atSpace).toHaveBeenCalledWith('default', {
+        kibana: [RECOVERY_ACTION],
+      });
+    });
+
+    it('prepares nothing for a check that asks about no protected type', () => {
+      const { actions } = createOlsService().prepareRecovery(request, [USE_ACTION]);
+      expect(actions.size).toBe(0);
+    });
+  });
+
   describe('#primeRecovery', () => {
     it('answers for the default space from a global check when Spaces is disabled', async () => {
       asPrincipal(STRANGER);
       const olsService = createOlsService({ spacesEnabled: false });
-      olsService.primeRecovery(request, TYPE, ['*'], true);
+      primeRecovery(olsService, ['*'], true);
       const scoped = olsService.asScoped(request);
 
       await expect(
@@ -445,7 +479,7 @@ describe('ScopedOlsService', () => {
     it('keeps a global answer apart from the default space when Spaces is enabled', async () => {
       asPrincipal(STRANGER);
       const olsService = createOlsService();
-      olsService.primeRecovery(request, TYPE, ['*'], true);
+      primeRecovery(olsService, ['*'], true);
 
       await olsService.asScoped(request).authorizeObjectAccess({
         type: TYPE,
@@ -494,6 +528,18 @@ describe('ScopedOlsService', () => {
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toBe('ols_admin_override');
     });
 
+    it('audits no override when recovery shows nothing the caller could not view', async () => {
+      grantedActions = new Set([...grantedActions, RECOVERY_ACTION]);
+      const objects = [{ id: 'own', acl: PRIVATE_ACL }];
+
+      await expect(
+        createOlsService()
+          .asScoped(request)
+          .filterVisible({ type: TYPE, spaceId: 'default', objects })
+      ).resolves.toEqual(objects);
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
     it('makes no lookup when nothing is restricted', async () => {
       const objects = [{ id: 'public' }];
 
@@ -515,8 +561,18 @@ describe('ScopedOlsService', () => {
 
       expect(checkPrivileges.atSpace).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.atSpace).toHaveBeenCalledWith('default', {
-        kibana: [...FEATURE_ACTIONS, RECOVERY_ACTION],
+        kibana: [...FEATURE_ACTIONS, RECOVERY_ACTION, LOGIN_ACTION],
       });
+    });
+
+    it('reports no recovery without the login action', async () => {
+      asPrincipal(STRANGER);
+      grantedActions = new Set([...FEATURE_ACTIONS, RECOVERY_ACTION]);
+
+      const decision = await evaluate(PRIVATE_ACL);
+
+      expect(decision.operationsViaRecovery.size).toBe(0);
+      expect(decision.operations.has('view')).toBe(false);
     });
 
     it('drops operations the caller lacks feature privileges for', async () => {
@@ -572,6 +628,23 @@ describe('ScopedOlsService', () => {
       expect(decision.operationsViaRecovery.size).toBe(0);
       expect(checkPrivileges.atSpace).toHaveBeenCalledWith('default', { kibana: FEATURE_ACTIONS });
       expect(userProfiles.getCurrentProfileId).not.toHaveBeenCalled();
+    });
+
+    it('allows a type operation that needs manage while OLS is disabled', async () => {
+      policies.getAccessPolicy.mockReturnValue({
+        ...POLICY,
+        operations: {
+          ...POLICY.operations,
+          archive: { access: 'manage', privileges: { api: ['archive-widget'] } },
+        },
+      });
+      grantedActions = new Set([...FEATURE_ACTIONS, 'api:archive-widget']);
+
+      const decision = await evaluate(PRIVATE_ACL, createOlsService({ enabled: false }));
+
+      expect([...decision.operations].sort()).toEqual(
+        ['archive', 'delete', 'edit', 'use', 'view'].sort()
+      );
     });
   });
 
@@ -981,14 +1054,16 @@ describe('ScopedOlsService', () => {
       });
     });
 
-    it('warns when the new owner of a transfer cannot edit the object', async () => {
+    it('warns when the new owner of a transfer cannot view and edit the object', async () => {
       const result = await authorizeChange({ kind: 'transfer', owner: GRANTEE }, PRIVATE_ACL);
 
       expect(result.warnings).toEqual([
         { target: 'owner', principal: GRANTEE, reason: 'missing_feature_privileges' },
       ]);
       // Managing access and transferring need the privileges of `edit`, and nothing else.
-      expect(checkUserProfilesAtSpace).toHaveBeenCalledWith('default', { kibana: [EDIT_ACTION] });
+      expect(checkUserProfilesAtSpace).toHaveBeenCalledWith('default', {
+        kibana: [VIEW_ACTION, EDIT_ACTION],
+      });
     });
 
     it('does not check feature privileges of a service account that becomes the owner', async () => {

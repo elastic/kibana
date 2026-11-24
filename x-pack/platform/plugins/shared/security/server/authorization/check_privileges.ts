@@ -35,10 +35,22 @@ interface CheckPrivilegesActions {
  * for recovery.
  */
 export interface PrivilegeCheckRecovery {
-  /** Returns the recovery actions to add for the requested Kibana privileges, mapped to their type. */
-  getRecoveryActions(kibanaPrivileges: readonly string[]): ReadonlyMap<string, string>;
-  /** Receives the answer for one type in the given spaces, `*` meaning globally. */
-  primeRecovery(request: KibanaRequest, type: string, spaceIds: string[], granted: boolean): void;
+  /**
+   * Prepares what a check of the given Kibana privileges answers on the side for a request.
+   *
+   * @param request The request the check runs for.
+   * @param kibanaPrivileges The Kibana privileges the check asks for.
+   * @returns The recovery actions to add, mapped to their type, and a function that stores the
+   *   answer for one type in the given spaces, `*` meaning globally. The answer is stored only
+   *   while the request still carries the credential it had when the check started.
+   */
+  prepareRecovery(
+    request: KibanaRequest,
+    kibanaPrivileges: readonly string[]
+  ): {
+    actions: ReadonlyMap<string, string>;
+    prime: (type: string, spaceIds: string[], granted: boolean) => void;
+  };
 }
 
 export function checkPrivilegesFactory(
@@ -114,16 +126,20 @@ export function checkPrivilegesFactory(
       privileges: CheckPrivilegesPayload,
       { requireLoginAction = true }: CheckPrivilegesOptions = {}
     ): Promise<CheckPrivilegesResponse> => {
-      const recovery = getRecovery?.();
       const requestedKibanaPrivileges =
         privileges.kibana === undefined
           ? []
           : Array.isArray(privileges.kibana)
           ? privileges.kibana
           : [privileges.kibana];
-      // Like the login action, recovery is checked without being requested, so the caller never sees it.
+      // Like the login action, recovery is checked without being requested, so the caller never sees
+      // it. Recovery counts only with the login action, so a check that doesn't ask for login can't
+      // answer it.
+      const recovery = requireLoginAction
+        ? getRecovery?.()?.prepareRecovery(request, requestedKibanaPrivileges)
+        : undefined;
       const recoveryActions = new Map(
-        [...(recovery?.getRecoveryActions(requestedKibanaPrivileges) ?? [])].filter(
+        [...(recovery?.actions ?? [])].filter(
           ([action]) => !requestedKibanaPrivileges.includes(action)
         )
       );
@@ -205,7 +221,11 @@ export function checkPrivilegesFactory(
               ? ResourceSerializer.deserializeSpaceResource(resource)
               : ALL_SPACES_ID;
           for (const [action, type] of recoveryActions) {
-            recovery.primeRecovery(request, type, [spaceId], resourcePrivilegesResponse[action]);
+            recovery.prime(
+              type,
+              [spaceId],
+              resourcePrivilegesResponse[action] && resourcePrivilegesResponse[actions.login]
+            );
           }
         }
 
