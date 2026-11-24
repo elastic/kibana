@@ -55,6 +55,8 @@ export interface LiveQueryDetailsItem {
   tags?: string[];
   status?: string;
   queries?: PackQueriesQuery[];
+  /** Set when a workflow run started the live query. `verified` is always `false` for now. */
+  origin?: { type: 'workflow'; run_id: string; verified: boolean };
 }
 
 export const useLiveQueryDetails = ({

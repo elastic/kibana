@@ -234,6 +234,7 @@ export async function setupDependencies(
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
     enhancedDependencies,
+    stepIoService,
     workflowExecutionState
   );
 

@@ -1193,6 +1193,124 @@ describe('bulkExecute()', () => {
     `);
   });
 
+  test('skips the actions of a connector that is not found and schedules the rest', async () => {
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: { actionTypeId: 'mock-action' },
+          references: [],
+        },
+        {
+          id: '456',
+          type: 'action',
+          attributes: {},
+          references: [],
+          error: {
+            error: 'Not Found',
+            message: 'Saved object [action/456] not found',
+            statusCode: 404,
+          },
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '234',
+          type: 'action_task_params',
+          attributes: { actionId: '123' },
+          references: [],
+        },
+      ],
+    });
+
+    const result = await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        uuid: 'aaa',
+        params: { baz: false },
+        spaceId: DEFAULT_SPACE_ID,
+        executionId: '123abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
+      },
+      {
+        id: '456',
+        uuid: 'bbb',
+        params: { baz: false },
+        spaceId: DEFAULT_SPACE_ID,
+        executionId: '123abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
+      },
+    ]);
+
+    expect(result).toEqual({
+      errors: true,
+      items: [
+        { id: '123', uuid: 'aaa', actionTypeId: 'mock-action', response: 'success' },
+        {
+          id: '456',
+          uuid: 'bbb',
+          actionTypeId: 'mock-action',
+          response: 'connectorNotFoundError',
+        },
+      ],
+    });
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+    expect(savedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes).toEqual(
+      expect.objectContaining({ actionId: '123' })
+    );
+    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.bulkSchedule.mock.calls[0][0]).toHaveLength(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Skipped the actions for the connector: 456. Error: connector not found.'
+    );
+  });
+
+  test('throws when fetching a connector fails with an error other than not found', async () => {
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
+    });
+    const error = { error: 'Forbidden', message: 'Forbidden', statusCode: 403 };
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [{ id: '123', type: 'action', attributes: {}, references: [], error }],
+    });
+
+    await expect(
+      executeFn(savedObjectsClient, [
+        {
+          id: '123',
+          params: { baz: false },
+          spaceId: DEFAULT_SPACE_ID,
+          executionId: '123abc',
+          apiKey: null,
+          source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'mock-action',
+        },
+      ])
+    ).rejects.toEqual(error);
+    expect(mockTaskManager.bulkSchedule).not.toHaveBeenCalled();
+  });
+
   test('passes through action uuid if provided', async () => {
     mockTaskManager.aggregate.mockResolvedValue({
       took: 1,
