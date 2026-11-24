@@ -90,6 +90,67 @@ describe('SchemaPropertyList', () => {
     ]);
   });
 
+  describe('required and default', () => {
+    const host = createEmptySchemaProperty({ id: 'host', name: 'host' });
+
+    it('toggles required without touching the default', async () => {
+      const onChange = jest.fn();
+      renderList({
+        properties: [{ ...host, hasDefault: true, defaultValue: 'a' }],
+        onChange,
+      });
+
+      await userEvent.click(screen.getByTestId('schemaProperty-required-host'));
+
+      expect(onChange).toHaveBeenCalledWith([
+        expect.objectContaining({ required: true, hasDefault: true, defaultValue: 'a' }),
+      ]);
+    });
+
+    it('explains Required in an info icon, and a click on it does not toggle the checkbox', async () => {
+      const onChange = jest.fn();
+      renderList({ properties: [host], onChange });
+
+      expect(screen.queryByText(/the caller must provide/i)).not.toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('schemaProperty-requiredInfo-host'));
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('keeps the default text disabled until the default is enabled, and enabling keeps it empty', async () => {
+      const onChange = jest.fn();
+      renderList({ properties: [host], onChange });
+
+      expect(screen.getByTestId('schemaProperty-default-host')).toBeDisabled();
+      await userEvent.click(screen.getByTestId('schemaProperty-hasDefault-host'));
+
+      expect(onChange).toHaveBeenCalledWith([
+        expect.objectContaining({ hasDefault: true, defaultValue: '' }),
+      ]);
+    });
+
+    it('takes a default over several lines, such as an ES|QL query', async () => {
+      const onChange = jest.fn();
+      const query = 'FROM a\n| WHERE b\n| LIMIT 1';
+      renderList({ properties: [{ ...host, hasDefault: true, defaultValue: query }], onChange });
+
+      const textbox = screen.getByTestId('schemaProperty-default-host');
+
+      expect(textbox.tagName).toBe('TEXTAREA');
+      expect(textbox).toHaveValue(query);
+      expect(textbox).toHaveAttribute('rows', '3');
+    });
+
+    it('edits the default text once enabled', async () => {
+      const onChange = jest.fn();
+      renderList({ properties: [{ ...host, hasDefault: true }], onChange });
+
+      await userEvent.type(screen.getByTestId('schemaProperty-default-host'), 'x');
+
+      expect(onChange).toHaveBeenCalledWith([expect.objectContaining({ defaultValue: 'x' })]);
+    });
+  });
+
   it('still offers add on an empty editable list', () => {
     renderList({ properties: [] });
 

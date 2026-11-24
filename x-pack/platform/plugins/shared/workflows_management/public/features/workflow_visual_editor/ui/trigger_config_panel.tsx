@@ -36,6 +36,10 @@ import {
 } from '@kbn/workflows-ui';
 import { detectIndent } from '@kbn/workflows-yaml';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
+import { KqlConditionInput } from './kql_condition_input';
+import { StepValidatedFormRow } from './step_validated_form_row';
+import { TriggerConnectorIdField } from './trigger_connector_id_field';
+import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
 import {
   findStepsReferencingInput,
   parseInputsToSchemaProperties,
@@ -44,7 +48,13 @@ import {
   SchemaPropertyList,
 } from '../../../shared/ui/schema_property_builder';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { triggerSchemas } from '../../../trigger_schemas';
 import { isStepFragmentDirty, parseStepFragment } from '../lib/parse_step_fragment';
+import {
+  readTriggerEventSettings,
+  writeTriggerCondition,
+  writeTriggerConnectorId,
+} from '../lib/trigger_event_fragment';
 
 ensureWorkflowGraphEuiIcons();
 
@@ -236,6 +246,18 @@ export function TriggerConfigPanel({
     [indent]
   );
 
+  const handleConnectorIdChange = useCallback(
+    (connectorId: string | undefined) =>
+      setFragment((current) => writeTriggerConnectorId(current, connectorId ?? '', indent)),
+    [indent]
+  );
+
+  const handleConditionChange = useCallback(
+    (condition: string) =>
+      setFragment((current) => writeTriggerCondition(current, condition, indent)),
+    [indent]
+  );
+
   const findReferencingSteps = useCallback(
     (name: string) => findStepsReferencingInput(workflowYaml, name),
     [workflowYaml]
@@ -288,6 +310,21 @@ export function TriggerConfigPanel({
 
   const showManualInputs = triggerType === 'manual';
   const showScheduledSettings = triggerType === 'scheduled';
+  // An event trigger: a connector's event (`github.issues`) or a registered one, which can be
+  // narrowed with a KQL condition on the event.
+  const eventConnectorType = useMemo(
+    () => getConnectorTypeIdForTriggerEventId(triggerType),
+    [triggerType]
+  );
+  const eventDefinition = useMemo(
+    () => triggerSchemas.getTriggerDefinition(triggerType),
+    [triggerType]
+  );
+  const showEventSettings =
+    !showManualInputs &&
+    !showScheduledSettings &&
+    (eventConnectorType !== undefined || eventDefinition !== undefined);
+  const eventSettings = useMemo(() => readTriggerEventSettings(parsed.js), [parsed.js]);
 
   return (
     <div
@@ -563,6 +600,68 @@ export function TriggerConfigPanel({
                         </EuiFormRow>
                       </div>
                     </EuiAccordion>
+                  ) : showEventSettings ? (
+                    <div
+                      data-test-subj="workflowTriggerConfigPanelEventSettings"
+                      css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.m }}
+                    >
+                      {eventConnectorType !== undefined ? (
+                        <StepValidatedFormRow
+                          label={i18n.translate('workflows.triggerConfigPanel.connectorLabel', {
+                            defaultMessage: 'Connector',
+                          })}
+                          description={i18n.translate(
+                            'workflows.triggerConfigPanel.connectorDescription',
+                            {
+                              defaultMessage:
+                                'Start this workflow for events from this connector, or from every connector of the type.',
+                            }
+                          )}
+                          isInvalid={false}
+                          fullWidth
+                          display="row"
+                        >
+                          <TriggerConnectorIdField
+                            connectorType={eventConnectorType}
+                            value={eventSettings.connectorId}
+                            onChange={(connectorId) => handleConnectorIdChange(connectorId)}
+                            readOnly={readOnly}
+                            testSubj="workflowTriggerConfigConnectorId"
+                          />
+                        </StepValidatedFormRow>
+                      ) : null}
+                      <StepValidatedFormRow
+                        label={i18n.translate('workflows.triggerConfigPanel.conditionLabel', {
+                          defaultMessage: 'Condition',
+                        })}
+                        description={i18n.translate(
+                          'workflows.triggerConfigPanel.conditionDescription',
+                          {
+                            defaultMessage:
+                              'Start this workflow only when this condition is true for the event.',
+                          }
+                        )}
+                        isInvalid={false}
+                        fullWidth
+                        display="row"
+                      >
+                        <KqlConditionInput
+                          value={eventSettings.condition}
+                          onChange={handleConditionChange}
+                          eventSchema={eventDefinition?.eventSchema}
+                          ariaLabel={i18n.translate(
+                            'workflows.triggerConfigPanel.conditionAriaLabel',
+                            { defaultMessage: 'Condition' }
+                          )}
+                          placeholder={i18n.translate(
+                            'workflows.triggerConfigPanel.conditionPlaceholder',
+                            { defaultMessage: 'Type a KQL condition on the event' }
+                          )}
+                          readOnly={readOnly}
+                          testSubj="workflowTriggerConfigCondition"
+                        />
+                      </StepValidatedFormRow>
+                    </div>
                   ) : (
                     <EuiEmptyPrompt
                       paddingSize="m"

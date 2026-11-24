@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type { ColorMode, Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux-v7';
+import { useDispatch, useSelector, useStore } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Document, isMap, isSeq, parseDocument, stringify as stringifyYaml } from 'yaml';
 import type { Node as YamlNode } from 'yaml';
@@ -289,6 +289,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   // `editorYaml` can return an execution's YAML on the executions tab, which must
   // not be the mutation source. Always mutate from `yamlString` (the live draft).
   const yamlString = useSelector(selectYamlString) ?? '';
+  const store = useStore();
   const workflowId = useSelector(selectWorkflowId);
   const loadedConnectors = useSelector(selectConnectors);
   const { canExecuteWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
@@ -781,12 +782,16 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   // The YAML changed from elsewhere (an undo, an edit in the YAML tab). A trigger is found by its
   // place in the list, which may have moved, so its panel closes; all it applied is in the YAML.
+  // The store's YAML is read here, not the rendered one: two edits made before this effect runs
+  // leave the render one edit behind, which would look like a change from elsewhere.
   useEffect(() => {
     const current = panelRef.current;
-    if (current?.mode !== 'edit-trigger' || yamlString === lastAppliedYamlRef.current) return;
+    if (current?.mode !== 'edit-trigger') return;
+    const latestYaml = selectYamlString(store.getState()) ?? '';
+    if (latestYaml === lastAppliedYamlRef.current) return;
     setPanel(null);
     setSelectedStep(null);
-  }, [yamlString, setSelectedStep]);
+  }, [yamlString, store, setSelectedStep]);
 
   /** Steps live-apply, so switching the canvas/URL selection never loses anything. */
   const requestStepSelect = useCallback(

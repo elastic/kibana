@@ -885,16 +885,16 @@ export class WorkflowGraphAuthoringPage {
       await field('description').fill(String(input.description).slice(0, 2000));
     const allowed = input.options ?? input.enum;
     if (allowed) await field('allowed').fill(allowed.join(', '));
-    // The value is either required, or has a default, or is left empty: the form does not allow two of them.
-    const radio = (mode: string) => this.page.locator(`[id="${suffix}-mode-${mode}"]`);
+    // Required and the default are independent: each has its own checkbox.
+    if (input.required === true) {
+      await field('required').check();
+    }
     if (input.default !== undefined) {
-      await radio('default').click();
+      await field('hasDefault').check();
       await this.fillInput(
         field('default'),
         typeof input.default === 'string' ? input.default : JSON.stringify(input.default)
       );
-    } else if (input.required === true) {
-      await radio('required').click();
     }
   }
 }

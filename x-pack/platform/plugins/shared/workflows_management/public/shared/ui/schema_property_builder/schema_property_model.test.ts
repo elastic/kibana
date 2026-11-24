@@ -6,7 +6,6 @@
  */
 
 import {
-  applyModeChange,
   applyTypeChange,
   createEmptySchemaProperty,
   findStepsReferencingInput,
@@ -29,27 +28,11 @@ describe('schema_property_model', () => {
     });
   });
 
-  describe('mode', () => {
-    it('clears default when leaving "Use a default"', () => {
-      const field = createEmptySchemaProperty({ mode: 'default', defaultValue: 'x' });
-      expect(applyModeChange(field, 'required')).toEqual(
-        expect.objectContaining({ mode: 'required', defaultValue: '' })
-      );
-      expect(applyModeChange(field, 'none')).toEqual(
-        expect.objectContaining({ mode: 'none', defaultValue: '' })
-      );
-    });
-
-    it('keeps defaultValue when selecting "Use a default"', () => {
-      const field = createEmptySchemaProperty({ mode: 'none', defaultValue: '' });
-      expect(applyModeChange(field, 'default')).toEqual(
-        expect.objectContaining({ mode: 'default', defaultValue: '' })
-      );
-    });
-
-    it('resets mode and default on type change', () => {
+  describe('type change', () => {
+    it('resets required, default and allowed values', () => {
       const field = createEmptySchemaProperty({
-        mode: 'default',
+        required: true,
+        hasDefault: true,
         defaultValue: 'hi',
         type: 'string',
         allowedValues: ['a'],
@@ -57,7 +40,8 @@ describe('schema_property_model', () => {
       expect(applyTypeChange(field, 'number')).toEqual(
         expect.objectContaining({
           type: 'number',
-          mode: 'none',
+          required: false,
+          hasDefault: false,
           defaultValue: '',
           allowedValues: [],
         })
@@ -71,13 +55,13 @@ describe('schema_property_model', () => {
         createEmptySchemaProperty({
           name: 'hostname',
           type: 'string',
-          mode: 'required',
+          required: true,
           description: 'Host',
         }),
         createEmptySchemaProperty({
           name: 'severity',
           type: 'string',
-          mode: 'default',
+          hasDefault: true,
           allowedValues: ['low', 'high'],
           allowOtherValues: false,
           defaultValue: 'low',
@@ -85,7 +69,6 @@ describe('schema_property_model', () => {
         createEmptySchemaProperty({
           name: 'note',
           type: 'string',
-          mode: 'none',
         }),
       ];
       const schema = schemaPropertiesToJsonSchema(fields);
@@ -114,10 +97,53 @@ describe('schema_property_model', () => {
       expect(parsed).not.toBe('unsupported');
       if (parsed === 'unsupported') return;
       expect(parsed.map((p) => p.name)).toEqual(['dry_run', 'env']);
-      expect(parsed[0].mode).toBe('required');
-      expect(parsed[1].mode).toBe('default');
+      expect(parsed[0]).toMatchObject({ required: true, hasDefault: false });
+      expect(parsed[1]).toMatchObject({ required: false, hasDefault: true });
       expect(parsed[1].allowedValues).toEqual(['dev', 'prod']);
       expect(parsed[1].defaultValue).toBe('dev');
+    });
+
+    describe('required and default are independent', () => {
+      const roundTrip = (inputs: unknown) => {
+        const parsed = parseInputsToSchemaProperties(inputs);
+        if (parsed === 'unsupported') throw new Error('unsupported');
+        return { parsed, schema: schemaPropertiesToJsonSchema(parsed) };
+      };
+
+      it('keeps a field that is both required and has a default', () => {
+        const { parsed, schema } = roundTrip({
+          type: 'object',
+          properties: { rule_id: { type: 'string', default: 'abc' } },
+          required: ['rule_id'],
+        });
+
+        expect(parsed[0]).toMatchObject({ required: true, hasDefault: true, defaultValue: 'abc' });
+        expect(schema.required).toEqual(['rule_id']);
+        expect(schema.properties?.rule_id).toMatchObject({ default: 'abc' });
+      });
+
+      it('keeps an empty-string default of a string', () => {
+        const { parsed, schema } = roundTrip({
+          type: 'object',
+          properties: { agent_id: { type: 'string', default: '' } },
+        });
+
+        expect(parsed[0]).toMatchObject({ required: false, hasDefault: true, defaultValue: '' });
+        expect(schema.properties?.agent_id).toMatchObject({ type: 'string', default: '' });
+        expect(schema.required).toBeUndefined();
+      });
+
+      it('writes no default while the default is not enabled, whatever the text', () => {
+        const field = createEmptySchemaProperty({ name: 'a', defaultValue: 'left over' });
+
+        expect(schemaPropertiesToJsonSchema([field]).properties?.a).not.toHaveProperty('default');
+      });
+
+      it('does not write an empty default for a type that cannot hold it', () => {
+        const field = createEmptySchemaProperty({ name: 'n', type: 'number', hasDefault: true });
+
+        expect(schemaPropertiesToJsonSchema([field]).properties?.n).not.toHaveProperty('default');
+      });
     });
 
     describe('legacy array inputs', () => {
@@ -133,7 +159,7 @@ describe('schema_property_model', () => {
         expect(parsed).not.toBe('unsupported');
         if (parsed === 'unsupported') return;
         expect(parsed.map((p) => p.name)).toEqual(['ids', 'dry_run']);
-        expect(parsed[0]).toMatchObject({ type: 'array', itemType: 'string', mode: 'default' });
+        expect(parsed[0]).toMatchObject({ type: 'array', itemType: 'string', hasDefault: true });
         expect(parsed[0].defaultValue).toBe('["a","b"]');
       });
 

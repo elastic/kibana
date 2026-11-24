@@ -10,21 +10,17 @@ import type { JsonSchema } from '@kbn/workflows/spec/schema/common/json_model_sh
 /** Types the visual schema builder can author. */
 export type SchemaPropertyType = 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
 
-/**
- * How the property behaves when the caller omits a value.
- * A single discriminant — required + default cannot both be set.
- */
-export type SchemaPropertyMode = 'required' | 'default' | 'none';
-
 /** One named property in the reusable inputs/outputs schema builder. */
 export interface SchemaPropertyField {
   readonly id: string;
   readonly name: string;
   readonly type: SchemaPropertyType;
   readonly description: string;
-  /** Required / default / leave-empty — exclusive by construction. */
-  readonly mode: SchemaPropertyMode;
-  /** String form of the default; only meaningful when mode === 'default'. */
+  /** The caller must provide a value; independent of the default. */
+  readonly required: boolean;
+  /** A default is written (`default` in the schema); on, an empty `defaultValue` is the empty string. */
+  readonly hasDefault: boolean;
+  /** String form of the default; only meaningful when `hasDefault`. */
   readonly defaultValue: string;
   /** Allowed values for scalar types (maps to JSON Schema `enum` / `examples`). */
   readonly allowedValues: readonly string[];

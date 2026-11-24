@@ -10,6 +10,7 @@ import { isScalar } from 'yaml';
 import type { QuerySuggestion } from '@kbn/kql/public';
 import { QuerySuggestionTypes } from '@kbn/kql/public';
 import { monaco } from '@kbn/monaco';
+import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { mergeTriggerEventSchemaValueSuggestions } from './event_schema_kql_value_suggestions';
 import { getOrCreateStubDataViewForTriggerEventSchema } from './event_schema_to_stub_data_view';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
@@ -179,35 +180,39 @@ export function mapQuerySuggestionsToMonaco(
   return items;
 }
 
-export async function getTriggerConditionKqlSuggestions(
-  ctx: ExtendedAutocompleteContext,
-  services: WorkflowKqlCompletionServices
-): Promise<monaco.languages.CompletionItem[]> {
-  const def = ctx.triggerConditionDefinition;
-  if (!def) {
-    return [];
-  }
-
-  const span = getTriggerConditionKqlSpan(ctx.yamlDocument, ctx.path, ctx.model.getValue());
-  if (!span) {
-    return [];
-  }
-
-  const { kql, contentStartInFile } = span;
+/**
+ * KQL suggestions for a condition on a trigger event: fields and values of its `eventSchema`.
+ * `caretInKql` is the caret's offset in `kql`; `contentStartInModel` is where `kql` starts in the
+ * model the suggestions are mapped onto (0 for an editor that holds only the condition).
+ */
+export async function getKqlSuggestionsForEventSchema({
+  kql,
+  caretInKql,
+  contentStartInModel,
+  model,
+  eventSchema,
+  services,
+}: {
+  kql: string;
+  caretInKql: number;
+  contentStartInModel: number;
+  model: monaco.editor.ITextModel;
+  eventSchema: PublicTriggerDefinition['eventSchema'];
+  services: WorkflowKqlCompletionServices;
+}): Promise<monaco.languages.CompletionItem[]> {
   const { autocomplete } = services.kql;
   if (!autocomplete.hasQuerySuggestions(KUERY_LANGUAGE)) {
     return [];
   }
 
-  const selectionInKql = ctx.absoluteOffset - contentStartInFile;
-  const rawStart = Math.max(0, Math.min(kql.length, selectionInKql));
+  const rawStart = Math.max(0, Math.min(kql.length, caretInKql));
   const { selectionStart, selectionEnd } = resolveKqlSelectionAfterFieldColon(
     kql,
     rawStart,
     rawStart
   );
 
-  const stub = getOrCreateStubDataViewForTriggerEventSchema(def.eventSchema, services.fieldFormats);
+  const stub = getOrCreateStubDataViewForTriggerEventSchema(eventSchema, services.fieldFormats);
 
   let querySuggestions: QuerySuggestion[] = [];
   try {
@@ -225,12 +230,37 @@ export async function getTriggerConditionKqlSuggestions(
   }
 
   const merged = mergeTriggerEventSchemaValueSuggestions(
-    def.eventSchema,
+    eventSchema,
     kql,
     selectionStart,
     selectionEnd,
     querySuggestions
   );
 
-  return mapQuerySuggestionsToMonaco(merged, ctx.model, contentStartInFile, kql, selectionStart);
+  return mapQuerySuggestionsToMonaco(merged, model, contentStartInModel, kql, selectionStart);
+}
+
+export async function getTriggerConditionKqlSuggestions(
+  ctx: ExtendedAutocompleteContext,
+  services: WorkflowKqlCompletionServices
+): Promise<monaco.languages.CompletionItem[]> {
+  const def = ctx.triggerConditionDefinition;
+  if (!def) {
+    return [];
+  }
+
+  const span = getTriggerConditionKqlSpan(ctx.yamlDocument, ctx.path, ctx.model.getValue());
+  if (!span) {
+    return [];
+  }
+
+  const { kql, contentStartInFile } = span;
+  return getKqlSuggestionsForEventSchema({
+    kql,
+    caretInKql: ctx.absoluteOffset - contentStartInFile,
+    contentStartInModel: contentStartInFile,
+    model: ctx.model,
+    eventSchema: def.eventSchema,
+    services,
+  });
 }

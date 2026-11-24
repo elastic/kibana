@@ -28,7 +28,7 @@ type Pending =
   | { readonly kind: 'caret'; readonly offset: number }
   | { readonly kind: 'token'; readonly start: number; readonly end: number };
 
-const EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
+export const SINGLE_LINE_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   automaticLayout: true,
   fontSize: 12,
   minimap: { enabled: false },
@@ -322,7 +322,7 @@ export function ReferenceTextInput({
         dataTestSubj={testSubj}
         editorDidMount={handleEditorMount}
         options={{
-          ...EDITOR_OPTIONS,
+          ...SINGLE_LINE_EDITOR_OPTIONS,
           padding: { top: Math.max(0, Math.floor((editorHeightPx - 18) / 2)) },
         }}
       />

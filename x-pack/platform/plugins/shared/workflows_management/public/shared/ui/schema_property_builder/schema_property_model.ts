@@ -11,7 +11,6 @@ import type { JsonSchema } from '@kbn/workflows/spec/schema/common/json_model_sh
 import {
   SCALAR_SCHEMA_PROPERTY_TYPES,
   type SchemaPropertyField,
-  type SchemaPropertyMode,
   type SchemaPropertyNameError,
   type SchemaPropertyType,
 } from './types';
@@ -29,7 +28,8 @@ export const createEmptySchemaProperty = (
   name: '',
   type: 'string',
   description: '',
-  mode: 'none',
+  required: false,
+  hasDefault: false,
   defaultValue: '',
   allowedValues: [],
   allowOtherValues: false,
@@ -153,22 +153,16 @@ const parseProperty = (
     }
   }
 
-  const isRequired = requiredNames.has(name);
-  const parsedDefault = defaultToString(schema.default);
-  // Prefer required over default when both appear in legacy YAML.
-  const mode: SchemaPropertyMode = isRequired
-    ? 'required'
-    : parsedDefault.trim()
-    ? 'default'
-    : 'none';
+  const hasDefault = schema.default !== undefined && schema.default !== null;
 
   return {
     id: createId(),
     name,
     type,
     description: typeof schema.description === 'string' ? schema.description : '',
-    mode,
-    defaultValue: mode === 'default' ? parsedDefault : '',
+    required: requiredNames.has(name),
+    hasDefault,
+    defaultValue: defaultToString(schema.default),
     allowedValues,
     allowOtherValues,
     properties,
@@ -247,9 +241,11 @@ const propertyToJsonSchema = (field: SchemaPropertyField): JsonSchema => {
     schema.description = field.description.trim();
   }
 
-  if (field.mode === 'default') {
+  if (field.hasDefault) {
     const def = coerceDefault(field.type, field.defaultValue);
+    // An enabled default left empty is the empty string, which only a string can hold.
     if (def !== undefined) schema.default = def as JsonSchema['default'];
+    else if (field.type === 'string') schema.default = '';
   }
 
   if (SCALAR_SCHEMA_PROPERTY_TYPES.has(field.type) && field.allowedValues.length > 0) {
@@ -308,7 +304,7 @@ export const schemaPropertiesToJsonSchema = (
     const name = field.name.trim();
     if (name) {
       properties[name] = propertyToJsonSchema(field);
-      if (field.mode === 'required') required.push(name);
+      if (field.required) required.push(name);
     }
   }
 
@@ -319,18 +315,7 @@ export const schemaPropertiesToJsonSchema = (
   };
 };
 
-/** Switch mode; clears the stored default unless selecting "Use a default". */
-export const applyModeChange = (
-  field: SchemaPropertyField,
-  mode: SchemaPropertyMode
-): SchemaPropertyField => {
-  if (mode === 'default') {
-    return { ...field, mode };
-  }
-  return { ...field, mode, defaultValue: '' };
-};
-
-/** Clear mode/default / allowed values that are incompatible after a type change. */
+/** Clear required/default/allowed values that are incompatible after a type change. */
 export const applyTypeChange = (
   field: SchemaPropertyField,
   nextType: SchemaPropertyType
@@ -338,7 +323,8 @@ export const applyTypeChange = (
   const next: SchemaPropertyField = {
     ...field,
     type: nextType,
-    mode: 'none',
+    required: false,
+    hasDefault: false,
     defaultValue: '',
     allowedValues: [],
     allowOtherValues: false,

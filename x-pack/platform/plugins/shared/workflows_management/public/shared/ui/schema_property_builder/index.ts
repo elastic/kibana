@@ -9,7 +9,6 @@ export { SchemaPropertyList } from './schema_property_list';
 export type { SchemaPropertyListProps } from './schema_property_list';
 export { SchemaListDragClone } from './schema_list_drag_clone';
 export {
-  applyModeChange,
   applyTypeChange,
   createEmptySchemaProperty,
   findStepsReferencingInput,
@@ -19,12 +18,7 @@ export {
   schemaPropertiesToJsonSchema,
   validateSchemaPropertyName,
 } from './schema_property_model';
-export type {
-  SchemaPropertyField,
-  SchemaPropertyMode,
-  SchemaPropertyNameError,
-  SchemaPropertyType,
-} from './types';
+export type { SchemaPropertyField, SchemaPropertyNameError, SchemaPropertyType } from './types';
 export {
   SCALAR_SCHEMA_PROPERTY_TYPES,
   SCHEMA_PROPERTY_MAX_DEPTH,

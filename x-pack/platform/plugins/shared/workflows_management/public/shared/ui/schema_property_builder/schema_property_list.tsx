@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCheckbox,
   EuiConfirmModal,
   EuiDragDropContext,
   euiDragDropReorder,
@@ -22,13 +23,13 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
-  EuiRadioGroup,
-  type EuiRadioGroupOption,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTextArea,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -37,7 +38,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SchemaListDragClone } from './schema_list_drag_clone';
 import {
-  applyModeChange,
   applyTypeChange,
   createEmptySchemaProperty,
   validateSchemaPropertyName,
@@ -47,7 +47,6 @@ import {
   SCHEMA_PROPERTY_MAX_DEPTH,
   SCHEMA_PROPERTY_TYPE_OPTIONS,
   type SchemaPropertyField,
-  type SchemaPropertyMode,
   type SchemaPropertyType,
 } from './types';
 
@@ -148,7 +147,7 @@ const PropertyEditor = ({
           {`· ${field.type}`}
         </EuiText>
       </EuiFlexItem>
-      {field.mode === 'required' ? (
+      {field.required ? (
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow">
             {i18n.translate('workflows.schemaPropertyBuilder.requiredBadge', {
@@ -327,93 +326,75 @@ const PropertyEditor = ({
           ) : null}
 
           <EuiSpacer size="s" />
-          <EuiFormRow
-            label={i18n.translate('workflows.schemaPropertyBuilder.whenNoValue', {
-              defaultMessage: 'When no value is provided',
-            })}
-            fullWidth
-          >
-            <EuiRadioGroup
-              compressed
-              name={`${dataTestSubjPrefix}-mode-${field.id}`}
-              idSelected={`${field.id}-mode-${field.mode}`}
-              onChange={(id) => {
-                const nextMode = id.slice(`${field.id}-mode-`.length) as SchemaPropertyMode;
-                onUpdate(applyModeChange(field, nextMode));
-              }}
-              data-test-subj={`${dataTestSubjPrefix}-mode-${field.id}`}
-              options={
-                [
-                  {
-                    id: `${field.id}-mode-required`,
-                    label: (
-                      <span>
-                        {i18n.translate('workflows.schemaPropertyBuilder.modeRequired', {
-                          defaultMessage: 'Required',
-                        })}
-                        <EuiText size="xs" color="subdued">
-                          <span>
-                            {i18n.translate(
-                              'workflows.schemaPropertyBuilder.modeRequiredSecondary',
-                              {
-                                defaultMessage: 'the caller must provide a value',
-                              }
-                            )}
-                          </span>
-                        </EuiText>
-                      </span>
-                    ),
-                  },
-                  {
-                    id: `${field.id}-mode-default`,
-                    label: (
-                      <EuiFlexGroup
-                        gutterSize="s"
-                        alignItems="center"
-                        responsive={false}
-                        // Keep the field on the same row as the radio label.
-                        css={{ flexWrap: 'nowrap' }}
-                      >
-                        <EuiFlexItem grow={false}>
-                          {i18n.translate('workflows.schemaPropertyBuilder.modeDefault', {
-                            defaultMessage: 'Use a default:',
-                          })}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={true}>
-                          <EuiFieldText
-                            compressed
-                            fullWidth
-                            value={field.defaultValue}
-                            disabled={field.mode !== 'default'}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => onUpdate({ ...field, defaultValue: e.target.value })}
-                            data-test-subj={`${dataTestSubjPrefix}-default-${field.id}`}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    ),
-                  },
-                  {
-                    id: `${field.id}-mode-none`,
-                    label: (
-                      <span>
-                        {i18n.translate('workflows.schemaPropertyBuilder.modeNone', {
-                          defaultMessage: 'Leave it empty',
-                        })}
-                        <EuiText size="xs" color="subdued">
-                          <span>
-                            {i18n.translate('workflows.schemaPropertyBuilder.modeNoneSecondary', {
-                              defaultMessage: 'optional, no value',
-                            })}
-                          </span>
-                        </EuiText>
-                      </span>
-                    ),
-                  },
-                ] as EuiRadioGroupOption[]
+          <EuiFormRow fullWidth>
+            <EuiCheckbox
+              id={`${field.id}-required`}
+              label={
+                <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+                  {i18n.translate('workflows.schemaPropertyBuilder.required', {
+                    defaultMessage: 'Required',
+                  })}
+                  <EuiIconTip
+                    type="info"
+                    color="subdued"
+                    content={i18n.translate('workflows.schemaPropertyBuilder.requiredInfo', {
+                      defaultMessage: 'The caller must provide a value',
+                    })}
+                    aria-label={i18n.translate('workflows.schemaPropertyBuilder.requiredInfoAria', {
+                      defaultMessage: 'About required inputs',
+                    })}
+                    anchorProps={{
+                      'data-test-subj': `${dataTestSubjPrefix}-requiredInfo-${field.id}`,
+                      // The icon sits inside the checkbox's label: a click must not toggle it.
+                      onClick: (event) => event.preventDefault(),
+                    }}
+                  />
+                </span>
               }
+              checked={field.required}
+              onChange={(e) => onUpdate({ ...field, required: e.target.checked })}
+              data-test-subj={`${dataTestSubjPrefix}-required-${field.id}`}
             />
           </EuiFormRow>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="flexStart"
+            responsive={false}
+            // Keep the checkbox and its value on the same row.
+            css={{ flexWrap: 'nowrap' }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiCheckbox
+                id={`${field.id}-hasDefault`}
+                label={i18n.translate('workflows.schemaPropertyBuilder.useDefault', {
+                  defaultMessage: 'Default value',
+                })}
+                checked={field.hasDefault}
+                onChange={(e) => onUpdate({ ...field, hasDefault: e.target.checked })}
+                data-test-subj={`${dataTestSubjPrefix}-hasDefault-${field.id}`}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <EuiTextArea
+                compressed
+                fullWidth
+                // Grows with its lines, up to a few: a default is often long, or an ES|QL query.
+                rows={Math.min(Math.max(field.defaultValue.split('\n').length, 1), 8)}
+                value={field.defaultValue}
+                disabled={!field.hasDefault}
+                aria-label={i18n.translate('workflows.schemaPropertyBuilder.defaultValueAria', {
+                  defaultMessage: 'Default value',
+                })}
+                placeholder={i18n.translate(
+                  'workflows.schemaPropertyBuilder.defaultValuePlaceholder',
+                  { defaultMessage: 'Empty when left blank' }
+                )}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => onUpdate({ ...field, defaultValue: e.target.value })}
+                data-test-subj={`${dataTestSubjPrefix}-default-${field.id}`}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           {field.type === 'array' ? (
             <>
