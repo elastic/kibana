@@ -253,8 +253,6 @@ describe('persona_matrix.parity.config.json', () => {
     expect(parityRegistryEntry?.ciLabels).toEqual([
       `evals:${PERSONA_MATRIX_SUITE_IDS['chrysalis-parity']}`,
     ]);
-    expect(parityRegistryEntry?.excludeFromEvalsAll).toBe(true);
-    expect(defaultRegistryEntry?.excludeFromEvalsAll).toBeUndefined();
   });
 
   it('lists the README calibration models, with their derived connector ids, in the parity config', () => {

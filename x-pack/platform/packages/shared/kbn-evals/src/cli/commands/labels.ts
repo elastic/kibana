@@ -117,10 +117,7 @@ export const labelsCmd: Command<void> = {
         : undefined;
 
     const desired = new Map<string, { color: string; description: string }>();
-    desired.set('evals:all', {
-      color: defaultColor,
-      description: 'Run all @kbn/evals suites, except those marked excludeFromEvalsAll',
-    });
+    desired.set('evals:all', { color: defaultColor, description: 'Run all @kbn/evals' });
     for (const label of allLabels) {
       if (label === 'evals:all') continue;
       const suiteId = label.slice('evals:'.length);

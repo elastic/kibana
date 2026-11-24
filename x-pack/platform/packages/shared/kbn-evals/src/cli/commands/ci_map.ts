@@ -27,8 +27,7 @@ export const ciMapCmd: Command<void> = {
       {
         label: 'evals:all',
         suiteId: '*',
-        command:
-          'Add GH label evals:all to run all eval suites in PR CI, except suites marked excludeFromEvalsAll',
+        command: 'Add GH label evals:all to run all eval suites in PR CI',
       },
       ...suites.flatMap((suite) => {
         const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];

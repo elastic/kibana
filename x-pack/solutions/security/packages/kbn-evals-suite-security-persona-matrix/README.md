@@ -111,7 +111,7 @@ The suite id is what the harness records as `suite_id` on every score, which is 
   jq -r '[.models[].id | "eis/" + .] | join(",")' x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/persona_matrix.parity.config.json
   ```
 
-  The suite is also selectable on a PR with the `evals:security-persona-matrix-parity` label. `evals:all` does not include it (`excludeFromEvalsAll` in `evals.suites.json`), so only its own label or an on-demand build runs it.
+  The suite is also selectable on a PR with the `evals:security-persona-matrix-parity` label, and `evals:all` includes it. To run `evals:all` without it, add `evals:skip-security-persona-matrix-parity`.
 
 ### Model set
 

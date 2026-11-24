@@ -64,7 +64,6 @@ const SUITES = {
       id: 'persona-matrix-parity',
       name: 'Persona Matrix (parity)',
       ciLabels: ['evals:persona-matrix-parity'],
-      excludeFromEvalsAll: true,
       configPath: 'x-pack/persona-matrix/parity.playwright.config.ts',
     },
   ],
@@ -215,30 +214,25 @@ describe('eval_pipeline', () => {
     });
   });
 
-  describe('`excludeFromEvalsAll`', () => {
+  describe('`evals:all` with the persona-matrix parity suite', () => {
     const MODELS = 'models:eis/openai-gpt-5.4';
 
-    it('keeps the suite out of `evals:all` while the other persona suite still runs', () => {
+    it('includes the parity suite alongside the other persona suite', () => {
       const yaml = getEvalPipeline(`evals:all,${MODELS}`) as string;
 
+      expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix-parity"');
       expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix"');
+      expect(yaml).toContain('EVAL_SUITE_ID: "agent-builder"');
+    });
+
+    it('drops only the parity suite when its skip label accompanies `evals:all`', () => {
+      const yaml = getEvalPipeline(
+        `evals:all,evals:skip-persona-matrix-parity,${MODELS}`
+      ) as string;
+
       expect(yaml).not.toContain('persona-matrix-parity');
-      expect(yaml).toContain('EVAL_SUITE_ID: "agent-builder"');
-    });
-
-    it('runs the suite when its own label accompanies `evals:all`', () => {
-      const yaml = getEvalPipeline(`evals:all,evals:persona-matrix-parity,${MODELS}`) as string;
-
-      expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix-parity"');
       expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix"');
       expect(yaml).toContain('EVAL_SUITE_ID: "agent-builder"');
-    });
-
-    it('still runs the suite from its own label', () => {
-      const yaml = getEvalPipeline(`evals:persona-matrix-parity,${MODELS}`) as string;
-
-      expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix-parity"');
-      expect(yaml).not.toContain('EVAL_SUITE_ID: "agent-builder"');
     });
   });
 
