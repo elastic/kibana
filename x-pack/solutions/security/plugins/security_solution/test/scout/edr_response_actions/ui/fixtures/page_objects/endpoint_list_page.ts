@@ -35,15 +35,16 @@ export class EndpointListPage {
 
   /** Opens the list; `query` is passed as the `sort_field` / `sort_direction` URL params. */
   async goto(query?: { sortField: string; sortDirection: 'asc' | 'desc' }): Promise<void> {
+    // Until the user privileges and the list init (metadata list, then the search-bar
+    // fields) finish, the page shows "Loading Endpoint Management" and no table. A cold
+    // first load in CI is slow, so the table gets the suite's app-load budget.
     await this.page.gotoApp(ENDPOINTS_APP_PATH, {
       params: query
         ? { sort_field: query.sortField, sort_direction: query.sortDirection }
         : undefined,
+      readyWhen: this.table,
+      readyTimeout: APP_LOAD_TIMEOUT_MS,
     });
-    // Until the user privileges and the list init (metadata list, then the search-bar
-    // fields) finish, the page shows "Loading Endpoint Management" and no table. On a
-    // cold first load that took over the default 10s action timeout in CI.
-    await this.table.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
   /**
