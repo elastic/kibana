@@ -63,7 +63,7 @@ const renderTab = (
   pathname: string = '/ai_index/tickets/settings'
 ) => {
   jest.mocked(useMemoryEnabled).mockReturnValue(memoryEnabled);
-  return render(
+  const renderUi = () => (
     <I18nProvider>
       <EuiProvider>
         <MemoryRouter initialEntries={[pathname]}>
@@ -80,6 +80,8 @@ const renderTab = (
       </EuiProvider>
     </I18nProvider>
   );
+  const result = render(renderUi());
+  return { ...result, rerenderTab: () => result.rerender(renderUi()) };
 };
 
 describe('SettingsTab', () => {
@@ -152,6 +154,18 @@ describe('SettingsTab', () => {
       renderTab({ aiIndex }, true, automationsPath);
 
       expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it('scrolls to Automations when Dreaming finishes loading on the mounted page', () => {
+      jest.mocked(useAiIndexDreaming).mockReturnValue({ dreaming: undefined, isLoading: true });
+      const { rerenderTab } = renderTab({ aiIndex }, true, automationsPath);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      jest.mocked(useAiIndexDreaming).mockReturnValue({ dreaming: undefined, isLoading: false });
+      rerenderTab();
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
     });
 
     it('scrolls to Automations once Dreaming has loaded', () => {
