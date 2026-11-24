@@ -233,6 +233,7 @@ describe('PackQueriesStatusTable — query details flyout failures', () => {
     expect(setErrorToast).toHaveBeenCalledTimes(1);
     expect(setErrorToast).toHaveBeenCalledWith(flyoutError, {
       title: 'Unable to show query details',
+      toastMessage: 'Unable to show query details',
     });
   });
 

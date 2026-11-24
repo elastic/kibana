@@ -76,8 +76,9 @@ describe('QueryDetailsFlyout', () => {
 
   it('close button calls onClose once', () => {
     const onClose = jest.fn();
+    const onParentClose = jest.fn();
     renderWithProviders(
-      <EuiFlyout session="start" size="m" aria-label="parent" onClose={noop}>
+      <EuiFlyout session="start" size="m" aria-label="parent" onClose={onParentClose}>
         <div data-test-subj="parent-content">parent</div>
         <QueryDetailsFlyout action={action} onClose={onClose} />
       </EuiFlyout>
@@ -88,12 +89,14 @@ describe('QueryDetailsFlyout', () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('parent-content')).toBeInTheDocument();
+    expect(onParentClose).not.toHaveBeenCalled();
   });
 
   it('Escape calls onClose once', () => {
     const onClose = jest.fn();
+    const onParentClose = jest.fn();
     renderWithProviders(
-      <EuiFlyout session="start" size="m" aria-label="parent" onClose={noop}>
+      <EuiFlyout session="start" size="m" aria-label="parent" onClose={onParentClose}>
         <div data-test-subj="parent-content">parent</div>
         <QueryDetailsFlyout action={action} onClose={onClose} />
       </EuiFlyout>
@@ -103,6 +106,7 @@ describe('QueryDetailsFlyout', () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('parent-content')).toBeInTheDocument();
+    expect(onParentClose).not.toHaveBeenCalled();
   });
 
   it('stays standalone when an unrelated managed session is active', () => {

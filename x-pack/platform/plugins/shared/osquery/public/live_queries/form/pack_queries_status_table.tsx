@@ -232,7 +232,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const handleQueryFlyoutError = useCallback(
     (error: Error) => {
       setQueryDetailsFlyoutOpen(null);
-      setErrorToast(error, { title: QUERY_DETAILS_FLYOUT_ERROR_TITLE });
+      setErrorToast(error, {
+        title: QUERY_DETAILS_FLYOUT_ERROR_TITLE,
+        toastMessage: QUERY_DETAILS_FLYOUT_ERROR_TITLE,
+      });
     },
     [setErrorToast]
   );

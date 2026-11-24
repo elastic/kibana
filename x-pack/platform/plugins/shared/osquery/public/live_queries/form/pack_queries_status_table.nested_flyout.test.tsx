@@ -105,9 +105,9 @@ describe('PackQueriesStatusTable inside a managed flyout', () => {
     expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
-  it('cleans up a registered child after a contained EUI size validation failure', () => {
+  it('contains an EUI size validation failure without leaving a child flyout registered', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    // EUI permits an l parent alone, but rejects it once the s child registers.
+    // EUI permits an l parent alone, but throws during render of the s child, before it registers.
     renderInResponse('l');
     const parent = screen.getByRole('dialog', { name: 'Response' });
     const table = screen.getByRole('table');
@@ -121,7 +121,7 @@ describe('PackQueriesStatusTable inside a managed flyout', () => {
         message:
           'EuiFlyout validation error: Flyouts cannot be size "l" unless the other flyout is "fill"',
       }),
-      { title: 'Unable to show query details' }
+      { title: 'Unable to show query details', toastMessage: 'Unable to show query details' }
     );
     expect(screen.queryByTestId('osquery-query-details-flyout')).not.toBeInTheDocument();
     expect(parent).toBeInTheDocument();
