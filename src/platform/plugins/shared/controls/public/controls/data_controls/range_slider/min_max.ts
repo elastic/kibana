@@ -150,7 +150,7 @@ export async function getEsqlMinMax({
       esqlQuery,
     }),
     signal: abortSignal,
-    search: dataService.search.search,
+    search: dataService.search,
     esqlVariables: fetchContext.esqlVariables ?? [],
     timezone: getControlsTimezone(),
   });

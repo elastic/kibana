@@ -13,6 +13,9 @@ on:
   # One proposal at a time: wait until the previous curator PR is merged or closed.
   skip-if-match: 'is:pr is:open label:flaky-fix-curator'
 
+if: >-
+  (!github.event.repository.fork)
+
 permissions:
   contents: read
   issues: read

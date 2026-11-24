@@ -83,7 +83,7 @@ export const ConfigureValuesQuery = ({
       setIsPreviewQueryRunning(true);
       const result = await getESQLSingleColumnValues({
         query,
-        search: dataService.search.search,
+        search: dataService.search,
         esqlVariables,
         timeRange: dataService.query.timefilter.timefilter.getTime(),
         timezone: getControlsTimezone(),

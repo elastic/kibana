@@ -582,6 +582,7 @@ src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-emulate @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs @elastic/response-ops
+src/platform/packages/shared/kbn-connector-topics @elastic/workflows-eng @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-discover
 src/platform/packages/shared/kbn-core-server-benchmarks @elastic/kibana-core
 src/platform/packages/shared/kbn-cps-server-utils @elastic/kibana-core
@@ -1537,7 +1538,6 @@ x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/timelines @elastic/security-investigations
 x-pack/solutions/security/test
 x-pack/solutions/security/test_helpers/detections-response-ftr-services @elastic/security-detection-engineering
 x-pack/solutions/security/test_plugins/resolver_test @elastic/security-solution
