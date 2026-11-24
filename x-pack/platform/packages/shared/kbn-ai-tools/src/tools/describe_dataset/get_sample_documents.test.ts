@@ -40,8 +40,7 @@ const SALT_PATTERN = /CONCAT\("([0-9a-f-]{36})", /;
 const getSalt = (query: string) => query.match(SALT_PATTERN)?.[1];
 const maskSalt = (query: string) => query.replace(SALT_PATTERN, 'CONCAT("<salt>", ');
 
-const RANDOM_ORDER =
-  'EVAL _sample_order = HASH("md5", CONCAT("<salt>", @timestamp::STRING)) | SORT _sample_order';
+const RANDOM_ORDER = 'SORT HASH("md5", CONCAT("<salt>", @timestamp::STRING))';
 
 const countResponse = (total: number) => ({
   columns: [{ name: 'total', type: 'long' }],
@@ -221,7 +220,7 @@ describe('getSampleDocumentsEsql', () => {
         `FROM logs-* | WHERE ${TIME_RANGE} | STATS total = COUNT(*)`
       );
       expect(maskSalt(query.mock.calls[1][0].query)).toBe(
-        `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | SAMPLE 0.00229 | ${RANDOM_ORDER} | LIMIT 2 | DROP _sample_order`
+        `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | SAMPLE 0.00229 | ${RANDOM_ORDER} | LIMIT 2`
       );
       expect(query.mock.calls[0][0]).not.toHaveProperty('filter');
       expect(result).toEqual({
@@ -336,7 +335,7 @@ describe('getSampleDocumentsEsql', () => {
         `SET unmapped_fields = "LOAD"; FROM logs-* | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND service.name == "checkout" | STATS total = COUNT(*)`
       );
       expect(maskSalt(query.mock.calls[1][0].query)).toBe(
-        `SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND service.name == "checkout" | SAMPLE 0.00229 | ${RANDOM_ORDER} | LIMIT 2 | DROP _sample_order`
+        `SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND service.name == "checkout" | SAMPLE 0.00229 | ${RANDOM_ORDER} | LIMIT 2`
       );
     } finally {
       deadline.dispose();
@@ -410,7 +409,7 @@ describe('getSampleDocumentsEsql', () => {
       });
 
       expect(maskSalt(query.mock.calls[1][0].query)).toBe(
-        `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | ${RANDOM_ORDER} | LIMIT 2 | DROP _sample_order`
+        `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | ${RANDOM_ORDER} | LIMIT 2`
       );
     } finally {
       deadline.dispose();

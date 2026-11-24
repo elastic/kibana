@@ -24,9 +24,10 @@ import {
 } from '../../utils/parse_esql_source_documents';
 import { esqlTimeRange, TIME_FIELD } from '../../utils/esql_time_range';
 
+// Headroom over the highest measured variance, ~23x that of independent sampling.
 const SAMPLE_COUNT_VARIANCE_RATIO = 25;
+// ~1 short sample in 1,000 under a normal approximation.
 const SAMPLE_COUNT_MARGIN_DEVIATIONS = 3;
-const SAMPLE_ORDER_COLUMN = '_sample_order';
 const ESQL_VIEW_PREFIX = '$.';
 
 const isEsqlView = (index: string) => index.startsWith(ESQL_VIEW_PREFIX);
@@ -212,16 +213,12 @@ export async function getSampleDocumentsEsql({
     if (sampleProbability < 1) {
       query = query.sample(sampleProbability);
     }
-    const orderColumn = esql.col(SAMPLE_ORDER_COLUMN);
     const timeField = esql.col(TIME_FIELD);
     // Without the salt, the same documents would win the sort on every request.
     const salt = esql.str(randomUUID());
 
     return printQuery(
-      query.pipe`EVAL ${orderColumn} = HASH("md5", CONCAT(${salt}, ${timeField}::string))`
-        .sort(SAMPLE_ORDER_COLUMN)
-        .limit(limit)
-        .drop(SAMPLE_ORDER_COLUMN)
+      query.pipe`SORT HASH("md5", CONCAT(${salt}, ${timeField}::string))`.limit(limit)
     );
   };
 
