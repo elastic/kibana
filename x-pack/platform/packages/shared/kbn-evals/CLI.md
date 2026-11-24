@@ -92,7 +92,7 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--skip-init`                    |           | Skip automatic config and connector setup                                       |
 | `--dry-run`                      |           | Print configuration and exit without running                                    |
 
-Traces are exported by EDOT to the export cluster (controlled by `--tracing-profile` / `TRACING_ES_URL`), and `TRACING_ES_URL` is set so trace-based evaluators query the right cluster.
+Traces are exported by EDOT to the tracing cluster (controlled by `--tracing-profile` / `TRACING_ES_URL`), and `TRACING_ES_URL` is set so trace-based evaluators query the right cluster.
 
 #### Spaces
 
@@ -112,9 +112,9 @@ node scripts/evals run --suite streams --space-ids marketing,sales
 
 `--datasets-profile` and `--export-profile` are deprecated aliases for `--evaluations-kbn-profile` and `--tracing-profile`. They still work and print a warning; if both an old and a new flag are passed, the new one wins. The re-run command printed by `start` uses the new names.
 
-#### Example: golden datasets + local export
+#### Example: golden datasets + local tracing
 
-Use `--profile dev-vault` for datasets and `--tracing-profile local` to export results locally:
+Use `--profile dev-vault` for the golden-cluster Kibana (datasets and scores) and `--tracing-profile local` to export and query traces locally:
 
 ```bash
 node scripts/evals init config                   # default profile (golden cluster pre-selected)
@@ -186,7 +186,7 @@ node scripts/evals run --suite streams --dry-run
 | `--repetitions <n>`               |           | Repeat each example N times                                                     |
 | `--concurrency <n>`               |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
 | `--space-ids <ids>`               |           | Comma-separated spaces to assign datasets and scores to (see [Spaces](#spaces)) |
-| `--profile <name>`                |           | Load both dataset + export settings from `config.<name>.json`                   |
+| `--profile <name>`                |           | Load both the evaluations Kibana and tracing settings from `config.<name>.json` |
 | `--evaluations-kbn-profile <name>` |          | Load the Kibana that stores datasets, scores and experiment reads from `config.<name>.json` |
 | `--tracing-profile <name>`        |           | Load the trace export and trace query settings from `config.<name>.json`        |
 | `--trace-es-url <url>`            |           | Elasticsearch URL for trace queries                                             |
