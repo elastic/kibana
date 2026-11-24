@@ -24,6 +24,8 @@ export interface MergeOptions {
   readonly distinct?: boolean;
 }
 
+const isPrimitive = (value: unknown): boolean => value === null || typeof value !== 'object';
+
 /** The plain values already in each array the merge created, used when `distinct` is set. */
 const seenValues = new WeakMap<unknown[], Set<unknown>>();
 
@@ -34,11 +36,11 @@ const appendValues = (
 ): unknown[] => {
   let seen = distinct ? seenValues.get(target) : undefined;
   if (distinct && !seen) {
-    seen = new Set(target.filter(isScalar));
+    seen = new Set(target.filter(isPrimitive));
     seenValues.set(target, seen);
   }
   for (const value of values) {
-    if (!seen || !isScalar(value)) {
+    if (!seen || !isPrimitive(value)) {
       target.push(value);
     } else if (!seen.has(value)) {
       seen.add(value);

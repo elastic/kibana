@@ -64,6 +64,12 @@ describe('mergeSamples', () => {
     });
   });
 
+  it('keeps null once when distinct', () => {
+    expect(mergeSamples([{ x: [null, 1, null] }, { x: [null] }], { distinct: true })).toEqual({
+      x: [null, 1],
+    });
+  });
+
   it('never deduplicates objects or nested arrays', () => {
     const shared = { a: 1 };
     const nested = [1];
