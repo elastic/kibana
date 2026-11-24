@@ -1103,6 +1103,7 @@ export const QueryBarTopRow = React.memo(
               onSettingsChange={setDateRangePickerSettings}
               autoRefresh={dateRangePickerAutoRefresh}
               onAutoRefreshChange={onDateRangePickerAutoRefreshChange}
+              autoRefreshMinIntervalMs={props.minRefreshInterval}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
               refreshEpoch={autoRefreshEpoch}
               resolveEpoch={submitEpoch}

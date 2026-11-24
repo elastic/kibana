@@ -35,14 +35,25 @@ export interface RefreshIntervalProps {
   value: AutoRefreshSettings;
   /** Called with the next auto-refresh state when the user changes it. */
   onChange: (value: AutoRefreshSettings) => void;
+  /**
+   * Lowest interval the user can set, in milliseconds. A lower count is not applied while
+   * typing and is raised to the lowest whole count of the selected unit on blur.
+   * @default 0
+   */
+  minIntervalMs?: number;
 }
+
+/** Lowest whole count of `unit` that is at least `minIntervalMs`, and never below 1. */
+const getMinCount = (minIntervalMs: number, unit: AutoRefreshIntervalUnit): number =>
+  Math.max(1, Math.ceil(minIntervalMs / autoRefreshIntervalToMs(1, unit)));
 
 /**
  * "Refresh every" form: a switch to turn auto-refresh on and off, an interval count and a unit.
  * Turning auto-refresh on also starts the timer, so a second click on play is not needed.
  */
-export function RefreshInterval({ value, onChange }: RefreshIntervalProps) {
+export function RefreshInterval({ value, onChange, minIntervalMs = 0 }: RefreshIntervalProps) {
   const derived = msToAutoRefreshInterval(value.intervalMs, value.intervalDisplayUnit);
+  const minCount = getMinCount(minIntervalMs, derived.unit);
 
   const [countInput, setCountInput] = useState<number | ''>(derived.count);
 
@@ -70,25 +81,37 @@ export function RefreshInterval({ value, onChange }: RefreshIntervalProps) {
 
       setCountInput(parsed);
 
-      if (typeof parsed === 'number' && !isNaN(parsed) && parsed > 0) {
-        onChange({ ...value, intervalMs: autoRefreshIntervalToMs(parsed, derived.unit) });
+      if (typeof parsed !== 'number' || isNaN(parsed) || parsed <= 0) return;
+
+      const intervalMs = autoRefreshIntervalToMs(parsed, derived.unit);
+      if (intervalMs >= minIntervalMs) {
+        onChange({ ...value, intervalMs });
       }
     },
-    [onChange, value, derived.unit]
+    [onChange, value, derived.unit, minIntervalMs]
   );
+
+  const handleCountBlur = useCallback(() => {
+    if (typeof countInput !== 'number' || countInput <= 0) return;
+    if (autoRefreshIntervalToMs(countInput, derived.unit) >= minIntervalMs) return;
+
+    setCountInput(minCount);
+    onChange({ ...value, intervalMs: autoRefreshIntervalToMs(minCount, derived.unit) });
+  }, [countInput, derived.unit, minIntervalMs, minCount, onChange, value]);
 
   const handleUnitChange = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
       const newUnit = e.target.value as AutoRefreshIntervalUnit;
       const currentCount = typeof countInput === 'number' && countInput > 0 ? countInput : 1;
+      const count = Math.max(currentCount, getMinCount(minIntervalMs, newUnit));
 
       onChange({
         ...value,
-        intervalMs: autoRefreshIntervalToMs(currentCount, newUnit),
+        intervalMs: autoRefreshIntervalToMs(count, newUnit),
         intervalDisplayUnit: newUnit,
       });
     },
-    [onChange, value, countInput]
+    [onChange, value, countInput, minIntervalMs]
   );
 
   return (
@@ -107,8 +130,9 @@ export function RefreshInterval({ value, onChange }: RefreshIntervalProps) {
           compressed
           fullWidth
           value={countInput}
-          min={1}
+          min={minCount}
           onChange={handleCountChange}
+          onBlur={handleCountBlur}
           disabled={!value.isEnabled}
           aria-label={refreshIntervalTexts.intervalCountAriaLabel}
           data-test-subj="dateRangePickerAutoRefreshIntervalCount"

@@ -56,6 +56,7 @@ export function SettingsPanel() {
     onSettingsChange,
     autoRefresh,
     onAutoRefreshChange,
+    autoRefreshMinIntervalMs,
     hasAutoRefresh,
     timeZone,
     prependBasePath,
@@ -92,7 +93,11 @@ export function SettingsPanel() {
         <PanelBodySection>
           <EuiFlexGroup gutterSize="l" direction="column">
             {hasAutoRefresh && autoRefresh ? (
-              <RefreshInterval value={autoRefresh} onChange={onAutoRefreshChange} />
+              <RefreshInterval
+                value={autoRefresh}
+                onChange={onAutoRefreshChange}
+                minIntervalMs={autoRefreshMinIntervalMs}
+              />
             ) : null}
             <PanelBodySectionInfo
               heading={settingsPanelTexts.timeFormatHeading}

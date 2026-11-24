@@ -141,6 +141,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   autoRefresh?: AutoRefreshSettings;
   /** Called when the user changes the auto-refresh state. No-op when the prop is not set. */
   onAutoRefreshChange: (autoRefresh: AutoRefreshSettings) => void;
+  /** Lowest refresh interval the user can set, in milliseconds. */
+  autoRefreshMinIntervalMs?: number;
   /**
    * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
    * Used for calendar day boundaries and displayed in the panel footer.
@@ -201,6 +203,7 @@ export function DateRangePickerProvider({
   onSettingsChange,
   autoRefresh,
   onAutoRefreshChange: onAutoRefreshChangeProp,
+  autoRefreshMinIntervalMs,
   timeZone,
   onRefresh,
   refreshEpoch,
@@ -397,6 +400,7 @@ export function DateRangePickerProvider({
       onSettingsChange,
       autoRefresh,
       onAutoRefreshChange,
+      autoRefreshMinIntervalMs,
       timeZone,
       autoRefreshSecondsRemaining,
       toggleAutoRefresh,
@@ -435,6 +439,7 @@ export function DateRangePickerProvider({
       onSettingsChange,
       autoRefresh,
       onAutoRefreshChange,
+      autoRefreshMinIntervalMs,
       timeZone,
       autoRefreshSecondsRemaining,
       toggleAutoRefresh,

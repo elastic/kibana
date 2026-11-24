@@ -154,6 +154,7 @@ export const AutoRefresh: Story = {
       intervalDisplayUnit: 's',
     },
     onAutoRefreshChange: action('onAutoRefreshChange'),
+    autoRefreshMinIntervalMs: 5000,
     showTimeWindowButtons: true,
     timeZone: 'Europe/Amsterdam',
     onRefresh: fn(),

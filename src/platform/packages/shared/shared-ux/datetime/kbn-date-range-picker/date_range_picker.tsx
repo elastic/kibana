@@ -184,6 +184,12 @@ export interface DateRangePickerProps {
   /** Called when the user changes the auto-refresh state, e.g. enables it or pauses the timer. */
   onAutoRefreshChange?: (autoRefresh: AutoRefreshSettings) => void;
   /**
+   * Lowest refresh interval the user can set, in milliseconds. Lower values typed into the
+   * interval field are raised to it.
+   * @default 0
+   */
+  autoRefreshMinIntervalMs?: number;
+  /**
    * Increment this value whenever an external timer (e.g. the Kibana timefilter) triggers a
    * refresh, so the visual countdown resets to stay in sync with actual query cadence and
    * relative bounds (e.g. `now-15m`) are re-resolved against the current time.

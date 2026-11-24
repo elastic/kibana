@@ -100,4 +100,46 @@ describe('RefreshInterval', () => {
 
     expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(60);
   });
+
+  describe('with `minIntervalMs`', () => {
+    it('does not apply a count below the minimum while typing and raises it on blur', () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <RefreshInterval
+          value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 's' }}
+          onChange={onChange}
+          minIntervalMs={5000}
+        />
+      );
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      fireEvent.change(count, { target: { value: '2' } });
+
+      expect(onChange).not.toHaveBeenCalled();
+
+      fireEvent.blur(count);
+
+      expect(count).toHaveValue(5);
+      expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ intervalMs: 5000 }));
+    });
+
+    it('raises the count to the minimum when switching to a smaller unit', () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <RefreshInterval
+          value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 'm' }}
+          onChange={onChange}
+          minIntervalMs={5000}
+        />
+      );
+
+      fireEvent.change(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit'), {
+        target: { value: 's' },
+      });
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ intervalDisplayUnit: 's', intervalMs: 5000 })
+      );
+    });
+  });
 });
