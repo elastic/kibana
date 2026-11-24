@@ -17,6 +17,13 @@ import { apiTest } from '../fixtures';
 
 const KQL_OPT_IN_STATS_PATH = '/internal/kql_opt_in_stats';
 
+const REQUEST_HEADERS = {
+  'content-type': 'application/json',
+  [ELASTIC_HTTP_VERSION_HEADER]: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
+  'x-elastic-internal-origin': 'kibana',
+  'kbn-xsrf': 'scout',
+};
+
 type CounterName = 'optInCount' | 'optOutCount';
 
 interface KqlTelemetryDoc {
@@ -28,13 +35,7 @@ apiTest.describe('KQL telemetry API', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest.beforeAll(async ({ samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-    headers = {
-      ...cookieHeader,
-      'content-type': 'application/json',
-      [ELASTIC_HTTP_VERSION_HEADER]: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
-      'x-elastic-internal-origin': 'kibana',
-      'kbn-xsrf': 'scout',
-    };
+    headers = { ...cookieHeader, ...REQUEST_HEADERS };
   });
 
   const getCounter = async (
@@ -71,6 +72,15 @@ apiTest.describe('KQL telemetry API', { tag: tags.deploymentAgnostic }, () => {
       }
     );
   }
+
+  apiTest('should reject an unauthenticated request', async ({ apiClient }) => {
+    const response = await apiClient.post(KQL_OPT_IN_STATS_PATH, {
+      headers: REQUEST_HEADERS,
+      body: { opt_in: true },
+    });
+
+    expect(response).toHaveStatusCode(401);
+  });
 
   const invalidBodies: Array<{ name: string; body: Record<string, unknown> }> = [
     { name: 'string', body: { opt_in: 'notabool' } },
