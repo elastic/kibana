@@ -26,9 +26,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { QueryProfileView, TimelineDriver, TimelineOperator } from '../profile/types';
 import { driverFacts } from './driver_facts';
 import { operatorCategory, useOperatorCategoryColors } from '../shared/operator_category';
-import { formatCount, formatDurationMillis } from '../shared/profile_format';
+import { formatDurationMillis } from '../shared/profile_format';
 import { heatLevel } from '../shared/profile_heat';
-import { operatorShareLabel, operatorTimeLabel, planningPhaseLabel } from './timeline_labels';
+import {
+  operatorRowsAriaLabel,
+  operatorRowsLabel,
+  operatorShareLabel,
+  operatorTimeLabel,
+  planningPhaseLabel,
+} from './timeline_labels';
 import { useOperatorStripStyles } from './operator_strip_styles';
 
 /** An operator also has to be at least this share of the whole query to be flagged. */
@@ -100,22 +106,22 @@ const OperatorStrip = ({
         const key = operatorKey(operator, index);
         const time = operatorTimeLabel(operator);
         const share = operatorShareLabel(operator);
+        const rows = operatorRowsLabel(operator);
         return (
           <button
             key={key}
             type="button"
             css={styles.stripStep}
             aria-expanded={selectedKey === key}
-            aria-label={i18n.translate('data.inspector.queryProfile.operatorButtonAriaLabel', {
-              defaultMessage: '{title}, {time}, {share}, {rowsIn} rows in, {rowsOut} rows out',
-              values: {
-                title: operator.title,
-                time,
-                share,
-                rowsIn: formatCount(operator.rowsReceived),
-                rowsOut: formatCount(operator.rowsEmitted),
-              },
-            })}
+            aria-label={[
+              i18n.translate('data.inspector.queryProfile.operatorButtonAriaLabel', {
+                defaultMessage: '{title}, {time}, {share}',
+                values: { title: operator.title, time, share },
+              }),
+              operatorRowsAriaLabel(operator),
+            ]
+              .filter(Boolean)
+              .join(', ')}
             onClick={() => onSelect(selectedKey === key ? undefined : key)}
             data-test-subj="esqlQueryProfileOperator"
           >
@@ -131,15 +137,7 @@ const OperatorStrip = ({
                 />
               ) : null}
             </span>
-            <span css={styles.stripShare}>
-              {i18n.translate('data.inspector.queryProfile.operatorRowsLabel', {
-                defaultMessage: 'Rows {rowsIn} → {rowsOut}',
-                values: {
-                  rowsIn: formatCount(operator.rowsReceived),
-                  rowsOut: formatCount(operator.rowsEmitted),
-                },
-              })}
-            </span>
+            {rows ? <span css={styles.stripShare}>{rows}</span> : null}
             <div aria-hidden="true">
               <EuiProgress
                 value={operator.share * 100}

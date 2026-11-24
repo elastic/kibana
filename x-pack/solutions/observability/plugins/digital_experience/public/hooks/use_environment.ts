@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-types';
 import { useQueryParam } from './use_query_param';
 
 /** Environment from the `environment` URL param, `undefined` for all environments. */
@@ -12,6 +13,8 @@ export const useEnvironment = (): {
   environment: string | undefined;
   setEnvironment: (environment: string | undefined) => void;
 } => {
-  const { value: environment, setValue: setEnvironment } = useQueryParam('environment');
+  const { value, setValue: setEnvironment } = useQueryParam('environment');
+  // `ENVIRONMENT_ALL` filters nothing, like an unset param.
+  const environment = value === ENVIRONMENT_ALL_VALUE ? undefined : value;
   return { environment, setEnvironment };
 };

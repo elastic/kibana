@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiComboBox,
@@ -70,24 +70,48 @@ const useEsqlRequests = (adapters: Adapters): Request[] => {
   return requests;
 };
 
-/** A loaded profile, or the reason it failed, with the request and run it belongs to. */
+/** A loaded profile, or the reason it failed, with the run it belongs to and the request it profiled. */
 interface LoadedProfile {
-  requestJson: object;
-  reloadKey: number;
+  runKey: string;
+  request: Request;
   view?: QueryProfileViewModel;
   error?: string;
 }
 
+/**
+ * Profiles the request when a run is asked for: when the view opens, when another request is picked
+ * and when the user profiles again, all of which change `runKey`. The panel being inspected can
+ * fetch again by itself, as with auto-refresh, and that logs a new request. It must not send
+ * another profiled run to the cluster, nor replace the profile that is being read.
+ */
 const useQueryProfile = (
   search: Pick<ISearchStart, 'esql'>,
   request: Request | undefined,
-  reloadKey: number
-): { view?: QueryProfileViewModel; error?: string; loading: boolean } => {
+  runKey: string
+): {
+  view?: QueryProfileViewModel;
+  error?: string;
+  /** The request that the profile on show was taken for. */
+  profiledRequest?: Request;
+  loading: boolean;
+} => {
   const [loaded, setLoaded] = useState<LoadedProfile | undefined>();
-  const requestJson = request?.json;
+  const latestRequest = useRef(request);
+  latestRequest.current = request;
+  // Once a request was logged this stays true. A refetch of the inspected panel empties the adapter
+  // for a moment, and that must not cancel the run that is going on, nor start another one.
+  const [hasSeenRequest, setHasSeenRequest] = useState(Boolean(request?.json));
+  const hasRequest = Boolean(request?.json);
+  useEffect(() => {
+    if (hasRequest) {
+      setHasSeenRequest(true);
+    }
+  }, [hasRequest]);
 
   useEffect(() => {
-    if (!requestJson) {
+    const target = latestRequest.current;
+    const requestJson = target?.json;
+    if (!hasSeenRequest || !target || !requestJson) {
       return;
     }
 
@@ -95,7 +119,7 @@ const useQueryProfile = (
     loadEsqlQueryProfile({ search, requestJson, abortSignal: controller.signal })
       .then((view) => {
         if (!controller.signal.aborted) {
-          setLoaded({ requestJson, reloadKey, view });
+          setLoaded({ runKey, request: target, view });
         }
       })
       .catch((caught: unknown) => {
@@ -103,8 +127,8 @@ const useQueryProfile = (
           return;
         }
         setLoaded({
-          requestJson,
-          reloadKey,
+          runKey,
+          request: target,
           error: readErrorMessage(
             caught,
             i18n.translate('data.inspector.queryProfile.unknownErrorMessage', {
@@ -117,12 +141,16 @@ const useQueryProfile = (
     return () => {
       controller.abort();
     };
-  }, [requestJson, search, reloadKey]);
+  }, [hasSeenRequest, runKey, search]);
 
-  // What was loaded for another request or run is not shown, not even for a moment.
-  const current =
-    loaded?.requestJson === requestJson && loaded?.reloadKey === reloadKey ? loaded : undefined;
-  return { view: current?.view, error: current?.error, loading: Boolean(requestJson) && !current };
+  // What was loaded for another run is not shown, not even for a moment.
+  const current = loaded?.runKey === runKey ? loaded : undefined;
+  return {
+    view: current?.view,
+    error: current?.error,
+    profiledRequest: current?.request,
+    loading: hasSeenRequest && loaded?.runKey !== runKey,
+  };
 };
 
 const RequestPicker = ({
@@ -251,15 +279,29 @@ export const QueryProfileView = ({
   search: Pick<ISearchStart, 'esql'>;
 }) => {
   const requests = useEsqlRequests(adapters);
-  const [selectedId, setSelectedId] = useState<string | undefined>();
+  // A refetch logs the requests again with new ids but the same names, so the pick is kept by both.
+  const [picked, setPicked] = useState<{ id: string; name: string } | undefined>();
   const selected = useMemo(
-    () => requests.find((request) => request.id === selectedId) ?? requests[0],
-    [requests, selectedId]
+    () =>
+      requests.find((request) => request.id === picked?.id) ??
+      requests.find((request) => request.name === picked?.name) ??
+      requests[0],
+    [requests, picked]
   );
   const [reloadKey, setReloadKey] = useState(0);
   const [tab, setTab] = useState<TabId>('timeline');
-  const { view, error, loading } = useQueryProfile(search, selected, reloadKey);
-  const completedTime = completedRequestTime(selected);
+  const { view, error, profiledRequest, loading } = useQueryProfile(
+    search,
+    selected,
+    `${picked?.id ?? ''}:${reloadKey}`
+  );
+  // The request that was profiled can still be pending when the profile starts, so its time is read
+  // from the latest copy of it while it is logged, and from the one taken once it is not.
+  const completedTime = completedRequestTime(
+    requests.find((request) => request.json === profiledRequest?.json) ?? profiledRequest
+  );
+  // The inspected panel fetched again since the profile was taken, or its request is gone.
+  const hasRequestChanged = Boolean(profiledRequest && selected?.json !== profiledRequest.json);
   const query = readQuery(selected);
   const heat = useMemo(
     () => (view && query ? computeCommandHeat(view, query) : undefined),
@@ -291,7 +333,7 @@ export const QueryProfileView = ({
           <EuiButtonEmpty
             size="xs"
             iconType="refresh"
-            isDisabled={loading}
+            isDisabled={loading || !selected?.json}
             onClick={() => setReloadKey((key) => key + 1)}
             data-test-subj="esqlQueryProfileRunAgain"
           >
@@ -302,13 +344,33 @@ export const QueryProfileView = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {hasRequestChanged ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued" data-test-subj="esqlQueryProfileRequestChanged">
+            <p>
+              {selected?.json ? (
+                <FormattedMessage
+                  id="data.inspector.queryProfile.requestChangedDescription"
+                  defaultMessage="The request has changed since this profile was taken. Profile again to see the new one."
+                />
+              ) : (
+                <FormattedMessage
+                  id="data.inspector.queryProfile.requestGoneDescription"
+                  defaultMessage="The request is no longer available. This is the last profile that was taken."
+                />
+              )}
+            </p>
+          </EuiText>
+        </>
+      ) : null}
       {requests.length > 1 && selected ? (
         <>
           <EuiSpacer size="s" />
           <RequestPicker
             requests={requests}
             selected={selected}
-            onSelect={(request) => setSelectedId(request.id)}
+            onSelect={(request) => setPicked({ id: request.id, name: request.name })}
           />
         </>
       ) : null}
@@ -321,7 +383,19 @@ export const QueryProfileView = ({
           })}
           text={<p>{error}</p>}
         />
-      ) : !selected?.json ? (
+      ) : view ? (
+        <>
+          <ProfileSummary view={view} />
+          <ProfileDetails
+            view={view}
+            heat={heat}
+            activeTab={activeTab}
+            showByCommand={showByCommand}
+            requestId={profiledRequest?.id}
+            onTabChange={setTab}
+          />
+        </>
+      ) : !selected?.json && !loading ? (
         <EuiText size="s" color="subdued" data-test-subj="esqlQueryProfileNoRequest">
           <p>
             <FormattedMessage
@@ -330,20 +404,8 @@ export const QueryProfileView = ({
             />
           </p>
         </EuiText>
-      ) : loading || !view ? (
-        <ProfileLoading />
       ) : (
-        <>
-          <ProfileSummary view={view} />
-          <ProfileDetails
-            view={view}
-            heat={heat}
-            activeTab={activeTab}
-            showByCommand={showByCommand}
-            requestId={selected?.id}
-            onTabChange={setTab}
-          />
-        </>
+        <ProfileLoading />
       )}
     </div>
   );

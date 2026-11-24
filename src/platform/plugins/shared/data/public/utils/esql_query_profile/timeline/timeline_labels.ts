@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { PlanningPhaseId, TimelineOperator } from '../profile/types';
 import type { DriverSpread } from './timeline_layout';
-import { formatDurationMillis, formatShare } from '../shared/profile_format';
+import { formatCount, formatDurationMillis, formatShare } from '../shared/profile_format';
 
 export const planningLabel = () =>
   i18n.translate('data.inspector.queryProfile.planningLaneLabel', { defaultMessage: 'Planning' });
@@ -51,6 +51,43 @@ export const groupLabel = (description: string): string => {
 
 /** A planning phase is called by its name in the profile, such as `view_resolution`. */
 export const planningPhaseLabel = (id: PlanningPhaseId): string => humanize(id);
+
+const countOrDash = (count: number | undefined): string =>
+  count === undefined ? '–' : formatCount(count);
+
+/** What an operator did with rows, such as "Rows 10 → 5". Nothing when it reports neither counter. */
+export const operatorRowsLabel = ({
+  rowsReceived,
+  rowsEmitted,
+}: TimelineOperator): string | undefined =>
+  rowsReceived === undefined && rowsEmitted === undefined
+    ? undefined
+    : i18n.translate('data.inspector.queryProfile.operatorRowsLabel', {
+        defaultMessage: 'Rows {rowsIn} → {rowsOut}',
+        values: { rowsIn: countOrDash(rowsReceived), rowsOut: countOrDash(rowsEmitted) },
+      });
+
+/** The same, in words for a screen reader. */
+export const operatorRowsAriaLabel = ({
+  rowsReceived,
+  rowsEmitted,
+}: TimelineOperator): string | undefined => {
+  const parts = [
+    rowsReceived === undefined
+      ? undefined
+      : i18n.translate('data.inspector.queryProfile.operatorRowsInAriaLabel', {
+          defaultMessage: '{count, plural, one {# row} other {# rows}} in',
+          values: { count: rowsReceived },
+        }),
+    rowsEmitted === undefined
+      ? undefined
+      : i18n.translate('data.inspector.queryProfile.operatorRowsOutAriaLabel', {
+          defaultMessage: '{count, plural, one {# row} other {# rows}} out',
+          values: { count: rowsEmitted },
+        }),
+  ].filter(Boolean);
+  return parts.length > 0 ? parts.join(', ') : undefined;
+};
 
 export const operatorTimeLabel = (operator: TimelineOperator): string =>
   operator.timeReported ? formatDurationMillis(operator.processNanos / 1e6) : '–';

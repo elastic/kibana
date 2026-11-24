@@ -7,11 +7,19 @@
 
 import { injectable } from 'inversify';
 import type { MetricCollectorWriter, MetricRecorder, MetricRecorderContext } from '../types';
-import { RULE_EXECUTION_COUNTERS } from '../counters';
+import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../counters';
 import {
+  alertEventStatus,
   alertEventType,
+  type AlertEventStatus,
   type AlertEventDocument,
 } from '../../../../resources/datastreams/alert_events';
+
+const EVENT_STATUS_COUNTER: Readonly<Record<AlertEventStatus, RuleExecutionCounter>> = {
+  [alertEventStatus.breached]: RULE_EXECUTION_COUNTERS.breachedEventsGenerated,
+  [alertEventStatus.recovered]: RULE_EXECUTION_COUNTERS.recoveredEventsGenerated,
+  [alertEventStatus.no_data]: RULE_EXECUTION_COUNTERS.noDataEventsGenerated,
+};
 
 /**
  * Domain-aware {@link MetricRecorder} that translates a bulk-write
@@ -22,6 +30,9 @@ import {
  * - `ruleEventsGenerated` / `signalsGenerated` come straight from the persisted
  *   documents on `meta.observations.bulkIndexResult.docs` (the latter filtered
  *   by `type`).
+ * - `breachedEventsGenerated` / `recoveredEventsGenerated` /
+ *   `noDataEventsGenerated` partition those same docs by `status`, an
+ *   orthogonal axis to `type` (a breached event can be a signal or an alert).
  * - `newEpisodesGenerated` is the one metric that needs a second input: which
  *   episodes are *new* is the director's knowledge, not a property of the doc.
  *   `DirectorStep` threads the freshly-opened episode ids on
@@ -54,11 +65,20 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
     collector.increment(RULE_EXECUTION_COUNTERS.ruleEventsGenerated, persistedDocs.length);
 
     let signalsCount = 0;
+    const statusCounts = new Map<RuleExecutionCounter, number>();
     const persistedEpisodeIds = new Set<string>();
+
     for (const doc of persistedDocs) {
       if (doc.type === alertEventType.signal) {
         signalsCount += 1;
       }
+
+      const statusCounter = EVENT_STATUS_COUNTER[doc.status];
+
+      if (statusCounter) {
+        statusCounts.set(statusCounter, (statusCounts.get(statusCounter) ?? 0) + 1);
+      }
+
       if (doc.alert) {
         persistedEpisodeIds.add(doc.alert.id);
       }
@@ -66,6 +86,10 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
 
     if (signalsCount > 0) {
       collector.increment(RULE_EXECUTION_COUNTERS.signalsGenerated, signalsCount);
+    }
+
+    for (const [counter, count] of statusCounts) {
+      collector.increment(counter, count);
     }
 
     // Count episodes, not docs: a single-series rule writes many docs that share

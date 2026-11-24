@@ -10,7 +10,7 @@
 /**
  * Converts radians to degrees for a number. For arrays, the function will be applied index-wise to each element.
  * @param {(number|number[])} a a number or an array of numbers, `a` is expected to be given in radians.
- * @return {(number|number[])} The degrees of `a`. Returns an array with the the degrees of each element if `a` is an array.
+ * @return {(number|number[])} The degrees of `a`. Returns an array with the degrees of each element if `a` is an array.
  * @example
  * radtodeg(0) // returns 0
  * radtodeg(1.5707963267948966) // returns 90

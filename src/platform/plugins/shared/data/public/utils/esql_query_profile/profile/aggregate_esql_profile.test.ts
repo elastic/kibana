@@ -89,6 +89,29 @@ describe('aggregateEsqlProfile', () => {
     expect(view.operators[1].share).toBe(0.25);
   });
 
+  it('tells a row counter that an operator does not report apart from a reported zero', () => {
+    const { operators } = aggregateEsqlProfile({
+      drivers: [
+        {
+          operators: [
+            { operator: 'LuceneSourceOperator', status: { rows_emitted: 100 } },
+            { operator: 'OutputOperator', status: {} },
+            { operator: 'ExchangeSinkOperator', status: { rows_received: 0, rows_emitted: 0 } },
+          ],
+        },
+        { operators: [{ operator: 'LuceneSourceOperator', status: { rows_emitted: 50 } }] },
+      ],
+    });
+    const byTitle = Object.fromEntries(operators.map((operator) => [operator.title, operator]));
+
+    expect(byTitle.LuceneSource.rowsReceived).toBeUndefined();
+    expect(byTitle.LuceneSource.rowsEmitted).toBe(150);
+    expect(byTitle.Output.rowsReceived).toBeUndefined();
+    expect(byTitle.Output.rowsEmitted).toBeUndefined();
+    expect(byTitle.ExchangeSink.rowsReceived).toBe(0);
+    expect(byTitle.ExchangeSink.rowsEmitted).toBe(0);
+  });
+
   it('returns an empty view when the profile is missing', () => {
     expect(aggregateEsqlProfile(undefined)).toMatchObject({
       queryTookMillis: undefined,
@@ -250,6 +273,12 @@ describe('aggregateEsqlProfile operator time', () => {
       'SampleOperator[probability=0.1]',
       { collect_nanos: 4_000, emit_nanos: 1_000, rows_received: 10 },
       4_000 + 1_000,
+    ],
+    [
+      'a fetch operator, which groups the documents and then appends the fetched columns',
+      'FetchOperator',
+      { plan_nanos: 3_000, gather_nanos: 2_000, rows_received: 10, documents: 10 },
+      3_000 + 2_000,
     ],
   ])('counts every phase of %s', (_, operator, status, expectedNanos) => {
     const { operators } = aggregateEsqlProfile({

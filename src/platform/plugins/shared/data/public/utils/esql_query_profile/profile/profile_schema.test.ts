@@ -25,13 +25,17 @@ describe('what the profile view reads from the ES|QL profile schema', () => {
 
   it('sums the timing fields of the operators that report no process time', () => {
     // A new field here has to be a phase of its own. If it is a part of another one, summing it
-    // counts that time twice.
+    // counts that time twice. `plan_nanos` and `gather_nanos` are the two stretches of work that the
+    // fetch operator does on the driver thread, one after the other. The wait for the nodes to
+    // answer is not in them.
     expect([...PHASE_NANOS_FIELDS].sort()).toEqual([
       'aggregation_finish_nanos',
       'aggregation_nanos',
       'collect_nanos',
       'emit_nanos',
+      'gather_nanos',
       'hash_nanos',
+      'plan_nanos',
       'receive_nanos',
     ]);
   });

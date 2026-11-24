@@ -193,7 +193,6 @@ const REDUX_TOOLKIT_V1_DIRS = [
   'x-pack/platform/plugins/shared/content_connectors',
   'x-pack/platform/plugins/shared/fleet',
   'x-pack/platform/plugins/shared/index_management',
-  'x-pack/platform/plugins/shared/license_management',
   'x-pack/platform/plugins/shared/maps',
   'x-pack/platform/plugins/shared/osquery',
   'x-pack/platform/plugins/shared/searchprofiler',

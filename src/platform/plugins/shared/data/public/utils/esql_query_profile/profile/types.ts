@@ -42,8 +42,10 @@ export interface OperatorMeasures {
   processNanos: number;
   /** False when no time was reported at all, which is not the same as 0 ms. */
   timeReported: boolean;
-  rowsReceived: number;
-  rowsEmitted: number;
+  /** Missing when not reported, as for a source, which takes no rows in. Not the same as 0. */
+  rowsReceived?: number;
+  /** Missing when not reported, as for a sink, which gives no rows out. Not the same as 0. */
+  rowsEmitted?: number;
 }
 
 /** How an operator is shown: a short title, and the bracketed detail of its description. */

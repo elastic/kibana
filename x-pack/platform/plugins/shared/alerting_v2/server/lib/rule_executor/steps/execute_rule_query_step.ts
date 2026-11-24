@@ -19,7 +19,7 @@ import type { QueryServiceContract } from '../../services/query_service/query_se
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
 import type { EsqlResponseFormatServiceContract } from '../../services/esql_response_format_service/esql_response_format_service';
 import { EsqlResponseFormatServiceToken } from '../../services/esql_response_format_service/tokens';
-import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
+import { guardedExpandStep, tap, withAtLeastOne } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
 import { getQueryRowLimit } from '../../../config';
 import { ConfigService } from '../../services/config_service/config_service';
@@ -84,15 +84,24 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           format,
         });
 
+        let hasRealBatch = false;
+        const trackedStream = tap(esqlRowBatchStream, () => {
+          hasRealBatch = true;
+        });
+
         let totalRows = 0;
         let loggedRowsDropped = false;
 
-        for await (const batch of withAtLeastOne<EsqlRowBatch>(esqlRowBatchStream, [])) {
+        for await (const batch of withAtLeastOne<EsqlRowBatch>(trackedStream, [])) {
           totalRows += batch.length;
 
           const counters: Partial<Record<RuleExecutionCounter, number>> = {
             [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
           };
+
+          if (hasRealBatch) {
+            counters[RULE_EXECUTION_COUNTERS.queryBatchesProcessed] = 1;
+          }
 
           if (!loggedRowsDropped && totalRows >= queryRowLimit) {
             loggedRowsDropped = true;

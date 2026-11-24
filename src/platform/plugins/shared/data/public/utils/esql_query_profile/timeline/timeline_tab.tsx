@@ -123,15 +123,21 @@ const Lane = ({
             css={[styles.laneBar, colorCss, isSelected ? styles.laneBarSelected : undefined]}
             style={{ left: `${box.left}%`, width: `${box.width}%` }}
             data-test-subj="esqlQueryProfileLaneBar"
-          />
-          {waits.map((wait, index) => (
-            <span
-              key={`${index}-${wait.left}-${wait.width}`}
-              css={styles.laneWait}
-              style={{ left: `${wait.left}%`, width: `${wait.width}%` }}
-              data-test-subj="esqlQueryProfileLaneWait"
-            />
-          ))}
+          >
+            {waits.map((wait, index) => (
+              <span
+                key={`${index}-${wait.left}-${wait.width}`}
+                css={styles.laneWait}
+                style={
+                  {
+                    '--wait-left': `${wait.left}%`,
+                    '--wait-width': `${wait.width}%`,
+                  } as React.CSSProperties
+                }
+                data-test-subj="esqlQueryProfileLaneWait"
+              />
+            ))}
+          </span>
         </span>
       </button>
     </EuiToolTip>
@@ -237,7 +243,7 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
                 tooltip={<LaneTooltip name={driver.label} facts={driverFacts(driver, origin)} />}
                 box={laneBox(driver.startMillis, driver.stopMillis, domain)}
                 waits={driver.sleeps.map((sleep) =>
-                  laneBox(sleep.startMillis, sleep.stopMillis, domain)
+                  laneBox(sleep.startMillis, sleep.stopMillis, driver)
                 )}
                 colorCss={styles.groupColor(groupIndex)}
                 isSelected={selectedLaneId === driver.id}

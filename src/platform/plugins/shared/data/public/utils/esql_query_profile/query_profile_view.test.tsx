@@ -134,6 +134,14 @@ describe('getEsqlQueryProfileViewDescription', () => {
     logRequest(esql, 'Documents', { query: 'FROM logs', include_execution_metadata: true });
     expect(view.shouldShow?.({ requests: esql })).toBe(true);
 
+    // Some callers, such as the metrics grid, do not set it. The key is logged all the same.
+    const withoutFlag = new RequestAdapter();
+    logRequest(withoutFlag, 'Documents', {
+      query: 'FROM logs',
+      include_execution_metadata: undefined,
+    });
+    expect(view.shouldShow?.({ requests: withoutFlag })).toBe(true);
+
     const dsl = new RequestAdapter();
     logRequest(dsl, 'Documents', { query: { match_all: {} }, size: 10 });
     expect(view.shouldShow?.({ requests: dsl })).toBe(false);
@@ -165,6 +173,7 @@ describe('QueryProfileView', () => {
         filter: { match_all: {} },
         approximation: true,
         project_routing: 'my-project',
+        dropNullColumns: true,
       },
       { queryTime: { label: 'Query time', value: '15ms' } }
     );
@@ -186,6 +195,7 @@ describe('QueryProfileView', () => {
         profile: true,
         approximation: true,
         projectRouting: 'my-project',
+        dropNullColumns: true,
       }),
       expect.objectContaining({ abortSignal: expect.anything() })
     );
@@ -260,7 +270,15 @@ describe('QueryProfileView', () => {
     expect(esql).toHaveBeenCalledTimes(2);
   });
 
-  it('says there is nothing to profile when the request is gone, instead of waiting for it', async () => {
+  it('says there is nothing to profile when no request was logged, instead of waiting for one', async () => {
+    renderView(<QueryProfileView adapters={{ requests: new RequestAdapter() }} search={search} />);
+
+    expect(await screen.findByTestId('esqlQueryProfileNoRequest')).toBeInTheDocument();
+    expect(screen.queryByTestId('esqlQueryProfileLoading')).not.toBeInTheDocument();
+    expect(esql).not.toHaveBeenCalled();
+  });
+
+  it('keeps the profile that is being read when the request is gone, and says it changed', async () => {
     const requests = new RequestAdapter();
     logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
     renderView(<QueryProfileView adapters={{ requests }} search={search} />);
@@ -268,8 +286,119 @@ describe('QueryProfileView', () => {
 
     act(() => requests.reset());
 
-    expect(await screen.findByTestId('esqlQueryProfileNoRequest')).toBeInTheDocument();
+    expect(await screen.findByTestId('esqlQueryProfileRequestChanged')).toHaveTextContent(
+      'no longer available'
+    );
+    expect(screen.getByTestId('esqlQueryProfileDuration')).toBeInTheDocument();
     expect(screen.queryByTestId('esqlQueryProfileLoading')).not.toBeInTheDocument();
+    // There is nothing to profile again, so the action is not offered.
+    expect(screen.getByTestId('esqlQueryProfileRunAgain')).toBeDisabled();
+  });
+
+  it('does not profile again when the inspected panel fetches again, until the user asks', async () => {
+    const requests = new RequestAdapter();
+    logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
+    renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+    await screen.findByTestId('esqlQueryProfileDuration');
+
+    // An auto-refresh resets the adapter and logs the request again.
+    act(() => requests.reset());
+    act(() => {
+      logRequest(requests, 'Documents', {
+        query: 'FROM untimed',
+        include_execution_metadata: true,
+      });
+    });
+
+    expect(await screen.findByTestId('esqlQueryProfileRequestChanged')).toBeInTheDocument();
+    expect(esql).toHaveBeenCalledTimes(1);
+
+    await userEvent.click(screen.getByTestId('esqlQueryProfileRunAgain'));
+
+    await waitFor(() =>
+      expect(esql).toHaveBeenLastCalledWith(
+        expect.objectContaining({ query: 'FROM untimed' }),
+        expect.anything()
+      )
+    );
+    expect(esql).toHaveBeenCalledTimes(2);
+    await waitFor(() =>
+      expect(screen.queryByTestId('esqlQueryProfileRequestChanged')).not.toBeInTheDocument()
+    );
+  });
+
+  it('lets a profile that has started finish when the panel fetches again meanwhile', async () => {
+    let finish: () => void = () => {};
+    esql.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = () => resolve({ rawResponse: { profile } });
+        })
+    );
+    const requests = new RequestAdapter();
+    logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
+    renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+    await waitFor(() => expect(esql).toHaveBeenCalledTimes(1));
+
+    // An auto-refresh empties the adapter for a moment, then logs the request again.
+    act(() => requests.reset());
+    // While it is empty the profile is still running, which is what the view says.
+    expect(screen.getByTestId('esqlQueryProfileLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('esqlQueryProfileNoRequest')).not.toBeInTheDocument();
+    act(() => {
+      logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
+    });
+    await act(async () => finish());
+
+    expect(await screen.findByTestId('esqlQueryProfileDuration')).toHaveTextContent('2 s');
+    expect(esql).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows how long the original took when the request was still pending as profiling began', async () => {
+    const requests = new RequestAdapter();
+    const responder = requests
+      .start('Documents')
+      .json({ query: QUERY, include_execution_metadata: true });
+    renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+    await screen.findByTestId('esqlQueryProfileDuration');
+    expect(screen.getByTestId('esqlQueryProfileIntro')).not.toHaveTextContent('original took');
+
+    act(() => {
+      responder.stats({ queryTime: { label: 'Query time', value: '15ms' } });
+      responder.ok({ json: {} });
+    });
+
+    expect(await screen.findByText(/The original took 15ms/)).toBeInTheDocument();
+  });
+
+  it('profiles again the request that was picked, also when a refetch gives the requests new ids', async () => {
+    const logBoth = (requests: RequestAdapter) => {
+      logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
+      logRequest(requests, 'Chart', { query: 'FROM untimed', include_execution_metadata: true });
+    };
+    const requests = new RequestAdapter();
+    logBoth(requests);
+    renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+    await screen.findByTestId('esqlQueryProfileDuration');
+    await userEvent.click(screen.getByRole('combobox', { name: 'Request' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Chart' }));
+    await waitFor(() =>
+      expect(esql).toHaveBeenLastCalledWith(
+        expect.objectContaining({ query: 'FROM untimed' }),
+        expect.anything()
+      )
+    );
+    await screen.findByTestId('esqlQueryProfileDuration');
+
+    act(() => requests.reset());
+    act(() => logBoth(requests));
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileRunAgain'));
+
+    await waitFor(() => expect(esql).toHaveBeenCalledTimes(3));
+    expect(esql).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'FROM untimed' }),
+      expect.anything()
+    );
   });
 
   describe('timeline', () => {
@@ -288,6 +417,17 @@ describe('QueryProfileView', () => {
       expect(screen.getByTestId('esqlQueryProfileRuler')).toBeInTheDocument();
       expect(screen.getAllByTestId('esqlQueryProfileLaneWait')).toHaveLength(1);
       expect(screen.getByText(/Waiting, for example for another driver/)).toBeInTheDocument();
+    });
+
+    it('draws a wait inside the bar of its driver, against the span of that driver', async () => {
+      await open();
+
+      const [wait] = screen.getAllByTestId('esqlQueryProfileLaneWait');
+
+      expect(wait.closest('[data-test-subj="esqlQueryProfileLaneBar"]')).not.toBeNull();
+      // The driver runs from 1,400 to 2,800 ms and waits from 1,600 to 2,700 ms.
+      expect(parseFloat(wait.style.getPropertyValue('--wait-left'))).toBeCloseTo(14.29, 1);
+      expect(parseFloat(wait.style.getPropertyValue('--wait-width'))).toBeCloseTo(78.57, 1);
     });
 
     it('says how long a driver waited when its lane is pointed at', async () => {
@@ -310,6 +450,14 @@ describe('QueryProfileView', () => {
       expect(strip).toHaveTextContent('LuceneSource');
       expect(strip).toHaveTextContent('60%');
       expect(strip).toHaveTextContent('Rows 10 → 10');
+
+      // A counter that is not reported is a dash, and an operator with neither has no rows line.
+      const tileOf = (name: string) =>
+        within(strip)
+          .getAllByTestId('esqlQueryProfileOperator')
+          .find((tile) => tile.textContent?.includes(name)) as HTMLElement;
+      expect(tileOf('ExchangeSink')).toHaveTextContent('Rows 5 → –');
+      expect(tileOf('HashAggregation')).not.toHaveTextContent('Rows');
       expect(strip).toHaveTextContent('HashAggregation');
 
       // Each bar is filled to the share of its own operator, so they are not all the same.
