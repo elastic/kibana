@@ -155,8 +155,8 @@ export const EsqlOptionsPopover = ({
                 }}
                 data-test-subj="lnsEsqlOptionsConvertButton"
               >
-                {i18n.translate('xpack.lens.config.esqlOptions.convertToEsqlButtonLabel', {
-                  defaultMessage: 'Convert to ES|QL',
+                {i18n.translate('xpack.lens.config.esqlOptions.switchToQueryEditorButtonLabel', {
+                  defaultMessage: 'Switch to ES|QL query editor',
                 })}
               </EuiButton>
             </EuiToolTip>

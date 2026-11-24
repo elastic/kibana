@@ -37,9 +37,9 @@ export type EsqlConversionFailureReason =
   | 'unknown';
 
 export const esqlConversionFailureTitle = i18n.translate(
-  'xpack.lens.config.cannotConvertToEsqlTitle',
+  'xpack.lens.config.cannotSwitchToEsqlQueryEditorTitle',
   {
-    defaultMessage: 'Cannot convert to ES|QL',
+    defaultMessage: 'Cannot switch to ES|QL query editor',
   }
 );
 

@@ -21,7 +21,7 @@ const renderPopover = (propsOverrides: Partial<EsqlOptionsPopoverProps> = {}) =>
     onUseEsqlChange: jest.fn(),
     convertToEsql: {
       isDisabled: false,
-      tooltip: 'Convert visualization to ES|QL',
+      tooltip: 'Switch visualization to ES|QL query editor',
       onClick: jest.fn(),
     },
     ...propsOverrides,

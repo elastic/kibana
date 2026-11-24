@@ -537,7 +537,7 @@ export async function convertToEsqlViaModal({
 }) {
   const { lens, esqlEditor } = pageObjects;
 
-  // Click on the "Convert to ES|QL" button in the ES|QL options popover of the in-line editor
+  // Click on the "Switch to ES|QL query editor" button in the ES|QL options popover of the in-line editor
   await lens.workspace.openEsqlOptions();
   await lens.workspace.convertToEsqlButton.click();
 

@@ -113,6 +113,20 @@ describe('form based toExpression engine selection', () => {
     ).toBe('esaggs');
   });
 
+  it('ignores the layer sampling when ES|QL is used', () => {
+    const sampledState: FormBasedPrivateState = {
+      ...stateWithCount,
+      useEsql: true,
+      layers: { first: { ...stateWithCount.layers.first, sampling: 0.01 } },
+    };
+    const fullState: FormBasedPrivateState = { ...sampledState, layers: stateWithCount.layers };
+
+    expect(getDataFunctionName({ state: sampledState })).toBe('esql');
+    expect(getExpressionAst({ state: sampledState })).toEqual(
+      getExpressionAst({ state: fullState })
+    );
+  });
+
   it('feeds the ES|QL request from the kibana search context so fast mode applies', () => {
     // `kibana` forwards `isApproximate` from the search context and `esql` reads it from its input.
     const functionNames = getExpressionAst({

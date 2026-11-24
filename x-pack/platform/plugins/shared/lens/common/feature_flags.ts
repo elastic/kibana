@@ -58,7 +58,7 @@ export const lensFeatureFlags = {
     fallback: false as boolean,
   },
   /**
-   * Enables the "Convert to ES|QL" button in the Lens inline editing flyout,
+   * Enables the "Switch to ES|QL query editor" button in the Lens inline editing flyout,
    * allowing users to convert form-based visualizations to ES|QL queries.
    */
   enableEsqlConversion: {

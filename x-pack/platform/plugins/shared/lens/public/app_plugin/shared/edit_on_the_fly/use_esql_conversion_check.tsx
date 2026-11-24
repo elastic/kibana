@@ -289,9 +289,12 @@ export const useEsqlConversionCheck = (
 
     return {
       isConvertToEsqlButtonDisabled: false,
-      convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
-        defaultMessage: 'Convert visualization to ES|QL',
-      }),
+      convertToEsqlButtonTooltip: i18n.translate(
+        'xpack.lens.config.switchToEsqlQueryEditorTooltip',
+        {
+          defaultMessage: 'Switch visualization to ES|QL query editor',
+        }
+      ),
       convertibleLayers,
       attributes: newAttributes,
     };

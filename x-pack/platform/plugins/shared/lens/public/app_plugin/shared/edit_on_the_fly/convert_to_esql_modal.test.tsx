@@ -108,7 +108,7 @@ describe('ConvertToEsqlModal', () => {
     it('calls onConfirm callback', () => {
       renderComponent({ layers: [mockLayers[0]] });
 
-      fireEvent.click(screen.getByRole('button', { name: /convert to es\|ql/i }));
+      fireEvent.click(screen.getByRole('button', { name: /switch to es\|ql query editor/i }));
 
       expect(mockOnConfirm).toHaveBeenCalled();
     });
@@ -130,7 +130,7 @@ describe('ConvertToEsqlModal', () => {
       const icon = screen.getByTestId('lnsEsqlConversionFailureReason-5');
       expect(icon).toBeInTheDocument();
       // EuiIcon jest mock renders the aria-label as text content
-      expect(icon).toHaveTextContent(/Cannot convert to ES\|QL: Formula operations/);
+      expect(icon).toHaveTextContent(/Cannot switch to ES\|QL query editor: Formula operations/);
     });
 
     it('summarizes which layers are converted and retained', () => {
@@ -172,7 +172,7 @@ describe('ConvertToEsqlModal', () => {
     it('converts all data layers without requiring a selection', async () => {
       renderComponent({ layers: mockLayers.slice(0, 4) });
 
-      const confirmButton = screen.getByRole('button', { name: /convert to es\|ql/i });
+      const confirmButton = screen.getByRole('button', { name: /switch to es\|ql query editor/i });
       expect(confirmButton).toBeEnabled();
 
       await userEvent.click(confirmButton);
@@ -183,7 +183,7 @@ describe('ConvertToEsqlModal', () => {
       renderComponent();
 
       expect(screen.getByText('Cannot be converted')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /convert to es\|ql/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /switch to es\|ql query editor/i })).toBeDisabled();
     });
   });
 

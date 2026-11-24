@@ -219,20 +219,23 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
 
   return (
     <EuiConfirmModal
-      aria-label={i18n.translate('xpack.lens.config.switchToQueryModeAriaLabel', {
-        defaultMessage: 'Convert visualization to ES|QL',
+      aria-label={i18n.translate('xpack.lens.config.switchToEsqlQueryEditorModalAriaLabel', {
+        defaultMessage: 'Switch to ES|QL query editor',
       })}
-      title={i18n.translate('xpack.lens.config.switchToQueryModeTitle', {
-        defaultMessage: 'Convert visualization to ES|QL',
+      title={i18n.translate('xpack.lens.config.switchToEsqlQueryEditorModalTitle', {
+        defaultMessage: 'Switch to ES|QL query editor',
       })}
       onCancel={onCancel}
       cancelButtonText={i18n.translate('xpack.lens.config.cancelButtonTextButtonLabel', {
         defaultMessage: 'Cancel',
       })}
       onConfirm={onConfirm}
-      confirmButtonText={i18n.translate('xpack.lens.config.switchToQueryModeButtonLabel', {
-        defaultMessage: 'Convert to ES|QL',
-      })}
+      confirmButtonText={i18n.translate(
+        'xpack.lens.config.switchToEsqlQueryEditorConfirmButtonLabel',
+        {
+          defaultMessage: 'Switch to ES|QL query editor',
+        }
+      )}
       confirmButtonDisabled={!isConfirmButtonEnabled}
       data-test-subj="lnsConvertToEsqlModal"
     >
