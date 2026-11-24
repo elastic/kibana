@@ -90,11 +90,11 @@ const renderJsonTemplate = (template: string, values: Record<string, unknown>): 
 export const memoryConcurrencyKeyFor = (instanceKey: string): string =>
   `context-engine-memory-${instanceKey}`;
 
-/** Consolidates the memories of one AI index into long-term facts and entities. */
+/** Consolidates the session memories of one AI index into long-term facts and entities. */
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 7,
+  version: 8,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(DREAMING_YAML, {
@@ -118,13 +118,13 @@ export type ContextEngineTraceDreamingWorkflowTemplateValues =
   ContextEngineDreamingWorkflowTemplateValues;
 
 /**
- * Extracts long-term facts and entities from the agent conversations the trace sources of one AI
- * index record.
+ * Extracts long-term facts and entities from the agent conversations saved as session events for
+ * one AI index.
  */
 export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 6,
+  version: 7,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(TRACE_DREAMING_YAML, {
@@ -145,13 +145,13 @@ export type ContextEngineTraceDreamingBatchWorkflowTemplateValues =
   ContextEngineDreamingWorkflowTemplateValues;
 
 /**
- * Extracts long-term facts and entities from one batch of agent rounds, without reading the AI
+ * Extracts long-term facts and entities from one batch of agent turns, without reading the AI
  * index's existing ones.
  */
 export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 5,
+  version: 6,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(TRACE_DREAMING_BATCH_YAML, {

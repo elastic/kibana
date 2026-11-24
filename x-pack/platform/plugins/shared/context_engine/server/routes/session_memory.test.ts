@@ -107,6 +107,7 @@ describe('session memory routes', () => {
       remember: jest.fn(async (_scope, { id }) => ({ id: id ?? 'unused' })),
       get: jest.fn(),
       forget: jest.fn(),
+      readRevised: jest.fn(),
     };
     getSessionMemoryService = jest.fn(async () => service);
 

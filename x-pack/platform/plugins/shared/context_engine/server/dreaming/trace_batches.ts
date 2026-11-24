@@ -79,7 +79,8 @@ export const splitRound = (
 };
 
 const conversationOf = (round: TraceTranscriptMemory): string => {
-  const conversationId = round.attributes?.['trace.conversation_id'];
+  const conversationId =
+    round.attributes?.['trace.conversation_id'] ?? round.attributes?.['session.id'];
   return typeof conversationId === 'string' ? conversationId : round.id;
 };
 

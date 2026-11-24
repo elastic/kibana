@@ -32,7 +32,7 @@ export interface RoundSpans {
   lastChat?: { inputMessages?: unknown; outputMessages?: unknown };
 }
 
-const truncate = (text: string, max: number): string =>
+export const truncate = (text: string, max: number): string =>
   text.length > max ? `${text.slice(0, max)}${ELLIPSIS}` : text;
 
 const asText = (value: unknown): string => {
@@ -148,7 +148,7 @@ const renderMessage = (message: Message, onlySentUserMessages: boolean): string[
   return lines;
 };
 
-const capRound = (text: string): string => {
+export const capRound = (text: string): string => {
   if (text.length <= MAX_ROUND_CHARS) {
     return text;
   }

@@ -10,6 +10,8 @@ jest.mock('../dreaming/trace_rounds');
 import { DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS } from '../../common/step_types/read_trace_transcripts';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { SessionEventsService } from '../session_events/types';
+import type { SessionMemoryService } from '../session_memory/types';
 import { readTraceTranscripts } from '../dreaming/trace_rounds';
 import { getReadTraceTranscriptsStepDefinition } from './read_trace_transcripts';
 import { createMockStepContext } from './test_utils';
@@ -32,6 +34,8 @@ describe('readTraceTranscripts step', () => {
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => memoryEnabled,
         checkReadPrivilege: async () => canRead,
+        getSessionMemoryService: async () => ({} as SessionMemoryService),
+        getSessionEventsService: async () => ({} as SessionEventsService),
       },
       { getCurrentDate: () => NOW }
     ).handler(createMockStepContext({ input: stepInput, esClient, spaceId: 'team-a' }));

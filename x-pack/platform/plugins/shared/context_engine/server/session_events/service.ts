@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkResponseItem,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SESSION_EVENTS_DATA_STREAM } from './data_streams';
 import type {
+  ReadSessionTurnsResult,
   SaveEventResult,
   SessionEventInput,
   SessionEventsScope,
   SessionEventsService,
+  SessionTurn,
   StoredSessionEvent,
   StoredSessionEventTypeFields,
 } from './types';
@@ -64,6 +69,29 @@ const toResult = (id: string, item: BulkResponseItem | undefined): SaveEventResu
   return { id, status: 'failed', error: cause ? `${reason}: ${cause}` : reason };
 };
 
+const TURNS_LOAD_BATCH = 50;
+const MAX_TURN_EVENTS_LOADED = 10_000;
+
+const turnKey = (sessionId: string, turnId: string): string => `${sessionId}\u0000${turnId}`;
+
+const compareEvents = (a: StoredSessionEvent, b: StoredSessionEvent): number => {
+  if (a.seq !== undefined && b.seq !== undefined && a.seq !== b.seq) {
+    return a.seq - b.seq;
+  }
+  return (
+    Date.parse(a.event_at) - Date.parse(b.event_at) ||
+    Date.parse(a['@timestamp']) - Date.parse(b['@timestamp'])
+  );
+};
+
+/** The first copy of each event: a resent event is stored again under the same session and id. */
+const withoutResent = (events: StoredSessionEvent[]): StoredSessionEvent[] => {
+  const seen = new Set<string>();
+  return [...events]
+    .sort((a, b) => Date.parse(a['@timestamp']) - Date.parse(b['@timestamp']))
+    .filter(({ id }) => !seen.has(id) && !!seen.add(id));
+};
+
 /** `esClient` must send the product origin that system data streams require, as core's clients do. */
 export const createSessionEventsService = (
   esClient: ElasticsearchClient
@@ -101,5 +129,101 @@ export const createSessionEventsService = (
     return {
       results: response.items.map((item, index) => toResult(events[index].id, item.create)),
     };
+  },
+
+  readTurns: async ({ space, aiIndexId, since, after, until, size }) => {
+    if (space.trim() === '') {
+      throw new Error('Reading session events requires a non-empty space');
+    }
+    const ownedFilter: QueryDslQueryContainer[] = [
+      { term: { space } },
+      { term: { ai_index_id: aiIndexId } },
+    ];
+    // Events of one save share a timestamp, so the session and event id break the tie.
+    const found = await esClient.search<StoredSessionEvent>({
+      index: SESSION_EVENTS_DATA_STREAM,
+      ignore_unavailable: true,
+      allow_partial_search_results: false,
+      size,
+      sort: [{ '@timestamp': 'asc' }, { session_id: 'asc' }, { id: 'asc' }],
+      ...(after && { search_after: [Date.parse(since), after.sessionId, after.eventId] }),
+      _source: ['@timestamp', 'session_id', 'turn_id', 'id'],
+      query: {
+        bool: {
+          filter: [
+            ...ownedFilter,
+            {
+              range: {
+                '@timestamp': after ? { gte: since, lte: until } : { gt: since, lte: until },
+              },
+            },
+          ],
+        },
+      },
+    });
+    const positions = found.hits.hits.flatMap(({ _source }) =>
+      _source
+        ? [
+            {
+              savedAt: _source['@timestamp'],
+              sessionId: _source.session_id,
+              eventId: _source.id,
+              turnId: _source.turn_id,
+            },
+          ]
+        : []
+    );
+
+    const turnPairs = new Map<string, { sessionId: string; turnId: string }>();
+    for (const { sessionId, turnId } of positions) {
+      turnPairs.set(turnKey(sessionId, turnId), { sessionId, turnId });
+    }
+    const pairs = [...turnPairs.values()];
+    const loaded = new Map<string, StoredSessionEvent[]>();
+    for (let start = 0; start < pairs.length; start += TURNS_LOAD_BATCH) {
+      const batch = pairs.slice(start, start + TURNS_LOAD_BATCH);
+      const response = await esClient.search<StoredSessionEvent>({
+        index: SESSION_EVENTS_DATA_STREAM,
+        ignore_unavailable: true,
+        allow_partial_search_results: false,
+        size: MAX_TURN_EVENTS_LOADED,
+        sort: [{ '@timestamp': 'asc' }],
+        query: {
+          bool: {
+            filter: [
+              ...ownedFilter,
+              { terms: { session_id: [...new Set(batch.map(({ sessionId }) => sessionId))] } },
+              { terms: { turn_id: [...new Set(batch.map(({ turnId }) => turnId))] } },
+            ],
+          },
+        },
+      });
+      for (const { _source } of response.hits.hits) {
+        const key = _source && turnKey(_source.session_id, _source.turn_id);
+        if (_source && key && turnPairs.has(key)) {
+          loaded.set(key, [...(loaded.get(key) ?? []), _source]);
+        }
+      }
+    }
+
+    const turns = pairs.flatMap(({ sessionId, turnId }): SessionTurn[] => {
+      const stored = loaded.get(turnKey(sessionId, turnId)) ?? [];
+      if (stored.length === 0) {
+        return [];
+      }
+      return [
+        {
+          sessionId,
+          turnId,
+          endedAt: stored.reduce(
+            (latest, event) => (event['@timestamp'] > latest ? event['@timestamp'] : latest),
+            stored[0]['@timestamp']
+          ),
+          events: withoutResent(stored).sort(compareEvents),
+        },
+      ];
+    });
+    const result: ReadSessionTurnsResult = { positions, turns, full: positions.length === size };
+    return result;
   },
 });

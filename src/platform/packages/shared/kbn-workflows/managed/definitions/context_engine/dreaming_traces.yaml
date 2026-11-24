@@ -1,12 +1,12 @@
 version: '1'
 name: __NAME__
-description: 'Extracts long-term facts and entities from the agent conversations the trace sources of a Context Engine AI index record, as the AI index dreaming config describes.'
+description: 'Extracts long-term facts and entities from the agent conversations saved as session events for a Context Engine AI index, as the AI index dreaming config describes.'
 enabled: false
 tags:
   - context-engine
   - memory
   - dreaming
-  - traces
+  - transcripts
   - scheduled
 settings:
   timeout: '30m'
@@ -45,17 +45,17 @@ triggers:
         dry_run:
           type: boolean
           default: false
-          description: Report what dreaming would write and reject, and write nothing. The run ends cancelled, so the next run reads the same rounds.
+          description: Report what dreaming would write and reject, and write nothing. The run ends cancelled, so the next run reads the same turns.
         since:
           type: string
           maxLength: 64
-          description: Read the rounds that ended since this ISO 8601 time, instead of since where the last successful run stopped.
+          description: Read the events saved since this ISO 8601 time, instead of since where the last successful run stopped.
 steps:
   - name: status
     type: context-engine.getDreamingStatus
     with:
       ai_index_id: '{{ consts.ai_index_id }}'
-      source: traces
+      source: transcripts
 
   - name: paused
     type: if
@@ -88,7 +88,7 @@ steps:
             omitStepExecutions: true
 
   - name: read_traces
-    type: context-engine.readTraceTranscripts
+    type: context-engine.readSessionTranscripts
     with:
       ai_index_id: '{{ consts.ai_index_id }}'
       since: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'

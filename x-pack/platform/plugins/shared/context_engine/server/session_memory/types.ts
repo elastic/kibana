@@ -59,6 +59,25 @@ export type ForgetResult =
   | { id: string; outcome: 'forgotten' | 'already_forgotten' | 'not_found' }
   | { id: string; outcome: 'failed'; error: string };
 
+export interface ReadSessionMemoriesInput {
+  space: string;
+  /** Only memories that list this AI index in `aiIndexIds`. */
+  aiIndexId: string;
+  /** ISO date: reads the revisions written after it. */
+  since: string;
+  /** The id of the last memory read at `since`: continues after it. */
+  after?: string;
+  /** The most revisions one read looks at. */
+  size: number;
+}
+
+export interface ReadSessionMemoriesResult {
+  /** The latest revision of each memory that was revised in the window, skipping forgotten ones. */
+  memories: SessionMemory[];
+  /** Where the read stopped, set only when it looked at `size` revisions: more may follow. */
+  next?: { revisedAt: string; id: string };
+}
+
 /**
  * Nothing refreshes the stream, so `get` and `forget` see a write only after the next refresh. A
  * read right after `remember` or `forget` can still miss that write.
@@ -74,4 +93,10 @@ export interface SessionMemoryService {
    * unique ids.
    */
   forget(scope: SessionMemoryScope, ids: readonly string[]): Promise<ForgetResult[]>;
+  /**
+   * Reads what was remembered or revised since a time, oldest first, across all users of a space,
+   * for dreaming. A memory whose latest revision no longer lists the AI index, or is a
+   * tombstone, is left out.
+   */
+  readRevised(input: ReadSessionMemoriesInput): Promise<ReadSessionMemoriesResult>;
 }

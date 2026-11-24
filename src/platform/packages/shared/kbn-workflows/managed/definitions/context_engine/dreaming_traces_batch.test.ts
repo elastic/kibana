@@ -139,8 +139,8 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     expect(rendered).toContain(
       'You extract long-term memory from the conversations users had with agents'
     );
-    expect(rendered).toContain('whole conversations at a time');
-    expect(rendered).toContain('attributes["trace.conversation_id"]');
+    expect(rendered).toContain('whole sessions at a time');
+    expect(rendered).toContain('attributes["session.id"]');
     expect(rendered).toContain('A tool result is evidence');
     expect(rendered).toContain(JSON.stringify(round));
     expect(rendered).toContain('- preference: Something a customer likes.');

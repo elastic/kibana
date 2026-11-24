@@ -7,6 +7,8 @@
 
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { SessionEventsService } from '../session_events/types';
+import type { SessionMemoryService } from '../session_memory/types';
 import { getDreamingStatusStepDefinition } from './get_dreaming_status';
 import { createMockStepContext } from './test_utils';
 
@@ -24,13 +26,15 @@ describe('getDreamingStatusStepDefinition', () => {
     memoryEnabled?: boolean;
     canRead?: boolean;
     get?: jest.Mock;
-    source?: 'memories' | 'traces' | 'relationships' | 'maintenance';
+    source?: 'memories' | 'transcripts' | 'traces' | 'relationships' | 'maintenance';
   } = {}) =>
     getDreamingStatusStepDefinition({
       getAiIndexService: () => ({ get } as unknown as AiIndexService),
       isContextEngineEnabled: async () => contextEngineEnabled,
       isMemoryEnabled: async () => memoryEnabled,
       checkReadPrivilege: async () => canRead,
+      getSessionMemoryService: async () => ({} as SessionMemoryService),
+      getSessionEventsService: async () => ({} as SessionEventsService),
     }).handler(
       createMockStepContext({
         input: { ai_index_id: 'support', ...(source && { source }) },
@@ -40,6 +44,10 @@ describe('getDreamingStatusStepDefinition', () => {
 
   it('dreams when Context Engine and memory are on and the AI index dreams', async () => {
     await expect(run()).resolves.toEqual({ output: { dream: true } });
+  });
+
+  it('dreams on transcripts without trace sources, which they no longer read', async () => {
+    await expect(run({ source: 'transcripts' })).resolves.toEqual({ output: { dream: true } });
   });
 
   it('fails without reading the AI index when the workflow user cannot read AI indices', async () => {

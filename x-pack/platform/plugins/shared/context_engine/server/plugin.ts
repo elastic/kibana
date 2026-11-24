@@ -340,6 +340,14 @@ export class ContextEnginePlugin
         isContextEngineEnabled,
         isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
         checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
+        getSessionMemoryService: async () => {
+          const [, , contextEngineStart] = await coreSetup.getStartServices();
+          return contextEngineStart.getSessionMemoryService();
+        },
+        getSessionEventsService: async () => {
+          const [, , contextEngineStart] = await coreSetup.getStartServices();
+          return contextEngineStart.getSessionEventsService();
+        },
       },
     });
 

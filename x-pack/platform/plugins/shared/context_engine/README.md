@@ -509,6 +509,28 @@ caller can choose `id`, two users can share the same id; combine the space, `use
 and `kibana.saved_object.id` to identify a single memory. The routes record rejected requests,
 background write errors, `not_found`, `failed`, and Elasticsearch errors as failures.
 
+## Dreaming input
+
+Dreaming reads what agents saved in the two session stores, and nothing from the AI index it
+writes to or from traces.
+
+- The dreaming workflow reads **session memories** with `context-engine.readSessionMemories`.
+  It reads the memories that list the AI index in `ai_index_ids` and were remembered or revised
+  since the last run, across all users of the space. A memory revised since is read once, as its
+  latest revision. A forgotten memory, or one whose latest revision no longer lists the AI index,
+  is left out.
+- The trace dreaming workflow reads **transcripts** with `context-engine.readSessionTranscripts`.
+  It finds the events that list the AI index and were saved since the last run, then rebuilds
+  each turn they belong to from all its events. A turn that continues after a run is read again,
+  whole, by a later run. Reasoning and meta events are left out of a transcript, and a turn
+  nobody said anything in is skipped. Events saved in the last 5 minutes wait for the next run,
+  by default, so a turn still running is not read half way.
+
+Both steps read as the internal user once they check that the workflow user can read AI
+indices in the space, and the memories they return are visible to the space, not to the user
+who saved them. A fact or entity cites the memories it came from as `session-memory://<id>`
+and `session://<session id>/<turn id>`.
+
 ## Improvements
 
 An **improvement** is a proposed change to one AI Index's KI pipeline, derived

@@ -73,7 +73,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     expect(() => convertToWorkflowGraph(render())).not.toThrow();
   });
 
-  it('checks the AI index dreams and has trace sources before reading traces or calling a model', () => {
+  it('checks the AI index dreams before reading session events or calling a model', () => {
     const { steps } = render();
 
     expect(steps.map(({ name }: Step) => name)).toEqual([
@@ -90,7 +90,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     expect(steps[0]).toEqual(
       expect.objectContaining({
         type: 'context-engine.getDreamingStatus',
-        with: { ai_index_id: '{{ consts.ai_index_id }}', source: 'traces' },
+        with: { ai_index_id: '{{ consts.ai_index_id }}', source: 'transcripts' },
       })
     );
     expect(findStep(steps, 'paused').steps).toEqual([
@@ -98,7 +98,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     ]);
   });
 
-  it('reads rounds from where the last run stopped, else since the last run, unless given a time', () => {
+  it('reads turns from where the last run stopped, else since the last run, unless given a time', () => {
     const read = findStep(render().steps, 'read_traces');
     const engine = createWorkflowLiquidEngine();
     const { since, after } = read.with as { since: string; after: string };
@@ -109,7 +109,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
       },
     };
 
-    expect(read.type).toBe('context-engine.readTraceTranscripts');
+    expect(read.type).toBe('context-engine.readSessionTranscripts');
     expect(engine.parseAndRenderSync(since, { inputs: {}, steps: { last_run: lastRun } })).toBe(
       '2026-11-01T00:00:00.000Z'
     );
