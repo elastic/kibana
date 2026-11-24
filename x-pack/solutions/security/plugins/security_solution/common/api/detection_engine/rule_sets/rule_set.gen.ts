@@ -108,6 +108,27 @@ export const RuleSetSeverities = lazySchema(() =>
 );
 export type RuleSetSeverities = z.infer<typeof RuleSetSeverities>;
 
+export const RuleSetLastRunOutcome = lazySchema(() => z.enum(['succeeded', 'warning', 'failed']));
+export type RuleSetLastRunOutcome = z.infer<typeof RuleSetLastRunOutcome>;
+export type RuleSetLastRunOutcomeEnum = typeof RuleSetLastRunOutcome.enum;
+export const RuleSetLastRunOutcomeEnum = RuleSetLastRunOutcome.enum;
+
+/**
+  * The outcome of the last rule run (the "Last response" of the rules table). A rule matches
+when its outcome is one of `include` and none of `exclude`. The value changes on every run,
+so membership by this condition changes too.
+
+  */
+export const RuleSetLastRunOutcomes = lazySchema(() =>
+  z
+    .object({
+      include: z.array(RuleSetLastRunOutcome).max(3).optional(),
+      exclude: z.array(RuleSetLastRunOutcome).max(3).optional(),
+    })
+    .strict()
+);
+export type RuleSetLastRunOutcomes = z.infer<typeof RuleSetLastRunOutcomes>;
+
 /**
  * `external`: Elastic prebuilt rules. `internal`: rules created in Kibana.
  */
@@ -161,6 +182,16 @@ export const RuleSetConditions = lazySchema(() =>
       rule_source: RuleSetRuleSource.optional(),
       mitre_tactic: RuleSetValues.optional(),
       tag_categories: RuleSetTagCategories.optional(),
+      /**
+       * Only enabled (`true`) or only disabled (`false`) rules. Enabling or disabling a rule changes its membership.
+       */
+      enabled: z
+        .boolean()
+        .optional()
+        .describe(
+          'Only enabled (`true`) or only disabled (`false`) rules. Enabling or disabling a rule changes its membership.'
+        ),
+      last_run_outcome: RuleSetLastRunOutcomes.optional(),
       search: RuleSetSearch.optional(),
     })
     .strict()

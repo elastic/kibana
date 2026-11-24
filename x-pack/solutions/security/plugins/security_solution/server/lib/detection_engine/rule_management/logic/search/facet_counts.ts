@@ -30,6 +30,8 @@ const CATEGORY_CONDITION: Partial<Record<GranularRulesFacetCategory, keyof RuleS
   type: 'type',
   severity: 'severity',
   source: 'rule_source',
+  enabled: 'enabled',
+  lastRunOutcome: 'last_run_outcome',
 };
 
 const MAX_TAGS_PER_CATEGORY = 1000;

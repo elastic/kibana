@@ -27,6 +27,7 @@ import { useRulesTableContext } from '../../rule_management_ui/components/rules_
 import { useRuleSetOutcomesQuery, useRuleSetsWithCountsQuery } from '../api';
 import { useRuleSetEditor } from './rule_set_editor_context';
 import { RuleSetMoreActions, RuleSetSwitcher, useSuggestRuleSets } from './rule_set_switcher';
+import { RuleSetConditionChips } from './rules_group_by_control';
 import * as i18n from './translations';
 
 /** `value` is undefined while it loads: a 0 there would read as "the group is empty". */
@@ -126,6 +127,12 @@ export const RuleSetHeader = () => {
                 <EuiText size="xs" color="subdued">
                   {group.description}
                 </EuiText>
+              </>
+            )}
+            {group && (
+              <>
+                <EuiSpacer size="s" />
+                <RuleSetConditionChips group={group} />
               </>
             )}
           </EuiFlexItem>

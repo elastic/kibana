@@ -267,9 +267,11 @@ const RuleSetEditorForm = ({
   });
 
   // Counts in the whole space: a set definition is not limited by another set.
-  const { data: facetCounts, isLoading: isLoadingFacets } = useFacetCounts({
-    conditions: debounced.conditions,
-  });
+  const {
+    data: facetCounts,
+    isLoading: isLoadingFacets,
+    isFetching: isFetchingFacets,
+  } = useFacetCounts({ conditions: debounced.conditions });
 
   const { data: preview, isFetching } = useRuleSetPreviewQuery({
     conditions: debounced.conditions,
@@ -363,7 +365,23 @@ const RuleSetEditorForm = ({
               overflowY: 'auto',
             }}
           >
-            <Step n={1} title={i18n.STEP_CONDITIONS} help={i18n.STEP_CONDITIONS_HELP}>
+            <Step
+              n={1}
+              title={i18n.STEP_CONDITIONS}
+              help={i18n.STEP_CONDITIONS_HELP}
+              action={
+                hasConditions ? (
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="right"
+                    onClick={() => onConditionsChange({})}
+                    data-test-subj="ruleSetEditorClearConditions"
+                  >
+                    {i18n.CLEAR_CONDITIONS}
+                  </EuiButtonEmpty>
+                ) : undefined
+              }
+            >
               <EuiFieldSearch
                 fullWidth
                 compressed
@@ -383,6 +401,8 @@ const RuleSetEditorForm = ({
                 onChange={onConditionsChange}
                 counts={facetCounts}
                 isLoading={isLoadingFacets}
+                isFetching={isFetchingFacets || debounced.conditions !== conditions}
+                scopeKey="editor"
               />
             </Step>
           </EuiFlexItem>

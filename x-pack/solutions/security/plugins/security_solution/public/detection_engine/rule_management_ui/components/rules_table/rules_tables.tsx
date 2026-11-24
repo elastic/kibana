@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { RulesGroupByControl } from '../../../rule_sets/components/rules_group_by_control';
+import { RulesFilterBar } from '../../../rule_sets/components/rules_group_by_control';
 import { GroupedRulesTable } from '../../../rule_sets/components/grouped_rules_table';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -109,7 +109,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       filterOptions,
       isPreflightInProgress,
       isAllSelected,
-      isFetched,
       isLoading,
       isRefetching,
       loadingRuleIds,
@@ -328,9 +327,10 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       break;
   }
 
-  const shouldShowLinearProgress =
-    (isFetched && isRefetching) || isInitializingPrebuiltRulesPackage;
-  const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
+  // New filters keep the current rows under a progress line: an overlay on every facet click
+  // reads as a frozen page. The overlay stays for the bulk action preflight.
+  const shouldShowLinearProgress = isRefetching || isInitializingPrebuiltRulesPackage;
+  const shouldShowLoadingOverlay = isPreflightInProgress;
   const rulesCount =
     sectionRulesCount ??
     Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
@@ -434,7 +434,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           )}
           <RulesTableFilters selectedTab={selectedTab} />
           <EuiSpacer size="s" />
-          <RulesGroupByControl />
+          <RulesFilterBar />
           <RulesTableWarnings warnings={warnings} />
           <RulesTableUtilityBar
             canBulkEdit={canReadRules}

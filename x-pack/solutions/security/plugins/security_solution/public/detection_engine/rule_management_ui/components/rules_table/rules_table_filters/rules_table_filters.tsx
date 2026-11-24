@@ -16,6 +16,7 @@ import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { AllRulesTabs } from '../constants';
 import { RuleSearchField } from './rule_search_field';
 import { GapFillStatusSelector } from './gap_fill_status_selector';
+import { RulesGroupByButton } from '../../../../rule_sets/components/rules_group_by_control';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
@@ -26,8 +27,8 @@ interface RulesTableFiltersProps {
 }
 
 /**
- * Search above the rules table. The other filters are facets in the panel on the left
- * (`RulesFacetPanel`); the gap filter stays here on the monitoring tab.
+ * Search and view settings above the rules table. The filters are facets in the panel on the
+ * left (`RulesFacetPanel`); the gap filter stays here on the monitoring tab.
  */
 const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => {
   const { startTransaction } = useStartTransaction();
@@ -57,7 +58,7 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
   );
 
   return (
-    <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
+    <FilterWrapper gutterSize="m" justifyContent="flexEnd" alignItems="center" wrap>
       <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
       {selectedTab === AllRulesTabs.monitoring && (
         <EuiFlexItem grow={false}>
@@ -69,6 +70,9 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
           </EuiFilterGroup>
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        <RulesGroupByButton />
+      </EuiFlexItem>
     </FilterWrapper>
   );
 };

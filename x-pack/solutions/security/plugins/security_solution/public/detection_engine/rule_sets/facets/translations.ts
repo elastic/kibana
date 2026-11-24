@@ -61,7 +61,10 @@ export const RULE_STATE = i18n.translate('xpack.securitySolution.ruleSets.facets
 
 export const RULE_STATE_HELP = i18n.translate(
   'xpack.securitySolution.ruleSets.facets.ruleStateHelp',
-  { defaultMessage: 'Filters this page only. A rule set does not store them.' }
+  {
+    defaultMessage:
+      'Rule state changes without an edit. A rule set with a state condition gains and loses rules when they are enabled, disabled or run.',
+  }
 );
 
 export const STATUS = i18n.translate('xpack.securitySolution.ruleSets.facets.status', {
@@ -79,6 +82,45 @@ export const DISABLED = i18n.translate('xpack.securitySolution.ruleSets.facets.d
 export const LAST_RESPONSE = i18n.translate('xpack.securitySolution.ruleSets.facets.lastResponse', {
   defaultMessage: 'Last response',
 });
+
+export const SUCCEEDED = i18n.translate('xpack.securitySolution.ruleSets.facets.succeeded', {
+  defaultMessage: 'Succeeded',
+});
+
+export const WARNING = i18n.translate('xpack.securitySolution.ruleSets.facets.warning', {
+  defaultMessage: 'Warning',
+});
+
+export const FAILED = i18n.translate('xpack.securitySolution.ruleSets.facets.failed', {
+  defaultMessage: 'Failed',
+});
+
+export const MORE_TAG_GROUPS = (count: number) =>
+  i18n.translate('xpack.securitySolution.ruleSets.facets.moreTagGroups', {
+    values: { count },
+    defaultMessage: '{count} more tag {count, plural, one {group} other {groups}}',
+  });
+
+export const FEWER_TAG_GROUPS = i18n.translate(
+  'xpack.securitySolution.ruleSets.facets.fewerTagGroups',
+  { defaultMessage: 'Fewer tag groups' }
+);
+
+export const COUNTS_IN_SET = (name: string) =>
+  i18n.translate('xpack.securitySolution.ruleSets.facets.countsInSet', {
+    values: { name },
+    defaultMessage: 'Counts inside {name}',
+  });
+
+export const COUNTS_IN_ALL = i18n.translate('xpack.securitySolution.ruleSets.facets.countsInAll', {
+  defaultMessage: 'Counts in all rules',
+});
+
+export const INCLUDE = (value: string) =>
+  i18n.translate('xpack.securitySolution.ruleSets.facets.include', {
+    values: { value },
+    defaultMessage: 'Include {value}',
+  });
 
 export const SHOW_ALL = (count: number) =>
   i18n.translate('xpack.securitySolution.ruleSets.facets.showAll', {

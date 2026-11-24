@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
-import type { GranularRulesFacetCategory } from '../../../../common/api/detection_engine/rule_management';
 import type {
   RuleScope,
   RuleSetConditions,
@@ -20,12 +20,13 @@ interface UseFacetCountsParams {
   conditions: RuleSetConditions;
   /** The rule set of the page, if any: counts are counts inside the set. */
   scope?: RuleScope;
-  /** KQL of the filters that are not facets (rule state). */
+  /** KQL of the filters that are not facets. */
   filter?: string;
   search?: string;
-  categories?: GranularRulesFacetCategory[];
   enabled?: boolean;
 }
+
+type FacetCountsData = FacetCountsResult & { total: number };
 
 /**
  * Counts for every facet in one request. The server counts each facet without its own selection,
@@ -36,12 +37,13 @@ export const useFacetCounts = ({
   scope,
   filter,
   search,
-  categories = FACET_COUNT_CATEGORIES,
   enabled = true,
-}: UseFacetCountsParams) =>
-  useQuery(
-    ['ruleFacetCounts', conditions, scope, filter, search, categories],
-    async ({ signal }): Promise<FacetCountsResult & { total: number }> => {
+}: UseFacetCountsParams) => {
+  const scopeKey = JSON.stringify(scope ?? null);
+  const last = useRef<{ scopeKey: string; data: FacetCountsData }>();
+  return useQuery(
+    ['ruleFacetCounts', conditions, scope, filter, search],
+    async ({ signal }): Promise<FacetCountsData> => {
       const response = await fetchSearchRules({
         fields: ['id'],
         pagination: { page: 1, perPage: 1 },
@@ -50,11 +52,9 @@ export const useFacetCounts = ({
         ...(scope ? { rule_scope: scope } : {}),
         ...(hasRuleSetConditions(conditions) ? { filter_params: conditions } : {}),
         aggregations: {
-          counts: categories,
+          counts: FACET_COUNT_CATEGORIES,
           exclude_own_filter: true,
-          tag_categories: categories.includes('tags')
-            ? Object.keys(conditions.tag_categories ?? {})
-            : [],
+          tag_categories: Object.keys(conditions.tag_categories ?? {}),
         },
         signal,
       });
@@ -64,5 +64,15 @@ export const useFacetCounts = ({
         tagCategoryCounts: response.tag_category_counts ?? {},
       };
     },
-    { enabled, keepPreviousData: true, refetchOnWindowFocus: false }
+    {
+      enabled,
+      refetchOnWindowFocus: false,
+      // The old counts stay while new ones load, but only inside the same scope: counts of another
+      // rule set would put values into the facets that the set does not have.
+      placeholderData: () => (last.current?.scopeKey === scopeKey ? last.current.data : undefined),
+      onSuccess: (data) => {
+        last.current = { scopeKey, data };
+      },
+    }
   );
+};

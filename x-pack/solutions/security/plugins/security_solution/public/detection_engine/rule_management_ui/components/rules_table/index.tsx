@@ -51,7 +51,7 @@ export const AllRules = React.memo(() => {
           >
             <RulesFacetPanel />
           </EuiFlexItem>
-          <EuiFlexItem css={{ minWidth: 0 }}>
+          <EuiFlexItem css={{ minWidth: 0, position: 'relative' }}>
             <RulesTables selectedTab={tabName as AllRulesTabs} />
           </EuiFlexItem>
         </EuiFlexGroup>

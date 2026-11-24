@@ -5,76 +5,147 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
-  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCheckbox,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiHealth,
+  EuiIconTip,
   EuiNotificationBadge,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { RuleSetConditions } from '../../../../common/api/detection_engine/rule_sets';
-import type { FacetCountsResult, FacetField, FacetSelection, FacetValue } from './facet_fields';
+import type {
+  FacetCountsResult,
+  FacetField,
+  FacetSection,
+  FacetSelection,
+  FacetValue,
+} from './facet_fields';
 import { allFacetFields, hasSelection } from './facet_fields';
 import { useIntegrationTitles } from '../components/group_by_fields';
 import * as i18n from './translations';
 
 const VISIBLE_VALUES = 5;
 const SEARCH_FROM = 10;
+const VISIBLE_TAG_GROUPS = 6;
+const NO_VALUES: FacetValue[] = [];
 
-const useRowStyles = () => {
+const usePanelStyles = () => {
   const { euiTheme } = useEuiTheme();
-  return {
-    row: css`
-      padding: 1px ${euiTheme.size.xs};
-      border-radius: ${euiTheme.border.radius.small};
-      &:hover {
-        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-      }
-      .ruleFacetExclude {
-        opacity: 0;
-      }
-      &:hover .ruleFacetExclude,
-      &:focus-within .ruleFacetExclude,
-      .ruleFacetExclude[aria-pressed='true'] {
-        opacity: 1;
-      }
-    `,
-    excluded: css`
-      text-decoration: line-through;
-      color: ${euiTheme.colors.textSubdued};
-    `,
-    empty: css`
-      color: ${euiTheme.colors.textDisabled};
-    `,
-  };
+  return useMemo(
+    () => ({
+      row: css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+        min-height: 26px;
+        padding: 0 ${euiTheme.size.xs};
+        border-radius: ${euiTheme.border.radius.small};
+        &:hover {
+          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        }
+        .ruleFacetExclude {
+          opacity: 0;
+        }
+        &:hover .ruleFacetExclude,
+        &:focus-within .ruleFacetExclude {
+          opacity: 1;
+        }
+      `,
+      checkbox: css`
+        flex: 1;
+        min-width: 0;
+        .euiCheckbox__label {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      `,
+      excludedLabel: css`
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-decoration: line-through;
+        color: ${euiTheme.colors.textDanger};
+      `,
+      empty: css`
+        color: ${euiTheme.colors.textDisabled};
+      `,
+      count: css`
+        flex-shrink: 0;
+        min-width: 28px;
+        padding: 0 6px;
+        border-radius: 10px;
+        text-align: right;
+        font-size: ${euiTheme.size.m};
+        line-height: 18px;
+        font-variant-numeric: tabular-nums;
+        color: ${euiTheme.colors.textSubdued};
+        background: ${euiTheme.colors.backgroundBaseSubdued};
+        transition: opacity ${euiTheme.animation.normal};
+      `,
+      countSelected: css`
+        color: ${euiTheme.colors.textPrimary};
+        background: ${euiTheme.colors.backgroundLightPrimary};
+      `,
+      countExcluded: css`
+        color: ${euiTheme.colors.textDanger};
+        background: ${euiTheme.colors.backgroundLightDanger};
+      `,
+      updating: css`
+        .ruleFacetCount {
+          opacity: 0.45;
+        }
+      `,
+      section: css`
+        margin: ${euiTheme.size.m} 0 ${euiTheme.size.xs};
+        padding-top: ${euiTheme.size.s};
+        border-top: ${euiTheme.border.thin};
+        font-size: ${euiTheme.size.m};
+        font-weight: ${euiTheme.font.weight.semiBold};
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: ${euiTheme.colors.textSubdued};
+      `,
+      group: css`
+        & + & {
+          margin-top: 2px;
+        }
+      `,
+    }),
+    [euiTheme]
+  );
 };
+
+type PanelStyles = ReturnType<typeof usePanelStyles>;
 
 const FacetValueRow = ({
   field,
   value,
   selection,
   onChange,
+  styles,
 }: {
   field: FacetField;
   value: FacetValue;
   selection: FacetSelection;
   onChange: (next: FacetSelection) => void;
+  styles: PanelStyles;
 }) => {
-  const styles = useRowStyles();
   const id = useGeneratedHtmlId({ prefix: `ruleFacet-${field.id}` });
   const isIncluded = selection.include.includes(value.value);
   const isExcluded = selection.exclude.includes(value.value);
@@ -95,115 +166,157 @@ const FacetValueRow = ({
       exclude: isExcluded ? without(selection.exclude) : [...selection.exclude, value.value],
     });
 
+  const dot = field.dotColor?.(value.value);
+  const text = dot ? (
+    <EuiHealth color={dot} textSize="inherit">
+      {value.label}
+    </EuiHealth>
+  ) : (
+    value.label
+  );
+
   return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      alignItems="center"
-      responsive={false}
-      css={styles.row}
-      data-test-subj={`ruleFacetValue-${field.id}-${value.value}`}
-    >
-      <EuiFlexItem css={{ minWidth: 0 }}>
-        <EuiCheckbox
-          id={id}
-          checked={isIncluded}
-          onChange={toggleInclude}
-          label={
-            <EuiText
-              size="s"
-              className="eui-textTruncate"
-              title={value.label}
-              css={[
-                isExcluded && styles.excluded,
-                value.count === 0 && !isIncluded && styles.empty,
-              ]}
-            >
-              {value.label}
-            </EuiText>
-          }
-        />
-      </EuiFlexItem>
-      {isExcluded && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="danger">{i18n.NOT}</EuiBadge>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          {value.count}
-        </EuiText>
-      </EuiFlexItem>
-      {field.canExclude && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={isExcluded ? i18n.UNDO_EXCLUDE(value.label) : i18n.EXCLUDE(value.label)}
-            disableScreenReaderOutput
-          >
+    <div css={styles.row} data-test-subj={`ruleFacetValue-${field.id}-${value.value}`}>
+      {isExcluded ? (
+        <>
+          <EuiToolTip content={i18n.UNDO_EXCLUDE(value.label)} disableScreenReaderOutput>
             <EuiButtonIcon
-              className="ruleFacetExclude"
-              iconType={isExcluded ? 'cross' : 'minusCircle'}
+              iconType="minusCircle"
+              color="danger"
               size="xs"
-              color={isExcluded ? 'danger' : 'text'}
-              aria-pressed={isExcluded}
-              aria-label={isExcluded ? i18n.UNDO_EXCLUDE(value.label) : i18n.EXCLUDE(value.label)}
+              aria-label={i18n.UNDO_EXCLUDE(value.label)}
               onClick={toggleExclude}
-              data-test-subj={`ruleFacetExclude-${field.id}-${value.value}`}
+              data-test-subj={`ruleFacetExcluded-${field.id}-${value.value}`}
             />
           </EuiToolTip>
-        </EuiFlexItem>
+          <span css={styles.excludedLabel} title={value.label}>
+            {text}
+          </span>
+        </>
+      ) : (
+        <EuiCheckbox
+          id={id}
+          css={styles.checkbox}
+          checked={isIncluded}
+          onChange={toggleInclude}
+          title={value.label}
+          label={
+            <span css={value.count === 0 && !isIncluded ? styles.empty : undefined}>{text}</span>
+          }
+        />
       )}
-    </EuiFlexGroup>
+      {field.canExclude && !isExcluded && (
+        <EuiToolTip content={i18n.EXCLUDE(value.label)} disableScreenReaderOutput>
+          <EuiButtonIcon
+            className="ruleFacetExclude"
+            iconType="minusCircle"
+            size="xs"
+            color="text"
+            aria-label={i18n.EXCLUDE(value.label)}
+            onClick={toggleExclude}
+            data-test-subj={`ruleFacetExclude-${field.id}-${value.value}`}
+          />
+        </EuiToolTip>
+      )}
+      <span
+        className="ruleFacetCount"
+        css={[styles.count, isIncluded && styles.countSelected, isExcluded && styles.countExcluded]}
+      >
+        {value.count}
+      </span>
+    </div>
   );
 };
 
-/** Selected values first, then by count, so a choice never scrolls out of view. */
-const sortValues = (values: FacetValue[], selection: FacetSelection) => {
-  const selected = new Set([...selection.include, ...selection.exclude]);
-  return [...values].sort(
-    (a, b) =>
-      Number(selected.has(b.value)) - Number(selected.has(a.value)) ||
-      b.count - a.count ||
-      a.label.localeCompare(b.label)
-  );
+/**
+ * The order of the values stays as it was first seen, so values do not jump under the cursor when
+ * counts change after a click. A value seen once stays (with 0) until `resetKey` changes.
+ */
+const useStableValues = (
+  values: FacetValue[],
+  selection: FacetSelection,
+  ordered: boolean | undefined,
+  resetKey: string
+): FacetValue[] => {
+  const seen = useRef<{ key: string; order: string[]; labels: Map<string, string> }>({
+    key: resetKey,
+    order: [],
+    labels: new Map(),
+  });
+  return useMemo(() => {
+    if (seen.current.key !== resetKey) {
+      seen.current = { key: resetKey, order: [], labels: new Map() };
+    }
+    const memory = seen.current;
+    const byValue = new Map(values.map((value) => [value.value, value]));
+    values.forEach(({ value, label }) => memory.labels.set(value, label));
+    const known = new Set(memory.order);
+    const fresh = values
+      .filter(({ value }) => !known.has(value))
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+      .map(({ value }) => value);
+    const missingSelected = [...selection.include, ...selection.exclude].filter(
+      (value) => !known.has(value) && !byValue.has(value)
+    );
+    memory.order = [...memory.order, ...fresh, ...missingSelected];
+    const stable = memory.order.map(
+      (value) => byValue.get(value) ?? { value, label: memory.labels.get(value) ?? value, count: 0 }
+    );
+    if (!ordered) {
+      return stable;
+    }
+    // A field with a natural order keeps it; values outside the list (if any) go last.
+    const position = new Map(values.map(({ value }, index) => [value, index]));
+    return [...stable].sort(
+      (a, b) =>
+        (position.get(a.value) ?? Number.MAX_SAFE_INTEGER) -
+        (position.get(b.value) ?? Number.MAX_SAFE_INTEGER)
+    );
+  }, [values, selection, ordered, resetKey]);
 };
 
-export const FacetGroup = ({
-  field,
-  values,
-  selection,
-  onChange,
-  initialIsOpen,
-}: {
+interface FacetGroupProps {
   field: FacetField;
   values: FacetValue[];
   selection: FacetSelection;
-  onChange: (next: FacetSelection) => void;
+  /** Stable across renders: the group is memoized and calls it with its field. */
+  onFieldChange: (field: FacetField, next: FacetSelection) => void;
   initialIsOpen: boolean;
-}) => {
+  resetKey: string;
+}
+
+const FacetGroupComponent = ({
+  field,
+  values,
+  selection,
+  onFieldChange,
+  initialIsOpen,
+  resetKey,
+}: FacetGroupProps) => {
+  const onChange = (next: FacetSelection) => onFieldChange(field, next);
+  const styles = usePanelStyles();
   const id = useGeneratedHtmlId({ prefix: `ruleFacetGroup-${field.id}` });
+  const [isOpen, setIsOpen] = useState(initialIsOpen);
   const [showAll, setShowAll] = useState(false);
   const [search, setSearch] = useState('');
   const active = selection.include.length + selection.exclude.length;
-
-  // A selected value with no rules under the other filters stays visible.
-  const withSelected = useMemo(() => {
-    const known = new Set(values.map(({ value }) => value));
-    const missing = [...selection.include, ...selection.exclude]
-      .filter((value) => !known.has(value))
-      .map((value) => ({ value, label: value, count: 0 }));
-    return field.ordered ? [...values, ...missing] : sortValues([...values, ...missing], selection);
-  }, [field.ordered, values, selection]);
+  const stable = useStableValues(values, selection, field.ordered, resetKey);
 
   const term = search.trim().toLowerCase();
-  const matching = term
-    ? withSelected.filter(({ label }) => label.toLowerCase().includes(term))
-    : withSelected;
-  const visible = showAll || term ? matching : matching.slice(0, VISIBLE_VALUES);
+  const matching = term ? stable.filter(({ label }) => label.toLowerCase().includes(term)) : stable;
+  const top = matching.slice(0, VISIBLE_VALUES);
+  // A selected value further down the list stays visible when the list is short.
+  const selectedBelow = matching
+    .slice(VISIBLE_VALUES)
+    .filter(({ value }) => selection.include.includes(value) || selection.exclude.includes(value));
+  const visible = showAll || term ? matching : [...top, ...selectedBelow];
 
   return (
     <EuiAccordion
       id={id}
-      initialIsOpen={initialIsOpen}
+      css={styles.group}
+      forceState={isOpen ? 'open' : 'closed'}
+      onToggle={setIsOpen}
       paddingSize="none"
       buttonContent={
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -214,56 +327,84 @@ export const FacetGroup = ({
           </EuiFlexItem>
           {active > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiNotificationBadge color="subdued">{active}</EuiNotificationBadge>
+              <EuiNotificationBadge color="accent">{active}</EuiNotificationBadge>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       }
       extraAction={
         active > 0 ? (
-          <EuiButtonEmpty size="xs" onClick={() => onChange({ include: [], exclude: [] })}>
+          <EuiButtonEmpty
+            size="xs"
+            flush="right"
+            onClick={() => onChange({ include: [], exclude: [] })}
+          >
             {i18n.CLEAR}
           </EuiButtonEmpty>
         ) : undefined
       }
       data-test-subj={`ruleFacetGroup-${field.id}`}
     >
-      <div css={{ padding: '2px 0 8px' }}>
-        {(showAll || term) && withSelected.length >= SEARCH_FROM && (
-          <>
-            <EuiFieldSearch
-              compressed
-              fullWidth
-              placeholder={i18n.FIND_VALUE(field.label)}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <EuiSpacer size="xs" />
-          </>
-        )}
-        {visible.length === 0 ? (
-          <EuiText size="xs" color="subdued">
-            {i18n.NO_VALUES}
-          </EuiText>
-        ) : (
-          visible.map((value) => (
-            <FacetValueRow
-              key={value.value}
-              field={field}
-              value={value}
-              selection={selection}
-              onChange={onChange}
-            />
-          ))
-        )}
-        {!term && matching.length > VISIBLE_VALUES && (
-          <EuiButtonEmpty size="xs" flush="left" onClick={() => setShowAll(!showAll)}>
-            {showAll ? i18n.SHOW_LESS : i18n.SHOW_ALL(matching.length)}
-          </EuiButtonEmpty>
-        )}
-      </div>
+      {/* Closed groups render nothing: the panel has many tag groups. */}
+      {isOpen && (
+        <div css={{ padding: '2px 0 6px' }}>
+          {(showAll || term) && stable.length >= SEARCH_FROM && (
+            <>
+              <EuiFieldSearch
+                compressed
+                fullWidth
+                placeholder={i18n.FIND_VALUE(field.label)}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <EuiSpacer size="xs" />
+            </>
+          )}
+          {visible.length === 0 ? (
+            <EuiText size="xs" color="subdued">
+              {i18n.NO_VALUES}
+            </EuiText>
+          ) : (
+            visible.map((value) => (
+              <FacetValueRow
+                key={value.value}
+                field={field}
+                value={value}
+                selection={selection}
+                onChange={onChange}
+                styles={styles}
+              />
+            ))
+          )}
+          {!term && matching.length > VISIBLE_VALUES && (
+            <EuiButtonEmpty size="xs" flush="left" onClick={() => setShowAll(!showAll)}>
+              {showAll ? i18n.SHOW_LESS : i18n.SHOW_ALL(matching.length)}
+            </EuiButtonEmpty>
+          )}
+        </div>
+      )}
     </EuiAccordion>
   );
+};
+
+const sameSelection = (a: FacetSelection, b: FacetSelection) =>
+  a.include.join('\n') === b.include.join('\n') && a.exclude.join('\n') === b.exclude.join('\n');
+
+/** Only the clicked group renders on a click; the others keep their output. */
+const FacetGroup = React.memo(
+  FacetGroupComponent,
+  (prev, next) =>
+    prev.field.id === next.field.id &&
+    prev.values === next.values &&
+    prev.resetKey === next.resetKey &&
+    prev.onFieldChange === next.onFieldChange &&
+    sameSelection(prev.selection, next.selection)
+);
+
+const SECTION_TITLES: Record<FacetSection, string | undefined> = {
+  rule: undefined,
+  state: i18n.RULE_STATE,
+  tags: i18n.TAGS,
 };
 
 export interface FacetPanelProps {
@@ -271,78 +412,104 @@ export interface FacetPanelProps {
   onChange: (next: RuleSetConditions) => void;
   counts: FacetCountsResult | undefined;
   isLoading: boolean;
-  /** Extra sections below the rule fields, for example rule state filters of the table. */
-  children?: React.ReactNode;
+  /** New counts are loading: the old ones stay, dimmed. */
+  isFetching?: boolean;
+  /** The scope of the counts (a rule set id); a new scope resets the order of the values. */
+  scopeKey?: string;
 }
 
 /**
- * Facets of rule fields and tag categories, with counts. The rules table and the rule set editor
- * both use it, so a field added to the field list appears in both.
+ * Facets of rule fields, rule state and tag categories, with counts. The rules table and the rule
+ * set editor both use it, so a field added to the field list appears in both.
  */
 export const FacetPanel = ({
   conditions,
   onChange,
   counts,
   isLoading,
-  children,
+  isFetching = false,
+  scopeKey = '',
 }: FacetPanelProps) => {
+  const styles = usePanelStyles();
   const integrationTitles = useIntegrationTitles();
+  const [showAllTagGroups, setShowAllTagGroups] = useState(false);
   const fields = allFacetFields(counts, conditions);
-  const selections = fields.map((field) => [field, field.get(conditions)] as const);
-  const hasAny = selections.some(([, selection]) => hasSelection(selection));
+
+  // The latest conditions and callback, so the handler passed to the memoized groups never changes.
+  const latest = useRef({ conditions, onChange });
+  latest.current = { conditions, onChange };
+  const onFieldChange = useCallback(
+    (field: FacetField, next: FacetSelection) =>
+      latest.current.onChange(field.set(latest.current.conditions, next)),
+    []
+  );
+
+  // Values depend on the counts only, so a click does not rebuild them for every group.
+  const valuesById = useMemo(() => {
+    const byId = new Map<string, FacetValue[]>();
+    if (counts) {
+      allFacetFields(counts, {}).forEach((field) =>
+        byId.set(field.id, field.values(counts, { integrationTitles }))
+      );
+    }
+    return byId;
+  }, [counts, integrationTitles]);
+  const valuesOf = (field: FacetField) => valuesById.get(field.id) ?? NO_VALUES;
+
+  if (isLoading && !counts) {
+    return <EuiSkeletonText lines={10} />;
+  }
+
+  const renderGroup = (field: FacetField) => {
+    const selection = field.get(conditions);
+    return (
+      <FacetGroup
+        key={`${scopeKey}-${field.id}`}
+        field={field}
+        values={valuesOf(field)}
+        selection={selection}
+        onFieldChange={onFieldChange}
+        initialIsOpen={field.section !== 'tags' || hasSelection(selection)}
+        resetKey={scopeKey}
+      />
+    );
+  };
+
+  const tagFields = fields.filter(({ section }) => section === 'tags');
+  const shownTagFields = showAllTagGroups
+    ? tagFields
+    : tagFields.filter(
+        (field, index) => index < VISIBLE_TAG_GROUPS || hasSelection(field.get(conditions))
+      );
+  const hiddenTagGroups = tagFields.length - shownTagFields.length;
 
   return (
-    <div data-test-subj="ruleFacetPanel">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h3>{i18n.FILTERS}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        {hasAny && (
+    <div css={isFetching ? styles.updating : undefined} data-test-subj="ruleFacetPanel">
+      {fields.filter(({ section }) => section === 'rule').map(renderGroup)}
+
+      <div css={styles.section}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>{SECTION_TITLES.state}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              onClick={() =>
-                onChange({ ...(conditions.search ? { search: conditions.search } : {}) })
-              }
-              data-test-subj="ruleFacetClearAll"
-            >
-              {i18n.CLEAR_ALL}
-            </EuiButtonEmpty>
+            <EuiIconTip content={i18n.RULE_STATE_HELP} type="info" size="s" color="subdued" />
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      {isLoading && !counts ? (
-        <EuiSkeletonText lines={8} />
-      ) : (
-        selections.map(([field, selection], index) => {
-          const isTag = field.id.startsWith('tag:') || field.id === 'tags';
-          const isFirstTag = isTag && !selections[index - 1]?.[0].id.match(/^(tag:|tags$)/);
-          return (
-            <React.Fragment key={field.id}>
-              {isFirstTag && (
-                <>
-                  <EuiHorizontalRule margin="s" />
-                  <EuiText size="xs" color="subdued">
-                    <strong>{i18n.TAGS}</strong>
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                </>
-              )}
-              <FacetGroup
-                field={field}
-                values={counts ? field.values(counts, { integrationTitles }) : []}
-                selection={selection}
-                onChange={(next) => onChange(field.set(conditions, next))}
-                initialIsOpen={!isTag || hasSelection(selection)}
-              />
-            </React.Fragment>
-          );
-        })
+        </EuiFlexGroup>
+      </div>
+      {fields.filter(({ section }) => section === 'state').map(renderGroup)}
+
+      <div css={styles.section}>{SECTION_TITLES.tags}</div>
+      {shownTagFields.map(renderGroup)}
+      {(hiddenTagGroups > 0 || showAllTagGroups) && (
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          iconType={showAllTagGroups ? 'chevronSingleUp' : 'chevronSingleDown'}
+          onClick={() => setShowAllTagGroups(!showAllTagGroups)}
+          data-test-subj="ruleFacetMoreTagGroups"
+        >
+          {showAllTagGroups ? i18n.FEWER_TAG_GROUPS : i18n.MORE_TAG_GROUPS(hiddenTagGroups)}
+        </EuiButtonEmpty>
       )}
-      {children}
     </div>
   );
 };

@@ -11,6 +11,7 @@ import type {
 } from '../../../../common/api/detection_engine/rule_management';
 import type {
   RuleSetConditions,
+  RuleSetLastRunOutcome,
   RuleSetRuleType,
   RuleSetValues,
 } from '../../../../common/api/detection_engine/rule_sets';
@@ -21,6 +22,7 @@ import {
   normalizeRuleSetConditions,
   tagCategoryOf,
 } from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
+import { SEVERITY_COLOR } from '../../../common/utils/risk_color_palette';
 import { RULE_TYPE_LABELS, SEVERITY_LABELS } from '../components/translations';
 import * as i18n from './translations';
 
@@ -40,8 +42,12 @@ export interface FacetValue {
  * One filterable rule field. The same list drives the facet panel of the rules table, the facet
  * panel of the rule set editor and the active filter chips, so a new field shows up everywhere.
  */
+/** Panel sections: what the rule is, what happens to it now, and its tags. */
+export type FacetSection = 'rule' | 'state' | 'tags';
+
 export interface FacetField {
   id: string;
+  section: FacetSection;
   label: string;
   canExclude: boolean;
   /** A rule has one value of this field: selecting a value replaces the previous one. */
@@ -54,6 +60,8 @@ export interface FacetField {
   ordered?: boolean;
   /** A readable label of one stored value, for chips. */
   valueLabel: (value: string, labels: FacetLabels) => string;
+  /** A colored dot before the value, for fields with a color code (severity, last response). */
+  dotColor?: (value: string) => string | undefined;
 }
 
 export interface FacetCountsResult {
@@ -94,6 +102,7 @@ const bucketValues = (
 
 const INTEGRATION_FIELD: FacetField = {
   id: 'integration',
+  section: 'rule',
   label: i18n.INTEGRATION,
   canExclude: true,
   get: (c) => selectionOf(c.related_integrations),
@@ -105,6 +114,7 @@ const INTEGRATION_FIELD: FacetField = {
 
 const TACTIC_FIELD: FacetField = {
   id: 'tactic',
+  section: 'rule',
   label: i18n.MITRE_TACTIC,
   canExclude: true,
   get: (c) => selectionOf(c.mitre_tactic),
@@ -115,6 +125,7 @@ const TACTIC_FIELD: FacetField = {
 
 const TYPE_FIELD: FacetField = {
   id: 'type',
+  section: 'rule',
   label: i18n.RULE_TYPE,
   canExclude: true,
   get: (c) => selectionOf(c.type),
@@ -135,6 +146,7 @@ const TYPE_FIELD: FacetField = {
 
 const SEVERITY_FIELD: FacetField = {
   id: 'severity',
+  section: 'rule',
   ordered: true,
   label: i18n.SEVERITY,
   canExclude: true,
@@ -148,15 +160,19 @@ const SEVERITY_FIELD: FacetField = {
       },
     }),
   values: ({ counts }) =>
-    bucketValues(counts.severity, (s) => SEVERITY_LABELS[s] ?? s).sort(
-      (a, b) => SEVERITIES.indexOf(b.value) - SEVERITIES.indexOf(a.value)
-    ),
+    [...SEVERITIES].reverse().map((severity) => ({
+      value: severity,
+      label: SEVERITY_LABELS[severity] ?? severity,
+      count: counts.severity?.[severity] ?? 0,
+    })),
   valueLabel: (severity) => SEVERITY_LABELS[severity] ?? severity,
+  dotColor: (severity) => SEVERITY_COLOR[severity as Severity],
 };
 
 /** The `source` facet counts by `params.immutable`: true is Elastic (external), false is custom. */
 const SOURCE_FIELD: FacetField = {
   id: 'source',
+  section: 'rule',
   ordered: true,
   label: i18n.SOURCE,
   canExclude: false,
@@ -184,6 +200,68 @@ export const RULE_FIELD_FACETS: FacetField[] = [
   SOURCE_FIELD,
 ];
 
+const STATUS_FIELD: FacetField = {
+  id: 'enabled',
+  section: 'state',
+  ordered: true,
+  label: i18n.STATUS,
+  canExclude: false,
+  single: true,
+  get: (c) => ({ include: c.enabled == null ? [] : [String(c.enabled)], exclude: [] }),
+  set: (c, { include }) =>
+    normalizeRuleSetConditions({
+      ...c,
+      enabled: include.length ? include[include.length - 1] === 'true' : undefined,
+    }),
+  values: ({ counts }) => [
+    { value: 'true', label: i18n.ENABLED, count: counts.enabled?.true ?? 0 },
+    { value: 'false', label: i18n.DISABLED, count: counts.enabled?.false ?? 0 },
+  ],
+  valueLabel: (value) => (value === 'true' ? i18n.ENABLED : i18n.DISABLED),
+};
+
+const LAST_RUN_OUTCOMES: readonly string[] = ['succeeded', 'warning', 'failed'];
+const isLastRunOutcome = (value: string): value is RuleSetLastRunOutcome =>
+  LAST_RUN_OUTCOMES.includes(value);
+const LAST_RESPONSE_LABELS: Record<string, string> = {
+  succeeded: i18n.SUCCEEDED,
+  warning: i18n.WARNING,
+  failed: i18n.FAILED,
+};
+const LAST_RESPONSE_COLORS: Record<string, string> = {
+  succeeded: 'success',
+  warning: 'warning',
+  failed: 'danger',
+};
+
+const LAST_RESPONSE_FIELD: FacetField = {
+  id: 'lastResponse',
+  section: 'state',
+  ordered: true,
+  label: i18n.LAST_RESPONSE,
+  canExclude: true,
+  get: (c) => selectionOf(c.last_run_outcome),
+  set: (c, { include, exclude }) =>
+    normalizeRuleSetConditions({
+      ...c,
+      last_run_outcome: {
+        include: include.filter(isLastRunOutcome),
+        exclude: exclude.filter(isLastRunOutcome),
+      },
+    }),
+  values: ({ counts }) =>
+    LAST_RUN_OUTCOMES.map((outcome) => ({
+      value: outcome,
+      label: LAST_RESPONSE_LABELS[outcome],
+      count: counts.lastRunOutcome?.[outcome] ?? 0,
+    })),
+  valueLabel: (outcome) => LAST_RESPONSE_LABELS[outcome] ?? outcome,
+  dotColor: (outcome) => LAST_RESPONSE_COLORS[outcome],
+};
+
+/** Rule state changes without an edit (a run, a bulk enable), so a set by state changes too. */
+export const STATE_FACETS: FacetField[] = [STATUS_FIELD, LAST_RESPONSE_FIELD];
+
 /** Facet counts categories that the panel asks `_search` for. */
 export const FACET_COUNT_CATEGORIES: GranularRulesFacetCategory[] = [
   'integration',
@@ -198,6 +276,7 @@ export const FACET_COUNT_CATEGORIES: GranularRulesFacetCategory[] = [
 
 const tagCategoryField = (category: string): FacetField => ({
   id: `tag:${category}`,
+  section: 'tags',
   label: category,
   canExclude: true,
   get: (c) => selectionOf(c.tag_categories?.[category]),
@@ -224,6 +303,7 @@ const tagCategoryField = (category: string): FacetField => ({
 
 const OTHER_TAGS_FIELD: FacetField = {
   id: 'tags',
+  section: 'tags',
   label: i18n.OTHER_TAGS,
   canExclude: true,
   get: (c) => selectionOf(c.tags),
@@ -258,7 +338,7 @@ export const tagFacets = (
 export const allFacetFields = (
   counts: FacetCountsResult | undefined,
   conditions: RuleSetConditions
-): FacetField[] => [...RULE_FIELD_FACETS, ...tagFacets(counts, conditions)];
+): FacetField[] => [...RULE_FIELD_FACETS, ...STATE_FACETS, ...tagFacets(counts, conditions)];
 
 export const hasSelection = ({ include, exclude }: FacetSelection) =>
   include.length > 0 || exclude.length > 0;

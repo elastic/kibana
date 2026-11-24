@@ -129,7 +129,7 @@ export const STEP_CONDITIONS_HELP = i18n.translate(
   'xpack.securitySolution.ruleSets.editor.stepConditionsHelp',
   {
     defaultMessage:
-      'New rules that match join the rule set automatically. All filled conditions must match. A rule must have all tags, like the tags filter of the table. For the other conditions, any value matches.',
+      'The same filters as the rules table. Rules that match all filled groups are in the set, and new rules that match join it. Inside a group, any checked value matches.',
   }
 );
 export const STEP_PICKED = (count: number) =>
@@ -563,6 +563,47 @@ export const ADD_FILTERS_TO_GROUP = (name: string) =>
     defaultMessage: 'Add filters to "{name}"',
     values: { name },
   });
+export const CLEAR_CONDITIONS = i18n.translate(
+  'xpack.securitySolution.ruleSets.editor.clearConditions',
+  { defaultMessage: 'Clear' }
+);
+
+export const SAVE_TO_SET = i18n.translate('xpack.securitySolution.ruleSets.filterBar.saveToSet', {
+  defaultMessage: 'Save to set',
+});
+
+export const SAVE_AS_NEW_SET = i18n.translate(
+  'xpack.securitySolution.ruleSets.filterBar.saveAsNewSet',
+  { defaultMessage: 'Save as new set' }
+);
+
+export const RESET_FILTERS = i18n.translate('xpack.securitySolution.ruleSets.filterBar.reset', {
+  defaultMessage: 'Reset',
+});
+
+export const FILTERS_CHANGED = (
+  shown: number | undefined,
+  total: number | undefined,
+  name: string
+) =>
+  i18n.translate('xpack.securitySolution.ruleSets.filterBar.changed', {
+    values: { shown: shown ?? '…', total: total ?? '…', name },
+    defaultMessage:
+      'Filters changed: {shown} of {total} rules. "{name}" does not change until you save.',
+  });
+
+export const FILTERS_MATCH = (shown: number | undefined, total: number | undefined) =>
+  i18n.translate('xpack.securitySolution.ruleSets.filterBar.match', {
+    values: { shown: shown ?? '…', total: total ?? '…' },
+    defaultMessage: 'Filters: {shown} of {total} rules.',
+  });
+
+export const SAVE_TO_SET_HELP = (name: string) =>
+  i18n.translate('xpack.securitySolution.ruleSets.filterBar.saveToSetHelp', {
+    values: { name },
+    defaultMessage: 'Adds the filters to the conditions of "{name}".',
+  });
+
 export const SAVE_AS_NEW_GROUP = i18n.translate(
   'xpack.securitySolution.ruleSets.toolbar.saveAsNewGroup',
   { defaultMessage: 'Save as new rule set (this rule set + filters)' }

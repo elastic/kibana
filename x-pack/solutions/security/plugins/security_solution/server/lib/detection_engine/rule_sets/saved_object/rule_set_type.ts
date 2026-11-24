@@ -42,6 +42,7 @@ const ruleTypes = [
   'new_terms',
 ] as const;
 const severities = ['low', 'medium', 'high', 'critical'] as const;
+const lastRunOutcomes = ['succeeded', 'warning', 'failed'] as const;
 
 const valuesSchema = schema.object({
   include: schema.maybe(schema.arrayOf(value, { maxSize: MAX_VALUES })),
@@ -77,6 +78,8 @@ const ruleSetSchemaV1 = schema.object({
     tag_categories: schema.maybe(
       schema.recordOf(schema.string({ minLength: 1, maxLength: 256 }), valuesSchema)
     ),
+    enabled: schema.maybe(schema.boolean()),
+    last_run_outcome: schema.maybe(enumValuesSchema(lastRunOutcomes)),
     search: schema.maybe(
       schema.object({
         term: schema.string({ minLength: 1, maxLength: 256 }),

@@ -23,7 +23,12 @@ import {
 } from '../../../../../../common/constants';
 import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
-import { hasRuleSetConditions } from '../../../../../../common/detection_engine/rule_sets/rule_set_conditions';
+import {
+  hasRuleSetConditions,
+  liftTagCategories,
+  normalizeRuleSetConditions,
+} from '../../../../../../common/detection_engine/rule_sets/rule_set_conditions';
+import type { RuleSetLastRunOutcome } from '../../../../../../common/api/detection_engine/rule_sets';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -35,7 +40,10 @@ import type {
   RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
-import type { WarningSchema } from '../../../../../../common/api/detection_engine';
+import type {
+  RuleExecutionStatus,
+  WarningSchema,
+} from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import {
   DEFAULT_FILTER_OPTIONS,
@@ -64,6 +72,13 @@ interface RulesSnoozeSettings {
   isFetching: boolean;
   isError: boolean;
 }
+
+/** The last response filter of earlier versions as a last run outcome. */
+const LEGACY_OUTCOMES: Partial<Record<RuleExecutionStatus, RuleSetLastRunOutcome>> = {
+  succeeded: 'succeeded',
+  'partial failure': 'warning',
+  failed: 'failed',
+};
 
 export interface RulesTableState {
   /**
@@ -218,22 +233,33 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     pagination: savedPagination,
   } = useRulesTableSavedState();
 
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    filter: savedFilter?.searchTerm ?? DEFAULT_FILTER_OPTIONS.filter,
-    tags: savedFilter?.tags ?? DEFAULT_FILTER_OPTIONS.tags,
-    showCustomRules: savedFilter?.source
-      ? savedFilter.source === RuleSource.Custom
-      : DEFAULT_FILTER_OPTIONS.showCustomRules,
-    showElasticRules: savedFilter?.source
-      ? savedFilter.source === RuleSource.Prebuilt
-      : DEFAULT_FILTER_OPTIONS.showElasticRules,
-    enabled: savedFilter?.enabled,
-    ruleExecutionStatus:
-      savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
-    gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
-    ruleSetId: savedFilter?.ruleSetId,
-    groupBy: savedFilter?.groupBy,
-    conditions: savedFilter?.conditions,
+  // Tags, source, enabled and last response are facets now: a saved table state or a link with
+  // the old filters opens with the same rules, shown in the facet panel.
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(() => {
+    const outcome = savedFilter?.ruleExecutionStatus
+      ? LEGACY_OUTCOMES[savedFilter.ruleExecutionStatus]
+      : undefined;
+    const conditions = normalizeRuleSetConditions({
+      ...(savedFilter?.tags?.length ? { tags: { include: savedFilter.tags, match: 'all' } } : {}),
+      ...(savedFilter?.source
+        ? {
+            rule_source: {
+              include: [savedFilter.source === RuleSource.Custom ? 'internal' : 'external'],
+            },
+          }
+        : {}),
+      ...(savedFilter?.enabled != null ? { enabled: savedFilter.enabled } : {}),
+      ...(outcome ? { last_run_outcome: { include: [outcome] } } : {}),
+      ...savedFilter?.conditions,
+    });
+    return {
+      ...DEFAULT_FILTER_OPTIONS,
+      filter: savedFilter?.searchTerm ?? DEFAULT_FILTER_OPTIONS.filter,
+      gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
+      ruleSetId: savedFilter?.ruleSetId,
+      groupBy: savedFilter?.groupBy,
+      conditions: liftTagCategories(conditions),
+    };
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({

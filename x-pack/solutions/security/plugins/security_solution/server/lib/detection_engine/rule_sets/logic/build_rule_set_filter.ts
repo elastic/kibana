@@ -12,6 +12,8 @@ import type {
   RuleSetValues,
 } from '../../../../../common/api/detection_engine/rule_sets';
 import {
+  ENABLED_FIELD,
+  LAST_RUN_OUTCOME_FIELD,
   PARAMS_IMMUTABLE_FIELD,
   PARAMS_TYPE_FIELD,
   TAGS_FIELD,
@@ -72,6 +74,8 @@ export const buildConditionsFilter = (conditions: RuleSetConditions): KueryNode 
     rule_source: ruleSource,
     mitre_tactic: tactic,
     tag_categories: tagCategories,
+    enabled,
+    last_run_outcome: lastRunOutcome,
     search,
   } = normalizeRuleSetConditions(conditions);
   const nodes: KueryNode[] = [
@@ -91,6 +95,8 @@ export const buildConditionsFilter = (conditions: RuleSetConditions): KueryNode 
           ),
         ]
       : []),
+    ...(enabled != null ? [nodeBuilder.is(ENABLED_FIELD, String(enabled))] : []),
+    ...(lastRunOutcome ? includeExclude(LAST_RUN_OUTCOME_FIELD, lastRunOutcome) : []),
     // Exactly the search of the rules table, so "Save filters as rule set" keeps the same rules.
     ...(search ? [fromKueryExpression(convertRuleSearchTermToKQL(search.term))] : []),
   ];

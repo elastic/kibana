@@ -97,6 +97,29 @@ components:
           items:
             $ref: '../model/rule_schema/common_attributes.schema.yaml#/components/schemas/Severity'
 
+    RuleSetLastRunOutcome:
+      type: string
+      enum: [succeeded, warning, failed]
+
+    RuleSetLastRunOutcomes:
+      type: object
+      additionalProperties: false
+      description: |
+        The outcome of the last rule run (the "Last response" of the rules table). A rule matches
+        when its outcome is one of `include` and none of `exclude`. The value changes on every run,
+        so membership by this condition changes too.
+      properties:
+        include:
+          type: array
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/RuleSetLastRunOutcome'
+        exclude:
+          type: array
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/RuleSetLastRunOutcome'
+
     RuleSetRuleSource:
       type: object
       additionalProperties: false
@@ -147,6 +170,11 @@ components:
           $ref: '#/components/schemas/RuleSetValues'
         tag_categories:
           $ref: '#/components/schemas/RuleSetTagCategories'
+        enabled:
+          type: boolean
+          description: Only enabled (`true`) or only disabled (`false`) rules. Enabling or disabling a rule changes its membership.
+        last_run_outcome:
+          $ref: '#/components/schemas/RuleSetLastRunOutcomes'
         search:
           $ref: '#/components/schemas/RuleSetSearch'
 

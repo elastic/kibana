@@ -74,6 +74,8 @@ export const normalizeRuleSetConditions = (conditions: RuleSetConditions): RuleS
     rule_source: conditions.rule_source?.include.length ? conditions.rule_source : undefined,
     mitre_tactic: normalizeValues(conditions.mitre_tactic, DEFAULT_ANY_MATCH),
     tag_categories: normalizeTagCategories(conditions.tag_categories),
+    enabled: typeof conditions.enabled === 'boolean' ? conditions.enabled : undefined,
+    last_run_outcome: normalizeIncludeExclude(conditions.last_run_outcome),
     search: conditions.search?.term.trim()
       ? { term: conditions.search.term.trim(), mode: conditions.search.mode }
       : undefined,

@@ -85,6 +85,7 @@ export const mergeConditions = (
     mitre_tactic: mergeValues(set.mitre_tactic, filters.mitre_tactic),
     type: mergeValues(set.type, filters.type),
     severity: mergeValues(set.severity, filters.severity),
+    last_run_outcome: mergeValues(set.last_run_outcome, filters.last_run_outcome),
     tag_categories: Object.fromEntries(
       [...categories].map((category) => [
         category,

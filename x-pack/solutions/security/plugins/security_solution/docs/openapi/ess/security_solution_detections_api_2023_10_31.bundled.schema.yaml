@@ -10159,6 +10159,12 @@ components:
         integration package names, for example `endpoint` or `okta`.
       type: object
       properties:
+        enabled:
+          description: Only enabled (`true`) or only disabled (`false`) rules. Enabling or
+            disabling a rule changes its membership.
+          type: boolean
+        last_run_outcome:
+          $ref: '#/components/schemas/RuleSetLastRunOutcomes'
         mitre_tactic:
           $ref: '#/components/schemas/RuleSetValues'
         related_integrations:
@@ -10215,6 +10221,34 @@ components:
       maxLength: 256
       minLength: 1
       type: string
+    RuleSetLastRunOutcome:
+      enum:
+        - succeeded
+        - warning
+        - failed
+      type: string
+    RuleSetLastRunOutcomes:
+      additionalProperties: false
+      description: >
+        The outcome of the last rule run (the "Last response" of the rules
+        table). A rule matches
+
+        when its outcome is one of `include` and none of `exclude`. The value
+        changes on every run,
+
+        so membership by this condition changes too.
+      type: object
+      properties:
+        exclude:
+          items:
+            $ref: '#/components/schemas/RuleSetLastRunOutcome'
+          maxItems: 3
+          type: array
+        include:
+          items:
+            $ref: '#/components/schemas/RuleSetLastRunOutcome'
+          maxItems: 3
+          type: array
     RuleSetMeta:
       type: object
       properties:
