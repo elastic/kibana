@@ -169,6 +169,51 @@ describe('computeNextWatermark', () => {
     });
   });
 
+  describe('deferred scan', () => {
+    const scan = AlertScan.of({
+      alerts: [
+        createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
+        createAlert({ alert_id: 'e2', last_event_timestamp: '2026-01-22T07:32:00.000Z' }),
+        createAlert({ alert_id: 'e3', last_event_timestamp: '2026-01-22T07:33:00.000Z' }),
+      ],
+    }).withDeferredTail(({ alert_id: alertId }) => alertId === 'e3');
+
+    it('advances to the truncation edge on a no_actions halt instead of windowEnd', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({
+          completed: false,
+          haltReason: 'no_actions',
+          finalState: { input: BASE_INPUT, scan },
+        }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:32:00.000Z');
+    });
+
+    it('advances to the truncation edge on normal completion', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({ finalState: { input: BASE_INPUT, scan } }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:32:00.000Z');
+    });
+
+    it('still does not advance on an aborted halt', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({
+          completed: false,
+          haltReason: 'aborted',
+          finalState: { input: BASE_INPUT, scan },
+        }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+    });
+  });
+
   describe('normal completion (not truncated)', () => {
     it('advances to windowEnd', () => {
       const result = computeNextWatermark({

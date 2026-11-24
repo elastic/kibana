@@ -6,11 +6,12 @@
  */
 
 import { useMemo } from 'react';
-import numeral from '@elastic/numeral';
 import moment from 'moment-timezone';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { getUserTimeZone } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
+import { NumberFormat, PercentFormat } from '@kbn/field-formats-plugin/common';
 import { useKibanaServices } from './use_kibana_services';
 
 // Every `moment.tz.names()` entry (and so `dateFormat:tz` option) that an Elasticsearch 9.7
@@ -27,6 +28,10 @@ export interface Formatters {
   formatNumber: (value: number) => string;
   /** A share between 0 and 1, with the `format:percent:defaultPattern` advanced setting. */
   formatPercent: (share: number) => string;
+  /** `formatNumber` with a sign unless it rounds to 0, e.g. "+1.5", "-1.5" or "0". */
+  formatSignedNumber: (value: number) => string;
+  /** `formatPercent` with a sign unless it rounds to 0, e.g. "+20%", "-20%" or "0%". */
+  formatSignedPercent: (share: number) => string;
   /** An absolute date, with the `dateFormat` and `dateFormat:tz` advanced settings. */
   formatDate: (date: string | number) => string;
   /**
@@ -36,28 +41,34 @@ export interface Formatters {
   timeZone: string;
 }
 
+/** The formatters of `uiSettings`, with Kibana's number and percent field formats. */
+export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
+  const getConfig: FieldFormatsGetConfigFn = (key, defaultOverride) =>
+    uiSettings.get(key, defaultOverride);
+  const number = new NumberFormat({}, getConfig);
+  const percent = new PercentFormat({}, getConfig);
+  const signedNumber = new NumberFormat({ alwaysShowSign: true }, getConfig);
+  const signedPercent = new PercentFormat({ alwaysShowSign: true }, getConfig);
+  const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
+  // As Kibana's own date histograms do: `Browser` becomes the browser's IANA time zone.
+  const userTimeZone = getUserTimeZone((key) => uiSettings.get(key));
+  const timeZone = ES_TIME_ZONE_OF[userTimeZone] ?? userTimeZone;
+
+  return {
+    formatNumber: (value) => number.convertToText(value),
+    formatPercent: (share) => percent.convertToText(share),
+    formatSignedNumber: (value) => signedNumber.convertToText(value),
+    formatSignedPercent: (share) => signedPercent.convertToText(share),
+    formatDate: (date) => moment(date).tz(timeZone).format(dateFormat),
+    timeZone,
+  };
+};
+
 /**
  * Formats numbers and dates the way the user configured Kibana (Advanced Settings), as other
  * Observability apps do, so the page matches the rest of Kibana.
  */
 export const useFormatters = (): Formatters => {
   const { uiSettings } = useKibanaServices();
-
-  return useMemo(() => {
-    const numberPattern = uiSettings.get<string>(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN);
-    const percentPattern = uiSettings.get<string>(
-      FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN
-    );
-    const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
-    // As Kibana's own date histograms do: `Browser` becomes the browser's IANA time zone.
-    const userTimeZone = getUserTimeZone((key) => uiSettings.get(key));
-    const timeZone = ES_TIME_ZONE_OF[userTimeZone] ?? userTimeZone;
-
-    return {
-      formatNumber: (value) => numeral(value).format(numberPattern),
-      formatPercent: (share) => numeral(share).format(percentPattern),
-      formatDate: (date) => moment(date).tz(timeZone).format(dateFormat),
-      timeZone,
-    };
-  }, [uiSettings]);
+  return useMemo(() => createFormatters(uiSettings), [uiSettings]);
 };

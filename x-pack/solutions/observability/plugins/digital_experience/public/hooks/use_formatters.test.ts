@@ -38,6 +38,21 @@ describe('useFormatters', () => {
     expect(formatPercent(0.125)).toBe('13%');
   });
 
+  it('signs a change unless it rounds to 0 under the pattern', () => {
+    const { formatSignedNumber, formatSignedPercent } = renderFormatters({
+      'format:number:defaultPattern': '0.[0]',
+      'format:percent:defaultPattern': '0%',
+    });
+
+    expect(formatSignedNumber(1.5)).toBe('+1.5');
+    expect(formatSignedNumber(-1.5)).toBe('-1.5');
+    expect(formatSignedNumber(-0.0004)).toBe('0');
+    expect(formatSignedPercent(0.2)).toBe('+20%');
+    expect(formatSignedPercent(-0.2)).toBe('-20%');
+    expect(formatSignedPercent(0.001)).toBe('0%');
+    expect(formatSignedPercent(-0.001)).toBe('0%');
+  });
+
   it('formats dates with the date format in the configured time zone', () => {
     const { formatDate, timeZone } = renderFormatters({ 'dateFormat:tz': 'America/New_York' });
 
