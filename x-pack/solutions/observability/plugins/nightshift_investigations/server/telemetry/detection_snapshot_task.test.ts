@@ -35,7 +35,12 @@ const setup = ({
       rules: rules.slice((page - 1) * perPage, page * perPage),
       total: rules.length,
     })),
-    listExternalConnectorSources: jest.fn().mockResolvedValue(['datadog', 'datadog', 'other']),
+    listConnectors: jest.fn().mockResolvedValue([
+      { actionTypeId: '.datadog', isInboundEventsEnabled: true },
+      { actionTypeId: '.datadog', isInboundEventsEnabled: true },
+      { actionTypeId: '.datadog', isInboundEventsEnabled: false },
+      { actionTypeId: '.slack2', isInboundEventsEnabled: true },
+    ]),
     getAlertActivity: jest.fn().mockResolvedValue({
       activeConnectorSources: ['datadog'],
       external_sources_active_24h: 2,
@@ -82,7 +87,15 @@ describe('reportDetectionSnapshots', () => {
       rules_truncated: false,
       automations_total: 2,
       automations_enabled: 1,
-      external_connectors_configured: 3,
+      automations_alert_trigger: 2,
+      automations_schedule_trigger: 0,
+      automations_slack_trigger: 0,
+      connectors_configured: 4,
+      connectors_by_type: [
+        { connector_type: '.datadog', count: 3 },
+        { connector_type: '.slack2', count: 1 },
+      ],
+      external_connectors_configured: 2,
       external_connectors_active_24h: 2,
       external_sources_active_24h: 2,
       external_alerts_24h: 7,
@@ -90,6 +103,31 @@ describe('reportDetectionSnapshots', () => {
       memory_enabled: false,
       custom_context_snippets: 4,
       sandbox_allowlist_hosts: 5,
+    });
+  });
+
+  it('counts an automation once per trigger kind it has', async () => {
+    const { analytics, run } = setup({
+      automations: [
+        {
+          isEnabled: true,
+          workflowId: 'workflow',
+          trigger: {
+            rows: [
+              { kind: 'slack', event: 'message' },
+              { kind: 'slack', event: 'message' },
+            ],
+          },
+        },
+        automation({ kind: 'slack', event: 'message' }),
+      ],
+    });
+
+    await run();
+
+    expect(analytics.reportEvent.mock.calls[0][1]).toMatchObject({
+      automations_alert_trigger: 0,
+      automations_slack_trigger: 2,
     });
   });
 

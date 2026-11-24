@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { IndicatorReader } from '../knowledge_indicators/knowledge_indicator_client/indicator_reader';
 import { RuleEventsClient } from '../significant_events/events/rule_events_client';
-import { getDetectionSnapshotKnowledgeCounts } from './detection_snapshot_contributor';
+import {
+  getDetectionSnapshotKnowledgeCounts,
+  getSlackSnapshotCounts,
+} from './detection_snapshot_contributor';
 
 const setup = (ruleIds: string[]) => {
   jest
@@ -70,5 +77,39 @@ describe('getDetectionSnapshotKnowledgeCounts', () => {
       significant_event_rules_active: 501,
     });
     expect(findRules).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('getSlackSnapshotCounts', () => {
+  const request = httpServerMock.createKibanaRequest();
+  const { signal } = new AbortController();
+
+  it('reports a disconnected app without listing bindings', async () => {
+    const slack = {
+      getStatus: jest.fn().mockResolvedValue({ status: 'pending_confirmation' }),
+      listBindings: jest.fn(),
+    };
+
+    await expect(getSlackSnapshotCounts(slack, request, signal)).resolves.toEqual({
+      slack_connected: false,
+      slack_channels_bound: 0,
+    });
+    expect(slack.listBindings).not.toHaveBeenCalled();
+  });
+
+  it('sums the bindings across cursor pages', async () => {
+    const slack = {
+      getStatus: jest.fn().mockResolvedValue({ status: 'connected' }),
+      listBindings: jest
+        .fn()
+        .mockResolvedValueOnce({ bindings: [{}, {}], nextCursor: 'next' })
+        .mockResolvedValueOnce({ bindings: [{}] }),
+    };
+
+    await expect(getSlackSnapshotCounts(slack, request, signal)).resolves.toEqual({
+      slack_connected: true,
+      slack_channels_bound: 3,
+    });
+    expect(slack.listBindings).toHaveBeenLastCalledWith(request, { cursor: 'next' });
   });
 });

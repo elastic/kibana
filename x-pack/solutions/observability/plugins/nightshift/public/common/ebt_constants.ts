@@ -8,6 +8,7 @@
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 
 export const NIGHTSHIFT_EBT_ACTIONS = {
+  ADD_CONNECTOR: 'addConnector',
   ADD_RECOMMENDED_SOURCES: 'addRecommendedSources',
   ASSIGN_INVESTIGATION: 'assignInvestigation',
   CANCEL_AUTOMATION_EDIT: 'cancelAutomationEdit',
@@ -25,6 +26,10 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   CREATE_AUTOMATION: 'createAutomation',
   OPEN_NIGHTSHIFT_IN_DEFAULT_SPACE: 'openNightshiftInDefaultSpace',
   CREATE_DRAFT_SOURCE: 'createDraftSource',
+  CONNECT_SLACK_CHANNEL: 'connectSlackChannel',
+  DELETE_CONNECTOR: 'deleteConnector',
+  DISCONNECT_SLACK_CHANNEL: 'disconnectSlackChannel',
+  EDIT_CONNECTOR: 'editConnector',
   DELETE_AUTOMATION: 'deleteAutomation',
   DELETE_INVESTIGATION: 'deleteInvestigation',
   DELETE_RULES: 'deleteRules',
@@ -117,6 +122,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
 
 export const NIGHTSHIFT_EBT_DETAILS = {
   // Entity filters report the row kind, never the slug: slugs are customer service names.
+  CONFIRM: 'confirm',
   ENTITY: 'entity',
   EXISTING_CONVERSATION: 'existingConversation',
   IMPACTED_SERVICE_TYPE: 'entity',

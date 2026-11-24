@@ -24,12 +24,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
 import {
   formatChannelLabel,
   useRelayAppBindings,
   useUnbindChannel,
 } from '../../../../data/relay_apps/use_relay_app_bindings';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import { ChannelLabel } from '../../../../components/ui/channel_label';
 import { ChannelAffectedAutomationsWarning } from './affected_automations';
 import { ConnectChannelModal } from './connect_channel_modal';
@@ -121,6 +123,10 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
       isDisabled={!canEdit}
       onClick={() => setIsConnectOpen(true)}
       data-test-subj="streamsSlackAppOpenConnectChannelButton"
+      {...getEbtProps({
+        action: NIGHTSHIFT_EBT_ACTIONS.CONNECT_SLACK_CHANNEL,
+        element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+      })}
     >
       {labels.connectChannels}
     </EuiButton>
@@ -328,6 +334,10 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
           onClick={() => setConfirmOpen(true)}
           aria-label={disconnectLabel}
           data-test-subj="streamsSlackAppUnbindChannelButton"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.DISCONNECT_SLACK_CHANNEL,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          })}
         />
       </EuiToolTip>
       {confirmOpen && (

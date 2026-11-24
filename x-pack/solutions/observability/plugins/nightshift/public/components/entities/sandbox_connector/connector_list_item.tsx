@@ -17,7 +17,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 
 const ACTIONS_CLASS = 'nightshiftConnectorListItem__actions';
 
@@ -133,6 +135,10 @@ export function ConnectorListItem({
             isDisabled={openDetailsDisabledReason !== undefined}
             onClick={onOpenDetails}
             data-test-subj={`nightshiftConnectorListOpenDetails-${connector.id}`}
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.EDIT_CONNECTOR,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
           />
         </EuiToolTip>
         <EuiToolTip content={deleteDisabledReason ?? deleteLabel} disableScreenReaderOutput>
@@ -143,6 +149,10 @@ export function ConnectorListItem({
             isDisabled={deleteDisabledReason !== undefined}
             onClick={onDelete}
             data-test-subj={`nightshiftConnectorListDelete-${connector.id}`}
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.DELETE_CONNECTOR,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
           />
         </EuiToolTip>
       </div>
