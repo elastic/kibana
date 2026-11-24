@@ -177,7 +177,6 @@ export const RulesListHeader = ({
   return (
     <>
       <AppHeader
-        sticky={false}
         title={RULES_LIST_PAGE_TITLE}
         tabs={tabs}
         spacing="bleed"

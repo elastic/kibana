@@ -22,6 +22,7 @@ import {
   LockedSectionPanel,
   SignalsPanel,
   SourcesPanel,
+  SpendPanel,
 } from '../components/ai_index_detail';
 import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
 import { SettingsTab } from '../components/ai_index_detail/settings';
@@ -295,6 +296,12 @@ export const AiIndexDetailPage = () => {
         isUnlocked={showAutomationsPanel}
       />
       <EuiSpacer size="m" />
+      {showAutomationsPanel && (
+        <>
+          <SpendPanel aiIndexId={aiIndex?.id} />
+          <EuiSpacer size="m" />
+        </>
+      )}
       {showSignalsSection &&
         (showSignalsPanel ? (
           <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />

@@ -390,14 +390,16 @@ describe('Authorization matrix', () => {
     expect(await screen.findByText('Managed workflows cannot be deleted')).toBeInTheDocument();
   });
 
-  it('disables the enabled switch when the workflow is invalid even if update is granted', () => {
+  it('disables the enabled switch for a disabled workflow that is invalid even if update is granted', () => {
     setKibanaCapabilities(noWorkflowCapabilities, {
       createWorkflow: false,
       updateWorkflow: true,
       deleteWorkflow: false,
       executeWorkflow: false,
     });
-    renderList({ item: createWorkflowListItem({ id: 'invalid-wf', valid: false }) });
+    renderList({
+      item: createWorkflowListItem({ id: 'invalid-wf', enabled: false, valid: false }),
+    });
     expect(screen.getByTestId('workflowToggleSwitch-invalid-wf')).toBeDisabled();
   });
 });
