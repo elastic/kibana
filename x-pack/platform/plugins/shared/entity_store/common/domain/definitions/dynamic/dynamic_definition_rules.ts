@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import type { z } from '@kbn/zod/v4';
 import type { Condition } from '@kbn/streamlang';
 import { isLiteralFieldPath, type DynamicMetric, type DynamicSource } from './dynamic_block_schema';
+import { areMetricAggsEquivalent } from './metric_measurement';
 import { isNotEmptyCondition } from '../common_fields';
 import type {
   CalculatedEntityIdentity,
@@ -23,7 +24,11 @@ export const NO_IDENTITY_ATTRIBUTE_RULE = 'attributes are not identity fields';
 export const NO_IDENTITY_METRIC_RULE = 'metrics are not identity fields';
 /** Name of the rule that metric output names stay off reserved inventory columns and attributes. */
 export const METRIC_NAME_RULE = 'metric names';
-/** Name of the rule that the same metric name keeps the same agg and unit across sources. */
+/**
+ * Name of the rule that the same metric name keeps one measurement and unit across sources.
+ * Aggregations may differ only when they share a declared measurement class (see
+ * `areMetricAggsEquivalent`); e.g. `avg` vs `max` is rejected, `sum_rate` vs `last` is allowed.
+ */
 export const METRIC_CONSISTENCY_RULE = 'metric consistency across sources';
 /** Name of the rule restricting `identityField` to what the inventory can group by. */
 export const SERVABLE_IDENTITY_RULE = 'servable identity';
@@ -217,14 +222,14 @@ const checkMetricNamesAndFields = (
         });
         return;
       }
-      if (prior.agg !== metric.agg || prior.unit !== metric.unit) {
+      if (!areMetricAggsEquivalent(prior.agg, metric.agg) || prior.unit !== metric.unit) {
         addIssue(
           namePath,
           `${METRIC_CONSISTENCY_RULE}: metric "${
             metric.name
-          }" must keep the same agg and unit on every source (first seen as agg "${prior.agg}"${
-            prior.unit !== undefined ? ` unit "${prior.unit}"` : ' with no unit'
-          })`
+          }" must keep a compatible aggregation and the same unit on every source (first seen as agg "${
+            prior.agg
+          }"${prior.unit !== undefined ? ` unit "${prior.unit}"` : ' with no unit'})`
         );
       }
     });
@@ -236,7 +241,8 @@ const checkMetricNamesAndFields = (
 /**
  * Whole-definition rules for a definition carrying `dynamic`: its identity must be servable as
  * ES|QL `BY` keys, no attribute or metric may read an identity field, metric names stay off
- * attributes and reserved columns, and the same metric name keeps one agg/unit across sources.
+ * attributes and reserved columns, and the same metric name keeps one measurement class and unit
+ * across sources.
  * A definition without `dynamic` is never checked.
  */
 export const assertDynamicDefinitionRules = (

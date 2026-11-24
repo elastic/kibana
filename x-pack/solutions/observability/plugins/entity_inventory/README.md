@@ -34,7 +34,7 @@ No body and no parameters. It returns one entry per registered definition that h
         { "name": "k8s.deployment.label.app", "kind": "attribute" },
         { "name": "k8s.deployment.uid", "kind": "attribute" },
         { "name": "k8s.deployment.available", "kind": "metric", "agg": "last", "unit": "count" },
-        { "name": "k8s.container.restarts", "kind": "metric", "agg": "last", "unit": "count" },
+        { "name": "k8s.container.restarts", "kind": "metric", "agg": "sum_rate", "unit": "count" },
         { "name": "last_seen", "kind": "last_seen" }
       ],
       "sources": [
@@ -76,6 +76,7 @@ Response:
 | `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, and Elasticsearch's `took`, `documentsFound` and `rowCount`. A failed query has null `took` and `documentsFound` and `rowCount` 0. Probes are not listed. |
 | `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
 | `unavailableColumns` | `{ column, indexPattern, field }` for an attribute no index behind that source's pattern maps; its value is null. |
+| `unsupportedMetrics` | `{ indexPattern, engine, column, field, agg }` for a metric the plan engine cannot compute (e.g. a rate under `FROM`); omitted from that plan's STATS. The app lists these in the section-header warning tip with `errors`. |
 
 Anything about one source degrades the result and is reported in `errors`; it never fails the request:
 
@@ -134,7 +135,7 @@ Registered today:
 
 | type | identified by | sources |
 | --- | --- | --- |
-| `k8s.deployment` | `<namespace>/<name>` (`kubernetes.namespace`, `kubernetes.deployment.name`; the ECS<->OTel alias layer resolves them on the OTel stream), cluster as the `k8s.cluster.name` column | `metrics-kubernetes.state_deployment-*`, `metrics-k8sclusterreceiver.otel-*` |
+| `k8s.deployment` | `<namespace>/<name>` (`kubernetes.namespace`, `kubernetes.deployment.name`; the ECS<->OTel alias layer resolves them on the OTel stream), cluster as the `k8s.cluster.name` column | `metrics-kubernetes.state_deployment-*`, `metrics-kubernetes.state_container-*` (restarts `sum_rate`), `metrics-k8sclusterreceiver.otel-*` (restarts `last`; same `cumulative_count` measurement) |
 
 The same namespace and name in two clusters is one `k8s.deployment` entity today.
 

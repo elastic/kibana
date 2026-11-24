@@ -269,7 +269,7 @@ describe('buildColumns with metrics', () => {
     );
   });
 
-  it('throws when the same metric name disagrees on agg or unit across plans', () => {
+  it('throws when the same metric name has incompatible aggs across plans', () => {
     const definition: EntityDefinitionWithoutId = {
       ...k8sNodeFixture,
       dynamic: {
@@ -287,7 +287,41 @@ describe('buildColumns with metrics', () => {
     };
     expect(() => columnsOf(definition)).toThrow(InventoryDefinitionError);
     expect(() => columnsOf(definition)).toThrow(
-      'metric "cpu" must keep the same agg and unit across plans of definition "k8s.node"'
+      'metric "cpu" must keep a compatible aggregation and the same unit across plans of definition "k8s.node"'
     );
+  });
+
+  it('keeps the first plan agg when sum_rate and last share cumulative_count', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [
+              {
+                name: 'restarts',
+                field: 'kubernetes.container.status.restarts',
+                agg: 'sum_rate',
+                unit: 'count',
+              },
+            ],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [
+              { name: 'restarts', field: 'k8s.container.restarts', agg: 'last', unit: 'count' },
+            ],
+          },
+        ],
+      },
+    };
+    const columns = columnsOf(definition);
+    expect(columns.find((column) => column.name === 'restarts')).toMatchObject({
+      kind: 'metric',
+      agg: 'sum_rate',
+      unit: 'count',
+      fieldByPlan: { 0: 'kubernetes.container.status.restarts', 1: 'k8s.container.restarts' },
+    });
   });
 });

@@ -23,6 +23,7 @@ export const INITIAL_LIST_RESPONSE: ListResponse = {
   queries: [],
   errors: [],
   unavailableColumns: [],
+  unsupportedMetrics: [],
 };
 
 export type EntityListResult = FetchResult<ListResponse>;

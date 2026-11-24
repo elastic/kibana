@@ -152,8 +152,12 @@ export type {
 export {
   METRIC_AGGS,
   METRIC_UNITS,
+  CUMULATIVE_COUNT_AGGS,
+  CUMULATIVE_COUNT_MEASUREMENT,
+  areMetricAggsEquivalent,
   getIdentityCompositions,
   getIdentityFields,
+  getMetricMeasurementClass,
   getPresenceFilter,
 } from './domain/definitions/dynamic';
 

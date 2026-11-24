@@ -15,9 +15,9 @@ import { MANAGED_BY } from '../constants';
  * serves both sources. The same namespace and name in two clusters land on one id; the cluster is
  * an attribute.
  *
- * Metrics (Elastic Kubernetes integration): available replicas from `state_deployment`, restart
- * count from `state_container` (docs carry deployment name + namespace). No deployment uptime
- * duration field exists in that integration, so uptime is not declared.
+ * Metrics: available replicas (`last`) from `state_deployment` / OTel. Restarts share one column:
+ * ECS counter uses `sum_rate`, OTel gauge uses `last` (same `cumulative_count` measurement). No
+ * deployment uptime duration field exists in that integration, so uptime is not declared.
  */
 export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
   type: 'k8s.deployment',
@@ -68,7 +68,7 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
           {
             name: 'k8s.container.restarts',
             field: 'kubernetes.container.status.restarts',
-            agg: 'last',
+            agg: 'sum_rate',
             unit: 'count',
           },
         ],

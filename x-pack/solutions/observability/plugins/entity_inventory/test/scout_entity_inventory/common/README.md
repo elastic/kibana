@@ -6,7 +6,7 @@ Hand-written, not recorded from a generator run. The OpenTelemetry Kubernetes ge
 benchmarking repo was not available when the Scout suite was added, so the archive is a minimal one
 shaped for the `list.spec.ts` cases.
 
-Contents: two data streams, three plain indices and one filtered alias, all in cluster
+Contents: three data streams, three plain indices and one filtered alias, all in cluster
 `scout-cluster`. Each `list.spec.ts` case reads its own time window, so the cases do not see each
 other's documents.
 
@@ -23,10 +23,17 @@ No index maps `k8s.deployment.uid`, although every OpenTelemetry document carrie
 
 - `metrics-kubernetes.state_deployment-default` (data stream): Elastic Agent names
   (`orchestrator.cluster.name`, `kubernetes.namespace`, `kubernetes.deployment.*`,
-  `kubernetes.labels.app`) and `metricset.name: state_deployment`.
+  `kubernetes.labels.app`) and `metricset.name: state_deployment`. Supplies
+  `k8s.deployment.available` via `last` of `kubernetes.deployment.replicas.available`.
+- `metrics-kubernetes.state_container-default` (data stream): Elastic Agent container state
+  (`kubernetes.namespace`, `kubernetes.deployment.name`,
+  `kubernetes.container.status.restarts`) and `metricset.name: state_container`. The definition
+  declares restarts as `sum_rate` here; under `FROM` that rate is omitted and listed in
+  `unsupportedMetrics[]` (no TSDS in this archive).
 - `metrics-k8sclusterreceiver.otel-default` (data stream): OpenTelemetry names (`k8s.cluster.name`,
   `k8s.namespace.name`, `k8s.deployment.name`, `k8s.deployment.available`,
-  `k8s.deployment.desired`).
+  `k8s.deployment.desired`, `k8s.container.restarts`). Restarts use `last` and fill the column when
+  the Agent rate plan cannot.
 - `metrics-k8sclusterreceiver.otel-tsds`: a plain time-series index (`index.mode: time_series`), not a
   data stream, with the same OpenTelemetry names. A time-series data stream sets its time bounds
   around the current time when it is created and rejects fixed archive timestamps; a plain index
@@ -38,10 +45,24 @@ No index maps `k8s.deployment.uid`, although every OpenTelemetry document carrie
   which matches `metrics-k8sclusterreceiver.otel-*` and filters on
   `k8s.deployment.name` in (`kept-standard`, `kept-tsds`).
 
+## Metric samples
+
+| Window | Entity | available | restarts (OTel `last`) |
+| --- | --- | --- | --- |
+| 2026-11-01 10:01 | checkout/cart-api | 3 | 5 |
+| 2026-11-01 10:01 | checkout/payments | 2 | 1 |
+| 2026-11-01 10:01 | platform/ingress | 1 | 0 |
+| 2026-11-05 10:01 | streaming/tsds-shared | 5 | 12 |
+| 2026-11-05 10:00 | streaming/standard-only | 1 | 3 |
+| 2026-11-05 10:00 | streaming/tsds-only | 2 | 7 |
+| 2026-11-05 14:01 | timeseries/ts-window | 2 | 8 |
+| 2026-11-07 10:00 | aliased/kept-standard | 1 | 9 |
+| 2026-11-07 10:00 | aliased/kept-tsds | 2 | 11 |
+
 ## Windows
 
-- 2026-11-01, 10:00:00 and 10:01:00: three deployments (`checkout/cart-api`, `checkout/payments`,
-  `platform/ingress`) in both data streams, with the same values.
+- 2026-11-01, 10:00:00 and 10:01:00: three deployments in Agent `state_deployment`, Agent
+  `state_container`, and the OpenTelemetry data stream.
 - 2026-11-05, 10:00:00 and 10:01:00, namespace `streaming`: `tsds-shared` in the OpenTelemetry data
   stream (10:00:00, older values) and the time-series index (10:01:00, newer values), `tsds-only` in
   the time-series index and `standard-only` in the OpenTelemetry data stream.

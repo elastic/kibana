@@ -20,6 +20,7 @@ export type FixtureScenario =
   | 'normal'
   | 'truncated'
   | 'withDiagnostics'
+  | 'withUnsupportedMetrics'
   | 'empty'
   | 'allSourcesFailed';
 
@@ -46,6 +47,16 @@ const UNAVAILABLE_COLUMNS = [
   },
 ];
 
+const UNSUPPORTED_METRICS = [
+  {
+    indexPattern: 'metrics-kubernetes.state_container-*',
+    engine: 'FROM' as const,
+    column: 'k8s.container.restarts',
+    field: 'kubernetes.container.status.restarts',
+    agg: 'sum_rate' as const,
+  },
+];
+
 /** Builds the list response of `type` for `scenario`, or `undefined` for an unknown type. */
 export const buildScenarioListResponse = (
   type: string,
@@ -63,6 +74,7 @@ export const buildScenarioListResponse = (
     queries: [],
     errors: [],
     unavailableColumns: [],
+    unsupportedMetrics: [],
   };
 
   switch (scenario) {
@@ -76,6 +88,15 @@ export const buildScenarioListResponse = (
         truncated: false,
         errors: SOURCE_ERRORS.slice(0, 1),
         unavailableColumns: UNAVAILABLE_COLUMNS,
+      };
+    }
+    case 'withUnsupportedMetrics': {
+      const rows = buildRows(NORMAL_ROW_COUNT);
+      return {
+        ...base,
+        rows,
+        truncated: false,
+        unsupportedMetrics: UNSUPPORTED_METRICS,
       };
     }
     case 'empty':

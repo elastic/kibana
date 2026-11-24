@@ -25,13 +25,6 @@ const STATE_PATTERN = 'metrics-kubernetes.state_deployment-*';
 const STATE_CONTAINER_PATTERN = 'metrics-kubernetes.state_container-*';
 const OTEL_PATTERN = 'metrics-k8sclusterreceiver.otel-*';
 
-/** Scout archive has no `state_container` stream, so that source's FROM plan is unusable. */
-const STATE_CONTAINER_UNUSABLE = {
-  indexPattern: STATE_CONTAINER_PATTERN,
-  status: null,
-  reason: `no readable index behind "${STATE_CONTAINER_PATTERN}" maps @timestamp`,
-};
-
 // No index maps `k8s.deployment.uid`, so each of the OpenTelemetry source's two plans (`TS` and
 // `FROM`) reports it: the response carries the same entry twice.
 const UID_UNAVAILABLE = {
@@ -39,18 +32,19 @@ const UID_UNAVAILABLE = {
   indexPattern: OTEL_PATTERN,
   field: 'k8s.deployment.uid',
 };
-const RESTARTS_UNAVAILABLE = {
+const UID_UNAVAILABLE_PER_OTEL_PLAN = [UID_UNAVAILABLE, UID_UNAVAILABLE];
+
+/**
+ * ECS restarts are `sum_rate` on a FROM-only `state_container` source: the generator omits the
+ * rate under FROM and reports it here. OTel still fills the column with `last`.
+ */
+const RESTARTS_UNSUPPORTED_ON_FROM = {
+  indexPattern: STATE_CONTAINER_PATTERN,
+  engine: 'FROM',
   column: 'k8s.container.restarts',
-  indexPattern: OTEL_PATTERN,
-  field: 'k8s.container.restarts',
+  field: 'kubernetes.container.status.restarts',
+  agg: 'sum_rate',
 };
-/** Per OTel plan: uid then restarts, in column order; two OTel plans (TS then FROM). */
-const OTEL_UNAVAILABLE_PER_PLAN = [
-  UID_UNAVAILABLE,
-  RESTARTS_UNAVAILABLE,
-  UID_UNAVAILABLE,
-  RESTARTS_UNAVAILABLE,
-];
 
 type QueryDiagnostic = ListResponse['queries'][number];
 
@@ -60,7 +54,7 @@ const summarizeQueries = (
   queries.map(({ indexPattern, engine, rowCount }) => ({ indexPattern, engine, rowCount }));
 
 interface ListResponse {
-  columns: Array<{ name: string; kind: string }>;
+  columns: Array<{ name: string; kind: string; agg?: string; unit?: string }>;
   rows: Array<Record<string, unknown>>;
   provenance: Record<string, Record<string, string>>;
   truncated: boolean;
@@ -127,13 +121,12 @@ apiTest.describe(
           'k8s.deployment.label.app': 'cart-api',
           // Mapped in no index, so no plan reads a value for it.
           'k8s.deployment.uid': null,
-          // Scout archive has no state_container / OTel restart samples.
-          'k8s.container.restarts': null,
+          'k8s.container.restarts': 5,
           last_seen: '2026-11-01T10:01:00.000Z',
         });
         expect(body.truncated).toBe(false);
-        expect(body.errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
-        expect(body.unavailableColumns).toStrictEqual(OTEL_UNAVAILABLE_PER_PLAN);
+        expect(body.errors).toStrictEqual([]);
+        expect(body.unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
       }
     );
 
@@ -168,10 +161,8 @@ apiTest.describe(
           expect(typeof query.took).toBe('number');
         });
         // The OpenTelemetry time-series index holds no 2026-11-01 documents, so its `TS` plan reads none.
-        // state_container is absent from the archive, so its FROM plan contributes no rows.
-        expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 0, 0, 3]);
+        expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 3, 0, 3]);
         expect(typeof body.took).toBe('number');
-        expect(body.unsupportedMetrics).toStrictEqual([]);
         expect('documentFilterWarnings' in body).toBe(false);
       }
     );
@@ -188,14 +179,14 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const { columns, rows, errors, unavailableColumns }: ListResponse = response.body;
 
-        expect(unavailableColumns).toStrictEqual(OTEL_UNAVAILABLE_PER_PLAN);
+        expect(unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
         expect(columns.find(({ name }) => name === 'k8s.deployment.uid')).toStrictEqual({
           name: 'k8s.deployment.uid',
           kind: 'attribute',
         });
         expect(rows.map((row) => row['k8s.deployment.uid'])).toStrictEqual([null, null, null]);
-        // An unmapped attribute leaves its plans usable; only the missing state_container source fails.
-        expect(errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
+        // An unmapped attribute leaves its plans usable, so nothing is reported in `errors`.
+        expect(errors).toStrictEqual([]);
       }
     );
 
@@ -232,7 +223,8 @@ apiTest.describe(
           {
             name: 'k8s.container.restarts',
             kind: 'metric',
-            agg: 'last',
+            // Canonical from the first source (ECS `sum_rate`); OTel still declares `last`.
+            agg: 'sum_rate',
             unit: 'count',
           },
           { name: 'last_seen', kind: 'last_seen' },
@@ -297,7 +289,7 @@ apiTest.describe(
     apiTest(
       'gives a source with no time-series index a FROM plan only and lists its rows',
       async ({ apiClient }) => {
-        // The Agent source's pattern holds only the state_deployment data stream.
+        // The Agent state_deployment pattern holds only a data stream (no time-series index).
         const response = await postList(
           apiClient,
           { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' },
@@ -329,22 +321,17 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const { rows, errors, queries }: ListResponse = response.body;
 
-        expect(rows).toStrictEqual([
-          {
-            'entity.id': 'k8s.deployment:timeseries/ts-window',
-            'kubernetes.namespace': 'timeseries',
-            'kubernetes.deployment.name': 'ts-window',
-            'k8s.cluster.name': 'scout-cluster',
-            'k8s.deployment.available': 2,
-            'k8s.deployment.desired': 2,
-            'k8s.deployment.paused': null,
-            'k8s.deployment.label.app': null,
-            'k8s.deployment.uid': null,
-            'k8s.container.restarts': null,
-            last_seen: '2026-11-05T14:01:00.000Z',
-          },
+        expect(rows.map((row) => row['entity.id'])).toStrictEqual([
+          'k8s.deployment:timeseries/ts-window',
         ]);
-        expect(errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
+        expect(rows[0]).toMatchObject({
+          'kubernetes.namespace': 'timeseries',
+          'kubernetes.deployment.name': 'ts-window',
+          'k8s.cluster.name': 'scout-cluster',
+          'k8s.deployment.desired': 2,
+          last_seen: '2026-11-05T14:01:00.000Z',
+        });
+        expect(errors).toStrictEqual([]);
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
           { indexPattern: STATE_CONTAINER_PATTERN, engine: 'FROM', rowCount: 0 },
@@ -368,34 +355,18 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const { rows, truncated, errors, queries }: ListResponse = response.body;
 
-        expect(
-          rows.map(
-            ({
-              'entity.id': entityId,
-              'k8s.deployment.available': available,
-              last_seen: lastSeen,
-            }) => ({ entityId, available, lastSeen })
-          )
-        ).toStrictEqual([
-          // The time-series value (5, at 10:01:00) is newer than the data stream's (4, at 10:00:00).
-          {
-            entityId: 'k8s.deployment:streaming/tsds-shared',
-            available: 5,
-            lastSeen: '2026-11-05T10:01:00.000Z',
-          },
-          {
-            entityId: 'k8s.deployment:streaming/standard-only',
-            available: 1,
-            lastSeen: '2026-11-05T10:00:00.000Z',
-          },
-          {
-            entityId: 'k8s.deployment:streaming/tsds-only',
-            available: 2,
-            lastSeen: '2026-11-05T10:00:00.000Z',
-          },
+        expect(rows.map((row) => row['entity.id'])).toStrictEqual([
+          'k8s.deployment:streaming/tsds-shared',
+          'k8s.deployment:streaming/standard-only',
+          'k8s.deployment:streaming/tsds-only',
+        ]);
+        expect(rows.map((row) => row.last_seen)).toStrictEqual([
+          '2026-11-05T10:01:00.000Z',
+          '2026-11-05T10:00:00.000Z',
+          '2026-11-05T10:00:00.000Z',
         ]);
         expect(truncated).toBe(false);
-        expect(errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
+        expect(errors).toStrictEqual([]);
         // Two rows per plan: `FROM` leaves out the time-series index (it would return tsds-only as
         // a third row) and `TS` reads only it (it would return standard-only).
         expect(summarizeQueries(queries)).toStrictEqual([
@@ -426,7 +397,7 @@ apiTest.describe(
           'k8s.deployment:aliased/kept-standard',
           'k8s.deployment:aliased/kept-tsds',
         ]);
-        expect(errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
+        expect(errors).toStrictEqual([]);
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
           { indexPattern: STATE_CONTAINER_PATTERN, engine: 'FROM', rowCount: 0 },
@@ -435,6 +406,155 @@ apiTest.describe(
         ]);
       }
     );
+
+    apiTest.describe('metrics', () => {
+      apiTest(
+        'returns archive available and restarts for the Nov-1 deployments',
+        async ({ apiClient }) => {
+          const response = await postList(apiClient, WINDOW);
+
+          expect(response).toHaveStatusCode(200);
+          const { rows }: ListResponse = response.body;
+
+          const cartApi = rows.find((row) => row['entity.id'] === CART_API_ID);
+          expect(cartApi?.['k8s.deployment.available']).toBe(3);
+          expect(cartApi?.['k8s.container.restarts']).toBe(5);
+
+          const payments = rows.find(
+            (row) => row['entity.id'] === 'k8s.deployment:checkout/payments'
+          );
+          expect(payments?.['k8s.deployment.available']).toBe(2);
+          expect(payments?.['k8s.container.restarts']).toBe(1);
+
+          const ingress = rows.find(
+            (row) => row['entity.id'] === 'k8s.deployment:platform/ingress'
+          );
+          expect(ingress?.['k8s.deployment.available']).toBe(1);
+          expect(ingress?.['k8s.container.restarts']).toBe(0);
+        }
+      );
+
+      apiTest(
+        'lists FROM sum_rate in unsupportedMetrics while OTel still fills restarts',
+        async ({ apiClient }) => {
+          const response = await postList(apiClient, WINDOW);
+
+          expect(response).toHaveStatusCode(200);
+          const { rows, unsupportedMetrics, columns }: ListResponse = response.body;
+
+          expect(unsupportedMetrics).toStrictEqual([RESTARTS_UNSUPPORTED_ON_FROM]);
+          expect(columns.find(({ name }) => name === 'k8s.container.restarts')).toStrictEqual({
+            name: 'k8s.container.restarts',
+            kind: 'metric',
+            agg: 'sum_rate',
+            unit: 'count',
+          });
+          expect(
+            rows.find((row) => row['entity.id'] === CART_API_ID)?.['k8s.container.restarts']
+          ).toBe(5);
+        }
+      );
+
+      apiTest(
+        'uses the newest sample inside the window for cart-api metrics',
+        async ({ apiClient }) => {
+          const through1000 = await postList(apiClient, {
+            from: '2026-11-01T09:00:00.000Z',
+            to: '2026-11-01T10:00:30.000Z',
+          });
+          const through1001 = await postList(apiClient, WINDOW);
+
+          expect(through1000).toHaveStatusCode(200);
+          expect(through1001).toHaveStatusCode(200);
+
+          const earlier = through1000.body.rows.find(
+            (row: Record<string, unknown>) => row['entity.id'] === CART_API_ID
+          );
+          expect(earlier?.['k8s.deployment.available']).toBe(3);
+          expect(earlier?.['k8s.container.restarts']).toBe(4);
+
+          const later = through1001.body.rows.find(
+            (row: Record<string, unknown>) => row['entity.id'] === CART_API_ID
+          );
+          expect(later?.['k8s.deployment.available']).toBe(3);
+          expect(later?.['k8s.container.restarts']).toBe(5);
+        }
+      );
+
+      apiTest('returns metric values from a time-series-only window', async ({ apiClient }) => {
+        const response = await postList(apiClient, {
+          from: '2026-11-05T13:00:00.000Z',
+          to: '2026-11-05T15:00:00.000Z',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const { rows, unsupportedMetrics }: ListResponse = response.body;
+
+        const tsWindow = rows.find(
+          (row) => row['entity.id'] === 'k8s.deployment:timeseries/ts-window'
+        );
+        expect(tsWindow?.['k8s.deployment.available']).toBe(2);
+        expect(tsWindow?.['k8s.container.restarts']).toBe(8);
+        expect(unsupportedMetrics).toStrictEqual([RESTARTS_UNSUPPORTED_ON_FROM]);
+      });
+
+      apiTest(
+        'returns metrics when the same entity has samples in both standard and TSDS schemas',
+        async ({ apiClient }) => {
+          const response = await postList(apiClient, {
+            from: '2026-11-05T09:00:00.000Z',
+            to: '2026-11-05T11:00:00.000Z',
+          });
+
+          expect(response).toHaveStatusCode(200);
+          const { rows }: ListResponse = response.body;
+
+          // TSDS 10:01 (5 / 12), not standard-index 10:00 (4 / 10).
+          const shared = rows.find(
+            (row) => row['entity.id'] === 'k8s.deployment:streaming/tsds-shared'
+          );
+          expect(shared?.['k8s.deployment.available']).toBe(5);
+          expect(shared?.['k8s.container.restarts']).toBe(12);
+
+          const standardOnly = rows.find(
+            (row) => row['entity.id'] === 'k8s.deployment:streaming/standard-only'
+          );
+          expect(standardOnly?.['k8s.deployment.available']).toBe(1);
+          expect(standardOnly?.['k8s.container.restarts']).toBe(3);
+
+          const tsdsOnly = rows.find(
+            (row) => row['entity.id'] === 'k8s.deployment:streaming/tsds-only'
+          );
+          expect(tsdsOnly?.['k8s.deployment.available']).toBe(2);
+          expect(tsdsOnly?.['k8s.container.restarts']).toBe(7);
+        }
+      );
+
+      apiTest(
+        'returns metric values for entities a filtered alias keeps',
+        async ({ apiClient }) => {
+          const response = await postList(apiClient, {
+            from: '2026-11-07T09:00:00.000Z',
+            to: '2026-11-07T11:00:00.000Z',
+          });
+
+          expect(response).toHaveStatusCode(200);
+          const { rows }: ListResponse = response.body;
+
+          const keptStandard = rows.find(
+            (row) => row['entity.id'] === 'k8s.deployment:aliased/kept-standard'
+          );
+          expect(keptStandard?.['k8s.deployment.available']).toBe(1);
+          expect(keptStandard?.['k8s.container.restarts']).toBe(9);
+
+          const keptTsds = rows.find(
+            (row) => row['entity.id'] === 'k8s.deployment:aliased/kept-tsds'
+          );
+          expect(keptTsds?.['k8s.deployment.available']).toBe(2);
+          expect(keptTsds?.['k8s.container.restarts']).toBe(11);
+        }
+      );
+    });
 
     apiTest('rejects from equal to or after to with 400', async ({ apiClient }) => {
       const equal = await postList(apiClient, {
@@ -538,7 +658,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const { rows, errors }: ListResponse = response.body;
         expect(rows.map((row) => row['entity.id']).sort()).toStrictEqual(DEPLOYMENT_IDS);
-        expect(errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
+        expect(errors).toStrictEqual([]);
       }
     );
 

@@ -192,5 +192,6 @@ export const buildListResponseFixture = (type: string): ListResponse | undefined
     queries: [],
     errors: [],
     unavailableColumns: [],
+    unsupportedMetrics: [],
   };
 };

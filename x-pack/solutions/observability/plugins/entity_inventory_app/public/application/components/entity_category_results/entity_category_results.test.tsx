@@ -40,7 +40,10 @@ import {
   getEmptyWithFailuresTitle,
   getTypeNotAvailableTitle,
 } from '../entity_states/translations';
-import { getSourceErrorText } from '../entity_section/translations';
+import {
+  getSourceErrorText,
+  getUnsupportedMetricText,
+} from '../entity_section/translations';
 
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);
@@ -110,7 +113,7 @@ describe('EntityCategoryResults', () => {
     );
     expect(screen.queryByTestId('entityInventoryTableLoading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTruncationCallout')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('entityInventorySourceErrorsIndicator')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryListWarningsIndicator')).not.toBeInTheDocument();
   });
 
   it('shows a spinner and no section while the types load', async () => {
@@ -216,7 +219,7 @@ describe('EntityCategoryResults', () => {
     });
   });
 
-  describe('source errors', () => {
+  describe('list warnings', () => {
     const getScenarioErrors = (scenario: FixtureScenario) =>
       buildScenarioListResponse('host', scenario)?.errors ?? [];
 
@@ -225,7 +228,7 @@ describe('EntityCategoryResults', () => {
 
       const section = await screen.findByTestId('entityInventoryTypeSection');
       expect(await within(section).findByTestId('entityInventoryTable')).toBeInTheDocument();
-      fireEvent.mouseOver(within(section).getByTestId('entityInventorySourceErrorsIndicator'));
+      fireEvent.mouseOver(within(section).getByTestId('entityInventoryListWarningsIndicator'));
 
       const tooltip = await screen.findByRole('tooltip');
       const errors = getScenarioErrors('withDiagnostics');
@@ -233,6 +236,20 @@ describe('EntityCategoryResults', () => {
       errors.forEach((sourceError) =>
         expect(tooltip).toHaveTextContent(getSourceErrorText(sourceError))
       );
+    });
+
+    it('lists unsupported metrics in the same section-header warning tooltip', async () => {
+      renderScenario('withUnsupportedMetrics');
+
+      const section = await screen.findByTestId('entityInventoryTypeSection');
+      expect(await within(section).findByTestId('entityInventoryTable')).toBeInTheDocument();
+      fireEvent.mouseOver(within(section).getByTestId('entityInventoryListWarningsIndicator'));
+
+      const tooltip = await screen.findByRole('tooltip');
+      const unsupported =
+        buildScenarioListResponse('host', 'withUnsupportedMetrics')?.unsupportedMetrics ?? [];
+      expect(unsupported).toHaveLength(1);
+      expect(tooltip).toHaveTextContent(getUnsupportedMetricText(unsupported[0]));
     });
 
     it('never shows the unavailable columns of the response', async () => {
@@ -250,7 +267,7 @@ describe('EntityCategoryResults', () => {
       renderScenario('normal');
 
       expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
-      expect(screen.queryByTestId('entityInventorySourceErrorsIndicator')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('entityInventoryListWarningsIndicator')).not.toBeInTheDocument();
     });
   });
 
@@ -270,7 +287,7 @@ describe('EntityCategoryResults', () => {
     expect(empty).toHaveTextContent(getEmptyWithFailuresTitle(HOST_TYPE_FIXTURE.name));
     expect(empty).toHaveTextContent(EMPTY_WITH_FAILURES_BODY);
     expect(empty).not.toHaveTextContent(EMPTY_BODY);
-    expect(screen.getByTestId('entityInventorySourceErrorsIndicator')).toBeInTheDocument();
+    expect(screen.getByTestId('entityInventoryListWarningsIndicator')).toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTruncationCallout')).not.toBeInTheDocument();
   });
 
@@ -432,13 +449,13 @@ describe('EntityCategoryResults', () => {
       .mockRejectedValueOnce(new Error('Request failed'));
     renderResults({ ...diagnosticsClient, getEntities });
     expect(await screen.findByTestId('entityInventoryTypeSectionCount')).toBeInTheDocument();
-    expect(screen.getByTestId('entityInventorySourceErrorsIndicator')).toBeInTheDocument();
+    expect(screen.getByTestId('entityInventoryListWarningsIndicator')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
 
     expect(await screen.findByTestId('entityInventoryTableError')).toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTypeSectionCount')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('entityInventorySourceErrorsIndicator')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryListWarningsIndicator')).not.toBeInTheDocument();
   });
 
   it('shows the table skeleton, not the previous rows, while a retry after a failed reload loads', async () => {

@@ -20,6 +20,7 @@ const LIST_RESPONSE: ListResponse = {
   queries: [],
   errors: [],
   unavailableColumns: [],
+  unsupportedMetrics: [],
 };
 
 const setup = () => {

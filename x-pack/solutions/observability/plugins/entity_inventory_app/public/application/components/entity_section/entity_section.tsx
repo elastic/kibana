@@ -17,34 +17,54 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { InventoryType, SourceError } from '@kbn/entity-inventory-plugin/common';
+import type {
+  InventoryType,
+  SourceError,
+  UnsupportedMetric,
+} from '@kbn/entity-inventory-plugin/common';
 import { useEntityList } from '../../hooks/use_entity_list';
 import { EntityTable } from '../entity_table/entity_table';
 import {
   ENTITY_COUNT_LABEL,
-  SOURCE_ERRORS_TITLE,
   getEntityCountValue,
+  getListWarningsTitle,
   getSourceErrorText,
+  getUnsupportedMetricText,
 } from './translations';
 
-/** A warning icon whose tooltip lists each source of `errors` that failed. */
-const SourceErrorsIndicator = ({ errors }: { errors: readonly SourceError[] }) => (
-  <EuiIconTip
-    type="warning"
-    color="warning"
-    title={SOURCE_ERRORS_TITLE}
-    aria-label={SOURCE_ERRORS_TITLE}
-    content={
-      <ul>
-        {/* Both plans of one source can fail, so an index pattern can appear twice. */}
-        {errors.map((sourceError, index) => (
-          <li key={index}>{getSourceErrorText(sourceError)}</li>
-        ))}
-      </ul>
-    }
-    iconProps={{ 'data-test-subj': 'entityInventorySourceErrorsIndicator' }}
-  />
-);
+/** Warning icon whose tooltip lists failed sources and metrics the plan engine could not compute. */
+const ListWarningsIndicator = ({
+  errors,
+  unsupportedMetrics,
+}: {
+  errors: readonly SourceError[];
+  unsupportedMetrics: readonly UnsupportedMetric[];
+}) => {
+  const title = getListWarningsTitle({
+    hasErrors: errors.length > 0,
+    hasUnsupportedMetrics: unsupportedMetrics.length > 0,
+  });
+  return (
+    <EuiIconTip
+      type="warning"
+      color="warning"
+      title={title}
+      aria-label={title}
+      content={
+        <ul>
+          {/* Both plans of one source can fail, so an index pattern can appear twice. */}
+          {errors.map((sourceError, index) => (
+            <li key={`error-${index}`}>{getSourceErrorText(sourceError)}</li>
+          ))}
+          {unsupportedMetrics.map((metric, index) => (
+            <li key={`unsupported-${index}`}>{getUnsupportedMetricText(metric)}</li>
+          ))}
+        </ul>
+      }
+      iconProps={{ 'data-test-subj': 'entityInventoryListWarningsIndicator' }}
+    />
+  );
+};
 
 export interface EntitySectionProps {
   entityType: InventoryType;
@@ -58,6 +78,7 @@ export const EntitySection = ({ entityType, onTruncatedChange }: EntitySectionPr
   const { data: list, loading, error } = listResult;
   const { truncated } = list;
   const showEntityCount = !error && (!loading || list.rows.length > 0);
+  const showWarnings = list.errors.length > 0 || list.unsupportedMetrics.length > 0;
 
   useEffect(() => {
     if (!truncated) {
@@ -86,9 +107,12 @@ export const EntitySection = ({ entityType, onTruncatedChange }: EntitySectionPr
         extraAction={
           showEntityCount && (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              {list.errors.length > 0 && (
+              {showWarnings && (
                 <EuiFlexItem grow={false}>
-                  <SourceErrorsIndicator errors={list.errors} />
+                  <ListWarningsIndicator
+                    errors={list.errors}
+                    unsupportedMetrics={list.unsupportedMetrics}
+                  />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>

@@ -6,12 +6,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SourceError } from '@kbn/entity-inventory-plugin/common';
+import type { SourceError, UnsupportedMetric } from '@kbn/entity-inventory-plugin/common';
 
 export const SOURCE_ERRORS_TITLE = i18n.translate(
   'xpack.entityInventoryApp.entityTable.sourceErrors.title',
   { defaultMessage: 'Some data sources failed' }
 );
+
+export const UNSUPPORTED_METRICS_TITLE = i18n.translate(
+  'xpack.entityInventoryApp.entityTable.unsupportedMetrics.title',
+  { defaultMessage: 'Some metrics could not be computed' }
+);
+
+export const LIST_WARNINGS_TITLE = i18n.translate(
+  'xpack.entityInventoryApp.entityTable.listWarnings.title',
+  { defaultMessage: 'Some data sources had issues' }
+);
+
+/** Tip title for the section-header warning icon (source errors and/or unsupported metrics). */
+export const getListWarningsTitle = ({
+  hasErrors,
+  hasUnsupportedMetrics,
+}: {
+  hasErrors: boolean;
+  hasUnsupportedMetrics: boolean;
+}): string => {
+  if (hasErrors && hasUnsupportedMetrics) {
+    return LIST_WARNINGS_TITLE;
+  }
+  if (hasUnsupportedMetrics) {
+    return UNSUPPORTED_METRICS_TITLE;
+  }
+  return SOURCE_ERRORS_TITLE;
+};
 
 export const getSourceErrorText = ({ indexPattern, status, reason }: SourceError) =>
   status === null
@@ -23,6 +50,18 @@ export const getSourceErrorText = ({ indexPattern, status, reason }: SourceError
         defaultMessage: '{indexPattern} ({status}): {reason}',
         values: { indexPattern, status, reason },
       });
+
+/** One line for a metric omitted because the plan engine cannot compute its aggregation. */
+export const getUnsupportedMetricText = ({
+  column,
+  agg,
+  engine,
+  indexPattern,
+}: UnsupportedMetric) =>
+  i18n.translate('xpack.entityInventoryApp.entityTable.diagnostics.unsupportedMetric', {
+    defaultMessage: '{column} ({agg}) omitted under {engine} on {indexPattern}',
+    values: { column, agg, engine, indexPattern },
+  });
 
 export const ENTITY_COUNT_LABEL = i18n.translate(
   'xpack.entityInventoryApp.entityTable.section.entityCountLabel',

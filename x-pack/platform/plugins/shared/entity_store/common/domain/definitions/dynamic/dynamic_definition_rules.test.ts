@@ -472,7 +472,7 @@ describe('dynamic definition rules', () => {
       );
     });
 
-    it('rejects the same metric name with different aggs across sources', () => {
+    it('rejects the same metric name with incompatible aggs across sources (avg vs last)', () => {
       expectRejected(
         withMetrics([
           {
@@ -486,6 +486,69 @@ describe('dynamic definition rules', () => {
         ]),
         ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
         METRIC_CONSISTENCY_RULE
+      );
+    });
+
+    it('rejects the same metric name with avg vs max across sources', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'cpu', field: 'a', agg: 'avg', unit: 'percent' }],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [{ name: 'cpu', field: 'b', agg: 'max', unit: 'percent' }],
+          },
+        ]),
+        ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
+        METRIC_CONSISTENCY_RULE
+      );
+    });
+
+    it('rejects sum_rate vs max_rate on the same metric name', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'bytes', field: 'a', agg: 'sum_rate', unit: 'bytes' }],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [{ name: 'bytes', field: 'b', agg: 'max_rate', unit: 'bytes' }],
+          },
+        ]),
+        ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
+        METRIC_CONSISTENCY_RULE
+      );
+    });
+
+    it('accepts sum_rate and last on the same metric name (cumulative_count)', () => {
+      expectAccepted(
+        withMetrics([
+          {
+            indexPattern: 'metrics-kubernetes.state_container-*',
+            metrics: [
+              {
+                name: 'k8s.container.restarts',
+                field: 'kubernetes.container.status.restarts',
+                agg: 'sum_rate',
+                unit: 'count',
+              },
+            ],
+          },
+          {
+            indexPattern: 'metrics-k8sclusterreceiver.otel-*',
+            metrics: [
+              {
+                name: 'k8s.container.restarts',
+                field: 'k8s.container.restarts',
+                agg: 'last',
+                unit: 'count',
+              },
+            ],
+          },
+        ])
       );
     });
 

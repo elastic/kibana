@@ -81,6 +81,80 @@
 {
   "type": "data_stream",
   "value": {
+    "data_stream": "metrics-kubernetes.state_container-default",
+    "template": {
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "metrics-kubernetes.state_container-*"
+      ],
+      "name": "metrics-kubernetes.state_container",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "dynamic": false,
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "metricset": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "orchestrator": {
+              "properties": {
+                "cluster": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "kubernetes": {
+              "properties": {
+                "namespace": {
+                  "type": "keyword"
+                },
+                "deployment": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "container": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "status": {
+                      "properties": {
+                        "restarts": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
     "data_stream": "metrics-k8sclusterreceiver.otel-default",
     "template": {
       "data_stream": {
@@ -152,6 +226,13 @@
                       "type": "long"
                     },
                     "desired": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "container": {
+                  "properties": {
+                    "restarts": {
                       "type": "long"
                     }
                   }
@@ -232,6 +313,14 @@
                   "time_series_metric": "gauge"
                 },
                 "desired": {
+                  "type": "long",
+                  "time_series_metric": "gauge"
+                }
+              }
+            },
+            "container": {
+              "properties": {
+                "restarts": {
                   "type": "long",
                   "time_series_metric": "gauge"
                 }
@@ -336,6 +425,13 @@
                   "type": "long"
                 }
               }
+            },
+            "container": {
+              "properties": {
+                "restarts": {
+                  "type": "long"
+                }
+              }
             }
           }
         }
@@ -428,6 +524,14 @@
                   "time_series_metric": "gauge"
                 },
                 "desired": {
+                  "type": "long",
+                  "time_series_metric": "gauge"
+                }
+              }
+            },
+            "container": {
+              "properties": {
+                "restarts": {
                   "type": "long",
                   "time_series_metric": "gauge"
                 }

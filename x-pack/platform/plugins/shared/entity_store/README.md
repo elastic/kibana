@@ -214,7 +214,7 @@ Whole-definition rules apply only when `dynamic` is present, at both `entitySche
 
 - Servable identity: `identityField` is a single literal field, or one unconditional ranking branch of literal fields and separators whose `documentsFilter` is exactly the derived presence filter, with no field evaluations, no `skipTypePrepend` and at most eight distinct fields. The built-in `host` identity fits; `user` does not.
 - No attribute or metric `field` may be an identity field.
-- No metric `field` or `name` may be an identity field, `entity.id`, or `last_seen`. Metric `name` may also not be any attribute name of the definition. The same metric `name` on several sources must keep the same `agg` and `unit`.
+- No metric `field` or `name` may be an identity field, `entity.id`, or `last_seen`. Metric `name` may also not be any attribute name of the definition. The same metric `name` on several sources must keep the same `unit` and a **compatible aggregation** (same measurement class): most aggs only match themselves (`avg` ≠ `max`), while `sum_rate` and `last` share `cumulative_count` so a counter rate and a gauge level can feed one column (e.g. container restarts).
 
 ### Type names
 
