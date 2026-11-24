@@ -276,6 +276,7 @@
     "responseOpsFormGenerator": "x-pack/platform/packages/shared/response-ops/form-generator",
     "connectors": "src/platform/packages/shared/kbn-connector-schemas",
     "connectorSpecs": "src/platform/packages/shared/kbn-connector-specs",
+    "connectorTopics": "src/platform/packages/shared/kbn-connector-topics",
     "esqlLanguage": "src/platform/packages/shared/esql/kbn-esql-language",
     "indexEditor": "src/platform/packages/private/kbn-index-editor",
     "palettes": "src/platform/packages/shared/kbn-palettes"

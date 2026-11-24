@@ -5,16 +5,36 @@
  * 2.0.
  */
 
-import type { ApplicationSource, ApplicationSummary } from '../../../../common/types/applications';
+import type {
+  ApplicationSource,
+  ApplicationSummary,
+  MobileApplicationSummary,
+  WebApplicationSummary,
+} from '../../../../common/types/applications';
 
 export * as testData from './constants';
 
-/** The row of one application and source, so assertions ignore data other suites may add. */
+/**
+ * The browser row of one application and source, so assertions ignore data other suites may add.
+ */
 export const findApplication = (
   applications: ApplicationSummary[],
   serviceName: string,
   source: ApplicationSource
-): ApplicationSummary | undefined =>
+): WebApplicationSummary | undefined =>
   applications.find(
-    (application) => application.serviceName === serviceName && application.source === source
+    (application): application is WebApplicationSummary =>
+      application.applicationType === 'web' &&
+      application.serviceName === serviceName &&
+      application.source === source
+  );
+
+/** The row of one mobile application, all its platforms. */
+export const findMobileApplication = (
+  applications: ApplicationSummary[],
+  serviceName: string
+): MobileApplicationSummary | undefined =>
+  applications.find(
+    (application): application is MobileApplicationSummary =>
+      application.applicationType === 'mobile' && application.serviceName === serviceName
   );
