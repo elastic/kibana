@@ -39,7 +39,10 @@ import { createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datast
 import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
-import { validateExportProviders } from './handlers/validate_export_providers';
+import {
+  validateExportProviders,
+  validateNoDottedResponseActionsKeys,
+} from './handlers/validate_export_providers';
 import { removeExportProviders } from '../../common/endpoint/models/export_providers';
 import {
   isPolicySetToEventCollectionOnly,
@@ -153,6 +156,12 @@ export const getPackagePolicyCreateCallback = (
     context,
     request
   ): Promise<NewPackagePolicy> => {
+    // Checked first: the early return below keeps the incoming policy as it is
+    const incomingPolicyValue = newPackagePolicy.inputs?.[0]?.config?.policy?.value;
+    if (isEndpointPackagePolicy(newPackagePolicy) && incomingPolicyValue) {
+      validateNoDottedResponseActionsKeys(incomingPolicyValue as PolicyConfig);
+    }
+
     // callback is called outside request context
     if (!context || !request) {
       logger.debug('PackagePolicyCreateCallback called outside request context. Skipping...');
@@ -379,6 +388,10 @@ export const getPackagePolicyUpdateCallback = (
       validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
 
       if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
+        // Runs whatever the feature flag: `removeExportProviders()` doesn't remove dotted keys
+        validateNoDottedResponseActionsKeys(
+          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+        );
         validateExportProviders(
           endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
         );

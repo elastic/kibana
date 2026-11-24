@@ -97,8 +97,18 @@ export default function ({ getService }: FtrProviderContext) {
     it('should reject a provider that breaks a field rule', async () => {
       await expectRejection(
         (policy) =>
-          setExportProviders(policy, [{ ...PROVIDER, service_url: 'http://acct.example.com' }]),
+          setExportProviders(policy, [
+            { ...PROVIDER, service_url: 'http://acct.blob.core.windows.net' },
+          ]),
         'export_providers[0] "azure-1": service_url must use https'
+      );
+    });
+
+    it('should reject a service_url that is not an Azure Blob Storage endpoint', async () => {
+      await expectRejection(
+        (policy) =>
+          setExportProviders(policy, [{ ...PROVIDER, service_url: 'https://acct.example.com' }]),
+        'export_providers[0] "azure-1": service_url must be an Azure Blob Storage endpoint (*.blob.core.windows.net, *.blob.core.usgovcloudapi.net or *.blob.core.chinacloudapi.cn)'
       );
     });
   });

@@ -6,7 +6,10 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { validateExportProviders } from './validate_export_providers';
+import {
+  validateExportProviders,
+  validateNoDottedResponseActionsKeys,
+} from './validate_export_providers';
 import { EndpointIntegrationFleetError } from './errors';
 import { policyFactory } from '../../../common/endpoint/models/policy_config';
 import { setExportProviders } from '../../../common/endpoint/models/export_providers';
@@ -220,6 +223,11 @@ describe('validateExportProviders()', () => {
         'export_providers[0] "azure-1": service_url must be a valid URL without credentials, query or fragment',
       ],
       [
+        'a service_url that is not an Azure Blob Storage endpoint',
+        { service_url: 'https://example.com' },
+        'export_providers[0] "azure-1": service_url must be an Azure Blob Storage endpoint (*.blob.core.windows.net, *.blob.core.usgovcloudapi.net or *.blob.core.chinacloudapi.cn)',
+      ],
+      [
         'a service_url that is too long',
         { service_url: `https://acct.blob.core.windows.net/${'a'.repeat(2048)}` },
         'export_providers[0] "azure-1": service_url must be at most 2048 characters',
@@ -274,5 +282,93 @@ describe('validateExportProviders()', () => {
       expect(error.statusCode).toBe(400);
       expect(error.apiPassThrough).toBe(true);
     });
+  });
+});
+
+describe('validateNoDottedResponseActionsKeys()', () => {
+  // `set()` with an array path writes a literal (dotted) key instead of expanding it
+  const getDottedKeyError = (policy: PolicyConfig): EndpointIntegrationFleetError => {
+    try {
+      validateNoDottedResponseActionsKeys(policy);
+    } catch (error) {
+      return error;
+    }
+
+    throw new Error('Expected validateNoDottedResponseActionsKeys() to throw');
+  };
+
+  it('should accept a policy with nested export providers', () => {
+    expect(() => validateNoDottedResponseActionsKeys(buildPolicy([buildProvider()]))).not.toThrow();
+  });
+
+  it.each(['windows.malware', 'windows.response_actionsX', 'response_actions.export_providers'])(
+    'should accept the unrelated root key %s',
+    (key) => {
+      expect(() =>
+        validateNoDottedResponseActionsKeys(set(policyFactory(), [key], {}))
+      ).not.toThrow();
+    }
+  );
+
+  it('should accept an unrelated dotted key in an OS', () => {
+    const policy = set(policyFactory(), ['linux', 'malware.mode'], 'off');
+
+    expect(() => validateNoDottedResponseActionsKeys(policy)).not.toThrow();
+  });
+
+  it.each([
+    'windows.response_actions',
+    'mac.response_actions.export_providers',
+    'linux.response_actions.export_providers.0.service_url',
+  ])('should reject the root key %s', (key) => {
+    const policy = set(policyFactory(), [key], { export_providers: [buildProvider()] });
+
+    expect(getDottedKeyError(policy).message).toBe(
+      `response_actions can't be set with a dotted key ("${key}")`
+    );
+  });
+
+  it.each(['windows', 'mac', 'linux'])('should reject a response_actions.* key in %s', (os) => {
+    const policy = set(
+      policyFactory(),
+      [os, 'response_actions.export_providers'],
+      [buildProvider()]
+    );
+
+    expect(getDottedKeyError(policy).message).toBe(
+      `response_actions can't be set with a dotted key ("response_actions.export_providers")`
+    );
+  });
+
+  it('should reject a dotted key inside response_actions', () => {
+    const policy = set(
+      buildPolicy([buildProvider()]),
+      ['mac', 'response_actions', 'export_providers.0.service_url'],
+      'https://example.com'
+    );
+
+    expect(getDottedKeyError(policy).message).toBe(
+      `response_actions can't be set with a dotted key ("export_providers.0.service_url")`
+    );
+  });
+
+  it('should quote and shorten a long key with control characters', () => {
+    const key = `windows.response_actions.\n${'a'.repeat(100)}`;
+    const { message } = getDottedKeyError(set(policyFactory(), [key], {}));
+
+    expect(message).toBe(
+      `response_actions can't be set with a dotted key ("windows.response_actions.\\n${'a'.repeat(
+        38
+      )}...")`
+    );
+    expect(message).not.toContain('\n');
+  });
+
+  it('should throw a 400 error that Fleet passes through to the API response', () => {
+    const error = getDottedKeyError(set(policyFactory(), ['windows.response_actions'], {}));
+
+    expect(error).toBeInstanceOf(EndpointIntegrationFleetError);
+    expect(error.statusCode).toBe(400);
+    expect(error.apiPassThrough).toBe(true);
   });
 });
