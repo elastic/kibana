@@ -49,6 +49,8 @@ export const createAlertEventStepCommonDefinition: CommonStepDefinition<
     fingerprint: "{{ inputs.payload.monitor_id }}"
     alert_status: "active"
     severity: "high"
+    routing_tags:
+      - "payments"
     data:
       rule_name: "{{ inputs.payload.monitor_name }}"
       source_alert_url: "{{ inputs.payload.url }}"

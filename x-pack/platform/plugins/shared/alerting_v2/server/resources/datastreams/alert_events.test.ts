@@ -132,6 +132,22 @@ describe('alertEventSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('validates routing tags on an event document and rejects an empty list', () => {
+    const event = {
+      '@timestamp': '2026-07-01T12:00:00.000Z',
+      group_hash: 'pd-group-hash',
+      data: {},
+      status: 'breached' as const,
+      source: 'pagerduty',
+      type: 'alert' as const,
+      space_id: 'default',
+      routing_tags: ['sre'],
+    };
+
+    expect(alertEventSchema.safeParse(event).success).toBe(true);
+    expect(alertEventSchema.safeParse({ ...event, routing_tags: [] }).success).toBe(false);
+  });
+
   it('validates an internal event document with a rule object', () => {
     const internalEvent = {
       '@timestamp': '2026-07-01T12:00:00.000Z',

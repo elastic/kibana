@@ -55,11 +55,12 @@ This stream is the durable history of rule evaluation.
 | `alert.status_count` | `long` | Consecutive count within the current alert status. |
 | `episode.id`, `episode.status`, `episode.status_count` | `alias` | Aliases of the `alert.*` fields, so queries on the pre-v8 names keep working. Aliases are not stored in `_source` and cannot be written. |
 | `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
-| `routing_tags` | `keyword` | Optional, `ignore_above: 128`. Action-policy routing tags. Top-level so events with no `rule` object can set it. Mapped in v9; no writer sets it yet. |
+| `routing_tags` | `keyword` | Optional, `ignore_above: 128`. Action-policy routing tags. Top-level so events with no `rule` object can set it. Mapped in v9. `createAlertEvent` writes them when the caller sends them. The rule executor does not yet, and the dispatcher still matches tags from the rule. |
 
 Writers:
 
 - `lib/rule_executor/steps/store_alert_events.ts`
+- `lib/alert_events_client/alert_events_client.ts` (`createAlertEvent`)
 
 Readers:
 

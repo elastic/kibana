@@ -6,6 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import { tagsSchema } from './common';
 import { alertEventSeveritySchema } from './severity';
 
 const alertEventStatusSchema = lazySchema(() => z.enum(['breached', 'recovered', 'no_data']));
@@ -39,6 +40,7 @@ export const alertEventSchema = lazySchema(() =>
       .optional(),
     space_id: z.string(),
     severity: alertEventSeveritySchema.optional(),
+    routing_tags: tagsSchema.min(1).optional(),
   })
 );
 

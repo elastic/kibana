@@ -60,6 +60,12 @@ describe('createSignalEventDataSchema', () => {
     ).toBe(false);
   });
 
+  it('rejects routing tags', () => {
+    expect(
+      createSignalEventDataSchema.safeParse({ source: 'datadog', routing_tags: ['sre'] }).success
+    ).toBe(false);
+  });
+
   it('rejects an invalid severity and unknown keys', () => {
     expect(
       createSignalEventDataSchema.safeParse({ source: 'datadog', severity: 'urgent' }).success
