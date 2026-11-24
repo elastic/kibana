@@ -83,9 +83,9 @@ export default function oauthPasswordTests({ getService }: FtrProviderContext) {
       expectedAuth: RegExp;
     }> = [
       {
-        name: 'standard form request with unchanged token type',
+        name: 'standard form request with a lowercase provider token type',
         options: {},
-        expectedAuth: /^bearer sim-oauth-password-\d+$/,
+        expectedAuth: /^Bearer sim-oauth-password-\d+$/,
       },
       {
         name: 'email JSON request with an explicit Bearer override',
@@ -110,13 +110,13 @@ export default function oauthPasswordTests({ getService }: FtrProviderContext) {
       const id = await createConnector({ scope: 'short-lived' });
       const { body: first } = await executeConnector(id);
       expect(first.status).to.be('ok');
-      expect(first.data.receivedAuth).to.match(/^bearer sim-oauth-password-\d+$/);
+      expect(first.data.receivedAuth).to.match(/^Bearer sim-oauth-password-\d+$/);
 
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       const { body: second } = await executeConnector(id);
       expect(second.status).to.be('ok');
-      expect(second.data.receivedAuth).to.match(/^bearer sim-oauth-password-\d+$/);
+      expect(second.data.receivedAuth).to.match(/^Bearer sim-oauth-password-\d+$/);
       expect(second.data.receivedAuth).not.to.be(first.data.receivedAuth);
     });
 
