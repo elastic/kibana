@@ -19,7 +19,7 @@ import {
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { useInvalidateRuleGroupStats, useRuleGroupOutcomesQuery } from '../../../rule_groups/api';
+import { useInvalidateRuleSetStats, useRuleSetOutcomesQuery } from '../../../rule_sets/api';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { ChartLabel } from '../../../../overview/components/detection_response/alerts_by_status/chart_label';
 import {
@@ -47,21 +47,21 @@ export const LastResponseSummaryChart: React.FC<LastResponseSummaryChartProps> =
   const {
     state: { lastUpdated: rulesTableLastUpdatedAt, filterOptions },
   } = useRulesTableContext();
-  const { ruleGroupId } = filterOptions;
-  const spaceHealthQuery = useGetSpaceHealth({}, { enabled: enabled && !ruleGroupId });
-  // With a rule group selected, the chart counts only the rules of the group.
-  const groupOutcomesQuery = useRuleGroupOutcomesQuery(enabled ? ruleGroupId : undefined);
-  const { isLoading, isError } = ruleGroupId ? groupOutcomesQuery : spaceHealthQuery;
-  const numberOfRules = ruleGroupId
+  const { ruleSetId } = filterOptions;
+  const spaceHealthQuery = useGetSpaceHealth({}, { enabled: enabled && !ruleSetId });
+  // With a rule set selected, the chart counts only the rules of the group.
+  const groupOutcomesQuery = useRuleSetOutcomesQuery(enabled ? ruleSetId : undefined);
+  const { isLoading, isError } = ruleSetId ? groupOutcomesQuery : spaceHealthQuery;
+  const numberOfRules = ruleSetId
     ? groupOutcomesQuery.data
     : spaceHealthQuery.data?.health?.state_at_the_moment?.number_of_rules;
   const invalidateSpaceHealthQuery = useInvalidateGetSpaceHealthQuery();
 
-  const invalidateRuleGroupStats = useInvalidateRuleGroupStats();
+  const invalidateRuleSetStats = useInvalidateRuleSetStats();
   useEffect(() => {
     invalidateSpaceHealthQuery();
-    invalidateRuleGroupStats();
-  }, [rulesTableLastUpdatedAt, invalidateSpaceHealthQuery, invalidateRuleGroupStats]);
+    invalidateRuleSetStats();
+  }, [rulesTableLastUpdatedAt, invalidateSpaceHealthQuery, invalidateRuleSetStats]);
 
   const { chartData, tableData, total, fillColor } = useMemo(() => {
     if (!numberOfRules) {

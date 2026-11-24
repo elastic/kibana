@@ -9,7 +9,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { getLastUpdated } from '@kbn/securitysolution-timeline-components';
-import { RuleGroupsUtilityActions } from '../../../rule_groups/components/rule_groups_utility_actions';
+import { RuleSetsUtilityActions } from '../../../rule_sets/components/rule_sets_utility_actions';
 
 import {
   UtilityBar,
@@ -111,7 +111,7 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
                 </UtilityBarAction>
               )}
 
-              {canBulkEdit && <RuleGroupsUtilityActions />}
+              {canBulkEdit && <RuleSetsUtilityActions />}
 
               <UtilityBarAction
                 disabled={hasDisabledActions}

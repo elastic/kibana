@@ -1,0 +1,112 @@
+openapi: 3.0.0
+info:
+  title: Rule set schemas
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    RuleSetId:
+      type: string
+      minLength: 1
+      description: The saved object id of a rule set.
+
+    RuleSetVisibility:
+      type: string
+      enum: [space, private]
+      description: |
+        `space`: every user of the space sees the group.
+        `private`: only the user who created the group sees it.
+
+    RuleSetConditions:
+      type: object
+      additionalProperties: false
+      description: |
+        Rules that match ALL filled conditions are in the group. Inside one condition, ANY value matches.
+        New rules that match join the group automatically.
+      properties:
+        tags:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+        integrations:
+          type: array
+          maxItems: 100
+          description: Package names of the related integrations, for example `endpoint`.
+          items:
+            type: string
+        rule_types:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+        severities:
+          type: array
+          maxItems: 4
+          items:
+            type: string
+        source:
+          type: string
+          enum: [elastic, custom]
+        search:
+          type: string
+          maxLength: 256
+          description: Same as the search field of the rules table (rule name, index patterns, MITRE ATT&CK).
+
+    RuleSetDefinition:
+      type: object
+      additionalProperties: false
+      required: [name, visibility, conditions, included_rule_ids, excluded_rule_ids]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description:
+          type: string
+          maxLength: 2048
+        visibility:
+          $ref: '#/components/schemas/RuleSetVisibility'
+        conditions:
+          $ref: '#/components/schemas/RuleSetConditions'
+        included_rule_ids:
+          type: array
+          maxItems: 10000
+          description: '`rule_id`s of rules that are in the group even if they do not match the conditions.'
+          items:
+            type: string
+        excluded_rule_ids:
+          type: array
+          maxItems: 10000
+          description: '`rule_id`s of rules that match the conditions but are never in the group.'
+          items:
+            type: string
+
+    RuleSet:
+      allOf:
+        - $ref: '#/components/schemas/RuleSetDefinition'
+        - type: object
+          required: [id, is_owner, version]
+          properties:
+            id:
+              $ref: '#/components/schemas/RuleSetId'
+            created_by:
+              type: string
+              description: Profile uid of the user who created the group.
+            created_at:
+              type: string
+            updated_at:
+              type: string
+            is_owner:
+              type: boolean
+              description: True when the current user created the group.
+            version:
+              type: string
+              description: Saved object version, for optimistic concurrency on update.
+            rules_count:
+              type: integer
+              description: How many rules are in the group now. Only in the list response.
+            failed_count:
+              type: integer
+              description: How many rules of the group failed on the last run. Only in the list response.

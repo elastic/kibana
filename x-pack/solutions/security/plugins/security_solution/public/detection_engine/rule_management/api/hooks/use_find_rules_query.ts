@@ -36,7 +36,7 @@ export interface FindRulesQueryArgs {
   gaps_range_start?: string;
   gaps_range_end?: string;
   gap_auto_fill_scheduler_id?: string;
-  rule_group_id?: string;
+  rule_set_id?: string;
 }
 
 const FIND_RULES_QUERY_KEY = ['POST', RULE_MANAGEMENT_RULES_URL_SEARCH];

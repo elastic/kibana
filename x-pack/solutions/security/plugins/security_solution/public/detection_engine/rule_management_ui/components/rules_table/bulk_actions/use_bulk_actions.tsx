@@ -123,7 +123,7 @@ export const useBulkActions = ({
           gapFillStatuses: options.gapFillStatuses,
         }),
         ...(activeSchedulerId && { schedulerId: activeSchedulerId }),
-        ...(options.ruleGroupId && { ruleGroupId: options.ruleGroupId }),
+        ...(options.ruleSetId && { ruleSetId: options.ruleSetId }),
       };
     },
     [activeSchedulerId]

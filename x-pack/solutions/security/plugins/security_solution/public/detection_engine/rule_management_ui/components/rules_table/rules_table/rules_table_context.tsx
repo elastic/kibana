@@ -230,7 +230,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ruleExecutionStatus:
       savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
     gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
-    ruleGroupId: savedFilter?.ruleGroupId,
+    ruleSetId: savedFilter?.ruleSetId,
     groupBy: savedFilter?.groupBy,
   });
 
@@ -271,15 +271,15 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       ...(shouldApplyGaps ? { gap_fill_statuses: filterOptions.gapFillStatuses } : {}),
       ...(gapRange ? { gaps_range_start: gapRange.start, gaps_range_end: gapRange.end } : {}),
       ...(activeSchedulerId ? { gap_auto_fill_scheduler_id: activeSchedulerId } : {}),
-      ...(filterOptions.ruleGroupId ? { rule_group_id: filterOptions.ruleGroupId } : {}),
+      ...(filterOptions.ruleSetId ? { rule_set_id: filterOptions.ruleSetId } : {}),
     };
   }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
 
   const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
     setFilterOptions((currentFilter) =>
-      // Another rule group starts with clear filters: a search or tag from the previous view can
+      // Another rule set starts with clear filters: a search or tag from the previous view can
       // hide all rules of the group.
-      'ruleGroupId' in newFilter && newFilter.ruleGroupId !== currentFilter.ruleGroupId
+      'ruleSetId' in newFilter && newFilter.ruleSetId !== currentFilter.ruleSetId
         ? { ...DEFAULT_FILTER_OPTIONS, ...newFilter }
         : { ...currentFilter, ...newFilter }
     );
@@ -303,8 +303,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       enabled: undefined,
       ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
       gapFillStatuses: undefined,
-      // The selected rule group is where the user is, not a filter. Keep it.
-      ruleGroupId: current.ruleGroupId,
+      // The selected rule set is where the user is, not a filter. Keep it.
+      ruleSetId: current.ruleSetId,
       groupBy: current.groupBy,
     }));
     setSortingOptions({

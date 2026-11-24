@@ -179,15 +179,15 @@ Only valid when query property is undefined.
       .optional()
       .describe('Gap auto fill scheduler ID used to determine gap fill status for rules'),
     /**
-      * Limit the action to the rules of this rule group. Valid only when query is provided
+      * Limit the action to the rules of this rule set. Valid only when query is provided
 (use an empty query for all rules of the group).
 
       */
-    rule_group_id: z
+    rule_set_id: z
       .string()
       .optional()
       .describe(
-        'Limit the action to the rules of this rule group. Valid only when query is provided\n(use an empty query for all rules of the group).\n'
+        'Limit the action to the rules of this rule set. Valid only when query is provided\n(use an empty query for all rules of the group).\n'
       ),
   })
 );

@@ -10,7 +10,7 @@ import type { CoreSetup, Logger, SavedObjectsType } from '@kbn/core/server';
 import { promptType } from '@kbn/security-ai-prompts';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { exceptionListType } from '@kbn/lists-plugin/server/saved_objects';
-import { ruleGroupType } from './lib/detection_engine/rule_groups/saved_object/rule_group_type';
+import { ruleSetType } from './lib/detection_engine/rule_sets/saved_object/rule_set_type';
 import { scriptsLibrarySavedObjectType } from './endpoint/lib/scripts_library';
 import type { ExperimentalFeatures } from '../common';
 import { trialCompanionNBASavedObjectType } from './lib/trial_companion/saved_objects';
@@ -67,7 +67,7 @@ const types = [
   promptType,
   referenceDataSavedObjectType,
   trialCompanionNBASavedObjectType,
-  ruleGroupType,
+  ruleSetType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);

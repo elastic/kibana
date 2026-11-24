@@ -1,0 +1,258 @@
+openapi: 3.0.0
+info:
+  title: Rule sets API endpoints
+  version: '1'
+paths:
+  /internal/detection_engine/rule_sets:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: FindRuleSets
+      summary: List the rule sets that the current user can see
+      parameters:
+        - name: with_counts
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        200:
+          description: The shared groups of the space and the private groups of the current user.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [groups]
+                properties:
+                  groups:
+                    type: array
+                    items:
+                      $ref: './rule_set.schema.yaml#/components/schemas/RuleSet'
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: CreateRuleSet
+      summary: Create a rule set
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './rule_set.schema.yaml#/components/schemas/RuleSetDefinition'
+      responses:
+        200:
+          description: The created group.
+          content:
+            application/json:
+              schema:
+                $ref: './rule_set.schema.yaml#/components/schemas/RuleSet'
+
+  /internal/detection_engine/rule_sets/{id}:
+    put:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: UpdateRuleSet
+      summary: Replace a rule set
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: './rule_set.schema.yaml#/components/schemas/RuleSetDefinition'
+                - type: object
+                  properties:
+                    version:
+                      type: string
+                      description: The version that the client read. A newer version on the server gives 409.
+      responses:
+        200:
+          description: The updated group.
+          content:
+            application/json:
+              schema:
+                $ref: './rule_set.schema.yaml#/components/schemas/RuleSet'
+    delete:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: DeleteRuleSet
+      summary: Delete a rule set. The rules do not change.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+      responses:
+        200:
+          description: Deleted.
+
+  /internal/detection_engine/rule_sets/_preview:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: PreviewRuleSet
+      summary: Show the rules of a group definition before it is saved
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [conditions, included_rule_ids, excluded_rule_ids]
+              properties:
+                conditions:
+                  $ref: './rule_set.schema.yaml#/components/schemas/RuleSetConditions'
+                included_rule_ids:
+                  type: array
+                  maxItems: 10000
+                  items:
+                    type: string
+                excluded_rule_ids:
+                  type: array
+                  maxItems: 10000
+                  items:
+                    type: string
+                page:
+                  type: integer
+                  minimum: 1
+                  default: 1
+                per_page:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 12
+      responses:
+        200:
+          description: The page of rules and the counts.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [total, by_conditions, only_picked, rules]
+                properties:
+                  total:
+                    type: integer
+                  by_conditions:
+                    type: integer
+                    description: Rules in the group because they match the conditions.
+                  only_picked:
+                    type: integer
+                    description: Rules in the group only because they were picked.
+                  rules:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, rule_id, name, type, severity, reason]
+                      properties:
+                        id:
+                          type: string
+                        rule_id:
+                          type: string
+                        name:
+                          type: string
+                        type:
+                          type: string
+                        severity:
+                          type: string
+                        reason:
+                          type: string
+                          enum: [conditions, picked, both]
+
+  /internal/detection_engine/rule_sets/_membership:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetRuleSetsMembership
+      summary: For a set of rules, say for each group if all, some or none of them are in it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  minItems: 1
+                  maxItems: 10000
+                  description: Saved object ids of the rules.
+                  items:
+                    type: string
+      responses:
+        200:
+          description: One entry for each group that the user can see.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [groups]
+                properties:
+                  groups:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, state]
+                      properties:
+                        id:
+                          $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+                        state:
+                          type: string
+                          enum: [all, some, none]
+
+  /internal/detection_engine/rule_sets/_bulk_assign:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: BulkAssignRuleSets
+      summary: Add rules to groups and remove rules from groups
+      description: |
+        Adding a rule removes it from the left-out list, and picks it only if the group conditions do not match it.
+        Removing a rule unpicks it, and leaves it out if the group conditions still match it. The rules do not change.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  minItems: 1
+                  maxItems: 10000
+                  description: Saved object ids of the rules.
+                  items:
+                    type: string
+                add_to:
+                  type: array
+                  items:
+                    $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+                remove_from:
+                  type: array
+                  items:
+                    $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+      responses:
+        200:
+          description: The groups that changed.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [updated]
+                properties:
+                  updated:
+                    type: array
+                    items:
+                      $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'

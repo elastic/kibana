@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { RuleGroupEditorProvider } from '../../../rule_groups/components/rule_group_editor_context';
-import { RuleGroupHeader } from '../../../rule_groups/components/rule_group_header';
+import { RuleSetEditorProvider } from '../../../rule_sets/components/rule_set_editor_context';
+import { RuleSetHeader } from '../../../rule_sets/components/rule_set_header';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
@@ -31,12 +31,12 @@ export const AllRules = React.memo(() => {
 
   if (tabName !== AllRulesTabs.updates) {
     return (
-      <RuleGroupEditorProvider>
+      <RuleSetEditorProvider>
         {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
         <GapSchedulerErrorsCallout />
-        <RuleGroupHeader />
+        <RuleSetHeader />
         <RulesTables selectedTab={tabName as AllRulesTabs} />
-      </RuleGroupEditorProvider>
+      </RuleSetEditorProvider>
     );
   } else {
     return (

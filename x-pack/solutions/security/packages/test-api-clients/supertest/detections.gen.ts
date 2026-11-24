@@ -25,15 +25,15 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 
 import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import type {
-  BulkAssignRuleGroupsRequestBodyInput,
-  CreateRuleGroupRequestBodyInput,
-  DeleteRuleGroupRequestParamsInput,
-  FindRuleGroupsRequestQueryInput,
-  GetRuleGroupsMembershipRequestBodyInput,
-  PreviewRuleGroupRequestBodyInput,
-  UpdateRuleGroupRequestParamsInput,
-  UpdateRuleGroupRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_groups/rule_groups_route.gen';
+  BulkAssignRuleSetsRequestBodyInput,
+  CreateRuleSetRequestBodyInput,
+  DeleteRuleSetRequestParamsInput,
+  FindRuleSetsRequestQueryInput,
+  GetRuleSetsMembershipRequestBodyInput,
+  PreviewRuleSetRequestBodyInput,
+  UpdateRuleSetRequestParamsInput,
+  UpdateRuleSetRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_sets/rule_sets_route.gen';
 import type { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import type { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
 import type { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
@@ -112,9 +112,9 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
 Removing a rule unpicks it, and leaves it out if the group conditions still match it. The rules do not change.
 
       */
-  bulkAssignRuleGroups(props: BulkAssignRuleGroupsProps, kibanaSpace: string = 'default') {
+  bulkAssignRuleSets(props: BulkAssignRuleSetsProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/internal/detection_engine/rule_groups/_bulk_assign', kibanaSpace))
+      .post(getRouteUrlForSpace('/internal/detection_engine/rule_sets/_bulk_assign', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -215,9 +215,9 @@ For detailed information on Kibana actions and alerting, and additional API call
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
-  createRuleGroup(props: CreateRuleGroupProps, kibanaSpace: string = 'default') {
+  createRuleSet(props: CreateRuleSetProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/internal/detection_engine/rule_groups', kibanaSpace))
+      .post(getRouteUrlForSpace('/internal/detection_engine/rule_sets', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -255,11 +255,11 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
-  deleteRuleGroup(props: DeleteRuleGroupProps, kibanaSpace: string = 'default') {
+  deleteRuleSet(props: DeleteRuleSetProps, kibanaSpace: string = 'default') {
     return supertest
       .delete(
         getRouteUrlForSpace(
-          replaceParams('/internal/detection_engine/rule_groups/{id}', props.params),
+          replaceParams('/internal/detection_engine/rule_sets/{id}', props.params),
           kibanaSpace
         )
       )
@@ -305,14 +305,6 @@ finishes and then call this operation once.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
-  findRuleGroups(props: FindRuleGroupsProps, kibanaSpace: string = 'default') {
-    return supertest
-      .get(getRouteUrlForSpace('/internal/detection_engine/rule_groups', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
-  },
   /**
    * Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
    */
@@ -324,9 +316,17 @@ finishes and then call this operation once.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
-  getRuleGroupsMembership(props: GetRuleGroupsMembershipProps, kibanaSpace: string = 'default') {
+  findRuleSets(props: FindRuleSetsProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/internal/detection_engine/rule_groups/_membership', kibanaSpace))
+      .get(getRouteUrlForSpace('/internal/detection_engine/rule_sets', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  getRuleSetsMembership(props: GetRuleSetsMembershipProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/detection_engine/rule_sets/_membership', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -418,9 +418,9 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       .send(props.body as object)
       .query(props.query);
   },
-  previewRuleGroup(props: PreviewRuleGroupProps, kibanaSpace: string = 'default') {
+  previewRuleSet(props: PreviewRuleSetProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/internal/detection_engine/rule_groups/_preview', kibanaSpace))
+      .post(getRouteUrlForSpace('/internal/detection_engine/rule_sets/_preview', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -816,11 +816,11 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
-  updateRuleGroup(props: UpdateRuleGroupProps, kibanaSpace: string = 'default') {
+  updateRuleSet(props: UpdateRuleSetProps, kibanaSpace: string = 'default') {
     return supertest
       .put(
         getRouteUrlForSpace(
-          replaceParams('/internal/detection_engine/rule_groups/{id}', props.params),
+          replaceParams('/internal/detection_engine/rule_sets/{id}', props.params),
           kibanaSpace
         )
       )
@@ -850,8 +850,8 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
 }
-export interface BulkAssignRuleGroupsProps {
-  body: BulkAssignRuleGroupsRequestBodyInput;
+export interface BulkAssignRuleSetsProps {
+  body: BulkAssignRuleSetsRequestBodyInput;
 }
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;
@@ -859,14 +859,14 @@ export interface CreateAlertsMigrationProps {
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
-export interface CreateRuleGroupProps {
-  body: CreateRuleGroupRequestBodyInput;
+export interface CreateRuleSetProps {
+  body: CreateRuleSetRequestBodyInput;
 }
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
 }
-export interface DeleteRuleGroupProps {
-  params: DeleteRuleGroupRequestParamsInput;
+export interface DeleteRuleSetProps {
+  params: DeleteRuleSetRequestParamsInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
@@ -875,14 +875,14 @@ export interface ExportRulesProps {
 export interface FinalizeAlertsMigrationProps {
   body: FinalizeAlertsMigrationRequestBodyInput;
 }
-export interface FindRuleGroupsProps {
-  query: FindRuleGroupsRequestQueryInput;
-}
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
-export interface GetRuleGroupsMembershipProps {
-  body: GetRuleGroupsMembershipRequestBodyInput;
+export interface FindRuleSetsProps {
+  query: FindRuleSetsRequestQueryInput;
+}
+export interface GetRuleSetsMembershipProps {
+  body: GetRuleSetsMembershipRequestBodyInput;
 }
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
@@ -894,8 +894,8 @@ export interface PerformRulesBulkActionProps {
   query: PerformRulesBulkActionRequestQueryInput;
   body: PerformRulesBulkActionRequestBodyInput;
 }
-export interface PreviewRuleGroupProps {
-  body: PreviewRuleGroupRequestBodyInput;
+export interface PreviewRuleSetProps {
+  body: PreviewRuleSetRequestBodyInput;
 }
 export interface ReadAlertsMigrationStatusProps {
   query: ReadAlertsMigrationStatusRequestQueryInput;
@@ -970,7 +970,7 @@ export interface SuggestUserProfilesProps {
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
 }
-export interface UpdateRuleGroupProps {
-  params: UpdateRuleGroupRequestParamsInput;
-  body: UpdateRuleGroupRequestBodyInput;
+export interface UpdateRuleSetProps {
+  params: UpdateRuleSetRequestParamsInput;
+  body: UpdateRuleSetRequestBodyInput;
 }

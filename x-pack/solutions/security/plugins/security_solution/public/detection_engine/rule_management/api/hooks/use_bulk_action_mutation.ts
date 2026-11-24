@@ -25,7 +25,7 @@ import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_ov
 import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from './prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
 import { useInvalidateFetchPrebuiltRulesDeprecationReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_deprecation_review_query';
 import { useInvalidateChangeHistory } from './use_infinite_change_history';
-import { useInvalidateRuleGroupCounts } from '../../../rule_groups/api';
+import { useInvalidateRuleSetCounts } from '../../../rule_sets/api';
 
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
@@ -50,7 +50,7 @@ export const useBulkActionMutation = (
     useInvalidateFetchPrebuiltRulesDeprecationReviewQuery();
   const invalidateChangeHistory = useInvalidateChangeHistory();
   const updateRulesCache = useUpdateRulesCache();
-  const invalidateRuleGroupCounts = useInvalidateRuleGroupCounts();
+  const invalidateRuleSetCounts = useInvalidateRuleSetCounts();
 
   return useMutation<
     BulkActionResponse,
@@ -118,7 +118,7 @@ export const useBulkActionMutation = (
           invalidateChangeHistory();
           break;
       }
-      invalidateRuleGroupCounts();
+      invalidateRuleSetCounts();
 
       if (options?.onSettled) {
         options.onSettled(...args);

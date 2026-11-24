@@ -40,7 +40,7 @@ export interface FindRuleOptions {
   aggregations?: Record<string, AggregationsAggregationContainer>;
   search?: string;
   searchFields?: string[];
-  /** Extra filter as a KQL node, ANDed with `filter`. Used for rule groups (`terms` nodes). */
+  /** Extra filter as a KQL node, ANDed with `filter`. Used for rule sets (`terms` nodes). */
   kueryFilter?: KueryNode;
 }
 

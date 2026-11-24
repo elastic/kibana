@@ -10,7 +10,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 
 /**
- * Session storage key of the rules table state, one per space: rule groups, tags and searches of
+ * Session storage key of the rules table state, one per space: rule sets, tags and searches of
  * one space mean nothing in another. The space comes from the URL, so the key is known on the
  * first render, when the table reads its saved state.
  */

@@ -10,7 +10,7 @@ import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import styled from 'styled-components';
-import { useRuleGroupFilterCountsQuery } from '../../../../rule_groups/api';
+import { useRuleSetFilterCountsQuery } from '../../../../rule_sets/api';
 import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
@@ -42,16 +42,16 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
     actions: { setFilterOptions },
   } = useRulesTableContext();
   const { data: ruleManagementFields } = useRuleManagementFilters();
-  // Inside a rule group, the tags and the Elastic/custom counts are the group's, not the space's.
-  const { ruleGroupId } = filterOptions;
-  const { data: groupCounts } = useRuleGroupFilterCountsQuery(ruleGroupId);
-  const allTags = ruleGroupId
+  // Inside a rule set, the tags and the Elastic/custom counts are the group's, not the space's.
+  const { ruleSetId } = filterOptions;
+  const { data: groupCounts } = useRuleSetFilterCountsQuery(ruleSetId);
+  const allTags = ruleSetId
     ? groupCounts?.tags ?? []
     : ruleManagementFields?.aggregated_fields.tags ?? [];
-  const rulesCustomCount = ruleGroupId
+  const rulesCustomCount = ruleSetId
     ? groupCounts?.custom
     : ruleManagementFields?.rules_summary.custom_count;
-  const rulesPrebuiltInstalledCount = ruleGroupId
+  const rulesPrebuiltInstalledCount = ruleSetId
     ? groupCounts?.prebuilt
     : ruleManagementFields?.rules_summary.prebuilt_installed_count;
 

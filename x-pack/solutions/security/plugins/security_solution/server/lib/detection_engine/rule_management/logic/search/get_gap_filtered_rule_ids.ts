@@ -82,7 +82,7 @@ export interface GapFilteredRuleIdsOptions {
   gapFillStatuses: GapFillStatus[];
   maxRuleIds: number;
   filter?: string;
-  /** Extra KQL node filter, for example a rule group. It is applied before the `maxRuleIds` cut. */
+  /** Extra KQL node filter, for example a rule set. It is applied before the `maxRuleIds` cut. */
   kueryFilter?: KueryNode;
   sortField?: FindRulesSortField;
   sortOrder?: SortOrder;

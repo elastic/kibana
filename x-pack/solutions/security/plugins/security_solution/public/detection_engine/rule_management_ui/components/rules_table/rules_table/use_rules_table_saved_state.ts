@@ -70,7 +70,7 @@ function validateState(
     enabled: filterFromUrl?.enabled ?? filterFromStorage?.enabled,
     ruleExecutionStatus:
       filterFromUrl?.ruleExecutionStatus ?? filterFromStorage?.ruleExecutionStatus,
-    ruleGroupId: filterFromUrl?.ruleGroupId ?? filterFromStorage?.ruleGroupId,
+    ruleSetId: filterFromUrl?.ruleSetId ?? filterFromStorage?.ruleSetId,
     groupBy: filterFromUrl?.groupBy ?? filterFromStorage?.groupBy,
   };
 

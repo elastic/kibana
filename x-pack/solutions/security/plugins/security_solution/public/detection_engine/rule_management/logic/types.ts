@@ -115,8 +115,8 @@ export interface FilterOptions {
   ruleSource?: RuleCustomizationStatus[]; // undefined is to display all the rules
   gapFillStatuses?: GapFillStatus[];
   includeRuleTypes?: Type[];
-  /** Show only the rules of this rule group. The server resolves the group. */
-  ruleGroupId?: string;
+  /** Show only the rules of this rule set. The server resolves the group. */
+  ruleSetId?: string;
   /** One value of one facet, picked in "Browse by". */
   browse?: { category: GranularRulesFacetCategory; value: string };
   /** Split the table into sections by this field. */
@@ -144,7 +144,7 @@ export interface FetchSearchRulesProps {
   gaps_range_start?: string;
   gaps_range_end?: string;
   gap_auto_fill_scheduler_id?: string;
-  rule_group_id?: string;
+  rule_set_id?: string;
   signal?: AbortSignal;
 }
 

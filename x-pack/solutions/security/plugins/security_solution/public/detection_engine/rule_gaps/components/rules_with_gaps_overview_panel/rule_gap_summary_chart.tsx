@@ -20,7 +20,7 @@ import {
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { useRuleGroupRuleIdsQuery } from '../../../rule_groups/api';
+import { useRuleSetRuleIdsQuery } from '../../../rule_sets/api';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import {
   useGetRuleIdsWithGaps,
@@ -59,8 +59,8 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
   const {
     state: { filterOptions },
   } = useRulesTableContext();
-  // With a rule group selected, the chart counts only the rules of the group.
-  const { data: groupRuleIds } = useRuleGroupRuleIdsQuery(filterOptions.ruleGroupId);
+  // With a rule set selected, the chart counts only the rules of the group.
+  const { data: groupRuleIds } = useRuleSetRuleIdsQuery(filterOptions.ruleSetId);
   const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
 
   const {
@@ -74,11 +74,11 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
       gapFillStatuses: [],
       excludedReasons,
       schedulerId: activeSchedulerId,
-      ruleIds: filterOptions.ruleGroupId ? groupRuleIds ?? [] : undefined,
+      ruleIds: filterOptions.ruleSetId ? groupRuleIds ?? [] : undefined,
     },
-    { enabled: enabled && (!filterOptions.ruleGroupId || groupRuleIds != null) }
+    { enabled: enabled && (!filterOptions.ruleSetId || groupRuleIds != null) }
   );
-  // Previous data is from another rule group or from the whole space: wrong numbers, not stale ones.
+  // Previous data is from another rule set or from the whole space: wrong numbers, not stale ones.
   const isLoading = isFirstLoad || isPreviousData;
 
   const {

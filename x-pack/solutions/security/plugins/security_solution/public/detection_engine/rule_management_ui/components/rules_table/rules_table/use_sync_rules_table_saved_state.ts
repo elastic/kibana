@@ -80,9 +80,9 @@ export function useSyncRulesTableSavedState(): void {
       storageStateToSave.ruleExecutionStatus = state.filterOptions.ruleExecutionStatus;
     }
 
-    if (state.filterOptions.ruleGroupId) {
-      urlStateToSave.ruleGroupId = state.filterOptions.ruleGroupId;
-      storageStateToSave.ruleGroupId = state.filterOptions.ruleGroupId;
+    if (state.filterOptions.ruleSetId) {
+      urlStateToSave.ruleSetId = state.filterOptions.ruleSetId;
+      storageStateToSave.ruleSetId = state.filterOptions.ruleSetId;
     }
 
     if (state.filterOptions.groupBy) {

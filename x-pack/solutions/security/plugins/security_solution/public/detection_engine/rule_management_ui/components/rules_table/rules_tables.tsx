@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { RulesGroupByControl } from '../../../rule_groups/components/rules_group_by_control';
-import { GroupedRulesTable } from '../../../rule_groups/components/grouped_rules_table';
+import { RulesGroupByControl } from '../../../rule_sets/components/rules_group_by_control';
+import { GroupedRulesTable } from '../../../rule_sets/components/grouped_rules_table';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { PrePackagedRulesPrompt } from '../pre_packaged_rules/load_empty_prompt';

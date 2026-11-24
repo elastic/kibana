@@ -27,7 +27,7 @@ import {
 import { buildSiemResponse } from '../../../../routes/utils';
 import { resolveGapPreFilter, transformFindAlerts } from '../../../utils/utils';
 import { translateSearchFieldsToSoFields } from '../../../logic/search/search_rules_field_translation';
-import { getRuleGroupsClient } from '../../../../rule_groups/api/register_routes';
+import { getRuleSetsClient } from '../../../../rule_sets/api/register_routes';
 
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
@@ -76,13 +76,13 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
             gaps_range_start: gapsRangeStart,
             gaps_range_end: gapsRangeEnd,
             gap_auto_fill_scheduler_id: schedulerId,
-            rule_group_id: ruleGroupId,
+            rule_set_id: ruleSetId,
           } = request.body;
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = await ctx.alerting.getRulesClient();
-          const ruleGroupFilter = ruleGroupId
-            ? await (await getRuleGroupsClient(context)).getFilter(ruleGroupId)
+          const ruleSetFilter = ruleSetId
+            ? await (await getRuleSetsClient(context)).getFilter(ruleSetId)
             : undefined;
 
           const combinedKql = buildGranularRulesKql({
@@ -111,7 +111,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
             const gapPreFilter = await resolveGapPreFilter({
               rulesClient,
               filter: combinedKql,
-              kueryFilter: ruleGroupFilter,
+              kueryFilter: ruleSetFilter,
               sortField,
               sortOrder,
               gapFillStatuses,
@@ -153,7 +153,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
             sortField,
             sortOrder,
             filter: combinedKql,
-            kueryFilter: ruleGroupFilter,
+            kueryFilter: ruleSetFilter,
             fields: effectiveFields,
             searchAfter: shouldUseSearchAfter ? searchAfterParam : undefined,
             aggregations: aggs,

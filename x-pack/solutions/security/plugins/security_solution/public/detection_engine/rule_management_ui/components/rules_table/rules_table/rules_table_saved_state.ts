@@ -24,7 +24,7 @@ export const RulesTableSavedFilter = lazySchema(() =>
       tags: z.array(z.string()),
       enabled: z.boolean(),
       ruleExecutionStatus: RuleExecutionStatus,
-      ruleGroupId: z.string(),
+      ruleSetId: z.string(),
       groupBy: GranularRulesFacetCategory,
     })
     .partial()

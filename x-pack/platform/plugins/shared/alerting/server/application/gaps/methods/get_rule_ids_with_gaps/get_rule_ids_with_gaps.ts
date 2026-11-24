@@ -127,14 +127,16 @@ export async function getRuleIdsWithGaps(
     }
 
     if (ruleIdsFilter && ruleIdsFilter.length === 0) {
-      // An explicit empty list (for example an empty rule group) matches no rule.
+      // An explicit empty list (for example an empty rule set) matches no rule.
       return { total: 0, ruleIds: [], latestGapTimestamp: undefined, summary: emptySummary() };
     }
 
-    // A short id list goes into the query. A long one (for example all rules of a rule group)
+    // A short id list goes into the query. A long one (for example all rules of a rule set)
     // would create one bool clause per id, so it is applied to the per-rule buckets below instead.
     const allowedRuleIds =
-      ruleIdsFilter && ruleIdsFilter.length > MAX_RULE_IDS_IN_QUERY ? new Set(ruleIdsFilter) : undefined;
+      ruleIdsFilter && ruleIdsFilter.length > MAX_RULE_IDS_IN_QUERY
+        ? new Set(ruleIdsFilter)
+        : undefined;
     if (ruleIdsFilter?.length && !allowedRuleIds) {
       const ruleIdsFilterKql = [...new Set(ruleIdsFilter)]
         .map((ruleId) => `rule.id: "${ruleId}"`)
@@ -203,7 +205,9 @@ export async function getRuleIdsWithGaps(
       },
     };
 
-    for (const b of buckets.filter((bucket) => !allowedRuleIds || allowedRuleIds.has(String(bucket.key)))) {
+    for (const b of buckets.filter(
+      (bucket) => !allowedRuleIds || allowedRuleIds.has(String(bucket.key))
+    )) {
       const sums = extractGapDurationSums(b);
       const exhaustedInfo = schedulerContext?.enabled
         ? getExhaustedRetryGapsInfo(b)

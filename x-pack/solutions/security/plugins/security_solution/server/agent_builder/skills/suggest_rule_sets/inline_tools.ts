@@ -11,7 +11,7 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
-import type { RuleGroupConditions } from '../../../../common/api/detection_engine/rule_groups';
+import type { RuleSetConditions } from '../../../../common/api/detection_engine/rule_sets';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import type { StartPlugins } from '../../../plugin_contract';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
@@ -20,8 +20,8 @@ import {
   PARAMS_TYPE_FIELD,
   TAGS_FIELD,
 } from '../../../../common/detection_engine/rule_management/rule_fields';
-import { RuleGroupsClient } from '../../../lib/detection_engine/rule_groups/logic/rule_groups_client';
-import { buildConditionsFilter } from '../../../lib/detection_engine/rule_groups/logic/build_rule_group_filter';
+import { RuleSetsClient } from '../../../lib/detection_engine/rule_sets/logic/rule_sets_client';
+import { buildConditionsFilter } from '../../../lib/detection_engine/rule_sets/logic/build_rule_set_filter';
 
 export const RULE_SETS_INVENTORY_TOOL_ID = 'security.rule_sets.get_inventory';
 export const RULE_SETS_PROPOSE_TOOL_ID = 'security.rule_sets.propose';
@@ -57,7 +57,7 @@ const createClient = async (getStartServices: GetStartServices, context: ToolHan
   return {
     rulesClient,
     startPlugins,
-    ruleGroups: new RuleGroupsClient(context.savedObjectsClient, rulesClient, user?.profile_uid),
+    ruleSets: new RuleSetsClient(context.savedObjectsClient, rulesClient, user?.profile_uid),
   };
 };
 
@@ -66,7 +66,7 @@ const errorResult = (message: string) => ({
 });
 
 /** The same conditions in any order are the same set. */
-const normalize = (conditions: RuleGroupConditions) =>
+const normalize = (conditions: RuleSetConditions) =>
   Object.fromEntries(
     Object.entries(conditions)
       .filter(
@@ -84,10 +84,7 @@ export const ruleSetsInventoryTool = (
   schema: z.object({}),
   handler: async (_args, context) => {
     try {
-      const { rulesClient, startPlugins, ruleGroups } = await createClient(
-        getStartServices,
-        context
-      );
+      const { rulesClient, startPlugins, ruleSets } = await createClient(getStartServices, context);
 
       const [all, custom, customRules, existing, installed] = await Promise.all([
         findRules({
@@ -124,7 +121,7 @@ export const ruleSetsInventoryTool = (
           sortOrder: 'asc',
           fields: ['name', 'tags'],
         }),
-        ruleGroups.find({ withCounts: false }),
+        ruleSets.find({ withCounts: false }),
         // The user can lack Fleet privileges: then the agent works without this list.
         startPlugins.fleet?.packageService
           .asScoped(context.request)
@@ -269,7 +266,7 @@ export const ruleSetsProposeTool = (
       if (!filter) {
         return errorResult('A rule set needs at least one condition.');
       }
-      const { rulesClient, ruleGroups } = await createClient(getStartServices, context);
+      const { rulesClient, ruleSets } = await createClient(getStartServices, context);
       const [matching, existing] = await Promise.all([
         findRules({
           rulesClient,
@@ -280,7 +277,7 @@ export const ruleSetsProposeTool = (
           sortField: undefined,
           sortOrder: undefined,
         }),
-        ruleGroups.find({ withCounts: false }),
+        ruleSets.find({ withCounts: false }),
       ]);
       if (matching.total === 0) {
         return errorResult(

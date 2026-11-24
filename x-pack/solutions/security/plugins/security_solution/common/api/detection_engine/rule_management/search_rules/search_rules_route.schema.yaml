@@ -52,10 +52,10 @@ paths:
                 filter:
                   description: Structured KQL filter applied to detection rules (alert saved objects).
                   $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFilter'
-                rule_group_id:
+                rule_set_id:
                   type: string
                   description: |
-                    Return only the rules of this rule group. The server resolves the group, so the
+                    Return only the rules of this rule set. The server resolves the group, so the
                     filter has no length or clause limit for groups with many picked rules.
                 aggregations:
                   $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesAggregations'

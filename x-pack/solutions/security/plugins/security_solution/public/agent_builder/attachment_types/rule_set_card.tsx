@@ -23,19 +23,19 @@ import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import type { ApplicationStart, HttpStart } from '@kbn/core/public';
 import type {
-  RuleGroup,
-  RuleGroupConditions,
-  RuleGroupDefinition,
-} from '../../../common/api/detection_engine/rule_groups';
-import { RULE_GROUPS_URL } from '../../../common/api/detection_engine/rule_groups';
+  RuleSet,
+  RuleSetConditions,
+  RuleSetDefinition,
+} from '../../../common/api/detection_engine/rule_sets';
+import { RULE_SETS_URL } from '../../../common/api/detection_engine/rule_sets';
 import { URL_PARAM_KEY } from '../../common/hooks/constants';
-import { describeConditionParts } from '../../detection_engine/rule_groups/components/condition_labels';
-import { notifyRuleSetCreated } from '../../detection_engine/rule_groups/rule_set_events';
+import { describeConditionParts } from '../../detection_engine/rule_sets/components/condition_labels';
+import { notifyRuleSetCreated } from '../../detection_engine/rule_sets/rule_set_events';
 
 export interface RuleSetSuggestion {
   name: string;
   reason: string;
-  conditions: RuleGroupConditions;
+  conditions: RuleSetConditions;
   rules_count: number;
   existing_rule_set?: { id: string; name: string };
 }
@@ -87,7 +87,7 @@ export const RuleSetCard = ({ suggestion, http, application, canEditRules }: Rul
     rules_count: rulesCount,
     existing_rule_set: existing,
   } = suggestion;
-  const [created, setCreated] = useState<RuleGroup>();
+  const [created, setCreated] = useState<RuleSet>();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -96,7 +96,7 @@ export const RuleSetCard = ({ suggestion, http, application, canEditRules }: Rul
     notifyRuleSetCreated(id);
     if (!window.location.pathname.includes(RULES_PAGE_PATH)) {
       application.navigateToApp('securitySolutionUI', {
-        path: `${RULES_PAGE_PATH}?${URL_PARAM_KEY.rulesTable}=${rison.encode({ ruleGroupId: id })}`,
+        path: `${RULES_PAGE_PATH}?${URL_PARAM_KEY.rulesTable}=${rison.encode({ ruleSetId: id })}`,
       });
     }
   };
@@ -105,7 +105,7 @@ export const RuleSetCard = ({ suggestion, http, application, canEditRules }: Rul
     setIsSaving(true);
     setError(undefined);
     try {
-      const definition: RuleGroupDefinition = {
+      const definition: RuleSetDefinition = {
         name,
         description: reason,
         visibility: 'private',
@@ -113,7 +113,7 @@ export const RuleSetCard = ({ suggestion, http, application, canEditRules }: Rul
         included_rule_ids: [],
         excluded_rule_ids: [],
       };
-      const ruleSet = await http.fetch<RuleGroup>(RULE_GROUPS_URL, {
+      const ruleSet = await http.fetch<RuleSet>(RULE_SETS_URL, {
         method: 'POST',
         version: '1',
         body: JSON.stringify(definition),

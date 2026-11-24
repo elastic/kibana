@@ -44,7 +44,7 @@ export const fetchRulesByQueryOrIds = async ({
   gapRange?: { start: string; end: string };
   gapFillStatuses?: GapFillStatus[];
   schedulerId?: string;
-  /** Extra KQL node filter, for example a rule group. Only used with `query`. */
+  /** Extra KQL node filter, for example a rule set. Only used with `query`. */
   kueryFilter?: KueryNode;
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> =>
   withSecuritySpan(
