@@ -125,5 +125,6 @@ describe('Endpoint policy upselling', () => {
     expect(
       await screen.findByTestId('endpointPolicy-protectionsLockedCard-title')
     ).toBeInTheDocument();
+    expect(screen.getByTestId('endpointPolicy-protectionsLockedCard')).toBeInTheDocument();
   });
 });
