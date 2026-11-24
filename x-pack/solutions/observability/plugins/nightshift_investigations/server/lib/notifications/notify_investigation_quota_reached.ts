@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { bold } from '@elastic/isomer-sdk/slack';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
@@ -12,6 +13,7 @@ import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftSettingsLocator } from '../../../common/locators';
 import { consumeAutomationBudget } from '../automations/automation_budget';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../automations/generate_workflow_yaml';
+import { readSlackNotificationParams } from './slack_notification';
 import type { InvestigationQuotaLimit } from '../../types';
 
 export interface LimitNoticeTarget {
@@ -62,19 +64,13 @@ export const getLimitNoticeTargets = ({
     ];
   }
   return notificationDestinations.flatMap(({ type, connector_id: connectorId, params }) => {
-    const { channel, thread_ts: threadTs } = params;
-    return type === 'slack' && typeof channel === 'string' && channel && threadTs === undefined
-      ? [{ connectorId, channel }]
-      : [];
+    const slack = type === 'slack' ? readSlackNotificationParams(params) : undefined;
+    return slack && slack.thread_ts === undefined ? [{ connectorId, channel: slack.channel }] : [];
   });
 };
 
 const countOf = (limit: number, noun: string): string =>
   `${limit} ${noun}${limit === 1 ? '' : 's'}`;
-
-// https://docs.slack.dev/messaging/formatting-message-text#escaping
-const escapeSlackText = (value: string): string =>
-  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 const getAutomationLimitReachedMessage = ({
   automationName,
@@ -83,12 +79,12 @@ const getAutomationLimitReachedMessage = ({
   automationName: string;
   limit?: number;
 }): string => {
-  const name = escapeSlackText(automationName.replace(/\s+/g, ' ').trim());
+  const name = bold(automationName.replace(/\s+/g, ' ').trim());
   const reached =
     limit === undefined
       ? 'its daily limit'
       : `its daily limit of ${countOf(limit, 'investigation')}`;
-  return `The automation *${name}* has reached ${reached}. It resumes at 00:00 UTC, or an admin can raise the limit on the automation.`;
+  return `The automation ${name} has reached ${reached}. It resumes at 00:00 UTC, or an admin can raise the limit on the automation.`;
 };
 
 const QUOTA_REACHED: Record<InvestigationQuotaLimit, (limit?: number) => string> = {
