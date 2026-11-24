@@ -32,7 +32,6 @@ describe('EdotBrowserSystem', () => {
       serviceName: 'kibana-frontend',
       serviceVersion: '9.5.0',
       exportConfig: config,
-      ignoreFetchUrls: [config.url],
     });
   });
 });

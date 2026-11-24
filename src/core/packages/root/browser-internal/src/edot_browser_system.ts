@@ -32,8 +32,6 @@ export class EdotBrowserSystem {
       serviceName: SERVICE_NAME,
       serviceVersion: this.serviceVersion,
       exportConfig: { url, headers },
-      // Avoid tracing the SDK's own export requests.
-      ignoreFetchUrls: [url],
     });
   }
 }
