@@ -12,7 +12,10 @@ import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { kbnRecessedGlassCss } from '@kbn/css-utils/public/recessed_glass_css';
+import {
+  KBN_RECESSED_GLASS_CLASS,
+  kbnRecessedGlassCss,
+} from '@kbn/css-utils/public/recessed_glass_css';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
@@ -91,7 +94,7 @@ const DashboardToolBarComponent = ({
 
   // Always mount so App Header title shows for read-only; write actions stay in Dashboard.
   return (
-    <div css={controlsOverrideStyles}>
+    <div className={KBN_RECESSED_GLASS_CLASS} css={controlsOverrideStyles}>
       <DashboardTopNav
         customLeadingBreadCrumbs={landingBreadcrumb}
         dashboardApi={dashboardContainer}

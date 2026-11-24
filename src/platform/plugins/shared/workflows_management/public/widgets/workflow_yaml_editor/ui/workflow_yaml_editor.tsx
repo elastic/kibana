@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import type { Document } from 'yaml';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
+import { KBN_RECESSED_GLASS_CLASS } from '@kbn/css-utils/public/recessed_glass_css';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
@@ -986,6 +987,8 @@ export const WorkflowYAMLEditor = ({
           ]}
           className={classnames({
             [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml,
+            // POC: the editor sits on the recessed glass; execution snapshots keep a plain fill.
+            [KBN_RECESSED_GLASS_CLASS]: !isExecutionYaml,
           })}
         >
           <YamlEditor

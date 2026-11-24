@@ -21,7 +21,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/shared-ux-page-kibana-template",
-    "@kbn/core-chrome-browser-hooks"
+    "@kbn/shared-ux-page-kibana-template"
   ]
 }

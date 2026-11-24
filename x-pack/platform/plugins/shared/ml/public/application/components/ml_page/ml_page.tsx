@@ -13,7 +13,6 @@ import type { EuiPaddingSize } from '@elastic/eui';
 import { EuiPageSection } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '@kbn/ml-common-types/locator_deprecated_routes';
@@ -89,7 +88,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
       },
     } = useMlKibana();
     const { showMLNavMenu } = useEnabledFeatures();
-    const isClassicChrome = useChromeStyle() === 'classic';
 
     const routeList = useMemo(
       () => {
@@ -156,8 +154,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
         className={'ml-app'}
         data-test-subj={'mlApp'}
         restrictWidth={false}
-        // POC: project chrome's frame is the recessed glass surface; classic keeps the white panel.
-        panelled={isClassicChrome}
+        panelled
         solutionNav={
           showMLNavMenu
             ? {

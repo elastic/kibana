@@ -11,14 +11,17 @@ import type { CSSObject } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
 /**
- * Set to `transparent` by the framed (project chrome) app wrapper in `@kbn/ui-chrome-layout`,
- * which paints the recessed glass itself.
+ * Marker class that opts the framed (project chrome) app wrapper in `@kbn/ui-chrome-layout`
+ * into painting the recessed glass. Always pair it with `kbnRecessedGlassCss`.
  */
 // POC: keep in sync with layout_application.styles.ts.
+export const KBN_RECESSED_GLASS_CLASS = 'kbnRecessedGlass';
+
+/** Set to `transparent` by the framed app wrapper when it paints the recessed glass. */
 const RECESSED_SURFACE_VAR = '--kbn-recessed-surface';
 
 /**
- * Recessed surface: transparent inside the project frame so its glass shows through,
+ * Recessed surface: transparent inside the glass frame so its glass shows through,
  * solid `backgroundBaseRecessed` elsewhere (classic chrome).
  */
 export const kbnRecessedGlassCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({

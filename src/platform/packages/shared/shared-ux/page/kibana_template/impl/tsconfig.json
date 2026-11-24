@@ -22,7 +22,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-card-no-data",
     "@kbn/shared-ux-card-no-data-mocks",
-    "@kbn/core-chrome-browser-hooks",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

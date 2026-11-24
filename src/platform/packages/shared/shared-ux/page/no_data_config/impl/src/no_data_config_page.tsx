@@ -9,7 +9,12 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  KBN_RECESSED_GLASS_CLASS,
+  kbnRecessedGlassCss,
+} from '@kbn/css-utils/public/recessed_glass_css';
 
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { NoDataPage } from '@kbn/shared-ux-page-no-data';
@@ -27,6 +32,7 @@ const getClasses = (template?: string, className?: string) => {
 
 export const NoDataConfigPage = (props: NoDataConfigPageProps) => {
   const { className, noDataConfig, pageSideBar, pageSideBarProps, ...rest } = props;
+  const euiThemeContext = useEuiTheme();
 
   if (!noDataConfig) {
     return null;
@@ -39,18 +45,21 @@ export const NoDataConfigPage = (props: NoDataConfigPageProps) => {
     );
   }
 
-  const classes = getClasses(undefined, className);
+  const classes = getClasses(undefined, classNames(className, KBN_RECESSED_GLASS_CLASS));
 
   return (
     <EuiPageTemplate
       className={classes}
+      // POC: no-data pages sit on the recessed glass empty-state surface.
+      css={css(kbnRecessedGlassCss(euiThemeContext))}
       restrictWidth={NO_DATA_PAGE_MAX_WIDTH}
       panelled={false}
       // Note: Once all pages have been converted to this new component,
       // the following props can be removed to allow the template to auto-handle
       // the fixed header and banner heights.
       offset={0}
-      minHeight={0}
+      // POC: fill the app area so the glass covers it even when app wrappers aren't flex containers.
+      minHeight="var(--kbn-application--content-height, 0)"
       {...rest}
     >
       {sideBar}

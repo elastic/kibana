@@ -415,7 +415,7 @@ export const VisualizeListing = () => {
               getDetailViewLink={getVisualizeListItemLink}
               tableCaption={visualizeLibraryPageTitle}
               {...listTableProps}
-              // POC: parent TabbedTableListView already owns the recessed page template.
+              // POC: parent TabbedTableListView already owns the page template.
               withoutPageTemplateWrapper
               onFetchSuccess={propsFromParent.onFetchSuccess}
               setPageDataTestSubject={propsFromParent.setPageDataTestSubject}

@@ -20,6 +20,7 @@ import { useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
+import { KBN_RECESSED_GLASS_CLASS } from '@kbn/css-utils/public/recessed_glass_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
@@ -189,7 +190,8 @@ export function WorkflowsPage() {
   return (
     <EuiPageTemplate
       offset={0}
-      // POC: project chrome's frame is the recessed glass surface; classic keeps the plain fill.
+      // POC: the list sits on the recessed glass frame in project chrome; classic keeps the plain fill.
+      className={isClassicChrome ? undefined : KBN_RECESSED_GLASS_CLASS}
       css={isClassicChrome ? { backgroundColor: euiTheme.colors.backgroundBasePlain } : undefined}
       panelled={isClassicChrome ? undefined : false}
       data-test-subj="workflowsPage"

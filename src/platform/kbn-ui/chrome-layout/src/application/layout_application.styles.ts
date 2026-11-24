@@ -46,28 +46,33 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       // Only apply distinguished background styling for framed appearance
       ${isFramedAppearance &&
       css`
-        // POC: the frame is the recessed glass surface; the ambient field shows through it.
-        background-color: transparent;
-        // Recessed surfaces inside the frame (kbnRecessedGlassCss in @kbn/css-utils) defer to this glass.
-        --kbn-recessed-surface: transparent;
+        background-color: ${euiTheme.colors.backgroundBasePlain};
         border-radius: ${euiTheme.border.radius.frame};
 
-        // A pseudo-element carries the backdrop filter so the wrapper doesn't become the
-        // containing block for position: fixed descendants inside apps.
-        &::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: -1;
-          border-radius: inherit;
-          pointer-events: none;
-          // POC: approximates the Figma glass (Frost, Light -45°) at 77% recessed fill; move to an EUI token.
-          background-color: ${transparentize(euiTheme.colors.backgroundBaseRecessed, 0.77)};
-          backdrop-filter: blur(1px);
+        // POC: the frame becomes the recessed glass surface only when an app opts in with
+        // KBN_RECESSED_GLASS_CLASS (@kbn/css-utils); the ambient field shows through it.
+        &:has(.kbnRecessedGlass) {
+          background-color: transparent;
+          // Recessed surfaces inside the frame (kbnRecessedGlassCss in @kbn/css-utils) defer to this glass.
+          --kbn-recessed-surface: transparent;
 
-          @media (prefers-reduced-transparency: reduce) {
-            background-color: ${euiTheme.colors.backgroundBaseRecessed};
-            backdrop-filter: none;
+          // A pseudo-element carries the backdrop filter so the wrapper doesn't become the
+          // containing block for position: fixed descendants inside apps.
+          &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            border-radius: inherit;
+            pointer-events: none;
+            // POC: approximates the Figma glass (Frost, Light -45°) at 77% recessed fill; move to an EUI token.
+            background-color: ${transparentize(euiTheme.colors.backgroundBaseRecessed, 0.77)};
+            backdrop-filter: blur(1px);
+
+            @media (prefers-reduced-transparency: reduce) {
+              background-color: ${euiTheme.colors.backgroundBaseRecessed};
+              backdrop-filter: none;
+            }
           }
         }
 

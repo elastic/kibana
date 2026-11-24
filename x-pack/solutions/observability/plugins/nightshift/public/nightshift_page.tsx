@@ -8,7 +8,6 @@
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
-import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -95,7 +94,6 @@ export const DetectionRoute = ({
 
 export function NightshiftPage(): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
-  const isClassicChrome = useChromeStyle() === 'classic';
   const {
     application,
     executionContext,
@@ -291,8 +289,7 @@ export function NightshiftPage(): React.ReactElement | null {
               },
             }
           : {}),
-        // POC: project chrome's frame is the recessed glass surface, so the gradient is classic-only.
-        ...(isHomePage && isClassicChrome
+        ...(isHomePage
           ? {
               css: css`
                 background: linear-gradient(
