@@ -9,7 +9,7 @@
 
 export type { GetConfigFn } from './src/types';
 export { UI_SETTINGS, DEFAULT_HISTOGRAM_BAR_TARGET } from './src/constants';
-export { getEsQueryConfig } from './src/es_query';
+export { getEsQueryConfig, getEsQueryConfigAsync } from './src/es_query';
 export {
   tabifyDocs,
   flattenHit,
