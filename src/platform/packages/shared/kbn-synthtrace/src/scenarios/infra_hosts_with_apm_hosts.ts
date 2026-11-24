@@ -57,8 +57,9 @@ const PROCESSES = [
 const PROCESS_STATE_COUNTS = countBy(PROCESSES, 'state');
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-const scenario: Scenario<InfraDocument | ApmFields> = async ({ logger, scenarioOpts }) => {
+const scenario: Scenario<InfraDocument | ApmFields> = async ({ logger, scenarioOpts, from }) => {
   const numInstances = getNumberOpt(scenarioOpts, 'numInstances', 10);
+  const processStartTime = from - ONE_DAY_MS;
 
   return {
     generate: ({ range, clients: { infraEsClient, apmEsClient } }) => {
@@ -66,7 +67,6 @@ const scenario: Scenario<InfraDocument | ApmFields> = async ({ logger, scenarioO
 
       // Only half of the hosts will have system metrics
       const hostList = times(numInstances / 2).map((index) => infra.host(`host-${index}`));
-      const processStartTime = range.from.getTime() - ONE_DAY_MS;
 
       const hosts = range
         .interval('30s')
