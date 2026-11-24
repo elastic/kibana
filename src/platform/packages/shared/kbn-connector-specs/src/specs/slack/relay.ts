@@ -317,11 +317,8 @@ const RELAY_DEFAULT_HISTORY_WINDOW_SECONDS = 2 * 60 * 60;
  * as bad credentials and every 429 as "do not move on".
  */
 type RelayReadOutcome =
-  | { ok: false; reason: 'not_readable'; channel: string; message: string }
+  | { ok: false; reason: 'not_readable'; channel: string; message?: string }
   | { ok: false; reason: 'throttled'; retry_after_seconds?: number };
-
-const NOT_READABLE_MESSAGE =
-  'The Elastic Slack app reads only public channels connected to this deployment. This channel is private, not connected, or archived. Read it through another Slack connector whose bot is a member.';
 
 interface ReadWindow {
   oldest?: string;
@@ -329,22 +326,29 @@ interface ReadWindow {
 }
 
 const getRelayErrorDetails = (error: unknown) => {
-  const { statusCode, reason, retryAfterSeconds } = (error ?? {}) as {
+  const { statusCode, reason, relayMessage, retryAfterSeconds } = (error ?? {}) as {
     statusCode?: unknown;
     reason?: unknown;
+    relayMessage?: unknown;
     retryAfterSeconds?: unknown;
   };
   return {
     statusCode: typeof statusCode === 'number' ? statusCode : undefined,
     reason: typeof reason === 'string' ? reason : undefined,
+    relayMessage: typeof relayMessage === 'string' && relayMessage ? relayMessage : undefined,
     retryAfterSeconds: typeof retryAfterSeconds === 'number' ? retryAfterSeconds : undefined,
   };
 };
 
 const toReadOutcome = (error: unknown, channel: string): RelayReadOutcome | undefined => {
-  const { statusCode, reason, retryAfterSeconds } = getRelayErrorDetails(error);
+  const { statusCode, reason, relayMessage, retryAfterSeconds } = getRelayErrorDetails(error);
   if (statusCode === 403 && reason === 'not_readable') {
-    return { ok: false, reason: 'not_readable', channel, message: NOT_READABLE_MESSAGE };
+    return {
+      ok: false,
+      reason: 'not_readable',
+      channel,
+      ...(relayMessage ? { message: relayMessage } : {}),
+    };
   }
   if (statusCode === 429) {
     return {
