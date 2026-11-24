@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AnyIDataStreamClient } from '@kbn/data-streams';
@@ -14,7 +15,8 @@ import { PinnedBaselineService } from './pinned_baseline_service';
 
 const createDataStreamsMock = () => {
   const create = jest.fn();
-  const search = jest.fn();
+  // By default no pointer exists yet, so pin()'s already-published lookup finds nothing.
+  const search = jest.fn().mockResolvedValue({ hits: { hits: [] } });
   const dataStreamClient = {
     create,
     search,
@@ -95,10 +97,13 @@ describe('PinnedBaselineService', () => {
 
     expect(initializeClient).toHaveBeenCalledWith(EvaluationIndices.PINNED_BASELINES);
     expect(create).toHaveBeenCalledTimes(2);
-    expect(create).toHaveBeenCalledWith({ documents: expect.any(Array), refresh: 'wait_for' });
     // Scores land before the pointer: an interrupted pin must never leave a pointer
-    // referencing a partial snapshot.
-    expect(captured.map(({ _id }) => _id)).toEqual(['baseline-1:score-doc-1', 'baseline-1']);
+    // referencing a partial snapshot. Only the final pointer write waits for a refresh.
+    expect(create.mock.calls.map(([args]) => args.refresh)).toEqual([false, 'wait_for']);
+    expect(captured.map(({ _id }) => _id)).toEqual([
+      `baseline-1:${createHash('sha256').update('score-doc-1').digest('hex')}`,
+      'baseline-1',
+    ]);
     expect(captured[1]).toMatchObject({
       doc_kind: 'pointer',
       space_ids: ['default'],
@@ -213,7 +218,9 @@ describe('PinnedBaselineService', () => {
     const writtenIds = (
       create.mock.calls[0][0] as { documents: Array<{ _id: string }> }
     ).documents.map(({ _id }) => _id);
-    expect(writtenIds).toEqual(['baseline-1:score-doc-1']);
+    expect(writtenIds).toEqual([
+      `baseline-1:${createHash('sha256').update('score-doc-1').digest('hex')}`,
+    ]);
   });
 
   it('findLatest queries pointer docs by suite/model/space and maps the hit', async () => {
@@ -290,7 +297,11 @@ describe('PinnedBaselineService', () => {
 
     search
       .mockResolvedValueOnce({
-        hits: { hits: [{ _source: { doc_kind: 'pointer', baseline: { id: 'baseline-1' } } }] },
+        hits: {
+          hits: [
+            { _source: { doc_kind: 'pointer', baseline: { id: 'baseline-1', score_count: 1 } } },
+          ],
+        },
       })
       .mockResolvedValueOnce({
         hits: {
@@ -337,6 +348,38 @@ describe('PinnedBaselineService', () => {
     expect(scores![0]).toMatchObject({ experiment_id: 'exp-1' });
   });
 
+  it('getScores refuses a snapshot whose readable scores disagree with the pointer count', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, search } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    search
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            { _source: { doc_kind: 'pointer', baseline: { id: 'baseline-1', score_count: 2 } } },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                ...getScoreDocument(),
+                doc_kind: 'score',
+                baseline: { id: 'baseline-1' },
+              },
+            },
+          ],
+        },
+      });
+
+    await expect(
+      service.getScores({ baselineId: 'baseline-1', spaceId: 'default' })
+    ).rejects.toThrow('snapshot is incomplete');
+  });
+
   it('getScores answers an unknown or invisible baseline with undefined, not an empty list', async () => {
     const logger = loggingSystemMock.createLogger();
     const { coreDataStreams, search } = createDataStreamsMock();
@@ -348,6 +391,81 @@ describe('PinnedBaselineService', () => {
       service.getScores({ baselineId: 'nope', spaceId: 'default' })
     ).resolves.toBeUndefined();
     expect(search).toHaveBeenCalledTimes(1);
+  });
+
+  it('pin returns an already-published baseline untouched instead of rewriting it', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create, search } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              '@timestamp': '2026-11-01T00:00:00.000Z',
+              doc_kind: 'pointer',
+              space_ids: ['default'],
+              baseline: {
+                id: 'baseline-1',
+                suite_id: 'suite-1',
+                execution_id: 'bk-1::suite-1::gpt-5',
+                judge_model_id: 'glm-5.2',
+                pinned_at: '2026-11-01T00:00:00.000Z',
+                score_count: 7,
+                dataset_ids: ['dataset-1'],
+              },
+              task: { model: { id: 'gpt-5' } },
+              metadata: { git: {} },
+            },
+          },
+        ],
+      },
+    });
+
+    const baseline = await service.pin({
+      pointer: getPointer(),
+      scores: [{ id: 'score-doc-1', document: getScoreDocument() }],
+      spaceIds: ['default'],
+    });
+
+    // The published pin wins: nothing is written, and the stored metadata is returned.
+    expect(create).not.toHaveBeenCalled();
+    expect(baseline).toMatchObject({
+      baseline_id: 'baseline-1',
+      score_count: 7,
+      pinned_at: '2026-11-01T00:00:00.000Z',
+    });
+  });
+
+  it('pin publishes no pointer when a later snapshot chunk fails', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    create
+      .mockImplementationOnce(async ({ documents }: { documents: Array<{ _id: string }> }) => ({
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+      }))
+      .mockImplementationOnce(async () => ({
+        errors: true,
+        items: [{ create: { status: 503, error: { reason: 'shard unavailable' } } }],
+      }));
+
+    await expect(
+      service.pin({
+        pointer: getPointer(),
+        scores: Array.from({ length: 1500 }, (_, index) => ({
+          id: `score-doc-${index}`,
+          document: getScoreDocument(),
+        })),
+        spaceIds: ['default'],
+      })
+    ).rejects.toThrow('shard unavailable');
+
+    // The first chunk succeeded, the second failed, and the pointer write never happened.
+    expect(create).toHaveBeenCalledTimes(2);
   });
 
   it('pin writes a large snapshot in bounded chunks before the pointer', async () => {

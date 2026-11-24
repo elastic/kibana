@@ -24,13 +24,18 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 
 /**
- * One execution is one baseline: the id is derived from (suite, execution) rather than
- * minted per request, so a retried `_pin` rewrites the same document IDs instead of
+ * One execution is one baseline per space: the id is derived from the tuple rather than
+ * minted per request, so a retried `_pin` targets the same document IDs instead of
  * stranding a pointerless snapshot per failed attempt, and pinning the same execution
- * twice is a no-op rather than a duplicate.
+ * twice is a no-op rather than a duplicate. The space is part of the id so pinning a
+ * shared execution in a second space creates that space's own baseline instead of
+ * colliding with the first one's documents. JSON encoding keeps distinct tuples from
+ * hashing alike whatever characters the ids contain.
  */
-const deterministicBaselineId = (suiteId: string, executionId: string): string =>
-  createHash('sha256').update(`${suiteId}\0${executionId}`).digest('hex');
+const deterministicBaselineId = (spaceId: string, suiteId: string, executionId: string): string =>
+  createHash('sha256')
+    .update(JSON.stringify([spaceId, suiteId, executionId]))
+    .digest('hex');
 import { EVALS_API_PRIVILEGES } from '@kbn/evals-plugin/common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -163,7 +168,7 @@ export function registerEvalBaselineRoutes({
 
       const baseline = await evalBaselines.pin({
         pointer: {
-          baseline_id: deterministicBaselineId(suiteId, executionId),
+          baseline_id: deterministicBaselineId(spaceId, suiteId, executionId),
           suite_id: suiteId,
           execution_id: executionId,
           task_model: scoreDocuments[0].task.model,

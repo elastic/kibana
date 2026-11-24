@@ -36,9 +36,11 @@ describe('resolveJudgeModelIds', () => {
 
   it('counts a recorded judge on legacy documents that predate evaluator.kind', () => {
     const legacyScore = {
-      evaluator: { name: 'judge', score: 1, model: { id: 'glm-5.2' } },
+      evaluator: { name: 'judge', score: 1, model: { id: 'legacy-judge' } },
     } as unknown as EvaluationScoreDocument;
 
-    expect(resolveJudgeModelIds([legacyScore, llmScore('glm-5.2')])).toEqual(['glm-5.2']);
+    // The legacy score alone must resolve, so a regression in legacy attribution
+    // cannot hide behind an explicitly typed score supplying the same model.
+    expect(resolveJudgeModelIds([legacyScore])).toEqual(['legacy-judge']);
   });
 });

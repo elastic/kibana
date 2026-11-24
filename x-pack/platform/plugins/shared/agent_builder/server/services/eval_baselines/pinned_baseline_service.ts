@@ -43,17 +43,12 @@ interface PinnedBaselinePointerDocument {
 // ingestion puts on one request, so a 10k-score pin doesn't go out as a single huge bulk.
 const BULK_WRITE_CHUNK_SIZE = 1000;
 
-// Elasticsearch caps document IDs at 512 bytes. A source score ID long enough to overflow
-// the combined ID is hashed instead (still deterministic per source doc, so retried pins
-// don't duplicate), keeping the readable form for the common auto-generated IDs.
-const MAX_DOCUMENT_ID_BYTES = 512;
-const snapshotDocumentId = (baselineId: string, scoreId: string): string => {
-  const documentId = `${baselineId}:${scoreId}`;
-  if (Buffer.byteLength(documentId, 'utf8') <= MAX_DOCUMENT_ID_BYTES) {
-    return documentId;
-  }
-  return `${baselineId}:${createHash('sha256').update(scoreId).digest('hex')}`;
-};
+// The source score ID is always hashed: it keeps the combined ID under Elasticsearch's
+// 512-byte cap whatever the source ID looks like, stays deterministic per source doc (so
+// retried pins target the same IDs), and a single form leaves no literal/hashed namespace
+// seam where two distinct scores could collide on one snapshot ID.
+const snapshotDocumentId = (baselineId: string, scoreId: string): string =>
+  `${baselineId}:${createHash('sha256').update(scoreId).digest('hex')}`;
 
 const pointerToResponse = (doc: PinnedBaselinePointerDocument): PinnedBaseline => ({
   baseline_id: doc.baseline.id,
@@ -134,26 +129,58 @@ export class PinnedBaselineService {
     }));
 
     const client = await this.getClient();
+
+    // A published pin is immutable: once its pointer exists, a retry (or a re-pin after
+    // more scores arrived for the execution) must not grow the stored snapshot past the
+    // pointer's recorded count, so it returns the existing pin untouched.
+    const existingPointer = await this.findPointerById(client, pointer.baseline_id);
+    if (existingPointer) {
+      this.logger.info(
+        `Baseline ${pointer.baseline_id} is already pinned; returning the existing pin.`
+      );
+      return pointerToResponse(existingPointer);
+    }
+
     // Bulk writes are not atomic, and `findLatest` selects whatever pointer exists: write
     // the snapshot first and publish the pointer only once every score landed, so a
-    // partially-written pin never becomes the active baseline.
+    // partially-written pin never becomes the active baseline. Only the pointer write
+    // waits for a refresh; the scores become searchable with it, and waiting per chunk
+    // would serialize a full pin over many refresh intervals.
     if (scoreDocuments.length > 0) {
-      await this.createDocuments(client, scoreDocuments, pointer.baseline_id);
+      await this.createDocuments(client, scoreDocuments, pointer.baseline_id, false);
     }
-    await this.createDocuments(client, [pointerDocument], pointer.baseline_id);
+    await this.createDocuments(client, [pointerDocument], pointer.baseline_id, 'wait_for');
 
     return pointerToResponse(pointerDocument);
+  }
+
+  private async findPointerById(
+    client: AnyIDataStreamClient,
+    baselineId: string
+  ): Promise<PinnedBaselinePointerDocument | undefined> {
+    const response = await client.search({
+      query: {
+        bool: {
+          must: [{ term: { doc_kind: 'pointer' } }, { term: { 'baseline.id': baselineId } }],
+        },
+      },
+      size: 1,
+      allow_partial_search_results: false,
+    });
+    const source = response.hits?.hits?.[0]?._source;
+    return source ? (source as unknown as PinnedBaselinePointerDocument) : undefined;
   }
 
   private async createDocuments<T extends { _id: string }>(
     client: AnyIDataStreamClient,
     documents: T[],
-    baselineId: string
+    baselineId: string,
+    refresh: false | 'wait_for'
   ): Promise<void> {
     for (let offset = 0; offset < documents.length; offset += BULK_WRITE_CHUNK_SIZE) {
       const response = await client.create({
         documents: documents.slice(offset, offset + BULK_WRITE_CHUNK_SIZE),
-        refresh: 'wait_for',
+        refresh,
       });
 
       const conflicted = response.items.filter((item) => item.create?.status === 409).length;
@@ -241,7 +268,10 @@ export class PinnedBaselineService {
       size: 1,
       allow_partial_search_results: false,
     });
-    if ((pointerResponse.hits?.hits ?? []).length === 0) {
+    const pointerSource = pointerResponse.hits?.hits?.[0]?._source as
+      | PinnedBaselinePointerDocument
+      | undefined;
+    if (!pointerSource) {
       return undefined;
     }
 
@@ -254,9 +284,22 @@ export class PinnedBaselineService {
     });
 
     const hits = response.hits?.hits ?? [];
-    return hits
+    const scores = hits
       .map((hit) => hit._source)
       .filter((source): source is PinnedBaselineScoreDocument => source !== undefined)
       .map(({ doc_kind: docKind, baseline, ...score }) => score as EvaluationScoreDocument);
+
+    // The pointer records how many scores its snapshot holds; a comparison must fail
+    // explicitly on a drifted snapshot (e.g. early chunks aged out of a rolled-over
+    // backing index) rather than quietly run against a different set of scores.
+    const expectedCount = pointerSource.baseline.score_count;
+    if (scores.length !== expectedCount) {
+      throw new Error(
+        `Pinned baseline "${baselineId}" snapshot is incomplete: its pointer records ` +
+          `${expectedCount} score(s) but ${scores.length} are readable. Re-pin the baseline.`
+      );
+    }
+
+    return scores;
   }
 }
