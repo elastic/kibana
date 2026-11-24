@@ -139,7 +139,11 @@ function reverseBuildVisualizationState(
       props.metric.apply_color_to =
         visualization.colorMode === 'Background' ? 'background' : 'value';
 
-      const color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
+      const color =
+        fromColorByValueLensStateToAPI(
+          visualization.palette,
+          LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS
+        ) ?? AUTO_COLOR;
       if (isColorByValueAbsolute(color) || isAutoColor(color) || isColorByValuePalette(color)) {
         props.metric.color = color;
       }

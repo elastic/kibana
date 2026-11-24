@@ -127,6 +127,7 @@ describe('resolveWorkerIndexCoverage', () => {
       name: ['logs-*', 'custom-*'],
       allow_no_indices: true,
       expand_wildcards: ['open'],
+      ignore_unavailable: true,
     });
   });
 
@@ -348,6 +349,122 @@ describe('resolveWorkerIndexCoverage', () => {
       });
       expect(esClient.security.getRole).not.toHaveBeenCalled();
       expect(management.getLatestFinishedWorkflowExecution).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('under a lenient caller resolve', () => {
+    const prunedSweep = sweepScope({
+      index_patterns: ['logs-*'],
+      missing: ['custom-edr-1'],
+    });
+
+    it('reports a name the sweep dropped as unreadable by the worker', async () => {
+      const { run } = setup({
+        universe: ['logs-*', 'custom-edr-1'],
+        callerResolves: resolved('logs-x', 'custom-edr-1'),
+        sweep: { scope: prunedSweep },
+        role: null,
+      });
+      const result = await run();
+      expect(result.source).toBe('last_sweep');
+      expect(result.unreadable_by_worker).toEqual(['custom-edr-1']);
+    });
+
+    it('keeps a remote miss the sweep observed', async () => {
+      const { run } = setup({
+        universe: ['logs-*', 'remote:custom-1'],
+        callerResolves: resolved('logs-x', 'remote:custom-1'),
+        sweep: {
+          scope: sweepScope({
+            index_patterns: ['logs-*', 'remote:custom-1'],
+            missing: ['remote:custom-1'],
+          }),
+        },
+      });
+      const result = await run();
+      expect(result.unreadable_by_worker).toEqual(['remote:custom-1']);
+    });
+
+    it('puts a name the caller cannot read in missing_for_everyone with no callout', async () => {
+      const { run } = setup({
+        universe: ['logs-*', 'custom-edr-1'],
+        callerResolves: resolved('logs-x'),
+        sweep: { scope: prunedSweep },
+      });
+      const result = await run();
+      expect(result.missing_for_everyone).toEqual(['custom-edr-1']);
+      expect(result.unreadable_by_worker).toEqual([]);
+    });
+
+    it('still reports caller_unreadable when the caller resolve is denied', async () => {
+      const { run } = setup({
+        callerResolves: responseError(403),
+      });
+      const result = await run();
+      expect(result.unavailable_reason).toBe('caller_unreadable');
+    });
+
+    it('falls back to the role for a pre-change sweep with a dotted index pattern', async () => {
+      const { run } = setup({
+        universe: ['logs-*'],
+        sweep: { scope: sweepScope({ index_patterns: ['logs-*', '.alerts-x'], missing: [] }) },
+      });
+      const result = await run();
+      expect(result.source).toBe('role');
+    });
+
+    it('does not report a resolving .ds- entry on the role path', async () => {
+      const backing = '.ds-logs-okta.system-default-2026.09.30-000001';
+      const { run } = setup({
+        universe: ['logs-*', backing],
+        callerResolves: {
+          indices: [],
+          aliases: [],
+          data_streams: [
+            { name: 'logs-okta.system-default', backing_indices: [backing], timestamp_field: '' },
+          ],
+        },
+        sweep: undefined,
+      });
+      const result = await run();
+      expect(result.source).toBe('role');
+      expect(result.missing_for_everyone).not.toContain(backing);
+      expect(result.unreadable_by_worker).not.toContain(backing);
+    });
+  });
+
+  describe('policy-skipped entries', () => {
+    it('reports the skipped list on every branch', async () => {
+      const skipped = ['.siem-signals-infosec-detections'];
+
+      const role = await setup().run({ policySkippedPatterns: skipped });
+      expect(role.policy_skipped).toEqual(skipped);
+
+      const failing = setup({ callerResolves: new Error('boom') });
+      const failed = await failing.run({ policySkippedPatterns: skipped });
+      expect(failed.policy_skipped).toEqual(skipped);
+
+      const withDefault = await setup().run();
+      expect(withDefault.policy_skipped).toEqual([]);
+    });
+
+    it('returns before any Elasticsearch call when no positive entry is left', async () => {
+      const { esClient, run } = setup({ universe: ['-foo*'] });
+
+      const result = await run({ policySkippedPatterns: ['.alerts-x'] });
+
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          universe: [],
+          unreadable_by_worker: [],
+          missing_for_everyone: [],
+          source: 'unavailable',
+          unavailable_reason: 'empty_universe',
+          checked_at: null,
+          policy_skipped: ['.alerts-x'],
+        })
+      );
     });
   });
 

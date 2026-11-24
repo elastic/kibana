@@ -6,94 +6,117 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { EuiBadge } from '@elastic/eui';
+import userEvent from '@testing-library/user-event';
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusPopoverButton } from './status_popover_button';
+
+/**
+ * Collects the color related CSS declarations Emotion generated for the element's classes,
+ * so that colors can be compared without depending on the generated class names.
+ */
+const getColorDeclarations = (element: HTMLElement): string[] => {
+  // only Emotion's generated classes (`css-<hash>-<label>`) carry the badge's styles
+  const classNames = Array.from(element.classList).filter((c) => c.startsWith('css-'));
+  const declarations: string[] = [];
+
+  Array.from(document.styleSheets).forEach((sheet) => {
+    Array.from(sheet.cssRules).forEach((rule) => {
+      if (
+        rule instanceof CSSStyleRule &&
+        classNames.some((c) => rule.selectorText.includes(`.${c}`))
+      ) {
+        Array.from(rule.style).forEach((property) => {
+          if (/color/i.test(property)) {
+            declarations.push(`${property}: ${rule.style.getPropertyValue(property)}`);
+          }
+        });
+      }
+    });
+  });
+
+  return declarations.sort();
+};
 
 describe('StatusPopoverButton', () => {
   const onClick = jest.fn();
 
-  it('renders', async () => {
-    const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    expect(
-      wrapper.find(`[data-test-subj="case-status-badge-popover-button-open"]`).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-status-badge-popover-button-open"] .euiBadge__iconButton`)
-        .exists()
-    ).toBeTruthy();
+  it('renders', async () => {
+    render(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
+
+    expect(screen.getByTestId('case-status-badge-popover-button-open')).toBeInTheDocument();
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
   it('renders with the pop over enabled by default', async () => {
-    const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
+    render(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-status-badge-popover-button-open"] .euiBadge__iconButton`)
-        .first()
-        .prop('disabled')
-    ).toBe(false);
+    expect(screen.getByRole('button')).toBeEnabled();
   });
 
   it('disables the button correctly', async () => {
-    const wrapper = mount(
-      <StatusPopoverButton disabled={true} status={CaseStatuses.open} onClick={onClick} />
-    );
+    render(<StatusPopoverButton disabled={true} status={CaseStatuses.open} onClick={onClick} />);
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-status-badge-popover-button-open"] .euiBadge__iconButton`)
-        .first()
-        .prop('disabled')
-    ).toBe(true);
+    expect(screen.getByRole('button')).toBeDisabled();
   });
 
   it('calls onClick when pressing the badge', async () => {
-    const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
+    render(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
 
-    wrapper
-      .find(`[data-test-subj="case-status-badge-popover-button-open"] .euiBadge__iconButton`)
-      .first()
-      .simulate('click');
+    await userEvent.click(screen.getByRole('button'));
     expect(onClick).toHaveBeenCalled();
   });
 
   describe('Colors', () => {
-    it('shows the correct color when status is open', async () => {
-      const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
+    it.each([
+      [CaseStatuses.open, 'success'],
+      [CaseStatuses['in-progress'], 'primary'],
+      [CaseStatuses.closed, 'default'],
+    ] as const)('renders the %s status badge with the %s color', (status, color) => {
+      const badgeProps = {
+        iconType: 'chevronSingleDown',
+        iconSide: 'right',
+        iconOnClick: onClick,
+        iconOnClickAriaLabel: 'aria-label',
+        'data-test-subj': 'badge',
+      } as const;
 
-      expect(
-        wrapper
-          .find(`[data-test-subj="case-status-badge-popover-button-open"]`)
-          .first()
-          .prop('color')
-      ).toBe('success');
-    });
+      const getColors = (element: React.ReactElement, testId = 'badge') => {
+        const { unmount } = render(element);
+        const colors = getColorDeclarations(screen.getByTestId(testId));
+        unmount();
+        return colors;
+      };
 
-    it('shows the correct color when status is in-progress', async () => {
-      const wrapper = mount(
-        <StatusPopoverButton status={CaseStatuses['in-progress']} onClick={onClick} />
+      const actual = getColors(
+        <StatusPopoverButton status={status} onClick={onClick} />,
+        `case-status-badge-popover-button-${status}`
+      );
+      const expected = getColors(
+        <EuiBadge {...badgeProps} color={color}>
+          {'label'}
+        </EuiBadge>
       );
 
-      expect(
-        wrapper
-          .find(`[data-test-subj="case-status-badge-popover-button-in-progress"]`)
-          .first()
-          .prop('color')
-      ).toBe('primary');
-    });
+      expect(actual).not.toHaveLength(0);
+      expect(actual).toEqual(expected);
 
-    it('shows the correct color when status is closed', async () => {
-      const wrapper = mount(<StatusPopoverButton status={CaseStatuses.closed} onClick={onClick} />);
-
-      expect(
-        wrapper
-          .find(`[data-test-subj="case-status-badge-popover-button-closed"]`)
-          .first()
-          .prop('color')
-      ).toBe('default');
+      (['success', 'primary', 'default'] as const)
+        .filter((c) => c !== color)
+        .forEach((other) => {
+          expect(
+            getColors(
+              <EuiBadge {...badgeProps} color={other}>
+                {'label'}
+              </EuiBadge>
+            )
+          ).not.toEqual(actual);
+        });
     });
   });
 });

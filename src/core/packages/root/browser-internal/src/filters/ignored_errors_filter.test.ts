@@ -16,13 +16,18 @@ describe('ignoredErrorsFilter', () => {
       transactions: [],
       errors: [
         { exception: { type: '', message: RESIZE_OBSERVER_LOOP_ERROR } },
+        { exception: { type: '', message: 'Script error.' } },
+        { exception: { type: 'Error', message: 'Script error. in bundle.js' } },
         { exception: { type: 'Error', message: 'Unexpected error' } },
       ],
     };
 
     expect(ignoredErrorsFilter(payload)).toEqual({
       transactions: [],
-      errors: [{ exception: { type: 'Error', message: 'Unexpected error' } }],
+      errors: [
+        { exception: { type: 'Error', message: 'Script error. in bundle.js' } },
+        { exception: { type: 'Error', message: 'Unexpected error' } },
+      ],
     });
   });
 

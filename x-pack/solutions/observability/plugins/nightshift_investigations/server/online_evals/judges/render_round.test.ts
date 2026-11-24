@@ -9,8 +9,10 @@ import {
   MAX_TOOL_CALLS_CHARS,
   MAX_TOOL_FIELD_CHARS,
   renderRound,
+  renderToolCalls,
   renderTraceMessages,
   roundEvidenceSchema,
+  truncateKeepingEnds,
 } from './render_round';
 
 describe('renderRound', () => {
@@ -190,5 +192,37 @@ describe('renderTraceMessages', () => {
       expect.objectContaining({ toolCallId: 'call_80' })
     );
     expect(messages[messages.length - 1]).toEqual({ role: 'assistant', content: 'a' });
+  });
+});
+
+describe('truncateKeepingEnds', () => {
+  it('leaves text that fits unchanged', () => {
+    expect(truncateKeepingEnds('short', 10)).toBe('short');
+  });
+
+  it('keeps the start and the end and counts the characters cut', () => {
+    expect(truncateKeepingEnds('abcdefghij', 4)).toBe('ab\n[truncated 6 characters]\nij');
+  });
+});
+
+describe('renderToolCalls', () => {
+  it('cuts each argument and result to the field limit, keeping both ends', () => {
+    const { text, omitted } = renderToolCalls(
+      {
+        input: { message: 'Investigate' },
+        steps: [
+          { tool_id: 'bash', arguments: 'a'.repeat(50), result: `HEAD${'x'.repeat(100)}TAIL` },
+        ],
+        response: { message: 'Done' },
+      },
+      { maxFieldChars: 20 }
+    );
+
+    expect(omitted).toBe(0);
+    expect(text).toContain('## Tool call 1: bash');
+    expect(text).toContain('HEAD');
+    expect(text).toContain('TAIL');
+    expect(text).toMatch(/\[truncated 88 characters\]/);
+    expect(text).toMatch(/\[truncated 30 characters\]/);
   });
 });

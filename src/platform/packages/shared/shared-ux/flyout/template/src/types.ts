@@ -61,10 +61,18 @@ export interface FlyoutBodyTabPanelProps {
   'data-test-subj'?: string;
 }
 
+/** Heading elements the header title can render as. */
+export type FlyoutHeaderTitleElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
 /** Props for the declarative `FlyoutTemplate.Header` zone. */
 export interface FlyoutHeaderProps {
-  /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
+  /** Title rendered by the header, in the heading element set by `titleElement`. */
   title: ReactNode;
+  /**
+   * Heading element for the title, to fit the flyout into the page's heading outline. Defaults to
+   * `h2`. The title's visual size does not depend on it.
+   */
+  titleElement?: FlyoutHeaderTitleElement;
   /**
    * Plain-text form of `title`, used to name the flyout in EUI's flyout menu. Set it when `title`
    * is a `ReactNode`. `flyoutMenuProps.title` wins when both are set. With a string `title`, it also
@@ -86,6 +94,11 @@ export interface FlyoutHeaderProps {
    * become part of the flyout's accessible name.
    */
   isLoading?: boolean;
+  /**
+   * Accessible name of the `isLoading` spinner, saying what is loading. Without it, the spinner
+   * has EUI's generic "Loading" name.
+   */
+  loadingLabel?: string;
   /** Subdued text below the title. */
   description?: ReactNode;
   /**
@@ -224,8 +237,8 @@ type FlyoutFooterSecondaryActionCommonProps = Omit<
   FlyoutFooterActionBaseProps;
 
 /**
- * Icons the AI-styled secondary action accepts. `addToChat` is left out because `AiButtonEmpty`
- * replaces the button's text with its own label for that icon, which would override `label`.
+ * Icons an AI-styled secondary action can take while the caller supplies `label`.
+ * `addToChat` is a separate variant: `AiButtonEmpty` supplies the shared Add to chat label.
  */
 export type FlyoutFooterAiActionIconType = Exclude<AiButtonIconType, 'addToChat'>;
 
@@ -236,6 +249,14 @@ export type FlyoutFooterSecondaryActionProps =
       /** Renders the action with AI styling, for an action that hands off to an AI agent or chat. */
       variant: 'ai';
       iconType?: FlyoutFooterAiActionIconType;
+    })
+  | (Omit<FlyoutFooterSecondaryActionCommonProps, 'iconType' | 'label'> & {
+      /**
+       * Renders an Add to chat action. `AiButtonEmpty` supplies the shared label and sparkles icon,
+       * so `label` is not accepted.
+       */
+      variant: 'ai';
+      iconType: 'addToChat';
     });
 
 type WithStringName<T> = T extends { name: ReactNode } ? Omit<T, 'name'> & { name: string } : T;

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { type Props, schema } from '@kbn/config-schema';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 
-import type { SettingsConfig, SettingsSection } from '../../../common/settings/types';
+import type { SettingsDefinition, SettingsSection } from '../../../common/settings/types';
 import { getAgentPolicyAdvancedSettings } from '../../../common/settings';
 import type { AgentPolicy } from '../../types';
 
@@ -20,7 +20,7 @@ export function getSettingsAPISchema(settingSection: SettingsSection) {
   return _getSettingsAPISchema(settings);
 }
 
-export function _getSettingsAPISchema(settings: SettingsConfig[]): Props {
+export function _getSettingsAPISchema(settings: SettingsDefinition[]): Props {
   const validations: Props = {};
   settings.forEach((setting) => {
     if (!setting.api_field) {
@@ -74,7 +74,7 @@ export function getSettingsValuesForAgentPolicy(
 }
 
 export function _getSettingsValuesForAgentPolicy(
-  settings: SettingsConfig[],
+  settings: SettingsDefinition[],
   agentPolicy: AgentPolicy
 ) {
   const settingsValues: { [k: string]: any } = {};

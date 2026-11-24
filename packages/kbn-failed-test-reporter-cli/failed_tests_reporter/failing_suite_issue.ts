@@ -11,6 +11,7 @@ import Path from 'path';
 import type { BuildRun, TestFramework } from '@kbn/scout-reporting';
 import {
   FLAKY_TEST_SUITE_METADATA_PREFIX,
+  readFlakySuiteIssueMetadata,
   SKIP_TIP,
   suiteIssueTitle,
   type FlakySuiteIssueMetadata,
@@ -21,13 +22,15 @@ import {
   formatFullFailureMessage,
   FRAMEWORK_LABELS,
   inlineCode,
+  issueList,
   KIBANA_BLOB_URL,
   plural,
   table,
   targetEnvironment,
-  testDashboardUrl,
+  type PreviousIssues,
 } from '../flaky_test_issues/markdown';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
+import { testHistoryUrl } from './test_history_dashboard';
 
 const KIBANA_COMPARE_URL = 'https://github.com/elastic/kibana/compare';
 
@@ -75,6 +78,8 @@ export interface FailingSuiteIssueContext {
   branch: string;
   /** Numbers of issues that mention the suite's file or are about some of its tests. */
   relatedIssues?: number[];
+  /** The per-test issues of its tests closed as its duplicates once it is filed. */
+  previousIssues?: PreviousIssues;
   /** When the issue is filed, recorded as the break's first post on its pipeline and branch. */
   postedAt?: Date;
 }
@@ -142,6 +147,34 @@ export const failingSuiteIssueMetadata = (
     : {}),
 });
 
+/**
+ * The suite metadata of an issue a break is posted on, with the break's tests, branch and pipeline
+ * added to what it recorded: `/skip` skips the suite on every recorded branch, so a suite filed for
+ * `main` that breaks on `9.6` gets skipped there too. The pipeline moves last, as the failed-test
+ * alerts read the latest failure last.
+ */
+export const breakSuiteMetadata = (
+  body: string,
+  suite: FailingSuite,
+  { pipeline, branch }: Pick<FailingSuiteIssueContext, 'pipeline' | 'branch'>
+): Pick<FailingSuiteIssueMetadata, 'suite.testIds' | 'suite.branches' | 'suite.pipelines'> => {
+  const recorded = readFlakySuiteIssueMetadata(body);
+  const pipelines = recorded?.['suite.pipelines'] ?? [];
+  return {
+    'suite.testIds': [
+      ...new Set([
+        ...(recorded?.['suite.testIds'] ?? []),
+        ...suite.tests.map(({ testId }) => testId),
+      ]),
+    ],
+    'suite.branches': [...new Set([...(recorded?.['suite.branches'] ?? []), branch])],
+    'suite.pipelines': [
+      ...pipelines.filter((recordedPipeline) => recordedPipeline !== pipeline),
+      pipeline,
+    ],
+  };
+};
+
 const blobLink = (repoRelativePath: string): string =>
   `[${inlineCode(repoRelativePath)}](${KIBANA_BLOB_URL}/${repoRelativePath})`;
 
@@ -205,12 +238,17 @@ const opening = (suite: FailingSuite, ctx: FailingSuiteIssueContext): string => 
   );
 };
 
-const testsList = (suite: FailingSuite): string =>
+/** One line per test, with the issues it was tracked in before, if any. */
+const testsList = (suite: FailingSuite, { previousIssues }: FailingSuiteIssueContext): string =>
   [
     'Consistently failing tests:',
-    ...suite.tests.map(
-      (test) => `- ${inlineCode(test.title)} · [history](${testDashboardUrl(test.testId)})`
-    ),
+    ...suite.tests.map((test) => {
+      const previous = previousIssues?.get(test.testId) ?? [];
+      return (
+        `- ${inlineCode(test.title)} · [history](${testHistoryUrl(test.testId)})` +
+        (previous.length > 0 ? ` · previously tracked in ${issueList(previous)}` : '')
+      );
+    }),
   ].join('\n');
 
 const suiteDetails = (suite: FailingSuite): string => {
@@ -243,9 +281,7 @@ const lastFailure = (suite: FailingSuite): string | undefined => {
 };
 
 const relatedIssues = ({ relatedIssues: numbers }: FailingSuiteIssueContext): string | undefined =>
-  numbers && numbers.length > 0
-    ? `Possibly related: ${numbers.map((number) => `#${number}`).join(', ')}.`
-    : undefined;
+  numbers && numbers.length > 0 ? `Possibly related: ${issueList(numbers)}.` : undefined;
 
 /** `` `a` ``, `` `a` and `b` `` or `` `a`, `b` and `c` ``. */
 const listOf = (items: readonly string[]): string =>
@@ -280,7 +316,7 @@ export const renderFailingSuiteIssueBody = (
   updateIssueMetadata(
     [
       opening(suite, ctx),
-      testsList(suite),
+      testsList(suite, ctx),
       suiteDetails(suite),
       lastFailure(suite),
       relatedIssues(ctx),

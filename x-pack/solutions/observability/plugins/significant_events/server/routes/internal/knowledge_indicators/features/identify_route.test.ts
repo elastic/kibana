@@ -40,6 +40,9 @@ jest.mock('@kbn/streams-schema', () => ({
 
 jest.mock('../../../../lib/significant_events/features', () => ({
   MS_PER_DAY: 86_400_000,
+  MAX_ENTITY_FILTERS: jest.requireActual(
+    '../../../../lib/significant_events/features/get_entity_filters'
+  ).MAX_ENTITY_FILTERS,
   MAX_INFERENCE_DOCUMENTS_BYTES: 288 * 1024,
   MAX_INFERENCE_DOCUMENT_BYTES: 32 * 1024,
   MAX_INFERENCE_DOCUMENT_FIELDS: 100,
@@ -533,7 +536,8 @@ describe('inferred feature identification route', () => {
         run_id: 'run-1',
         workflow_execution_id: 'workflow-run-1',
         parent_workflow_execution_id: 'onboarding-run-1',
-      })
+      }),
+      expect.anything()
     );
   });
 

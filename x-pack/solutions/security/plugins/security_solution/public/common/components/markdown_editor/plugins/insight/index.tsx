@@ -40,7 +40,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { EventHit } from '@kbn/securitysolution-timeline-search-strategy';
 import { FormProvider, useController, useForm } from 'react-hook-form';
-import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
+import { getTimelineFieldsDataFromHit } from '../../../../../../common/utils/get_timeline_fields_data_from_hit';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';

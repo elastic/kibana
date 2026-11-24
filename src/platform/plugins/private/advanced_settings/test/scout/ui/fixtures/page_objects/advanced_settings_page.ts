@@ -9,6 +9,9 @@
 
 import type { ScoutPage } from '@kbn/scout';
 
+// Saving a setting waits on a Kibana + Elasticsearch round-trip, slow on Cloud.
+const SAVE_TIMEOUT_MS = 30_000;
+
 export class AdvancedSettingsPage {
   readonly searchBar;
   readonly saveButton;
@@ -50,7 +53,7 @@ export class AdvancedSettingsPage {
   // visible and waiting on it is a no-op).
   async saveAndWait() {
     await this.saveButton.click();
-    await this.saveButton.waitFor({ state: 'hidden' });
+    await this.saveButton.waitFor({ state: 'hidden', timeout: SAVE_TIMEOUT_MS });
   }
 
   async setAdvancedSettingsSelect(settingName: string, value: string) {

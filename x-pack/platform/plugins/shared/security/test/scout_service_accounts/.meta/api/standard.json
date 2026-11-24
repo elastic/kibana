@@ -1,9 +1,48 @@
 {
-  "sha1": "05c7b9b25386e30abadaa3d186023fb219dc6e45",
+  "sha1": "029a55aea5e2895a43827dac660eae74738274c3",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "0b7abb3917a2dfb-c650d42226c5a04",
+      "title": "Bulk update Elasticsearch service account workload bindings binds, rebinds and unbinds several workloads, each of which runs as its account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/bulk_update_workload_bindings.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "0b7abb3917a2dfb-1b3b5363fb3ccc3",
+      "title": "Bulk update Elasticsearch service account workload bindings refuses every change of a caller without manage_security, and audits each refusal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/bulk_update_workload_bindings.spec.ts",
+        "line": 195,
+        "column": 23
+      }
+    },
+    {
+      "id": "0b7abb3917a2dfb-dfb93814de247b3",
+      "title": "Bulk update Elasticsearch service account workload bindings changes nothing when two changes name the same workload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/bulk_update_workload_bindings.spec.ts",
+        "line": 272,
+        "column": 9
+      }
+    },
     {
       "id": "9c74fe5c346746e-5cff0607f7ce78a",
       "title": "Create Elasticsearch service accounts creates the account with the requested roles, mints its token, and reports the id, name and roles",
@@ -364,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 114,
+        "line": 116,
         "column": 23
       }
     },
@@ -377,7 +416,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 144,
+        "line": 146,
         "column": 14
       }
     },
@@ -390,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 212,
+        "line": 214,
         "column": 14
       }
     },
@@ -403,7 +442,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 219,
+        "line": 221,
         "column": 19
       }
     },
@@ -416,7 +455,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 242,
+        "line": 244,
         "column": 28
       }
     },
@@ -429,7 +468,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 271,
+        "line": 273,
         "column": 97
       }
     },
@@ -442,7 +481,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 298,
+        "line": 300,
         "column": 28
       }
     },
@@ -754,7 +793,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/principal_uiam_service_account.spec.ts",
-        "line": 28,
+        "line": 30,
         "column": 15
       }
     },
@@ -897,7 +936,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
-        "line": 182,
+        "line": 184,
         "column": 70
       }
     },
@@ -910,7 +949,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
-        "line": 200,
+        "line": 202,
         "column": 17
       }
     },
@@ -923,7 +962,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
-        "line": 216,
+        "line": 218,
         "column": 27
       }
     },
@@ -936,7 +975,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
-        "line": 244,
+        "line": 246,
         "column": 15
       }
     }

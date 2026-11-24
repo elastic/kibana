@@ -7,7 +7,9 @@
 
 import { globalSetupHook } from '@kbn/scout-oblt';
 import { ES_ARCHIVES } from '../../common/fixtures/constants';
+import { ingestMobileData } from '../../common/fixtures/mobile_data';
 import { ingestOtelRumData } from '../../common/fixtures/otel_rum_data';
+import { ingestTimeZoneData } from '../../common/fixtures/time_zone_data';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
 globalSetupHook(
@@ -15,6 +17,8 @@ globalSetupHook(
   { tag: DIGITAL_EXPERIENCE_TAGS },
   async ({ esArchiver, esClient, config }) => {
     await ingestOtelRumData(esClient);
+    await ingestTimeZoneData(esClient);
+    await ingestMobileData(esClient);
 
     // CI runs the setup in every lane of this config; only stateful specs read Classic RUM data,
     // and the archive's ILM settings do not exist on serverless.
