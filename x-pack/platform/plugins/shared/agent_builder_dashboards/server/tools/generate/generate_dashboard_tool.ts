@@ -302,11 +302,11 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
           });
         if (refreshIntervalFailure) {
           failures.push(refreshIntervalFailure);
-        }
-        // Reverting the refresh interval can leave the dashboard as it was.
-        if (latestVersion && isEqual(dashboardData, latestVersion.data)) {
-          logger.info('Dashboard was not updated because it did not change');
-          return toDashboardResult(dashboardData, dashboardAttachmentId, latestVersion.version);
+          // Reverting the refresh interval can leave the dashboard as it was.
+          if (latestVersion && isEqual(dashboardData, latestVersion.data)) {
+            logger.info('Dashboard was not updated because it did not change');
+            return toDashboardResult(dashboardData, dashboardAttachmentId, latestVersion.version);
+          }
         }
 
         const description = `Dashboard: ${dashboardData.title}`;
