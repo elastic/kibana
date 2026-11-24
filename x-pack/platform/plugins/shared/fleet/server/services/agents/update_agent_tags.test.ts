@@ -1092,6 +1092,69 @@ describe('update_agent_tags', () => {
         expect(errorResults[0].agent_id).toEqual(agentAction.agents[1]);
       });
 
+      it('should scope the error results of a batch to the space, as the results of updated agents are', async () => {
+        // of 2 agents, 1 failed, 1 conflicted and the update did not go through the 2nd and 3rd: it
+        // went through 1 agent of the 2 given, and that one failed
+        esClient.updateByQuery.mockResolvedValue({
+          failures: [{ id: 'agent1', cause: { reason: 'error reason' } }],
+          updated: 0,
+          version_conflicts: 0,
+          total: 1,
+        } as any);
+
+        await updateTagsBatch(
+          soClient,
+          esClient,
+          [{ id: 'agent1' } as Agent, { id: 'agent2' } as Agent],
+          {},
+          {
+            tagsToAdd: ['new'],
+            tagsToRemove: [],
+            total: 2,
+            spaceId: 'myspace',
+            retryCount: MAX_RETRY_COUNT,
+          }
+        );
+
+        // the failure, and the agent that the update skipped
+        const results = getErrorResults(esClient) as any[];
+        expect(results.map((result) => result.error).sort()).toEqual([
+          'agent not found, or not in the space of the action anymore',
+          'error reason',
+        ]);
+        expect(results.map((result) => result.namespaces)).toEqual([['myspace'], ['myspace']]);
+      });
+
+      it('should scope the result of a version conflict on the last retry to the space', async () => {
+        esClient.updateByQuery.mockResolvedValue({
+          failures: [],
+          updated: 1,
+          version_conflicts: 1,
+          total: 2,
+        } as any);
+
+        await expect(
+          updateTagsBatch(
+            soClient,
+            esClient,
+            [{ id: 'agent1' } as Agent, { id: 'agent2' } as Agent],
+            {},
+            {
+              tagsToAdd: ['new'],
+              tagsToRemove: [],
+              total: 2,
+              spaceId: 'myspace',
+              retryCount: MAX_RETRY_COUNT,
+            }
+          )
+        ).rejects.toBeInstanceOf(FleetVersionConflictError);
+
+        const results = getErrorResults(esClient) as any[];
+        expect(results.map((result) => [result.error, result.namespaces])).toEqual([
+          ['version conflict on last retry', ['myspace']],
+        ]);
+      });
+
       it('should not publish the id of an agent that left the space', async () => {
         esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1, total: 1 } as any);
 

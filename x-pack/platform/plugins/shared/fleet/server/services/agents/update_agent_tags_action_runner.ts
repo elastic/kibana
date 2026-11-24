@@ -334,7 +334,7 @@ export async function updateTagsBatch(
       skippedAgentIds.map((agentId) => ({
         agentId,
         actionId,
-        namespace: spaceId,
+        namespaces,
         error: 'agent not found, or not in the space of the action anymore',
       }))
     );
@@ -363,7 +363,7 @@ export async function updateTagsBatch(
       failures.map((failure) => ({
         agentId: failure.id,
         actionId,
-        namespace: spaceId,
+        namespaces,
         error: failure.cause.reason ?? undefined, // reason can be null and we want to replace it with undefined
       }))
     );
@@ -378,7 +378,7 @@ export async function updateTagsBatch(
         versionConflictIds.map((id) => ({
           agentId: id,
           actionId,
-          namespace: spaceId,
+          namespaces,
           error: 'version conflict on last retry',
         }))
       );
