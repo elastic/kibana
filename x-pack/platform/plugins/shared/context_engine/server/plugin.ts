@@ -32,6 +32,7 @@ import type {
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { installActionWorkflows } from './managed_workflows/install_action_workflows';
 import { registerImprovementRoutes } from './routes/improvements';
 import { registerSessionEventsRoutes } from './routes/session_events';
 import { registerSessionMemoryRoutes } from './routes/session_memory';
@@ -492,6 +493,15 @@ export class ContextEnginePlugin
       getWorkflowsManagement: () => this.workflowsManagementApiPromise,
       getAiIndexService: () => aiIndexService,
     });
+
+    // Improvements are put up as proposals that run these, so they are only needed with proposals.
+    if (this.proposalsProvider) {
+      void installActionWorkflows({
+        workflowsExtensions: startDeps.workflowsExtensions,
+        owner: CONTEXT_ENGINE_WORKFLOW_OWNER,
+        logger: this.logger.get('managed_workflows'),
+      });
+    }
 
     const soClient = coreStart.savedObjects.createInternalRepository();
     const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(soClient);
