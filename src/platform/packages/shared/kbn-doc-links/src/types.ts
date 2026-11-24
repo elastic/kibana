@@ -424,6 +424,7 @@ export interface DocLinks {
   readonly query: {
     readonly eql: string;
     readonly kueryQuerySyntax: string;
+    readonly kueryQueryNestedFields: string;
     readonly luceneQuery: string;
     readonly luceneQuerySyntax: string;
     readonly percolate: string;

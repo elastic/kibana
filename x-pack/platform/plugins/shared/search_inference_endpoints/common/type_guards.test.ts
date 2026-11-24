@@ -9,6 +9,7 @@ import {
   isCspRegion,
   isReasoningEffortLevel,
   isRegionPolicyConflictAttributes,
+  isTestableTaskType,
 } from './type_guards';
 
 describe('isCspRegion', () => {
@@ -67,6 +68,23 @@ describe('isReasoningEffortLevel', () => {
     expect(isReasoningEffortLevel(null)).toBe(false);
     expect(isReasoningEffortLevel(42)).toBe(false);
     expect(isReasoningEffortLevel({ effort: 'high' })).toBe(false);
+  });
+});
+
+describe('isTestableTaskType', () => {
+  it.each([
+    'chat_completion',
+    'completion',
+    'text_embedding',
+    'embedding',
+    'sparse_embedding',
+    'rerank',
+  ])('returns true for task type %s', (taskType) => {
+    expect(isTestableTaskType(taskType)).toBe(true);
+  });
+
+  it('returns false for an unsupported task type', () => {
+    expect(isTestableTaskType('unknown_type')).toBe(false);
   });
 });
 

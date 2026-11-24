@@ -23,6 +23,10 @@ import { entityInventoryRouter } from '../routes/config';
 import { EntityTablePreferencesProvider } from './context/entity_table_preferences_context';
 import { EntityTypesProvider } from './context/entity_types_context';
 import { createHttpEntityInventoryApiClient } from '../inventory_api/http_client';
+import { withPerformanceRecording } from '../inventory_api/with_performance_recording';
+import { ENTITY_INVENTORY_PERFORMANCE_OVERLAY_ENABLED } from '../../common/feature_flags';
+import { createPerformanceRecorder } from './performance_overlay/performance_recorder';
+import { PerformanceOverlay } from './performance_overlay/performance_overlay';
 
 interface EntityInventoryShellProps {
   PageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
@@ -77,10 +81,23 @@ export function renderApp(
 ) {
   const { PageTemplate } = plugins.observabilityShared.navigation;
 
+  // The client keeps its identity when the flag flips, so the page neither re-renders nor refetches.
+  const recorder = createPerformanceRecorder();
+  let isRecording = false;
+  const flagSubscription = core.featureFlags
+    .getBooleanValue$(ENTITY_INVENTORY_PERFORMANCE_OVERLAY_ENABLED, false)
+    .subscribe((enabled) => {
+      isRecording = enabled;
+    });
+
   const services: StartServices = {
     ...core,
     ...plugins,
-    inventoryApi: createHttpEntityInventoryApiClient(core.http),
+    inventoryApi: withPerformanceRecording(
+      createHttpEntityInventoryApiClient(core.http),
+      recorder,
+      () => isRecording
+    ),
     config,
   };
 
@@ -90,9 +107,13 @@ export function renderApp(
         <RouterProvider history={history} router={entityInventoryRouter}>
           <EntityInventoryShell PageTemplate={PageTemplate} />
         </RouterProvider>
+        <PerformanceOverlay recorder={recorder} />
       </KibanaContextProvider>
     ),
     element
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => {
+    flagSubscription.unsubscribe();
+    ReactDOM.unmountComponentAtNode(element);
+  };
 }

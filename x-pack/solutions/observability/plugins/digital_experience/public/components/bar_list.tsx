@@ -8,6 +8,7 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useFormatters } from '../hooks/use_formatters';
 
 export interface BarListItem {
@@ -17,15 +18,39 @@ export interface BarListItem {
   value: number;
 }
 
-/** The count of a row and its share of the total, e.g. `1,200 · 64%`. */
-export function ShareValue({ value, total }: { value: number; total: number }) {
+/** The share rounded to a whole percent, and `<1%` rather than `0%` for a share that isn't zero. */
+const wholePercentOf = (share: number, formatPercent: (share: number) => string): string => {
+  const whole = Math.round(share * 100) / 100;
+  if (whole === 0 && share > 0) {
+    return i18n.translate('xpack.digitalExperience.barList.underOnePercent', {
+      defaultMessage: '<{onePercent}',
+      values: { onePercent: formatPercent(0.01) },
+    });
+  }
+  return formatPercent(whole);
+};
+
+/**
+ * The count of a row and its share of the total, e.g. `1,200 · 64%`; with `wholePercent`, the
+ * share is rounded to a whole percent before Kibana's percent format, e.g. `64%` for `63.8%`.
+ */
+export function ShareValue({
+  value,
+  total,
+  wholePercent = false,
+}: {
+  value: number;
+  total: number;
+  wholePercent?: boolean;
+}) {
   const { formatNumber, formatPercent } = useFormatters();
+  const share = value / total;
   return (
     <EuiText size="xs" className="eui-textNoWrap">
       <strong>{formatNumber(value)}</strong>
       {total > 0 && (
         <EuiText size="xs" color="subdued" component="span">
-          {` · ${formatPercent(value / total)}`}
+          {` · ${wholePercent ? wholePercentOf(share, formatPercent) : formatPercent(share)}`}
         </EuiText>
       )}
     </EuiText>
@@ -49,11 +74,14 @@ export function ShareBar({ value, total, label }: { value: number; total: number
 export function BarList({
   items,
   total,
+  wholePercent,
   'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
 }: {
   items: BarListItem[];
   total: number;
+  /** Shows the shares as whole percents, e.g. `30%` and not `30.137%`. */
+  wholePercent?: boolean;
   'aria-label': string;
   'data-test-subj'?: string;
 }) {
@@ -79,7 +107,7 @@ export function BarList({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ShareValue value={value} total={total} />
+                <ShareValue value={value} total={total} wholePercent={wholePercent} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <ShareBar value={value} total={total} label={key} />

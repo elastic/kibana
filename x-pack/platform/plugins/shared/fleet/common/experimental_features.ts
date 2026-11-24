@@ -26,7 +26,6 @@ const _allowedExperimentalValues = {
   enableAgentlessPoliciesUI: true, // When enabled, the UI reads/writes agentless integration policies through the managed integrations API. Disable as a kill switch to fall back to the legacy APIs — but disableAgentlessLegacyAPI overrides it (the fallback would 400).
   enableEsqlViewInstall: false,
   enableSloTemplates: true,
-  newBrowseIntegrationUx: true, // When enabled integrations, browse integrations page will use the new UX.
   enableVersionSpecificPolicies: true, // When enabled, version specific policies will be created when packages use agent version conditions
   enableIntegrationInactivityAlerting: true, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
   enableSimplifiedAgentlessUX: true, // When enabled, the agentless deployment mode will be simplified for single input/datastreams integrations.

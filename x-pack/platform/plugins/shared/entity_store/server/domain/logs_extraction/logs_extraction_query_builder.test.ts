@@ -209,6 +209,33 @@ describe('buildLogsExtractionEsqlQuery', () => {
     });
   });
 
+  describe('latest index created before the definition stored a field', () => {
+    const buildFor = (type: 'user' | 'host') =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition(type, 'default'),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+      });
+
+    it('sets user.entity.id to null right before the join so an unmapped lookup column resolves', async () => {
+      const query = buildFor('user');
+
+      const placeholder =
+        '| EVAL user.entity.id = TO_STRING(null)\n| LOOKUP JOIN _coordinator:latest-index';
+      expect(query).toContain(placeholder);
+      expect(query.indexOf(placeholder)).toBeGreaterThan(query.indexOf('| STATS'));
+      expect(query.split('TO_STRING(null)')).toHaveLength(2);
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+
+    it('adds no placeholder to a definition that does not store the field', () => {
+      expect(buildFor('host')).not.toContain('TO_STRING(null)');
+    });
+  });
+
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {
     const base = getEntityDefinition('host', 'default');
     const query = buildLogsExtractionEsqlQuery({

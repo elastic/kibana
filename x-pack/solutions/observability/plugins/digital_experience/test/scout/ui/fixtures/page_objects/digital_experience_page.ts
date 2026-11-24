@@ -25,6 +25,9 @@ type OverviewFilterName =
   | 'pageUrl'
   | 'pageContains';
 
+/** The KPIs of the mobile page's row. */
+type MobileKpi = 'Sessions' | 'Users' | 'ErrorRate';
+
 export class DigitalExperiencePage {
   public readonly mainContainer: Locator;
   public readonly applicationsTable: EuiBasicTableObject;
@@ -35,6 +38,7 @@ export class DigitalExperiencePage {
   public readonly search: Locator;
   public readonly summary: Locator;
   public readonly pageLoadsChart: Locator;
+  public readonly sessionsRetention: Locator;
   public readonly otelOverviewKpis: Locator;
   public readonly otelOverviewVitals: Locator;
   public readonly otelOverviewTrends: Locator;
@@ -52,6 +56,7 @@ export class DigitalExperiencePage {
   public readonly networkHttpRequests: Locator;
   public readonly networkSlowestResources: Locator;
   public readonly otelOverviewTopClicks: Locator;
+  public readonly otelOverviewFrustration: Locator;
   public readonly overviewClearFilters: Locator;
   public readonly overviewAllFilters: Locator;
   public readonly overviewFiltersFlyout: Locator;
@@ -69,6 +74,7 @@ export class DigitalExperiencePage {
   public readonly sessionsTable: EuiBasicTableObject;
   public readonly sessionsSearch: Locator;
   public readonly sessionsJsErrorsFilter: Locator;
+  public readonly sessionsFrustrationFilter: Locator;
   public readonly sessionsClearFilters: Locator;
   public readonly sessionsKpis: Locator;
   public readonly sessionsEmpty: Locator;
@@ -87,6 +93,15 @@ export class DigitalExperiencePage {
   public readonly permissionDenied: Locator;
   public readonly classicRumPageLoadMetric: Locator;
   public readonly classicRumServiceSelect: Locator;
+  public readonly mobileTab: Locator;
+  public readonly mobileApplicationsTable: EuiBasicTableObject;
+  public readonly mobileKpis: Locator;
+  public readonly mobilePagePlatforms: Locator;
+  public readonly mobileOsFilter: Locator;
+  public readonly mobileCompareToggle: Locator;
+  public readonly mobileOpenInDiscover: Locator;
+  public readonly platformFilter: Locator;
+  public readonly platformList: EuiSelectableObject;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
@@ -98,6 +113,7 @@ export class DigitalExperiencePage {
     this.search = page.getByTestId('digitalExperienceApplicationsSearch');
     this.summary = page.getByTestId('digitalExperienceApplicationsSummary');
     this.pageLoadsChart = page.getByTestId('digitalExperiencePageLoadsChart');
+    this.sessionsRetention = page.getByTestId('digitalExperienceSessionsRetention');
     this.otelOverviewKpis = page.getByTestId('digitalExperienceOverviewKpis');
     this.otelOverviewVitals = page.getByTestId('digitalExperienceOverviewVitals');
     this.otelOverviewTrends = page.getByTestId('digitalExperienceOverviewTrends');
@@ -114,6 +130,7 @@ export class DigitalExperiencePage {
     this.networkHttpRequests = page.getByTestId('digitalExperienceNetworkHttpRequests');
     this.networkSlowestResources = page.getByTestId('digitalExperienceNetworkSlowestResources');
     this.otelOverviewTopClicks = page.getByTestId('digitalExperienceOverviewTopClicks');
+    this.otelOverviewFrustration = page.getByTestId('digitalExperienceOverviewFrustration');
     this.overviewClearFilters = page.getByTestId('digitalExperienceOverviewClearFilters');
     this.overviewAllFilters = page.getByTestId('digitalExperienceOverviewAllFilters');
     this.overviewFiltersFlyout = page.getByTestId('digitalExperienceOverviewFiltersFlyout');
@@ -132,6 +149,7 @@ export class DigitalExperiencePage {
     this.sessionsTable = page.components.basicTable('digitalExperienceSessionsTable');
     this.sessionsSearch = page.getByTestId('digitalExperienceSessionsSearch');
     this.sessionsJsErrorsFilter = page.getByTestId('digitalExperienceSessionsJsErrorsFilter');
+    this.sessionsFrustrationFilter = page.getByTestId('digitalExperienceSessionsFrustrationFilter');
     this.sessionsClearFilters = page.getByTestId('digitalExperienceSessionsClearFilters');
     this.sessionsKpis = page.getByTestId('digitalExperienceSessionsKpis');
     this.sessionsEmpty = page.getByTestId('digitalExperienceSessionsEmpty');
@@ -152,6 +170,71 @@ export class DigitalExperiencePage {
     this.permissionDenied = page.getByTestId('ResetSessionButton');
     this.classicRumPageLoadMetric = page.getByTestId('uxClientMetrics-totalPageLoad');
     this.classicRumServiceSelect = page.getByTestId('uxServiceNameFilterSelect');
+    this.mobileTab = page.getByTestId('digitalExperienceApplicationTypeTab-mobile');
+    this.mobileApplicationsTable = page.components.basicTable(
+      'digitalExperienceMobileApplicationsTable'
+    );
+    this.mobileKpis = page.getByTestId('digitalExperienceMobileKpis');
+    // The header's badges, one per platform the application reported on.
+    this.mobilePagePlatforms = page.getByTestId(/^digitalExperienceMobilePlatformBadge-/);
+    this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
+    this.mobileCompareToggle = page.getByTestId('digitalExperienceMobileCompareToggle');
+    this.mobileOpenInDiscover = page.getByTestId('digitalExperienceMobileOpenInDiscover');
+    this.platformFilter = page.getByTestId('digitalExperiencePlatformFilter');
+    this.platformList = page.components.selectable('digitalExperiencePlatformFilterList');
+  }
+
+  /** The link that opens a mobile application's page, by its exact name. */
+  mobileApplicationLink(serviceName: string): Locator {
+    return this.mobileApplicationsTable.rows.getByRole('link', { name: serviceName, exact: true });
+  }
+
+  /** The row of a mobile application in the Mobile tab's table, by its exact name. */
+  mobileApplicationRow(serviceName: string): Locator {
+    return this.mobileApplicationsTable.rows.filter({
+      has: this.page.getByRole('link', { name: serviceName, exact: true }),
+    });
+  }
+
+  /** The value of a KPI of the mobile page, e.g. `Sessions`. */
+  mobileKpiValue(kpi: MobileKpi): Locator {
+    return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Value`);
+  }
+
+  /** A mobile KPI's change against the previous period, shown with Compare on. */
+  mobileKpiChange(kpi: MobileKpi): Locator {
+    return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Change`);
+  }
+
+  /** A mobile KPI's value in the previous period, shown with Compare on. */
+  mobileKpiPrevious(kpi: MobileKpi): Locator {
+    return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Previous`);
+  }
+
+  /**
+   * Narrows the mobile page to one OS, e.g. `iPadOS`, by its value: its option's label also has its
+   * sessions, as the Sessions list's facets.
+   */
+  async selectMobileOs(osName: string): Promise<void> {
+    await this.mobileOsFilter.click();
+    await this.page.getByTestId(`digitalExperienceMobileOsFilterOption-${osName}`).click();
+  }
+
+  /**
+   * Turns the mobile page's Compare on or off from its header, whose narrow layouts move the menu
+   * items into the overflow menu.
+   */
+  async toggleMobileCompare(): Promise<void> {
+    if (!(await this.mobileCompareToggle.isVisible())) {
+      await this.page.getByTestId('app-menu-overflow-button').click();
+    }
+    await this.mobileCompareToggle.click();
+  }
+
+  /** Narrows the Mobile tab to one platform by its label, `Android` or `iOS`. */
+  async selectPlatform(label: 'Android' | 'iOS'): Promise<void> {
+    await this.platformFilter.click();
+    await this.platformList.selectOption(label);
   }
 
   /** Opens the list with the given URL query, by default only the time range. */
@@ -194,6 +277,11 @@ export class DigitalExperiencePage {
     return this.applicationsTable.rows.filter({
       has: this.page.getByRole('link', { name: serviceName, exact: true }),
     });
+  }
+
+  /** The source badge of a row, rendered from the same source its application link points at. */
+  applicationSource(serviceName: string): Locator {
+    return this.applicationRow(serviceName).getByTestId('digitalExperienceApplicationSource');
   }
 
   classicDataHint(serviceName: string): Locator {
@@ -299,6 +387,16 @@ export class DigitalExperiencePage {
     await this.sourceList.selectOption(label);
   }
 
+  /** The row of an element in the Overview's Frustration panel, found by its CSS selector. */
+  frustrationRow(selector: string): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFrustrationRow-${selector}`);
+  }
+
+  /** The "Open sessions" link of an element's row in the Frustration panel. */
+  frustrationSessionsLink(selector: string): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFrustrationSessionsLink-${selector}`);
+  }
+
   sessionRow(sessionId: string): Locator {
     return this.page.getByTestId(`digitalExperienceSessionRow-${sessionId}`);
   }
@@ -312,6 +410,7 @@ export class DigitalExperiencePage {
       | 'total'
       | 'withJsErrors'
       | 'withFailedRequests'
+      | 'withFrustration'
       | 'medianDuration'
       | 'avgPageViews'
       | 'bounceRate'

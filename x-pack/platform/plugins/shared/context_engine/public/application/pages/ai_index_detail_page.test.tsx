@@ -15,7 +15,6 @@ import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types'
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -36,6 +35,7 @@ import { AiIndexDetailPage } from './ai_index_detail_page';
 import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
+import type { LatestWorkflowExecution } from '../hooks/use_latest_workflow_execution';
 
 const AI_INDEX_DETAIL_ROUTE_PATHS = [
   CONTEXT_ENGINE_PATHS.detail,
@@ -128,6 +128,19 @@ jest.mock('../hooks/use_ai_index_dreaming', () => ({
   useAiIndexDreaming: jest.fn(),
 }));
 
+const mockDefaultLatestWorkflowExecution = (): LatestWorkflowExecution => ({
+  executions: undefined,
+  unavailableWorkflowIds: [],
+  isRunning: false,
+  activeExecutionId: undefined,
+  isError: false,
+  isLoading: false,
+});
+
+jest.mock('../hooks/use_latest_workflow_execution', () => ({
+  useLatestWorkflowExecution: jest.fn(() => mockDefaultLatestWorkflowExecution()),
+}));
+
 jest.mock('../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => ({
     agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
@@ -140,6 +153,10 @@ const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
 const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 const mockUseAiIndexDreaming = jest.mocked(useAiIndexDreaming);
 const preferenceDreaming = { enabled: true, facts: [{ type: 'preference' }] };
+
+jest.mock('../hooks/use_ai_index_spend', () => ({
+  useAiIndexSpend: () => ({ spend: undefined, isLoading: true, error: undefined }),
+}));
 
 jest.mock('../hooks/use_signals', () => ({
   useSignals: () => ({
@@ -273,7 +290,11 @@ describe('AiIndexDetailPage', () => {
     mockUseFeedbackLoopEnabled.mockReturnValue(true);
     mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
-    mockUseAiIndexDreaming.mockReturnValue({ dreaming: undefined, isLoading: false });
+    mockUseAiIndexDreaming.mockReturnValue({
+      dreaming: undefined,
+      workflowIds: [],
+      isLoading: false,
+    });
   });
 
   afterEach(() => {
@@ -443,7 +464,11 @@ describe('AiIndexDetailPage', () => {
   });
 
   it('opens the dreaming settings from the Settings tab when memory is globally enabled', async () => {
-    mockUseAiIndexDreaming.mockReturnValue({ dreaming: preferenceDreaming, isLoading: false });
+    mockUseAiIndexDreaming.mockReturnValue({
+      dreaming: preferenceDreaming,
+      workflowIds: [],
+      isLoading: false,
+    });
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 
@@ -459,7 +484,7 @@ describe('AiIndexDetailPage', () => {
     );
   });
 
-  it('redirects a Settings deep link to the overview when memory is globally disabled', async () => {
+  it('opens the Settings tab from a deep link when memory is globally disabled', async () => {
     mockUseMemoryEnabled.mockReturnValue(false);
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -467,14 +492,15 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services, undefined, `${getAiIndexDetailPath(aiIndex.id)}/settings`);
     await waitForAiIndexDetailLoaded();
 
-    expect(await screen.findByTestId('contextAiIndexDetailTab-overview')).toHaveAttribute(
+    expect(await screen.findByTestId('contextAiIndexSettingsTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-settings')).toHaveAttribute(
       'aria-selected',
       'true'
     );
     expect(screen.queryByTestId('contextAiIndexDreamingPanel')).not.toBeInTheDocument();
   });
 
-  it('hides the Settings tab when memory is globally disabled', async () => {
+  it('shows the Settings tab when memory is globally disabled', async () => {
     mockUseMemoryEnabled.mockReturnValue(false);
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -483,7 +509,20 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextAiIndexDetailTab-overview')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexDetailTab-settings')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-settings')).toBeInTheDocument();
+  });
+
+  it('shows the Advanced settings section with backing index and delete panels', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+    await waitForAiIndexDetailLoaded();
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-settings'));
+
+    expect(await screen.findByTestId('contextAiIndexSettingsTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSettingsBackingIndex')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSettingsDelete')).toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -619,7 +658,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
   });
 
-  it('edits the description and refetches the AI index', async () => {
+  it('edits the description on the Settings tab and refetches the AI index', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
     services.http.put.mockResolvedValue({ status: 'updated' });
@@ -629,10 +668,14 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-settings'));
+    await screen.findByTestId('contextAiIndexSettingsTab');
 
-    const textArea = await screen.findByTestId('contextDescriptionTextArea');
+    const textArea = screen.getByTestId('contextDescriptionTextArea');
+    expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
+
     fireEvent.change(textArea, { target: { value: 'A brand new description' } });
+    expect(screen.getByTestId('contextDescriptionSaveButton')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
 
     await waitFor(() => {
@@ -650,10 +693,10 @@ describe('AiIndexDetailPage', () => {
       );
     });
 
-    // The editor closes and the detail data is refetched after a successful save.
     await waitFor(() => {
-      expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
     });
+    expect(screen.getByTestId('contextDescriptionTextArea')).toBeInTheDocument();
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
 
@@ -731,11 +774,8 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextAddDescriptionButton')).not.toBeInTheDocument();
 
     await waitForAiIndexDetailLoaded();
-
-    expect(screen.getByTestId('contextAddDescriptionButton')).toBeEnabled();
 
     expect(screen.getByTestId('contextAddAutomationButton')).toBeEnabled();
   });
@@ -841,7 +881,6 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
-    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
     await screen.findByTestId('contextSourcesPanel');
@@ -877,7 +916,6 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextAddAutomationButton')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
     expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
@@ -985,17 +1023,11 @@ describe('AiIndexDetailPage', () => {
     );
     expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
     expect(history.location.pathname).toBe(getAiIndexKnowledgeDocumentsPath(aiIndex.id));
-    await openAppMenuOverflow();
-    await waitFor(() => {
-      expect(screen.getByTestId('contextListKiPanelDestLink')).toBeInTheDocument();
-    });
-    expect(screen.getByTestId('contextListKiDiscoverLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanelDestLink')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextListKiPanelSummary')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('contextListKiDiscoverLink')).toHaveAttribute(
-      'href',
-      '/app/discover'
-    );
+    const discoverLink = await screen.findByTestId('contextListKiDiscoverLink');
+    expect(discoverLink).toHaveAttribute('href', '/app/discover');
   });
 
   it('hides the Knowledge Indicators tab when there are no KIs', async () => {
