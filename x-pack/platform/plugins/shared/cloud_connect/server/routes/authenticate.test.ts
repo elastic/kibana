@@ -8,6 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerAuthenticateRoute } from './authenticate';
+import { getCurrentClusterData } from '../lib/cluster_info';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { CloudConnectApiKey } from '../types';
 import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
@@ -287,15 +288,13 @@ describe('Authentication Routes', () => {
     });
 
     it('should authenticate with admin key and generate cluster-scoped key', async () => {
-      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
-      const { getCurrentClusterData } = require('../lib/cluster_info');
 
       mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
         isClusterScoped: false,
         hasValidScope: true,
       });
 
-      getCurrentClusterData.mockResolvedValue({
+      jest.mocked(getCurrentClusterData).mockResolvedValue({
         id: 'es-cluster-uuid',
         name: 'my-cluster',
         version: '8.15.0',
@@ -477,9 +476,7 @@ describe('Authentication Routes', () => {
         isClusterScoped: false,
         hasValidScope: true,
       });
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getCurrentClusterData } = require('../lib/cluster_info');
-      getCurrentClusterData.mockResolvedValue({});
+      jest.mocked(getCurrentClusterData).mockResolvedValue({});
       mockCloudConnectInstance.onboardClusterWithKeyGeneration.mockRejectedValue({
         isAxiosError: true,
         code: 'ECONNRESET',
@@ -569,9 +566,7 @@ describe('Authentication Routes', () => {
         isClusterScoped: false,
         hasValidScope: true,
       });
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getCurrentClusterData } = require('../lib/cluster_info');
-      getCurrentClusterData.mockResolvedValue({});
+      jest.mocked(getCurrentClusterData).mockResolvedValue({});
       mockCloudConnectInstance.onboardClusterWithKeyGeneration.mockRejectedValue({
         isAxiosError: true,
         message: 'Request failed with status code 504',
