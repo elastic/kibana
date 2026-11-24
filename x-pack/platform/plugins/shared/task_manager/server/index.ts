@@ -88,6 +88,10 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
         level: 'warning',
         message: `Configuring "xpack.task_manager.request_timeouts" is deprecated and will be removed in a future version. This setting should be removed.`,
       }),
+      deprecate('unsafe.authenticate_background_task_utilization', '10.0.0', {
+        level: 'warning',
+        message: `Configuring "xpack.task_manager.unsafe.authenticate_background_task_utilization" is deprecated and will be removed in 10.0.0. Remove this setting; the background task utilization API will always require authentication.`,
+      }),
       (settings, fromPath, addDeprecation) => {
         const taskManager = get(settings, fromPath);
         if (taskManager?.index) {
