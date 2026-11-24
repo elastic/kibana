@@ -47,6 +47,7 @@ export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connecto
 export {
   RECEIVE_ONLY_CONNECTOR_TYPE_IDS,
   connectorTypeSupportsReceiveOnly,
+  specSupportsReceiveOnly,
 } from './src/receive_only_connector_type_ids';
 export type { ReceiveOnlyConnectorTypeId } from './src/receive_only_connector_type_ids';
 export { createReceiveOnlyConnectorValidator } from './src/receive_only_connector_validator';

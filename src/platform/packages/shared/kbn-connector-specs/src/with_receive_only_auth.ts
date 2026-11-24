@@ -9,8 +9,7 @@
 
 import { NO_AUTH_TYPE_ID } from './auth_types/none';
 import type { ConnectorSpec } from './connector_spec';
-import { isDualConnectorSpec } from './is_dual_connector_spec';
-import { connectorTypeSupportsReceiveOnly } from './receive_only_connector_type_ids';
+import { specSupportsReceiveOnly } from './receive_only_connector_type_ids';
 
 const augmentedSpecs = new WeakMap<ConnectorSpec, ConnectorSpec>();
 
@@ -24,11 +23,7 @@ const hasNoneAuth = (spec: ConnectorSpec): boolean =>
  * auth type when the spec does not already list it. Every other spec is returned unchanged.
  */
 export const withReceiveOnlyAuth = (spec: ConnectorSpec): ConnectorSpec => {
-  if (
-    !connectorTypeSupportsReceiveOnly(spec.metadata.id) ||
-    !isDualConnectorSpec(spec) ||
-    hasNoneAuth(spec)
-  ) {
+  if (!specSupportsReceiveOnly(spec) || hasNoneAuth(spec)) {
     return spec;
   }
 

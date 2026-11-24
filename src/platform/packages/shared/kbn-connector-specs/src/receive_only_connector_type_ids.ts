@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectorSpec } from './connector_spec';
+import { isDualConnectorSpec } from './is_dual_connector_spec';
 import { DATADOG_CONNECTOR_TYPE_ID } from './specs/datadog/constants';
 
 /**
@@ -26,3 +28,7 @@ export type ReceiveOnlyConnectorTypeId = (typeof RECEIVE_ONLY_CONNECTOR_TYPE_IDS
 /** True when this connector type is opted into receive-only auth, validation, and form behavior. */
 export const connectorTypeSupportsReceiveOnly = (actionTypeId: string): boolean =>
   (RECEIVE_ONLY_CONNECTOR_TYPE_IDS as readonly string[]).includes(actionTypeId);
+
+/** True when this spec is dual and its id is opted into receive-only behavior. */
+export const specSupportsReceiveOnly = (spec: ConnectorSpec): boolean =>
+  connectorTypeSupportsReceiveOnly(spec.metadata.id) && isDualConnectorSpec(spec);
