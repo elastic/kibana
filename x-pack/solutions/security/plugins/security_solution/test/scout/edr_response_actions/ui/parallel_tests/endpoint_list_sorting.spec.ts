@@ -110,6 +110,8 @@ spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () =
           await header.click();
           expect((await listResponse).status()).toBe(200);
           await expect(header).toHaveAttribute('aria-sort', ariaSort);
+          // Set by the same response as aria-sort, so this is the sorted response's total.
+          await expect(endpointList.total).toHaveText('Showing 3 endpoints');
         }
       });
     }
@@ -126,5 +128,6 @@ spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () =
       'aria-sort',
       'descending'
     );
+    await expect(endpointList.total).toHaveText('Showing 3 endpoints');
   });
 });
