@@ -11,7 +11,7 @@ import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extens
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
-import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
+import { getAllConnectors, getStepExposure, isDeprecatedStepType } from '../../../../common/schema';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
 import { isActionGroup, isActionOption } from '../types';
@@ -19,6 +19,7 @@ import { isActionGroup, isActionOption } from '../types';
 jest.mock('../../../../common/schema', () => ({
   getAllConnectors: jest.fn(),
   isDeprecatedStepType: jest.fn(() => false),
+  getStepExposure: jest.fn(() => 'open'),
 }));
 jest.mock('../../../trigger_schemas', () => ({
   triggerSchemas: { getTriggerDefinitions: jest.fn(() => []) },
@@ -61,6 +62,7 @@ describe('getActionOptions', () => {
 
     (getAllConnectors as jest.Mock).mockReturnValue([]);
     (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
+    (getStepExposure as jest.Mock).mockReturnValue('open');
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => false
     );
@@ -540,6 +542,42 @@ describe('getActionOptions', () => {
     expect(kibanaGroup).toBeDefined();
     if (kibanaGroup && isActionGroup(kibanaGroup)) {
       expect(kibanaGroup.options).toHaveLength(0);
+    }
+  });
+
+  it('should hide internal and managed-only custom steps from the actions menu', () => {
+    const createStepDefinition = (id: string) => ({
+      id,
+      label: id,
+      description: id,
+      category: StepCategory.Kibana,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    });
+
+    const stepExposures: Record<string, string> = {
+      'custom.internal': 'internal',
+      'custom.managedOnly': 'managed_only',
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([
+      { type: 'custom.open', description: 'Open step' },
+      { type: 'custom.internal', description: 'Internal step' },
+      { type: 'custom.managedOnly', description: 'Managed-only step' },
+    ]);
+    (getStepExposure as jest.Mock).mockImplementation(
+      (stepType: string) => stepExposures[stepType] ?? 'open'
+    );
+    mockWorkflowsExtensions.getStepDefinition.mockImplementation(
+      (type: string) => createStepDefinition(type) as any
+    );
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options.map((option) => option.id)).toEqual(['custom.open']);
     }
   });
 

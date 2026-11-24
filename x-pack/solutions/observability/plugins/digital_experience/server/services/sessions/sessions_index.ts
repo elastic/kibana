@@ -46,6 +46,11 @@ export interface SessionDocument {
   click_count: number;
   /** `exception` events, as the applications list counts JS errors. */
   js_error_count: number;
+  /**
+   * The p75 of the page loads' load event end in milliseconds, and how many page loads reported
+   * one, as the Overview's load time reads them.
+   */
+  load_time: { p75: number | null; count: number };
   /** HTTP requests the browser made with a known outcome, and the failed ones. */
   http_request_count: number;
   http_failed_request_count: number;
@@ -100,6 +105,7 @@ export const sessionsIndexMappings = {
     page_load_count: count,
     click_count: count,
     js_error_count: count,
+    load_time: { properties: { p75: { type: 'double' }, count } },
     http_request_count: count,
     http_failed_request_count: count,
     bounced: { type: 'boolean' },
