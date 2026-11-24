@@ -30,7 +30,13 @@ export const createNoteQueue = ({
   const jobs: Array<{ alertId: string; note: string }> = [];
 
   return {
-    /** The alerts of the list that the allowance still has a note for. */
+    /**
+     * The alerts of the list that the allowance still has a note for. This only looks: the
+     * allowance is spent by `add`, once the alerts are closed or skipped. That is correct because
+     * the sweep handles decisions one after another, so a decision's `add` runs before the next
+     * decision's `take`. Run decisions in parallel and this would have to reserve the allowance,
+     * and give back what is not used.
+     */
     take: (alertIds: string[]): string[] => alertIds.slice(0, left),
 
     /**
