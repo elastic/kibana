@@ -140,6 +140,7 @@ export enum SecurityPageName {
    * These live on the `alertzero` plugin rather than `securitySolutionUI`, so their link ids are built with
    * `alertZeroLink()` instead of `securityLink()`.
    */
+  alertZeroHome = 'home',
   alertZeroEscalations = 'escalations',
   alertZeroWatches = 'watches',
   alertZeroWatchesWorkers = 'watches_workers',

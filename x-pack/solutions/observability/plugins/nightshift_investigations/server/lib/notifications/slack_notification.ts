@@ -20,6 +20,12 @@ const slackNotificationParamsSchema = z.strictObject({
     .describe('Parent message ID identifying the reply thread'),
 });
 
+/** The Slack destination's channel and thread, or undefined when its params are invalid. */
+export const readSlackNotificationParams = (params: JsonObject) => {
+  const parsed = slackNotificationParamsSchema.safeParse(params);
+  return parsed.success ? parsed.data : undefined;
+};
+
 const parseSlackNotificationParams = (params: JsonObject) => {
   const parsed = slackNotificationParamsSchema.safeParse(params);
   if (!parsed.success) {

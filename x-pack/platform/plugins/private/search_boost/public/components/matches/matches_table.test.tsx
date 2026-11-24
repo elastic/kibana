@@ -44,28 +44,19 @@ const getColumnNames = () =>
 const hasOutrankedByColumn = () =>
   getColumnNames().some((name) => name?.startsWith('Outranked by rule'));
 
-const toMatch = (name: string, isHidden = false): BoostRuleMatch => ({ name, isHidden });
+const toMatch = (name: string): BoostRuleMatch => ({ name });
 
 describe('MatchesTable', () => {
   afterEach(() => {
     contentListQueryClient.clear();
   });
 
-  it('leaves hidden matches out until "Show hidden" is on', async () => {
-    renderTable();
+  it('lists hidden matches with the rest', async () => {
+    renderTable({ matches: [toMatch('orders'), toMatch('.internal-alerts')] });
 
-    await waitFor(() => expect(getMatchNames()).toHaveLength(8));
-    expect(getMatchNames()).not.toContain('.products-08');
+    await waitFor(() => expect(getMatchNames()).toEqual(['.internal-alerts', 'orders']));
     expect(screen.getByTestId('searchBoostMatchesCount')).toHaveTextContent(
-      'Showing 1–8 of 8 indices · 1 hidden'
-    );
-
-    await userEvent.click(screen.getByTestId('searchBoostShowHidden'));
-
-    await waitFor(() => expect(getMatchNames()).toContain('.products-08'));
-    expect(screen.getByTestId('searchBoostHiddenBadge')).toHaveTextContent('Hidden');
-    expect(screen.getByTestId('searchBoostMatchesCount')).toHaveTextContent(
-      'Showing 1–9 of 9 indices'
+      /^Showing 1–2 of 2 indices$/
     );
   });
 
@@ -128,16 +119,8 @@ describe('MatchesTable', () => {
   it('has no data retention column for indices', async () => {
     renderTable();
 
-    await waitFor(() => expect(getMatchNames()).toHaveLength(8));
+    await waitFor(() => expect(getMatchNames()).toHaveLength(9));
     expect(getColumnNames()).not.toContain('Data retention');
-  });
-
-  it('disables "Show hidden" when nothing hidden matches', async () => {
-    renderTable({ matches: [toMatch('orders')] });
-
-    const showHidden = await screen.findByTestId('searchBoostShowHidden');
-    expect(showHidden).toBeDisabled();
-    expect(showHidden).toHaveAccessibleDescription('This rule matches no hidden indices.');
   });
 
   describe('outranked matches', () => {
@@ -186,39 +169,6 @@ describe('MatchesTable', () => {
       );
     });
 
-    it('counts the hidden matches the status filter would show', async () => {
-      renderTable({
-        matches: [
-          toMatch('a'),
-          { ...toMatch('b'), outrankedByRuleName: 'catalog' },
-          toMatch('.hidden-applied', true),
-          { ...toMatch('.hidden-outranked', true), outrankedByRuleName: 'catalog' },
-        ],
-        isOutrankingComputed: true,
-      });
-
-      await userEvent.click(await screen.findByTestId('searchBoostStatusFilter-outranked'));
-
-      await waitFor(() => expect(getMatchNames()).toEqual(['b']));
-      expect(screen.getByTestId('searchBoostMatchesCount')).toHaveTextContent(
-        'Showing 1 of 1 index · 1 hidden'
-      );
-    });
-
-    it('shows the column only while an outranked match is shown', async () => {
-      renderTable({
-        matches: [toMatch('a'), { ...toMatch('.hidden', true), outrankedByRuleName: 'catalog' }],
-        isOutrankingComputed: true,
-      });
-
-      await waitFor(() => expect(getMatchNames()).toEqual(['a']));
-      expect(hasOutrankedByColumn()).toBe(false);
-
-      await userEvent.click(screen.getByTestId('searchBoostShowHidden'));
-
-      await waitFor(() => expect(hasOutrankedByColumn()).toBe(true));
-    });
-
     it('leaves them out until that data is passed in', async () => {
       renderTable({ matches: outrankedMatches });
 
@@ -235,18 +185,6 @@ describe('MatchesTable', () => {
       expect(await screen.findByTestId('searchBoostMatchesEmpty')).toHaveTextContent(
         'This rule matches nothing yet.'
       );
-    });
-
-    it('says when only hidden matches are left out, keeping "Show hidden" at hand', async () => {
-      renderTable({ matches: [toMatch('.hidden-index', true)] });
-
-      expect(await screen.findByTestId('searchBoostMatchesEmpty')).toHaveTextContent(
-        'Only hidden indices match. Show hidden to see them.'
-      );
-
-      await userEvent.click(screen.getByTestId('searchBoostShowHidden'));
-
-      await waitFor(() => expect(getMatchNames()).toEqual(['.hidden-index']));
     });
 
     it('says when the search leaves nothing', async () => {

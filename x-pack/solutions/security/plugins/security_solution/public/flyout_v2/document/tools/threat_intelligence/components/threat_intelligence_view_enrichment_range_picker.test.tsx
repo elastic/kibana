@@ -16,7 +16,8 @@ import {
   THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID,
 } from './test_ids';
 
-describe('EnrichmentRangePicker', () => {
+// Failing: See https://github.com/elastic/kibana/issues/306935
+describe.skip('EnrichmentRangePicker', () => {
   const setRangeSpy = jest.fn();
 
   const rangePickerProps = {

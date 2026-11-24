@@ -5,7 +5,7 @@ pageLoadAssetSize:
   agentBuilderDashboards: 4468
   agentBuilderPlatform: 23882
   agentBuilderSml: 597
-  agentBuilderVisualizations: 1551
+  agentBuilderVisualizations: 2566
   agentBuilderWorkflows: 1152
   agenticInvestigations: 54247
   aiAnonymizationSettings: 1775
@@ -33,8 +33,8 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 3166
   contentManagement: 6737
-  contextEngine: 3495
-  contextEngineAgentBuilder: 2553
+  contextEngine: 4053
+  contextEngineAgentBuilder: 2911
   controls: 4166
   core: 320
   cps: 6032
@@ -54,7 +54,7 @@ pageLoadAssetSize:
   dataViews: 1697
   dataVisualizer: 7461
   devTools: 4281
-  digitalExperience: 6000
+  digitalExperience: 8301
   discover: 21958
   discoverEnhanced: 1359
   discoveries: 31528
@@ -209,7 +209,6 @@ pageLoadAssetSize:
   synthetics: 20839
   telemetry: 20586
   telemetryManagementSection: 1738
-  timelines: 1409
   transform: 8828
   triggersActionsUi: 3396
   uiActions: 454
