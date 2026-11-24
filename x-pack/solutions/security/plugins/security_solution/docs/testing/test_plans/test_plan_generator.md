@@ -30,7 +30,7 @@ Before starting, make sure you have:
 
 ## Step 1 — Generate a GitHub Personal Access Token (optional)
 
-You only need this token if you enable the GitHub MCP server. The `gh` CLI gets its own token from the browser login in Step 4, so you can skip to Step 2. If `GH_TOKEN` is set in your shell, `gh` uses it instead of the browser login, so unset it before Step 4. For the GitHub MCP's `mcp.json` entry, see [GitHub MCP shows as disconnected in Cursor](#github-mcp-shows-as-disconnected-in-cursor).
+You only need this token if you enable the GitHub MCP server. The `gh` CLI gets its own token from the browser login in Step 4, so you can skip to Step 2. For the GitHub MCP's `mcp.json` entry, see [GitHub MCP shows as disconnected in Cursor](#github-mcp-shows-as-disconnected-in-cursor).
 
 1. Go to [github.com/settings/tokens](https://github.com/settings/tokens)
 2. Click **"Generate new token (classic)"**
@@ -118,6 +118,8 @@ brew install gh
 ```
 
 ### Authenticate with SSO
+
+If `GH_TOKEN` is set in your shell, `gh` uses it instead of the browser login, so unset it first (`unset GH_TOKEN`).
 
 Elastic does not allow HTTPS authentication. When running `gh auth login`, select **Login with a web browser** (not HTTPS):
 ```bash
