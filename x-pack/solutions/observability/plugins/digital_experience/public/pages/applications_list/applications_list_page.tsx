@@ -280,7 +280,8 @@ export function ApplicationsListPage() {
     enable: enableSessions,
     enabling: enablingSessions,
     enableError: enableSessionsError,
-  } = useSessionsStatus();
+    // Sessions are web only: the Mobile tab, when the URL picks it, needs no status.
+  } = useSessionsStatus({ enabled: applicationType !== APPLICATION_TYPE.mobile });
   // The status only refreshes by itself while sessions rebuild, so a refresh also checks it again.
   const refreshAll = useCallback(() => {
     refresh();

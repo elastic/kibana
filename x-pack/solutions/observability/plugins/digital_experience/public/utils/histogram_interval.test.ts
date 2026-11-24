@@ -31,7 +31,7 @@ describe('getTimeChartXDomain', () => {
   it.each([
     // Histogram mode draws the bars past `max` by one interval.
     [true, { min: 1_000, max: 2_000, minInterval: SECOND }],
-    // Areas end at the last bucket's start, so the interval is added for its shading.
+    // Lines and areas end at the last bucket's start, so the domain reaches the bucket's end.
     [false, { min: 1_000, max: 3_000, minInterval: SECOND }],
   ])('spans the range up to its last bucket when hasBars is %s', (hasBars, xDomain) => {
     const range = { start: 1_500, end: 2_500 };

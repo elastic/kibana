@@ -71,13 +71,14 @@ describe('PartialBucketsEndzones', () => {
     expect(lastShadedZones()).toEqual([]);
   });
 
-  it('shades whole edge buckets outside the domain of areas, as Lens does', () => {
-    // `isFullBin` zones lie outside the domain, so an area chart draws nothing.
+  it('shades the partial edge buckets of lines and areas inside their domain', () => {
+    // Their domain reaches the last bucket's end, from 0 to 3 hours: the zones run from its edges
+    // to the range's, over the parts of the edge buckets outside it.
     renderEndzones({ start: HOUR / 2, end: 2.5 * HOUR }, { hasBars: false });
 
     expect(lastShadedZones()).toEqual([
-      { coordinates: { x1: 0 } },
-      { coordinates: { x0: 3 * HOUR } },
+      { coordinates: { x1: HOUR / 2 } },
+      { coordinates: { x0: 2.5 * HOUR } },
     ]);
   });
 

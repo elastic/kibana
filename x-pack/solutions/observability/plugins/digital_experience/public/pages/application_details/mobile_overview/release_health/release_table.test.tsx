@@ -122,13 +122,19 @@ describe('ReleaseTable', () => {
     expect(onSelectRelease).toHaveBeenLastCalledWith('1.5.0');
     unmount();
 
+    // The selected release is a removable pill
     renderTable('1.5.0');
-    const selected = within(row('1.5.0')).getByRole('button', {
-      name: 'Stop filtering by release 1.5.0',
-    });
-    expect(selected).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(selected);
+    fireEvent.click(
+      within(row('1.5.0')).getByRole('button', { name: 'Stop filtering by release 1.5.0' })
+    );
     expect(onSelectRelease).toHaveBeenLastCalledWith(undefined);
+  });
+
+  it('shows no share while filtered by a release, which would always read 100%', () => {
+    renderTable('2.0.0');
+
+    expect(row('2.0.0')).toHaveTextContent('600');
+    expect(row('2.0.0')).not.toHaveTextContent('%');
   });
 
   it('has no filter on "Other", which is no release', () => {

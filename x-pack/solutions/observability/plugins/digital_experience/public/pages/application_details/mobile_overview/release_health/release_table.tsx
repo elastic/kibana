@@ -6,9 +6,9 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { orderBy } from 'lodash';
+import { orderBy, sumBy } from 'lodash';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiHealth, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiHealth, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { MIN_RELEASE_SESSIONS, OTHER_RELEASE_LABEL } from '../../../../../common/mobile/releases';
@@ -47,6 +47,14 @@ const RELEASE_COLUMN = i18n.translate('xpack.digitalExperience.mobile.releases.t
 const SESSIONS_COLUMN = i18n.translate('xpack.digitalExperience.mobile.releases.table.sessions', {
   defaultMessage: 'Sessions',
 });
+
+const SESSIONS_DESCRIPTION = i18n.translate(
+  'xpack.digitalExperience.mobile.releases.table.sessionsDescription',
+  {
+    defaultMessage:
+      "Distinct session.id values in this release in the time range, and their share of all releases' sessions.",
+  }
+);
 
 const USERS_COLUMN = i18n.translate('xpack.digitalExperience.mobile.releases.table.users', {
   defaultMessage: 'Users',
@@ -87,13 +95,16 @@ export const sortReleases = (
     ['asc', 'asc', direction]
   );
 
-/** The sessions with their share of every release's sessions, e.g. `1,200 (60%)`. */
+/**
+ * The sessions with their share of every release's sessions, e.g. `1,200 (60%)`; without a total,
+ * e.g. when filtered to one release, whose share would always read 100%.
+ */
 const formatSessions = (
   sessions: number,
-  totalSessions: number,
+  totalSessions: number | undefined,
   { formatNumber, formatShare }: Formatters
 ): string =>
-  totalSessions > 0
+  totalSessions !== undefined && totalSessions > 0
     ? `${formatNumber(sessions)} (${formatShare(sessions / totalSessions)})`
     : formatNumber(sessions);
 
@@ -109,7 +120,7 @@ const releaseColumns = ({
 }: {
   colors: ReadonlyMap<string, string>;
   formatters: Formatters;
-  totalSessions: number;
+  totalSessions: number | undefined;
   selectedRelease: string | undefined;
   onSelectRelease: (release: string | undefined) => void;
 }): Array<EuiBasicTableColumn<MobileReleaseRow>> => [
@@ -121,14 +132,33 @@ const releaseColumns = ({
       if (isOther) {
         return <EuiHealth color={colors.get(release)}>{OTHER_RELEASE_LABEL}</EuiHealth>;
       }
-      const isSelected = release === selectedRelease;
+      // The selected release as a removable filter pill, so it's clear a click takes it off.
+      if (release === selectedRelease) {
+        return (
+          <EuiHealth color={colors.get(release)}>
+            <EuiBadge
+              color="hollow"
+              iconType="cross"
+              iconSide="right"
+              onClick={() => onSelectRelease(undefined)}
+              onClickAriaLabel={filterLabel(release, true)}
+              data-test-subj="digitalExperienceMobileReleaseFilterLink"
+              {...getEbtProps({
+                action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+                element: MOBILE_APPLICATION_EBT_ELEMENTS.RELEASE_FILTER,
+              })}
+            >
+              {release}
+            </EuiBadge>
+          </EuiHealth>
+        );
+      }
       return (
         <EuiHealth color={colors.get(release)}>
           <EuiLink
-            color={isSelected ? 'primary' : 'text'}
-            aria-pressed={isSelected}
-            aria-label={filterLabel(release, isSelected)}
-            onClick={() => onSelectRelease(isSelected ? undefined : release)}
+            color="text"
+            aria-label={filterLabel(release, false)}
+            onClick={() => onSelectRelease(release)}
             data-test-subj="digitalExperienceMobileReleaseFilterLink"
             {...getEbtProps({
               action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
@@ -144,6 +174,7 @@ const releaseColumns = ({
   {
     field: 'sessions',
     name: SESSIONS_COLUMN,
+    nameTooltip: { content: SESSIONS_DESCRIPTION },
     ...metricColumnPreset<MobileReleaseRow>(),
     sortable: true,
     render: (sessions: number) => formatSessions(sessions, totalSessions, formatters),
@@ -192,7 +223,7 @@ export function ReleaseTable({
 }) {
   const formatters = useFormatters();
   const [sort, setSort] = useState<Sort>(DEFAULT_SORT);
-  const totalSessions = releases.reduce((total, { sessions }) => total + sessions, 0);
+  const totalSessions = selectedRelease === undefined ? sumBy(releases, 'sessions') : undefined;
   const items = useMemo(() => sortReleases(releases, sort), [releases, sort]);
 
   const onChange = ({ sort: nextSort }: Criteria<MobileReleaseRow>) => {

@@ -151,13 +151,12 @@ on serverless and stateful.
   loads apart from the KPIs (`GET .../mobile_applications/{serviceName}/releases`, same params as
   the KPI route) and has its own error state with a retry; the toolbar's refresh reloads both.
   The table, in a bordered panel like the KPIs and charts, shows each release's share of the
-  sessions, sorts by sessions, users or error rate ("Other" stays last) and shows the error rate
-  with two decimals; a release filters the page by it (the `release` filter), or takes the filter
-  off when selected. Each chart has a one-line header (an `h3` and an info tip with the
+  sessions (none while filtered by a release, where it would read 100%), sorts by sessions, users
+  or error rate ("Other" stays last) and shows the error rate with two decimals; a release filters
+  the page by it (the `release` filter), and the selected one shows as a pill whose cross takes
+  the filter off. Each chart has a one-line header (an `h3` and an info tip with the
   calculation), so both plots line up, and a legend below it (hover a release to spotlight it,
-  click to hide it); dragging over one narrows the time range. The adoption chart plots sessions,
-  or each release's share of every bucket's sessions (Sessions / Share, kept across visits), so
-  the swings of traffic over the day don't hide a rollout's progress. Shares show one decimal at
+  click to hide it); dragging over one narrows the time range. Session shares show one decimal at
   most (`formatShare`). The crash rate (#64) and the cold start (#68) join the table's columns and
   the charts later.
 
@@ -272,10 +271,10 @@ The page loads chart and the Overview trends bucket by the time zone of Advanced
 weeks or months, so they start at local midnight. Below that they are fixed intervals (up to 12
 hours) that keep their local alignment across daylight saving changes; the bucket holding a change
 is an hour shorter or longer. The first and last buckets, which cover only part of the selected
-range, are shaded as partial data, as in Lens (`Endzones` from `@kbn/charts-plugin`), with its
-limits: area charts aren't shaded, and as every bucket is measured by the shortest one, a last
-bucket longer than that (a 31-day month after February, a day after a daylight saving change) may
-not be.
+range, are shaded as partial data, as in Lens (`Endzones` from `@kbn/charts-plugin`, without
+`isFullBin`): from the range's edges over the part of the edge buckets outside it, for bars and
+for lines and areas, whose domain reaches the end of the last bucket. As every bucket is measured by the shortest one, a last bucket longer than that (a
+31-day month after February, a day after a daylight saving change) may not be shaded.
 
 Both routes take an optional `timeZone` (at most 64 characters; `UTC` when left out): a name
 moment-timezone knows, or a `+HH:MM`/`-HH:MM` offset, which the browser sends when it can't name
@@ -826,7 +825,9 @@ readers also need `read` on `digital-experience-sessions-*` (and on the source i
 session detail timeline). Without it they answer 403 naming those privileges; other failures are
 logged and answer 500 without Elasticsearch details:
 
-- `GET /internal/digital_experience/sessions/status`: whether sessions are set up or turned off, the
+- `GET /internal/digital_experience/sessions/status` (fetched by `SessionsStatusProvider` only once
+  a web page asks for it, and checked back only while one is open, so mobile pages and the list's
+  Mobile tab request none): whether sessions are set up or turned off, the
   task's health, lag and last error, whether it is still building, how many days sessions are kept,
   whether the current user can set them up (`canEnable`) and whether the app should do it for them
   (`autoEnable`), what keeps anyone from
