@@ -31,11 +31,8 @@ export interface RecordImprovementsOptions {
   /** Straight off the agent, unvalidated. */
   proposals: unknown[];
   improvementsService: ImprovementsServiceApi;
-  /**
-   * Where an improvement is put up for review. Without it improvements are only recorded, which
-   * is all an observe-only index does with them.
-   */
-  review?: {
+  /** Where an improvement is put up for review. */
+  review: {
     provider: ProposalsProvider;
     context: ProposalsProviderContext;
     logger: Logger;
@@ -125,7 +122,7 @@ export const recordImprovements = async ({
       continue;
     }
 
-    if (review && !isProposable(proposal.action)) {
+    if (!isProposable(proposal.action)) {
       skipped.push({
         action: proposal.action,
         title: proposal.title,
@@ -209,21 +206,19 @@ export const recordImprovements = async ({
   const writtenIds = new Set(written.map(({ improvement_id: id }) => id));
 
   const proposalFailures = new Map<string, string>();
-  if (review) {
-    for (const improvement of written) {
-      const proposal = toProposal(improvement);
-      if (!proposal) {
-        continue;
-      }
-      try {
-        await review.provider.create({ ...review.context, proposal });
-      } catch (error) {
-        const detail = error instanceof Error ? error.message : String(error);
-        review.logger.warn(
-          `Could not propose improvement [${improvement.improvement_id}] for review: ${detail}`
-        );
-        proposalFailures.set(improvement.improvement_id, detail);
-      }
+  for (const improvement of written) {
+    const proposal = toProposal(improvement);
+    if (!proposal) {
+      continue;
+    }
+    try {
+      await review.provider.create({ ...review.context, proposal });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      review.logger.warn(
+        `Could not propose improvement [${improvement.improvement_id}] for review: ${detail}`
+      );
+      proposalFailures.set(improvement.improvement_id, detail);
     }
   }
 

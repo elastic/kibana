@@ -285,7 +285,7 @@ record:
   analysis may propose for this index. Deployments routinely want an agent that
   may suggest KIs but never touch workflows, and an agent asked in a prompt to
   avoid an action is not prevented from taking it — so the allowed set is
-  config that the apply step enforces, not prompt text. An empty list is
+  config that the run enforces when it records, not prompt text. An empty list is
   observe-only: the run still reports what it found but may not propose a
   change.
 
@@ -535,21 +535,23 @@ is already configured. Each panel filters one cached list client-side, so the
 panels between them cost a single request, and a panel with nothing to review
 renders with no trace of the feature.
 
-Approving is the authorization boundary: both the store access and the change it
-materializes run on the approving user's own Elasticsearch client and request,
-so an approval can never effect something the reviewer could not do themselves.
-Rejecting asks why first — the reason is optional, but when given it is recorded
-on `resolution.reason`, which is what later runs read to avoid re-proposing the
-same thing.
+Improvements are reviewed as [proposals](../proposals/README.md), so the
+feedback loop is unavailable where the proposals plugin is off: the routes below
+return 404 and the workflow steps fail. Each KI improvement is put up as a
+gateless proposal under the id `context-engine-<improvement_id>`, which runs a
+Context Engine action workflow as the approver, so an approval can never effect
+something the reviewer could not do themselves. A proposal does not notify its
+producer of a decision, so the list route, and the start of each analysis run,
+read the outcome of every open improvement's proposal and record it in the store:
+a dismissal's rationale lands on `resolution.reason`, which is what later runs
+read to avoid re-proposing the same thing.
 
-The panels are backed by four internal routes, all gated by the
+The panels are backed by two internal routes, all gated by the
 `contextEngine:feedbackLoopEnabled` setting on top of `contextEngine:enabled`:
 
 | Method | Path                                                                    | Description                                        |
 | ------ | ----------------------------------------------------------------------- | -------------------------------------------------- |
 | `GET`  | `/internal/context_engine/ai_index/{id}/improvements`                   | Open suggestions for an AI index, paginated        |
-| `POST` | `/internal/context_engine/ai_index/{id}/improvements/{impId}/approve`   | Apply the change and record it as applied          |
-| `POST` | `/internal/context_engine/ai_index/{id}/improvements/{impId}/reject`    | Record it as rejected, with an optional `reason`   |
 | `POST` | `/internal/context_engine/ai_index/{id}/feedback_analysis/_run`         | Start one analysis run off-schedule                |
 
 One run analyzes an index at a time. The workflow declares
@@ -560,9 +562,9 @@ id is still returned, only marked `skipped`. `_run` therefore reads the
 execution back — an mget by id, so the skip is visible immediately — and answers
 `409` rather than reporting a run that was thrown away.
 
-KI proposals (`add_ki`, `edit_ki`, `remove_ki`) currently have no panel. The
-loop is not expected to propose them, and the apply path for them exists either
-way.
+Only KI improvements (`add_ki`, `edit_ki`, `remove_ki`) can be proposed so far,
+because they are the only ones with an action workflow; a run skips the others
+as `action_not_allowed`.
 
 Unlike signals, the store is **global rather than per-space**: an improvement
 targets an AI index's KI pipeline, and the AI index registry has no space
@@ -579,7 +581,7 @@ record of what the loop did to a user's index survives every transition:
   proposed fix (e.g. `remove_workflow:<workflow_id>`) and contains no free text,
   so a re-run over the same latent problem appends a revision instead of
   creating a near-duplicate row.
-- `revision_id` is the ES `_id`; every write, including APPLY / REJECT, appends
+- `revision_id` is the ES `_id`; every write, including a recorded decision, appends
   a revision carrying `previous_revision_id`.
 - `latest: true` marks the head of each lineage, and `list`/`get` filter on it.
   A boolean flag rather than `collapse`, because `collapse` makes
@@ -600,8 +602,9 @@ record of what the loop did to a user's index survives every transition:
   it is self-healing rather than permanent: a head lookup returns every head of
   a lineage and the next `write` or `transition` retires all of them, so the
   lineage converges back to a single head.
-- `failed` is a status, not an error return: an approval whose apply step errors
-  stays visible and retryable, with the reason on `resolution.error`.
+- `failed` is a status, not an error return: an approved proposal whose action
+  failed is recorded with the reason on `resolution.error`. A failed gateless
+  proposal is final, so the next analysis run may propose the change again.
 - A rejection keeps the reviewer's rationale on `resolution.reason`, so the next
   run knows a fix was considered and turned down rather than re-proposing it.
 

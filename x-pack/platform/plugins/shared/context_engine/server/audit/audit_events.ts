@@ -86,16 +86,11 @@ export interface KiAuditEventParams {
 
 export enum ImprovementAuditAction {
   RECORD = 'context_engine_improvement_record',
-  APPROVE = 'context_engine_improvement_approve',
-  REJECT = 'context_engine_improvement_reject',
   RUN = 'context_engine_feedback_analysis_run',
 }
 
 export interface ImprovementDecisionAuditEventParams {
-  action:
-    | ImprovementAuditAction.APPROVE
-    | ImprovementAuditAction.REJECT
-    | ImprovementAuditAction.RUN;
+  action: ImprovementAuditAction.RUN;
   aiIndexId: string;
   /** Id of the approved or rejected improvement; absent for a run. */
   improvementId?: string;
@@ -106,8 +101,6 @@ const DECISION_VERB: Record<
   ImprovementDecisionAuditEventParams['action'],
   { attempt: string; done: string }
 > = {
-  [ImprovementAuditAction.APPROVE]: { attempt: 'approve', done: 'approved' },
-  [ImprovementAuditAction.REJECT]: { attempt: 'reject', done: 'rejected' },
   [ImprovementAuditAction.RUN]: {
     attempt: 'run feedback analysis for',
     done: 'run feedback analysis for',

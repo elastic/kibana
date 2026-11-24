@@ -13,7 +13,11 @@ import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { recordImprovements } from '../feedback_analysis/record_improvements';
 import { improvementAuditEvent } from '../audit/audit_events';
 import type { FeedbackAnalysisStepDependencies } from './helpers';
-import { assertContextEngineEnabled, assertFeedbackLoopEnabled } from './helpers';
+import {
+  assertContextEngineEnabled,
+  assertFeedbackLoopEnabled,
+  requireProposalsProvider,
+} from './helpers';
 
 /** Records what an analysis run proposed. */
 export const getRecordImprovementsStepDefinition = ({
@@ -33,6 +37,7 @@ export const getRecordImprovementsStepDefinition = ({
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
       await assertFeedbackLoopEnabled(isFeedbackLoopEnabled);
+      const proposalsProvider = requireProposalsProvider(getProposalsProvider);
 
       if (!(await checkWritePrivilege(request, spaceId))) {
         throw new ExecutionError({
@@ -59,7 +64,6 @@ export const getRecordImprovementsStepDefinition = ({
         );
         const allowedActions = feedbackAnalysis?.allowed_actions ?? [...IMPROVEMENT_ACTIONS];
 
-        const proposalsProvider = getProposalsProvider();
         const result = await recordImprovements({
           aiIndexId,
           spaceId,
@@ -69,9 +73,7 @@ export const getRecordImprovementsStepDefinition = ({
           allowedActions,
           proposals: improvements,
           improvementsService: getImprovementsService(esClient, spaceId),
-          ...(proposalsProvider && {
-            review: { provider: proposalsProvider, context: { spaceId, request }, logger },
-          }),
+          review: { provider: proposalsProvider, context: { spaceId, request }, logger },
         });
 
         auditLogger?.log(improvementAuditEvent({ aiIndexId, recorded: result.recorded.length }));

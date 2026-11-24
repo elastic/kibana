@@ -22,6 +22,12 @@ const buildProposal = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+const defaultReview = () => ({
+  provider: { create: jest.fn(async () => true), getOutcome: jest.fn() } as never,
+  context: { spaceId: 'default', request: {} as never },
+  logger: { warn: jest.fn() } as never,
+});
+
 describe('recordImprovements', () => {
   let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'write'>>;
 
@@ -35,6 +41,7 @@ describe('recordImprovements', () => {
       allowedActions: [...IMPROVEMENT_ACTIONS],
       proposals: [buildProposal()],
       improvementsService: improvementsService as unknown as ImprovementsServiceApi,
+      review: defaultReview(),
       ...overrides,
     });
 

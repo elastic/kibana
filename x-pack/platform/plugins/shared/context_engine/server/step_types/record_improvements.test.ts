@@ -52,7 +52,7 @@ const buildStep = ({
   const definition = getRecordImprovementsStepDefinition({
     getAiIndexService: () => ({ get } as unknown as AiIndexService),
     getImprovementsService: () => improvementsService,
-    getProposalsProvider: () => undefined,
+    getProposalsProvider: () => proposalsProvider,
     getAuditLogger: async () => auditLogger,
     isContextEngineEnabled: async () => contextEngineEnabled,
     isFeedbackLoopEnabled: async () => feedbackLoopEnabled,
@@ -66,6 +66,11 @@ beforeEach(() => {
   jest.clearAllMocks();
   recordImprovementsMock.mockResolvedValue(RESULT);
 });
+
+const proposalsProvider = {
+  create: jest.fn(async () => true),
+  getOutcome: jest.fn(async () => null),
+};
 
 describe('getRecordImprovementsStepDefinition', () => {
   it('returns what was recorded and what was skipped', async () => {
@@ -171,7 +176,7 @@ describe('getRecordImprovementsStepDefinition', () => {
       getAiIndexService: () =>
         ({ get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('orders')) } as never),
       getImprovementsService: () => improvementsService,
-      getProposalsProvider: () => undefined,
+      getProposalsProvider: () => proposalsProvider,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled: async () => true,
       isFeedbackLoopEnabled: async () => true,
@@ -223,7 +228,7 @@ describe('getRecordImprovementsStepDefinition', () => {
     const { handler } = getRecordImprovementsStepDefinition({
       getAiIndexService: () => ({ get } as never),
       getImprovementsService,
-      getProposalsProvider: () => undefined,
+      getProposalsProvider: () => proposalsProvider,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled,
       isFeedbackLoopEnabled: async () => true,

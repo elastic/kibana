@@ -258,6 +258,21 @@ export const assertFeedbackLoopEnabled = async (
   }
 };
 
+/** Returns the proposals provider, failing the step when the proposals plugin is off. */
+export const requireProposalsProvider = (
+  getProposalsProvider: () => ProposalsProvider | undefined
+): ProposalsProvider => {
+  const provider = getProposalsProvider();
+  if (!provider) {
+    throw new ExecutionError({
+      type: 'FeatureDisabledError',
+      message:
+        'The Context Engine feedback loop needs the proposals plugin, which is not available in this deployment.',
+    });
+  }
+  return provider;
+};
+
 /** Resolves an AI index id to its backing store, failing the step when the id is unknown. */
 export const resolveAiIndex = async (
   getAiIndexService: () => AiIndexService,

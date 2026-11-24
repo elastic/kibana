@@ -134,20 +134,10 @@ export interface ListImprovementsResponse {
   total: number;
 }
 
-/** Response to approving or rejecting an improvement: its updated state. */
-export interface MutateImprovementResponse {
-  improvement: Improvement;
-}
-
 /** Response to starting a feedback analysis run. */
 export interface RunFeedbackAnalysisResponse {
   /** Id of the started workflow execution. */
   execution_id: string;
-}
-
-/** Body of a reject request. */
-export interface RejectImprovementRequest {
-  reason?: string;
 }
 
 /** What an analysis run posts when it finishes. */

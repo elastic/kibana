@@ -354,11 +354,6 @@ export class ContextEnginePlugin
       return startDeps.spaces;
     };
 
-    const getActions = async () => {
-      const [, startDeps] = await coreSetup.getStartServices();
-      return startDeps.actions;
-    };
-
     // Read-only Signals routes (reads run as the current user, scoped to the active space).
     registerSignalRoutes({
       router,
@@ -372,9 +367,7 @@ export class ContextEnginePlugin
       getAiIndexService,
       getImprovementsService,
       getProposalsProvider: () => this.proposalsProvider,
-      getWorkflowProvider: () => this.workflowProvider,
       getScheduleService,
-      getActions,
       getSpaces,
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
       logger: this.logger.get('routes'),
@@ -546,9 +539,11 @@ export class ContextEnginePlugin
     const soClient = coreStart.savedObjects.createInternalRepository();
     const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(soClient);
 
+    // Improvements are reviewed as proposals, so the loop is unavailable without a provider.
     this.isFeedbackLoopEnabled = async () =>
-      (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID)) ??
-      false;
+      this.proposalsProvider !== undefined &&
+      ((await globalUiSettings.get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID)) ??
+        false);
     this.isGlobalMemoryEnabled = async () =>
       (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false;
     scheduleSignalGenerator({ taskManager: startDeps.taskManager }).catch((err) => {

@@ -5,34 +5,18 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  aiIndexFeedbackAnalysisRunPath,
-  aiIndexImprovementsPath,
-  improvementApprovePath,
-  improvementRejectPath,
-} from '../../common/constants';
+import { aiIndexFeedbackAnalysisRunPath, aiIndexImprovementsPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { Improvement } from '../../common/http_api/improvements';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import { FeedbackAnalysisAlreadyRunningError } from '../feedback_analysis/schedule';
 import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
-import { applyImprovement, ApplyImprovementError } from '../improvements/apply';
-import { ImprovementConflictError } from '../improvements/errors';
 import type { ImprovementsServiceApi } from '../improvements/service';
-import type { WorkflowProvider } from '../workflows/provider';
-import { ImprovementAuditAction } from '../audit/audit_events';
+import type { ProposalsProvider } from '../proposals/provider';
 import { registerImprovementRoutes } from './improvements';
-
-jest.mock('../improvements/apply', () => {
-  const actual = jest.requireActual('../improvements/apply');
-  return { ...actual, applyImprovement: jest.fn() };
-});
-
-const applyImprovementMock = applyImprovement as jest.MockedFunction<typeof applyImprovement>;
 
 interface RegisteredRoute {
   config: {
@@ -77,7 +61,7 @@ describe('improvements routes', () => {
   let improvements: jest.Mocked<ImprovementsServiceApi>;
   let aiIndexService: jest.Mocked<AiIndexService>;
   let scheduleService: jest.Mocked<FeedbackAnalysisScheduleService>;
-  let workflowProvider: WorkflowProvider | undefined;
+  let proposalsProvider: jest.Mocked<ProposalsProvider> | undefined;
   let auditLog: jest.Mock;
   let currentUser: { username: string } | null;
 
@@ -105,17 +89,6 @@ describe('improvements routes', () => {
     return route.handler(createContext(), httpServerMock.createKibanaRequest(request), response);
   };
 
-  const approve = () =>
-    callRoute('POST', improvementApprovePath, {
-      params: { aiIndexId: AI_INDEX_ID, improvementId: IMPROVEMENT_ID },
-    });
-
-  const reject = (body: Record<string, unknown> = {}) =>
-    callRoute('POST', improvementRejectPath, {
-      params: { aiIndexId: AI_INDEX_ID, improvementId: IMPROVEMENT_ID },
-      body,
-    });
-
   beforeEach(() => {
     jest.clearAllMocks();
     routes = {};
@@ -124,7 +97,7 @@ describe('improvements routes', () => {
     currentUser = { username: 'reviewer' };
     auditLog = jest.fn();
     response = httpServerMock.createResponseFactory();
-    workflowProvider = undefined;
+    proposalsProvider = { create: jest.fn(), getOutcome: jest.fn().mockResolvedValue(null) };
 
     improvements = {
       write: jest.fn(),
@@ -148,8 +121,6 @@ describe('improvements routes', () => {
       remove: jest.fn(),
     };
 
-    applyImprovementMock.mockResolvedValue('ki-new');
-
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (_versionConfig: unknown, handler: RequestHandler) => {
         routes[`${method}:${config.path}`] = { config, handler };
@@ -167,36 +138,29 @@ describe('improvements routes', () => {
       router,
       getAiIndexService: () => aiIndexService,
       getImprovementsService: () => improvements,
-      getProposalsProvider: () => undefined,
-      getWorkflowProvider: () => workflowProvider,
+      getProposalsProvider: () => proposalsProvider,
       getScheduleService: () => scheduleService,
-      getActions: async () => ({} as ActionsPluginStart),
       getSpaces: async () => undefined,
       getFeedbackLoopEnabled: async () => feedbackLoopEnabled,
       logger: loggingSystemMock.createLogger(),
     });
   });
 
-  it('registers reads as read routes and decisions as write routes', () => {
+  it('registers the list as a read route and the run as a write route', () => {
     expect(routes[`GET:${aiIndexImprovementsPath}`].config).toMatchObject({
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
-    for (const path of [
-      improvementApprovePath,
-      improvementRejectPath,
-      aiIndexFeedbackAnalysisRunPath,
-    ]) {
-      expect(routes[`POST:${path}`].config).toMatchObject({
-        access: 'internal',
-        security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
-      });
-    }
+    expect(routes[`POST:${aiIndexFeedbackAnalysisRunPath}`].config).toMatchObject({
+      access: 'internal',
+      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
+    });
   });
 
   it.each([
     ['the context engine setting is off', () => (featureFlagEnabled = false)],
     ['the feedback loop setting is off', () => (feedbackLoopEnabled = false)],
+    ['the proposals plugin is not available', () => (proposalsProvider = undefined)],
   ])('returns 404 on every route when %s', async (_name, disable) => {
     disable();
 
@@ -204,13 +168,11 @@ describe('improvements routes', () => {
       params: { aiIndexId: AI_INDEX_ID },
       query: { from: 0, size: 25 },
     });
-    await approve();
-    await reject();
     await callRoute('POST', aiIndexFeedbackAnalysisRunPath, {
       params: { aiIndexId: AI_INDEX_ID },
     });
 
-    expect(response.notFound).toHaveBeenCalledTimes(4);
+    expect(response.notFound).toHaveBeenCalledTimes(2);
   });
 
   describe('list', () => {
@@ -228,6 +190,27 @@ describe('improvements routes', () => {
       });
     });
 
+    it('records a decision made on the proposal before listing it', async () => {
+      const listed = improvement();
+      improvements.list.mockResolvedValue({ items: [listed], total: 1 });
+      proposalsProvider!.getOutcome.mockResolvedValue({ state: 'rejected', by: 'ana' });
+
+      await callRoute('GET', aiIndexImprovementsPath, {
+        params: { aiIndexId: AI_INDEX_ID },
+        query: { from: 0, size: 25 },
+      });
+
+      expect(proposalsProvider!.getOutcome).toHaveBeenCalledWith(
+        expect.objectContaining({ proposalId: `context-engine-${IMPROVEMENT_ID}` })
+      );
+      expect(improvements.transition).toHaveBeenCalledWith(IMPROVEMENT_ID, 'rejected', {
+        by: 'ana',
+      });
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { items: [expect.objectContaining({ status: 'rejected' })], total: 1 },
+      });
+    });
+
     it('passes an explicit status filter through', async () => {
       await callRoute('GET', aiIndexImprovementsPath, {
         params: { aiIndexId: AI_INDEX_ID },
@@ -237,144 +220,6 @@ describe('improvements routes', () => {
       expect(improvements.list).toHaveBeenCalledWith(
         expect.objectContaining({ status: ['applied', 'rejected'] })
       );
-    });
-  });
-
-  describe('approve', () => {
-    it('applies the change and records who approved it', async () => {
-      await approve();
-
-      expect(applyImprovementMock).toHaveBeenCalledWith(
-        expect.objectContaining({ improvement_id: IMPROVEMENT_ID }),
-        expect.objectContaining({ spaceId: 'default' })
-      );
-      expect(improvements.transition).toHaveBeenCalledWith(IMPROVEMENT_ID, 'applied', {
-        by: 'reviewer',
-        applied_target_id: 'ki-new',
-      });
-      expect(response.ok).toHaveBeenCalledWith({
-        body: { improvement: expect.objectContaining({ status: 'applied' }) },
-      });
-    });
-
-    it('applies on the caller’s own client, not a stored one', async () => {
-      const context = createContext();
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
-      await routes[`POST:${improvementApprovePath}`].handler(
-        context,
-        httpServerMock.createKibanaRequest({
-          params: { aiIndexId: AI_INDEX_ID, improvementId: IMPROVEMENT_ID },
-        }),
-        response
-      );
-
-      expect(applyImprovementMock).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({ esClient })
-      );
-    });
-
-    it('records an apply failure on the improvement so it can be retried', async () => {
-      applyImprovementMock.mockRejectedValue(new ApplyImprovementError('Destination is a pattern'));
-
-      await approve();
-
-      expect(improvements.transition).toHaveBeenCalledWith(IMPROVEMENT_ID, 'failed', {
-        by: 'reviewer',
-        error: 'Destination is a pattern',
-      });
-      expect(response.badRequest).toHaveBeenCalledWith({
-        body: { message: 'Destination is a pattern' },
-      });
-    });
-
-    it('refuses to approve one that is already decided', async () => {
-      improvements.get.mockResolvedValue(improvement({ status: 'rejected' }));
-
-      await approve();
-
-      expect(applyImprovementMock).not.toHaveBeenCalled();
-      expect(response.conflict).toHaveBeenCalled();
-    });
-
-    it('still offers a failed one, because nothing was written', async () => {
-      improvements.get.mockResolvedValue(improvement({ status: 'failed' }));
-
-      await approve();
-
-      expect(applyImprovementMock).toHaveBeenCalled();
-    });
-
-    it('404s an improvement belonging to a different AI index', async () => {
-      improvements.get.mockResolvedValue(improvement({ ai_index_id: 'other' }));
-
-      await approve();
-
-      expect(response.notFound).toHaveBeenCalled();
-      expect(applyImprovementMock).not.toHaveBeenCalled();
-    });
-
-    it('returns 409 when someone else decided it first', async () => {
-      improvements.transition.mockRejectedValue(new ImprovementConflictError([IMPROVEMENT_ID]));
-
-      await approve();
-
-      expect(response.conflict).toHaveBeenCalled();
-    });
-
-    it('audits both the decision and its failure', async () => {
-      await approve();
-      expect(auditLog).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: ImprovementAuditAction.APPROVE,
-            outcome: 'success',
-          }),
-        })
-      );
-
-      auditLog.mockClear();
-      applyImprovementMock.mockRejectedValue(new ApplyImprovementError('nope'));
-      await approve();
-
-      expect(auditLog).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: ImprovementAuditAction.APPROVE,
-            outcome: 'failure',
-          }),
-        })
-      );
-    });
-  });
-
-  describe('reject', () => {
-    it('records the reviewer and their reason', async () => {
-      await reject({ reason: 'The KI already covers this' });
-
-      expect(improvements.transition).toHaveBeenCalledWith(IMPROVEMENT_ID, 'rejected', {
-        by: 'reviewer',
-        reason: 'The KI already covers this',
-      });
-      expect(response.ok).toHaveBeenCalledWith({
-        body: { improvement: expect.objectContaining({ status: 'rejected' }) },
-      });
-    });
-
-    it('refuses to reject one that was already applied', async () => {
-      improvements.get.mockResolvedValue(improvement({ status: 'applied' }));
-
-      await reject();
-
-      expect(improvements.transition).not.toHaveBeenCalled();
-      expect(response.conflict).toHaveBeenCalled();
-    });
-
-    it('changes nothing in the AI index', async () => {
-      await reject();
-
-      expect(applyImprovementMock).not.toHaveBeenCalled();
     });
   });
 

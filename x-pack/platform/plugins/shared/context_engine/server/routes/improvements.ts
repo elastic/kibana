@@ -5,53 +5,36 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type {
-  ElasticsearchClient,
-  IRouter,
-  KibanaResponseFactory,
-  Logger,
-  RequestHandler,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter, Logger, RequestHandler } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   DEFAULT_IMPROVEMENTS_PAGE_SIZE,
   IMPROVEMENTS_INTERNAL_API_VERSION,
   MAX_AI_INDEX_ID_LENGTH,
-  MAX_IMPROVEMENT_ID_LENGTH,
-  MAX_IMPROVEMENT_REJECT_REASON_LENGTH,
   MAX_IMPROVEMENTS_PAGE_SIZE,
   MAX_IMPROVEMENTS_RESULT_WINDOW,
   aiIndexFeedbackAnalysisRunPath,
   aiIndexImprovementsPath,
-  improvementApprovePath,
-  improvementRejectPath,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type {
-  ImprovementResolution,
   ImprovementStatus,
   ListImprovementsResponse,
-  MutateImprovementResponse,
   RunFeedbackAnalysisResponse,
 } from '../../common/http_api/improvements';
 import {
   IMPROVEMENT_STATUSES,
   OPEN_IMPROVEMENT_STATUSES,
-  isOpenImprovement,
 } from '../../common/http_api/improvements';
 import { validateAiIndexId } from '../../common/validation';
 import type { AiIndexService } from '../ai_indices/service';
 import { FeedbackAnalysisAlreadyRunningError } from '../feedback_analysis/schedule';
 import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
-import { ApplyImprovementError, applyImprovement } from '../improvements/apply';
-import { ImprovementConflictError, ImprovementNotFoundError } from '../improvements/errors';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import { reconcileImprovements } from '../improvements/reconcile';
 import type { ProposalsProvider } from '../proposals/provider';
-import type { WorkflowProvider } from '../workflows/provider';
 import { handleAiIndexError } from './ai_index_errors';
 import { ImprovementAuditAction, improvementDecisionAuditEvent } from '../audit/audit_events';
 import { resolveSpaceId } from './space';
@@ -73,11 +56,6 @@ const aiIndexIdSchema = schema.string({
 });
 
 const aiIndexParamsSchema = schema.object({ aiIndexId: aiIndexIdSchema });
-
-const improvementParamsSchema = schema.object({
-  aiIndexId: aiIndexIdSchema,
-  improvementId: schema.string({ minLength: 1, maxLength: MAX_IMPROVEMENT_ID_LENGTH }),
-});
 
 const listImprovementsQuerySchema = schema.object({
   /** Statuses to include; defaults to the open statuses. */
@@ -104,21 +82,6 @@ const listImprovementsQuerySchema = schema.object({
   }),
 });
 
-const rejectBodySchema = schema.object({
-  /** Why the improvement was rejected. */
-  reason: schema.maybe(schema.string({ maxLength: MAX_IMPROVEMENT_REJECT_REASON_LENGTH })),
-});
-
-const handleImprovementError = (error: unknown, response: KibanaResponseFactory) => {
-  if (error instanceof ImprovementConflictError) {
-    return response.conflict({ body: { message: error.message } });
-  }
-  if (error instanceof ImprovementNotFoundError) {
-    return response.notFound({ body: { message: error.message } });
-  }
-  throw error;
-};
-
 export interface ImprovementRouteDeps {
   router: IRouter;
   getAiIndexService: () => AiIndexService;
@@ -127,12 +90,9 @@ export interface ImprovementRouteDeps {
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsServiceApi;
-  /** Returns the registered workflow operations, or `undefined` if none are registered. */
-  getWorkflowProvider: () => WorkflowProvider | undefined;
   /** Returns the registered proposals operations, or `undefined` if none are registered. */
   getProposalsProvider: () => ProposalsProvider | undefined;
   getScheduleService: () => FeedbackAnalysisScheduleService;
-  getActions: () => Promise<ActionsPluginStart>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
   /** Whether the global `contextEngine:feedbackLoopEnabled` setting is on. */
   getFeedbackLoopEnabled: () => Promise<boolean>;
@@ -144,17 +104,16 @@ export const registerImprovementRoutes = ({
   router,
   getAiIndexService,
   getImprovementsService,
-  getWorkflowProvider,
   getProposalsProvider,
   getScheduleService,
-  getActions,
   getSpaces,
   getFeedbackLoopEnabled,
   logger,
 }: ImprovementRouteDeps) => {
   const gate = <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
     withContextEngineFeatureFlag<P, Q, B>(async (ctx, request, response) => {
-      if (!(await getFeedbackLoopEnabled())) {
+      // Improvements are reviewed as proposals, so there is nothing to review without them.
+      if (!getProposalsProvider() || !(await getFeedbackLoopEnabled())) {
         return response.notFound();
       }
       return handler(ctx, request, response);
@@ -190,182 +149,21 @@ export const registerImprovementRoutes = ({
         });
 
         const proposals = getProposalsProvider();
-        const body: ListImprovementsResponse = proposals
-          ? {
-              ...listed,
-              items: await reconcileImprovements({
-                improvements: listed.items,
-                improvementsService: improvements,
-                proposals,
-                context: { spaceId, request },
-                logger,
-              }),
-            }
-          : listed;
+        if (!proposals) {
+          return response.notFound();
+        }
+        const body: ListImprovementsResponse = {
+          ...listed,
+          items: await reconcileImprovements({
+            improvements: listed.items,
+            improvementsService: improvements,
+            proposals,
+            context: { spaceId, request },
+            logger,
+          }),
+        };
 
         return response.ok({ body });
-      })
-    );
-
-  router.versioned
-    .post({
-      path: improvementApprovePath,
-      security: WRITE_SECURITY,
-      access: 'internal',
-      summary: 'Approve an improvement',
-      description:
-        "Applies the proposed change under the caller's own privileges and records the improvement as applied. A failed apply is recorded on the improvement, which stays open so it can be retried.",
-    })
-    .addVersion(
-      {
-        version: IMPROVEMENTS_INTERNAL_API_VERSION,
-        validate: { request: { params: improvementParamsSchema } },
-      },
-      gate(async (ctx, request, response) => {
-        const core = await ctx.core;
-        const esClient = core.elasticsearch.client.asCurrentUser;
-        const auditLogger = core.security.audit.logger;
-        const { aiIndexId, improvementId } = request.params;
-        const audit = (error?: Error) =>
-          auditLogger.log(
-            improvementDecisionAuditEvent({
-              action: ImprovementAuditAction.APPROVE,
-              aiIndexId,
-              improvementId,
-              error,
-            })
-          );
-
-        const spaceId = resolveSpaceId(await getSpaces(), request);
-        const improvements = getImprovementsService(esClient, 'default');
-        const improvement = await improvements.get(improvementId);
-
-        if (!improvement || improvement.ai_index_id !== aiIndexId) {
-          return response.notFound({
-            body: { message: `Improvement [${improvementId}] was not found.` },
-          });
-        }
-        if (!isOpenImprovement(improvement.status)) {
-          return response.conflict({
-            body: {
-              message: `Improvement [${improvementId}] was already ${improvement.status} and cannot be approved.`,
-            },
-          });
-        }
-
-        const by = core.security.authc.getCurrentUser()?.username;
-        const resolution: ImprovementResolution = by ? { by } : {};
-
-        let appliedTargetId: string;
-        try {
-          appliedTargetId = await applyImprovement(improvement, {
-            esClient,
-            aiIndexService: getAiIndexService(),
-            workflows: getWorkflowProvider(),
-            actions: await getActions(),
-            spaceId,
-            request,
-            logger,
-          });
-        } catch (error) {
-          if (!(error instanceof ApplyImprovementError)) {
-            audit(error instanceof Error ? error : new Error(String(error)));
-            return handleImprovementError(error, response);
-          }
-
-          await improvements
-            .transition(improvementId, 'failed', { ...resolution, error: error.message })
-            .catch((transitionError) => {
-              logger.warn(
-                `Failed to record the apply failure on improvement [${improvementId}]: ${transitionError.message}`
-              );
-            });
-          audit(error);
-
-          return response.badRequest({ body: { message: error.message } });
-        }
-
-        try {
-          const improved = await improvements.transition(improvementId, 'applied', {
-            ...resolution,
-            applied_target_id: appliedTargetId,
-          });
-          audit();
-
-          const body: MutateImprovementResponse = { improvement: improved };
-          return response.ok({ body });
-        } catch (error) {
-          audit(error instanceof Error ? error : new Error(String(error)));
-          return handleImprovementError(error, response);
-        }
-      })
-    );
-
-  router.versioned
-    .post({
-      path: improvementRejectPath,
-      security: WRITE_SECURITY,
-      access: 'internal',
-      summary: 'Reject an improvement',
-      description:
-        'Records the improvement as rejected. It leaves the review list but is still handed to later runs, along with the reason, so the same fix is not proposed again.',
-    })
-    .addVersion(
-      {
-        version: IMPROVEMENTS_INTERNAL_API_VERSION,
-        validate: { request: { params: improvementParamsSchema, body: rejectBodySchema } },
-      },
-      gate(async (ctx, request, response) => {
-        const core = await ctx.core;
-        const esClient = core.elasticsearch.client.asCurrentUser;
-        const auditLogger = core.security.audit.logger;
-        const { aiIndexId, improvementId } = request.params;
-
-        const improvements = getImprovementsService(esClient, 'default');
-        const improvement = await improvements.get(improvementId);
-
-        if (!improvement || improvement.ai_index_id !== aiIndexId) {
-          return response.notFound({
-            body: { message: `Improvement [${improvementId}] was not found.` },
-          });
-        }
-        if (!isOpenImprovement(improvement.status)) {
-          return response.conflict({
-            body: {
-              message: `Improvement [${improvementId}] was already ${improvement.status} and cannot be rejected.`,
-            },
-          });
-        }
-
-        const by = core.security.authc.getCurrentUser()?.username;
-        const { reason } = request.body;
-
-        try {
-          const improved = await improvements.transition(improvementId, 'rejected', {
-            ...(by ? { by } : {}),
-            ...(reason ? { reason } : {}),
-          });
-          auditLogger.log(
-            improvementDecisionAuditEvent({
-              action: ImprovementAuditAction.REJECT,
-              aiIndexId,
-              improvementId,
-            })
-          );
-
-          const body: MutateImprovementResponse = { improvement: improved };
-          return response.ok({ body });
-        } catch (error) {
-          auditLogger.log(
-            improvementDecisionAuditEvent({
-              action: ImprovementAuditAction.REJECT,
-              aiIndexId,
-              improvementId,
-              error: error instanceof Error ? error : new Error(String(error)),
-            })
-          );
-          return handleImprovementError(error, response);
-        }
       })
     );
 

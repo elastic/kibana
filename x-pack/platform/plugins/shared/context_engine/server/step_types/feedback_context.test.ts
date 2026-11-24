@@ -41,7 +41,7 @@ const buildStep = ({
   getFeedbackContextStepDefinition({
     getAiIndexService: () => aiIndexService,
     getImprovementsService: () => improvementsService,
-    getProposalsProvider: () => undefined,
+    getProposalsProvider: () => proposalsProvider,
     getAuditLogger: async () => undefined,
     isContextEngineEnabled: async () => contextEngineEnabled,
     isFeedbackLoopEnabled: async () => feedbackLoopEnabled,
@@ -53,6 +53,11 @@ beforeEach(() => {
   jest.clearAllMocks();
   buildFeedbackContextMock.mockResolvedValue(CONTEXT);
 });
+
+const proposalsProvider = {
+  create: jest.fn(async () => true),
+  getOutcome: jest.fn(async () => null),
+};
 
 describe('getFeedbackContextStepDefinition', () => {
   it('flattens the run context into the step output the workflow templates against', async () => {
@@ -171,7 +176,7 @@ describe('getFeedbackContextStepDefinition', () => {
     const { handler } = getFeedbackContextStepDefinition({
       getAiIndexService: () => aiIndexService,
       getImprovementsService,
-      getProposalsProvider: () => undefined,
+      getProposalsProvider: () => proposalsProvider,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled,
       isFeedbackLoopEnabled: async () => true,
