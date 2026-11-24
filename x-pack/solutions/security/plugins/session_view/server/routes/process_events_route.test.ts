@@ -169,7 +169,8 @@ describe('process_events_route.ts', () => {
       });
 
       it('starts a forward page at its cursor', async () => {
-        const cursor = '2021-11-23T15:25:06.510Z';
+        // a forward page holds the events from its cursor on, so the cursor is not after its first event
+        const cursor = '2021-11-23T15:25:00.000Z';
         const range = await fetchAndGetAlertsRange(cursor, true, mockEvents.length);
 
         expect(range).toEqual({ gte: cursor, lte: lastTimestamp });
