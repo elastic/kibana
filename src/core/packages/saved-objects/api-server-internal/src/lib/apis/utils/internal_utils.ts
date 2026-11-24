@@ -24,7 +24,6 @@ import {
   encodeHitVersion,
   readAclFromRawSource,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { projectAcl } from './acl';
 
 export interface GetBulkOperationErrorRawResponse {
   status: number;
@@ -93,7 +92,7 @@ export function getExpectedVersionProperties(version?: string, document?: SavedO
 export interface GetSavedObjectFromSourceOptions {
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: SavedObjectsRawDocParseOptions['migrationVersionCompatibility'];
-  /** Whether the result includes the object's stored ACL. See {@link projectAcl}. */
+  /** Whether the result includes the object's stored ACL. Off by default. */
   includeAcl?: boolean;
 }
 
@@ -104,8 +103,8 @@ export interface GetSavedObjectFromSourceOptions {
  * @param type The saved object type.
  * @param id The saved object ID.
  * @param doc The raw document, with its sequence number and primary term if Elasticsearch returned them.
- * @param options `migrationVersionCompatibility`, and `includeAcl`, which keeps the stored ACL in the
- *   result. See {@link projectAcl}.
+ * @param options `migrationVersionCompatibility`, and `includeAcl`, which reads the stored ACL into
+ *   the result. Without it, the result has no `acl`.
  *
  * @internal
  */
@@ -141,29 +140,26 @@ export function getSavedObjectFromSource<T>(
     ];
   }
 
-  const acl = readAclFromRawSource(doc._source);
-  return projectAcl(
-    {
-      id,
-      type,
-      namespaces,
-      migrationVersion,
-      coreMigrationVersion,
-      typeMigrationVersion,
-      ...(originId && { originId }),
-      ...(updatedAt && { updated_at: updatedAt }),
-      ...(createdAt && { created_at: createdAt }),
-      ...(createdBy && { created_by: createdBy }),
-      ...(updatedBy && { updated_by: updatedBy }),
-      version: encodeHitVersion(doc),
-      attributes: doc._source[type],
-      references: doc._source.references || [],
-      managed,
-      accessControl,
-      ...(acl && { acl }),
-    },
-    includeAcl
-  );
+  const acl = includeAcl ? readAclFromRawSource(doc._source) : undefined;
+  return {
+    id,
+    type,
+    namespaces,
+    migrationVersion,
+    coreMigrationVersion,
+    typeMigrationVersion,
+    ...(originId && { originId }),
+    ...(updatedAt && { updated_at: updatedAt }),
+    ...(createdAt && { created_at: createdAt }),
+    ...(createdBy && { created_by: createdBy }),
+    ...(updatedBy && { updated_by: updatedBy }),
+    version: encodeHitVersion(doc),
+    attributes: doc._source[type],
+    references: doc._source.references || [],
+    managed,
+    accessControl,
+    ...(acl && { acl }),
+  };
 }
 
 /**

@@ -29,6 +29,7 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
+import { omit } from 'lodash';
 import type { ApiExecutionContext } from './types';
 import {
   validateConvertFilterToKueryNode,
@@ -38,7 +39,6 @@ import {
   removeAclFromTopHits,
 } from '../search';
 import { includedFields } from '../utils';
-import { projectAcl } from './utils/acl';
 
 export interface PerformFindParams {
   options: SavedObjectsFindOptions;
@@ -289,10 +289,9 @@ export const performFind = async <T = unknown, A = unknown>(
           redactTypeMap
         );
       } else if (disableExtensions) {
-        migrated = projectAcl(
-          migrationHelper.migrateStorageDocument(rawObject),
-          internalOptions.includeAcl
-        );
+        const document = migrationHelper.migrateStorageDocument(rawObject);
+        migrated =
+          internalOptions.includeAcl || !('acl' in document) ? document : omit(document, 'acl');
       } else {
         migrated = await migrationHelper.migrateAndDecryptStorageDocument({
           document: rawObject,

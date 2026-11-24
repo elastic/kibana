@@ -19,7 +19,6 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
-import { projectAcl } from '../utils/acl';
 
 export type ISerializerHelper = PublicMethodsOf<SerializerHelper>;
 
@@ -53,6 +52,6 @@ export class SerializerHelper {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
 
-    return projectAcl(omit(savedObject, ['namespace']), includeAcl) as SavedObject<T>;
+    return omit(savedObject, includeAcl ? ['namespace'] : ['namespace', 'acl']) as SavedObject<T>;
   }
 }

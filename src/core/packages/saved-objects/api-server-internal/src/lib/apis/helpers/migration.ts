@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   SavedObjectsErrorHelpers,
@@ -14,10 +15,8 @@ import {
   type AuthorizationTypeMap,
   type SavedObject,
 } from '@kbn/core-saved-objects-server';
-import type { StoredAcl } from '@kbn/ols';
 import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import type { IEncryptionHelper } from './encryption';
-import { projectAcl } from '../utils/acl';
 
 export type IMigrationHelper = PublicMethodsOf<MigrationHelper>;
 
@@ -99,6 +98,6 @@ export class MigrationHelper {
     };
 
     const result = downgrade ? migrate(await decrypt(document)) : await decrypt(migrate(document));
-    return projectAcl<SavedObject<T> & { acl?: StoredAcl }>(result, includeAcl);
+    return includeAcl || !('acl' in result) ? result : (omit(result, 'acl') as SavedObject<T>);
   }
 }
