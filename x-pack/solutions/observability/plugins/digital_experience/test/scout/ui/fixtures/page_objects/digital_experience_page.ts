@@ -96,6 +96,10 @@ export class DigitalExperiencePage {
   public readonly mobileTab: Locator;
   public readonly mobileApplicationsTable: EuiBasicTableObject;
   public readonly mobileKpis: Locator;
+  public readonly mobileReleaseHealth: Locator;
+  public readonly mobileReleaseTable: Locator;
+  public readonly mobileReleaseErrorRateChart: Locator;
+  public readonly mobileReleaseAdoptionChart: Locator;
   public readonly mobilePagePlatforms: Locator;
   public readonly mobileOsFilter: Locator;
   public readonly mobileCompareToggle: Locator;
@@ -175,6 +179,14 @@ export class DigitalExperiencePage {
       'digitalExperienceMobileApplicationsTable'
     );
     this.mobileKpis = page.getByTestId('digitalExperienceMobileKpis');
+    this.mobileReleaseHealth = page.getByTestId('digitalExperienceMobileReleaseHealth');
+    this.mobileReleaseTable = page.getByTestId('digitalExperienceMobileReleaseTable');
+    this.mobileReleaseErrorRateChart = page.getByTestId(
+      'digitalExperienceMobileReleaseErrorRateChart'
+    );
+    this.mobileReleaseAdoptionChart = page.getByTestId(
+      'digitalExperienceMobileReleaseAdoptionChart'
+    );
     // The header's badges, one per platform the application reported on.
     this.mobilePagePlatforms = page.getByTestId(/^digitalExperienceMobilePlatformBadge-/);
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
@@ -220,14 +232,8 @@ export class DigitalExperiencePage {
     await this.page.getByTestId(`digitalExperienceMobileOsFilterOption-${osName}`).click();
   }
 
-  /**
-   * Turns the mobile page's Compare on or off from its header, whose narrow layouts move the menu
-   * items into the overflow menu.
-   */
+  /** Turns Compare on or off from the mobile page's Health summary. */
   async toggleMobileCompare(): Promise<void> {
-    if (!(await this.mobileCompareToggle.isVisible())) {
-      await this.page.getByTestId('app-menu-overflow-button').click();
-    }
     await this.mobileCompareToggle.click();
   }
 

@@ -80,6 +80,15 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       await expect(digitalExperience.mobilePagePlatforms).toHaveText(['Android', 'iOS']);
     });
 
+    await test.step('shows the release health below the KPIs: the table and both charts', async () => {
+      await expect(digitalExperience.mobileReleaseHealth).toBeVisible();
+      await expect(
+        digitalExperience.mobileReleaseTable.getByText('1.0.0', { exact: true })
+      ).toBeVisible();
+      await expect(digitalExperience.mobileReleaseErrorRateChart).toBeVisible();
+      await expect(digitalExperience.mobileReleaseAdoptionChart).toBeVisible();
+    });
+
     await test.step('has no accessibility violations on the mobile page', async () => {
       const { violations } = await page.checkA11y({ include: ['main'] });
       expect(violations).toHaveLength(0);

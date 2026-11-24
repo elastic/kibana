@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { range } from 'lodash';
 import moment from 'moment';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { TARGET_BUCKETS } from '../../../common/histogram';
@@ -25,6 +26,28 @@ export const getHistogramInterval = (start: number, end: number): HistogramInter
   }
 
   return { value: Math.max(Math.round(interval?.asSeconds() ?? 0), 1), unit: 's' };
+};
+
+/**
+ * The start of every bucket of `interval` that covers `[start, end)`, in UTC as ES|QL's `TBUCKET`
+ * aligns them, so a series can fill the buckets its query left out for having no documents.
+ */
+export const getBucketTimestamps = (
+  start: number,
+  end: number,
+  { value, unit }: HistogramInterval
+): number[] => {
+  if (unit === 's') {
+    const step = value * 1000;
+    return range(Math.floor(start / step) * step, end, step);
+  }
+  const timestamps: number[] = [];
+  const bucket = moment.utc(start).startOf(unit === 'w' ? 'isoWeek' : unit);
+  while (bucket.valueOf() < end) {
+    timestamps.push(bucket.valueOf());
+    bucket.add(value, unit);
+  }
+  return timestamps;
 };
 
 /** The buckets of a request's date histograms, built once per request for every search. */

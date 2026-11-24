@@ -10,18 +10,22 @@ import { useEuiTheme } from '@elastic/eui';
 import { Endzones } from '@kbn/charts-plugin/public';
 import type { TimeChartXDomain } from '../utils/histogram_interval';
 
-/** Shades the edge buckets that cover only part of the queried range, as Lens's `XyEndzones` does. */
+/**
+ * Shades the parts of the edge buckets outside the queried range, as Lens's `XyEndzones` does for
+ * its date histograms: from the range's edges to the domain's, which reaches the end of the last
+ * bucket. `isFullBin` would put the zones past the domain, where nothing shows.
+ */
 export function PartialBucketsEndzones({ xDomain }: { xDomain: TimeChartXDomain | undefined }) {
   const { colorMode } = useEuiTheme();
 
   if (!xDomain) {
     return null;
   }
-  const { range, hasBars } = xDomain;
+  const { range } = xDomain;
 
   return (
     <Endzones
-      isFullBin={!hasBars}
+      isFullBin={false}
       isDarkMode={colorMode === 'DARK'}
       domainStart={range.start}
       domainEnd={range.end}

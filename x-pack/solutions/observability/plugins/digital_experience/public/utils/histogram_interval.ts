@@ -23,8 +23,9 @@ export interface TimeChartXDomain {
 
 /**
  * The x domain of a date histogram chart over the range of `histogram`, as Lens computes it
- * (`getXDomain` in `expression_xy`): bars' histogram mode draws past `max` by one interval, areas
- * add it to `max`.
+ * (`getXDomain` in `expression_xy`): bars' histogram mode draws past `max` by one interval; lines
+ * and areas draw each point at its bucket's start, so their `max` gets that interval for the last
+ * bucket, which `PartialBucketsEndzones` shades from the range's end when it's partial.
  */
 export const getTimeChartXDomain = ({
   points,

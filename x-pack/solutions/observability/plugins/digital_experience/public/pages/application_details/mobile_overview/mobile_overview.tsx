@@ -6,7 +6,16 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -23,9 +32,16 @@ import { useEnvironment } from '../../../hooks/use_environment';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useQueryParam } from '../../../hooks/use_query_param';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
-import { MOBILE_ERROR_RATE_DESCRIPTION, MOBILE_USERS_DESCRIPTION } from '../../../labels';
+import { formatErrorRate } from '../../../utils/format_error_rate';
+import {
+  COMPARE_LABEL,
+  MOBILE_ERROR_RATE_DESCRIPTION,
+  MOBILE_USERS_DESCRIPTION,
+} from '../../../labels';
 import { ComparedKpiPanel } from '../../../components/compared_kpi_panel';
 import type { ComparedKpiPanelProps } from '../../../components/compared_kpi_panel';
+import { ReleaseHealth } from './release_health/release_health';
+import type { MobileReleasesState } from './release_health/use_mobile_releases';
 import type { MobileKpisState } from './use_mobile_kpis';
 
 const OS_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.os', {
@@ -48,6 +64,8 @@ const MOBILE_KPIS: ReadonlyArray<
     'title' | 'tooltip' | 'changeUnit' | 'higherIsBetter' | 'data-test-subj'
   > & {
     kpi: MobileKpi;
+    /** How the value shows; the user's number format unless set. */
+    formatValue?: (value: number) => string;
   }
 > = [
   {
@@ -79,8 +97,34 @@ const MOBILE_KPIS: ReadonlyArray<
     tooltip: MOBILE_ERROR_RATE_DESCRIPTION,
     changeUnit: 'relative',
     higherIsBetter: false,
+    formatValue: formatErrorRate,
   },
 ];
+
+const HEALTH_SUMMARY_TITLE = i18n.translate('xpack.digitalExperience.mobile.healthSummary.title', {
+  defaultMessage: 'Health summary',
+});
+
+/** Compare to the previous period, in the URL, so a reload or Share keeps it. */
+const CompareSwitch = ({
+  isComparing,
+  onToggle,
+}: {
+  isComparing: boolean;
+  onToggle: () => void;
+}) => (
+  <EuiSwitch
+    compressed
+    label={COMPARE_LABEL}
+    checked={isComparing}
+    onChange={onToggle}
+    data-test-subj="digitalExperienceMobileCompareToggle"
+    {...getEbtProps({
+      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_COMPARE,
+      element: MOBILE_APPLICATION_EBT_ELEMENTS.COMPARE_TOGGLE,
+    })}
+  />
+);
 
 const LOAD_ERROR_TITLE = i18n.translate('xpack.digitalExperience.mobile.loadError', {
   defaultMessage: 'Could not load the mobile application',
@@ -133,23 +177,31 @@ const ClearFiltersButton = ({ onClear }: { onClear: () => void }) => (
 
 /**
  * The body of a mobile application's page, all its platforms: the toolbar its tabs share, with the
- * OS and release filters, and the KPI row. The sibling issues add their sections below it as they
- * fill them.
+ * OS and release filters, the health summary (the KPI row, with Compare) and the release health. The sibling issues add their
+ * sections below it as they fill them.
  */
 export function MobileOverview({
-  kpisState: { kpis, currentKpis, isLoading, error, refresh },
+  kpisState: { kpis, currentKpis, isLoading, error, refresh: refreshKpis },
+  releasesState,
 }: {
   /** Fetched by the page, whose header shows its platforms. */
   kpisState: MobileKpisState;
+  /** Fetched by the page, so the toolbar's refresh reloads it with the KPIs. */
+  releasesState: MobileReleasesState;
 }) {
+  const refresh = () => {
+    refreshKpis();
+    releasesState.refresh();
+  };
   const { environment } = useEnvironment();
   const formatters = useFormatters();
   const { formatNumber } = formatters;
-  // In the URL, so a reload or a shared link keeps them; the page's header sets Compare.
+  // In the URL, so a reload or a shared link keeps them.
   const { value: release, setValue: setRelease } = useQueryParam('release');
   const { value: osName, setValue: setOsName } = useQueryParam('osName');
-  const { value: compare } = useQueryParam('compare');
+  const { value: compare, setValue: setCompare } = useQueryParam('compare');
   const isComparing = compare === 'true';
+  const healthSummaryTitleId = useGeneratedHtmlId({ prefix: 'healthSummaryTitle' });
 
   const hasNoData = currentKpis !== undefined && !currentKpis.hasData;
   const isFiltered = environment !== undefined || osName !== undefined || release !== undefined;
@@ -241,18 +293,42 @@ export function MobileOverview({
             />
           )
         ) : (
-          <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
-            {MOBILE_KPIS.map(({ kpi, ...panel }) => (
-              <ComparedKpiPanel
-                key={kpi}
-                {...panel}
-                value={currentKpis?.[kpi]}
-                formatValue={formatNumber}
-                isComparing={isComparing}
-                isLoading={isLoading}
-              />
-            ))}
-          </EuiFlexGroup>
+          <>
+            <section aria-labelledby={healthSummaryTitleId}>
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" wrap>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h2 id={healthSummaryTitleId}>{HEALTH_SUMMARY_TITLE}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <CompareSwitch
+                    isComparing={isComparing}
+                    onToggle={() => setCompare(isComparing ? undefined : 'true')}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
+                {MOBILE_KPIS.map(({ kpi, formatValue = formatNumber, ...panel }) => (
+                  <ComparedKpiPanel
+                    key={kpi}
+                    {...panel}
+                    value={currentKpis?.[kpi]}
+                    formatValue={formatValue}
+                    isComparing={isComparing}
+                    isLoading={isLoading}
+                  />
+                ))}
+              </EuiFlexGroup>
+            </section>
+            <EuiSpacer size="l" />
+            <ReleaseHealth
+              releasesState={releasesState}
+              selectedRelease={release}
+              onSelectRelease={setRelease}
+            />
+          </>
         ))}
     </>
   );
