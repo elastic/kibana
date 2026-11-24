@@ -126,10 +126,10 @@ import type {
 } from './fake_entities';
 import {
   AWS_REINVENT_TYPE_ORDER,
-  awsReinventHeaderBadges,
   awsReinventTypeLabel,
   getCloudProvider,
   getCloudService,
+  inventoryHeaderBadges,
   type CloudProviderId,
 } from './cloud_providers';
 import { useCloudHierarchyEnabled } from './use_cloud_hierarchy';
@@ -2387,6 +2387,7 @@ const AllEntitiesViewInner = ({
   const selectedEntityType = selectedEntity?.type;
   const selectedEntityHealth = selectedEntity?.health;
   const selectedEntityRegion = selectedEntity?.tags.region;
+  const selectedEntityEnvironment = selectedEntity?.tags.environment;
 
   // Prefer the click context (what the map/table showed) so an in-flyout
   // selection opens coherent with it; fall back to the dataset lookup for
@@ -2396,6 +2397,7 @@ const AllEntitiesViewInner = ({
   const childEntityType = childEntityContext?.entityType ?? childEntity?.type;
   const childEntityHealth = childEntityContext?.health ?? childEntity?.health;
   const childEntityRegion = childEntityContext?.region ?? childEntity?.tags.region;
+  const childEntityEnvironment = childEntity?.tags.environment;
 
   const selectedHostedApmServiceNames = useMemo(() => {
     if (!selectedEntity) return undefined;
@@ -4304,10 +4306,16 @@ const AllEntitiesViewInner = ({
                   entityName={selectedEntityName}
                   entityType={selectedEntityType}
                   entityHealth={selectedEntityHealth}
-                  headerBadgeLabels={
-                    awsReinventOn ? awsReinventHeaderBadges(selectedEntityType) : undefined
-                  }
+                  headerBadgeLabels={inventoryHeaderBadges(
+                    selectedEntity?.category,
+                    selectedEntity
+                      ? getCategoryDescriptor(selectedEntity.category)?.label
+                      : undefined,
+                    selectedEntityType,
+                    awsReinventOn
+                  )}
                   region={selectedEntityRegion}
+                  environment={selectedEntityEnvironment}
                   onClose={closeEntity}
                   onSelectEntity={openChildEntity}
                   onNavigateEntity={openEntity}
@@ -4352,10 +4360,16 @@ const AllEntitiesViewInner = ({
                     entityName={childEntityName}
                     entityType={childEntityType}
                     entityHealth={childEntityHealth}
-                    headerBadgeLabels={
-                      awsReinventOn ? awsReinventHeaderBadges(childEntityType) : undefined
-                    }
+                    headerBadgeLabels={inventoryHeaderBadges(
+                      childEntity?.category,
+                      childEntity
+                        ? getCategoryDescriptor(childEntity.category)?.label
+                        : undefined,
+                      childEntityType,
+                      awsReinventOn
+                    )}
                     region={childEntityRegion}
+                    environment={childEntityEnvironment}
                     hostedApmServiceNames={childHostedApmServiceNames}
                     onClose={closeChildEntity}
                     onSelectEntity={openChildEntity}

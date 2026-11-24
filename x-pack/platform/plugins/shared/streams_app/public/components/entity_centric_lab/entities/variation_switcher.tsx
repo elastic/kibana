@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.31';
+export const PROTOTYPE_VERSION = '1.32';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-24',
+    summary:
+      'Flyout header badges show category and type, and Environment and Region move into entity details.',
+    details:
+      'The first header badge is the category and the second is the type. A GCP Compute Engine host reads Hosts and GCP Compute Engine. Environment and Region are rows in entity details. The alerts badge opens the Alerts tab even when no alerts are set up. Bump to v1.32.',
+  },
   {
     date: '2026-11-24',
     summary:

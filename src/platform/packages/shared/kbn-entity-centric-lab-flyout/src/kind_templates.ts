@@ -100,6 +100,9 @@ export const entityTypeToKind = (type: string | undefined): EntityKind | undefin
   if (normalized.includes('daemonset')) return 'workload';
   if (normalized.includes('cronjob')) return 'workload';
   if (normalized.includes('container')) return 'container';
+  // Compute VMs live in Hosts. Classifying them as cloud (they contain
+  // "gcp" / "azure") picks the AWS region template.
+  if (normalized.includes('compute engine') || normalized.includes('azure vm')) return 'host';
   if (
     normalized.includes('postgres') ||
     normalized.includes('mysql') ||
@@ -3787,7 +3790,7 @@ const detectAwsCloudVariant = (typeLabel: string | undefined): AwsCloudVariant =
   const lower = typeLabel.toLowerCase();
   if (lower.includes('ec2') || lower.includes('instance')) return 'ec2';
   if (lower.includes('lambda') || lower.includes('function')) return 'lambda';
-  if (lower.includes('s3') || lower.includes('bucket')) return 's3';
+  if (lower.includes('s3') || lower.includes('bucket') || lower.includes('blob')) return 's3';
   return 'region';
 };
 

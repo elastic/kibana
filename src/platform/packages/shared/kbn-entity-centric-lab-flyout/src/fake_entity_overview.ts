@@ -137,14 +137,19 @@ export const buildFakeEntityOverview = (
   /**
    * Region the entity lives in (e.g. `eu-west-1`), supplied by callers
    * that have it on their dataset (the Streams entities page passes
-   * `entity.tags.region`). When present it's surfaced both as a header
-   * badge and as a "Region" row in the Overview → Entity details grid so
-   * the flyout stays consistent with the list/grid/geomap region filter.
+   * `entity.tags.region`). Written as a "Region" row in the Overview →
+   * Entity details grid. It is not a header badge.
    */
-  region?: string
+  region?: string,
+  /**
+   * Environment the entity runs in (e.g. `production`). Written as an
+   * "Environment" row in Entity details. When omitted, a template
+   * "Production" header badge is still moved into that row.
+   */
+  environment?: string
 ): EntityOverview => {
   const base = resolveEntityOverview(entityName, entityType, entityHealth);
-  return region ? withRegion(base, region) : base;
+  return placeEnvironmentAndRegion(base, region, environment);
 };
 
 const resolveEntityOverview = (
@@ -176,23 +181,51 @@ const resolveEntityOverview = (
   return buildGenericEntityOverview(entityName);
 };
 
-/**
- * Overlay the caller-supplied region onto an overview: add a header
- * badge (unless one already reads as that region) and set the "Region"
- * row in the Entity details grid (replacing a template default like the
- * cloud kinds' hard-coded region, or appending when absent).
- */
-const withRegion = (overview: EntityOverview, region: string): EntityOverview => {
-  const hasRegionTag = overview.tags.some((tag) => tag.label === region);
-  const tags: EntityTag[] = hasRegionTag
-    ? [...overview.tags]
-    : [...overview.tags, { label: region, color: 'hollow' }];
+/** Header chip kind templates use for the environment. It belongs in Entity details. */
+const ENVIRONMENT_HEADER_LABEL = 'Production';
 
-  const regionRow: EntityDetailRow = { id: 'region', label: 'Region', value: region };
-  const hasRegionRow = overview.details.some((row) => row.id === 'region');
-  const details: EntityDetailRow[] = hasRegionRow
-    ? overview.details.map((row) => (row.id === 'region' ? regionRow : row))
-    : [...overview.details, regionRow];
+const upsertDetail = (
+  details: readonly EntityDetailRow[],
+  row: EntityDetailRow
+): EntityDetailRow[] => {
+  const index = details.findIndex((item) => item.id === row.id);
+  if (index === -1) return [...details, row];
+  return details.map((item) => (item.id === row.id ? row : item));
+};
+
+/**
+ * Environment and Region are metadata, not header badges. Drop the
+ * "Production" chip and any chip whose label is the region, and make
+ * sure both show up as key-value rows.
+ */
+const placeEnvironmentAndRegion = (
+  overview: EntityOverview,
+  region?: string,
+  environment?: string
+): EntityOverview => {
+  const regionLabel = region?.trim();
+  const hadEnvironmentBadge = overview.tags.some((tag) => tag.label === ENVIRONMENT_HEADER_LABEL);
+  const tags = overview.tags.filter((tag) => {
+    if (tag.label === ENVIRONMENT_HEADER_LABEL) return false;
+    if (regionLabel && tag.label === regionLabel) return false;
+    return true;
+  });
+
+  let details = [...overview.details];
+  const environmentValue =
+    environment?.trim() ||
+    details.find((row) => row.id === 'environment')?.value ||
+    (hadEnvironmentBadge ? 'production' : undefined);
+  if (environmentValue) {
+    details = upsertDetail(details, {
+      id: 'environment',
+      label: 'Environment',
+      value: environmentValue,
+    });
+  }
+  if (regionLabel) {
+    details = upsertDetail(details, { id: 'region', label: 'Region', value: regionLabel });
+  }
 
   return { ...overview, tags, details };
 };

@@ -219,18 +219,23 @@ export const awsReinventTypeLabel = (entityType: string): string =>
   AWS_REINVENT_TYPE_LABELS[entityType] ?? entityType;
 
 /**
- * Header badges for an AWS resource while AWS Re-invent is on.
- * Returns undefined for every other type, including the same resources
- * when the caller leaves the variant off.
+ * Flyout header badges: category first, type second.
+ * AWS Re-invent keeps the AWS page labels (AWS / EC2 instances). Every
+ * other entity uses its inventory category and type, so a GCP host
+ * reads Hosts / GCP Compute Engine rather than the cloud template's
+ * cloud / AWS region chips.
  */
-export const awsReinventHeaderBadges = (
-  entityType: string | undefined
+export const inventoryHeaderBadges = (
+  categoryId: string | undefined,
+  categoryLabel: string | undefined,
+  entityType: string | undefined,
+  awsReinventOn: boolean
 ): { readonly category: string; readonly type: string } | undefined => {
-  if (!entityType) return undefined;
-  const type = AWS_REINVENT_TYPE_LABELS[entityType];
-  if (type) return { category: 'AWS', type };
-  const alreadyRelocated = Object.values(AWS_REINVENT_TYPE_LABELS).includes(entityType);
-  return alreadyRelocated ? { category: 'AWS', type: entityType } : undefined;
+  if (!categoryLabel || !entityType) return undefined;
+  if (awsReinventOn && categoryId === 'aws') {
+    return { category: 'AWS', type: awsReinventTypeLabel(entityType) };
+  }
+  return { category: categoryLabel, type: entityType };
 };
 
 export const getProviderIdForEntityType = (entityType: string): CloudProviderId | undefined => {

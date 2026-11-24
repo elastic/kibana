@@ -107,12 +107,18 @@ interface EntityFlyoutProps {
   /**
    * Optional region (e.g. `eu-west-1`) supplied by callers that carry it
    * on their dataset — the Streams entities page passes
-   * `entity.tags.region`. Surfaced as a header badge and a "Region" row
-   * in the Overview → Entity details grid so the flyout matches the
-   * list/grid/geomap region filter. Omitted by callers without the data
-   * (e.g. Discover), in which case no region is shown.
+   * `entity.tags.region`. Written as a "Region" row in the Overview →
+   * Entity details grid. Omitted by callers without the data (e.g.
+   * Discover), in which case no region is shown.
    */
   readonly region?: string;
+  /**
+   * Optional environment (e.g. `production`) supplied by callers that
+   * carry it on their dataset — the Streams entities page passes
+   * `entity.tags.environment`. Written as an "Environment" row in
+   * Entity details, not as a header badge.
+   */
+  readonly environment?: string;
   /**
    * Optional callback fired when the user clicks a related entity name from
    * inside the flyout (e.g. a row in the Dependencies tab, or a node in the
@@ -216,9 +222,9 @@ interface EntityFlyoutProps {
    */
   readonly alertsInMaintenance?: number;
   /**
-   * Replaces the category and type header badges. The AWS Re-invent variant
-   * uses this so EC2 / Lambda / S3 read as AWS plus their type name. When
-   * omitted, the kind template badges are shown (Hosts, Functions, Storage).
+   * Header badges: category first, type second. Callers pass the inventory
+   * category and type so the chips match the list (Hosts / GCP Compute
+   * Engine) instead of the kind template's own labels.
    */
   readonly headerBadgeLabels?: { readonly category: string; readonly type: string };
   /**
@@ -527,6 +533,7 @@ export const EntityFlyout = ({
   entityType,
   entityHealth,
   region,
+  environment,
   onClose,
   onSelectEntity,
   // `onNavigateEntity` is intentionally not destructured: the back/forward
@@ -652,8 +659,8 @@ export const EntityFlyout = ({
     [entityName, entityHealth, chaosOn]
   );
   const overview = useMemo(
-    () => buildFakeEntityOverview(entityName, entityType, effectiveHealth, region),
-    [entityName, entityType, effectiveHealth, region]
+    () => buildFakeEntityOverview(entityName, entityType, effectiveHealth, region, environment),
+    [entityName, entityType, effectiveHealth, region, environment]
   );
 
   // Header badges always lead with the health indicator (see
@@ -662,14 +669,15 @@ export const EntityFlyout = ({
   // with overflow collapsed behind a clickable "+ N more" badge after
   // the first four.
   const orderedTags = useMemo(() => {
-    let headerSlots = 0;
     const sourceTags = headerBadgeLabels
-      ? overview.tags.map((tag) => {
-          if (HEALTH_TAG_LABELS.has(tag.label) || headerSlots >= 2) return tag;
-          const label = headerSlots === 0 ? headerBadgeLabels.category : headerBadgeLabels.type;
-          headerSlots += 1;
-          return { ...tag, label };
-        })
+      ? [
+          { label: headerBadgeLabels.category, color: 'hollow' },
+          { label: headerBadgeLabels.type, color: 'hollow' },
+          ...overview.tags.filter((tag) => HEALTH_TAG_LABELS.has(tag.label)),
+          ...overview.tags
+            .filter((tag) => !HEALTH_TAG_LABELS.has(tag.label))
+            .slice(2),
+        ]
       : overview.tags;
     if (hideHealthBadge) {
       const withoutHealth = sourceTags.filter((tag) => !HEALTH_TAG_LABELS.has(tag.label));
@@ -1228,11 +1236,8 @@ export const EntityFlyout = ({
 
   const headerAlertsBadgeClickable = useMemo(() => {
     if (!alertsBadge) return false;
-    if (!visibleTabs.some((tab) => tab.id === 'alerts')) return false;
-    if (alertsActiveCount === null) return false;
-    if (alertsBadge.label === 'No alert set up' || alertsBadge.label === 'N/A') return false;
-    return true;
-  }, [alertsBadge, visibleTabs, alertsActiveCount]);
+    return visibleTabs.some((tab) => tab.id === 'alerts');
+  }, [alertsBadge, visibleTabs]);
 
   const isHeaderAlertsBadge = useCallback(
     (tag: { label: string; color: string }) =>

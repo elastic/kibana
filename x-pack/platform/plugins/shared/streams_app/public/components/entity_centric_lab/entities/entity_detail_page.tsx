@@ -105,7 +105,7 @@ import {
   enrichK8sFlyoutOverviewDetails,
 } from './flyout_k8s_related_resources';
 import { buildFakeEntities, getCategoryDescriptor } from './fake_entities';
-import { awsReinventHeaderBadges } from './cloud_providers';
+import { inventoryHeaderBadges } from './cloud_providers';
 import { entityTypeLogo } from './entity_type_logo';
 import { entityAlertBadgePresentation, entityInMaintenanceCount } from './entity_alert_badge';
 import { AlertStatusBadge } from './alert_status_badge';
@@ -415,6 +415,7 @@ const EntityDetailPageInner = () => {
   const entityType = entity?.type;
   const entityHealth = entity?.health;
   const entityRegion = entity?.tags.region;
+  const entityEnvironment = entity?.tags.environment;
 
   const kind = useMemo(
     () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
@@ -428,8 +429,9 @@ const EntityDetailPageInner = () => {
 
   // Fake data builders
   const overview = useMemo(
-    () => buildFakeEntityOverview(entityName, entityType, entityHealth, entityRegion),
-    [entityName, entityType, entityHealth, entityRegion]
+    () =>
+      buildFakeEntityOverview(entityName, entityType, entityHealth, entityRegion, entityEnvironment),
+    [entityName, entityType, entityHealth, entityRegion, entityEnvironment]
   );
   const alertsActiveOverride = inventoryAlertsActiveOverride(entity);
   const tabsData = useMemo(
@@ -449,16 +451,22 @@ const EntityDetailPageInner = () => {
 
   // Badge order — Phase 1: category → type → alerts → rest (matches flyout).
   // Non-Phase-1: lead with the health indicator badge.
-  const headerBadgeLabels = awsReinventOn ? awsReinventHeaderBadges(entityType) : undefined;
+  const headerBadgeLabels = inventoryHeaderBadges(
+    entity?.category,
+    entity ? getCategoryDescriptor(entity.category)?.label : undefined,
+    entityType,
+    awsReinventOn
+  );
   const orderedTags = useMemo(() => {
-    let headerSlots = 0;
     const sourceTags = headerBadgeLabels
-      ? overview.tags.map((tag) => {
-          if (HEALTH_TAG_LABELS.has(tag.label) || headerSlots >= 2) return tag;
-          const label = headerSlots === 0 ? headerBadgeLabels.category : headerBadgeLabels.type;
-          headerSlots += 1;
-          return { ...tag, label };
-        })
+      ? [
+          { label: headerBadgeLabels.category, color: 'hollow' },
+          { label: headerBadgeLabels.type, color: 'hollow' },
+          ...overview.tags.filter((tag) => HEALTH_TAG_LABELS.has(tag.label)),
+          ...overview.tags
+            .filter((tag) => !HEALTH_TAG_LABELS.has(tag.label))
+            .slice(2),
+        ]
       : overview.tags;
     if (isPhase1) {
       const withoutHealth = sourceTags.filter((tag) => !HEALTH_TAG_LABELS.has(tag.label));
@@ -735,6 +743,7 @@ const EntityDetailPageInner = () => {
   const childEntityType = childEntityContext?.entityType ?? childEntity?.type;
   const childEntityHealth = childEntityContext?.health ?? childEntity?.health;
   const childEntityRegion = childEntityContext?.region ?? childEntity?.tags.region;
+  const childEntityEnvironment = childEntity?.tags.environment;
 
   const childHostedApmServiceNames = useMemo(() => {
     if (!childEntity) return undefined;
@@ -1418,8 +1427,14 @@ const EntityDetailPageInner = () => {
           entityName={childEntityName}
           entityType={childEntityType}
           entityHealth={childEntityHealth}
-          headerBadgeLabels={awsReinventOn ? awsReinventHeaderBadges(childEntityType) : undefined}
+          headerBadgeLabels={inventoryHeaderBadges(
+            childEntity?.category,
+            childEntity ? getCategoryDescriptor(childEntity.category)?.label : undefined,
+            childEntityType,
+            awsReinventOn
+          )}
           region={childEntityRegion}
+          environment={childEntityEnvironment}
           hostedApmServiceNames={childHostedApmServiceNames}
           onClose={closeChildEntity}
           onSelectEntity={openChildEntity}
