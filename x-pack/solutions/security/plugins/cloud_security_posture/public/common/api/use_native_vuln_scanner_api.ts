@@ -25,6 +25,7 @@ import type {
 } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import type { InventoryPackBody } from '@kbn/cloud-security-posture-common/native_vuln_scanner/pack_body';
 import { useKibana } from '../hooks/use_kibana';
+import { getHttpErrorInfo } from '../../pages/vulnerabilities/scanner_settings/http_error';
 
 export type OnboardingStatusResponse = OnboardingStatus | InsufficientLicenseStatus;
 
@@ -141,8 +142,9 @@ export const useNativeVulnScannerStatus = ({ awaitingScan }: { awaitingScan: boo
 };
 
 /**
- * Whether the scanner routes exist (status answers 200). The routes are absent when the plugin is
- * off, so any failure counts as "not available" and is swallowed instead of logged.
+ * Whether the scanner routes exist. They are absent (404) when the plugin is off; any other
+ * failure (network, 5xx, 401) is transient and is rethrown so it is not cached as "not available"
+ * for the whole session.
  */
 export const useNativeVulnScannerAvailability = () => {
   const client = useNativeVulnScannerClient();
@@ -154,7 +156,8 @@ export const useNativeVulnScannerAvailability = () => {
         await client.getStatus();
         return true;
       } catch (e) {
-        return false;
+        if (getHttpErrorInfo(e).status === 404) return false;
+        throw e;
       }
     },
     { retry: false, refetchOnWindowFocus: false, staleTime: Infinity }

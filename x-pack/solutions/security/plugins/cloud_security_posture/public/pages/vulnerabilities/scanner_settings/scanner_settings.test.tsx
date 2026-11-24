@@ -31,6 +31,7 @@ import type {
 import { TestProvider } from '../../../test/test_provider';
 import { getMockDependencies } from '../../../test/fixtures/get_mock_dependencies';
 import { INVENTORY_RETRY_MS, SCAN_START_GRACE_MS, ScannerSettingsPage } from '.';
+import { SCAN_POLL_INTERVAL_MS } from '../../../common/api/use_native_vuln_scanner_api';
 import { PIN_RESTART_SETTLE_MS } from './apply_onboarding';
 import {
   SCANNER_SETTINGS_TEST_SUBJECTS,
@@ -802,7 +803,6 @@ describe('ScannerSettingsPage', () => {
     });
 
     describe('while a scan is awaited', () => {
-      const SCAN_POLL_INTERVAL_MS = 5000;
       const finishedScan: SummaryDoc = {
         '@timestamp': '2026-11-17T08:00:00.000Z',
         run_id: 'run-2',

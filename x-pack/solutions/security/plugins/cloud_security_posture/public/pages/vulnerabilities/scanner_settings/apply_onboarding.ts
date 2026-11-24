@@ -55,7 +55,8 @@ const union = (...lists: string[][]): string[] => Array.from(new Set(lists.flat(
 const applyPack = async (
   client: NativeVulnScannerClient,
   plan: OnboardingPlan,
-  policyIds: string[]
+  policyIds: string[],
+  afterNameConflict = false
 ): Promise<PackStepResult> => {
   try {
     const { data: found } = await client.findPacks(INVENTORY_PACK_NAME);
@@ -63,8 +64,15 @@ const applyPack = async (
     const existing = found.find(({ name }) => name === INVENTORY_PACK_NAME);
 
     if (!existing) {
-      const { data } = await client.createPack(INVENTORY_PACK_BODY, policyIds);
-      return { status: 'created', packId: data.saved_object_id ?? data.id };
+      try {
+        const { data } = await client.createPack(INVENTORY_PACK_BODY, policyIds);
+        return { status: 'created', packId: data.saved_object_id ?? data.id };
+      } catch (e) {
+        // osquery checks the name and then writes without a lock, so a concurrent apply can win the
+        // create. Its pack is the one to merge into, so read again once instead of reporting a failure.
+        if (afterNameConflict || getHttpErrorInfo(e).status !== 409) throw e;
+        return applyPack(client, plan, policyIds, true);
+      }
     }
 
     const current = existing.policy_ids ?? [];

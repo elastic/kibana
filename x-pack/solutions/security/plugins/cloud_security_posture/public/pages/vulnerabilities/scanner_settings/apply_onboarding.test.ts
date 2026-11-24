@@ -79,6 +79,37 @@ describe('applyOnboarding', () => {
     expect(result.liveQuery).toEqual({ status: 'started' });
   });
 
+  it('merges into the pack a concurrent apply created when the create answers 409', async () => {
+    const { client, asClient } = createClient();
+    client.pinRuntime.mockResolvedValueOnce({ results: [pinResult('p1')] });
+    client.createPack.mockRejectedValueOnce(
+      httpError(409, `Pack with name "${INVENTORY_PACK_NAME}" already exists.`)
+    );
+    client.findPacks.mockResolvedValueOnce({ data: [] }).mockResolvedValueOnce({
+      data: [{ saved_object_id: 'raced-pack', name: INVENTORY_PACK_NAME, policy_ids: ['p9'] }],
+    });
+
+    const result = await applyOnboarding(asClient, planWith('create'), ['p1']);
+
+    expect(client.createPack).toHaveBeenCalledTimes(1);
+    expect(client.updatePack).toHaveBeenCalledWith(
+      'raced-pack',
+      expect.objectContaining({ policy_ids: ['p9', 'p1'] })
+    );
+    expect(result.pack).toEqual({ status: 'updated', packId: 'raced-pack' });
+  });
+
+  it('reports a failure when the create keeps answering 409 with no pack to merge into', async () => {
+    const { client, asClient } = createClient();
+    client.pinRuntime.mockResolvedValueOnce({ results: [pinResult('p1')] });
+    client.createPack.mockRejectedValue(httpError(409, 'Pack with name "x" already exists.'));
+
+    const result = await applyOnboarding(asClient, planWith('create'), ['p1']);
+
+    expect(client.createPack).toHaveBeenCalledTimes(2);
+    expect(result.pack.status).toBe('failed');
+  });
+
   it('ignores a fuzzy search hit whose name is not exactly the pack name', async () => {
     const { client, asClient } = createClient();
     client.pinRuntime.mockResolvedValueOnce({ results: [pinResult('p1')] });
