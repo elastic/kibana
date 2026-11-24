@@ -15,7 +15,7 @@ import {
   resolveEvaluationConnectorId,
   resolveProfileEnvOverrides,
 } from '../run_helpers';
-import { formatProfilesSummary } from '../profiles';
+import { formatProfilesSummary, PROFILE_FLAG_NAMES } from '../profiles';
 import { isTTY } from '../prompts';
 import { buildPlaywrightArgs } from './playwright_args';
 
@@ -57,10 +57,7 @@ export const runSuiteCmd: Command<void> = {
       'grep',
       'grep-invert',
       'profile',
-      'datasets-profile',
-      'export-profile',
-      'evaluations-kbn-profile',
-      'tracing-profile',
+      ...PROFILE_FLAG_NAMES,
       'trace-es-url',
       'trace-es-api-key',
       'evaluations-kbn-url',

@@ -66,6 +66,17 @@ const TRACING_PROFILE_FLAGS: ProfileFlagNames = {
   deprecated: 'export-profile',
 };
 
+/**
+ * The per-side profile flags and their deprecated aliases. A command that reads them has to declare
+ * them, or the parser rejects them. `--profile` is not included: each command declares it itself.
+ */
+export const PROFILE_FLAG_NAMES: readonly string[] = [
+  EVALUATIONS_KBN_PROFILE_FLAGS.current,
+  EVALUATIONS_KBN_PROFILE_FLAGS.deprecated,
+  TRACING_PROFILE_FLAGS.current,
+  TRACING_PROFILE_FLAGS.deprecated,
+];
+
 const readProfileFlag = (
   flagsReader: FlagsReader,
   { current, deprecated }: ProfileFlagNames
