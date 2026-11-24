@@ -122,9 +122,12 @@ export class EditLayerPanel extends Component<Props, State> {
   }
 
   _onSourceChange = (...args: Array<OnSourceChangeArgs<Record<string, unknown>>>) => {
-    // Sources from other plugins can change keys unknown to maps, propName is not narrowed to SourcePropName for them
     return this.props.updateSourceProps(
       this.props.selectedLayer!.getId(),
+      // Cast is required because ILayer is not generic over the source descriptor, so
+      // ILayer.renderSourceSettingsEditor can only type onChange args as Record<string, unknown>
+      // and propName is a string instead of SourcePropName.
+      // TODO remove cast by making ILayer generic over the source descriptor
       args as OnSourceChangeArgs[]
     );
   };
