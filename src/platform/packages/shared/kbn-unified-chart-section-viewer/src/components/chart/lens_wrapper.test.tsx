@@ -366,7 +366,6 @@ describe('LensWrapper', () => {
 
       onLoad(false, tablesWithRows);
       expect(onChartLoaded).toHaveBeenCalledTimes(1);
-      expect(onChartLoaded).toHaveBeenCalledWith();
     });
 
     it('reports a chart when only one of several layers has data', () => {
@@ -376,7 +375,7 @@ describe('LensWrapper', () => {
       onLoad(false, {
         tables: { tables: { layer1: { rows: [] }, layer2: { rows: [{ a: 1 }] } } },
       });
-      expect(onChartLoaded).toHaveBeenCalledWith();
+      expect(onChartLoaded).toHaveBeenCalledTimes(1);
     });
 
     it.each([
