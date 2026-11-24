@@ -563,6 +563,12 @@ components:
         expect.stringContaining("couldn't check main for a newer version"),
       ]);
     });
+
+    it('records that the page could not be read, so an open issue is not closed', async () => {
+      const { sources } = await detect();
+
+      expect(sources.main.newerVersionError).toEqual(expect.any(String));
+    });
   });
 
   it('opens an issue when the latest spec does not load', async () => {

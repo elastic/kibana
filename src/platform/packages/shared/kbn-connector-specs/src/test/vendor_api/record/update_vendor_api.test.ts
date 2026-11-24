@@ -516,6 +516,35 @@ actions:
     });
   });
 
+  it('drops the pin, and where to look, when a capture replaces a pinned source', async () => {
+    const V1 = 'https://specs.example.com/v1/openapi.yaml';
+    documents[V1] = documents[SPEC_URL];
+    documents['https://specs.example.com/v1/models.yaml'] = documents[MODELS_URL];
+    await update({ sources: { main: V1 } });
+    const manifest = await readJson('manifest.json');
+    manifest.sources.main = {
+      ...manifest.sources.main,
+      pinned: true,
+      note: 'The vendor publishes a file per release.',
+      latest: { url: 'https://specs.example.com/releases', pattern: '/(v\\d+)/' },
+    };
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      serializeManifest(parseManifest(JSON.stringify(manifest)))
+    );
+
+    await update({
+      sources: { main: V1 },
+      captures: { main: selfContainedSpecYaml('2.0') },
+      notes: { main: 'Captured with credentials.' },
+    });
+
+    const { main } = (await readJson('manifest.json')).sources;
+    expect(main).toMatchObject({ captured: true });
+    expect(main.pinned).toBeUndefined();
+    expect(main.latest).toBeUndefined();
+  });
+
   describe('with a captured source', () => {
     const NOTE = 'The vendor only serves this spec to a request carrying credentials.';
     const writeManifest = (manifest: unknown) =>

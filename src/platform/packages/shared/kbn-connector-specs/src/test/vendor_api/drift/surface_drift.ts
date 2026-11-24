@@ -45,6 +45,7 @@ export type SurfaceActionKind =
   | 'unchanged'
   | 'refresh'
   | 'none'
+  | 'inconclusive'
   | 'failed';
 
 export interface SurfaceAction {
@@ -147,7 +148,14 @@ export const surfaceDrift = async ({
         if (outcome === 'refresh') {
           refreshed.push(entry);
         }
-        if (existing?.state === 'open') {
+        // A release page that didn't load says nothing about a newer version, so an open issue
+        // about one stays open.
+        if (
+          existing?.state === 'open' &&
+          Object.values(entry.sources).some(({ newerVersionError }) => newerVersionError)
+        ) {
+          actions.push({ connector, action: 'inconclusive', issue: existing });
+        } else if (existing?.state === 'open') {
           const finding =
             outcome === 'refresh'
               ? `only changes for \`${connector}\` that the refresh PR picks up`

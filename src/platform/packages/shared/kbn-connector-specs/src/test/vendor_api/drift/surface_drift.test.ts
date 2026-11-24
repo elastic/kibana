@@ -187,6 +187,20 @@ describe('surfaceDrift', () => {
     expect(comments[0][1]).not.toContain('healthy');
   });
 
+  it('leaves an open issue alone when a release page could not be read', async () => {
+    const { tracker, issues } = createTracker([issueOf(drifted, 7, 'open')]);
+    const unchecked: ConnectorDrift = {
+      ...healthy,
+      sources: { main: { status: 'unchanged', newerVersionError: 'HTTP 503' } },
+    };
+
+    const { actions } = await surface([unchecked], tracker);
+
+    expect(actions[0]).toMatchObject({ action: 'inconclusive', issue: { number: 7 } });
+    expect(issues[0].state).toBe('open');
+    expect(tracker.update).not.toHaveBeenCalled();
+  });
+
   it('closes the open issue of a connector that no longer exists', async () => {
     const { tracker, issues, comments } = createTracker([
       issueOf({ ...drifted, connector: '.removed' }, 7, 'open'),

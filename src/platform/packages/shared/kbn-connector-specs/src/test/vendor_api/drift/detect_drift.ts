@@ -73,6 +73,11 @@ export interface SourceDrift {
   readonly url?: string;
   /** Set when the vendor names a version above the one the source's URL does; see `latest`. */
   readonly newerVersion?: NewerVersion;
+  /**
+   * Set when the vendor's release page couldn't be read, so whether a newer version exists is
+   * unknown; an open issue stays open until a check can tell.
+   */
+  readonly newerVersionError?: string;
 }
 
 /** An operation an action calls, as the committed manifest records it. */
@@ -609,6 +614,7 @@ export const detectDrift = async ({
   // A page that fails to name a version is a problem with the page, which a warning reports; it
   // is not news about the vendor's API, so it doesn't open an issue.
   const newerVersions: Record<string, NewerVersion> = {};
+  const newerVersionErrors: Record<string, string> = {};
   for (const [name, source] of Object.entries(manifest.sources)) {
     const { latest: where } = source;
     if (!where || source.captured) {
@@ -625,13 +631,27 @@ export const detectDrift = async ({
           error
         )}`
       );
+      newerVersionErrors[name] = errorMessage(error);
     }
   }
+  // When another source didn't load there is no comparison, so the sources that did load have no
+  // entry yet; one with a newer version still gets one.
+  const compared: Record<string, SourceDrift> = latest?.sources ?? sources;
   const checked = Object.fromEntries(
-    Object.entries(latest?.sources ?? sources).map(([name, source]) => [
-      name,
-      name in newerVersions ? { ...source, newerVersion: newerVersions[name] } : source,
-    ])
+    [...new Set([...Object.keys(compared), ...Object.keys(newerVersions)])].map((name) => {
+      const source: SourceDrift = compared[name] ?? {
+        status: 'unchanged',
+        url: manifest.sources[name]?.url,
+      };
+      return [
+        name,
+        {
+          ...source,
+          ...(name in newerVersions ? { newerVersion: newerVersions[name] } : {}),
+          ...(name in newerVersionErrors ? { newerVersionError: newerVersionErrors[name] } : {}),
+        },
+      ];
+    })
   );
 
   const latestSpecs = latest?.result?.specs;
