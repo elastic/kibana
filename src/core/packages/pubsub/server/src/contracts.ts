@@ -10,6 +10,13 @@
 import type { Topic } from './topic';
 
 /**
+ * Maximum number of characters in a producer-supplied event id. Longer ids are rejected.
+ *
+ * @public
+ */
+export const PUBSUB_MAX_ID_LENGTH = 256;
+
+/**
  * The event a producer writes.
  *
  * @public

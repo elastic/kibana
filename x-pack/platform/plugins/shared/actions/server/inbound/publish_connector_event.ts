@@ -6,11 +6,8 @@
  */
 
 import { createHash } from 'crypto';
-import type { Logger, PubSubStart, Topic } from '@kbn/core/server';
+import { PUBSUB_MAX_ID_LENGTH, type Logger, type PubSubStart, type Topic } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-
-/** Matches the pubsub event id limit. Ids over this length are rejected and then swallowed here. */
-const PUBSUB_EVENT_ID_MAX_LENGTH = 256;
 
 /** Spoke payload plus the hub fields. Extra spoke fields stay on the published object. */
 export interface ConnectorEventPublishData {
@@ -40,7 +37,7 @@ const publicationId = (data: ConnectorEventPublishData): string => {
   }
 
   const scopedId = [spaceId, connectorId, correlationKey].map(encodeURIComponent).join(':');
-  if (scopedId.length <= PUBSUB_EVENT_ID_MAX_LENGTH) {
+  if (scopedId.length <= PUBSUB_MAX_ID_LENGTH) {
     return scopedId;
   }
 
