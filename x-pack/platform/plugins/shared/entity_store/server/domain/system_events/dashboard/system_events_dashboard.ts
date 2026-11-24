@@ -55,11 +55,11 @@ const NO_VALUE = '—';
 const relative = (field: string) =>
   `CASE(${field} IS NULL, "${NO_VALUE}", DATE_DIFF("minute", ${field}, NOW()) < 120, CONCAT(TO_STRING(DATE_DIFF("minute", ${field}, NOW())), " min ago"), DATE_DIFF("hour", ${field}, NOW()) < 48, CONCAT(TO_STRING(DATE_DIFF("hour", ${field}, NOW())), " h ago"), CONCAT(TO_STRING(DATE_DIFF("day", ${field}, NOW())), " days ago"))`;
 
-/** Time since `field` and the exact UTC time, such as "12 min ago · 2026-11-17 08:16 UTC". */
+/** Time since `field` and the exact time in the viewer's time zone, such as "12 min ago · 2026-11-17 08:16". */
 const when = (field: string) =>
   `CASE(${field} IS NULL, "${NO_VALUE}", CONCAT(${relative(
     field
-  )}, " · ", DATE_FORMAT("yyyy-MM-dd HH:mm", ${field}), " UTC"))`;
+  )}, " · ", DATE_FORMAT("yyyy-MM-dd HH:mm", ${field})))`;
 
 /** The task a run doc belongs to, as text. */
 const TASK_LABEL = `CASE(event.action == "maintainer", CONCAT("maintainer: ", entity_store.maintainer_id), event.action == "extraction", CONCAT("extraction: ", entity_store.entity_type, " · ", entity_store.mode), event.action)`;
@@ -154,7 +154,7 @@ const statusStripPanels = ({
       index: events,
       esql: `${snapshots}
 | STATS last_success = MAX(@timestamp)
-| EVAL \`Hours since success\` = DATE_DIFF("hour", last_success, NOW()), \`Last success\` = CONCAT(DATE_FORMAT("yyyy-MM-dd HH:mm", last_success), " UTC")
+| EVAL \`Hours since success\` = DATE_DIFF("hour", last_success, NOW()), \`Last success\` = DATE_FORMAT("yyyy-MM-dd HH:mm", last_success)
 | KEEP \`Hours since success\`, \`Last success\``,
       metric: 'Hours since success',
       secondary: 'Last success',
