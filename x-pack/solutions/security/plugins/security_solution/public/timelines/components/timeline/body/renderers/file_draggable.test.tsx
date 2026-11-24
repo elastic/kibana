@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
 
 import { FileDraggable } from './file_draggable';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
 jest.mock('../../../../../common/lib/kibana');
@@ -37,10 +37,8 @@ describe('FileDraggable', () => {
   beforeEach(() => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
-  const mount = useMountAppended();
-
   test('it prefers fileName and filePath over endgameFileName and endgameFilePath when all of them are provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <FileDraggable
           scopeId="some_scope"
@@ -54,13 +52,13 @@ describe('FileDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[fileName]in[filePath]from its original path[fileExtOriginalPath]'
     );
   });
 
   test('it returns an empty string when none of the files or paths are provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <FileDraggable
           scopeId="some_scope"
@@ -74,11 +72,11 @@ describe('FileDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('');
+    expect(container).toBeEmptyDOMElement();
   });
 
   test('it renders just the endgameFileName if only endgameFileName is provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <FileDraggable
           scopeId="some_scope"
@@ -92,11 +90,11 @@ describe('FileDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('[endgameFileName]');
+    expect(container.textContent).toEqual('[endgameFileName]');
   });
 
   test('it renders "in endgameFilePath" if only endgameFilePath is provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <FileDraggable
           scopeId="some_scope"
@@ -110,11 +108,11 @@ describe('FileDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('in[endgameFilePath]');
+    expect(container.textContent).toEqual('in[endgameFilePath]');
   });
 
   test('it renders just the filename if only fileName is provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <FileDraggable
           scopeId="some_scope"
@@ -128,11 +126,11 @@ describe('FileDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('[fileName]');
+    expect(container.textContent).toEqual('[fileName]');
   });
 
   test('it renders "in filePath" if only filePath is provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <FileDraggable
           scopeId="some_scope"
@@ -146,11 +144,11 @@ describe('FileDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('in[filePath]');
+    expect(container.textContent).toEqual('in[filePath]');
   });
 
   test('should passing correct scopeId to cell actions', () => {
-    mount(
+    render(
       <TestProviders>
         <FileDraggable
           scopeId="some_scope"

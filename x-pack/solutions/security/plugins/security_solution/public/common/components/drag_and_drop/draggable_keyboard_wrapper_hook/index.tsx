@@ -8,7 +8,7 @@
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import type { FluidDragActions } from '@hello-pangea/dnd';
-import { useAddToTimeline } from '@kbn/timelines-plugin/public/hooks/use_add_to_timeline';
+import { useAddToTimeline } from '../../../../timelines/components/add_to_timeline/use_add_to_timeline';
 import { draggableKeyDownHandler } from './helpers';
 
 export interface UseDraggableKeyboardWrapperProps {

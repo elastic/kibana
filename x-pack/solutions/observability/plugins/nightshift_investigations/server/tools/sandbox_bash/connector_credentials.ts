@@ -29,6 +29,8 @@ export interface ConnectorCredentialEnv {
   secretValues: string[];
   /** Header env keys the credential proxy may only send to the connector's hosts. */
   secretEnvKeys: SecretEnvKey[];
+  /** Connector hosts allowed for the command, even when no auth headers are needed. */
+  allowedHosts: string[];
 }
 
 export type ConnectorCredentialResolution = ConnectorCredentialEnv | { errorMessage: string };
@@ -173,7 +175,7 @@ export const buildConnectorEnv = ({
     .filter((key) => key.startsWith(`${CONNECTOR_ENV_PREFIX}HEADER_`))
     .map((key) => ({ key, allowed_hosts: [...hosts] }));
 
-  return { env, secretValues: [...new Set(secretValues)], secretEnvKeys };
+  return { env, secretValues: [...new Set(secretValues)], secretEnvKeys, allowedHosts: [...hosts] };
 };
 
 /**

@@ -14,7 +14,7 @@
  * the fix (see #259695).
  *
  * The ES layer is replaced by a lightweight in-memory stub that honours the
- * query's `alert_ids` filter and `search_after` cursor so we can assert
+ * query's source filters and `search_after` cursor so we can assert
  * correct multi-page traversal.
  */
 
@@ -46,7 +46,10 @@ const mockLogger = { warn: jest.fn() } as never;
 
 let tsCounter = 1_700_000_000_000; // monotonic timestamp seed
 
-const createHit = (id: string, opts: { alertIds?: string[]; ts?: number } = {}): LiveActionHit => {
+const createHit = (
+  id: string,
+  opts: { alertIds?: string[]; ts?: number; workflow?: boolean } = {}
+): LiveActionHit => {
   const ts = opts.ts ?? (tsCounter -= 1000);
 
   return {
@@ -56,16 +59,62 @@ const createHit = (id: string, opts: { alertIds?: string[]; ts?: number } = {}):
       space_id: 'default',
       queries: [{ id: `q-${id}`, query: 'SELECT 1;', agents: ['agent-1'] }],
       ...(opts.alertIds ? { alert_ids: opts.alertIds } : {}),
+      ...(opts.workflow ? { origin: { type: 'workflow' } } : {}),
     },
     fields: { action_id: [id] },
     sort: [ts, 1],
   };
 };
 
+interface TestClause {
+  term?: Record<string, string | { value: string }>;
+  exists?: { field: string };
+  bool?: {
+    filter?: TestClause[];
+    must_not?: TestClause | TestClause[];
+    should?: TestClause[];
+    minimum_should_match?: number;
+  };
+}
+
+const matchesClause = (
+  clause: TestClause,
+  document: Record<string, string | string[] | undefined>
+): boolean => {
+  if (clause.term) {
+    return Object.entries(clause.term).every(([field, term]) => {
+      const expected = typeof term === 'string' ? term : term.value;
+      const value = document[field];
+
+      return Array.isArray(value) ? value.includes(expected) : value === expected;
+    });
+  }
+
+  if (clause.exists) {
+    const value = document[clause.exists.field];
+
+    return Array.isArray(value) ? value.length > 0 : value != null;
+  }
+
+  if (clause.bool) {
+    const { filter = [], must_not = [], should = [], minimum_should_match } = clause.bool;
+    const excluded = Array.isArray(must_not) ? must_not : [must_not];
+    const minimum = minimum_should_match ?? (should.length > 0 && filter.length === 0 ? 1 : 0);
+
+    return (
+      filter.every((child) => matchesClause(child, document)) &&
+      excluded.every((child) => !matchesClause(child, document)) &&
+      should.filter((child) => matchesClause(child, document)).length >= minimum
+    );
+  }
+
+  throw new Error('Unsupported test clause');
+};
+
 /**
  * In-memory stub that simulates ES `search` by applying the same filters
  * that `buildLiveActionsQuery` emits. It respects:
- * - `alert_ids` existence / must_not-existence filters
+ * - source term, existence and boolean filters
  * - `search_after` cursor
  * - `size`
  */
@@ -79,27 +128,17 @@ const simulateEsSearch = (
 
   let hits = [...allHits];
 
-  // apply alert_ids filters
-  for (const filter of filters) {
-    const json = JSON.stringify(filter);
-    if (json.includes('alert_ids')) {
-      if (json.includes('must_not')) {
-        // must_not exists alert_ids → keep only hits WITHOUT alert_ids
-        hits = hits.filter((h) => {
-          const alertIds = (h._source as Record<string, unknown>)?.alert_ids;
-
-          return !alertIds || (Array.isArray(alertIds) && alertIds.length === 0);
-        });
-      } else if (json.includes('"exists"')) {
-        // exists alert_ids → keep only hits WITH alert_ids
-        hits = hits.filter((h) => {
-          const alertIds = (h._source as Record<string, unknown>)?.alert_ids;
-
-          return Array.isArray(alertIds) && alertIds.length > 0;
-        });
-      }
-    }
-  }
+  hits = hits.filter((hit) =>
+    (filters as TestClause[]).every((filter) =>
+      matchesClause(filter, {
+        type: 'INPUT_ACTION',
+        input_type: 'osquery',
+        space_id: 'default',
+        alert_ids: hit._source?.alert_ids,
+        'origin.type': hit._source?.origin?.type,
+      })
+    )
+  );
 
   // apply search_after
   const searchAfter = body.search_after as SortValues | undefined;
@@ -325,6 +364,38 @@ describe('source filter pagination (integration)', () => {
       expect(page1.hasMore).toBe(true);
     });
   });
+
+  test.each([
+    { selected: ['workflow'], expected: ['Workflow'] },
+    { selected: ['live'], expected: ['Live'] },
+    { selected: ['rule'], expected: ['Rule'] },
+    { selected: ['live', 'rule'], expected: ['Live', 'Rule'] },
+    { selected: ['live', 'workflow'], expected: ['Live', 'Workflow'] },
+    { selected: ['rule', 'workflow'], expected: ['Rule', 'Workflow'] },
+    { selected: ['live', 'rule', 'workflow'], expected: ['Live', 'Rule', 'Workflow'] },
+  ])(
+    'paginates $selected without losing, duplicating or leaking sources',
+    async ({ selected, expected }) => {
+      const hits = Array.from({ length: 32 }, (_, index) =>
+        createHit(`mixed-${index}`, {
+          workflow: index % 4 >= 2,
+          alertIds: index % 2 === 1 ? ['alert-1'] : undefined,
+        })
+      );
+      const rows = await fetchAllPages(hits, {
+        pageSize: 3,
+        activeFilters: new Set(selected as SourceFilter[]),
+      });
+      const expectedIds = hits
+        .filter((_, index) =>
+          expected.includes(index % 4 >= 2 ? 'Workflow' : index % 2 === 1 ? 'Rule' : 'Live')
+        )
+        .map((hit) => hit._source?.action_id);
+      expect(rows.map((row) => row.id)).toEqual(expectedIds);
+      expect(new Set(rows.map((row) => row.id)).size).toBe(rows.length);
+      expect(rows.every((row) => expected.includes(row.source))).toBe(true);
+    }
+  );
 
   describe('edge cases', () => {
     test('single row matching filter: hasMore is false, one row returned', async () => {

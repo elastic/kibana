@@ -66,6 +66,65 @@ const titleOf = ({ info }: OpenApiDocument): string => {
   return [title, version].filter((part) => typeof part === 'string').join(' ');
 };
 
+interface CapturedReplacement {
+  readonly name: string;
+  readonly known: ManifestSource;
+  /** The URL inspected in place of the captured one. */
+  readonly url: string;
+  /** What that URL turned out to be. */
+  readonly format: ManifestSource['format'];
+  /** The `--pages` it was inspected with. */
+  readonly pages: readonly string[] | undefined;
+}
+
+/**
+ * How to record a captured source from the URL inspected in its place: capture it again from
+ * there, or, if the vendor now serves it publicly, record it as an ordinary source. Either way,
+ * the manifest first loses the fields a source of the new kind doesn't have.
+ */
+const describeCapturedReplacement = ({
+  name,
+  known,
+  url,
+  format,
+  pages,
+}: CapturedReplacement): string => {
+  const recordFlags = [
+    `--source ${name}=${url}`,
+    // `--format` can't name openapi, which is what a source without a format is.
+    ...(isMarkdownFormat(format) ? [`--format ${name}=${format}`] : []),
+    ...(pages ?? []).map((prefix) => `--pages ${name}=${prefix}`),
+  ].join(' ');
+  // Recording validates the manifest before --format applies, so a GraphQL or MCP source's format
+  // changes with the endpoints and tools it loses. A Markdown reference's only has to change when
+  // the replacement isn't one, as --format names Markdown, and recording tells OpenAPI from
+  // Swagger by itself.
+  const declaresOtherKind =
+    isProtocolFormat(known.format) || (isMarkdownFormat(known.format) && !isMarkdownFormat(format));
+  const edits = [
+    ...(declaresOtherKind ? [`set "format" to "${format}"`] : []),
+    // Recording applies the manifest's pages when no --pages is given, and only to a Markdown
+    // reference, so they stay only for a Markdown replacement inspected with --pages of its own.
+    ...(known.pages !== undefined && (!isMarkdownFormat(format) || pages === undefined)
+      ? ['remove "pages"']
+      : []),
+    // Only GraphQL and MCP sources have these, and --inspect only reads the other kinds.
+    ...(known.endpoints !== undefined ? ['remove "endpoints"'] : []),
+    ...(known.tools !== undefined ? ['remove "tools"'] : []),
+  ];
+  return [
+    `${name} is captured from ${known.url} in ${MANIFEST}.`,
+    ...(edits.length > 0
+      ? [`${url} is ${format}, so first edit ${name} in ${MANIFEST}: ${edits.join(', ')}.`]
+      : []),
+    // A Markdown reference is read from an index and the pages it links to, so it can't be
+    // captured from one document.
+    isMarkdownFormat(format)
+      ? `A Markdown reference can't be captured, so it is public: remove "captured" from ${name} too, or drift checks skip it, and record with ${recordFlags}.`
+      : `If ${url} also needs credentials, capture it from there: record with ${recordFlags} --capture ${name}=<file>. If it is public, also remove "captured" from ${name}, or drift checks skip it, and record with ${recordFlags}.`,
+  ].join(' ');
+};
+
 /**
  * Shows what vendor specs offer before a connector is written against them: the operations
  * they list, or for chosen operations everything an action needs to call one. Specs are
@@ -111,14 +170,25 @@ export const inspectVendorApi = async ({
   const added: Record<string, ManifestSource> = {};
   for (const [name, url] of Object.entries(urls)) {
     const known = manifest?.sources[name];
-    const declaredFormat = formatFlags[name] ?? known?.format;
+    // A captured source's format and pages describe the document that was captured, not one given
+    // in its place, which may be another kind of document.
+    const describes = known !== undefined && !(known.captured && known.url !== url);
+    const declaredFormat = formatFlags[name] ?? (describes ? known?.format : undefined);
     if (isProtocolFormat(declaredFormat)) {
       log.warning(
         `Skipping ${name}: --inspect reads OpenAPI operations, and it is ${declaredFormat}`
       );
       continue;
     }
-    const pages = pageFlags[name] ?? known?.pages;
+    // Only the captured URL is one the vendor wouldn't serve; one given in its place is inspected.
+    if (known?.captured && known.url === url) {
+      log.warning(
+        `Skipping ${name}: it is captured, so the vendor would not serve it to a plain fetch. ` +
+          'Its snapshot has only the operations the connector calls.'
+      );
+      continue;
+    }
+    const pages = pageFlags[name] ?? (describes ? known?.pages : undefined);
     if (!isMarkdownFormat(declaredFormat) && pages !== undefined) {
       throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);
     }
@@ -130,7 +200,9 @@ export const inspectVendorApi = async ({
     loaded[name] = document;
     if (known && known.url !== url) {
       problems.push(
-        `${name} is ${known.url} in ${MANIFEST}; to move it, record with --source ${name}=${url}`
+        known.captured
+          ? describeCapturedReplacement({ name, known, url, format, pages })
+          : `${name} is ${known.url} in ${MANIFEST}; to move it, record with --source ${name}=${url}`
       );
     } else if (directory && !known) {
       added[name] = {
@@ -142,9 +214,11 @@ export const inspectVendorApi = async ({
       };
     }
   }
-  // An overlay action may target a source that --source left out, so it only counts as stale when
-  // every source is loaded.
-  const loadsEverySource = Object.keys(manifest?.sources ?? {}).every((name) => name in loaded);
+  // An overlay action may target a source that --source left out, or one given another URL than
+  // the manifest's, so it only counts as stale when every source is loaded from its own URL.
+  const loadsEverySource = Object.entries(manifest?.sources ?? {}).every(
+    ([name, { url }]) => name in loaded && urls[name] === url
+  );
   const documents = applyOverlayToSources(loaded, overlay, loadsEverySource ? log : SILENT_LOG);
   const manifestUpdated = directory !== undefined && Object.keys(added).length > 0;
   if (directory && manifestUpdated) {
