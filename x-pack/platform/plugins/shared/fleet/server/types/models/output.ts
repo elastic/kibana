@@ -876,25 +876,40 @@ const OtlpUpdateSecretsSchema = schema.maybe(
   })
 );
 
+const OTLP_AUTH_DESCRIPTION =
+  'How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.';
+
 export const OtlpSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Otlp),
   otlp_exporter: OtlpExporterSchema,
-  auth: schema.maybe(schema.oneOf([schema.literal(null), OtlpAuthSchema])),
+  auth: schema.maybe(
+    schema.oneOf([schema.literal(null), OtlpAuthSchema], {
+      meta: { description: OTLP_AUTH_DESCRIPTION },
+    })
+  ),
   secrets: OtlpSecretsSchema,
 };
 
 const OtlpResponseSchema = {
   ...OtlpSchema,
   otlp_exporter: schema.maybe(OtlpExporterResponseSchema),
-  auth: schema.maybe(schema.oneOf([schema.literal(null), OtlpAuthResponseSchema])),
+  auth: schema.maybe(
+    schema.oneOf([schema.literal(null), OtlpAuthResponseSchema], {
+      meta: { description: OTLP_AUTH_DESCRIPTION },
+    })
+  ),
 };
 
 export const OtlpUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Otlp)),
   otlp_exporter: schema.maybe(OtlpExporterSchema),
-  auth: schema.maybe(schema.oneOf([schema.literal(null), OtlpAuthSchema])),
+  auth: schema.maybe(
+    schema.oneOf([schema.literal(null), OtlpAuthSchema], {
+      meta: { description: OTLP_AUTH_DESCRIPTION },
+    })
+  ),
   secrets: OtlpUpdateSecretsSchema,
 };
 
