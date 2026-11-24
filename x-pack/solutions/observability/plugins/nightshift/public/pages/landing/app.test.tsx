@@ -177,7 +177,10 @@ function setSections({
     isInitialLoading,
     isFetching,
     totalCount,
-    loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
+    loadedCount: sections.reduce(
+      (sum, section) => (section.id === 'closed' ? sum : sum + section.investigations.length),
+      0
+    ),
     refetchAll,
   });
 }
@@ -1074,7 +1077,7 @@ describe('NightshiftApp', () => {
       expect(within(closedSection()).getAllByRole('listitem')).toHaveLength(3);
       expect(mockUsePageReady).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          customMetrics: expect.objectContaining({ value1: 3, value2: 4 }),
+          customMetrics: expect.objectContaining({ value1: 0, value2: 4 }),
         })
       );
       expect(
@@ -1127,6 +1130,51 @@ describe('NightshiftApp', () => {
       ).not.toBeInTheDocument();
       expect(closedToggle()).toHaveAttribute('aria-expanded', 'false');
       expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
+    });
+
+    it('excludes Closed rows from homepage-viewed and open page-ready metrics', async () => {
+      records = [
+        criticalInvestigation,
+        makeInvestigation('open-unrated', 'Open unrated'),
+        makeInvestigation('closed-critical', 'Closed critical', {
+          metadata: { status: 'closed', severity: 'critical' },
+        }),
+        makeInvestigation('closed-unrated', 'Closed unrated', {
+          metadata: { status: 'closed' },
+        }),
+      ];
+      renderApp({ client, initialEntries: [fixedWindowUrl] });
+
+      await waitFor(() =>
+        expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent(
+          '2'
+        )
+      );
+      await waitFor(() =>
+        expect(reportEvent).toHaveBeenCalledWith('nightshift_homepage_viewed', {
+          investigation_count: 2,
+          critical_count: 1,
+          high_count: 0,
+          medium_count: 0,
+          low_count: 0,
+          unrated_count: 1,
+        })
+      );
+      expect(mockUsePageReady).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          isReady: true,
+          customMetrics: expect.objectContaining({
+            key1: 'investigation_count',
+            value1: 2,
+            key2: 'investigation_total',
+            value2: 4,
+            key3: 'active_investigation_count',
+            value3: 0,
+            key4: 'unrated_investigation_count',
+            value4: 1,
+          }),
+        })
+      );
     });
   });
 });

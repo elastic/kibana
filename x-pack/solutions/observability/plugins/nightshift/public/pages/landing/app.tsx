@@ -305,9 +305,19 @@ export function NightshiftApp({
     () => sections.flatMap((section) => section.investigations),
     [sections]
   );
+  const openUnratedCount = useMemo(
+    () =>
+      sections
+        .filter((section) => section.id !== 'closed')
+        .flatMap((section) => section.investigations)
+        .filter(({ metadata }) => metadata.severity === undefined).length,
+    [sections]
+  );
   // Read by effects that must not re-run when the list refetches.
   const loadedInvestigationsRef = useRef(loadedInvestigations);
   loadedInvestigationsRef.current = loadedInvestigations;
+  const openUnratedCountRef = useRef(openUnratedCount);
+  openUnratedCountRef.current = openUnratedCount;
 
   // The landing page is "viewed" once its first load lands, with what it then shows.
   useEffect(() => {
@@ -324,9 +334,7 @@ export function NightshiftApp({
     reportNightshiftHomepageViewed(analytics, {
       investigationCount: loadedCount,
       severityCounts,
-      unratedCount: loadedInvestigationsRef.current.filter(
-        ({ metadata }) => metadata.severity === undefined
-      ).length,
+      unratedCount: openUnratedCountRef.current,
     });
   }, [
     allFailed,
@@ -384,7 +392,7 @@ export function NightshiftApp({
       key3: 'active_investigation_count',
       value3: loadedInvestigations.filter(({ in_progress: inProgress }) => inProgress).length,
       key4: 'unrated_investigation_count',
-      value4: loadedInvestigations.filter(({ metadata }) => metadata.severity === undefined).length,
+      value4: openUnratedCount,
     },
     meta: {
       description: '[ttfmp_nightshift] The nightshift landing page has loaded investigations.',

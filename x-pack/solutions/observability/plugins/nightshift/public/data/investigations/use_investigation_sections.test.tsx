@@ -317,6 +317,23 @@ describe('useInvestigationSections', () => {
     await waitFor(() => expect(result.current.totalCount).toBe(5));
   });
 
+  it('includes Closed in totalCount while keeping loadedCount open-only', () => {
+    mockUseFetchInvestigations.mockImplementation((params) => {
+      if (params.inProgress) {
+        return sectionResult({ ids: ['running-a'] });
+      }
+      if (params.status === 'closed') {
+        return sectionResult({ ids: ['closed-a', 'closed-b'], total: 3 });
+      }
+      return sectionResult();
+    });
+
+    const { result } = renderSections();
+
+    expect(result.current.totalCount).toBe(4);
+    expect(result.current.loadedCount).toBe(1);
+  });
+
   it('treats a non-empty in-progress section as active and polls only that section', () => {
     const { result } = renderSections();
 

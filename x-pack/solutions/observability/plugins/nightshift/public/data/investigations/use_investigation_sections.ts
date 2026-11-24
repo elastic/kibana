@@ -65,6 +65,7 @@ export interface InvestigationSectionsResult {
   isFetching: boolean;
   /** Investigations matching the current filters, each counted once: the sections are disjoint. */
   totalCount: number;
+  /** Open investigations loaded across the open sections (excludes Closed). */
   loadedCount: number;
   refetchAll: () => void;
 }
@@ -325,7 +326,10 @@ export const useInvestigationSections = ({
     isInitialLoading: sections.some((section) => section.isInitialLoading),
     isFetching: sections.some((section) => section.isFetching),
     totalCount: sections.reduce((sum, section) => sum + section.total, 0),
-    loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
+    loadedCount: sections.reduce(
+      (sum, section) => (section.id === 'closed' ? sum : sum + section.investigations.length),
+      0
+    ),
     refetchAll,
   };
 };
