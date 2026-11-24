@@ -49,8 +49,9 @@ export interface OlsObject {
 export interface ISavedObjectsOlsExtension {
   /**
    * Whether OLS is enforced for this request. Only the provider's trusted configuration sets it to
-   * `false`, when OLS is deliberately disabled: then the extension adds no filters and denies
-   * nothing, creates objects without an ACL, and refuses requested initial access and ACL changes.
+   * `false`, when OLS is deliberately disabled: then Core does not call `getReadFilters` or
+   * `authorizeObjects`, and the extension creates objects without an ACL and refuses requested
+   * initial access and ACL changes.
    * An extension that cannot enforce OLS, for example because the provider is missing, is not a
    * disabled extension: it fails closed and reports `true`.
    */
@@ -58,8 +59,8 @@ export interface ISavedObjectsOlsExtension {
 
   /**
    * Returns one query clause per type with an access policy, built for the given spaces and keyed
-   * by type. The result has an entry for every requested type with an access policy. Types without
-   * a policy have no entry and need no clause. A missing entry for a type with a policy is a
+   * by type. Types without a policy have no entry and need no clause. When `enabled` is `true`, the
+   * result has an entry for every requested type with an access policy, and a missing one is a
    * provider bug: Core must fail the request, never read it as allowed.
    */
   getReadFilters(params: {
@@ -67,9 +68,9 @@ export interface ISavedObjectsOlsExtension {
   }): Promise<Map<string, estypes.QueryDslQueryContainer>>;
 
   /**
-   * Decides an operation for each object, keyed by {@link getOlsObjectKey}. The result has an entry
-   * for every requested object of a type with an access policy. Objects of types without a policy
-   * have no entry, which means allowed. A missing entry for an object of a type with a policy is a
+   * Decides an operation for each object, keyed by {@link getOlsObjectKey}. Objects of types
+   * without a policy have no entry, which means allowed. When `enabled` is `true`, the result has an
+   * entry for every requested object of a type with an access policy, and a missing one is a
    * provider bug: Core must fail the request, never read it as allowed.
    */
   authorizeObjects(params: {
