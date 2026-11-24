@@ -767,7 +767,10 @@ export class WorkflowContextManager {
 
     // Prefer the list snapshotted onto input at enter. Re-evaluate the
     // expression only for older executions that never stored `items`.
-    const foreachInput = this.readIoValue(stepExecution.id, 'input') as EsWorkflowStepExecution['input'];
+    const foreachInput = this.readIoValue(
+      stepExecution.id,
+      'input'
+    ) as EsWorkflowStepExecution['input'];
     const foreachExpression = this.extractForeachExpression(foreachInput);
     const items =
       this.extractPersistedForeachItems(foreachInput) ??

@@ -279,9 +279,9 @@ describe('StepIoService (LRU): cache retention', () => {
     const recentProducer = producers.find(
       (step) => step.stepId === `produce_${LRU_PRODUCER_COUNT - 1}`
     );
-    const readRecent = Array.from(
-      fixture.stepExecutionRepositoryMock.stepExecutions.values()
-    ).find((step) => step.stepId === 'read_recent');
+    const readRecent = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).find(
+      (step) => step.stepId === 'read_recent'
+    );
     const earlyReadSnapshots = leafStepsNamed(fixture, 'read_early_').map((step) => ({
       stepId: step.stepId,
       status: step.status,

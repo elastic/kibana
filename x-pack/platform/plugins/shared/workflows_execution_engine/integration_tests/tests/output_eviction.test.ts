@@ -804,9 +804,7 @@ steps:
     // Assert against the known items rather than the co-rendered `expect` field:
     // after resume, `foreach.item` for that field can be empty when loop input
     // is not resident, which is unrelated to per-branch output rehydration.
-    const got = Array.from(
-      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-    )
+    const got = Array.from(workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values())
       .filter((stepExecution) => stepExecution.stepId === 'readBack')
       .map((stepExecution) => (stepExecution.output as { got: string }).got)
       .sort();

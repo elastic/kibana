@@ -54,9 +54,9 @@ const runAcrossPersistenceBoundary = async (reference: string, producerName = 'p
       ?.status
   ).toBe(ExecutionStatus.WAITING);
 
-  const producer = Array.from(
-    fixture.stepExecutionRepositoryMock.stepExecutions.values()
-  ).find((step) => step.stepId === producerName);
+  const producer = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).find(
+    (step) => step.stepId === producerName
+  );
 
   const getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
   await fixture.resumeWorkflowAtScheduledTime();
@@ -195,9 +195,9 @@ steps:
         ?.status
     ).toBe(ExecutionStatus.WAITING);
 
-    const branch = Array.from(
-      fixture.stepExecutionRepositoryMock.stepExecutions.values()
-    ).find((step) => step.stepId === `branch_${route}`);
+    const branch = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).find(
+      (step) => step.stepId === `branch_${route}`
+    );
     const getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
     await fixture.resumeWorkflowAtScheduledTime();
 
