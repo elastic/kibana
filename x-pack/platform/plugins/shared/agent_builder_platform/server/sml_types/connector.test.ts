@@ -10,6 +10,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { createConnectorSmlType } from './connector';
 
 jest.mock('@kbn/connector-specs', () => ({
@@ -60,6 +61,7 @@ async function collectPages(iterable: AsyncIterable<SmlListItem[]>): Promise<Sml
 describe('connectorSmlType', () => {
   const connectorSmlType = createConnectorSmlType({
     getActionSavedObjectsClient: mockGetActionSavedObjectsClient,
+    getActionsStart: async () => ({} as ActionsPluginStart),
     logger: mockLogger,
   });
 
@@ -229,8 +231,8 @@ describe('connectorSmlType', () => {
 
       await collectPages(connectorSmlType.list(createContext() as never));
 
-      expect(isChatCallableConnectorType).toHaveBeenCalledWith('.slack');
-      expect(isChatCallableConnectorType).toHaveBeenCalledWith('.mcp');
+      expect(isChatCallableConnectorType).toHaveBeenCalledWith('.slack', expect.anything());
+      expect(isChatCallableConnectorType).toHaveBeenCalledWith('.mcp', expect.anything());
     });
 
     it('yields nothing when no connectors pass the chat-callable filter', async () => {

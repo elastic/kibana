@@ -25,6 +25,7 @@ import type {
   ActionTypeSecrets,
   InMemoryConnector,
 } from './types';
+import { serializeSpecSummary } from './specs_client/lib/serialize_spec_summary';
 import { isSandboxCapableConnectorType } from './application/connector/lib/is_sandbox_capable_connector';
 
 export interface ActionTypeRegistryOpts {
@@ -339,7 +340,11 @@ export class ActionTypeRegistry {
         description: actionType.description,
         isExperimental: actionType.isExperimental,
         isTestable: Boolean(actionType.isTestable),
-      }));
+      }))
+      .map((type) => {
+        const spec = this.getSpec(type.id);
+        return spec ? { ...type, specSummary: serializeSpecSummary({ spec, type }) } : type;
+      });
   }
 
   /**

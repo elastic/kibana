@@ -9,6 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
+  createConnectorSpecProvider,
   getToolResultId,
   createErrorResult,
   listAgentConnectors,
@@ -54,10 +55,14 @@ A connector that exists in the space but is not in this list is not assigned to 
       const actionsStart = await getActionsStart();
       const actionsClient = await actionsStart.getActionsClientWithRequest(context.request);
 
+      const specProvider = createConnectorSpecProvider({ actionsStart });
       const allowedIds = resolveAllowedConnectorIds(context.agentConfiguration);
 
       if (includeUnassigned) {
-        const all = await listAgentConnectors(actionsClient, { allowedIds: undefined });
+        const all = await listAgentConnectors(actionsClient, {
+          allowedIds: undefined,
+          specProvider,
+        });
         const connectors = all.map((connector) => ({
           ...connector,
           assigned: allowedIds === undefined || allowedIds.includes(connector.id),
@@ -77,7 +82,7 @@ A connector that exists in the space but is not in this list is not assigned to 
         };
       }
 
-      const connectors = await listAgentConnectors(actionsClient, { allowedIds });
+      const connectors = await listAgentConnectors(actionsClient, { allowedIds, specProvider });
 
       return {
         results: [

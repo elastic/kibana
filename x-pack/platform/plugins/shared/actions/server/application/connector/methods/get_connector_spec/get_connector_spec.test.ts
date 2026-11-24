@@ -130,6 +130,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
+    actionTypeRegistry.getUtils.mockReturnValue(configurationUtilities);
     actionTypeRegistry.getSpec.mockImplementation((id: string) => specsById[id]);
     actionTypeRegistry.list.mockReturnValue([
       ...Object.values(specsById).map(listRow),
@@ -137,12 +138,23 @@ describe('getConnectorSpecAsJsonSchema', () => {
     ]);
   });
 
+  describe('configurationUtilities', () => {
+    test('uses the utilities held by the action type registry', async () => {
+      const result = await getConnectorSpecAsJsonSchema({
+        context: createContext(),
+        id: '.alienvault-otx',
+      });
+
+      expect(actionTypeRegistry.getUtils).toHaveBeenCalled();
+      expect(result.metadata.id).toBe('.alienvault-otx');
+    });
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to get actions before returning a connector type spec', async () => {
       await getConnectorSpecAsJsonSchema({
         context: createContext(),
         id: '.alienvault-otx',
-        configurationUtilities,
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
@@ -155,7 +167,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
         getConnectorSpecAsJsonSchema({
           context: createContext(),
           id: '.alienvault-otx',
-          configurationUtilities,
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to get actions]`);
 
@@ -169,7 +180,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
         getConnectorSpecAsJsonSchema({
           context: createContext(),
           id: '.alienvault-otx',
-          configurationUtilities,
         })
       ).rejects.toThrow();
 
@@ -185,7 +195,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
         getConnectorSpecAsJsonSchema({
           context: createContext(),
           id: '.alienvault-otx',
-          configurationUtilities,
         })
       ).rejects.toThrow();
 
@@ -205,7 +214,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.alienvault-otx',
-      configurationUtilities,
     });
     expect(result).toHaveProperty('metadata');
     expect(result.metadata).toHaveProperty('id', '.alienvault-otx');
@@ -220,7 +228,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.alienvault-otx',
-      configurationUtilities,
     });
     expect(result.metadata).toHaveProperty('id', '.alienvault-otx');
     expect(result).toHaveProperty('schema');
@@ -239,7 +246,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.stub-with-skill',
-      configurationUtilities,
     });
     expect(result.skill).toBe(stubWithSkill.skill);
   });
@@ -248,7 +254,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.alienvault-otx',
-      configurationUtilities,
     });
     expect(result).not.toHaveProperty('skill');
   });
@@ -257,7 +262,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.pagerduty_mcp',
-      configurationUtilities,
     });
     expect(result.actions.length).toBeGreaterThan(0);
     for (const action of result.actions) {
@@ -274,7 +278,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.abuseipdb',
-      configurationUtilities,
     });
     expect(result).toHaveProperty('isTestable', true);
   });
@@ -283,7 +286,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.stub-no-test',
-      configurationUtilities,
     });
     expect(result).toHaveProperty('isTestable', false);
   });
@@ -293,7 +295,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
       getConnectorSpecAsJsonSchema({
         context: createContext(),
         id: '__no_such_spec_connector__',
-        configurationUtilities,
       })
     ).rejects.toMatchObject({ output: { statusCode: 404 } });
   });
@@ -302,7 +303,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.catalog-only',
-      configurationUtilities,
     });
 
     expect(result.metadata).toHaveProperty('id', '.catalog-only');
@@ -317,7 +317,6 @@ describe('getConnectorSpecAsJsonSchema', () => {
       getConnectorSpecAsJsonSchema({
         context: createContext(),
         id: '.server-log',
-        configurationUtilities,
       })
     ).rejects.toMatchObject({ output: { statusCode: 404 } });
   });
@@ -329,10 +328,11 @@ describe('getConnectorSpecAsJsonSchema', () => {
       isEarsExperimentalEnabled: () => false,
     } as unknown as ActionsConfigurationUtilities;
 
+    actionTypeRegistry.getUtils.mockReturnValue(earsEnabledUtils);
+
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.stub-experimental-ears',
-      configurationUtilities: earsEnabledUtils,
     });
 
     const schemaJson = result.schema as {
@@ -355,10 +355,11 @@ describe('getConnectorSpecAsJsonSchema', () => {
       isEarsExperimentalEnabled: () => false,
     } as unknown as ActionsConfigurationUtilities;
 
+    actionTypeRegistry.getUtils.mockReturnValue(earsEnabledUtils);
+
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.google_calendar',
-      configurationUtilities: earsEnabledUtils,
     });
 
     const schemaJson = result.schema as {
@@ -381,10 +382,11 @@ describe('getConnectorSpecAsJsonSchema', () => {
       isEarsExperimentalEnabled: () => true,
     } as unknown as ActionsConfigurationUtilities;
 
+    actionTypeRegistry.getUtils.mockReturnValue(earsEnabledUtils);
+
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.stub-experimental-ears',
-      configurationUtilities: earsEnabledUtils,
     });
 
     const schemaJson = result.schema as {

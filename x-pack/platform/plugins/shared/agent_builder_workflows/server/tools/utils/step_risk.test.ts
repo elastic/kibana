@@ -7,8 +7,11 @@
 
 import { kibanaRegistry } from '@elastic/schemas/kibana/tools/index.js';
 import { createNonInteractiveConfig } from '@kbn/agent-builder-common';
+import { createPackageConnectorSpecProvider } from '@kbn/agent-builder-server';
 import { getKibanaConnectors } from '@kbn/workflows';
 import { findUnsafeSteps, getStepRisk, getWorkflowSteps, KIBANA_STEP_APIS } from './step_risk';
+
+const specProvider = createPackageConnectorSpecProvider();
 
 const normalizePath = (path: string): string => path.replace(/\{[^}]+\}/g, '{}');
 
@@ -29,7 +32,7 @@ describe('getStepRisk', () => {
     ['http', { safe: false, destructive: false }],
     ['elasticsearch.request', { safe: false, destructive: false }],
   ])('classifies %s', (stepType, expected) => {
-    expect(getStepRisk(stepType)).toEqual(expected);
+    expect(getStepRisk(stepType, specProvider)).toEqual(expected);
   });
 
   it.each([
@@ -38,7 +41,7 @@ describe('getStepRisk', () => {
     ['elasticsearch.indices.delete', false, true, 'indices.delete'],
     ['elasticsearch.index', false, true, 'index'],
   ])('uses the execute_api registry flag for %s', (stepType, safe, destructive, api) => {
-    expect(getStepRisk(stepType)).toEqual({
+    expect(getStepRisk(stepType, specProvider)).toEqual({
       safe,
       destructive,
       api: { target: 'elasticsearch', api },
@@ -51,7 +54,10 @@ describe('getStepRisk', () => {
     ['kibana.SetAlertsStatus', false, 'security-detections-api.set-alerts-status'],
     ['kibana.createCase', false, 'cases.create-case'],
   ])('matches %s to its Kibana registry entry by method and path', (stepType, safe, api) => {
-    expect(getStepRisk(stepType)).toMatchObject({ safe, api: { target: 'kibana', api } });
+    expect(getStepRisk(stepType, specProvider)).toMatchObject({
+      safe,
+      api: { target: 'kibana', api },
+    });
   });
 
   describe('KIBANA_STEP_APIS', () => {
@@ -94,7 +100,7 @@ steps:
     const result = getWorkflowSteps(yaml);
     const steps = 'steps' in result ? result.steps : [];
     expect(
-      findUnsafeSteps(steps, createNonInteractiveConfig()).map(({ step, risk }) => [
+      findUnsafeSteps(steps, createNonInteractiveConfig(), specProvider).map(({ step, risk }) => [
         step.stepId,
         risk,
       ])

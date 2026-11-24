@@ -12,6 +12,7 @@ import type {
 } from '@kbn/agent-builder-sml-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -20,6 +21,7 @@ export interface PluginSetupDependencies {
 }
 
 export interface PluginStartDependencies {
+  actions: ActionsPluginStart;
   agentBuilder: AgentBuilderPluginStart;
   agentBuilderSml: AgentBuilderSmlPluginStart;
   security?: SecurityPluginStart;

@@ -41,6 +41,6 @@ export {
   createOtherResult,
   isToolResultId,
 } from './utils';
-export { describeZodSchema, formatSchemaForLlm } from './schema_utils';
+export { describeSchema, formatSchemaForLlm } from './schema_utils';
 export type { InternalToolDefinition, InternalToolAvailabilityHandler } from './internal';
 export type { ToolRegistry, ToolListParams, ToolCreateParams, ToolUpdateParams } from './registry';

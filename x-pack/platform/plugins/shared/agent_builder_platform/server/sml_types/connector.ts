@@ -18,12 +18,15 @@ import {
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import {
-  filterActionsBySelection,
   formatConnectorActionLine,
-  getConnectorSpec,
   isSpecificActionsSelection,
   type SelectedActions,
 } from '@kbn/connector-specs';
+import {
+  createConnectorSpecProvider,
+  filterSpecActionsBySelection,
+} from '@kbn/agent-builder-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
@@ -35,6 +38,7 @@ interface ConnectorSmlTypeDeps {
    * hidden type.
    */
   getActionSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
+  getActionsStart: () => Promise<ActionsPluginStart>;
   logger: Logger;
 }
 
@@ -44,13 +48,18 @@ interface ConnectorSmlTypeDeps {
  * Connectors are indexed into the SML via event-driven calls and during periodic crawls.
  */
 export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefinition => {
-  const { getActionSavedObjectsClient, logger } = deps;
+  const { getActionSavedObjectsClient, getActionsStart, logger } = deps;
+  // The crawl hooks (`list`, `getSmlEntry`) run without a request, so specs are read from the
+  // actions start contract instead of an ActionsClient.
+  const getSpecProvider = async () =>
+    createConnectorSpecProvider({ actionsStart: await getActionsStart() });
 
   return {
     id: CONNECTOR_KI_TYPE,
     attachmentType: AttachmentType.connector,
 
     async *list(context) {
+      const specProvider = await getSpecProvider();
       const finder = context.savedObjectsClient.createPointInTimeFinder({
         type: 'action',
         perPage: 1000,
@@ -61,7 +70,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
           yield response.saved_objects
             .filter((so) => {
               const { actionTypeId } = so.attributes as { actionTypeId?: string };
-              return isChatCallableConnectorType(actionTypeId ?? '');
+              return isChatCallableConnectorType(actionTypeId ?? '', specProvider);
             })
             .map((so) => ({
               id: so.id,
@@ -76,6 +85,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
 
     getSmlEntry: async (originId, context) => {
       try {
+        const specProvider = await getSpecProvider();
         const so = await context.savedObjectsClient.get('action', originId);
         const attrs = so.attributes as {
           name?: string;
@@ -86,18 +96,18 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         const actionTypeId = attrs.actionTypeId ?? '';
         const selectedActions = attrs.config?.selectedActions as SelectedActions;
 
-        const spec = getConnectorSpec(actionTypeId);
-        const displayName = spec?.metadata.displayName ?? actionTypeId;
-        const description = spec?.metadata.description ?? '';
+        const spec = specProvider.getSpec(actionTypeId);
+        const displayName = spec?.displayName ?? actionTypeId;
+        const description = spec?.description ?? '';
 
         const isRestricted = isSpecificActionsSelection(selectedActions);
         const visibleActions = spec
-          ? filterActionsBySelection(spec.actions, selectedActions, {
+          ? filterSpecActionsBySelection(spec.actions, selectedActions, {
               requireDescription: true,
             })
           : [];
-        const subActionDescriptions = visibleActions.map(([actionName, action]) =>
-          formatConnectorActionLine(actionName, action)
+        const subActionDescriptions = visibleActions.map((action) =>
+          formatConnectorActionLine(action.name, action)
         );
 
         const headerParts = [...new Set([name, displayName, description].filter(Boolean))];
@@ -123,6 +133,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
     requiredHiddenTypes: ['action'],
 
     searchByTitle: async ({ title, size, constraints }, { request }) => {
+      const specProvider = await getSpecProvider();
       const allowedIds = constraints?.[SmlSearchFilterType.connector]?.ids;
       if (allowedIds?.length === 0) {
         return [];
@@ -145,7 +156,8 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         .flatMap((connector) => (isSavedObjectErrorResult(connector) ? [] : [connector]))
         .filter(
           ({ id, attributes: { name = id, actionTypeId = '' } }) =>
-            isChatCallableConnectorType(actionTypeId) && name.toLowerCase().includes(lowerTitle)
+            isChatCallableConnectorType(actionTypeId, specProvider) &&
+            name.toLowerCase().includes(lowerTitle)
         )
         .slice(0, size)
         .map(({ id, attributes }) => ({ originId: id, title: attributes.name ?? id }));
