@@ -42,7 +42,10 @@ export const sourceTitle = i18n.translate(
   }
 );
 
-export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVectorSource {
+export class MVTSingleLayerVectorSource
+  extends AbstractSource<TiledSingleLayerVectorSourceDescriptor>
+  implements IMvtVectorSource
+{
   static createDescriptor({
     urlTemplate,
     layerName,
