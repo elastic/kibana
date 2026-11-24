@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux-v7';
 import type { Dispatch } from 'redux-v4';
 import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { useAddToTimelineSensor } from '@kbn/timelines-plugin/public/hooks/use_add_to_timeline';
+import { useAddToTimelineSensor } from '../../../timelines/components/add_to_timeline/use_add_to_timeline';
 
 import type { BrowserFields } from '../../containers/source';
 import { dragAndDropSelectors } from '../../store';

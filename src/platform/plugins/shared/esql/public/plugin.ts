@@ -26,6 +26,7 @@ import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import {
   ESQL_CONTROL_TRIGGER,
   UPDATE_ESQL_QUERY_TRIGGER,
@@ -46,6 +47,7 @@ interface EsqlPluginStartDependencies {
   licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
   cps?: CPSPluginStart;
+  inference?: InferencePublicStart;
   // LOOKUP JOIN deps
   share: SharePluginStart;
   data: DataPublicPluginStart;
@@ -69,6 +71,8 @@ export interface EsqlPluginStart extends NlToEsqlAvailability {
   variablesService: EsqlVariablesService;
   isServerless: boolean;
   getLicense: () => Promise<ILicense | undefined>;
+  /** True when the optional inference plugin is available for NL / suggest-fix features. */
+  isInferenceAvailable: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
   /**
@@ -115,6 +119,7 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       usageCollection,
       cps,
       licensing,
+      inference,
       fileUpload,
       fieldFormats,
       share,
@@ -144,7 +149,7 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       );
       const createESQLControlAction = new CreateESQLControlAction(
         core,
-        data.search.search,
+        data.search,
         data.query.timefilter.timefilter
       );
       return createESQLControlAction;
@@ -171,6 +176,7 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       isServerless,
       variablesService,
       getLicense,
+      isInferenceAvailable: Boolean(inference),
       ...createNlToEsqlAvailability(getLicense, core.http),
       enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
       enrichViews: (views: EsqlView[]) => this.viewEnricherService.enrich(views),

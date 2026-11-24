@@ -10,13 +10,13 @@
 import { useEffect, useState } from 'react';
 import { useKibanaServices } from '../kibana_services';
 
-/** Whether natural language to ES|QL is available (Enterprise license and an AI connector). */
+/** Whether natural language to ES|QL is available (inference plugin, Enterprise license and an AI connector). */
 export const useIsNlToEsqlAvailable = (): boolean => {
   const deps = useKibanaServices();
   const [isAvailable, setIsAvailable] = useState(false);
 
   useEffect(() => {
-    if (!deps) {
+    if (!deps?.esql.isInferenceAvailable) {
       return;
     }
     let cancelled = false;

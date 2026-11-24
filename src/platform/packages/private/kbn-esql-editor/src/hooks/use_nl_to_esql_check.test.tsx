@@ -19,7 +19,10 @@ describe('useNlToEsqlCheck', () => {
   const hasEnterpriseLicenseMock = jest.fn();
 
   const createWrapper =
-    (esqlService?: { hasEnterpriseLicense: typeof hasEnterpriseLicenseMock }) =>
+    (esqlService?: {
+      hasEnterpriseLicense: typeof hasEnterpriseLicenseMock;
+      isInferenceAvailable?: boolean;
+    }) =>
     ({ children }: { children: React.ReactNode }) =>
       (
         <KibanaContextProvider services={{ core: coreStart, esql: esqlService }}>
@@ -42,9 +45,26 @@ describe('useNlToEsqlCheck', () => {
     expect(hasEnterpriseLicenseMock).not.toHaveBeenCalled();
   });
 
-  it('should return true when license is enterprise', async () => {
+  it('should return false when inference is unavailable', async () => {
     const { result } = renderHook(() => useNlToEsqlCheck(), {
-      wrapper: createWrapper({ hasEnterpriseLicense: hasEnterpriseLicenseMock }),
+      wrapper: createWrapper({
+        hasEnterpriseLicense: hasEnterpriseLicenseMock,
+        isInferenceAvailable: false,
+      }),
+    });
+
+    await act(async () => {});
+
+    expect(result.current).toBe(false);
+    expect(hasEnterpriseLicenseMock).not.toHaveBeenCalled();
+  });
+
+  it('should return true when license is enterprise and inference is available', async () => {
+    const { result } = renderHook(() => useNlToEsqlCheck(), {
+      wrapper: createWrapper({
+        hasEnterpriseLicense: hasEnterpriseLicenseMock,
+        isInferenceAvailable: true,
+      }),
     });
 
     await act(async () => {});
@@ -56,7 +76,10 @@ describe('useNlToEsqlCheck', () => {
     hasEnterpriseLicenseMock.mockResolvedValue(false);
 
     const { result } = renderHook(() => useNlToEsqlCheck(), {
-      wrapper: createWrapper({ hasEnterpriseLicense: hasEnterpriseLicenseMock }),
+      wrapper: createWrapper({
+        hasEnterpriseLicense: hasEnterpriseLicenseMock,
+        isInferenceAvailable: true,
+      }),
     });
 
     await act(async () => {});
@@ -65,7 +88,10 @@ describe('useNlToEsqlCheck', () => {
   });
 
   it('starts the next editor with the last known license result', async () => {
-    const wrapper = createWrapper({ hasEnterpriseLicense: hasEnterpriseLicenseMock });
+    const wrapper = createWrapper({
+      hasEnterpriseLicense: hasEnterpriseLicenseMock,
+      isInferenceAvailable: true,
+    });
     const first = renderHook(() => useNlToEsqlCheck(), { wrapper });
 
     await act(async () => {});

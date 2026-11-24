@@ -128,6 +128,8 @@ export interface EsqlPluginStartBase {
   getLicense: () => Promise<ILicense | undefined>;
   hasEnterpriseLicense: () => Promise<boolean>;
   hasInferenceConnector: () => Promise<boolean>;
+  /** False when the optional inference plugin is absent; NL / suggest-fix UI should stay hidden. */
+  isInferenceAvailable?: boolean;
   isServerless: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;

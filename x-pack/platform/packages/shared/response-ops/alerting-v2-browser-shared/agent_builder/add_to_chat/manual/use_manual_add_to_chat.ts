@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { AttachmentConverter } from '../../types';
 import { addItemsToChat } from './add_items_to_chat';
 import {
@@ -18,6 +19,7 @@ import {
 
 export interface ManualAddToChatServices {
   agentBuilder?: AgentBuilderPluginStart;
+  application: ApplicationStart;
 }
 
 export interface UseManualAddToChatResult {
@@ -30,7 +32,8 @@ export const useManualAddToChat = <FocusedItem>(
   converter: AttachmentConverter<FocusedItem>,
   services: ManualAddToChatServices
 ): UseManualAddToChatResult => {
-  const { agentBuilder } = services;
+  const { agentBuilder, application } = services;
+  const hasAgentBuilderShow = application.capabilities.agentBuilder?.show === true;
 
   const converterRef = useRef(converter);
   converterRef.current = converter;
@@ -78,10 +81,10 @@ export const useManualAddToChat = <FocusedItem>(
     };
   }, [agentBuilder]);
 
-  const isAddToChatAvailable = Boolean(agentBuilder?.openChat && item);
+  const isAddToChatAvailable = Boolean(agentBuilder?.openChat && hasAgentBuilderShow && item);
 
   const addToChat = useCallback(() => {
-    if (!item) {
+    if (!item || application.capabilities.agentBuilder?.show !== true) {
       return;
     }
 
@@ -91,7 +94,7 @@ export const useManualAddToChat = <FocusedItem>(
       addAttachment: agentBuilder?.addAttachment,
       activeConversation$: agentBuilder?.events?.ui.activeConversation$,
     });
-  }, [agentBuilder, item]);
+  }, [agentBuilder, application, item]);
 
   return { addToChat, isAddToChatAvailable };
 };

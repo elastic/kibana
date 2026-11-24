@@ -11,7 +11,7 @@
  * MongoDB Connector
  *
  * Provides read-only access to MongoDB collections using the native MongoDB
- * driver. Supports any MongoDB deployment reachable via a connection URI,
+ * driver. Supports MongoDB Server 4.4+ deployments reachable via a connection URI,
  * using mongodb:// or mongodb+srv://: replica sets, sharded clusters, or
  * standalone instances.
  *
@@ -238,7 +238,7 @@ export const MongoDBConnector: ConnectorSpec = {
           }),
           helpText: i18n.translate('connectorSpecs.mongodb.config.uri.helpText', {
             defaultMessage:
-              'Full MongoDB connection string. Supports mongodb:// and mongodb+srv:// schemes. ' +
+              'Full MongoDB connection string for MongoDB Server 4.4+. Supports mongodb:// and mongodb+srv:// schemes. ' +
               'Include the database name in the path (e.g. /mydb) to use it as the default for actions. ' +
               'Credentials are authenticated against the admin database by default; append ' +
               '?authSource=yourDbName to override.',
@@ -452,8 +452,8 @@ export const MongoDBConnector: ConnectorSpec = {
   skill: [
     '## MongoDB Connector',
     '',
-    'Provides access to MongoDB collections. Supports any deployment reachable',
-    'via a mongodb:// or mongodb+srv:// connection URI: replica sets, sharded',
+    'Provides access to MongoDB Server 4.4+ collections via a mongodb:// or',
+    'mongodb+srv:// connection URI: replica sets, sharded',
     'clusters, and standalone instances.',
     '',
     '### Discovery pattern',

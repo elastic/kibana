@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
 import { ProcessHash } from './process_hash';
@@ -44,37 +44,35 @@ describe('ProcessHash', () => {
   beforeEach(() => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
-  const mount = useMountAppended();
-
   test('displays the processHashSha256 when provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ProcessHash {...allProps} processHashSha256="[processHashSha256]" />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('[processHashSha256]');
+    expect(container.textContent).toEqual('[processHashSha256]');
   });
 
   test('displays nothing when processHashSha256 is null', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ProcessHash {...allProps} processHashSha256={null} />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('');
+    expect(container).toBeEmptyDOMElement();
   });
 
   test('displays nothing when processHashSha256 is undefined', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ProcessHash {...allProps} />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('');
+    expect(container).toBeEmptyDOMElement();
   });
 
   test('should passing correct scopeId to cell actions', () => {
-    mount(
+    render(
       <TestProviders>
         <ProcessHash {...allProps} />
       </TestProviders>

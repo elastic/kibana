@@ -32,6 +32,28 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     return Promise.resolve(this.workflowExecutions.get(workflowExecutionId) || null);
   }
 
+  public async getWorkflowExecutionsByIds(
+    workflowExecutionIds: string[],
+    spaceId: string
+  ): Promise<Map<string, EsWorkflowExecution>> {
+    const executionsById = new Map<string, EsWorkflowExecution>();
+    for (const id of workflowExecutionIds) {
+      const execution = this.workflowExecutions.get(id);
+      if (execution && execution.spaceId === spaceId) {
+        executionsById.set(id, execution);
+      }
+    }
+    return executionsById;
+  }
+
+  public async getWorkflowExecutionStatusesByIds(
+    workflowExecutionIds: string[],
+    spaceId: string
+  ): Promise<Map<string, ExecutionStatus>> {
+    const executions = await this.getWorkflowExecutionsByIds(workflowExecutionIds, spaceId);
+    return new Map([...executions].map(([id, { status }]) => [id, status]));
+  }
+
   public async getWorkflowExecutionCancelState(
     workflowExecutionId: string,
     spaceId: string

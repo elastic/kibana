@@ -39,19 +39,28 @@ import {
   ConversationAccessControlMode,
   isConversationAccessControlRole,
   isPublicConversation,
+  isSteerMessageEvent,
   normalizeConversationAccessControl,
   createBackgroundExecutionAlreadyReportedError,
   createBadRequestError,
   createConversationAlreadyExistsError,
+  createConversationAwaitingPromptError,
   createConversationBusyError,
   createConversationNotFoundError,
+  createConversationNotSteerableError,
   createConversationWriteConflictError,
   createInternalError,
+  createNoActiveExecutionError,
+  createTooManyPendingSteersError,
   isAgentNotFoundError,
   isAgentUnavailableError,
   isAttachmentEvent,
   isConversationNotFoundError,
   isExecutionTerminalEvent,
+  pendingSteersFor,
+  STEERS_PER_RUN_MAX,
+  TimelineEventType,
+  type UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type {
@@ -78,6 +87,9 @@ import {
 } from '../access_control';
 import type {
   AppendEventsRequest,
+  AppendSteerRequest,
+  AppendSteerResult,
+  ConversationWithVersion,
   ActiveExecutionUpdate,
   ConversationCreateRequest,
   ConversationUpdatableFields,
@@ -89,6 +101,7 @@ import type {
   ConversationListResult,
 } from './types';
 import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
+import { SteerSignal } from './steer_signals';
 import {
   ConversationBusySignal,
   applyActiveExecutionUpdate,
@@ -98,6 +111,7 @@ import {
   readHeldExecution,
   toActiveExecution,
 } from './active_execution';
+import { getPendingResumeRound } from '../../execution/utils/pending_round';
 import type { AgentExecutionClient } from '../../execution/persistence';
 import {
   MAX_CONVERSATIONS_PER_PAGE,
@@ -167,6 +181,13 @@ type ConversationWriteEmission =
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
+  getWithVersion(conversationId: string): Promise<ConversationWithVersion>;
+  peekVersion(conversationId: string): Promise<{ seqNo: number; primaryTerm: number }>;
+  /** Atomically validates the active execution and appends an idempotent steer. */
+  appendSteer(
+    request: AppendSteerRequest,
+    options: ConversationWriteOptions
+  ): Promise<AppendSteerResult>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(
@@ -812,6 +833,139 @@ class ConversationClientImpl implements ConversationClient {
       return conversationWithoutFeedback;
     }
     return conversation;
+  }
+
+  async getWithVersion(conversationId: string): Promise<ConversationWithVersion> {
+    const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
+    return {
+      conversation: toConversationResponseFromDocument({
+        document,
+        user: this.getUser(),
+        resolveTemplate: getTemplate,
+      }),
+      seqNo: document._seq_no,
+      primaryTerm: document._primary_term,
+    };
+  }
+
+  async peekVersion(conversationId: string): Promise<{ seqNo: number; primaryTerm: number }> {
+    let response: GetResponse<Pick<ConversationProperties, 'space'>>;
+    try {
+      response = await this.esClient.get<Pick<ConversationProperties, 'space'>>({
+        index: conversationIndexName,
+        id: conversationId,
+        _source_includes: ['space'],
+      });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404 || err?.statusCode === 404) {
+        throw createConversationNotFoundError({ conversationId });
+      }
+      throw err;
+    }
+    const docSpace = response._source?.space;
+    const spaceMatches = isDefaultSpace(this.space)
+      ? docSpace === undefined || docSpace === this.space
+      : docSpace === this.space;
+    if (
+      !response.found ||
+      !spaceMatches ||
+      response._seq_no === undefined ||
+      response._primary_term === undefined
+    ) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+    return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+  }
+
+  async appendSteer(
+    { id: conversationId, message, eventId, actor }: AppendSteerRequest,
+    { source }: ConversationWriteOptions
+  ): Promise<AppendSteerResult> {
+    let written: UserMessageEvent | undefined;
+
+    try {
+      await this.writeConversation({
+        conversationId,
+        access: 'converse',
+        source,
+        peekHeld: true,
+        fields: (current) => {
+          if (isPublicConversation(current.access_control)) {
+            throw new SteerSignal({ kind: 'not_steerable' });
+          }
+          // A retry is answered first, whatever the run has done since: paused on a prompt or ended.
+          const currentEvents = current.events ?? [];
+          const stored = currentEvents.find((event) => event.id === eventId);
+          if (stored) {
+            if (!isSteerMessageEvent(stored) || stored.actor.id !== actor.id) {
+              throw new SteerSignal({ kind: 'event_id_taken' });
+            }
+            throw new SteerSignal({ kind: 'already_stored', event: stored });
+          }
+          // A live holder is checked first: a resume holds the lock while the stored events still
+          // end in the pause it answers. The lock is free only while a round waits on a prompt.
+          // The stamp is the holder's timeline id, the one its events carry, so settlement can
+          // join the two.
+          const held = current.active_execution?.timeline_execution_id;
+          if (!held || isExecutionStale(current.execution)) {
+            throw new SteerSignal({
+              kind:
+                getPendingResumeRound(current) !== undefined
+                  ? 'awaiting_prompt'
+                  : 'no_active_execution',
+            });
+          }
+          // Five per run in total, read or not: what the run has read is in the execution document.
+          if (pendingSteersFor(currentEvents, held).length >= STEERS_PER_RUN_MAX) {
+            throw new SteerSignal({ kind: 'too_many_pending' });
+          }
+          written = {
+            id: eventId,
+            type: TimelineEventType.userMessage,
+            created_at: new Date().toISOString(),
+            actor,
+            data: { message, steer: { execution_id: held } },
+          };
+          const appended = [...currentEvents, written];
+          return {
+            events: appended,
+            rounds: eventsToRounds(appended),
+            schema_version: CONVERSATION_SCHEMA_VERSION,
+            // The author has read their own message; everyone else sees the conversation as unread.
+            read_by: (current.read_by ?? []).filter(({ userId }) => userId === actor.id),
+            read: false,
+          };
+        },
+      });
+    } catch (error) {
+      if (!(error instanceof SteerSignal)) {
+        throw error;
+      }
+      const { outcome } = error;
+      switch (outcome.kind) {
+        case 'already_stored':
+          return { event: outcome.event, alreadyStored: true };
+        case 'not_steerable':
+          throw createConversationNotSteerableError({ conversationId });
+        case 'awaiting_prompt':
+          throw createConversationAwaitingPromptError({ conversationId });
+        case 'no_active_execution':
+          throw createNoActiveExecutionError({ conversationId });
+        case 'too_many_pending':
+          throw createTooManyPendingSteersError({ conversationId });
+        case 'event_id_taken':
+          throw createBadRequestError(
+            `event_id "${eventId}" already names an event that is not a message of yours.`
+          );
+      }
+    }
+
+    if (!written) {
+      throw createInternalError(
+        `Steer ${eventId} on conversation ${conversationId} was not written`
+      );
+    }
+    return { event: written, alreadyStored: false };
   }
 
   async updateRoundFeedback(

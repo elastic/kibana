@@ -16,11 +16,27 @@ jest.mock('../kibana_services', () => ({
 }));
 
 describe('useIsNlToEsqlAvailable', () => {
-  const esql = { hasEnterpriseLicense: jest.fn(), hasInferenceConnector: jest.fn() };
+  const esql = {
+    isInferenceAvailable: true,
+    hasEnterpriseLicense: jest.fn(),
+    hasInferenceConnector: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibanaServices as jest.Mock).mockReturnValue({ esql });
+  });
+
+  it('is false without the inference plugin', async () => {
+    (useKibanaServices as jest.Mock).mockReturnValue({
+      esql: { ...esql, isInferenceAvailable: false },
+    });
+
+    const { result } = renderHook(() => useIsNlToEsqlAvailable());
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+
+    expect(result.current).toBe(false);
+    expect(esql.hasEnterpriseLicense).not.toHaveBeenCalled();
   });
 
   it('is true with an Enterprise license and an AI connector', async () => {
