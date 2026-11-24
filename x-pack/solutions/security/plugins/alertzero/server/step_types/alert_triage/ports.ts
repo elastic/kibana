@@ -538,11 +538,11 @@ export const findAlertIdsWithTag = async (
 };
 
 /**
- * Which of the given alerts are closed as a false positive and carry `carryingTag`. Used to find out
- * which alerts a close whose outcome is unknown did close: the tag is the evidence that the sweep
- * did it, because the cleanup after a failed close takes it off the alerts that stayed open, so an
- * alert that an analyst closes after that does not carry it. A partial result throws: an alert
- * missed would read as not closed and get no note.
+ * Which of the given alerts are closed as a false positive and carry `carryingTag`. Used to find
+ * out which alerts a close whose outcome is unknown did close: the tag is the evidence that the
+ * sweep did it, because the cleanup after a failed close takes it off the alerts that stayed open,
+ * so an alert that an analyst closes after that does not carry it. The cleanup is best effort. A
+ * partial result throws: an alert missed would read as not closed and get no note.
  */
 export const findAlertsClosedAsFalsePositive = async (
   { callKibanaApi }: KibanaApi,
