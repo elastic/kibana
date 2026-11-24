@@ -140,7 +140,7 @@ export function registerConnectorRoutes({
             message: i18n.translate(
               'xpack.contentConnectors.routes.addConnector.connectorExistsError',
               {
-                defaultMessage: 'Connector or index already exists',
+                defaultMessage: 'Content crawler or index already exists',
               }
             ),
             response,
@@ -202,7 +202,7 @@ export function registerConnectorRoutes({
               'xpack.contentConnectors.routes.connectors.statusTransitionError',
               {
                 defaultMessage:
-                  'Connector sync job cannot be cancelled. Connector is already cancelled or not in a cancelable state.',
+                  'Content crawler sync job cannot be cancelled. Content crawler is already cancelled or not in a cancelable state.',
               }
             ),
             response,
@@ -771,7 +771,7 @@ export function registerConnectorRoutes({
       if (!connectorResult) {
         return createError({
           errorCode: ErrorCode.RESOURCE_NOT_FOUND,
-          message: `Connector with id ${connectorId} is not found.`,
+          message: `Content crawler with id ${connectorId} is not found.`,
           response,
           statusCode: 404,
         });
@@ -842,7 +842,7 @@ export function registerConnectorRoutes({
             message: i18n.translate(
               'xpack.contentConnectors.routes.connectors.resource_not_found_error',
               {
-                defaultMessage: 'Connector with id {connectorId} is not found.',
+                defaultMessage: 'Content crawler with id {connectorId} is not found.',
                 values: { connectorId },
               }
             ),
@@ -989,7 +989,7 @@ export function registerConnectorRoutes({
             message: i18n.translate(
               'xpack.contentConnectors.routes.connectors.resource_not_found_error',
               {
-                defaultMessage: 'Connector with id {connectorId} is not found.',
+                defaultMessage: 'Content crawler with id {connectorId} is not found.',
                 values: { connectorId },
               }
             ),
@@ -1068,7 +1068,7 @@ export function registerConnectorRoutes({
             message: i18n.translate(
               'xpack.contentConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
               {
-                defaultMessage: 'Cannot find a unique connector name',
+                defaultMessage: 'Cannot find a unique content crawler name',
               }
             ),
             response,
@@ -1113,7 +1113,7 @@ export function registerConnectorRoutes({
             message: i18n.translate(
               'xpack.contentConnectors.routes.connectors.resource_not_found_error',
               {
-                defaultMessage: 'Connector with id {connectorId} is not found.',
+                defaultMessage: 'Content crawler with id {connectorId} is not found.',
                 values: { connectorId },
               }
             ),
@@ -1129,7 +1129,7 @@ export function registerConnectorRoutes({
               'xpack.contentConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
               {
                 defaultMessage:
-                  'Failed to fetch agentless deployment details: This action is only supported for Elastic-managed connectors.',
+                  'Failed to fetch agentless deployment details: This action is only supported for Elastic-managed content crawlers.',
               }
             ),
             response,
@@ -1327,7 +1327,7 @@ export function registerConnectorRoutes({
           message: i18n.translate(
             'xpack.contentConnectors.server.routes.createApiIndex.connectorExistsError',
             {
-              defaultMessage: 'A connector for this index already exists',
+              defaultMessage: 'A content crawler for this index already exists',
             }
           ),
           response,
@@ -1379,7 +1379,7 @@ export function registerConnectorRoutes({
           message: i18n.translate(
             'xpack.contentConnectors.routes.indices.apiKey.connectorNotFound',
             {
-              defaultMessage: 'No connector found for index {indexName}.',
+              defaultMessage: 'No content crawler found for index {indexName}.',
               values: { indexName },
             }
           ),

@@ -89,7 +89,8 @@ export const ConnectorDetailOverview: React.FC = () => {
             text={i18n.translate(
               'xpack.contentConnectors.content.connectors.overview.agentlessDeploymentNotReadyCallOut.description',
               {
-                defaultMessage: 'Setting up the agentless infrastructure to run the connector.',
+                defaultMessage:
+                  'Setting up the agentless infrastructure to run the content crawler.',
               }
             )}
           />
@@ -103,7 +104,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             title={i18n.translate(
               'xpack.contentConnectors.content.connectors.overview.connectorErrorCallOut.title',
               {
-                defaultMessage: 'Your connector has reported an error',
+                defaultMessage: 'Your content crawler has reported an error',
               }
             )}
             text={error}
@@ -118,14 +119,14 @@ export const ConnectorDetailOverview: React.FC = () => {
             title={i18n.translate(
               'xpack.contentConnectors.content.connectors.overview.connectorNoIndexCallOut.title',
               {
-                defaultMessage: 'Connector has no attached index',
+                defaultMessage: 'Content crawler has no attached index',
               }
             )}
             text={i18n.translate(
               'xpack.contentConnectors.content.connectors.overview.connectorNoIndexCallOut.description',
               {
                 defaultMessage:
-                  "You won't be able to start syncing content until your connector is attached to an index.",
+                  "You won't be able to start syncing content until your content crawler is attached to an index.",
               }
             )}
           >
@@ -162,7 +163,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             text={
               <FormattedMessage
                 id="xpack.contentConnectors.content.connectors.overview.connectorIndexDoesntExistCallOut.description"
-                defaultMessage="The connector will create the index on its next sync, or you can manually create the index {indexName} with your desired settings and mappings."
+                defaultMessage="The content crawler will create the index on its next sync, or you can manually create the index {indexName} with your desired settings and mappings."
                 values={{
                   indexName: <EuiCode>{connector.index_name}</EuiCode>,
                 }}
@@ -181,13 +182,13 @@ export const ConnectorDetailOverview: React.FC = () => {
               'xpack.contentConnectors.content.connectors.overview.nativeCloudCallout.title',
               {
                 defaultMessage:
-                  'Elastic managed connectors (formerly native connectors) are no longer supported outside Elastic Cloud',
+                  'Elastic managed content crawlers (formerly native content crawlers) are no longer supported outside Elastic Cloud',
               }
             )}
             text={
               <FormattedMessage
                 id="xpack.contentConnectors.content.connectors.overview.nativeCloudCallout.content"
-                defaultMessage="Convert it to a {link}, to be self-hosted on your own infrastructure. Elastic managed connectors are available only in your Elastic Cloud deployment."
+                defaultMessage="Convert it to a {link}, to be self-hosted on your own infrastructure. Elastic managed content crawlers are available only in your Elastic Cloud deployment."
                 values={{
                   link: (
                     <EuiLink
@@ -198,7 +199,7 @@ export const ConnectorDetailOverview: React.FC = () => {
                     >
                       {i18n.translate(
                         'xpack.contentConnectors.content.connectors.overview.nativeCloudCallout.connectorClient',
-                        { defaultMessage: 'self-managed connector' }
+                        { defaultMessage: 'self-managed content crawler' }
                       )}
                     </EuiLink>
                   ),
@@ -212,7 +213,7 @@ export const ConnectorDetailOverview: React.FC = () => {
                 onClick: () => showModal(),
                 children: i18n.translate(
                   'xpack.contentConnectors.content.indices.connectors.overview.convertConnector.buttonLabel',
-                  { defaultMessage: 'Convert connector' }
+                  { defaultMessage: 'Convert content crawler' }
                 ),
               },
             }}

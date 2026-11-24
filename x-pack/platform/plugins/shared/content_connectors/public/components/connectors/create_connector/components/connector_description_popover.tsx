@@ -36,7 +36,7 @@ const nativePopoverPanels = [
   {
     description: i18n.translate(
       'xpack.contentConnectors.connectorDescriptionPopover.connectorDescriptionBadge.native.configureConnectorLabel',
-      { defaultMessage: 'Configure your connector using our Kibana UI' }
+      { defaultMessage: 'Configure your content crawler using our Kibana UI' }
     ),
     icons: [
       <EuiIcon size="l" type="plugs" aria-hidden={true} />,
@@ -60,7 +60,7 @@ const connectorClientPopoverPanels = [
       'xpack.contentConnectors.connectorDescriptionPopover.connectorDescriptionBadge.client.configureConnectorLabel',
       {
         defaultMessage:
-          'Deploy connector code on your own infrastructure by running from source or using Docker',
+          'Deploy content crawler code on your own infrastructure by running from source or using Docker',
       }
     ),
     icons: [
@@ -106,7 +106,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
   return (
     <EuiPopover
       aria-label={i18n.translate('xpack.contentConnectors.createConnector.infoPopover.ariaLabel', {
-        defaultMessage: 'Connector description',
+        defaultMessage: 'Content crawler description',
       })}
       anchorPosition="upCenter"
       button={
@@ -151,14 +151,14 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                             'xpack.contentConnectors.createConnector.connectorDescriptionBadge.isOnlySelfManagedAvailableTitle',
                             {
                               defaultMessage:
-                                'This connector is not available as an Elastic-managed Connector',
+                                'This content crawler is not available as an Elastic-managed Content Crawler',
                             }
                           )
                         : i18n.translate(
                             'xpack.contentConnectors.createConnector.connectorDescriptionBadge.isRunningLocallyTitle',
                             {
                               defaultMessage:
-                                'Elastic managed connectors are only available in Elastic Cloud',
+                                'Elastic managed content crawlers are only available in Elastic Cloud',
                             }
                           )
                     }
@@ -178,7 +178,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                   title={i18n.translate(
                     'xpack.contentConnectors.createConnector.connectorDescriptionBadge.elasticManagedDiscontinuedTitle',
                     {
-                      defaultMessage: 'Elastic managed Connector are no longer supported',
+                      defaultMessage: 'Elastic managed Content Crawler are no longer supported',
                     }
                   )}
                   size="s"
@@ -240,7 +240,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                     'xpack.contentConnectors.createConnector.connectorDescriptionBadge.learnMore',
                     {
                       defaultMessage:
-                        'Take advantage of Elastic managed connectors and generative AI capabilities to address search challenges across your organization in real time, at scale.',
+                        'Take advantage of Elastic managed content crawlers and generative AI capabilities to address search challenges across your organization in real time, at scale.',
                     }
                   )}
                 </EuiText>

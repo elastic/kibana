@@ -142,7 +142,7 @@ export const ConnectorDeployment: React.FC = () => {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.contentConnectors.content.connector_detail.configurationConnector.steps.configureIndexAndApiKey.description.source"
-                          defaultMessage="We automatically generate a connector configuration, an API key, and create a new Elasticsearch index. Connector information and API key will be added to the {configYaml} file of your connector. You can also use an existing API key."
+                          defaultMessage="We automatically generate a content crawler configuration, an API key, and create a new Elasticsearch index. Content crawler information and API key will be added to the {configYaml} file of your content crawler. You can also use an existing API key."
                           values={{
                             configYaml: (
                               <EuiCode>
@@ -221,7 +221,7 @@ export const ConnectorDeployment: React.FC = () => {
                   title: i18n.translate(
                     'xpack.contentConnectors.connector_detail.configurationConnector.steps.runConnector.title',
                     {
-                      defaultMessage: 'Run connector service',
+                      defaultMessage: 'Run content crawler service',
                     }
                   ),
                   titleSize: 'xs',
@@ -240,7 +240,7 @@ export const ConnectorDeployment: React.FC = () => {
                   title: i18n.translate(
                     'xpack.contentConnectors.connector_detail.configurationConnector.steps.waitingForConnector.title',
                     {
-                      defaultMessage: 'Waiting for your connector to check in',
+                      defaultMessage: 'Waiting for your content crawler to check in',
                     }
                   ),
                   titleSize: 'xs',

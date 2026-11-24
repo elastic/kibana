@@ -149,7 +149,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                   <p>
                     {i18n.translate(
                       'xpack.contentConnectors.connectorDeployment.connectorCreatedFlexItemLabel',
-                      { defaultMessage: 'Connector created' }
+                      { defaultMessage: 'Content crawler created' }
                     )}
                   </p>
                 </EuiText>
@@ -193,7 +193,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                     <EuiToolTip
                       content={i18n.translate(
                         'xpack.contentConnectors.connectorDeployment.copyConnectorId',
-                        { defaultMessage: 'Copy connector ID' }
+                        { defaultMessage: 'Copy content crawler ID' }
                       )}
                       disableScreenReaderOutput
                     >
@@ -204,7 +204,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                         onClick={copy}
                         aria-label={i18n.translate(
                           'xpack.contentConnectors.connectorDeployment.copyConnectorId',
-                          { defaultMessage: 'Copy connector ID' }
+                          { defaultMessage: 'Copy content crawler ID' }
                         )}
                       />
                     </EuiToolTip>

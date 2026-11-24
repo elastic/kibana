@@ -32,7 +32,7 @@ export const ConvertConnectorModal: React.FC = () => {
       onConfirm={() => convertConnector()}
       title={i18n.translate(
         'xpack.contentConnectors.searchApplications.searchApplication.indices.convertInfexConfirm.title',
-        { defaultMessage: 'Sure you want to convert your connector?' }
+        { defaultMessage: 'Sure you want to convert your content crawler?' }
       )}
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
@@ -54,7 +54,7 @@ export const ConvertConnectorModal: React.FC = () => {
             'xpack.contentConnectors.searchApplications.searchApplication.indices.convertIndexConfirm.description',
             {
               defaultMessage:
-                "Converting an Elastic managed connector to a self-managed connector can't be undone.",
+                "Converting an Elastic managed content crawler to a self-managed content crawler can't be undone.",
             }
           )}
         </p>

@@ -100,7 +100,7 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
               'xpack.contentConnectors.connectorDeployment.p.createConfigFileInstructions',
               {
                 defaultMessage:
-                  'You need a configuration file with your Elasticsearch and connector details. In your terminal, run the following command to create the config.yml file:',
+                  'You need a configuration file with your Elasticsearch and content crawler details. In your terminal, run the following command to create the config.yml file:',
               }
             )}
           </p>
@@ -112,7 +112,7 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
           <p>
             <FormattedMessage
               id="xpack.contentConnectors..connectorDeployment.p.configFileExplanation"
-              defaultMessage="This command creates a {configFile} file in the {directory} directory with your specific connector and Elasticsearch details."
+              defaultMessage="This command creates a {configFile} file in the {directory} directory with your specific content crawler and Elasticsearch details."
               values={{
                 configFile: <EuiCode>config.yml</EuiCode>,
                 directory: <EuiCode>$HOME/elastic-connectors</EuiCode>,

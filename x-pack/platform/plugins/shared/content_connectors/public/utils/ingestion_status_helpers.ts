@@ -18,7 +18,7 @@ export function ingestionStatusToText(ingestionStatus: IngestionStatus): string 
   if (ingestionStatus === IngestionStatus.ERROR) {
     return i18n.translate(
       'xpack.contentConnectors.content.searchIndices.ingestionStatus.connectorError.label',
-      { defaultMessage: 'Connector failure' }
+      { defaultMessage: 'Content crawler failure' }
     );
   }
   if (ingestionStatus === IngestionStatus.SYNC_ERROR) {
