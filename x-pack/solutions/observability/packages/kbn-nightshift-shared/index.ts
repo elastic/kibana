@@ -134,6 +134,10 @@ export {
   type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';
 
+export { toFromSourceQuery } from './src/sources/to_from_source_query';
+
+export { SOURCE_TIMESTAMP_FIELD, getTimestampColumnProblem } from './src/sources/timestamp_column';
+
 export {
   NIGHTSHIFT_USAGE_PARENT_ID,
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
@@ -165,6 +169,8 @@ export {
   NIGHTSHIFT_SUPPORTED_SPACE_ID,
   NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
 } from './src/spaces';
+
+export type { NightshiftAutomationLocatorParams } from './src/automations';
 
 export {
   SETTINGS_TAB_IDS,

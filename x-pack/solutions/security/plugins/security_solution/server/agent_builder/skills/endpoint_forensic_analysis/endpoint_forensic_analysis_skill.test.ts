@@ -27,6 +27,15 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(isAllowedBuiltinSkill(ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID)).toBe(true);
   });
 
+  // kbn-evals-suite-endpoint mirrors these ids as literals (it cannot import the
+  // plugin server); renaming a tool must fail here so the mirror is updated too.
+  it('registers the tool ids the endpoint eval suite mirrors', () => {
+    expect(ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID).toBe(
+      'security.endpoint_forensic.discover_telemetry'
+    );
+    expect(ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID).toBe('security.endpoint_forensic.extract_iocs');
+  });
+
   it('exposes ES|QL and index discovery platform registry tools only (read-only scope)', () => {
     const registryTools = endpointForensicAnalysisSkill.getRegistryTools?.() ?? [];
     expect(registryTools).toEqual([

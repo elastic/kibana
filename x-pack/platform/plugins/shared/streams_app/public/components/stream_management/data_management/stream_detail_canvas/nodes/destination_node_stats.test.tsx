@@ -6,10 +6,23 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import type { DestinationStatsView } from '../../../../../services/unit_stats_client/types';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { EMPTY_DESTINATION_FAILED } from '../../../../../services/unit_stats_client/map_stats_response';
+import type {
+  DestinationFailedView,
+  DestinationStatsView,
+} from '../../../../../services/unit_stats_client/types';
 import type { StatsEntry } from '../../../../unit_stats/state_management/types';
 import { DestinationNodeStats } from './destination_node_stats';
+
+// The sparklines are charts, which need the services of the page, and have tests of their own.
+jest.mock('../../../../streams_layout/destinations/failure_sparkline', () => ({
+  FailureSparkline: () => null,
+}));
+// What the popover fetches when it opens needs the services of the page, and has tests of its own.
+jest.mock('../../../../unit_stats/use_destination_popover_failures', () => ({
+  useDestinationPopoverFailures: () => undefined,
+}));
 
 const mockUseDestinationStats = jest.fn();
 
@@ -23,7 +36,7 @@ const statsWith = ({
 }: Partial<Pick<DestinationStatsView, 'eventsRate' | 'latencyAverage'>>): DestinationStatsView => ({
   eventsRate,
   eventsTotal: null,
-  failedRate: null,
+  failed: EMPTY_DESTINATION_FAILED,
   latencyAverage,
   series: { bucketMs: 300000, points: [] },
 });
@@ -216,6 +229,150 @@ describe('DestinationNodeStats', () => {
 
       expect(await screen.findByText(/Could not load stats\./)).toBeTruthy();
       expect(await screen.findByText(/Elasticsearch is unavailable/)).toBeTruthy();
+    });
+  });
+
+  describe('failures', () => {
+    const failureClass = (
+      rate: number | null,
+      percentage: number | null,
+      unit = '{item}'
+    ): DestinationFailedView['authentication'] => ({ rate, unit, percentage, breakdown: [] });
+
+    const withFailed = (
+      failed: Partial<DestinationFailedView>,
+      {
+        eventsRate = 4.2,
+        latencyAverage = 0.17,
+      }: { eventsRate?: number | null; latencyAverage?: number | null } = {}
+    ): StatsEntry<DestinationStatsView> => ({
+      status: 'ready',
+      stats: {
+        ...statsWith({ eventsRate, latencyAverage }),
+        failed: { ...EMPTY_DESTINATION_FAILED, ...failed },
+      },
+    });
+
+    it.each<[string, Partial<DestinationFailedView>]>([
+      ['no data', {}],
+      [
+        'a percentage and a rate of 0',
+        { authentication: failureClass(0, 0), authorization: failureClass(0, 0) },
+      ],
+    ])('shows no failure icon for %s', (_description, failed) => {
+      renderFooter(withFailed(failed));
+
+      expect(isShown('streamsCanvasDestinationFailures')).toBe(false);
+    });
+
+    it.each<[string, Partial<DestinationFailedView>]>([
+      ['authentication', { authentication: failureClass(0.5, 11.9) }],
+      ['authorization', { authorization: failureClass(1.9, 45.2) }],
+      ['a rate with no percentage', { authentication: failureClass(0.5, null) }],
+    ])('shows the failure icon for %s', (_description, failed) => {
+      renderFooter(withFailed(failed));
+
+      expect(isShown('streamsCanvasDestinationFailures')).toBe(true);
+    });
+
+    it('lists the failures in the popover, with the percentage first', async () => {
+      renderFooter(withFailed({ authentication: failureClass(0.5, 11.9) }));
+
+      fireEvent.mouseOver(screen.getByTestId('streamsCanvasDestinationFailures'));
+
+      const popover = await screen.findByTestId('streamsCanvasDestinationFailuresPopover');
+      expect(within(popover).getByText('Delivery failures')).toBeTruthy();
+      const summary = 'streamsDestinationFailurePopoverSummary';
+      expect(text(`${summary}Subtitle`)).toBe('Of events in the last 15 minutes');
+      expect(text(`${summary}AuthenticationPercentage`)).toContain('12%');
+      expect(text(`${summary}AuthenticationRate`)).toContain('0.50/s');
+    });
+
+    it('names upload attempts for a destination that counts them', async () => {
+      renderFooter(withFailed({ authentication: failureClass(0.44, 100, '{request}') }));
+
+      fireEvent.mouseOver(screen.getByTestId('streamsCanvasDestinationFailures'));
+
+      expect(await screen.findByText('Of upload attempts in the last 15 minutes')).toBeTruthy();
+    });
+
+    it('keeps the rate and the latency next to the icon', () => {
+      renderFooter(withFailed({ authentication: failureClass(0.5, 11.9) }));
+
+      expect(text('streamsCanvasDestinationRate')).toBe('4.2/s');
+      expect(text('streamsCanvasDestinationLatency')).toBe('170ms');
+    });
+
+    it('does not say that data is not flowing in when there are failures and no rate or latency', () => {
+      renderFooter(
+        withFailed(
+          { authentication: failureClass(0.5, null) },
+          { eventsRate: null, latencyAverage: null }
+        )
+      );
+
+      expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
+      expect(isShown('streamsCanvasDestinationFailures')).toBe(true);
+    });
+
+    it('still says that data is not flowing in when there are no failures and no rate or latency', () => {
+      renderFooter(withFailed({}, { eventsRate: null, latencyAverage: null }));
+
+      expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(true);
+      expect(isShown('streamsCanvasDestinationFailures')).toBe(false);
+    });
+
+    it('shows the failure icon next to the stale icon of old values', () => {
+      const entry = withFailed({ authentication: failureClass(0.5, 11.9) });
+      renderFooter({ ...entry, status: 'stale' });
+
+      expect(isShown('streamsCanvasDestinationFailures')).toBe(true);
+      expect(isShown('streamsCanvasDestinationStale')).toBe(true);
+    });
+
+    it('shows no failure icon when the stats could not be loaded', () => {
+      renderFooter({ status: 'error', error: { code: 'unavailable', reason: 'Unavailable' } });
+
+      expect(isShown('streamsCanvasDestinationFailures')).toBe(false);
+    });
+  });
+
+  describe('stats that loaded in part', () => {
+    const PARTIAL: StatsEntry<DestinationStatsView> = {
+      status: 'ready',
+      stats: statsWith({ eventsRate: 3700, latencyAverage: 0.012 }),
+      error: { code: 'error', reason: 'The stats query failed.' },
+    };
+
+    it('keeps the numbers, and adds a partial icon', () => {
+      renderFooter(PARTIAL);
+
+      expect(text('streamsCanvasDestinationRate')).toBe('3.7k/s');
+      expect(text('streamsCanvasDestinationLatency')).toBe('12ms');
+      expect(isShown('streamsCanvasDestinationPartial')).toBe(true);
+      expect(isShown('streamsCanvasDestinationError')).toBe(false);
+    });
+
+    it('says what is missing in the tooltip', async () => {
+      renderFooter(PARTIAL);
+
+      fireEvent.mouseOver(screen.getByTestId('streamsCanvasDestinationPartial'));
+
+      expect(await screen.findByText(/Some stats could not be loaded\./)).toBeTruthy();
+      expect(await screen.findByText(/The stats query failed\./)).toBeTruthy();
+    });
+
+    it('shows only the stale icon when the values are also old', () => {
+      renderFooter({ ...PARTIAL, status: 'stale' });
+
+      expect(isShown('streamsCanvasDestinationStale')).toBe(true);
+      expect(isShown('streamsCanvasDestinationPartial')).toBe(false);
+    });
+
+    it('shows no partial icon for stats with no error', () => {
+      renderFooter({ status: 'ready', stats: statsWithRate(3700) });
+
+      expect(isShown('streamsCanvasDestinationPartial')).toBe(false);
     });
   });
 

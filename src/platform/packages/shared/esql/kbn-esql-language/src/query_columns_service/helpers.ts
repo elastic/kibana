@@ -8,7 +8,7 @@
  */
 import type { ESQLCallbacks, ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
 import type { ESQLAstJoinCommand, ESQLAstPromqlCommand, ESQLAstCommand } from '@elastic/esql/types';
-import { BasicPrettyPrinter, isSource, synth, Walker } from '@elastic/esql';
+import { BasicPrettyPrinter, isSource, isSubQuery, synth, Walker } from '@elastic/esql';
 import { esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '../..';
 import {
   UnmappedFieldsStrategy,
@@ -17,7 +17,7 @@ import {
 } from '../commands/registry/types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
-import { columnIsPresent } from '../commands/definitions/utils/columns';
+import { columnIsPresent, columnsWithFlattenedKeys } from '../commands/definitions/utils/columns';
 import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 import { getLookupJoinSource } from '../commands/definitions/utils/sources';
 import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
@@ -142,6 +142,12 @@ export function getUnmappedFields(
   const columsSet = new Set(previousPipeFields.map((col) => col.name));
 
   Walker.walk(command, {
+    // FORK branches belong to this pipeline; an IN subquery has its own columns.
+    visitParens: (node, parent, walker) => {
+      if (isSubQuery(node) && parent !== command) {
+        walker.skipChildren();
+      }
+    },
     visitColumn: (node) => {
       if (
         !columnIsPresent(node, columsSet) &&
@@ -197,14 +203,15 @@ export async function getCurrentQueryAvailableColumns(
   };
 
   const previousCommands = commands.slice(0, -1);
+  const fieldsBeforeUnmapped = columnsWithFlattenedKeys(lastCommand, previousPipeFields);
   const unmappedFields = getUnmappedFields(
     lastCommand,
     previousCommands,
-    previousPipeFields,
+    fieldsBeforeUnmapped,
     unmappedFieldsStrategy
   );
 
-  const fields = [...previousPipeFields, ...unmappedFields];
+  const fields = [...fieldsBeforeUnmapped, ...unmappedFields];
 
   const columns = commandDef?.methods.columnsAfter
     ? await commandDef.methods.columnsAfter(

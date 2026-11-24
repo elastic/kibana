@@ -22,9 +22,8 @@ import {
 
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
-import { metrics, trace, type Attributes } from '@opentelemetry/api';
+import { metrics, SeverityNumber, trace, type Attributes } from '@opentelemetry/api';
 import { LogLevel } from '@kbn/logging';
-import { SeverityNumber } from '@opentelemetry/api-logs';
 import { OtelAppender } from './otel_appender';
 import { RetryingLogRecordExporter } from './retrying_log_exporter';
 import { Layouts } from '../../layouts/layouts';

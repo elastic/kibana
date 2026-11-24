@@ -9,7 +9,11 @@
 
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import agent from 'elastic-apm-node';
-import { getConfiguration, shouldInstrumentClient } from '@kbn/apm-config-loader';
+import {
+  getBrowserTracingConfiguration,
+  getConfiguration,
+  shouldInstrumentClient,
+} from '@kbn/apm-config-loader';
 import { getPageLoadTransactionName } from './get_page_load_transaction_name';
 
 const OMIT_APM_CONFIG: Array<keyof AgentConfigOptions> = [
@@ -20,6 +24,8 @@ const OMIT_APM_CONFIG: Array<keyof AgentConfigOptions> = [
   'captureHeaders',
   'captureBody',
 ];
+
+const EDOT_OWNED_INSTRUMENTATIONS = ['fetch', 'xmlhttprequest'];
 
 export const getApmConfig = (requestPath: string) => {
   const baseConfig = getConfiguration('kibana-frontend') || {};
@@ -40,6 +46,13 @@ export const getApmConfig = (requestPath: string) => {
     flushInterval: 150,
     pageLoadTransactionName: getPageLoadTransactionName(requestPath),
   };
+
+  // Both agents inject `traceparent` on same-origin requests and would overwrite each other.
+  if (getBrowserTracingConfiguration()) {
+    config.disableInstrumentations = [
+      ...new Set([...(restOfConfig.disableInstrumentations ?? []), ...EDOT_OWNED_INSTRUMENTATIONS]),
+    ];
+  }
 
   // Get current active backend transaction to make distributed tracing
   // work for rendering the app

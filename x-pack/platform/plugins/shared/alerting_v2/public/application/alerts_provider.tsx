@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -170,6 +171,9 @@ export const AlertingV2AlertsProvider = ({
   const kibanaReactServices: AlertsKibanaServices = useMemo(
     () => ({
       ...coreStart,
+      agentBuilder: container.isBound(PluginStart('agentBuilder'))
+        ? (container.get(PluginStart('agentBuilder')) as AgentBuilderPluginStart)
+        : undefined,
       share: container.get(PluginStart('share')) as SharePluginStart,
       data: container.get(PluginStart('data')) as DataPublicPluginStart,
       dataViews: container.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,

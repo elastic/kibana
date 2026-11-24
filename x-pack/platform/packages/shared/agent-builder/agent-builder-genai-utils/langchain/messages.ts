@@ -45,6 +45,14 @@ export const extractRefusal = (message: BaseMessage): string | undefined => {
   return typeof refusal === 'string' && refusal.length > 0 ? refusal : undefined;
 };
 
+/**
+ * Extract the provider reasoning (thinking) text the inference layer attached to a message, if any.
+ */
+export const extractReasoningContent = (message: BaseMessage): string | undefined => {
+  const reasoning = message.additional_kwargs?.reasoning_content;
+  return typeof reasoning === 'string' && reasoning.length > 0 ? reasoning : undefined;
+};
+
 export interface ToolCall {
   toolCallId: string;
   toolName: string;

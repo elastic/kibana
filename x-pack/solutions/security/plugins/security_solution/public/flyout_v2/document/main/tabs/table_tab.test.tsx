@@ -10,10 +10,7 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils';
-import {
-  TABLE_TAB_CONTENT_TEST_ID,
-  TABLE_TAB_SEARCH_INPUT_TEST_ID,
-} from '../../../../flyout/document_details/right/tabs/test_ids';
+import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
 import {
   TABLE_TAB_SETTING_BUTTON_TEST_ID,
   TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID,

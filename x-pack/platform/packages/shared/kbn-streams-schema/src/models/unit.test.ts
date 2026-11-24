@@ -147,6 +147,18 @@ describe('streams unit stats request schema', () => {
     ).toBe(true);
   });
 
+  it('accepts the delivery series option on a destination only, and no other option', () => {
+    const parse = (component: object) =>
+      streamsUnitStatsRequestSchema.safeParse({ components: [component] }).success;
+    const include = { delivery_series: true };
+
+    expect(parse({ kind: 'destination', id: 'es-prod', include })).toBe(true);
+    expect(parse({ kind: 'destination', id: 'es-prod', include: {} })).toBe(true);
+    expect(parse({ kind: 'destination', id: 'es-prod', include: { unknown: true } })).toBe(false);
+    expect(parse({ kind: 'processor', id: 'p', include })).toBe(false);
+    expect(parse({ kind: 'source', id: 's', include })).toBe(false);
+  });
+
   it('treats an empty request and an empty components list as valid', () => {
     expect(streamsUnitStatsRequestSchema.safeParse({}).success).toBe(true);
     expect(streamsUnitStatsRequestSchema.safeParse({ components: [] }).success).toBe(true);
