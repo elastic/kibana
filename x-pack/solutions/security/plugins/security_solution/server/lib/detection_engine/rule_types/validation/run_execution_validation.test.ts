@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { RuleParams } from '../../rule_schema';
@@ -47,18 +48,20 @@ describe('runExecutionValidation', () => {
     secondaryTimestamp,
     inputIndex = ['auditbeat-*'],
     isServerless = false,
+    runtimeMappings,
   }: {
     params?: RuleParams;
     secondaryTimestamp?: string;
     inputIndex?: string[];
     isServerless?: boolean;
+    runtimeMappings?: estypes.MappingRuntimeFields;
   } = {}) =>
     runExecutionValidation({
       params,
       inputIndex,
       ruleName: 'test-rule',
       scopedClusterClient,
-      runtimeMappings: undefined,
+      runtimeMappings,
       primaryTimestamp: '@timestamp',
       secondaryTimestamp,
       ruleExecutionLogger,
@@ -243,6 +246,38 @@ describe('runExecutionValidation', () => {
     expect(checkForFrozenIndices).not.toHaveBeenCalled();
   });
 
+  it('warns and keeps the other results when the frozen indices check fails', async () => {
+    mockMatchedIndices({ '@timestamp': { date_nanos: { type: 'date_nanos' } } }, [
+      'auditbeat-1',
+      'partial-auditbeat-2',
+    ]);
+    jest.mocked(checkForFrozenIndices).mockRejectedValue(new Error('boom'));
+
+    const result = await run();
+
+    expect(result).toEqual({
+      skipExecution: false,
+      warnings: ['Frozen indices check failed to execute Error: boom'],
+      frozenIndicesQueriedCount: 0,
+      dateNanosTimestampFields: ['@timestamp'],
+      mixedTimestampFields: [],
+    });
+  });
+
+  it('sends the runtime mappings of the rule with the request', async () => {
+    mockMatchedIndices({ '@timestamp': { date: { type: 'date' } } });
+    const runtimeMappings = { 'event.ingested': { type: 'date' as const } };
+
+    await run({ secondaryTimestamp: 'event.ingested', runtimeMappings });
+
+    expect(mockResolveIndexPatterns).toHaveBeenCalledWith({
+      esClient: scopedClusterClient.asCurrentUser,
+      indexPatterns: ['auditbeat-*'],
+      fields: ['@timestamp', 'event.ingested'],
+      runtimeMappings,
+    });
+  });
+
   it('passes the index patterns as they are, including the excluding ones', async () => {
     mockMatchedIndices({ '@timestamp': { date: { type: 'date' } } });
     const inputIndex = ['-auditbeat-old-*', 'auditbeat-*', 'filebeat-*'];
@@ -300,6 +335,33 @@ describe('runExecutionValidation', () => {
       expect(result.warnings).toEqual([NO_MATCHING_THREAT_INDICES_WARNING]);
       expect(hasTimestampFields).not.toHaveBeenCalled();
       expect(checkForFrozenIndices).not.toHaveBeenCalled();
+    });
+
+    it('skips execution when the rule indices request fails and no threat index matches', async () => {
+      mockResolveIndexPatterns
+        .mockRejectedValueOnce(new Error('boom'))
+        .mockResolvedValueOnce({ matchedIndices: [], fields: {} });
+
+      const result = await run({ params });
+
+      expect(result.skipExecution).toBe(true);
+      expect(result.warnings).toEqual([
+        'Encountered an error validating index patterns: Error: boom',
+        NO_MATCHING_THREAT_INDICES_WARNING,
+      ]);
+      expect(hasTimestampFields).not.toHaveBeenCalled();
+      expect(checkForFrozenIndices).not.toHaveBeenCalled();
+    });
+
+    it('sends the runtime mappings with the rule indices request only', async () => {
+      mockMatchedIndices(date);
+      const runtimeMappings = { 'event.ingested': { type: 'date' as const } };
+
+      await run({ params, runtimeMappings });
+
+      expect(
+        mockResolveIndexPatterns.mock.calls.map(([options]) => options.runtimeMappings)
+      ).toEqual([runtimeMappings, undefined]);
     });
 
     it('does not check the threat timestamp fields when no rule index matches', async () => {
