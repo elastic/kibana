@@ -160,6 +160,9 @@ export default function ({ getService }: FtrProviderContext) {
       indexedData = await endpointTestResources.loadEndpointData({
         alertsPerHost: 0,
         withResponseActions: false,
+        // `file_export` needs Endpoint 9.7.0+; on serverless the default is Fleet's latest
+        // released agent version, which can be older
+        agentVersion: '9.7.0',
       });
       agentId = indexedData.hosts[0].agent.id;
       packagePolicyId = indexedData.integrationPolicies[0].id;

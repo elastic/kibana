@@ -54,10 +54,14 @@ export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsRespons
 };
 
 // Document Generator override that uses a custom Endpoint Metadata generator and sets the
-// `agent.version` to the current version
-const createDocGeneratorClass = async (kbnClient: KbnClient, isServerless: boolean) => {
-  let version = kibanaPackageJson.version;
-  if (isServerless) {
+// `agent.version` to `agentVersion` when given, otherwise to the current version
+const createDocGeneratorClass = async (
+  kbnClient: KbnClient,
+  isServerless: boolean,
+  agentVersion?: string
+) => {
+  let version = agentVersion ?? kibanaPackageJson.version;
+  if (agentVersion === undefined && isServerless) {
     version = await fetchFleetLatestAvailableAgentVersion(kbnClient);
   }
   // TS doesn't like the `version` let being used in the class definition
@@ -123,6 +127,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
      * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processed by the transform
      * @param [options.waitTimeout=120000] If waitUntilTransformed=true, number of ms to wait until timeout
      * @param [options.customIndexFn] If provided, will use this function to generate and index data instead
+     * @param [options.agentVersion] The `agent.version` of the loaded hosts, which decides their capabilities. Defaults to the Kibana version (on serverless, Fleet's latest available agent version)
      */
     async loadEndpointData(
       options: Partial<{
@@ -136,6 +141,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
         customIndexFn: () => Promise<IndexedHostsAndAlertsResponse>;
         spaceId: string;
         withResponseActions: boolean;
+        agentVersion: string;
       }> = {}
     ): Promise<IndexedHostsAndAlertsResponseExtended> {
       const {
@@ -149,6 +155,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
         customIndexFn,
         spaceId = DEFAULT_SPACE_ID,
         withResponseActions = true,
+        agentVersion,
       } = options;
 
       const client = this.getScopedKbnClient(spaceId);
@@ -162,7 +169,11 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
       }
 
       const isServerless = await isServerlessKibanaFlavor(client);
-      const CurrentKibanaVersionDocGenerator = await createDocGeneratorClass(client, isServerless);
+      const CurrentKibanaVersionDocGenerator = await createDocGeneratorClass(
+        client,
+        isServerless,
+        agentVersion
+      );
 
       // load data into the system
       const indexedData = customIndexFn
