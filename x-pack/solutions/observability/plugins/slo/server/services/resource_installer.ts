@@ -26,40 +26,70 @@ import { COMPOSITE_SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/comp
 import { HEALTH_INDEX_TEMPLATE } from '../assets/index_templates/health_index_template';
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
 import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
+import { SLOResourcesNotInstalled } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 
 export interface ResourceInstaller {
-  ensureCommonResourcesInstalled(): Promise<void>;
+  install(): Promise<void>;
 }
+
+const COMPONENT_TEMPLATES: readonly ClusterPutComponentTemplateRequest[] = [
+  SLI_MAPPINGS_TEMPLATE,
+  SLI_SETTINGS_TEMPLATE,
+  SUMMARY_MAPPINGS_TEMPLATE,
+  SUMMARY_SETTINGS_TEMPLATE,
+  COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE,
+];
+
+const INDEX_TEMPLATES: readonly IndicesPutIndexTemplateRequest[] = [
+  SLI_INDEX_TEMPLATE,
+  SUMMARY_INDEX_TEMPLATE,
+  COMPOSITE_SUMMARY_INDEX_TEMPLATE,
+  HEALTH_INDEX_TEMPLATE,
+];
+
+const BASE_INDICES: readonly string[] = [
+  SLI_DESTINATION_INDEX_NAME,
+  SUMMARY_DESTINATION_INDEX_NAME,
+  SUMMARY_TEMP_INDEX_NAME,
+  COMPOSITE_SUMMARY_INDEX_NAME,
+];
 
 export class DefaultResourceInstaller implements ResourceInstaller {
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
-  public async ensureCommonResourcesInstalled(): Promise<void> {
+  // Every Elasticsearch call retries transient errors; the install stops at the first resource that still fails.
+  public async install(): Promise<void> {
+    this.logger.debug('Installing SLO shared resources');
+
+    await Promise.all(
+      COMPONENT_TEMPLATES.map((template) =>
+        this.installResource(template.name, () => this.createOrUpdateComponentTemplate(template))
+      )
+    );
+
+    for (const template of INDEX_TEMPLATES) {
+      await this.installResource(template.name, () => this.createOrUpdateIndexTemplate(template));
+    }
+
+    for (const index of BASE_INDICES) {
+      await this.installResource(index, () => this.createIndex(index));
+    }
+    await this.installResource(`${COMPOSITE_SUMMARY_INDEX_NAME} mappings`, () =>
+      this.updateCompositeSummaryMapping()
+    );
+    await this.installResource(HEALTH_DATA_STREAM_NAME, () =>
+      this.createDataStream(HEALTH_DATA_STREAM_NAME)
+    );
+  }
+
+  private async installResource(name: string, install: () => Promise<unknown>): Promise<void> {
     try {
-      this.logger.debug('Installing SLO shared resources');
-      await Promise.all([
-        this.createOrUpdateComponentTemplate(SLI_MAPPINGS_TEMPLATE),
-        this.createOrUpdateComponentTemplate(SLI_SETTINGS_TEMPLATE),
-        this.createOrUpdateComponentTemplate(SUMMARY_MAPPINGS_TEMPLATE),
-        this.createOrUpdateComponentTemplate(SUMMARY_SETTINGS_TEMPLATE),
-        this.createOrUpdateComponentTemplate(COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE),
-      ]);
-
-      await this.createOrUpdateIndexTemplate(SLI_INDEX_TEMPLATE);
-      await this.createOrUpdateIndexTemplate(SUMMARY_INDEX_TEMPLATE);
-      await this.createOrUpdateIndexTemplate(COMPOSITE_SUMMARY_INDEX_TEMPLATE);
-
-      await this.createIndex(SLI_DESTINATION_INDEX_NAME);
-      await this.createIndex(SUMMARY_DESTINATION_INDEX_NAME);
-      await this.createIndex(SUMMARY_TEMP_INDEX_NAME);
-      await this.createIndex(COMPOSITE_SUMMARY_INDEX_NAME);
-      await this.updateCompositeSummaryMapping();
-
-      await this.createOrUpdateIndexTemplate(HEALTH_INDEX_TEMPLATE);
-      await this.createDataStream(HEALTH_DATA_STREAM_NAME);
+      await install();
     } catch (err) {
-      this.logger.error(`Error while installing SLO shared resources: ${err}`);
+      throw new SLOResourcesNotInstalled(
+        `Failed to install SLO resource [${name}]: ${err.message}`
+      );
     }
   }
 
