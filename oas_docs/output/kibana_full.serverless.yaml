@@ -178948,8 +178948,11 @@ components:
                       type: object
                       properties:
                         hash:
+                          maxLength: 512
                           type: string
                         id:
+                          maxLength: 512
+                          minLength: 1
                           type: string
                       required:
                         - id
@@ -181537,8 +181540,11 @@ components:
                       type: object
                       properties:
                         hash:
+                          maxLength: 512
                           type: string
                         id:
+                          maxLength: 512
+                          minLength: 1
                           type: string
                       required:
                         - id
@@ -189384,8 +189390,11 @@ components:
                       type: object
                       properties:
                         hash:
+                          maxLength: 512
                           type: string
                         id:
+                          maxLength: 512
+                          minLength: 1
                           type: string
                       required:
                         - id
