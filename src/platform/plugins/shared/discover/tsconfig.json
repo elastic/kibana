@@ -93,7 +93,6 @@
     "@kbn/custom-icons",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/aiops-plugin",
-    "@kbn/licensing-plugin",
     "@kbn/licensing-types",
     "@kbn/data-visualizer-plugin",
     "@kbn/search-types",

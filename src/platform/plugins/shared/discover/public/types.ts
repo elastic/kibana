@@ -41,7 +41,6 @@ import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { Setup as InspectorPublicPluginSetup } from '@kbn/inspector-plugin/public/plugin';
@@ -167,7 +166,6 @@ export interface DiscoverStartPlugins {
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPublicPluginStart;
   lens: LensPublicStart;
-  licensing?: LicensingPluginStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   navigation: NavigationStart;
   noDataPage?: NoDataPagePluginStart;

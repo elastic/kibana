@@ -63,7 +63,6 @@ import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -174,7 +173,6 @@ export interface DiscoverServices {
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
-  licensing?: LicensingPluginStart;
   cps?: CPSPluginStart;
   licensing?: LicensingPluginStart;
   embeddableEditor: EmbeddableEditorService;
@@ -306,7 +304,6 @@ export const buildServices = ({
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
-    licensing: plugins.licensing,
     cps: plugins.cps,
     licensing: plugins.licensing,
     embeddableEditor: new EmbeddableEditorService(
