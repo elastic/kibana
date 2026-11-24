@@ -604,7 +604,7 @@ record of what the loop did to a user's index survives every transition:
   lineage converges back to a single head.
 - `failed` is a status, not an error return: an approved proposal whose action
   failed is recorded with the reason on `resolution.error`. A failed gateless
-  proposal is final, so the next analysis run may propose the change again.
+  proposal is final and keeps its id, so the same improvement is not proposed again.
 - A rejection keeps the reviewer's rationale on `resolution.reason`, so the next
   run knows a fix was considered and turned down rather than re-proposing it.
 
