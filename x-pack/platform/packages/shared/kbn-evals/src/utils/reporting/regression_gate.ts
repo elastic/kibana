@@ -30,6 +30,19 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 // Keeps e.g. 0.3 - 0.2 (0.0999…) from slipping under a 0.1 threshold.
 const FLOAT_TOLERANCE = 1e-9;
 
+/** Problems with a gate's thresholds; the same ranges `evals_suites_config.test.ts` enforces. */
+export const validateRegressionGateConfig = ({
+  alpha,
+  minAbsoluteDrop,
+  maxBaselineAgeDays,
+}: RegressionGateConfig): string[] => [
+  ...(alpha > 0 && alpha < 1 ? [] : ['alpha must be in (0, 1)']),
+  ...(minAbsoluteDrop > 0 && minAbsoluteDrop <= 1 ? [] : ['min drop must be in (0, 1]']),
+  ...(Number.isInteger(maxBaselineAgeDays) && maxBaselineAgeDays > 0
+    ? []
+    : ['max baseline age must be a positive whole number of days']),
+];
+
 export const inconclusiveVerdict = (summary: string): RegressionGateVerdict => ({
   state: 'inconclusive',
   summary,

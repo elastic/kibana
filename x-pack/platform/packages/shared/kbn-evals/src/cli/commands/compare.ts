@@ -22,7 +22,11 @@ import type {
   RegressionGateConfig,
   RegressionGateVerdict,
 } from '../../utils/reporting/regression_gate';
-import { evaluateRegressionGate, inconclusiveVerdict } from '../../utils/reporting/regression_gate';
+import {
+  evaluateRegressionGate,
+  inconclusiveVerdict,
+  validateRegressionGateConfig,
+} from '../../utils/reporting/regression_gate';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
@@ -50,13 +54,19 @@ const readRegressionGateFlags = (flagsReader: FlagsReader): RegressionGateConfig
   if (missing.length > 0) {
     throw createFlagError(`The --gate-* flags go together; missing --${missing.join(', --')}.`);
   }
-  return {
+  const gate = {
     dataset: flagsReader.requiredString('gate-dataset'),
     evaluator: flagsReader.requiredString('gate-evaluator'),
     minAbsoluteDrop: readNumberFlag(flagsReader, 'gate-min-drop'),
     alpha: readNumberFlag(flagsReader, 'gate-alpha'),
     maxBaselineAgeDays: readNumberFlag(flagsReader, 'gate-max-baseline-age-days'),
   };
+  // Out-of-range thresholds would produce wrong verdicts, e.g. an alpha of 2 flags noise.
+  const problems = validateRegressionGateConfig(gate);
+  if (problems.length > 0) {
+    throw createFlagError(`Invalid --gate-* flags: ${problems.join('; ')}.`);
+  }
+  return gate;
 };
 
 export const compareCmd: Command<void> = {

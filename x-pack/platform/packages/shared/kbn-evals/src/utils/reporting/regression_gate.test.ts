@@ -7,7 +7,7 @@
 
 import type { ComparisonResult } from '@kbn/evals-common';
 import type { RegressionGateConfig } from './regression_gate';
-import { evaluateRegressionGate } from './regression_gate';
+import { evaluateRegressionGate, validateRegressionGateConfig } from './regression_gate';
 
 const NOW = new Date('2026-11-19T12:00:00Z');
 const FRESH_BASELINE = '2026-11-18T12:00:00Z';
@@ -126,5 +126,26 @@ describe('evaluateRegressionGate', () => {
     ],
   ])('is inconclusive for %s', (_label, options, results, summary) => {
     expect(evaluate(results, options)).toEqual({ state: 'inconclusive', summary });
+  });
+});
+
+describe('validateRegressionGateConfig', () => {
+  it('accepts sane thresholds', () => {
+    expect(validateRegressionGateConfig(GATE)).toEqual([]);
+  });
+
+  it('rejects thresholds that would produce wrong verdicts', () => {
+    expect(
+      validateRegressionGateConfig({
+        ...GATE,
+        alpha: 2,
+        minAbsoluteDrop: -0.1,
+        maxBaselineAgeDays: 0,
+      })
+    ).toEqual([
+      'alpha must be in (0, 1)',
+      'min drop must be in (0, 1]',
+      'max baseline age must be a positive whole number of days',
+    ]);
   });
 });

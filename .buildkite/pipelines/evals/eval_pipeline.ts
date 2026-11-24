@@ -444,12 +444,19 @@ export function touchesEvalsDecisionPaths(changedFiles: readonly string[]): bool
  */
 export function getEvalTriggerStep(
   githubPrLabels: string,
-  changedFiles: readonly string[] = []
+  changedFiles: readonly string[] = [],
+  changedFilesCapped = false
 ): string | null {
   // Gate on the SAME filtered set we forward, so the parent's decision matches what the child
   // re-selects from (a spaced/`=` selection label can't pass here yet vanish before the child).
   const forwardableLabels = getForwardablePrLabels(githubPrLabels);
-  if (!shouldRunEvals(forwardableLabels) && !touchesEvalsDecisionPaths(changedFiles)) {
+  // A capped file list may leave out decision paths, so emit the step and let it decide from the
+  // live labels.
+  if (
+    !shouldRunEvals(forwardableLabels) &&
+    !changedFilesCapped &&
+    !touchesEvalsDecisionPaths(changedFiles)
+  ) {
     return null;
   }
 
