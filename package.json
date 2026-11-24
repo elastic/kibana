@@ -153,7 +153,7 @@
     "@elastic/ecs": "9.3.0",
     "@elastic/elasticsearch": "9.4.2",
     "@elastic/ems-client": "8.8.1",
-    "@elastic/esql": "4.9.1",
+    "@elastic/esql": "4.9.2",
     "@elastic/eui": "116.5.0",
     "@elastic/eui-theme-borealis": "8.0.0",
     "@elastic/filesaver": "1.1.2",

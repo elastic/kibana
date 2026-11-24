@@ -29,7 +29,7 @@ export const elasticsearchRoleSchema = schema.object(
               'Cluster privileges that define the cluster level actions that users can perform.',
           },
         }),
-        { maxSize: 100 }
+        { maxSize: 1000 }
       )
     ),
     /**
@@ -47,7 +47,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
             clusters: schema.arrayOf(
               schema.string({
@@ -56,7 +56,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
           },
           {
@@ -66,7 +66,7 @@ export const elasticsearchRoleSchema = schema.object(
             },
           }
         ),
-        { maxSize: 100 }
+        { maxSize: 1000 }
       )
     ),
 
@@ -88,7 +88,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -119,7 +119,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The index level privileges that the role members have for the data streams and indices.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -177,7 +177,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -191,7 +191,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -222,7 +222,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The index level privileges that role members have for the specified indices.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -273,7 +273,7 @@ export const elasticsearchRoleSchema = schema.object(
             description: 'A username that members of this role can impersonate.',
           },
         }),
-        { maxSize: 100 }
+        { maxSize: 1000 }
       )
     ),
   },
@@ -403,7 +403,7 @@ export const getKibanaRoleSchema = (
                   }
                 },
               }),
-              { maxSize: 100 }
+              { maxSize: 1000 }
             )
           )
         ),

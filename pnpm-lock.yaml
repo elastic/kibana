@@ -391,8 +391,8 @@ importers:
         specifier: 8.8.1
         version: 8.8.1
       '@elastic/esql':
-        specifier: 4.9.1
-        version: 4.9.1
+        specifier: 4.9.2
+        version: 4.9.2
       '@elastic/eui':
         specifier: 116.5.0
         version: 116.5.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
@@ -10656,8 +10656,8 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql@4.9.1':
-    resolution: {integrity: sha512-pdOR21qr80GmdNa+OzXhMLdd7eXyylmCP2uNEDrTy2uAFFH7ylKS4WB8pEuHBZl+ZfBS9IAIFJFpi6uA7mOoaQ==}
+  '@elastic/esql@4.9.2':
+    resolution: {integrity: sha512-ccxoFHeaOuWgvBh44XVhl+SRNI5tq3X0DkIBN/3C/W+NekHr/eKbULZhKQ5YTPtUsbFqEyEUiWN9X8BGqmD4Lw==}
 
   '@elastic/eui-theme-borealis@8.0.0':
     resolution: {integrity: sha512-mNcZxVYPr5c1VDru42Z/VnFZn9GtgNSiEF3SfCiI1c29LNWVzz9qle35tffDxJSu/A2iIWA8tBmuxAFYYLydnw==}
@@ -26924,7 +26924,7 @@ snapshots:
       eslint: 8.57.0(supports-color@10.2.2)
       typescript: 6.0.3
 
-  '@elastic/esql@4.9.1':
+  '@elastic/esql@4.9.2':
     dependencies:
       '@elastic/pretty-printer': 4.21.1
       antlr4: 4.13.2
