@@ -62,8 +62,7 @@ export const createConnectorRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
-          const actions = await context.actions;
-          const actionsClient = actions.getActionsClient();
+          const actionsClient = (await context.actions).getActionsClient();
           const action = transformCreateConnectorBodyV1(req.body);
           const resp = await actionsClient.create({
             action,

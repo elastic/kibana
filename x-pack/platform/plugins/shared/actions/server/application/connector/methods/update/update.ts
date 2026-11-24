@@ -137,8 +137,11 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const configurationUtilities = context.actionTypeRegistry.getUtils();
 
   // Without a requested version, a versioned connector keeps its major and takes the latest minor.
-  const { major: pinnedMajor } = parseSpecVersion(attributes.specVersion ?? '') ?? {};
-  const specVersion = requestedSpecVersion ?? (!!pinnedMajor ? String(pinnedMajor) : undefined);
+  const pinnedMajor = registeredActionType.specs
+    ? parseSpecVersion(attributes.specVersion ?? '')?.major
+    : undefined;
+  const specVersion =
+    requestedSpecVersion ?? (pinnedMajor !== undefined ? String(pinnedMajor) : undefined);
   const { resolvedSpecVersion, actionTypeForValidation: actionType } = resolveConnectorSpecVersion({
     actionType: registeredActionType,
     specVersion,

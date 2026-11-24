@@ -53,8 +53,7 @@ export const getConnectorRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actions = await context.actions;
-        const actionsClient = actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const { id }: GetConnectorParamsV1 = req.params;
         const connector = await actionsClient.get({ id });
         return res.ok({
