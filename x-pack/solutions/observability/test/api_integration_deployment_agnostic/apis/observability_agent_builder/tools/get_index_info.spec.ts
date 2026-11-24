@@ -192,6 +192,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('operation: "get-index-patterns" in a non-default space', () => {
       const spaceId = 'space1';
       const space1LogSources = ['logs-space1-*'];
+      const space1ApmTransactionIndices = 'traces-space1-*';
+      const space1MetricIndices = 'metrics-space1-*';
 
       before(async () => {
         await spaces.create({ id: spaceId, name: spaceId });
@@ -199,6 +201,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { [OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID]: space1LogSources },
           { space: spaceId }
         );
+        await kibanaServer.savedObjects.create({
+          type: 'apm-indices',
+          id: 'apm-indices',
+          attributes: { apmIndices: { transaction: space1ApmTransactionIndices } },
+          overwrite: true,
+          space: spaceId,
+        });
+        await kibanaServer.savedObjects.create({
+          type: 'metrics-data-source',
+          id: 'default',
+          attributes: { metricIndices: space1MetricIndices },
+          overwrite: true,
+          space: spaceId,
+        });
         await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       });
 
@@ -206,15 +222,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await spaces.delete(spaceId);
       });
 
-      it('returns the log sources configured for the requested space', async () => {
+      it('returns the data sources configured for the requested space', async () => {
         const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
           params: { operation: 'get-index-patterns' },
           spaceId,
         });
-        const data = results[0].data as unknown as IndexPatternsResult;
+        const { indexPatterns } = results[0].data as unknown as IndexPatternsResult;
 
-        expect(data.indexPatterns.logs).to.eql(space1LogSources);
+        expect({
+          logs: indexPatterns.logs,
+          apmTransaction: indexPatterns.apm.transaction,
+          metrics: indexPatterns.metrics,
+        }).to.eql({
+          logs: space1LogSources,
+          apmTransaction: space1ApmTransactionIndices,
+          metrics: [space1MetricIndices],
+        });
       });
     });
 
