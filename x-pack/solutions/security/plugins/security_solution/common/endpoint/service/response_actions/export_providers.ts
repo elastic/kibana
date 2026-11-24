@@ -216,3 +216,22 @@ export const getExportProviderAccountKeyError = (
   }
   return undefined;
 };
+
+/** Maximum length of `parameters.export_path` (contract, elastic/security-team#19465) */
+export const EXPORT_PATH_MAX_LENGTH = 1024;
+
+const EXPORT_PATH_CHARACTERS_PATTERN = /^[A-Za-z0-9._~/-]+$/;
+
+/** The blob path Kibana chooses for an export: one blob per action */
+export const getExportPath = (actionId: string): string => `${actionId}/upload.zip`;
+
+/** Contract format: 1–1024 chars of [A-Za-z0-9._~/-], no leading or trailing '/', no '.' or '..' segment */
+export const isValidExportPath = (path: string): boolean => {
+  if (path.length === 0 || path.length > EXPORT_PATH_MAX_LENGTH) {
+    return false;
+  }
+  if (!EXPORT_PATH_CHARACTERS_PATTERN.test(path) || path.startsWith('/') || path.endsWith('/')) {
+    return false;
+  }
+  return !path.split('/').some((segment) => segment === '.' || segment === '..');
+};

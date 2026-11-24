@@ -145,7 +145,7 @@ describe('export_providers_handler', () => {
     const providerWithExtras = {
       ...provider,
       service_url: 'https://acct.blob.core.windows.net',
-      credentials: { account_key: { isSecretRef: true, id: 'x' } },
+      credentials: { type: 'account_key' as const, key_id: 'x' },
       foo: 'bar',
     };
     const packagePolicy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy({

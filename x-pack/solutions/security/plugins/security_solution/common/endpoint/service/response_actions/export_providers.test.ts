@@ -9,6 +9,9 @@ import type { ExportProvider } from '../../types';
 import {
   getExportProviderFieldErrors as getFieldErrors,
   getExportProviderAccountKeyError,
+  getExportPath,
+  isValidExportPath,
+  EXPORT_PATH_MAX_LENGTH,
 } from './export_providers';
 
 /** The server passes unvalidated JSON, so the tests pass values of any type */
@@ -381,5 +384,41 @@ describe('getExportProviderAccountKeyError', () => {
     ['a URL-safe base64 "_" character', `${'A'.repeat(85)}_==`],
   ])('is invalid_format for %s', (_desc, key) => {
     expect(getExportProviderAccountKeyError(key)).toBe('invalid_format');
+  });
+});
+
+describe('getExportPath', () => {
+  it('is `<action id>/upload.zip`', () => {
+    expect(getExportPath('abc')).toBe('abc/upload.zip');
+  });
+});
+
+describe('isValidExportPath', () => {
+  it.each([
+    [
+      'the path Kibana chooses for an action id',
+      getExportPath('6f2b0c1e-6a43-4c55-9d0a-2f1b7c3e9a10'),
+    ],
+    ['1 character', 'a'],
+    ['1024 characters', 'a'.repeat(EXPORT_PATH_MAX_LENGTH)],
+  ])('accepts %s', (_desc, path) => {
+    expect(isValidExportPath(path)).toBe(true);
+  });
+
+  it.each([
+    ['0 characters', ''],
+    ['1025 characters', 'a'.repeat(EXPORT_PATH_MAX_LENGTH + 1)],
+    ['a leading "/"', '/a/upload.zip'],
+    ['a trailing "/"', 'a/upload.zip/'],
+    ['a "." segment', 'a/./upload.zip'],
+    ['a ".." segment', 'a/../upload.zip'],
+    ['a space', 'a b/upload.zip'],
+    ['a "\\"', 'a\\upload.zip'],
+    ['a "%"', 'a%2Fb/upload.zip'],
+    ['a "?"', 'a/upload.zip?x'],
+    ['a "#"', 'a/upload.zip#x'],
+    ['a non-ASCII character', 'é/upload.zip'],
+  ])('rejects %s', (_desc, path) => {
+    expect(isValidExportPath(path)).toBe(false);
   });
 });

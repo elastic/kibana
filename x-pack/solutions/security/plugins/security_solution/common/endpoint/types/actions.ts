@@ -348,6 +348,8 @@ export interface ResponseActionGetFileParameters {
   force?: boolean;
   /** Id of an export provider in the host's Elastic Defend policy. Endpoint uploads the file there instead of to Fleet */
   export?: string;
+  /** Set by Kibana when `export` is set, never by the API caller: the blob path Endpoint uploads to */
+  export_path?: string;
 }
 
 export interface ResponseActionsExecuteParameters {
@@ -365,7 +367,10 @@ export interface ResponseActionCancelParameters {
 
 export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
 
-export type ResponseActionMemoryDumpParameters = MemoryDumpActionRequestBody['parameters'];
+export type ResponseActionMemoryDumpParameters = MemoryDumpActionRequestBody['parameters'] & {
+  /** Set by Kibana when `export` is set, never by the API caller: the blob path Endpoint uploads to */
+  export_path?: string;
+};
 
 export interface ResponseActionMemoryDumpOutputContent {
   code: string;

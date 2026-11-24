@@ -6,7 +6,10 @@
  */
 
 import { createMockEndpointAppContextService } from '../../../mocks';
-import { getExportProvidersForAgent } from './get_export_providers_for_agent';
+import {
+  getEndpointPackagePolicyForAgent,
+  getExportProvidersForAgent,
+} from './get_export_providers_for_agent';
 import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { FleetAgentGenerator } from '../../../../../common/endpoint/data_generators/fleet_agent_generator';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -61,6 +64,57 @@ describe('getExportProvidersForAgent()', () => {
       page: 1,
       perPage: 10_000,
       total: 1,
+    });
+  });
+
+  describe('getEndpointPackagePolicyForAgent()', () => {
+    const callGetPolicy = (agentId: string = AGENT_ID) =>
+      getEndpointPackagePolicyForAgent({
+        endpointService: endpointServiceMock,
+        spaceId: SPACE_ID,
+        agentId,
+      });
+
+    it('returns the package policy whose `policy_ids` includes the agent `policy_id`, out of several candidates', async () => {
+      const generator = new FleetPackagePolicyGenerator('seed');
+      packagePolicyListMock.mockResolvedValue({
+        items: [
+          generator.generateEndpointPackagePolicy({
+            id: 'other-policy',
+            policy_ids: ['some-other-agent-policy'],
+          }),
+          generator.generate({
+            id: 'osquery-policy',
+            policy_ids: [AGENT_POLICY_ID],
+            package: { name: 'osquery_manager', title: 'Osquery Manager', version: '1.0.0' },
+          }),
+          generator.generateEndpointPackagePolicy({
+            id: 'matching-policy',
+            policy_ids: [AGENT_POLICY_ID],
+          }),
+        ],
+        page: 1,
+        perPage: 10_000,
+        total: 3,
+      });
+
+      await expect(callGetPolicy()).resolves.toEqual(
+        expect.objectContaining({ id: 'matching-policy' })
+      );
+    });
+
+    it('rejects with EndpointHostNotFoundError for an unknown agent', async () => {
+      getMetadataForEndpointsMock.mockResolvedValue([]);
+
+      await expect(callGetPolicy('unknown-agent')).rejects.toBeInstanceOf(
+        EndpointHostNotFoundError
+      );
+    });
+
+    it('rejects with NotFoundError when no Elastic Defend integration policy matches', async () => {
+      packagePolicyListMock.mockResolvedValue({ items: [], page: 1, perPage: 10_000, total: 0 });
+
+      await expect(callGetPolicy()).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 
