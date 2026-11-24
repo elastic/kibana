@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { screen } from '@elastic/eui/lib/test/rtl';
+import { screen } from '@elastic/eui/es/test/rtl';
 import { AlertsSection } from './alerts_section';
 import * as hasDataHook from '../../../../../hooks/use_has_data';
 import * as datePickerHook from '../../../../../hooks/use_date_picker_context';

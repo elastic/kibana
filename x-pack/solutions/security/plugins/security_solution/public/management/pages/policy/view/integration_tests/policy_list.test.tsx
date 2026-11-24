@@ -19,7 +19,7 @@ import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import {
   mockEndpointResultList,
   setEndpointListApiMockImplementation,

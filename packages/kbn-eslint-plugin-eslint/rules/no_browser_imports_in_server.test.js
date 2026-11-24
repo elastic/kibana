@@ -58,7 +58,7 @@ tsRuleTester.run('@kbn/eslint/no_browser_imports_in_server', rule, {
       errors: [{ messageId: 'patternWithCustomMessage' }],
     },
     {
-      code: "import { euiPaletteColorBlind } from '@elastic/eui/lib/services/color/eui_palettes';",
+      code: "import { euiPaletteColorBlind } from '@elastic/eui/es/services/color/eui_palettes';",
       options: OPTIONS,
       errors: [{ messageId: 'patternWithCustomMessage' }],
     },

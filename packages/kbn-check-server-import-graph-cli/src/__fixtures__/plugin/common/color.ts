@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { isColorDark } from '@elastic/eui/lib/services';
+export { isColorDark } from '@elastic/eui/es/services';

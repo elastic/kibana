@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import { focusEuiToolTipTrigger } from '@elastic/eui/lib/test/rtl';
+import { focusEuiToolTipTrigger } from '@elastic/eui/es/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 import { InfraFormatterType } from '../../../../common/inventory/types';
 import type { InfraWaffleMapOptions } from '../../../../common/inventory/types';

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { keys } from '@elastic/eui';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@elastic/eui/es/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { collectionActions } from './lib/collection_actions';

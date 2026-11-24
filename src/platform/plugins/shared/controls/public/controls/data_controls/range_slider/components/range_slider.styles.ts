@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 
 import type { UseEuiTheme } from '@elastic/eui';
 // @ts-ignore - Kibana has trouble reaching into lib/components for types
-import { euiFormControlDefaultShadow } from '@elastic/eui/lib/components/form/form.styles';
+import { euiFormControlDefaultShadow } from '@elastic/eui/es/components/form/form.styles';
 
 export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
   const { euiTheme } = euiThemeContext;

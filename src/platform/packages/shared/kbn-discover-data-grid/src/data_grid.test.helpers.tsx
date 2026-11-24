@@ -34,7 +34,7 @@ jest.mock('@elastic/eui', () => {
   const { dirname, join } = jest.requireActual<typeof import('path')>('path');
   // Kibana's EUI Jest build stubs tabular copy, so test against its browser implementation.
   const tabularCopy = jest.requireActual<typeof import('@elastic/eui')>(
-    join(dirname(require.resolve('@elastic/eui/package.json')), 'lib/services/copy/tabular_copy')
+    join(dirname(require.resolve('@elastic/eui/package.json')), 'es/services/copy/tabular_copy')
   );
   return {
     ...actual,

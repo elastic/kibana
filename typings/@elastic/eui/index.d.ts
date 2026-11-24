@@ -9,6 +9,6 @@
 
 // TODO: Remove once typescript definitions are in EUI
 
-declare module '@elastic/eui/lib/services' {
+declare module '@elastic/eui/es/services' {
   export const RIGHT_ALIGNMENT: any;
 }

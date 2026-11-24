@@ -101,9 +101,9 @@ export function createSharedSrcConfig({
       conditionNames: ['browser', 'module', 'import', 'require', 'default'],
       alias: {
         '@elastic/eui$': '@elastic/eui/optimize/es',
-        '@elastic/eui/lib/components/provider/nested$':
+        '@elastic/eui/es/components/provider/nested$':
           '@elastic/eui/optimize/es/components/provider/nested',
-        '@elastic/eui/lib/services/theme/warning$':
+        '@elastic/eui/es/services/theme/warning$':
           '@elastic/eui/optimize/es/services/theme/warning',
         // Dedupe bare `monaco-editor` imports onto the API module @kbn/monaco already uses.
         'monaco-editor$': 'monaco-editor/editor/editor.api.js',

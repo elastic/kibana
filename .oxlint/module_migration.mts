@@ -179,5 +179,14 @@ export const moduleMigrationRule: DummyRule = [
       disallowedMessage:
         "Use the `yaml` package instead of js-yaml (e.g. `import yaml from 'yaml'`).",
     },
+    // EUI will drop CommonJS in the future: https://github.com/elastic/eui/pull/9751
+    {
+      from: '@elastic/eui/lib',
+      to: '@elastic/eui/es',
+    },
+    {
+      from: '@elastic/eui/optimize/lib',
+      to: '@elastic/eui/optimize/es',
+    },
   ],
 ];
