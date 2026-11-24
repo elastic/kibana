@@ -18,6 +18,7 @@ import {
   apiPublishesAwaitingRequiredFilters,
   apiPublishesTitle,
   getTitle,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
@@ -64,6 +65,9 @@ const useAwaitingControlLabels = (): string[] | undefined => {
 };
 
 export function AwaitingFiltersScreen() {
+  const dashboardApi = useDashboardApi();
+  const [hasUnpublished] = useBatchedPublishingSubjects(dashboardApi.hasUnpublishedFilters$);
+
   const labels = useAwaitingControlLabels();
   const isDarkTheme = useKibanaIsDarkMode();
 
@@ -88,6 +92,13 @@ export function AwaitingFiltersScreen() {
           isLoading
           data-test-subj="dashboardAwaitingRequiredFiltersSkeleton"
         />
+      ) : labels.length === 0 && hasUnpublished ? (
+        <span data-test-subj="dashboardAwaitingPublishSubtitle">
+          {i18n.translate('dashboard.emptyScreen.awaitingPublishSubtitle', {
+            defaultMessage:
+              'All required controls have values. Apply the changes to see this dashboard.',
+          })}
+        </span>
       ) : (
         <span data-test-subj="dashboardAwaitingRequiredFiltersSubtitle">
           <FormattedMessage
