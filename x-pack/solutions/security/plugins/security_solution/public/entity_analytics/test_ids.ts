@@ -37,3 +37,8 @@ export const ENGINE_STATUS_PANEL_TEST_ID = 'engine-status-panel';
 // RiskScoreTab - Form inputs
 export const RISK_SCORE_RETAIN_CHECKBOX_TEST_ID = 'riskScoreRetainCheckbox';
 export const RISK_SCORE_DISCARD_BUTTON_TEST_ID = 'riskScoreDiscardButton';
+export const RUN_HISTORY_DASHBOARD_LINK_TEST_ID = 'entity-store-run-history-dashboard-link';
+export const ENTITY_STORE_CONFIGURATION_TEST_ID = 'entity-store-configuration';
+export const ENTITY_STORE_OVERVIEW_TEST_ID = 'entity-store-overview';
+export const ENTITY_STORE_PROBLEMS_TEST_ID = 'entity-store-problems';
+export const ENTITY_STORE_ENGINES_TABLE_TEST_ID = 'entity-store-engines-table';

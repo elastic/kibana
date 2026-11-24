@@ -22,6 +22,8 @@ export interface EngineDescriptor {
   frequency?: string;
   delay?: string;
   docsPerSecond?: number;
+  maxLogsPerPage?: number;
+  maxTimeWindowSize?: string;
   error?: { message: string; action: 'init' };
 }
 
@@ -45,11 +47,26 @@ export interface EngineComponentStatus {
   metadata?: Record<string, unknown>;
   health?: 'green' | 'yellow' | 'red' | 'unavailable' | 'unknown';
   errors?: Array<{ title?: string; message?: string }>;
+  /** Task components only: the task's last run status, run count and last error. */
+  status?: string | null;
+  runs?: number;
+  lastError?: string | null;
 }
 
 export interface GetEntityStoreStatusResponse {
   status: EntityStoreStatus;
   engines: Array<EngineDescriptor & { components?: EngineComponentStatus[] }>;
+  excludedUserNames?: string[];
+  historySnapshot?: {
+    status: 'started' | 'stopped';
+    frequency: string;
+    retentionDays: number;
+  };
+}
+
+export interface SetupSystemEventsResponse {
+  installed: boolean;
+  dashboardId?: string;
 }
 
 export interface InitEntityStoreResponse {

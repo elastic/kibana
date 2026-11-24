@@ -11,6 +11,7 @@ import { EuiCallOut, EuiProgress, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 
 import { EntityAnalyticsErrorPanel } from '../components/entity_analytics_error_panel';
 import { useToggleEntityAnalytics } from '../hooks/use_toggle_entity_analytics';
@@ -61,6 +62,10 @@ const ENTITY_RESOLUTION_TAB_LABEL = i18n.translate(
 const ENGINE_STATUS_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.engineStatus.tabTitle',
   { defaultMessage: 'Engine status' }
+);
+const SETTINGS_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.settings.tabTitle',
+  { defaultMessage: 'Settings' }
 );
 const CLEAR_ENTITY_DATA_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.clearMenuItemLabel',
@@ -117,7 +122,8 @@ export const EntityAnalyticsManagementHeader = ({
   const { data: entityEnginePrivileges, isLoading: isLoadingPrivileges } =
     useEntityEnginePrivileges();
   const deleteEntityStoreMutation = useDeleteEntityStoreMutation();
-  const { docLinks } = useKibana().services;
+  const { docLinks, uiSettings } = useKibana().services;
+  const isEntityStoreV2Enabled = uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
 
   const userHasRiskEnginePrivileges =
@@ -210,7 +216,7 @@ export const EntityAnalyticsManagementHeader = ({
         ? [
             {
               id: TabId.Status,
-              label: ENGINE_STATUS_TAB_LABEL,
+              label: isEntityStoreV2Enabled ? SETTINGS_TAB_LABEL : ENGINE_STATUS_TAB_LABEL,
               isSelected: selectedTabId === TabId.Status,
               onClick: () => onTabChange(TabId.Status),
               'data-test-subj': ENGINE_STATUS_TAB_TEST_ID,
@@ -224,6 +230,7 @@ export const EntityAnalyticsManagementHeader = ({
       isWatchlistsEnabled,
       hasEntityResolutionLicense,
       shouldDisplayEngineStatusTab,
+      isEntityStoreV2Enabled,
     ]
   );
 

@@ -6,9 +6,11 @@
  */
 import { useMemo } from 'react';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
+import { API_VERSIONS as ENTITY_STORE_API_VERSIONS } from '@kbn/entity-store/common';
 import type {
   GetEntityStoreStatusResponse,
   InitEntityStoreResponse,
+  SetupSystemEventsResponse,
 } from '@kbn/entity-store/common';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
@@ -90,8 +92,16 @@ export const useEntityStoreRoutes = () => {
         context,
       });
 
+    /** Installs the run history streams and dashboard if missing. Needs only read access. */
+    const setupSystemEvents = async () =>
+      http.fetch<SetupSystemEventsResponse>(ENTITY_STORE_ROUTES.internal.SYSTEM_EVENTS_SETUP, {
+        method: 'POST',
+        version: ENTITY_STORE_API_VERSIONS.internal.v2,
+      });
+
     return {
       getEntityStoreStatus,
+      setupSystemEvents,
       installEntityStore,
       startEntityStore,
       stopEntityStore,

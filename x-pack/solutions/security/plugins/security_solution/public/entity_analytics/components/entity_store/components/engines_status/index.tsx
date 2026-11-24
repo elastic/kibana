@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 
 import { useEntityStoreTypes } from '../../../../hooks/use_enabled_entity_types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
@@ -24,6 +25,8 @@ import { downloadBlob } from '../../../../../common/utils/download_blob';
 import { EngineComponentsStatusTable } from './components/engine_components_status';
 import { useEntityStoreStatus } from '../../hooks/use_entity_store';
 import { isEngineLoading } from './helpers';
+import { EntityStoreSettings } from './components/entity_store_settings';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { EngineStatusHeader } from './components/engine_status_header';
 import { EngineStatusHeaderAction } from './components/engine_status_header_action';
 import { EntityStoreErrorCallout } from '../entity_store_error_callout';
@@ -47,6 +50,8 @@ export const EngineStatus = () => {
     withComponents: true,
   });
   const enabledEntityTypes = useEntityStoreTypes();
+  const isEntityStoreV2Enabled =
+    useKibana().services.uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const downloadJson = () => {
     downloadBlob(new Blob([JSON.stringify(data)]), FILE_NAME);
@@ -90,26 +95,32 @@ export const EngineStatus = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       )}
-      <EuiFlexItem>
-        {enginesStatusData.map(({ engine, type }) => {
-          return (
-            <Fragment key={type}>
-              <EngineStatusHeader
-                entityType={type}
-                actionButton={<EngineStatusHeaderAction engine={engine} />}
-              />
-              <EntityStoreErrorCallout engine={engine} size="s" />
-              <EuiSpacer size="s" />
-              <EuiPanel hasShadow={false} hasBorder={false}>
-                {engine && !isEngineLoading(engine.status) && engine.components && (
-                  <EngineComponentsStatusTable components={engine.components} />
-                )}
-              </EuiPanel>
-              <EuiSpacer size="xl" />
-            </Fragment>
-          );
-        })}
-      </EuiFlexItem>
+      {isEntityStoreV2Enabled ? (
+        <EuiFlexItem>
+          <EntityStoreSettings data={data} entityTypes={enabledEntityTypes} />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem>
+          {enginesStatusData.map(({ engine, type }) => {
+            return (
+              <Fragment key={type}>
+                <EngineStatusHeader
+                  entityType={type}
+                  actionButton={<EngineStatusHeaderAction engine={engine} />}
+                />
+                <EntityStoreErrorCallout engine={engine} size="s" />
+                <EuiSpacer size="s" />
+                <EuiPanel hasShadow={false} hasBorder={false}>
+                  {engine && !isEngineLoading(engine.status) && engine.components && (
+                    <EngineComponentsStatusTable components={engine.components} />
+                  )}
+                </EuiPanel>
+                <EuiSpacer size="xl" />
+              </Fragment>
+            );
+          })}
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

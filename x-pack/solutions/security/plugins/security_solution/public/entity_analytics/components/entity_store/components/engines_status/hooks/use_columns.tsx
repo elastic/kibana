@@ -7,6 +7,7 @@
 
 import {
   EuiButtonIcon,
+  EuiCode,
   EuiHealth,
   EuiIcon,
   EuiLink,
@@ -24,6 +25,7 @@ import {
   type EngineComponentStatus,
 } from '../../../../../../../common/api/entity_analytics';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { formatTaskName } from '../format';
 
 type TableColumn = EuiBasicTableColumn<EngineComponentStatus>;
 
@@ -49,9 +51,57 @@ const RESOURCE_TO_TEXT: Record<EngineComponentResource, string> = {
   data_stream: 'Data stream',
 };
 
+/** Sentence case names, for the readable table. */
+const RESOURCE_TO_READABLE_TEXT: Record<EngineComponentResource, string> = {
+  ingest_pipeline: 'Ingest pipeline',
+  enrich_policy: 'Enrich policy',
+  index: 'Index',
+  component_template: 'Component template',
+  task: 'Task',
+  transform: 'Transform',
+  entity_definition: 'Entity definition',
+  entity_engine: 'Engine',
+  index_template: 'Index template',
+  ilm_policy: 'ILM policy',
+  data_stream: 'Data stream',
+};
+
+const HEALTH_LABEL: Record<Required<EngineComponentStatus>['health'], string> = {
+  green: i18n.translate('xpack.securitySolution.entityAnalytics.entityStore.health.healthy', {
+    defaultMessage: 'Healthy',
+  }),
+  yellow: i18n.translate('xpack.securitySolution.entityAnalytics.entityStore.health.degraded', {
+    defaultMessage: 'Degraded',
+  }),
+  red: i18n.translate('xpack.securitySolution.entityAnalytics.entityStore.health.failing', {
+    defaultMessage: 'Failing',
+  }),
+  unavailable: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.entityStore.health.unavailable',
+    { defaultMessage: 'Unavailable' }
+  ),
+  unknown: i18n.translate('xpack.securitySolution.entityAnalytics.entityStore.health.unknown', {
+    defaultMessage: 'Unknown',
+  }),
+};
+
+const INSTALLED_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.installed.installed',
+  { defaultMessage: 'Installed' }
+);
+const MISSING_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.installed.missing',
+  { defaultMessage: 'Missing' }
+);
+
+/**
+ * With `readable`, the table spells states out in words (color is never the only signal),
+ * uses sentence case, and names tasks in plain language with the id in a tooltip.
+ */
 export const useColumns = (
   onToggleExpandedItem: (item: EngineComponentStatus) => void,
-  expandedItems: EngineComponentStatus[]
+  expandedItems: EngineComponentStatus[],
+  readable = false
 ): TableColumn[] => {
   const { getUrlForApp } = useKibana().services.application;
 
@@ -66,7 +116,8 @@ export const useColumns = (
           />
         ),
         width: '12em',
-        render: (resource: EngineComponentStatus['resource']) => RESOURCE_TO_TEXT[resource],
+        render: (resource: EngineComponentStatus['resource']) =>
+          readable ? RESOURCE_TO_READABLE_TEXT[resource] : RESOURCE_TO_TEXT[resource],
       },
       {
         field: 'id',
@@ -79,8 +130,18 @@ export const useColumns = (
         render: (id: EngineComponentStatus['id'], { resource, installed }) => {
           const path = getResourcePath(id, resource);
 
+          if (readable && resource === EngineComponentResourceEnum.task) {
+            return (
+              <EuiToolTip content={id}>
+                <span tabIndex={0}>{formatTaskName(id)}</span>
+              </EuiToolTip>
+            );
+          }
+
+          const label = readable ? <EuiCode transparentBackground>{id}</EuiCode> : id;
+
           if (!installed || !path) {
-            return id;
+            return label;
           }
 
           return (
@@ -90,7 +151,7 @@ export const useColumns = (
                 path,
               })}
             >
-              {id}
+              {label}
             </EuiLink>
           );
         },
@@ -103,10 +164,14 @@ export const useColumns = (
             defaultMessage="Installed"
           />
         ),
-        width: '6em',
-        align: 'center',
+        width: readable ? '9em' : '6em',
+        align: readable ? 'left' : 'center',
         render: (value: boolean) =>
-          value ? (
+          readable ? (
+            <EuiHealth color={value ? 'success' : 'danger'} data-test-subj="installation-status">
+              {value ? INSTALLED_LABEL : MISSING_LABEL}
+            </EuiHealth>
+          ) : value ? (
             <EuiIcon
               data-test-subj="installation-status"
               type="check"
@@ -131,14 +196,19 @@ export const useColumns = (
             defaultMessage="Health"
           />
         ),
-        width: '6em',
-        align: 'center',
+        width: readable ? '9em' : '6em',
+        align: readable ? 'left' : 'center',
         render: ({ installed, resource, health }: EngineComponentStatus) => {
           if (!installed) {
-            return null;
+            return readable ? '—' : null;
           }
 
-          return <EuiHealth color={HEALTH_COLOR[health ?? 'green']} />;
+          const color = HEALTH_COLOR[health ?? 'green'];
+          return readable ? (
+            <EuiHealth color={color}>{HEALTH_LABEL[health ?? 'green']}</EuiHealth>
+          ) : (
+            <EuiHealth color={color} />
+          );
         },
       },
       {
@@ -181,7 +251,7 @@ export const useColumns = (
         },
       },
     ],
-    [expandedItems, getUrlForApp, onToggleExpandedItem]
+    [expandedItems, getUrlForApp, onToggleExpandedItem, readable]
   );
 };
 

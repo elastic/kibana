@@ -69,6 +69,24 @@ export const useEntityStoreStatus = (opts: Options = {}) => {
   });
 };
 
+const SETUP_SYSTEM_EVENTS = ['POST', 'ENTITY_STORE_SETUP_SYSTEM_EVENTS'];
+
+/**
+ * Installs the run history dashboard once per page load, for stores installed before it existed.
+ * Idempotent on the server, so a repeat on the next page load is cheap.
+ */
+export const useSetupSystemEvents = ({ enabled }: { enabled: boolean }) => {
+  const { setupSystemEvents } = useEntityStoreRoutes();
+
+  return useQuery({
+    queryKey: SETUP_SYSTEM_EVENTS,
+    queryFn: setupSystemEvents,
+    enabled,
+    staleTime: Infinity,
+    retry: false,
+  });
+};
+
 interface ResponseError {
   body?: { message?: string };
 }
