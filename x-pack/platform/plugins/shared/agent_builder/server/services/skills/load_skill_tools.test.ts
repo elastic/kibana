@@ -73,11 +73,11 @@ describe('loadSkillTools', () => {
     );
   });
 
-  describe('requiresAllAssociatedTools', () => {
+  describe('requiresAllRegistryTools', () => {
     const load = (skillOverrides: Parameters<typeof createMockSkill>[0]) =>
       loadSkillTools({
         skill: createMockSkill({
-          requiresAllAssociatedTools: true,
+          requiresAllRegistryTools: true,
           getRegistryTools: jest.fn().mockReturnValue(['registry-1', 'registry-2']),
           ...skillOverrides,
         }),
@@ -110,7 +110,7 @@ describe('loadSkillTools', () => {
     it('does not require the tools of a skill that has not opted in', async () => {
       ctx.toolProvider.list.mockResolvedValue([{ id: 'registry-1' } as any]);
 
-      await expect(load({ requiresAllAssociatedTools: false })).resolves.toMatchObject({
+      await expect(load({ requiresAllRegistryTools: false })).resolves.toMatchObject({
         loadedToolIds: ['registry-1'],
       });
     });

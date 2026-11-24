@@ -85,7 +85,7 @@ export const loadSkillTools = async ({
       : [];
 
   // The registry checked the tools it saw; this call may resolve different ids, so check these too.
-  if (skill.requiresAllAssociatedTools) {
+  if (skill.requiresAllRegistryTools) {
     const loadedIds = new Set(registryExecutableTools.map(({ id }) => id));
     const missing = registryToolIds.filter((id) => !loadedIds.has(id));
     if (missing.length > 0) {

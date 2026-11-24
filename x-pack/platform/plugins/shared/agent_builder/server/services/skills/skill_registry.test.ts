@@ -899,14 +899,14 @@ describe('createSkillRegistry', () => {
     });
   });
 
-  describe('requiresAllAssociatedTools', () => {
+  describe('requiresAllRegistryTools', () => {
     const toolA = 'tool.a';
     const toolB = 'tool.b';
     const gated = (id: string, tools: string[]) =>
       createMockInternalSkillDefinition({
         id,
         name: id,
-        requiresAllAssociatedTools: true,
+        requiresAllRegistryTools: true,
         getRegistryTools: () => tools,
       });
     const plain = createMockInternalSkillDefinition({
@@ -952,7 +952,7 @@ describe('createSkillRegistry', () => {
       const broken = createMockInternalSkillDefinition({
         id: 'broken',
         name: 'broken',
-        requiresAllAssociatedTools: true,
+        requiresAllRegistryTools: true,
         getRegistryTools: () => Promise.reject(new Error('cannot resolve tools')),
       });
       const registry = createSkillRegistry({
@@ -970,14 +970,14 @@ describe('createSkillRegistry', () => {
     });
 
     it('applies the flag from a public built-in skill definition through the built-in provider', async () => {
-      const definition = (id: string, requiresAllAssociatedTools: boolean): SkillDefinition =>
+      const definition = (id: string, requiresAllRegistryTools: boolean): SkillDefinition =>
         ({
           id,
           name: id,
           basePath: 'skills/platform',
           description: 'd',
           content: 'c',
-          requiresAllAssociatedTools,
+          requiresAllRegistryTools,
           getRegistryTools: () => [toolA],
         } as unknown as SkillDefinition);
       const createWith = (availableToolIds: string[]) =>

@@ -157,7 +157,7 @@ export interface SkillDefinition<
    * the tool's own availability). Adding a tool to `getRegistryTools` also makes it required.
    * Defaults to false.
    */
-  requiresAllAssociatedTools?: boolean;
+  requiresAllRegistryTools?: boolean;
   /**
    * Optional dynamic availability configuration.
    * When provided, the framework evaluates the handler per-request to decide

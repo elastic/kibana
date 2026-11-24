@@ -92,7 +92,7 @@ export interface InternalSkillDefinition {
    * When true, the skill is unavailable when any tool returned by `getRegistryTools` is
    * unavailable to the caller.
    */
-  requiresAllAssociatedTools?: boolean;
+  requiresAllRegistryTools?: boolean;
   /**
    * When present, evaluates whether the skill is available for the current
    * request context. Skills that return `{ status: 'unavailable' }` are
