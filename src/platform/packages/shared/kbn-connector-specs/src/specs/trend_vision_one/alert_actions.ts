@@ -8,18 +8,20 @@
  */
 
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import type { ListPage, Params } from './client';
+import type { ListPage } from './client';
 import {
   budgetLeft,
   buildFilter,
   checkNextLink,
   filterHeader,
-  getApiOrigin,
   getHeader,
+  normaliseLink,
+  pageUrl,
+  safeDecode,
   vendorRequest,
   withoutDeprecated,
 } from './client';
-import { ALERTS_MAX_RESULTS, ALERTS_PAGE_SIZE, API_PREFIX, MIN_PAGE_BUDGET_MS } from './constants';
+import { ALERTS_MAX_RESULTS, ALERTS_PAGE_SIZE, MIN_PAGE_BUDGET_MS, VENDOR } from './constants';
 import { ACTION_DESCRIPTIONS } from './descriptions';
 import type {
   AddAlertNoteInput,
@@ -63,15 +65,6 @@ const isOnNextLinkPath = (ctx: ActionContext, link: string): string | null => {
   }
 };
 
-/** Absolute link of the first page of a listing, so a cut first page can be read again. */
-const pageUrl = (ctx: ActionContext, params: Params): string => {
-  const link = new URL(`${getApiOrigin(ctx)}${API_PREFIX}${ALERTS_PATH}`);
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== '') link.searchParams.set(key, String(value));
-  }
-  return link.href;
-};
-
 export const alertActions: ConnectorSpec['actions'] = {
   listAlerts: {
     isTool: true,
@@ -92,7 +85,9 @@ export const alertActions: ConnectorSpec['actions'] = {
       };
       let url = input.nextLink ? checkNextLink(ctx, input.nextLink, ALERTS_PATH) : undefined;
       const items: unknown[] = [];
-      const seen = new Set<string>();
+      // The page links read in this run, starting with the first one: a nextLink equal to one of
+      // them would make the caller read the same pages again.
+      const seen = new Set<string>([normaliseLink(ctx, url ?? pageUrl(ctx, ALERTS_PATH, params))]);
       let totalCount: number | null = null;
       let nextLink: string | null = null;
       let nextLinkRepeats = 0;
@@ -117,16 +112,22 @@ export const alertActions: ConnectorSpec['actions'] = {
           // The page holds more alerts than maxResults allows: continue from this page again so
           // no alert is skipped; the first `room` alerts of that read were already returned.
           // maxResults is at least the page size (10), so the next call with the same maxResults
-          // reads this whole page and moves past it.
-          nextLink = url ?? pageUrl(ctx, params);
+          // reads this whole page and moves past it. This only applies if the product ever returns
+          // more than 10 alerts per page: maxResults is a multiple of 10, so a page of 10 is never cut.
+          nextLink = url ?? pageUrl(ctx, ALERTS_PATH, params);
           nextLinkRepeats = room;
           break;
         }
-        if (!nextLink || items.length >= input.maxResults || seen.has(nextLink)) break;
+        if (nextLink && seen.has(normaliseLink(ctx, nextLink))) {
+          // The product repeated a cursor: there is no further page to continue from.
+          nextLink = null;
+          break;
+        }
+        if (!nextLink || items.length >= input.maxResults) break;
         // Too little of the action's time budget is left for another page: return what was read
         // and the nextLink of the page not read.
         if (budgetLeft(ctx) < MIN_PAGE_BUDGET_MS) break;
-        seen.add(nextLink);
+        seen.add(normaliseLink(ctx, nextLink));
         const next = isOnNextLinkPath(ctx, nextLink);
         if (!next) break;
         url = next;
@@ -167,14 +168,20 @@ export const alertActions: ConnectorSpec['actions'] = {
         if (unchanged) {
           return { id: input.id, updated: false, outcome: 'skipped', ...changes };
         }
-        etag = current.etag ?? undefined;
+        if (!current.etag) {
+          // Without If-Match the PATCH could overwrite a change made after the read: never send it.
+          throw new Error(
+            `${VENDOR} updateAlertStatus stopped: Workbench alert ${input.id} was read without an ETag, so the update was not sent (it could overwrite a newer change); nothing was changed. Try again later.`
+          );
+        }
+        etag = current.etag;
       }
       await vendorRequest(ctx, {
         action: 'updateAlertStatus',
         method: 'PATCH',
         path: alertPath(input.id),
         data: changes,
-        headers: etag ? { 'If-Match': etag } : undefined,
+        headers: { 'If-Match': etag },
         mutating: true,
         notFound: `Workbench alert ${input.id}`,
       });
@@ -198,7 +205,7 @@ export const alertActions: ConnectorSpec['actions'] = {
       });
       const location = getHeader(response, 'location');
       const noteId = location ? location.split('?')[0].split('/').filter(Boolean).pop() : undefined;
-      return { alertId: input.alertId, noteId: noteId ? decodeURIComponent(noteId) : null };
+      return { alertId: input.alertId, noteId: noteId ? safeDecode(noteId) : null };
     },
   },
 };

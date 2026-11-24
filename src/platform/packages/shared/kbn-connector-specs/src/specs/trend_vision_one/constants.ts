@@ -39,8 +39,8 @@ export const ACTION_BUDGET_MS = 100_000;
 export const MIN_PAGE_BUDGET_MS = 10_000;
 
 export const MAX_ATTEMPTS = 3;
-/** Wait before retry n when the product sends no Retry-After: at once, then 2 s, then 5 s. */
-export const BACKOFF_MS: readonly number[] = [0, 2_000, 5_000];
+/** Wait before retry n when the product sends no usable Retry-After: 2 s, then 5 s; never at once. */
+export const BACKOFF_MS: readonly number[] = [2_000, 5_000];
 export const RETRY_AFTER_CAP_MS = 30_000;
 export const READ_RETRY_STATUSES: readonly number[] = [429, 500, 502, 503, 504];
 /** State-changing calls are retried only when the product refused them (429). */
@@ -51,6 +51,11 @@ export const ALERTS_DEFAULT_MAX_RESULTS = 50;
 export const ALERTS_MAX_RESULTS = 200;
 export const ENDPOINT_FILTER_MAX = 1024;
 export const OAT_FILTER_MAX = 4000;
+/** Largest page size of each list action; a caller nextLink may not ask for more. */
+export const ENDPOINT_TOP_MAX = 200;
+export const OAT_TOP_MAX = 100;
+/** Characters above U+00FF are silently removed from an HTTP header by the HTTP client. */
+export const ABOVE_LATIN1 = /[\u0100-\uffff]/;
 
 /** Deprecated by the product: removed from every returned alert and never sent. */
 export const DEPRECATED_ALERT_FIELD = 'investigationStatus';

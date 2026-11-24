@@ -22,6 +22,7 @@ import {
   vendorRequest,
   withoutDeprecated,
 } from './client';
+import { getFinitePositiveNumber, getHeaderValue } from '../../connector_utils';
 import { ACTION_BUDGET_MS, REQUEST_TIMEOUT_MS } from './constants';
 import {
   API,
@@ -120,6 +121,7 @@ describe('TrendAI Vision One requests and errors', () => {
       data: undefined,
       headers: undefined,
       timeout: 60_000,
+      maxRedirects: 0,
     });
   });
 
@@ -162,6 +164,7 @@ describe('TrendAI Vision One requests and errors', () => {
       statusCode: 429,
       status: 429,
       headers: { 'retry-after': '20' },
+      response: { status: 429, headers: { 'retry-after': '20' } },
     });
   });
 
@@ -179,9 +182,145 @@ describe('TrendAI Vision One requests and errors', () => {
         statusCode: status,
         status,
         headers: { 'x-request-id': 'r1' },
+        response: { status, headers: { 'x-request-id': 'r1' } },
       });
     }
   );
+
+  it('keeps only the status and a copy of the headers on the error, never the request config with the key', async () => {
+    request.mockRejectedValue(
+      Object.assign(httpError(429, {}, { 'retry-after': '20' }), {
+        config: { headers: { Authorization: 'Bearer unit-test-key' } },
+        request: { headers: { Authorization: 'Bearer unit-test-key' } },
+      })
+    );
+    const error = (await vendorRequest(ctx, {
+      action: 'x',
+      method: 'POST',
+      path: '/x',
+      mutating: true,
+      noRetry: () => true,
+    }).catch((caught: unknown) => caught)) as Record<string, unknown>;
+    expect(Object.keys(error.response as object).sort()).toEqual(['headers', 'status']);
+    expect(error).not.toHaveProperty('config');
+    expect(error).not.toHaveProperty('request');
+    expect(JSON.stringify(error)).not.toContain('unit-test-key');
+  });
+
+  describe('read by the Kibana action executor', () => {
+    // The same reads as x-pack/platform/plugins/shared/actions/server/lib/single_file_connectors/
+    // generate_executor_function.ts: getHttpStatus (errorMeta.statusCode) and the Retry-After
+    // part of getRetryDate, through error.response and error.request.res.
+    interface AxiosLikeError {
+      response?: { status?: unknown; headers?: unknown };
+      request?: { res?: { headers?: unknown } };
+    }
+    const getErrorHeaderValue = (error: unknown, headerName: string): unknown => {
+      const { response, request: req } = (error ?? {}) as AxiosLikeError;
+      const value =
+        getHeaderValue({ headers: response?.headers, headerName }) ??
+        getHeaderValue({ headers: req?.res?.headers, headerName });
+      return Array.isArray(value) ? value[0] : value;
+    };
+    const getHttpStatus = (error: unknown): number | undefined => {
+      const status = (error as AxiosLikeError | undefined)?.response?.status;
+      return typeof status === 'number' ? status : undefined;
+    };
+    const getRetryDate = (error: unknown): Date | undefined => {
+      if (getHttpStatus(error) === undefined) return undefined;
+      const retryAfter = getErrorHeaderValue(error, 'retry-after');
+      if (typeof retryAfter === 'string' && retryAfter.trim() !== '') {
+        const seconds = getFinitePositiveNumber(retryAfter.trim());
+        if (seconds !== undefined) return new Date(Date.now() + seconds * 1000);
+        const dateMs = Date.parse(retryAfter);
+        if (!Number.isNaN(dateMs)) return new Date(Math.max(dateMs, Date.now()));
+      }
+      return undefined;
+    };
+    const executorResult = (error: unknown) => {
+      const statusCode = getHttpStatus(error);
+      const retry = getRetryDate(error);
+      return {
+        status: 'error',
+        message: error instanceof Error ? error.message : String(error),
+        ...(statusCode !== undefined ? { errorMeta: { statusCode } } : {}),
+        ...(retry ? { retry } : {}),
+      };
+    };
+    const NOW = Date.parse('2026-11-24T10:00:00Z');
+
+    it('keeps status 429 and the Retry-After time of a rate-limited action', async () => {
+      jest.spyOn(Date, 'now').mockReturnValue(NOW);
+      request.mockRejectedValue(
+        httpError(429, vendorError('TooManyRequests', 'slow down'), { 'Retry-After': '20' })
+      );
+      const error = await vendorRequest(ctx, {
+        action: 'listAlerts',
+        method: 'GET',
+        path: '/x',
+        mutating: false,
+      }).catch((caught: unknown) => caught);
+      expect(executorResult(error)).toEqual({
+        status: 'error',
+        message:
+          'TrendAI Vision One rate limit reached for listAlerts; try again later (TooManyRequests: slow down)',
+        errorMeta: { statusCode: 429 },
+        retry: new Date(NOW + 20_000),
+      });
+    });
+
+    it.each([400, 401, 403, 404, 412, 500, 503])(
+      'keeps status %s as errorMeta.statusCode',
+      async (status) => {
+        request.mockRejectedValue(httpError(status));
+        const error = await vendorRequest(ctx, {
+          action: 'x',
+          method: 'POST',
+          path: '/x',
+          mutating: true,
+        }).catch((caught: unknown) => caught);
+        expect(executorResult(error)).toMatchObject({ errorMeta: { statusCode: status } });
+      }
+    );
+  });
+
+  it.each([301, 302, 307, 308])(
+    'does not follow a %s redirect: one request, maxRedirects 0, and the status in the error',
+    async (status) => {
+      request.mockRejectedValue(
+        httpError(status, '', { location: 'https://other.example/v3.0/sandbox/files/analyze' })
+      );
+      const error = (await vendorRequest(ctx, {
+        action: 'submitFileToSandbox',
+        method: 'POST',
+        path: '/sandbox/files/analyze',
+        data: { archivePassword: 'secret' },
+        mutating: true,
+      }).catch((caught: unknown) => caught)) as Error & { response?: { status?: number } };
+      expect(request).toHaveBeenCalledTimes(1);
+      expect(sent()).toMatchObject({
+        url: `${API}/sandbox/files/analyze`,
+        maxRedirects: 0,
+      });
+      expect(error.message).toBe(
+        `TrendAI Vision One submitFileToSandbox failed (${status}): no details`
+      );
+      expect(error.response?.status).toBe(status);
+      // Only the original request was made: the body and the key never went to the Location host.
+      for (const [config] of request.mock.calls) {
+        expect(String(config.url)).not.toContain('other.example');
+      }
+    }
+  );
+
+  it('does not follow or retry a redirect of a read either', async () => {
+    request.mockRejectedValue(httpError(301, '', { location: 'https://other.example/x' }));
+    await expect(
+      vendorRequest(ctx, { action: 'listAlerts', method: 'GET', path: '/x', mutating: false })
+    ).rejects.toThrow('TrendAI Vision One listAlerts failed (301)');
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(sent().maxRedirects).toBe(0);
+  });
 
   it('names the Kibana response size limit and the inputs that shrink a response that is too large', async () => {
     request.mockRejectedValue(
@@ -204,8 +343,8 @@ describe('TrendAI Vision One requests and errors', () => {
       .mockResolvedValueOnce(ok({ items: [] }));
     await vendorRequest(ctx, { action: 'x', method: 'GET', path: '/x', mutating: false });
     expect(request).toHaveBeenCalledTimes(3);
-    expect(timers.sleep).toHaveBeenNthCalledWith(1, 0);
-    expect(timers.sleep).toHaveBeenNthCalledWith(2, 2_000);
+    expect(timers.sleep).toHaveBeenNthCalledWith(1, 2_000);
+    expect(timers.sleep).toHaveBeenNthCalledWith(2, 5_000);
   });
 
   it('stops after three attempts with the rate limit message', async () => {
@@ -216,10 +355,10 @@ describe('TrendAI Vision One requests and errors', () => {
     expect(request).toHaveBeenCalledTimes(3);
   });
 
-  it('honours Retry-After and caps it at 30 s', async () => {
+  it('honours Retry-After up to the 30 s cap', async () => {
     request
       .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '7' }))
-      .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '300' }))
+      .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '30' }))
       .mockResolvedValueOnce(ok({}));
     await vendorRequest(ctx, { action: 'x', method: 'POST', path: '/x', mutating: true });
     expect(timers.sleep).toHaveBeenNthCalledWith(1, 7_000);
@@ -395,7 +534,8 @@ describe('TrendAI Vision One action time budget', () => {
     await expect(read()).rejects.toThrow('(503)');
     expect(request).toHaveBeenCalledTimes(2);
     expect(sent(0).timeout).toBe(60_000);
-    expect(sent(1).timeout).toBe(40_000);
+    // 60 s spent, plus the 2 s back-off before the retry.
+    expect(sent(1).timeout).toBe(38_000);
   });
 
   it('does not wait for a Retry-After that passes the budget', async () => {

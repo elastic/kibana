@@ -9,6 +9,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
+  ABOVE_LATIN1,
   ALERT_SEVERITIES,
   ALERT_STATUSES,
   ALERTS_DEFAULT_MAX_RESULTS,
@@ -26,11 +27,29 @@ export const ID_PATTERN = /^[A-Za-z0-9-]+$/;
 export const UUID_PATTERN =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
+/** True when the date and time parts of a yyyy-MM-ddThh:mm:ssZ value exist (no 31 February, hour 24, minute 60). */
+const isRealDateTime = (value: string): boolean => {
+  const [year, month, day, hour, minute, second] = value.match(/\d+/g)?.map(Number) ?? [];
+  if (hour > 23 || minute > 59 || second > 59) return false;
+  const date = new Date(0);
+  date.setUTCFullYear(year, month - 1, day);
+  return (
+    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
+  );
+};
+const REAL_DATE_TIME = 'Use a real date and time, for example 2026-11-01T00:00:00Z';
+
+/** A filter value goes into the TMV1-Filter header, which cannot carry characters above U+00FF. */
+const isHeaderSafe = (value: string): boolean => !ABOVE_LATIN1.test(value);
+const headerSafeMessage = (what: string): string =>
+  `${what} must not contain characters above U+00FF (the TMV1-Filter header cannot carry them)`;
+
 const dateTime = (what: string) =>
   z
     .string()
     .max(20)
     .regex(ISO_UTC, 'Use ISO 8601 UTC, for example 2026-11-01T00:00:00Z')
+    .refine(isRealDateTime, REAL_DATE_TIME)
     .describe(`${what}, ISO 8601 UTC (yyyy-MM-ddThh:mm:ssZ).`);
 
 export const idField = (what: string) =>
@@ -87,8 +106,9 @@ export const ListAlertsInputSchema = lazySchema(() =>
       .int()
       .min(ALERTS_PAGE_SIZE)
       .max(ALERTS_MAX_RESULTS)
+      .multipleOf(ALERTS_PAGE_SIZE, `maxResults must be a multiple of ${ALERTS_PAGE_SIZE}`)
       .default(ALERTS_DEFAULT_MAX_RESULTS)
-      .describe('Alerts to read, 10-200 (default 50), in pages of 10.'),
+      .describe('Alerts to read, 10-200 in steps of 10 (default 50), in pages of 10.'),
     nextLink: nextLinkField(),
   })
 );
@@ -109,6 +129,8 @@ export const UpdateAlertStatusInputSchema = lazySchema(() =>
       investigationResult: resultField().optional().describe('New investigation result.'),
       etag: z
         .string()
+        .trim()
+        .min(1, 'etag must not be blank')
         .max(128)
         .optional()
         .describe('etag from getAlertDetails; the update fails if the alert changed since then.'),
@@ -132,6 +154,7 @@ const oatDate = (what: string) =>
     .string()
     .max(40)
     .regex(ISO_UTC, 'Use ISO 8601 UTC, for example 2026-11-01T00:00:00Z')
+    .refine(isRealDateTime, REAL_DATE_TIME)
     .optional()
     .describe(`${what}, ISO 8601 UTC.`);
 
@@ -151,6 +174,7 @@ export const ListOatInputSchema = lazySchema(() =>
       filter: z
         .string()
         .max(OAT_FILTER_MAX)
+        .refine(isHeaderSafe, headerSafeMessage('filter'))
         .optional()
         .describe("TMV1-Filter expression, for example riskLevel eq 'high'."),
       nextLink: nextLinkField(),
@@ -180,11 +204,13 @@ export const ListEndpointsInputSchema = lazySchema(() =>
     endpointName: z
       .string()
       .max(255)
+      .refine(isHeaderSafe, headerSafeMessage('endpointName'))
       .optional()
       .describe('Only endpoints with this computer name.'),
     filter: z
       .string()
       .max(1024)
+      .refine(isHeaderSafe, headerSafeMessage('filter'))
       .optional()
       .describe("TMV1-Filter expression, for example osPlatform eq 'windows'."),
     // An endpoint item is about 3.2 KB with all fields: 200 items (about 640 KB) stay under the

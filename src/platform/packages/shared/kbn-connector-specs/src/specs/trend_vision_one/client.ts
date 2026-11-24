@@ -10,6 +10,7 @@
 import type { AxiosError, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import {
+  ABOVE_LATIN1,
   ACTION_BUDGET_MS,
   API_PREFIX,
   BACKOFF_MS,
@@ -45,6 +46,9 @@ export const apiUrlProblem = (raw: string): string | undefined => {
   if (parsed.hostname.startsWith('portal.')) {
     const apiUrl = `https://api.${parsed.hostname.slice('portal.'.length)}`;
     return `${VENDOR} API URL looks like the console address (portal...). Use the API address instead, for example ${apiUrl}.`;
+  }
+  if (parsed.username || parsed.password) {
+    return `${VENDOR} API URL must not contain a user name or password. Give only the API address, for example ${parsed.protocol}//${parsed.host}.`;
   }
   const isLoopbackHttp = parsed.protocol === 'http:' && LOOPBACK_HOSTS.has(parsed.hostname);
   if (parsed.protocol !== 'https:' && !isLoopbackHttp) {
@@ -156,21 +160,37 @@ export const toVendorError = (
     return new Error(`${VENDOR} ${action} request failed: ${failureReason(err, timeoutMs)}`);
   }
   const message = statusMessage(action, status, describeError(err.response?.data), notFound);
-  // The executor reads statusCode and headers (Retry-After on a 429) from the thrown error.
+  const headers = { ...(err.response?.headers ?? {}) };
+  // The Kibana action executor reads error.response.status (errorMeta.statusCode) and
+  // error.response.headers (Retry-After) from the thrown error. Only the status and a plain copy
+  // of the response headers are kept: never the request config, which holds the API key.
   return Object.assign(new Error(message), {
     statusCode: status,
     status,
-    headers: { ...(err.response?.headers ?? {}) },
+    headers,
+    response: { status, headers },
   });
 };
 
-const getRetryDelayMs = (error: AxiosError, attempt: number): number => {
-  const seconds = Number(getHeader(error.response, 'retry-after'));
-  if (Number.isFinite(seconds) && seconds >= 0) {
-    return Math.min(RETRY_AFTER_CAP_MS, Math.round(seconds * 1000));
-  }
-  return BACKOFF_MS[Math.min(attempt - 1, BACKOFF_MS.length - 1)];
+/** The wait the product asked for in Retry-After; undefined when it is absent, blank or not a number of seconds. */
+const getRetryAfterMs = (error: AxiosError): number | undefined => {
+  const raw = getHeader(error.response, 'retry-after')?.trim();
+  if (!raw) return undefined;
+  const seconds = Number(raw);
+  return Number.isFinite(seconds) && seconds >= 0 ? Math.round(seconds * 1000) : undefined;
 };
+
+/** Decodes a percent-encoded value; the raw value when it is malformed (never throws). */
+export const safeDecode = (value: string): string => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+
+/** Added to a failed state-changing request whose outcome is unknown (no answer read, or a 5xx). */
+const MAYBE_APPLIED = 'The change may already have been applied; check before repeating it.';
 
 export interface VendorRequest {
   action: string;
@@ -218,7 +238,8 @@ const budgetSpent = (action: string): Error =>
 
 /**
  * Sends one request with the retry policy: reads retry on 429 and 5xx, state-changing calls only
- * on 429; at most 3 attempts; Retry-After honoured and capped at 30 s. Each request gets the
+ * on 429; at most 3 attempts; Retry-After honoured, and when it is above 30 s the last answer is
+ * reported instead of retrying early. Each request gets the
  * remaining action budget as its timeout (at most 60 s); no request starts and no retry waits
  * once the budget would be passed.
  */
@@ -242,6 +263,8 @@ export const vendorRequest = async <T = unknown>(
         data: req.data,
         headers: req.headers,
         timeout: timeoutMs,
+        // The API does not redirect: a 3xx fails with its status, so no body or key is sent on.
+        maxRedirects: 0,
       });
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -252,11 +275,19 @@ export const vendorRequest = async <T = unknown>(
         attempt < MAX_ATTEMPTS &&
         !req.noRetry?.(axiosError);
       if (!retryable) {
-        throw toVendorError(req.action, error, req.notFound, timeoutMs);
+        const failure = toVendorError(req.action, error, req.notFound, timeoutMs);
+        const unknownOutcome =
+          req.mutating &&
+          (axiosError?.isAxiosError || axiosError?.response) &&
+          (status === undefined || status >= 500);
+        if (unknownOutcome) failure.message = `${failure.message}. ${MAYBE_APPLIED}`;
+        throw failure;
       }
-      const delayMs = getRetryDelayMs(axiosError, attempt);
-      if (delayMs >= budgetLeft(ctx)) {
-        // The wait would pass the action's budget: report the last answer instead of retrying.
+      const retryAfterMs = getRetryAfterMs(axiosError);
+      const delayMs = retryAfterMs ?? BACKOFF_MS[Math.min(attempt - 1, BACKOFF_MS.length - 1)];
+      if (delayMs > RETRY_AFTER_CAP_MS || delayMs >= budgetLeft(ctx)) {
+        // The wait is above the cap or would pass the action's budget: report the last answer
+        // instead of retrying before the product allows it.
         throw toVendorError(req.action, error, req.notFound, timeoutMs);
       }
       ctx.log.debug(`${VENDOR} ${req.action}: HTTP ${status}, retry ${attempt} in ${delayMs} ms`);
@@ -267,9 +298,15 @@ export const vendorRequest = async <T = unknown>(
 
 /**
  * Checks a caller-supplied nextLink: it must be on the configured region host and on the action's
- * own path, so the API key is never sent anywhere else. Returns the absolute URL to request.
+ * own path, so the API key is never sent anywhere else, and may not ask for a page size above
+ * maxTop (when given). Returns the absolute URL to request.
  */
-export const checkNextLink = (ctx: ActionContext, nextLink: string, path: string): string => {
+export const checkNextLink = (
+  ctx: ActionContext,
+  nextLink: string,
+  path: string,
+  maxTop?: number
+): string => {
   const origin = getApiOrigin(ctx);
   let parsed: URL;
   try {
@@ -282,7 +319,40 @@ export const checkNextLink = (ctx: ActionContext, nextLink: string, path: string
       `nextLink must point to ${origin}${API_PREFIX}${path}; pass the nextLink value returned by this action`
     );
   }
+  if (parsed.username || parsed.password) {
+    throw new Error('nextLink must not contain a user name or password');
+  }
+  if (maxTop !== undefined) {
+    for (const top of parsed.searchParams.getAll('top')) {
+      if (!(Number(top) <= maxTop)) {
+        throw new Error(
+          `nextLink asks for a page size (top=${top}) above the limit of ${maxTop} of this action; pass the nextLink value returned by this action`
+        );
+      }
+    }
+  }
   return parsed.href;
+};
+
+/** Absolute link of the first page of a listing, to compare it with a returned nextLink. */
+export const pageUrl = (ctx: ActionContext, path: string, params: Params): string => {
+  const link = new URL(`${getApiOrigin(ctx)}${API_PREFIX}${path}`);
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== '') link.searchParams.set(key, String(value));
+  }
+  return link.href;
+};
+
+/** A link in one comparable form (absolute, sorted query, no fragment) to spot a repeated cursor. */
+export const normaliseLink = (ctx: ActionContext, link: string): string => {
+  try {
+    const parsed = new URL(link, getApiOrigin(ctx));
+    parsed.hash = '';
+    parsed.searchParams.sort();
+    return parsed.href;
+  } catch {
+    return link;
+  }
 };
 
 /** Quotes a value for TMV1-Filter: single quotes are doubled. */
@@ -305,8 +375,15 @@ export const buildFilter = (
   return parts.length > 0 ? parts.join(' and ') : undefined;
 };
 
-export const filterHeader = (filter: string | undefined): RawAxiosRequestHeaders | undefined =>
-  filter ? { 'TMV1-Filter': filter } : undefined;
+export const filterHeader = (filter: string | undefined): RawAxiosRequestHeaders | undefined => {
+  // The HTTP client silently removes characters above U+00FF from a header: never send a changed filter.
+  if (filter && ABOVE_LATIN1.test(filter)) {
+    throw new Error(
+      `${VENDOR} filter has characters above U+00FF, which the TMV1-Filter header cannot carry; nothing was sent. Use agentGuid or a filter with those characters left out`
+    );
+  }
+  return filter ? { 'TMV1-Filter': filter } : undefined;
+};
 
 export interface ListPage {
   totalCount?: number;

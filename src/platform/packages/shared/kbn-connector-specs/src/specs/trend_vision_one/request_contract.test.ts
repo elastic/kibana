@@ -50,6 +50,17 @@ const propertyNames = (schema: SpecSchema | undefined): Set<string> => {
   return names;
 };
 
+/** True when the sent field names satisfy the spec's required fields (one branch of a oneOf/anyOf). */
+const requiredSent = (schema: SpecSchema, sent: Set<string>): boolean => {
+  const node = deref(schema);
+  const alternatives = node.oneOf ?? node.anyOf;
+  return (
+    (node.required ?? []).every((name) => sent.has(name)) &&
+    (node.allOf ?? []).every((part) => requiredSent(part, sent)) &&
+    (!alternatives || alternatives.some((part) => requiredSent(part, sent)))
+  );
+};
+
 /** True when a sent value has the spec type and, for an enum, one of its values. */
 const fitsSchema = (value: unknown, schema: SpecSchema): boolean => {
   if (schema.type === 'array') {
@@ -157,6 +168,7 @@ describe('TrendAI Vision One requests match the recorded vendor spec', () => {
         encodeURIComponent(String(input[param]))
       );
       expect(sentRequest.method.toLowerCase()).toBe(method);
+      expect(sentRequest.maxRedirects).toBe(0);
       expect(new URL(sentRequest.url).pathname).toBe(expectedPath);
 
       const declared = (where: string) =>
@@ -185,6 +197,29 @@ describe('TrendAI Vision One requests match the recorded vendor spec', () => {
             );
       if (Object.keys(content).length === 0) expect(sentNames).toEqual([]);
       for (const key of sentNames) expect(bodyNames).toContain(key);
+
+      // The body has the spec's shape (an array body is an array) and carries every required field.
+      const [bodyContent] = Object.values(content);
+      if (bodyContent?.schema) {
+        const bodySchema = deref(bodyContent.schema);
+        const isArray = bodySchema.type === 'array';
+        const sentItems: Array<Set<string>> =
+          data instanceof FormData
+            ? [new Set<string>(data.keys())]
+            : (Array.isArray(data) ? data : [data]).map(
+                (item: object) => new Set<string>(Object.keys(item ?? {}))
+              );
+        if (!(data instanceof FormData)) expect(Array.isArray(data)).toBe(isArray);
+        expect(sentItems.length).toBeGreaterThan(0);
+        const itemSchema = isArray && bodySchema.items ? bodySchema.items : bodySchema;
+        for (const names of sentItems) {
+          expect({
+            action: name,
+            sent: [...names],
+            hasRequired: requiredSent(itemSchema, names),
+          }).toEqual({ action: name, sent: [...names], hasRequired: true });
+        }
+      }
     }
   );
 

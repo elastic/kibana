@@ -1,7 +1,7 @@
 ---
 navigation_title: "TrendAI Vision One"
 type: reference
-description: "Read Workbench alerts, Observed Attack Techniques detections, and endpoints, isolate endpoints, block suspicious objects, and read sandbox analysis results in TrendAI Vision One."
+description: "Read Workbench alerts, Observed Attack Techniques detections, endpoints, response tasks, and sandbox analysis results in TrendAI Vision One."
 applies_to:
   stack: preview 9.7
   serverless: preview
@@ -9,10 +9,10 @@ applies_to:
 
 # TrendAI Vision One connector [trend-vision-one-action-type]
 
-The TrendAI Vision One connector connects to the TrendAI Vision One public API (v3.0) of your tenant's region. Use it to list Workbench alerts, read Observed Attack Techniques detections, find endpoints, isolate an endpoint, add an object to the suspicious object list, and read the result of a sandbox analysis.
+The TrendAI Vision One connector connects to the TrendAI Vision One public API (v3.0) of your tenant's region. Use it to list Workbench alerts, read Observed Attack Techniques detections, find endpoints, follow response tasks, and read the result of a sandbox analysis.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Actions marked _(not yet available)_ are not exposed to agents. You can call them only through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+This connector is currently available in **Agent Builder** only. Agents can only read: every action that changes data in TrendAI Vision One is marked _(not yet available)_ and is not exposed to agents. You can call those actions only through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
 ## Create connectors in {{kib}} [define-trend-vision-one-ui]
@@ -52,13 +52,13 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 The TrendAI Vision One connector exposes the following actions:
 
 `listAlerts`
-:   Lists Workbench alerts in a time window (`startDateTime`, `endDateTime`, `dateTimeTarget`), newest first, optionally filtered by `status`, `investigationResult`, and `severity`, and sorted with `orderBy` (default `createdDateTime desc`). `dateTimeTarget` is `createdDateTime` (default), `updatedDateTime`, or `firstInvestigatedDateTime`. Reads pages of 10 and returns at most `maxResults` alerts (10 to 200, default 50) in `items`, with `totalCount`, `pagesRead`, `nextLink`, and `nextLinkRepeats`. When the last page read holds more alerts than `maxResults` allows, `nextLink` reads that page again, and `nextLinkRepeats` is the number of alerts at its start that this call already returned, so no alert is skipped.
+:   Lists Workbench alerts in a time window (`startDateTime`, `endDateTime`, `dateTimeTarget`), newest first, optionally filtered by `status`, `investigationResult`, and `severity`, and sorted with `orderBy` (default `createdDateTime desc`). `dateTimeTarget` is `createdDateTime` (default), `updatedDateTime`, or `firstInvestigatedDateTime`. Reads pages of 10 and returns at most `maxResults` alerts (10 to 200 in steps of 10, default 50) in `items`, with `totalCount`, `pagesRead`, `nextLink`, and `nextLinkRepeats`. When the last page read holds more alerts than `maxResults` allows, `nextLink` reads that page again, and `nextLinkRepeats` is the number of alerts at its start that this call already returned, so no alert is skipped.
 
 `getAlertDetails`
 :   Returns one Workbench alert by ID, with its status, investigation result, severity, score, impact scope, indicators, matched rules, and the alert's current `etag`.
 
 `updateAlertStatus` _(not yet available)_
-:   Sets the `status` (Open, In Progress, Closed) and the `investigationResult` of a Workbench alert; give at least one. When you pass the `etag` from `getAlertDetails`, the update fails if the alert changed since that read. Without `etag`, the connector reads the alert first, returns `outcome: skipped` when the alert already has the requested values, and otherwise updates it with the current ETag.
+:   Sets the `status` (Open, In Progress, Closed) and the `investigationResult` of a Workbench alert; give at least one. When you pass the `etag` from `getAlertDetails`, the update fails if the alert changed since that read; a blank `etag` is rejected. Without `etag`, the connector reads the alert first, returns `outcome: skipped` when the alert already has the requested values, and otherwise updates it with the current ETag. If TrendAI Vision One returns no ETag, the action fails without changing the alert: the connector never sends an update without `If-Match`.
 
 `addAlertNote` _(not yet available)_
 :   Adds a note (`content`, up to 500,000 characters) to a Workbench alert and returns the new `noteId`. A note cannot be deleted.
@@ -69,8 +69,8 @@ The TrendAI Vision One connector exposes the following actions:
 `listEndpoints`
 :   Lists managed endpoints with their agent GUID, name, operating system, IP addresses, isolation status, and agent and sensor state. Narrow the list with `agentGuid`, `endpointName`, or a `filter`. Returns one page (`top` 10, 50, 100 (default), or 200) and `nextLink`. Use `select` (up to 10 fields) to return only the fields you need and `orderBy` to sort by `agentGuid` (default) or by the last connection or scan time.
 
-`isolateEndpoint`
-:   Isolates an endpoint from the network; it can still reach the TrendAI Vision One management server. Give exactly one of `agentGuid` or `endpointName`, and an optional `description` shown in the task list. The agent asks you to confirm before it isolates an endpoint. A person restores the connection in the TrendAI Vision One console, because the restore action is not available to agents.
+`isolateEndpoint` _(not yet available)_
+:   Isolates an endpoint from the network; it can still reach the TrendAI Vision One management server. Give exactly one of `agentGuid` or `endpointName`, and an optional `description` shown in the task list.
 
 `restoreEndpointConnection` _(not yet available)_
 :   Restores the network connection of an isolated endpoint. Give exactly one of `agentGuid` or `endpointName`.
@@ -99,8 +99,8 @@ The TrendAI Vision One connector exposes the following actions:
 `forceUserSignOut` _(not yet available)_
 :   Signs a user out of all active Microsoft Entra ID sessions.
 
-`addToSuspiciousObjectList`
-:   Adds a URL, domain, IP address, file SHA-1, file SHA-256, or sender email address to the suspicious object list, with an optional scan action (`block` or `log`), risk level, and expiry (`daysToExpiration`, -1 for never, up to 365). The agent asks you to confirm before it adds an object, and a person removes it in the TrendAI Vision One console. Each type holds at most 10,000 objects; when a list is full, TrendAI Vision One deletes the objects that expire first.
+`addToSuspiciousObjectList` _(not yet available)_
+:   Adds a URL, domain, IP address, file SHA-1, file SHA-256, or sender email address to the suspicious object list, with an optional scan action (`block` or `log`), risk level, and expiry (`daysToExpiration`, -1 for never, up to 365). Adding an object that is already on the list updates its entry. Each type holds at most 10,000 objects; when a list is full, TrendAI Vision One deletes the objects that expire first.
 
 `removeFromSuspiciousObjectList` _(not yet available)_
 :   Removes an object from the suspicious object list. Returns `outcome: notFound` when the object is not on the list.
@@ -109,7 +109,7 @@ The TrendAI Vision One connector exposes the following actions:
 :   Adds an object to the suspicious object exception list so that it is never flagged. This weakens detection for that object.
 
 `submitFileToSandbox` _(not yet available)_
-:   Submits one file, base64-encoded in `file` with its `fileName`, to the sandbox. Optional `documentPassword`, `archivePassword`, and `arguments` are given as plain text. Returns the submission `id`, the file `digest`, and the submission `quota`. Using Sandbox Analysis requires TrendAI Flex in your TrendAI Vision One tenant; ask your TrendAI Vision One administrator if submissions are refused.
+:   Submits one file, base64-encoded in `file` with its `fileName`, to the sandbox. `file` must be standard base64 with its `=` padding (a length that is a multiple of 4). Optional `documentPassword`, `archivePassword`, and `arguments` are given as plain text. Returns the submission `id`, the file `digest`, and the submission `quota`. Using Sandbox Analysis requires TrendAI Flex in your TrendAI Vision One tenant; ask your TrendAI Vision One administrator if submissions are refused.
 
 `submitUrlsToSandbox` _(not yet available)_
 :   Submits 1 to 10 URLs to the sandbox. Returns one item per URL with its status and submission ID, and the submission `quota`. A submission costs sandbox credits and cannot be deleted. Using Sandbox Analysis requires TrendAI Flex in your TrendAI Vision One tenant; ask your TrendAI Vision One administrator if submissions are refused.
@@ -119,19 +119,19 @@ The TrendAI Vision One connector exposes the following actions:
 
 ### Behavior of the actions [trend-vision-one-action-behavior]
 
-* **Response tasks.** Response actions send one target per call, start a task in TrendAI Vision One, and return at once with `outcome`, `status`, `taskId`, and `error`. `outcome` is `requested` when the task started and `skipped` when the same task is already in progress, so repeating a call does not start a second task. When TrendAI Vision One does not find the target, and for any other per-item error, the action fails with the product's code and message. Follow the task with `getResponseTaskStatus`.
+* **Response tasks.** Response actions send one target per call, start a task in TrendAI Vision One, and return at once with `outcome`, `status`, `taskId`, and `error`. `outcome` is `requested` when the task started and `skipped` when the same task is already in progress, with the `taskId` of that task when TrendAI Vision One returns it, so repeating a call does not start a second task. When TrendAI Vision One does not find the target, and for any other per-item error, the action fails with the product's code and message. `restoreEndpointConnection` by `endpointName` gets a per-item 500 both for a name TrendAI Vision One does not know and for a server error, so its error names both causes: check the name or use `agentGuid`, and retry if the name is right. Follow the task with `getResponseTaskStatus`.
 * **List changes.** `addToSuspiciousObjectList`, `removeFromSuspiciousObjectList`, and `addToExceptionList` send one object per call and return `outcome`, `status`, and `error`. `removeFromSuspiciousObjectList` returns `outcome: notFound` when the object is not on the list, so repeating a removal succeeds. Other errors fail the action with the product's code and message.
 * **Alert updates.** `updateAlertStatus` returns `outcome: skipped` without a change when the alert already has the requested values, and fails with a not found error for an unknown alert.
 * **Collected files.** `getResponseTaskStatus` returns the hashes, size, and expiry of a collected file and `archiveReady`. The download link of the archive and its password are not returned, so they are not kept in the saved tool output; download the archive from the TrendAI Vision One console.
-* **Pagination.** List actions return `nextLink` when more data exists. Pass it back as `nextLink` with the same filters to read the next page. The connector follows a `nextLink` only on the configured region host and on the same API path.
+* **Pagination.** List actions return `nextLink` when more data exists. Pass it back as `nextLink` with the same filters to read the next page. The connector follows a `nextLink` only on the configured region host and on the same API path. When TrendAI Vision One answers with a `nextLink` that was already read, `listAlerts` stops and returns `nextLink: null`.
 * **Filters.** Filter values such as `endpointName` and the free-form `filter` are trimmed. A blank value is ignored like a missing one; spaces inside a value are kept. `agentGuid` is trimmed and must be a UUID, so a blank `agentGuid` is rejected; leave it out instead.
 * **Deprecated fields.** The connector never sends the deprecated `investigationStatus` alert field and removes it from returned alerts. Use `status` and `investigationResult`.
-* **Errors.** An error from TrendAI Vision One keeps its HTTP status and response headers, such as `Retry-After` on a 429, so that the caller can decide when to retry.
-* **Limits and retries.** Every request times out after 60 seconds, and responses follow the {{kib}} Actions response size limit (`xpack.actions.maxResponseContentLength`). Read actions retry on HTTP 429 and 5xx errors; state-changing actions retry only on HTTP 429. Each request makes at most three attempts and honors `Retry-After` up to 30 seconds. One action run has a time budget of 100 seconds, below the {{kib}} limit for an action: each request gets the time left as its timeout, no request starts and no retry waits once the budget would be passed, and `listAlerts` stops reading pages when less than 10 seconds are left and returns the alerts read with the `nextLink` of the next page. A sandbox submission is not retried when the daily quota is used up.
+* **Errors.** An error from TrendAI Vision One keeps its HTTP status and response headers, such as `Retry-After` on a 429, so that the caller can decide when to retry. The connector does not follow redirects: an HTTP 3xx answer fails the action with its status, and nothing is sent to the redirect location.
+* **Limits and retries.** Every request times out after 60 seconds, and responses follow the {{kib}} Actions response size limit (`xpack.actions.maxResponseContentLength`). Read actions retry on HTTP 429, 500, 502, 503, and 504; state-changing actions retry only on HTTP 429. A 429 inside a 207 per-item answer fails the item without a retry. Each request makes at most three attempts and honors `Retry-After` up to 30 seconds: a longer `Retry-After` is not retried early, and the action fails with the rate limit message. One action run has a time budget of 100 seconds, below the {{kib}} limit for an action: each request gets the time left as its timeout, no request starts and no retry waits once the budget would be passed, and `listAlerts` stops reading pages when less than 10 seconds are left and returns the alerts read with the `nextLink` of the next page. A sandbox submission is not retried when the daily quota is used up.
 
 ## Required permissions [trend-vision-one-permissions]
 
-Each action needs the permissions in the following table on the role of the API key. The table is taken from the TrendAI Vision One v3.0 API reference. Response actions need the **View, filter, and search (Task List tab)** permission in addition to their own permission, so that the task they start can be read.
+Each action needs the permissions in the following table on the role of the API key. The table is taken from the TrendAI Vision One v3.0 API reference. Response actions need the **View, filter, and search (Task List tab)** permission in addition to their own permission, so that the task they start can be read with `getResponseTaskStatus`, which also needs **Download task result**.
 
 | Action | Permissions |
 | --- | --- |

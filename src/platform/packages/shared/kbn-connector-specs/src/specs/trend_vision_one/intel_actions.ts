@@ -60,8 +60,9 @@ const toBase64 = (text: string): string => Buffer.from(text, 'utf8').toString('b
 
 export const intelActions: ConnectorSpec['actions'] = {
   addToSuspiciousObjectList: {
-    isTool: true,
-    scope: 'write',
+    isTool: false,
+    // A repeated add updates the entry, and a full list makes the product delete objects.
+    scope: 'destroy',
     description: ACTION_DESCRIPTIONS.addToSuspiciousObjectList,
     input: AddSuspiciousObjectInputSchema,
     handler: async (ctx, input: AddSuspiciousObjectInput) =>

@@ -90,7 +90,7 @@ export const CollectFileInputSchema = lazySchema(() =>
 export type CollectFileInput = z.infer<typeof CollectFileInputSchema>;
 
 export const GetTaskInputSchema = lazySchema(() =>
-  z.object({ id: idField('id').describe('taskId returned by a response action.') })
+  z.object({ id: idField('id').describe('The task id.') })
 );
 export type GetTaskInput = z.infer<typeof GetTaskInputSchema>;
 
@@ -106,6 +106,8 @@ export const EmailTaskInputSchema = lazySchema(() =>
         .describe('Internet message id.'),
       mailBox: z
         .string()
+        .trim()
+        .min(1, notBlank('mailBox'))
         .max(255)
         .optional()
         .describe('Mailbox address; only with messageId. Default: all mailboxes.'),
@@ -193,6 +195,9 @@ export const AddExceptionInputSchema = lazySchema(() =>
 export type AddExceptionInput = z.infer<typeof AddExceptionInputSchema>;
 
 const BASE64 = /^[A-Za-z0-9+/]*={0,2}$/;
+/** Padded, canonical base64: whole 4-character groups that decode and encode back unchanged. */
+const isCanonicalBase64 = (value: string): boolean =>
+  value.length % 4 === 0 && Buffer.from(value, 'base64').toString('base64') === value;
 const byteLimit = (max: number) => (value: string) => Buffer.byteLength(value, 'utf8') <= max;
 
 export const SubmitFileInputSchema = lazySchema(() =>
@@ -202,6 +207,7 @@ export const SubmitFileInputSchema = lazySchema(() =>
       .min(4)
       .max(1048576)
       .regex(BASE64, 'file is base64 content')
+      .refine(isCanonicalBase64, 'file is padded base64 content (length a multiple of 4)')
       .describe('Base64 file content (about 768 KB of file at most).'),
     fileName: z.string().min(1).max(255).describe('File name with extension.'),
     documentPassword: z
@@ -234,6 +240,6 @@ export const SubmitUrlsInputSchema = lazySchema(() =>
 export type SubmitUrlsInput = z.infer<typeof SubmitUrlsInputSchema>;
 
 export const GetSandboxResultInputSchema = lazySchema(() =>
-  z.object({ id: idField('id').describe('Submission id from a sandbox submit action.') })
+  z.object({ id: idField('id').describe('The submission id.') })
 );
 export type GetSandboxResultInput = z.infer<typeof GetSandboxResultInputSchema>;

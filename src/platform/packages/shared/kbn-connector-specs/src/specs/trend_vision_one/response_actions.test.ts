@@ -144,6 +144,33 @@ describe('TrendAI Vision One response tasks', () => {
     });
   });
 
+  it('returns the task id of the running task when a duplicate item carries Operation-Location', async () => {
+    request.mockResolvedValueOnce(
+      ok(
+        [
+          {
+            status: 400,
+            headers: [
+              {
+                name: 'Operation-Location',
+                value: 'https://api.xdr.trendmicro.com/v3.0/response/tasks/00000031',
+              },
+            ],
+            body: { error: { code: 'TaskError', message: 'Task duplication.' } },
+          },
+        ],
+        {},
+        207
+      )
+    );
+    await expect(run('restoreEndpointConnection', { agentGuid: AGENT_GUID })).resolves.toEqual({
+      outcome: 'skipped',
+      status: 400,
+      taskId: '00000031',
+      error: { code: 'TaskError', message: 'Task duplication.' },
+    });
+  });
+
   it.each([
     [400, 'BadRequest', 'Target not found.'],
     [404, 'NotFound', 'Endpoint does not exist'],
@@ -154,11 +181,24 @@ describe('TrendAI Vision One response tasks', () => {
     );
   });
 
-  it('fails as not found when restore by endpointName gets the item 500 the product answers for an unknown name', async () => {
+  it('names both causes when restore by endpointName gets an item 500: an unknown name or a server error', async () => {
     request.mockResolvedValueOnce(itemError(500, 'InternalServerError', 'Internal server error.'));
-    await expect(run('restoreEndpointConnection', { endpointName: 'gone' })).rejects.toThrow(
-      'restoreEndpointConnection found no such target (500): InternalServerError: Internal server error.. TrendAI Vision One answers 500 for an endpointName it does not know'
+    const error = await run('restoreEndpointConnection', { endpointName: 'gone' }).catch(
+      (caught: Error) => caught
     );
+    expect((error as Error).message).toBe(
+      'TrendAI Vision One restoreEndpointConnection failed for the target (500): InternalServerError: Internal server error. TrendAI Vision One answers 500 both for an endpointName it does not know and for a server error: check the name with listEndpoints or use agentGuid; if the name is right, retry later'
+    );
+    expect((error as Error).message).not.toContain('found no such target');
+  });
+
+  it('joins the hint with one period when the item message has no final period', async () => {
+    request.mockResolvedValueOnce(itemError(500, 'InternalServerError', 'boom'));
+    const error = await run('restoreEndpointConnection', { endpointName: 'gone' }).catch(
+      (caught: Error) => caught
+    );
+    expect((error as Error).message).toContain('InternalServerError: boom. TrendAI Vision One');
+    expect((error as Error).message).not.toContain('..');
   });
 
   it('keeps an item 500 of restore by agentGuid as a failed target', async () => {
@@ -242,6 +282,38 @@ describe('TrendAI Vision One response tasks', () => {
     ['/v3.0/response/tasks/00000003?x=1', '00000003'],
   ])('takes the task id from the last segment of %s', (value, id) => {
     expect(taskIdFrom({ headers: [{ name: 'Operation-Location', value }] })).toBe(id);
+  });
+
+  it.each([
+    ['https://api.xdr.trendmicro.com/v3.0/response/tasks/%E0%A4%A', '%E0%A4%A'],
+    ['/v3.0/response/tasks/%', '%'],
+    ['/v3.0/response/tasks/RM%2D1', 'RM-1'],
+  ])('reads the task id from %s without throwing on a malformed sequence', (value, id) => {
+    expect(taskIdFrom({ headers: [{ name: 'Operation-Location', value }] })).toBe(id);
+  });
+
+  it('keeps a started task a success when its Operation-Location is malformed', async () => {
+    request.mockResolvedValueOnce(accepted('%E0%A4%A'));
+    await expect(run('isolateEndpoint', { agentGuid: AGENT_GUID })).resolves.toEqual({
+      outcome: 'requested',
+      status: 202,
+      taskId: '%E0%A4%A',
+      error: null,
+    });
+  });
+
+  it.each([[''], ['   '], ['\t']])('refuses the blank mailBox %j before any request', (mailBox) => {
+    const parsed = parseInput('quarantineEmailMessage', { messageId: '<m@x>', mailBox });
+    expect(parsed.success).toBe(false);
+    expect(JSON.stringify(parsed.error)).toContain('mailBox must not be blank');
+  });
+
+  it('sends a padded mailBox trimmed and none when it is absent', async () => {
+    request.mockResolvedValue(accepted());
+    await run('quarantineEmailMessage', { messageId: '<m@x>', mailBox: '  lab@example.com ' });
+    expect(sent().data).toEqual([{ messageId: '<m@x>', mailBox: 'lab@example.com' }]);
+    await run('quarantineEmailMessage', { messageId: '<m@x>' });
+    expect(sent(1).data).toEqual([{ messageId: '<m@x>' }]);
   });
 
   it('returns a null taskId without an Operation-Location header', () => {

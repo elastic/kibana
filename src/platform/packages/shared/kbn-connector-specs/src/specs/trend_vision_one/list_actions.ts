@@ -9,8 +9,15 @@
 
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import type { ListPage, Params } from './client';
-import { buildFilter, checkNextLink, filterHeader, vendorRequest } from './client';
-import { ENDPOINT_FILTER_MAX } from './constants';
+import {
+  buildFilter,
+  checkNextLink,
+  filterHeader,
+  normaliseLink,
+  pageUrl,
+  vendorRequest,
+} from './client';
+import { ENDPOINT_FILTER_MAX, ENDPOINT_TOP_MAX, OAT_TOP_MAX } from './constants';
 import { ACTION_DESCRIPTIONS } from './descriptions';
 import type { ListEndpointsInput, ListOatInput } from './types';
 import { ListEndpointsInputSchema, ListOatInputSchema } from './types';
@@ -22,16 +29,21 @@ export interface PageResult {
   nextLink: string | null;
 }
 
-/** Reads one page: the first one from params, or the caller's checked nextLink with the same filter. */
+/**
+ * Reads one page: the first one from params, or the caller's checked nextLink with the same filter.
+ * A nextLink that asks for a page size above maxTop is refused; a returned nextLink equal to the
+ * link that was read is not handed back (the caller would read the same page again).
+ */
 export const readOnePage = async (
   ctx: ActionContext,
   action: string,
   path: string,
   params: Params,
   filter: string | undefined,
-  nextLink: string | undefined
+  nextLink: string | undefined,
+  maxTop: number
 ): Promise<PageResult> => {
-  const url = nextLink ? checkNextLink(ctx, nextLink, path) : undefined;
+  const url = nextLink ? checkNextLink(ctx, nextLink, path, maxTop) : undefined;
   const { data } = await vendorRequest<ListPage>(ctx, {
     action,
     method: 'GET',
@@ -42,11 +54,15 @@ export const readOnePage = async (
     mutating: false,
   });
   const items = Array.isArray(data?.items) ? data.items : [];
+  const returned = data?.nextLink ?? null;
+  const repeated =
+    returned !== null &&
+    normaliseLink(ctx, returned) === normaliseLink(ctx, url ?? pageUrl(ctx, path, params));
   return {
     totalCount: data?.totalCount ?? null,
     count: data?.count ?? items.length,
     items,
-    nextLink: data?.nextLink ?? null,
+    nextLink: repeated ? null : returned,
   };
 };
 
@@ -69,7 +85,8 @@ export const listActions: ConnectorSpec['actions'] = {
           top: input.top,
         },
         input.filter?.trim() || undefined,
-        input.nextLink
+        input.nextLink,
+        OAT_TOP_MAX
       ),
   },
 
@@ -97,7 +114,8 @@ export const listActions: ConnectorSpec['actions'] = {
         '/endpointSecurity/endpoints',
         { top: input.top, select: input.select?.join(','), orderBy: input.orderBy },
         filter,
-        input.nextLink
+        input.nextLink,
+        ENDPOINT_TOP_MAX
       );
     },
   },

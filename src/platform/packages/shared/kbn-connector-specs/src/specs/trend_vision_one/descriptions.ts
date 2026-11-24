@@ -21,10 +21,10 @@ export const ACTION_DESCRIPTIONS = {
     'Set a Workbench alert status and/or investigationResult. Triage words: new = Open; in progress = In Progress; true positive = Closed + True Positive; false positive = Closed + False Positive; closed = Closed + Other Findings. Fails if the alert changed since the etag was read.',
   addAlertNote: 'Add a note to a Workbench alert. Returns the new noteId.',
   listObservedAttackTechniques:
-    'List Observed Attack Techniques detections by detection or ingestion time (last 365 days), with an optional filter. A time range needs both its start and end; without one, only the last hour of detections. Returns one page and nextLink.',
+    'List Observed Attack Techniques detections by detection or ingestion time (last 365 days), with an optional filter. A time range needs both its start and end; without one, only the last hour of detections. An ingestion range alone still returns only the last hour of detections; give a detection range to read more. Returns one page and nextLink.',
   listEndpoints:
-    'List managed endpoints (agentGuid, endpointName, OS, IP addresses, isolationStatus, agent and sensor state). Use it to find the agentGuid for isolateEndpoint. Returns one page and nextLink.',
-  isolateEndpoint: `Isolate an endpoint from the network; it still reaches the management server. Confirm with the user first: the agent cannot undo it; a person restores the connection in the TrendAI Vision One console. ${ENDPOINT} ${TASK}`,
+    'List managed endpoints (agentGuid, endpointName, OS, IP addresses, isolationStatus, agent and sensor state). Returns one page and nextLink.',
+  isolateEndpoint: `Isolate an endpoint from the network; it still reaches the management server. ${ENDPOINT} ${TASK}`,
   restoreEndpointConnection: `Restore the network connection of an isolated endpoint. ${ENDPOINT} ${TASK}`,
   terminateProcess: `Terminate a running process on a Windows endpoint by processId and its fileName or fileSha1 (give at least one). Irreversible. ${ENDPOINT} ${TASK}`,
   collectForensicFile: `Collect a file from an endpoint into a password-protected archive in the product. ${ENDPOINT} ${TASK}`,
@@ -35,7 +35,7 @@ export const ACTION_DESCRIPTIONS = {
   disableUserAccount: `Disable a user account in Active Directory or Microsoft Entra ID. ${TASK}`,
   enableUserAccount: `Enable a disabled user account in Active Directory or Microsoft Entra ID. ${TASK}`,
   forceUserSignOut: `Sign a user out of all active Microsoft Entra ID sessions. ${TASK}`,
-  addToSuspiciousObjectList: `Add an object to the suspicious object list so connected products block or log it. Confirm with the user first: the agent cannot undo it; a person removes the object in the TrendAI Vision One console. ${OBJECT} Returns outcome added.`,
+  addToSuspiciousObjectList: `Add an object to the suspicious object list so connected products block or log it; adding an object that is already on the list updates its entry, and when the list of that type is full the product deletes the objects closest to expiry. ${OBJECT} Returns outcome added.`,
   removeFromSuspiciousObjectList: `Remove an object from the suspicious object list. ${OBJECT} Returns outcome removed or notFound.`,
   addToExceptionList: `Add an object to the exception list so it is never flagged; this weakens detection. ${OBJECT} Returns outcome added.`,
   submitFileToSandbox:

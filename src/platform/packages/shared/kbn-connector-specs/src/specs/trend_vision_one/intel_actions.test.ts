@@ -217,6 +217,28 @@ describe('TrendAI Vision One sandbox', () => {
   ])('%s rejects %j at the schema', (name, input) => {
     expect(parseInput(name, input).success).toBe(false);
   });
+
+  it.each([
+    ['5 characters (a dangling character Buffer would drop)', 'aGVsb'],
+    ['unpadded', 'aGVsbG8'],
+    ['short padding', 'aGVsbG8=='.slice(0, 6)],
+    ['padding in the middle', 'aG=sbG8='],
+    ['non-zero bits before the padding', 'aGVsbG9='],
+    ['too much padding', 'aGVsbA==='],
+  ])('submitFileToSandbox rejects file content that is not canonical base64: %s', (_case, file) => {
+    const parsed = parseInput('submitFileToSandbox', { file, fileName: 'a.txt' });
+    expect(parsed.success).toBe(false);
+    expect(JSON.stringify(parsed.error)).toMatch(/file is (padded )?base64 content/);
+  });
+
+  it.each([
+    ['no padding', Buffer.from('abc').toString('base64')],
+    ['one padding character', Buffer.from('hello').toString('base64')],
+    ['two padding characters', Buffer.from('elastic').toString('base64')],
+    ['+ and /', Buffer.from([0xfb, 0xff, 0xbf]).toString('base64')],
+  ])('submitFileToSandbox accepts canonical base64 with %s', (_case, file) => {
+    expect(parseInput('submitFileToSandbox', { file, fileName: 'a.txt' }).success).toBe(true);
+  });
 });
 
 describe('TrendAI Vision One list and sandbox input bounds', () => {

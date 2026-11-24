@@ -72,7 +72,7 @@ describe('TrendAI Vision One listAlerts', () => {
     request
       .mockResolvedValueOnce(page(ids(1, 10), link2))
       .mockResolvedValueOnce(page(ids(11, 20), link3));
-    const result = (await run('listAlerts', { status: 'Open', maxResults: 15 })) as Record<
+    const result = (await run('listAlerts', { status: 'Open', maxResults: 20 })) as Record<
       string,
       unknown
     >;
@@ -82,8 +82,8 @@ describe('TrendAI Vision One listAlerts', () => {
       params: undefined,
       headers: { 'TMV1-Filter': "status eq 'Open'" },
     });
-    expect(result).toMatchObject({ count: 15, pagesRead: 2, nextLink: link2, nextLinkRepeats: 5 });
-    expect(idsOf(result)).toEqual(ids(1, 15));
+    expect(result).toMatchObject({ count: 20, pagesRead: 2, nextLink: link3, nextLinkRepeats: 0 });
+    expect(idsOf(result)).toEqual(ids(1, 20));
   });
 
   it('returns the vendor nextLink when the last page fills maxResults exactly', async () => {
@@ -122,37 +122,62 @@ describe('TrendAI Vision One listAlerts', () => {
     };
     request.mockImplementation(async ({ url }: { url: string }) => pages[url]);
 
-    const first = (await run('listAlerts', { maxResults: 15 })) as Record<string, unknown>;
-    expect(first).toMatchObject({ count: 15, nextLink: link2, nextLinkRepeats: 5 });
+    const first = (await run('listAlerts', { maxResults: 20 })) as Record<string, unknown>;
+    expect(first).toMatchObject({ count: 20, nextLink: link3, nextLinkRepeats: 0 });
     const second = (await run('listAlerts', {
       nextLink: first.nextLink as string,
-      maxResults: 15,
+      maxResults: 20,
     })) as Record<string, unknown>;
-    expect(second).toMatchObject({ count: 15, nextLink: link3, nextLinkRepeats: 5 });
-    const third = (await run('listAlerts', {
-      nextLink: second.nextLink as string,
-      maxResults: 15,
-    })) as Record<string, unknown>;
-    expect(third).toMatchObject({ count: 10, nextLink: null, nextLinkRepeats: 0 });
+    expect(second).toMatchObject({ count: 10, nextLink: null, nextLinkRepeats: 0 });
 
-    // Each call skips the alerts the previous call said it would repeat, and still adds new ones.
+    // A page is never cut, so no call repeats an alert of the previous one.
     const newFirst = idsOf(first);
     const newSecond = idsOf(second).slice(first.nextLinkRepeats as number);
-    const newThird = idsOf(third).slice(second.nextLinkRepeats as number);
-    expect(newFirst).toEqual(ids(1, 15));
-    expect(newSecond).toEqual(ids(16, 25));
-    expect(newThird).toEqual(ids(26, 30));
-    const union = [...newFirst, ...newSecond, ...newThird];
+    expect(newFirst).toEqual(ids(1, 20));
+    expect(newSecond).toEqual(ids(21, 30));
+    const union = [...newFirst, ...newSecond];
     expect(new Set(union).size).toBe(union.length);
     expect(union).toEqual(ids(1, 30));
   });
 
-  it('stops when the product repeats a nextLink', async () => {
+  it('stops when the product repeats a nextLink and returns no nextLink to continue from', async () => {
     const link = `${API}/workbench/alerts?skipToken=same`;
     request.mockResolvedValue(page(['WB-1'], link));
     const result = (await run('listAlerts', { maxResults: 200 })) as Record<string, unknown>;
     expect(request).toHaveBeenCalledTimes(2);
-    expect(result).toMatchObject({ pagesRead: 2, nextLink: link });
+    expect(result).toMatchObject({ pagesRead: 2, nextLink: null });
+  });
+
+  it('stops after one page when the product links back to the first page', async () => {
+    request.mockResolvedValue(
+      page(['WB-1'], `${API}/workbench/alerts?startDateTime=2026-11-01T00%3A00%3A00Z`)
+    );
+    const result = (await run('listAlerts', {
+      startDateTime: '2026-11-01T00:00:00Z',
+      maxResults: 200,
+    })) as Record<string, unknown>;
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({ pagesRead: 1, count: 1, nextLink: null });
+  });
+
+  it('stops after one page when the product answers the caller nextLink with the same cursor', async () => {
+    const link = `${API}/workbench/alerts?skipToken=p2&top=10`;
+    request.mockResolvedValue(page(['WB-11'], link));
+    const result = (await run('listAlerts', { nextLink: link, maxResults: 200 })) as Record<
+      string,
+      unknown
+    >;
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({ pagesRead: 1, nextLink: null });
+  });
+
+  it('compares links in a normalised form: a relative link or reordered query is the same cursor', async () => {
+    request
+      .mockResolvedValueOnce(page(['WB-1'], `${API}/workbench/alerts?skipToken=p2&top=10`))
+      .mockResolvedValueOnce(page(['WB-2'], '/v3.0/workbench/alerts?top=10&skipToken=p2#x'));
+    const result = (await run('listAlerts', { maxResults: 200 })) as Record<string, unknown>;
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(result).toMatchObject({ pagesRead: 2, count: 2, nextLink: null });
   });
 
   it('stops without a request when the product returns a nextLink on another host', async () => {
@@ -201,8 +226,50 @@ describe('TrendAI Vision One listAlerts', () => {
     }
   );
 
-  it.each([10, 200])('accepts maxResults %i at the schema', (maxResults) => {
+  it.each([10, 20, 50, 200])('accepts maxResults %i at the schema', (maxResults) => {
     expect(parseInput('listAlerts', { maxResults }).success).toBe(true);
+  });
+
+  it.each([11, 15, 25, 199])(
+    'rejects maxResults %i, not a multiple of the page size of 10, at the schema',
+    (maxResults) => {
+      const parsed = parseInput('listAlerts', { maxResults });
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toContain('maxResults must be a multiple of 10');
+    }
+  );
+
+  it.each([
+    ['2026-02-31T25:61:61Z'],
+    ['2026-02-31T00:00:00Z'],
+    ['2026-02-29T00:00:00Z'],
+    ['2026-04-31T00:00:00Z'],
+    ['2026-13-01T00:00:00Z'],
+    ['2026-00-10T00:00:00Z'],
+    ['2026-01-00T00:00:00Z'],
+    ['2026-01-32T00:00:00Z'],
+    ['2026-01-01T24:00:00Z'],
+    ['2026-01-01T00:60:00Z'],
+    ['2026-01-01T00:00:60Z'],
+  ])('rejects the impossible date-time %s at the schema', (value) => {
+    for (const field of ['startDateTime', 'endDateTime']) {
+      const parsed = parseInput('listAlerts', { [field]: value });
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toContain('Use a real date and time');
+    }
+  });
+
+  it.each([
+    ['2026-02-28T23:59:59Z'],
+    ['2024-02-29T00:00:00Z'],
+    ['2000-02-29T12:30:45Z'],
+    ['2026-12-31T00:00:00Z'],
+    ['2026-01-01T00:00:00Z'],
+    ['2026-04-30T23:00:59Z'],
+  ])('accepts the valid edge date-time %s at the schema', (value) => {
+    expect(parseInput('listAlerts', { startDateTime: value, endDateTime: value }).success).toBe(
+      true
+    );
   });
 });
 
@@ -298,6 +365,32 @@ describe('TrendAI Vision One updateAlertStatus', () => {
     expect(request).toHaveBeenCalledTimes(1);
   });
 
+  it.each(['', '   '])('rejects the blank etag %j at the schema', (etag) => {
+    const parsed = parseInput('updateAlertStatus', { id: 'WB-1', status: 'Closed', etag });
+    expect(parsed.success).toBe(false);
+    expect(JSON.stringify(parsed.error)).toContain('etag must not be blank');
+  });
+
+  it('fails before any change when the alert is read without an ETag', async () => {
+    request.mockResolvedValueOnce(ok(alert('WB-1'), {}));
+    await expect(run('updateAlertStatus', { id: 'WB-1', status: 'Closed' })).rejects.toThrow(
+      'TrendAI Vision One updateAlertStatus stopped: Workbench alert WB-1 was read without an ETag, so the update was not sent'
+    );
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(request.mock.calls.map(([config]) => config.method)).toEqual(['GET']);
+  });
+
+  it('still skips an alert that already has the requested values when it is read without an ETag', async () => {
+    request.mockResolvedValueOnce(ok({ id: 'WB-1', status: 'Closed' }, {}));
+    await expect(run('updateAlertStatus', { id: 'WB-1', status: 'Closed' })).resolves.toEqual({
+      id: 'WB-1',
+      updated: false,
+      outcome: 'skipped',
+      status: 'Closed',
+    });
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
   it('requires status or investigationResult', () => {
     expect(parseInput('updateAlertStatus', { id: 'WB-1' }).success).toBe(false);
     expect(
@@ -307,6 +400,23 @@ describe('TrendAI Vision One updateAlertStatus', () => {
 });
 
 describe('TrendAI Vision One addAlertNote', () => {
+  it.each([
+    ['%E0%A4%A', '%E0%A4%A'],
+    ['%', '%'],
+    ['n%2D7', 'n-7'],
+  ])(
+    'reads the note id %s from Location without failing a successful write',
+    async (segment, noteId) => {
+      request.mockResolvedValueOnce(
+        ok(undefined, { location: `${API}/workbench/alerts/WB-1/notes/${segment}` }, 201)
+      );
+      await expect(
+        run('addAlertNote', { alertId: 'WB-1', content: 'Checked by SOC' })
+      ).resolves.toEqual({ alertId: 'WB-1', noteId });
+      expect(request).toHaveBeenCalledTimes(1);
+    }
+  );
+
   it('posts the note and returns the note id from Location', async () => {
     request.mockResolvedValueOnce(
       ok(undefined, { location: `${API}/workbench/alerts/WB-1/notes/7` }, 201)

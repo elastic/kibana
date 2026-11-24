@@ -73,10 +73,13 @@ export const startTask = async (
   return toTaskOutcome(action, data, unknownTarget);
 };
 
-/** Restore answers an unknown endpointName with a per-item 500 (seen live), not "Target not found.". */
+/**
+ * Restore answers an unknown endpointName with a per-item 500 (seen live), not "Target not found.";
+ * the same 500 is also a server error, so the message names both causes.
+ */
 const UNKNOWN_ENDPOINT_NAME: UnknownTarget = {
   status: 500,
-  hint: 'TrendAI Vision One answers 500 for an endpointName it does not know; check the name with listEndpoints or use agentGuid',
+  hint: 'TrendAI Vision One answers 500 both for an endpointName it does not know and for a server error: check the name with listEndpoints or use agentGuid; if the name is right, retry later',
 };
 
 /** Handler of a response action: one target, one task. */
@@ -87,7 +90,7 @@ const taskHandler =
 
 export const responseActions: ConnectorSpec['actions'] = {
   isolateEndpoint: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.isolateEndpoint,
     input: EndpointTaskInputSchema,

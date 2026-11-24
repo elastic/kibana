@@ -46,11 +46,13 @@ setVendorSpec({
 const NOT_TOOLS = [
   'addAlertNote',
   'addToExceptionList',
+  'addToSuspiciousObjectList',
   'collectForensicFile',
   'deleteEmailMessage',
   'disableUserAccount',
   'enableUserAccount',
   'forceUserSignOut',
+  'isolateEndpoint',
   'quarantineEmailMessage',
   'removeFromSuspiciousObjectList',
   'restoreEndpointConnection',
@@ -58,6 +60,15 @@ const NOT_TOOLS = [
   'submitUrlsToSandbox',
   'terminateProcess',
   'updateAlertStatus',
+];
+
+const READ_TOOLS = [
+  'getAlertDetails',
+  'getResponseTaskStatus',
+  'getSandboxAnalysisResult',
+  'listAlerts',
+  'listEndpoints',
+  'listObservedAttackTechniques',
 ];
 
 describe('TrendAI Vision One connector definition', () => {
@@ -84,29 +95,43 @@ describe('TrendAI Vision One connector definition', () => {
     expect(notTools).toEqual(NOT_TOOLS);
   });
 
-  it('marks reads as read and changes as write or destroy', () => {
+  it('gives agents exactly the 6 read actions as tools', () => {
+    const tools = Object.entries(TrendVisionOne.actions)
+      .filter(([, action]) => action.isTool !== false)
+      .map(([name]) => name)
+      .sort();
+    expect(tools).toEqual(READ_TOOLS);
+    for (const name of tools) expect(TrendVisionOne.actions[name].scope).toBe('read');
+  });
+
+  it('pins the scope of every action (the PR Actions table)', () => {
     const scopes = Object.fromEntries(
       Object.entries(TrendVisionOne.actions).map(([name, action]) => [name, action.scope])
     );
-    for (const name of [
-      'listAlerts',
-      'getAlertDetails',
-      'listEndpoints',
-      'listObservedAttackTechniques',
-      'getResponseTaskStatus',
-      'getSandboxAnalysisResult',
-    ]) {
-      expect(scopes[name]).toBe('read');
-    }
-    for (const name of [
-      'updateAlertStatus',
-      'isolateEndpoint',
-      'terminateProcess',
-      'deleteEmailMessage',
-      'removeFromSuspiciousObjectList',
-    ]) {
-      expect(scopes[name]).toBe('destroy');
-    }
+    expect(scopes).toEqual({
+      listAlerts: 'read',
+      getAlertDetails: 'read',
+      updateAlertStatus: 'destroy',
+      addAlertNote: 'write',
+      listObservedAttackTechniques: 'read',
+      listEndpoints: 'read',
+      isolateEndpoint: 'destroy',
+      restoreEndpointConnection: 'destroy',
+      terminateProcess: 'destroy',
+      collectForensicFile: 'write',
+      getResponseTaskStatus: 'read',
+      quarantineEmailMessage: 'destroy',
+      deleteEmailMessage: 'destroy',
+      disableUserAccount: 'destroy',
+      enableUserAccount: 'destroy',
+      forceUserSignOut: 'destroy',
+      addToSuspiciousObjectList: 'destroy',
+      removeFromSuspiciousObjectList: 'destroy',
+      addToExceptionList: 'write',
+      submitFileToSandbox: 'write',
+      submitUrlsToSandbox: 'write',
+      getSandboxAnalysisResult: 'read',
+    });
   });
 
   it('defaults the region to India', () => {
@@ -135,6 +160,8 @@ describe('TrendAI Vision One connector definition', () => {
     ['https://api.in.xdr.trendmicro.com?x=1', 'must not have a query string (?...)'],
     ['https://api.in.xdr.trendmicro.com#x', 'must not have a fragment (#...)'],
     ['https://api.in.xdr.trendmicro.com/v3.0', 'must not have a path (/v3.0)'],
+    ['https://user:secret@api.in.xdr.trendmicro.com', 'must not contain a user name or password'],
+    ['https://user@api.in.xdr.trendmicro.com', 'must not contain a user name or password'],
   ])('refuses apiUrl %s when the connector is saved', (apiUrl, message) => {
     const result = TrendVisionOne.schema?.safeParse({ apiUrl });
     expect(result?.success).toBe(false);
@@ -152,6 +179,22 @@ describe('TrendAI Vision One connector definition', () => {
   });
 });
 
+describe('TrendAI Vision One apiUrl length', () => {
+  const hostOfLength = (length: number) =>
+    `https://${'a'.repeat(length - 'https://.com'.length)}.com`;
+
+  it('accepts an apiUrl of 2048 characters and refuses one of 2049', () => {
+    const at = hostOfLength(2048);
+    const over = hostOfLength(2049);
+    expect(at).toHaveLength(2048);
+    expect(over).toHaveLength(2049);
+    expect(TrendVisionOne.schema?.safeParse({ apiUrl: at }).success).toBe(true);
+    const result = TrendVisionOne.schema?.safeParse({ apiUrl: over });
+    expect(result?.success).toBe(false);
+    expect(JSON.stringify(result?.error?.issues)).toContain('2048');
+  });
+});
+
 describe('TrendAI Vision One agent skill', () => {
   const skill = String(TrendVisionOne.skill);
   const named = new Set(skill.match(/`(\w+)`/g)?.map((name) => name.slice(1, -1)));
@@ -164,13 +207,32 @@ describe('TrendAI Vision One agent skill', () => {
     expect([...named].sort()).toEqual(tools);
   });
 
-  it('asks the agent to confirm before isolating or blocking and says a person undoes them', () => {
-    expect(skill).toContain(
-      'Confirm with the user before `isolateEndpoint` and `addToSuspiciousObjectList`: the agent cannot undo them'
+  it('marks exactly the actions agents cannot use as not yet available on the docs page', () => {
+    const docs = fs.readFileSync(
+      join(REPO_ROOT, 'docs/reference/connectors-kibana/trend-vision-one-action-type.md'),
+      'utf8'
     );
+    expect(docs).toContain('currently available in **Agent Builder** only');
+    expect(docs).toContain('Agents can only read');
+    expect(docs).not.toMatch(/asks you to confirm/i);
+    for (const [name, action] of Object.entries(TrendVisionOne.actions)) {
+      const marked = docs.includes(`\n\`${name}\` _(not yet available)_\n`);
+      const listed = marked || docs.includes(`\n\`${name}\`\n`);
+      expect({ name, listed }).toEqual({ name, listed: true });
+      expect({ name, marked }).toEqual({ name, marked: action.isTool === false });
+    }
+  });
+
+  it('names exactly the 6 read tools and says a person makes every change', () => {
+    expect([...named].sort()).toEqual(READ_TOOLS);
+    expect(skill).toContain('These tools only read. A person makes every change');
+    expect(skill).not.toMatch(/confirm/i);
+    for (const name of READ_TOOLS) {
+      expect(String(TrendVisionOne.actions[name].description)).not.toMatch(/confirm/i);
+    }
     for (const name of ['isolateEndpoint', 'addToSuspiciousObjectList']) {
-      expect(TrendVisionOne.actions[name].isTool).toBe(true);
-      expect(TrendVisionOne.actions[name].description).toContain('Confirm with the user first');
+      expect(TrendVisionOne.actions[name].isTool).toBe(false);
+      expect(TrendVisionOne.actions[name].description).not.toMatch(/confirm/i);
     }
   });
 
@@ -182,6 +244,37 @@ describe('TrendAI Vision One agent skill', () => {
       if (action.isTool === false) continue;
       for (const other of hidden) expect(String(action.description)).not.toContain(other);
     }
+  });
+
+  /** Every description text of a tool input schema, at any depth. */
+  const fieldDescriptions = (node: unknown): string[] => {
+    if (Array.isArray(node)) return node.flatMap(fieldDescriptions);
+    if (node === null || typeof node !== 'object') return [];
+    return Object.entries(node as Record<string, unknown>).flatMap(([key, value]) =>
+      key === 'description' && typeof value === 'string' ? [value] : fieldDescriptions(value)
+    );
+  };
+
+  it('keeps the input field descriptions of agent tools free of actions agents cannot use', () => {
+    const hidden = Object.entries(TrendVisionOne.actions)
+      .filter(([, action]) => action.isTool === false)
+      .map(([name]) => name);
+    let checked = 0;
+    for (const name of READ_TOOLS) {
+      const texts = fieldDescriptions(z.toJSONSchema(TrendVisionOne.actions[name].input));
+      for (const text of texts) {
+        checked++;
+        for (const other of hidden) expect(text).not.toContain(other);
+        expect(text).not.toMatch(/submit action|response action|sandbox submit/i);
+      }
+    }
+    expect(checked).toBeGreaterThan(20);
+    expect(
+      fieldDescriptions(z.toJSONSchema(TrendVisionOne.actions.getSandboxAnalysisResult.input))
+    ).toContain('The submission id.');
+    expect(
+      fieldDescriptions(z.toJSONSchema(TrendVisionOne.actions.getResponseTaskStatus.input))
+    ).toContain('The task id.');
   });
 });
 

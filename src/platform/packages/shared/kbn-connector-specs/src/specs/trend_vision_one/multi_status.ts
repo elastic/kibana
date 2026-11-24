@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { safeDecode } from './client';
 import { VENDOR } from './constants';
 
 /** One entry of a 207 Multi-Status answer: the per-item status, headers and body. */
@@ -28,7 +29,10 @@ export interface TaskOutcome {
   error: ItemError | null;
 }
 
-/** A per-item status the product answers for an unknown target, with a hint for the caller. */
+/**
+ * A per-item status the product answers both for an unknown target and for a server error, with a
+ * hint for the caller that names both causes.
+ */
 export interface UnknownTarget {
   status: number;
   hint: string;
@@ -64,13 +68,14 @@ export const taskIdFrom = (item: MultiStatusItem): string | null => {
   const location = item.headers?.find((h) => h.name?.toLowerCase() === 'operation-location');
   if (!location?.value) return null;
   const segments = location.value.split('?')[0].split('/').filter(Boolean);
-  return segments.length > 0 ? decodeURIComponent(segments[segments.length - 1]) : null;
+  return segments.length > 0 ? safeDecode(segments[segments.length - 1]) : null;
 };
 
 /**
  * Item rules of a response task: 202 requested with its task id; "Task duplication." skipped (the
- * same task is already running); an unknown target ("Target not found.", 404, or the caller's
- * `unknownTarget` status) and any other item error fail the action.
+ * same task is already running) with the task id when the item has one; an unknown target
+ * ("Target not found." or 404), the caller's `unknownTarget` status (with its hint) and any other
+ * item error fail the action.
  */
 export const toTaskOutcome = (
   action: string,
@@ -88,17 +93,14 @@ export const toTaskOutcome = (
     error?.code === 'TaskError' &&
     /task duplication/i.test(error.message ?? '')
   ) {
-    return { outcome: 'skipped', status, taskId: null, error };
+    return { outcome: 'skipped', status, taskId: taskIdFrom(item), error };
   }
-  const isUnknownTarget = unknownTarget !== undefined && status === unknownTarget.status;
-  if (
-    status === 404 ||
-    isUnknownTarget ||
-    (status === 400 && /target not found/i.test(error?.message ?? ''))
-  ) {
+  if (unknownTarget !== undefined && status === unknownTarget.status) {
+    throw new Error(`${failItem(action, item).message.replace(/\.$/, '')}. ${unknownTarget.hint}`);
+  }
+  if (status === 404 || (status === 400 && /target not found/i.test(error?.message ?? ''))) {
     const detail = [error?.code, error?.message].filter(Boolean).join(': ') || 'no details';
-    const hint = isUnknownTarget ? `. ${unknownTarget.hint}` : '';
-    throw new Error(`${VENDOR} ${action} found no such target (${status}): ${detail}${hint}`);
+    throw new Error(`${VENDOR} ${action} found no such target (${status}): ${detail}`);
   }
   throw failItem(action, item);
 };

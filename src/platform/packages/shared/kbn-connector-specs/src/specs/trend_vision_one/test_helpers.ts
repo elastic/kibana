@@ -69,6 +69,7 @@ export interface SpecSchema {
   $ref?: string;
   type?: string;
   enum?: unknown[];
+  required?: string[];
   properties?: Record<string, SpecSchema>;
   items?: SpecSchema;
   oneOf?: SpecSchema[];
