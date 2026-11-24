@@ -8,6 +8,7 @@
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAgentId } from '../../../hooks/use_conversation';
@@ -18,6 +19,7 @@ import { useCurrentUser } from '../../../hooks/use_current_user';
 import { useCarryOverDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { DEFAULT_CONVERSATION_STARTERS } from './default_conversation_starters';
 import { useConversationStarters } from './use_conversation_starters';
 
 // The agent is resolved by the real hooks (list first, then by id), against a fake agents service,
@@ -32,11 +34,7 @@ jest.mock('../../../hooks/use_input_draft');
 jest.mock('../../../context/active_space_context');
 jest.mock('../../../context/conversation/conversation_context');
 
-const agentWithStarters = {
-  id: 'agent-1',
-  name: 'Agent',
-  conversation_starters: [{ label: 'Top errors' }],
-};
+const defaultAgent = { id: agentBuilderDefaultAgentId, name: 'Elastic AI Agent' };
 
 describe('useConversationStarters with the real agent hooks', () => {
   let queryClient: QueryClient;
@@ -49,9 +47,9 @@ describe('useConversationStarters with the real agent hooks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient = new QueryClient();
-    get.mockResolvedValue(agentWithStarters);
+    get.mockResolvedValue(defaultAgent);
     jest.mocked(useAgentBuilderServices).mockReturnValue({ agentService: { list, get } } as never);
-    jest.mocked(useAgentId).mockReturnValue('agent-1');
+    jest.mocked(useAgentId).mockReturnValue(agentBuilderDefaultAgentId);
     jest
       .mocked(useSubmitMessage)
       .mockReturnValue({ submitMessage: jest.fn(), isCreatingConversation: false });
@@ -67,27 +65,28 @@ describe('useConversationStarters with the real agent hooks', () => {
       .mockReturnValue({ takeNewChatDraft: jest.fn(), saveDraftTo: jest.fn() });
   });
 
-  it('shows the starters of an agent found in the agents list', async () => {
-    list.mockResolvedValue([agentWithStarters]);
+  it('shows the default starters for the default agent found in the agents list', async () => {
+    list.mockResolvedValue([defaultAgent]);
 
     const { result } = renderHook(() => useConversationStarters(), { wrapper });
 
-    await waitFor(() => expect(result.current.starters).toEqual([{ label: 'Top errors' }]));
+    await waitFor(() => expect(result.current.starters).toEqual(DEFAULT_CONVERSATION_STARTERS));
     // The agent is also fetched by id, as the message input does, to check whether it is bound to a
     // service account.
-    expect(get).toHaveBeenCalledWith('agent-1');
+    expect(get).toHaveBeenCalledWith(agentBuilderDefaultAgentId);
   });
 
-  it('shows the starters of an agent that is not in the list, such as a hidden one', async () => {
+  it('shows the default starters when the default agent is not in the list', async () => {
     list.mockResolvedValue([]);
 
     const { result } = renderHook(() => useConversationStarters(), { wrapper });
 
-    await waitFor(() => expect(result.current.starters).toEqual([{ label: 'Top errors' }]));
-    expect(get).toHaveBeenCalledWith('agent-1');
+    await waitFor(() => expect(result.current.starters).toEqual(DEFAULT_CONVERSATION_STARTERS));
+    expect(get).toHaveBeenCalledWith(agentBuilderDefaultAgentId);
   });
 
-  it('shows nothing for an agent without starters', async () => {
+  it('shows nothing for any other agent', async () => {
+    jest.mocked(useAgentId).mockReturnValue('agent-1');
     list.mockResolvedValue([{ id: 'agent-1', name: 'Agent' }]);
     get.mockResolvedValue({ id: 'agent-1', name: 'Agent' });
 

@@ -73,6 +73,7 @@ describe('NewConversationPrompt', () => {
     mockedUseNowrapFitsContainer.mockReturnValue(true);
     mockUseConversationStarters.mockReturnValue({
       starters: [{ label: 'first' }],
+      source: 'default',
       onSelect: jest.fn(),
       isDisabled: false,
     });
@@ -94,6 +95,16 @@ describe('NewConversationPrompt', () => {
     render(<NewConversationPrompt />, { wrapper });
 
     expect(await screen.findByTestId('mockConversationStarters')).toBeInTheDocument();
+  });
+
+  it('tells the starters where they came from and the solution of the space', async () => {
+    render(<NewConversationPrompt />, { wrapper });
+
+    await waitFor(() =>
+      expect(mockStartersListProps).toHaveBeenLastCalledWith(
+        expect.objectContaining({ source: 'default', solution: 'classic' })
+      )
+    );
   });
 
   it('shows the starters in a row on the full screen and stacked in the flyout', async () => {

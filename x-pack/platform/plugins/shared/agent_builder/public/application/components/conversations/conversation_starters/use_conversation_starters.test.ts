@@ -6,6 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
@@ -13,6 +14,7 @@ import { useCurrentUser } from '../../../hooks/use_current_user';
 import { useCarryOverDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { DEFAULT_CONVERSATION_STARTERS } from './default_conversation_starters';
 import { useConversationStarters } from './use_conversation_starters';
 
 jest.mock('../../../hooks/use_conversation');
@@ -57,14 +59,9 @@ describe('useConversationStarters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     submitMessage.mockReset();
-    mockUseAgentId.mockReturnValue('agent-1');
+    mockUseAgentId.mockReturnValue(agentBuilderDefaultAgentId);
     mockUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
-    mockSendState({
-      agent: {
-        id: 'agent-1',
-        conversation_starters: [{ label: 'first' }, { label: 'second' }],
-      } as never,
-    });
+    mockSendState();
     mockUseActiveSpaceId.mockReturnValue('default');
     mockUseConversationContext.mockReturnValue({ sessionTag: 'tag' } as never);
     mockUseCurrentUser.mockReturnValue({ currentUser: { user: { username: 'elastic' } } } as never);
@@ -72,15 +69,16 @@ describe('useConversationStarters', () => {
     mockUseCarryOverDraft.mockReturnValue({ takeNewChatDraft, saveDraftTo });
   });
 
-  it('returns the starters of the selected agent', () => {
+  it('returns the default starters for the default agent', () => {
     const { result } = renderHook(() => useConversationStarters());
 
-    expect(mockUseAgentSendState).toHaveBeenCalledWith('agent-1');
-    expect(result.current.starters).toEqual([{ label: 'first' }, { label: 'second' }]);
+    expect(mockUseAgentSendState).toHaveBeenCalledWith(agentBuilderDefaultAgentId);
+    expect(result.current.starters).toEqual(DEFAULT_CONVERSATION_STARTERS);
+    expect(result.current.source).toBe('default');
   });
 
-  it('returns no starters while the agent is not found yet', () => {
-    mockSendState({ agent: undefined });
+  it('returns no starters for any other agent', () => {
+    mockUseAgentId.mockReturnValue('agent-1');
 
     const { result } = renderHook(() => useConversationStarters());
 
@@ -97,14 +95,6 @@ describe('useConversationStarters', () => {
 
   it('returns no starters when the agent is bound and the user cannot invoke it', () => {
     mockSendState({ isBoundAgentForbidden: true });
-
-    const { result } = renderHook(() => useConversationStarters());
-
-    expect(result.current.starters).toEqual([]);
-  });
-
-  it('returns no starters when the agent has none', () => {
-    mockSendState({ agent: { id: 'agent-1' } as never });
 
     const { result } = renderHook(() => useConversationStarters());
 
@@ -128,7 +118,7 @@ describe('useConversationStarters', () => {
       spaceId: 'default',
       sessionTag: 'tag',
       username: 'elastic',
-      agentId: 'agent-1',
+      agentId: agentBuilderDefaultAgentId,
     });
   });
 
@@ -251,7 +241,7 @@ describe('useConversationStarters', () => {
 
     const { result } = renderHook(() => useConversationStarters());
 
-    expect(mockUseAgentSendState).toHaveBeenCalledWith('agent-1');
+    expect(mockUseAgentSendState).toHaveBeenCalledWith(agentBuilderDefaultAgentId);
     expect(result.current.isDisabled).toBe(true);
   });
 

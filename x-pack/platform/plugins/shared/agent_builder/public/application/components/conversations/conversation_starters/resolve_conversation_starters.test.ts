@@ -10,32 +10,32 @@ import { resolveConversationStarters } from './resolve_conversation_starters';
 const labels = (...values: string[]) => values.map((label) => ({ label }));
 
 describe('resolveConversationStarters', () => {
-  it('returns the agent starters', () => {
-    expect(resolveConversationStarters({ agentStarters: labels('a', 'b') })).toEqual(
+  it('returns the default starters', () => {
+    expect(resolveConversationStarters({ defaultStarters: labels('a', 'b') })).toEqual(
       labels('a', 'b')
     );
   });
 
-  it('returns an empty list when the agent has no starters', () => {
+  it('returns an empty list when there are no starters', () => {
     expect(resolveConversationStarters({})).toEqual([]);
-    expect(resolveConversationStarters({ agentStarters: [] })).toEqual([]);
+    expect(resolveConversationStarters({ defaultStarters: [] })).toEqual([]);
   });
 
   it('trims labels', () => {
-    expect(resolveConversationStarters({ agentStarters: labels('  a  ', 'b') })).toEqual(
+    expect(resolveConversationStarters({ defaultStarters: labels('  a  ', 'b') })).toEqual(
       labels('a', 'b')
     );
   });
 
   it('drops starters without a label and repeated labels, keeping the first', () => {
     expect(
-      resolveConversationStarters({ agentStarters: labels('a', '', '   ', 'a', 'b') })
+      resolveConversationStarters({ defaultStarters: labels('a', '', '   ', 'a', 'b') })
     ).toEqual(labels('a', 'b'));
   });
 
   it('keeps at most three starters', () => {
-    expect(resolveConversationStarters({ agentStarters: labels('1', '2', '3', '4', '5') })).toEqual(
-      labels('1', '2', '3')
-    );
+    expect(
+      resolveConversationStarters({ defaultStarters: labels('1', '2', '3', '4', '5') })
+    ).toEqual(labels('1', '2', '3'));
   });
 });

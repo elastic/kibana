@@ -20,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { ConversationStarter } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
+import type { ConversationStartersSource } from './resolve_conversation_starters';
 
 const groupAriaLabel = i18n.translate('xpack.agentBuilder.conversationStarters.groupAriaLabel', {
   defaultMessage: 'Conversation starters',
@@ -68,6 +70,10 @@ export interface ConversationStartersListProps {
   isDisabled?: boolean;
   /** Stacks full-width cards in a column, for narrow containers like the flyout. */
   isStacked?: boolean;
+  /** Who defined the starters, reported with the clicks. */
+  source?: ConversationStartersSource;
+  /** The solution of the current space, reported with the clicks. */
+  solution?: SolutionView;
 }
 
 export const ConversationStartersList: React.FC<ConversationStartersListProps> = ({
@@ -75,6 +81,8 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
   onSelect,
   isDisabled = false,
   isStacked = false,
+  source = 'default',
+  solution,
 }) => {
   const styles = useEuiMemoizedStyles(componentStyles);
 
@@ -108,7 +116,7 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
                 ? AGENT_BUILDER_UI_EBT.element.flyout
                 : AGENT_BUILDER_UI_EBT.element.pageContent,
               action: AGENT_BUILDER_UI_EBT.action.conversationStarters.CONVERSATION_STARTER_CLICK,
-              detail: `${index + 1}`,
+              detail: `${source}:${solution ?? 'unknown'}:${index + 1}`,
             })}
           >
             <span css={styles.content}>

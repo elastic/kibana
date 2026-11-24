@@ -8,16 +8,19 @@
 import type { ConversationStarter } from '@kbn/agent-builder-common';
 import { MAX_CONVERSATION_STARTERS } from '@kbn/agent-builder-common';
 
+/** Where the starters being shown came from, reported with the clicks. */
+export type ConversationStartersSource = 'application' | 'solution' | 'default';
+
 /**
  * Picks the starters to show. Labels are trimmed, starters without a label and repeated labels are
  * dropped, and at most MAX_CONVERSATION_STARTERS are returned.
  */
 export const resolveConversationStarters = ({
-  agentStarters,
+  defaultStarters,
 }: {
-  agentStarters?: readonly ConversationStarter[];
+  defaultStarters?: readonly ConversationStarter[];
 }): ConversationStarter[] => {
-  const normalized = (agentStarters ?? []).flatMap(({ label }): ConversationStarter[] => {
+  const normalized = (defaultStarters ?? []).flatMap(({ label }): ConversationStarter[] => {
     const trimmedLabel = label.trim();
     return trimmedLabel ? [{ label: trimmedLabel }] : [];
   });

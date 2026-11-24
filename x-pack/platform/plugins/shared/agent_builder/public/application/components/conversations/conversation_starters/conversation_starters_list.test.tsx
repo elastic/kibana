@@ -82,9 +82,26 @@ describe('ConversationStartersList', () => {
 
     expect(first).toHaveAttribute('data-ebt-action', 'conversation_starter_click');
     expect(first).toHaveAttribute('data-ebt-element', 'agentBuilder.pageContent');
-    expect(first).toHaveAttribute('data-ebt-detail', '1');
-    expect(second).toHaveAttribute('data-ebt-detail', '2');
+    expect(first).toHaveAttribute('data-ebt-detail', 'default:unknown:1');
+    expect(second).toHaveAttribute('data-ebt-detail', 'default:unknown:2');
     expect(second.getAttribute('data-ebt-detail')).not.toContain('second');
+  });
+
+  it('reports where the starters came from and the solution of the space', () => {
+    render(
+      <ConversationStartersList
+        starters={[{ label: 'first' }, { label: 'second' }]}
+        onSelect={jest.fn()}
+        source="solution"
+        solution="security"
+      />,
+      { wrapper }
+    );
+
+    const [first, second] = screen.getAllByTestId('agentBuilderConversationStarter');
+
+    expect(first).toHaveAttribute('data-ebt-detail', 'solution:security:1');
+    expect(second).toHaveAttribute('data-ebt-detail', 'solution:security:2');
   });
 
   it('reports clicks in the flyout under the flyout element', () => {

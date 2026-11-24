@@ -8,6 +8,7 @@
 import type { MutableRefObject } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { ConversationStarter } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
@@ -16,11 +17,14 @@ import { useCarryOverDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import type { TakeInputDraft } from '../conversation_input/conversation_input';
+import { DEFAULT_CONVERSATION_STARTERS } from './default_conversation_starters';
+import type { ConversationStartersSource } from './resolve_conversation_starters';
 import { resolveConversationStarters } from './resolve_conversation_starters';
 
 /**
- * The starters to show for the selected agent, and how to send one. Nothing is returned while the
- * agent loads or when the user can't run it, so starters never appear for an input that can't send.
+ * The starters to show, and how to send one. They are shown for the default Elastic AI agent only.
+ * Nothing is returned while the agent loads or when the user can't run it, so starters never appear
+ * for an input that can't send.
  */
 export const useConversationStarters = ({
   isInputUploading = false,
@@ -31,8 +35,7 @@ export const useConversationStarters = ({
 } = {}) => {
   const agentId = useAgentId();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
-  const { agent, agentExists, isBoundAgentForbidden, isAgentModelLoading } =
-    useAgentSendState(agentId);
+  const { agentExists, isBoundAgentForbidden, isAgentModelLoading } = useAgentSendState(agentId);
   const spaceId = useActiveSpaceId();
   const { sessionTag } = useConversationContext();
   const { currentUser } = useCurrentUser();
@@ -43,12 +46,15 @@ export const useConversationStarters = ({
     agentId,
   });
 
-  const canSend = agentExists && !isBoundAgentForbidden;
-  const agentStarters = agent?.conversation_starters;
+  const canShow = agentExists && !isBoundAgentForbidden && agentId === agentBuilderDefaultAgentId;
+  const source: ConversationStartersSource = 'default';
 
   const starters = useMemo(
-    () => (canSend ? resolveConversationStarters({ agentStarters }) : []),
-    [canSend, agentStarters]
+    () =>
+      canShow
+        ? resolveConversationStarters({ defaultStarters: DEFAULT_CONVERSATION_STARTERS })
+        : [],
+    [canShow]
   );
 
   const onSelect = useCallback(
@@ -69,6 +75,7 @@ export const useConversationStarters = ({
 
   return {
     starters,
+    source,
     onSelect,
     isDisabled: isCreatingConversation || isAgentModelLoading || isInputUploading,
   };

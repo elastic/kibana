@@ -179,7 +179,7 @@ export const NewConversationPrompt: React.FC<{}> = () => {
   const wrapAndCenter = !fitsOnOneLine;
   const [isInputUploading, setIsInputUploading] = useState(false);
   const takeInputDraftRef = useRef<TakeInputDraft | null>(null);
-  const { starters, onSelect, isDisabled } = useConversationStarters({
+  const { starters, source, onSelect, isDisabled } = useConversationStarters({
     isInputUploading,
     takeInputDraftRef,
   });
@@ -248,6 +248,8 @@ export const NewConversationPrompt: React.FC<{}> = () => {
             onSelect={onSelect}
             isDisabled={isDisabled}
             isStacked={isEmbeddedContext}
+            source={source}
+            solution={spaceSolution}
           />
         </EuiFlexItem>
       )}
