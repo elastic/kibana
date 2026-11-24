@@ -19,8 +19,16 @@
 export const RULE_EXECUTION_COUNTERS = {
   signalsGenerated: 'signalsGenerated',
   ruleEventsGenerated: 'ruleEventsGenerated',
+  breachedEventsGenerated: 'breachedEventsGenerated',
+  recoveredEventsGenerated: 'recoveredEventsGenerated',
+  noDataEventsGenerated: 'noDataEventsGenerated',
   newEpisodesGenerated: 'newEpisodesGenerated',
+  episodesTransitionedToPending: 'episodesTransitionedToPending',
+  episodesTransitionedToActive: 'episodesTransitionedToActive',
+  episodesTransitionedToRecovering: 'episodesTransitionedToRecovering',
+  episodesTransitionedToInactive: 'episodesTransitionedToInactive',
   rowsReturnedByQuery: 'rowsReturnedByQuery',
+  queryBatchesProcessed: 'queryBatchesProcessed',
   groupsDroppedByLimit: 'groupsDroppedByLimit',
   rowsDroppedByLimit: 'rowsDroppedByLimit',
 } as const;

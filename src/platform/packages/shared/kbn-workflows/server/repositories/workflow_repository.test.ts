@@ -470,6 +470,40 @@ describe('WorkflowRepository.getWorkflow', () => {
     });
   });
 
+  it('maps the template origin when the workflow was created from a template', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: {
+          hits: [
+            {
+              _id: 'wf-from-template',
+              _source: {
+                ...baseSource,
+                templateSlug: 'triage-alerts',
+                templateVersion: '1.2.0',
+                templateOrigin: 'install',
+                created_at: '2024-01-02T03:04:05.000Z',
+                updated_at: '2024-06-07T08:09:10.000Z',
+              },
+            },
+          ],
+        },
+      }),
+    };
+    const repository = new WorkflowRepository({
+      esClient: esClient as any,
+      logger: loggingSystemMock.create().get(),
+    });
+
+    const wf = await repository.getWorkflow('wf-from-template', 'default');
+    expect(wf).toMatchObject({
+      templateSlug: 'triage-alerts',
+      templateVersion: '1.2.0',
+      templateOrigin: 'install',
+    });
+  });
+
   it('applies managed filter in getWorkflow when managedFilter is managed', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({

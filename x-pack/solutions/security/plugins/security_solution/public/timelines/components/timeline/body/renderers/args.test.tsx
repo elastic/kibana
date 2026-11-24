@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { TestProviders } from '../../../../../common/mock';
 import { ArgsComponent } from './args';
 import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
@@ -34,28 +33,31 @@ const MockedCellActionsRenderer = jest.fn(({ children }) => {
 });
 
 describe('Args', () => {
-  const mount = useMountAppended();
-
   beforeEach(() => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
 
   describe('rendering', () => {
-    test('it renders against shallow snapshot', () => {
-      const wrapper = shallow(
-        <ArgsComponent
-          scopeId="some_scope"
-          contextId="context-123"
-          eventId="event-123"
-          args={['arg1', 'arg2', 'arg3']}
-          processTitle="process-title-1"
-        />
+    test('it renders each arg and the process title as badges', () => {
+      render(
+        <TestProviders>
+          <ArgsComponent
+            scopeId="some_scope"
+            contextId="context-123"
+            eventId="event-123"
+            args={['arg1', 'arg2', 'arg3']}
+            processTitle="process-title-1"
+          />
+        </TestProviders>
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(screen.getAllByTestId('mock-cell-action-renderer')).toHaveLength(4);
+      ['arg1', 'arg2', 'arg3', 'process-title-1'].forEach((text) =>
+        expect(screen.getByText(text)).toBeInTheDocument()
+      );
     });
 
     test('it returns an empty string when both args and process title are undefined', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <ArgsComponent
             scopeId="some_scope"
@@ -66,11 +68,11 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
 
     test('it returns an empty string when both args and process title are null', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <ArgsComponent
             scopeId="some_scope"
@@ -81,11 +83,11 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
 
     test('it returns an empty string when args is an empty array, and title is an empty string', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <ArgsComponent
             scopeId="some_scope"
@@ -96,11 +98,11 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
 
     test('it returns args when args are provided, and process title is NOT provided', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <ArgsComponent
             scopeId="some_scope"
@@ -111,11 +113,11 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('arg1arg2arg3');
+      expect(container.textContent).toEqual('arg1arg2arg3');
     });
 
     test('it returns process title when process title is provided, and args is NOT provided', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <ArgsComponent
             scopeId="some_scope"
@@ -126,11 +128,11 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('process-title-1');
+      expect(container.textContent).toEqual('process-title-1');
     });
 
     test('it returns both args and process title, when both are provided', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <ArgsComponent
             scopeId="some_scope"
@@ -141,11 +143,11 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('arg1arg2arg3process-title-1');
+      expect(container.textContent).toEqual('arg1arg2arg3process-title-1');
     });
 
     test('should passing correct scopeId to cell actions', () => {
-      mount(
+      render(
         <TestProviders>
           <div>
             <ArgsComponent

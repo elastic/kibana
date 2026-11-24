@@ -77,6 +77,7 @@ plugins:
     - monitoring
     - navigation
     - nightshift
+    - nightshift_detection
     - nightshift_investigations
     - nightshift_sources
     - notification_center

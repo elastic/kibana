@@ -8,7 +8,7 @@
 import { z, lazySchema } from '@kbn/zod';
 
 import { ALL_VALUE, SLO_STATUS } from '../constants';
-import { MAX_DATE_STRING_LENGTH } from './limits';
+import { MAX_DATE_STRING_LENGTH, MAX_KEYWORD_LENGTH } from './limits';
 
 const allOrAnyString = z.union([z.literal(ALL_VALUE), z.string()]);
 
@@ -81,7 +81,12 @@ const summarySchema = lazySchema(() =>
     .meta({ id: 'SLOSummary', description: 'The SLO computed data', additionalProperties: true })
 );
 
-const groupingsSchema = z.record(z.string(), z.union([z.string(), z.number()]));
+const groupingsSchema = lazySchema(() =>
+  z.record(
+    z.string().max(MAX_KEYWORD_LENGTH),
+    z.union([z.string().max(MAX_KEYWORD_LENGTH), z.number()])
+  )
+);
 
 const metaSchema = lazySchema(() =>
   z

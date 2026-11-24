@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { Header } from './header';
-import { mockObservedService } from '../../../../flyout/entity_details/service_right/mocks';
+import { mockObservedService } from '../mocks';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 
 const mockProps = {

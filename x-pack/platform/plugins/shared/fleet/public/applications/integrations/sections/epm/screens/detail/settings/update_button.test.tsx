@@ -245,3 +245,65 @@ describe('UpdateButton breaking changes acknowledgement', () => {
     });
   });
 });
+
+describe('UpdateButton agent version incompatibility', () => {
+  const agentVersionBlock = {
+    package_name: 'nginx',
+    package_version: '2.0.0',
+    version_condition: '^9.4.0',
+    blocked_count: 2,
+    observed_versions: ['9.3.1'],
+  };
+  const dryRunRecord = (id: string, block?: typeof agentVersionBlock) =>
+    ({
+      hasErrors: false,
+      diff: [{ id, name: `${id}-name` }, {}],
+      ...(block ? { agent_version_block: block } : {}),
+    } as never);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockInstallPackage.mockResolvedValue(true);
+    mockUpgradePoliciesMutateAsync.mockResolvedValue([{ id: 'policy-1', success: true }]);
+  });
+
+  it('skips the policies blocked by their agents versions and says so', async () => {
+    const { toasts } = await renderAndConfirmUpgrade({
+      packagePolicyIds: ['policy-1', 'policy-blocked'],
+      dryRunData: [dryRunRecord('policy-1'), dryRunRecord('policy-blocked', agentVersionBlock)],
+    });
+
+    await waitFor(() =>
+      expect(mockUpgradePoliciesMutateAsync).toHaveBeenCalledWith({
+        packagePolicyIds: ['policy-1'],
+        acknowledgeBreakingChanges: false,
+      })
+    );
+    expect(toasts.addWarning).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: expect.stringContaining('1 agent-based policy'),
+        text: expect.stringContaining('policy-blocked-name'),
+      })
+    );
+  });
+
+  it('reports the policies that failed when the upgrade partially succeeds', async () => {
+    mockUpgradePoliciesMutateAsync.mockResolvedValue([
+      { id: 'policy-1', success: true },
+      { id: 'policy-2', name: 'second', success: false, body: { message: 'blocked by agents' } },
+    ]);
+
+    const { toasts } = await renderAndConfirmUpgrade({
+      packagePolicyIds: ['policy-1', 'policy-2'],
+    });
+
+    await waitFor(() => expect(toasts.addWarning).toHaveBeenCalled());
+    expect(toasts.addWarning).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: expect.stringContaining('1 agent-based policy'),
+        text: expect.stringContaining('blocked by agents'),
+      })
+    );
+    expect(toasts.addSuccess).toHaveBeenCalled();
+  });
+});

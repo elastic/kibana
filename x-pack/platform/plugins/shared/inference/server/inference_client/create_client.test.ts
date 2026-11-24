@@ -183,6 +183,7 @@ describe('createClient', () => {
         bindTo: jest.fn(),
         listConnectors: jest.fn(),
         getConnectorById: jest.fn(),
+        decide: jest.fn(),
       };
       createInferenceClientMock.mockReturnValue(unboundClient);
       bindClientMock.mockImplementation(

@@ -342,6 +342,7 @@ export class ActionsPlugin
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
   private setupContract?: PluginSetupContract;
+  private isCatalogFeatureFlagEnabled = false;
   private connectorCatalogFeatureFlagSubscription?: Subscription;
   private connectorCatalog?: ConnectorCatalogHandle;
   private catalogReady: Promise<void> = Promise.resolve();
@@ -656,8 +657,7 @@ export class ActionsPlugin
     this.connectorCatalogFeatureFlagSubscription = core.featureFlags
       .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
       .subscribe((isCatalogEnabled: boolean) => {
-        return isCatalogEnabled;
-        // TODO: implement the connector catalog logic
+        this.isCatalogFeatureFlagEnabled = isCatalogEnabled;
       });
 
     const {
@@ -1142,6 +1142,7 @@ export class ActionsPlugin
       actionsConfig,
     } = this;
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
+    const isCatalogFeatureFlagEnabled = () => this.isCatalogFeatureFlagEnabled;
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
@@ -1216,6 +1217,7 @@ export class ActionsPlugin
           return actionTypeRegistry!.list({ featureId });
         },
         getSkippedPreconfiguredConnectorIds: getSkippedPreconfiguredIds,
+        isCatalogFeatureFlagEnabled,
       };
     };
   };
@@ -1355,6 +1357,7 @@ export class ActionsPlugin
   public stop() {
     this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
     this.connectorCatalogFeatureFlagSubscription = undefined;
+    this.isCatalogFeatureFlagEnabled = false;
     this.isStopping = true;
     this.connectorCatalog?.stop();
     if (this.licenseState) {
