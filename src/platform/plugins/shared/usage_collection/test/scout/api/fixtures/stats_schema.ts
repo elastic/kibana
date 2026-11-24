@@ -62,7 +62,7 @@ const baseResponseSchema = schema.object({
     status: schema.string(),
   }),
   process: processSchema,
-  processes: schema.arrayOf(processSchema),
+  processes: schema.arrayOf(processSchema, { maxSize: 10 }),
   os: schema.object({
     platform: schema.string(),
     platform_release: schema.string(),
