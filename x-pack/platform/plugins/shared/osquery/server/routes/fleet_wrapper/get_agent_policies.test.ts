@@ -109,7 +109,6 @@ describe('getAgentPoliciesRoute integration ownership', () => {
         agents: 7,
         package_policy_id: `pp-${index}`,
         package_policy_name: `Integration pp-${index}`,
-        osquery_package_policies: [{ id: `pp-${index}`, name: `Integration pp-${index}` }],
       })),
     });
     expect(packagePolicyService.fetchAllItems).toHaveBeenCalledTimes(1);
@@ -129,7 +128,6 @@ describe('getAgentPoliciesRoute integration ownership', () => {
         agents: 7,
         package_policy_id: 'shared',
         package_policy_name: 'Integration shared',
-        osquery_package_policies: [{ id: 'shared', name: 'Integration shared' }],
       })),
     });
     expect(asInternalScopedUser).toHaveBeenCalledWith('test-space');
@@ -145,21 +143,9 @@ describe('getAgentPoliciesRoute integration ownership', () => {
 
     expect(response.ok).toHaveBeenCalledWith({
       body: [
-        expect.objectContaining({
-          id: 'A',
-          osquery_package_policies: [
-            { id: 'pp1', name: 'Integration pp1' },
-            { id: 'pp2', name: 'Integration pp2' },
-          ],
-        }),
-        expect.objectContaining({
-          id: 'B',
-          osquery_package_policies: [{ id: 'pp1', name: 'Integration pp1' }],
-        }),
-        expect.objectContaining({
-          id: 'C',
-          osquery_package_policies: [{ id: 'pp2', name: 'Integration pp2' }],
-        }),
+        expect.objectContaining({ id: 'A' }),
+        expect.objectContaining({ id: 'B', package_policy_id: 'pp1' }),
+        expect.objectContaining({ id: 'C', package_policy_id: 'pp2' }),
       ],
     });
     // Ambiguous with two integrations, so the singular fields are omitted.
@@ -185,10 +171,25 @@ describe('getAgentPoliciesRoute integration ownership', () => {
           id,
           package_policy_id: 'new',
           package_policy_name: 'Integration new',
-          osquery_package_policies: [{ id: 'new', name: 'Integration new' }],
         })
       ),
     });
+  });
+
+  it('does not report a disabled integration or input as the owner of an agent policy', async () => {
+    const disabledIntegration = { ...makePackagePolicy('off', ['A', 'B']), enabled: false };
+    const disabledInput = {
+      ...makePackagePolicy('input-off', ['C']),
+      inputs: [{ type: 'osquery', enabled: false }],
+    };
+    setPackagePolicies([[disabledIntegration, disabledInput] as never]);
+
+    const response = await runRoute();
+
+    const body = response.ok.mock.calls[0][0]?.body as Array<Record<string, unknown>>;
+    // Still listed so the picker can show them, but never grouped as a shared integration.
+    expect(body.map(({ id }) => id)).toEqual(['A', 'B', 'C']);
+    body.forEach((policy) => expect(policy).not.toHaveProperty('package_policy_id'));
   });
 
   it('omits missing or cross-space policies using the scoped lookup with ignoreMissing', async () => {

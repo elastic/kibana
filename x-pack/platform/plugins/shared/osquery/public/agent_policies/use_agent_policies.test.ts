@@ -40,7 +40,7 @@ describe('selectAgentPolicies', () => {
 
   it('leaves unshared integrations as individual policies', () => {
     const selection = selectAgentPolicies([
-      policy('A', { osquery_package_policies: [{ id: 'pp1', name: 'Dedicated A' }] }),
+      policy('A'),
       policy('B', { package_policy_id: 'pp2', package_policy_name: 'Dedicated B' }),
     ]);
 
@@ -53,7 +53,7 @@ describe('selectAgentPolicies', () => {
     const selection = selectAgentPolicies([
       policy('A'),
       policy('B', { package_policy_name: 'No integration id' }),
-      policy('C', { osquery_package_policies: [] }),
+      policy('C'),
     ]);
 
     expect(selection.groupsByPackagePolicyId).toEqual({});
@@ -79,13 +79,12 @@ describe('selectAgentPolicies', () => {
     const single = (integration: typeof pp1) => ({
       package_policy_id: integration.id,
       package_policy_name: integration.name,
-      osquery_package_policies: [integration],
     });
     const response = [
       policy('C', single(pp2)),
       policy('B', single(pp1)),
       policy('E', single(pp1)),
-      policy('A', { osquery_package_policies: [pp2, pp1] }),
+      policy('A'),
     ];
 
     const selection = selectAgentPolicies(response);

@@ -990,6 +990,31 @@ export const resolveBlockSpaceAndName = (
 };
 
 /**
+ * `resolveBlockSpaceAndName` for a block read off a package policy: an empty `pack_name`
+ * counts as missing, the same rule everywhere a block's identity is decoded.
+ */
+export const resolvePackBlockIdentity = (
+  packagePolicy: PackagePolicy,
+  packKey: string,
+  block: unknown
+): { spaceId: string; packName: string; ambiguous?: boolean } => {
+  const blockPackName = (block as { pack_name?: unknown } | undefined)?.pack_name;
+
+  return resolveBlockSpaceAndName(
+    packagePolicy,
+    packKey,
+    typeof blockPackName === 'string' && blockPackName.length ? blockPackName : undefined
+  );
+};
+
+/**
+ * Fleet leaves a disabled integration, or one whose Osquery input is disabled, out of the
+ * agent policy, so nothing is delivered through it.
+ */
+export const isDeliveringPackagePolicy = (packagePolicy: PackagePolicy): boolean =>
+  packagePolicy.enabled !== false && packagePolicy.inputs?.[0]?.enabled !== false;
+
+/**
  * Drain ALL osquery package policies via keyset `fetchAllItems`. Shared by the
  * create/delete/update routes and the reconciler; replaces the offset-capped
  * `list({ perPage: 1000 })` that silently dropped policies past the first 1000.
@@ -1145,8 +1170,7 @@ export const resolveSharedIntegrationOverdelivery = (
 
   for (const packagePolicy of writtenPackagePolicies.values()) {
     if (!satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')) continue;
-    // Fleet does not deliver disabled integrations or inputs, so nobody receives the pack.
-    if (packagePolicy.enabled === false || packagePolicy.inputs?.[0]?.enabled === false) continue;
+    if (!isDeliveringPackagePolicy(packagePolicy)) continue;
 
     const additionalPolicyIds = [...new Set(packagePolicy.policy_ids)]
       .filter((id) => !selectedPolicyIds.has(id))
@@ -1195,16 +1219,20 @@ export const computeEffectivePolicyIds = async (
   }
 
   for (const packagePolicy of packagePolicies) {
-    // Fleet leaves disabled integrations and inputs out of the agent policy, so their
-    // pack blocks are never delivered.
+    if (!isDeliveringPackagePolicy(packagePolicy)) continue;
     const input = packagePolicy.inputs?.[0];
-    if (packagePolicy.enabled === false || input?.enabled === false) continue;
     const blocks: Record<string, { pack_id?: unknown; pack_name?: unknown }> =
       input?.config?.osquery?.value?.packs ?? {};
+    // An integration shared across spaces carries every space of its agent policies; the
+    // first one is not "the" space. If it belongs to this space, resolve in this space.
+    const belongsToSpace =
+      packagePolicy.spaceIds?.includes(spaceId) || packagePolicy.spaceIds?.includes(ALL_SPACES_ID);
+    const scopedPackagePolicy = belongsToSpace
+      ? { ...packagePolicy, spaceIds: [spaceId] }
+      : packagePolicy;
     for (const [packKey, block] of Object.entries(blocks)) {
       const blockPackId = typeof block?.pack_id === 'string' ? block.pack_id : undefined;
-      const blockPackName = typeof block?.pack_name === 'string' ? block.pack_name : undefined;
-      const resolved = resolveBlockSpaceAndName(packagePolicy, packKey, blockPackName);
+      const resolved = resolvePackBlockIdentity(scopedPackagePolicy, packKey, block);
 
       let matchedPackIds: string[] = [];
       if (blockPackId) {

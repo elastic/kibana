@@ -2490,6 +2490,41 @@ describe('computeEffectivePolicyIds', () => {
     expect(getByIds.mock.calls[0][1]).toHaveLength(4);
   });
 
+  test('resolves a pack of a later space of a multi-space integration, with or without pack_id', async () => {
+    const multiSpace = {
+      ...targetingPackagePolicy('multi', ['A', 'B'], {
+        'team--with-id': { pack_id: 'with-id', pack_name: 'with-id' },
+        'team--legacy': { pack_name: 'legacy' },
+      }),
+      spaceIds: ['default', 'team'],
+    } as PackagePolicy;
+
+    const result = await computeEffectivePolicyIds(
+      asPacks(['with-id', 'legacy']),
+      'team',
+      [multiSpace],
+      lookup
+    );
+
+    expect(result).toEqual(
+      new Map([
+        ['with-id', ['A', 'B']],
+        ['legacy', ['A', 'B']],
+      ])
+    );
+  });
+
+  test('ignores an integration that is not in the requested space', async () => {
+    const otherSpace = {
+      ...targetingPackagePolicy('other', ['A'], { 'team--legacy': { pack_name: 'legacy' } }),
+      spaceIds: ['default'],
+    } as PackagePolicy;
+
+    expect(
+      await computeEffectivePolicyIds(asPacks(['legacy']), 'team', [otherSpace], lookup)
+    ).toEqual(new Map([['legacy', []]]));
+  });
+
   test('recognizes legacy bare keys and space-prefixed keys in the default space without double-counting owners', async () => {
     expect(
       await computeEffectivePolicyIds(

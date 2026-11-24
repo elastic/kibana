@@ -32,6 +32,7 @@ import { PolicyAssignmentList } from './policy_assignment_list';
 import { QueriesField } from './queries_field';
 import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
 import { useAgentPolicies } from '../../agent_policies';
+import { expandToSharedIntegrations } from '../../agent_policies/expand_to_shared_integrations';
 import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
 import { convertPackQueriesToSO, convertSOQueriesToPack, storedQueryVersion } from './utils';
@@ -124,16 +125,12 @@ export const getDeliveredPolicyIds = (
   selectedPolicyIds: readonly string[],
   shards: Record<string, number> | undefined,
   groupsByPackagePolicyId: Record<string, { policyIds: string[] }> | undefined
-): string[] => {
-  const policies = new Set(getSubmittedPolicyIds(selectedPolicyIds, shards));
-  for (const { policyIds: groupPolicyIds } of Object.values(groupsByPackagePolicyId ?? {})) {
-    if (groupPolicyIds.some((id) => policies.has(id))) {
-      groupPolicyIds.forEach((id) => policies.add(id));
-    }
-  }
-
-  return [...policies];
-};
+): string[] => [
+  ...expandToSharedIntegrations(
+    getSubmittedPolicyIds(selectedPolicyIds, shards),
+    groupsByPackagePolicyId
+  ),
+];
 
 const PackFormComponent: React.FC<PackFormProps> = ({
   defaultValue,

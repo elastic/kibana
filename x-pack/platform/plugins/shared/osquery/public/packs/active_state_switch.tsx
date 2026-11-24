@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from '../agent_policies/use_agent_policies';
+import { expandToSharedIntegrations } from '../agent_policies/expand_to_shared_integrations';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useUpdatePack } from './use_update_pack';
@@ -51,19 +52,11 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   // expand the saved targets by their group. `effective_policy_ids` alone is
   // not enough: a disabled pack has no wire block and reports `[]`.
   const deliveredPolicyIds = useMemo(() => {
-    const ids = new Set([...item.policy_ids, ...(item.effective_policy_ids ?? [])]);
-    for (const policyId of item.policy_ids) {
-      const groupId = data?.groupIdByPolicyId?.[policyId];
-      data?.groupsByPackagePolicyId?.[groupId ?? '']?.policyIds.forEach((id) => ids.add(id));
-    }
+    const ids = expandToSharedIntegrations(item.policy_ids, data?.groupsByPackagePolicyId);
+    (item.effective_policy_ids ?? []).forEach((id) => ids.add(id));
 
     return [...ids];
-  }, [
-    data?.groupIdByPolicyId,
-    data?.groupsByPackagePolicyId,
-    item.effective_policy_ids,
-    item.policy_ids,
-  ]);
+  }, [data?.groupsByPackagePolicyId, item.effective_policy_ids, item.policy_ids]);
 
   const agentCount = useMemo(
     () =>
@@ -148,7 +141,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
         <ConfirmDeployAgentPolicyModal
           onConfirm={handleToggleActive}
           onCancel={hideConfirmationModal}
-          agentCount={agentCount}
+          agentCount={agentPoliciesError ? undefined : agentCount}
           agentPolicyCount={deliveredPolicyIds.length}
         />
       )}

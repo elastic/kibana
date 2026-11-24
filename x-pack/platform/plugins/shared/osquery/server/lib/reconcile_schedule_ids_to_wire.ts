@@ -26,7 +26,7 @@ import {
   makePackKey,
   PACK_KEY_SEPARATOR,
   removePackFromPolicy,
-  resolveBlockSpaceAndName,
+  resolvePackBlockIdentity,
   toPackExecutionDefaults,
 } from '../routes/pack/utils';
 import { escapeFilterValue } from '../routes/utils/generate_copy_name';
@@ -54,27 +54,6 @@ const resolveLegacyCandidates = (packKey: string): Array<{ spaceId: string; pack
   }
 
   return candidates;
-};
-
-/**
- * Resolve a pack block's name and space from the policy and block, never by
- * splitting its `${spaceId}--${packName}` key on an arbitrary `--`: both halves
- * can contain `--` (space ids admit `-`, pack names are unbounded), and since
- * `makePackKey(parse(key))` round-trips, a mis-split silently overwrites the
- * block with another pack's queries.
- */
-const resolvePackBlockIdentity = (
-  packagePolicy: PackagePolicy,
-  packKey: string,
-  block: unknown
-): { spaceId: string; packName: string; ambiguous?: boolean } => {
-  const blockPackName = (block as { pack_name?: unknown } | undefined)?.pack_name;
-
-  return resolveBlockSpaceAndName(
-    packagePolicy,
-    packKey,
-    typeof blockPackName === 'string' && blockPackName.length ? blockPackName : undefined
-  );
 };
 
 /**

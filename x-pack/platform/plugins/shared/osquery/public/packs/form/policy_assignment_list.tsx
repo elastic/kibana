@@ -38,6 +38,7 @@ import type { EuiSearchBarOnChangeArgs, Query, UseEuiTheme } from '@elastic/eui'
 import { PLUGIN_ID as FLEET_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAgentPolicies } from '../../agent_policies';
+import { expandToSharedIntegrations } from '../../agent_policies/expand_to_shared_integrations';
 import { useKibana } from '../../common/lib/kibana';
 
 interface PolicyRow {
@@ -399,16 +400,10 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     return [...rows, ...orphanPolicies];
   }, [knownPolicies, orphanPolicies, groupsByPackagePolicyId, groupIdByPolicyId]);
 
-  const selectedSet = useMemo(() => {
-    const selected = new Set(selectedIds ?? []);
-    for (const { policyIds } of Object.values(groupsByPackagePolicyId ?? {})) {
-      if (policyIds.some((id) => selected.has(id))) {
-        policyIds.forEach((id) => selected.add(id));
-      }
-    }
-
-    return selected;
-  }, [selectedIds, groupsByPackagePolicyId]);
+  const selectedSet = useMemo(
+    () => expandToSharedIntegrations(selectedIds ?? [], groupsByPackagePolicyId),
+    [selectedIds, groupsByPackagePolicyId]
+  );
 
   // Shard-keyed policies are explicit targets too: the form keeps them out of
   // `policy_ids` (they live in `shards`), so they must not be reported as

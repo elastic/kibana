@@ -10,5 +10,4 @@ import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 export type OsqueryAgentPolicy = GetAgentPoliciesResponseItem & {
   package_policy_id?: string;
   package_policy_name?: string;
-  osquery_package_policies?: Array<{ id: string; name: string }>;
 };
