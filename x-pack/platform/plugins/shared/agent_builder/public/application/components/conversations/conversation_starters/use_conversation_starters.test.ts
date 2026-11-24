@@ -11,6 +11,7 @@ import { useAgentId } from '../../../hooks/use_conversation';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
 import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useCarryOverDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -21,6 +22,7 @@ jest.mock('../../../hooks/use_conversation');
 jest.mock('../../../hooks/use_submit_message');
 jest.mock('../../../hooks/agents/use_agent_send_state');
 jest.mock('../../../hooks/use_current_user');
+jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../hooks/use_input_draft');
 jest.mock('../../../context/active_space_context');
 jest.mock('../../../context/conversation/conversation_context');
@@ -29,6 +31,7 @@ const mockUseAgentId = jest.mocked(useAgentId);
 const mockUseSubmitMessage = jest.mocked(useSubmitMessage);
 const mockUseAgentSendState = jest.mocked(useAgentSendState);
 const mockUseCurrentUser = jest.mocked(useCurrentUser);
+const mockUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 const mockUseCarryOverDraft = jest.mocked(useCarryOverDraft);
 const mockUseActiveSpaceId = jest.mocked(useActiveSpaceId);
 const mockUseConversationContext = jest.mocked(useConversationContext);
@@ -39,7 +42,6 @@ const saveDraftTo = jest.fn();
 
 const mockSendState = (overrides: Partial<ReturnType<typeof useAgentSendState>> = {}) => {
   mockUseAgentSendState.mockReturnValue({
-    agent: undefined,
     agentExists: true,
     isAgentDeleted: false,
     isBoundAgentForbidden: false,
@@ -60,6 +62,7 @@ describe('useConversationStarters', () => {
     jest.clearAllMocks();
     submitMessage.mockReset();
     mockUseAgentId.mockReturnValue(agentBuilderDefaultAgentId);
+    mockUseExperimentalFeatures.mockReturnValue(true);
     mockUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
     mockSendState();
     mockUseActiveSpaceId.mockReturnValue('default');
@@ -75,6 +78,14 @@ describe('useConversationStarters', () => {
     expect(mockUseAgentSendState).toHaveBeenCalledWith(agentBuilderDefaultAgentId);
     expect(result.current.starters).toEqual(DEFAULT_CONVERSATION_STARTERS);
     expect(result.current.source).toBe('default');
+  });
+
+  it('returns no starters while the experimental features are off', () => {
+    mockUseExperimentalFeatures.mockReturnValue(false);
+
+    const { result } = renderHook(() => useConversationStarters());
+
+    expect(result.current.starters).toEqual([]);
   });
 
   it('returns no starters for any other agent', () => {

@@ -13,8 +13,8 @@ import { useValidateAgentId } from './use_validate_agent_id';
 
 /**
  * Whether messages can be sent to an agent, in the pieces the message input needs to explain why
- * not, and the agent itself once it is found. The input and the conversation starters share it, so
- * both follow the same rules and look the agent up once.
+ * not. The input and the conversation starters share it, so both follow the same rules and look the
+ * agent up once.
  */
 export const useAgentSendState = (agentId: string | undefined) => {
   const { isFetched } = useAgentBuilderAgents();
@@ -29,11 +29,11 @@ export const useAgentSendState = (agentId: string | undefined) => {
 
   const { invokeBoundAgents } = useUiPrivileges();
   const { agent: currentAgent } = useAgentBuilderAgentById(isAgentIdValid ? agentId : undefined);
-  const agent = currentAgent ?? agentById ?? undefined;
+  const agent = currentAgent ?? agentById;
 
   const isBoundAgentForbidden = Boolean(agent?.service_account_id) && !invokeBoundAgents;
 
   const isAgentDeleted = !agentExists && !isLoadingAgentById && isFetched && Boolean(agentId);
 
-  return { agent, agentExists, isAgentDeleted, isBoundAgentForbidden, isAgentModelLoading };
+  return { agentExists, isAgentDeleted, isBoundAgentForbidden, isAgentModelLoading };
 };

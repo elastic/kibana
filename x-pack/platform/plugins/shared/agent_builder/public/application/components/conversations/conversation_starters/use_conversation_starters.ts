@@ -13,6 +13,7 @@ import { useAgentId } from '../../../hooks/use_conversation';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
 import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useCarryOverDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -21,9 +22,11 @@ import { DEFAULT_CONVERSATION_STARTERS } from './default_conversation_starters';
 import type { ConversationStartersSource } from './resolve_conversation_starters';
 import { resolveConversationStarters } from './resolve_conversation_starters';
 
+const STARTERS_SOURCE: ConversationStartersSource = 'default';
+
 /**
- * The starters to show, and how to send one. They are shown for the default Elastic AI agent only.
- * Nothing is returned while the agent loads or when the user can't run it, so starters never appear
+ * The starters to show, and how to send one. They are shown for the default Elastic AI agent only,
+ * and only while the experimental features setting is on, until their copy is final. Nothing is returned while the agent loads or when the user can't run it, so starters never appear
  * for an input that can't send.
  */
 export const useConversationStarters = ({
@@ -46,8 +49,12 @@ export const useConversationStarters = ({
     agentId,
   });
 
-  const canShow = agentExists && !isBoundAgentForbidden && agentId === agentBuilderDefaultAgentId;
-  const source: ConversationStartersSource = 'default';
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const canShow =
+    isExperimentalFeaturesEnabled &&
+    agentExists &&
+    !isBoundAgentForbidden &&
+    agentId === agentBuilderDefaultAgentId;
 
   const starters = useMemo(
     () =>
@@ -75,7 +82,7 @@ export const useConversationStarters = ({
 
   return {
     starters,
-    source,
+    source: STARTERS_SOURCE,
     onSelect,
     isDisabled: isCreatingConversation || isAgentModelLoading || isInputUploading,
   };

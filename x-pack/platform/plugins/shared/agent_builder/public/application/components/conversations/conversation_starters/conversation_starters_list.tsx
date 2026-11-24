@@ -46,6 +46,10 @@ const componentStyles = (euiThemeContext: UseEuiTheme) => {
       font-weight: ${euiTheme.font.weight.regular};
       color: ${euiTheme.colors.textSubdued};
     `,
+    cardDisabled: css`
+      cursor: not-allowed;
+      color: ${euiTheme.colors.textDisabled};
+    `,
     content: css`
       display: flex;
       align-items: center;
@@ -107,7 +111,7 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
           <EuiPanel
             hasBorder
             paddingSize="none"
-            css={styles.card}
+            css={[styles.card, isDisabled && styles.cardDisabled]}
             disabled={isDisabled}
             onClick={() => onSelect(starter)}
             data-test-subj="agentBuilderConversationStarter"

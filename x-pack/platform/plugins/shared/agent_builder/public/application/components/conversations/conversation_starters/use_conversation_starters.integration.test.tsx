@@ -16,6 +16,7 @@ import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useCarryOverDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -30,6 +31,7 @@ jest.mock('../../../hooks/use_submit_message');
 jest.mock('../../../hooks/use_ui_privileges');
 jest.mock('../../../hooks/agents/use_agent_model');
 jest.mock('../../../hooks/use_current_user');
+jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../hooks/use_input_draft');
 jest.mock('../../../context/active_space_context');
 jest.mock('../../../context/conversation/conversation_context');
@@ -55,6 +57,7 @@ describe('useConversationStarters with the real agent hooks', () => {
       .mockReturnValue({ submitMessage: jest.fn(), isCreatingConversation: false });
     jest.mocked(useUiPrivileges).mockReturnValue({ invokeBoundAgents: true } as never);
     jest.mocked(useAgentModel).mockReturnValue({ isLoading: false, isLocked: false });
+    jest.mocked(useExperimentalFeatures).mockReturnValue(true);
     jest.mocked(useActiveSpaceId).mockReturnValue('default');
     jest.mocked(useConversationContext).mockReturnValue({ sessionTag: 'tag' } as never);
     jest

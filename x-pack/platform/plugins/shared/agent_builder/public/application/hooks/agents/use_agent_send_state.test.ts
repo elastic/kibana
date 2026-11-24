@@ -63,7 +63,6 @@ describe('useAgentSendState', () => {
     const { result } = renderHook(() => useAgentSendState('agent-1'));
 
     expect(result.current).toEqual({
-      agent: undefined,
       agentExists: true,
       isAgentDeleted: false,
       isBoundAgentForbidden: false,
@@ -78,15 +77,6 @@ describe('useAgentSendState', () => {
 
     expect(result.current.agentExists).toBe(true);
     expect(result.current.isAgentDeleted).toBe(false);
-    expect(result.current.agent).toEqual({ name: 'hidden agent' });
-  });
-
-  it('returns the agent it looked up for an agent in the list', () => {
-    setState({ byId: { name: 'listed agent' } as never });
-
-    const { result } = renderHook(() => useAgentSendState('agent-1'));
-
-    expect(result.current.agent).toEqual({ name: 'listed agent' });
   });
 
   it('reports an agent that is in neither place as deleted', () => {
