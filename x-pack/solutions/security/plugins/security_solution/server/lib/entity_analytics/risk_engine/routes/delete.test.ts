@@ -12,11 +12,11 @@ import {
   requestContextMock,
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
-import { riskEnginePrivilegesMock } from './risk_engine_privileges.mock';
+import { riskEnginePrivilegesMock } from '../../risk_score/routes/risk_engine_privileges.mock';
 import { riskEngineCleanupRoute } from './delete';
-import { deleteSavedObjects } from '../utils/saved_object_configuration';
+import { deleteSavedObjects } from '../../risk_score/configuration/saved_object_configuration';
 
-jest.mock('../utils/saved_object_configuration', () => ({
+jest.mock('../../risk_score/configuration/saved_object_configuration', () => ({
   deleteSavedObjects: jest.fn(),
 }));
 

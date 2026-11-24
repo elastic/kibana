@@ -18,15 +18,15 @@ import {
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
+import { withRiskEnginePrivilegeCheck } from './risk_engine_privileges';
 import type { EntityAnalyticsRoutesDeps, RiskEngineConfiguration } from '../../types';
-import { RiskEngineAuditActions } from '../audit';
+import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import {
   getConfiguration,
   initSavedObjects,
   updateSavedObjectAttribute,
-} from '../utils/saved_object_configuration';
+} from '../configuration/saved_object_configuration';
 
 const updateRiskEngineSavedObject = async ({
   savedObjectsClient,
@@ -99,7 +99,7 @@ export const riskEngineConfigureSavedObjectRoute = (
           securitySolution.getAuditLogger()?.log({
             message: 'User attempted to configure the saved object of the risk engine',
             event: {
-              action: RiskEngineAuditActions.RISK_ENGINE_CONFIGURE_SAVED_OBJECT,
+              action: RiskScoreAuditActions.RISK_ENGINE_CONFIGURE_SAVED_OBJECT,
               category: AUDIT_CATEGORY.DATABASE,
               type: AUDIT_TYPE.CHANGE,
               outcome: AUDIT_OUTCOME.UNKNOWN,
@@ -114,7 +114,7 @@ export const riskEngineConfigureSavedObjectRoute = (
               message:
                 'User attempted to configure the saved object of the risk engine, but the Kibana Task Manager was unavailable',
               event: {
-                action: RiskEngineAuditActions.RISK_ENGINE_CONFIGURE_SAVED_OBJECT,
+                action: RiskScoreAuditActions.RISK_ENGINE_CONFIGURE_SAVED_OBJECT,
                 category: AUDIT_CATEGORY.DATABASE,
                 type: AUDIT_TYPE.CHANGE,
                 outcome: AUDIT_OUTCOME.FAILURE,

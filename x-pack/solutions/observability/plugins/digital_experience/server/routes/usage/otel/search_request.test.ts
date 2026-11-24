@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FRUSTRATION_EVENTS } from '../../../../common/otel_data';
 import { usageSearch } from './search_request';
 
 const PARAMS = { serviceName: 'shop', start: 1000, end: 2000 };
@@ -23,23 +24,34 @@ describe('usageSearch', () => {
     });
   });
 
-  it('filters the browser documents of the application, page loads and clicks only', () => {
+  it('filters the browser documents of the application, page loads, clicks and frustration only', () => {
     const { filter } = usageSearch(PARAMS).query.bool;
 
     expect(filter).toContainEqual({ term: { 'telemetry.sdk.language': 'webjs' } });
     expect(filter).toContainEqual({ term: { 'service.name': 'shop' } });
     expect(filter).toContainEqual({
-      terms: { event_name: ['browser.navigation_timing', 'browser.user_action.click'] },
+      terms: {
+        event_name: [
+          'browser.navigation_timing',
+          'browser.user_action.click',
+          'browser.frustration.rage_click',
+          'browser.frustration.dead_click',
+          'browser.frustration.error_click',
+        ],
+      },
     });
   });
 
-  it('filters the environment in one aggregation, without picker terms', () => {
+  it('lists every environment for the picker and filters the usage to the selected one', () => {
     const all = usageSearch(PARAMS).aggs;
-    const production = inEnvironment(usageSearch({ ...PARAMS, environment: 'production' }));
+    const { aggs } = usageSearch({ ...PARAMS, environment: 'production' });
 
-    expect(Object.keys(all)).toEqual(['inEnvironment']);
     expect(all.inEnvironment.filter).toEqual({ match_all: {} });
-    expect(JSON.stringify(production.filter)).toContain('production');
+    expect(aggs.environments).toBeDefined();
+    expect(aggs.environmentNames).toBeDefined();
+    expect(aggs.environmentNotDefined).toBeDefined();
+    expect(JSON.stringify(aggs.inEnvironment.filter)).toContain('production');
+    expect(JSON.stringify(aggs.environments)).not.toContain('production');
   });
 
   it('reads the top pages from navigation timings, with their load time', () => {
@@ -78,6 +90,33 @@ describe('usageSearch', () => {
     expect(selectors.terms).toEqual({ field: 'browser.css_selector', size: 10 });
     expect(selectors.aggs.tagName.terms).toEqual({ field: 'browser.tag_name', size: 1 });
   });
+
+  it('reads the frustration by type, element and page', () => {
+    const { frustration } = inEnvironment(usageSearch(PARAMS)).aggs;
+    const byType = { terms: { field: 'event_name', size: 3 } };
+    const sessions = { cardinality: { field: 'session.id' } };
+
+    expect(frustration).toEqual({
+      filter: { bool: { filter: [{ terms: { event_name: [...FRUSTRATION_EVENTS] } }] } },
+      aggs: {
+        byType,
+        sessions,
+        elements: {
+          terms: { field: 'browser.css_selector', size: 10 },
+          aggs: {
+            byType,
+            sessions,
+            tagName: { terms: { field: 'browser.tag_name', size: 1 } },
+            topPage: { terms: { field: 'url.full', size: 1 } },
+          },
+        },
+        pages: {
+          terms: { field: 'url.full', size: 30 },
+          aggs: { byType, sessions },
+        },
+      },
+    });
+  });
 });
 
 describe('usageSearch with filters', () => {
@@ -115,8 +154,10 @@ describe('usageSearch with filters', () => {
     });
   });
 
-  it('narrows the page loads to the selected page, not the clicks', () => {
-    const { pageLoads, clicks } = inEnvironment(usageSearch({ ...PARAMS, filters: FILTERS })).aggs;
+  it('narrows the page loads and frustration to the selected page, not the clicks', () => {
+    const { pageLoads, clicks, frustration } = inEnvironment(
+      usageSearch({ ...PARAMS, filters: FILTERS })
+    ).aggs;
 
     expect(pageLoads.filter.bool.filter).toEqual([
       { term: { event_name: 'browser.navigation_timing' } },
@@ -125,6 +166,10 @@ describe('usageSearch with filters', () => {
     expect(clicks.filter).toEqual({
       bool: { filter: [{ term: { event_name: 'browser.user_action.click' } }] },
     });
+    expect(frustration.filter.bool.filter).toEqual([
+      { terms: { event_name: [...FRUSTRATION_EVENTS] } },
+      { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
+    ]);
   });
 
   it('is unchanged without a selection', () => {
