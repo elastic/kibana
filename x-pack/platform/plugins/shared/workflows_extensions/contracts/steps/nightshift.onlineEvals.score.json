@@ -75,7 +75,7 @@
         "type": "array"
       },
       "graded_report": {
-        "description": "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored. `pre_recovery`, the report just before an alert recovery, isn't supported yet.",
+        "description": "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored (a recovery round's own analysis). `pre_recovery`, the report just before an alert recovery, isn't supported yet.",
         "enum": [
           "first_round",
           "pre_recovery",

@@ -1,0 +1,211 @@
+{
+  "exposure": "open",
+  "id": "significantEvents.resolveWrittenDetections",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "properties": {
+          "@timestamp": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "change_point_type": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "classifier": {
+            "properties": {
+              "baseline": {
+                "properties": {
+                  "decision": {
+                    "enum": [
+                      "above_normal",
+                      "background",
+                      "warming_up"
+                    ],
+                    "type": "string"
+                  },
+                  "median": {
+                    "type": "number"
+                  },
+                  "samples": {
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "threshold": {
+                    "type": "number"
+                  },
+                  "value": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "decision",
+                  "samples",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "live_events": {
+                "items": {
+                  "$ref": "#/definitions/__schema1"
+                },
+                "maxItems": 50,
+                "type": "array"
+              },
+              "probe_has_rows": {
+                "type": "boolean"
+              },
+              "probe_status": {
+                "enum": [
+                  "ok",
+                  "error",
+                  "timeout",
+                  "no_query",
+                  "aborted"
+                ],
+                "type": "string"
+              },
+              "reason": {
+                "enum": [
+                  "state_changed",
+                  "probe_unavailable",
+                  "unjudged_member",
+                  "not_live_member",
+                  "member_joining",
+                  "series_too_old",
+                  "above_normal",
+                  "below_judged",
+                  "flaky_probe",
+                  "over_cap"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "live_events",
+              "reason"
+            ],
+            "type": "object"
+          },
+          "detection_id": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "flaky_probe": {
+            "type": "boolean"
+          },
+          "p_value": {
+            "type": "number"
+          },
+          "recent_detection_count": {
+            "type": "number"
+          },
+          "rule_name": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "rule_uuid": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "source_id": {
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "__schema1": {
+        "properties": {
+          "event_id": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "evidence_found": {
+            "type": "boolean"
+          },
+          "status": {
+            "maxLength": 32,
+            "type": "string"
+          },
+          "stored_verdict": {
+            "maxLength": 32,
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "stored_verdict"
+        ],
+        "type": "object"
+      },
+      "__schema2": {
+        "maxLength": 255,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "batch": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "reported_rule_uuids": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "workflow_execution_id": {
+        "maxLength": 255,
+        "type": "string"
+      }
+    },
+    "required": [
+      "batch",
+      "reported_rule_uuids",
+      "workflow_execution_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "maxLength": 255,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "derived_count": {
+        "maximum": 1000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "stamp_rule_uuids": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "unknown_reported_count": {
+        "maximum": 1000,
+        "minimum": 0,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "derived_count",
+      "stamp_rule_uuids",
+      "unknown_reported_count"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

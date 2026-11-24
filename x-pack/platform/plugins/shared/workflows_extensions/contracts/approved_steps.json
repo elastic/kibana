@@ -148,6 +148,7 @@
     "security.updateNote",
     "significantEvents.classifyDetections",
     "significantEvents.resolveModel",
+    "significantEvents.resolveWrittenDetections",
     "threat_intel.fetch_source",
     "workflow.getLastRun"
   ]
