@@ -146,6 +146,31 @@ describe('writeFindings', () => {
     expect(es.updateByQuery).not.toHaveBeenCalled();
   });
 
+  it('leaves the open findings of the excluded hosts alone and fixes the others', async () => {
+    await writeFindings(es, {
+      ...PARAMS,
+      hosts: [host('h1'), host('h2')],
+      findings: [finding('h1', 'CVE-1'), finding('h2', 'CVE-1')],
+      skipFixPassHostIds: new Set(['h1']),
+    });
+
+    expect(es.updateByQuery).toHaveBeenCalledTimes(1);
+    const [fixRequest] = es.updateByQuery.mock.calls[0];
+    expect(JSON.stringify(fixRequest?.query)).toContain('"host.id":["h2"]');
+  });
+
+  it('does not run the fix pass when every host is excluded', async () => {
+    await writeFindings(es, {
+      ...PARAMS,
+      hosts: [host('h1')],
+      findings: [finding('h1', 'CVE-1')],
+      skipFixPassHostIds: new Set(['h1']),
+    });
+
+    expect(es.bulk).toHaveBeenCalledTimes(1);
+    expect(es.updateByQuery).not.toHaveBeenCalled();
+  });
+
   it('reports open findings the fix pass skipped on conflicts or failures', async () => {
     es.updateByQuery.mockResolvedValue({
       updated: 1,

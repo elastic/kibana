@@ -97,6 +97,8 @@ export interface WriteFindingsParams {
    * known to be incomplete, where an absent finding does not mean the vulnerability is fixed.
    */
   skipFixPass?: boolean;
+  /** Ids of `hosts` whose open findings are left as they are, while every other host is fixed as usual. */
+  skipFixPassHostIds?: ReadonlySet<string>;
   signal?: AbortSignal;
 }
 
@@ -163,6 +165,7 @@ export const writeFindings = async (
     knowledge,
     keepKev = false,
     skipFixPass = false,
+    skipFixPassHostIds,
     signal,
   }: WriteFindingsParams
 ): Promise<WriteFindingsResult> => {
@@ -193,12 +196,12 @@ export const writeFindings = async (
     written += batch.length - countFailures(response, failures);
   }
   if (Object.keys(failures).length > 0) throw new FindingsWriteError(failures);
-  if (hosts.length === 0 || skipFixPass) {
+  const hostIds = [...metaById.keys()].filter((id) => !skipFixPassHostIds?.has(id));
+  if (hostIds.length === 0 || skipFixPass) {
     return { written, fixed: 0, fixSkipped: 0, kevListed, failures };
   }
 
   await es.indices.refresh({ index: FINDINGS_INDEX }, { signal });
-  const hostIds = [...metaById.keys()];
   let fixed = 0;
   let fixSkipped = 0;
   for (let i = 0; i < hostIds.length; i += HOST_BATCH) {

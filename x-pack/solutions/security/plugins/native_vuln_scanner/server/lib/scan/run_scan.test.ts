@@ -1080,17 +1080,29 @@ describe('runScan on Windows hosts', () => {
     expect(note).toContain('2026-Oct');
   });
 
-  describe('a window month with no rows', () => {
-    const openFindingsFixed = async (broken: string[]) => {
-      const { deps } = setup([windowsAgent('w1', WIN10_OS)]);
+  describe('fixed status', () => {
+    // The trimmed fixtures have no 2026-Aug document, so a 3-month window is Sep, Oct and Nov.
+    // 7807 is inside that window (and inside the Oct and Nov window); 7500 is below both.
+    const IN_WINDOW = { ...WIN10_OS, revision: '7807' };
+    const BELOW_WINDOW = { ...WIN10_OS, revision: '7500' };
+
+    const realWriter = () => {
       const { writeFindings: realWrite } = jest.requireActual('../findings');
       writeMock.mockImplementation(realWrite);
+    };
+    const fixedHostIds = (es: { updateByQuery: unknown }): string[][] =>
+      (es.updateByQuery as jest.Mock).mock.calls.map(
+        ([request]) => request.query.bool.filter[0].terms['host.id']
+      );
+
+    const openFindingsFixed = async (broken: string[]) => {
+      const { deps } = setup([windowsAgent('w1', IN_WINDOW)]);
+      realWriter();
       (deps.es.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [], took: 1 });
       (deps.es.updateByQuery as jest.Mock).mockResolvedValue({ updated: 3 });
       const summary = await runScan(
         {
           ...deps,
-          // The trimmed fixtures have no 2026-Aug document, so the window stops at Sep.
           refreshMsrc: (o) =>
             refreshMsrcFeed({ ...o, windowMonths: 3, fetchImpl: msrcFetch(broken) as never }),
         },
@@ -1098,6 +1110,74 @@ describe('runScan on Windows hosts', () => {
       );
       return { summary, es: deps.es };
     };
+
+    it('does not fix the findings of a host older than the window when a month rolls out of it', async () => {
+      const { deps } = setup([windowsAgent('w1', BELOW_WINDOW), windowsAgent('w2', IN_WINDOW)]);
+      realWriter();
+      (deps.es.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [], took: 1 });
+      (deps.es.updateByQuery as jest.Mock).mockResolvedValue({ updated: 3 });
+      const scan = (windowMonths: number, runId: string) =>
+        runScan(
+          {
+            ...deps,
+            refreshMsrc: (o) =>
+              refreshMsrcFeed({ ...o, windowMonths, fetchImpl: msrcFetch() as never }),
+          },
+          { signal: new AbortController().signal, runId }
+        );
+
+      const wide = await scan(3, 'r1');
+      const wideFindings = wide.findings;
+      (deps.es.updateByQuery as jest.Mock).mockClear();
+      const narrow = await scan(2, 'r2');
+
+      // Sep leaves the window, so the findings that only Sep fixes stop matching.
+      expect(narrow.findings).toBeLessThan(wideFindings);
+      expect(narrow.matchStats.windows_build_older_than_window).toBe(1);
+      expect(fixedHostIds(deps.es)).toEqual([['w2']]);
+      expect(narrow.releases[MSRC_RELEASE_KEY]).toBe('matched');
+      expect(narrow.notes?.[MSRC_RELEASE_KEY]).toContain(
+        'fixed status not updated for 1 host(s) older than the MSRC window'
+      );
+    });
+
+    it('keeps the fix pass when a failed month still has rows from an earlier fetch', async () => {
+      const { deps } = setup([windowsAgent('w1', IN_WINDOW)]);
+      realWriter();
+      (deps.es.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [], took: 1 });
+      (deps.es.updateByQuery as jest.Mock).mockResolvedValue({ updated: 3 });
+      // The same site, with the index re-stamping Oct and the Oct document now answering 500.
+      const restamped = jest.fn(async (url: string) => {
+        if (url.endsWith('/cvrf/v3.0/updates')) {
+          const index = JSON.parse(fixture('updates_trimmed.json').toString('utf8'));
+          for (const entry of index.value) {
+            if (entry.ID === '2026-Oct') entry.CurrentReleaseDate = '2026-11-24T08:00:00Z';
+          }
+          return body(JSON.stringify(index));
+        }
+        return url.endsWith('/2026-Oct') ? body('boom', 500) : msrcFetch()(url);
+      });
+      const scan = (fetchImpl: unknown, runId: string) =>
+        runScan(
+          {
+            ...deps,
+            refreshMsrc: (o) =>
+              refreshMsrcFeed({ ...o, windowMonths: 3, fetchImpl: fetchImpl as never }),
+          },
+          { signal: new AbortController().signal, runId }
+        );
+
+      await scan(msrcFetch(), 'r1');
+      (deps.es.updateByQuery as jest.Mock).mockClear();
+      const summary = await scan(restamped, 'r2');
+
+      expect(summary.releases[MSRC_RELEASE_KEY]).toBe('matched');
+      expect(fixedHostIds(deps.es)).toEqual([['w1']]);
+      const note = summary.notes?.[MSRC_RELEASE_KEY] ?? '';
+      expect(note).toContain('MSRC 2026-Oct could not be refreshed');
+      expect(note).toContain('kept the rows from the previous fetch');
+      expect(note).not.toContain('fixed status not updated');
+    });
 
     it('writes the findings but marks none fixed, and says why', async () => {
       const { summary, es } = await openFindingsFixed(['2026-Sep']);

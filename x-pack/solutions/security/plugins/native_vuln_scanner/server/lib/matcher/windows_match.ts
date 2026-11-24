@@ -212,6 +212,19 @@ const toAdvisory = (row: MsrcAdvisoryRow, cve: MsrcCve | undefined): MatchedAdvi
 });
 
 /**
+ * Whether the host's build is below the earliest fix in the window. Fixes released before the
+ * window are not in the feed, so the host's absent findings cannot be read as fixed.
+ */
+export const isOlderThanWindow = (
+  host: WindowsHostInventory,
+  index: WindowsAdvisoryIndex
+): boolean => {
+  const { product } = host;
+  const floor = index.windowFloor.get(floorKey(product.productId, product.build));
+  return floor !== undefined && compareWindowsBuild(product.installedBuild, floor) < 0;
+};
+
+/**
  * Matches one Windows host: exactly one finding for each CVE the host's build is below the fix
  * of. Hosts whose product has no rows on their servicing line produce nothing.
  */
@@ -228,8 +241,7 @@ export const matchWindowsHost = (
     return [];
   }
 
-  const floor = index.windowFloor.get(floorKey(product.productId, product.build));
-  if (stats && floor && compareWindowsBuild(product.installedBuild, floor) < 0) {
+  if (stats && isOlderThanWindow(host, index)) {
     stats.windows_build_older_than_window = (stats.windows_build_older_than_window ?? 0) + 1;
   }
 

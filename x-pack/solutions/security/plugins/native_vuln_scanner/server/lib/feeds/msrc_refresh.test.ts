@@ -325,6 +325,45 @@ describe('refreshMsrcFeed', () => {
     expect((second as PromiseFulfilledResult<{ slices: unknown[] }>).value.slices).toHaveLength(1);
   });
 
+  it('rethrows instead of fetching again when the caller that joined a shared fetch is aborted too', async () => {
+    const site = msrcSite();
+    const firstAbort = new AbortController();
+    const secondAbort = new AbortController();
+    let monthFetches = 0;
+    const gate = jest.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith('/cvrf/v3.0/updates')) return site.fetchImpl(url, init);
+      monthFetches++;
+      // Both callers have joined the one shared fetch by the time the timer fires.
+      if (monthFetches === 1) {
+        setImmediate(() => {
+          firstAbort.abort(new Error('first caller aborted'));
+          secondAbort.abort(new Error('second caller aborted'));
+        });
+      }
+      return new Promise<Response>((_, reject) => {
+        if (init?.signal?.aborted) return reject(init.signal.reason);
+        init?.signal?.addEventListener('abort', () => reject(init.signal?.reason), { once: true });
+      });
+    });
+    const options = {
+      feedMirrorUrl: undefined,
+      windowMonths: 1,
+      fetchImpl: gate as unknown as typeof fetch,
+    };
+
+    const [first, second] = await Promise.allSettled([
+      refreshMsrcFeed({ ...options, signal: firstAbort.signal }),
+      refreshMsrcFeed({ ...options, signal: secondAbort.signal }),
+    ]);
+
+    expect(first.status).toBe('rejected');
+    expect(second.status).toBe('rejected');
+    // The second caller's own signal is aborted too, so it reports the failure it joined and does
+    // not start a download of its own.
+    expect((second as PromiseRejectedResult).reason).toEqual(new Error('first caller aborted'));
+    expect(monthFetches).toBe(1);
+  });
+
   it('does not share a fetch across mirrors, or once a month was re-stamped', async () => {
     const site = msrcSite();
     await Promise.all([

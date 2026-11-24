@@ -10,6 +10,7 @@ export { buildAdvisoryIndex, matchHost, rhelKernelEvr, sourceRpmName } from './m
 export type { WindowsAdvisoryIndex, WindowsHostInventory } from './windows_match';
 export {
   buildWindowsAdvisoryIndex,
+  isOlderThanWindow,
   kbDigitsOf,
   MAX_INSTALLED_KBS,
   matchWindowsHost,

@@ -20,6 +20,7 @@ import type { Finding, MatchStats } from '../matcher';
 import {
   buildAdvisoryIndex,
   buildWindowsAdvisoryIndex,
+  isOlderThanWindow,
   matchHost,
   matchWindowsHost,
 } from '../matcher';
@@ -324,11 +325,14 @@ const WINDOWS_STAT_LABELS: Record<string, string> = {
 const windowsNote = (
   { warnings }: MsrcRefreshResult,
   { skippedRows, matchStats }: ScanSummary,
-  missingMonths: readonly string[]
+  missingMonths: readonly string[],
+  olderHosts: number
 ): string => {
   const parts = [...warnings];
   if (missingMonths.length > 0) {
     parts.push(`fixed status not updated this run: MSRC ${missingMonths.join(', ')} unavailable`);
+  } else if (olderHosts > 0) {
+    parts.push(`fixed status not updated for ${olderHosts} host(s) older than the MSRC window`);
   }
   const left = Object.entries(skippedRows)
     .filter(([reason]) => reason.startsWith('windows_'))
@@ -571,6 +575,13 @@ export const runScan = async (
       // their findings are absent, not fixed, so the fix pass is skipped for this run.
       const present = new Set(refreshed.slices.map(({ id }) => id));
       const missingMonths = refreshed.window.filter((month) => !present.has(month));
+      // A host below the window's earliest fix is in the same position: the fix that closed its
+      // oldest findings was released before the window, so absent does not mean fixed.
+      const olderHostIds = new Set(
+        windowsHosts
+          .filter(({ inventory: host }) => isOlderThanWindow(host, index))
+          .map(({ meta }) => meta.id)
+      );
       const written = await writeFindings(es, {
         hosts: windowsHosts.map(({ meta }) => meta),
         findings,
@@ -580,6 +591,7 @@ export const runScan = async (
         kev: kev?.entries,
         keepKev: kev?.status === 'unavailable',
         skipFixPass: missingMonths.length > 0,
+        skipFixPassHostIds: olderHostIds,
         signal,
       });
       for (const { cve } of findings) cves.add(cve.id);
@@ -591,7 +603,7 @@ export const runScan = async (
       summary.fixSkipped += written.fixSkipped;
       summary.kev.listed += written.kevListed;
       summary.feedInfo[MSRC_RELEASE_KEY] = msrcFeedInfo(refreshed, feedMirrorUrl, scanStart);
-      const note = windowsNote(refreshed, summary, missingMonths);
+      const note = windowsNote(refreshed, summary, missingMonths, olderHostIds.size);
       if (note) (summary.notes ??= {})[MSRC_RELEASE_KEY] = truncate(note);
       for (const warning of refreshed.warnings) logger.warn(warning);
     } catch (error) {
