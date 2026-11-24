@@ -18,10 +18,37 @@ import {
   type Params,
 } from '@kbn/contrast-roles';
 
-/** APCA Lc of the trend's area color against the tile's fill. */
-export const TREND_LC = 50;
-/** APCA Lc of the line along the top of the trend's area, against the tile's fill. */
-export const TREND_LINE_LC = 30;
+/** APCA Lc targets of the subdued tiles. */
+export interface SubduedTargets {
+  /** The tile's fill, against the surface. */
+  fill: number;
+  /** The value's text, against what is behind it (the fill, or the trend over the fill). */
+  ink: number;
+  /** The trend's area color, against the fill. */
+  trend: number;
+  /** The line along the top of the trend's area, against the fill. */
+  trendLine: number;
+  /** The darkest fill dynamic coloring reaches, at the end of its ramp. */
+  dynamicFillMax: number;
+  /** A colored value at the start of a ramp, against the surface. Values reach ink at the ramp's end. */
+  valueRampMin: number;
+  /** Extra Lc for the fill of tiles without a trend. 0 turns the boost off. */
+  noTrendExtraFill: number;
+  /** Extra Lc for the value of tiles without a trend. 0 turns the boost off. */
+  noTrendExtraInk: number;
+}
+
+export const DEFAULT_SUBDUED_TARGETS: Readonly<SubduedTargets> = {
+  fill: DEFAULT_PARAMS.lc.faint,
+  ink: DEFAULT_PARAMS.lc.ink,
+  trend: 50,
+  trendLine: 30,
+  dynamicFillMax: 15,
+  valueRampMin: 50,
+  noTrendExtraFill: 3,
+  noTrendExtraInk: 5,
+};
+
 /** The trend's area: Lens's gradient area fill at 2/3 of its opacity, so it costs the value less contrast. */
 export const TREND_OPACITY = 2 / 3;
 // Lens's stacked area gradient (expression_xy's data_layers.tsx): 12 stops, eased from 0.1 at the bottom to 0.4 at the top.
@@ -38,17 +65,11 @@ export const TREND_GRADIENT_STOPS = Array.from({ length: TREND_GRADIENT_STOP_COU
 });
 // The value can sit on the most opaque part of the trend's area.
 const TREND_BEHIND_VALUE_OPACITY = Math.max(...TREND_GRADIENT_STOPS.map(({ opacity }) => opacity));
-/** APCA Lc of the darkest fill dynamic coloring reaches, at the end of its ramp. */
-export const DYNAMIC_FILL_MAX_LC = 15;
 /** Ramp fills are steps of one color rather than roles, so they keep the workbench's taper. */
 export const RAMP_PARAMS: Params = {
   ...DEFAULT_PARAMS,
   chroma: { ...DEFAULT_PARAMS.chroma, taper: 0.5 },
 };
-/** APCA Lc of a colored value at the start of a ramp, against the surface. Values reach ink at the ramp's end. */
-export const VALUE_RAMP_MIN_LC = 50;
-/** Extra Lc for the fill and value of tiles without a trend. 0 turns the boost off. */
-export const NO_TREND_EXTRA_LC = { faint: 3, ink: 5 } as const;
 
 export interface MetricTileColors {
   fill: Hex;
@@ -62,41 +83,51 @@ export interface MetricTileOptions {
   /** The color is a step of dynamic coloring by one hue's ramp, so the fill keeps its position along the ramp. */
   ramp: boolean;
   hasTrend: boolean;
+  targets?: Readonly<SubduedTargets>;
 }
+
+const targetsKey = (targets: Readonly<SubduedTargets>) =>
+  (Object.keys(DEFAULT_SUBDUED_TARGETS) as Array<keyof SubduedTargets>)
+    .map((key) => targets[key])
+    .join(',');
 
 const resolve = (
   color: string,
   mode: Mode,
-  { ramp, hasTrend }: MetricTileOptions
+  { ramp, hasTrend, targets = DEFAULT_SUBDUED_TARGETS }: MetricTileOptions
 ): MetricTileColors | undefined => {
   const anchored = anchorHue(color);
   if (!anchored) return undefined;
   const { model, angle } = anchored;
   const surface = SURFACES[mode];
   const p = DEFAULT_PARAMS;
-  const { lc } = p;
-  const extra = hasTrend ? { faint: 0, ink: 0 } : NO_TREND_EXTRA_LC;
+  const extraFill = hasTrend ? 0 : targets.noTrendExtraFill;
+  const extraInk = hasTrend ? 0 : targets.noTrendExtraInk;
 
   const fill = ramp
     ? model.contrastColor(
         angle,
-        lc.faint + rampPosition(color, mode) * (DYNAMIC_FILL_MAX_LC - lc.faint) + extra.faint,
+        targets.fill +
+          rampPosition(color, mode) * (targets.dynamicFillMax - targets.fill) +
+          extraFill,
         surface,
         RAMP_PARAMS
       ).hex
-    : model.rolesAt(angle, surface, { ...p, lc: { ...lc, faint: lc.faint + extra.faint } }).faint;
+    : model.rolesAt(angle, surface, { ...p, lc: { ...p.lc, faint: targets.fill + extraFill } })
+        .faint;
 
   // Strict, like ink: a light base's correction would pull the trend toward the fill (a pale yellow's to about Lc 20).
-  const trend = model.contrastColor(angle, TREND_LC, surface, p, fill, null, true).hex;
+  const trend = model.contrastColor(angle, targets.trend, surface, p, fill, null, true).hex;
   // The value is drawn over the trend, so its contrast is measured against both.
   const behindValue = hasTrend ? blend(trend, fill, TREND_BEHIND_VALUE_OPACITY) : fill;
 
   return {
     fill,
-    ink: model.contrastColor(angle, lc.ink + extra.ink, surface, p, behindValue, null, true).hex,
+    ink: model.contrastColor(angle, targets.ink + extraInk, surface, p, behindValue, null, true)
+      .hex,
     border: model.baseColor(angle, surface, p).hex,
     trend,
-    trendLine: model.contrastColor(angle, TREND_LINE_LC, surface, p, fill, null, true).hex,
+    trendLine: model.contrastColor(angle, targets.trendLine, surface, p, fill, null, true).hex,
   };
 };
 
@@ -120,34 +151,47 @@ export const metricTileColors = (
   mode: Mode,
   opts: MetricTileOptions
 ): MetricTileColors | undefined => {
-  const key = [color, mode, opts.ramp, opts.hasTrend].join('|');
+  const key = [
+    color,
+    mode,
+    opts.ramp,
+    opts.hasTrend,
+    targetsKey(opts.targets ?? DEFAULT_SUBDUED_TARGETS),
+  ].join('|');
   if (cache.has(key)) return cache.get(key);
   const colors = resolve(color, mode, opts);
   cache.set(key, colors);
   return colors;
 };
 
-const resolveValue = (color: string, mode: Mode, ramp: boolean): Hex | undefined => {
+const resolveValue = (
+  color: string,
+  mode: Mode,
+  ramp: boolean,
+  { ink, valueRampMin }: Readonly<SubduedTargets>
+): Hex | undefined => {
   const anchored = anchorHue(color);
   if (!anchored) return undefined;
   const { model, angle } = anchored;
   const surface = SURFACES[mode];
   const p = DEFAULT_PARAMS;
-  const { ink } = p.lc;
   // Ramp colors keep their position along the ramp, so the values still tell the ramp's steps apart.
-  const target = ramp
-    ? VALUE_RAMP_MIN_LC + rampPosition(color, mode) * (ink - VALUE_RAMP_MIN_LC)
-    : ink;
+  const target = ramp ? valueRampMin + rampPosition(color, mode) * (ink - valueRampMin) : ink;
   return model.contrastColor(angle, target, surface, p, surface, null, true).hex;
 };
 
 const valueCache = new Map<string, Hex | undefined>();
 
 /** A colored value's text color: ink with its color as the base, or undefined for colors with no hue. */
-export const metricValueColor = (color: string, mode: Mode, ramp: boolean): Hex | undefined => {
-  const key = [color, mode, ramp].join('|');
+export const metricValueColor = (
+  color: string,
+  mode: Mode,
+  ramp: boolean,
+  targets: Readonly<SubduedTargets> = DEFAULT_SUBDUED_TARGETS
+): Hex | undefined => {
+  const key = [color, mode, ramp, targetsKey(targets)].join('|');
   if (valueCache.has(key)) return valueCache.get(key);
-  const value = resolveValue(color, mode, ramp);
+  const value = resolveValue(color, mode, ramp, targets);
   valueCache.set(key, value);
   return value;
 };

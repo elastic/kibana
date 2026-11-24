@@ -8,7 +8,12 @@
  */
 
 import { DEFAULT_PARAMS, SURFACES, apcaLc, borealis } from '@kbn/contrast-roles';
-import { TREND_LC, blend, metricTileColors, metricValueColor } from './metric_tile_colors';
+import {
+  DEFAULT_SUBDUED_TARGETS,
+  blend,
+  metricTileColors,
+  metricValueColor,
+} from './metric_tile_colors';
 
 describe('metricTileColors', () => {
   it('gives undefined for a gray', () => {
@@ -26,7 +31,20 @@ describe('metricTileColors', () => {
 
   it("keeps a pale base's trend at its contrast against the fill", () => {
     const { fill, trend } = metricTileColors('#FCD883', 'light', { ramp: false, hasTrend: true })!;
-    expect(Math.abs(apcaLc(trend, fill))).toBeGreaterThanOrEqual(TREND_LC - 1);
+    expect(Math.abs(apcaLc(trend, fill))).toBeGreaterThanOrEqual(DEFAULT_SUBDUED_TARGETS.trend - 1);
+  });
+
+  it('uses the given targets', () => {
+    const targets = { ...DEFAULT_SUBDUED_TARGETS, fill: 30 };
+    const { fill } = metricTileColors('#61A2FF', 'light', {
+      ramp: false,
+      hasTrend: true,
+      targets,
+    })!;
+    expect(Math.abs(apcaLc(fill, SURFACES.light))).toBeGreaterThanOrEqual(29);
+    expect(metricTileColors('#61A2FF', 'light', { ramp: false, hasTrend: true })!.fill).not.toBe(
+      fill
+    );
   });
 
   it('blends in sRGB', () => {

@@ -49,6 +49,7 @@ import {
 } from '../../common/constants';
 import type { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService, getFeatureFlagsService } from '../services';
+import { useSubduedTargets } from '../services/subdued_targets';
 import { getColor, getMetricFormatter } from './helpers';
 import { getSecondaryMetricInfo } from './secondary_metric_info';
 import type { TrendConfig } from './secondary_metric_info';
@@ -61,7 +62,7 @@ import {
 
 // Feature flag values when they can't be evaluated (no provider or override).
 const SUBDUED_TILES_FALLBACK = true;
-const TOP_BORDER_FALLBACK = true;
+const TOP_BORDER_FALLBACK = false;
 /*
  * This is a very hacky, this styling should be in @elastic/charts, not here, but this is en experimental feature.
  * We're adding gradient and reaching into the DOM to style the trend line and top border.
@@ -245,6 +246,7 @@ export const MetricVis = ({
     METRIC_SUBDUED_TOP_BORDER_FLAG,
     TOP_BORDER_FALLBACK
   );
+  const targets = useSubduedTargets();
   const paletteColors = config.metric.palette?.params?.colors;
   const isRampPalette = useMemo(
     () => Boolean(paletteColors && isSingleHueRamp(paletteColors)),
@@ -400,7 +402,7 @@ export const MetricVis = ({
     const ramp = Boolean(paletteColor) && isRampPalette;
     const subdue = subdueTiles && !highContrastMode && tileColor !== defaultColor;
     const tileColors = subdue
-      ? metricTileColors(tileColor, mode, { ramp, hasTrend: Boolean(trend) })
+      ? metricTileColors(tileColor, mode, { ramp, hasTrend: Boolean(trend), targets })
       : undefined;
     const subdued = isBackground ? tileColors : undefined;
     subduedTiles[rowIdx] = subdued;
@@ -457,7 +459,7 @@ export const MetricVis = ({
         valueColor:
           tileColor === defaultColor
             ? undefined
-            : (subdue && metricValueColor(tileColor, mode, ramp)) || tileColor,
+            : (subdue && metricValueColor(tileColor, mode, ramp, targets)) || tileColor,
       }),
       ...(config.metric.applyColorTo === 'background' && {
         color: subdued?.fill ?? tileColor,

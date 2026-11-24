@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { Suspense, lazy, type ReactNode } from 'react';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
@@ -26,14 +27,28 @@ export interface ExpressionMetricPluginSetup {
   charts: ChartsPluginSetup;
 }
 
+/** The developer toolbar's start contract, typed here so production code doesn't import the dev-only plugin. */
+interface DeveloperToolbarStart {
+  registerItem: (item: { id: string; children: ReactNode; priority?: number }) => () => void;
+}
+
 /** @internal */
 export interface ExpressionMetricPluginStart {
   fieldFormats: FieldFormatsStart;
   usageCollection?: UsageCollectionStart;
+  developerToolbar?: DeveloperToolbarStart;
 }
+
+const LazySubduedTargetsPanel = lazy(() =>
+  import('./components/subdued_targets_panel').then(({ SubduedTargetsPanel }) => ({
+    default: SubduedTargetsPanel,
+  }))
+);
 
 /** @internal */
 export class ExpressionMetricPlugin implements Plugin {
+  private unregisterSubduedTargetsPanel?: () => void;
+
   public setup(
     core: CoreSetup<ExpressionMetricPluginStart, void>,
     { expressions, charts }: ExpressionMetricPluginSetup
@@ -54,8 +69,21 @@ export class ExpressionMetricPlugin implements Plugin {
     setThemeService(charts.theme);
   }
 
-  public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {
+  public start(core: CoreStart, { fieldFormats, developerToolbar }: ExpressionMetricPluginStart) {
     setFormatService(fieldFormats);
     setFeatureFlagsService(core.featureFlags);
+
+    this.unregisterSubduedTargetsPanel = developerToolbar?.registerItem({
+      id: 'Metric contrast',
+      children: (
+        <Suspense fallback={null}>
+          <LazySubduedTargetsPanel />
+        </Suspense>
+      ),
+    });
+  }
+
+  public stop() {
+    this.unregisterSubduedTargetsPanel?.();
   }
 }

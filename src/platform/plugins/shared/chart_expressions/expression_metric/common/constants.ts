@@ -18,7 +18,6 @@ export const DEFAULT_TRENDLINE_NAME = 'default';
 export const METRIC_SUBDUED_TILES_FLAG = 'lens.metric.subdued';
 /** Feature flag: a top border in the hue's base on subdued metric tiles. */
 export const METRIC_SUBDUED_TOP_BORDER_FLAG = 'lens.metric.subdued.border';
-
 export const LabelPosition = {
   BOTTOM: 'bottom',
   TOP: 'top',
