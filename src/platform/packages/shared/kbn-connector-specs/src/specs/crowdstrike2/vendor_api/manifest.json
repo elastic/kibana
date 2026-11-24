@@ -715,7 +715,7 @@
       "captured": true,
       "fetchedAt": "2026-11-20T12:57:00.000Z",
       "format": "swagger",
-      "note": "Exported from the Falcon console's API documentation while logged in (Swagger 2.0, 'CrowdStrike API Specification', US-2 cloud); the page is login-gated and has no public URL. The export was normalised before capture: 896 references to response, parameter and schema objects the export does not define (all in operations the connector does not call) were removed, and 15 regular expressions that JavaScript cannot parse were dropped. Every Falcon cloud serves the same API from its own host; overlay.yaml lists them.",
+      "note": "Captured from the Falcon console, which serves its API spec only to a logged-in session: the url is the console's Swagger document for the US-2 cloud and is kept as a reference, not a download link (a plain fetch is refused, so it is never fetched). To refresh: log in to the Falcon console, open https://assets.falcon.us-2.crowdstrike.com/support/api/swagger-us2.html in the same browser (other clouds: swagger-<cloud>.html on their assets host; US-1: https://assets.falcon.crowdstrike.com/support/api/swagger.html), save the Swagger 2.0 JSON it links to ('CrowdStrike API Specification'), normalise it as below, and record again with --capture. Normalisation: 896 references to response, parameter and schema objects the export does not define (all in operations the connector does not call) were removed, and 15 regular expressions that JavaScript cannot parse were dropped. Every Falcon cloud serves the same API from its own host; overlay.yaml lists them.",
       "url": "https://assets.falcon.us-2.crowdstrike.com/support/api/swagger-us2.json"
     }
   }
