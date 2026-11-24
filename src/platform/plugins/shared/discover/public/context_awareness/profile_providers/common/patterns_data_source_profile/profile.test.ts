@@ -13,7 +13,7 @@ import type {
 } from '@kbn/unified-data-table';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { EsqlSource } from '@kbn/data-source';
-import { httpServiceMock } from '@kbn/core/public/mocks';
+import { mapEsqlResponseToDatatable } from '@kbn/data-plugin/common';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
@@ -49,9 +49,9 @@ const getConfiguration = (
 };
 
 describe('Patterns numeric column widths', () => {
-  it('compacts an aliased SPARKLINE result through the double-to-number type mapping', async () => {
+  it('compacts an aliased SPARKLINE column after mapping the fetched response', async () => {
     const query =
-      'FROM logs-sparkline-width | STATS trend = SPARKLINE(bytes) BY category = CATEGORIZE(message)';
+      'FROM logs-sparkline-width | STATS trend = SPARKLINE(COUNT(*), @timestamp, 3, "2026-01-01T00:00:00Z", "2026-01-04T00:00:00Z") BY category = CATEGORIZE(message)';
     const provider = createPatternsDataSourceProfileProvider({
       ...createProfileProviderSharedServicesMock(),
       aiops: undefined,
@@ -67,20 +67,24 @@ describe('Patterns numeric column widths', () => {
     }
     expect(resolution.context.sparklineColumns).toEqual(['trend']);
 
-    const http = httpServiceMock.createStartContract();
-    http.post.mockResolvedValue({
-      columns: [
-        { name: 'trend', esType: 'double' },
-        { name: 'category', esType: 'keyword' },
-      ],
-    });
-    const source = await EsqlSource.create({ query, http, resolveTimeField: false });
-    expect(source.getColumn('trend')).toMatchObject({ type: 'number', esType: 'double' });
+    const datatable = mapEsqlResponseToDatatable(
+      {
+        columns: [
+          { name: 'trend', type: 'double' },
+          { name: 'category', type: 'keyword' },
+        ],
+        values: [[[2, 5, 3], 'Connected to .*']],
+      },
+      { query }
+    );
+    const source = await EsqlSource.create({ query, resolveTimeField: false });
+    const fetchedSource = source.withColumns(datatable.columns);
+    expect(fetchedSource.getColumn('trend')).toMatchObject({ type: 'number', esType: 'double' });
 
     const configuration = accessor(() => ({}), {
       context: resolution.context,
       toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
-    })({ columns: ['trend', 'category'], dataSource: source });
+    })({ columns: datatable.columns.map(({ name }) => name), dataSource: fetchedSource });
     expect(configuration.trend({ column: { id: 'trend' } }).initialWidth).toBe(150);
     expect(configuration.category).toBeUndefined();
   });
