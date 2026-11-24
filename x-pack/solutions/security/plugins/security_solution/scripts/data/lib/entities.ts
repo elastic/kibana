@@ -187,7 +187,7 @@ export const HOSTS: Record<string, CatalogHost> = {
 export const USERS: Record<string, CatalogUser> = {
   jsmith: {
     name: 'jsmith',
-    email: 'jsmith@corp.example',
+    email: 'jsmith@corp.example.cloud',
     full_name: 'John Smith',
     id: 'S-1-5-21-1001',
     domain: 'CORP',
@@ -197,7 +197,7 @@ export const USERS: Record<string, CatalogUser> = {
   },
   'r.martinez': {
     name: 'r.martinez',
-    email: 'r.martinez@corp.example',
+    email: 'r.martinez@corp.example.cloud',
     full_name: 'Rosa Martinez',
     id: 'S-1-5-21-1002',
     domain: 'CORP',
@@ -207,7 +207,7 @@ export const USERS: Record<string, CatalogUser> = {
   },
   admin_svc: {
     name: 'admin_svc',
-    email: 'admin_svc@corp.example',
+    email: 'admin_svc@corp.example.cloud',
     full_name: 'Admin Service Account',
     id: 'S-1-5-21-9001',
     domain: 'CORP',
@@ -217,7 +217,7 @@ export const USERS: Record<string, CatalogUser> = {
   },
   'dev-user': {
     name: 'dev-user',
-    email: 'dev-user@corp.example',
+    email: 'dev-user@corp.example.cloud',
     full_name: 'Dev User',
     id: 'AIDA1234567890',
     roles: ['developer'],
@@ -225,7 +225,7 @@ export const USERS: Record<string, CatalogUser> = {
   },
   'j.ops': {
     name: 'j.ops',
-    email: 'j.ops@corp.example',
+    email: 'j.ops@corp.example.cloud',
     full_name: 'Jordan Ops',
     id: 'S-1-5-21-3002',
     domain: 'CORP',
@@ -234,7 +234,7 @@ export const USERS: Record<string, CatalogUser> = {
   },
   'it.admin': {
     name: 'it.admin',
-    email: 'it.admin@corp.example',
+    email: 'it.admin@corp.example.cloud',
     full_name: 'IT Administrator',
     id: 'S-1-5-21-3003',
     domain: 'CORP',
@@ -243,15 +243,15 @@ export const USERS: Record<string, CatalogUser> = {
   },
   'alex.chen': {
     name: 'alex.chen',
-    email: 'alex.chen@corp.example',
+    email: 'alex.chen@corp.example.cloud',
     full_name: 'Alex Chen',
     id: 'uid-alex-chen-001',
     roles: ['finance-analyst'],
     asset: { criticality: 'high_impact', business_unit: 'Finance' },
   },
-  'helpdesk@corp.example': {
-    name: 'helpdesk@corp.example',
-    email: 'helpdesk@corp.example',
+  'helpdesk@corp.example.cloud': {
+    name: 'helpdesk@corp.example.cloud',
+    email: 'helpdesk@corp.example.cloud',
     full_name: 'IT Helpdesk',
     id: 'okta-uid-helpdesk',
     roles: ['helpdesk', 'it-support'],
@@ -332,7 +332,7 @@ export const pickUserPool = ({
     const idx = out.length;
     out.push({
       name: `user-gen-${idx + 1}`,
-      email: `user-gen-${idx + 1}@corp.example`,
+      email: `user-gen-${idx + 1}@corp.example.cloud`,
       full_name: `Generated User ${idx + 1}`,
       id: `uid-gen-${idx + 1}`,
       asset: { criticality: 'low_impact', business_unit: 'Engineering' },

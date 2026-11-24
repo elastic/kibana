@@ -38,7 +38,6 @@ const { Column } = ContentListTable;
 
 type MatchItem = ContentListItem &
   BoostRuleMatch & {
-    storageSizeInBytes: number;
     retentionOrder: number;
     status: MatchStatus;
   };
@@ -63,7 +62,6 @@ const toItem = (match: BoostRuleMatch): MatchItem => ({
   ...match,
   id: match.name,
   title: match.name,
-  storageSizeInBytes: match.storageSizeInBytes ?? 0,
   retentionOrder: getRetentionOrder(match.retention),
   status: match.outrankedByRuleName ? 'outranked' : 'applied',
 });
@@ -78,7 +76,10 @@ const summarizeMatches = (matches: BoostRuleMatch[]) => {
     items.push(item);
     itemsById.set(item.id, item);
     hasOutranked ||= Boolean(item.outrankedByRuleName);
-    largestBytes = Math.max(largestBytes, item.storageSizeInBytes);
+    // A size that couldn't be loaded has no bar.
+    if (item.storageSizeInBytes !== undefined) {
+      largestBytes = Math.max(largestBytes, item.storageSizeInBytes);
+    }
   }
   return { items, itemsById, hasOutranked, largestBytes };
 };
@@ -98,7 +99,8 @@ export interface MatchesTableProps {
   /** Must keep its identity between renders, since a new array reloads the list. */
   matches: BoostRuleMatch[];
   queryKeyScope: string;
-  getMatchLinkProps: (name: string) => LinkProps;
+  /** Left out shows the names as plain text. */
+  getMatchLinkProps?: (name: string) => LinkProps | undefined;
   getRuleLinkProps: (ruleName: string) => LinkProps;
   isOutrankingComputed?: boolean;
 }
@@ -166,9 +168,9 @@ export const MatchesTable = ({
                   match && (
                     <NameCell
                       name={match.name}
-                      linkProps={latest.current.getMatchLinkProps(match.name)}
+                      linkProps={latest.current.getMatchLinkProps?.(match.name)}
                       isStruckThrough={Boolean(match.outrankedByRuleName)}
-                      data-test-subj="searchBoostMatchLink"
+                      data-test-subj="searchBoostMatchName"
                     />
                   )
                 );
@@ -205,7 +207,7 @@ export const MatchesTable = ({
                 const match = getMatch(item);
                 return (
                   <StorageSize
-                    bytes={match?.storageSizeInBytes ?? 0}
+                    bytes={match?.storageSizeInBytes}
                     largestBytes={latest.current.largestBytes}
                     showsBar={isWide}
                     isOutranked={Boolean(match?.outrankedByRuleName)}

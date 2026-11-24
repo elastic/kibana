@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-/** Base path of the engine's internal routes. */
-export const DETECTION_ENGINE_API_PATH = '/internal/nightshift/detection';
+export enum WorkflowsDataInputStep {
+  Upload = 1,
+  End = 2,
+}
