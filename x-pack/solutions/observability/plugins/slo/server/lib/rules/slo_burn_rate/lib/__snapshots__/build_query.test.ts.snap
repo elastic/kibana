@@ -229,6 +229,11 @@ Object {
       },
     },
   },
+  "filter_path": Array [
+    "took",
+    "aggregations.instances.after_key",
+    "aggregations.instances.buckets.key",
+  ],
   "query": Object {
     "bool": Object {
       "filter": Array [
@@ -490,6 +495,11 @@ Object {
       },
     },
   },
+  "filter_path": Array [
+    "took",
+    "aggregations.instances.after_key",
+    "aggregations.instances.buckets.key",
+  ],
   "query": Object {
     "bool": Object {
       "filter": Array [
