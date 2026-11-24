@@ -20,6 +20,7 @@ import {
   getQuerySummary,
   buildRenameSourceFieldMap,
 } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import { zipObject } from 'lodash';
 import DateMath from '@kbn/datemath';
 import { ESQL_TABLE_TYPE } from '../strategies/esql_search/types';
@@ -137,18 +138,45 @@ export const extractEsqlErrorInfo = (attributes: unknown): { type?: string; reas
   return {};
 };
 
-/** Re-formats an Elasticsearch ES|QL error into a user-friendly message and re-throws it. */
+/**
+ * Builds the JSON that the Inspector shows for a failed request: the error attributes when there
+ * are any, else the message. Anything can be thrown, so it makes no assumption about the value.
+ */
+export const getInspectorErrorJson = (error: unknown): object => {
+  const attributes = (error as { attributes?: unknown } | null | undefined)?.attributes;
+  if (typeof attributes === 'object' && attributes !== null) return attributes;
+  return { message: error instanceof Error ? error.message : String(error) };
+};
+
+const isAbortError = (error: object): boolean =>
+  (error as { name?: unknown }).name === 'AbortError';
+
+/**
+ * Re-formats an Elasticsearch ES|QL error into a user-friendly message and re-throws it.
+ * Only an error that carries Elasticsearch error attributes is reworded. Anything else was not
+ * reported by Elasticsearch (a network failure, an abort, a bug) and is rethrown as it is.
+ */
 export const formatAndRethrowEsqlError = (error: unknown): never => {
-  const err = error as Record<string, unknown> & { message: string };
-  if (!err.attributes) {
-    err.message = `Unexpected error from Elasticsearch: ${err.message}`;
-  } else {
-    const { type, reason } = extractEsqlErrorInfo(err.attributes);
-    if (type === 'parsing_exception') {
-      err.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
-    } else {
-      err.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
-    }
-  }
+  // A rejection is not always an object (e.g. a string)
+  if (typeof error !== 'object' || error === null) throw new Error(String(error));
+  // An abort is deliberate and callers recognize it by its name or type
+  if (isAbortError(error)) throw error;
+
+  const { attributes } = error as { attributes?: unknown };
+  if (!attributes) throw error;
+
+  const err = error as { message: string };
+  const { type, reason } = extractEsqlErrorInfo(attributes);
+  err.message =
+    type === 'parsing_exception'
+      ? i18n.translate('data.search.esql.error.parsingException', {
+          defaultMessage:
+            "Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: {reason}",
+          values: { reason },
+        })
+      : i18n.translate('data.search.esql.error.unexpected', {
+          defaultMessage: 'Unexpected error from Elasticsearch: {type} - {reason}',
+          values: { type, reason },
+        });
   throw err;
 };

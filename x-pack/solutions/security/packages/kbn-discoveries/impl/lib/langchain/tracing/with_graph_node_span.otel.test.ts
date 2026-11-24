@@ -6,7 +6,7 @@
  */
 
 import { END, START, Annotation, StateGraph } from '@langchain/langgraph';
-import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { SpanStatusCode, context } from '@opentelemetry/api';
 import { defaultResource } from '@opentelemetry/resources';
 import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace';
@@ -43,7 +43,7 @@ const initialState: State = {
 
 describe('withGraphNodeSpan with a real tracer', () => {
   const exporter = new InMemorySpanExporter();
-  const contextManager = new AsyncHooksContextManager();
+  const contextManager = new AsyncLocalStorageContextManager();
 
   beforeAll(() => {
     contextManager.enable();

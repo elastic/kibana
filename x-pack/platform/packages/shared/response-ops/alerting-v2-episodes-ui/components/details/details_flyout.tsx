@@ -235,7 +235,7 @@ export const AlertEpisodeDetailsFlyout = ({
   const { addToChat, isAddToChatAvailable } = useManualAddToChat(
     focusedEpisode,
     alertAttachmentConverter,
-    { agentBuilder: services.agentBuilder }
+    { agentBuilder: services.agentBuilder, application: services.application }
   );
   const takeActionPanels = useMemo(
     () =>
