@@ -17,6 +17,8 @@ jest.mock('../services/cloud_connect_client');
 jest.mock('../lib/create_storage_service');
 jest.mock('../lib/cluster_info');
 
+const mockGetCurrentClusterData = getCurrentClusterData as jest.Mock;
+
 describe('Authentication Routes', () => {
   let mockRouter: jest.Mocked<IRouter>;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -293,7 +295,7 @@ describe('Authentication Routes', () => {
         hasValidScope: true,
       });
 
-      jest.mocked(getCurrentClusterData).mockResolvedValue({
+      mockGetCurrentClusterData.mockResolvedValue({
         id: 'es-cluster-uuid',
         name: 'my-cluster',
         version: '8.15.0',
@@ -475,7 +477,7 @@ describe('Authentication Routes', () => {
         isClusterScoped: false,
         hasValidScope: true,
       });
-      jest.mocked(getCurrentClusterData).mockResolvedValue({});
+      mockGetCurrentClusterData.mockResolvedValue({});
       mockCloudConnectInstance.onboardClusterWithKeyGeneration.mockRejectedValue({
         isAxiosError: true,
         code: 'ECONNRESET',
@@ -565,7 +567,7 @@ describe('Authentication Routes', () => {
         isClusterScoped: false,
         hasValidScope: true,
       });
-      jest.mocked(getCurrentClusterData).mockResolvedValue({});
+      mockGetCurrentClusterData.mockResolvedValue({});
       mockCloudConnectInstance.onboardClusterWithKeyGeneration.mockRejectedValue({
         isAxiosError: true,
         message: 'Request failed with status code 504',
