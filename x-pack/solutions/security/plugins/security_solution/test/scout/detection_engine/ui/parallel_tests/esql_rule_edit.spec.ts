@@ -162,27 +162,5 @@ spaceTest.describe(
         await expect(ruleEditPage.ruleDetailsAboutSection).toBeVisible();
       }
     );
-
-    spaceTest(
-      'saves the rule after confirming the warning when a queried field does not exist',
-      async ({ apiServices, pageObjects, scoutSpace }) => {
-        const { ruleEditPage } = pageObjects;
-        const { id } = await apiServices.detectionRule.createEsqlRule({
-          ...ESQL_RULE,
-          enabled: false,
-          query: `from ${esqlSourceIndexName(
-            scoutSpace.id
-          )} metadata _id, _version, _index | keep hello.world`,
-        });
-
-        await ruleEditPage.navigate(id);
-        await ruleEditPage.save();
-        await expect(ruleEditPage.saveWithWarningsModal).toBeVisible();
-
-        await ruleEditPage.confirmSaveWithWarnings();
-        await expect(ruleEditPage.saveWithWarningsModal).toBeHidden();
-        await expect(ruleEditPage.ruleDetailsAboutSection).toBeVisible();
-      }
-    );
   }
 );

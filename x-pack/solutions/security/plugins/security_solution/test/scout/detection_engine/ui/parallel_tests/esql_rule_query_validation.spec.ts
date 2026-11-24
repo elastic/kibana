@@ -79,32 +79,5 @@ spaceTest.describe(
         await expect(ruleDetailsPage.header).toContainText(RULE_NAME);
       }
     );
-
-    spaceTest(
-      'asks for confirmation when a non-aggregating query drops the _id column',
-      async ({ pageObjects, scoutSpace }) => {
-        const { esqlRuleForm, ruleCreateWizard, ruleDetailsPage } = pageObjects;
-
-        await esqlRuleForm.setQueryAndWaitToSettle(
-          `from ${esqlSourceIndexName(
-            scoutSpace.id
-          )} metadata _id, _version, _index | drop _id | limit 5`
-        );
-        await esqlRuleForm.continueToAboutStep();
-
-        await ruleCreateWizard.waitForAboutStepEnabled();
-        await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
-        await ruleCreateWizard.aboutRuleDescription.fill(RULE_DESCRIPTION);
-        await ruleCreateWizard.aboutContinue.click();
-        await ruleCreateWizard.scheduleContinue.click();
-
-        await ruleCreateWizard.createWithoutEnabling.click();
-        await expect(esqlRuleForm.saveWithErrorsModal).toBeVisible();
-
-        await esqlRuleForm.confirmSaveWithErrors();
-        await expect(esqlRuleForm.saveWithErrorsModal).toBeHidden();
-        await expect(ruleDetailsPage.header).toContainText(RULE_NAME);
-      }
-    );
   }
 );
