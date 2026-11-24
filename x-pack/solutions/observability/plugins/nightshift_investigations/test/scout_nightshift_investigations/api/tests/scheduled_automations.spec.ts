@@ -311,6 +311,7 @@ apiTest.describe(
                   triggeredBy?: string;
                   executedBy?: string;
                   executedByDisplayName?: string;
+                  runsAsServiceAccount?: boolean;
                 }>;
                 usedToday: number;
               };
@@ -320,6 +321,7 @@ apiTest.describe(
               expect(run).toMatchObject({
                 triggeredBy: 'manual',
                 executedBy: execution.data.executedBy,
+                runsAsServiceAccount: true,
               });
               expect(run.executedByDisplayName).toMatch(/.+/);
               expect(run.executedByDisplayName).not.toMatch(/^u_/);

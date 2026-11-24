@@ -584,7 +584,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 390,
+        "line": 392,
         "column": 22
       }
     },

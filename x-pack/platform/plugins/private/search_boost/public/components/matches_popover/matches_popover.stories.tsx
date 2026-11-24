@@ -34,14 +34,10 @@ const MatchesPopoverStory = (args: StoryArgs) => {
 
 const match = (name: string, overrides: Partial<BoostRuleMatch> = {}): BoostRuleMatch => ({
   name,
-  isHidden: false,
   ...overrides,
 });
 
 const outranked = { outrankedByRuleName: 'Product catalog' };
-
-const hiddenMatches = (count: number): BoostRuleMatch[] =>
-  Array.from({ length: count }, (_, index) => match(`.hidden-${index + 1}`, { isHidden: true }));
 
 const meta: Meta<StoryArgs> = {
   title: 'Search boost/Matches popover',
@@ -73,25 +69,7 @@ export const WithOutranked: Story = {
       match('products', outranked),
       match('synonyms'),
       match('users'),
-      ...hiddenMatches(5),
     ],
-  },
-};
-
-export const WithHidden: Story = {
-  args: {
-    matches: [
-      match('kibana_sample_data_ecommerce'),
-      match('synonyms'),
-      match('users'),
-      ...hiddenMatches(3),
-    ],
-  },
-};
-
-export const OnlyHidden: Story = {
-  args: {
-    matches: hiddenMatches(3),
   },
 };
 
@@ -104,7 +82,6 @@ export const LongList: Story = {
           index % 7 === 0 ? outranked : {}
         )
       ),
-      ...hiddenMatches(5),
     ],
   },
 };
