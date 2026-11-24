@@ -823,7 +823,7 @@ describe('EndpointActionsClient', () => {
           });
         });
 
-        it('should succeed when endpoint supports the `file_export` capability', async () => {
+        it('should succeed and keep `export` in the Fleet action and the action request when endpoint supports the `file_export` capability', async () => {
           const generator = new EndpointMetadataGenerator('seed');
 
           applyEsClientSearchMock({
@@ -836,14 +836,35 @@ describe('EndpointActionsClient', () => {
             ]),
           });
 
+          const parameters = { path: 'C:\\file.txt', export: 'provider-1' };
+
           await expect(
             endpointActionsClient.getFile(
               responseActionsClientMock.createGetFileOptions({
                 ...getCommonResponseActionOptions(),
-                parameters: { path: 'C:\\file.txt', export: 'provider-1' },
+                parameters,
               })
             )
           ).resolves.toBeDefined();
+
+          // Dropping `export` would silently turn the export into a normal upload to Fleet
+          expect(
+            (await classConstructorOptions.endpointService.getFleetActionsClient())
+              .create as jest.Mock
+          ).toHaveBeenCalledWith(
+            expect.objectContaining({ data: expect.objectContaining({ parameters }) })
+          );
+          expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+            expect.objectContaining({
+              index: ENDPOINT_ACTIONS_INDEX,
+              document: expect.objectContaining({
+                EndpointActions: expect.objectContaining({
+                  data: expect.objectContaining({ parameters }),
+                }),
+              }),
+            }),
+            expect.anything()
+          );
         });
 
         describe('and `force` is also set to `true`', () => {
@@ -1322,7 +1343,7 @@ describe('EndpointActionsClient', () => {
           });
         });
 
-        it('should succeed when endpoint supports both `memdump_process` and `file_export`', async () => {
+        it('should succeed and keep `export` in the Fleet action and the action request when endpoint supports both `memdump_process` and `file_export`', async () => {
           const generator = new EndpointMetadataGenerator('seed');
 
           applyEsClientSearchMock({
@@ -1337,14 +1358,34 @@ describe('EndpointActionsClient', () => {
             ]),
           });
 
+          const parameters = { type: 'process' as const, pid: 123, export: 'provider-1' };
+
           await expect(
             endpointActionsClient.memoryDump(
               responseActionsClientMock.createMemoryDumpActionOption({
                 ...getCommonResponseActionOptions(),
-                parameters: { type: 'process', pid: 123, export: 'provider-1' },
+                parameters,
               })
             )
           ).resolves.toBeDefined();
+
+          expect(
+            (await classConstructorOptions.endpointService.getFleetActionsClient())
+              .create as jest.Mock
+          ).toHaveBeenCalledWith(
+            expect.objectContaining({ data: expect.objectContaining({ parameters }) })
+          );
+          expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+            expect.objectContaining({
+              index: ENDPOINT_ACTIONS_INDEX,
+              document: expect.objectContaining({
+                EndpointActions: expect.objectContaining({
+                  data: expect.objectContaining({ parameters }),
+                }),
+              }),
+            }),
+            expect.anything()
+          );
         });
       });
     });
