@@ -556,6 +556,50 @@ describe('useProposal', () => {
       expect(invalidateSpy).toHaveBeenCalledWith(expect.any(Object), { cancelRefetch: false });
     });
 
+    it('lets an earlier revision fetch that is already in flight finish instead of restarting it', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-3': { id: 'p-3', rootProposalId: 'p-1', revision: 3, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper, queryClient } = createWrapper();
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      http.get.mockImplementationOnce(async () => {
+        await gate;
+        return proposals['p-1'];
+      });
+      let isSettled = false;
+      const inFlight = queryClient
+        .refetchQueries({ queryKey: queryKeys.proposals.detail('p-1') })
+        .then(() => {
+          isSettled = true;
+        });
+      const fetchesOfEarlier = () => http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'));
+      await waitFor(() => expect(fetchesOfEarlier()).toHaveLength(2));
+
+      const latest = renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      expect(fetchesOfEarlier()).toHaveLength(2);
+      expect(isSettled).toBe(false);
+
+      release();
+      await act(async () => {
+        await inFlight;
+      });
+
+      expect(isSettled).toBe(true);
+      expect(fetchesOfEarlier()).toHaveLength(2);
+    });
+
     it('refetches an earlier revision whose card shows a load error, even if its old data reads as replaced', async () => {
       const replaced = {
         id: 'p-1',
