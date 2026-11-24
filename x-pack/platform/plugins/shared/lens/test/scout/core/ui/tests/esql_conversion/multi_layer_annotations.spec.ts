@@ -112,7 +112,7 @@ test.describe(
       expect(await lens.workspace.getEsqlQuery()).toContain('STATS COUNT(*)');
     });
 
-    test('should disable Convert to ES|QL button for query annotations that use global filters', async ({
+    test('converts query annotations of layers that use global filters and keeps the setting', async ({
       pageObjects,
       page,
     }) => {
@@ -122,10 +122,8 @@ test.describe(
         pageObjects,
         testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
       );
-      await expect(lens.workspace.convertToEsqlButton).toBeEnabled();
 
-      // The fixture's annotation layer uses global filters, which ES|QL annotations don't apply,
-      // so converting its query annotation would change what the chart shows.
+      // The fixture's annotation layer uses global filters, and ES|QL annotations apply them too.
       await lens.layers.activateLayerTab(2);
       await lens.dimensions.openDimensionEditor(
         'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
@@ -135,7 +133,19 @@ test.describe(
       await lens.style.configureQueryAnnotation({ queryString: '*', timeField: 'utc_time' });
       await lens.closeDimensionEditor();
 
-      await expect(lens.workspace.convertToEsqlButton).toBeDisabled();
+      await expect(lens.workspace.convertToEsqlButton).toBeEnabled();
+      await lens.workspace.convertToEsqlButton.click();
+      await lens.workspace.convertToEsqlModalConfirmButton.click();
+      await expect(lens.workspace.convertToEsqlModal).toBeHidden();
+      await expect.poll(() => lens.layers.getLayerCount()).toBe(4);
+
+      await lens.layers.activateLayerTab(2);
+      await page.testSubj.click('lnsLayerSettings');
+      await expect(page.testSubj.locator('lns-layerSettings-ignoreGlobalFilters')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+      await page.testSubj.click('lns-indexPattern-dimensionContainerBack');
 
       await cancelLensInlineEditorAndWaitClosed({ lens });
     });

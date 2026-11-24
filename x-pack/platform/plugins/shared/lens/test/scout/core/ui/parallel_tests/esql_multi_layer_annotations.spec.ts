@@ -153,10 +153,10 @@ spaceTest.describe(
         await expect(page.testSubj.locator('lnsAnnotationLayer_addFromLibrary')).toHaveCount(0);
 
         await lens.layers.ensureLayerTabIsActive(1);
-        // No data view switcher, layer settings (ignore global filters), or data-view-based
-        // "Save to library" action on the annotation layer.
+        // No data view switcher or data-view-based "Save to library" action on the annotation
+        // layer. Layer settings stay available because ES|QL annotations apply global filters.
         await expect(page.testSubj.locator('lns_layerIndexPatternLabel')).toHaveCount(0);
-        await expect(page.testSubj.locator('lnsLayerSettings')).toHaveCount(0);
+        await expect(page.testSubj.locator('lnsLayerSettings')).toBeVisible();
         await lens.layers.openLayerActions(1);
         await expect(page.testSubj.locator('lnsXY_annotationLayer_saveToLibrary')).toHaveCount(0);
         await lens.layers.closeLayerActions(1);
