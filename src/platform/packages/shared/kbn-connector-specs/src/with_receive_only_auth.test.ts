@@ -7,41 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from './connector_spec';
 import { InboundWebhook } from './specs/inbound_webhook/inbound_webhook';
+import { createTestDualConnectorSpec } from './test/create_test_dual_connector_spec';
 import { withReceiveOnlyAuth } from './with_receive_only_auth';
 
-const createSpec = (overrides: Partial<ConnectorSpec>): ConnectorSpec => ({
-  metadata: {
-    id: '.test',
-    displayName: 'Test',
-    description: 'Test',
-    minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
-  },
-  actions: {
-    ping: {
-      input: z.object({}),
-      handler: async () => ({}),
-      scope: 'read',
-    },
-  },
-  test: { enabled: false, handler: async () => ({}) },
-  auth: { types: ['basic'] },
-  events: {
-    definitions: {
-      received: {
-        eventId: 'test.received',
-        title: 'Received',
-        description: 'Inbound',
-        eventSchema: z.object({ body: z.unknown() }),
-      },
-    },
-    handleEvents: async () => ({ type: 'emit', events: [] }),
-  },
-  ...overrides,
-});
+const createSpec = (overrides: Partial<ConnectorSpec>): ConnectorSpec =>
+  createTestDualConnectorSpec({ auth: { types: ['basic'] }, ...overrides });
 
 const authTypeId = (authType: string | { type: string }): string =>
   typeof authType === 'string' ? authType : authType.type;

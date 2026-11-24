@@ -14,8 +14,8 @@ import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/publ
 import type { IconType } from '@elastic/eui';
 import {
   getConnectorSpec,
-  hasRunActionsSwitch,
   hideNoAuthInPicker,
+  isDualConnectorSpec,
   isInboundOnlyConnectorSpec,
 } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
@@ -137,7 +137,7 @@ export function transformSpecToActionTypeModel(
   uiSettings?: IUiSettingsClient
 ): ActionTypeModel {
   const registeredSpec = getConnectorSpec(spec.metadata.id);
-  const showsRunActionsSwitch = hasRunActionsSwitch(registeredSpec);
+  const showsRunActionsSwitch = registeredSpec !== undefined && isDualConnectorSpec(registeredSpec);
 
   return {
     id: spec.metadata.id,

@@ -7,7 +7,6 @@
 
 import React, { lazy } from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { hasRunActionsSwitch } from '@kbn/connector-specs';
 import { FormTestProvider } from '../../components/test_utils';
 import { ConnectorFormFields } from './connector_form_fields';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -22,11 +21,8 @@ jest.mock('@kbn/connector-specs', () => {
     ...actual,
     connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
     connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
-    hasRunActionsSwitch: jest.fn(() => false),
   };
 });
-
-const mockHasRunActionsSwitch = hasRunActionsSwitch as jest.Mock;
 
 describe('ConnectorFormFields', () => {
   let appMockRenderer: AppMockRenderer;
@@ -278,10 +274,6 @@ describe('ConnectorFormFields', () => {
     });
 
     describe('Run actions switch', () => {
-      beforeEach(() => {
-        mockHasRunActionsSwitch.mockReturnValue(false);
-      });
-
       const renderDual = (showInboundEvents = true) =>
         appMockRenderer.render(
           <FormTestProvider
@@ -297,9 +289,7 @@ describe('ConnectorFormFields', () => {
           </FormTestProvider>
         );
 
-      it('shows the switch with the outbound fields for a dual connector that offers no authentication', async () => {
-        mockHasRunActionsSwitch.mockReturnValue(true);
-
+      it('shows the switch with the outbound fields for a dual connector', async () => {
         const result = renderDual();
 
         expect(result.getAllByTestId('connector-outbound-label')).toHaveLength(1);
@@ -309,10 +299,22 @@ describe('ConnectorFormFields', () => {
         });
       });
 
-      it('shows only the Outbound heading for a dual connector without no authentication', async () => {
-        const result = renderDual();
+      it('does not show the switch for a connector that is not dual', async () => {
+        const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+          actionConnectorFields: lazy(() => import('./connector_mock')),
+        });
 
-        expect(result.getByTestId('connector-outbound-label')).toBeInTheDocument();
+        const result = appMockRenderer.render(
+          <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+            <ConnectorFormFields
+              actionTypeModel={actionTypeModel}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+              showInboundEvents
+            />
+          </FormTestProvider>
+        );
+
         expect(result.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
         await waitFor(() => {
           expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
@@ -320,8 +322,6 @@ describe('ConnectorFormFields', () => {
       });
 
       it('does not show the switch when inbound events are hidden', () => {
-        mockHasRunActionsSwitch.mockReturnValue(true);
-
         const result = renderDual(false);
 
         expect(result.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();

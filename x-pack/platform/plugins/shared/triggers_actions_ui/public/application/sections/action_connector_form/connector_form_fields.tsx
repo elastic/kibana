@@ -10,7 +10,7 @@ import React, { memo, Suspense, useContext } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { connectorTypeIsDual, getConnectorSpec, hasRunActionsSwitch } from '@kbn/connector-specs';
+import { connectorTypeIsDual } from '@kbn/connector-specs';
 
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
@@ -61,10 +61,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   const actionTypeId = actionTypeModel?.id;
   const isDual = actionTypeId != null && connectorTypeIsDual(actionTypeId);
   const showDualInbound = isDual && isClusterInboundEventsEnabled && showInboundEvents;
-  const showRunActionsSwitch =
-    actionTypeId != null &&
-    showInboundEvents &&
-    hasRunActionsSwitch(getConnectorSpec(actionTypeId));
+  const showRunActionsSwitch = isDual && showInboundEvents;
   const showSettingsSection =
     FieldsComponent !== null || settingsContent != null || showDualInbound;
   const showSettingsTitle =
