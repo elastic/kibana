@@ -9,7 +9,8 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
 import { UserActions } from '.';
-import { basicCase } from '../../containers/mock';
+import { basicCase, getUserAction } from '../../containers/mock';
+import { UserActionActions } from '../../../common/types/domain';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
@@ -19,7 +20,7 @@ import { useGetCaseUsers } from '../../containers/use_get_case_users';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { renderWithTestingProviders } from '../../common/mock';
-import type { CaseUserActionsStats } from '../../containers/types';
+import type { CaseUserActionsStats, UserActionUI } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
 jest.mock('../../containers/use_infinite_find_case_user_actions');
@@ -245,6 +246,71 @@ describe('UserActions (redesign)', () => {
       );
 
       expect(screen.queryByTestId('user-actions-no-search-results')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('"more activities" counter', () => {
+    const PER_PAGE = 10;
+    const TOTAL = 45;
+
+    const buildTitleActions = (prefix: string, count: number): UserActionUI[] =>
+      Array.from({ length: count }, (_, index) =>
+        getUserAction('title', UserActionActions.update, { id: `${prefix}-${index}` })
+      );
+
+    const mockInfinitePages = (userActions: UserActionUI[], hasNextPage = true) => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions, latestAttachments: [], total: TOTAL, perPage: PER_PAGE }] },
+        isLoading: false,
+        hasNextPage,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+    };
+
+    const mockLastPage = (userActions: UserActionUI[]) => {
+      useFindCaseUserActionsMock.mockReturnValue({
+        data: { userActions, latestAttachments: [] },
+        isLoading: false,
+      });
+    };
+
+    const bigCaseStats: CaseUserActionsStats = { ...userActionsStats, total: TOTAL };
+
+    it('does not count the separately fetched last page as hidden', async () => {
+      mockInfinitePages(buildTitleActions('infinite', PER_PAGE));
+      mockLastPage(buildTitleActions('last', 5));
+
+      renderWithTestingProviders(<UserActions {...defaultProps} userActionsStats={bigCaseStats} />);
+
+      expect(await screen.findByText('30 more activities')).toBeInTheDocument();
+    });
+
+    it('still excludes the last page when one of its actions renders no row', async () => {
+      const settingsWithoutKnownFields = getUserAction('settings', UserActionActions.update, {
+        id: 'unrenderable-settings',
+        payload: { settings: {} },
+      });
+      mockInfinitePages(buildTitleActions('infinite', PER_PAGE));
+      mockLastPage([...buildTitleActions('last', 4), settingsWithoutKnownFields]);
+
+      renderWithTestingProviders(<UserActions {...defaultProps} userActionsStats={bigCaseStats} />);
+
+      expect(await screen.findByText('30 more activities')).toBeInTheDocument();
+    });
+
+    it('subtracts nothing when filters make the infinite query load every page', async () => {
+      mockInfinitePages(buildTitleActions('infinite', PER_PAGE));
+
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActionsStats={bigCaseStats}
+          userActivityQueryParams={{ ...userActivityQueryParams, authors: ['elastic'] }}
+        />
+      );
+
+      expect(await screen.findByText('35 more activities')).toBeInTheDocument();
     });
   });
 });

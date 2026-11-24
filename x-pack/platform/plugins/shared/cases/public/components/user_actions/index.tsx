@@ -69,7 +69,7 @@ export const UserActions = React.memo((props: UserActionsProps) => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-    remainingActionCount,
+    remainingActionCount: notLoadedByInfiniteQueryCount,
     total: totalFilteredUserActions,
   } = useUserActionsPagination({
     userActivityQueryParams,
@@ -152,6 +152,11 @@ export const UserActions = React.memo((props: UserActionsProps) => {
       attachActionButton,
       commentRefs,
     ]
+  );
+
+  const remainingActionCount = Math.max(
+    notLoadedByInfiniteQueryCount - lastPageUserActions.length,
+    0
   );
 
   const allComments = useCommentsList({
