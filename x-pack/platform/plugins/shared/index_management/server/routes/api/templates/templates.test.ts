@@ -134,5 +134,51 @@ describe('Component templates API', () => {
         body: true,
       });
     });
+    it('ignores data_stream_options sent by the client and keeps the stored value', async () => {
+      transportRequest.mockResolvedValue({
+        index_templates: [
+          {
+            name: 'test-template',
+            index_template: {
+              template: { data_stream_options: { failure_store: { enabled: true } } },
+            },
+          },
+        ],
+      });
+      indexTemplateExists.mockResolvedValue({ acknowledged: true });
+      updateIndexTemplate.mockResolvedValue(true);
+
+      await router.runRequest({
+        ...mockRequest,
+        body: {
+          ...mockRequest.body,
+          template: { data_stream_options: { failure_store: { enabled: false } } },
+        },
+      });
+
+      expect(updateIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          template: expect.objectContaining({
+            data_stream_options: { failure_store: { enabled: true } },
+          }),
+        })
+      );
+    });
+    it('does not send client data_stream_options when none is stored', async () => {
+      transportRequest.mockResolvedValue({ index_templates: [{ name: 'test-template' }] });
+      indexTemplateExists.mockResolvedValue({ acknowledged: true });
+      updateIndexTemplate.mockResolvedValue(true);
+
+      await router.runRequest({
+        ...mockRequest,
+        body: {
+          ...mockRequest.body,
+          template: { data_stream_options: { failure_store: { enabled: false } } },
+        },
+      });
+
+      const arg = updateIndexTemplate.mock.calls[0][0] as any;
+      expect(arg.template?.data_stream_options).toBeUndefined();
+    });
   });
 });

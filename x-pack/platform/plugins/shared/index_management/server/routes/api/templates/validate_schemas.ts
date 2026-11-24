@@ -28,6 +28,7 @@ export const templateSchema = schema.object({
           frozen_after: schema.maybe(schema.string({ maxLength: 1000 })),
         })
       ),
+      data_stream_options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     })
   ),
   composedOf: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 })),
