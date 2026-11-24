@@ -319,11 +319,11 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       const block = blockOf(response.body);
       expect(sectionLines(block, 'Memory')).toStrictEqual(
         expect.arrayContaining([
-          'Memory writes are enabled for this AI-index registry entry.',
+          'This AI index takes memories. Agents do not write memory to it directly; dreaming may promote short-term memories into it.',
           'memory.session',
           'memory.session_fact',
-          'Use platform.context_engine.remember to write memory.',
-          'Use platform.context_engine.forget with a memory id to tombstone memory.',
+          `Use platform.context_engine.remember to save a short-term memory, with \`${SINGLE_AI_INDEX_ID}\` in aiIndexIds so dreaming can promote it into this AI index.`,
+          'Use platform.context_engine.forget with the ids returned by remember to forget short-term memories. It does not change KIs stored in this AI index.',
         ])
       );
       expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([

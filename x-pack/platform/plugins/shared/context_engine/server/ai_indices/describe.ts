@@ -77,12 +77,12 @@ const memorySection = (aiIndex: AiIndexItem, target: string): string[] => {
 
   return [
     'Memory',
-    'Memory writes are enabled for this AI-index registry entry.',
-    'Available memory types',
+    'This AI index takes memories. Agents do not write memory to it directly; dreaming may promote short-term memories into it.',
+    'Memory KI types',
     'memory.session',
     'memory.session_fact',
-    'Use platform.context_engine.remember to write memory.',
-    'Use platform.context_engine.forget with a memory id to tombstone memory.',
+    `Use platform.context_engine.remember to save a short-term memory, with \`${aiIndex.id}\` in aiIndexIds so dreaming can promote it into this AI index.`,
+    'Use platform.context_engine.forget with the ids returned by remember to forget short-term memories. It does not change KIs stored in this AI index.',
     'Unless the task specifically calls for memory, exclude memory types from ordinary KI retrieval:',
     EXCLUDE_MEMORY_KI_TYPES_FILTER,
     'For cross-session recall, search granular facts with hybrid retrieval:',

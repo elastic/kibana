@@ -47,7 +47,7 @@ Every HTTP call below authenticates with:
 | Query (retrieve) | POST /api/context_engine/ai_index/_query | Run ES\\|QL, keyword and semantic search fused, over this index's Knowledge Indicators |
 | List | GET /api/context_engine/ai_index | See every AI index you can read in this space |
 | Add a source | PUT /api/context_engine/ai_index/${aiIndexId} | Point this index at a new ES\\|QL query or connector so Context Engine turns that data into KIs |
-| Remember / Forget | MCP tools \`platform_context_engine_remember\` / \`platform_context_engine_forget\` | Save or retract a fact or session memory on this index (only if memory is enabled on it) |
+| Remember / Forget | MCP tools \`platform_context_engine_remember\` / \`platform_context_engine_forget\` | Save a short-term memory for the calling user, or forget one by the id \`platform_context_engine_remember\` returned. Pass \`${aiIndexId}\` in \`aiIndexIds\` so dreaming can promote the memory into this index |
 
 Full plugin reference: https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/context_engine/README.md
 
@@ -82,7 +82,7 @@ If this directory has application source, read enough to understand it, then map
 | Chat or support loop that re-reads raw files, tickets, or logs on every question | \`platform_context_engine_describe_ai_index\` once, then \`platform_context_engine_query_ai_indices\` before answering |
 | Hardcoded FAQ/runbook text duplicated across the codebase | A \`connector\` or \`esql\` source on this AI index, so Context Engine turns the underlying data into KIs instead |
 | Grep or regex search over docs/logs for "how do I..." questions | ES\\|QL hybrid search via \`platform_context_engine_query_ai_indices\` (keyword + \`.semantic\` fields, fused) |
-| Per-session state thrown away between runs | \`platform_context_engine_remember\` for durable facts, \`platform_context_engine_forget\` to retract them, only if memory is enabled on this index |
+| Per-session state thrown away between runs | \`platform_context_engine_remember\` to save short-term memories that dreaming can promote into this index, \`platform_context_engine_forget\` to retract them |
 | A pipeline already reading some Elasticsearch indices another way | An \`esql\` source pointing at those same indices, so they also feed this AI index's KIs |
 
 ## Step 4 — Propose, then get approval before touching code
@@ -93,7 +93,7 @@ Non-negotiable when implementing:
 - Call \`_describe\` (or the \`platform_context_engine_describe_ai_index\` tool) once before writing your first ES|QL query against this index. It gives the real field names and working example queries, not assumed ones.
 - \`PUT /api/context_engine/ai_index/${aiIndexId}\` replaces the whole record. GET the current record first, merge your change into \`sources\` (or \`automations\`, \`description\`), then send back only: \`description\`, \`memory_enabled\`, \`feedback_analysis\`, \`dest\`, \`automations\`, \`sources\`, \`traces\` (each trace as \`{ type, value }\`). Strip \`id\`, \`managed\`, \`date_created\`, \`date_modified\`, and any derived \`query\` field on traces first. The GET response includes those; the PUT schema does not accept them and will 400 if you send them back.
 - Don't fight the lifecycle filters (\`governance.lifecycle.status\`, \`expires_at\`) that \`_query\` injects automatically; they're what keeps deleted and expired KIs out of results.
-- \`platform_context_engine_remember\`/\`platform_context_engine_forget\` only work when this AI index has \`memory_enabled: true\`. Don't try to write memory content through any other route.
+- \`platform_context_engine_remember\`/\`platform_context_engine_forget\` act on the short-term memories of the user who owns the API key, not on KIs in this AI index. Passing \`${aiIndexId}\` in \`aiIndexIds\` requires the Elasticsearch \`write\` privilege on \`${aiIndexDest}\`. Don't write memory into this index directly.
 - \`/internal/context_engine/...\` routes are an internal implementation detail, not a stable public contract. Build new integrations on sources plus the three public routes/tools above.
 
 ## Step 5 — Suggest uses tailored to this project
