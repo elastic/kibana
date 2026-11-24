@@ -298,6 +298,8 @@ describe('Agents CRUD test', () => {
       'not_a_field:abc',
       'fleet-agents.default_api_key:abc*',
       'fleet-agents.attributes.default_api_key > "a"',
+      'agent.id:1 and default_api_key:*',
+      'agent.id:1 and true:x',
     ])(
       'rejects a kuery with a field not in the agent mappings (%s) before searching',
       async (kuery) => {

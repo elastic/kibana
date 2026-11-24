@@ -284,14 +284,20 @@ export const validateAgentKueryFields = (kuery: string | undefined): string | un
   } catch (e) {
     return undefined;
   }
-  const errors = validateFilterKueryNode({
-    astFilter,
-    types: [AGENTS_PREFIX],
-    indexMapping: AGENT_QUERYABLE_MAPPINGS,
-    storeValue: true,
-    skipNormalization: true,
-  })
-    .map(({ error }) => error)
-    .filter((error) => error != null);
+  let errors: string[];
+  try {
+    errors = validateFilterKueryNode({
+      astFilter,
+      types: [AGENTS_PREFIX],
+      indexMapping: AGENT_QUERYABLE_MAPPINGS,
+      storeValue: true,
+      skipNormalization: true,
+    })
+      .map(({ error }) => error)
+      .filter((error) => error != null);
+  } catch (e) {
+    // The parser accepts non-string field names (e.g. `true:foo`), which the walker cannot check.
+    return 'Kuery field is not supported';
+  }
   return errors.length > 0 ? errors.join('\n') : undefined;
 };

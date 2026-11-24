@@ -485,6 +485,12 @@ describe('validateAgentKueryFields', () => {
     '*:d*',
     'local_metadata.host.*:foo',
     'status:online and not (agent.id:1 or *_key:d*)',
+    'default_api_key:*',
+    'agent.id:1 and default_api_key:*',
+    'not access_api_key:*',
+    'status:online or not_a_field:*',
+    'true:foo',
+    'agent.id:1 and true:x',
   ])('returns an error for %s', (kuery) => {
     expect(validateAgentKueryFields(kuery)).toBeDefined();
   });

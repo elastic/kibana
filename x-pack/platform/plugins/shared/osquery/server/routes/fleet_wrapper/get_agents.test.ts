@@ -159,6 +159,24 @@ describe('getAgentsRoute', () => {
     expect(searchEsQuery).toContain('policy-1');
   });
 
+  it('replaces only the trailing policy_name clause when the search text contains one', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest(buildAgentSearchKuery('web or policy_name:Production')) as never,
+      mockResponse
+    );
+
+    expect(mockResponse.badRequest).not.toHaveBeenCalled();
+    expect(receivedKueryNode().function).toBe('and');
+
+    const esQuery = receivedEsQuery();
+    // No clause filters on the `policy_name` field...
+    expect(esQuery).not.toContain('"policy_name"');
+    // ...and the quoted hostname clause keeps the raw search text intact.
+    expect(esQuery).toContain('"local_metadata.host.hostname":"web or policy_name:Production"');
+  });
+
   it('returns empty result when no osquery policies exist', async () => {
     mockPackagePolicyService.fetchAllItems.mockResolvedValue(packagePolicyPages([[]]));
     const mockResponse = httpServerMock.createResponseFactory();
