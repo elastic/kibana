@@ -211,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: '.kibana_security_solution*',
         query: { bool: { filter: [{ term: { type: EXPORT_PROVIDER_KEY_SAVED_OBJECT_TYPE } }] } },
       });
-      const keyDoc = hits.hits.find((hit) => hit._id.endsWith(keyId));
+      const keyDoc = hits.hits.find((hit) => hit._id?.endsWith(keyId));
 
       if (!keyDoc?._source) {
         throw new Error(`Expected to find the key object [${keyId}] in .kibana_security_solution*`);
@@ -279,7 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // The key object exists before the package policy is deleted.
       const { hits: hitsBeforeDelete } = await es.search(keysOfThisPolicyQuery);
-      expect(hitsBeforeDelete.hits.some((hit) => hit._id.endsWith(keyId))).to.be(true);
+      expect(hitsBeforeDelete.hits.some((hit) => hit._id?.endsWith(keyId))).to.be(true);
 
       await kbnClient.request({
         method: 'POST',
