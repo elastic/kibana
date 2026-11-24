@@ -6,7 +6,7 @@
  */
 
 import { readFileSync } from 'fs';
-import type { Response } from 'supertest';
+import type { Response as SupertestResponse } from 'supertest';
 import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
 import url from 'url';
@@ -574,13 +574,27 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it.skip('should be able to have many pending SP initiated logins all successfully succeed', async () => {
-        const samlResponseMapByRequestId: Record<string, { samlResponse: string; cookie: any }> =
-          {};
+      it('should be able to have many pending SP initiated logins all successfully succeed', async () => {
+        const getSessionCookie = (setCookieHeaders: string | string[] | undefined): Cookie => {
+          const headers = Array.isArray(setCookieHeaders) ? setCookieHeaders : [setCookieHeaders];
+          const sessionCookie = headers
+            .map((header) => (header ? parseCookie(header) : undefined))
+            .find((cookie) => cookie?.key === 'sid');
+          if (!sessionCookie) {
+            throw new Error('SAML response did not set a session cookie.');
+          }
+          return sessionCookie;
+        };
 
-        let sharedCookie;
-        for (let i = 0; i < 10; i++) {
-          const samlHandshakeResponse: Response = await supertest
+        const pendingLogins: Array<{
+          samlResponse: string;
+          intermediateCookie: Cookie;
+          expectedLocation: string;
+        }> = [];
+        let sharedCookie: Cookie | undefined;
+
+        for (let index = 0; index < 10; index++) {
+          const samlHandshakeResponse = await supertest
             .post('/internal/security/login')
             .ca(CA_CERT)
             .set('kbn-xsrf', 'xxx')
@@ -588,65 +602,61 @@ export default function ({ getService }: FtrProviderContext) {
             .send({
               providerType: 'saml',
               providerName: 'saml2',
-              currentURL: `https://kibana.com/login?next=/abc/xyz/${i}`,
+              currentURL: `https://kibana.com/login?next=/abc/xyz/${index}`,
             })
             .expect(200);
 
+          const intermediateCookie = getSessionCookie(samlHandshakeResponse.headers['set-cookie']);
           if (!sharedCookie) {
-            sharedCookie = parseCookie(samlHandshakeResponse.headers['set-cookie'][0])!;
+            sharedCookie = intermediateCookie;
           }
 
-          const cookie = parseCookie(samlHandshakeResponse.headers['set-cookie'][0])!;
           const samlRequestId = await getSAMLRequestId(samlHandshakeResponse.body.location);
-          expect(samlRequestId).not.to.be(undefined);
+          if (!samlRequestId) {
+            throw new Error('SAML handshake did not include a request ID.');
+          }
 
           const samlResponse = await createSAMLResponse({
             issuer: `http://www.elastic.co/saml2`,
             inResponseTo: samlRequestId,
           });
 
-          samlResponseMapByRequestId[samlRequestId!] = { samlResponse, cookie };
+          pendingLogins.push({
+            samlResponse,
+            intermediateCookie,
+            expectedLocation: `/abc/xyz/${index}`,
+          });
         }
 
-        const preparedCallbacks = [];
+        // Complete one login first so the remaining callbacks exercise an existing authenticated
+        // cookie as well as the still-pending intermediate cookie.
+        const firstLogin = pendingLogins[0];
+        const firstResponse = await supertest
+          .post('/api/security/saml/callback')
+          .ca(CA_CERT)
+          .set('Cookie', firstLogin.intermediateCookie.cookieString())
+          .send({ SAMLResponse: firstLogin.samlResponse })
+          .expect(302);
+        expect(firstResponse.headers.location).to.be(firstLogin.expectedLocation);
 
-        for (const requestId of Object.keys(samlResponseMapByRequestId)) {
-          const samlValues = samlResponseMapByRequestId[requestId];
+        const authenticatedCookie = getSessionCookie(firstResponse.headers['set-cookie']);
 
-          const callbackFunc = () => {
-            return supertest
+        const responses: SupertestResponse[] = await Promise.all(
+          pendingLogins.slice(1).map(({ samlResponse, intermediateCookie }, index) =>
+            supertest
               .post('/api/security/saml/callback')
               .ca(CA_CERT)
-              .set('Cookie', samlValues.cookie.cookieString())
-              .send({
-                SAMLResponse: samlValues.samlResponse,
-              });
-          };
-
-          preparedCallbacks.push(callbackFunc);
-        }
-
-        const responses = await Promise.all(
-          preparedCallbacks.map((func) => {
-            return func();
-          })
+              .set(
+                'Cookie',
+                (index % 2 === 0 ? intermediateCookie : authenticatedCookie).cookieString()
+              )
+              .send({ SAMLResponse: samlResponse })
+              .expect(302)
+          )
         );
-        expect(
-          responses.map((response: Response) => {
-            return response.headers.location;
-          })
-        ).to.eql([
-          '/abc/xyz/0',
-          '/abc/xyz/1',
-          '/abc/xyz/2',
-          '/abc/xyz/3',
-          '/abc/xyz/4',
-          '/abc/xyz/5',
-          '/abc/xyz/6',
-          '/abc/xyz/7',
-          '/abc/xyz/8',
-          '/abc/xyz/9',
-        ]);
+        responses.forEach((response, index) => {
+          expect(response.headers.location).to.be(pendingLogins[index + 1].expectedLocation);
+        });
       });
     });
 

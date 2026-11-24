@@ -116,7 +116,6 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         const { uiSettings } = await context.core;
         const body = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: false,
-          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
@@ -128,7 +127,6 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         const { uiSettings } = await context.core;
         const body = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: true,
-          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
