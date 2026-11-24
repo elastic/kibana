@@ -568,6 +568,12 @@ export class ActionExecutor {
 
         eventLogger.logEvent(startEvent);
 
+        // Only types with `specVersions` get a version. Other types see no change.
+        const resolvedSpecVersion = actionType.specVersions?.resolveExecutionVersion(
+          rawAction.specVersion
+        );
+        const specVersionFields = resolvedSpecVersion ? { specVersion: resolvedSpecVersion } : {};
+
         let validatedParams: Record<string, unknown>;
         let validatedConfig: Record<string, unknown>;
         let validatedSecrets: Record<string, unknown>;
@@ -581,7 +587,7 @@ export class ActionExecutor {
               secrets,
               taskInfo,
             },
-            { configurationUtilities }
+            { configurationUtilities, ...specVersionFields }
           );
           validatedParams = validationResult.validatedParams;
           validatedConfig = validationResult.validatedConfig;
@@ -644,6 +650,7 @@ export class ActionExecutor {
             authMode,
             profileUid,
             connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
+            ...specVersionFields,
           });
 
           if (rawResult && rawResult.status === 'error') {

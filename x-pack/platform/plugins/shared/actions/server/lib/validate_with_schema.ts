@@ -102,7 +102,10 @@ function validateWithSchema<
         case 'params':
           name = 'action params';
           if (actionType.validate.params) {
-            const validatedValue = actionType.validate.params.schema.parse(value);
+            const { resolveSchema, schema } = actionType.validate.params;
+            const validatedValue = (
+              resolveSchema ? resolveSchema(validatorServices) : schema
+            ).parse(value);
 
             if (actionType.validate.params.customValidator) {
               actionType.validate.params.customValidator(
@@ -116,7 +119,10 @@ function validateWithSchema<
         case 'config':
           name = 'connector type config';
           if (actionType.validate.config) {
-            const validatedValue = actionType.validate.config.schema.parse(value);
+            const { resolveSchema, schema } = actionType.validate.config;
+            const validatedValue = (
+              resolveSchema ? resolveSchema(validatorServices) : schema
+            ).parse(value);
 
             if (actionType.validate.config.customValidator) {
               actionType.validate.config.customValidator(
@@ -131,7 +137,10 @@ function validateWithSchema<
         case 'secrets':
           name = 'connector type secrets';
           if (actionType.validate.secrets && value !== undefined && value !== null) {
-            const validatedValue = actionType.validate.secrets.schema.parse(value);
+            const { resolveSchema, schema } = actionType.validate.secrets;
+            const validatedValue = (
+              resolveSchema ? resolveSchema(validatorServices) : schema
+            ).parse(value);
 
             if (actionType.validate.secrets.customValidator) {
               actionType.validate.secrets.customValidator(

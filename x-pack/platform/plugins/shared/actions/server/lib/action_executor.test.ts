@@ -3018,3 +3018,107 @@ describe('execute() - EARS structured logging', () => {
     expect(earsLines()).toEqual([]);
   });
 });
+
+describe('execute() - spec version dispatch', () => {
+  const buildVersionedType = (resolveExecutionVersion: jest.Mock) => {
+    const resolveSchema = jest.fn(() => z.object({}).passthrough());
+    const customValidator = jest.fn();
+    const executor = jest.fn().mockResolvedValue({ status: 'ok', actionId: CONNECTOR_ID });
+    const versionedType: ConnectorType = {
+      ...connectorType,
+      validate: {
+        config: { schema: z.object({}).passthrough(), resolveSchema, customValidator },
+        secrets: { schema: z.object({}).passthrough(), resolveSchema, customValidator },
+        params: { schema: z.object({}).passthrough(), resolveSchema, customValidator },
+      },
+      executor,
+      specVersions: {
+        getLatestVersions: jest.fn(),
+        resolveExecutionVersion,
+      },
+    };
+    return { versionedType, resolveSchema, customValidator, executor };
+  };
+
+  const savedObjectWithPin = (specVersion?: string) => ({
+    ...connectorSavedObject,
+    attributes: { ...connectorSavedObject.attributes, ...(specVersion ? { specVersion } : {}) },
+  });
+
+  test('passes the pin to resolveSchema, customValidator and the executor', async () => {
+    const resolveExecutionVersion = jest.fn((pin?: string) => pin as string);
+    const { versionedType, resolveSchema, customValidator, executor } =
+      buildVersionedType(resolveExecutionVersion);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      savedObjectWithPin('1.0')
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(versionedType);
+
+    await actionExecutor.execute(executeParams);
+
+    expect(resolveExecutionVersion).toHaveBeenCalledTimes(1);
+    expect(resolveExecutionVersion).toHaveBeenCalledWith('1.0');
+    expect(resolveSchema).toHaveBeenCalledTimes(3);
+    for (const [validatorServices] of resolveSchema.mock.calls as unknown as Array<
+      [{ specVersion?: string }]
+    >) {
+      expect(validatorServices.specVersion).toBe('1.0');
+    }
+    expect(customValidator).toHaveBeenCalledTimes(3);
+    for (const [, validatorServices] of customValidator.mock.calls) {
+      expect(validatorServices).toEqual(expect.objectContaining({ specVersion: '1.0' }));
+    }
+    expect(executor).toHaveBeenCalledWith(expect.objectContaining({ specVersion: '1.0' }));
+  });
+
+  test('uses the version returned by resolveExecutionVersion when there is no pin', async () => {
+    const resolveExecutionVersion = jest.fn().mockReturnValue('1.3');
+    const { versionedType, resolveSchema, executor } = buildVersionedType(resolveExecutionVersion);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      savedObjectWithPin()
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(versionedType);
+
+    await actionExecutor.execute(executeParams);
+
+    expect(resolveExecutionVersion).toHaveBeenCalledWith(undefined);
+    expect(resolveSchema).toHaveBeenCalledWith(expect.objectContaining({ specVersion: '1.3' }));
+    expect(executor).toHaveBeenCalledWith(expect.objectContaining({ specVersion: '1.3' }));
+  });
+
+  test('an in-memory connector without a pin uses the no-pin path', async () => {
+    const resolveExecutionVersion = jest.fn().mockReturnValue('1.3');
+    const { versionedType, executor } = buildVersionedType(resolveExecutionVersion);
+    connectorTypeRegistry.get.mockReturnValueOnce(versionedType);
+
+    await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
+
+    expect(resolveExecutionVersion).toHaveBeenCalledWith(undefined);
+    expect(executor).toHaveBeenCalledWith(expect.objectContaining({ specVersion: '1.3' }));
+  });
+
+  test('a type without specVersions gets no specVersion key', async () => {
+    const resolveSchema = jest.fn(() => z.object({}).passthrough());
+    const customValidator = jest.fn();
+    const executor = jest.fn().mockResolvedValue({ status: 'ok', actionId: CONNECTOR_ID });
+    const plainType: ConnectorType = {
+      ...connectorType,
+      validate: {
+        config: { schema: z.object({}).passthrough(), resolveSchema, customValidator },
+        secrets: { schema: z.object({}).passthrough() },
+        params: { schema: z.object({}).passthrough() },
+      },
+      executor,
+    };
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      savedObjectWithPin('1.0')
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(plainType);
+
+    await actionExecutor.execute(executeParams);
+
+    expect(executor.mock.calls[0][0]).not.toHaveProperty('specVersion');
+    expect(customValidator).toHaveBeenCalledTimes(1);
+    expect(customValidator.mock.calls[0][1]).not.toHaveProperty('specVersion');
+  });
+});

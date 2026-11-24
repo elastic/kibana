@@ -668,3 +668,90 @@ describe('validateConnectors', () => {
     );
   });
 });
+
+describe('resolveSchema', () => {
+  const buildType = (key: 'params' | 'config' | 'secrets') => {
+    const schemaParse = jest.fn((value: Record<string, unknown>) => ({ from: 'schema', ...value }));
+    const resolvedParse = jest.fn((value: Record<string, unknown>) => ({
+      from: 'resolved',
+      ...value,
+    }));
+    const resolveSchema = jest.fn(() => ({ parse: resolvedParse }));
+    const customValidator = jest.fn();
+    const actionType = getConnectorType({
+      id: 'foo',
+      name: 'bar',
+      validate: {
+        config: { schema: z.object({}).passthrough() },
+        secrets: { schema: z.object({}).passthrough() },
+        params: { schema: z.object({}).passthrough() },
+        [key]: { schema: { parse: schemaParse }, resolveSchema, customValidator },
+      },
+    });
+    return { actionType, schemaParse, resolvedParse, resolveSchema, customValidator };
+  };
+
+  const validators = {
+    params: validateParams,
+    config: validateConfig,
+    secrets: validateSecrets,
+  } as const;
+
+  const keys = ['params', 'config', 'secrets'] as const;
+
+  test.each(keys)('uses resolveSchema for %s and passes the validator services', (key) => {
+    const { actionType, schemaParse, resolvedParse, resolveSchema, customValidator } =
+      buildType(key);
+    const services: ValidatorServices = { configurationUtilities, specVersion: '1.1' };
+
+    const result = validators[key](actionType, { a: 1 }, services);
+
+    expect(result).toEqual({ from: 'resolved', a: 1 });
+    expect(resolveSchema).toHaveBeenCalledWith(services);
+    expect(resolvedParse).toHaveBeenCalledWith({ a: 1 });
+    expect(schemaParse).not.toHaveBeenCalled();
+    expect(customValidator).toHaveBeenCalledWith({ from: 'resolved', a: 1 }, services);
+  });
+
+  test.each(keys)('uses schema for %s when resolveSchema is absent', (key) => {
+    const schemaParse = jest.fn((value: Record<string, unknown>) => ({ from: 'schema', ...value }));
+    const customValidator = jest.fn();
+    const actionType = getConnectorType({
+      id: 'foo',
+      name: 'bar',
+      validate: {
+        config: { schema: z.object({}).passthrough() },
+        secrets: { schema: z.object({}).passthrough() },
+        params: { schema: z.object({}).passthrough() },
+        [key]: { schema: { parse: schemaParse }, customValidator },
+      },
+    });
+    const services: ValidatorServices = { configurationUtilities };
+
+    const result = validators[key](actionType, { a: 1 }, services);
+
+    expect(result).toEqual({ from: 'schema', a: 1 });
+    expect(customValidator).toHaveBeenCalledWith({ from: 'schema', a: 1 }, services);
+  });
+
+  test('wraps an error thrown by resolveSchema in a bad request', () => {
+    const actionType = getConnectorType({
+      id: 'foo',
+      name: 'bar',
+      validate: {
+        config: { schema: z.object({}).passthrough() },
+        secrets: { schema: z.object({}).passthrough() },
+        params: {
+          schema: z.object({}).passthrough(),
+          resolveSchema: () => {
+            throw new Error('no such version');
+          },
+        },
+      },
+    });
+
+    expect(() => validateParams(actionType, {}, { configurationUtilities })).toThrow(
+      'error validating action params: no such version'
+    );
+  });
+});
