@@ -10,7 +10,7 @@
 /**
  * Calculates the cube root of a number. For arrays, the function will be applied index-wise to each element.
  * @param {(number|number[])} a a number or an array of numbers
- * @return {(number|number[])} The cube root of `a`. Returns an array with the the cube roots of each element if `a` is an array.
+ * @return {(number|number[])} The cube root of `a`. Returns an array with the cube roots of each element if `a` is an array.
  *
  * @example
  * cbrt(-27) // returns -3

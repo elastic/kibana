@@ -10,43 +10,7 @@
  * See `@kbn/gen-ai-functional-testing` for the shared ToolingLog-based version.
  */
 
-import { existsSync, readFileSync } from 'fs';
-import { resolve } from 'path';
-
 import type { Client } from '@elastic/elasticsearch';
-import { REPO_ROOT } from '@kbn/repo-info';
-
-const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
-
-export interface DiscoveredEisModel {
-  inferenceId: string;
-  modelId: string;
-  metadata?: {
-    heuristics?: {
-      properties?: string[];
-    };
-  };
-}
-
-const EXCLUDED_EIS_PROPERTIES = new Set(['efficient', 'ocr-only']);
-
-export const getPreDiscoveredEisModelsForScout = (): DiscoveredEisModel[] => {
-  if (!existsSync(EIS_MODELS_PATH)) {
-    return [];
-  }
-  try {
-    const data = JSON.parse(readFileSync(EIS_MODELS_PATH, 'utf8')) as {
-      models?: DiscoveredEisModel[];
-    };
-    const models = data.models ?? [];
-    return models.filter(
-      (model) =>
-        !model.metadata?.heuristics?.properties?.some((p) => EXCLUDED_EIS_PROPERTIES.has(p))
-    );
-  } catch {
-    return [];
-  }
-};
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

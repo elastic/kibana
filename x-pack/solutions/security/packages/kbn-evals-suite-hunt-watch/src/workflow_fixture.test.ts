@@ -43,7 +43,7 @@ interface MockOptions {
   /** Per-space worker catalog overrides, keyed by spaceId. */
   workerOverrides?: Record<
     string,
-    Partial<{ enabled: boolean; state: string; workflowId: string }>
+    Partial<{ enabled: boolean; state: string; stateReason: string; workflowId: string }>
   >;
   /** Replaces the worker yaml document returned for every space. */
   workerYaml?: string;
@@ -86,6 +86,7 @@ const buildMockFetch = (options: MockOptions = {}): HttpHandler => {
             id: 'system-security-hunt-continuous-threat-hunt',
             enabled: override.enabled ?? true,
             state: override.state ?? 'ok',
+            stateReason: override.stateReason,
             workflowId: override.workflowId ?? expectedWorkerWorkflowId(spaceId),
           },
         ],
@@ -96,8 +97,8 @@ const buildMockFetch = (options: MockOptions = {}): HttpHandler => {
   }) as unknown as HttpHandler;
 };
 
-const run = (fetch: HttpHandler, spaceIds: string[] = ['default']) =>
-  assertWorkflowInstalled({ fetch, log: new ToolingLog(), spaceIds });
+const run = (fetch: HttpHandler, spaceIds: string[] = ['default'], log = new ToolingLog()) =>
+  assertWorkflowInstalled({ fetch, log, spaceIds });
 
 describe('assertWorkflowInstalled', () => {
   it('resolves when every global child and the per-space Worker are healthy', async () => {
@@ -116,10 +117,45 @@ describe('assertWorkflowInstalled', () => {
     ).rejects.toThrow(/enabled=false/);
   });
 
-  it('throws naming the space when the Worker state is not "ok"', async () => {
+  it('throws naming the space when the Worker is paused', async () => {
     await expect(
       run(buildMockFetch({ workerOverrides: { default: { state: 'paused' } } }))
     ).rejects.toThrow(/state=paused/);
+  });
+
+  it('throws when the Worker is unavailable', async () => {
+    await expect(
+      run(buildMockFetch({ workerOverrides: { default: { state: 'unavailable' } } }))
+    ).rejects.toThrow(/state=unavailable/);
+  });
+
+  it('throws on an unknown Worker state', async () => {
+    await expect(
+      run(buildMockFetch({ workerOverrides: { default: { state: 'mystery' } } }))
+    ).rejects.toThrow(/state=mystery/);
+  });
+
+  it('accepts an enabled degraded Worker and logs the reason', async () => {
+    const log = new ToolingLog();
+    const info = jest.spyOn(log, 'info');
+    await expect(
+      run(
+        buildMockFetch({
+          workerOverrides: {
+            default: { state: 'degraded', stateReason: 'blocked:empty_universe' },
+          },
+        }),
+        ['default'],
+        log
+      )
+    ).resolves.toBeUndefined();
+    expect(info).toHaveBeenCalledWith(expect.stringContaining('blocked:empty_universe'));
+  });
+
+  it('still throws when a degraded Worker is not enabled', async () => {
+    await expect(
+      run(buildMockFetch({ workerOverrides: { default: { enabled: false, state: 'degraded' } } }))
+    ).rejects.toThrow(/enabled=false/);
   });
 
   it('throws when the per-space workflowId does not match the templated scheme', async () => {

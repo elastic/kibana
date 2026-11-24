@@ -8,6 +8,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
+import { CLOUD_DEFEND_BASE_PATH } from '@kbn/cloud-defend-plugin/public';
 import { GlobalHeader } from '.';
 import {
   ADD_DATA_PATH,
@@ -112,6 +113,26 @@ describe('global header', () => {
     expect(queryByTestId('add-data')).not.toBeInTheDocument();
   });
 
+  it('clears the legacy action menu on Defend for containers pages', () => {
+    const setHeaderActionMenu = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: { ...mockUseKibana().services, setHeaderActionMenu },
+    });
+    (useLocation as jest.Mock).mockReturnValue({
+      pathname: `${CLOUD_DEFEND_BASE_PATH}/policies`,
+    });
+
+    render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    expect(setHeaderActionMenu).toHaveBeenCalledWith(undefined);
+    expect(setHeaderActionMenu).not.toHaveBeenCalledWith(expect.any(Function));
+  });
+
   it('clears the legacy action menu on Cloud Security Posture pages', () => {
     const setHeaderActionMenu = jest.fn();
     (useKibana as jest.Mock).mockReturnValue({
@@ -200,6 +221,8 @@ describe('global header', () => {
     '/manage',
     '/configurations',
     '/configurations/integrations/browse',
+    '/siem_readiness',
+    '/siem_readiness/visibility/coverage',
   ])(
     'does not mount the header action menu on %s, where the page app header owns the actions',
     (pathname) => {

@@ -17,10 +17,10 @@ export const getDreamingStatusInputSchema = lazySchema(() =>
   z.object({
     ai_index_id: aiIndexIdSchema,
     source: z
-      .enum(['memories', 'traces', 'relationships'])
+      .enum(['memories', 'traces', 'relationships', 'maintenance'])
       .optional()
       .describe(
-        'What the run dreams on: memories (the default); the traces configured on the AI index, which also need a trace source; or its facts and entities, to link with relationships, which also need relationship types'
+        'What the run dreams on: memories (the default); the traces configured on the AI index, which also need a trace source; its facts and entities, to link with relationships, which also need relationship types; or its facts and entities, to maintain, which also needs maintenance turned on'
       ),
   })
 );
@@ -58,7 +58,8 @@ export const getDreamingStatusStepCommonDefinition: CommonStepDefinition<
           'global Context Engine memory setting is off, or the AI index no longer ' +
           'has dreaming turned on. With source traces, also when the AI index has no trace ' +
           'sources; with source relationships, also when its dreaming config has no relationship ' +
-          'types. A dreaming run checks it first, so turning memory off stops ' +
+          'types; with source maintenance, also when its maintenance is turned off. A dreaming ' +
+          'run checks it first, so turning memory off stops ' +
           'scheduled runs before they read memories or call a model.',
       }
     ),

@@ -27,6 +27,9 @@ export const useSaveAiIndexSources = (): {
     errorTitle: i18n.translate('xpack.contextEngine.saveAiIndexSources.errorTitle', {
       defaultMessage: 'Unable to update sources',
     }),
+    warningTitle: i18n.translate('xpack.contextEngine.saveAiIndexSources.warningTitle', {
+      defaultMessage: 'Sources saved, but some automations were not updated',
+    }),
     buildProperties,
   });
 

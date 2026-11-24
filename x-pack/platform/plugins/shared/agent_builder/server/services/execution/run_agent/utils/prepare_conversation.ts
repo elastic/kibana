@@ -17,6 +17,7 @@ import type {
 import {
   EventActorType,
   isAttachmentEvent,
+  isSteerMessageEvent,
   isTimelineEvent,
   isMessageEvent,
 } from '@kbn/agent-builder-common';
@@ -45,6 +46,7 @@ import {
   groupTimelineRounds,
   groupTimelineEntries,
   isTimelineStandaloneEvent,
+  isTimelineStandaloneUserMessage,
   isTimelineRound,
   linkedInputEvents,
 } from './context_timeline';
@@ -88,6 +90,7 @@ export const prepareConversation = async ({
   metadata,
   templateId,
   resumeAnchors,
+  unreadSteerIds,
 }: {
   /** The conversation's normalized context timeline (see `eventsForContext`). */
   timeline: ContextTimelineEvent[];
@@ -99,6 +102,8 @@ export const prepareConversation = async ({
   metadata?: Record<string, MetadataFieldValue>;
   templateId?: string;
   resumeAnchors?: ResumeAnchors;
+  /** Steers settled without being read (see `unreadSettledSteerIds`): kept as history. Absent without stored events. */
+  unreadSteerIds?: ReadonlySet<string>;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const resolveContext: AttachmentResolveContext = {
@@ -119,6 +124,15 @@ export const prepareConversation = async ({
   const processedTimeline: ProcessedTimelineEvent[] = [];
   const includedRounds = new Set(effectiveRounds.map((round) => round.id));
   for (const round of groupTimelineEntries(timeline)) {
+    // A read steer enters the model context through its delivery step; a pending one through the
+    // drain. Only a steer its run never read is history.
+    const standaloneMessage = isTimelineStandaloneUserMessage(round)
+      ? round.userMessage
+      : undefined;
+    const isSteer = standaloneMessage !== undefined && isSteerMessageEvent(standaloneMessage);
+    if (isSteer && !unreadSteerIds?.has(standaloneMessage.id)) {
+      continue;
+    }
     if (isTimelineStandaloneEvent(round)) {
       // Rendered unescaped, so never taken from the stored event.
       const processedEvent = isAttachmentEvent(round.event)
@@ -160,6 +174,7 @@ export const prepareConversation = async ({
         inputEvents.length > 0
           ? { ...processedInput, attachment_events: inputEvents }
           : processedInput,
+      ...(isSteer ? { unread_steer: true } : {}),
     };
     // A round carries its user message and its run; a standalone message itself and its inputs.
     const events = isTimelineRound(round) ? round.events : [round.userMessage, ...round.events];

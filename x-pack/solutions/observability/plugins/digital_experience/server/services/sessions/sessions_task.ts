@@ -15,9 +15,8 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import {
-  SESSIONS_TASK_ID,
-  SESSIONS_TASK_TYPE,
-  SESSIONS_VERSION,
+  MOBILE_SESSIONS_RECONCILE_HOURS,
+  MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES,
   type SessionsSettings,
 } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
@@ -27,7 +26,12 @@ import {
   putSessionsIndexTemplate,
   sessionsIndexExists,
 } from './sessions_index';
-import { INITIAL_WINDOW_MS, summarizeSessions } from './summarize_sessions';
+import type { SessionsPlatform } from './sessions_platforms';
+import {
+  INITIAL_WINDOW_MS,
+  summarizeSessions,
+  type SummarizeSessionsResult,
+} from './summarize_sessions';
 
 /** No window starts after this much of a run, so it ends well before its timeout. */
 const RUN_BUDGET_MS = 45 * 1000;
@@ -37,6 +41,9 @@ const RUN_BUDGET_MS = 45 * 1000;
  * window without end.
  */
 const RUN_TIME_LIMIT_MS = 4 * 60 * 1000;
+
+export const RECONCILE_INTERVAL_MS = MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES * 60 * 1000;
+export const RECONCILE_MS = MOBILE_SESSIONS_RECONCILE_HOURS * 60 * 60 * 1000;
 
 export const NO_API_KEY_MESSAGE =
   'The task has no API key, so it cannot read events. Enable sessions again to grant one.';
@@ -64,7 +71,22 @@ const stateSchemaV1 = schema.object({
   failedApiKeyId: schema.maybe(schema.nullable(schema.string())),
 });
 
-export type SessionsTaskState = TypeOf<typeof stateSchemaV1>;
+/** The state of a platform's task that rebuilds its recent sessions, as the mobile one does. */
+const reconcilingStateSchemaV1 = stateSchemaV1.extends({
+  /** The pass under way has summarized every event from its start up to here. */
+  reconcileFrom: schema.maybe(schema.nullable(schema.string())),
+  /** Where the pass under way ends: the checkpoint when it started. */
+  reconcileUntil: schema.maybe(schema.nullable(schema.string())),
+  reconcileWindowMs: schema.maybe(schema.number()),
+  lastReconcileStartedAt: schema.maybe(schema.nullable(schema.string())),
+});
+
+/** A task's state; the browser task's has none of the reconcile fields. */
+export type SessionsTaskState = TypeOf<typeof reconcilingStateSchemaV1>;
+type ReconcileState = Pick<
+  SessionsTaskState,
+  'reconcileFrom' | 'reconcileUntil' | 'reconcileWindowMs' | 'lastReconcileStartedAt'
+>;
 
 /** The sessions settings the task runs with. */
 export interface SessionsTaskSettings extends SessionsSettings {
@@ -73,6 +95,7 @@ export interface SessionsTaskSettings extends SessionsSettings {
 }
 
 export interface RunSessionsTaskParams {
+  platform: SessionsPlatform;
   state: SessionsTaskState;
   /** The task's API key, or `undefined` when it has none. */
   esClient: ElasticsearchClient | undefined;
@@ -101,9 +124,14 @@ export const apiKeyIdOf = (request: KibanaRequest): string | null => {
   return secret && API_KEY_ID.test(id) ? id : null;
 };
 
-const logErrorChange = (logger: Logger, previous: SessionsTaskState, message: string) => {
+const logErrorChange = (
+  logger: Logger,
+  platform: SessionsPlatform,
+  previous: SessionsTaskState,
+  message: string
+) => {
   if (previous.lastError?.message !== message) {
-    logger.warn(`Summarizing Digital Experience sessions failed: ${message}`);
+    logger.warn(`Summarizing ${platform.label} failed: ${message}`);
   }
 };
 
@@ -111,15 +139,76 @@ const logErrorChange = (logger: Logger, previous: SessionsTaskState, message: st
  * Why a run of this Kibana stands down: the summaries belong to a newer version, which owns the
  * index and its template.
  */
-export const newerVersionMessage = (version: number) =>
-  `The session summaries are version ${version}, newer than this Kibana builds (version ${SESSIONS_VERSION}), so it left them to the nodes that can.`;
+export const newerVersionMessage = (version: number, currentVersion: number) =>
+  `The session summaries are version ${version}, newer than this Kibana builds (version ${currentVersion}), so it left them to the nodes that can.`;
+
+const reconcileStateOf = ({
+  reconcileFrom,
+  reconcileUntil,
+  reconcileWindowMs,
+  lastReconcileStartedAt,
+}: SessionsTaskState): ReconcileState => ({
+  reconcileFrom,
+  reconcileUntil,
+  reconcileWindowMs,
+  lastReconcileStartedAt,
+});
+
+interface ReconcilePass {
+  from: string;
+  until: string;
+  windowMs: number;
+  startedAt: string;
+}
+
+/**
+ * The pass that rebuilds the recent sessions to run now: the one under way, or a new one over the
+ * `RECONCILE_MS` before the checkpoint once the last one started `RECONCILE_INTERVAL_MS` ago.
+ */
+export const reconcilePassOf = (
+  state: ReconcileState,
+  checkpoint: string,
+  now: number
+): ReconcilePass | null => {
+  const { reconcileFrom, reconcileUntil, reconcileWindowMs, lastReconcileStartedAt } = state;
+  if (reconcileFrom && reconcileUntil) {
+    return {
+      from: reconcileFrom,
+      until: reconcileUntil,
+      windowMs: reconcileWindowMs ?? INITIAL_WINDOW_MS,
+      startedAt: lastReconcileStartedAt ?? new Date(now).toISOString(),
+    };
+  }
+  if (lastReconcileStartedAt && now - Date.parse(lastReconcileStartedAt) < RECONCILE_INTERVAL_MS) {
+    return null;
+  }
+  return {
+    from: new Date(Date.parse(checkpoint) - RECONCILE_MS).toISOString(),
+    until: checkpoint,
+    windowMs: INITIAL_WINDOW_MS,
+    startedAt: new Date(now).toISOString(),
+  };
+};
+
+/** The state of the pass after a run of it: done once it reached its end. */
+const afterReconcilePass = (
+  pass: ReconcilePass,
+  { checkpoint, windowMs, caughtUp }: SummarizeSessionsResult
+): ReconcileState => ({
+  reconcileFrom: caughtUp ? null : checkpoint,
+  reconcileUntil: caughtUp ? null : pass.until,
+  reconcileWindowMs: windowMs,
+  lastReconcileStartedAt: pass.startedAt,
+});
 
 /**
  * One run: summarizes the sessions with new events, window by window, and runs again right away
- * while it hasn't caught up. Failures are kept in the state rather than thrown, so the next run
- * retries from the same checkpoint and the status shows them.
+ * while it hasn't caught up. Once caught up, a platform that reconciles then rebuilds its recent
+ * sessions with the rest of the run's time. Failures are kept in the state rather than thrown, so
+ * the next run retries from the same checkpoint and the status shows them.
  */
 export const runSessionsTask = async ({
+  platform,
   state,
   esClient,
   apiKeyId,
@@ -131,7 +220,7 @@ export const runSessionsTask = async ({
 }: RunSessionsTaskParams): Promise<{ state: SessionsTaskState; runAt?: Date }> => {
   const at = new Date(now).toISOString();
   if (!esClient) {
-    logErrorChange(logger, state, NO_API_KEY_MESSAGE);
+    logErrorChange(logger, platform, state, NO_API_KEY_MESSAGE);
     return {
       state: { ...state, lastRunAt: at, lastError: { message: NO_API_KEY_MESSAGE, at } },
     };
@@ -141,26 +230,31 @@ export const runSessionsTask = async ({
   // summaries and the index template are that version's, so this node leaves them alone instead
   // of rebuilding them as its own, which would overwrite the template and restart the backfill
   // every time the task moved between them.
-  if (state.version != null && state.version > SESSIONS_VERSION) {
-    const message = newerVersionMessage(state.version);
+  if (state.version != null && state.version > platform.version) {
+    const message = newerVersionMessage(state.version, platform.version);
     if (state.lastError?.message !== message) {
       logger.warn(message);
     }
     return { state: { ...state, lastRunAt: at, lastError: { message, at } } };
   }
 
+  const started = Date.now();
   // A deleted index, or a new version, is rebuilt from the lookback, also after a failed run.
-  let rebuild = state.version !== SESSIONS_VERSION;
+  let rebuild = state.version !== platform.version;
   try {
     // The template has to be in place before the index is created, or the index gets dynamic
     // mappings and nothing repairs it until the next version. Put it while rebuilding, and
     // whenever the index is missing, which covers a template that was deleted by hand.
-    if (rebuild || !(await sessionsIndexExists(esClient, signal))) {
-      await putSessionsIndexTemplate(internalClient, signal);
+    if (rebuild || !(await sessionsIndexExists(esClient, platform, signal))) {
+      await putSessionsIndexTemplate(internalClient, platform, signal);
     }
-    const created = await createSessionsIndex(esClient, signal);
+    const created = await createSessionsIndex(esClient, platform, signal);
     rebuild = rebuild || created;
+    // Once a run: the setting only changes with the cluster, and every query of the run is
+    // split against it.
+    const maxRows = await esqlMaxRows(internalClient, signal);
     const result = await summarizeSessions({
+      platform,
       esClient,
       signal,
       now,
@@ -170,29 +264,77 @@ export const runSessionsTask = async ({
       timeLimitMs: RUN_TIME_LIMIT_MS,
       concurrency,
       logger,
-      // Once a run: the setting only changes with the cluster, and every query of the run is
-      // split against it.
-      maxRows: await esqlMaxRows(internalClient, signal),
+      maxRows,
     });
 
     const caughtUp = (!rebuild && state.caughtUp === true) || result.caughtUp;
     if (caughtUp && state.caughtUp !== true) {
-      logger.info('Digital Experience session summaries caught up with the events.');
+      logger.info(`${platform.taskTitle} caught up with the events.`);
     }
-    if (state.lastError) {
-      logger.info('Summarizing Digital Experience sessions works again.');
+
+    let reconcileState: ReconcileState = {};
+    let reconcileError: string | null = null;
+    if (platform.reconcile) {
+      // A rebuild reads every event anyway, so the first pass waits for the interval after it.
+      reconcileState = rebuild
+        ? {
+            reconcileFrom: null,
+            reconcileUntil: null,
+            reconcileWindowMs: INITIAL_WINDOW_MS,
+            lastReconcileStartedAt: at,
+          }
+        : reconcileStateOf(state);
+      const pass = result.caughtUp ? reconcilePassOf(reconcileState, result.checkpoint, now) : null;
+      const elapsed = Date.now() - started;
+      if (pass && elapsed < RUN_BUDGET_MS) {
+        // A failed pass leaves the regular one's progress in place, and is retried next run.
+        try {
+          reconcileState = afterReconcilePass(
+            pass,
+            await summarizeSessions({
+              platform,
+              esClient,
+              signal,
+              now,
+              checkpoint: pass.from,
+              until: Date.parse(pass.until),
+              rebuildUntil: Date.parse(result.checkpoint),
+              windowMs: pass.windowMs,
+              budgetMs: RUN_BUDGET_MS - elapsed,
+              timeLimitMs: RUN_TIME_LIMIT_MS - elapsed,
+              concurrency,
+              logger,
+              maxRows,
+            })
+          );
+        } catch (error) {
+          reconcileError = describeError(error);
+          reconcileState = {
+            reconcileFrom: pass.from,
+            reconcileUntil: pass.until,
+            reconcileWindowMs: pass.windowMs,
+            lastReconcileStartedAt: pass.startedAt,
+          };
+          logErrorChange(logger, platform, state, reconcileError);
+        }
+      }
+    }
+
+    if (state.lastError && !reconcileError) {
+      logger.info(`Summarizing ${platform.label} works again.`);
     }
     return {
       state: {
-        version: SESSIONS_VERSION,
+        version: platform.version,
         checkpoint: result.checkpoint,
         windowMs: result.windowMs,
         caughtUp,
         lastRunAt: at,
         lastSuccessAt: at,
-        lastError: null,
+        lastError: reconcileError ? { message: reconcileError, at } : null,
         apiKeyInvalid: false,
         failedApiKeyId: null,
+        ...reconcileState,
       },
       // Behind: run again right away instead of waiting for the interval.
       ...(result.caughtUp ? {} : { runAt: new Date() }),
@@ -200,7 +342,7 @@ export const runSessionsTask = async ({
   } catch (error) {
     const message = describeError(error);
     const unauthorized = isResponseError(error) && error.statusCode === 401;
-    logErrorChange(logger, state, message);
+    logErrorChange(logger, platform, state, message);
     return {
       state: {
         ...state,
@@ -249,35 +391,38 @@ export const taskCostOf = (concurrency: number): TaskCost => {
 };
 
 /**
- * Registers the task that builds the session summaries with ES|QL. It runs with the API key Task
- * Manager granted on behalf of the user who enabled sessions, never as the internal user, so it
- * only summarizes what that user can read. Only the index template is the internal user's.
+ * Registers the task that builds a platform's session summaries with ES|QL. It runs with the API
+ * key Task Manager granted on behalf of the user who enabled sessions, never as the internal user,
+ * so it only summarizes what that user can read. Only the index template is the internal user's.
  */
 export const registerSessionsTask = ({
+  platform,
   core,
   logger,
   taskManager,
   settings,
 }: {
+  platform: SessionsPlatform;
   core: CoreSetup;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
   settings: SessionsTaskSettings;
 }): void => {
+  const stateSchema = platform.reconcile ? reconcilingStateSchemaV1 : stateSchemaV1;
   taskManager.registerTaskDefinitions({
-    [SESSIONS_TASK_TYPE]: {
-      title: 'Digital Experience session summaries',
-      description:
-        'Summarizes the RUM sessions with new events into the Digital Experience sessions index.',
+    [platform.taskType]: {
+      title: platform.taskTitle,
+      description: platform.taskDescription,
       // A run starts no window after 45s and stops one after 4m; this only stops one stuck on a
       // query.
       timeout: '5m',
       cost: taskCostOf(settings.concurrency),
-      stateSchemaByVersion: { 1: { schema: stateSchemaV1, up: (state) => state } },
+      stateSchemaByVersion: { 1: { schema: stateSchema, up: (state) => state } },
       createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
           const result = await runSessionsTask({
+            platform,
             state: taskInstance.state,
             esClient: fakeRequest
               ? coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser
@@ -301,22 +446,25 @@ export const registerSessionsTask = ({
 };
 
 /**
- * Schedules the task with an API key granted on behalf of `request`'s user, or gives an existing
- * task a new key, which keeps its state and so its checkpoint. The previous key is invalidated.
+ * Schedules a platform's task with an API key granted on behalf of `request`'s user, or gives an
+ * existing task a new key, which keeps its state and so its checkpoint. The previous key is
+ * invalidated.
  */
 export const scheduleSessionsTask = async ({
+  platform,
   taskManager,
   request,
   settings,
 }: {
+  platform: SessionsPlatform;
   taskManager: TaskManagerStartContract;
   request: KibanaRequest;
   settings: SessionsSettings;
 }): Promise<void> => {
   await taskManager.ensureScheduled(
     {
-      id: SESSIONS_TASK_ID,
-      taskType: SESSIONS_TASK_TYPE,
+      id: platform.taskId,
+      taskType: platform.taskType,
       schedule: { interval: settings.frequency },
       params: {},
       state: {},

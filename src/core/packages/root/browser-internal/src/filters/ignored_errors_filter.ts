@@ -13,12 +13,14 @@ import type { FilterFn, Payload } from './types';
 export const RESIZE_OBSERVER_LOOP_ERROR =
   'ResizeObserver loop completed with undelivered notifications.';
 
+export const SCRIPT_ERROR = 'Script error.';
+
 /**
  * Errors are matched on `exception.message` only. The browser dispatches these as bare
  * `error` events without an `Error` object, so the RUM agent has no name to derive
  * `exception.type` from and reports it as an empty string.
  */
-export const IGNORED_ERROR_MESSAGES = [RESIZE_OBSERVER_LOOP_ERROR];
+export const IGNORED_ERROR_MESSAGES = [RESIZE_OBSERVER_LOOP_ERROR, SCRIPT_ERROR];
 
 /** Drops errors reported by the browser that are known to be benign. */
 export const ignoredErrorsFilter: FilterFn = (payload: Payload) => {

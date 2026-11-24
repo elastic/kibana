@@ -433,7 +433,7 @@ describe('SystemFlyoutService', () => {
       expect(mockReactDomRender).toHaveBeenCalledTimes(1);
 
       const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
-      expect(getByRole('heading', { level: 3, name: 'My Flyout Title' })).toBeInTheDocument();
+      expect(getByRole('heading', { level: 2, name: 'My Flyout Title' })).toBeInTheDocument();
     });
 
     it('runs content hooks inside React, so state updates re-render the zones', () => {
@@ -454,9 +454,9 @@ describe('SystemFlyoutService', () => {
       systemFlyouts.openTemplate({ session: 'never' }, Content);
       const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
 
-      expect(getByRole('heading', { level: 3, name: 'Count 0' })).toBeInTheDocument();
+      expect(getByRole('heading', { level: 2, name: 'Count 0' })).toBeInTheDocument();
       fireEvent.click(getByRole('button', { name: 'increment' }));
-      expect(getByRole('heading', { level: 3, name: 'Count 1' })).toBeInTheDocument();
+      expect(getByRole('heading', { level: 2, name: 'Count 1' })).toBeInTheDocument();
     });
 
     it('lets nested content close the flyout through useFlyoutClose', () => {
