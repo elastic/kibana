@@ -239,15 +239,17 @@ const ProfileDetails = ({
     <>
       <EuiSpacer size="m" />
       <EuiTabs size="s" bottomBorder>
-        <EuiTab
-          isSelected={activeTab === 'timeline'}
-          onClick={() => onTabChange('timeline')}
-          data-test-subj="esqlQueryProfileTimelineTab"
-        >
-          {i18n.translate('data.inspector.queryProfile.timelineTabLabel', {
-            defaultMessage: 'Timeline',
-          })}
-        </EuiTab>
+        {view.hasTimeline ? (
+          <EuiTab
+            isSelected={activeTab === 'timeline'}
+            onClick={() => onTabChange('timeline')}
+            data-test-subj="esqlQueryProfileTimelineTab"
+          >
+            {i18n.translate('data.inspector.queryProfile.timelineTabLabel', {
+              defaultMessage: 'Timeline',
+            })}
+          </EuiTab>
+        ) : null}
         {showByCommand ? (
           <EuiTab
             isSelected={activeTab === 'byCommand'}
@@ -302,13 +304,15 @@ export const QueryProfileView = ({
   );
   // The inspected panel fetched again since the profile was taken, or its request is gone.
   const hasRequestChanged = Boolean(profiledRequest && selected?.json !== profiledRequest.json);
-  const query = readQuery(selected);
+  // The commands have to be those of the query that was profiled, which can differ from the selected one.
+  const query = readQuery(profiledRequest);
   const heat = useMemo(
     () => (view && query ? computeCommandHeat(view, query) : undefined),
     [view, query]
   );
   const showByCommand = hasCommandBreakdown(heat);
-  const activeTab = tab === 'byCommand' && !showByCommand ? 'timeline' : tab;
+  const activeTab =
+    showByCommand && (tab === 'byCommand' || !view?.hasTimeline) ? 'byCommand' : 'timeline';
 
   return (
     <div data-test-subj="esqlQueryProfile">

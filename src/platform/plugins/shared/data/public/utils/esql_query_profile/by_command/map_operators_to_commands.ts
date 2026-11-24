@@ -50,6 +50,15 @@ const lineStartsOf = (query: string): number[] => {
   return starts;
 };
 
+/** The index that is the given number of characters on from an index. A character can be two units. */
+const advance = (query: string, from: number, characters: number): number => {
+  let index = from;
+  for (let count = 0; count < characters && index < query.length; count++) {
+    index += (query.codePointAt(index) ?? 0) > 0xffff ? 2 : 1;
+  }
+  return index;
+};
+
 /**
  * Where a position of the profile is in the query, as an index into the query string. The position
  * is only believed when the text ES reports for it is what the query has there.
@@ -63,26 +72,24 @@ const offsetOf = (
   if (lineStart === undefined) {
     return undefined;
   }
-  const offset = lineStart + column - 1;
+  // Elasticsearch counts the column in characters, so an emoji before the command is one.
+  const offset = advance(query, lineStart, column - 1);
   return query.startsWith(text, offset) ? offset : undefined;
 };
 
 /**
- * The commands of a query, with the commands of the subqueries of every FROM or FORK listed just
- * before the command that holds them. Subqueries are counted across the whole query.
+ * The commands of a query, with the commands of the subqueries of each command listed just before
+ * the command that holds them. Subqueries are counted across the whole query, in the order they
+ * are written.
  */
 const listEntries = (commands: QueryCommand[]): Entry[] => {
-  let subquery = 0;
-  return commands.flatMap((command): Entry[] => {
-    if (!command.branches?.length) {
-      return [{ command }];
-    }
-    const inner = command.branches.flatMap((branch) => {
-      const index = subquery++;
-      return branch.map((innerCommand) => ({ command: innerCommand, subquery: index }));
+  let nextSubquery = 0;
+  const list = (inCommands: QueryCommand[], subquery?: number): Entry[] =>
+    inCommands.flatMap((command): Entry[] => {
+      const inner = (command.branches ?? []).flatMap((branch) => list(branch, nextSubquery++));
+      return [...inner, { command, subquery }];
     });
-    return [...inner, { command }];
-  });
+  return list(commands);
 };
 
 /** The operator time found for one command, while the operators are being attributed. */
@@ -144,19 +151,18 @@ export function mapOperatorsToCommands({
   let totalNanos = 0;
 
   operators.forEach(({ title, drivers }) => {
-    drivers
-      .filter((driver) => driver.timeReported)
-      .forEach(({ nodeName, planNodeId, processNanos }) => {
-        totalNanos += processNanos;
-        const target =
-          planNodeId === undefined ? undefined : commandOf(planNodeKey(nodeName, planNodeId));
-        if (!target) {
-          unattributedNanos += processNanos;
-          return;
-        }
-        target.nanos += processNanos;
-        target.operatorNanos.set(title, (target.operatorNanos.get(title) ?? 0) + processNanos);
-      });
+    // An operator that reports no time still belongs to its command, with no time to add.
+    drivers.forEach(({ nodeName, planNodeId, processNanos }) => {
+      totalNanos += processNanos;
+      const target =
+        planNodeId === undefined ? undefined : commandOf(planNodeKey(nodeName, planNodeId));
+      if (!target) {
+        unattributedNanos += processNanos;
+        return;
+      }
+      target.nanos += processNanos;
+      target.operatorNanos.set(title, (target.operatorNanos.get(title) ?? 0) + processNanos);
+    });
   });
 
   const heats = accumulators.map(({ entry, nanos, operatorNanos }) => ({

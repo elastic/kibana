@@ -85,14 +85,27 @@ describe('splitQueryCommands branches', () => {
     expect(splitQueryCommands('FROM a, b METADATA _id')[0].branches).toBeUndefined();
   });
 
-  it('gives the branches of a FORK, and only looks one level deep', () => {
+  it('gives the branches of a FORK', () => {
     const [, fork] = splitQueryCommands('FROM logs | FORK (WHERE a > 1 | LIMIT 2) (WHERE a < 1)');
 
     expect(fork.name).toBe('FORK');
     expect(branchNames(fork)).toEqual([['WHERE', 'LIMIT'], ['WHERE']]);
+  });
 
+  it('gives a command the subqueries inside its expressions, such as WHERE ... IN (...)', () => {
+    const [, where, limit] = splitQueryCommands('FROM a | WHERE k IN (FROM b | KEEP k) | LIMIT 1');
+
+    expect(branchNames(where)).toEqual([['FROM', 'KEEP']]);
+    expect(where.branches?.[0][1].text).toBe('KEEP k');
+    expect(limit.branches).toBeUndefined();
+  });
+
+  it('goes down through subqueries of subqueries', () => {
     const [nested] = splitQueryCommands('FROM (FROM (FROM a | LIMIT 1) | STATS c = COUNT(*))');
+
     expect(branchNames(nested)).toEqual([['FROM', 'STATS']]);
-    expect(nested.branches?.[0][0].branches).toBeUndefined();
+    const [inner] = nested.branches?.[0] ?? [];
+    expect(branchNames(inner)).toEqual([['FROM', 'LIMIT']]);
+    expect(inner.branches?.[0][1].text).toBe('LIMIT 1');
   });
 });

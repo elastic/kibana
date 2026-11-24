@@ -11,10 +11,15 @@ import { aggregateEsqlProfile } from '../profile/aggregate_esql_profile';
 import { mapOperatorsToCommands } from './map_operators_to_commands';
 import { splitQueryCommands } from './query_commands';
 
-/** Where a piece of text is in a query, as ES reports the source of a plan node. */
+/** Where a piece of text is in a query, as ES reports the source of a plan node: in characters. */
 const sourceOf = (query: string, text: string, from = 0) => {
   const lines = query.slice(0, query.indexOf(text, from)).split('\n');
-  return { line: lines.length, column: lines[lines.length - 1].length + 1, text, view: null };
+  return {
+    line: lines.length,
+    column: Array.from(lines[lines.length - 1]).length + 1,
+    text,
+    view: null,
+  };
 };
 
 const NO_SOURCE = { line: null, column: null, text: null, view: null };
@@ -27,7 +32,8 @@ interface Step {
     text?: string;
     /** Look for the text from here, for a repeated one. */ from?: number;
   };
-  nanos: number;
+  /** Left out for an operator that reports no time. */
+  nanos?: number;
 }
 
 interface Options {
@@ -52,7 +58,7 @@ const heatOf = (
         operators: steps.map(({ operator, node, nanos }) => ({
           operator,
           plan_node_id: node?.id,
-          status: { process_nanos: nanos },
+          status: nanos === undefined ? {} : { process_nanos: nanos },
         })),
       },
     ],
@@ -142,6 +148,20 @@ describe('mapOperatorsToCommands', () => {
     ]);
   });
 
+  it('finds the command after an emoji on the same line, as ES counts it as one character', () => {
+    const query = 'FROM logs | WHERE a == "😀😀" | LIMIT 5';
+    const heat = heatOf(query, [
+      { operator: 'LimitOperator', node: { id: '1', text: 'LIMIT 5' }, nanos: 10 },
+    ]);
+
+    expect(sharesByCommand(heat)).toEqual([
+      ['FROM logs', 0],
+      ['WHERE a == "😀😀"', 0],
+      ['LIMIT 5', 1],
+    ]);
+    expect(heat.unattributedShare).toBe(0);
+  });
+
   it('does not believe a position whose text is not what the query has there', () => {
     const steps = [{ operator: 'LimitOperator', node: { id: '1', text: 'LIMIT 10' }, nanos: 50 }];
 
@@ -168,6 +188,18 @@ describe('mapOperatorsToCommands', () => {
 
     expect(heat.commands.every(({ share }) => share === 0)).toBe(true);
     expect(heat.unattributedShare).toBe(1);
+  });
+
+  it('keeps an operator that reports no time in the list of its command', () => {
+    const heat = heatOf('FROM logs | SORT a', [
+      { operator: 'LuceneSourceOperator', node: { id: '1', text: 'FROM logs' }, nanos: 10 },
+      { operator: 'ExchangeSinkOperator', node: { id: '2', text: 'SORT a' } },
+    ]);
+
+    expect(heat.commands.map(({ operators }) => operators)).toEqual([
+      ['LuceneSource'],
+      ['ExchangeSink'],
+    ]);
   });
 
   it('returns zero shares when nothing reports a time', () => {
@@ -243,7 +275,7 @@ describe('mapOperatorsToCommands with subqueries', () => {
   });
 
   it('numbers the subqueries across the whole query when more than one command has them', () => {
-    const query = 'FROM logs | FORK (LIMIT 1) (LIMIT 2) | FORK (LIMIT 3) (LIMIT 4)';
+    const query = 'FROM (FROM a | LIMIT 1), (FROM b | LIMIT 2) | FORK (LIMIT 3) (LIMIT 4)';
     const steps = [
       { operator: 'LimitOperator', node: { id: '1', text: 'LIMIT 3' }, nanos: 40 },
       { operator: 'LimitOperator', node: { id: '2', text: 'LIMIT 1' }, nanos: 60 },
@@ -254,11 +286,49 @@ describe('mapOperatorsToCommands with subqueries', () => {
     expect(
       forks.commands.map(({ command, subquery, share }) => [command.text, subquery, share])
     ).toEqual([
-      ['FROM logs', undefined, 0],
+      ['FROM a', 0, 0],
       ['LIMIT 1', 0, 0.6],
+      ['FROM b', 1, 0],
       ['LIMIT 2', 1, 0],
       ['LIMIT 3', 2, 0.4],
       ['LIMIT 4', 3, 0],
+    ]);
+  });
+
+  it('gives the commands of a subquery in IN (...) their own operators, apart from the WHERE', () => {
+    const query = 'FROM a | WHERE k IN (FROM b | KEEP k) | LIMIT 1';
+    const inHeat = heatOf(query, [
+      { operator: 'LuceneSourceOperator', node: { id: '1', text: 'FROM b' }, nanos: 30 },
+      {
+        operator: 'FilterOperator',
+        node: { id: '2', text: 'WHERE k IN (FROM b | KEEP k)' },
+        nanos: 10,
+      },
+      { operator: 'LimitOperator', node: { id: '3', text: 'LIMIT 1' }, nanos: 10 },
+    ]);
+
+    expect(
+      inHeat.commands.map(({ command, subquery, share }) => [command.text, subquery, share])
+    ).toEqual([
+      ['FROM a', undefined, 0],
+      ['FROM b', 0, 0.6],
+      ['KEEP k', 0, 0],
+      ['WHERE k IN (FROM b | KEEP k)', undefined, 0.2],
+      ['LIMIT 1', undefined, 0.2],
+    ]);
+  });
+
+  it('reaches the commands of subqueries inside subqueries', () => {
+    const query = 'FROM (FROM (FROM logs | LIMIT 5))';
+    const nestedHeat = heatOf(query, [
+      { operator: 'LimitOperator', node: { id: '1', text: 'LIMIT 5' }, nanos: 10 },
+    ]);
+
+    expect(
+      nestedHeat.commands.map(({ command, subquery, share }) => [command.text, subquery, share])
+    ).toEqual([
+      ['FROM logs', 1, 0],
+      ['LIMIT 5', 1, 1],
     ]);
   });
 });

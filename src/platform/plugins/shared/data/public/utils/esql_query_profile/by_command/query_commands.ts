@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstCommand, ESQLAstItem, ESQLParens } from '@elastic/esql';
-import { Parser } from '@elastic/esql';
+import type { ESQLAstCommand } from '@elastic/esql';
+import { Parser, Walker } from '@elastic/esql';
 
 export interface QueryCommand {
   /** The command name in upper case, such as STATS. */
@@ -20,14 +20,12 @@ export interface QueryCommand {
   /** Where the command ends in the query, as an index just past its last character. */
   end: number;
   /**
-   * The queries inside the parentheses of a FROM or FORK command, in the order they are written.
-   * Each is a list of commands. Only one level is looked at.
+   * The subqueries of the command, in the order they are written, such as those in the parentheses
+   * of a FROM or FORK, or the one of `WHERE a IN (FROM b | KEEP a)`. Each is a list of commands,
+   * which can have subqueries of their own.
    */
   branches?: QueryCommand[][];
 }
-
-const isParens = (item: ESQLAstItem): item is ESQLParens =>
-  !Array.isArray(item) && item.type === 'parens';
 
 /** Turns a position counted in characters, as the parser does, into an index of the string. */
 type ToIndex = (position: number) => number;
@@ -53,36 +51,40 @@ const toQueryCommand = (query: string, toIndex: ToIndex, command: ESQLAstCommand
   const start = toIndex(command.location.min);
   // The parser's location includes its last character.
   const end = toIndex(command.location.max + 1);
-  return { name: command.name.toUpperCase(), text: query.slice(start, end), start, end };
+  const branches = readBranches(query, toIndex, command);
+  const queryCommand = {
+    name: command.name.toUpperCase(),
+    text: query.slice(start, end),
+    start,
+    end,
+  };
+  return branches.length > 0 ? { ...queryCommand, branches } : queryCommand;
 };
 
-/** The queries in parentheses of a command, such as the subqueries of a FROM. */
+/** The subqueries of a command, wherever it holds them. Those inside them are read in turn. */
 const readBranches = (
   query: string,
   toIndex: ToIndex,
   command: ESQLAstCommand
 ): QueryCommand[][] => {
-  const args: ESQLAstItem[] = command.args;
-  return args
-    .filter(isParens)
-    .flatMap(({ child }) =>
-      'commands' in child
-        ? [child.commands.map((inner) => toQueryCommand(query, toIndex, inner))]
-        : []
-    )
-    .filter((branch) => branch.length > 0);
+  const branches: QueryCommand[][] = [];
+  Walker.walk(command, {
+    visitQuery: ({ commands }, _parent, walker) => {
+      walker.skipChildren();
+      branches.push(commands.map((inner) => toQueryCommand(query, toIndex, inner)));
+    },
+  });
+  return branches.filter((branch) => branch.length > 0);
 };
 
 /**
- * Splits an ES|QL query into its commands. A command with queries in parentheses, such as a FROM
- * with subqueries or a FORK, gets them as `branches`. The query is parsed, so pipes in strings and
+ * Splits an ES|QL query into its commands. A command with subqueries, such as a FROM with
+ * subqueries, a FORK or a WHERE with IN (...), gets them as `branches`. The query is parsed, so pipes in strings and
  * comments do not split it.
  */
 export function splitQueryCommands(query: string): QueryCommand[] {
   const toIndex = createToIndex(query);
-  return Parser.parse(query).root.commands.map((command) => {
-    const queryCommand = toQueryCommand(query, toIndex, command);
-    const branches = readBranches(query, toIndex, command);
-    return branches.length > 0 ? { ...queryCommand, branches } : queryCommand;
-  });
+  return Parser.parse(query).root.commands.map((command) =>
+    toQueryCommand(query, toIndex, command)
+  );
 }

@@ -548,6 +548,45 @@ describe('QueryProfileView', () => {
       expect(screen.queryByTestId('esqlQueryProfileByCommand')).not.toBeInTheDocument();
     });
 
+    it('keeps the commands of the profiled query when its request is gone or changes', async () => {
+      const requests = new RequestAdapter();
+      logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
+      renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+      await screen.findByTestId('esqlQueryProfileDuration');
+
+      act(() => requests.reset());
+      act(() => {
+        logRequest(requests, 'Documents', {
+          query: 'FROM untimed',
+          include_execution_metadata: true,
+        });
+      });
+      await screen.findByTestId('esqlQueryProfileRequestChanged');
+      await userEvent.click(screen.getByTestId('esqlQueryProfileByCommandTab'));
+
+      const commands = await screen.findAllByTestId('esqlQueryProfileCommand');
+      expect(commands).toHaveLength(4);
+      expect(commands[0]).toHaveTextContent('FROM logs');
+      expect(commands[0]).toHaveTextContent('60%');
+    });
+
+    it('opens on By command when the profile has no timing for drivers', async () => {
+      const untimedDrivers = {
+        ...profile,
+        drivers: profile.drivers.map(
+          ({ start_millis: _start, stop_millis: _stop, sleeps: _sleeps, ...driver }) => driver
+        ),
+      };
+      const untimedSearch = {
+        esql: jest.fn(async () => ({ rawResponse: { profile: untimedDrivers } })),
+      } as unknown as Pick<ISearchStart, 'esql'>;
+
+      renderProfileOf(QUERY, untimedSearch);
+
+      expect(await screen.findByTestId('esqlQueryProfileByCommand')).toBeInTheDocument();
+      expect(screen.queryByTestId('esqlQueryProfileTimelineTab')).not.toBeInTheDocument();
+    });
+
     it('has no tab when the profile does not tie operators to commands, as with older Elasticsearch', async () => {
       renderProfileOf('FROM untimed', search);
 
