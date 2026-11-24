@@ -75,7 +75,7 @@ export class PanelActions {
   /**
    * Checks if a panel action exists as a descendant of the panel wrapper (not globally visible).
    */
-  async panelActionExistsInWrapper(
+  private async panelActionExistsInWrapper(
     actionTestSubj: string,
     panelWrapper: Locator
   ): Promise<boolean> {
@@ -101,6 +101,54 @@ export class PanelActions {
       await this.page.testSubj.locator(actionTestSubj).filter({ visible: true }).click();
       // Wait for context menu to close after clicking the action
       await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
+    }
+  }
+
+  /**
+   * Checks if a panel has a specific action available.
+   * Checks both hover actions and context menu.
+   *
+   * Uses count() > 0 for the context menu to include hidden elements.
+   */
+  async panelHasAction(actionTestSubj: string, title?: string): Promise<boolean> {
+    const panelWrapper = await this.hoverPanel(title);
+
+    if (await this.panelActionExistsInWrapper(actionTestSubj, panelWrapper)) {
+      return true;
+    }
+
+    // Check in context menu
+    await this.openPanelContextMenu(title);
+    const count = await this.page.testSubj.locator(actionTestSubj).count();
+
+    // Close menu by pressing Escape
+    await this.page.keyboard.press('Escape');
+    return count > 0;
+  }
+
+  /**
+   * Asserts that a panel action exists (throws if not found).
+   */
+  async expectExistsPanelAction(actionTestSubj: string, title?: string) {
+    const exists = await this.panelHasAction(actionTestSubj, title);
+    if (!exists) {
+      // Collect available actions for better error message
+      await this.openPanelContextMenu(title);
+      const allActions = await this.page
+        .locator('[data-test-subj^="embeddablePanelAction-"]')
+        .all();
+      const actionNames: string[] = [];
+      for (const action of allActions) {
+        const testSubj = await action.getAttribute('data-test-subj');
+        if (testSubj) actionNames.push(testSubj);
+      }
+      await this.page.keyboard.press('Escape');
+
+      throw new Error(
+        `Expected panel action "${actionTestSubj}" to exist for panel "${
+          title || 'first panel'
+        }". Available actions: [${actionNames.join(', ')}]`
+      );
     }
   }
 }

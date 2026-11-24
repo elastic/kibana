@@ -330,6 +330,11 @@ export class CanvasPage {
     await this.panelActions.clickPanelAction(actionTestSubj, title);
   }
 
+  /** Whether a panel offers an action, via hover actions or the context menu. */
+  async panelHasAction(actionTestSubj: string, title?: string): Promise<boolean> {
+    return this.panelActions.panelHasAction(actionTestSubj, title);
+  }
+
   /** Click the "Edit" panel action to open the embeddable's editor (inline or full). */
   async editPanel(title?: string) {
     await this.clickPanelAction('embeddablePanelAction-editPanel', title);

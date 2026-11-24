@@ -951,59 +951,17 @@ export class DashboardApp {
   }
 
   /**
-   * Checks if a panel has a specific action available.
-   * Checks both hover actions and context menu.
-   *
-   * Uses count() > 0 to include hidden elements.
-   * (finds elements even if not visible).
+   * Checks if a panel has a specific action available (hover actions or context menu).
    */
   async panelHasAction(actionTestSubj: string, title?: string): Promise<boolean> {
-    const panelWrapper = await this.panelActions.hoverPanel(title);
-
-    // Check if action exists in panel wrapper (hover actions)
-    const existsInWrapper = await this.panelActions.panelActionExistsInWrapper(
-      actionTestSubj,
-      panelWrapper
-    );
-    if (existsInWrapper) {
-      return true;
-    }
-
-    // Check in context menu
-    await this.openPanelContextMenu(title);
-    // Use count() > 0 to find elements even if hidden
-    const actionInMenu = this.page.testSubj.locator(actionTestSubj);
-    const count = await actionInMenu.count();
-
-    // Close menu by pressing Escape
-    await this.page.keyboard.press('Escape');
-    return count > 0;
+    return this.panelActions.panelHasAction(actionTestSubj, title);
   }
 
   /**
    * Asserts that a panel action exists (throws if not found).
    */
   async expectExistsPanelAction(actionTestSubj: string, title?: string) {
-    const exists = await this.panelHasAction(actionTestSubj, title);
-    if (!exists) {
-      // Collect available actions for better error message
-      await this.openPanelContextMenu(title);
-      const allActions = await this.page
-        .locator('[data-test-subj^="embeddablePanelAction-"]')
-        .all();
-      const actionNames: string[] = [];
-      for (const action of allActions) {
-        const testSubj = await action.getAttribute('data-test-subj');
-        if (testSubj) actionNames.push(testSubj);
-      }
-      await this.page.keyboard.press('Escape');
-
-      throw new Error(
-        `Expected panel action "${actionTestSubj}" to exist for panel "${
-          title || 'first panel'
-        }". Available actions: [${actionNames.join(', ')}]`
-      );
-    }
+    await this.panelActions.expectExistsPanelAction(actionTestSubj, title);
   }
 
   /**
