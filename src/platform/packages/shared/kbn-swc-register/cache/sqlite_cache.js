@@ -229,6 +229,9 @@ class SqliteCache {
 
     try {
       this.#db.prepare('DELETE FROM cache WHERE atime < ?').run(Date.now() - ATIME_LIMIT);
+      this.#db
+        .prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('lastPrune', ?)")
+        .run(GLOBAL_ATIME);
     } catch (error) {
       process.stderr.write(`
 Failed to cleanup @kbn/swc-register cache:
@@ -237,10 +240,6 @@ Failed to cleanup @kbn/swc-register cache:
 
 To eliminate this problem you may want to delete the "${Path.relative(process.cwd(), dir)}"
 directory and report this error to the Operations team.\n`);
-    } finally {
-      this.#db
-        .prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('lastPrune', ?)")
-        .run(GLOBAL_ATIME);
     }
   }
 

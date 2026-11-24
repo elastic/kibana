@@ -10,8 +10,8 @@
 import Fs from 'fs';
 import Path from 'path';
 import { Writable } from 'stream';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
+import { spawn } from 'child_process';
+import { once } from 'events';
 import { DatabaseSync } from 'node:sqlite';
 
 import del from 'del';
@@ -22,7 +22,6 @@ const DIR = Path.resolve(__dirname, '../__tmp__/cache');
 const DB_FILE = Path.resolve(DIR, 'v3.sqlite');
 const DAY = 1000 * 60 * 60 * 24;
 const GLOBAL_ATIME = new Date().setHours(0, 0, 0, 0);
-const execFileAsync = promisify(execFile);
 
 const makeTestFile = (name: string, source: string) => {
   const path = Path.resolve(DIR, name);
@@ -241,19 +240,32 @@ it('shares entries between instances using the same directory', async () => {
   expect(reader.getCode('shared')).toBe('var shared = true');
 });
 
-it('shares concurrent writes from separate processes', async () => {
+it('shares a cache between processes that open it at the same time', async () => {
+  await makeCache({ dir: DIR, prefix: 'prefix' }).close();
   const cacheModule = require.resolve('./sqlite_cache');
-  const writeFromProcess = (key: string) =>
-    execFileAsync(process.execPath, [
+  const startWriter = (key: string) =>
+    spawn(process.execPath, [
       '-e',
       `const { SqliteCache } = require(${JSON.stringify(cacheModule)});
        const cache = new SqliteCache({ dir: ${JSON.stringify(DIR)}, prefix: 'prefix' });
-       cache.update(${JSON.stringify(key)}, { code: ${JSON.stringify(
-        key
-      )} }).then(() => cache.close());`,
+       process.stdout.write('ready');
+       process.stdin.once('data', () => {
+         cache.update(${JSON.stringify(key)}, { code: ${JSON.stringify(key)} })
+           .then(() => cache.close());
+       });`,
     ]);
 
-  await Promise.all([writeFromProcess('first'), writeFromProcess('second')]);
+  const first = startWriter('first');
+  const second = startWriter('second');
+  await Promise.all([once(first.stdout, 'data'), once(second.stdout, 'data')]);
+
+  const firstExit = once(first, 'exit');
+  first.stdin.end('write');
+  expect((await firstExit)[0]).toBe(0);
+
+  const secondExit = once(second, 'exit');
+  second.stdin.end('write');
+  expect((await secondExit)[0]).toBe(0);
 
   expect(readRow('first')).toMatchObject({ code: 'first' });
   expect(readRow('second')).toMatchObject({ code: 'second' });
@@ -271,10 +283,17 @@ it('treats malformed source maps as cache misses', () => {
   }
 });
 
-it('does not block for long when another connection holds the write lock', async () => {
+it('does not block for long when another process holds the write lock', async () => {
   const cache = makeCache({ dir: DIR, prefix: 'prefix' });
-  const locker = new DatabaseSync(DB_FILE);
-  locker.exec('BEGIN IMMEDIATE');
+  const locker = spawn(process.execPath, [
+    '-e',
+    `const { DatabaseSync } = require('node:sqlite');
+     const db = new DatabaseSync(${JSON.stringify(DB_FILE)});
+     db.exec('BEGIN IMMEDIATE');
+     process.stdout.write('locked');
+     process.stdin.once('data', () => { db.exec('ROLLBACK'); db.close(); });`,
+  ]);
+  await once(locker.stdout, 'data');
   const stderr = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
 
   try {
@@ -283,8 +302,9 @@ it('does not block for long when another connection holds the write lock', async
     expect(Date.now() - start).toBeLessThan(1000);
   } finally {
     stderr.mockRestore();
-    locker.exec('ROLLBACK');
-    locker.close();
+    const exit = once(locker, 'exit');
+    locker.stdin.end('release');
+    expect((await exit)[0]).toBe(0);
   }
 });
 
@@ -331,4 +351,25 @@ it('prunes stale entries when the last prune is older than a week', async () => 
   await makeCache({ dir: DIR, prefix: 'prefix' }).close();
   expect(readRow('old')).toBe(undefined);
   expect(readRow('fresh')).toMatchObject({ code: 'fresh' });
+});
+
+it('defers pruning when another connection holds the write lock', async () => {
+  await makeCache({ dir: DIR, prefix: 'prefix' }).close();
+  writeRows([['old', GLOBAL_ATIME - 31 * DAY, 'old', null]]);
+  const locker = new DatabaseSync(DB_FILE);
+  locker.prepare("UPDATE meta SET value = ? WHERE key = 'lastPrune'").run(GLOBAL_ATIME - 8 * DAY);
+  locker.exec('BEGIN IMMEDIATE');
+  const stderr = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+
+  try {
+    await makeCache({ dir: DIR, prefix: 'prefix' }).close();
+    expect(readRow('old')).toMatchObject({ code: 'old' });
+  } finally {
+    stderr.mockRestore();
+    locker.exec('ROLLBACK');
+    locker.close();
+  }
+
+  await makeCache({ dir: DIR, prefix: 'prefix' }).close();
+  expect(readRow('old')).toBe(undefined);
 });
