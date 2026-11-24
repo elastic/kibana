@@ -74,6 +74,8 @@ export class PanelActions {
 
   /**
    * Checks if a panel action exists as a descendant of the panel wrapper (not globally visible).
+   *
+   * `panelWrapper` must come from `hoverPanel`, which guarantees the hover menu has rendered.
    */
   private async panelActionExistsInWrapper(
     actionTestSubj: string,
