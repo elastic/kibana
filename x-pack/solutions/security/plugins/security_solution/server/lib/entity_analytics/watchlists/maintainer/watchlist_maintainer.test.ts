@@ -30,7 +30,7 @@ describe('watchlist maintainer run', () => {
 
   const getStartServices = jest.fn();
 
-  const run = () => {
+  const run = (signal: AbortSignal = new AbortController().signal) => {
     const { run: maintainerRun } = createWatchlistMaintainer({
       getStartServices,
       logger,
@@ -40,7 +40,7 @@ describe('watchlist maintainer run', () => {
       status: { metadata: { namespace: 'new-space' }, state: {} },
       esClient: elasticsearchServiceMock.createElasticsearchClient(),
       fakeRequest: httpServerMock.createKibanaRequest(),
-      signal: new AbortController().signal,
+      signal,
     } as unknown as Parameters<typeof maintainerRun>[0]);
   };
 
@@ -84,6 +84,17 @@ describe('watchlist maintainer run', () => {
     await run();
 
     expect(mockSyncAllWatchlists).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not touch the index or sync when the run was already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    await run(controller.signal);
+
+    expect(internalEsClient.indices.exists).not.toHaveBeenCalled();
+    expect(internalEsClient.indices.create).not.toHaveBeenCalled();
+    expect(mockSyncAllWatchlists).not.toHaveBeenCalled();
   });
 
   it('does nothing below the platinum license', async () => {

@@ -7,6 +7,7 @@
 
 import { createManualEntityService } from './service';
 import { MANUAL_SOURCE_ID } from './constants';
+import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
@@ -192,6 +193,31 @@ describe('manual entity service', () => {
         not_found: 1,
         total: 1,
         items: [{ euid: 'user:unknown', status: 'not_found', error: expect.any(String) }],
+      });
+    });
+
+    it('returns not_found for every entity when the watchlist index does not exist yet', async () => {
+      const { esClient, service } = createService();
+      esClient.search.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          meta: {} as never,
+          warnings: null,
+        })
+      );
+
+      const result = await service.unassign(['user:a', 'user:b']);
+
+      expect(result).toEqual({
+        successful: 0,
+        failed: 0,
+        not_found: 2,
+        total: 2,
+        items: [
+          { euid: 'user:a', status: 'not_found', error: expect.any(String) },
+          { euid: 'user:b', status: 'not_found', error: expect.any(String) },
+        ],
       });
     });
 

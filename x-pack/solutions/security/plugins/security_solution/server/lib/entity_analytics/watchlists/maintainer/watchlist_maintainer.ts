@@ -48,6 +48,11 @@ export const createWatchlistMaintainer = ({
 
     // Create the watchlist index if it doesn't exist to make sure new spaces have an index.
     // Added to "run" and not "setup" in case the first run fails. Uses the internal client because the index is hidden.
+    if (signal.aborted) {
+      logger.debug(`Watchlist maintainer run aborted for namespace "${namespace}"`);
+      return status.state;
+    }
+
     try {
       await ensureWatchlistIndex({
         esClient: coreStart.elasticsearch.client.asInternalUser,
