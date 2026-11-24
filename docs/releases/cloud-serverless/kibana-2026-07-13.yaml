@@ -16,7 +16,7 @@ entries:
     target: 2026-07-07
   description: The response envelope for the Dashboards API search endpoint changed from `{ dashboards, page, total }` to `{ data, meta }`, where the pagination fields (`page`, `per_page`, and `total`) move under `meta`. The endpoint also enforces a maximum `per_page` of 1000.
   impact: Requests that set `per_page` above 1000 are rejected. Clients that read `dashboards`, `page`, or `total` from the top level of the response no longer receive those fields.
-  action: Update Dashboards API search clients to read results from `data` and pagination from `meta`, and keep `per_page` at or below 1000. Refer to the [Dashboards API reference](https://dashboardsapispec.kibana.dev/index.html) for the updated schemas.
+  action: Update Dashboards API search clients to read results from `data` and pagination from `meta`, and keep `per_page` at or below 1000. Refer to the [Dashboards API reference](https://www.elastic.co/docs/api/kibana/group/endpoint-dashboards) for the updated schemas.
   areas:
   - Dashboards and visualizations
   prs:
@@ -46,7 +46,7 @@ entries:
     target: 2026-07-09
   description: The `duration` format used in visualization configuration now uses short-hand unit values aligned with {{esql}} conventions for its `from` and `to` options. This affects the `api/visualizations` and `api/dashboards` APIs, for both by-value and by-reference panels. For example, `minutes` becomes `min`, `humanize` becomes `auto-approximate`, and `humanizePrecise` becomes `auto`.
   impact: API requests that configure duration formats with the previous verbose unit names (for example, `minutes`, `humanize`, or `asMilliseconds`) are rejected.
-  action: Update the duration `from` and `to` values in your visualization and dashboard panel API payloads to the new short-hand units. Refer to the [Dashboards API reference](https://dashboardsapispec.kibana.dev/index.html) for the updated schemas.
+  action: Update the duration `from` and `to` values in your visualization and dashboard panel API payloads to the new short-hand units. Refer to the [Dashboards API reference](https://www.elastic.co/docs/api/kibana/group/endpoint-dashboards) for the updated schemas.
   areas:
   - Alerting and reporting
   - Dashboards and visualizations
