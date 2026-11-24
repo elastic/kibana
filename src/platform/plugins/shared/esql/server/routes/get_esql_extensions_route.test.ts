@@ -32,7 +32,7 @@ describe('ESQL extensions route', () => {
     } as never);
     const call = (query: string) =>
       handler(
-        coreMock.createCustomRequestHandlerContext(context) as never,
+        { core: Promise.resolve(context) } as never,
         httpServerMock.createKibanaRequest({ params: { solutionId: 'oblt', query } }),
         kibanaResponseFactory
       );
