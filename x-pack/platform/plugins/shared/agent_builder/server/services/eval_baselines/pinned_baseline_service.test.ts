@@ -102,8 +102,9 @@ describe('PinnedBaselineService', () => {
     expect(create.mock.calls.map(([args]) => args.refresh)).toEqual([false, 'wait_for']);
     expect(captured.map(({ _id }) => _id)).toEqual([
       `baseline-1:${createHash('sha256').update('score-doc-1').digest('hex')}`,
-      // One pointer document per pin, so a later re-pin can promote the same snapshot.
-      expect.stringMatching(/^baseline-1:pointer:/),
+      // The first pin's pointer is write-once: racing first pins conflict on this ID
+      // instead of publishing competing pointers.
+      'baseline-1:pointer',
     ]);
     expect(captured[1]).toMatchObject({
       doc_kind: 'pointer',
@@ -450,6 +451,40 @@ describe('PinnedBaselineService', () => {
     });
     expect(baseline).toMatchObject({ baseline_id: 'baseline-1', score_count: 7 });
     expect(baseline.pinned_at).not.toBe('2026-11-01T00:00:00.000Z');
+  });
+
+  it('pin returns the stored pointer when a concurrent first pin wins the write-once race', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create, search } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    // No pointer is visible when this pin starts, but the winner's pointer is stored by
+    // the time the losing pointer write conflicts.
+    search
+      .mockResolvedValueOnce({ hits: { hits: [] } })
+      .mockResolvedValueOnce({ hits: { hits: [getStoredPointerHit()] } });
+    create
+      .mockImplementationOnce(async ({ documents }: { documents: Array<{ _id: string }> }) => ({
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+      }))
+      .mockImplementationOnce(async () => ({
+        errors: false,
+        items: [{ create: { status: 409 } }],
+      }));
+
+    const baseline = await service.pin({
+      pointer: getPointer(),
+      scores: [{ id: 'score-doc-1', document: getScoreDocument() }],
+      spaceIds: ['default'],
+    });
+
+    // The winner's view of the snapshot is the published one, not this request's.
+    expect(baseline).toMatchObject({
+      baseline_id: 'baseline-1',
+      score_count: 7,
+      pinned_at: '2026-11-01T00:00:00.000Z',
+    });
   });
 
   it('repin promotes the stored snapshot without reading any source scores', async () => {

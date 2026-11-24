@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { AnyIDataStreamClient } from '@kbn/data-streams';
@@ -54,8 +54,14 @@ const snapshotDocumentId = (baselineId: string, scoreId: string): string =>
 // the stored snapshot, and the reads select the newest one, so re-pinning execution A
 // after a bad pin of B makes A the latest baseline again. The `pointer` segment cannot
 // collide with snapshot score IDs, whose suffix is always a hex digest.
-const pointerDocumentId = (baselineId: string, pinnedAt: string): string =>
-  `${baselineId}:pointer:${pinnedAt}`;
+//
+// The first pin's pointer ID is deterministic (write-once): racing first pins conflict on
+// it instead of publishing competing pointers with different score counts, and the loser
+// returns the stored pointer. Each promotion gets a unique ID, so concurrent promotions
+// never silently drop one request's attribution.
+const firstPointerDocumentId = (baselineId: string): string => `${baselineId}:pointer`;
+const promotionPointerDocumentId = (baselineId: string): string =>
+  `${baselineId}:pointer:${randomUUID()}`;
 
 const pointerToResponse = (doc: PinnedBaselinePointerDocument): PinnedBaseline => ({
   baseline_id: doc.baseline.id,
@@ -124,7 +130,7 @@ export class PinnedBaselineService {
     ].sort();
 
     const pointerDocument: { _id: string } & PinnedBaselinePointerDocument = {
-      _id: pointerDocumentId(pointer.baseline_id, pinnedAt),
+      _id: firstPointerDocumentId(pointer.baseline_id),
       '@timestamp': pinnedAt,
       doc_kind: 'pointer',
       space_ids: spaceIds,
@@ -166,7 +172,20 @@ export class PinnedBaselineService {
     if (scoreDocuments.length > 0) {
       await this.createDocuments(client, scoreDocuments, pointer.baseline_id, false);
     }
-    await this.createDocuments(client, [pointerDocument], pointer.baseline_id, 'wait_for');
+    const conflicts = await this.createDocuments(
+      client,
+      [pointerDocument],
+      pointer.baseline_id,
+      'wait_for'
+    );
+    if (conflicts > 0) {
+      // A concurrent first pin won the write-once pointer: its view of the snapshot is
+      // the published one, so answer with what is stored rather than this request's.
+      const storedPointer = await this.findPointerById(client, pointer.baseline_id);
+      if (storedPointer) {
+        return pointerToResponse(storedPointer);
+      }
+    }
 
     return pointerToResponse(pointerDocument);
   }
@@ -201,7 +220,7 @@ export class PinnedBaselineService {
     const pinnedAt = new Date().toISOString();
     const pointerDocument: { _id: string } & PinnedBaselinePointerDocument = {
       ...existing,
-      _id: pointerDocumentId(existing.baseline.id, pinnedAt),
+      _id: promotionPointerDocumentId(existing.baseline.id),
       '@timestamp': pinnedAt,
       baseline: {
         ...existing.baseline,
@@ -234,12 +253,14 @@ export class PinnedBaselineService {
     return source ? (source as unknown as PinnedBaselinePointerDocument) : undefined;
   }
 
+  /** Returns the number of documents that already existed (409), for the caller to judge. */
   private async createDocuments<T extends { _id: string }>(
     client: AnyIDataStreamClient,
     documents: T[],
     baselineId: string,
     refresh: false | 'wait_for'
-  ): Promise<void> {
+  ): Promise<number> {
+    let totalConflicted = 0;
     for (let offset = 0; offset < documents.length; offset += BULK_WRITE_CHUNK_SIZE) {
       const response = await client.create({
         documents: documents.slice(offset, offset + BULK_WRITE_CHUNK_SIZE),
@@ -250,6 +271,7 @@ export class PinnedBaselineService {
       if (conflicted > 0) {
         // Already written by a retried pin with the same deterministic IDs.
         this.logger.warn(`${conflicted} baseline document(s) for ${baselineId} already existed`);
+        totalConflicted += conflicted;
       }
       const failures = response.items.filter((item) => {
         const status = item.create?.status;
@@ -261,6 +283,7 @@ export class PinnedBaselineService {
         throw new Error(`Failed to write ${failures.length} baseline document(s): ${reason}`);
       }
     }
+    return totalConflicted;
   }
 
   async findLatest({

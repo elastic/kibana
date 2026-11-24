@@ -94,6 +94,19 @@ export function registerEvalBaselineRoutes({
       const spaceId = (await context.agentBuilder).spaces.getSpaceId();
       const baselineId = deterministicBaselineId(spaceId, suiteId, executionId);
 
+      // An already-pinned baseline promotes its stored snapshot without reading the live
+      // scores: rollback must not depend on data it will not use. The source scores may
+      // have aged out of retention, grown past the snapshot limit, or gained a second
+      // judge since the snapshot was taken — none of which invalidates the stored pin.
+      const repinned = await evalBaselines.repin({
+        baselineId,
+        pinnedBy: pinnedBy ?? null,
+        reason: reason ?? null,
+      });
+      if (repinned) {
+        return response.ok({ body: { baseline: repinned } });
+      }
+
       const [, startDeps] = await coreSetup.getStartServices();
       const evaluationScoreService = startDeps.evals?.evaluationScoreService;
       if (!evaluationScoreService) {
@@ -146,17 +159,6 @@ export function registerEvalBaselineRoutes({
       );
 
       if (scores.length === 0) {
-        // The snapshot outlives the source scores (365-day vs 90-day retention), so an
-        // execution whose scores aged out can still be re-pinned: rolling back to a pin
-        // older than the scores retention promotes its stored snapshot.
-        const repinned = await evalBaselines.repin({
-          baselineId,
-          pinnedBy: pinnedBy ?? null,
-          reason: reason ?? null,
-        });
-        if (repinned) {
-          return response.ok({ body: { baseline: repinned } });
-        }
         return response.notFound({
           body: {
             message: `No scores found for execution "${executionId}" in suite "${suiteId}". The run may not have exported scores yet, or they aged out of retention.`,

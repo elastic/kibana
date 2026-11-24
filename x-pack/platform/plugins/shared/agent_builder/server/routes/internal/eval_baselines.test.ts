@@ -207,8 +207,7 @@ describe('eval baselines routes', () => {
       expect(pin).not.toHaveBeenCalled();
     });
 
-    it('promotes the stored snapshot when the source scores aged out of retention', async () => {
-      search.mockResolvedValue(createSearchResponse([]));
+    it('promotes an already-pinned baseline without reading the live scores', async () => {
       repin.mockResolvedValue({ baseline_id: 'baseline-1', score_count: 7 });
 
       const response = await handlers[EVAL_BASELINES_PIN_URL](
@@ -226,6 +225,8 @@ describe('eval baselines routes', () => {
         pinnedBy: 'pipeline',
         reason: 'monthly re-pin',
       });
+      // Rollback must not depend on live scores it will not use: no search, no limits.
+      expect(search).not.toHaveBeenCalled();
       expect(pin).not.toHaveBeenCalled();
     });
 
