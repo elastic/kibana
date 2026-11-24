@@ -15,7 +15,7 @@ The states, from the top of the results area down:
 - While `types` loads, the page shows a spinner and no sections. When `types` fails, the page shows one error with a retry and no sections, on every page. A type a page asks for that `types` does not return shows "not available" and is never listed.
 - While a section loads its first `_list`, or retries a failed one, it shows a table skeleton. A later load keeps the rows up under a progress bar; a failed load replaces them, the count and the source errors with an error and a retry.
 - When any section shows a truncated list with rows, one warning callout above the sections names the row limit (`MAX_LIST_LIMIT`, 9,999) and each truncated type.
-- When some sources failed, a warning icon in the section header lists them in its tooltip; the table stays up. With no rows, the empty state says the result may be incomplete. The response's `unavailableColumns` are not shown.
+- When some sources failed or returned partial results, a warning icon in the section header lists them in its tooltip; the table stays up. With no rows, the empty state says the result may be incomplete. The response's `unavailableColumns` are not shown.
 
 > [!WARNING]
 > The list limit is 9,999, not 10,000. ES|QL [returns at most 10,000 rows by default](https://www.elastic.co/docs/reference/query-languages/esql/limitations#result-set-size-limit), so the server queries one row more than requested to detect a cut list. `MAX_LIST_LIMIT` holds the number; do not hardcode it.

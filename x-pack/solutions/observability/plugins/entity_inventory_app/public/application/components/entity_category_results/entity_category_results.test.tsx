@@ -236,6 +236,19 @@ describe('EntityCategoryResults', () => {
       ]);
     });
 
+    it('lists a partial probe, and the partial result before the error of the same query', async () => {
+      renderScenario('partialSources');
+
+      const section = await screen.findByTestId('entityInventoryTypeSection');
+      expect(await within(section).findByTestId('entityInventoryTable')).toBeInTheDocument();
+
+      expect(await getTooltipProblems(section)).toEqual([
+        'metrics-system.*-*: partial result: some shards or clusters did not answer, so rows may be missing',
+        'metrics-hostmetricsreceiver.otel-*: partial result: some shards or clusters did not answer, so rows may be missing',
+        'metrics-hostmetricsreceiver.otel-*: no readable index behind the pattern maps @timestamp',
+      ]);
+    });
+
     it('lists a failed query with its HTTP status', async () => {
       renderScenario('allSourcesFailed');
 

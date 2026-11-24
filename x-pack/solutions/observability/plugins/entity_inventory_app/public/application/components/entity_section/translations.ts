@@ -10,7 +10,7 @@ import type { SourceProblem } from '../../utils/list_source_problems';
 
 export const SOURCE_ERRORS_TITLE = i18n.translate(
   'xpack.entityInventoryApp.entityTable.sourceErrors.title',
-  { defaultMessage: 'Some data sources failed' }
+  { defaultMessage: 'Some data sources failed or returned partial results' }
 );
 
 export const getSourceProblemText = ({ indexPattern, status, reason }: SourceProblem) =>

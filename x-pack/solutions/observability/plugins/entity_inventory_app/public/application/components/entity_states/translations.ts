@@ -46,6 +46,7 @@ export const getEmptyWithFailuresTitle = (typeName: string) =>
 export const EMPTY_WITH_FAILURES_BODY = i18n.translate(
   'xpack.entityInventoryApp.entityTable.empty.withFailures.sourcesFailedBody',
   {
-    defaultMessage: 'Some data sources failed, so entities may exist that are not shown.',
+    defaultMessage:
+      'Some data sources failed or returned partial results, so entities may exist that are not shown.',
   }
 );

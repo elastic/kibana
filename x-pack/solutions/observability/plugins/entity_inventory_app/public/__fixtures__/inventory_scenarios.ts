@@ -25,6 +25,7 @@ export type FixtureScenario =
   | 'normal'
   | 'truncated'
   | 'withDiagnostics'
+  | 'partialSources'
   | 'empty'
   | 'allSourcesFailed';
 
@@ -44,13 +45,17 @@ const NO_STATS = {
   shards: null,
 };
 
-const probe = (indexPattern: string, error: SourceError | null = null): ListProbeDiagnostic => ({
+const probe = (
+  indexPattern: string,
+  error: SourceError | null = null,
+  isPartial = false
+): ListProbeDiagnostic => ({
   indexPattern,
   esql: `TS ${indexPattern} | LIMIT 1`,
   params: [],
   outcome: error ? 'failed' : 'no_time_series',
   ...NO_STATS,
-  isPartial: error ? null : false,
+  isPartial: error ? null : isPartial,
   error,
 });
 
@@ -126,6 +131,24 @@ export const buildScenarioListResponse = (
         unavailableColumns: UNAVAILABLE_COLUMNS,
       };
     }
+    case 'partialSources':
+      // A partial probe, and a query that is both partial and unusable.
+      return {
+        ...base,
+        rows: buildRows(NORMAL_ROW_COUNT),
+        truncated: false,
+        probes: [probe(SYSTEM_PATTERN, null, true)],
+        queries: [
+          query(OTEL_PATTERN, {
+            isPartial: true,
+            error: {
+              kind: 'unusable',
+              status: null,
+              reason: 'no readable index behind the pattern maps @timestamp',
+            },
+          }),
+        ],
+      };
     case 'empty':
       return { ...base, rows: [], truncated: false };
     case 'allSourcesFailed':
