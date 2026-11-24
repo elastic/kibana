@@ -10,7 +10,7 @@ import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import type { ESQLDataGridState } from '@kbn/esql-datagrid/public';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import { useDatasetPreview } from './use_dataset_preview';
+import type { DatasetPreviewState } from './use_dataset_preview';
 
 /** The dataset does not exist until the wizard submits, so the preview runs a fixed query. */
 export const DATASET_PREVIEW_QUERY = 'FROM kibana_sample_data_ecommerce';
@@ -30,14 +30,17 @@ const LoadingPrompt = ({ dataTestSubj }: { dataTestSubj: string }) => (
 );
 
 export interface DatasetPreviewProps {
+  preview: DatasetPreviewState;
   gridState?: ESQLDataGridState;
   onGridStateChange?: (state: ESQLDataGridState) => void;
 }
 
-export const DatasetPreview = ({ gridState, onGridStateChange }: DatasetPreviewProps) => {
-  const { isLoading, error, result } = useDatasetPreview(DATASET_PREVIEW_QUERY);
-
-  if (isLoading) {
+export const DatasetPreview = ({
+  preview: { isLoading, error, result },
+  gridState,
+  onGridStateChange,
+}: DatasetPreviewProps) => {
+  if (isLoading && !result) {
     return <LoadingPrompt dataTestSubj="createDatasetWizardPreviewLoading" />;
   }
 

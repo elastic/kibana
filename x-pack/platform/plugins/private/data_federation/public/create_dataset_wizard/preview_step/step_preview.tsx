@@ -6,19 +6,49 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import { DatasetPreview, type DatasetPreviewProps } from './dataset_preview';
+import { DATASET_PREVIEW_QUERY, DatasetPreview, type DatasetPreviewProps } from './dataset_preview';
+import { useDatasetPreview } from './use_dataset_preview';
 
-export function StepPreview({ gridState, onGridStateChange }: DatasetPreviewProps) {
+export type StepPreviewProps = Pick<DatasetPreviewProps, 'gridState' | 'onGridStateChange'>;
+
+export function StepPreview({ gridState, onGridStateChange }: StepPreviewProps) {
+  const preview = useDatasetPreview(DATASET_PREVIEW_QUERY);
+  const { isLoading, refresh } = preview;
+
   return (
     <div data-test-subj="createDatasetWizardPreviewStep">
-      <EuiTitle size="m">
-        <h2>{createDatasetWizardStrings.previewStepLabel}</h2>
-      </EuiTitle>
-      <EuiSpacer size="l" />
-      <DatasetPreview gridState={gridState} onGridStateChange={onGridStateChange} />
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="m">
+            <h2>{createDatasetWizardStrings.previewStepLabel}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="text"
+            data-test-subj="createDatasetWizardPreviewRefreshButton"
+            iconType="refresh"
+            isLoading={isLoading}
+            onClick={refresh}
+            size="s"
+          >
+            {createDatasetWizardStrings.previewRefreshButton}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiText size="s" color="subdued">
+        <p>{createDatasetWizardStrings.previewStepDescription}</p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <DatasetPreview
+        preview={preview}
+        gridState={gridState}
+        onGridStateChange={onGridStateChange}
+      />
     </div>
   );
 }

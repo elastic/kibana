@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -30,19 +30,25 @@ export interface DatasetPreviewState {
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
+export interface UseDatasetPreviewResult extends DatasetPreviewState {
+  refresh: () => void;
+}
+
 /** Runs an ES|QL query and returns the results in the shape the ES|QL data grid renders. */
-export const useDatasetPreview = (esqlQuery: string): DatasetPreviewState => {
+export const useDatasetPreview = (esqlQuery: string): UseDatasetPreviewResult => {
   const {
     services: { data, http },
   } = useKibana<DataFederationKibanaServices>();
   const [state, setState] = useState<DatasetPreviewState>({ isLoading: true });
+  const [refreshCount, setRefreshCount] = useState(0);
+  const refresh = useCallback(() => setRefreshCount((count) => count + 1), []);
 
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
 
     const runPreview = async () => {
-      setState({ isLoading: true });
+      setState(({ result }) => ({ isLoading: true, result }));
       try {
         const [{ rawResponse: response }, dataView] = await Promise.all([
           data.search.esql({ query: esqlQuery, columnMetadata: true }, { abortSignal: signal }),
@@ -75,7 +81,7 @@ export const useDatasetPreview = (esqlQuery: string): DatasetPreviewState => {
     runPreview();
 
     return () => abortController.abort();
-  }, [data, http, esqlQuery]);
+  }, [data, http, esqlQuery, refreshCount]);
 
-  return state;
+  return useMemo(() => ({ ...state, refresh }), [state, refresh]);
 };

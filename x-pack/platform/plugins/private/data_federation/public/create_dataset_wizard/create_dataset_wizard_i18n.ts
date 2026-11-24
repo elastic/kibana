@@ -103,6 +103,19 @@ export const createDatasetWizardStrings = {
   previewStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.previewStepLabel', {
     defaultMessage: 'Preview results',
   }),
+  previewStepDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.previewStepDescription',
+    {
+      defaultMessage:
+        'Shows the first 10 rows read from your dataset using the current configuration.',
+    }
+  ),
+  previewRefreshButton: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.previewRefreshButton',
+    {
+      defaultMessage: 'Refresh',
+    }
+  ),
   previewLoadingTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.previewLoadingTitle',
     {

@@ -37,7 +37,12 @@ jest.mock('@kbn/code-editor', () => ({
 }));
 
 jest.mock('./preview_step/dataset_preview', () => ({
+  ...jest.requireActual('./preview_step/dataset_preview'),
   DatasetPreview: () => <div data-test-subj="mockDatasetPreview" />,
+}));
+
+jest.mock('./preview_step/use_dataset_preview', () => ({
+  useDatasetPreview: () => ({ isLoading: false, refresh: jest.fn() }),
 }));
 
 describe('CreateDatasetWizardPage', () => {
