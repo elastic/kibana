@@ -39,11 +39,13 @@ export async function __kbnBootstrap__() {
     injectedMetadata.version
   );
 
+  // Not awaited: a stalled optional chunk must not block Core startup.
+  // eslint-disable-next-line no-console
+  edotBrowserSystem.setup().catch(console.warn);
+
   await Promise.all([
     // eslint-disable-next-line no-console
     apmSystem.setup().catch(console.warn),
-    // eslint-disable-next-line no-console
-    edotBrowserSystem.setup().catch(console.warn),
     i18n.getIsInitialized()
       ? Promise.resolve()
       : injectedMetadata.i18n.translationsUrl === null

@@ -12,6 +12,7 @@ import { getConfigurationFilePaths, getConfigFromFiles, applyConfigOverrides } f
 import { ApmConfiguration } from './config';
 
 let apmConfig: ApmConfiguration | undefined;
+let browserTracingConfig: { value: BrowserTracingConfiguration | undefined } | undefined;
 
 /**
  * Load the APM configuration.
@@ -30,6 +31,7 @@ export const loadConfiguration = (
   applyConfigOverrides(rawConfiguration, argv);
 
   apmConfig = new ApmConfiguration(rootDir, rawConfiguration, isDistributable);
+  browserTracingConfig = undefined;
   return apmConfig;
 };
 
@@ -46,12 +48,15 @@ export const getBrowserTracingConfiguration = (): BrowserTracingConfiguration | 
   if (!apmConfig) {
     return undefined;
   }
-  const { enabled, tracing } = apmConfig.getTelemetryConfig();
-  const { enabled: browserEnabled, url, headers } = tracing.browser ?? {};
-  if (!enabled || !browserEnabled || !url) {
-    return undefined;
+  // Called on every page render, so resolve (and validate) the telemetry config once.
+  if (!browserTracingConfig) {
+    const { enabled, tracing } = apmConfig.getTelemetryConfig();
+    const { enabled: browserEnabled, url, headers } = tracing.browser ?? {};
+    browserTracingConfig = {
+      value: enabled && browserEnabled && url ? { url, headers } : undefined,
+    };
   }
-  return { url, headers };
+  return browserTracingConfig.value;
 };
 
 export const getConfiguration = (serviceName: string): AgentConfigOptions | undefined => {
