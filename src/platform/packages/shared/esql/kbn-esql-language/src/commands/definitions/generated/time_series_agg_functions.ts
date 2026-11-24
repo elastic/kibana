@@ -113,6 +113,57 @@ const absentOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'counter_double',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the absent over time',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_integer',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the absent over time',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_long',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the absent over time',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
           optional: false,
           description: 'the metric field to calculate the value for',
@@ -1830,6 +1881,57 @@ const countOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'counter_double',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the count over time',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_integer',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the count over time',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_long',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the count over time',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
           optional: false,
           description: 'the metric field to calculate the value for',
@@ -2253,6 +2355,23 @@ const firstOverTimeDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'boolean',
+    },
     {
       params: [
         {
@@ -2715,6 +2834,23 @@ const lastOverTimeDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'boolean',
+    },
     {
       params: [
         {
@@ -3853,6 +3989,57 @@ const presentOverTimeDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'cartesian_shape',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the present over time',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_double',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the present over time',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_integer',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the present over time',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_long',
           optional: false,
           description: 'the metric field to calculate the value for',
         },

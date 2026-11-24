@@ -11,7 +11,13 @@ import {
   ToolResultType,
 } from '@kbn/agent-builder-common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
-import { INVESTIGATION_TIMEOUT_MS, UNPERSISTED_CONVERSATION_ERROR, runInvestigation } from './task';
+import {
+  INVESTIGATION_TIMEOUT_MS,
+  STILL_IN_PROGRESS_ERROR_PREFIX,
+  UNPERSISTED_CONVERSATION_ERROR,
+  runInvestigation,
+  waitForInvestigationToEnd,
+} from './task';
 import { ungradedPlaceholder } from './placeholder';
 
 jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
@@ -37,6 +43,8 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
 });
 
 const notFound = () => Object.assign(new Error('Not Found'), { status: 404 });
+const httpError = (status: number, message: string) =>
+  Object.assign(new Error(message), { status });
 
 it('executes the manual investigation and reads what it recorded from the shared API', async () => {
   const conversation = {
@@ -351,6 +359,74 @@ it('bounds a start failure even when no investigation was created', async () => 
   expect(output.investigation_id).toBeUndefined();
 });
 
+it('keeps polling when a read fails because a shard is not ready yet', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'investigation' })
+    .mockRejectedValueOnce(httpError(500, 'no shard available'))
+    .mockResolvedValueOnce(investigation())
+    .mockRejectedValueOnce(httpError(503, 'conversation index starting'))
+    .mockResolvedValueOnce({ rounds: [{ trace_id: 'agent-trace', steps: [] }] });
+
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output.execution_error).toBeUndefined();
+  expect(output).toMatchObject({
+    workflow_status: 'complete',
+    traceId: 'agent-trace',
+    structured_report: { conclusion: 'Synthetic timeouts increased.' },
+  });
+});
+
+it('keeps the finished investigation when the read after the poll fails transiently', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'investigation' })
+    .mockResolvedValueOnce(investigation())
+    .mockResolvedValueOnce({ rounds: [{ trace_id: 'agent-trace', steps: [] }] })
+    .mockRejectedValueOnce(httpError(503, 'no shard available'));
+
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output.execution_error).toBeUndefined();
+  expect(output).toMatchObject({
+    workflow_status: 'complete',
+    structured_report: { conclusion: 'Synthetic timeouts increased.' },
+  });
+});
+
+it('still fails when transient reads never recover before the timeout', async () => {
+  const clock = jest
+    .spyOn(Date, 'now')
+    .mockReturnValueOnce(0)
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
+  try {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ investigation_id: 'unready' })
+      .mockRejectedValue(httpError(500, 'no shard available'));
+    expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+      investigation_id: 'unready',
+      execution_error:
+        'Investigation was not created within 30 minutes. Last read failed: no shard available',
+    });
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('does not retry a poll that failed for a reason other than a transient server error', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'rejected' })
+    .mockRejectedValueOnce(httpError(400, 'bad investigation id'));
+
+  expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+    execution_error: 'bad investigation id',
+  });
+  expect(fetch).toHaveBeenCalledTimes(2);
+});
+
 it('retains the latest report and conversation when a later poll fails', async () => {
   const fetch = jest
     .fn()
@@ -397,6 +473,60 @@ it('bounds polling and retains partial conversation evidence when an investigati
   }
 });
 
+it('reports a finished investigation whose conversation never persisted as the harness failure', async () => {
+  const clock = jest
+    .spyOn(Date, 'now')
+    .mockReturnValueOnce(0)
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
+  try {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ investigation_id: 'lost' })
+      .mockResolvedValueOnce(investigation({ id: 'lost', in_progress: false }))
+      .mockResolvedValue({ rounds: [] });
+    const output = await runInvestigation(fetch, example, connector);
+    expect(output.execution_error).toBe(
+      'Investigation finished but its conversation had no rounds after 30 minutes'
+    );
+    // Not the agent-timeout prefix, so ORCA leaves the run unscored rather than scoring it 0.
+    expect(output.execution_error?.startsWith(STILL_IN_PROGRESS_ERROR_PREFIX)).toBe(false);
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('reports an agent failure the recovery read finds, not the provisional missing-conversation error', async () => {
+  const clock = jest
+    .spyOn(Date, 'now')
+    .mockReturnValueOnce(0)
+    .mockReturnValueOnce(0)
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
+  try {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ investigation_id: 'recovered' })
+      .mockResolvedValueOnce(investigation({ id: 'recovered', in_progress: false }))
+      // The last poll fails transiently, so the timeout sees no conversation.
+      .mockRejectedValueOnce(httpError(503, 'conversation index starting'))
+      .mockResolvedValue({
+        rounds: [
+          {
+            steps: [],
+            interruption: {
+              type: 'failed',
+              error: { code: 'internalError', message: 'connector timed out' },
+            },
+          },
+        ],
+      });
+    expect((await runInvestigation(fetch, example, connector)).execution_error).toBe(
+      'Investigation round failed: connector timed out'
+    );
+  } finally {
+    clock.mockRestore();
+  }
+});
+
 it('reports an investigation that never appeared', async () => {
   const clock = jest
     .spyOn(Date, 'now')
@@ -414,4 +544,31 @@ it('reports an investigation that never appeared', async () => {
   } finally {
     clock.mockRestore();
   }
+});
+
+describe('waitForInvestigationToEnd', () => {
+  const finished = { rounds: [{ status: ConversationRoundStatus.completed, steps: [] }] };
+
+  it('waits until the investigation and its last round have ended', async () => {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce(investigation({ in_progress: true }))
+      .mockResolvedValueOnce(investigation())
+      .mockResolvedValueOnce(finished);
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 60_000)).resolves.toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('gives up once the investigation is still running at the deadline', async () => {
+    const fetch = jest.fn().mockResolvedValue(investigation({ in_progress: true }));
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 0)).resolves.toBe(false);
+  });
+
+  it('does not take an investigation that is not found yet as ended', async () => {
+    const fetch = jest.fn().mockRejectedValue(notFound());
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 0)).resolves.toBe(false);
+  });
 });

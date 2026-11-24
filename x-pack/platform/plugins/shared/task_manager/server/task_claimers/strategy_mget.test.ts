@@ -31,7 +31,6 @@ import { TaskClaiming, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_clai
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import type { ClaimOwnershipResult } from '.';
 import type { FillPoolResult } from '../lib/fill_pool';
@@ -41,6 +40,11 @@ import {
   createDiscoveryServiceMock,
   createFindSO,
 } from '../kibana_discovery_service/mock_kibana_discovery_service';
+import {
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+  TracerProvider,
+} from '@opentelemetry/sdk-trace';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -122,13 +126,13 @@ const taskPartitioner = new TaskPartitioner({
 });
 
 // needs more tests in the similar to the `strategy_default.test.ts` test suite
-let otelExporter: tracing.InMemorySpanExporter;
-let otelProvider: tracing.BasicTracerProvider;
+let otelExporter: InMemorySpanExporter;
+let otelProvider: TracerProvider;
 
 beforeAll(() => {
-  otelExporter = new tracing.InMemorySpanExporter();
-  otelProvider = new tracing.BasicTracerProvider({
-    spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+  otelExporter = new InMemorySpanExporter();
+  otelProvider = new TracerProvider({
+    spanProcessors: [new SimpleSpanProcessor({ exporter: otelExporter })],
   });
   trace.setGlobalTracerProvider(otelProvider);
 });

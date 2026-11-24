@@ -9,15 +9,24 @@ import type { Alert } from '../types';
 
 /**
  * Result of the windowed candidate-alert scan (FetchAlertsStep): the fetched
- * rows plus whether the scan hit ESQL_QUERY_ROW_LIMIT and deferred a tail.
+ * rows plus whether a tail of the window was deferred to the next tick.
  */
 export class AlertScan {
-  private static readonly EMPTY = new AlertScan([], false);
+  private static readonly EMPTY = new AlertScan([], false, false);
 
   private constructor(
     public readonly alerts: readonly Alert[],
-    /** True when the scan reached ESQL_QUERY_ROW_LIMIT and a tail was deferred. */
-    public readonly truncated: boolean
+    /**
+     * True when a tail was deferred: the scan reached `dispatcher.run.alerts.max`,
+     * or a later step narrowed it with `withDeferredTail`.
+     */
+    public readonly truncated: boolean,
+    /**
+     * True when a later step deferred some fetched alerts to the next tick
+     * (see `withDeferredTail`). Those alerts get no record this tick, so the
+     * watermark must stop at the truncation edge whatever the tick outcome.
+     */
+    public readonly deferred: boolean
   ) {}
 
   public static of({
@@ -27,7 +36,7 @@ export class AlertScan {
     alerts: readonly Alert[];
     truncated?: boolean;
   }): AlertScan {
-    return new AlertScan(alerts, truncated);
+    return new AlertScan(alerts, truncated, false);
   }
 
   public static empty(): AlertScan {
@@ -36,6 +45,18 @@ export class AlertScan {
 
   public isEmpty(): boolean {
     return this.alerts.length === 0;
+  }
+
+  /**
+   * Narrows the scan to the alerts before the first deferred one, after a step
+   * deferred some alerts to the next tick. Rows are sorted ascending, so the
+   * truncation edge cannot pass a deferred alert. Kept alerts after the cut
+   * may still be dispatched; they are only left out of the watermark's scan.
+   */
+  public withDeferredTail(isDeferred: (alert: Alert) => boolean): AlertScan {
+    const cut = this.alerts.findIndex(isDeferred);
+    const kept = cut === -1 ? this.alerts : this.alerts.slice(0, cut);
+    return new AlertScan(kept, true, true);
   }
 
   /**

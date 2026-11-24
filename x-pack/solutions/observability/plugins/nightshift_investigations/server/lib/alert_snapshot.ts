@@ -47,6 +47,7 @@ import {
 } from '@kbn/rule-data-utils';
 import {
   alertSnapshotSchema,
+  MAX_V2_ALERT_DATA_LENGTH,
   v2AlertSnapshotSchema,
   type InvestigationAlertSnapshot,
   type AlertSnapshot,
@@ -96,17 +97,18 @@ export interface EpisodeLookup {
   spaceId: string;
 }
 
-const UNKNOWN = 'unknown';
+/** Placeholder a classic snapshot records for an alert field the alert document lacks. */
+export const UNKNOWN_ALERT_FIELD = 'unknown';
 
 const buildClassicSnapshot = (alert: Record<string, unknown>): AlertSnapshot =>
   parseAlertSnapshot(alert) ??
   alertSnapshotSchema.parse({
     id: alert[ALERT_UUID],
-    rule_id: alert[ALERT_RULE_UUID] ?? UNKNOWN,
-    rule_name: alert[ALERT_RULE_NAME] ?? UNKNOWN,
-    rule_type_id: alert[ALERT_RULE_TYPE_ID] ?? UNKNOWN,
-    rule_category: alert[ALERT_RULE_CATEGORY] ?? UNKNOWN,
-    status: alert[ALERT_STATUS] ?? UNKNOWN,
+    rule_id: alert[ALERT_RULE_UUID] ?? UNKNOWN_ALERT_FIELD,
+    rule_name: alert[ALERT_RULE_NAME] ?? UNKNOWN_ALERT_FIELD,
+    rule_type_id: alert[ALERT_RULE_TYPE_ID] ?? UNKNOWN_ALERT_FIELD,
+    rule_category: alert[ALERT_RULE_CATEGORY] ?? UNKNOWN_ALERT_FIELD,
+    status: alert[ALERT_STATUS] ?? UNKNOWN_ALERT_FIELD,
     start: alert[ALERT_START] ?? alert[TIMESTAMP],
   });
 
@@ -167,6 +169,57 @@ const buildEpisodesSummaryQuery = (spaceId: string, episodeIds: string[]) => {
   return asTypedEsqlQuery<EpisodeEventsEsqlRow>(query.keep(...EPISODE_EVENTS_FIELDS));
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const fieldJsonLength = (key: string, value: unknown): number =>
+  JSON.stringify(key).length + 1 + JSON.stringify(value).length;
+
+export const truncateV2AlertData = (data: Record<string, unknown>): Record<string, unknown> => {
+  const truncated = { ...data };
+  const sizes = new Map<string, number>(
+    Object.entries(data).map(([key, value]) => [key, fieldJsonLength(key, value)])
+  );
+  let fieldsTotal = [...sizes.values()].reduce((sum, size) => sum + size, 0);
+  const jsonLength = () => 2 + fieldsTotal + Math.max(sizes.size - 1, 0);
+  const setField = (key: string, value: unknown) => {
+    const size = fieldJsonLength(key, value);
+    fieldsTotal += size - (sizes.get(key) ?? 0);
+    sizes.set(key, size);
+    truncated[key] = value;
+  };
+  const largestOf = (keys: string[]): string | undefined =>
+    keys.reduce<string | undefined>(
+      (best, key) =>
+        best === undefined || (sizes.get(key) ?? 0) > (sizes.get(best) ?? 0) ? key : best,
+      undefined
+    );
+
+  const arrayKeys = Object.keys(data).filter((key) => Array.isArray(data[key]));
+  while (jsonLength() > MAX_V2_ALERT_DATA_LENGTH) {
+    const key = largestOf(
+      arrayKeys.filter((arrayKey) => {
+        const value = truncated[arrayKey];
+        return Array.isArray(value) && value.length > 0;
+      })
+    );
+    if (key === undefined) break;
+    const original = data[key];
+    const value = truncated[key];
+    if (!Array.isArray(original) || !Array.isArray(value)) break;
+    setField(key, value.slice(0, Math.floor(value.length / 2)));
+    setField(`${key}_truncated`, original.length);
+  }
+  while (jsonLength() > MAX_V2_ALERT_DATA_LENGTH) {
+    const key = largestOf([...sizes.keys()]);
+    if (key === undefined) break;
+    fieldsTotal -= sizes.get(key) ?? 0;
+    sizes.delete(key);
+    delete truncated[key];
+  }
+  return truncated;
+};
+
 const fetchV2Snapshots = async (
   { esClient, getRulesClient, spaceId }: EpisodeLookup,
   episodeIds: string[]
@@ -199,9 +252,10 @@ const fetchV2Snapshots = async (
   return new Map(
     episodes.flatMap((episode) => {
       const episodeData = dataByEpisode.get(episode['episode.id']);
+      const rawData: unknown = episodeData ? JSON.parse(episodeData) : undefined;
       const data = v2AlertSnapshotSchema.shape.data
         .catch(undefined)
-        .parse(episodeData ? JSON.parse(episodeData) : undefined);
+        .parse(isRecord(rawData) ? truncateV2AlertData(rawData) : rawData);
       const ruleId = episode['rule.id'] ?? undefined;
       const ruleName = ruleId
         ? ruleNames.get(ruleId)

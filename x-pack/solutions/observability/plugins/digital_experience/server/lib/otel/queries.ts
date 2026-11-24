@@ -29,16 +29,8 @@ import {
   SPAN_STATUS_ERROR,
   WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
+  ENVIRONMENT_FIELDS,
 } from '../../../common/otel_data';
-
-/**
- * `service.environment` aliases the deprecated `deployment.environment`, which newer SDKs replace
- * with `deployment.environment.name`.
- */
-export const ENVIRONMENT_FIELDS = [
-  SERVICE_ENVIRONMENT,
-  RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
-];
 
 /** The browser SDK documents of the time range, for every application. */
 export const browserDocuments = (start: number, end: number) => [
@@ -50,17 +42,26 @@ export const browserDocuments = (start: number, end: number) => [
 /** The documents of one application, by its exact name. */
 export const serviceDocuments = (serviceName: string) => termQuery(SERVICE_NAME, serviceName);
 
-/** The browser SDK documents of one application in the time range. */
+/**
+ * The browser SDK documents of one application in the time range, and only those `kuery` (the
+ * Overview's KQL, as a query) matches when it is given.
+ */
 export const applicationDocuments = ({
   serviceName,
   start,
   end,
+  kuery,
 }: {
   serviceName: string;
   start: number;
   end: number;
+  kuery?: estypes.QueryDslQueryContainer;
 }) => {
-  return [...browserDocuments(start, end), ...serviceDocuments(serviceName)];
+  return [
+    ...browserDocuments(start, end),
+    ...serviceDocuments(serviceName),
+    ...(kuery ? [kuery] : []),
+  ];
 };
 
 /** A filter aggregation counting the documents of one event, e.g. the page loads. */

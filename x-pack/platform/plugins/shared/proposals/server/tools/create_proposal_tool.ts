@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
@@ -29,38 +29,47 @@ import type { ProposalPrivilegesChecker } from '../services/check_proposal_privi
 import { createProposalCreator, DEFAULT_PROPOSAL_WAIT } from '../services/create_proposal';
 import type { ProposalsService } from '../services/proposals_service';
 
-export const createProposalToolSchema = z.object({
-  title: z
-    .string()
-    .min(1)
-    .max(MAX_TITLE_LENGTH)
-    .describe('Short plain-text label naming the proposed action, no Markdown.'),
-  comment: createProposalRequestSchema.shape.comment
-    .min(1)
-    .describe(
-      'What to do and why, as Markdown for the analyst who carries it out: the concrete steps, commands or config changes, and the findings that support them.'
+export const createProposalToolSchema = lazySchema(() =>
+  z.object({
+    title: z
+      .string()
+      .min(1)
+      .max(MAX_TITLE_LENGTH)
+      .describe('Short plain-text label naming the proposed action, no Markdown.'),
+    comment: createProposalRequestSchema.shape.comment
+      .min(1)
+      .describe(
+        'What to do and why, as Markdown for the analyst who carries it out: the concrete steps, commands or config changes, and the findings that support them.'
+      ),
+    origin: proposalOriginSchema.describe(
+      'The feature you are working for, as named in your instructions. It routes the proposal to that feature\'s queue; use "agent_builder" when none applies.'
     ),
-  origin: proposalOriginSchema.describe(
-    'The feature you are working for, as named in your instructions. It routes the proposal to that feature\'s queue; use "agent_builder" when none applies.'
-  ),
-  impact: proposalImpactSchema
-    .optional()
-    .describe('How disruptive carrying out the action is. Defaults to "low".'),
-  confidence: proposalConfidenceSchema
-    .optional()
-    .describe(
-      'How strongly the findings support that this action resolves the issue. Defaults to "medium".'
+    impact: proposalImpactSchema
+      .optional()
+      .describe('How disruptive carrying out the action is. Defaults to "low".'),
+    confidence: proposalConfidenceSchema
+      .optional()
+      .describe(
+        'How strongly the findings support that this action resolves the issue. Defaults to "medium".'
+      ),
+    category: proposalCategorySchema
+      .optional()
+      .describe('Grouping for the decision queue, when your instructions name one.'),
+    actionWorkflowId: createProposalRequestSchema.shape.actionWorkflowId.describe(
+      'Id of an action workflow that carries the action out once the analyst approves it, when your instructions list one that fits. Omit for a step the analyst carries out themselves.'
     ),
-  category: proposalCategorySchema
-    .optional()
-    .describe('Grouping for the decision queue, when your instructions name one.'),
-});
+    actionInput: createProposalRequestSchema.shape.actionInput.describe(
+      "The action workflow's single input object, filled to match the input schema listed for it. Only with actionWorkflowId."
+    ),
+  })
+);
 
 export type CreateProposalToolParams = z.infer<typeof createProposalToolSchema>;
 
 const DESCRIPTION =
   'Propose an action for a human to decide, in the current conversation. ' +
-  'The proposal runs nothing: the analyst carries it out and approves or dismisses it. ' +
+  'Without actionWorkflowId the proposal runs nothing: the analyst carries it out and approves or dismisses it. ' +
+  'With actionWorkflowId, approving it runs that action workflow with actionInput. ' +
   'Create one proposal per distinct action, and only for concrete steps (a command, a config change, a code fix, a rollback), not general advice. ' +
   'The proposal card is added to the conversation for the analyst; returns the proposal id once it exists.';
 
@@ -83,8 +92,8 @@ const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
 /**
- * `proposals.create`: an agent proposes an action without an action workflow, in the
- * conversation it runs in.
+ * `proposals.create`: an agent proposes an action, optionally carried out by an action workflow
+ * once approved, in the conversation it runs in.
  *
  * A to-do (`category: 'todo'`) is written straight to the index and decided by the service, so
  * the tool answers with the proposal itself and nothing stays parked. Every other category goes
@@ -149,7 +158,7 @@ export const createProposalTool = ({
       },
     },
     handler: async (
-      { title, comment, origin, impact, confidence, category },
+      { title, comment, origin, impact, confidence, category, actionWorkflowId, actionInput },
       { request, spaceId, runContext }
     ) => {
       const conversationId = getToolConversationId({ runContext });
@@ -168,7 +177,16 @@ export const createProposalTool = ({
           request,
           spaceId,
           conversationId,
-          proposal: { title, comment, origin, impact, confidence, category },
+          proposal: {
+            title,
+            comment,
+            origin,
+            impact,
+            confidence,
+            category,
+            actionWorkflowId,
+            actionInput,
+          },
         });
         if (!proposal) {
           return {

@@ -73,6 +73,9 @@ jest.mock('./rules/rules_tab', () => ({
 jest.mock('./signals/signals_tab', () => ({
   SignalsTab: () => <div data-test-subj="signalsTabStub" />,
 }));
+jest.mock('./topology/tab', () => ({
+  TopologyTab: () => <div data-test-subj="topologyTabStub" />,
+}));
 jest.mock('./run_limits_banner', () => ({ RunLimitsBanner: () => null }));
 let mockRecommendedSourcesTableMountCount = 0;
 jest.mock('../../components/entities/source/recommended_sources/recommended_sources_table', () => ({
@@ -440,15 +443,16 @@ describe('DetectionPage', () => {
       'true'
     );
     expect(screen.queryByTestId('nightshiftDetectionTab-signals')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionTab-topology')).not.toBeInTheDocument();
   });
 
-  it('shows the Signals tab in developer mode', async () => {
+  it.each(['signals', 'topology'] as const)('shows the %s tab in developer mode', async (id) => {
     mockUseDeveloperMode.mockReturnValue({ isDeveloperMode: true });
 
-    renderPage('/detections/signals', 'signals');
+    renderPage(`/detections/${id}`, id);
 
-    expect(await screen.findByTestId('signalsTabStub')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftDetectionTab-signals')).toHaveAttribute(
+    expect(await screen.findByTestId(`${id}TabStub`)).toBeInTheDocument();
+    expect(screen.getByTestId(`nightshiftDetectionTab-${id}`)).toHaveAttribute(
       'aria-selected',
       'true'
     );
@@ -510,6 +514,15 @@ describe('DetectionPage', () => {
     expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
   });
 
+  it('counts the same statuses in the overview tile as the events list filter selects', async () => {
+    renderPage('/detections/events?status=inactive');
+
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    expect(mockUseDetectionOverview).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ['inactive'] })
+    );
+  });
+
   it('shows the overview error instead of zero counts', async () => {
     mockUseDetectionOverview.mockReturnValue({
       data: undefined,
@@ -532,7 +545,11 @@ describe('DetectionPage', () => {
     renderPage('/detections/events?rangeFrom=now-5zz&rangeTo=now');
 
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
-    expect(mockUseDetectionOverview).toHaveBeenCalledWith({ from: 'now-24h', to: 'now' });
+    expect(mockUseDetectionOverview).toHaveBeenCalledWith({
+      from: 'now-24h',
+      to: 'now',
+      status: ['active', 'recovering'],
+    });
   });
 
   it('keeps entities and every tab filter when switching tabs, but not the page or flyout', async () => {
@@ -551,5 +568,45 @@ describe('DetectionPage', () => {
     expect(params.get('rulesSearch')).toBe('agent');
     expect(params.has('page')).toBe(false);
     expect(params.has('eventId')).toBe(false);
+  });
+
+  describe('viewport size', () => {
+    const originalInnerWidth = window.innerWidth;
+
+    afterEach(() => {
+      window.innerWidth = originalInnerWidth;
+    });
+
+    const getWorkspaceSection = () =>
+      screen.getByTestId('nightshiftDetectionOverviewFullSlot').parentElement?.parentElement;
+
+    it('clips the workspace to the viewport so its panes scroll on their own on a desktop', async () => {
+      renderPage();
+      expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+
+      expect(getWorkspaceSection()).toHaveStyle({ overflow: 'hidden' });
+    });
+
+    it('lets the page scroll as a whole instead of clipping the workspace', async () => {
+      window.innerWidth = 400;
+      renderPage();
+      expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+
+      expect(getWorkspaceSection()).not.toHaveStyle({ overflow: 'hidden' });
+    });
+
+    it('shows the compact overview on a phone, where the tab body does not scroll on its own', async () => {
+      window.innerWidth = 400;
+      renderPage();
+      expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+
+      expect(screen.getByTestId('nightshiftDetectionOverviewFullSlot')).toHaveAttribute(
+        'data-collapsed',
+        'true'
+      );
+      expect(screen.getByTestId('nightshiftDetectionOverviewCompactSlot')).not.toHaveAttribute(
+        'data-collapsed'
+      );
+    });
   });
 });

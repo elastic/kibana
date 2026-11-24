@@ -7,8 +7,10 @@
 
 import {
   parsePresetSchedule,
+  type AlertSourceMode,
   type PresetSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
+import type { AlertSeverity } from '@kbn/rule-data-utils';
 import type { Automation } from '../../../../data/automations/use_automations';
 import { UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 
@@ -34,6 +36,9 @@ export type TriggerFormValues =
       ruleNamePattern: string;
       ruleNames: string[];
       ruleTags: string[];
+      severities: AlertSeverity[];
+      alertSources: string[];
+      alertSourceMode: AlertSourceMode;
     }
   | {
       kind: 'every';
@@ -84,7 +89,15 @@ export const createTriggerFormValues = (kind: TriggerFormValues['kind']): Trigge
     return { kind, channels: [], users: [], bots: [], messageFilter: '' };
   }
   if (kind === 'alert') {
-    return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [] };
+    return {
+      kind,
+      ruleNamePattern: '',
+      ruleNames: [],
+      ruleTags: [],
+      severities: [],
+      alertSources: [],
+      alertSourceMode: 'include',
+    };
   }
   return {
     kind,
@@ -132,6 +145,13 @@ export const toPresetSchedule = (
     : { schedulePreset: 'daily', time, timezone };
 };
 
+export const getScheduledRunsPerDay = (trigger: TriggerFormValues): number | undefined => {
+  if (trigger.kind !== 'every') return undefined;
+  if (trigger.unit !== 'hour') return 1;
+  if (!trigger.betweenHours) return 24;
+  return Number(trigger.endTime.slice(0, 2)) - Number(trigger.startTime.slice(0, 2)) + 1;
+};
+
 export const toAutomationFormValues = (automation: Automation): AutomationFormValues => {
   const row = automation.trigger.rows[0];
   const [completion] = automation.completions;
@@ -145,6 +165,9 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
           ruleNamePattern: row.ruleNamePattern ?? '',
           ruleNames: row.ruleNames ?? [],
           ruleTags: row.tags ?? [],
+          severities: row.severities ?? [],
+          alertSources: row.alertSources ?? [],
+          alertSourceMode: row.alertSourceMode ?? 'include',
         }
       : row?.kind === 'slack'
       ? {

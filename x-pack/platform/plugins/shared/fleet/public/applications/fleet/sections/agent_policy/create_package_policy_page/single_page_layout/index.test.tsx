@@ -24,6 +24,7 @@ import {
 import type { CreatePackagePolicyRouteState } from '../../../../types';
 import {
   sendCreatePackagePolicyForRq,
+  useBulkGetAgentPoliciesQuery,
   sendCreateAgentPolicy,
   sendGetAgentStatus,
   useIntraAppState,
@@ -95,6 +96,9 @@ jest.mock('../../../../hooks', () => {
       })
     ),
     useGetPackageInfoByKeyQuery: jest.fn(),
+    useBulkGetAgentPoliciesQuery: jest.fn((...args) =>
+      jest.requireActual('../../../../hooks').useBulkGetAgentPoliciesQuery(...args)
+    ),
     sendGetSettings: jest.fn().mockResolvedValue({
       data: { item: {} },
     }),
@@ -606,6 +610,118 @@ describe('When on the package policy create page', () => {
       });
     });
 
+    test('requires acknowledging that some agents would stop collecting data before saving', async () => {
+      const packageInfo = getMockPackageInfo();
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+        ...packageInfo,
+        data: {
+          ...packageInfo.data,
+          item: { ...packageInfo.data.item, conditions: { agent: { version: '^9.4.0' } } },
+        },
+      });
+      const bulkGetAgentPoliciesQuery = jest.mocked(useBulkGetAgentPoliciesQuery);
+      const actualBulkGetAgentPoliciesQuery = bulkGetAgentPoliciesQuery.getMockImplementation();
+      bulkGetAgentPoliciesQuery.mockReturnValue({
+        data: {
+          items: [
+            {
+              id: 'agent-policy-1',
+              active_agents_per_version: [
+                { version: '9.3.1', count: 2 },
+                { version: '9.4.0', count: 1 },
+              ],
+            },
+          ],
+        },
+      } as unknown as ReturnType<typeof useBulkGetAgentPoliciesQuery>);
+
+      try {
+        await act(async () => {
+          render('agent-policy-1');
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('incompatibleAgentVersionCallout')).toBeInTheDocument();
+        });
+        const saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
+        expect(saveBtn).toBeDisabled();
+
+        await act(async () => {
+          fireEvent.click(
+            renderResult.getByTestId('acknowledgeAgentVersionIncompatibilityCheckbox')
+          );
+        });
+        await waitFor(() => expect(saveBtn).not.toBeDisabled());
+
+        await act(async () => {
+          fireEvent.click(saveBtn);
+        });
+
+        expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+          expect.objectContaining({ acknowledge_agent_version_incompatibility: true }),
+          expect.anything()
+        );
+      } finally {
+        bulkGetAgentPoliciesQuery.mockImplementation(actualBulkGetAgentPoliciesQuery!);
+      }
+    });
+
+    test('asks to acknowledge an incompatibility reported by Fleet that the agent counts do not show', async () => {
+      // e.g. without the Agents Read privilege, the agent policies have no agent counts
+      const packageInfo = getMockPackageInfo();
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+        ...packageInfo,
+        data: {
+          ...packageInfo.data,
+          item: { ...packageInfo.data.item, conditions: { agent: { version: '^9.4.0' } } },
+        },
+      });
+      (sendCreatePackagePolicyForRq as jest.MockedFunction<any>).mockRejectedValueOnce({
+        statusCode: 400,
+        message: 'Cannot add nginx 1.3.0 to the selected agent policies',
+        attributes: {
+          type: 'agent_version_incompatible',
+          agent_version_block: {
+            package_name: 'nginx',
+            package_version: '1.3.0',
+            version_condition: '^9.4.0',
+          },
+        },
+      });
+      await act(async () => {
+        render('agent-policy-1');
+      });
+
+      let saveBtn: HTMLElement;
+      await waitFor(() => {
+        saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
+        expect(saveBtn).not.toBeDisabled();
+      });
+      expect(renderResult.queryByTestId('incompatibleAgentVersionCallout')).toBeNull();
+
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('incompatibleAgentVersionCallout')).toBeInTheDocument();
+      });
+      expect(saveBtn!).toBeDisabled();
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('acknowledgeAgentVersionIncompatibilityCheckbox'));
+      });
+      await waitFor(() => expect(saveBtn).not.toBeDisabled());
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenLastCalledWith(
+        expect.objectContaining({ acknowledge_agent_version_incompatibility: true }),
+        expect.anything()
+      );
+    });
+
     test('warns when the policy saved but its cloud connector could not record the template details', async () => {
       // The request helper reports the failed template-details write through the options it is handed;
       // the save itself succeeded, so the page must add a warning next to the success toast.
@@ -644,7 +760,11 @@ describe('When on the package policy create page', () => {
     });
 
     describe('On save navigate', () => {
-      async function setupSaveNavigate(routeState: any, queryParamsPolicyId?: string) {
+      async function setupSaveNavigate(
+        routeState: any,
+        queryParamsPolicyId?: string,
+        modalButtonText: RegExp = /Add Elastic Agent to your hosts/
+      ) {
         (useIntraAppState as jest.MockedFunction<any>).mockReturnValue(routeState);
         render(queryParamsPolicyId);
 
@@ -666,9 +786,7 @@ describe('When on the package policy create page', () => {
         );
 
         await act(async () => {
-          fireEvent.click(
-            renderResult.getByText(/Add Elastic Agent to your hosts/).closest('button')!
-          );
+          fireEvent.click(renderResult.getByText(modalButtonText).closest('button')!);
         });
       }
 
@@ -708,13 +826,24 @@ describe('When on the package policy create page', () => {
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
       });
 
-      test('should navigate to integration policies page if no route state and no queryParamsPolicyId', async () => {
+      test('should navigate to integration policies page with the add agent help param if no route state and the agent is added later', async () => {
+        await setupSaveNavigate({}, undefined, /Add Elastic Agent later/);
+
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
+          INTEGRATIONS_PLUGIN_ID,
+          {
+            path: '/detail/nginx-1.3.0/policies?showAddAgentHelpForPolicyId=agent-policy-1',
+          }
+        );
+      });
+
+      test('should navigate to integration policies page with the add agent param if no route state and no queryParamsPolicyId', async () => {
         await setupSaveNavigate({});
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
           INTEGRATIONS_PLUGIN_ID,
           {
-            path: '/detail/nginx-1.3.0/policies',
+            path: '/detail/nginx-1.3.0/policies?addAgentToPolicyId=agent-policy-1',
           }
         );
       });

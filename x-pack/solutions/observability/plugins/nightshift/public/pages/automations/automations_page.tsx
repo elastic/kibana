@@ -12,6 +12,7 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
 import { useKibana } from '../../hooks/use_kibana';
+import { useAllRelayAppBindings } from '../../data/relay_apps/use_relay_app_bindings';
 import { useInvestigatorServiceAccount } from '../../data/service_accounts/use_investigator_service_account';
 import {
   MANAGE_SECURITY_REQUIRED_BODY,
@@ -28,6 +29,7 @@ import {
   useCurrentUsername,
   useDeleteAutomation,
   useRefreshAutomations,
+  useRunAutomation,
   useFetchAutomations,
   type Automation,
 } from '../../data/automations/use_automations';
@@ -71,7 +73,9 @@ export const AutomationsPage = (): React.ReactElement => {
       ? MANAGE_SECURITY_REQUIRED_REASON
       : undefined;
   const { data, error, isInitialLoading, refetch } = useFetchAutomations();
+  const connectedChannels = useAllRelayAppBindings();
   const deleteAutomation = useDeleteAutomation();
+  const runAutomation = useRunAutomation();
   const refreshAutomations = useRefreshAutomations();
   const cloneAutomation = useCreateAutomation(true);
   const currentUsername = useCurrentUsername();
@@ -79,6 +83,8 @@ export const AutomationsPage = (): React.ReactElement => {
   const [range, setRange] = useState<TimeRange>({ start: 'now-48h', end: 'now' });
   const [rangeLabel, setRangeLabel] = useState(listLabels.last48Hours);
   const [refreshedAt, setRefreshedAt] = useState(() => Date.now());
+  const requestRun = (automation: Automation) =>
+    runAutomation.mutate(automation, { onSuccess: () => setRefreshedAt(Date.now()) });
   const [order, setOrder] = useState<string[]>([]);
   const [page, setPage] = useState({ index: 0, size: DEFAULT_PAGE_SIZE });
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
@@ -105,6 +111,7 @@ export const AutomationsPage = (): React.ReactElement => {
   } = useAutomationFilters(automations, getFacets);
   const {
     isReached: isGlobalLimitReached,
+    blockingLimit,
     limit: globalLimit,
     settingsHref: globalLimitSettingsHref,
     refetch: refetchQuotas,
@@ -159,12 +166,15 @@ export const AutomationsPage = (): React.ReactElement => {
       <AutomationsTable
         automations={visibleAutomations}
         canManage={canManage}
+        onRun={requestRun}
+        isRunPending={runAutomation.isLoading}
         editDisabledReason={editDisabledReason}
         runCounts={runCounts}
         usedToday={usedToday}
         getFacets={getFacets}
         isRateLimited={isRateLimited}
         isGlobalLimitReached={isGlobalLimitReached}
+        connectedChannels={connectedChannels}
         pageIndex={pageIndex}
         pageSize={page.size}
         onPageChange={(index, size) => setPage({ index, size })}
@@ -196,9 +206,13 @@ export const AutomationsPage = (): React.ReactElement => {
       )}
       {!isEmpty && (
         <>
-          {isGlobalLimitReached && globalLimit !== undefined && (
+          {blockingLimit && globalLimit !== undefined && (
             <>
-              <GlobalLimitCallout limit={globalLimit} settingsHref={globalLimitSettingsHref} />
+              <GlobalLimitCallout
+                group={blockingLimit}
+                limit={globalLimit}
+                settingsHref={globalLimitSettingsHref}
+              />
               <EuiSpacer size="m" />
             </>
           )}
@@ -255,6 +269,8 @@ export const AutomationsPage = (): React.ReactElement => {
           automations={orderedAutomations}
           automation={detailAutomation}
           canManage={canManage}
+          onRun={requestRun}
+          isRunPending={runAutomation.isLoading}
           editDisabledReason={editDisabledReason}
           usedToday={usedToday.get(detailAutomation.id) ?? 0}
           runRange={runRange}

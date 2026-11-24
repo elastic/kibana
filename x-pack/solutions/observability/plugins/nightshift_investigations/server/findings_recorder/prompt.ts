@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ActionCatalogEntry } from '@kbn/proposals-common';
 import { RECORDER_RESULTS_DIR } from './constants';
 
 /**
@@ -24,7 +25,7 @@ const HYPOTHESES = `- hypotheses: every candidate cause the agent considered, as
   - candidate is the name on the collapsed card: a noun phrase of at most eight words that tells it apart from the others ('Connection pool exhausted after 14:02 deploy', not 'Deploy' and not a sentence packed with counts). No leading 'Hypothesis:', no counts, no ids.
   - status is investigating while open, dismissed once ruled out, confirmed for the root cause.
   - confidence is 0 to 1 and reflects how strongly the evidence points to it.
-  - reason is the opened card: exactly two Markdown lines, each one sentence, no bullets. The ids, thresholds, counts and time windows belong here. Write '**Tested:** the claim as you checked it, and against which signal and time window.' then '**Result:** what the data showed and what it decided, ending with the word Confirmed, Dismissed or Unresolved.' While the hypothesis is still investigating, write the same two lines with what you have so far, ending in Unresolved.
+  - reason is the opened card: two Markdown lines, each one sentence, no bullets, plus a third line while the hypothesis is still investigating. The ids, thresholds, counts and time windows belong here. Write '**Tested:** the claim as you checked it, and against which signal and time window.' then '**Result:** what the data showed and what it decided, ending with the word Confirmed, Dismissed or Unresolved.' While the hypothesis is still investigating, write the same two lines with what you have so far, ending in Unresolved, then a third line: '**Settled by:** Refuted if <signal> <comparison> <threshold> in <window>; confirmed if <the opposite>.' It says what observation would settle the hypothesis, in at most 20 words, one short clause for each outcome. Use only the signals, numbers and windows the conversation shows, including the agent's own next checks. Always state the test itself, even when the data to run it is missing: then end with 'Needs <the data>.' after the test, never only 'Needs ...'. When nothing in the conversation gives a number, name the signal and the direction without one, or write 'No clear test yet'. Never invent a threshold. A dismissed or confirmed hypothesis has no third line.
   - Confirmed means it caused the triggering symptom, not that a signal is present in the data. A downstream effect of a confirmed cause is dismissed with a reason that names it as one. Mark a hypothesis confirmed only when the agent's own text asserts it or its evidence clearly establishes it.`;
 
 const SUMMARY = `- summary: what did we see, and since when? At most 60 words of Markdown: one lead sentence of at most 25 words naming the symptom, where it showed up and when it started, then at most three bullets of at most 20 words for the scale, how it developed and the current state. It does not state a cause or a conclusion. Example:
@@ -53,13 +54,13 @@ ${HYPOTHESES}
 ${UPDATING}`;
 
 const evidenceField = (files: boolean) =>
-  `- evidence (on the impact, and on the confirmed or leading hypothesis): the observations that back the claim, each a short description, a small chart, or both. Make a chart only from numbers that appear in the tool results in this conversation${
+  `- evidence (on the impact, on each listed entity, and on the confirmed or leading hypothesis): the observations that back the claim, each a short description, a small chart, or both. When impact was found, always include a chart for the impact and for each listed entity when the conversation holds a series of three or more points for it, such as the error rate or request volume over time. Check every listed entity against the conversation before you answer, and look for its series before you settle for a description: an entity gets its own chart even when the same series is also the impact chart. When no impact was found, leave the impact evidence a description or out, and do not chart a flat or unaffected series. Make a chart only from numbers that appear in the tool results in this conversation${
     files ? ' or in the files you read' : ''
-  }: copy the x and y values exactly as they appear, never estimate, extend or invent a point, and use a description instead when you have fewer than three points.${
+  }: copy the x and y values exactly as they appear, never estimate, extend or invent a point, and use a description only when you have fewer than three points for that claim: a chart of one or two points is never drawn.${
     files
       ? ' A tool result that was too long to be shown in full says where its full output is: when you want to chart or quote its numbers, read that file first, and use a description only if the numbers are not in it.'
       : ''
-  } A chart has a title that says what it measures and the time window, a time x axis with ISO 8601 timestamps (or a category axis), at most about 30 points, and an annotation where the problem began when known. At most one chart for the impact and one per hypothesis, and none for a dismissed hypothesis. Keep links out of the description.`;
+  } A chart has a title that says what it measures and the time window, a time x axis with ISO 8601 timestamps (or a category axis), at most about 30 points, and an annotation where the problem began when known. At most one chart for the impact, one per listed entity and one per hypothesis, and none for a dismissed hypothesis. Keep links out of the description.`;
 
 const FINAL_RECORD = (files: boolean) => `${ROLE}
 
@@ -70,7 +71,7 @@ Be concise. There are at most eight hypotheses. Merge near-duplicates instead of
 The record is shown to people on the investigation overview, on its card, and in notifications. The agent has finished, so you fill in all of the fields below.
 
 ${SUMMARY}
-- verdict: what is the most likely cause? At most 70 words of Markdown, no headings. Open with a single sentence of at most 25 words naming the cause as you would say it out loud to the on-call engineer ('Search filters have returned nothing since the 07-13 deploy, because the field they filter on is missing from the index mapping.', not 'The investigation has determined that the ROOT CAUSE is a mapping configuration issue'). When a hypothesis is confirmed, state the cause flatly, with no 'likely' or 'probably'. When none is, open with the literal words 'Cause not confirmed:' followed by the leading candidate, and never state it as the cause. Then add at most three bullets: the mechanism in one line, what rules the other candidates out or how confident you are, and any data you were missing that limited the conclusion. Stop there: the evidence is in the hypotheses. When the agent's Cortex results already document the cause as a known or chronic pattern, say so in the lead sentence and focus on what is new, and never present a documented condition as a fresh discovery. Example:
+- verdict: what is the most likely cause? At most 70 words of Markdown, no headings. Open with a single sentence of at most 25 words naming the cause as you would say it out loud to the on-call engineer ('Search filters have returned nothing since the 07-13 deploy, because the field they filter on is missing from the index mapping.', not 'The investigation has determined that the ROOT CAUSE is a mapping configuration issue'). When a hypothesis is confirmed, state the cause flatly, with no 'likely' or 'probably'. When none is, open with the literal words 'Cause not confirmed:' followed by the leading candidate, and never state it as the cause. Then add at most three bullets: the mechanism in one line, what rules the other candidates out or how confident you are, and any data you were missing that limited the conclusion. Stop there: the evidence is in the hypotheses. When the agent's Wiki results already document the cause as a known or chronic pattern, say so in the lead sentence and focus on what is new, and never present a documented condition as a fresh discovery. Example:
 
 The 14:02Z deploy shrank the orders service connection pool, so it ran out of connections under normal load.
 
@@ -81,11 +82,16 @@ The 14:02Z deploy shrank the orders service connection pool, so it ran out of co
   - high: the affected operation fails or is blocked on the verified path, or is broadly degraded or intermittently failing for a significant subset.
   - medium: minor confirmed degradation with limited reach, or the evidence never settled whether the operation fails or only slows.
   - low: confirmed recovery, or confirmed absence of impact. Say which in the verdict.
-  - If the agent's final message states a severity, use it.
-  - If the conversation says a person changed the severity, it is theirs: leave severity out of your answer, whatever the evidence shows.
-- impact: the business consequence, not the symptom: who or what was hurt and how badly. One lead sentence of at most 25 words, then at most three bullets of at most 20 words, one per distinct consequence, each with the share or size the agent measured; at most 45 words in all. Do not repeat the symptom, the time window or the counts the summary already says, and never write a caption for the chart. Example: 'Shoppers in every region could not complete checkout, and about a third of attempts were lost.' When entities are listed, the lead sentence alone is enough. Add entities only when two or more services or components were affected in different ways, grouped at service level; never list a single entity. Give each entity its own evidence of how it was affected. When the record already lists entities, list them again with their evidence unless the agent has since shown they were not affected.
+  - If the conversation says a person set or changed the severity, it is theirs and final: leave severity out of your answer, whatever the evidence or any later round shows. The rules below apply only when no person has set it.
+  - The agent does not rate severity and its message never decides it: you do, from the evidence.
+  - The severity the record already holds is the starting point. On a follow-up round keep it, and change it only when this round's confirmed findings clearly move it to another level above. A retest that only adds, dismisses or leaves candidates untested is not a reason to change it.
+- impact: the business consequence, not the symptom: who or what was hurt and how badly. One lead sentence of at most 25 words, then at most three bullets of at most 20 words, one per distinct consequence, each with the share or size the agent measured; at most 45 words in all. Do not repeat the symptom, the time window or the counts the summary already says, and never write a caption for the chart. Example: 'Shoppers in every region could not complete checkout, and about a third of attempts were lost.' When entities are listed, the lead sentence alone is enough. Add entities only when two or more services or components were affected in different ways, grouped at service level; never list a single entity. Give each entity its own evidence of how it was affected, with a chart of its own failure signal when the evidence rule below allows. When the record already lists entities, list them again with their evidence unless the agent has since shown they were not affected.
 ${evidenceField(files)}
-- proposals: concrete actions for a person to decide, at most three, and only for steps the findings support: a command to run, a config change, a code fix or a rollback. Not general advice, and none that repeats a proposal the record already lists: the same action on the same target counts as a repeat even in different words, so propose only a step that is new. Each has a short plain-text title and a comment saying what to do and why, in Markdown, with the concrete steps and the findings that support them. Add impact (how disruptive the action is) and confidence (how strongly the findings say it resolves the issue) when you can judge them. Leave proposals out when the cause is unverified and no action is clear.
+- proposals: concrete actions for a person to decide, at most three per pass and at most five open across the investigation, and only for steps the findings support: a command to run, a config change, a code fix, a rollback or a targeted check needed to settle an open question. Not general advice. Output only new or materially updated actions from this round: leave unchanged open proposals out (they stay open on their own), and omit proposals or send [] on a follow-up that only answers a question, confirms details without changing what to do, or discusses actions already covered. When the conversation lists existing proposals:
+  - Open proposals are shown as P1, P2, ... with their full text. If an action refines, broadens, narrows or replaces the same work or target as an open proposal — or replaces an earlier diagnostic check that this round's findings answered with a concrete fix — set supersedes to that open proposal's ID (for example 'P1') and give the complete updated title and comment instead of adding another proposal. An open proposal that runs a workflow keeps it: give the same action_workflow_id with the complete action_input. A to-do cannot gain a workflow.
+  - Never repeat an open proposal in different words without superseding it, and never re-propose or supersede a closed (applied, declined, expired, running or failed) proposal.
+  - Supersede an open proposal only with the same action refined, never to fold a different action into it. When five are open, a different action is left out.
+  - Each proposal has a short plain-text title and a comment saying what to do and why, in Markdown, with the concrete steps and the findings that support them. Add impact (how disruptive the action is) and confidence (how strongly the findings say it resolves the issue) when you can judge them. Leave proposals out when no concrete action is clear.
 ${HYPOTHESES}
 
 ${UPDATING}`;
@@ -96,16 +102,44 @@ const FILES = `
 
 You can read files in the investigation's workspace with \`recorder_read_file\` (path, optional offset and length). You cannot change anything. Tool results that were too long to be shown are stored in full under ${RECORDER_RESULTS_DIR}, and long command output the agent saved is under /workspace/.tool-output. Read only what you need to write accurate evidence, then give your answer with structuredOutput. The tools named nightshift_sandbox_* in the transcript are the agent's own and cannot be called: use recorder_read_file.`;
 
+/** A catalog entry as the prompt shows it: what the model needs to pick it and fill its input. */
+const describeAction = ({
+  workflowId,
+  name,
+  description,
+  impact,
+  inputSchema,
+}: ActionCatalogEntry) =>
+  `- ${name} (id: ${workflowId}${impact ? `, impact: ${impact}` : ''})${
+    description ? `: ${description}` : ''
+  }\n  input schema: ${JSON.stringify(inputSchema ?? {})}`;
+
+/**
+ * The workflows the space offers to carry an action out. Listed only on the final pass, the one
+ * that proposes, and only when there are any, so a space without them sees no change.
+ */
+const ACTIONS = (actions: readonly ActionCatalogEntry[]) => `
+
+## Workflows
+
+Someone in this space wrote workflows that carry actions out once a person approves them. When one of them carries out a proposal, set action_workflow_id to its id and fill action_input from what the findings show, matching its input schema (the properties of its actionInput): use only values the transcript supports, and leave an optional property out rather than guess it. Keep the comment, which says what the workflow will do and why. A proposal without a fitting workflow is a step the person carries out, and has no action_workflow_id.
+
+${actions.map(describeAction).join('\n')}`;
+
 /** The system prompt for a live pass, or for the final pass with or without workspace files. */
 export const buildRecorderSystemPrompt = ({
   final,
   files = false,
+  actions = [],
 }: {
   final: boolean;
   files?: boolean;
+  /** The action workflows a proposal can carry. Only the final pass proposes. */
+  actions?: readonly ActionCatalogEntry[];
 }): string => {
   if (!final) return LIVE_SYSTEM_PROMPT;
-  return files ? `${FINAL_RECORD(true)}${FILES}` : FINAL_RECORD(false);
+  const record = files ? `${FINAL_RECORD(true)}${FILES}` : FINAL_RECORD(false);
+  return actions.length > 0 ? `${record}${ACTIONS(actions)}` : record;
 };
 
 /** Asked while the agent is still working. */
@@ -114,4 +148,4 @@ export const LIVE_INSTRUCTION =
 
 /** Asked once the agent has given its final answer. */
 export const FINAL_INSTRUCTION =
-  'The agent has finished, and its final message to the user is the last message above. Make the record final from it: set the verdict from that message and settle every hypothesis (none left investigating unless the telemetry needed to check it was unavailable). Where the message states a severity, or a status or confidence for a hypothesis, use it; decide from the evidence only what it leaves open. Set the severity (unless a person changed it) and the impact, each with evidence where the numbers are available.';
+  'The agent has finished, and its final message to the user is the last message above. Make the record final from it: set the verdict from that message and settle every hypothesis (none left investigating unless the telemetry needed to check it was unavailable). Where the message states a status or confidence for a hypothesis, use it; decide from the evidence only what it leaves open. Set the severity as the severity rules in the record describe, and the impact, each with evidence where the numbers are available.';

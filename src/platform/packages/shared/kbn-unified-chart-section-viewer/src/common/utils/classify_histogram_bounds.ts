@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ceil, floor } from 'lodash';
 import type { HistogramBounds } from '../../types';
 
 /** A MIN/MAX cell as it arrives in an ES|QL row. */
@@ -20,8 +21,8 @@ const toFiniteNumber = (value: RawHistogramBound): number | undefined => {
 };
 
 /**
- * Returns MIN/MAX when both values are finite and min is not greater than max.
- * A point (min === max) is kept. Missing, non-finite, or inverted bounds are undefined.
+ * Returns finite, ordered MIN/MAX rounded outward to hundredths, or undefined.
+ * A point already on a hundredth stays a point.
  */
 export const parseHistogramBounds = (
   rawMin: RawHistogramBound,
@@ -33,5 +34,11 @@ export const parseHistogramBounds = (
     return undefined;
   }
 
-  return { min, max };
+  const roundedMin = floor(min, 2);
+  const roundedMax = ceil(max, 2);
+
+  return {
+    min: Number.isFinite(roundedMin) ? roundedMin : min,
+    max: Number.isFinite(roundedMax) ? roundedMax : max,
+  };
 };

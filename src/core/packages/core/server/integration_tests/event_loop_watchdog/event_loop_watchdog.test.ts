@@ -8,9 +8,12 @@
  */
 
 import { spawn } from 'node:child_process';
+import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
+import Os from 'node:os';
 import Path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
+import type { CpuProfile } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/profile_capture';
 
 const HARNESS = Path.resolve(__dirname, 'fixtures', 'watchdog_harness.ts');
 
@@ -31,7 +34,39 @@ interface WorkerLogLine {
       phase?: string;
       blockedMs?: number;
       ongoing?: boolean;
-      stats?: { starting: PhaseStats; running: PhaseStats; heapUsed: number };
+      stats?: {
+        starting: PhaseStats;
+        running: PhaseStats;
+        heapUsed: number;
+        profiling?: {
+          pastStartAfter: number;
+          profiled: number;
+          captureFailed: number;
+          skippedCooldown: number;
+          files: { written: number; sameFrame: number; writeFailed: number };
+        };
+      };
+      profile?: {
+        blockedMs: number;
+        profiledAfterMs: number;
+        profilerStartMs: number;
+        sampledMs: number;
+        coverage: number;
+        captureDurationMs: number;
+        samples: number;
+        frames: Array<{ name: string; location?: string; percent: number }>;
+        kibanaFrames: Array<{
+          name: string;
+          location?: string;
+          percent: number;
+          callers: Array<{ name: string; location?: string }>;
+        }>;
+        topKibanaFrame?: { location?: string; percent: number };
+        nodes: number;
+        heapUsed: number;
+        stopReason: string;
+        file: string;
+      };
     };
   };
 }
@@ -57,6 +92,8 @@ interface HarnessResult {
 
 interface RunHarnessOptions {
   timeoutMs?: number;
+  /** Optional profile output directory passed to the child as `WATCHDOG_PROFILE_DIR`. */
+  profileDir?: string;
   /** Checked after each stdout log line; the child is killed with SIGKILL once it returns true. */
   killWhen?: (workerLogLines: WorkerLogLine[]) => boolean;
 }
@@ -67,15 +104,20 @@ interface RunHarnessOptions {
  */
 const runHarness = (
   scenario: string,
-  { timeoutMs = 90_000, killWhen }: RunHarnessOptions = {}
+  { timeoutMs = 90_000, killWhen, profileDir }: RunHarnessOptions = {}
 ): Promise<HarnessResult> =>
   new Promise((resolve, reject) => {
-    // CI sets --max-old-space-size in NODE_OPTIONS, which overrides the worker's heap limit.
+    // CI sets --max-old-space-size in NODE_OPTIONS, which overrides the worker's heap limit
+    // (https://github.com/nodejs/node/issues/67014).
     const { NODE_OPTIONS, ...env } = process.env;
     const child = spawn(
       process.execPath,
       ['-e', `require('@kbn/setup-node-env'); require(${JSON.stringify(HARNESS)});`, scenario],
-      { cwd: REPO_ROOT, env, stdio: ['ignore', 'pipe', 'pipe', 'pipe'] }
+      {
+        cwd: REPO_ROOT,
+        env: profileDir ? { ...env, WATCHDOG_PROFILE_DIR: profileDir } : env,
+        stdio: ['ignore', 'pipe', 'pipe', 'pipe'],
+      }
     );
     const workerLogLines: WorkerLogLine[] = [];
     const unparsedLogLines: string[] = [];
@@ -144,6 +186,61 @@ const statsOf = ({ workerLogLines }: HarnessResult) =>
 const statsLogLines = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.filter(({ kibana }) => kibana?.event_loop_watchdog?.stats);
 const blockOf = ({ kibana }: WorkerLogLine) => kibana?.event_loop_watchdog;
+const profileLogLines = ({ workerLogLines }: HarnessResult) =>
+  workerLogLines.filter(({ kibana }) => kibana?.event_loop_watchdog?.profile);
+/** The profiler's thread only shows in /proc, so the check runs on Linux. */
+const expectProfilerStopped = ({ mainLogLines }: HarnessResult) => {
+  if (process.platform === 'linux') {
+    expect(mainLogLines.map(({ message }) => message)).toContain('profiler thread stopped');
+  }
+};
+/**
+ * Runs a file-writing scenario in a temp directory and returns its result, file path, and parsed
+ * profile.
+ */
+const runWritingHarness = async (scenario: string, options: RunHarnessOptions = {}) => {
+  const profileDir = mkdtempSync(Path.join(Os.tmpdir(), 'watchdog-profiles-'));
+  try {
+    const result = await runHarness(scenario, { ...options, profileDir });
+    const files = readdirSync(profileDir);
+    expect(files).toHaveLength(1);
+    const file = Path.join(profileDir, files[0]);
+    return { result, file, profile: JSON.parse(readFileSync(file, 'utf8')) as CpuProfile };
+  } finally {
+    rmSync(profileDir, { recursive: true, force: true });
+  }
+};
+const isKibanaUrl = (url: string) =>
+  url.startsWith('src/') || url.startsWith('x-pack/') || url.startsWith('@kbn/');
+/**
+ * Checks profile structure and that Kibana frames remain visible with DevTools' default ignore
+ * rules.
+ */
+const expectViewableProfile = ({
+  nodes,
+  startTime,
+  endTime,
+  samples = [],
+  timeDeltas = [],
+}: CpuProfile) => {
+  const ids = new Set(nodes.map(({ id }) => id));
+  const children = new Set(nodes.flatMap((node) => node.children ?? []));
+  expect(samples.length).toBeGreaterThan(0);
+  expect(samples.length).toBe(timeDeltas.length);
+  expect(samples.filter((id) => !ids.has(id))).toEqual([]);
+  expect([...children].filter((id) => !ids.has(id))).toEqual([]);
+  expect(nodes.filter(({ id }) => !children.has(id))).toHaveLength(1);
+  expect(startTime).toBeLessThanOrEqual(endTime);
+  const urls = nodes.map(({ callFrame }) => callFrame.url ?? '');
+  const kibanaUrls = urls.filter(isKibanaUrl);
+  expect(kibanaUrls.length).toBeGreaterThan(0);
+  // Kibana URLs must not keep the `node_modules/` prefix that DevTools ignores by default.
+  expect(kibanaUrls.filter((url) => url.includes('node_modules/'))).toEqual([]);
+  expect(urls.filter((url) => url.startsWith(`file://${REPO_ROOT}/src/`))).toEqual([]);
+  expect(urls.filter((url) => url.startsWith(`file://${REPO_ROOT}/x-pack/`))).toEqual([]);
+};
+const restarts = ({ mainLogLines }: HarnessResult) =>
+  mainLogLines.filter(({ message }) => message.includes('exited unexpectedly'));
 
 describe('event loop watchdog in a child process', () => {
   let blocks: HarnessResult;
@@ -241,6 +338,20 @@ describe('event loop watchdog in a child process', () => {
     });
   }, 120_000);
 
+  it('passes profiling toggles to the running worker without restarting it', async () => {
+    const result = await runHarness('profiling_toggle');
+    expectCleanExit(result);
+    expect(result.workerLogLines.map(({ message }) => message)).toEqual([
+      'profiling 1',
+      'profiling 0',
+      'profiling 1',
+    ]);
+    const readyLines = result.mainLogLines.filter(({ message }) =>
+      message.startsWith('Worker event-loop-watchdog ready ')
+    );
+    expect(readyLines).toHaveLength(1);
+  }, 120_000);
+
   it('detects ongoing event loop blocks once short-block notifications exceed the rate limit', async () => {
     const blockWarnings = (lines: WorkerLogLine[], ongoing: boolean) =>
       lines.filter((line) => blockOf(line)?.ongoing === ongoing);
@@ -268,4 +379,191 @@ describe('event loop watchdog in a child process', () => {
     expect(sinceBlockingMs).toBeGreaterThan(0);
     expect(sinceBlockingMs).toBeLessThan(10_000);
   }, 90_000);
+
+  describe('profiling', () => {
+    it('profiles a block past the start threshold and logs it when the block ends', async () => {
+      const result = await runHarness('profile_blocks');
+      expectCleanExit(result);
+      const lines = profileLogLines(result);
+      expect(lines).toHaveLength(1);
+      expect(lines[0]).toMatchObject({
+        message: expect.stringMatching(
+          /^Event loop block profile #1: block ~\d+ms \(profiled after/
+        ),
+        log: { level: 'INFO', logger: 'metrics.event_loop_watchdog' },
+        kibana: { event_loop_watchdog: { profile: { stopReason: 'block_ended' } } },
+      });
+      const profile = lines[0].kibana?.event_loop_watchdog?.profile;
+      expect(profile?.profiledAfterMs).toBeGreaterThanOrEqual(1_000);
+      expect(profile?.blockedMs).toBeGreaterThanOrEqual(3_900);
+      expect(profile?.samples).toBeGreaterThan(50);
+      expect(profile?.coverage).toBeGreaterThan(0);
+      expect(profile?.coverage).toBeLessThanOrEqual(1);
+      expect(profile?.captureDurationMs).toBeGreaterThan(0);
+      expect(profile?.topKibanaFrame?.location).toMatch(
+        /^src\/core\/packages\/core\/server\/integration_tests\/event_loop_watchdog\/fixtures\/watchdog_harness\.ts:\d+$/
+      );
+      expect(restarts(result)).toEqual([]);
+    }, 120_000);
+
+    it('writes the profile to the profiling directory and logs its file name at WARN', async () => {
+      const { result, file, profile } = await runWritingHarness('profile_blocks');
+      expectCleanExit(result);
+      const lines = profileLogLines(result);
+      expect(lines).toHaveLength(1);
+      expect(lines[0].log.level).toBe('WARN');
+      expect(lines[0].message).toContain(`. Writing ${Path.basename(file)}. Top: `);
+      expect(lines[0].message).not.toContain(Path.dirname(file));
+      expect(lines[0].kibana?.event_loop_watchdog?.profile?.file).toBe('admitted');
+      // The stats count the write only after it completes, so this confirms it finished before
+      // shutdown.
+      const files = statsOf(result).map(({ profiling }) => profiling?.files);
+      expect(files.reduce((sum, counts) => sum + (counts?.written ?? 0), 0)).toBe(1);
+      expect(files.reduce((sum, counts) => sum + (counts?.writeFailed ?? 0), 0)).toBe(0);
+      expectViewableProfile(profile);
+      expect(profile.nodes.map(({ callFrame }) => callFrame.url)).toContain(
+        'src/core/packages/core/server/integration_tests/event_loop_watchdog/fixtures/watchdog_harness.ts'
+      );
+      expect(restarts(result)).toEqual([]);
+    }, 120_000);
+
+    it('stops a capture at its maximum duration while the main thread is still blocked', async () => {
+      const result = await runHarness('profile_max_duration');
+      expectCleanExit(result);
+      const [line] = profileLogLines(result);
+      expect(line.kibana?.event_loop_watchdog?.profile).toMatchObject({
+        stopReason: 'max_duration',
+        samples: expect.any(Number),
+      });
+      // The block went on past the capture, so the capture covers only part of it.
+      expect(line.kibana?.event_loop_watchdog?.profile?.coverage).toBeLessThan(1);
+      expect(line.message).toMatch(/so far/);
+      const ended = result.mainLogLines.find(({ message }) => message === 'block ended');
+      // Logged by the worker before the main thread's block ended.
+      expect(Date.parse(line['@timestamp'])).toBeLessThan(ended?.at ?? NaN);
+    }, 120_000);
+
+    it('writes a large profile without running out of memory at the 64 MB limit', async () => {
+      const { result, profile: written } = await runWritingHarness('profile_large', {
+        timeoutMs: 120_000,
+      });
+      expectCleanExit(result);
+      // A file cut mid-write fails to parse in `runWritingHarness`.
+      expectViewableProfile(written);
+      const [line] = profileLogLines(result);
+      const profile = line.kibana?.event_loop_watchdog?.profile;
+      expect(profile?.stopReason).toBe('max_duration');
+      // At least 11.9k nodes; loadDeepCode(2_000, 40) produces ~21k on macOS, ~25k on Linux arm64, ~21k on amd64.
+      // Its written file is ~4.4 to 5.1 MB, so this covers the MB dimension as well as node count; the raw
+      // profile size isn't on the capture line by design, so node count is what's asserted here.
+      expect(profile?.nodes).toBeGreaterThanOrEqual(11_900);
+      expect(profile?.frames.length).toBeGreaterThan(0);
+      expect(profile?.kibanaFrames.length).toBeGreaterThan(0);
+      expect(profile?.heapUsed).toBeGreaterThan(0);
+      // No out-of-memory restart at the shipped limit.
+      expect(restarts(result)).toEqual([]);
+    }, 150_000);
+
+    it('profiles three large blocks in a row in the same worker, and writes one file for the same top frame', async () => {
+      const { result, profile: written } = await runWritingHarness('profile_repeated', {
+        timeoutMs: 180_000,
+      });
+      expectCleanExit(result);
+      const profiles = profileLogLines(result);
+      // A restarted worker numbers its captures from #1 again.
+      expect(profiles.map(({ message }) => message)).toEqual([
+        expect.stringContaining('profile #1:'),
+        expect.stringContaining('profile #2:'),
+        expect.stringContaining('profile #3:'),
+      ]);
+      for (const line of profiles) {
+        const profile = line.kibana?.event_loop_watchdog?.profile;
+        expect(profile?.nodes).toBeGreaterThanOrEqual(11_900);
+        expect(profile?.frames.length).toBeGreaterThan(0);
+        expect(profile?.kibanaFrames.length).toBeGreaterThan(0);
+      }
+      // All three captures share a top frame, so only the first is written.
+      expect(profiles.map((line) => line.kibana?.event_loop_watchdog?.profile?.file)).toEqual([
+        'admitted',
+        'same_frame',
+        'same_frame',
+      ]);
+      const files = statsOf(result).map(({ profiling }) => profiling?.files);
+      expect(files.reduce((sum, counts) => sum + (counts?.written ?? 0), 0)).toBe(1);
+      expect(files.reduce((sum, counts) => sum + (counts?.sameFrame ?? 0), 0)).toBe(2);
+      expect(files.reduce((sum, counts) => sum + (counts?.writeFailed ?? 0), 0)).toBe(0);
+      expectViewableProfile(written);
+      expect(restarts(result)).toEqual([]);
+    }, 210_000);
+
+    it('writes three large profiles in a row in the same worker, one per top frame', async () => {
+      const profileDir = mkdtempSync(Path.join(Os.tmpdir(), 'watchdog-profiles-'));
+      try {
+        const result = await runHarness('profile_repeated_frames', {
+          timeoutMs: 180_000,
+          profileDir,
+        });
+        expectCleanExit(result);
+        const profiles = profileLogLines(result).map(
+          (line) => line.kibana?.event_loop_watchdog?.profile
+        );
+        expect(profiles.map((profile) => profile?.file)).toEqual([
+          'admitted',
+          'admitted',
+          'admitted',
+        ]);
+        expect(new Set(profiles.map((profile) => profile?.kibanaFrames[0]?.location)).size).toBe(3);
+        for (const profile of profiles) {
+          expect(profile?.nodes).toBeGreaterThanOrEqual(11_900);
+        }
+        const counts = statsOf(result).map(({ profiling }) => profiling?.files);
+        expect(counts.reduce((sum, files) => sum + (files?.written ?? 0), 0)).toBe(3);
+        expect(counts.reduce((sum, files) => sum + (files?.writeFailed ?? 0), 0)).toBe(0);
+        // A file cut mid-write fails to parse.
+        const files = readdirSync(profileDir);
+        expect(files).toHaveLength(3);
+        for (const file of files) {
+          expectViewableProfile(
+            JSON.parse(readFileSync(Path.join(profileDir, file), 'utf8')) as CpuProfile
+          );
+        }
+        expect(restarts(result)).toEqual([]);
+      } finally {
+        rmSync(profileDir, { recursive: true, force: true });
+      }
+    }, 210_000);
+
+    it("ends the main thread's profile when the worker crashes while profiling", async () => {
+      const result = await runHarness('profile_crash');
+      expectCleanExit(result);
+      expect(result.workerLogLines.map(({ message }) => message)).toContain('profiling started');
+      expectProfilerStopped(result);
+    }, 120_000);
+
+    it("ends the main thread's profile when the watchdog stops while a capture's stop is in flight", async () => {
+      const result = await runHarness('profile_shutdown');
+      expectCleanExit(result);
+      expect(result.mainLogLines.map(({ message }) => message)).toContain(
+        'Event loop watchdog stopped'
+      );
+      expect(restarts(result)).toEqual([]);
+      expectProfilerStopped(result);
+    }, 120_000);
+
+    it('logs the running capture when profiling is turned off, and profiles no later block', async () => {
+      const result = await runHarness('profile_flag_off');
+      expectCleanExit(result);
+      const lines = profileLogLines(result);
+      expect(lines).toHaveLength(1);
+      const second = result.mainLogLines.find(({ message }) => message === 'second block');
+      expect(Date.parse(lines[0]['@timestamp'])).toBeLessThan(second?.at ?? NaN);
+      // Both blocks are past the start threshold, profiled or not.
+      const pastStartAfter = statsOf(result).reduce(
+        (total, { profiling }) => total + (profiling?.pastStartAfter ?? 0),
+        0
+      );
+      expect(pastStartAfter).toBe(2);
+      expect(restarts(result)).toEqual([]);
+    }, 120_000);
+  });
 });

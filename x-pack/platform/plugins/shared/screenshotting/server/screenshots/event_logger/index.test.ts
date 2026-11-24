@@ -7,23 +7,27 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
 import moment from 'moment';
 import type { ScreenshottingAction } from '.';
 import { Actions, EventLogger, Transactions } from '.';
 import type { ElementPosition } from '../get_element_position_data';
+import {
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+  TracerProvider,
+} from '@opentelemetry/sdk-trace';
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
 
-let otelExporter: tracing.InMemorySpanExporter;
-let otelProvider: tracing.BasicTracerProvider;
+let otelExporter: InMemorySpanExporter;
+let otelProvider: TracerProvider;
 
 beforeAll(() => {
-  otelExporter = new tracing.InMemorySpanExporter();
-  otelProvider = new tracing.BasicTracerProvider({
-    spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+  otelExporter = new InMemorySpanExporter();
+  otelProvider = new TracerProvider({
+    spanProcessors: [new SimpleSpanProcessor({ exporter: otelExporter })],
   });
   trace.setGlobalTracerProvider(otelProvider);
 });

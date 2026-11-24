@@ -12,6 +12,7 @@ import type { ServiceAccountsServiceStart } from './types';
 export const serviceAccountsServiceMock = {
   createStart: (): jest.MockedObjectDeep<ServiceAccountsServiceStart> => ({
     backend: {
+      type: 'uiam',
       create: jest.fn().mockResolvedValue({
         id: 'mock-service-account-id',
         name: 'mock-service-account-name',
@@ -46,6 +47,12 @@ export const serviceAccountsServiceMock = {
     management: {
       listWorkloads: jest.fn().mockResolvedValue([]),
       countBoundWorkloads: jest.fn().mockResolvedValue(new Map()),
+      summarizeBoundWorkloads: jest.fn().mockResolvedValue({
+        total: 0,
+        serviceAccounts: 0,
+        byWorkload: [],
+        byBinderType: { user: 0, api_key: 0, service_account: 0 },
+      }),
       delete: jest.fn().mockResolvedValue({ deleted: true, warnings: [] }),
     },
     workloads: {
@@ -63,6 +70,7 @@ export const serviceAccountsServiceMock = {
         boundAt: '2026-08-21T00:00:00.000Z',
       }),
       unbindWorkload: jest.fn().mockResolvedValue(true),
+      bulkUpdateWorkloadBindings: jest.fn().mockResolvedValue([]),
       getBinding: jest.fn().mockResolvedValue(null),
       getServiceAccountSummary: jest.fn().mockResolvedValue(null),
       withScopedRequest: jest.fn().mockImplementation(async (_pluginId, _params, fn) =>

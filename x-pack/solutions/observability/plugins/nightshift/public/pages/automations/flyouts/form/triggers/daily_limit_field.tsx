@@ -38,6 +38,7 @@ export const DailyLimitField = ({
   savedLimit,
   onRaiseLimit,
   readOnly = false,
+  scheduledRunsPerDay,
 }: {
   value: string;
   helpText: string;
@@ -46,10 +47,11 @@ export const DailyLimitField = ({
   savedLimit?: number;
   onRaiseLimit?: (limit: number) => void;
   readOnly?: boolean;
+  scheduledRunsPerDay?: number;
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    isReached: isGlobalLimitReached,
+    blockingLimit,
     limit: globalInvestigationLimit,
     settingsHref: globalLimitSettingsHref,
   } = useGlobalLimit();
@@ -137,9 +139,10 @@ export const DailyLimitField = ({
       <EuiText size="s" color="subdued">
         {isUnlimited ? triggerLabels.noDailyLimitHelp : helpText}
       </EuiText>
-      {usedToday !== undefined && isGlobalLimitReached && globalInvestigationLimit !== undefined ? (
+      {usedToday !== undefined && blockingLimit && globalInvestigationLimit !== undefined ? (
         <div css={calloutCss}>
           <GlobalLimitCallout
+            group={blockingLimit}
             limit={globalInvestigationLimit}
             settingsHref={globalLimitSettingsHref}
           />
@@ -170,6 +173,19 @@ export const DailyLimitField = ({
           )}
         </>
       )}
+      {!isUnlimited &&
+        isValidDailyLimit(value) &&
+        scheduledRunsPerDay !== undefined &&
+        limit < scheduledRunsPerDay && (
+          <KbnWarningCallout
+            announceOnMount={false}
+            size="s"
+            css={calloutCss}
+            title={triggerLabels.limitBelowScheduleTitle}
+            text={triggerLabels.getLimitBelowScheduleBody(scheduledRunsPerDay, limit)}
+            data-test-subj="automationDailyLimitBelowScheduleCallout"
+          />
+        )}
       {!isUnlimited && limit > SOFT_DAILY_LIMIT && (
         <KbnWarningCallout
           announceOnMount={false}

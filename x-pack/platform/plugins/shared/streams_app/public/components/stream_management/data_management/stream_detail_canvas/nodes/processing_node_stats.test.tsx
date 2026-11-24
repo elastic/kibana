@@ -141,14 +141,14 @@ describe('ProcessingNodeStats', () => {
     it('shows the rate and the time once the numbers are known', () => {
       renderRow(ROUTE_SLOT, { status: 'ready', eventsRate: 3700, durationAverage: 0.008 });
 
-      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k eps');
+      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k/s');
       expect(text('streamsCanvasProcessingNodeDuration')).toBe('8ms');
     });
 
     it('shows the last numbers with a stale mark when a refresh has failed', () => {
       renderRow(ROUTE_SLOT, { status: 'stale', eventsRate: 3700, durationAverage: 0.008 });
 
-      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k eps');
+      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k/s');
       expect(text('streamsCanvasProcessingNodeDuration')).toBe('8ms');
       expect(isShown('streamsCanvasProcessingNodeStale')).toBe(true);
     });
@@ -159,18 +159,36 @@ describe('ProcessingNodeStats', () => {
       expect(isShown('streamsCanvasProcessingNodeStale')).toBe(false);
     });
 
-    it('shows a dash for a number that is missing, and never a zero', () => {
+    it('shows No data, and no numbers, when neither the rate nor the time is known', () => {
       renderRow(ROUTE_SLOT, { status: 'ready', eventsRate: null, durationAverage: null });
 
+      expect(text('streamsCanvasProcessingNodeNoData')).toBe('No data');
+      expect(isShown('streamsCanvasProcessingNodeRate')).toBe(false);
+      expect(isShown('streamsCanvasProcessingNodeDuration')).toBe(false);
+      expect(isShown('streamsCanvasProcessingNodeStale')).toBe(false);
+    });
+
+    it('shows No data with a stale mark when a refresh has failed and nothing is known', () => {
+      renderRow(ROUTE_SLOT, { status: 'stale', eventsRate: null, durationAverage: null });
+
+      expect(text('streamsCanvasProcessingNodeNoData')).toBe('No data');
+      expect(isShown('streamsCanvasProcessingNodeStale')).toBe(true);
+    });
+
+    it('shows a time without a rate when only the rate is missing', () => {
+      renderRow(ROUTE_SLOT, { status: 'ready', eventsRate: null, durationAverage: 0.008 });
+
       expect(text('streamsCanvasProcessingNodeRate')).toBe('-');
-      expect(text('streamsCanvasProcessingNodeDuration')).toBe('-');
+      expect(text('streamsCanvasProcessingNodeDuration')).toBe('8ms');
+      expect(isShown('streamsCanvasProcessingNodeNoData')).toBe(false);
     });
 
     it('shows a rate without a time when only the time is missing', () => {
       renderRow(ROUTE_SLOT, { status: 'ready', eventsRate: 3700, durationAverage: null });
 
-      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k eps');
+      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k/s');
       expect(text('streamsCanvasProcessingNodeDuration')).toBe('-');
+      expect(isShown('streamsCanvasProcessingNodeNoData')).toBe(false);
     });
 
     it('marks the node with a warning, and shows no numbers, when the stats could not be loaded', () => {
@@ -207,6 +225,7 @@ describe('ProcessingNodeStats', () => {
       expect(isShown('streamsCanvasProcessingNodeStats')).toBe(true);
       expect(isShown('streamsCanvasProcessingNodeRate')).toBe(false);
       expect(isShown('streamsCanvasProcessingNodeDuration')).toBe(false);
+      expect(isShown('streamsCanvasProcessingNodeNoData')).toBe(false);
     });
   });
 });

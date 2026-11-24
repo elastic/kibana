@@ -15,7 +15,8 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
-import type { InstanceTaskCost, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskCost } from '@kbn/task-manager-plugin/server';
 
 export const taskToScheduleSchema = schema.object({
   taskType: schema.string({ minLength: 1, maxLength: 200 }),
@@ -53,7 +54,9 @@ export const taskToScheduleSchema = schema.object({
   ),
   timeoutOverride: schema.maybe(schema.string({ maxLength: 50 })),
   cost: schema.maybe(
-    schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
+    schema.number({
+      validate: (value) => (value in TaskCost ? undefined : `Invalid cost "${value}"`),
+    })
   ),
 });
 
@@ -66,7 +69,7 @@ export interface TaskToSchedule {
   scope?: string[];
   schedule?: IntervalSchedule | RruleSchedule;
   timeoutOverride?: string;
-  cost?: InstanceTaskCost;
+  cost?: TaskCost;
 }
 
 const scheduleBodySchema = schema.object({

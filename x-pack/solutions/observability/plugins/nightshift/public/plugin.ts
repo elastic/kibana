@@ -19,7 +19,10 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { BehaviorSubject, type Subscription } from 'rxjs';
 import type { AgenticInvestigationsPublicPluginSetup } from '@kbn/agentic-investigations-plugin/public';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
-import { NightshiftSettingsLocatorDefinition } from '../common/locators';
+import {
+  NightshiftAutomationLocatorDefinition,
+  NightshiftSettingsLocatorDefinition,
+} from '../common/locators';
 import { FocusedSignificantEventService } from './chat/focused_significant_event_service';
 import type {
   NightshiftPublicSetup,
@@ -68,6 +71,7 @@ export class NightshiftPlugin
     this.ensureEbtEvents = ensureEbtEvents;
 
     pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
+    pluginsSetup.share.url.locators.create(new NightshiftAutomationLocatorDefinition());
 
     if (pluginsSetup.agenticInvestigations) {
       this.registerSignificantEventFlyout(pluginsSetup.agenticInvestigations, startServicesPromise);
@@ -76,7 +80,7 @@ export class NightshiftPlugin
     coreSetup.application.register({
       id: NIGHTSHIFT_APP_ID,
       title: i18n.translate('xpack.nightshift.appTitle', {
-        defaultMessage: 'Nightshift',
+        defaultMessage: 'nightshift',
       }),
       appRoute: NIGHTSHIFT_APP_ROUTE,
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -168,7 +172,7 @@ export class NightshiftPlugin
         });
       })
       .catch((error) => {
-        this.context.logger.get().error(`Failed to initialize Nightshift: ${error}`);
+        this.context.logger.get().error(`Failed to initialize nightshift: ${error}`);
       });
 
     return {};

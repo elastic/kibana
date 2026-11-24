@@ -25,7 +25,7 @@ import type { EntityStoreRecord } from '../../../../../flyout/entity_details/sha
 import {
   combineEntityGroupFilters,
   getEntityGroupRecords,
-} from '../../../../../flyout/entity_details/shared/entity_store_group_utils';
+} from '../../../../../flyout_v2/entity/shared/utils/entity_store_group_utils';
 
 const HOST_DETAILS_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,

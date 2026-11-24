@@ -24,6 +24,7 @@ import {
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
+import { BaseEventBusSubscriber } from '../base_event_bus_subscriber';
 
 /**
  * Singleton bus subscriber that forwards `alert.status.changed` domain events
@@ -34,38 +35,25 @@ import type { EventBus, Subscription } from '../event_bus';
  * catalog to walk. Publishers only publish once an integration has opted in.
  */
 @injectable()
-export class AlertStatusChangedWorkflowSubscriber {
-  #subscription: Subscription | null = null;
-
-  private readonly logger: LoggerServiceContract;
-
+export class AlertStatusChangedWorkflowSubscriber extends BaseEventBusSubscriber {
   constructor(
     @inject(AlertingDomainEventBusToken)
-    private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(WorkflowServiceToken)
     private readonly workflows: WorkflowServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('events');
+    super(bus, loggerService.forSubsystem('events'));
   }
 
-  public start(): void {
-    if (this.#subscription !== null) {
-      this.logger.debug({
-        message: () => 'Subscriber start called more than once; ignoring',
-      });
-
-      return;
-    }
-
-    this.#subscription = this.bus.subscribe(ALERT_STATUS_CHANGED_EVENT_TYPE, (event, context) =>
-      this.#dispatch(event as AlertStatusChangedEvent, context)
-    );
-  }
-
-  public stop(): void {
-    this.#subscription?.unsubscribe();
-    this.#subscription = null;
+  protected createSubscriptions(
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
+  ): Subscription[] {
+    return [
+      bus.subscribe(ALERT_STATUS_CHANGED_EVENT_TYPE, (event, context) =>
+        this.#dispatch(event, context)
+      ),
+    ];
   }
 
   async #dispatch(
