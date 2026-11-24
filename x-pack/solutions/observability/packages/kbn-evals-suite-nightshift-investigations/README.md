@@ -360,9 +360,19 @@ though the gate only reads the golden one.
 
 The golden cut has 15 examples, and the daily baseline on `main` moves by up to about 0.2 between
 runs, so the thresholds aren't calibrated yet. Before `evals gate` becomes a required check, the
-gate is backtested on pairs of consecutive daily runs (`node scripts/evals compare <run> <run>`
-with the `--gate-*` flags). If it flags noise, the golden shard gets repetitions or the thresholds
-are raised.
+gate is backtested on pairs of consecutive daily runs. If it flags noise, the golden shard gets
+repetitions or the thresholds are raised. Compare each pair newer run first, with a large maximum
+baseline age, since the age is measured against today rather than against the newer run:
+
+```bash
+# EVAL_KBN_URL and EVAL_KBN_API_KEY point at the evaluations cluster the daily runs export to.
+node scripts/evals compare <newer-daily-run-id> <older-daily-run-id> \
+  --suite nightshift-investigations \
+  --gate-dataset ns-investigation-golden-2710 --gate-evaluator goal_pass \
+  --gate-min-drop 0.1 --gate-alpha 0.05 --gate-max-baseline-age-days 365
+```
+
+The verdict is the "Regression gate:" line in the output.
 
 ## Connector sets
 
