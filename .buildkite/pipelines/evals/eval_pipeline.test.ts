@@ -285,6 +285,10 @@ describe('eval_pipeline', () => {
         getEvalTriggerStep('', ['x-pack/gated/server/a.test.ts', 'x-pack/other/index.ts'])
       ).toBeNull();
     });
+
+    it('emits the trigger when GitHub capped the file list, since decision paths may be missing', () => {
+      expect(getEvalTriggerStep('', ['x-pack/other/index.ts'], true)).not.toBeNull();
+    });
   });
 
   describe('getEvalTriggerStep', () => {

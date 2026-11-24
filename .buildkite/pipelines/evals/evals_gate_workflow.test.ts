@@ -238,6 +238,37 @@ describe('runEvalsGate', () => {
     expect(calls.statuses).toEqual([]);
   });
 
+  it("ignores a PR event for a commit that is no longer the PR's head", async () => {
+    const calls = await run(
+      { changedFiles: ['plugins/gated/b.ts'] },
+      {
+        eventName: 'pull_request_target',
+        repo: { owner: 'elastic', repo: 'kibana' },
+        payload: { pull_request: { number: 7, head: { sha: EARLIER } } },
+      }
+    );
+    expect(calls.statuses).toEqual([]);
+  });
+
+  it('fails open when GitHub capped the PR file list', async () => {
+    const fake = createFake({ changedFiles: [], commentId: 3 });
+    fake.api.listChangedFiles = async () => undefined;
+    await runEvalsGate({
+      api: fake.api,
+      core: fake.core,
+      context: PR_EVENT,
+      readSuites: () => SUITES,
+    });
+    expect(fake.calls.statuses).toEqual([
+      {
+        sha: HEAD,
+        state: 'success',
+        description: 'Evals gate not enforced: the PR changes more files than GitHub lists (3,000)',
+      },
+    ]);
+    expect(fake.calls.deletedComments).toEqual([3]);
+  });
+
   it('ignores status events from other contexts', async () => {
     const calls = await run(
       { changedFiles: [], openPrNumbers: [7] },

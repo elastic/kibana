@@ -37,6 +37,10 @@ const MAX_LISTED_FILES = 20;
 const GATED_BASE_BRANCH = 'main';
 // GitHub truncates a comparison's file list at this many files.
 const COMPARE_FILES_LIMIT = 300;
+// GitHub lists at most this many files for a PR, even with pagination.
+const PR_FILES_LIMIT = 3000;
+const TOO_MANY_FILES_DESCRIPTION =
+  'Evals gate not enforced: the PR changes more files than GitHub lists (3,000)';
 
 export interface GatePullRequest {
   number: number;
@@ -51,7 +55,8 @@ export interface GatePullRequest {
 export interface GateApi {
   getPullRequest: (prNumber: number) => Promise<GatePullRequest>;
   findOpenPullRequestNumbers: (sha: string) => Promise<number[]>;
-  listChangedFiles: (prNumber: number) => Promise<string[]>;
+  /** The PR's changed files, or `undefined` when GitHub capped the list. */
+  listChangedFiles: (prNumber: number) => Promise<string[] | undefined>;
   listCommitShas: (prNumber: number) => Promise<string[]>;
   getStatus: (
     sha: string,
@@ -77,7 +82,7 @@ export interface GateContext {
   eventName: string;
   repo: { owner: string; repo: string };
   payload: {
-    pull_request?: { number: number };
+    pull_request?: { number: number; head?: { sha: string } };
     sha?: string;
     context?: string;
   };
@@ -133,15 +138,15 @@ export const createGateApi = (
     });
     return search.items.map(({ number }) => number);
   },
-  listChangedFiles: async (prNumber) =>
-    withRenames(
-      await github.paginate(github.rest.pulls.listFiles, {
-        owner,
-        repo,
-        pull_number: prNumber,
-        per_page: 100,
-      })
-    ),
+  listChangedFiles: async (prNumber) => {
+    const files = await github.paginate(github.rest.pulls.listFiles, {
+      owner,
+      repo,
+      pull_number: prNumber,
+      per_page: 100,
+    });
+    return files.length >= PR_FILES_LIMIT ? undefined : withRenames(files);
+  },
   listCommitShas: async (prNumber) =>
     (
       await github.paginate(github.rest.pulls.listCommits, {
@@ -308,6 +313,18 @@ const evaluatePullRequest = async ({
   }
 
   const changedFiles = await api.listChangedFiles(pr.number);
+  // A capped list may leave out decision paths, so fail open like any other infra limit.
+  if (!changedFiles) {
+    await api.setStatus({
+      sha: pr.headSha,
+      state: 'success',
+      description: TOO_MANY_FILES_DESCRIPTION,
+    });
+    if (commentId) {
+      await api.deleteComment(commentId);
+    }
+    return;
+  }
   const lookup = {
     listPullRequestCommitShas: () => api.listCommitShas(pr.number),
     getVerdict: async (sha: string, context: string) =>
@@ -410,10 +427,14 @@ export const runEvalsGate = async ({
         core.info(`Skipping #${prNumber}: it targets ${pr.baseRef}, not ${GATED_BASE_BRANCH}.`);
         continue;
       }
-      // A status for an older commit runs in that commit's concurrency group, so evaluating the
-      // new head here could race the head's own run. The head's events cover it.
-      if (context.eventName === 'status' && pr.headSha !== context.payload.sha) {
-        core.info(`Skipping #${prNumber}: the status is for ${context.payload.sha}, not its head.`);
+      // An event for an older commit runs in that commit's concurrency group, so evaluating the
+      // new head here could race the head's own run with stale labels. The head's events cover it.
+      const eventSha =
+        context.eventName === 'status'
+          ? context.payload.sha
+          : context.payload.pull_request?.head?.sha;
+      if (eventSha && pr.headSha !== eventSha) {
+        core.info(`Skipping #${prNumber}: the event is for ${eventSha}, not its head.`);
         continue;
       }
       headSha = pr.headSha;
