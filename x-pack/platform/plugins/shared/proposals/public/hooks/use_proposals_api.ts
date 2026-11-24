@@ -103,7 +103,9 @@ const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined):
       queryKey: queryKeys.proposals.details,
     });
     for (const [queryKey, cached] of cachedDetails) {
-      if (cached?.rootProposalId === rootProposalId && cached.id !== id) {
+      const isOtherInChain = cached?.rootProposalId === rootProposalId && cached.id !== id;
+      const isAlreadyReplaced = Boolean(cached?.supersededBy) || cached?.status === 'superseded';
+      if (isOtherInChain && !isAlreadyReplaced) {
         void queryClient.invalidateQueries({ queryKey, exact: true });
       }
     }

@@ -489,6 +489,29 @@ describe('useProposal', () => {
       });
     });
 
+    it('does not refetch an earlier revision that already reads as replaced', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': {
+          id: 'p-1',
+          rootProposalId: 'p-1',
+          revision: 1,
+          status: 'superseded',
+          supersededBy: 'p-2',
+        },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const replaced = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(replaced.result.current.isSuccess).toBe(true));
+      const latest = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+
+      const fetchesOfReplaced = http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'));
+      expect(fetchesOfReplaced).toHaveLength(1);
+    });
+
     it('leaves proposals from another chain alone', async () => {
       const proposals: Record<string, object> = {
         'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
