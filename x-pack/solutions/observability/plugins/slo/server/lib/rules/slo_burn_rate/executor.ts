@@ -151,7 +151,10 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
     const { results, hasReachedLimit } = await withSpan(
       { name: BURN_RATE_EXECUTOR_SPAN_NAMES.EVAL, type: 'rule' },
       () =>
-        evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd), projectRouting, alertLimit)
+        evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd), {
+          projectRouting,
+          maxResults: alertLimit,
+        })
     );
 
     const dependencies = params.dependencies;

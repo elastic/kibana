@@ -181,14 +181,9 @@ describe('evaluate', () => {
       .mockResolvedValueOnce(candidatesResponse(['host-a', 'host-b'], { instanceId: 'host-b' }))
       .mockResolvedValueOnce(evaluationResponse(['host-a', 'host-b']));
 
-    const { results, hasReachedLimit } = await evaluate(
-      esClient,
-      slo,
-      params,
-      STARTED_AT,
-      undefined,
-      1
-    );
+    const { results, hasReachedLimit } = await evaluate(esClient, slo, params, STARTED_AT, {
+      maxResults: 1,
+    });
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(results.map(({ instanceId }) => instanceId)).toEqual(['host-a']);
@@ -201,14 +196,9 @@ describe('evaluate', () => {
       .mockResolvedValueOnce(evaluationResponse(['host-a']))
       .mockResolvedValueOnce(candidatesResponse([]));
 
-    const { results, hasReachedLimit } = await evaluate(
-      esClient,
-      slo,
-      params,
-      STARTED_AT,
-      undefined,
-      1
-    );
+    const { results, hasReachedLimit } = await evaluate(esClient, slo, params, STARTED_AT, {
+      maxResults: 1,
+    });
 
     expect(esClient.search).toHaveBeenCalledTimes(3);
     expect(results.map(({ instanceId }) => instanceId)).toEqual(['host-a']);
@@ -225,8 +215,7 @@ describe('evaluate', () => {
       slo,
       paramsWithNonPositiveThreshold,
       STARTED_AT,
-      undefined,
-      1
+      { maxResults: 1 }
     );
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
@@ -331,7 +320,7 @@ describe('evaluate', () => {
       .mockResolvedValueOnce(candidatesResponse(['host-a']))
       .mockResolvedValueOnce(evaluationResponse([]));
 
-    await evaluate(esClient, slo, params, STARTED_AT, projectRouting);
+    await evaluate(esClient, slo, params, STARTED_AT, { projectRouting });
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(esClient.search).toHaveBeenNthCalledWith(1, expected);

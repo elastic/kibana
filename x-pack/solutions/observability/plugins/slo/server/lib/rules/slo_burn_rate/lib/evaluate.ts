@@ -83,6 +83,11 @@ interface CandidatesAggResults {
 
 export type BurnRateEvaluationResult = ReturnType<typeof transformBucketToResults>[number];
 
+interface EvaluateOptions {
+  projectRouting?: string;
+  maxResults?: number;
+}
+
 export interface EvaluationResult {
   results: BurnRateEvaluationResult[];
   hasReachedLimit: boolean;
@@ -180,8 +185,7 @@ export async function evaluate(
   slo: SLODefinition,
   params: BurnRateRuleParams,
   startedAt: Date,
-  projectRouting?: string,
-  maxResults: number = Number.POSITIVE_INFINITY
+  { projectRouting, maxResults = Number.POSITIVE_INFINITY }: EvaluateOptions = {}
 ): Promise<EvaluationResult> {
   if (params.windows.length === 0) {
     return { results: [], hasReachedLimit: false };
