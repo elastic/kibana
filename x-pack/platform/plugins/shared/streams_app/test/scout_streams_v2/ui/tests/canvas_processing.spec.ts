@@ -125,6 +125,9 @@ test.describe('Stream canvas - processing', { tag: tags.serverless.observability
     await expect(
       streams.processingFlyout.getByTestId('streamsProcessingFlyoutStepSummary')
     ).toHaveText('upsert attributes.team = "core"');
+    await expect(
+      streams.processingFlyout.getByTestId('streamsProcessingFlyoutStepSignal-logs')
+    ).toHaveText('Logs');
 
     const saveRequest = page.waitForRequest(
       (request) =>
