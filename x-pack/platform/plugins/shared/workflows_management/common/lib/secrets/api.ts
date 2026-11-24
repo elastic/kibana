@@ -12,3 +12,10 @@ export const WORKFLOW_SECRET_TEST_ROUTE = `${WORKFLOW_SECRET_ROUTE}/_test`;
 
 // Outside of `/secrets/`, so that it can never clash with the name of a secret.
 export const WORKFLOW_SECRET_CONNECTORS_ROUTE = '/internal/workflows/secret_connectors';
+
+/** Lists the workflows that use one secret, apart from those the user can't read. */
+export const WORKFLOW_SECRET_USAGE_ROUTE = `${WORKFLOW_SECRET_ROUTE}/_usage`;
+
+// Outside of `/secrets/`, for the same reason as the connectors route.
+/** Counts the workflows that use each secret, apart from those the user can't read. */
+export const WORKFLOW_SECRETS_USAGE_ROUTE = '/internal/workflows/secret_usage';

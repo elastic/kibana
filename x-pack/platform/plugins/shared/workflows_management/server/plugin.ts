@@ -153,7 +153,7 @@ export class WorkflowsPlugin
     });
 
     if (secretsEnabled) {
-      setupWorkflowSecrets({ core, router });
+      setupWorkflowSecrets({ core, router, api, spaces });
     }
 
     core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(

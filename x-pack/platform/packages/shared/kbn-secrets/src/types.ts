@@ -58,6 +58,34 @@ export interface SecretsListResponse {
   readonly secrets: SecretMetadata[];
 }
 
+/** How many of a consumer's items use a secret, split by whether the requesting user can see them. */
+export interface SecretUsageCount {
+  /** Items that use the secret and that the requesting user can see. */
+  readonly visibleCount: number;
+  /** Items that use the secret and that the requesting user cannot see. */
+  readonly hiddenCount: number;
+}
+
+/** What a consumer's route that counts the items using each secret returns. */
+export interface SecretUsageCountsResponse {
+  /** The usage of each secret that is in use, by lowercased secret name. */
+  readonly counts: Record<string, SecretUsageCount>;
+}
+
+/** An item of a consumer that uses a secret. */
+export interface SecretUsageItem {
+  readonly id: string;
+  readonly name: string;
+  /** Whether the item is on. A disabled item still breaks when the secret goes away. */
+  readonly enabled: boolean;
+}
+
+/** What a consumer's route that lists the items using one secret returns. */
+export interface SecretUsageResponse extends SecretUsageCount {
+  /** Some of the visible items that use the secret, which may be fewer than `visibleCount`. */
+  readonly items: SecretUsageItem[];
+}
+
 /** A type of connector that can hold secrets. */
 export interface SecretConnectorType {
   readonly connectorTypeId: string;

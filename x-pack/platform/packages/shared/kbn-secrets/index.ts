@@ -48,6 +48,10 @@ export type {
   SecretsClient,
   SecretSource,
   SecretTestResult,
+  SecretUsageCount,
+  SecretUsageCountsResponse,
+  SecretUsageItem,
+  SecretUsageResponse,
   TestSecretParams,
   WriteSecretParams,
 } from './src/types';

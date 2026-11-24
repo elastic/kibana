@@ -123,6 +123,21 @@ const getSecretNamesInText = (text: string): string[] => {
   }
 };
 
+// Calls `onString` with every string of a parsed workflow and the path it is at.
+const visitStrings = (
+  value: unknown,
+  path: YamlPath,
+  onString: (text: string, path: YamlPath) => void
+): void => {
+  if (typeof value === 'string') {
+    onString(value, path);
+  } else if (Array.isArray(value)) {
+    value.forEach((item, index) => visitStrings(item, [...path, index], onString));
+  } else if (isRecord(value)) {
+    Object.entries(value).forEach(([key, item]) => visitStrings(item, [...path, key], onString));
+  }
+};
+
 /**
  * Finds the secrets referenced where the execution engine does not resolve them: anywhere
  * but the inputs of an HTTP or connector step. Reads the parsed workflow, so it is cheap
@@ -137,21 +152,33 @@ export const findMisplacedSecretReferences = ({
 }): MisplacedSecretReference[] => {
   const misplaced: MisplacedSecretReference[] = [];
 
-  const visit = (value: unknown, path: YamlPath): void => {
-    if (typeof value === 'string') {
-      const names = getSecretNamesInText(value);
-      if (names.length > 0 && !isSecretAllowedAtPath({ workflowDefinition, workflowGraph, path })) {
-        misplaced.push(...names.map((name) => ({ name, path })));
-      }
-    } else if (Array.isArray(value)) {
-      value.forEach((item, index) => visit(item, [...path, index]));
-    } else if (isRecord(value)) {
-      Object.entries(value).forEach(([key, item]) => visit(item, [...path, key]));
+  visitStrings(workflowDefinition, [], (text, path) => {
+    const names = getSecretNamesInText(text);
+    if (names.length > 0 && !isSecretAllowedAtPath({ workflowDefinition, workflowGraph, path })) {
+      misplaced.push(...names.map((name) => ({ name, path })));
     }
-  };
-  visit(workflowDefinition, []);
+  });
 
   return misplaced;
+};
+
+/**
+ * Returns the distinct names of the secrets that a parsed workflow references, as written.
+ * It looks everywhere, because a workflow that references a secret where the execution engine
+ * does not resolve it is not valid (see `findMisplacedSecretReferences`), so for a valid
+ * workflow every reference is one that runs. Comments are not in a parsed workflow.
+ */
+export const getReferencedSecretNames = (workflowDefinition: unknown): string[] => {
+  const names = new Set<string>();
+  visitStrings(workflowDefinition, [], (text) => {
+    for (const name of getSecretNamesInText(text)) {
+      // `secrets` alone names no secret.
+      if (name !== '') {
+        names.add(name);
+      }
+    }
+  });
+  return [...names];
 };
 
 /**

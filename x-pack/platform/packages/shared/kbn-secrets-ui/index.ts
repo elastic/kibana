@@ -6,7 +6,7 @@
  */
 
 export { createSecretsApi, getSecretsErrorMessage } from './src/api';
-export type { SecretsApi, SecretsApiRoutes, SecretsHttpError } from './src/api';
+export type { SecretsApi, SecretsApiRoutes, SecretsHttpError, SecretsUsageApi } from './src/api';
 export { SecretsManagement } from './src/secrets_management';
 export type { SecretsManagementProps } from './src/secrets_management';
 export {
@@ -15,4 +15,9 @@ export {
   useUpdateSecret,
   useTestSecret,
 } from './src/use_secret_mutations';
-export { useSecretConnectors, useSecrets } from './src/use_secrets';
+export {
+  useSecretConnectors,
+  useSecrets,
+  useSecretsUsage,
+  useSecretUsage,
+} from './src/use_secrets';

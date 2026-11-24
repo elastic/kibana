@@ -110,6 +110,7 @@ export { collectAllVariables } from './common/validation/variables/collect_all_v
 export { validateVariables } from './common/validation/variables/validate_variables';
 export {
   findMisplacedSecretReferences,
+  getReferencedSecretNames,
   isSecretAllowedAtPath,
   SECRET_NOT_ALLOWED_MESSAGE,
   validateSecretReferences,

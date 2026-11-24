@@ -14,10 +14,11 @@ import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { getSecretsErrorMessage } from './api';
 import type { SecretsApi, SecretsHttpError } from './api';
 import { SecretFlyout } from './secret_flyout';
+import { SecretUsedBy } from './secret_usage';
 import { SecretsTable } from './secrets_table';
 import { DeleteSecretModal } from './delete_secret_modal';
 import { useTestSecret } from './use_secret_mutations';
-import { useSecretConnectors, useSecrets } from './use_secrets';
+import { useSecretConnectors, useSecrets, useSecretsUsage } from './use_secrets';
 
 const HTTP_FORBIDDEN = 403;
 const HTTP_UNAVAILABLE = 503;
@@ -62,6 +63,11 @@ export interface SecretsManagementProps {
   notifications: NotificationsStart;
   /** How the consumer refers to a secret by its name, such as `{{ secrets.name }}`. */
   getSecretReference: (name: string) => string;
+  /**
+   * Where an item that uses a secret can be opened, by its id. Without it, the items that use a
+   * secret are listed without links. Only used when the API can tell where secrets are used.
+   */
+  getUsageItemHref?: (id: string) => string;
 }
 
 /** Lists the secrets of a consumer, and creates, edits, deletes and tests them. Must be rendered within a `QueryClientProvider`. */
@@ -69,9 +75,11 @@ export const SecretsManagement = ({
   api,
   notifications,
   getSecretReference,
+  getUsageItemHref,
 }: SecretsManagementProps) => {
   const { data, error, isLoading } = useSecrets(api);
   const { data: connectorsData, isLoading: isLoadingConnectors } = useSecretConnectors(api);
+  const { data: usageData } = useSecretsUsage(api);
   const testSecret = useTestSecret({ api, notifications });
   // `null` when the flyout is closed, `{}` to create a secret and `{ secret }` to edit one.
   const [flyout, setFlyout] = useState<{ secret?: SecretMetadata } | null>(null);
@@ -129,6 +137,18 @@ export const SecretsManagement = ({
           secrets={secrets}
           connectors={connectorsData?.connectors}
           getSecretReference={getSecretReference}
+          renderUsedBy={
+            api.usage
+              ? ({ name }) => (
+                  <SecretUsedBy
+                    api={api}
+                    name={name}
+                    counts={usageData?.counts}
+                    getItemHref={getUsageItemHref}
+                  />
+                )
+              : undefined
+          }
           testingSecretName={testSecret.isLoading ? testSecret.variables?.name : undefined}
           onTest={({ name }) => testSecret.mutate({ name })}
           onEdit={(secret) => setFlyout({ secret })}
@@ -153,6 +173,7 @@ export const SecretsManagement = ({
           api={api}
           notifications={notifications}
           secret={secretToDelete}
+          getUsageItemHref={getUsageItemHref}
           onClose={() => setSecretToDelete(null)}
         />
       ) : null}

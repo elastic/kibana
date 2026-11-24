@@ -16,6 +16,21 @@ export const SECRETS_MANAGE_SECURITY: RouteSecurity = {
 };
 
 /**
+ * Managing secrets does not need the privilege to read workflows, so the handler checks the
+ * privileges to read them in `authzResult` to decide which workflows to name. Without
+ * `extendedPrivileges`, `authzResult` does not report them.
+ */
+export const SECRETS_USAGE_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [...WorkflowsManagementOperationPrivileges.manageSecrets],
+    extendedPrivileges: [
+      WorkflowsManagementApiActions.read,
+      WorkflowsManagementApiActions.readManaged,
+    ],
+  },
+};
+
+/**
  * Names and descriptions, never values. Workflow authors need them to reference a secret,
  * and secret managers need them to manage one.
  */

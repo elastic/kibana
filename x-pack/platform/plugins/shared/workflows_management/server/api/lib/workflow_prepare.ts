@@ -13,10 +13,12 @@ import {
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
 import type { EsWorkflow, EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
-import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { InvalidYamlSchemaError, parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 
 import { generateWorkflowId } from '../../../common/lib/import';
+import { getWorkflowSecretNames } from '../../../common/lib/secrets/get_workflow_secret_names';
 import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml';
 import { getCalledWorkflowIds } from '../../../common/lib/workflow_dependents/find_call_sites';
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
@@ -96,6 +98,18 @@ const extractLooseMetadataFields = (
 };
 
 /**
+ * Secrets belong to one space, so a workflow stored in the global space cannot use them,
+ * and saving one that does is refused.
+ */
+export const assertNoSecretsInGlobalWorkflow = (data: WorkflowProperties): void => {
+  if (data.spaceId === GLOBAL_WORKFLOW_SPACE_ID && data.secretNames?.length) {
+    throw new InvalidYamlSchemaError(
+      'Workflows shared across all spaces cannot use secrets, because each secret belongs to a single space.'
+    );
+  }
+};
+
+/**
  * Validates YAML and builds a WorkflowProperties document ready for indexing.
  * Shared by user-created and managed workflow creation paths.
  */
@@ -165,6 +179,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
     calledWorkflowIds: getCalledWorkflowIds(workflowToCreate.definition),
     calledWorkflowIdsIndexed: true,
+    secretNames: getWorkflowSecretNames(workflowToCreate.definition),
     yaml,
     definition: workflowToCreate.definition ?? null,
     createdBy: authenticatedUser,
@@ -182,6 +197,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
   };
+  assertNoSecretsInGlobalWorkflow(workflowData);
 
   return { id, workflowData, definition: workflowToCreate.definition };
 };

@@ -52,6 +52,7 @@ const storageSettings = {
       calledWorkflowIds: types.keyword({}), // We look up the workflows that run a workflow
       // An empty `calledWorkflowIds` isn't indexed, so this tells indexed documents from older ones
       calledWorkflowIdsIndexed: types.boolean({}),
+      secretNames: types.keyword({}), // We look up the workflows that use a secret
       managed: types.boolean({}),
       managedBy: types.keyword({}),
       billable: types.boolean({ index: false }),
@@ -91,6 +92,11 @@ export interface WorkflowProperties extends WorkflowAccessSubject {
   calledWorkflowIds?: string[];
   /** True once `calledWorkflowIds` is set, including when the workflow runs no other workflow. */
   calledWorkflowIdsIndexed?: boolean;
+  /**
+   * The normalized names of the secrets that the workflow references. Empty unless the workflow
+   * is valid and can run. Missing on documents saved before it existed, which use none.
+   */
+  secretNames?: string[];
   yaml: string;
   definition: WorkflowYaml | null;
   createdBy: string;

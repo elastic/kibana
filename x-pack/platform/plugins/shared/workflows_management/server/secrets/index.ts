@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import { SecretsUnavailableError } from '@kbn/secrets';
 import { WORKFLOWS_SECRETS_CONSUMER_ID } from '@kbn/workflows';
 import { registerSecretsRoutes } from './register_secrets_routes';
+import type { RouteDependencies } from '../api/routes/types';
+import {
+  canReadManagedWorkflows,
+  hasWorkflowReadPrivilege,
+} from '../api/routes/utils/route_security';
+import type { SecretUsageReadAccess } from '../api/workflows_management_api';
 import type { WorkflowsRouter, WorkflowsServerPluginStartDeps } from '../types';
 
 export { workflowSecretsSubFeature } from './secrets_sub_feature';
+
+const getReadAccess = (request: KibanaRequest): SecretUsageReadAccess => ({
+  canReadWorkflows: hasWorkflowReadPrivilege(request),
+  canReadManagedWorkflows: canReadManagedWorkflows(request),
+});
 
 /**
  * Sets up everything workflow secrets add to the plugin, except their privileges: those are
@@ -21,10 +32,12 @@ export { workflowSecretsSubFeature } from './secrets_sub_feature';
 export const setupWorkflowSecrets = ({
   core,
   router,
+  api,
+  spaces,
 }: {
   core: CoreSetup<WorkflowsServerPluginStartDeps>;
   router: WorkflowsRouter;
-}): void => {
+} & Pick<RouteDependencies, 'api' | 'spaces'>): void => {
   registerSecretsRoutes({
     router,
     getSecretsClient: async (request) => {
@@ -34,5 +47,9 @@ export const setupWorkflowSecrets = ({
       }
       return secrets.getClient({ request, consumer: WORKFLOWS_SECRETS_CONSUMER_ID });
     },
+    getSecretUsageCounts: (request) =>
+      api.getSecretUsageCounts(spaces.getSpaceId(request), request, getReadAccess(request)),
+    getSecretUsage: (request, name) =>
+      api.getSecretUsage(name, spaces.getSpaceId(request), request, getReadAccess(request)),
   });
 };

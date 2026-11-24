@@ -6,7 +6,7 @@
  */
 
 import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBack } from '@kbn/app-header';
@@ -31,6 +31,11 @@ const SecretsPageContent = () => {
 
   useWorkflowsBreadcrumbs(secretsPageTitle);
 
+  const getWorkflowHref = useCallback(
+    (id: string) => application.getUrlForApp(PLUGIN_ID, { path: `/${encodeURIComponent(id)}` }),
+    [application]
+  );
+
   const back = useMemo<AppHeaderBack>(
     () => ({
       label: i18n.translate('workflows.secretsPage.backToWorkflows', {
@@ -53,6 +58,7 @@ const SecretsPageContent = () => {
           api={api}
           notifications={notifications}
           getSecretReference={getWorkflowSecretReference}
+          getUsageItemHref={getWorkflowHref}
         />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

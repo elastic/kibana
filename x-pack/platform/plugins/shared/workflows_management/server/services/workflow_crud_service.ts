@@ -67,6 +67,7 @@ import {
   ensureWorkflowServiceAccountMutationAuthorized,
   withWorkflowBindingChange,
 } from './workflow_service_account_binding';
+import { getWorkflowSecretNames } from '../../common/lib/secrets/get_workflow_secret_names';
 import {
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   WorkflowChangeHistoryAction,
@@ -93,6 +94,7 @@ import {
 import {
   applyFieldUpdates,
   applyYamlUpdate,
+  assertNoSecretsInGlobalWorkflow,
   getTriggerTypesFromDefinition,
   keepEnabledUnlessDeclared,
   prepareWorkflowDocumentFromYaml,
@@ -1258,7 +1260,10 @@ export class WorkflowCrudService {
         }
         merged.calledWorkflowIds = getCalledWorkflowIds(merged.definition);
         merged.calledWorkflowIdsIndexed = true;
+        // An invalid save stores no definition, so it clears the secrets that the workflow used.
+        merged.secretNames = getWorkflowSecretNames(merged.definition);
         previousVersion = existingSource.version;
+        assertNoSecretsInGlobalWorkflow(merged);
         return merged;
       },
     });

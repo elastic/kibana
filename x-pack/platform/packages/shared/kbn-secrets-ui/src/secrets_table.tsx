@@ -18,6 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { SECRET_PROVIDER_TYPE } from '@kbn/secrets';
@@ -32,6 +33,8 @@ interface SecretsTableProps {
   connectors?: readonly SecretConnector[];
   /** How the consumer refers to a secret by its name, for the copy button. */
   getSecretReference: (name: string) => string;
+  /** Renders where a secret is used. The "Used by" column is only shown when this is provided. */
+  renderUsedBy?: (secret: SecretMetadata) => ReactNode;
   /** The secret that is being tested, so that it cannot be tested twice at once. */
   testingSecretName?: string;
   onTest: (secret: SecretMetadata) => void;
@@ -44,6 +47,7 @@ export const SecretsTable = ({
   secrets,
   connectors,
   getSecretReference,
+  renderUsedBy,
   testingSecretName,
   onTest,
   onEdit,
@@ -148,6 +152,16 @@ export const SecretsTable = ({
           </EuiText>
         ) : null,
     },
+    ...(renderUsedBy
+      ? [
+          {
+            name: i18n.translate('xpack.secretsUi.table.usedByColumn', {
+              defaultMessage: 'Used by',
+            }),
+            render: renderUsedBy,
+          },
+        ]
+      : []),
     {
       field: 'updatedBy',
       name: i18n.translate('xpack.secretsUi.table.updatedByColumn', {

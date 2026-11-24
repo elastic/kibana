@@ -14,6 +14,8 @@ import type {
   SecretMetadata,
   SecretsListResponse,
   SecretTestResult,
+  SecretUsageCountsResponse,
+  SecretUsageResponse,
   TestSecretParams,
   WriteSecretParams,
 } from '@kbn/secrets';
@@ -30,6 +32,19 @@ export interface SecretsApiRoutes {
   readonly secretTest: string;
   /** `GET` lists the connectors that can hold secrets and that the user may access. */
   readonly secretConnectors: string;
+  /** Leave out when the consumer cannot tell where its secrets are used. */
+  readonly usage?: {
+    /** `GET` counts the items that use each secret. */
+    readonly secrets: string;
+    /** `GET` lists the items that use the secret named by its `{name}` parameter. */
+    readonly secret: string;
+  };
+}
+
+/** Which items of a consumer use its secrets. Only what the user is allowed to see is listed. */
+export interface SecretsUsageApi {
+  readonly getSecretsUsage: () => Promise<SecretUsageCountsResponse>;
+  readonly getSecretUsage: (params: { name: string }) => Promise<SecretUsageResponse>;
 }
 
 /** Calls the routes of one consumer of secrets. No call ever returns the value of a secret. */
@@ -42,7 +57,20 @@ export interface SecretsApi {
   readonly deleteSecret: (params: DeleteSecretParams) => Promise<void>;
   readonly testSecret: (params: TestSecretParams) => Promise<SecretTestResult>;
   readonly listSecretConnectors: () => Promise<SecretConnectorsResponse>;
+  /** Absent when the consumer does not provide the usage routes. */
+  readonly usage?: SecretsUsageApi;
 }
+
+const createSecretsUsageApi = ({
+  http,
+  routes,
+}: {
+  http: HttpSetup;
+  routes: NonNullable<SecretsApiRoutes['usage']>;
+}): SecretsUsageApi => ({
+  getSecretsUsage: () => http.get<SecretUsageCountsResponse>(routes.secrets),
+  getSecretUsage: ({ name }) => http.get<SecretUsageResponse>(buildPath(routes.secret, { name })),
+});
 
 export const createSecretsApi = ({
   http,
@@ -62,6 +90,7 @@ export const createSecretsApi = ({
   deleteSecret: ({ name }) => http.delete<void>(buildPath(routes.secret, { name })),
   testSecret: ({ name }) => http.post<SecretTestResult>(buildPath(routes.secretTest, { name })),
   listSecretConnectors: () => http.get<SecretConnectorsResponse>(routes.secretConnectors),
+  usage: routes.usage && createSecretsUsageApi({ http, routes: routes.usage }),
 });
 
 /** The server explains what is wrong with a request (a bad reference, a taken name) in its body. */

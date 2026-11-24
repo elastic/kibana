@@ -12,7 +12,9 @@ import {
   WORKFLOW_SECRET_CONNECTORS_ROUTE,
   WORKFLOW_SECRET_ROUTE,
   WORKFLOW_SECRET_TEST_ROUTE,
+  WORKFLOW_SECRET_USAGE_ROUTE,
   WORKFLOW_SECRETS_ROUTE,
+  WORKFLOW_SECRETS_USAGE_ROUTE,
 } from '../../../../common/lib/secrets/api';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -21,6 +23,7 @@ const WORKFLOW_SECRETS_API_ROUTES: SecretsApiRoutes = {
   secret: WORKFLOW_SECRET_ROUTE,
   secretTest: WORKFLOW_SECRET_TEST_ROUTE,
   secretConnectors: WORKFLOW_SECRET_CONNECTORS_ROUTE,
+  usage: { secrets: WORKFLOW_SECRETS_USAGE_ROUTE, secret: WORKFLOW_SECRET_USAGE_ROUTE },
 };
 
 /** Calls the secrets routes of Workflows. */
