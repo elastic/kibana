@@ -549,6 +549,8 @@ describe('useProposal', () => {
       await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
       await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
 
+      proposals['p-1'] = { ...proposals['p-1'], status: 'superseded', supersededBy: 'p-3' };
+      proposals['p-2'] = { ...proposals['p-2'], status: 'superseded', supersededBy: 'p-3' };
       const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
       renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
 
@@ -595,6 +597,7 @@ describe('useProposal', () => {
         true
       );
 
+      proposals['p-1'] = { ...proposals['p-1'], status: 'superseded', supersededBy: 'p-3' };
       release();
       await act(async () => {
         await inFlight;
@@ -602,6 +605,47 @@ describe('useProposal', () => {
 
       expect(isSettled).toBe(true);
       expect(fetchesOfEarlier()).toHaveLength(2);
+    });
+
+    it('checks once more when the refresh returns a state that still reads as open', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-3': { id: 'p-3', rootProposalId: 'p-1', revision: 3, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper, queryClient } = createWrapper();
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+
+      // This request reads the server before the later revision exists, and answers after it.
+      const staleRead = proposals['p-1'];
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      http.get.mockImplementationOnce(async () => {
+        await gate;
+        return staleRead;
+      });
+      const inFlight = queryClient.refetchQueries({
+        queryKey: queryKeys.proposals.detail('p-1'),
+      });
+      const fetchesOfEarlier = () => http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'));
+      await waitFor(() => expect(fetchesOfEarlier()).toHaveLength(2));
+
+      const latest = renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      proposals['p-1'] = { ...staleRead, status: 'superseded', supersededBy: 'p-3' };
+      release();
+      await act(async () => {
+        await inFlight;
+      });
+
+      await waitFor(() => expect(first.result.current.data?.supersededBy).toBe('p-3'));
+      expect(fetchesOfEarlier()).toHaveLength(3);
     });
 
     it('refetches an earlier revision whose card shows a load error, even if its old data reads as replaced', async () => {
@@ -1053,6 +1097,69 @@ describe('useDismissProposal', () => {
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
   });
+});
+
+describe('when the API answers 409 for a proposal that is on screen', () => {
+  it.each(['approve', 'dismiss'] as const)(
+    '%s waits for the proposal to refetch, so the card shows the settled state',
+    async (kind) => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+      };
+      const http = makeHttp();
+      http.get.mockImplementation(async (url: string) => proposals[url.split('/').pop() ?? '']);
+      http.post.mockRejectedValue(makeHttpFetchError(409));
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+      const { Wrapper, queryClient } = createWrapper();
+      const { result } = renderHook(
+        () => ({
+          proposal: useProposal('p-1'),
+          approve: useApproveProposal(),
+          dismiss: useDismissProposal(),
+        }),
+        { wrapper: Wrapper }
+      );
+      await waitFor(() => expect(result.current.proposal.data?.status).toBe('pending'));
+
+      // The proposal settled behind the card. Every read waits until the test releases it.
+      proposals['p-1'] = { ...proposals['p-1'], status: 'no_action', decision: 'dismissed' };
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      http.get.mockImplementation(async (url: string) => {
+        await gate;
+        return proposals[url.split('/').pop() ?? ''];
+      });
+      const detailKey = queryKeys.proposals.detail('p-1');
+      let isSettled = false;
+      let statusWhenSettled: string | undefined;
+      const decision = (
+        kind === 'approve'
+          ? result.current.approve.mutateAsync({ id: 'p-1', body: {} })
+          : result.current.dismiss.mutateAsync({ id: 'p-1', body: { dismissReason: 'no_reason' } })
+      ).catch(() => {
+        isSettled = true;
+        statusWhenSettled = queryClient.getQueryData<{ status: string }>(detailKey)?.status;
+      });
+      await waitFor(() => expect(http.get.mock.calls.length).toBeGreaterThan(1));
+
+      expect(isSettled).toBe(false);
+      expect(result.current.proposal.data?.status).toBe('pending');
+
+      release();
+      await act(async () => {
+        await decision;
+      });
+
+      // The decision ends only after the refetch, so the cache already shows the settled state.
+      expect(isSettled).toBe(true);
+      expect(statusWhenSettled).toBe('no_action');
+      await waitFor(() => expect(result.current.proposal.data?.status).toBe('no_action'));
+    }
+  );
 });
 
 describe('useIsApprovingProposal / useIsDecliningProposal', () => {

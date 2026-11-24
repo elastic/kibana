@@ -99,33 +99,45 @@ const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined):
     if (!isRevision || !id || !rootProposalId) {
       return;
     }
-    const cachedDetails = queryClient.getQueriesData<ProposalWithMetadata>({
-      queryKey: queryKeys.proposals.details,
-    });
-    const staleHashes = new Set<string>();
-    for (const [queryKey, cached] of cachedDetails) {
-      const isOtherInChain = cached?.rootProposalId === rootProposalId && cached.id !== id;
-      const isReplaced = Boolean(cached?.supersededBy) || cached?.status === 'superseded';
-      // A failed refetch keeps the old data, but the card shows a load error instead of it.
-      const query = queryClient.getQueryCache().find(queryKey, { exact: true });
-      const isShowingError = query?.state.status === 'error';
-      const isShowingReplacement = isReplaced && !isShowingError;
-      if (query && isOtherInChain && !isShowingReplacement) {
-        staleHashes.add(query.queryHash);
-      }
-    }
-    if (staleHashes.size === 0) {
-      return;
-    }
-    // One call scans the cache once. `cancelRefetch: false` joins a fetch already in flight,
-    // so a decision that waits for its own refresh is not cut short.
-    void queryClient.invalidateQueries(
-      {
+    // Cards of the chain that still read as open, or that show a load error.
+    const findStaleHashes = (): Set<string> => {
+      const staleHashes = new Set<string>();
+      const cachedDetails = queryClient.getQueriesData<ProposalWithMetadata>({
         queryKey: queryKeys.proposals.details,
-        predicate: ({ queryHash }) => staleHashes.has(queryHash),
-      },
-      { cancelRefetch: false }
-    );
+      });
+      for (const [queryKey, cached] of cachedDetails) {
+        const isOtherInChain = cached?.rootProposalId === rootProposalId && cached.id !== id;
+        const isReplaced = Boolean(cached?.supersededBy) || cached?.status === 'superseded';
+        // A failed refetch keeps the old data, but the card shows a load error instead of it.
+        const query = queryClient.getQueryCache().find(queryKey, { exact: true });
+        const isShowingError = query?.state.status === 'error';
+        const isShowingReplacement = isReplaced && !isShowingError;
+        if (query && isOtherInChain && !isShowingReplacement) {
+          staleHashes.add(query.queryHash);
+        }
+      }
+      return staleHashes;
+    };
+
+    // One call scans the cache once. `cancelRefetch: false` joins a request already in flight,
+    // so a decision that waits for its own refresh is not cut short.
+    const refreshStaleCards = async (): Promise<void> => {
+      const staleHashes = findStaleHashes();
+      if (staleHashes.size === 0) {
+        return;
+      }
+      await queryClient.invalidateQueries(
+        {
+          queryKey: queryKeys.proposals.details,
+          predicate: ({ queryHash }) => staleHashes.has(queryHash),
+        },
+        { cancelRefetch: false }
+      );
+    };
+
+    // A joined request can return a state that the server read before this revision existed.
+    // Check once more after the refresh. Do not repeat, so the number of requests stays bounded.
+    void refreshStaleCards().then(refreshStaleCards);
   }, [queryClient, id, rootProposalId, isRevision]);
 };
 
