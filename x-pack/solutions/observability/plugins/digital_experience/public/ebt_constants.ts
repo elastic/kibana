@@ -102,6 +102,7 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
 
 export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   RETRY: 'overviewRetry',
+  KPIS_RETRY: 'overviewKpisRetry',
   USAGE_RETRY: 'overviewUsageRetry',
   BROWSER_SESSIONS_LINK: 'overviewBrowserSessionsLink',
   OS_SESSIONS_LINK: 'overviewOsSessionsLink',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { logsSearch, spansSearch } from './search_requests';
+import { logsSearch } from './search_requests';
 
 /** The runtime field of the page filter, which reads the route of a page and then its URL. */
 const PAGE_FIELD = 'digital_experience_filter_pageUrl';
@@ -26,37 +26,30 @@ const pageLoadsOf = (request: ReturnType<typeof logsSearch>) =>
     aggs: Record<string, unknown>;
   };
 
-describe('logsSearch and spansSearch', () => {
-  it('fail instead of returning partial results', () => {
+describe('logsSearch defaults', () => {
+  it('fails instead of returning partial results', () => {
     expect(logsSearch(PARAMS).allow_partial_search_results).toBe(false);
-    expect(spansSearch(PARAMS).allow_partial_search_results).toBe(false);
   });
 
-  it('read the local OTel indices only, ignoring missing ones', () => {
+  it('reads the local OTel logs only, ignoring missing ones', () => {
     expect(logsSearch(PARAMS)).toMatchObject({
       index: 'logs-*.otel-*',
       ignore_unavailable: true,
     });
-    expect(spansSearch(PARAMS)).toMatchObject({
-      index: 'traces-*.otel-*',
-      ignore_unavailable: true,
-    });
   });
 
-  it('read the requested application and browser documents only', () => {
-    [logsSearch(PARAMS), spansSearch(PARAMS)].forEach((request) => {
-      const filter = request.query?.bool?.filter;
-      expect(filter).toContainEqual({ term: { 'service.name': 'shop' } });
-      expect(filter).toContainEqual({ term: { 'telemetry.sdk.language': 'webjs' } });
-      expect(filter).toContainEqual({
-        range: { '@timestamp': { gte: 0, lte: 60 * 60 * 1000, format: 'epoch_millis' } },
-      });
+  it('reads the requested application and browser documents only', () => {
+    const filter = logsSearch(PARAMS).query?.bool?.filter;
+    expect(filter).toContainEqual({ term: { 'service.name': 'shop' } });
+    expect(filter).toContainEqual({ term: { 'telemetry.sdk.language': 'webjs' } });
+    expect(filter).toContainEqual({
+      range: { '@timestamp': { gte: 0, lte: 60 * 60 * 1000, format: 'epoch_millis' } },
     });
   });
 });
 
 describe('logsSearch', () => {
-  it('reads only the events the metrics count', () => {
+  it('reads only the events the metrics count, and the JS errors for the environment picker', () => {
     expect(logsSearch(PARAMS).query?.bool?.filter).toContainEqual({
       terms: { event_name: ['browser.navigation_timing', 'browser.web_vital', 'exception'] },
     });
@@ -68,13 +61,7 @@ describe('logsSearch', () => {
     });
   });
 
-  it('counts JS errors by the exception event', () => {
-    expect(inEnvironmentOf(logsSearch(PARAMS)).aggs.jsErrors).toEqual({
-      filter: { bool: { filter: [{ term: { event_name: 'exception' } }] } },
-    });
-  });
-
-  it('takes the load time percentile and its samples from the page loads', () => {
+  it('takes the load time percentile from the page loads', () => {
     const { aggs } = pageLoadsOf(logsSearch(PARAMS));
 
     expect(aggs.loadTime).toEqual({
@@ -84,9 +71,7 @@ describe('logsSearch', () => {
         keyed: false,
       },
     });
-    expect(aggs.loadTimeSamples).toEqual({
-      value_count: { field: 'browser.navigation_timing.load_event_end' },
-    });
+    expect(aggs.loadTimeSamples).toBeUndefined();
   });
 
   it('counts the trend and its load time in the same buckets as the page loads', () => {
@@ -174,7 +159,7 @@ describe('logsSearch', () => {
   });
 });
 
-describe('logsSearch and spansSearch with filters', () => {
+describe('logsSearch with filters', () => {
   const FILTERS = {
     browser: [{ value: 'Chrome', exclude: false }],
     country: [{ value: 'DE', exclude: false }],
@@ -183,25 +168,21 @@ describe('logsSearch and spansSearch with filters', () => {
   const BROWSER_TERM = { terms: { digital_experience_filter_browser: ['Chrome'] } };
   const COUNTRY_TERM = { terms: { digital_experience_filter_country: ['DE'] } };
 
-  it('define the runtime fields the filters read', () => {
-    [logsSearch(PARAMS), spansSearch(PARAMS)].forEach((request) => {
-      expect(Object.keys(request.runtime_mappings ?? {})).toEqual([
-        'digital_experience_filter_browser',
-        'digital_experience_filter_os',
-        'digital_experience_filter_device',
-        'digital_experience_filter_country',
-        'digital_experience_filter_appVersion',
-        'digital_experience_filter_pageUrl',
-      ]);
-    });
+  it('defines the runtime fields the filters read', () => {
+    expect(Object.keys(logsSearch(PARAMS).runtime_mappings ?? {})).toEqual([
+      'digital_experience_filter_browser',
+      'digital_experience_filter_os',
+      'digital_experience_filter_device',
+      'digital_experience_filter_country',
+      'digital_experience_filter_appVersion',
+      'digital_experience_filter_pageUrl',
+    ]);
   });
 
-  it('narrow the metrics to the selected browser, OS, device and country', () => {
+  it('narrows the metrics to the selected browser, OS, device and country', () => {
     const logs = inEnvironmentOf(logsSearch({ ...PARAMS, filters: FILTERS })).filter;
-    const spans = inEnvironmentOf(spansSearch({ ...PARAMS, filters: FILTERS })).filter;
 
     expect(logs).toEqual({ bool: { filter: [{ match_all: {} }, BROWSER_TERM, COUNTRY_TERM] } });
-    expect(spans).toEqual({ bool: { filter: [{ match_all: {} }, BROWSER_TERM, COUNTRY_TERM] } });
   });
 
   it('keep the picker environments and the filter values over every selection', () => {
@@ -214,7 +195,7 @@ describe('logsSearch and spansSearch with filters', () => {
     );
   });
 
-  it('narrow the page loads and their trend to the selected page, not the other metrics', () => {
+  it('narrow the page loads and their trend to the selected page, not the web vitals', () => {
     const logs = inEnvironmentOf(logsSearch({ ...PARAMS, filters: FILTERS }));
 
     expect(pageLoadsOf(logsSearch({ ...PARAMS, filters: FILTERS })).filter).toEqual({
@@ -225,32 +206,19 @@ describe('logsSearch and spansSearch with filters', () => {
         ],
       },
     });
-    expect(logs.aggs.jsErrors).toEqual({
-      filter: { bool: { filter: [{ term: { event_name: 'exception' } }] } },
-    });
-  });
-
-  it('leave the HTTP requests whole when only a page is selected', () => {
-    const request = spansSearch({
-      ...PARAMS,
-      filters: { pageUrl: [{ value: 'https://shop.example.com/', exclude: false }] },
-    });
-
-    expect(inEnvironmentOf(request).filter).toEqual({ match_all: {} });
+    expect(JSON.stringify(logs.aggs.lcp)).not.toContain(PAGE_FIELD);
   });
 
   it('leave out the documents of an excluded value', () => {
     const filters = { browser: [{ value: 'Chrome', exclude: true }] };
 
-    [logsSearch({ ...PARAMS, filters }), spansSearch({ ...PARAMS, filters })].forEach((request) => {
-      expect(inEnvironmentOf(request).filter).toEqual({
-        bool: {
-          filter: [
-            { match_all: {} },
-            { bool: { must_not: [{ terms: { digital_experience_filter_browser: ['Chrome'] } }] } },
-          ],
-        },
-      });
+    expect(inEnvironmentOf(logsSearch({ ...PARAMS, filters })).filter).toEqual({
+      bool: {
+        filter: [
+          { match_all: {} },
+          { bool: { must_not: [{ terms: { digital_experience_filter_browser: ['Chrome'] } }] } },
+        ],
+      },
     });
   });
 
@@ -262,52 +230,11 @@ describe('logsSearch and spansSearch with filters', () => {
   });
 });
 
-describe('spansSearch', () => {
-  it('reads only the HTTP requests the browser makes', () => {
-    const filter = spansSearch(PARAMS).query?.bool?.filter;
-
-    expect(filter).toContainEqual({ term: { kind: 'Client' } });
-    expect(filter).toContainEqual({ exists: { field: 'http.request.method' } });
-  });
-
-  it('counts the requests with a response status or an error span status', () => {
-    expect(inEnvironmentOf(spansSearch(PARAMS)).aggs.requests).toEqual({
-      filter: {
-        bool: {
-          should: [
-            { exists: { field: 'http.response.status_code' } },
-            { term: { 'status.code': 'Error' } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    });
-  });
-
-  it('counts a request as failed from an HTTP status of 400 or an error span status', () => {
-    expect(inEnvironmentOf(spansSearch(PARAMS)).aggs.failed).toEqual({
-      filter: {
-        bool: {
-          should: [
-            { range: { 'http.response.status_code': { gte: 400 } } },
-            { term: { 'status.code': 'Error' } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    });
-  });
-});
-
-describe('logsSearch and spansSearch with a KQL query', () => {
+describe('logsSearch with a KQL query', () => {
   const KUERY = { match: { 'user_agent.name': 'Chrome' } };
 
-  it('keep only the documents the query matches, in both searches', () => {
-    [logsSearch({ ...PARAMS, kuery: KUERY }), spansSearch({ ...PARAMS, kuery: KUERY })].forEach(
-      (request) => {
-        expect(request.query?.bool?.filter).toContainEqual(KUERY);
-      }
-    );
+  it('keeps only the documents the query matches', () => {
+    expect(logsSearch({ ...PARAMS, kuery: KUERY }).query?.bool?.filter).toContainEqual(KUERY);
   });
 
   it('read the same documents without it', () => {

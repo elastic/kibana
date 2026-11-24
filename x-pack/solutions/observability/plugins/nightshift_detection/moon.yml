@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/significant-events-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/std'
+  - '@kbn/ui-callout'
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
@@ -55,6 +56,7 @@ tags:
 fileGroups:
   src:
     - common/**/*
+    - public/**/*
     - server/**/*
     - test/scout*/**/*
     - '!target/**/*'

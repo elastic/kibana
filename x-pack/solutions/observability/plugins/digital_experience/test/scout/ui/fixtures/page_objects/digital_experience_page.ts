@@ -279,6 +279,11 @@ export class DigitalExperiencePage {
     });
   }
 
+  /** The source badge of a row, rendered from the same source its application link points at. */
+  applicationSource(serviceName: string): Locator {
+    return this.applicationRow(serviceName).getByTestId('digitalExperienceApplicationSource');
+  }
+
   classicDataHint(serviceName: string): Locator {
     return this.applicationRow(serviceName).getByTestId('digitalExperienceClassicDataHint');
   }
