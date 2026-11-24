@@ -12,18 +12,6 @@ import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { SignificantEventsPausedError } from '../../../lib/errors/significant_events_paused_error';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
-import { assessSourceSampling } from '../../../lib/significant_events/features/assess_source_sampling';
-
-jest.mock('../../../lib/significant_events/features/assess_source_sampling', () => ({
-  assessSourceSampling: jest.fn().mockResolvedValue({ kind: 'supported' }),
-}));
-
-const source = {
-  id: 'logs.nginx',
-  slug: 'logs-nginx',
-  view_name: '$.nightshift.sources.default.logs-nginx',
-  esql_updated_at: '2026-01-01T00:00:00.000Z',
-};
 
 describe('startKiIdentificationToolHandler', () => {
   const setup = (maintenanceState: 'enabled' | 'paused' = 'enabled') => {
@@ -43,7 +31,7 @@ describe('startKiIdentificationToolHandler', () => {
       telemetry,
       logger: loggerMock.create(),
       getSourcesClient: jest.fn().mockResolvedValue({
-        get: jest.fn().mockResolvedValue({ source }),
+        get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
       }),
     });
     const maintenanceService = {
@@ -52,24 +40,22 @@ describe('startKiIdentificationToolHandler', () => {
 
     return {
       managementApi,
-      args: {
-        source,
-        streamsKIsOnboardingClient,
-        maintenanceService,
-        esClient: {} as never,
-        request: httpServerMock.createKibanaRequest(),
-        logger: loggerMock.create(),
-      },
+      streamsKIsOnboardingClient,
+      maintenanceService,
+      request: httpServerMock.createKibanaRequest(),
     };
   };
 
   it('triggers onboarding workflow and returns tracking Kibana path', async () => {
-    const { managementApi, args } = setup();
-    const { request } = args;
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
 
     const result = await startKiIdentificationToolHandler({
-      ...args,
+      sourceId: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
+      streamsKIsOnboardingClient,
+      maintenanceService,
+      request,
     });
 
     expect(result).toEqual({
@@ -91,42 +77,35 @@ describe('startKiIdentificationToolHandler', () => {
   });
 
   it('rejects with SignificantEventsPausedError while paused', async () => {
-    const { managementApi, args } = setup('paused');
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } =
+      setup('paused');
 
     await expect(
       startKiIdentificationToolHandler({
-        ...args,
+        sourceId: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
+        streamsKIsOnboardingClient,
+        maintenanceService,
+        request,
       })
     ).rejects.toBeInstanceOf(SignificantEventsPausedError);
 
     expect(managementApi.runWorkflow).not.toHaveBeenCalled();
   });
 
-  it('rejects a refused source with a 400', async () => {
-    const { managementApi, args } = setup();
-    jest
-      .mocked(assessSourceSampling)
-      .mockResolvedValueOnce({ kind: 'unsupported', reason: 'no @timestamp' });
-
-    await expect(
-      startKiIdentificationToolHandler({
-        ...args,
-        steps: [KIsOnboardingStep.FeaturesIdentification],
-      })
-    ).rejects.toMatchObject({ statusCode: 400, message: 'no @timestamp' });
-
-    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
-  });
-
   it('throws when workflow is not found', async () => {
-    const { managementApi, args } = setup();
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
     managementApi.getWorkflow.mockResolvedValue(null);
 
     await expect(
       startKiIdentificationToolHandler({
-        ...args,
+        sourceId: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
+        streamsKIsOnboardingClient,
+        maintenanceService,
+        request,
       })
     ).rejects.toThrow(/Workflow .+ not found/);
   });

@@ -196,19 +196,17 @@ export const createSourceKnowledgeStateClient = ({
     }
     const lease = { owner: randomUUID(), expiresAt: Date.now() + WRITE_LEASE_MS };
     let state: SourceKnowledgeState = { ...stored?.attributes, lease };
-    // Read by id and written against a version, so no write waits for a refresh (~1 s each).
     const locked = await (stored
       ? repository.update<SourceKnowledgeState>(
           SOURCE_KNOWLEDGE_STATE_TYPE,
           sourceId,
           { lease },
-          { namespace: space, version: stored.version, refresh: false }
+          { namespace: space, version: stored.version }
         )
       : repository.create<SourceKnowledgeState>(SOURCE_KNOWLEDGE_STATE_TYPE, state, {
           id: sourceId,
           namespace: space,
           overwrite: false,
-          refresh: false,
         })
     ).catch(rethrowConflictAsLeaseHeld);
     let version = locked.version;
@@ -219,7 +217,7 @@ export const createSourceKnowledgeStateClient = ({
           SOURCE_KNOWLEDGE_STATE_TYPE,
           sourceId,
           patch,
-          { namespace: space, version, refresh: false }
+          { namespace: space, version }
         );
         state = { ...state, ...patch };
         version = updated.version;

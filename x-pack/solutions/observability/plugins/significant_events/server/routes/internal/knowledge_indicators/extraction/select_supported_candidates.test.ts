@@ -23,10 +23,6 @@ const getEsqlColumnSchemaMock = jest.mocked(getEsqlColumnSchema);
 const TIMESTAMP_COLUMN = { name: '@timestamp', type: 'date' };
 const MISSING_TIMESTAMP_REASON =
   'The query must return a [@timestamp] column. Nightshift reads every source over time windows on it.';
-const TIME_RANGE = {
-  start: Date.parse('2026-01-01T00:00:00.000Z'),
-  end: Date.parse('2026-01-02T00:00:00.000Z'),
-};
 
 const makeCandidate = (sourceId: string): SourceCandidate => ({
   sourceId,
@@ -58,31 +54,14 @@ const mockColumnsByView = (
   });
 };
 
-const select = (
-  sourceIds: string[],
-  availableSlots: number,
-  {
-    emptyViews = [],
-    failingViews = [],
-    partialViews = [],
-  }: { emptyViews?: string[]; failingViews?: string[]; partialViews?: string[] } = {}
-) => {
+const select = (sourceIds: string[], availableSlots: number, { hasDocuments = true } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  esClient.esql.query.mockImplementation((async ({ query }: { query: string }) => {
-    if (failingViews.some((view) => query.includes(view))) {
-      throw new Error('Request timed out');
-    }
-    if (partialViews.some((view) => query.includes(view))) {
-      return { is_partial: true, values: [[0]] };
-    }
-    return { values: [[emptyViews.some((view) => query.includes(view)) ? 0 : 1]] };
-  }) as never);
+  esClient.esql.query.mockResolvedValue({ values: [[hasDocuments ? 1 : 0]] } as never);
 
   return selectSupportedCandidates({
     candidates: sourceIds.map(makeCandidate),
     availableSlots,
     viewNames: new Map(sourceIds.map((id) => [id, `view-${id}`])),
-    timeRange: TIME_RANGE,
     esClient,
     logger: loggingSystemMock.createLogger(),
   });
@@ -128,60 +107,24 @@ describe('selectSupportedCandidates', () => {
     ]);
   });
 
-  it('rejects a source whose query Elasticsearch refuses to plan', async () => {
-    mockColumnsByView({
-      'view-broken': makeResponseError(
-        400,
-        'verification_exception',
-        'Found 1 problem\nline 1:21 (in view [view-broken]): Unknown column [gone_field]'
-      ),
-      'view-ok': [TIMESTAMP_COLUMN],
-    });
+  it('keeps a source with no index yet', async () => {
+    mockColumnsByView({ 'view-pending': [] });
 
-    const { toSchedule, unsupported } = await select(['broken', 'ok'], 1);
+    const { toSchedule, unsupported } = await select(['pending'], 1, { hasDocuments: false });
 
-    expect(ids(toSchedule)).toEqual(['ok']);
-    expect(unsupported).toEqual([
-      {
-        sourceId: 'broken',
-        sourceSlug: 'broken-slug',
-        reason:
-          'Elasticsearch rejects the source query: Found 1 problem\nline 1:21 (in view [view-broken]): Unknown column [gone_field]',
-      },
-    ]);
+    expect(ids(toSchedule)).toEqual(['pending']);
+    expect(unsupported).toEqual([]);
   });
 
-  it('gives the slot of a source with no document to the next candidate', async () => {
-    mockColumnsByView({
-      'view-nomatch': [],
-      'view-quiet': [TIMESTAMP_COLUMN],
-      'view-a': [TIMESTAMP_COLUMN],
-      'view-b': [TIMESTAMP_COLUMN],
-    });
-
-    const { toSchedule, skipped, empty } = await select(['nomatch', 'quiet', 'a', 'b'], 1, {
-      emptyViews: ['view-nomatch', 'view-quiet'],
-    });
-
-    expect(ids(empty)).toEqual(['nomatch', 'quiet']);
-    expect(ids(toSchedule)).toEqual(['a']);
-    expect(ids(skipped)).toEqual(['b']);
-  });
-
-  it('keeps a source whose probe or document check cannot answer', async () => {
+  it('keeps a source whose probe cannot answer', async () => {
     mockColumnsByView({
       'view-slow': new Error('Request timed out'),
       'view-down': makeResponseError(503, 'unavailable_shards_exception', 'no shard available'),
-      'view-uncounted': [TIMESTAMP_COLUMN],
-      'view-partial': [TIMESTAMP_COLUMN],
     });
 
-    const { toSchedule } = await select(['slow', 'down', 'uncounted', 'partial'], 5, {
-      failingViews: ['view-uncounted'],
-      partialViews: ['view-partial'],
-    });
+    const { toSchedule } = await select(['slow', 'down'], 5);
 
-    expect(ids(toSchedule)).toEqual(['slow', 'down', 'uncounted', 'partial']);
+    expect(ids(toSchedule)).toEqual(['slow', 'down']);
   });
 
   it('rejects a fractional slot count instead of looping without progress', async () => {
@@ -217,7 +160,6 @@ describe('selectSupportedCandidates', () => {
         candidates: [makeCandidate('orphan')],
         availableSlots: 1,
         viewNames: new Map(),
-        timeRange: TIME_RANGE,
         esClient,
         logger: loggingSystemMock.createLogger(),
       })

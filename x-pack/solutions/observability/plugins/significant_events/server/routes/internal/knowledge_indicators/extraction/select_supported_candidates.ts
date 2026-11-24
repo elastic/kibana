@@ -7,13 +7,15 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import {
-  assessSourceSampling,
-  type SamplingTimeRange,
-} from '../../../../lib/significant_events/features/assess_source_sampling';
+import { timeoutSignal } from '@kbn/std';
+import { StatusError } from '../../../../lib/errors/status_error';
+import { probeSampleColumns } from '../../../../lib/significant_events/features/probe_sample_columns';
+import { parseError } from '../../../../lib/streams/parse_error';
 import type { SourceCandidate } from './classify_sources';
 
 const MAX_CONCURRENT_PROBES = 5;
+// A probe that runs out of time rejects nothing, so this only bounds how long the route waits.
+const PROBE_TIMEOUT_MS = 15_000;
 
 export interface UnsupportedSource {
   sourceId: string;
@@ -21,30 +23,58 @@ export interface UnsupportedSource {
   reason: string;
 }
 
+/** Answers why feature identification would refuse to sample the source, with its own guard. */
+const getSamplingProblem = async ({
+  index,
+  esClient,
+  logger,
+}: {
+  index: string;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<string | undefined> => {
+  const signal = timeoutSignal(PROBE_TIMEOUT_MS);
+  try {
+    const probe = await probeSampleColumns({
+      esClient,
+      index,
+      logger,
+      signal,
+      samplingTimeoutMs: PROBE_TIMEOUT_MS,
+    });
+    return probe.kind === 'unsupported' ? probe.problem : undefined;
+  } catch (error) {
+    if (error instanceof StatusError) {
+      return error.message;
+    }
+    // The probe could not answer: the run decides.
+    logger.debug(() => `Probe of [${index}] failed: ${parseError(error).message}`);
+    return undefined;
+  } finally {
+    signal.dispose();
+  }
+};
+
 /**
- * Fills the available slots with the first candidates feature identification can sample and that
- * hold a document in `timeRange`, so a run bound to fail or to find nothing takes neither a slot
- * nor a daily extraction unit.
+ * Fills the available slots with the first candidates feature identification can sample, so a
+ * run bound to fail takes neither a slot nor a daily extraction unit.
  */
 export const selectSupportedCandidates = async ({
   candidates,
   availableSlots,
   viewNames,
-  timeRange,
   esClient,
   logger,
 }: {
   candidates: SourceCandidate[];
   availableSlots: number;
   viewNames: ReadonlyMap<string, string>;
-  timeRange: SamplingTimeRange;
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<{
   toSchedule: SourceCandidate[];
   skipped: SourceCandidate[];
   unsupported: UnsupportedSource[];
-  empty: SourceCandidate[];
 }> => {
   if (!Number.isInteger(availableSlots) || availableSlots < 0) {
     throw new Error(`availableSlots must be a non-negative integer, received [${availableSlots}]`);
@@ -52,7 +82,6 @@ export const selectSupportedCandidates = async ({
 
   const toSchedule: SourceCandidate[] = [];
   const unsupported: UnsupportedSource[] = [];
-  const empty: SourceCandidate[] = [];
   let next = 0;
 
   // Probes only as many candidates as there are slots left: the sources past the last slot
@@ -66,39 +95,27 @@ export const selectSupportedCandidates = async ({
     );
     const batch = candidates.slice(next, next + batchSize);
     next += batch.length;
-    const assessments = await Promise.all(
-      batch.map(async (candidate) => {
-        const index = viewNames.get(candidate.sourceId);
+    const problems = await Promise.all(
+      batch.map(async ({ sourceId }) => {
+        const index = viewNames.get(sourceId);
         if (index === undefined) {
-          throw new Error(`Missing view name for source [${candidate.sourceId}]`);
+          throw new Error(`Missing view name for source [${sourceId}]`);
         }
-        const assessment = await assessSourceSampling({ index, timeRange, esClient, logger });
-        return { candidate, assessment };
+        return getSamplingProblem({ index, esClient, logger });
       })
     );
 
-    for (const { candidate, assessment } of assessments) {
-      const { sourceId, sourceSlug } = candidate;
-      switch (assessment.kind) {
-        case 'unsupported': {
-          const { reason } = assessment;
-          logger.debug(() => `Not scheduling onboarding of source ${sourceId}: ${reason}`);
-          unsupported.push({ sourceId, sourceSlug, reason });
-          break;
-        }
-        case 'empty':
-          logger.debug(
-            () => `Not scheduling onboarding of source ${sourceId}: no document to sample`
-          );
-          empty.push(candidate);
-          break;
-        case 'supported':
-        case 'unknown':
-          toSchedule.push(candidate);
-          break;
+    batch.forEach((candidate, position) => {
+      const reason = problems[position];
+      if (reason === undefined) {
+        toSchedule.push(candidate);
+        return;
       }
-    }
+      const { sourceId, sourceSlug } = candidate;
+      logger.debug(() => `Not scheduling onboarding of source ${sourceId}: ${reason}`);
+      unsupported.push({ sourceId, sourceSlug, reason });
+    });
   }
 
-  return { toSchedule, skipped: candidates.slice(next), unsupported, empty };
+  return { toSchedule, skipped: candidates.slice(next), unsupported };
 };

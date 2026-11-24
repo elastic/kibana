@@ -6,7 +6,6 @@
  */
 
 import { SignificantEventsPausedError } from '../../lib/errors/significant_events_paused_error';
-import { StatusError } from '../../lib/errors/status_error';
 import { SourceDisabledError, UnknownSourceSlugError } from './resolve_source_slugs';
 
 const getStatusCode = (err: unknown): number | undefined => {
@@ -63,10 +62,6 @@ export const classifyError = (err: unknown): string => {
   }
   if (statusCode === 409 || message.includes('Could not acquire lock')) {
     return 'Another source operation is in progress. Try again in a moment.';
-  }
-  // A 400 this plugin threw is a refusal worded for the caller.
-  if (err instanceof StatusError && err.statusCode === 400) {
-    return message;
   }
   return `Unexpected error: ${message.slice(0, 200)}`;
 };

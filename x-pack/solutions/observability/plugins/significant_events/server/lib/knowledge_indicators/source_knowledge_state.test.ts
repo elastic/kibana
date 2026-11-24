@@ -139,18 +139,6 @@ describe('source knowledge write coordination', () => {
     ).resolves.toBe('new knowledge');
   });
 
-  it('writes the state without waiting for a refresh', async () => {
-    const { client, repository } = setup();
-    await client.write({ sourceId: 'source', run: async () => {} });
-    await client.write({ sourceId: 'source', run: async () => {} });
-
-    const writeOptions = [
-      ...repository.create.mock.calls.map(([, , options]) => options),
-      ...repository.update.mock.calls.map(([, , , options]) => options),
-    ];
-    expect(writeOptions).toEqual(Array(5).fill(expect.objectContaining({ refresh: false })));
-  });
-
   it('retains the old revision and releases the lease after a failed cleanup', async () => {
     const { client, source, documents } = setup();
     await client.write({ sourceId: 'source', run: async () => {} });

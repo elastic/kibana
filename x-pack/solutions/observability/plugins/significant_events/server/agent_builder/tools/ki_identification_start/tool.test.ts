@@ -19,10 +19,6 @@ import {
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
-jest.mock('../../../lib/significant_events/features/assess_source_sampling', () => ({
-  assessSourceSampling: jest.fn().mockResolvedValue({ kind: 'supported' }),
-}));
-
 describe('createKiIdentificationStartTool', () => {
   const telemetry = {
     trackAgentToolKiIdentificationStarted: jest.fn(),

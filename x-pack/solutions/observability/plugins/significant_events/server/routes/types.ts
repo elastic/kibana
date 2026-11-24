@@ -61,8 +61,8 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   sourceKnowledgeState: SourceKnowledgeStateClient;
   /**
    * Starts onboarding for a source revision; resolves to whether a run was started. Skipped for a
-   * disabled source, a paused maintenance state, a source with nothing to sample and, unless
-   * `ignoreContinuousSetting` is set, while continuous onboarding is off.
+   * disabled source, a paused maintenance state and, unless `ignoreContinuousSetting` is set,
+   * while continuous onboarding is off.
    */
   scheduleSourceOnboarding: (
     source: NightshiftSource,
