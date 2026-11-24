@@ -103,7 +103,7 @@ export interface UseAllRelayAppBindings {
 }
 
 /** Every Slack channel connected to this deployment, for pickers that need the full list. */
-export function useAllRelayAppBindings(enabled = true): UseAllRelayAppBindings {
+export function useAllRelayAppBindings(): UseAllRelayAppBindings {
   const {
     services: { http },
   } = useKibana();
@@ -129,12 +129,11 @@ export function useAllRelayAppBindings(enabled = true): UseAllRelayAppBindings {
       return { bindings, isComplete: !cursor };
     },
     ...BINDINGS_QUERY_OPTIONS,
-    enabled,
   });
 
   return {
     bindings: query.data?.bindings ?? EMPTY_BINDINGS,
-    isLoading: query.isLoading && enabled,
+    isLoading: query.isLoading,
     isError: query.isError,
     isComplete: query.data?.isComplete ?? true,
   };

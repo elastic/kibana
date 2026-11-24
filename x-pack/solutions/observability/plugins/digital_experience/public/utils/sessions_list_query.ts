@@ -13,6 +13,7 @@ import { inRangeFromStringRt, nonEmptyStringRt, toBooleanRt, toNumberRt } from '
 import {
   SESSION_SORT_FIELDS,
   SESSIONS_LIST_MAX_FACET_LENGTHS,
+  SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH,
   SESSIONS_LIST_MAX_PAGE,
   SESSIONS_LIST_MAX_PER_PAGE,
   SESSIONS_LIST_MAX_SEARCH_LENGTH,
@@ -94,6 +95,22 @@ export const filterValueRt = (maxLength: number) =>
     'MaxLength'
   );
 
+/**
+ * `filterValueRt`'s bounds as a plain string, for a URL param the app also sets from a plain
+ * string, e.g. a picked environment, so the router drops what the routes would reject.
+ */
+export const boundedParamRt = (maxLength: number) =>
+  new t.Type<string, string, unknown>(
+    `BoundedParam(${maxLength})`,
+    (input): input is string => filterValueRt(maxLength).is(input),
+    (input, context) =>
+      filterValueRt(maxLength).is(input) ? t.success(input) : t.failure(input, context),
+    t.identity
+  );
+
+/** A frustrated element's selector or page path the list can filter by. */
+export const frustrationFilterRt = filterValueRt(SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH);
+
 /** `toBooleanRt` for a URL param: an unset param stays unset rather than becoming `false`. */
 const booleanParamRt = new t.Type<boolean, boolean, unknown>(
   'BooleanParam',
@@ -125,6 +142,9 @@ export const sessionsListQueryRt = t.partial({
   entryPage: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.entryPage),
   withJsErrors: booleanParamRt,
   withFailedRequests: booleanParamRt,
+  withFrustration: booleanParamRt,
+  frustrationTarget: frustrationFilterRt,
+  frustrationPage: frustrationFilterRt,
   duration: durationBucketRt,
   sortField: sortFieldRt,
   sortDirection: t.keyof({ asc: null, desc: null }),
@@ -142,6 +162,9 @@ const SESSIONS_LIST_QUERY_KEYS = [
   'entryPage',
   'withJsErrors',
   'withFailedRequests',
+  'withFrustration',
+  'frustrationTarget',
+  'frustrationPage',
   'duration',
   'sortField',
   'sortDirection',

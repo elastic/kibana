@@ -1409,6 +1409,70 @@ describe('Outputs preconfiguration', () => {
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
+    it('should not update output on repeated setup if stored otel_disable_beatsauth is false and preconfigured does not set it', async () => {
+      mockedOutputService.bulkGet.mockResolvedValue([
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          is_preconfigured: true,
+          otel_disable_beatsauth: false,
+        } as Output,
+      ]);
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const preconfiguredOutputs = [
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch' as const,
+          hosts: ['http://es.co:80'],
+        },
+      ];
+
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, preconfiguredOutputs);
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, preconfiguredOutputs);
+
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    it('should update output if stored otel_disable_beatsauth is true and preconfigured does not set it', async () => {
+      mockedOutputService.bulkGet.mockResolvedValue([
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          is_preconfigured: true,
+          otel_disable_beatsauth: true,
+        } as Output,
+      ]);
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+        },
+      ]);
+
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
+    });
+
     it('should update output if preconfigured remote ES output exists and otel_exporter_config_yaml changed', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1491,6 +1555,31 @@ describe('Outputs preconfiguration', () => {
           ssl: {
             key: 'unsecureKey',
           },
+        } as PreconfiguredOutput,
+      ]);
+
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    it('should not update output if preconfigured kafka output only differs by proxy_id', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-kafka-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          password: 'unsecurePassword',
+          ssl: {
+            key: 'unsecureKey',
+          },
+          // Kafka clears proxy_id on save, so it must never be seen as a change (#267281)
+          proxy_id: 'non-existent-proxy',
         } as PreconfiguredOutput,
       ]);
 

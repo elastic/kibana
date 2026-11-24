@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   updateLoadingState,
   setZeroDocsFallback,
-} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+} from '@kbn/aiops-log-rate-analysis/api/stream_actions';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { InferenceTracingPhoenixExportConfig } from '@kbn/inference-tracing-config';
 import { memoize } from 'lodash';
 import {
@@ -13,6 +12,7 @@ import {
   SemanticConventions,
 } from '@arizeai/openinference-semantic-conventions';
 import { diag } from '@opentelemetry/api';
+import type { ReadableSpan } from '@opentelemetry/sdk-trace';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
 import { ElasticGenAIAttributes, GenAISemanticConventions } from '../types';
 import { getChatSpan } from './get_chat_span';
@@ -74,7 +74,7 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
     };
   }
 
-  processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
+  processInferenceSpan(span: ReadableSpan): ReadableSpan {
     const operationName = span.attributes[GenAISemanticConventions.GenAIOperationName];
     span.resource.attributes[SEMRESATTRS_PROJECT_NAME] = this.config.project_name ?? 'default';
     span.attributes[SemanticConventions.OPENINFERENCE_SPAN_KIND] =

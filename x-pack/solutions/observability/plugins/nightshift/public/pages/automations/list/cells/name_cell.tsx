@@ -7,19 +7,24 @@
 
 import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink } from '@elastic/eui';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import type { Automation } from '../../../../data/automations/use_automations';
+import { getUnconnectedSlackChannelsMessage } from '../../utils/unconnected_slack_channels';
 import { AutomationTags } from './tags_badge';
 
 export const AutomationNameCell = ({
   automation,
+  unconnectedSlackChannels = [],
   onOpen,
 }: {
   automation: Automation;
+  /** Slack channels the automation listens to that are no longer connected. */
+  unconnectedSlackChannels?: string[];
   onOpen: () => void;
 }) => {
   const tags = automation.tags ?? [];
+  const message = getUnconnectedSlackChannelsMessage(unconnectedSlackChannels);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -36,6 +41,17 @@ export const AutomationNameCell = ({
           {automation.name}
         </EuiLink>
       </EuiFlexItem>
+      {unconnectedSlackChannels.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type="warning"
+            color="warning"
+            content={message}
+            aria-label={message}
+            iconProps={{ 'data-test-subj': 'automationBrokenSlackChannel' }}
+          />
+        </EuiFlexItem>
+      )}
       {tags.length > 0 && (
         <EuiFlexItem grow={false}>
           <AutomationTags tags={tags} />

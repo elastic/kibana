@@ -27,12 +27,13 @@ import { formatTimestamp } from '../../../common/format_timestamp';
 import { useToggleAutomation, type Automation } from '../../../data/automations/use_automations';
 import {
   formatChannelValue,
-  useAllRelayAppBindings,
+  type UseAllRelayAppBindings,
 } from '../../../data/relay_apps/use_relay_app_bindings';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { RunCounts, RunCountStatus } from '../hooks/use_automation_usage';
 import type { AutomationFacets } from '../utils/filter_automations';
 import { getTriggerDisplay } from '../utils/trigger_display';
+import { getUnconnectedSlackChannels } from '../utils/unconnected_slack_channels';
 import { AutomationAuthorCell } from './cells/author_cell';
 import { AutomationNameCell } from './cells/name_cell';
 import { AutomationActions } from './cells/row_actions';
@@ -54,6 +55,7 @@ export const AutomationsTable = ({
   getFacets,
   isRateLimited,
   isGlobalLimitReached = false,
+  connectedChannels,
   pageIndex,
   pageSize,
   onPageChange,
@@ -77,6 +79,8 @@ export const AutomationsTable = ({
   getFacets: (automation: Automation) => AutomationFacets;
   isRateLimited: (automation: Automation) => boolean;
   isGlobalLimitReached?: boolean;
+  /** Connected Slack channels used for destination labels and disconnected trigger warnings. */
+  connectedChannels: UseAllRelayAppBindings;
   pageIndex: number;
   pageSize: number;
   onPageChange: (index: number, size: number) => void;
@@ -91,17 +95,7 @@ export const AutomationsTable = ({
 }) => {
   const toggleAutomation = useToggleAutomation();
   const dateFormat = useKibana().services.uiSettings.get<string>('dateFormat');
-  const { bindings } = useAllRelayAppBindings(
-    automations.some(({ completions = [] }) =>
-      completions.some(
-        ({ action, targetMode, destination }) =>
-          action === 'post_to_slack' &&
-          targetMode === 'channel' &&
-          destination &&
-          !destination.startsWith('#')
-      )
-    )
-  );
+  const { bindings } = connectedChannels;
   const [sort, setSort] = useState<{ field: string; direction: 'asc' | 'desc' }>({
     field: 'name',
     direction: 'asc',
@@ -121,7 +115,14 @@ export const AutomationsTable = ({
       name: listLabels.automationColumn,
       sortable: true,
       render: (_name: string, automation: Automation) => (
-        <AutomationNameCell automation={automation} onOpen={() => onOpenAutomation(automation)} />
+        <AutomationNameCell
+          automation={automation}
+          unconnectedSlackChannels={getUnconnectedSlackChannels(
+            automation.trigger.rows,
+            connectedChannels
+          )}
+          onOpen={() => onOpenAutomation(automation)}
+        />
       ),
     },
     {
