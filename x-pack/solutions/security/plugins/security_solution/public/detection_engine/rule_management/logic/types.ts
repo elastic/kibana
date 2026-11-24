@@ -33,7 +33,10 @@ import type {
   GranularRulesSearch,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
-import type { RuleScope } from '../../../../common/api/detection_engine/rule_sets';
+import type {
+  RuleScope,
+  RuleSetConditions,
+} from '../../../../common/api/detection_engine/rule_sets';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 export interface CreateRulesProps {
   rule: RuleCreateProps;
@@ -118,6 +121,8 @@ export interface FilterOptions {
   includeRuleTypes?: Type[];
   /** Show only the rules of this rule set. The server resolves the group. */
   ruleSetId?: string;
+  /** Facet selections: the same shape as rule set conditions, sent as `filter_params`. */
+  conditions?: RuleSetConditions;
   /** One value of one facet, picked in "Browse by". */
   browse?: { category: GranularRulesFacetCategory; value: string };
   /** Split the table into sections by this field. */
@@ -146,6 +151,7 @@ export interface FetchSearchRulesProps {
   gaps_range_end?: string;
   gap_auto_fill_scheduler_id?: string;
   rule_scope?: RuleScope;
+  filter_params?: RuleSetConditions;
   signal?: AbortSignal;
 }
 

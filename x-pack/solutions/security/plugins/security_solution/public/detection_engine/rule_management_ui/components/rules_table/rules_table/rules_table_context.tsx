@@ -23,6 +23,7 @@ import {
 } from '../../../../../../common/constants';
 import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
+import { hasRuleSetConditions } from '../../../../../../common/detection_engine/rule_sets/rule_set_conditions';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -232,6 +233,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
     ruleSetId: savedFilter?.ruleSetId,
     groupBy: savedFilter?.groupBy,
+    conditions: savedFilter?.conditions,
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
@@ -272,6 +274,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       ...(gapRange ? { gaps_range_start: gapRange.start, gaps_range_end: gapRange.end } : {}),
       ...(activeSchedulerId ? { gap_auto_fill_scheduler_id: activeSchedulerId } : {}),
       ...(filterOptions.ruleSetId ? { rule_scope: { rule_set_id: filterOptions.ruleSetId } } : {}),
+      ...(filterOptions.conditions && hasRuleSetConditions(filterOptions.conditions)
+        ? { filter_params: filterOptions.conditions }
+        : {}),
     };
   }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
 
@@ -303,6 +308,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       enabled: undefined,
       ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
       gapFillStatuses: undefined,
+      conditions: undefined,
       // The selected rule set is where the user is, not a filter. Keep it.
       ruleSetId: current.ruleSetId,
       groupBy: current.groupBy,

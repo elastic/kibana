@@ -1239,6 +1239,8 @@ components:
           type: string
           minLength: 1
           maxLength: 256
+        filter_params:
+          $ref: '../../rule_sets/rule_set.schema.yaml#/components/schemas/RuleSetConditions'
 
     BulkDeleteRules:
       allOf:

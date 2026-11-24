@@ -13,6 +13,14 @@ import type {
 /** Tags combine like the tags filter of the rules table: a rule must have all of them. */
 export const DEFAULT_TAGS_MATCH: NonNullable<RuleSetValues['match']> = 'all';
 export const DEFAULT_INTEGRATIONS_MATCH: NonNullable<RuleSetValues['match']> = 'any';
+/** Values of one MITRE tactic or one tag category are alternatives. */
+export const DEFAULT_ANY_MATCH: NonNullable<RuleSetValues['match']> = 'any';
+
+/** The tag prefix of a category, for example `OS` for `OS: Windows`; undefined without a prefix. */
+export const tagCategoryOf = (tag: string): string | undefined => {
+  const index = tag.indexOf(': ');
+  return index > 0 ? tag.slice(0, index) : undefined;
+};
 
 interface IncludeExclude<T> {
   include?: T[];
@@ -40,6 +48,16 @@ const normalizeValues = (
   return normalized && { ...normalized, match: normalized.match ?? defaultMatch };
 };
 
+const normalizeTagCategories = (
+  categories: RuleSetConditions['tag_categories']
+): RuleSetConditions['tag_categories'] => {
+  const entries = Object.entries(categories ?? {}).flatMap(([category, values]) => {
+    const normalized = normalizeValues(values, DEFAULT_ANY_MATCH);
+    return normalized ? [[category, normalized] as const] : [];
+  });
+  return entries.length ? Object.fromEntries(entries) : undefined;
+};
+
 /**
  * The stored form of conditions: no empty parts, no duplicate values, and `match` always written,
  * so a stored set keeps its meaning if a default changes later.
@@ -54,6 +72,8 @@ export const normalizeRuleSetConditions = (conditions: RuleSetConditions): RuleS
     type: normalizeIncludeExclude(conditions.type),
     severity: normalizeIncludeExclude(conditions.severity),
     rule_source: conditions.rule_source?.include.length ? conditions.rule_source : undefined,
+    mitre_tactic: normalizeValues(conditions.mitre_tactic, DEFAULT_ANY_MATCH),
+    tag_categories: normalizeTagCategories(conditions.tag_categories),
     search: conditions.search?.term.trim()
       ? { term: conditions.search.term.trim(), mode: conditions.search.mode }
       : undefined,
@@ -61,6 +81,48 @@ export const normalizeRuleSetConditions = (conditions: RuleSetConditions): RuleS
   return Object.fromEntries(
     Object.entries(normalized).filter(([, value]) => value !== undefined)
   ) as RuleSetConditions;
+};
+
+/**
+ * Moves prefixed tags from `tags` to `tag_categories` where the meaning stays the same: excluded
+ * tags always; an included tag when it is the only included tag of its category and `tags`
+ * requires all tags (or has one). Sets made by the AI or by an API client then open with the same
+ * facets that would have built them.
+ */
+export const liftTagCategories = (conditions: RuleSetConditions): RuleSetConditions => {
+  const { tags } = conditions;
+  if (!tags) {
+    return conditions;
+  }
+  const include = tags.include ?? [];
+  const categories: Record<string, RuleSetValues> = { ...conditions.tag_categories };
+  const kept: { include: string[]; exclude: string[] } = { include: [], exclude: [] };
+  const lift = (tag: string, key: 'include' | 'exclude') => {
+    const category = tagCategoryOf(tag);
+    const current = category ? categories[category] : undefined;
+    const canLift =
+      category != null &&
+      (key === 'exclude' ||
+        (!current?.include?.length &&
+          (tags.match === 'all' || include.length === 1) &&
+          include.filter((other) => tagCategoryOf(other) === category).length === 1));
+    if (category == null || !canLift) {
+      kept[key].push(tag);
+      return;
+    }
+    categories[category] = {
+      ...current,
+      [key]: [...(current?.[key] ?? []), tag],
+      match: current?.match ?? DEFAULT_ANY_MATCH,
+    };
+  };
+  include.forEach((tag) => lift(tag, 'include'));
+  (tags.exclude ?? []).forEach((tag) => lift(tag, 'exclude'));
+  return normalizeRuleSetConditions({
+    ...conditions,
+    tags: { ...tags, ...kept },
+    tag_categories: categories,
+  });
 };
 
 export const hasRuleSetConditions = (conditions: RuleSetConditions): boolean =>

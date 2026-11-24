@@ -137,6 +137,15 @@ export const RuleSetSearch = lazySchema(() =>
 export type RuleSetSearch = z.infer<typeof RuleSetSearch>;
 
 /**
+  * Tags grouped by their prefix, for example `OS` for `OS: Windows`. Each key is a prefix and
+holds full tag values. Values of one category combine with its `match` (`any` by default);
+categories combine with AND, like the filter per logical group of prebuilt tags.
+
+  */
+export const RuleSetTagCategories = lazySchema(() => z.object({}).catchall(RuleSetValues));
+export type RuleSetTagCategories = z.infer<typeof RuleSetTagCategories>;
+
+/**
   * Rules that match ALL filled conditions are in the set. New rules that match join the set
 automatically. Field names are the names of the rule API. `related_integrations` takes
 integration package names, for example `endpoint` or `okta`.
@@ -150,6 +159,8 @@ export const RuleSetConditions = lazySchema(() =>
       type: RuleSetRuleTypes.optional(),
       severity: RuleSetSeverities.optional(),
       rule_source: RuleSetRuleSource.optional(),
+      mitre_tactic: RuleSetValues.optional(),
+      tag_categories: RuleSetTagCategories.optional(),
       search: RuleSetSearch.optional(),
     })
     .strict()

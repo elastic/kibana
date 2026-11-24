@@ -63,6 +63,7 @@ components:
         - integration
         - tactic
         - source
+        - severity
 
 
     SearchRulesAggregations:
@@ -73,9 +74,25 @@ components:
       properties:
         counts:
           type: array
+          maxItems: 20
           description: Facet categories for which to compute counts over the filtered + searched set.
           items:
             $ref: '#/components/schemas/GranularRulesFacetCategory'
+        exclude_own_filter:
+          type: boolean
+          description: |
+            Count each category without the `filter_params` condition on the same field, so a
+            facet shows the other values a user can add (disjunctive facets). Group by leaves it off.
+        tag_categories:
+          type: array
+          maxItems: 50
+          description: |
+            Tag prefixes, for example `OS`. Counts the tags of each prefix without the
+            `filter_params.tag_categories` condition of that prefix.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 256
 
     FacetCounts:
       type: object

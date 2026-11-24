@@ -70,6 +70,7 @@ export const GranularRulesFacetCategory = lazySchema(() =>
     'integration',
     'tactic',
     'source',
+    'severity',
   ])
 );
 export type GranularRulesFacetCategory = z.infer<typeof GranularRulesFacetCategory>;
@@ -88,8 +89,32 @@ export const SearchRulesAggregations = lazySchema(() =>
        */
       counts: z
         .array(GranularRulesFacetCategory)
+        .max(20)
         .optional()
         .describe('Facet categories for which to compute counts over the filtered + searched set.'),
+      /**
+      * Count each category without the `filter_params` condition on the same field, so a
+facet shows the other values a user can add (disjunctive facets). Group by leaves it off.
+
+      */
+      exclude_own_filter: z
+        .boolean()
+        .optional()
+        .describe(
+          'Count each category without the `filter_params` condition on the same field, so a\nfacet shows the other values a user can add (disjunctive facets). Group by leaves it off.\n'
+        ),
+      /**
+      * Tag prefixes, for example `OS`. Counts the tags of each prefix without the
+`filter_params.tag_categories` condition of that prefix.
+
+      */
+      tag_categories: z
+        .array(z.string().min(1).max(256))
+        .max(50)
+        .optional()
+        .describe(
+          'Tag prefixes, for example `OS`. Counts the tags of each prefix without the\n`filter_params.tag_categories` condition of that prefix.\n'
+        ),
     })
     .strict()
 );

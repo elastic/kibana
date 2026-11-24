@@ -4746,6 +4746,8 @@ components:
           enum:
             - delete
           type: string
+        filter_params:
+          $ref: '#/components/schemas/RuleSetConditions'
         gap_auto_fill_scheduler_id:
           description: Gap auto fill scheduler ID used to determine gap fill status for
             rules
@@ -4798,6 +4800,8 @@ components:
           enum:
             - disable
           type: string
+        filter_params:
+          $ref: '#/components/schemas/RuleSetConditions'
         gap_auto_fill_scheduler_id:
           description: Gap auto fill scheduler ID used to determine gap fill status for
             rules
@@ -4859,6 +4863,8 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        filter_params:
+          $ref: '#/components/schemas/RuleSetConditions'
         gap_auto_fill_scheduler_id:
           description: Gap auto fill scheduler ID used to determine gap fill status for
             rules
@@ -4986,6 +4992,8 @@ components:
             $ref: '#/components/schemas/BulkActionEditPayload'
           minItems: 1
           type: array
+        filter_params:
+          $ref: '#/components/schemas/RuleSetConditions'
         gap_auto_fill_scheduler_id:
           description: Gap auto fill scheduler ID used to determine gap fill status for
             rules
@@ -5039,6 +5047,8 @@ components:
           enum:
             - enable
           type: string
+        filter_params:
+          $ref: '#/components/schemas/RuleSetConditions'
         gap_auto_fill_scheduler_id:
           description: Gap auto fill scheduler ID used to determine gap fill status for
             rules
@@ -5089,6 +5099,8 @@ components:
           enum:
             - export
           type: string
+        filter_params:
+          $ref: '#/components/schemas/RuleSetConditions'
         gap_auto_fill_scheduler_id:
           description: Gap auto fill scheduler ID used to determine gap fill status for
             rules
@@ -5155,6 +5167,8 @@ components:
           required:
             - start_date
             - end_date
+        filter_params:
+          $ref: '#/components/schemas/RuleSetConditions'
         gap_auto_fill_scheduler_id:
           description: Gap auto fill scheduler ID used to determine gap fill status for
             rules
@@ -5204,6 +5218,8 @@ components:
           enum:
             - run
           type: string
+        filter_params:
+          $ref: '#/components/schemas/RuleSetConditions'
         gap_auto_fill_scheduler_id:
           description: Gap auto fill scheduler ID used to determine gap fill status for
             rules
@@ -9127,6 +9143,8 @@ components:
         integration package names, for example `endpoint` or `okta`.
       type: object
       properties:
+        mitre_tactic:
+          $ref: '#/components/schemas/RuleSetValues'
         related_integrations:
           $ref: '#/components/schemas/RuleSetValues'
         rule_source:
@@ -9135,6 +9153,8 @@ components:
           $ref: '#/components/schemas/RuleSetSearch'
         severity:
           $ref: '#/components/schemas/RuleSetSeverities'
+        tag_categories:
+          $ref: '#/components/schemas/RuleSetTagCategories'
         tags:
           $ref: '#/components/schemas/RuleSetValues'
         type:
@@ -9316,6 +9336,20 @@ components:
             - included_rules_count
             - excluded_rules_count
       description: A rule set without the picked and left-out rule lists, for lists of sets.
+    RuleSetTagCategories:
+      additionalProperties:
+        $ref: '#/components/schemas/RuleSetValues'
+      description: >
+        Tags grouped by their prefix, for example `OS` for `OS: Windows`. Each
+        key is a prefix and
+
+        holds full tag values. Values of one category combine with its `match`
+        (`any` by default);
+
+        categories combine with AND, like the filter per logical group of
+        prebuilt tags.
+      maxProperties: 50
+      type: object
     RuleSetValue:
       maxLength: 1024
       minLength: 1

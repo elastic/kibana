@@ -18,4 +18,5 @@ export const RULES_FACET_CATEGORY_TO_ATTRIBUTE: Record<GranularRulesFacetCategor
   integration: 'alert.attributes.params.relatedIntegrations.package',
   tactic: 'alert.attributes.params.threat.tactic.name',
   source: 'alert.attributes.params.immutable',
+  severity: 'alert.attributes.params.severity',
 };

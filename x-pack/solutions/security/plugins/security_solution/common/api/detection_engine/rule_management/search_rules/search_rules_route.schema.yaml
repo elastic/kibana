@@ -54,6 +54,8 @@ paths:
                   $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFilter'
                 rule_scope:
                   $ref: '../../rule_sets/rule_set.schema.yaml#/components/schemas/RuleScope'
+                filter_params:
+                  $ref: '../../rule_sets/rule_set.schema.yaml#/components/schemas/RuleSetConditions'
                 aggregations:
                   $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesAggregations'
                 search:
@@ -149,6 +151,8 @@ paths:
                     items:
                       $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                   counts:
+                    $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+                  tag_category_counts:
                     $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
                 required:
                   - page

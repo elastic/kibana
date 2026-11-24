@@ -23,6 +23,7 @@ export const RULE_ID_FIELD = 'alert.attributes.params.ruleId';
 export const RULE_SO_ID_FIELD = 'alert.id';
 const INTEGRATION_PACKAGE_FIELD = 'alert.attributes.params.relatedIntegrations.package';
 const SEVERITY_FIELD = 'alert.attributes.params.severity';
+const TACTIC_FIELD = 'alert.attributes.params.threat.tactic.name';
 
 /** A `terms` query is exact match, so every id list is bounded well below `index.max_terms_count`. */
 export const MAX_TERMS_VALUES = 10_000;
@@ -69,6 +70,8 @@ export const buildConditionsFilter = (conditions: RuleSetConditions): KueryNode 
     type,
     severity,
     rule_source: ruleSource,
+    mitre_tactic: tactic,
+    tag_categories: tagCategories,
     search,
   } = normalizeRuleSetConditions(conditions);
   const nodes: KueryNode[] = [
@@ -76,6 +79,9 @@ export const buildConditionsFilter = (conditions: RuleSetConditions): KueryNode 
     ...(integrations ? includeExclude(INTEGRATION_PACKAGE_FIELD, integrations) : []),
     ...(type ? includeExclude(PARAMS_TYPE_FIELD, type) : []),
     ...(severity ? includeExclude(SEVERITY_FIELD, severity) : []),
+    ...(tactic ? includeExclude(TACTIC_FIELD, tactic) : []),
+    // One group of clauses per tag category: OR inside a category, AND across categories.
+    ...Object.values(tagCategories ?? {}).flatMap((values) => includeExclude(TAGS_FIELD, values)),
     // Same field as the Elastic / Custom filter of the rules table.
     ...(ruleSource
       ? [

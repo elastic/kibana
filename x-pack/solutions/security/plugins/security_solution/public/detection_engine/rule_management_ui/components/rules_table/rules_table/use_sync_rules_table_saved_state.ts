@@ -6,6 +6,7 @@
  */
 
 import { useEffect } from 'react';
+import { hasRuleSetConditions } from '../../../../../../common/detection_engine/rule_sets/rule_set_conditions';
 import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -88,6 +89,11 @@ export function useSyncRulesTableSavedState(): void {
     if (state.filterOptions.groupBy) {
       urlStateToSave.groupBy = state.filterOptions.groupBy;
       storageStateToSave.groupBy = state.filterOptions.groupBy;
+    }
+
+    if (state.filterOptions.conditions && hasRuleSetConditions(state.filterOptions.conditions)) {
+      urlStateToSave.conditions = state.filterOptions.conditions;
+      storageStateToSave.conditions = state.filterOptions.conditions;
     }
 
     const hasUrlStateToSave = Object.keys(urlStateToSave).length > 0;

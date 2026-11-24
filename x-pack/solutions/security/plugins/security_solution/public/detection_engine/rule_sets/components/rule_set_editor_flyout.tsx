@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useMount from 'react-use/lib/useMount';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
+  EuiFieldSearch,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -41,10 +42,8 @@ import type {
   RuleSetDefinition,
 } from '../../../../common/api/detection_engine/rule_sets';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useFetchRuleManagementFiltersQuery } from '../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import { fetchSearchRules } from '../../rule_management/api/api';
 import {
-  useRuleFacetCountsQuery,
   useRuleSetPreviewQuery,
   useRuleSetQuery,
   useRuleSetsWithCountsQuery,
@@ -52,10 +51,11 @@ import {
 } from '../api';
 import type { PickedRule } from './rule_picker_modal';
 import { RulePickerModal } from './rule_picker_modal';
-import { RuleConditionsFilterBar } from './rule_conditions_filter_bar';
-import { useIntegrationTitles } from './group_by_fields';
+import { FacetPanel } from '../facets/facet_panel';
+import { useFacetCounts } from '../facets/use_facet_counts';
 import {
   hasRuleSetConditions,
+  liftTagCategories,
   normalizeRuleSetConditions,
 } from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
 import * as i18n from './translations';
@@ -190,7 +190,7 @@ export const RuleSetEditorFlyout = ({ ruleSetId, ...props }: RuleSetEditorFlyout
   const titleId = useGeneratedHtmlId();
   if (ruleSetId && !group) {
     return (
-      <EuiFlyout aria-labelledby={titleId} onClose={props.onClose} size={1200} ownFocus>
+      <EuiFlyout aria-labelledby={titleId} onClose={props.onClose} size={1400} ownFocus>
         <EuiFlyoutBody>
           <h2 id={titleId} className="euiScreenReaderOnly">
             {i18n.EDIT_GROUP}
@@ -221,7 +221,9 @@ const RuleSetEditorForm = ({
   const [visibility, setVisibility] = useState<RuleSetDefinition['visibility']>(
     start.visibility ?? 'space'
   );
-  const [conditions, setConditions] = useState<RuleSetConditions>(start.conditions ?? {});
+  const [conditions, setConditions] = useState<RuleSetConditions>(() =>
+    liftTagCategories(start.conditions ?? {})
+  );
   const [included, setIncluded] = useState<string[]>(start.included_rule_ids ?? []);
   const [excluded, setExcluded] = useState<string[]>(start.excluded_rule_ids ?? []);
   const titleId = useGeneratedHtmlId();
@@ -264,17 +266,10 @@ const RuleSetEditorForm = ({
       .catch(() => {});
   });
 
-  const { data: filters } = useFetchRuleManagementFiltersQuery();
-  // Only the packages that rules use, one option each; Fleet lists one row per policy template.
-  const { data: integrationCounts } = useRuleFacetCountsQuery('integration');
-  const integrationTitles = useIntegrationTitles();
-  const integrationOptions = useMemo(
-    () =>
-      Object.keys(integrationCounts ?? {})
-        .map((pkg) => ({ value: pkg, label: integrationTitles.get(pkg) ?? pkg }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
-    [integrationCounts, integrationTitles]
-  );
+  // Counts in the whole space: a set definition is not limited by another set.
+  const { data: facetCounts, isLoading: isLoadingFacets } = useFacetCounts({
+    conditions: debounced.conditions,
+  });
 
   const { data: preview, isFetching } = useRuleSetPreviewQuery({
     conditions: debounced.conditions,
@@ -308,8 +303,8 @@ const RuleSetEditorForm = ({
     }
   };
 
-  const setCondition = <K extends keyof RuleSetConditions>(key: K, value: RuleSetConditions[K]) =>
-    setConditions((current) => normalizeRuleSetConditions({ ...current, [key]: value }));
+  const onConditionsChange = (next: RuleSetConditions) =>
+    setConditions(normalizeRuleSetConditions(next));
 
   const rememberNames = (rules: PickedRule[]) =>
     setNames(
@@ -341,7 +336,7 @@ const RuleSetEditorForm = ({
     <EuiFlyout
       aria-labelledby={titleId}
       onClose={onClose}
-      size={1200}
+      size={1400}
       ownFocus
       data-test-subj="ruleSetEditorFlyout"
     >
@@ -357,7 +352,41 @@ const RuleSetEditorForm = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false} css={{ width: 460 }}>
+          <EuiFlexItem
+            grow={false}
+            // Own scroll, so a long facet list does not push the preview out of view.
+            css={{
+              width: 290,
+              position: 'sticky',
+              top: 0,
+              maxHeight: 'calc(100vh - 220px)',
+              overflowY: 'auto',
+            }}
+          >
+            <Step n={1} title={i18n.STEP_CONDITIONS} help={i18n.STEP_CONDITIONS_HELP}>
+              <EuiFieldSearch
+                fullWidth
+                compressed
+                placeholder={i18n.SEARCH_PLACEHOLDER}
+                value={conditions.search?.term ?? ''}
+                onChange={(e) =>
+                  onConditionsChange({
+                    ...conditions,
+                    search: e.target.value ? { term: e.target.value, mode: 'legacy' } : undefined,
+                  })
+                }
+                data-test-subj="ruleSetEditorSearch"
+              />
+              <EuiSpacer size="m" />
+              <FacetPanel
+                conditions={conditions}
+                onChange={onConditionsChange}
+                counts={facetCounts}
+                isLoading={isLoadingFacets}
+              />
+            </Step>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ width: 380 }}>
             <EuiFormRow label={i18n.NAME} fullWidth>
               <EuiFieldText
                 fullWidth
@@ -400,16 +429,6 @@ const RuleSetEditorForm = ({
             <EuiTitle size="xs">
               <h3>{i18n.WHICH_RULES}</h3>
             </EuiTitle>
-            <EuiSpacer size="s" />
-
-            <Step n={1} title={i18n.STEP_CONDITIONS} help={i18n.STEP_CONDITIONS_HELP}>
-              <RuleConditionsFilterBar
-                conditions={conditions}
-                onChange={setCondition}
-                tags={filters?.aggregated_fields.tags ?? []}
-                integrations={integrationOptions}
-              />
-            </Step>
             <EuiSpacer size="s" />
 
             <Step

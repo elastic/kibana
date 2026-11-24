@@ -22,7 +22,7 @@ import {
   GranularRulesSearch,
   FacetCounts,
 } from '../granular_rules/granular_rules_contract.gen';
-import { RuleScope } from '../../rule_sets/rule_set.gen';
+import { RuleScope, RuleSetConditions } from '../../rule_sets/rule_set.gen';
 import { FindRulesSortField } from '../find_rules/find_rules_route.gen';
 import { SortOrder } from '../../model/sorting.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
@@ -71,6 +71,7 @@ export const SearchRulesRequestBody = lazySchema(() =>
         'Structured KQL filter applied to detection rules (alert saved objects).'
       ),
       rule_scope: RuleScope.optional(),
+      filter_params: RuleSetConditions.optional(),
       aggregations: SearchRulesAggregations.optional(),
       search: GranularRulesSearch.optional(),
       sort_field: FindRulesSortField.optional(),
@@ -154,6 +155,7 @@ at or past the default 10,000-result max) or the request used `search_after`.
           'Sort values of the last hit on this page, for use as `search_after` on the next\nrequest. Only included when deep pagination applies (offset\nat or past the default 10,000-result max) or the request used `search_after`.\n'
         ),
       counts: FacetCounts.optional(),
+      tag_category_counts: FacetCounts.optional(),
     })
     .strict()
 );

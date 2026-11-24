@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { nodeBuilder } from '@kbn/es-query';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
@@ -29,6 +30,8 @@ import { resolveGapPreFilter, transformFindAlerts } from '../../../utils/utils';
 import { translateSearchFieldsToSoFields } from '../../../logic/search/search_rules_field_translation';
 import { getRuleSetsClient } from '../../../../rule_sets/api/register_routes';
 import { resolveRuleScope } from '../../../logic/search/rule_scope';
+import { fetchDisjunctiveFacetCounts } from '../../../logic/search/facet_counts';
+import { buildConditionsFilter } from '../../../../rule_sets/logic/build_rule_set_filter';
 
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
@@ -78,11 +81,17 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
             gaps_range_end: gapsRangeEnd,
             gap_auto_fill_scheduler_id: schedulerId,
             rule_scope: ruleScope,
+            filter_params: filterParams,
           } = request.body;
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = await ctx.alerting.getRulesClient();
-          const ruleSetFilter = await resolveRuleScope(ruleScope, () => getRuleSetsClient(context));
+          const scopeFilter = await resolveRuleScope(ruleScope, () => getRuleSetsClient(context));
+          const paramsFilter = filterParams ? buildConditionsFilter(filterParams) : undefined;
+          const ruleSetFilter =
+            scopeFilter && paramsFilter
+              ? nodeBuilder.and([scopeFilter, paramsFilter])
+              : scopeFilter ?? paramsFilter;
 
           const combinedKql = buildGranularRulesKql({
             filter,
@@ -159,9 +168,24 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
             ruleIds: hasGapFilters ? ruleIdsWithGaps : undefined,
           });
 
-          const counts = rules.aggregations
+          const mainCounts = rules.aggregations
             ? expandRawAggregationResult(rules.aggregations, categoryCounts)
             : undefined;
+          const tagCategories = aggregations?.tag_categories ?? [];
+          const disjunctive =
+            mainCounts && filterParams && (aggregations?.exclude_own_filter || tagCategories.length)
+              ? await fetchDisjunctiveFacetCounts({
+                  rulesClient,
+                  filter: combinedKql,
+                  scopeFilter,
+                  filterParams,
+                  mainCounts,
+                  categories: aggregations?.exclude_own_filter ? categoryCounts : [],
+                  tagCategories,
+                  ruleIds: hasGapFilters ? ruleIdsWithGaps : undefined,
+                })
+              : undefined;
+          const counts = disjunctive?.counts ?? mainCounts;
 
           const transformedRules = transformFindAlerts(
             rules,
@@ -171,6 +195,9 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
           const responseBody: SearchRulesResponse = {
             ...transformedRules,
             ...(counts ? { counts } : {}),
+            ...(disjunctive && tagCategories.length
+              ? { tag_category_counts: disjunctive.tagCategoryCounts }
+              : {}),
             ...(shouldUseSearchAfter ? { search_after: rules.searchAfter } : {}),
           };
 

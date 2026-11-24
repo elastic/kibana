@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { RulesFacetPanel } from '../../../rule_sets/facets/rules_facet_panel';
 import { RuleSetEditorProvider } from '../../../rule_sets/components/rule_set_editor_context';
 import { RuleSetHeader } from '../../../rule_sets/components/rule_set_header';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
@@ -35,7 +37,24 @@ export const AllRules = React.memo(() => {
         {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
         <GapSchedulerErrorsCallout />
         <RuleSetHeader />
-        <RulesTables selectedTab={tabName as AllRulesTabs} />
+        <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
+          <EuiFlexItem
+            grow={false}
+            // Sticky with its own scroll, so the facets stay in view next to a long table.
+            css={{
+              width: 260,
+              position: 'sticky',
+              top: 'calc(var(--euiFixedHeadersOffset, 0px) + 8px)',
+              maxHeight: 'calc(100vh - var(--euiFixedHeadersOffset, 0px) - 16px)',
+              overflowY: 'auto',
+            }}
+          >
+            <RulesFacetPanel />
+          </EuiFlexItem>
+          <EuiFlexItem css={{ minWidth: 0 }}>
+            <RulesTables selectedTab={tabName as AllRulesTabs} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </RuleSetEditorProvider>
     );
   } else {

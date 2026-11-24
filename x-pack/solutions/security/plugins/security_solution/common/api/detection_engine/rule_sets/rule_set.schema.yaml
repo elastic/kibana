@@ -143,8 +143,22 @@ components:
           $ref: '#/components/schemas/RuleSetSeverities'
         rule_source:
           $ref: '#/components/schemas/RuleSetRuleSource'
+        mitre_tactic:
+          $ref: '#/components/schemas/RuleSetValues'
+        tag_categories:
+          $ref: '#/components/schemas/RuleSetTagCategories'
         search:
           $ref: '#/components/schemas/RuleSetSearch'
+
+    RuleSetTagCategories:
+      type: object
+      maxProperties: 50
+      description: |
+        Tags grouped by their prefix, for example `OS` for `OS: Windows`. Each key is a prefix and
+        holds full tag values. Values of one category combine with its `match` (`any` by default);
+        categories combine with AND, like the filter per logical group of prebuilt tags.
+      additionalProperties:
+        $ref: '#/components/schemas/RuleSetValues'
 
     RuleScope:
       type: object

@@ -10,68 +10,67 @@ import {
   DEFAULT_TAGS_MATCH,
   normalizeRuleSetConditions,
 } from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
+import { allFacetFields } from '../facets/facet_fields';
 import * as i18n from './translations';
 
-interface IncludeExclude {
-  include?: string[];
-  exclude?: string[];
-  match?: 'all' | 'any';
-}
-
-const describeField = (
-  label: string,
-  field: IncludeExclude | undefined,
-  toLabel: (value: string) => string = (value) => value
-): string[] => [
-  ...(field?.include?.length
-    ? [`${label}: ${field.include.map(toLabel).join(field.match === 'all' ? ' + ' : ', ')}`]
-    : []),
-  ...(field?.exclude?.length
-    ? [`${i18n.NOT_CONDITION(label)}: ${field.exclude.map(toLabel).join(', ')}`]
-    : []),
-];
-
-/** One readable label per filled condition, for chips and summaries. */
+/**
+ * One readable label per filled condition, for chips and summaries. The facet field list gives
+ * the fields and the value labels, so a set reads the same as the facets that built it.
+ */
 export const describeConditionParts = (
   conditions: RuleSetConditions,
-  integrationTitles?: Map<string, string>
+  integrationTitles: Map<string, string> = new Map()
 ): string[] => {
-  const {
-    tags,
-    related_integrations: integrations,
-    type,
-    severity,
-    rule_source: ruleSource,
-    search,
-  } = normalizeRuleSetConditions(conditions);
+  const normalized = normalizeRuleSetConditions(conditions);
+  const labels = { integrationTitles };
   return [
-    ...(search ? [`${i18n.SEARCH_CONDITION}: "${search.term}"`] : []),
-    ...describeField(i18n.TAGS, tags),
-    ...describeField(
-      i18n.INTEGRATIONS,
-      integrations,
-      (name) => integrationTitles?.get(name) ?? name
-    ),
-    ...describeField(i18n.RULE_TYPES, type, (t) => i18n.RULE_TYPE_LABELS[t] ?? t),
-    ...describeField(i18n.SEVERITY, severity, (s) => i18n.SEVERITY_LABELS[s] ?? s),
-    ...(ruleSource
-      ? [ruleSource.include[0] === 'external' ? i18n.SOURCE_ELASTIC : i18n.SOURCE_CUSTOM]
-      : []),
+    ...(normalized.search ? [`${i18n.SEARCH_CONDITION}: "${normalized.search.term}"`] : []),
+    ...allFacetFields(undefined, normalized).flatMap((field) => {
+      const { include, exclude } = field.get(normalized);
+      const isTags = field.id === 'tags';
+      const label = isTags ? i18n.TAGS : field.label;
+      const list = (values: string[]) => values.map((value) => field.valueLabel(value, labels));
+      const separator = isTags && normalized.tags?.match === 'all' ? ' + ' : ', ';
+      return [
+        ...(include.length ? [`${label}: ${list(include).join(separator)}`] : []),
+        ...(exclude.length ? [`${i18n.NOT_CONDITION(label)}: ${list(exclude).join(', ')}`] : []),
+      ];
+    }),
   ];
 };
 
-const union = (a: string[] = [], b: string[] = []) => [...new Set([...a, ...b])];
+interface Values<V> {
+  include?: V[];
+  exclude?: V[];
+}
+
+const union = <V>(a: V[] = [], b: V[] = []): V[] => [...new Set([...a, ...b])];
+
+/** The table shows set AND filters: filter values narrow the included values, excludes add up. */
+const mergeValues = <V>(set: Values<V> | undefined, filter: Values<V> | undefined) =>
+  filter
+    ? {
+        ...set,
+        ...filter,
+        include: filter.include?.length ? filter.include : set?.include,
+        exclude: union(set?.exclude, filter.exclude),
+      }
+    : set;
 
 /**
  * Adds the visible table filters to set conditions. Included tags add up (a rule must have all of
  * them); for the other fields the filter values replace the included values of the set. Excluded
- * values of the set stay.
+ * values of both stay.
  */
 export const mergeConditions = (
   set: RuleSetConditions,
   filters: RuleSetConditions
-): RuleSetConditions =>
-  normalizeRuleSetConditions({
+): RuleSetConditions => {
+  const categories = new Set([
+    ...Object.keys(set.tag_categories ?? {}),
+    ...Object.keys(filters.tag_categories ?? {}),
+  ]);
+  return normalizeRuleSetConditions({
     ...set,
     ...filters,
     tags:
@@ -82,9 +81,15 @@ export const mergeConditions = (
             match: set.tags?.match ?? DEFAULT_TAGS_MATCH,
           }
         : undefined,
-    related_integrations: filters.related_integrations
-      ? { ...set.related_integrations, ...filters.related_integrations }
-      : set.related_integrations,
-    type: filters.type ? { ...set.type, ...filters.type } : set.type,
-    severity: filters.severity ? { ...set.severity, ...filters.severity } : set.severity,
+    related_integrations: mergeValues(set.related_integrations, filters.related_integrations),
+    mitre_tactic: mergeValues(set.mitre_tactic, filters.mitre_tactic),
+    type: mergeValues(set.type, filters.type),
+    severity: mergeValues(set.severity, filters.severity),
+    tag_categories: Object.fromEntries(
+      [...categories].map((category) => [
+        category,
+        mergeValues(set.tag_categories?.[category], filters.tag_categories?.[category]) ?? {},
+      ])
+    ),
   });
+};

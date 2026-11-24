@@ -29,10 +29,12 @@ import {
   groupByValueLabel,
   useIntegrationTitles,
 } from './group_by_fields';
+import { ActiveFacetChips } from '../facets/active_facet_chips';
 import * as i18n from './translations';
 
 /** The visible filters that a group can store, cleared after they move into the group. */
 const CLEARED_GROUP_FILTERS = {
+  conditions: undefined,
   filter: '',
   tags: [],
   showElasticRules: false,
@@ -202,6 +204,10 @@ export const RulesGroupByControl = () => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
       {group && <GroupConditionChips group={group} integrationTitles={integrationTitles} />}
+      <ActiveFacetChips
+        conditions={filterOptions.conditions ?? {}}
+        onChange={(next) => setFilterOptions({ conditions: next })}
+      />
       {browse && (
         <EuiFlexItem grow={false}>
           <EuiBadge

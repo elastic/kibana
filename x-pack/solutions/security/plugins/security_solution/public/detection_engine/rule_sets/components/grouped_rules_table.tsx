@@ -43,6 +43,7 @@ import {
   toGroupConditions,
   useIntegrationTitles,
 } from './group_by_fields';
+import { hasRuleSetConditions } from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
 import * as i18n from './translations';
 
 const SECTIONS_STEP = 20;
@@ -58,6 +59,9 @@ const buildSectionQuery = (filterOptions: FilterOptions, browse?: FilterOptions[
     ...(structuredKql !== '' ? { filter: { term: structuredKql, mode: 'KQL' as const } } : {}),
     ...(searchTerm ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
     ...(filterOptions.ruleSetId ? { rule_scope: { rule_set_id: filterOptions.ruleSetId } } : {}),
+    ...(filterOptions.conditions && hasRuleSetConditions(filterOptions.conditions)
+      ? { filter_params: filterOptions.conditions }
+      : {}),
   };
 };
 

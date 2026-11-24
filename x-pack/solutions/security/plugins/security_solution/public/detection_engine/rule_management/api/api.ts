@@ -14,6 +14,7 @@ import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import type { RuleSetConditions } from '../../../../common/api/detection_engine/rule_sets';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   GetPrebuiltRuleBaseVersionRequest,
@@ -274,6 +275,7 @@ export const fetchSearchRules = async ({
   gaps_range_end,
   gap_auto_fill_scheduler_id,
   rule_scope,
+  filter_params,
 }: FetchSearchRulesProps): Promise<FetchSearchRulesResponse> => {
   const body = {
     page: pagination.page,
@@ -290,6 +292,7 @@ export const fetchSearchRules = async ({
     ...(gaps_range_end ? { gaps_range_end } : {}),
     ...(gap_auto_fill_scheduler_id ? { gap_auto_fill_scheduler_id } : {}),
     ...(rule_scope ? { rule_scope } : {}),
+    ...(filter_params ? { filter_params } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchSearchRulesResponse>(
@@ -493,6 +496,8 @@ export type QueryOrIds =
       gapFillStatuses?: GapFillStatus[];
       schedulerId?: string;
       ruleSetId?: string;
+      /** Facet selections, the same shape as rule set conditions. */
+      filterParams?: RuleSetConditions;
     }
   | { query?: undefined; ids: string[] };
 
@@ -569,6 +574,7 @@ export async function performBulkAction({
       bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
     gap_auto_fill_scheduler_id: 'schedulerId' in bulkAction ? bulkAction.schedulerId : undefined,
     rule_set_id: 'ruleSetId' in bulkAction ? bulkAction.ruleSetId : undefined,
+    filter_params: 'filterParams' in bulkAction ? bulkAction.filterParams : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
@@ -593,6 +599,9 @@ export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExpor
     action: BulkActionTypeEnum.export,
     query: queryOrIds.query,
     ids: queryOrIds.ids,
+    // Without them, "Select all" + Export in a set would export every rule that matches the query.
+    rule_set_id: 'ruleSetId' in queryOrIds ? queryOrIds.ruleSetId : undefined,
+    filter_params: 'filterParams' in queryOrIds ? queryOrIds.filterParams : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {

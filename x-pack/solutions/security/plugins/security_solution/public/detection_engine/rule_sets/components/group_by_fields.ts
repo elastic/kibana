@@ -15,6 +15,7 @@ import { RuleSetRuleTypeEnum } from '../../../../common/api/detection_engine/rul
 import {
   DEFAULT_INTEGRATIONS_MATCH,
   DEFAULT_TAGS_MATCH,
+  normalizeRuleSetConditions,
 } from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
 import { useIntegrations } from '../../common/components/related_integrations/use_integrations';
 import type { FilterOptions } from '../../rule_management/logic/types';
@@ -101,7 +102,8 @@ export const useIntegrationTitles = (): Map<string, string> => {
  * not part of a set.
  */
 export const filtersToGroupConditions = (filterOptions: FilterOptions): RuleSetConditions => {
-  const conditions: RuleSetConditions = {};
+  // Facet selections are already in the shape of set conditions.
+  const conditions: RuleSetConditions = { ...filterOptions.conditions };
   if (filterOptions.tags.length) {
     conditions.tags = { include: filterOptions.tags, match: DEFAULT_TAGS_MATCH };
   }
@@ -121,5 +123,5 @@ export const filtersToGroupConditions = (filterOptions: FilterOptions): RuleSetC
       toGroupConditions(filterOptions.browse.category, filterOptions.browse.value) ?? {}
     );
   }
-  return conditions;
+  return normalizeRuleSetConditions(conditions);
 };

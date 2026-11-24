@@ -73,6 +73,10 @@ const ruleSetSchemaV1 = schema.object({
         }),
       })
     ),
+    mitre_tactic: schema.maybe(valuesSchema),
+    tag_categories: schema.maybe(
+      schema.recordOf(schema.string({ minLength: 1, maxLength: 256 }), valuesSchema)
+    ),
     search: schema.maybe(
       schema.object({
         term: schema.string({ minLength: 1, maxLength: 256 }),

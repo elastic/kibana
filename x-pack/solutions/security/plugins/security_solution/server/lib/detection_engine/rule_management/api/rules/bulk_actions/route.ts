@@ -11,6 +11,8 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type {
   BulkActionSkipResult,
@@ -53,7 +55,9 @@ import type { BulkActionError } from './bulk_actions_response';
 import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { getRuleSetsClient } from '../../../../rule_sets/api/register_routes';
+import type { RuleSetsClient } from '../../../../rule_sets/logic/rule_sets_client';
 import { resolveRuleScope } from '../../../logic/search/rule_scope';
+import { buildConditionsFilter } from '../../../../rule_sets/logic/build_rule_set_filter';
 import { fetchRulesByQueryOrIds, BulkActionRuleNotFoundError } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
@@ -76,6 +80,19 @@ interface ValidationError {
   statusCode: number;
 }
 
+/** A bulk action by query can be limited to a rule set and to a structured filter. */
+const resolveBulkScope = async (
+  body: PerformRulesBulkActionRequestBody,
+  getClient: () => Promise<RuleSetsClient>
+): Promise<KueryNode | undefined> => {
+  const scope = await resolveRuleScope(
+    body.rule_set_id ? { rule_set_id: body.rule_set_id } : undefined,
+    getClient
+  );
+  const params = body.filter_params ? buildConditionsFilter(body.filter_params) : undefined;
+  return scope && params ? nodeBuilder.and([scope, params]) : scope ?? params;
+};
+
 const validateBulkAction = (
   body: PerformRulesBulkActionRequestBody
 ): ValidationError | undefined => {
@@ -93,9 +110,9 @@ const validateBulkAction = (
     };
   }
 
-  if (body?.rule_set_id && body.query === undefined) {
+  if ((body?.rule_set_id || body?.filter_params) && body.query === undefined) {
     return {
-      body: `rule_set_id needs query. Send an empty query for all rules of the set.`,
+      body: `rule_set_id and filter_params need query. Send an empty query for all matching rules.`,
       statusCode: 400,
     };
   }
@@ -294,10 +311,7 @@ export const performBulkActionRoute = (
             gapRange: gapParams.gapRange,
             gapFillStatuses: gapParams.gapFillStatuses,
             schedulerId: body.gap_auto_fill_scheduler_id,
-            kueryFilter: await resolveRuleScope(
-              body.rule_set_id ? { rule_set_id: body.rule_set_id } : undefined,
-              () => getRuleSetsClient(context)
-            ),
+            kueryFilter: await resolveBulkScope(body, () => getRuleSetsClient(context)),
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);

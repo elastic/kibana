@@ -72,6 +72,7 @@ function validateState(
       filterFromUrl?.ruleExecutionStatus ?? filterFromStorage?.ruleExecutionStatus,
     ruleSetId: filterFromUrl?.ruleSetId ?? filterFromStorage?.ruleSetId,
     groupBy: filterFromUrl?.groupBy ?? filterFromStorage?.groupBy,
+    conditions: filterFromUrl?.conditions ?? filterFromStorage?.conditions,
   };
 
   const sortingFromUrl = safeParseResult(urlState, RulesTableSavedSorting);

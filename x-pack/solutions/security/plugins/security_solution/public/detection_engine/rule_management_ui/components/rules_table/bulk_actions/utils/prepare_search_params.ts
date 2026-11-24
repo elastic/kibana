@@ -10,6 +10,7 @@ import { convertRulesFilterToKQL } from '../../../../../../../common/detection_e
 import type { QueryOrIds } from '../../../../../rule_management/logic';
 import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
+import { hasRuleSetConditions } from '../../../../../../../common/detection_engine/rule_sets/rule_set_conditions';
 
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 
@@ -84,5 +85,8 @@ export const prepareSearchParams = ({
     ...(props.gapFillStatuses?.length ? { gapFillStatuses: props.gapFillStatuses } : {}),
     ...(props.schedulerId ? { schedulerId: props.schedulerId } : {}),
     ...(props.filterOptions.ruleSetId ? { ruleSetId: props.filterOptions.ruleSetId } : {}),
+    ...(props.filterOptions.conditions && hasRuleSetConditions(props.filterOptions.conditions)
+      ? { filterParams: props.filterOptions.conditions }
+      : {}),
   };
 };
