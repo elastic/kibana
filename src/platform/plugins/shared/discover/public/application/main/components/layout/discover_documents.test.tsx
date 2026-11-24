@@ -10,6 +10,8 @@
 import React from 'react';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { of } from 'rxjs';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -150,6 +152,25 @@ describe('Discover documents layout', () => {
       error: new Error('This query failed'),
     });
     expect(screen.getByText('This query failed')).toBeVisible();
+    expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+  });
+
+  test('offers to explain the ES|QL error with AI when the documents failed to load', async () => {
+    const services = createDiscoverServicesMock();
+    services.licensing = {
+      license$: of({ isActive: true, hasAtLeast: () => true }),
+    } as unknown as LicensingPluginStart;
+    const { toolkit } = await setup({ services });
+
+    await mountComponent({
+      fetchStatus: FetchStatus.ERROR,
+      hits: [],
+      toolkit,
+      isEsqlMode: true,
+      error: new Error('This query failed'),
+    });
+
+    expect(await screen.findByTestId('discoverErrorExplainButton')).toBeInTheDocument();
     expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
   });
 

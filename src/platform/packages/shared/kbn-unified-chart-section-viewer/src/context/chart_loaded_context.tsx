@@ -7,10 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContext, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
+import type { PropsWithChildren } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 
-export const ChartLoadedContext = createContext<ChartSectionProps['onChartLoaded']>(undefined);
+const ChartLoadedContext = createContext<ChartSectionProps['onChartLoaded']>(undefined);
+
+interface ChartLoadedContextProviderProps {
+  onChartLoaded: ChartSectionProps['onChartLoaded'];
+}
+
+/**
+ * Provides the callback to report that a chart of the section finished loading with data.
+ */
+export const ChartLoadedContextProvider = ({
+  onChartLoaded,
+  children,
+}: PropsWithChildren<ChartLoadedContextProviderProps>) => (
+  <ChartLoadedContext.Provider value={onChartLoaded}>{children}</ChartLoadedContext.Provider>
+);
 
 /**
  * Returns the optional callback to report that a chart of the section finished loading with data.

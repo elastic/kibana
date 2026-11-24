@@ -20,7 +20,7 @@ import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
-import { ChartLoadedContext } from '../../context/chart_loaded_context';
+import { ChartLoadedContextProvider } from '../../context/chart_loaded_context';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -348,9 +348,9 @@ describe('LensWrapper', () => {
     const renderWithOnChartLoaded = (onChartLoaded?: () => void) => {
       render(
         <EuiThemeProvider>
-          <ChartLoadedContext.Provider value={onChartLoaded}>
+          <ChartLoadedContextProvider onChartLoaded={onChartLoaded}>
             <LensWrapper {...defaultProps} />
-          </ChartLoadedContext.Provider>
+          </ChartLoadedContextProvider>
         </EuiThemeProvider>
       );
 
@@ -395,9 +395,9 @@ describe('LensWrapper', () => {
       const second = jest.fn();
       const renderWrapper = (onChartLoaded: () => void) => (
         <EuiThemeProvider>
-          <ChartLoadedContext.Provider value={onChartLoaded}>
+          <ChartLoadedContextProvider onChartLoaded={onChartLoaded}>
             <LensWrapper {...defaultProps} />
-          </ChartLoadedContext.Provider>
+          </ChartLoadedContextProvider>
         </EuiThemeProvider>
       );
       const { rerender } = render(renderWrapper(first));

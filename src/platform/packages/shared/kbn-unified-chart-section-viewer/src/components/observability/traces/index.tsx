@@ -20,7 +20,7 @@ import { ThroughputChart } from './throughput';
 import { ChartsGrid } from '../../charts_grid';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractUsedMetadataFields } from '../../../utils';
-import { ChartLoadedContext } from '../../../context/chart_loaded_context';
+import { ChartLoadedContextProvider } from '../../../context/chart_loaded_context';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
@@ -109,7 +109,7 @@ function TraceMetricsGrid({
   }
 
   return (
-    <ChartLoadedContext.Provider value={onChartLoaded}>
+    <ChartLoadedContextProvider onChartLoaded={onChartLoaded}>
       <ChartsGrid
         id="tracesGrid"
         toolbarCss={chartToolbarCss}
@@ -153,7 +153,7 @@ function TraceMetricsGrid({
           </EuiPanel>
         </TraceMetricsProvider>
       </ChartsGrid>
-    </ChartLoadedContext.Provider>
+    </ChartLoadedContextProvider>
   );
 }
 
