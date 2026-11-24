@@ -1079,6 +1079,20 @@ describe('getFleetServerHostsForAgentPolicy', () => {
     expect(host).toEqual(expect.objectContaining({ id: 'selected-host' }));
   });
 
+  it('keeps the default host, without its ssl settings, when they cannot be decrypted', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Unable to decrypt'));
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {});
+
+    expect(host).toEqual(expect.objectContaining({ id: 'test123', is_default: true }));
+    expect(host.ssl).toBeUndefined();
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      'Could not read the SSL settings of the default Fleet Server host [test123], so it is used without them: Unable to decrypt'
+    );
+  });
+
   it('throws when there is no default host and the policy has none', async () => {
     const soClient = getMockedSoClient();
     getMockedEncryptedSoClient();

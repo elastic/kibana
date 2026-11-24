@@ -596,7 +596,17 @@ export async function getFleetServerHostsForAgentPolicy(
 
   // getDefaultFleetServerHost() reads the host without decrypting it, so it has no `ssl`. Read it
   // again decrypted, as for an explicitly selected host, so the policy gets its SSL settings.
-  return fleetServerHostService.get(defaultFleetServerHost.id);
+  try {
+    return await fleetServerHostService.get(defaultFleetServerHost.id);
+  } catch (error) {
+    // Its URLs and proxy were read, so keep the host rather than losing it over its SSL settings.
+    appContextService
+      .getLogger()
+      .warn(
+        `Could not read the SSL settings of the default Fleet Server host [${defaultFleetServerHost.id}], so it is used without them: ${error.message}`
+      );
+    return defaultFleetServerHost;
+  }
 }
 
 /**
