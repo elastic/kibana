@@ -19,20 +19,9 @@ const isEmptyValue = (value: unknown): boolean => {
 
 const isScalar = (value: unknown): boolean => value != null && typeof value !== 'object';
 
-/**
- * Picks the value to keep when two samples disagree, so its type accepts both: a decimal over a
- * whole number, and a string when the types differ.
- */
-const mergeScalars = (target: unknown, source: unknown): unknown => {
-  if (typeof target === typeof source) {
-    const isDecimalOverWhole =
-      typeof target === 'number' && Number.isInteger(target) && !Number.isInteger(source);
-    return isDecimalOverWhole ? source : target;
-  }
-  if (typeof target === 'string') return target;
-  if (typeof source === 'string') return source;
-  return String(target);
-};
+/** A value's kind for typing. Whole and decimal numbers differ: they map to different types. */
+const getValueKind = (value: unknown): string =>
+  typeof value === 'number' && !Number.isInteger(value) ? 'decimal' : typeof value;
 
 /** Returns the value to keep when a sample has a plain value (not an object or array) for a key. */
 const mergePlainValue = (target: unknown, source: unknown): unknown => {
@@ -41,7 +30,9 @@ const mergePlainValue = (target: unknown, source: unknown): unknown => {
     target.push(source);
     return target;
   }
-  if (isScalar(target) && isScalar(source)) return mergeScalars(target, source);
+  if (isScalar(target) && isScalar(source) && getValueKind(target) !== getValueKind(source)) {
+    return [target, source];
+  }
   return target;
 };
 
@@ -101,9 +92,9 @@ const mergeInto = (target: SampleObject, source: SampleObject): SampleObject => 
 /**
  * Deep-merges sample objects into one representative object without changing them: arrays are
  * concatenated, an object and an array of objects under the same key are merged together, a plain
- * value and an array are combined into one array, and objects win over scalars. When scalars
- * disagree, the kept value's type accepts all of them: a decimal over a whole number, a string when
- * the types differ.
+ * value and an array are combined into one array, and objects win over scalars. Plain values of
+ * different types (whole and decimal numbers count as different) are kept together in an array, so
+ * a field's type can be inferred from all of them. Otherwise the first non-empty value wins.
  */
 export const mergeSamples = (samples: readonly SampleObject[]): SampleObject => {
   const result = Object.create(null) as SampleObject;

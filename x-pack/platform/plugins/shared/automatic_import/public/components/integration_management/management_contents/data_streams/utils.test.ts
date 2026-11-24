@@ -198,6 +198,12 @@ describe('data stream utils', () => {
   });
 
   describe('flattenPipelineObject', () => {
+    it('should show every differently typed value from an array of objects', () => {
+      expect(
+        flattenPipelineObject({ rules: [{ flag: true }, { flag: 1 }, { flag: [false] }] })
+      ).toEqual([{ field: 'rules.flag', value: '[true,1,false]', type: 'string' }]);
+    });
+
     it('should flatten a simple object', () => {
       const input = {
         field1: 'value1',

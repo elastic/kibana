@@ -39,15 +39,17 @@ describe('mergeSamples', () => {
     expect(result.status).toBe('ok');
   });
 
-  it('prefers a decimal over a whole number', () => {
-    expect(mergeSamples([{ score: 3 }, { score: 3.14 }])).toEqual({ score: 3.14 });
-    expect(mergeSamples([{ score: 3.14 }, { score: 3 }])).toEqual({ score: 3.14 });
+  it('keeps whole and decimal numbers together in an array', () => {
+    expect(mergeSamples([{ score: 3 }, { score: 3.14 }])).toEqual({ score: [3, 3.14] });
+    expect(mergeSamples([{ score: 3.14 }, { score: 3 }])).toEqual({ score: [3.14, 3] });
   });
 
-  it('keeps a string when values have different types', () => {
-    expect(mergeSamples([{ port: 443 }, { port: 'tcp' }])).toEqual({ port: 'tcp' });
-    expect(mergeSamples([{ port: 'tcp' }, { port: 443 }])).toEqual({ port: 'tcp' });
-    expect(mergeSamples([{ flag: 1 }, { flag: true }])).toEqual({ flag: '1' });
+  it('keeps values of different types together in an array', () => {
+    expect(mergeSamples([{ port: 443 }, { port: 'tcp' }])).toEqual({ port: [443, 'tcp'] });
+    expect(mergeSamples([{ port: 'tcp' }, { port: 443 }])).toEqual({ port: ['tcp', 443] });
+    expect(mergeSamples([{ flag: 1 }, { flag: true }, { flag: 2 }])).toEqual({
+      flag: [1, true, 2],
+    });
   });
 
   it('fills empty values from later docs', () => {
@@ -123,8 +125,11 @@ describe('mergeObjectElements', () => {
     });
   });
 
-  it('prefers a decimal over a whole number across elements', () => {
-    expect(mergeObjectElements([{ score: 1 }, { score: 0.5 }])).toEqual({ score: 0.5 });
+  it('keeps differently typed values from every element without changing them', () => {
+    expect(mergeObjectElements([{ score: 1 }, { score: 0.5 }])).toEqual({ score: [1, 0.5] });
+    expect(mergeObjectElements([{ flag: true }, { flag: 1 }, { flag: [false] }])).toEqual({
+      flag: [true, 1, false],
+    });
   });
 
   it('returns undefined when the array has no object elements', () => {
