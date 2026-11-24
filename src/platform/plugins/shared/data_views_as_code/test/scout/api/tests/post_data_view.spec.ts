@@ -417,6 +417,35 @@ apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgno
     }
   );
 
+  apiTest(
+    'creates the data view only in the url space when spaces is omitted from a non-default space',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(`s/${spaceId}${BASE_PATH}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        body: {
+          index_pattern: `logs-no-spaces-named-${Date.now()}-*`,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.meta.spaces).toStrictEqual([spaceId]);
+
+      const defaultSpaceResponse = await apiClient.get(`${BASE_PATH}/${response.body.id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(defaultSpaceResponse).toHaveStatusCode(404);
+    }
+  );
+
   apiTest('returns 400 when spaces does not include the current space', async ({ apiClient }) => {
     const response = await apiClient.post(BASE_PATH, {
       headers: {
@@ -434,13 +463,15 @@ apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgno
   });
 
   apiTest('can create a data view in all spaces with `*`', async ({ apiClient }) => {
+    const uniqueIndexPattern = `logs-all-spaces-${Date.now()}-*`;
+
     const response = await apiClient.post(BASE_PATH, {
       headers: {
         ...COMMON_HEADERS,
         ...adminApiCredentials.apiKeyHeader,
       },
       body: {
-        index_pattern: `logs-all-spaces-${Date.now()}-*`,
+        index_pattern: uniqueIndexPattern,
         spaces: ['*'],
       },
       responseType: 'json',
@@ -450,6 +481,18 @@ apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgno
 
     expect(response).toHaveStatusCode(201);
     expect(response.body.meta.spaces).toStrictEqual(['*']);
+
+    const spaceResponse = await apiClient.get(`s/${spaceId}${BASE_PATH}/${response.body.id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminApiCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(spaceResponse).toHaveStatusCode(200);
+    expect(spaceResponse.body.id).toBe(response.body.id);
+    expect(spaceResponse.body.data.index_pattern).toBe(uniqueIndexPattern);
   });
 
   apiTest('returns 400 when spaces contains an empty id', async ({ apiClient }) => {

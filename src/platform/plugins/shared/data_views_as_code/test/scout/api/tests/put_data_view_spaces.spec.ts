@@ -44,7 +44,12 @@ apiTest.describe(
     const thirdSpaceId = `data-views-put-space-3-${Date.now()}`;
     const allSpaceIds = [spaceId, secondSpaceId, thirdSpaceId];
 
-    apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
+    // Creating the first data view in a space with no default sets `defaultIndex`, so it is
+    // restored afterwards to avoid leaving it pointing at a deleted data view.
+    let initialDefaultIndex: string | number | boolean | undefined;
+
+    apiTest.beforeAll(async ({ requestAuth, apiServices, kbnClient }) => {
+      initialDefaultIndex = await kbnClient.uiSettings.get('defaultIndex');
       for (const id of allSpaceIds) {
         await apiServices.spaces.create({ id, name: id });
       }
@@ -54,7 +59,7 @@ apiTest.describe(
       );
     });
 
-    apiTest.afterAll(async ({ apiServices }) => {
+    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
       for (const id of allSpaceIds) {
         await apiServices.spaces.delete(id);
       }
@@ -64,6 +69,11 @@ apiTest.describe(
         } catch {
           // ignore cleanup errors
         }
+      }
+      if (initialDefaultIndex === undefined) {
+        await kbnClient.uiSettings.unset('defaultIndex');
+      } else {
+        await kbnClient.uiSettings.update({ defaultIndex: initialDefaultIndex });
       }
     });
 
@@ -256,6 +266,64 @@ apiTest.describe(
     );
 
     apiTest(
+      'without spaces in the body, creates the data view only in the url space of a non-default space',
+      async ({ apiClient }) => {
+        const id = `dv-put-named-space-${Date.now()}-${Math.random()}`;
+
+        const response = await apiClient.put(`s/${spaceId}${BASE_PATH}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          body: { index_pattern: `put-named-space-${Date.now()}-*` },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(201);
+        expect(response.body.meta.spaces).toStrictEqual([spaceId]);
+
+        const defaultSpaceResponse = await apiClient.get(`${BASE_PATH}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(defaultSpaceResponse).toHaveStatusCode(404);
+      }
+    );
+
+    apiTest(
+      'without spaces in the body, updates the data view leaving it only in the url space of a non-default space',
+      async ({ apiClient }) => {
+        const id = await createSharedDataView(apiClient, ['default', spaceId]);
+
+        const response = await apiClient.put(`s/${spaceId}${BASE_PATH}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          body: { index_pattern: `put-named-space-update-${Date.now()}-*` },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.meta.spaces).toStrictEqual([spaceId]);
+
+        const defaultSpaceResponse = await apiClient.get(`${BASE_PATH}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(defaultSpaceResponse).toHaveStatusCode(404);
+      }
+    );
+
+    apiTest(
       'with many spaces in the body, adds and removes spaces to match them',
       async ({ apiClient }) => {
         const id = await createSharedDataView(apiClient, ['default', spaceId]);
@@ -315,14 +383,15 @@ apiTest.describe(
           })
         ).body.data.index_pattern;
 
-        const response = await apiClient.put(`${BASE_PATH}/${id}`, {
+        // Sent from the named space, so the url space is `spaceId` and `default` is not enough.
+        const response = await apiClient.put(`s/${spaceId}${BASE_PATH}/${id}`, {
           headers: {
             ...COMMON_HEADERS,
             ...adminApiCredentials.apiKeyHeader,
           },
           body: {
             index_pattern: `put-spaces-without-url-space-${Date.now()}-*`,
-            spaces: [spaceId],
+            spaces: ['default'],
           },
           responseType: 'json',
         });

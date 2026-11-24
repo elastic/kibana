@@ -749,7 +749,8 @@ describe('DataViewsAsCodeService', () => {
       });
 
       it('throws a 403 when the requested spaces include an unknown space', async () => {
-        const { service, mockSavedObjectsClient } = setup({ namespaces: ['default', '?'] });
+        // The existing spaces are all known, so only the request validation can reject it.
+        const { service, mockSavedObjectsClient } = setup({ namespaces: ['default'] });
 
         await expect(
           service.upsert(id, { ...inputSpecWithoutId, spaces: ['default', '?'] }, 'default')
