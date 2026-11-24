@@ -6,6 +6,7 @@
  */
 
 import { FeatureRegistry } from './feature_registry';
+import type { ConfigOverridesType } from './config';
 import type {
   ElasticsearchFeatureConfig,
   FeatureKibanaPrivilegesReference,
@@ -2904,6 +2905,20 @@ describe('FeatureRegistry', () => {
 
     describe('#validateFeatures', () => {
       function createRegistry(...features: KibanaFeatureConfig[]) {
+        return buildRegistry(undefined, ...features);
+      }
+
+      function createRegistryWithOverrides(
+        overrides: ConfigOverridesType,
+        ...features: KibanaFeatureConfig[]
+      ) {
+        return buildRegistry(overrides, ...features);
+      }
+
+      function buildRegistry(
+        overrides: ConfigOverridesType | undefined,
+        ...features: KibanaFeatureConfig[]
+      ) {
         const registry = new FeatureRegistry();
 
         // Non-deprecated feature.
@@ -3020,6 +3035,10 @@ describe('FeatureRegistry', () => {
           registry.registerKibanaFeature(feature);
         }
 
+        if (overrides) {
+          registry.applyOverrides(overrides);
+        }
+
         registry.lockRegistration();
         return registry;
       }
@@ -3029,6 +3048,7 @@ describe('FeatureRegistry', () => {
         all,
         read,
         subAlpha,
+        disabled = false,
       }: {
         deprecated?: { notice: string; replacedBy?: string[] };
         all?: FeatureKibanaPrivilegesReference[];
@@ -3037,6 +3057,7 @@ describe('FeatureRegistry', () => {
           default: FeatureKibanaPrivilegesReference[];
         };
         subAlpha?: FeatureKibanaPrivilegesReference[];
+        disabled?: boolean;
       } = {}): KibanaFeatureConfig {
         return {
           deprecated: deprecated ?? { notice: 'It was a mistake.' },
@@ -3048,11 +3069,13 @@ describe('FeatureRegistry', () => {
             all: {
               savedObject: { all: [], read: [] },
               ui: [],
+              ...(disabled ? { disabled: true } : {}),
               replacedBy: all ?? [{ feature: 'feature-beta', privileges: ['all'] }],
             },
             read: {
               savedObject: { all: [], read: [] },
               ui: [],
+              ...(disabled ? { disabled: true } : {}),
               replacedBy: read ?? {
                 default: [{ feature: 'feature-beta', privileges: ['all'] }],
                 minimal: [{ feature: 'feature-beta', privileges: ['read', 'sub-beta-2-1'] }],
@@ -3564,6 +3587,57 @@ describe('FeatureRegistry', () => {
         ).toThrowErrorMatchingInlineSnapshot(
           `"Cannot replace privilege \\"sub-alpha-1-1\\" of deprecated feature \\"feature-alpha\\" with disabled privilege \\"read\\" of feature \\"feature-delta\\"."`
         );
+      });
+
+      it('allows disabled privileges to be replaced by disabled privileges', () => {
+        // Case 1: top-level disabled privileges replaced by the disabled `read`
+        // privilege of feature-delta.
+        expect(() =>
+          createRegistry(
+            createDeprecatedFeature({
+              all: [{ feature: 'feature-delta', privileges: ['read'] }],
+              read: {
+                default: [{ feature: 'feature-delta', privileges: ['read'] }],
+                minimal: [{ feature: 'feature-delta', privileges: ['read'] }],
+              },
+              disabled: true,
+            })
+          ).validateFeatures()
+        ).not.toThrow();
+
+        // Case 2: sub-feature privilege disabled via config overrides and
+        // replaced by a disabled privilege.
+        const registry = createRegistryWithOverrides(
+          {
+            'feature-alpha': {
+              subFeatures: { privileges: { 'sub-alpha-1-1': { disabled: true } } },
+            },
+          },
+          createDeprecatedFeature({
+            subAlpha: [{ feature: 'feature-delta', privileges: ['read'] }],
+          })
+        );
+        expect(() => registry.validateFeatures()).not.toThrow();
+      });
+
+      it('allows disabled privileges to be replaced by enabled privileges', () => {
+        // Case 1: top-level disabled privileges replaced by enabled privileges
+        // of feature-beta.
+        expect(() =>
+          createRegistry(createDeprecatedFeature({ disabled: true })).validateFeatures()
+        ).not.toThrow();
+
+        // Case 2: sub-feature privilege disabled via config overrides and
+        // replaced by an enabled privilege.
+        const registry = createRegistryWithOverrides(
+          {
+            'feature-alpha': {
+              subFeatures: { privileges: { 'sub-alpha-1-1': { disabled: true } } },
+            },
+          },
+          createDeprecatedFeature()
+        );
+        expect(() => registry.validateFeatures()).not.toThrow();
       });
 
       it('requires correct list of feature IDs to be replaced by', () => {
