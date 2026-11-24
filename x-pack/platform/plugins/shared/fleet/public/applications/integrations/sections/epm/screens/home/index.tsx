@@ -15,7 +15,6 @@ import { installationStatuses } from '../../../../../../../common/constants';
 import {
   INTEGRATIONS_ROUTING_PATHS,
   INTEGRATIONS_SEARCH_QUERYPARAM,
-  INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM,
   INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM,
 } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
@@ -44,7 +43,6 @@ export const getParams = (params: CategoryParams, search: string) => {
   const selectedCategory: ExtendedIntegrationCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  const onlyAgentlessParam = queryParams.get(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM) === 'true';
 
   const showDeprecatedParam =
     queryParams.get(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM) === 'true' ? true : undefined;
@@ -53,7 +51,6 @@ export const getParams = (params: CategoryParams, search: string) => {
     selectedCategory,
     searchParam,
     selectedSubcategory: subcategory,
-    onlyAgentless: onlyAgentlessParam,
     showDeprecated: showDeprecatedParam,
   };
 };
