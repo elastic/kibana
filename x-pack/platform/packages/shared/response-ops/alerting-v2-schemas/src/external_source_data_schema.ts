@@ -167,6 +167,12 @@ export const externalSourceResponseSchema = lazySchema(() =>
   externalSourceDataBaseSchema
     .extend({
       id: z.string().describe('Unique import identifier.'),
+      type: z
+        .string()
+        .max(256)
+        .describe(
+          'The source the import receives events from. It cannot be changed after creation.'
+        ),
       version: z
         .number()
         .int()

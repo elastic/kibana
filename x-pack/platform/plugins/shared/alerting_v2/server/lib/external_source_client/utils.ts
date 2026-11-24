@@ -90,11 +90,14 @@ export const buildUpdateExternalSourceAttributes = ({
   updatedAt: now,
 });
 
-/** The stored fields a PATCH merges into, in the shape of the create data. */
+/**
+ * The stored fields a PATCH merges into, in the shape of the create data. `type` is the stored
+ * string: the merged result is re-validated against the create schema before it is written.
+ */
 export const toExternalSourceData = (
   attributes: ExternalSourceSavedObjectAttributes,
   connectorId: string
-): ExternalSourceData => ({
+): Omit<ExternalSourceData, 'type'> & { type: string } => ({
   type: attributes.type,
   kind: attributes.kind,
   metadata: toStoredMetadata(attributes.metadata),
