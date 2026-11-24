@@ -17,6 +17,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { EvalsMode } from './config';
 import type { DatasetService } from './storage/datasets/dataset_service';
 import type { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
+import type { ReviewService } from './storage/reviews/review_service';
 import type { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import type {
   EvaluatorOrigin,
@@ -99,6 +100,7 @@ export interface EvalsRouteHandlerContext {
   evaluationScoreService: EvaluationScoreService;
   onlineScoreService: OnlineScoreService;
   evaluatorDefinitionService: EvaluatorDefinitionService;
+  reviewService: ReviewService;
   evaluatorRegistry: EvaluatorRegistry;
 }
 

@@ -6,7 +6,7 @@
  */
 
 import { ESTIMATED_COST_EVALUATOR_NAME } from '@kbn/evals';
-import { wilsonInterval, type ConfidenceInterval } from './trajectory_agreement';
+import { verdictPairingKey, wilsonInterval, type ConfidenceInterval } from '@kbn/evals-common';
 import { classifyFamily } from './judge_provenance';
 
 /**
@@ -67,8 +67,8 @@ const NON_VERDICT_EVALUATORS = new Set([
 /** Scores are 0..1; a verdict is the pass/fail side of the midpoint. */
 const passed = (score: number): boolean => score > 0.5;
 
-const cellKey = (v: JudgeVerdict): string =>
-  `${v.suiteId ?? ''}\u0000${v.example}\u0000${v.repetition}\u0000${v.evaluator}`;
+const cellKey = ({ suiteId, example, repetition, evaluator }: JudgeVerdict): string =>
+  verdictPairingKey({ suiteId, exampleId: example, repetition, evaluator });
 
 /**
  * Compares the two judges with the most overlap, pairing verdicts by (example, repetition, evaluator).

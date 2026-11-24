@@ -74,6 +74,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
       getInferenceStart: async () => inferenceStart,
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
@@ -188,6 +189,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
       getInferenceStart: async () => inferenceStart,
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
     };
     registerTestEvaluatorRoute(dependencies);
     registerEvaluateRoute(dependencies);
@@ -282,6 +284,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
       getInferenceStart: async () => inferenceStart,
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
     };
     registerTestEvaluatorRoute(dependencies);
     registerEvaluateRoute(dependencies);

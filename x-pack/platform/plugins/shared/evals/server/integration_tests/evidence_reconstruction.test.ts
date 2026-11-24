@@ -376,6 +376,7 @@ describe('trace evidence reconstruction integration', () => {
       getInferenceStart: async () => inferenceStart,
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
     };
 
     registerResolveInstrumentationRoute(routeDependencies);

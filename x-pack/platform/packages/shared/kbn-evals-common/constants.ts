@@ -62,6 +62,7 @@ export const EvaluationIndices = {
   DATASETS: `${EVALUATION_INDEX_PREFIX}-datasets`,
   DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
   EVALUATORS: `${EVALUATION_INDEX_PREFIX}-evaluators`,
+  REVIEWS: `${EVALUATION_INDEX_PREFIX}-reviews`,
 } as const;
 
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
@@ -99,3 +100,19 @@ export const MAX_EVALUATOR_NAME_LENGTH = 128 as const;
 export const MAX_EVALUATOR_VERSION_LENGTH = 64 as const;
 
 export const MAX_DATASET_TAG_FACETS = 100 as const;
+
+export const EVALS_REVIEW_QUEUES_URL = `${EVALS_INTERNAL_URL}/review_queues` as const;
+export const EVALS_REVIEW_QUEUE_URL = `${EVALS_REVIEW_QUEUES_URL}/{queueId}` as const;
+export const EVALS_REVIEW_QUEUE_NEXT_URL = `${EVALS_REVIEW_QUEUE_URL}/_next` as const;
+export const EVALS_REVIEW_QUEUE_ITEM_URL = `${EVALS_REVIEW_QUEUE_URL}/items/{itemId}` as const;
+export const EVALS_REVIEW_QUEUE_AGREEMENT_URL = `${EVALS_REVIEW_QUEUE_URL}/agreement` as const;
+
+/** Agreement pooled over every review queue of one evaluator, within one major version. */
+export const EVALS_EVALUATOR_REVIEW_AGREEMENT_URL =
+  `${EVALS_EVALUATOR_URL}/review_agreement` as const;
+
+export const MAX_REVIEW_QUEUE_SAMPLE_SIZE = 1000 as const;
+export const MAX_REVIEW_RUBRIC_LENGTH = 8192 as const;
+export const MAX_REVIEW_RATIONALE_LENGTH = 4096 as const;
+export const REVIEW_PASS_LABEL = 'pass' as const;
+export const REVIEW_FAIL_LABEL = 'fail' as const;

@@ -10,7 +10,6 @@ import {
   answersFromDocs,
   cellAgreement,
   firstDivergence,
-  intervalsOverlap,
   pathContractFromDocs,
   resolveProbe,
   rowAgreement,
@@ -18,8 +17,8 @@ import {
   trailsEqual,
   trailSetsEqual,
   trailsFromDocs,
-  wilsonInterval,
 } from './trajectory_agreement';
+import { wilsonInterval } from '@kbn/evals-common';
 
 describe('trailsEqual / sequenceSimilarity', () => {
   it('treats identical tool_id sequences as equal', () => {
@@ -245,38 +244,6 @@ describe('resolveProbe', () => {
       probe: false,
       source: 'legacy-prefix',
     });
-  });
-});
-
-describe('wilsonInterval', () => {
-  it('brackets the point estimate and stays inside [0, 1]', () => {
-    const wide = wilsonInterval(7, 27);
-    expect(wide.low).toBeGreaterThan(0.1);
-    expect(wide.high).toBeLessThan(0.5);
-    expect(wide.low).toBeLessThan(7 / 27);
-    expect(wide.high).toBeGreaterThan(7 / 27);
-  });
-
-  it('does not run below zero at a zero rate', () => {
-    const zero = wilsonInterval(0, 10);
-    expect(zero.low).toBe(0);
-    expect(zero.high).toBeGreaterThan(0);
-  });
-
-  it('narrows as the sample grows', () => {
-    const small = wilsonInterval(5, 20);
-    const large = wilsonInterval(50, 200);
-    expect(large.high - large.low).toBeLessThan(small.high - small.low);
-  });
-});
-
-describe('intervalsOverlap', () => {
-  it('treats two small-sample rates a few points apart as indistinguishable', () => {
-    expect(intervalsOverlap(wilsonInterval(7, 27), wilsonInterval(6, 27))).toBe(true);
-  });
-
-  it('separates rates that genuinely differ at adequate sample size', () => {
-    expect(intervalsOverlap(wilsonInterval(10, 200), wilsonInterval(180, 200))).toBe(false);
   });
 });
 

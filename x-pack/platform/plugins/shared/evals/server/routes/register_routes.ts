@@ -36,6 +36,7 @@ import { registerDeleteExampleRoute } from './datasets/delete_example';
 import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
 import { registerResolveDatasetRoute } from './datasets/resolve_dataset';
 import { registerRemoteConfigsRoutes } from './remotes/register_routes';
+import { registerReviewQueueRoutes } from './reviews/register_routes';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
 import { registerIngestScoresRoute } from './scores/ingest_scores';
@@ -67,7 +68,9 @@ export interface RouteDependencies extends SpaceDependencies {
   getInferenceStart: () => Promise<InferenceServerStart>;
   getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
   getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
+  getInternalReviewQueuesSoClient: () => Promise<SavedObjectsClientContract>;
   getCurrentUsername?: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentProfileUid?: (request: KibanaRequest) => Promise<string | undefined>;
   taskProviderRegistry?: TaskProviderRegistry;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
@@ -118,4 +121,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetExperimentExecutionRoute(dependencies);
   registerCancelExperimentExecutionRoute(dependencies);
   registerRemoteConfigsRoutes(dependencies);
+  registerReviewQueueRoutes(dependencies);
 };

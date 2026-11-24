@@ -12,11 +12,13 @@ export const APP_PATH = '/app/evals' as const;
 export const EVALS_API_PRIVILEGES = {
   read: 'read_evals',
   manage: 'manage_evals',
+  review: 'manage_evals_review',
 } as const;
 
 export const EVALS_UI_PRIVILEGES = {
   show: 'show',
   manage: 'manage',
+  review: 'review',
 } as const;
 
 export type {

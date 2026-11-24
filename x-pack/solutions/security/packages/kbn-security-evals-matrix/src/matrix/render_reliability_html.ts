@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { intervalsOverlap } from '@kbn/evals-common';
 import type { Matrix, MatrixCell, MatrixRow } from './build_matrix';
 import type { MatrixProvenance } from './render_matrix';
 import type { MatrixConfig } from './load_matrix_config';
@@ -16,7 +17,6 @@ import {
   type JudgeVerdict,
 } from './judge_agreement';
 import {
-  intervalsOverlap,
   MIN_RELIABILITY_REPETITIONS,
   resolveProbe,
   rowAgreement,

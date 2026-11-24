@@ -25,6 +25,10 @@ import {
   EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
   evalsRemoteKibanaConfigSavedObjectType,
 } from './saved_objects/remote_kibana_config';
+import {
+  EVALS_REVIEW_QUEUE_SAVED_OBJECT_TYPE,
+  evalsReviewQueueSavedObjectType,
+} from './saved_objects/review_queue';
 import type {
   EvalsRequestHandlerContext,
   EvalsPluginSetup,
@@ -35,6 +39,7 @@ import type {
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/datasets/dataset_service';
 import { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
+import { ReviewService } from './storage/reviews/review_service';
 import { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import { evaluationsDataStreamDefinition } from './storage/scores/scores_index_template';
 import { OnlineScoreService } from './storage/scores/online_score_service';
@@ -55,6 +60,7 @@ export class EvalsPlugin
   private evaluationScoreService?: EvaluationScoreService;
   private evaluatorDefinitionService?: EvaluatorDefinitionService;
   private onlineScoreService?: OnlineScoreService;
+  private reviewService?: ReviewService;
   private started = false;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
@@ -157,6 +163,7 @@ export class EvalsPlugin
     coreSetup.dataStreams.registerDataStream(onlineScoresDataStreamDefinition);
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
+    coreSetup.savedObjects.registerType(evalsReviewQueueSavedObjectType);
     encryptedSavedObjects.registerType({
       type: EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
       attributesToEncrypt: new Set(['apiKey']),
@@ -170,7 +177,8 @@ export class EvalsPlugin
           !this.datasetService ||
           !this.evaluationScoreService ||
           !this.onlineScoreService ||
-          !this.evaluatorDefinitionService
+          !this.evaluatorDefinitionService ||
+          !this.reviewService
         ) {
           throw new Error('Evals storage services have not been initialized');
         }
@@ -180,6 +188,7 @@ export class EvalsPlugin
           evaluationScoreService: this.evaluationScoreService,
           onlineScoreService: this.onlineScoreService,
           evaluatorDefinitionService: this.evaluatorDefinitionService,
+          reviewService: this.reviewService,
           evaluatorRegistry,
         };
       }
@@ -195,13 +204,17 @@ export class EvalsPlugin
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: [EVALS_API_PRIVILEGES.read, EVALS_API_PRIVILEGES.manage],
+          api: [
+            EVALS_API_PRIVILEGES.read,
+            EVALS_API_PRIVILEGES.manage,
+            EVALS_API_PRIVILEGES.review,
+          ],
           management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
             read: [],
           },
-          ui: [EVALS_UI_PRIVILEGES.show, EVALS_UI_PRIVILEGES.manage],
+          ui: [EVALS_UI_PRIVILEGES.show, EVALS_UI_PRIVILEGES.manage, EVALS_UI_PRIVILEGES.review],
         },
         read: {
           app: ['kibana', PLUGIN_ID],
@@ -223,6 +236,12 @@ export class EvalsPlugin
       })
     );
 
+    const internalReviewQueuesSoClientPromise = coreSetup.getStartServices().then(([coreStart]) =>
+      coreStart.savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [EVALS_REVIEW_QUEUE_SAVED_OBJECT_TYPE],
+      })
+    );
+
     const getInferenceStart = () =>
       coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.inference);
 
@@ -234,6 +253,11 @@ export class EvalsPlugin
     const getCurrentUsername = async (request: KibanaRequest): Promise<string | undefined> => {
       const [, pluginsStart] = await coreSetup.getStartServices();
       return pluginsStart.security?.authc.getCurrentUser(request)?.username;
+    };
+
+    const getCurrentProfileUid = async (request: KibanaRequest): Promise<string | undefined> => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      return pluginsStart.security?.authc.getCurrentUser(request)?.profile_uid;
     };
 
     // When security is disabled there is no per-space authz to enforce, so grant.
@@ -278,8 +302,10 @@ export class EvalsPlugin
       getEncryptedSavedObjectsStart: () =>
         coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
+      getInternalReviewQueuesSoClient: () => internalReviewQueuesSoClientPromise,
       getSpaceId,
       getCurrentUsername,
+      getCurrentProfileUid,
       checkManageEvalsPrivileges,
       getAccessibleSpaceIds,
       taskProviderRegistry,
@@ -317,6 +343,12 @@ export class EvalsPlugin
       evaluatorRegistry.isBuiltIn
     );
     this.onlineScoreService = new OnlineScoreService(this.logger, coreStart.dataStreams);
+    this.reviewService = new ReviewService(
+      this.logger,
+      // Origin-only under CPS: the review items index is plugin-owned and lives in this project.
+      coreStart.elasticsearch.client.asInternalUser,
+      this.isServerless
+    );
 
     return {
       datasetService: this.datasetService,

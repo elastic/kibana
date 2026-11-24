@@ -142,6 +142,7 @@ describe('online scores ingestion and listing integration', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
       getSpaceId: async () => activeSpaceId,
     });
     registerListOnlineScoresRoute({
@@ -152,6 +153,7 @@ describe('online scores ingestion and listing integration', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
       getSpaceId: async () => activeSpaceId,
     });
     const versionedRouter = router.versioned as MockedVersionedRouter;

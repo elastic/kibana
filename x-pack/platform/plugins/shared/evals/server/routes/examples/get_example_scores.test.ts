@@ -30,6 +30,7 @@ describe('GET /internal/evals/examples/{exampleId}/scores', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;

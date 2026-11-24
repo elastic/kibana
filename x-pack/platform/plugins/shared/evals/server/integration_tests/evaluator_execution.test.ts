@@ -164,6 +164,7 @@ describe('trace evaluators integration', () => {
         } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
     });
 
     const route = versionedRouter.getRoute('post', EVALS_EVALUATE_URL);
@@ -508,6 +509,7 @@ describe('trace evaluators integration', () => {
         } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
     });
 
     const routeConfig = versionedRouter.post.mock.calls[0][0];
