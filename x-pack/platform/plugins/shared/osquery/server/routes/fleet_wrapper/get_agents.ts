@@ -79,23 +79,31 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         const agentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, agentPolicyIds);
 
         // FIND agents by policy_name
-        const policyNamePattern = /policy_name:([^ ]+)/;
+        // `use_all_agents` emits the `policy_name` clause as the last term of the search group, and
+        // the search text also appears unescaped in earlier clauses, so the last match is the real one.
+        const policyNamePattern = /policy_name:([^ ]+)/g;
         let kuery = query.kuery;
-        const policyName: string | undefined = kuery.match(policyNamePattern)?.[1];
+        const policyNameClause = [...kuery.matchAll(policyNamePattern)].pop();
+        const policyName: string | undefined = policyNameClause?.[1];
 
         const foundPolicyByName = policyName
           ? agentPolicies?.filter((policy) =>
               policy.name.toLowerCase().includes(policyName.toLowerCase())
-            )
+            ) ?? []
           : [];
 
-        if (foundPolicyByName?.length) {
+        // `policy_name` is not an agent field, and Fleet rejects unmapped kuery fields, so the
+        // clause is replaced by the policy ids it resolved to. Its value may contain spaces, so the
+        // clause runs up to the closing `)` of the search group. No match yields a match-nothing clause.
+        if (policyNameClause?.index !== undefined) {
+          const clauseStart = policyNameClause.index;
+          const groupEnd = kuery.lastIndexOf(')');
+          const clauseEnd = groupEnd > clauseStart ? groupEnd : kuery.length;
           kuery =
-            // remove the ) from the end of the kuery
-            kuery.slice(0, -1) +
-            ' or ' +
+            kuery.slice(0, clauseStart) +
             buildPolicyIdKuery(foundPolicyByName.map((p) => p.id)) +
-            ')';
+            ' ' +
+            kuery.slice(clauseEnd);
         }
 
         const agentPolicyById = mapKeys(agentPolicies, 'id');

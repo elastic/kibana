@@ -112,6 +112,20 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body).to.have.property('groups');
     });
 
+    it('lists agents for a picker search, whose policy_name clause Fleet does not map', async () => {
+      // Mirrors the search kuery built by the Osquery agent picker (use_all_agents.ts).
+      const searchValue = 'Osquery policy';
+      const kuery = encodeURIComponent(
+        `policy_id:("${agentPolicyId}" or ${agentPolicyId}#*) and (local_metadata.host.hostname.keyword:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}* or policy_id: *${searchValue}* or local_metadata.os.platform: *${searchValue}* or policy_name:${searchValue} )`
+      );
+      const response = await getWithInternalHeaders(
+        `/internal/osquery/fleet_wrapper/agents?page=1&perPage=20&showInactive=false&kuery=${kuery}`
+      );
+
+      expect(response.status).to.be(200);
+      expect(response.body.agents.map(({ id }: { id: string }) => id)).to.contain(agentId);
+    });
+
     it('returns bulk agent details', async () => {
       const response = await postWithInternalHeaders(
         '/internal/osquery/fleet_wrapper/agents/_bulk'
