@@ -8,7 +8,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { SessionsStatus } from '../../../../common/sessions';
 import { useApiClient } from '../../../hooks/use_api_client';
-import { useSessionsStatus } from './use_sessions_status';
+import { STATUS_REFRESH_MS, useSessionsStatusState } from './use_sessions_status';
+
+const STATUS_ENDPOINT = 'GET /internal/digital_experience/sessions/status';
+const ENABLE_ENDPOINT = 'POST /internal/digital_experience/sessions/enable';
 
 jest.mock('../../../hooks/use_api_client');
 
@@ -25,7 +28,7 @@ const deferred = <T>() => {
   return { promise, resolve };
 };
 
-describe('useSessionsStatus', () => {
+describe('useSessionsStatusState', () => {
   const fetch = jest.fn();
 
   beforeEach(() => {
@@ -43,7 +46,7 @@ describe('useSessionsStatus', () => {
       .mockReturnValueOnce(poll.promise)
       .mockResolvedValueOnce(statusOf('enabled'))
       .mockResolvedValueOnce(statusOf('after'));
-    const { result } = renderHook(() => useSessionsStatus());
+    const { result } = renderHook(() => useSessionsStatusState());
     await waitFor(() => expect(result.current.status).toEqual(statusOf('before')));
 
     // A poll starts, then enabling finishes before the poll answers.
@@ -57,5 +60,64 @@ describe('useSessionsStatus', () => {
     // A status requested after enabling replaces it.
     act(() => result.current.refresh());
     await waitFor(() => expect(result.current.status).toEqual(statusOf('after')));
+  });
+
+  describe('setting sessions up by itself', () => {
+    const notSetUp = (autoEnable: boolean) => ({ installed: false, autoEnable } as SessionsStatus);
+
+    const respondWith = (status: SessionsStatus, enable: () => Promise<SessionsStatus>) =>
+      fetch.mockImplementation((endpoint: string) =>
+        endpoint === ENABLE_ENDPOINT ? enable() : Promise.resolve(status)
+      );
+
+    const enableCalls = () => fetch.mock.calls.filter(([endpoint]) => endpoint === ENABLE_ENDPOINT);
+
+    it('sets them up when the status says the user can', async () => {
+      respondWith(notSetUp(true), async () => statusOf('enabled'));
+      const { result } = renderHook(() => useSessionsStatusState());
+
+      await waitFor(() => expect(result.current.status).toEqual(statusOf('enabled')));
+      expect(enableCalls()).toHaveLength(1);
+    });
+
+    it('waits to be asked when the user can not', async () => {
+      respondWith(notSetUp(false), async () => statusOf('enabled'));
+      const { result } = renderHook(() => useSessionsStatusState());
+
+      await waitFor(() => expect(result.current.status).toEqual(notSetUp(false)));
+      expect(enableCalls()).toHaveLength(0);
+    });
+
+    it('tries once, and keeps the error for the prompt to show', async () => {
+      const failure = new Error('Could not enable sessions');
+      respondWith(notSetUp(true), async () => {
+        throw failure;
+      });
+      const { result } = renderHook(() => useSessionsStatusState());
+
+      await waitFor(() => expect(result.current.enableError).toBe(failure));
+      act(() => result.current.refresh());
+      await waitFor(() => expect(fetch).toHaveBeenCalledTimes(3));
+      expect(enableCalls()).toHaveLength(1);
+    });
+  });
+
+  it('checks the status again while sessions rebuild, and stops once they are built', async () => {
+    jest.useFakeTimers();
+    try {
+      fetch
+        .mockResolvedValueOnce({ installed: true, rebuilding: true } as SessionsStatus)
+        .mockResolvedValue({ installed: true, rebuilding: false } as SessionsStatus);
+      const { result } = renderHook(() => useSessionsStatusState());
+      await waitFor(() => expect(result.current.status?.rebuilding).toBe(true));
+
+      await act(async () => jest.advanceTimersByTime(STATUS_REFRESH_MS));
+      await waitFor(() => expect(result.current.status?.rebuilding).toBe(false));
+      await act(async () => jest.advanceTimersByTime(3 * STATUS_REFRESH_MS));
+
+      expect(fetch.mock.calls.filter(([endpoint]) => endpoint === STATUS_ENDPOINT)).toHaveLength(2);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
