@@ -20,7 +20,7 @@ export function initializePauseFetchManager(
   // and we'd mistake them for a search change and start a new session.
   const initialFiltersSubscription = merge(
     // child filters are only pushed once loading finishes. If nothing is loading at start
-    // (e.g. no controls), they're never pushed, so unpause right away instead
+    // (e.g. an empty dashboard), they're never pushed, so unpause right away instead
     filtersManager.api.childFiltersLoading$.pipe(
       take(1),
       filter((loading) => !loading)
