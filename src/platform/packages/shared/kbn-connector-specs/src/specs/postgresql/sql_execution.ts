@@ -14,7 +14,7 @@ import { getResponseLimit } from '../../lib/clients/postgresql_response_limit';
 export const DEFAULT_MAX_ROWS = 100;
 export const MAX_MAX_ROWS = 1000;
 
-// Rows fetched from a cursor per round trip, which bounds how much is buffered beyond the response limit.
+// Rows fetched in the first cursor batch; later batches are sized from the row width and the remaining budget.
 const FETCH_BATCH_SIZE = 20;
 
 // Fallback for xpack.actions.maxResponseContentLength when the client did not record one.
@@ -83,8 +83,9 @@ export const withReadOnlySession = async <R>(
     await client.query({ text: `DECLARE ${cursor} NO SCROLL CURSOR FOR ${text}`, values });
     const rows: T[] = [];
     let truncated = false;
+    let batchSize = Math.min(FETCH_BATCH_SIZE, maxRows + 1);
     for (;;) {
-      const { rows: batch } = await client.query<T>(`FETCH ${FETCH_BATCH_SIZE} FROM ${cursor}`);
+      const { rows: batch } = await client.query<T>(`FETCH ${batchSize} FROM ${cursor}`);
       const capped = capRows(batch, maxRows - rows.length, remainingBytes);
       rows.push(...capped.rows);
       remainingBytes -= capped.bytes;
@@ -92,7 +93,14 @@ export const withReadOnlySession = async <R>(
         truncated = true;
         break;
       }
-      if (batch.length < FETCH_BATCH_SIZE) break;
+      if (batch.length < batchSize) break;
+      // Size the next batch from the average row width so far, so buffering stays near the remaining byte
+      // budget without a round trip per few rows. One row past maxRows is enough to detect truncation.
+      const averageBytes = Math.max(1, capped.bytes / batch.length);
+      batchSize = Math.min(
+        maxRows - rows.length + 1,
+        Math.max(1, Math.floor(remainingBytes / averageBytes))
+      );
     }
     return { rows, rowCount: rows.length, truncated };
   };

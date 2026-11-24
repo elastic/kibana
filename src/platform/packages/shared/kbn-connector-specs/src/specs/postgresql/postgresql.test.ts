@@ -16,6 +16,8 @@ type Row = Record<string, unknown>;
 interface ScriptedResult {
   rows?: Row[];
   error?: Error;
+  /** Raised by the first FETCH, like a runtime error PostgreSQL reports while producing rows. */
+  fetchError?: Error;
   rowCount?: number | null;
   command?: string;
 }
@@ -33,7 +35,7 @@ const makePool = (
   // Consumes the next scripted result; the last one repeats.
   const nextResult = (): ScriptedResult => (queue.length > 1 ? queue.shift() ?? {} : queue[0]);
   const statements: Array<{ text: string; values?: unknown[] }> = [];
-  const cursors = new Map<string, Row[]>();
+  const cursors = new Map<string, { rows: Row[]; fetchError?: Error }>();
   const client = Object.assign(new EventEmitter(), {
     query: jest.fn(async (arg: string | { text: string; values?: unknown[] }) => {
       const statement = typeof arg === 'string' ? { text: arg } : arg;
@@ -54,12 +56,14 @@ const makePool = (
         statements.push({ ...statement, text: declare[2] });
         const next = nextResult();
         if (next.error) throw next.error;
-        cursors.set(declare[1], [...(next.rows ?? [])]);
+        cursors.set(declare[1], { rows: [...(next.rows ?? [])], fetchError: next.fetchError });
         return {};
       }
       const fetch = /^FETCH (\d+) FROM (\S+)$/.exec(statement.text);
       if (fetch) {
-        return { rows: (cursors.get(fetch[2]) ?? []).splice(0, Number(fetch[1])) };
+        const cursor = cursors.get(fetch[2]);
+        if (cursor?.fetchError) throw cursor.fetchError;
+        return { rows: (cursor?.rows ?? []).splice(0, Number(fetch[1])) };
       }
       const next = nextResult();
       if (next.error) throw next.error;
@@ -334,7 +338,13 @@ describe('PostgresqlConnector', () => {
       expect(statements.filter(({ text }) => text.startsWith('FETCH '))).toHaveLength(1);
     });
 
-    it('fetches in batches until the rows run out', async () => {
+    const fetchSizes = (statements: Array<{ text: string }>) =>
+      statements
+        .map(({ text }) => /^FETCH (\d+) FROM /.exec(text)?.[1])
+        .filter(Boolean)
+        .map(Number);
+
+    it('sizes later batches from the row width, so small rows need few round trips', async () => {
       const { pool, statements } = makePool([{ rows: rowsOf(45) }]);
 
       const result = (await PostgresqlConnector.actions.query.handler(makeContext(pool), {
@@ -342,7 +352,42 @@ describe('PostgresqlConnector', () => {
       })) as { rowCount: number; truncated: boolean };
 
       expect(result).toMatchObject({ rowCount: 45, truncated: false });
-      expect(statements.filter(({ text }) => text.startsWith('FETCH '))).toHaveLength(3);
+      // After the first 20 rows, the next batch asks for every row that could still be returned (100 - 20 + 1).
+      expect(fetchSizes(statements)).toEqual([20, 81]);
+    });
+
+    it('shrinks batches as the response-size budget runs low', async () => {
+      const { pool, statements } = makePool([
+        { rows: Array.from({ length: 100 }, () => ({ v: 'x'.repeat(98) })) },
+      ]);
+      // Each row serializes to 106 bytes, so 30 rows fit: 20 in the first batch, then 10, then the one that overflows.
+      setResponseLimit(pool, 106 * 30);
+
+      const result = (await PostgresqlConnector.actions.query.handler(makeContext(pool), {
+        sql: 'SELECT v FROM wide',
+      })) as { rowCount: number; truncated: boolean };
+
+      expect(result).toMatchObject({ rowCount: 30, truncated: true });
+      expect(fetchSizes(statements)).toEqual([20, 10, 1]);
+    });
+
+    it('rolls back, resets and releases the session when a FETCH fails, and the next read works', async () => {
+      const { pool, client, statements } = makePool([
+        { rows: [], fetchError: new Error('division by zero') },
+        { rows: rowsOf(1) },
+      ]);
+      const ctx = makeContext(pool);
+
+      await expect(
+        PostgresqlConnector.actions.query.handler(ctx, { sql: 'SELECT 1/0' })
+      ).rejects.toThrow('division by zero');
+
+      expect(statements.slice(-2).map(({ text }) => text)).toEqual(['ROLLBACK', 'DISCARD ALL']);
+      expect(client.release).toHaveBeenCalledWith(false);
+
+      await expect(
+        PostgresqlConnector.actions.query.handler(ctx, { sql: 'SELECT id FROM t' })
+      ).resolves.toMatchObject({ rowCount: 1, truncated: false });
     });
 
     it('defaults to 100 rows and flags truncation when more exist', async () => {
