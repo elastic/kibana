@@ -50,23 +50,23 @@ export const hunts: Hunt[] = [
           module: 'okta',
         },
         user: {
-          name: 'helpdesk@corp.example',
-          email: 'helpdesk@corp.example',
+          name: 'helpdesk@corp.example.cloud',
+          email: 'helpdesk@corp.example.cloud',
           full_name: 'IT Helpdesk',
         },
         'user.target': {
-          name: 'm.johnson@corp.example',
-          email: 'm.johnson@corp.example',
+          name: 'm.johnson@corp.example.cloud',
+          email: 'm.johnson@corp.example.cloud',
           full_name: 'Mary Johnson',
         },
         source: { ip: '192.0.2.5' },
         okta: {
-          actor: { alternate_id: 'helpdesk@corp.example', display_name: 'IT Helpdesk' },
+          actor: { alternate_id: 'helpdesk@corp.example.cloud', display_name: 'IT Helpdesk' },
           outcome: { result: 'SUCCESS' },
           target: [
             {
               type: 'User',
-              alternateId: 'm.johnson@corp.example',
+              alternateId: 'm.johnson@corp.example.cloud',
               displayName: 'Mary Johnson',
             },
           ],
@@ -75,7 +75,10 @@ export const hunts: Hunt[] = [
             geographical_context: { country: 'US', city: 'Austin' },
           },
         },
-        related: { user: ['helpdesk@corp.example', 'm.johnson@corp.example'], ip: ['192.0.2.5'] },
+        related: {
+          user: ['helpdesk@corp.example.cloud', 'm.johnson@corp.example.cloud'],
+          ip: ['192.0.2.5'],
+        },
       },
     ],
   },
@@ -107,23 +110,23 @@ export const hunts: Hunt[] = [
           module: 'okta',
         },
         user: {
-          name: 'it-admin@corp.example',
-          email: 'it-admin@corp.example',
+          name: 'it-admin@corp.example.cloud',
+          email: 'it-admin@corp.example.cloud',
           full_name: 'Mike Torres',
         },
         'user.target': {
-          name: 'oncall-eng@corp.example',
-          email: 'oncall-eng@corp.example',
+          name: 'oncall-eng@corp.example.cloud',
+          email: 'oncall-eng@corp.example.cloud',
           full_name: 'On-Call Engineer',
         },
         source: { ip: '192.0.2.5' },
         okta: {
-          actor: { alternate_id: 'it-admin@corp.example', display_name: 'Mike Torres' },
+          actor: { alternate_id: 'it-admin@corp.example.cloud', display_name: 'Mike Torres' },
           outcome: { result: 'SUCCESS' },
           target: [
             {
               type: 'User',
-              alternateId: 'oncall-eng@corp.example',
+              alternateId: 'oncall-eng@corp.example.cloud',
               displayName: 'On-Call Engineer',
             },
           ],
@@ -136,7 +139,7 @@ export const hunts: Hunt[] = [
           },
         },
         related: {
-          user: ['it-admin@corp.example', 'oncall-eng@corp.example'],
+          user: ['it-admin@corp.example.cloud', 'oncall-eng@corp.example.cloud'],
           ip: ['192.0.2.5'],
         },
       },

@@ -17,7 +17,10 @@ import type { ICommandCallbacks, ICommandContext } from '../types';
 import { getAvailableMetadataFields, isValidMetadataField } from '../options/metadata';
 import { errors, getMessageFromId } from '../../definitions/utils';
 import { validateSources } from '../../definitions/utils/validation/sources';
-import { findNamedSubqueryForSource } from '../../definitions/utils/named_subqueries';
+import {
+  findNamedSubqueryForSource,
+  isNamedSubqueryDeclaredBefore,
+} from '../../definitions/utils/named_subqueries';
 import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
@@ -50,10 +53,11 @@ export const validate = (
   const sources = command.args.filter((arg) => isSource(arg)) as ESQLSource[];
   const indexSources: ESQLSource[] = [];
   for (const source of sources) {
-    if (findNamedSubqueryForSource(source, context?.namedSubqueries ?? [])) {
-      messages.push(errors.subqueryNotSupportedInTs(source));
-    } else {
+    const namedSubquery = findNamedSubqueryForSource(source, context?.namedSubqueries ?? []);
+    if (!namedSubquery) {
       indexSources.push(source);
+    } else if (isNamedSubqueryDeclaredBefore(namedSubquery, source)) {
+      messages.push(errors.subqueryNotSupportedInTs(source));
     }
   }
   messages.push(...validateSources(indexSources, context));
