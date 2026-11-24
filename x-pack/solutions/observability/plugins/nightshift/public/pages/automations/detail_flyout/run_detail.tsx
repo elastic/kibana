@@ -121,7 +121,7 @@ const OpenInvestigationButton = ({ investigationId }: { investigationId: string 
   );
 };
 
-const RunSlackDeliveryStatus = ({ investigationId, investigationExecutionId, status }: Run) => {
+const RunSlackDeliveryStatus = ({ investigationId, investigationExecutionId }: Run) => {
   const { application, nightshiftInvestigations } = useKibana().services;
   if (!investigationId || !investigationExecutionId || !nightshiftInvestigations) return null;
   const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
@@ -135,7 +135,6 @@ const RunSlackDeliveryStatus = ({ investigationId, investigationExecutionId, sta
           ? application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/general' })
           : undefined
       }
-      isRunning={status === 'running'}
     />
   );
 };

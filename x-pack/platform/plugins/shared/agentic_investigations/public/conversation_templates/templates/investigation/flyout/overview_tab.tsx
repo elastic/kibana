@@ -15,6 +15,7 @@ import {
   type OverviewSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import type { ImpactEntityTarget } from '@kbn/agentic-investigations-impact';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import type { Investigation } from '../../../../../common';
 import { HypothesisTreeCard } from '../../../../hypotheses/tree/hypothesis_tree_card';
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
@@ -158,7 +159,9 @@ export const InvestigationOverview: React.FC<
         showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
       />
       {OverviewSection && (
-        <OverviewSection investigationId={conversation.id} isRunning={data?.in_progress ?? false} />
+        <KibanaErrorBoundary>
+          <OverviewSection investigationId={conversation.id} />
+        </KibanaErrorBoundary>
       )}
     </>
   );

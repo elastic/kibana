@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -25,6 +26,8 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common
 import { slackDeliveriesQueryKey } from '../../../data/query_keys';
 
 const endpoint = 'GET /internal/nightshift/investigations/{id}/slack_deliveries';
+const isInaccessible = (error: unknown): boolean =>
+  isHttpFetchError(error) && [403, 404].includes(error.response?.status ?? 0);
 
 const phaseLabels = {
   started: i18n.translate('xpack.nightshift.slackDelivery.startedLabel', {
@@ -75,7 +78,7 @@ const reasonLabels = {
 };
 
 const failedMessage = i18n.translate('xpack.nightshift.slackDelivery.failedMessage', {
-  defaultMessage: 'Check the Slack app and channel connection in Slack settings.',
+  defaultMessage: 'Check the Slack connector and its access to this channel.',
 });
 
 const unconfirmedMessage = i18n.translate('xpack.nightshift.slackDelivery.unconfirmedMessage', {
@@ -87,16 +90,14 @@ export const SlackDeliveryStatus = ({
   investigationId,
   executionId,
   settingsHref,
-  isRunning,
 }: {
   investigationsClient: NightshiftInvestigationsPublicStart['investigationsClient'];
   investigationId: string;
   executionId?: string;
   settingsHref?: string;
-  isRunning?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { data, isError } = useQuery({
+  const { data, error, isError } = useQuery({
     queryKey: slackDeliveriesQueryKey(investigationId, executionId),
     queryFn: ({ signal }) =>
       investigationsClient.fetch(endpoint, {
@@ -107,9 +108,10 @@ export const SlackDeliveryStatus = ({
         signal: signal ?? null,
       }),
     retry: false,
-    refetchInterval: isRunning ? 10_000 : false,
+    // Dispatch, investigation completion, and the failure sweep can record receipts at different times.
+    refetchInterval: (_data, query) => (isInaccessible(query.state.error) ? false : 30_000),
   });
-  if (!data?.deliveries.length && !isError) return null;
+  if (isInaccessible(error) || (!data?.deliveries.length && !isError)) return null;
 
   return (
     <section data-test-subj="nightshiftSlackDeliveryStatus">
@@ -132,7 +134,7 @@ export const SlackDeliveryStatus = ({
       {data?.deliveries.map(({ id, channel, phase, status, reason, attemptedAt }) => {
         const needsSettings =
           status === 'failed' &&
-          (!reason || reason === 'channel_not_connected' || reason === 'app_disconnected');
+          (reason === 'channel_not_connected' || reason === 'app_disconnected');
         return (
           <EuiFlexGroup
             key={id}

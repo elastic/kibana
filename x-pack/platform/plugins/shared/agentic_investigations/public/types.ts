@@ -63,7 +63,6 @@ export type ImpactEntityOpener = (entity: ImpactEntityTarget) => void;
 
 export type InvestigationOverviewSection = ComponentType<{
   investigationId: string;
-  isRunning: boolean;
 }>;
 
 /** A flyout a solution registers for the alerts of one `source`. */

@@ -96,7 +96,7 @@ it.each([{ message: 'Investigate the alert' }, { instructions: 'Investigate the 
         {
           workflowRunId: 'exec-1',
           input: { title: 'Alert triage', ...prompt },
-          output: { investigation_id: 'investigation-1' },
+          output: { investigation_id: 'investigation-1', execution_id: 'investigation-run-1' },
         },
       ],
     });
@@ -143,6 +143,7 @@ it.each([{ message: 'Investigate the alert' }, { instructions: 'Investigate the 
           title: 'Alert triage',
           message: 'Investigate the alert',
           investigationId: 'investigation-1',
+          investigationExecutionId: 'investigation-run-1',
           skipReason: null,
           dailyLimit: undefined,
           runsAsServiceAccount: false,

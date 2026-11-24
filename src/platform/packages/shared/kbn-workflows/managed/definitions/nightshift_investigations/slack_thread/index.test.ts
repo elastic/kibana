@@ -238,7 +238,7 @@ describe('Nightshift Slack thread workflow', () => {
       with: { text: '{{ variables.result_text }}', blocks: '${{ variables.result_blocks }}' },
     });
     expect(postResult.with).not.toHaveProperty('messageTs');
-    expect(postResult).not.toHaveProperty('on-failure.continue', true);
+    expect(postResult).not.toHaveProperty('on-failure');
   });
 
   it('records the message holding the result when it is new or was not recorded', () => {

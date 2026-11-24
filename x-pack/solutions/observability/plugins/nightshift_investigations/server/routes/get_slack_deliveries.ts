@@ -8,6 +8,7 @@
 import { serverUnavailable } from '@hapi/boom';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { getSlackDeliveryStatus } from '../lib/notifications/slack_delivery_status';
@@ -23,7 +24,12 @@ export const getSlackDeliveriesRoute = createNightshiftInvestigationsServerRoute
       'Returns the latest recorded status for each Slack destination on an investigation or run.',
   },
   security: {
-    authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read, 'read_investigations'] },
+    authz: {
+      requiredPrivileges: [
+        NIGHTSHIFT_API_PRIVILEGES.read,
+        { anyRequired: ['read_investigations', 'manage_investigations'] },
+      ],
+    },
   },
   params: lazySchema(() =>
     z.object({
@@ -57,13 +63,18 @@ export const getSlackDeliveriesRoute = createNightshiftInvestigationsServerRoute
     // Starts return the bound run. Its shared investigation child normally owns the receipts.
     const management = getWorkflowsManagement()?.management;
     if (!management) throw serverUnavailable('Workflows management is not available');
-    const children = await management.getChildWorkflowExecutions(executionId, spaceId, request);
-    const executionIds = new Set([
-      executionId,
-      ...children
-        .filter(({ workflowId }) => workflowId === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID)
-        .map((child) => child.executionId),
-    ]);
+    const executionIds = new Set([executionId]);
+    try {
+      const children = await management.getChildWorkflowExecutions(executionId, spaceId, request);
+      for (const child of children) {
+        if (child.workflowId === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID) {
+          executionIds.add(child.executionId);
+        }
+      }
+    } catch (error) {
+      // A retained receipt can outlive its execution. The investigation read already scoped it.
+      if (!(error instanceof WorkflowNotFoundError)) throw error;
+    }
     return { deliveries: getSlackDeliveryStatus(routing, executionIds) };
   },
 });

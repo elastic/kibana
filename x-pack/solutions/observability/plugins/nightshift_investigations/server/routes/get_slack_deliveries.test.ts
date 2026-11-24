@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { InvestigationNotFoundError } from '../client/errors';
 import { createRoutingTestContext } from '../lib/notifications/notification_routing.mock';
@@ -32,7 +33,13 @@ const setup = () => {
       getNotificationRoutingClient,
       getWorkflowsManagement: () => ({ management: { getChildWorkflowExecutions } }),
     } as never);
-  return { client, call, getNotifiableInvestigation, getNotificationRoutingClient };
+  return {
+    client,
+    call,
+    getNotifiableInvestigation,
+    getNotificationRoutingClient,
+    getChildWorkflowExecutions,
+  };
 };
 
 it('shows failed findings for the selected run even after a follow-up delivered to the same channel', async () => {
@@ -80,6 +87,21 @@ it('shows failed findings for the selected run even after a follow-up delivered 
   expect((await call()).deliveries).toEqual(
     expect.arrayContaining([expect.objectContaining({ channel: '#checkout', status: 'sent' })])
   );
+});
+
+it('reads a retained receipt when its workflow execution is gone', async () => {
+  const { client, call, getChildWorkflowExecutions } = setup();
+  getChildWorkflowExecutions.mockRejectedValue(new WorkflowNotFoundError('expired'));
+  const routing = await client.initialize('expired', NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, [
+    { type: 'slack', connector_id: 'slack', params: { channel: '#ops' } },
+  ]);
+  await client.claim('expired', routing.destinations[0].id, 'started', 'start', true);
+  await client.record('start', { status: 'sent', channel: 'C1', message_ts: '1.2' });
+
+  expect((await call('expired')).deliveries).toEqual([
+    expect.objectContaining({ channel: '#ops', status: 'sent' }),
+  ]);
+  expect(await call('unknown')).toEqual({ deliveries: [] });
 });
 
 it('requires a scoped investigation read before loading the routing document', async () => {

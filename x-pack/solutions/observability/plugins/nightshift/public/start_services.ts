@@ -56,13 +56,12 @@ export const startNightshiftServices = ({
     subscription.add(
       agenticInvestigations.registerInvestigationOverviewSection(
         NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-        ({ investigationId, isRunning }) =>
+        ({ investigationId }) =>
           React.createElement(
             React.Suspense,
             { fallback: null },
             React.createElement(LazySlackDeliveryStatus, {
               investigationId,
-              isRunning,
               investigationsClient: nightshiftInvestigations.investigationsClient,
               settingsHref,
             })

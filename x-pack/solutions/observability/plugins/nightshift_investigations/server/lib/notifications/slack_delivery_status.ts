@@ -35,7 +35,7 @@ const getDeliveryReason = (error: string | undefined): DeliveryReason | undefine
   }
 };
 
-interface SlackDeliveryStatus {
+export interface SlackDeliveryStatus {
   id: string;
   channel: string;
   phase?: NotificationPhase;
