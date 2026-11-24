@@ -10,7 +10,8 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isEqual } from 'lodash';
+import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import { ErrorCallout } from '@kbn/discover-utils/components';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { EsqlErrorHelp } from '../../../../components/common/esql_error_help';
@@ -25,6 +26,8 @@ import {
 
 export interface DiscoverSearchErrorCalloutProps {
   error: Error;
+  /** The query of the failed request, AI help is only offered while it is still the active query */
+  failedQuery?: AggregateQuery | Query;
 }
 
 /**
@@ -32,6 +35,7 @@ export interface DiscoverSearchErrorCalloutProps {
  */
 export const DiscoverSearchErrorCallout = ({
   error,
+  failedQuery,
 }: DiscoverSearchErrorCalloutProps): React.ReactElement => {
   const { core, docLinks, licensing } = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
@@ -48,8 +52,9 @@ export const DiscoverSearchErrorCallout = ({
       })
     : undefined;
 
+  const isActiveQuery = !failedQuery || isEqual(failedQuery, query);
   const aiHelp =
-    isEsqlMode && isOfAggregateQueryType(query) && hasEnterpriseLicense ? (
+    isEsqlMode && isOfAggregateQueryType(query) && hasEnterpriseLicense && isActiveQuery ? (
       <EsqlErrorHelp
         http={core.http}
         query={query.esql}

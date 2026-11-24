@@ -594,7 +594,9 @@ function DiscoverDocumentsComponent({
 
   if (documentState.fetchStatus === FetchStatus.ERROR && documentState.error) {
     // displayed in place of the documents if they failed to load while the chart is already displayed
-    return <DiscoverSearchErrorCallout error={documentState.error} />;
+    return (
+      <DiscoverSearchErrorCallout error={documentState.error} failedQuery={documentState.query} />
+    );
   }
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {

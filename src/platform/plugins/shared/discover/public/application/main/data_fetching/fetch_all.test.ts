@@ -320,6 +320,11 @@ describe('test fetchAll', () => {
       showChart();
       await fetchPromise;
 
+      // the error still reaches documents$, it is shown in place of the documents
+      expect(subjects.documents$.getValue()).toEqual(
+        expect.objectContaining({ fetchStatus: FetchStatus.ERROR, error })
+      );
+      expect(subjects.totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
       expect(subjects.main$.getValue()).toEqual({
         fetchStatus: FetchStatus.COMPLETE,
         foundDocuments: true,

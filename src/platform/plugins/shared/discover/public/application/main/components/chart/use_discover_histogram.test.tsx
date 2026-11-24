@@ -564,7 +564,16 @@ describe('useDiscoverHistogram', () => {
         });
       };
 
-      return { toolkit, hook, main$, documents$, totalHits$, fetchAbortController, setChartState };
+      return {
+        toolkit,
+        hook,
+        main$,
+        documents$,
+        totalHits$,
+        fetch$,
+        fetchAbortController,
+        setChartState,
+      };
     };
 
     it('should set main$ to PARTIAL and stop the chart loading when the chart completes with results', async () => {
@@ -596,6 +605,32 @@ describe('useDiscoverHistogram', () => {
         );
       });
       setChartState(UnifiedHistogramFetchStatus.complete, 5);
+      expect(main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+    });
+
+    it('should not replay the result of the previous fetch when the chart visibility changes', async () => {
+      const { toolkit, main$, fetch$, fetchAbortController, setChartState } =
+        await setupEsqlChart();
+      const setHideChart = (hideChart: boolean) =>
+        act(() => {
+          toolkit.internalState.dispatch(
+            toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+              appState: { hideChart },
+            })
+          );
+        });
+      setChartState(UnifiedHistogramFetchStatus.complete, 5);
+
+      // a new fetch starts, the histogram still holds the result of the previous one
+      act(() => {
+        fetchAbortController.current.abort();
+        fetchAbortController.current = new AbortController();
+        main$.next({ fetchStatus: FetchStatus.LOADING });
+        fetch$.next({ abortController: fetchAbortController.current });
+      });
+      setHideChart(true);
+      setHideChart(false);
+
       expect(main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     });
 

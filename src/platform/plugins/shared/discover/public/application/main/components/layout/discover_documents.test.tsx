@@ -24,6 +24,7 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { DEFAULT_EXPANDED_DOC_OWNER, internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
+import type { AggregateQuery } from '@kbn/es-query';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
@@ -62,12 +63,14 @@ async function mountComponent({
   toolkit,
   isEsqlMode,
   error,
+  query,
 }: {
   fetchStatus: FetchStatus;
   hits: EsHitRecord[];
   toolkit?: InternalStateMockToolkit;
   isEsqlMode?: boolean;
   error?: Error;
+  query?: AggregateQuery;
 }) {
   if (!toolkit) {
     ({ toolkit } = await setup());
@@ -88,6 +91,7 @@ async function mountComponent({
   const testDocuments = {
     fetchStatus,
     error,
+    query,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     ...(isEsqlMode
       ? {
@@ -172,6 +176,26 @@ describe('Discover documents layout', () => {
 
     expect(await screen.findByTestId('discoverErrorExplainButton')).toBeInTheDocument();
     expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+  });
+
+  test('does not offer to explain the error of a query which is not the active one anymore', async () => {
+    const services = createDiscoverServicesMock();
+    services.licensing = {
+      license$: of({ isActive: true, hasAtLeast: () => true }),
+    } as unknown as LicensingPluginStart;
+    const { toolkit } = await setup({ services });
+
+    await mountComponent({
+      fetchStatus: FetchStatus.ERROR,
+      hits: [],
+      toolkit,
+      isEsqlMode: true,
+      error: new Error('This query failed'),
+      query: { esql: 'from previous' },
+    });
+
+    expect(screen.getByText('This query failed')).toBeVisible();
+    expect(screen.queryByTestId('discoverErrorExplainButton')).not.toBeInTheDocument();
   });
 
   test('render complete when loading but documents were already fetched', async () => {
