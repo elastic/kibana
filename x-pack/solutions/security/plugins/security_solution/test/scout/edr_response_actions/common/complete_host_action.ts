@@ -286,6 +286,9 @@ const pollHostIsolation = async ({
           'kbn-xsrf': 'scout',
           ...INTERNAL_API_HEADERS,
         },
+        // One attempt bounded by the remaining budget: the lock is held while this runs, and the loop retries.
+        retries: 1,
+        signal: AbortSignal.timeout(Math.max(deadline - Date.now(), 1)),
       });
       lastAgentStatus = response.data;
 
