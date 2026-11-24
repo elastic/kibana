@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { isPlainObject, mergeWith } from 'lodash';
+
+import { MANAGED_OTLP_EXPORTER_DEFAULTS } from '../../../common/constants/output';
 import type { OtlpExporterConfig } from '../../../common/types';
 import { isManagedOtlpEndpointUrl } from '../../../common/services/managed_otlp_endpoint';
 import {
   getOtlpSendingQueueSizeError,
   mergeOtlpSendingQueue,
-  withManagedOtlpQueueDefaults,
   withRemovedStoredSettings,
 } from '../../../common/services/otlp_sending_queue';
 import type { OtlpSendingQueue } from '../../../common/services/otlp_sending_queue';
@@ -26,15 +28,15 @@ export const isManagedOtlpEndpoint = (endpoint: string): boolean =>
   isManagedOtlpEndpointUrl(endpoint, getManagedOtlpEndpoint());
 
 /**
- * Fills the settings of the sending queue that are not set, left out or `null`, with the ones that
- * Elastic recommends, when the endpoint is the managed OTLP endpoint. The settings that are set
- * are kept.
+ * Deep-merges managed-OTLP sending_queue defaults into the exporter config when the endpoint
+ * points at the managed OTLP service. User-supplied fields win at every level, and a setting that
+ * is left out or `null` gets the default.
  *
  * A `null` block is an explicit opt-out and is kept: `sending_queue: null` leaves the queue to the
  * spec defaults, and `batch: null` turns batching off.
  *
- * The recommended sizes are in bytes, so they are only set for a queue or a batch that counts
- * bytes, and only when they fit with the sizes that are set.
+ * Uses lodash mergeWith with an array-replacement customizer (same pattern as otel_collector.ts)
+ * so that array values are replaced wholesale rather than concatenated.
  */
 export const applyManagedOtlpDefaults = (exporter: OtlpExporterConfig): OtlpExporterConfig => {
   if (!isManagedOtlpEndpoint(exporter.endpoint) || exporter.sending_queue === null) {
@@ -42,8 +44,20 @@ export const applyManagedOtlpDefaults = (exporter: OtlpExporterConfig): OtlpExpo
   }
   return {
     ...exporter,
-    sending_queue: withManagedOtlpQueueDefaults(exporter.sending_queue),
-  } as OtlpExporterConfig;
+    sending_queue: mergeWith(
+      {},
+      MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue,
+      exporter.sending_queue,
+      (dst: unknown, src: unknown) => {
+        if (Array.isArray(src)) {
+          return src;
+        }
+        if (src === null) {
+          return isPlainObject(dst) ? null : dst;
+        }
+      }
+    ),
+  };
 };
 
 /**

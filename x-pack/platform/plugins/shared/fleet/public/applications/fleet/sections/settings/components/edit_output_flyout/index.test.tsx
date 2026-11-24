@@ -2460,36 +2460,24 @@ describe('EditOutputFlyout', () => {
           QUEUE_TEXT_FIELDS.forEach((testSubj) => expect(value(utils, testSubj)).toBe(''));
         });
 
-        it('should show the spec size for a queue of the managed endpoint that does not count bytes', async () => {
-          mockStartServices(false, MANAGED_URL);
-          const { utils } = renderFlyout();
-          selectOtlpType(utils);
-          setValue(utils, 'otlpEndpointInput', 'managed.example.com:443');
-          setValue(utils, 'otlpQueueSizerInput', 'items');
-
-          await waitFor(() => {
-            expect(utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput')).toHaveAttribute(
-              'placeholder',
-              '1000'
-            );
-          });
-        });
-
-        it('should size a queue of the managed endpoint that does not count bytes for its batch', async () => {
+        it('should show the defaults of the managed endpoint whatever the units', async () => {
           mockStartServices(false, MANAGED_URL);
           const { utils } = renderFlyout();
           selectOtlpType(utils);
           setValue(utils, 'otlpEndpointInput', 'managed.example.com:443');
           setValue(utils, 'otlpQueueSizerInput', 'items');
           setValue(utils, 'otlpBatchSizerInput', 'items');
-          const queueSize = () => utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput');
 
-          // the queue holds a batch of the default minimum size
-          await waitFor(() => expect(queueSize()).toHaveAttribute('placeholder', '8192'));
-
-          // without batching, the queue keeps the spec default
-          click(utils, 'otlpBatchEnabledInput');
-          await waitFor(() => expect(queueSize()).toHaveAttribute('placeholder', '1000'));
+          await waitFor(() => {
+            expect(utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput')).toHaveAttribute(
+              'placeholder',
+              '50000000'
+            );
+          });
+          expect(utils.getByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput')).toHaveAttribute(
+            'placeholder',
+            '1000000'
+          );
         });
 
         it('should send the empty settings of the managed endpoint as null for the server to fill', async () => {
@@ -2583,7 +2571,7 @@ describe('EditOutputFlyout', () => {
           });
         });
 
-        it('should not use a recommended maximum batch size below the minimum', async () => {
+        it('should compare a minimum batch size with the recommended maximum', async () => {
           mockStartServices(false, MANAGED_URL);
           const { utils } = renderFlyout();
           selectOtlpType(utils);
@@ -2591,13 +2579,11 @@ describe('EditOutputFlyout', () => {
           setValue(utils, 'otlpBatchMinSizeInput', '5000000');
           fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMaxSizeInput'));
 
-          // the server leaves the maximum unset, so there is no maximum
           await waitFor(() => {
             expect(
-              utils.getByTestId('settingsOutputsFlyout.otlpBatchMaxSizeInput')
-            ).toHaveAttribute('placeholder', '0');
+              utils.getByText(/can not be less than the minimum size \(5000000\)/)
+            ).toBeInTheDocument();
           });
-          expect(utils.queryByText(/can not be less than the minimum size/)).toBeNull();
         });
       });
 
@@ -3096,7 +3082,9 @@ describe('EditOutputFlyout', () => {
           } as Output);
           fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput'));
 
-          expect(utils.getByText(/minimum size \(8192\) can not be more than/)).toBeInTheDocument();
+          expect(
+            utils.getByText(/minimum size \(1000000\) can not be more than/)
+          ).toBeInTheDocument();
         });
 
         it('should clear the error and enable Save when the endpoint becomes the managed one', async () => {

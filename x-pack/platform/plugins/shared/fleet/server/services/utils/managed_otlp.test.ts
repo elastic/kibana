@@ -152,63 +152,16 @@ describe('applyManagedOtlpDefaults', () => {
     expect(applyManagedOtlpDefaults(exporter({ batch: null })).sending_queue?.batch).toBeNull();
   });
 
-  it('does not set the recommended sizes, in bytes, for a queue and a batch that do not count bytes', () => {
+  it('fills the recommended settings whatever the units, leaving the sizes to the validation', () => {
     expect(
-      applyManagedOtlpDefaults(
-        exporter({
-          sizer: 'requests',
-          queue_size: null,
-          batch: { sizer: 'items', min_size: null, max_size: null },
-        })
-      ).sending_queue
-    ).toEqual({
-      enabled: true,
-      sizer: 'requests',
-      queue_size: null,
-      block_on_overflow: true,
-      batch: { flush_timeout: '1s', sizer: 'items', min_size: null, max_size: null },
-    });
-  });
-
-  it('does not set a recommended size that does not fit with the sizes that are set', () => {
-    // a maximum of 4000000 would be below the minimum
-    expect(
-      applyManagedOtlpDefaults(exporter({ batch: { min_size: 5_000_000, max_size: null } }))
-        .sending_queue?.batch
-    ).toEqual(expect.objectContaining({ min_size: 5_000_000, max_size: null }));
-    // a minimum of 1000000 would be above the maximum
-    expect(
-      applyManagedOtlpDefaults(exporter({ batch: { max_size: 500_000 } })).sending_queue?.batch
-    ).toEqual(expect.not.objectContaining({ min_size: expect.anything() }));
-    // a minimum of 1000000 would not fit in the queue
-    expect(
-      applyManagedOtlpDefaults(exporter({ queue_size: 500_000 })).sending_queue?.batch
-    ).toEqual({ flush_timeout: '1s', sizer: 'bytes', max_size: 4_000_000 });
-  });
-
-  it('sizes a queue that does not count bytes to hold a batch in the same unit', () => {
-    expect(
-      applyManagedOtlpDefaults(
-        exporter({ sizer: 'items', batch: { sizer: 'items', min_size: 2000 } })
-      ).sending_queue
+      applyManagedOtlpDefaults(exporter({ sizer: 'items', batch: { sizer: 'items' } })).sending_queue
     ).toEqual({
       enabled: true,
       sizer: 'items',
-      queue_size: 2000,
+      queue_size: 50_000_000,
       block_on_overflow: true,
-      batch: { flush_timeout: '1s', sizer: 'items', min_size: 2000 },
+      batch: { flush_timeout: '1s', sizer: 'items', min_size: 1_000_000, max_size: 4_000_000 },
     });
-    // the default minimum of 8192 items does not fit in the default queue of 1000 items
-    expect(
-      applyManagedOtlpDefaults(exporter({ sizer: 'items', batch: { sizer: 'items' } }))
-        .sending_queue?.queue_size
-    ).toBe(8192);
-    // a batch that fits keeps the spec default queue size
-    expect(
-      applyManagedOtlpDefaults(
-        exporter({ sizer: 'items', batch: { sizer: 'items', min_size: 500 } })
-      ).sending_queue?.queue_size
-    ).toBeUndefined();
   });
 
   it('does not change the queue of an endpoint that is not managed', () => {
@@ -310,7 +263,7 @@ describe('getOtlpExporterUpdate', () => {
       sizer: 'items',
       queue_size: 100_000,
       block_on_overflow: false,
-      batch: { flush_timeout: '1s', sizer: 'items', min_size: 3000 },
+      batch: { flush_timeout: '1s', sizer: 'items', min_size: 3000, max_size: 4_000_000 },
     });
     expect(
       getOtlpExporterUpdate({

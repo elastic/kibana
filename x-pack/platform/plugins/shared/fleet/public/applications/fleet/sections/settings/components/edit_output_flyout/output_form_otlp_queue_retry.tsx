@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 
 import type { OutputFormInputsType } from './use_output_form';
 import {
-  getOtlpQueueDefaults,
   getOtlpQueueDefaultsOfInputs,
   hasOtlpQueueSettings,
   hasOtlpRetrySettings,
@@ -274,17 +273,7 @@ export const OtlpSendingQueueSettings: React.FunctionComponent<{
               defaultMessage="Queue size unit"
             />
           }
-          helpText={
-            <OtlpDefaultHint
-              defaultValue={
-                getOtlpQueueDefaults({
-                  isManaged: defaults.isManaged,
-                  queueSizer: '',
-                  batchSizer: '',
-                }).sizer
-              }
-            />
-          }
+          helpText={<OtlpDefaultHint defaultValue={defaults.sizer} />}
           input={inputs.otlpQueueSizerInput}
           testSubj="otlpQueueSizerInput"
           options={QUEUE_SIZER_OPTIONS}
