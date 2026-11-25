@@ -10,22 +10,24 @@ import type { ChatCompletionChunkEvent, ChatCompletionEvent } from '@kbn/inferen
 import { isChatCompletionChunkEvent, isChatCompletionTokenCountEvent } from '@kbn/inference-common';
 
 /**
- * Gives streaming consumers an attempt boundary when retrying.
+ * Keeps a retried attempt's partial tool calls away from streaming consumers.
  *
  * `retryWithExponentialBackoff` re-subscribes the source after a retryable
- * error, so without a guard a stalled attempt that already streamed chunks and
- * its retry appear as one uninterrupted response. Tool-call chunks keep their
- * original indexes, so the retry's arguments could be merged into the stalled
- * attempt's unfinished JSON.
+ * error, so without a guard a stalled attempt that already streamed tool-call
+ * chunks and its retry appear as one uninterrupted response. Tool-call chunks
+ * keep their original indexes, so the retry's arguments could be merged into
+ * the stalled attempt's unfinished JSON.
  *
- * Chunk events are buffered per attempt and only published once the attempt
- * has proven successful (first message event, or stream completion). On error,
- * the buffered chunks are dropped when `discardHeldChunksOnError` says the
- * error will be retried — partial output of a retried attempt is never a valid
- * prefix of the response — and flushed before the error when it is terminal,
- * exactly like `holdTokenCountEventsUntilMessage` treats token counts. The
- * error itself is always forwarded unchanged so downstream retry logic keeps
- * working.
+ * Chunks that carry no tool calls (text, reasoning, refusal) stream through
+ * immediately, so incremental streaming keeps working for every caller.
+ * Buffering starts at the first chunk of an attempt that carries a tool call;
+ * from then on every chunk of that attempt is held, preserving event order,
+ * until the attempt has proven successful (first message event, or stream
+ * completion). On error, the held chunks are dropped when
+ * `discardHeldChunksOnError` says the error will be retried and flushed before
+ * the error when it is terminal, exactly like `holdTokenCountEventsUntilMessage`
+ * treats token counts. The error itself is always forwarded unchanged so
+ * downstream retry logic keeps working.
  *
  * `discardHeldChunksOnError` is called once per error and typically closes
  * over an attempt counter (see `retryHoldingTokenCountEvents`); keep it free of
@@ -42,6 +44,7 @@ export function skipStreamedOutputFromRetryableAttempts({
   return (source$) =>
     new Observable<ChatCompletionEvent>((subscriber) => {
       let published = false;
+      let holding = false;
       const chunks: ChatCompletionChunkEvent[] = [];
 
       const publish = () => {
@@ -60,7 +63,12 @@ export function skipStreamedOutputFromRetryableAttempts({
             return;
           }
           if (isChatCompletionChunkEvent(event)) {
-            chunks.push(event);
+            holding = holding || event.tool_calls.length > 0;
+            if (holding) {
+              chunks.push(event);
+            } else {
+              subscriber.next(event);
+            }
             return;
           }
           if (isChatCompletionTokenCountEvent(event)) {
@@ -72,7 +80,7 @@ export function skipStreamedOutputFromRetryableAttempts({
           subscriber.next(event);
         },
         error: (error) => {
-          // partial output of an attempt that will be retried is never
+          // held tool-call output of an attempt that will be retried is never
           // exposed; a terminal error flushes it so callers that relied on
           // partial output before the error keep getting it. The error itself
           // must reach downstream retry logic untouched either way.

@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under
- * one or more contributor license agreements. Licensed under the Elastic
- * License 2.0; you may not use this file except in compliance with the Elastic
- * License 2.0.
- */
-
-import { defer, Subject } from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { defer, Subject, toArray } from 'rxjs';
 import { createInferenceProviderError } from '@kbn/inference-common';
 import { retryWithExponentialBackoff } from '../../../common/utils/retry_with_exponential_backoff';
 import { skipStreamedOutputFromRetryableAttempts } from './skip_attempt_output';
 
-const chunkEvent = (text: string): any => ({ type: 'chatCompletionChunk', text });
+// tool-call chunk: held back until the attempt proves successful
+const chunkEvent = (text: string): any => ({
+  type: 'chatCompletionChunk',
+  content: text,
+  tool_calls: [{ index: 0, toolCallId: 'call', function: { name: 'tool', arguments: text } }],
+});
+// text-only chunk: streams through immediately
+const textChunk = (text: string): any => ({
+  type: 'chatCompletionChunk',
+  content: text,
+  tool_calls: [],
+});
 const tokensEvent = { type: 'chatCompletionTokenCount' } as any;
 const messageEvent = { type: 'chatCompletionMessage' } as any;
 const stallError = () => createInferenceProviderError('Inference stream idle', { status: 504 });
@@ -168,6 +171,74 @@ describe('skipStreamedOutputFromRetryableAttempts', () => {
       upstream.error(error);
 
       await expect(result).rejects.toBe(error);
+    });
+
+    it('streams text-only chunks before the source completes', () => {
+      const upstream = new Subject<any>();
+      const emitted: unknown[] = [];
+      upstream
+        .pipe(skipStreamedOutputFromRetryableAttempts({ discardHeldChunksOnError: () => true }))
+        .subscribe((event) => emitted.push(event));
+
+      upstream.next(textChunk('a'));
+      expect(emitted).toEqual([textChunk('a')]);
+      upstream.next(textChunk('b'));
+      expect(emitted).toEqual([textChunk('a'), textChunk('b')]);
+    });
+
+    it('holds a tool-call chunk and everything after it, keeping event order', () => {
+      const upstream = new Subject<any>();
+      const emitted: unknown[] = [];
+      upstream
+        .pipe(skipStreamedOutputFromRetryableAttempts({ discardHeldChunksOnError: () => true }))
+        .subscribe((event) => emitted.push(event));
+
+      upstream.next(textChunk('thinking'));
+      upstream.next(chunkEvent('{"a"'));
+      upstream.next(textChunk('after'));
+      expect(emitted).toEqual([textChunk('thinking')]);
+
+      upstream.next(messageEvent);
+      expect(emitted).toEqual([
+        textChunk('thinking'),
+        chunkEvent('{"a"'),
+        textChunk('after'),
+        messageEvent,
+      ]);
+    });
+
+    it('drops a retried attempt held tool-call chunks but not the text it already streamed', async () => {
+      let attempt = 0;
+      let errorCount = 0;
+      const events = await defer(() => {
+        attempt += 1;
+        const subject = new Subject<any>();
+        queueMicrotask(() => {
+          if (attempt === 1) {
+            subject.next(textChunk('hello'));
+            subject.next(chunkEvent('partial {"'));
+            setTimeout(() => subject.error(stallError()), 0);
+          } else {
+            subject.next(chunkEvent('{}'));
+            subject.next(messageEvent);
+            subject.complete();
+          }
+        });
+        return subject;
+      })
+        .pipe(
+          skipStreamedOutputFromRetryableAttempts({
+            discardHeldChunksOnError: () => {
+              errorCount += 1;
+              return errorCount <= 1;
+            },
+          }),
+          retryWithExponentialBackoff({ maxRetry: 1, initialDelay: 1 }),
+          toArray()
+        )
+        .toPromise();
+
+      expect(events).toEqual([textChunk('hello'), chunkEvent('{}'), messageEvent]);
     });
 
     it('publishes the buffered chunks of a successful attempt, order preserved', async () => {

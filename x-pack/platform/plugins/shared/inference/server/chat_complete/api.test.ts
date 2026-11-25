@@ -50,6 +50,21 @@ import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
+// Tool-call chunks are the ones the retry guard holds back until the attempt succeeds.
+const toolChunk = (label: string) =>
+  chunkEvent('', [
+    {
+      index: 0,
+      toolCallId: 'call',
+      function: { name: 'myTool', arguments: JSON.stringify({ label }) },
+    },
+  ]);
+const toolArguments = (event: ChatCompletionChunkEvent) =>
+  JSON.parse(event.tool_calls[0].function.arguments).label;
+const toolsOption = {
+  myTool: { description: 'my tool', schema: { type: 'object', properties: {} } },
+} as const;
+
 describe('createChatCompleteApi', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let logger: MockedLogger;
@@ -373,17 +388,18 @@ describe('createChatCompleteApi', () => {
       inferenceAdapter.chatComplete.mockImplementation(() => {
         count++;
         if (count === 1) {
-          const partial = chunkEvent('partial');
+          const partial = toolChunk('partial');
           return concat(
             of(partial),
             throwError(() => createInferenceProviderError('Inference stream idle', { status: 504 }))
           );
         }
-        return of(chunkEvent('full answer'));
+        return of(toolChunk('full answer'));
       });
 
       const events$ = chatComplete({
         stream: true,
+        tools: toolsOption,
         connectorId: 'connectorId',
         messages: [{ role: MessageRole.User, content: 'question' }],
         maxRetries: 1,
@@ -399,7 +415,29 @@ describe('createChatCompleteApi', () => {
       );
 
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(2);
-      expect(events.map((event) => event.content)).toEqual(['full answer']);
+      expect(events.map(toolArguments)).toEqual(['full answer']);
+    });
+
+    it('streams text chunks before the source completes', async () => {
+      const subject = new Subject<ChatCompletionChunkEvent>();
+      inferenceAdapter.chatComplete.mockReturnValue(subject.asObservable());
+
+      const emitted: string[] = [];
+      chatComplete({
+        stream: true,
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 1,
+      })
+        .pipe(filter(isChatCompletionChunkEvent))
+        .subscribe((event) => emitted.push(event.content));
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      subject.next(chunkEvent('chunk-1'));
+      expect(emitted).toEqual(['chunk-1']);
+      subject.next(chunkEvent('chunk-2'));
+      expect(emitted).toEqual(['chunk-1', 'chunk-2']);
+      subject.complete();
     });
 
     describe('request cancellation', () => {
@@ -591,7 +629,7 @@ describe('createChatCompleteApi', () => {
       // token-count events do. If the callback API discarded chunks on every
       // error (regardless of retry outcome), the chunk would be missing here.
       inferenceAdapter.chatComplete.mockImplementation(() => {
-        const partial = chunkEvent('partial');
+        const partial = toolChunk('partial');
         return concat(
           of(partial),
           throwError(() => createInferenceProviderError('Inference stream idle', { status: 504 }))
@@ -600,6 +638,7 @@ describe('createChatCompleteApi', () => {
 
       const events$ = chatComplete({
         stream: true,
+        tools: toolsOption,
         connectorId: 'connectorId',
         messages: [{ role: MessageRole.User, content: 'question' }],
         maxRetries: 0,
@@ -624,7 +663,7 @@ describe('createChatCompleteApi', () => {
 
       expect(caughtError).toBeInstanceOf(Error);
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
-      expect(emitted.filter(isChatCompletionChunkEvent).map((e) => e.content)).toEqual(['partial']);
+      expect(emitted.filter(isChatCompletionChunkEvent).map(toolArguments)).toEqual(['partial']);
     });
 
     it('does not concatenate a stalled attempt chunks with the retry when maxRetries is fractional', async () => {
@@ -637,15 +676,16 @@ describe('createChatCompleteApi', () => {
         count++;
         if (count === 1) {
           return concat(
-            of(chunkEvent('partial')),
+            of(toolChunk('partial')),
             throwError(() => createInferenceProviderError('Inference stream idle', { status: 504 }))
           );
         }
-        return of(chunkEvent('full answer'));
+        return of(toolChunk('full answer'));
       });
 
       const events$ = chatComplete({
         stream: true,
+        tools: toolsOption,
         connectorId: 'connectorId',
         messages: [{ role: MessageRole.User, content: 'question' }],
         maxRetries: 0.5,
@@ -661,7 +701,7 @@ describe('createChatCompleteApi', () => {
       );
 
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(2);
-      expect(events.map((event) => event.content)).toEqual(['full answer']);
+      expect(events.map(toolArguments)).toEqual(['full answer']);
     });
 
     it('implicitly retries errors when configured to', async () => {

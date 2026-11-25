@@ -196,11 +196,10 @@ export function createChatCompleteCallbackApi({
             shouldStreamInferenceEndpoint,
           })
         ).pipe(
-          // a retryable attempt that already streamed output must not resurface:
-          // merging a stalled attempt's partial chunks with the retry's would
-          // corrupt consumers (e.g. tool-call argument JSON). Buffered chunks
-          // are flushed before a terminal error; errors that will not be
-          // retried fail through untouched.
+          // a retryable attempt's partial tool calls must not resurface:
+          // merging a stalled attempt's tool-call chunks with the retry's would
+          // corrupt the argument JSON. Text chunks stream through; held
+          // tool-call chunks are flushed before a terminal error.
           skipStreamedOutputFromRetryableAttempts({
             discardHeldChunksOnError: (error) => {
               errorCount += 1;
