@@ -222,55 +222,52 @@ describe('getConnectorSpecAsJsonSchema', () => {
         ).rejects.toMatchObject({ output: { statusCode: 400 } });
       }
     );
-  });
 
-  it('serves the legacy spec without a version when the catalog is disabled', async () => {
-    const legacyResult = await getConnectorSpecAsJsonSchema({
-      context: createContext(),
-      id: catalogOnly.metadata.id,
-      configurationUtilities,
-    });
-    const versionedSpec: ConnectorSpec = {
-      ...catalogOnly,
-      schema: z4.object({ region: z4.string() }),
-    };
-    actionTypeRegistry.get.mockReturnValue(
-      getConnectorType({
-        id: catalogOnly.metadata.id,
-        spec: catalogOnly,
-        specs: new Map([['2.0', versionedSpec]]),
-      })
-    );
-
-    const result = await getConnectorSpecAsJsonSchema({
-      context: createContext(),
-      id: catalogOnly.metadata.id,
-      configurationUtilities,
-    });
-
-    expect(result).toEqual(legacyResult);
-    expect(result.metadata.specVersion).toBeUndefined();
-    expect(actionTypeRegistry.get).not.toHaveBeenCalled();
-  });
-
-  it('omits the served version for an unversioned connector', async () => {
-    const result = await getConnectorSpecAsJsonSchema({
-      context: createContext(),
-      id: catalogOnly.metadata.id,
-      configurationUtilities,
-    });
-    expect(result.metadata.specVersion).toBeUndefined();
-  });
-
-  it('rejects a requested version for an unversioned connector', async () => {
-    await expect(
-      getConnectorSpecAsJsonSchema({
+    it('serves the legacy spec without a version when the catalog is disabled', async () => {
+      actionTypeRegistry.get.mockReturnValue(
+        getConnectorType({
+          id: catalogOnly.metadata.id,
+          spec: catalogOnly,
+          specs: new Map([['2.0', firstSpec]]),
+        })
+      );
+      const result = await getConnectorSpecAsJsonSchema({
         context: createContext(),
         id: catalogOnly.metadata.id,
-        specVersion: '1',
-        configurationUtilities: { ...configurationUtilities, isCatalogEnabled: () => true },
-      })
-    ).rejects.toMatchObject({ output: { statusCode: 400 } });
+        configurationUtilities,
+      });
+
+      expect(result.metadata.specVersion).toBeUndefined();
+    });
+
+    it('omits the served version for an unversioned connector', async () => {
+      const result = await getConnectorSpecAsJsonSchema({
+        context: createContext(),
+        id: catalogOnly.metadata.id,
+        configurationUtilities,
+      });
+      expect(result.metadata.specVersion).toBeUndefined();
+    });
+
+    it.each([
+      { name: 'no versioned specs', specs: undefined },
+      { name: 'an empty versioned specs map', specs: new Map<string, ConnectorSpec>() },
+    ])(
+      'falls back to the unversioned spec when the catalog is enabled but the type has $name',
+      async ({ specs }) => {
+        actionTypeRegistry.get.mockReturnValue(
+          getConnectorType({ id: catalogOnly.metadata.id, spec: catalogOnly, specs })
+        );
+        const result = await getConnectorSpecAsJsonSchema({
+          context: createContext(),
+          id: catalogOnly.metadata.id,
+          specVersion: '1',
+          configurationUtilities: { ...configurationUtilities, isCatalogEnabled: () => true },
+        });
+
+        expect(result.metadata.specVersion).toBeUndefined();
+      }
+    );
   });
 
   describe('authorization', () => {

@@ -30,13 +30,12 @@ export async function getConnectorSpecAsJsonSchema({
   }
 
   const registered = getRegisteredSpec(context.actionTypeRegistry, id);
-  const { resolvedSpecVersion, selectedSpec } = configurationUtilities.isCatalogEnabled()
-    ? resolveConnectorSpecVersion({
-        actionType: context.actionTypeRegistry.get(id),
-        specVersion,
-        configurationUtilities,
-      })
-    : { resolvedSpecVersion: undefined, selectedSpec: registered.spec };
+  const actionType = context.actionTypeRegistry.get(id);
+  const { resolvedSpecVersion, selectedSpec } =
+    configurationUtilities.isCatalogEnabled() && actionType?.specs?.size
+      ? resolveConnectorSpecVersion({ actionType, specVersion, configurationUtilities })
+      : { resolvedSpecVersion: undefined, selectedSpec: registered.spec };
+
   const spec = selectedSpec ?? registered.spec;
   const detail = serializeSpecDetail({ ...registered, spec }, configurationUtilities);
 
