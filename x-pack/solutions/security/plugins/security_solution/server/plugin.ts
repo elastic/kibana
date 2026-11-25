@@ -27,6 +27,7 @@ import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plu
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { ATTACK_FINGERPRINT_AI_INDEX_ID } from '@kbn/alertzero-plugin/common/ai_indices';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerCustomYaraSignaturesRoutes } from './endpoint/routes/custom_yara_signatures';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -904,7 +905,20 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions);
+      registerWorkflowSteps(plugins.workflowsExtensions, {
+        getRulesClient: async (request, spaceId) => {
+          const [, startPlugins] = await core.getStartServices();
+          return startPlugins.alerting.getRulesClientWithRequestInSpace(
+            request,
+            brandSpaceId(spaceId)
+          );
+        },
+        getInternalEsClient: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.elasticsearch.client.asInternalUser;
+        },
+        logger: this.logger.get('ruleSearchIndex'),
+      });
       registerEndpointWorkflowSteps(plugins.workflowsExtensions, {
         experimentalFeatures: config.experimentalFeatures,
         analytics: core.analytics,

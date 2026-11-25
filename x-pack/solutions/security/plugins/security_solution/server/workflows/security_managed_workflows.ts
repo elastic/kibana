@@ -20,11 +20,13 @@ import {
   uninstallThreatIntelManagedWorkflows,
 } from './threat_intel_workflow/install';
 import { enumerateSpaceIds } from './lib/enumerate_space_ids';
+import { installRuleSearchIndexWorkflows } from './rule_search_workflow/install';
 
 /**
  * Single plugin-start entry for securitySolution managed workflows: install alert
  * analysis (always), install or uninstall threat-intel workflows when AlertZero
- * is on/off, then call `ready()` exactly once. Replaces the two prior
+ * is on/off, install the (disabled) rule search index workflow in every space, then call
+ * `ready()` exactly once. Replaces the two prior
  * AndMarkReady helpers that each called `ready()` and raced each other.
  */
 export const installSecurityManagedWorkflowsAndMarkReady = async ({
@@ -85,6 +87,16 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
     logger.warn('Failed to install or uninstall threat intelligence managed workflows', {
       error,
     });
+  }
+
+  try {
+    await installRuleSearchIndexWorkflows({
+      managedWorkflowsClient,
+      spaceIds: await enumerateSpaceIds(createSpaceRepository(core)),
+      logger,
+    });
+  } catch (error) {
+    logger.warn('Failed to install the rule search index workflows', { error });
   }
 
   try {

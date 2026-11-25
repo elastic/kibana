@@ -137,7 +137,6 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: L
           const semantic =
             search?.mode === 'semantic' && search.term.trim()
               ? await resolveSemanticSearch({
-                  rulesClient,
                   esClient: ctx.core.elasticsearch.client.asInternalUser,
                   spaceId: ctx.securitySolution.getSpaceId(),
                   term: search.term.trim(),

@@ -158,10 +158,10 @@ at or past the default 10,000-result max) or the request used `search_after`.
       counts: FacetCounts.optional(),
       tag_category_counts: FacetCounts.optional(),
       /**
-       * The search mode that ran; `legacy` when `semantic` was asked but no model was available.
+       * The search mode that ran; `legacy` when `semantic` was asked but there is no model or the space is not indexed yet.
        */
       search_mode: GranularRulesSearchMode.optional().describe(
-        'The search mode that ran; `legacy` when `semantic` was asked but no model was available.'
+        'The search mode that ran; `legacy` when `semantic` was asked but there is no model or the space is not indexed yet.'
       ),
     })
     .strict()

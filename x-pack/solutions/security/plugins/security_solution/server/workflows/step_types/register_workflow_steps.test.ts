@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
@@ -34,9 +35,13 @@ describe('registerWorkflowSteps (server)', () => {
   it('registers all steps', () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions);
+    registerWorkflowSteps(workflowsExtensions, {
+      getRulesClient: jest.fn(),
+      getInternalEsClient: jest.fn(),
+      logger: loggingSystemMock.createLogger(),
+    });
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(21);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(22);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );

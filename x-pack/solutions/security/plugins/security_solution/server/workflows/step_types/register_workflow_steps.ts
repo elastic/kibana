@@ -27,12 +27,17 @@ import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
 import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints';
+import type { SyncRuleSearchIndexStepDependencies } from './sync_rule_search_index_step/sync_rule_search_index_step';
+import { createSyncRuleSearchIndexStepDefinition } from './sync_rule_search_index_step/sync_rule_search_index_step';
+
+export type RegisterWorkflowStepsDependencies = SyncRuleSearchIndexStepDependencies;
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
 export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  deps: RegisterWorkflowStepsDependencies
 ): void => {
   workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
   workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
@@ -55,4 +60,5 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(patchRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(getAlertEntitiesStepDefinition);
   workflowsExtensions.registerStepDefinition(matchAttackFingerprintsStepDefinition);
+  workflowsExtensions.registerStepDefinition(createSyncRuleSearchIndexStepDefinition(deps));
 };

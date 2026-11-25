@@ -6,16 +6,14 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { getRuleSearchModels } from './rule_search_index';
-import { prepareRuleSearchIndex } from './rule_search_sync';
+import { RULE_SEARCH_INDEX, getRuleSearchModels } from './rule_search_index';
 import { searchRelevantRuleIds } from './rule_search_query';
 
 export { syncRuleSearchIndex } from './rule_search_sync';
 
 export type SemanticSearchResult =
   | { mode: 'semantic'; ruleIds: string[] }
-  | { mode: 'legacy'; reason: 'no_model' | 'indexing' | 'error' };
+  | { mode: 'legacy'; reason: 'no_model' | 'not_indexed' | 'error' };
 
 /** The table and its facet counts ask for the same text right after each other. */
 const CACHE_TTL_MS = 30_000;
@@ -24,19 +22,32 @@ const cache = new Map<string, { at: number; ruleIds: string[] }>();
 /** The same text from the table and its facet counts at once: one search, not two. */
 const inFlight = new Map<string, Promise<SemanticSearchResult>>();
 
+/** The rule search index workflow of the space has run at least once. */
+const isSpaceIndexed = async (esClient: ElasticsearchClient, spaceId: string) => {
+  const result = await esClient.search({
+    index: RULE_SEARCH_INDEX,
+    ignore_unavailable: true,
+    size: 0,
+    terminate_after: 1,
+    track_total_hits: true,
+    query: { term: { space_id: spaceId } },
+  });
+  const total = result.hits.total;
+  return (typeof total === 'number' ? total : total?.value ?? 0) > 0;
+};
+
 /**
  * The relevant rules for a text, best first, as saved object ids; or why the search falls back
- * to `legacy` (no model on this cluster, the space is being indexed for the first time, or an
- * error). The index is read with the internal user; only ids leave this function.
+ * to `legacy` (no model on this cluster, the space is not indexed because its rule search index
+ * workflow is off or has not run yet, or an error). Search only reads the index, with the
+ * internal user; only ids leave this function.
  */
 const runSemanticSearch = async ({
-  rulesClient,
   esClient,
   spaceId,
   term,
   logger,
 }: {
-  rulesClient: RulesClient;
   esClient: ElasticsearchClient;
   spaceId: string;
   term: string;
@@ -52,9 +63,8 @@ const runSemanticSearch = async ({
     if (!models.embedding) {
       return { mode: 'legacy', reason: 'no_model' };
     }
-    const readiness = await prepareRuleSearchIndex({ rulesClient, esClient, spaceId, logger });
-    if (readiness === 'indexing') {
-      return { mode: 'legacy', reason: 'indexing' };
+    if (!(await isSpaceIndexed(esClient, spaceId))) {
+      return { mode: 'legacy', reason: 'not_indexed' };
     }
     const ranked = await searchRelevantRuleIds({ esClient, spaceId, term, models });
     const ruleIds = ranked.map(({ soId }) => soId);
@@ -69,7 +79,6 @@ const runSemanticSearch = async ({
 };
 
 export const resolveSemanticSearch = (params: {
-  rulesClient: RulesClient;
   esClient: ElasticsearchClient;
   spaceId: string;
   term: string;

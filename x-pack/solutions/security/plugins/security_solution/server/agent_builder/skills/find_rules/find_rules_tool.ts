@@ -278,7 +278,6 @@ export const createFindRulesInlineTool = ({
       // them as the user with the structured filters, and they keep the relevance order.
       const semantic = input.query
         ? await resolveSemanticSearch({
-            rulesClient,
             esClient: coreStart.elasticsearch.client.asInternalUser,
             spaceId: startPlugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             term: input.query,

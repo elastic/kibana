@@ -108,4 +108,10 @@ export const registerWorkflowSteps = (
       (m) => m.matchAttackFingerprintsStepDefinition
     )
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./sync_rule_search_index_step/sync_rule_search_index_step').then(
+      (m) => m.syncRuleSearchIndexStepDefinition
+    )
+  );
 };

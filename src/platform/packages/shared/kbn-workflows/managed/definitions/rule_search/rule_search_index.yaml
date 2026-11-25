@@ -1,0 +1,26 @@
+version: "1"
+# Every 5m: brings the rule search index of this space up to date. Only new and changed rules are
+# embedded again (same updated_at and card version: skipped); documents of deleted rules are removed.
+# Rules are read as the user who enabled the workflow, so only the rules that user can read are indexed.
+name: "Security: index detection rules for search by meaning"
+description: >-
+  Turn this workflow on to enable search by meaning on the Rules page of this space.
+  Every 5 minutes it indexes the detection rules that were added or changed since the last run,
+  and removes the rules that were deleted. Until it has run once, the Rules page searches by words only.
+tags:
+  - security
+  - detection-rules
+enabled: false
+settings:
+  concurrency:
+    key: "security-rule-search-index-{{ workflow.spaceId }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "5m"
+  - type: manual
+steps:
+  - name: sync_rule_search_index
+    type: security.syncRuleSearchIndex

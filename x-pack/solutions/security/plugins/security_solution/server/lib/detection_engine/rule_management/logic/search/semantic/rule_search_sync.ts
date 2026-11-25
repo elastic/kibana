@@ -7,10 +7,6 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type {
-  AggregationsFilterAggregate,
-  AggregationsMaxAggregate,
-} from '@elastic/elasticsearch/lib/api/types';
 import { findRules } from '../find_rules';
 import { RULE_SEARCH_INDEX, ensureRuleSearchIndex } from './rule_search_index';
 import {
@@ -19,7 +15,6 @@ import {
   ruleSearchDocumentId,
 } from './rule_search_document';
 
-const PAGE_SIZE = 1000;
 const BULK_SIZE = 100;
 const MAX_RULES = 10_000;
 
@@ -31,7 +26,7 @@ export interface RuleSearchSyncResult {
   tookMs: number;
 }
 
-/** One sync per space at a time; searches meanwhile use what is indexed. */
+/** One sync per space at a time (a scheduled and a manual run can overlap). */
 const running = new Map<string, Promise<RuleSearchSyncResult>>();
 
 interface SyncParams {
@@ -74,38 +69,47 @@ const syncSpace = async ({ rulesClient, esClient, spaceId, logger }: SyncParams)
   const started = Date.now();
   await ensureRuleSearchIndex(esClient, logger);
   const indexed = await indexedState(esClient, spaceId);
-  const seen = new Set<string>();
-  const changed = [];
 
-  for (let page = 1; page * PAGE_SIZE <= MAX_RULES; page++) {
-    const result = await findRules({
+  // One request, not pages: RulesClient pages have no tiebreaker, and rules that run rewrite
+  // their saved objects meanwhile, so pages skip some rules and repeat others.
+  const current = await findRules({
+    rulesClient,
+    filter: undefined,
+    fields: ['updatedAt'],
+    sortField: undefined,
+    sortOrder: undefined,
+    page: 1,
+    perPage: MAX_RULES,
+  });
+  const seen = new Set(current.data.map((rule) => rule.id));
+  const changedIds = current.data
+    .filter((rule) => indexed.get(rule.id) !== new Date(rule.updatedAt).toISOString())
+    .map((rule) => rule.id);
+
+  let embedded = 0;
+  let failed = 0;
+  for (let i = 0; i < changedIds.length; i += BULK_SIZE) {
+    const ruleIds = changedIds.slice(i, i + BULK_SIZE);
+    const { data: rules } = await findRules({
       rulesClient,
       filter: undefined,
       sortField: undefined,
       sortOrder: undefined,
-      page,
-      perPage: PAGE_SIZE,
+      page: 1,
+      perPage: ruleIds.length,
+      ruleIds,
     });
-    for (const rule of result.data) {
-      seen.add(rule.id);
-      if (indexed.get(rule.id) !== new Date(rule.updatedAt).toISOString()) {
-        changed.push(buildRuleSearchDocument(spaceId, rule));
-      }
-    }
-    if (page * PAGE_SIZE >= result.total) break;
-  }
-
-  let failed = 0;
-  for (let i = 0; i < changed.length; i += BULK_SIZE) {
-    const response = await esClient.bulk({
-      operations: changed
-        .slice(i, i + BULK_SIZE)
-        .flatMap((doc) => [
-          { index: { _index: RULE_SEARCH_INDEX, _id: ruleSearchDocumentId(spaceId, doc.so_id) } },
-          doc,
+    if (rules.length) {
+      const response = await esClient.bulk({
+        operations: rules.flatMap((rule) => [
+          { index: { _index: RULE_SEARCH_INDEX, _id: ruleSearchDocumentId(spaceId, rule.id) } },
+          buildRuleSearchDocument(spaceId, rule),
         ]),
-    });
-    failed += response.items.filter((item) => item.index?.error).length;
+      });
+      const batchFailed = response.items.filter((item) => item.index?.error).length;
+      embedded += rules.length - batchFailed;
+      failed += batchFailed;
+    }
   }
 
   const gone = [...indexed.keys()].filter((soId) => !seen.has(soId));
@@ -119,7 +123,7 @@ const syncSpace = async ({ rulesClient, esClient, spaceId, logger }: SyncParams)
   await esClient.indices.refresh({ index: RULE_SEARCH_INDEX });
 
   const summary = {
-    indexed: changed.length - failed,
+    indexed: embedded,
     deleted: gone.length,
     failed,
     total: seen.size,
@@ -138,56 +142,4 @@ export const syncRuleSearchIndex = (params: SyncParams): Promise<RuleSearchSyncR
   const sync = syncSpace(params).finally(() => running.delete(params.spaceId));
   running.set(params.spaceId, sync);
   return sync;
-};
-
-export type RuleSearchReadiness = 'ready' | 'indexing';
-
-/**
- * Before a search: compare the rule count and the last update with the index. Up to date:
- * ready. Changed: sync in the background and search what is indexed. Nothing indexed yet: sync
- * in the background and let this search fall back to `legacy`.
- */
-export const prepareRuleSearchIndex = async (params: SyncParams): Promise<RuleSearchReadiness> => {
-  const { rulesClient, esClient, spaceId, logger } = params;
-  await ensureRuleSearchIndex(esClient, logger);
-  const [latest, indexed] = await Promise.all([
-    findRules({
-      rulesClient,
-      filter: undefined,
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-      page: 1,
-      perPage: 1,
-    }),
-    esClient.search<
-      unknown,
-      { latest: AggregationsMaxAggregate; old_cards: AggregationsFilterAggregate }
-    >({
-      index: RULE_SEARCH_INDEX,
-      size: 0,
-      track_total_hits: true,
-      query: { term: { space_id: spaceId } },
-      aggs: {
-        latest: { max: { field: 'updated_at' } },
-        old_cards: {
-          filter: { bool: { must_not: { term: { card_version: RULE_CARD_VERSION } } } },
-        },
-      },
-    }),
-  ]);
-  const indexedTotal =
-    typeof indexed.hits.total === 'number' ? indexed.hits.total : indexed.hits.total?.value ?? 0;
-  const indexedLatest = indexed.aggregations?.latest.value ?? null;
-  const rulesLatest = latest.data[0] ? new Date(latest.data[0].updatedAt).getTime() : null;
-  const upToDate =
-    indexedTotal === latest.total &&
-    indexedLatest === rulesLatest &&
-    (indexed.aggregations?.old_cards.doc_count ?? 0) === 0;
-
-  if (!upToDate || running.has(spaceId)) {
-    syncRuleSearchIndex(params).catch((error) =>
-      logger.error(`Rule search index sync failed for space ${spaceId}: ${error.message}`)
-    );
-  }
-  return indexedTotal > 0 ? 'ready' : 'indexing';
 };

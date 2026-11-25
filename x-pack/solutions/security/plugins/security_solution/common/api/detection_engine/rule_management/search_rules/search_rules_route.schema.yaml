@@ -156,7 +156,7 @@ paths:
                     $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
                   search_mode:
                     $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearchMode'
-                    description: The search mode that ran; `legacy` when `semantic` was asked but no model was available.
+                    description: The search mode that ran; `legacy` when `semantic` was asked but there is no model or the space is not indexed yet.
                 required:
                   - page
                   - perPage
