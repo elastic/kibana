@@ -46,6 +46,7 @@ const createConversationsDataClientMock = () => {
     conversationExists: jest.fn(),
     getConversation: jest.fn(),
     updateConversation: jest.fn(),
+    updateConversationTitleIfUnset: jest.fn(),
     getReader: jest.fn(),
     getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
   };

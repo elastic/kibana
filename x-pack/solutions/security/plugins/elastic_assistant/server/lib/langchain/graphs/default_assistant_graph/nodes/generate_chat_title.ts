@@ -98,11 +98,10 @@ export async function generateChatTitle({
     logger.debug(`chatTitle: ${chatTitle}`);
 
     if (conversation?.title !== chatTitle) {
-      await conversationsDataClient?.updateConversation({
-        conversationUpdateProps: {
-          id: state.conversationId,
-          title: chatTitle,
-        },
+      await conversationsDataClient?.updateConversationTitleIfUnset({
+        id: state.conversationId,
+        title: chatTitle,
+        placeholderTitle: NEW_CHAT,
       });
     }
   } catch (e) {
@@ -115,11 +114,10 @@ export async function generateChatTitle({
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
       errorLocation: 'generateChatTitle',
     });
-    await conversationsDataClient?.updateConversation({
-      conversationUpdateProps: {
-        id: state.conversationId,
-        title: (e.name ?? e.message ?? e.toString()).slice(0, 60),
-      },
+    await conversationsDataClient?.updateConversationTitleIfUnset({
+      id: state.conversationId,
+      title: (e.name ?? e.message ?? e.toString()).slice(0, 60),
+      placeholderTitle: NEW_CHAT,
     });
   }
 }
