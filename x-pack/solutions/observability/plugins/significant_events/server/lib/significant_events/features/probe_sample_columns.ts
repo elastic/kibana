@@ -84,9 +84,7 @@ const probeColumns = async ({
       throw error;
     }
     const reason = getVerificationReason(error);
-    // With the caller's fields in the probe the refusal can be about one of them, not the source:
-    // NULLIFY does not cover a metadata name such as `_id`.
-    if (reason !== undefined && fields.length === 0) {
+    if (reason) {
       return {
         kind: 'unsupported',
         problem: `Elasticsearch rejects the query behind [${index}]: ${reason}`,

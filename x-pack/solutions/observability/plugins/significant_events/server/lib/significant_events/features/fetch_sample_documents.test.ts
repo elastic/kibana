@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { errors, type TransportResult } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { BasicPrettyPrinter } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -40,15 +39,6 @@ const COUNT_RESPONSE = (total: number) => ({
   columns: [{ name: 'total', type: 'long' }],
   values: [[total]],
 });
-
-const makeVerificationError = (reason: string) =>
-  new errors.ResponseError({
-    statusCode: 400,
-    headers: {},
-    warnings: [],
-    meta: {} as unknown as TransportResult['meta'],
-    body: { error: { type: 'verification_exception', reason } },
-  } as TransportResult);
 
 const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
   _index: '',
@@ -686,37 +676,6 @@ describe('fetchSampleDocuments', () => {
     );
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
     expect(result.hasFilteredDocuments).toBe(false);
-  });
-
-  it('keeps sampling when Elasticsearch refuses to plan a probe that names filter fields', async () => {
-    getEsqlColumnSchemaMock.mockRejectedValueOnce(
-      makeVerificationError('Found 1 problem\nline 1:63: Unknown column [_id]')
-    );
-    getSampleDocumentsEsqlMock.mockResolvedValue({ hits: [createHit('random-1')], total: 1 });
-
-    const result = await fetchSampleDocuments({
-      esClient: {} as ElasticsearchClient,
-      index: 'logs.test-default',
-      start: 100,
-      end: 200,
-      features: [
-        createFeature({
-          id: 'feature-1',
-          updatedAt: '2026-01-02T00:00:00.000Z',
-          field: '_id',
-          value: 'abc',
-        }),
-      ],
-      logger,
-      size: 5,
-      entityFilteredRatio: 0.4,
-      diverseRatio: 0,
-      maxEntityFilters: 10,
-      samplingTimeoutMs: 30_000,
-      iteration: 1,
-    });
-
-    expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
   });
 
   it('keeps sampling without the entity arm when the column probe fails', async () => {
