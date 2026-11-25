@@ -28,7 +28,12 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import { isRetryResult } from './retry_unauthorized';
-import { AUTHORIZATION_HEADER, ES_SECONDARY_AUTH_HEADER } from './headers';
+import {
+  AUTHORIZATION_HEADER,
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  ES_SECONDARY_AUTH_HEADER,
+  ES_SECONDARY_CLIENT_AUTH_HEADER,
+} from './headers';
 
 /**
  * Timing context stored in Transport request options for instrumentation
@@ -262,9 +267,11 @@ export const createTransport = ({
           ...clientAuthenticationHeaders,
           ...options?.headers,
         };
-        const isSignedAgain = Object.keys(clientAuthenticationHeaders).some(
-          (name) => retryHeaders[name] !== opts.headers?.[name]
-        );
+        const isSignedAgain =
+          retryHeaders[ES_CLIENT_AUTHENTICATION_HEADER] !==
+            opts.headers?.[ES_CLIENT_AUTHENTICATION_HEADER] ||
+          retryHeaders[ES_SECONDARY_CLIENT_AUTH_HEADER] !==
+            opts.headers?.[ES_SECONDARY_CLIENT_AUTH_HEADER];
         if (!isSignedAgain) {
           return await retryUnauthorizedRequest(error);
         }
