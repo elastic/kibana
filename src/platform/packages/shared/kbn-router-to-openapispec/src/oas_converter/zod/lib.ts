@@ -505,8 +505,8 @@ function normalizeOasMetaExtensions(
 /**
  * For `z.discriminatedUnion` schemas, auto-generate an OAS discriminator whose
  * mapping covers every variant. OAS 3.0 resolves discriminator values only to
- * named schemas, so returns `null` unless every variant has a stable component
- * name and a required discriminator property.
+ * named schemas through string mapping keys, so returns `null` unless every
+ * variant has a stable component name and a required string discriminator.
  */
 function buildAutoDiscriminator(schema: z.ZodType): OasMetaExtensions | null {
   const { discriminator: key, options } = (schema as any)._zod?.def ?? {};
@@ -517,10 +517,11 @@ function buildAutoDiscriminator(schema: z.ZodType): OasMetaExtensions | null {
   for (const opt of options) {
     const name = getStableComponentName(opt);
     const values: z.core.util.PropValues[string] | undefined = opt._zod?.propValues?.[key];
-    if (!name || !values?.size || values.has(undefined)) return null;
+    if (!name || !values?.size) return null;
 
     for (const value of values) {
-      mapping[String(value)] = `#/components/schemas/${name}`;
+      if (typeof value !== 'string') return null;
+      mapping[value] = `#/components/schemas/${name}`;
     }
   }
 
