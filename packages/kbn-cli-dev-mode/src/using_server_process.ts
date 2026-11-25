@@ -33,6 +33,8 @@ export function usingServerProcess<T>(
     (): ProcResource => {
       const proc = execaNode(options.script, options.argv, {
         stdio: 'pipe',
+        // exits are observed through `nodeChildProcess` events, and restarts SIGKILL the server
+        reject: false,
         nodeOptions: [
           ...process.execArgv,
           ...(ACTIVE_INSPECT_FLAG ? [`${ACTIVE_INSPECT_FLAG}=${process.debugPort + 1}`] : []),

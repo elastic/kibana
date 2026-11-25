@@ -146,6 +146,7 @@ describe('#run$', () => {
               "--argv",
               "--disallow-code-generation-from-strings",
             ],
+            "reject": false,
             "stdio": "pipe",
           },
         ],

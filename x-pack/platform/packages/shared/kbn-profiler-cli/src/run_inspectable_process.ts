@@ -35,6 +35,8 @@ export async function runInspectableProcess({
     env: { NODE_OPTIONS: extendNodeOptions(process.env.NODE_OPTIONS, inspectorPort) },
     stdout: 'inherit',
     stderr: 'pipe',
+    // the result is never awaited and aborting kills the process
+    reject: false,
   });
 
   const open$ = new Subject<void>();
