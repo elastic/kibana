@@ -7,7 +7,7 @@
 
 import type { Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { PROPERTY_PATH_REGEX } from '@kbn/workflows-yaml';
+import { SINGLE_IDENTIFIER_REGEX } from '@kbn/workflows-yaml';
 
 export function wrapAsMonacoSuggestion(
   key: string,
@@ -21,7 +21,7 @@ export function wrapAsMonacoSuggestion(
 ): monaco.languages.CompletionItem {
   let keyToInsert = key;
   const isAt = triggerCharacter === '@';
-  const keyCouldAccessedByDot = PROPERTY_PATH_REGEX.test(key);
+  const keyCouldAccessedByDot = SINGLE_IDENTIFIER_REGEX.test(key);
   const removeDot = isAt || !keyCouldAccessedByDot;
 
   if (!keyCouldAccessedByDot) {

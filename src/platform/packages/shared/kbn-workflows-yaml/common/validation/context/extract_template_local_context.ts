@@ -22,6 +22,7 @@
 import type { AssignTag, CaptureTag, ForTag, Tag, Template } from 'liquidjs';
 import { LRUCache } from 'lru-cache';
 import { getLiquidInstance, parseTemplateString } from '../../liquid/liquid_parse_cache';
+import { SINGLE_IDENTIFIER_REGEX } from '../../regex';
 
 export interface AssignVariable {
   name: string;
@@ -91,9 +92,6 @@ export function parseAssignRhs(args: string): string | null {
   if (eqIndex === -1) return null;
   return trimmed.slice(eqIndex + 1).trim() || null;
 }
-
-/** Matches a single Liquid identifier (not a dotted workflow path). */
-const SINGLE_IDENTIFIER_REGEX = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
 
 /** Liquid for-loop range literal, e.g. `(1..3)`. */
 export const LIQUID_RANGE_LITERAL_REGEX = /^\(\s*\d+\s*\.\.\s*\d+\s*\)$/;

@@ -78,6 +78,17 @@ describe('wrapAsMonacoSuggestion', () => {
       expect(result.additionalTextEdits).toHaveLength(1);
     });
 
+    it.each(['kibana.alert.message', 'bo.0.la', '95.0', 'a[0]'])(
+      'should use bracket notation for key %s that looks like a path',
+      (key) => {
+        const range = createMockRange();
+        const result = wrapAsMonacoSuggestion(key, '.', range, 'QUOTE_DOUBLE', false, 'string');
+
+        expect(result.insertText).toBe(`['${key}']`);
+        expect(result.additionalTextEdits).toHaveLength(1);
+      }
+    );
+
     it('should use double quotes in bracket notation when scalar type is QUOTE_DOUBLE', () => {
       const range = createMockRange();
       const result = wrapAsMonacoSuggestion(
@@ -122,7 +133,7 @@ describe('wrapAsMonacoSuggestion', () => {
     it('should not wrap with curly braces when useCurlyBraces is false', () => {
       const range = createMockRange();
       const result = wrapAsMonacoSuggestion(
-        'inputs.name',
+        'inputs',
         '@',
         range,
         null,
@@ -132,7 +143,7 @@ describe('wrapAsMonacoSuggestion', () => {
         false
       );
 
-      expect(result.insertText).toBe('inputs.name');
+      expect(result.insertText).toBe('inputs');
       expect(result.insertTextRules).toBe(monaco.languages.CompletionItemInsertTextRule.None);
     });
 
