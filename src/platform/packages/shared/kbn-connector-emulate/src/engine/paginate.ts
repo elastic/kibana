@@ -155,9 +155,6 @@ const encodeCursor = (position: number): string =>
   Buffer.from(`${CURSOR_PREFIX}${position}`).toString('base64url');
 
 const decodeCursor = (cursor: string): number | undefined => {
-  if (/^\d+$/.test(cursor) && Number(cursor) >= NUMERIC_CURSOR_BASE) {
-    return Number(cursor) - NUMERIC_CURSOR_BASE;
-  }
   const decoded = Buffer.from(cursor, 'base64url').toString();
   const position = Number(decoded.slice(CURSOR_PREFIX.length));
   return decoded.startsWith(CURSOR_PREFIX) && Number.isInteger(position) && position >= 0
@@ -165,8 +162,17 @@ const decodeCursor = (cursor: string): number | undefined => {
     : undefined;
 };
 
+const decodeNumericCursor = (cursor: string): number | undefined =>
+  /^\d+$/.test(cursor) && Number(cursor) >= NUMERIC_CURSOR_BASE
+    ? Number(cursor) - NUMERIC_CURSOR_BASE
+    : undefined;
+
 // Cursors are compared as strings, whether the vendor sends them as strings or numbers.
 const asCursor = (value: unknown): unknown => (typeof value === 'number' ? String(value) : value);
+
+// A value an item holds, as a request carries it: an array's elements joined with commas.
+const toCursor = (held: unknown): unknown =>
+  Array.isArray(held) ? held.join(',') : asCursor(held);
 
 const readParameter = (
   { query, headers, body }: RequestParameters,
@@ -216,7 +222,10 @@ const readStart = (
   request: NextUrlRequest,
   read: (name: string) => unknown,
   size: number,
-  recordedPositions?: ReadonlyMap<string, number>
+  {
+    recordedPositions,
+    numericCursors = false,
+  }: { recordedPositions?: ReadonlyMap<string, number>; numericCursors?: boolean } = {}
 ): number | undefined => {
   if ('cursorParam' in request) {
     const cursor = asCursor(read(request.cursorParam));
@@ -224,7 +233,8 @@ const readStart = (
       return 0;
     }
     return typeof cursor === 'string'
-      ? recordedPositions?.get(cursor) ?? decodeCursor(cursor)
+      ? recordedPositions?.get(cursor) ??
+          (numericCursors ? decodeNumericCursor(cursor) : decodeCursor(cursor))
       : undefined;
   }
   if ('offsetParam' in request) {
@@ -303,6 +313,10 @@ const withLastItemCursor = (
     return items;
   }
   const held: unknown = get(item, path);
+  // A replayed item already holds its recorded cursor, in the vendor's own shape.
+  if (recorded !== undefined && toCursor(held) === recorded) {
+    return items;
+  }
   if (typeof held === 'number') {
     set(item, path, Number(recorded ?? NUMERIC_CURSOR_BASE + position));
   } else {
@@ -330,7 +344,7 @@ const readRecordedNext = (
     }
     const items = getItems(body, itemsPath);
     const held: unknown = Array.isArray(items) ? get(last(items), nextPath) : undefined;
-    return Array.isArray(held) ? held.join(',') : asCursor(held);
+    return toCursor(held);
   } else if (pagination.style === 'link') {
     url = LINK_NEXT.exec(header('link') ?? '')?.[1];
   } else if (pagination.style === 'next_url') {
@@ -549,25 +563,33 @@ const paginate = (
   }
   const read = (name: string) => readParameter(request, parameterLocation(pagination), name);
   const size = readPageSize(pagination, read);
-  const start = readStart(requestOf(pagination), read, size, recorded?.positions);
+  const collection = recorded
+    ? resize(recorded.items, collectionSize)
+    : buildCollection(template[0], collectionSize ?? DEFAULT_COLLECTION_SIZE);
+  const lastItemPath =
+    pagination.style === 'cursor' && pagination.response.in === 'last_item'
+      ? pagination.response.nextPath
+      : undefined;
+  const start = readStart(requestOf(pagination), read, size, {
+    recordedPositions: recorded?.positions,
+    numericCursors:
+      lastItemPath !== undefined && typeof get(collection[0], lastItemPath) === 'number',
+  });
   if (start === undefined) {
     return BAD_CURSOR;
   }
 
-  const collection = recorded
-    ? resize(recorded.items, collectionSize)
-    : buildCollection(template[0], collectionSize ?? DEFAULT_COLLECTION_SIZE);
   const cursorAt = (position: number) => recorded?.cursors.get(position) ?? encodeCursor(position);
   const slice = collection.slice(start, start + size);
   // A last item's cursor points past it, on the last page too: the next page is then empty.
   const items =
-    pagination.style === 'cursor' && pagination.response.in === 'last_item'
-      ? withLastItemCursor(slice, {
-          path: pagination.response.nextPath,
+    lastItemPath === undefined
+      ? slice
+      : withLastItemCursor(slice, {
+          path: lastItemPath,
           position: start + slice.length,
           recorded: recorded?.cursors.get(start + slice.length),
-        })
-      : slice;
+        });
   const page: object =
     itemsPath === '' || !isRecord(body) ? items : set(cloneDeep(body), itemsPath, items);
   const inBody = !Array.isArray(page);

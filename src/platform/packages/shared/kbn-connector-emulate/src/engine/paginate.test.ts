@@ -554,7 +554,7 @@ describe('withPagination', () => {
       expect(calls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
     });
 
-    it('joins a recorded array cursor with commas, and keeps it an array', async () => {
+    it('replays a recorded array cursor as recorded, and reads it joined with commas', async () => {
       const { fetch } = createRecordedMock([
         hitsPage(undefined, [hit('a', 3), hit('b', 2)]),
         hitsPage('2,b', [hit('c', 1)]),
@@ -563,9 +563,16 @@ describe('withPagination', () => {
       const first = await getJson(fetch, '/hits?size=2');
       const second = await getJson(fetch, '/hits?size=2&search_after=2,b');
 
-      expect(first.body.channels).toEqual([hit('a', 3), { id: 'b', sort: ['2,b'] }]);
-      expect(ids(second.body)).toEqual(['c']);
+      expect(first.body.channels).toEqual([hit('a', 3), hit('b', 2)]);
+      expect(second.body.channels).toEqual([hit('c', 1)]);
     });
+
+    it.each(['/hits?search_after=2000000001', '/conversations.list?cursor=2000000001'])(
+      'answers 400 for a number where the cursor is a string: %s',
+      async (path) => {
+        expect((await getJson(createMock(3).fetch, path)).status).toBe(400);
+      }
+    );
 
     it('hands out the cursor of the page it serves, whatever the page size', async () => {
       const { fetch } = createRecordedMock([hitsPage(undefined, [hit('a', 3), hit('b', 2)])]);
