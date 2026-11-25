@@ -72,7 +72,7 @@ const readHostMetadata = async (
 
 /**
  * Polls host metadata until Endpoint reports `packagePolicyId` applied at `packagePolicyRevision`
- * or later with a `success` or `warning` status. Throws as soon as that revision reports `failure`.
+ * or later with a `success` or `warning` status. Throws as soon as that revision reports another status.
  */
 const waitForEndpointOnPolicy = async (
   apiClient: ApiClientFixture,
@@ -107,16 +107,16 @@ const waitForEndpointOnPolicy = async (
         if (
           id === packagePolicyId &&
           revisionApplied &&
-          status === HostPolicyResponseActionStatus.failure
+          !ACCEPTED_APPLIED_STATUSES.includes(status)
         ) {
           throw new Error(
-            `Endpoint on agent ${agentId} failed to apply package policy ${packagePolicyId}: ${JSON.stringify(
+            `Endpoint on agent ${agentId} did not apply package policy ${packagePolicyId} (status ${status}): ${JSON.stringify(
               applied
             )}`
           );
         }
 
-        return { id, revisionApplied, statusAccepted: ACCEPTED_APPLIED_STATUSES.includes(status) };
+        return { id, revisionApplied };
       },
       {
         message: `Endpoint on agent ${agentId} reports package policy ${packagePolicyId} applied at revision ${packagePolicyRevision} or later`,
@@ -124,7 +124,7 @@ const waitForEndpointOnPolicy = async (
         intervals: [5_000],
       }
     )
-    .toStrictEqual({ id: packagePolicyId, revisionApplied: true, statusAccepted: true });
+    .toStrictEqual({ id: packagePolicyId, revisionApplied: true });
 
   log?.info(
     `[edr_real_fleet] agent ${agentId} Endpoint applied package policy ${packagePolicyId} after ${
