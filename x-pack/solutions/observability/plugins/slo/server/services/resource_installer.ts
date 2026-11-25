@@ -57,7 +57,7 @@ const BASE_INDICES: readonly string[] = [
 ];
 
 export class DefaultResourceInstaller implements ResourceInstaller {
-  // Set per install() run; every ES call then stops retrying once aborted.
+  // Set per install() run; every ES call is then aborted, and stops retrying, once the signal fires.
   private signal?: AbortSignal;
 
   constructor(
@@ -107,7 +107,9 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       this.logger.debug(`SLO component template found with version [${template._meta.version}]`);
     } else {
       this.logger.debug(`Installing SLO component template [${template.name}]`);
-      return this.execute(() => this.esClient.cluster.putComponentTemplate(template));
+      return this.execute((options) =>
+        this.esClient.cluster.putComponentTemplate(template, options)
+      );
     }
   }
 
@@ -118,13 +120,13 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       this.logger.debug(`SLO index template found with version [${template._meta.version}]`);
     } else {
       this.logger.debug(`Installing SLO index template [${template.name}]`);
-      return this.execute(() => this.esClient.indices.putIndexTemplate(template));
+      return this.execute((options) => this.esClient.indices.putIndexTemplate(template, options));
     }
   }
 
   private async createIndex(indexName: string) {
     try {
-      await this.execute(() => this.esClient.indices.create({ index: indexName }));
+      await this.execute((options) => this.esClient.indices.create({ index: indexName }, options));
     } catch (err) {
       if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
         throw err;
@@ -137,15 +139,20 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     if (!mappings) {
       return;
     }
-    await this.execute(() =>
-      this.esClient.indices.putMapping({ index: COMPOSITE_SUMMARY_INDEX_NAME, ...mappings })
+    await this.execute((options) =>
+      this.esClient.indices.putMapping(
+        { index: COMPOSITE_SUMMARY_INDEX_NAME, ...mappings },
+        options
+      )
     );
   }
 
   private async createDataStream(dataStreamName: string) {
     try {
       this.logger.debug(`Installing data stream [${dataStreamName}]`);
-      await this.execute(() => this.esClient.indices.createDataStream({ name: dataStreamName }));
+      await this.execute((options) =>
+        this.esClient.indices.createDataStream({ name: dataStreamName }, options)
+      );
     } catch (err) {
       if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
         throw err;
@@ -153,8 +160,8 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     }
   }
 
-  private async execute<T>(esCall: () => Promise<T>): Promise<T> {
-    return await retryTransientEsErrors(esCall, {
+  private async execute<T>(esCall: (options: { signal?: AbortSignal }) => Promise<T>): Promise<T> {
+    return await retryTransientEsErrors(() => esCall({ signal: this.signal }), {
       logger: this.logger,
       retryOptions: this.retryOptions,
       signal: this.signal,
@@ -162,16 +169,16 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   }
 
   private async fetchComponentTemplateVersion(name: string) {
-    const response = await this.execute(() =>
-      this.esClient.cluster.getComponentTemplate({ name }, { ignore: [404] })
+    const response = await this.execute((options) =>
+      this.esClient.cluster.getComponentTemplate({ name }, { ...options, ignore: [404] })
     );
 
     return response?.component_templates?.[0]?.component_template?._meta?.version ?? null;
   }
 
   private async fetchIndexTemplateVersion(name: string) {
-    const response = await this.execute(() =>
-      this.esClient.indices.getIndexTemplate({ name }, { ignore: [404] })
+    const response = await this.execute((options) =>
+      this.esClient.indices.getIndexTemplate({ name }, { ...options, ignore: [404] })
     );
 
     return response?.index_templates?.[0]?.index_template?._meta?.version ?? null;

@@ -71,7 +71,7 @@ export class ResourceInstallState {
 
   private async install(retryOptions: RetryOptions): Promise<void> {
     const deadline = Date.now() + LOCK_WAIT_TIMEOUT_MS;
-    while (!(await this.withinDeadline(this.installUnderLock(retryOptions), deadline))) {
+    while (!(await this.installWithinLockWait(retryOptions, deadline))) {
       if (Date.now() >= deadline) {
         throw new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE);
       }
@@ -82,14 +82,24 @@ export class ResourceInstallState {
     }
   }
 
-  // A slow lock attempt must not outlast the caller's wait budget.
-  private withinDeadline(attempt: Promise<boolean>, deadline: number): Promise<boolean> {
+  // The deadline bounds only the wait for the lock: once this node holds it, the install runs to completion.
+  private installWithinLockWait(retryOptions: RetryOptions, deadline: number): Promise<boolean> {
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let lockWaitExpired = false;
     const expired = new Promise<never>((_, reject) => {
-      timer = setTimeout(
-        () => reject(new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE)),
-        Math.max(deadline - Date.now(), 0)
-      );
+      timer = setTimeout(() => {
+        lockWaitExpired = true;
+        reject(new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE));
+      }, Math.max(deadline - Date.now(), 0));
+    });
+    const attempt = this.installUnderLock(retryOptions, undefined, {
+      onLockAcquired: () => {
+        clearTimeout(timer);
+        // An abandoned attempt that acquires the lock late must not install.
+        if (lockWaitExpired) {
+          throw new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE);
+        }
+      },
     });
     return Promise.race([attempt, expired]).finally(() => clearTimeout(timer));
   }
@@ -98,12 +108,16 @@ export class ResourceInstallState {
   // is cheap: up-to-date resources are skipped.
   private async installUnderLock(
     retryOptions: RetryOptions,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    { onLockAcquired }: { onLockAcquired?: () => void } = {}
   ): Promise<boolean> {
     const { installerFactory, lockManager } = this.dependencies;
     try {
       const installer = await installerFactory(retryOptions);
-      await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () => installer.install(signal));
+      await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () => {
+        onLockAcquired?.();
+        return installer.install(signal);
+      });
       return true;
     } catch (err) {
       if (isLockAcquisitionError(err)) {

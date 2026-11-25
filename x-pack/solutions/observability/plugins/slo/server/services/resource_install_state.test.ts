@@ -195,4 +195,23 @@ describe('ResourceInstallState', () => {
     await jest.advanceTimersByTimeAsync(30_000);
     await assertion;
   });
+
+  it('does not cut off an install that already holds the lock when the wait budget elapses', async () => {
+    jest.useFakeTimers();
+    const { installer, state } = setup();
+    let resolveInstall: () => void = () => {};
+    installer.install.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveInstall = resolve;
+      })
+    );
+
+    const result = state.ensureInstalled();
+    await jest.advanceTimersByTimeAsync(60_000);
+    resolveInstall();
+
+    await expect(result).resolves.toBeUndefined();
+    await state.ensureInstalled();
+    expect(installer.install).toHaveBeenCalledTimes(1);
+  });
 });

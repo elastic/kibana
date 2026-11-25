@@ -107,11 +107,13 @@ describe('resourceInstaller', () => {
       COMPOSITE_SUMMARY_INDEX_NAME,
     ]);
     expect(esClient.indices.putMapping).toHaveBeenCalledWith(
-      expect.objectContaining({ index: COMPOSITE_SUMMARY_INDEX_NAME })
+      expect.objectContaining({ index: COMPOSITE_SUMMARY_INDEX_NAME }),
+      { signal: undefined }
     );
-    expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
-      name: HEALTH_DATA_STREAM_NAME,
-    });
+    expect(esClient.indices.createDataStream).toHaveBeenCalledWith(
+      { name: HEALTH_DATA_STREAM_NAME },
+      { signal: undefined }
+    );
   });
 
   it('does not install the common resources when there is a version match', async () => {
