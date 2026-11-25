@@ -496,6 +496,10 @@ const trimSubmission = (data: SubmissionResponse) => ({
   scannerUserAgent: data.options?.useragent,
 });
 
+/** urlscan reports `ip-address` for anonymous requests and the account's scope for an accepted key. */
+const isAccountScope = (scope: unknown): boolean =>
+  typeof scope === 'string' && scope !== '' && scope !== 'ip-address';
+
 /** Flatten the per-action, per-window quota object into the numbers a caller throttles on. */
 const isQuotaWindow = (value: unknown): value is QuotaWindow =>
   typeof value === 'object' && value !== null && 'limit' in (value as Record<string, unknown>);
@@ -1001,13 +1005,15 @@ Gotchas that matter:
         const data = response.data as QuotaResponse;
         // The quota endpoint answers 200 for an anonymous caller too, just with the reduced
         // per-IP budget and scope "ip-address" (verified live), so a 200 alone does not prove a
-        // key was accepted. When the connector is configured WITH a key, an "ip-address" scope
-        // means the key silently did not take effect, and that must fail rather than look green.
+        // key was accepted. When the connector is configured WITH a key, an "ip-address" or empty
+        // scope means the key silently did not take effect, and that must fail rather than look green.
         // A rejected key does not usually reach this branch: urlscan answers 400 for a
         // malformed key and 401 for an unknown one, both of which throw below.
-        if (usesApiKey && data.scope === 'ip-address') {
+        if (usesApiKey && data.scope !== undefined && !isAccountScope(data.scope)) {
           throw new Error(
-            'Connected to urlscan.io but the API key was not applied: quota scope is "ip-address", which urlscan reports for anonymous requests. Check that the key is set and that it is sent in the api-key header.'
+            `Connected to urlscan.io but the API key was not applied: quota scope is ${JSON.stringify(
+              data.scope
+            )}, which names no account (anonymous requests report "ip-address"). Check that the key is set and that it is sent in the api-key header.`
           );
         }
         const searchPerDay = (data.limits?.search as { day?: { limit?: number } } | undefined)?.day
@@ -1017,7 +1023,7 @@ Gotchas that matter:
             ? 'Successfully authenticated to the URLScan.io API'
             : 'Reached the URLScan.io API anonymously. Search, screenshots and quotas work; scanning, results and DOM need an API key.',
           scope: data.scope,
-          authenticated: data.scope !== undefined && data.scope !== 'ip-address',
+          authenticated: isAccountScope(data.scope),
           searchRequestsPerDay: searchPerDay,
         };
       } catch (error) {

@@ -1297,6 +1297,21 @@ describe('URLScan.io connector', () => {
       await expect(UrlscanIo.test.handler(ctx)).rejects.toThrow(/was not applied/);
     });
 
+    it.each([null, '', 42])(
+      'fails when a key is configured but the quota scope is %p, which names no account',
+      async (scope) => {
+        const { ctx, client } = createContext({ authType: 'api_key_header' });
+        client.get.mockResolvedValue({ data: { scope, limits: {} }, headers: {} });
+        await expect(UrlscanIo.test.handler(ctx)).rejects.toThrow(/was not applied/);
+      }
+    );
+
+    it.each([null, ''])('does not report authenticated for a %p scope', async (scope) => {
+      const { ctx, client } = createContext({ authType: 'none' });
+      client.get.mockResolvedValue({ data: { scope, limits: {} }, headers: {} });
+      await expect(UrlscanIo.test.handler(ctx)).resolves.toMatchObject({ authenticated: false });
+    });
+
     it('passes anonymously, and says which actions still need a key', async () => {
       const { ctx, client } = createContext({ authType: 'none' });
       client.get.mockResolvedValue({ data: { scope: 'ip-address', limits: {} }, headers: {} });
