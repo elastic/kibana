@@ -46,6 +46,7 @@ browserslist
 react-day-picker
 mysql2
 mssql
+oracledb
 jszip
 @rsdoctor/rspack-plugin
 @rspack/core
@@ -75,6 +76,7 @@ oxlint-tsgolint
 bump-cli
 @oxlint/plugins
 @types/mssql
+@types/oracledb
 monaco-marker-data-provider
 @opentelemetry/core
 @opentelemetry/resources

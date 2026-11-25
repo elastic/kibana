@@ -26,6 +26,7 @@ export const LICENSE_ALLOWED = [
   '(WTFPL OR MIT)',
   '(MIT OR WTFPL)',
   '(Unlicense OR Apache-2.0)',
+  '(Apache-2.0 OR UPL-1.0)', // oracledb: dual-licensed, we elect Apache-2.0
   'AFLv2.1',
   '(AFL-2.1 OR BSD-3-Clause)',
   'Apache 2.0',

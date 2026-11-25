@@ -35,6 +35,7 @@ allowBuilds:
   'msw': false # copies a worker script if configured; unused
   'nice-napi': false # optional piscina nice-value helper
   'node-liblzma': false # optional native dep of just-bash; lazy-loads with fallback
+  'oracledb': false # install script only checks the environment; Thin mode needs no native binary
   'playwright-chromium': false # browsers installed explicitly in bootstrap
   'protobufjs': false # prints a version-scheme warning
   'puppeteer': false # browser download skipped via .puppeteerrc
