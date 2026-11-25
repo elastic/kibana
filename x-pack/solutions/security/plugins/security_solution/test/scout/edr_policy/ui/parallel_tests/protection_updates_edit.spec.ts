@@ -100,6 +100,7 @@ spaceTest.describe(
         // The picker starts at yesterday again, which differs from the deployed version.
         await expect(protectionUpdates.saveButton).toBeEnabled();
         await protectionUpdates.save();
+        await expect(protectionUpdates.successToast).toBeVisible();
         await expect(protectionUpdates.saveButton).toBeDisabled();
       });
     });
