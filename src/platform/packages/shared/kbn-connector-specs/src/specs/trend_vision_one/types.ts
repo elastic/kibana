@@ -12,9 +12,6 @@ import {
   ABOVE_LATIN1,
   ALERT_SEVERITIES,
   ALERT_STATUSES,
-  ALERTS_DEFAULT_MAX_RESULTS,
-  ALERTS_MAX_RESULTS,
-  ALERTS_PAGE_SIZE,
   DATE_TIME_TARGETS,
   ENDPOINT_SELECT_FIELDS,
   INVESTIGATION_RESULTS,
@@ -70,7 +67,7 @@ export const nextLinkField = () =>
     .max(4096)
     .optional()
     .describe(
-      'nextLink from the previous call, to read the next page. Pass the same filters again (and maxResults for listAlerts); the time range, sort, page size and selected fields come from the link.'
+      'nextLink from the previous call, to read the next page. Pass the same filters again; the time range, sort, page size and selected fields come from the link.'
     );
 
 /** Sort fields the product documents for alerts (investigationStatus is deprecated and left out). */
@@ -105,14 +102,6 @@ export const ListAlertsInputSchema = lazySchema(() =>
       .describe(
         "Sort, for example 'createdDateTime desc' (default) or 'severity desc,score desc'; fields: id, caseId, name, status, investigationResult, modelId, model, score, severity, createdDateTime, updatedDateTime, firstInvestigatedDateTime."
       ),
-    maxResults: z
-      .number()
-      .int()
-      .min(ALERTS_PAGE_SIZE)
-      .max(ALERTS_MAX_RESULTS)
-      .multipleOf(ALERTS_PAGE_SIZE, `maxResults must be a multiple of ${ALERTS_PAGE_SIZE}`)
-      .default(ALERTS_DEFAULT_MAX_RESULTS)
-      .describe('Alerts to read, 10-200 in steps of 10 (default 50), in pages of 10.'),
     nextLink: nextLinkField(),
   })
 );

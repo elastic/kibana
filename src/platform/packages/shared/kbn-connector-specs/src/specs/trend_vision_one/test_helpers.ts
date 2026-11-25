@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { timers } from './client';
 import { TrendVisionOne } from './trend_vision_one';
 
 export const ORIGIN = 'https://api.in.xdr.trendmicro.com';
@@ -52,11 +51,10 @@ export const httpError = (
 
 export const vendorError = (code: string, message: string) => ({ error: { code, message } });
 
-/** Resets the request mock and stubs the back-off sleep before each test. */
+/** Resets the request mock before each test. */
 export const resetMocksAroundEachTest = () => {
   beforeEach(() => {
     request.mockReset();
-    jest.spyOn(timers, 'sleep').mockResolvedValue(undefined);
   });
   afterEach(() => {
     jest.restoreAllMocks();

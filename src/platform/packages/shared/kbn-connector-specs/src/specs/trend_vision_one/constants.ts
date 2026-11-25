@@ -10,8 +10,8 @@
 export const TREND_VISION_ONE_CONNECTOR_TYPE_ID = '.trend_vision_one';
 export const VENDOR = 'TrendAI Vision One';
 
-/** India, the region of the default tenant. */
-export const DEFAULT_API_URL = 'https://api.in.xdr.trendmicro.com';
+/** United States, the first region of the product's API reference. */
+export const DEFAULT_API_URL = 'https://api.xdr.trendmicro.com';
 
 /** The documented regional API hosts, as listed in the product's API reference. */
 export const REGION_HOSTS: Readonly<Record<string, string>> = {
@@ -30,25 +30,7 @@ export const REGION_HOSTS: Readonly<Record<string, string>> = {
 
 export const API_PREFIX = '/v3.0';
 export const REQUEST_TIMEOUT_MS = 60_000;
-/**
- * Time budget of one action run, below Kibana's ~120 s limit for an action execution: no request
- * starts and no retry waits beyond it.
- */
-export const ACTION_BUDGET_MS = 100_000;
-/** listAlerts reads a further page only when at least this much of the budget is left. */
-export const MIN_PAGE_BUDGET_MS = 10_000;
 
-export const MAX_ATTEMPTS = 3;
-/** Wait before retry n when the product sends no usable Retry-After: 2 s, then 5 s; never at once. */
-export const BACKOFF_MS: readonly number[] = [2_000, 5_000];
-export const RETRY_AFTER_CAP_MS = 30_000;
-export const READ_RETRY_STATUSES: readonly number[] = [429, 500, 502, 503, 504];
-/** State-changing calls are retried only when the product refused them (429). */
-export const WRITE_RETRY_STATUSES: readonly number[] = [429];
-
-export const ALERTS_PAGE_SIZE = 10;
-export const ALERTS_DEFAULT_MAX_RESULTS = 50;
-export const ALERTS_MAX_RESULTS = 200;
 export const ENDPOINT_FILTER_MAX = 1024;
 export const OAT_FILTER_MAX = 4000;
 /** Largest page size of each list action; a caller nextLink may not ask for more. */
@@ -116,8 +98,6 @@ export const ENDPOINT_SELECT_FIELDS = [
   'versionControlPolicy',
   'agentUpdatePolicy',
   'agentUpdateStatus',
-  'agentVersion',
-  'agentVersionStatus',
   'creditAllocatedLicenses',
   'securityPolicy',
   'securityPolicyOverriddenStatus',

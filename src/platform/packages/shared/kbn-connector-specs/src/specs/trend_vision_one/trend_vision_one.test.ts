@@ -134,9 +134,9 @@ describe('TrendAI Vision One connector definition', () => {
     });
   });
 
-  it('defaults the region to India', () => {
+  it('defaults the region to the United States', () => {
     expect(TrendVisionOne.schema?.parse({})).toEqual({
-      apiUrl: 'https://api.in.xdr.trendmicro.com',
+      apiUrl: 'https://api.xdr.trendmicro.com',
     });
   });
 
@@ -148,7 +148,7 @@ describe('TrendAI Vision One connector definition', () => {
     for (const host of Object.values(REGION_HOSTS)) {
       expect(helpText).toContain(`https://${host}`);
     }
-    expect(helpText).toContain('India: https://api.in.xdr.trendmicro.com (default)');
+    expect(helpText).toContain('United States: https://api.xdr.trendmicro.com (default)');
     expect(helpText).toContain('not the console address (portal...)');
     expect(helpText).toContain('with https and without a path, query string or fragment');
     expect(helpText).toContain('allowed hosts');

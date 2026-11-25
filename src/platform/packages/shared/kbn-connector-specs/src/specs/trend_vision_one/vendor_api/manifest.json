@@ -217,11 +217,9 @@
   "sources": {
     "vision_one": {
       "apiVersion": "v3.0",
-      "captured": true,
-      "fetchedAt": "2026-11-20T03:43:48.000Z",
+      "fetchedAt": "2026-11-25T02:45:54.136Z",
       "format": "openapi",
-      "note": "Exported from the TrendAI Vision One console (the v3.0 public API OpenAPI document, sp-api-open-v3.0.json), which is available only to signed-in customers and has no public URL, so the source URL is a placeholder and the drift check cannot refetch it. The export was normalised before trimming: 2 regular expressions that JavaScript cannot parse were removed. The snapshot keeps only the 22 operations the connector calls and the schemas they reference.",
-      "url": "https://your-console.xdr.trendmicro.com/sp-api-open-v3.0.json"
+      "url": "https://automation.trendmicro.com/sp-api-open-v3.0.json"
     }
   }
 }

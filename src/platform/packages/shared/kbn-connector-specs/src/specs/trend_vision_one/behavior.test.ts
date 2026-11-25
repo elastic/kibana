@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TrendVisionOne } from './trend_vision_one';
 import {
   AGENT_GUID,
-  ctx,
   httpError,
   ok,
   request,
@@ -187,42 +185,7 @@ describe('TrendAI Vision One repeated calls', () => {
   });
 });
 
-describe('TrendAI Vision One read requests retry a server error', () => {
-  const page = ok({ totalCount: 0, count: 0, items: [] });
-  it.each([
-    ['listAlerts', {}, page],
-    ['getAlertDetails', { id: 'WB-1' }, ok({ id: 'WB-1', status: 'Open' }, { etag: '"e1"' })],
-    ['listObservedAttackTechniques', {}, page],
-    ['listEndpoints', {}, page],
-    ['getResponseTaskStatus', { id: '00000012' }, ok({ id: '00000012', status: 'running' })],
-  ])('%s is read again after a 503 and succeeds', async (name, input, answer) => {
-    request.mockRejectedValueOnce(httpError(503)).mockResolvedValueOnce(answer);
-    await expect(run(name, input)).resolves.toBeDefined();
-    expect(request).toHaveBeenCalledTimes(2);
-  });
-
-  it('updateAlertStatus retries the read of the alert but never the PATCH', async () => {
-    request
-      .mockRejectedValueOnce(httpError(503))
-      .mockResolvedValueOnce(ok({ id: 'WB-1', status: 'Open' }, { etag: '"e1"' }))
-      .mockRejectedValueOnce(httpError(503));
-    await expect(run('updateAlertStatus', { id: 'WB-1', status: 'Closed' })).rejects.toThrow(
-      '(503)'
-    );
-    expect(request).toHaveBeenCalledTimes(3);
-    expect(request.mock.calls.map(([config]) => config.method)).toEqual(['GET', 'GET', 'PATCH']);
-  });
-
-  it('the connector test retries its connectivity check after a 503', async () => {
-    request
-      .mockRejectedValueOnce(httpError(503))
-      .mockResolvedValueOnce(ok({ status: 'available' }));
-    await expect(TrendVisionOne.test?.handler(ctx)).resolves.toEqual({
-      message: 'Connected to TrendAI Vision One (available)',
-    });
-    expect(request).toHaveBeenCalledTimes(2);
-  });
-
+describe('TrendAI Vision One a server error is not repeated', () => {
   it('a response task start is not repeated after a 503', async () => {
     request.mockRejectedValueOnce(httpError(503));
     await expect(run('isolateEndpoint', { agentGuid: AGENT_GUID })).rejects.toThrow('(503)');
@@ -230,18 +193,8 @@ describe('TrendAI Vision One read requests retry a server error', () => {
   });
 });
 
-describe('TrendAI Vision One read retry statuses', () => {
-  it.each([500, 502, 503, 504, 429])('a read is retried after HTTP %s', async (status) => {
-    request
-      .mockRejectedValueOnce(httpError(status))
-      .mockResolvedValueOnce(ok({ id: '00000012', status: 'running' }));
-    await expect(run('getResponseTaskStatus', { id: '00000012' })).resolves.toMatchObject({
-      status: 'running',
-    });
-    expect(request).toHaveBeenCalledTimes(2);
-  });
-
-  it.each([400, 401, 403, 404, 501])('a read is not retried after HTTP %s', async (status) => {
+describe('TrendAI Vision One read failures', () => {
+  it.each([400, 401, 403, 404, 501])('a read is sent once after HTTP %s', async (status) => {
     request.mockRejectedValueOnce(httpError(status));
     await expect(run('getResponseTaskStatus', { id: '00000012' })).rejects.toThrow();
     expect(request).toHaveBeenCalledTimes(1);

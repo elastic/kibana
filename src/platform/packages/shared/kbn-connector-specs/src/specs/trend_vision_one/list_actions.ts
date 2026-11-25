@@ -41,7 +41,7 @@ export const readOnePage = async (
   params: Params,
   filter: string | undefined,
   nextLink: string | undefined,
-  maxTop: number
+  maxTop?: number
 ): Promise<PageResult> => {
   const url = nextLink ? checkNextLink(ctx, nextLink, path, maxTop) : undefined;
   const { data } = await vendorRequest<ListPage>(ctx, {

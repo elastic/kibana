@@ -15,8 +15,7 @@ import {
   filterHeader,
   getApiOrigin,
   normaliseLink,
-  decodedId,
-  timers,
+  lastPathSegment,
   vendorRequest,
 } from './client';
 import { taskIdFrom } from './multi_status';
@@ -35,53 +34,7 @@ import {
 
 resetMocksAroundEachTest();
 
-describe('TrendAI Vision One Retry-After and failed writes', () => {
-  it.each([
-    ['a read', false],
-    ['a state-changing call', true],
-  ])(
-    'stops and reports the last answer when Retry-After is above the cap, for %s (no early retry)',
-    async (_what, mutating) => {
-      request.mockRejectedValue(
-        httpError(429, vendorError('TooManyRequests', 'slow down'), { 'retry-after': '120' })
-      );
-      const error = await vendorRequest(ctx, {
-        action: 'listAlerts',
-        method: mutating ? 'POST' : 'GET',
-        path: '/x',
-        mutating,
-      }).catch((caught: Error & { response?: { headers: Record<string, string> } }) => caught);
-      expect((error as Error).message).toContain('rate limit reached for listAlerts');
-      expect((error as Error).message).not.toContain('may already have been applied');
-      // The error keeps Retry-After so the caller can wait properly.
-      expect((error as { response?: { headers: unknown } }).response?.headers).toEqual({
-        'retry-after': '120',
-      });
-      expect(request).toHaveBeenCalledTimes(1);
-      expect(timers.sleep).not.toHaveBeenCalled();
-    }
-  );
-
-  it.each([[''], ['   '], ['soon'], ['-5']])(
-    'uses the normal back-off, never an immediate retry, for Retry-After %j',
-    async (retryAfter) => {
-      request
-        .mockRejectedValueOnce(httpError(503, {}, { 'retry-after': retryAfter }))
-        .mockRejectedValueOnce(httpError(503, {}, { 'retry-after': retryAfter }))
-        .mockResolvedValueOnce(ok({}));
-      await vendorRequest(ctx, { action: 'x', method: 'GET', path: '/x', mutating: false });
-      expect(timers.sleep).toHaveBeenNthCalledWith(1, 2_000);
-      expect(timers.sleep).toHaveBeenNthCalledWith(2, 5_000);
-    }
-  );
-
-  it('uses the normal back-off for a 429 without Retry-After', async () => {
-    request.mockRejectedValueOnce(httpError(429)).mockResolvedValueOnce(ok({}));
-    await vendorRequest(ctx, { action: 'x', method: 'POST', path: '/x', mutating: true });
-    expect(timers.sleep).toHaveBeenCalledTimes(1);
-    expect(timers.sleep).toHaveBeenCalledWith(2_000);
-  });
-
+describe('TrendAI Vision One failed writes', () => {
   const mutate = (action = 'addAlertNote') =>
     vendorRequest(ctx, { action, method: 'POST', path: '/x', mutating: true });
 
@@ -114,7 +67,7 @@ describe('TrendAI Vision One Retry-After and failed writes', () => {
     ['a 400', httpError(400, vendorError('BadRequest', 'no'))],
     ['a 404', httpError(404)],
     ['a 412', httpError(412)],
-    ['a 429 after the last attempt', httpError(429)],
+    ['a 429', httpError(429)],
   ])('adds no "may already have been applied" hint after %s on a write', async (_what, failure) => {
     request.mockRejectedValue(failure);
     const error = await mutate().catch((caught: Error) => caught);
@@ -203,10 +156,17 @@ describe('TrendAI Vision One filter header characters', () => {
 });
 
 describe('TrendAI Vision One id decoding and link normalising', () => {
-  it('decodes a valid id and returns null for a malformed or unusable one', () => {
-    expect(decodedId('n%2D7')).toBe('n-7');
-    expect(decodedId('%E0%A4%A')).toBeNull();
-    expect(decodedId('a%20b')).toBeNull();
+  it.each([
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/note_7#details', 'note_7'],
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/note_7?x=1', 'note_7'],
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/a%23b', 'a#b'],
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/2035567', '2035567'],
+    ['/v3.0/workbench/alerts/WB-1/notes/2035567/', '2035567'],
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/%E0%A4%A', null],
+    ['https://api.xdr.trendmicro.com/', null],
+    ['https://', null],
+  ])('takes the last path segment of %s: %j', (value, expected) => {
+    expect(lastPathSegment(value)).toBe(expected);
   });
 
   it('decodes a segment without any id rule and returns null when it is malformed', () => {
@@ -255,7 +215,6 @@ describe('TrendAI Vision One headers on a failed request, as the Kibana executor
     ['write 429 with Retry-After', true, 429, true],
     ['write 503 with Retry-After', true, 503, true],
   ])('%s: the vendor delay is handed over (retry date %s)', async (_what, mutating, status) => {
-    // A single attempt: a Retry-After above the cap is reported instead of waited for.
     const error = await failure(mutating, httpError(status, {}, { 'Retry-After': '120' }));
     const waitMs = (retryDate(error)?.getTime() ?? 0) - Date.now();
     expect(waitMs).toBeGreaterThan(110_000);
@@ -367,4 +326,84 @@ describe('TrendAI Vision One ids read from Location headers', () => {
       });
     }
   );
+});
+
+describe('TrendAI Vision One task id from the Operation-Location pathname', () => {
+  const taskId = (value: string) =>
+    taskIdFrom({ headers: [{ name: 'Operation-Location', value }] });
+  const base = 'https://api.xdr.trendmicro.com/v3.0/response/tasks';
+
+  it.each([
+    [`${base}/00000001`, '00000001'],
+    [`${base}/00000001#details`, '00000001'],
+    [`${base}/00000001?x=1`, '00000001'],
+    [`${base}/RM%2D1`, 'RM-1'],
+  ])('reads the task id of %s', (value, id) => {
+    expect(taskId(value)).toBe(id);
+  });
+
+  it.each([
+    [`${base}/%E0%A4%A`],
+    [`${base}/a%23b`],
+    [`${base}/a%20b`],
+    [`${base}/${'a'.repeat(37)}`],
+  ])('gives null when the id is malformed or rejected by the id check: %s', (value) => {
+    expect(taskId(value)).toBeNull();
+  });
+});
+
+describe('TrendAI Vision One sends one request and throws the failure once', () => {
+  const send = (mutating: boolean) =>
+    vendorRequest(ctx, {
+      action: 'x',
+      method: mutating ? 'POST' : 'GET',
+      path: '/x',
+      mutating,
+    }).catch((caught: unknown) => caught);
+
+  it.each([
+    ['read', 429, false],
+    ['read', 500, false],
+    ['read', 503, false],
+    ['write', 429, true],
+    ['write', 500, true],
+    ['write', 503, true],
+  ])(
+    'a %s answered with %s sends exactly one request and keeps the status and headers',
+    async (_kind, status, mutating) => {
+      request.mockRejectedValue(
+        httpError(status, {}, { 'retry-after': '2', 'x-request-id': 'r1' })
+      );
+      const error = await send(mutating);
+      expect(request).toHaveBeenCalledTimes(1);
+      expect(error).toMatchObject({
+        status,
+        statusCode: status,
+        headers: { 'retry-after': '2', 'x-request-id': 'r1' },
+        response: { status, headers: { 'retry-after': '2', 'x-request-id': 'r1' } },
+      });
+    }
+  );
+
+  it.each([
+    ['read', false],
+    ['write', true],
+  ])('a %s that times out sends one request', async (_kind, mutating) => {
+    request.mockRejectedValue(
+      Object.assign(new Error('timeout'), { isAxiosError: true, code: 'ECONNABORTED' })
+    );
+    const error = await send(mutating);
+    expect(request).toHaveBeenCalledTimes(1);
+    expect((error as Error).message).toContain('request failed: timed out after 60 s');
+  });
+
+  it.each([
+    ['read', false],
+    ['write', true],
+  ])('a %s is sent with the 60 s timeout and no redirect', async (_kind, mutating) => {
+    request.mockResolvedValue(ok({}));
+    await send(mutating);
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(request.mock.calls[0][0]).toMatchObject({ timeout: 60000, maxRedirects: 0 });
+  });
 });

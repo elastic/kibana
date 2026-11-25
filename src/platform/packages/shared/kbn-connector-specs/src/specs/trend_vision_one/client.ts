@@ -11,27 +11,15 @@ import type { AxiosError, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import {
   ABOVE_LATIN1,
-  ACTION_BUDGET_MS,
   API_PREFIX,
-  BACKOFF_MS,
   DEFAULT_API_URL,
   DEPRECATED_ALERT_FIELD,
-  MAX_ATTEMPTS,
-  READ_RETRY_STATUSES,
   REQUEST_TIMEOUT_MS,
-  RETRY_AFTER_CAP_MS,
   VENDOR,
-  WRITE_RETRY_STATUSES,
 } from './constants';
-import { isAcceptedId } from './types';
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH';
 export type Params = Record<string, string | number | undefined>;
-
-/** Indirection so tests can skip the real back-off waits. */
-export const timers = {
-  sleep: (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms)),
-};
 
 /** Hosts on the same machine (local emulators): the only hosts that may use plain http. */
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
@@ -173,14 +161,6 @@ export const toVendorError = (
   });
 };
 
-/** The wait the product asked for in Retry-After; undefined when it is absent, blank or not a number of seconds. */
-const getRetryAfterMs = (error: AxiosError): number | undefined => {
-  const raw = getHeader(error.response, 'retry-after')?.trim();
-  if (!raw) return undefined;
-  const seconds = Number(raw);
-  return Number.isFinite(seconds) && seconds >= 0 ? Math.round(seconds * 1000) : undefined;
-};
-
 /** Decodes a percent-encoded URL segment; null when it is malformed (never throws). */
 export const decodeSegment = (value: string): string | null => {
   try {
@@ -191,12 +171,20 @@ export const decodeSegment = (value: string): string | null => {
 };
 
 /**
- * The task id of a Location or Operation-Location header value: decoded without error and accepted by
- * the id input check of the read actions; null otherwise (a successful write is never turned into an error).
+ * The last non-empty segment of the path of a Location or Operation-Location header value, decoded
+ * (the note id of addAlertNote, the task id of a response task).
+ * The URL parser drops the query and the fragment (an encoded %23 stays in the segment); null when
+ * the value cannot be parsed or the segment is malformed.
  */
-export const decodedId = (value: string): string | null => {
-  const id = decodeSegment(value);
-  return id !== null && isAcceptedId(id) ? id : null;
+export const lastPathSegment = (value: string): string | null => {
+  let pathname: string;
+  try {
+    pathname = new URL(value, 'https://placeholder.invalid').pathname;
+  } catch {
+    return null;
+  }
+  const segment = pathname.split('/').filter(Boolean).pop();
+  return segment === undefined ? null : decodeSegment(segment);
 };
 
 /** Added to a failed state-changing request whose outcome is unknown (no answer read, or a 5xx). */
@@ -214,8 +202,6 @@ export interface VendorRequest {
   mutating: boolean;
   /** Label for a 404, for example "Workbench alert WB-1". */
   notFound?: string;
-  /** Returns true when a retryable failure must not be retried (an exhausted sandbox quota). */
-  noRetry?: (error: AxiosError) => boolean;
 }
 
 const dropEmpty = (params: Params = {}): Record<string, string | number> => {
@@ -226,83 +212,36 @@ const dropEmpty = (params: Params = {}): Record<string, string | number> => {
   return out;
 };
 
-const deadlines = new WeakMap<object, number>();
-
-/** Starts the time budget of one action run (ACTION_BUDGET_MS) for this context. */
-export const startActionBudget = (ctx: ActionContext): void => {
-  deadlines.set(ctx, Date.now() + ACTION_BUDGET_MS);
-};
-
-/** Milliseconds left in the action's time budget; unlimited when no budget was started. */
-export const budgetLeft = (ctx: ActionContext): number => {
-  const deadline = deadlines.get(ctx);
-  return deadline === undefined ? Number.POSITIVE_INFINITY : deadline - Date.now();
-};
-
-const budgetSpent = (action: string): Error =>
-  new Error(
-    `${VENDOR} ${action} stopped: the ${
-      ACTION_BUDGET_MS / 1000
-    } s time budget of one action run is spent`
-  );
-
 /**
- * Sends one request with the retry policy: reads retry on 429 and 5xx, state-changing calls only
- * on 429; at most 3 attempts; Retry-After honoured, and when it is above 30 s the last answer is
- * reported instead of retrying early. Each request gets the
- * remaining action budget as its timeout (at most 60 s); no request starts and no retry waits
- * once the budget would be passed.
+ * Sends one request, with no retry: a failure is thrown once with the HTTP status and the response
+ * headers (Retry-After included), so the caller decides what to do next.
  */
 export const vendorRequest = async <T = unknown>(
   ctx: ActionContext,
   req: VendorRequest
 ): Promise<AxiosResponse<T>> => {
   const url = req.url ?? `${getApiOrigin(ctx)}${API_PREFIX}${req.path ?? ''}`;
-  const retryStatuses = req.mutating ? WRITE_RETRY_STATUSES : READ_RETRY_STATUSES;
-  for (let attempt = 1; ; attempt++) {
-    const left = budgetLeft(ctx);
-    if (left <= 0) {
-      throw budgetSpent(req.action);
-    }
-    const timeoutMs = Math.min(REQUEST_TIMEOUT_MS, left);
-    try {
-      return await ctx.client.request<T>({
-        method: req.method,
-        url,
-        params: req.url ? undefined : dropEmpty(req.params),
-        data: req.data,
-        headers: req.headers,
-        timeout: timeoutMs,
-        // The API does not redirect: a 3xx fails with its status, so no body or key is sent on.
-        maxRedirects: 0,
-      });
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      const status = axiosError?.response?.status;
-      const retryable =
-        status !== undefined &&
-        retryStatuses.includes(status) &&
-        attempt < MAX_ATTEMPTS &&
-        !req.noRetry?.(axiosError);
-      if (!retryable) {
-        const failure = toVendorError(req.action, error, req.notFound, timeoutMs);
-        const unknownOutcome =
-          req.mutating &&
-          (axiosError?.isAxiosError || axiosError?.response) &&
-          (status === undefined || status >= 500);
-        if (unknownOutcome) failure.message = `${failure.message}. ${MAYBE_APPLIED}`;
-        throw failure;
-      }
-      const retryAfterMs = getRetryAfterMs(axiosError);
-      const delayMs = retryAfterMs ?? BACKOFF_MS[Math.min(attempt - 1, BACKOFF_MS.length - 1)];
-      if (delayMs > RETRY_AFTER_CAP_MS || delayMs >= budgetLeft(ctx)) {
-        // The wait is above the cap or would pass the action's budget: report the last answer
-        // instead of retrying before the product allows it.
-        throw toVendorError(req.action, error, req.notFound, timeoutMs);
-      }
-      ctx.log.debug(`${VENDOR} ${req.action}: HTTP ${status}, retry ${attempt} in ${delayMs} ms`);
-      await timers.sleep(delayMs);
-    }
+  try {
+    return await ctx.client.request<T>({
+      method: req.method,
+      url,
+      params: req.url ? undefined : dropEmpty(req.params),
+      data: req.data,
+      headers: req.headers,
+      timeout: REQUEST_TIMEOUT_MS,
+      // The API does not redirect: a 3xx fails with its status, so no body or key is sent on.
+      maxRedirects: 0,
+    });
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    const status = axiosError?.response?.status;
+    const failure = toVendorError(req.action, error, req.notFound, REQUEST_TIMEOUT_MS);
+    const unknownOutcome =
+      req.mutating &&
+      (axiosError?.isAxiosError || axiosError?.response) &&
+      (status === undefined || status >= 500);
+    if (unknownOutcome) failure.message = `${failure.message}. ${MAYBE_APPLIED}`;
+    throw failure;
   }
 };
 

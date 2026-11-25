@@ -14,7 +14,7 @@
             "headers": [
               {
                 "name": "Operation-Location",
-                "value": "https://api.in.xdr.trendmicro.com/v3.0/response/tasks/00000012"
+                "value": "https://api.xdr.trendmicro.com/v3.0/response/tasks/00000012"
               }
             ]
           }
@@ -37,7 +37,7 @@
             "headers": [
               {
                 "name": "Operation-Location",
-                "value": "https://api.in.xdr.trendmicro.com/v3.0/response/tasks/00000012"
+                "value": "https://api.xdr.trendmicro.com/v3.0/response/tasks/00000012"
               }
             ]
           }
@@ -62,7 +62,7 @@
             "headers": [
               {
                 "name": "Operation-Location",
-                "value": "https://api.in.xdr.trendmicro.com/v3.0/response/tasks/00000012"
+                "value": "https://api.xdr.trendmicro.com/v3.0/response/tasks/00000012"
               }
             ]
           }
@@ -86,7 +86,7 @@
             "headers": [
               {
                 "name": "Operation-Location",
-                "value": "https://api.in.xdr.trendmicro.com/v3.0/response/tasks/00000012"
+                "value": "https://api.xdr.trendmicro.com/v3.0/response/tasks/00000012"
               }
             ]
           }
@@ -109,7 +109,7 @@
             "headers": [
               {
                 "name": "Operation-Location",
-                "value": "https://api.in.xdr.trendmicro.com/v3.0/response/tasks/00000012"
+                "value": "https://api.xdr.trendmicro.com/v3.0/response/tasks/00000012"
               }
             ]
           }
@@ -132,7 +132,7 @@
             "headers": [
               {
                 "name": "Operation-Location",
-                "value": "https://api.in.xdr.trendmicro.com/v3.0/response/tasks/00000012"
+                "value": "https://api.xdr.trendmicro.com/v3.0/response/tasks/00000012"
               }
             ]
           }
@@ -155,7 +155,7 @@
             "headers": [
               {
                 "name": "Operation-Location",
-                "value": "https://api.in.xdr.trendmicro.com/v3.0/response/tasks/00000012"
+                "value": "https://api.xdr.trendmicro.com/v3.0/response/tasks/00000012"
               }
             ]
           }
@@ -178,7 +178,7 @@
             "headers": [
               {
                 "name": "Operation-Location",
-                "value": "https://api.in.xdr.trendmicro.com/v3.0/response/tasks/00000012"
+                "value": "https://api.xdr.trendmicro.com/v3.0/response/tasks/00000012"
               }
             ]
           }
@@ -201,7 +201,7 @@
             "headers": [
               {
                 "name": "Operation-Location",
-                "value": "https://api.in.xdr.trendmicro.com/v3.0/response/tasks/00000012"
+                "value": "https://api.xdr.trendmicro.com/v3.0/response/tasks/00000012"
               }
             ]
           }
@@ -529,17 +529,17 @@
   },
   "listAlerts": {
     "input": {
-      "nextLink": "https://api.in.xdr.trendmicro.com/v3.0/workbench/alerts?skipToken=fixture-page-2"
+      "nextLink": "https://api.xdr.trendmicro.com/v3.0/workbench/alerts?skipToken=fixture-page-2"
     }
   },
   "listEndpoints": {
     "input": {
-      "nextLink": "https://api.in.xdr.trendmicro.com/v3.0/endpointSecurity/endpoints?skipToken=fixture-page-2"
+      "nextLink": "https://api.xdr.trendmicro.com/v3.0/endpointSecurity/endpoints?skipToken=fixture-page-2"
     }
   },
   "listObservedAttackTechniques": {
     "input": {
-      "nextLink": "https://api.in.xdr.trendmicro.com/v3.0/oat/detections?nextBatchToken=fixture-page-2"
+      "nextLink": "https://api.xdr.trendmicro.com/v3.0/oat/detections?nextBatchToken=fixture-page-2"
     }
   }
 }

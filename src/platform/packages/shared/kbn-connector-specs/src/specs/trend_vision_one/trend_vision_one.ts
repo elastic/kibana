@@ -18,29 +18,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import type { ConnectorSpec } from '../../connector_spec';
 import { UISchemas } from '../../connector_spec';
 import { alertActions } from './alert_actions';
-import { apiUrlProblem, startActionBudget, vendorRequest } from './client';
+import { apiUrlProblem, vendorRequest } from './client';
 import { DEFAULT_API_URL, REGION_HOSTS, TREND_VISION_ONE_CONNECTOR_TYPE_ID } from './constants';
 import { intelActions } from './intel_actions';
 import { listActions } from './list_actions';
 import { responseActions } from './response_actions';
-
-/** Starts the time budget of one action run before every handler. */
-const withActionBudget = (actions: ConnectorSpec['actions']): ConnectorSpec['actions'] =>
-  Object.fromEntries(
-    Object.entries(actions).map(([name, action]) => [
-      name,
-      {
-        ...action,
-        handler: (ctx: ActionContext, input: unknown) => {
-          startActionBudget(ctx);
-          return action.handler(ctx, input);
-        },
-      },
-    ])
-  );
 
 const REGION_LIST = Object.entries(REGION_HOSTS)
   .map(([region, host]) => {
@@ -116,12 +101,12 @@ export const TrendVisionOne: ConnectorSpec = {
     fields: ['apiUrl'],
   },
 
-  actions: withActionBudget({
+  actions: {
     ...alertActions,
     ...listActions,
     ...responseActions,
     ...intelActions,
-  }),
+  },
 
   skill: [
     '## TrendAI Vision One',
@@ -142,7 +127,6 @@ export const TrendVisionOne: ConnectorSpec = {
       defaultMessage: 'Checks the region API URL and the API key with the connectivity check.',
     }),
     handler: async (ctx) => {
-      startActionBudget(ctx);
       const { data } = await vendorRequest<{ status?: string }>(ctx, {
         action: 'test',
         method: 'GET',

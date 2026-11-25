@@ -14,7 +14,7 @@ const OBJECT = 'type is url, domain, ip, fileSha1, fileSha256 or senderMailAddre
 
 export const ACTION_DESCRIPTIONS = {
   listAlerts:
-    'List Workbench alerts in a time window, newest first, filtered by status, investigationResult or severity. Returns at most maxResults items, totalCount, pagesRead and nextLink to continue; nextLinkRepeats alerts at the start of nextLink were already returned.',
+    'List Workbench alerts in a time window, newest first, filtered by status, investigationResult or severity. Returns one page of up to 10 alerts with totalCount and nextLink; pass nextLink to read the next page.',
   getAlertDetails:
     'Get one Workbench alert: status, investigationResult, severity, score, impactScope, indicators, matchedRules and its etag.',
   updateAlertStatus:

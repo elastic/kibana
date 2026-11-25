@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosError } from 'axios';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { getHeader, readQuota, vendorRequest } from './client';
+import { readQuota, vendorRequest } from './client';
 import { ACTION_DESCRIPTIONS } from './descriptions';
 import type { ListOutcome } from './multi_status';
 import { toListOutcome } from './multi_status';
@@ -51,10 +50,6 @@ const changeList = async (
   });
   return { type, value, ...toListOutcome(action, data, success) };
 };
-
-/** A sandbox 429 that reports no submissions left is the daily quota, not a transient limit. */
-const quotaExhausted = (error: AxiosError): boolean =>
-  getHeader(error.response, 'tmv1-submission-remaining-count') === '0';
 
 const toBase64 = (text: string): string => Buffer.from(text, 'utf8').toString('base64');
 
@@ -122,7 +117,6 @@ export const intelActions: ConnectorSpec['actions'] = {
         path: '/sandbox/files/analyze',
         data: form,
         mutating: true,
-        noRetry: quotaExhausted,
       });
       const body = response.data ?? {};
       return {
@@ -146,7 +140,6 @@ export const intelActions: ConnectorSpec['actions'] = {
         path: '/sandbox/urls/analyze',
         data: input.urls.map((url) => ({ url })),
         mutating: true,
-        noRetry: quotaExhausted,
       });
       return {
         items: Array.isArray(response.data) ? response.data : [],

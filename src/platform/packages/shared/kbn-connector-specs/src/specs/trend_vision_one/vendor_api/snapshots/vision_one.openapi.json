@@ -5929,8 +5929,7 @@
                                 "JAGUAR_ACTIVITY_DNA",
                                 "JAGUAR_ACTIVITY_PTE",
                                 "MESSAGE_EMAIL_META",
-                                "NETWORK_ACTIVITY",
-                                "FORENSIC_EVENT"
+                                "NETWORK_ACTIVITY"
                               ],
                               "type": "string"
                             },
@@ -6444,7 +6443,7 @@
       }
     },
     "securitySchemes": {
-      "BearerAuthToken": {
+      "bearerAuth": {
         "bearerFormat": "JWT",
         "scheme": "bearer",
         "type": "http"
@@ -6452,7 +6451,7 @@
     }
   },
   "info": {
-    "title": "TrendAI Vision One™ Public API"
+    "title": "Trend Vision One Public API"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -6516,8 +6515,6 @@
                 "versionControlPolicy",
                 "agentUpdatePolicy",
                 "agentUpdateStatus",
-                "agentVersion",
-                "agentVersionStatus",
                 "creditAllocatedLicenses",
                 "securityPolicy",
                 "securityPolicyOverriddenStatus",
@@ -6580,21 +6577,6 @@
                               "pause",
                               "disable",
                               "notSupported"
-                            ],
-                            "type": "string"
-                          },
-                          "agentVersion": {
-                            "type": "string"
-                          },
-                          "agentVersionStatus": {
-                            "enum": [
-                              "latestVersion",
-                              "controlledLatestVersion",
-                              "updateRecommended",
-                              "updateFailed",
-                              "agentEndOfLife",
-                              "osVersionNotSupported",
-                              "unknownVersions"
                             ],
                             "type": "string"
                           },
@@ -8646,7 +8628,7 @@
   },
   "security": [
     {
-      "BearerAuthToken": []
+      "bearerAuth": []
     }
   ],
   "servers": [
@@ -8676,12 +8658,6 @@
     },
     {
       "url": "https://api.ca.xdr.trendmicro.com"
-    },
-    {
-      "url": "https://api.za.xdr.trendmicro.com"
-    },
-    {
-      "url": "https://api.id.xdr.trendmicro.com"
     }
   ]
 }

@@ -12,18 +12,15 @@ import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   buildFilter,
-  budgetLeft,
   checkNextLink,
   getApiOrigin,
   getHeader,
   readQuota,
-  startActionBudget,
-  timers,
   vendorRequest,
   withoutDeprecated,
 } from './client';
 import { getFinitePositiveNumber, getHeaderValue } from '../../connector_utils';
-import { ACTION_BUDGET_MS, REQUEST_TIMEOUT_MS } from './constants';
+import { REQUEST_TIMEOUT_MS } from './constants';
 import {
   API,
   ctx,
@@ -45,9 +42,9 @@ describe('TrendAI Vision One region API URL', () => {
     ['https://api.xdr.trendmicro.com/', 'https://api.xdr.trendmicro.com'],
     ['https://api.xdr.trendmicro.co.jp', 'https://api.xdr.trendmicro.co.jp'],
     ['  https://api.mea.xdr.trendmicro.com  ', 'https://api.mea.xdr.trendmicro.com'],
-    [undefined, 'https://api.in.xdr.trendmicro.com'],
-    ['', 'https://api.in.xdr.trendmicro.com'],
-  ])('uses the origin of %j (plain URL parse, default India)', (apiUrl, origin) => {
+    [undefined, 'https://api.xdr.trendmicro.com'],
+    ['', 'https://api.xdr.trendmicro.com'],
+  ])('uses the origin of %j (plain URL parse, default United States)', (apiUrl, origin) => {
     expect(getApiOrigin(ctxWith(apiUrl))).toBe(origin);
   });
 
@@ -155,7 +152,6 @@ describe('TrendAI Vision One requests and errors', () => {
       method: 'POST',
       path: '/x',
       mutating: true,
-      noRetry: () => true,
     }).catch((caught: unknown) => caught);
     expect(error).toBeInstanceOf(Error);
     expect(error).toMatchObject({
@@ -199,7 +195,6 @@ describe('TrendAI Vision One requests and errors', () => {
       method: 'POST',
       path: '/x',
       mutating: true,
-      noRetry: () => true,
     }).catch((caught: unknown) => caught)) as Record<string, unknown>;
     expect(Object.keys(error.response as object).sort()).toEqual(['headers', 'status']);
     expect(error).not.toHaveProperty('config');
@@ -336,54 +331,11 @@ describe('TrendAI Vision One requests and errors', () => {
     );
   });
 
-  it('retries a read on 500 and 503 and succeeds on the third attempt', async () => {
-    request
-      .mockRejectedValueOnce(httpError(500))
-      .mockRejectedValueOnce(httpError(503))
-      .mockResolvedValueOnce(ok({ items: [] }));
-    await vendorRequest(ctx, { action: 'x', method: 'GET', path: '/x', mutating: false });
-    expect(request).toHaveBeenCalledTimes(3);
-    expect(timers.sleep).toHaveBeenNthCalledWith(1, 2_000);
-    expect(timers.sleep).toHaveBeenNthCalledWith(2, 5_000);
-  });
-
-  it('stops after three attempts with the rate limit message', async () => {
-    request.mockRejectedValue(httpError(429, vendorError('TooManyRequests', 'slow down')));
-    await expect(
-      vendorRequest(ctx, { action: 'listAlerts', method: 'GET', path: '/x', mutating: false })
-    ).rejects.toThrow('TrendAI Vision One rate limit reached for listAlerts; try again later');
-    expect(request).toHaveBeenCalledTimes(3);
-  });
-
-  it('honours Retry-After up to the 30 s cap', async () => {
-    request
-      .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '7' }))
-      .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '30' }))
-      .mockResolvedValueOnce(ok({}));
-    await vendorRequest(ctx, { action: 'x', method: 'POST', path: '/x', mutating: true });
-    expect(timers.sleep).toHaveBeenNthCalledWith(1, 7_000);
-    expect(timers.sleep).toHaveBeenNthCalledWith(2, 30_000);
-  });
-
   it('never retries a state-changing call on 5xx', async () => {
     request.mockRejectedValue(httpError(500, vendorError('InternalServerError', 'boom')));
     await expect(
       vendorRequest(ctx, { action: 'isolateEndpoint', method: 'POST', path: '/x', mutating: true })
     ).rejects.toThrow('isolateEndpoint failed (500): InternalServerError: boom');
-    expect(request).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not retry when the caller marks the failure final', async () => {
-    request.mockRejectedValue(httpError(429));
-    await expect(
-      vendorRequest(ctx, {
-        action: 'x',
-        method: 'POST',
-        path: '/x',
-        mutating: true,
-        noRetry: () => true,
-      })
-    ).rejects.toThrow('rate limit reached');
     expect(request).toHaveBeenCalledTimes(1);
   });
 
@@ -495,77 +447,5 @@ describe('TrendAI Vision One helpers', () => {
       count: null,
       exemptionCount: null,
     });
-  });
-});
-
-describe('TrendAI Vision One action time budget', () => {
-  const T0 = new Date('2026-11-20T00:00:00Z');
-  beforeEach(() => {
-    jest.useFakeTimers({ now: T0 });
-    jest.spyOn(timers, 'sleep').mockImplementation(async (ms: number) => {
-      jest.advanceTimersByTime(ms);
-    });
-  });
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-  const read = () =>
-    vendorRequest(ctx, { action: 'x', method: 'GET', path: '/x', mutating: false });
-  const slow = (ms: number, outcome: () => unknown) => async () => {
-    jest.advanceTimersByTime(ms);
-    return outcome();
-  };
-
-  it('is 100 s, below the Kibana action limit, and has no limit before it is started', () => {
-    expect(ACTION_BUDGET_MS).toBe(100_000);
-    const fresh = { ...ctx };
-    expect(budgetLeft(fresh)).toBe(Number.POSITIVE_INFINITY);
-    startActionBudget(fresh);
-    expect(budgetLeft(fresh)).toBe(100_000);
-  });
-
-  it('gives each request the remaining budget as its timeout and stops retrying when it is spent', async () => {
-    startActionBudget(ctx);
-    request.mockImplementation(
-      slow(60_000, () => {
-        throw httpError(503);
-      })
-    );
-    await expect(read()).rejects.toThrow('(503)');
-    expect(request).toHaveBeenCalledTimes(2);
-    expect(sent(0).timeout).toBe(60_000);
-    // 60 s spent, plus the 2 s back-off before the retry.
-    expect(sent(1).timeout).toBe(38_000);
-  });
-
-  it('does not wait for a Retry-After that passes the budget', async () => {
-    startActionBudget(ctx);
-    request.mockImplementation(
-      slow(80_000, () => {
-        throw httpError(429, {}, { 'retry-after': '30' });
-      })
-    );
-    await expect(read()).rejects.toThrow('rate limit reached');
-    expect(request).toHaveBeenCalledTimes(1);
-    expect(timers.sleep).not.toHaveBeenCalled();
-  });
-
-  it('never starts a request once the budget is spent', async () => {
-    startActionBudget(ctx);
-    jest.advanceTimersByTime(100_000);
-    await expect(read()).rejects.toThrow(
-      'TrendAI Vision One x stopped: the 100 s time budget of one action run is spent'
-    );
-    expect(request).not.toHaveBeenCalled();
-  });
-
-  it('reports a request cut by the budget with the timeout it had', async () => {
-    startActionBudget(ctx);
-    jest.advanceTimersByTime(90_000);
-    request.mockRejectedValueOnce(
-      Object.assign(new Error('timeout'), { isAxiosError: true, code: 'ECONNABORTED' })
-    );
-    await expect(read()).rejects.toThrow('request failed: timed out after 10 s');
-    expect(sent().timeout).toBe(10_000);
   });
 });

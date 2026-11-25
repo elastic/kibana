@@ -24,16 +24,16 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 TrendAI Vision One connectors have the following configuration properties:
 
 Region API URL
-:   The API address of your tenant's region, from the following table. The default is India. Use the API address (`api...`), not the console address (`portal...`): the connector refuses a `portal.` address and names the matching API address. The URL must use `https` and contain only the region host: no path, query string, or fragment. The connector accepts `http` only for `localhost`, `127.0.0.1`, and `[::1]`, which is meant for testing against a mock server. The host must be in the {{kib}} allowed hosts list (`xpack.actions.allowedHosts`).
+:   The API address of your tenant's region, from the following table. The default is United States. Use the API address (`api...`), not the console address (`portal...`): the connector refuses a `portal.` address and names the matching API address. The URL must use `https` and contain only the region host: no path, query string, or fragment. The connector accepts `http` only for `localhost`, `127.0.0.1`, and `[::1]`, which is meant for testing against a mock server. The host must be in the {{kib}} allowed hosts list (`xpack.actions.allowedHosts`).
 
 | Region | API address |
 | --- | --- |
-| United States | `https://api.xdr.trendmicro.com` |
+| United States | `https://api.xdr.trendmicro.com` (default) |
 | Germany | `https://api.eu.xdr.trendmicro.com` |
 | Singapore | `https://api.sg.xdr.trendmicro.com` |
 | Japan | `https://api.xdr.trendmicro.co.jp` |
 | Australia | `https://api.au.xdr.trendmicro.com` |
-| India | `https://api.in.xdr.trendmicro.com` (default) |
+| India | `https://api.in.xdr.trendmicro.com` |
 | United Arab Emirates | `https://api.mea.xdr.trendmicro.com` |
 | United Kingdom | `https://api.uk.xdr.trendmicro.com` |
 | Canada | `https://api.ca.xdr.trendmicro.com` |
@@ -52,7 +52,7 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 The TrendAI Vision One connector exposes the following actions:
 
 `listAlerts`
-:   Lists Workbench alerts in a time window (`startDateTime`, `endDateTime`, `dateTimeTarget`), newest first, optionally filtered by `status`, `investigationResult`, and `severity`, and sorted with `orderBy` (default `createdDateTime desc`). `dateTimeTarget` is `createdDateTime` (default), `updatedDateTime`, or `firstInvestigatedDateTime`. Reads pages of 10 and returns at most `maxResults` alerts (10 to 200 in steps of 10, default 50) in `items`, with `totalCount`, `pagesRead`, `nextLink`, and `nextLinkRepeats`. When the last page read holds more alerts than `maxResults` allows, `nextLink` reads that page again, and `nextLinkRepeats` is the number of alerts at its start that this call already returned, so no alert is skipped.
+:   Lists Workbench alerts in a time window (`startDateTime`, `endDateTime`, `dateTimeTarget`), newest first, optionally filtered by `status`, `investigationResult`, and `severity`, and sorted with `orderBy` (default `createdDateTime desc`). `dateTimeTarget` is `createdDateTime` (default), `updatedDateTime`, or `firstInvestigatedDateTime`. Returns one page of up to 10 alerts in `items`, with `totalCount` and `nextLink`; pass `nextLink` back to read the next page.
 
 `getAlertDetails`
 :   Returns one Workbench alert by ID, with its status, investigation result, severity, score, impact scope, indicators, matched rules, and the alert's current `etag`.
@@ -123,11 +123,11 @@ The TrendAI Vision One connector exposes the following actions:
 * **List changes.** `addToSuspiciousObjectList`, `removeFromSuspiciousObjectList`, and `addToExceptionList` send one object per call and return `outcome`, `status`, and `error`. `removeFromSuspiciousObjectList` returns `outcome: notFound` when the object is not on the list, so repeating a removal succeeds. Other errors fail the action with the product's code and message.
 * **Alert updates.** `updateAlertStatus` returns `outcome: skipped` without a change when the alert already has the requested values, and fails with a not found error for an unknown alert.
 * **Collected files.** `getResponseTaskStatus` returns the hashes, size, and expiry of a collected file and `archiveReady`. The download link of the archive and its password are not returned, so they are not kept in the saved tool output; download the archive from the TrendAI Vision One console.
-* **Pagination.** List actions return `nextLink` when more data exists. Pass it back as `nextLink` with the same filters to read the next page. The connector follows a `nextLink` only on the configured region host and on the same API path. When TrendAI Vision One answers with a `nextLink` that was already read, `listAlerts` stops and returns `nextLink: null`.
+* **Pagination.** List actions return `nextLink` when more data exists. Pass it back as `nextLink` with the same filters to read the next page. The connector follows a `nextLink` only on the configured region host and on the same API path. Each call reads one page. When TrendAI Vision One answers with the same `nextLink` that was just read, the action returns `nextLink: null`.
 * **Filters.** Filter values such as `endpointName` and the free-form `filter` are trimmed. A blank value is ignored like a missing one; spaces inside a value are kept. `agentGuid` is trimmed and must be a UUID, so a blank `agentGuid` is rejected; leave it out instead.
 * **Deprecated fields.** The connector never sends the deprecated `investigationStatus` alert field and removes it from returned alerts. Use `status` and `investigationResult`.
-* **Errors.** A failed request keeps its HTTP status and the response headers, including `Retry-After`, so that {{kib}} can apply the delay the product asks for. The connector itself retries a state-changing request only after a 429, where the product refused it, and retries reads on 500, 502, 503, and 504 and on 429. A write that fails with a 5xx or a timeout may already have been applied, so check before repeating it. When an action runs from a queue, the {{kib}} retry policy decides whether a failed request is repeated. The connector does not follow redirects: an HTTP 3xx answer fails the action with its status, and nothing is sent to the redirect location.
-* **Limits and retries.** Every request times out after 60 seconds, and responses follow the {{kib}} Actions response size limit (`xpack.actions.maxResponseContentLength`). Read actions retry on HTTP 429, 500, 502, 503, and 504; state-changing actions retry only on HTTP 429. A 429 inside a 207 per-item answer fails the item without a retry. Each request makes at most three attempts and honors `Retry-After` up to 30 seconds: a longer `Retry-After` is not retried early, and the action fails with the rate limit message. One action run has a time budget of 100 seconds, below the {{kib}} limit for an action: each request gets the time left as its timeout, no request starts and no retry waits once the budget would be passed, and `listAlerts` stops reading pages when less than 10 seconds are left and returns the alerts read with the `nextLink` of the next page. A sandbox submission is not retried when the daily quota is used up.
+* **Errors.** A failed request is thrown once and keeps its HTTP status and the response headers, including `Retry-After`, so the agent decides what to do. The connector does not retry. A write that fails with a 5xx or a timeout may already have been applied, so check before repeating it. The connector does not follow redirects: an HTTP 3xx answer fails the action with its status, and nothing is sent to the redirect location.
+* **Limits.** Every request times out after 60 seconds, and responses follow the {{kib}} Actions response size limit (`xpack.actions.maxResponseContentLength`).
 
 ## Required permissions [trend-vision-one-permissions]
 

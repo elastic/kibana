@@ -106,14 +106,6 @@ describe('TrendAI Vision One suspicious object lists', () => {
     expect(sent().data).toEqual([{ url: 'https://intranet.example/*', description: 'lab' }]);
   });
 
-  it('retries a list change only on 429', async () => {
-    request
-      .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '1' }))
-      .mockResolvedValueOnce(items(201));
-    await run('addToSuspiciousObjectList', { type: 'ip', value: '203.0.113.9' });
-    expect(request).toHaveBeenCalledTimes(2);
-  });
-
   it.each([
     [{ type: 'fileSha1', value: 'a'.repeat(39) }, false],
     [{ type: 'fileSha1', value: 'g'.repeat(40) }, false],
@@ -155,18 +147,6 @@ describe('TrendAI Vision One sandbox', () => {
       arguments: null,
       quota: { reserveCount: 1, remainingCount: 9, count: 1, exemptionCount: 0 },
     });
-  });
-
-  it('does not retry when the daily quota is used up', async () => {
-    request.mockRejectedValueOnce(
-      httpError(429, vendorError('TooManyRequests', 'Quota exceeded'), {
-        'tmv1-submission-remaining-count': '0',
-      })
-    );
-    await expect(run('submitUrlsToSandbox', { urls: ['https://example.com'] })).rejects.toThrow(
-      'rate limit reached'
-    );
-    expect(request).toHaveBeenCalledTimes(1);
   });
 
   it('returns the 413 message for a file the product will not take', async () => {
