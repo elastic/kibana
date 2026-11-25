@@ -60,6 +60,16 @@ jest.mock(
   { virtual: true }
 );
 
+jest.mock(
+  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+  '/test/node_modules/oracledb/package.json',
+  () => ({
+    name: 'oracledb',
+    version: '1.0.0',
+  }),
+  { virtual: true }
+);
+
 describe('Check Prod Native Modules', () => {
   let mockLog: jest.Mocked<ToolingLog>;
 
@@ -135,6 +145,25 @@ describe('Check Prod Native Modules', () => {
           path: '/test/node_modules/@elastic/test-package',
         },
       ]);
+    });
+
+    it('should skip allowed production dependencies without checking them', async () => {
+      const mockProductionDependencies = new Map([['oracledb@1.0.0', true]]);
+      const mockProdNativeModulesFound: Array<{ name: string; version: string; path: string }> = [];
+
+      (fs.readdir as jest.Mock)
+        .mockResolvedValueOnce([{ name: 'oracledb', isDirectory: () => true }])
+        .mockResolvedValue([{ name: 'oracledb.node', isDirectory: () => false }]);
+      (existsSync as jest.Mock).mockImplementation((p: string) => p.endsWith('package.json'));
+
+      await checkDependencies(
+        '/test/node_modules',
+        mockProductionDependencies,
+        mockProdNativeModulesFound,
+        mockLog
+      );
+
+      expect(mockProdNativeModulesFound).toEqual([]);
     });
 
     it('should handle scoped packages', async () => {

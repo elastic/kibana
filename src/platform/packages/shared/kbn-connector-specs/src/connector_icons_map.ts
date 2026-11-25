@@ -466,6 +466,11 @@ export const ConnectorIconsMap: Map<
   ],
 
   [
+    '.oracle',
+    lazy(() => import(/* webpackChunkName: "connectorIconOracle" */ './specs/oracle/icon')),
+  ],
+
+  [
     '.sentinelone2',
     lazy(
       () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')

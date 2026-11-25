@@ -24,6 +24,8 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       // Mirrors the externals added for kbn-optimizer and kbn-rspack-optimizer.
       mongodb: 'commonjs mongodb',
       'mongodb-connection-string-url': 'commonjs mongodb-connection-string-url',
+      // oracledb requires Node.js built-ins (async_hooks) that have no browser polyfill; loaded server-side only.
+      oracledb: 'commonjs oracledb',
     },
     module: {
       rules: [
