@@ -17,11 +17,16 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { createListConnectorsTool } from './list_connectors_tool';
 import { createGetConnectorSubActionsTool } from './get_connector_sub_actions_tool';
 
-jest.mock('@kbn/connector-specs', () => ({
-  getConnectorSpec: jest.fn(),
-  isToolAction: jest.fn(),
-  isSelectedActionEnabled: jest.fn().mockReturnValue(true),
-}));
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    getConnectorSpec: jest.fn(),
+    isToolAction: jest.fn(),
+    isSelectedActionEnabled: jest.fn().mockReturnValue(true),
+    isConnectorOutboundActionsEnabled: actual.isConnectorOutboundActionsEnabled,
+    getUsableSelectedActions: actual.getUsableSelectedActions,
+  };
+});
 
 jest.mock('@kbn/agent-builder-server', () => {
   const actual = jest.requireActual('@kbn/agent-builder-server');

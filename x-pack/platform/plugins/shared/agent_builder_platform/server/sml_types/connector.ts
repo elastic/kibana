@@ -21,8 +21,8 @@ import {
   filterActionsBySelection,
   formatConnectorActionLine,
   getConnectorSpec,
+  getUsableSelectedActions,
   isSpecificActionsSelection,
-  type SelectedActions,
 } from '@kbn/connector-specs';
 import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
@@ -84,7 +84,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         };
         const name = attrs.name ?? originId;
         const actionTypeId = attrs.actionTypeId ?? '';
-        const selectedActions = attrs.config?.selectedActions as SelectedActions;
+        const selectedActions = getUsableSelectedActions({ actionTypeId, config: attrs.config });
 
         const spec = getConnectorSpec(actionTypeId);
         const displayName = spec?.metadata.displayName ?? actionTypeId;
@@ -165,7 +165,10 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         };
         const connectorName = attrs.name ?? originId;
         const connectorType = attrs.actionTypeId ?? '';
-        const attachmentSelectedActions = attrs.config?.selectedActions as SelectedActions;
+        const attachmentSelectedActions = getUsableSelectedActions({
+          actionTypeId: connectorType,
+          config: attrs.config,
+        });
 
         const data: ConnectorAttachmentData = {
           connector_id: originId,

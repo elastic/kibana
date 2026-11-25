@@ -24,6 +24,8 @@ interface RawConnectorResponse {
   connector_type_id: string;
   is_missing_secrets?: boolean;
   is_deprecated?: boolean;
+  /** False when a connector that both sends and receives has outbound actions turned off. */
+  is_outbound_actions_enabled?: boolean;
 }
 
 const CONNECTORS_API_PATH = '/api/actions/connectors';
@@ -54,7 +56,13 @@ export const useFetchConnectorsByType = ({
     queryKey: ALL_CONNECTORS_KEY,
     queryFn: async () => {
       const all = await http.get<RawConnectorResponse[]>(CONNECTORS_API_PATH);
-      return all.map(toSingleStepConnector);
+      // A connector with outbound actions off cannot run an action, so it is not offered.
+      return all
+        .filter(
+          ({ is_outbound_actions_enabled: isOutboundActionsEnabled }) =>
+            isOutboundActionsEnabled !== false
+        )
+        .map(toSingleStepConnector);
     },
     enabled: isEnabled,
     refetchOnWindowFocus: false,

@@ -541,6 +541,67 @@ describe('connector attachment type', () => {
     });
   });
 
+  describe('resolve with outbound actions off', () => {
+    it('resolves a connector with outbound off to an empty selection', async () => {
+      soClient.get.mockResolvedValue({
+        id: 'connector-123',
+        type: 'action',
+        attributes: {
+          name: 'Slack',
+          actionTypeId: '.slack2',
+          config: { outboundEnabled: false, selectedActions: ['sendMessage'] },
+        },
+        references: [],
+      });
+
+      const result = await connectorType.resolve!('connector-123', formatContext as never);
+
+      expect(result).toEqual({
+        connector_id: 'connector-123',
+        connector_name: 'Slack',
+        connector_type: '.slack2',
+        selected_actions: [],
+      });
+    });
+
+    it('formats a connector with outbound off with no sub-actions', async () => {
+      getConnectorSpecMock.mockReturnValue({
+        metadata: {
+          id: '.slack2',
+          displayName: 'Slack',
+          description: 'Slack connector',
+          minimumLicense: 'enterprise',
+          supportedFeatureIds: [],
+        },
+        actions: {
+          sendMessage: {
+            isTool: true,
+            scope: 'write',
+            description: 'Send a message',
+            input: z.object({}),
+            handler: jest.fn(),
+          },
+        },
+        test: { handler: jest.fn(), enabled: false },
+      });
+      formatSchemaForLlmMock.mockReturnValue('No parameters');
+
+      const formatted = connectorType.format(
+        createAttachment({
+          connector_id: 'connector-123',
+          connector_name: 'Slack',
+          connector_type: '.slack2',
+          selected_actions: [],
+        }),
+        formatContext
+      ) as AgentFormattedAttachment;
+      const text = (await (formatted as any).getRepresentation()).value as string;
+
+      expect(text).not.toContain('sendMessage');
+      expect(text).not.toContain('Available sub-actions');
+    });
+  });
+
   describe('isReadonly', () => {
     it('is true', () => {
       expect(connectorType.isReadonly).toBe(true);

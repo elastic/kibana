@@ -9,6 +9,7 @@ import type { Connector } from '@kbn/actions-plugin/server';
 import {
   filterActionsBySelection,
   getConnectorSpec,
+  getUsableSelectedActions,
   type SelectedActions,
 } from '@kbn/connector-specs';
 import type { ConnectorItem, ConnectorSubAction, OAuthStatus } from '../../common/http_api/tools';
@@ -52,7 +53,7 @@ export const toConnectorItem = (
     oauthStatus?: OAuthStatus;
   }
 ): ConnectorItem => {
-  const selectedActions = connector.config?.selectedActions as SelectedActions;
+  const selectedActions = getUsableSelectedActions(connector);
   return {
     id: connector.id,
     name: connector.name,

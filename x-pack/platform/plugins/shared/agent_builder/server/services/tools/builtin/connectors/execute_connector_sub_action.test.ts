@@ -411,6 +411,50 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(mockExecute).not.toHaveBeenCalled();
   });
 
+  it('rejects a connector with outbound actions off before execute', async () => {
+    isSelectedActionEnabledMock.mockImplementation(
+      jest.requireActual('@kbn/connector-specs').isSelectedActionEnabled
+    );
+    mockGet.mockResolvedValue({
+      id: 'conn-123',
+      actionTypeId: '.slack2',
+      config: { outboundEnabled: false, selectedActions: ['sendMessage'] },
+      isOutboundActionsEnabled: false,
+    });
+
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    const result = await tool.handler(
+      { connectorId: 'conn-123', subAction: 'sendMessage', params: {} },
+      mockContext
+    );
+
+    expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+    expect(
+      ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
+    ).toContain('is not enabled');
+    expect(mockExecute).not.toHaveBeenCalled();
+  });
+
+  it('runs a sub-action of a connector with outbound actions on and a saved selection', async () => {
+    isSelectedActionEnabledMock.mockImplementation(
+      jest.requireActual('@kbn/connector-specs').isSelectedActionEnabled
+    );
+    mockGet.mockResolvedValue({
+      id: 'conn-123',
+      actionTypeId: '.slack2',
+      config: { selectedActions: ['sendMessage'] },
+    });
+    mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    await tool.handler(
+      { connectorId: 'conn-123', subAction: 'sendMessage', params: {} },
+      mockContext
+    );
+
+    expect(mockExecute).toHaveBeenCalled();
+  });
+
   it('returns error when connector resolution fails', async () => {
     mockGet.mockRejectedValue(new Error('Saved object not found'));
 

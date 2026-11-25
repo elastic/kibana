@@ -356,6 +356,30 @@ describe('connectorSmlType', () => {
       expect(result!.content).not.toContain('internalAction');
     });
 
+    it('lists no callable actions for a connector with outbound off', async () => {
+      mockSavedObjectsClient.get.mockResolvedValue({
+        id: 'conn-1',
+        type: 'action',
+        attributes: {
+          name: 'My Slack',
+          actionTypeId: '.slack2',
+          config: { outboundEnabled: false, selectedActions: ['sendMessage'] },
+        },
+        references: [],
+      });
+      getConnectorSpec.mockReturnValue({
+        metadata: { id: '.slack2', displayName: 'Slack', description: 'Slack connector' },
+        actions: {
+          sendMessage: { isTool: true, description: 'Send a message', handler: jest.fn() },
+        },
+      });
+
+      const result = await connectorSmlType.getSmlEntry!('conn-1', createContext() as never);
+
+      expect(result!.content).not.toContain('sendMessage');
+      expect(result!.content).toContain('Only these actions are callable:');
+    });
+
     it('handles missing optional fields gracefully', async () => {
       mockSavedObjectsClient.get.mockResolvedValue({
         id: 'conn-1',
@@ -408,6 +432,26 @@ describe('connectorSmlType', () => {
           connector_type: '.mcp',
         },
       });
+    });
+
+    it('returns an empty selection for a connector with outbound off', async () => {
+      mockSavedObjectsClient.get.mockResolvedValue({
+        id: 'conn-1',
+        type: 'action',
+        attributes: {
+          name: 'My Slack',
+          actionTypeId: '.slack2',
+          config: { outboundEnabled: false },
+        },
+        references: [],
+      });
+
+      const result = await connectorSmlType.toAttachment!(
+        { references: [{ uri: 'connector://conn-1', relation: 'derived_from' }] } as never,
+        createAttachmentContext() as never
+      );
+
+      expect(result?.data).toEqual(expect.objectContaining({ selected_actions: [] }));
     });
 
     it('returns undefined and logs warning when connector is not found', async () => {

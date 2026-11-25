@@ -21,8 +21,8 @@ import {
   filterActionsBySelection,
   formatConnectorActionLine,
   getConnectorSpec,
+  getUsableSelectedActions,
   isSpecificActionsSelection,
-  type SelectedActions,
 } from '@kbn/connector-specs';
 
 /**
@@ -54,7 +54,10 @@ export const createConnectorAttachmentType = ({
         actionTypeId: string;
         config?: Record<string, unknown>;
       }>('action', origin);
-      const selectedActions = attributes.config?.selectedActions as SelectedActions;
+      const selectedActions = getUsableSelectedActions({
+        actionTypeId: attributes.actionTypeId,
+        config: attributes.config,
+      });
       return {
         connector_id: origin,
         connector_name: attributes.name ?? origin,

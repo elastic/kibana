@@ -8,7 +8,11 @@
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
-import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
+import {
+  connectorSpecHasEvents,
+  connectorsSpecs,
+  getUsableSelectedActions,
+} from '@kbn/connector-specs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -49,9 +53,9 @@ const getConnectorInstanceConfig = (
     connector.actionTypeId === '.inference'
       ? (connector.config?.taskType as string | undefined)
       : undefined;
-  const selectedActions = Array.isArray(connector.config?.selectedActions)
-    ? (connector.config?.selectedActions as string[])
-    : undefined;
+  // A connector with outbound off gets an empty list, so no workflow step offers it.
+  const usableSelectedActions = getUsableSelectedActions(connector);
+  const selectedActions = Array.isArray(usableSelectedActions) ? usableSelectedActions : undefined;
 
   if (taskType !== undefined || selectedActions !== undefined) {
     return {

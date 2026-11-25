@@ -18,6 +18,7 @@ import {
 } from '@kbn/agent-builder-server';
 import {
   getConnectorSpec,
+  getUsableSelectedActions,
   isSelectedActionEnabled,
   isToolAction,
   type SelectedActions,
@@ -164,7 +165,7 @@ export const createExecuteConnectorSubActionTool = ({
     try {
       const connector = await actionsClient.get({ id: connectorId });
       connectorType = connector.actionTypeId;
-      selectedActions = connector.config?.selectedActions as SelectedActions;
+      selectedActions = getUsableSelectedActions(connector);
     } catch (error) {
       return {
         results: [

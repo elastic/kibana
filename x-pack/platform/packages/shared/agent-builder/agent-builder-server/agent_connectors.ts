@@ -5,18 +5,32 @@
  * 2.0.
  */
 
-import { getConnectorSpec, isSelectedActionEnabled, isToolAction } from '@kbn/connector-specs';
-import type { SelectedActions } from '@kbn/connector-specs';
+import {
+  getConnectorSpec,
+  getUsableSelectedActions,
+  isConnectorOutboundActionsEnabled,
+  isSelectedActionEnabled,
+  isToolAction,
+} from '@kbn/connector-specs';
 import { formatSchemaForLlm } from './tools';
 
 /** Minimal actions-client interface needed by the connector helpers below. */
 interface MinimalActionsClient {
-  getAll(): Promise<Array<{ id: string; name: string; actionTypeId: string }>>;
+  getAll(): Promise<
+    Array<{
+      id: string;
+      name: string;
+      actionTypeId: string;
+      config?: Record<string, unknown>;
+      isOutboundActionsEnabled?: boolean;
+    }>
+  >;
   get(opts: { id: string }): Promise<{
     id: string;
     name: string;
     actionTypeId: string;
     config?: Record<string, unknown>;
+    isOutboundActionsEnabled?: boolean;
   }>;
 }
 
@@ -54,6 +68,7 @@ export const resolveAllowedConnectorIds = (
 /**
  * Returns connectors that have a ConnectorSpec and, when allowedIds is provided,
  * are within that set. Pass undefined to allow all connectors; pass [] to block all.
+ * Connectors with outbound actions turned off are not listed, because an agent cannot use them.
  */
 export const listAgentConnectors = async (
   actionsClient: MinimalActionsClient,
@@ -64,7 +79,10 @@ export const listAgentConnectors = async (
 
   return allConnectors
     .filter(
-      (c) => !!getConnectorSpec(c.actionTypeId) && (allowedSet === null || allowedSet.has(c.id))
+      (c) =>
+        !!getConnectorSpec(c.actionTypeId) &&
+        (allowedSet === null || allowedSet.has(c.id)) &&
+        isConnectorOutboundActionsEnabled(c)
     )
     .map((c) => {
       const spec = getConnectorSpec(c.actionTypeId)!;
@@ -93,7 +111,7 @@ export const getAgentConnectorDetail = async (
   const spec = getConnectorSpec(connector.actionTypeId);
   if (!spec) return null;
 
-  const selectedActions = connector.config?.selectedActions as SelectedActions;
+  const selectedActions = getUsableSelectedActions(connector);
 
   const subActions: ConnectorSubActionDetail[] = Object.entries(spec.actions)
     .filter(([name]) => isToolAction(spec, name) && isSelectedActionEnabled(name, selectedActions))

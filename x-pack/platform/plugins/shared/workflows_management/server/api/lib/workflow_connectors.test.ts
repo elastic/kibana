@@ -179,6 +179,53 @@ describe('getAvailableConnectors', () => {
     });
   });
 
+  it('gives a dual connector with outbound off an empty selectedActions list', async () => {
+    const actionsClient = {
+      getAll: jest.fn().mockResolvedValue([
+        mockConnector({
+          id: 'slack2-off',
+          name: 'Slack receive only',
+          actionTypeId: '.slack2',
+          config: { outboundEnabled: false, selectedActions: ['sendMessage'] },
+          isOutboundActionsEnabled: false,
+        }),
+        mockConnector({
+          id: 'slack2-off-no-selection',
+          name: 'Slack receive only, no selection',
+          actionTypeId: '.slack2',
+          config: { outboundEnabled: false },
+        }),
+        mockConnector({
+          id: 'slack2-on',
+          name: 'Slack',
+          actionTypeId: '.slack2',
+          config: { selectedActions: ['sendMessage'] },
+        }),
+      ]),
+    };
+    const actionsClientWithRequest = {
+      listTypes: jest.fn().mockResolvedValue([mockActionType({ id: '.slack2', name: 'Slack' })]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      spaceId: 'default',
+      request,
+    });
+
+    const instances = result.connectorTypes['.slack2'].instances;
+    expect(instances.find(({ id }) => id === 'slack2-off')?.config).toEqual({
+      selectedActions: [],
+    });
+    expect(instances.find(({ id }) => id === 'slack2-off-no-selection')?.config).toEqual({
+      selectedActions: [],
+    });
+    expect(instances.find(({ id }) => id === 'slack2-on')?.config).toEqual({
+      selectedActions: ['sendMessage'],
+    });
+  });
+
   it('omits config entirely for connectors with no taskType or selectedActions', async () => {
     const actionsClient = {
       getAll: jest
