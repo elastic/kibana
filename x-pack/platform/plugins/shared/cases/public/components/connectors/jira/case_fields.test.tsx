@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '@kbn/code-editor-mock/jest_helper';
 import React from 'react';
 import { omit } from 'lodash/fp';
 import { screen, fireEvent, within } from '@testing-library/react';

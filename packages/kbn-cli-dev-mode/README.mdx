@@ -12,7 +12,7 @@ the `--dev` flag. This mode provides several useful features in a single CLI for
 experience:
 
   - automatic server restarts when code changes
-  - runs the `@kbn/optimizer` to build browser bundles
+  - runs the `@kbn/rspack-optimizer` to build browser bundles
   - runs a base path proxy which helps developers test that they are writing code which is 
 compatible with custom basePath settings while they work
   - pauses requests when the server or optimizer are not ready to handle requests so that when 
@@ -42,7 +42,7 @@ migrating this functionality to the KP and making this unnecessary
 
 ## `Optimizer`
 
-The `Optimizer` object manages a `@kbn/optimizer` instance, adapting its configuration and 
+The `Optimizer` object manages a `@kbn/rspack-optimizer` instance, adapting its configuration and 
 logging to the data available to the CLI.
 
 ## `BasePathProxyServer`

@@ -356,16 +356,16 @@ describe('Discover url generator', () => {
       exampleProfileState: {
         boxColor: 'transparent',
       },
+      metricsState: {
+        counterAggregation: 'max',
+        gaugeAggregation: 'last_value',
+        histogramPercentile: 'p90',
+      },
     });
     expect(state).toEqual({
       profileState: {
         exampleProfileState: {
           rowControlColor: 'text',
-        },
-        metricsState: {
-          counterAggregation: 'max',
-          gaugeAggregation: 'last_value',
-          histogramPercentile: 'p90',
         },
       },
     });

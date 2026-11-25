@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-restricted-syntax */
+/* eslint-disable @kbn/compat/eslint-no-restricted-syntax */
 export default {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-dependency-usage'],
 };

@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { KindSelect } from './kind_select';
 
 describe('KindSelect', () => {
@@ -21,12 +20,11 @@ describe('KindSelect', () => {
     expect(screen.getByText('Collect evidence')).toBeInTheDocument();
   });
 
-  it('calls onChange with the selected kind', async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
+  it('calls onChange with the selected kind', () => {
     const onChange = jest.fn();
     render(<KindSelect value="alert" onChange={onChange} />);
 
-    await user.click(screen.getByTestId('ruleV2KindSelect-signal'));
+    fireEvent.click(screen.getByTestId('ruleV2KindSelect-signal'));
 
     expect(onChange).toHaveBeenCalledWith('signal');
   });

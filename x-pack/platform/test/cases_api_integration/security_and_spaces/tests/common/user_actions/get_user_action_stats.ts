@@ -23,12 +23,13 @@ import {
 } from '../../../../common/lib/authentication/users';
 import {
   getPostCaseRequest,
-  persistableStateAttachment,
   postCaseReq,
-  postCommentActionsReq,
-  postCommentAlertReq,
   postCommentUserReq,
-  postExternalReferenceESReq,
+  postUnifiedActionsReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '../../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -81,12 +82,11 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: theCase.id,
         params: [
           // Only this one should show up in total_comments
-          postCommentUserReq,
-          // The ones below count as total_other_actions
-          postExternalReferenceESReq,
-          persistableStateAttachment,
-          postCommentActionsReq,
-          postCommentAlertReq,
+          postUnifiedCommentReq,
+          postUnifiedIndicatorReq,
+          postUnifiedLensReq,
+          postUnifiedActionsReq,
+          postUnifiedAlertReq,
         ],
       });
 
@@ -119,12 +119,11 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: theCase.id,
         params: [
           // only this one should show up in total_comments
-          postCommentUserReq,
-          // the ones below count as total_other_actions
-          postExternalReferenceESReq,
-          persistableStateAttachment,
-          postCommentActionsReq,
-          postCommentAlertReq,
+          postUnifiedCommentReq,
+          postUnifiedIndicatorReq,
+          postUnifiedLensReq,
+          postUnifiedActionsReq,
+          postUnifiedAlertReq,
         ],
       });
 

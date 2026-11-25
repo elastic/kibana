@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Duration, DurationUnit } from '../../../models/duration';
 import { createCompositeSLOParamsSchema } from './composite_slo_create';
 
 const BASE_BODY = {
@@ -58,4 +59,92 @@ describe('CreateCompositeSLO schema validation', () => {
 
     expect(result.success).toBe(false);
   });
+
+  const buildMembers = (count: number) =>
+    Array.from({ length: count }, (_, index) => ({ sloId: `slo-id-${index}`, weight: 1 }));
+
+  it.each([2, 25])('accepts %i members', (count) => {
+    const result = createCompositeSLOParamsSchema.safeParse(buildRequest(buildMembers(count)));
+
+    expect(result.success).toBe(true);
+  });
+
+  it.each([0, 1, 26])('rejects %i members', (count) => {
+    const result = createCompositeSLOParamsSchema.safeParse(buildRequest(buildMembers(count)));
+
+    expect(result.success).toBe(false);
+  });
+
+  it.each([0, -5, 1.5])('rejects a member weight of %d', (weight) => {
+    const request = buildRequest([
+      { sloId: 'slo-id-1', weight },
+      { sloId: 'slo-id-2', weight: 1 },
+    ]);
+
+    const result = createCompositeSLOParamsSchema.safeParse(request);
+
+    expect(result.success).toBe(false);
+  });
+
+  describe('string bounds', () => {
+    const members = buildMembers(2);
+    const parseBody = (overrides: Record<string, unknown>) =>
+      createCompositeSLOParamsSchema.safeParse({ body: { ...BASE_BODY, members, ...overrides } });
+
+    it.each([
+      ['name', 'a'.repeat(1024), 'a'.repeat(1025)],
+      ['description', 'a'.repeat(10000), 'a'.repeat(10001)],
+    ])('bounds %s', (field, valid, tooLong) => {
+      expect(parseBody({ [field]: valid }).success).toBe(true);
+      expect(parseBody({ [field]: tooLong }).success).toBe(false);
+    });
+
+    it('rejects an empty name', () => {
+      expect(parseBody({ name: '' }).success).toBe(false);
+    });
+
+    it('bounds timeWindow.duration', () => {
+      expect(
+        parseBody({ timeWindow: { duration: `${'1'.repeat(15)}d`, type: 'rolling' } }).success
+      ).toBe(true);
+      expect(
+        parseBody({ timeWindow: { duration: `${'1'.repeat(16)}d`, type: 'rolling' } }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('timeWindow', () => {
+    const members = buildMembers(2);
+
+    it('decodes the duration into a Duration', () => {
+      const result = createCompositeSLOParamsSchema.parse({ body: { ...BASE_BODY, members } });
+
+      expect(result.body.timeWindow.duration).toBeInstanceOf(Duration);
+      expect(result.body.timeWindow.duration.isEqual(new Duration(30, DurationUnit.Day))).toBe(
+        true
+      );
+    });
+
+    it('rejects an invalid duration', () => {
+      const result = createCompositeSLOParamsSchema.safeParse({
+        body: { ...BASE_BODY, members, timeWindow: { duration: '30x', type: 'rolling' } },
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
+  it.each(['short', 'Invalid-Upper-Case', 'a'.repeat(49)])(
+    'rejects a member sloId of "%s"',
+    (sloId) => {
+      const request = buildRequest([
+        { sloId, weight: 1 },
+        { sloId: 'slo-id-2', weight: 1 },
+      ]);
+
+      const result = createCompositeSLOParamsSchema.safeParse(request);
+
+      expect(result.success).toBe(false);
+    }
+  );
 });

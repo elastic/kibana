@@ -165,4 +165,12 @@ export class EsqlServiceTestbed {
   public readonly POST = (path: string) => {
     return request.post(this.kibana!.root, path).set('x-elastic-internal-origin', 'esql-test');
   };
+
+  public readonly PUT = (path: string) => {
+    return request.put(this.kibana!.root, path).set('x-elastic-internal-origin', 'esql-test');
+  };
+
+  public readonly DELETE = (path: string) => {
+    return request.delete(this.kibana!.root, path).set('x-elastic-internal-origin', 'esql-test');
+  };
 }

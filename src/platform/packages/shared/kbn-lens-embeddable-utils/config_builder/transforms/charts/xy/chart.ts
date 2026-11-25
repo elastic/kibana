@@ -10,11 +10,12 @@
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
+import { DatasourceNotFoundError } from '../../../errors';
 import type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from '../../../schema';
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
-import { isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
+import { isAPIDataLayer, isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import { getReversibleMappings, getScaleTypeFromColumnType } from '../utils';
 import {
@@ -68,8 +69,26 @@ function convertAPIDomainToStateFormat(
   }
 }
 
+/**
+ * Y axes (`y`, `y2`) that at least one data layer plots a metric on: the only Y axes the runtime
+ * draws.
+ */
+function getUsedYAxes(layers: XYConfig['layers']): Set<'y' | 'y2'> {
+  const usedAxes = new Set<'y' | 'y2'>();
+  for (const layer of layers) {
+    if (!isAPIDataLayer(layer)) {
+      continue;
+    }
+    for (const metric of layer.y) {
+      usedAxes.add(metric.axis ?? 'y');
+    }
+  }
+  return usedAxes;
+}
+
 function convertAxisSettingsToStateFormat(
-  axis: XYConfig['axis']
+  axis: XYConfig['axis'],
+  layers: XYConfig['layers']
 ): Pick<
   XYPersistedState,
   | 'xTitle'
@@ -85,9 +104,12 @@ function convertAxisSettingsToStateFormat(
   | 'yRightExtent'
   | 'labelsOrientation'
 > {
+  // The runtime draws a Y axis only when a data layer plots a metric on it (a reference line does
+  // not create one), so the settings of any other Y axis are not stored.
+  const usedYAxes = getUsedYAxes(layers);
   const xAxis = axis?.x;
-  const yLeftAxis = axis?.y;
-  const yRightAxis = axis?.y2;
+  const yLeftAxis = usedYAxes.has('y') ? axis?.y : undefined;
+  const yRightAxis = usedYAxes.has('y2') ? axis?.y2 : undefined;
 
   const xExtent = convertAPIDomainToStateFormat(xAxis?.domain, DEFAULT_X_AXIS_DOMAIN);
   const yLeftExtent = convertAPIDomainToStateFormat(yLeftAxis?.domain, DEFAULT_Y_AXIS_DOMAIN);
@@ -134,9 +156,12 @@ function convertAxisSettingsToStateFormat(
             yRightAxis?.labels?.orientation ?? 'horizontal'
           ),
         };
-  const xTitle = xAxis?.title?.text;
-  const yTitle = yLeftAxis?.title?.text;
-  const yRightTitle = yRightAxis?.title?.text;
+  // Lens shows an axis title's text only on the axis, so the text of a hidden title is not stored.
+  const getTitleText = (title: { visible?: boolean; text?: string } | undefined) =>
+    title?.visible === false ? undefined : title?.text;
+  const xTitle = getTitleText(xAxis?.title);
+  const yTitle = getTitleText(yLeftAxis?.title);
+  const yRightTitle = getTitleText(yRightAxis?.title);
   const yLeftScale = yLeftAxis?.scale;
   const yRightScale = yRightAxis?.scale;
   return stripUndefined({
@@ -168,18 +193,24 @@ export function buildVisualizationState(
   return {
     preferredSeriesType: dataLayers[0]?.seriesType ?? 'bar_stacked',
     ...convertLegendToStateFormat(config.legend),
-    ...convertAxisSettingsToStateFormat(config.axis),
+    ...convertAxisSettingsToStateFormat(config.axis, config.layers),
     ...convertStylingToStateFormat(config.styling ?? {}, seriesTypes),
     layers,
   };
 }
 
-function areAllLayersEsql(apiLayers: XYLayer[]): apiLayers is XYConfigESQL['layers'] {
-  return apiLayers.length > 0 && apiLayers.every(isAPIesqlXYLayer);
+// The ES|QL/DSL homogeneity check only applies to data layers. Annotation layers
+// never participate in that split (query annotations carry their own data-view
+// data source, manual annotations none), and reference line layers may be ES|QL
+// or data-view based alongside ES|QL data layers.
+function areAllDataLayersEsql(apiLayers: XYLayer[]): apiLayers is XYConfigESQL['layers'] {
+  const dataLayers = apiLayers.filter(isAPIDataLayer);
+  return dataLayers.length > 0 && dataLayers.every(isAPIesqlXYLayer);
 }
 
-function areAllLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYConfigNoESQL['layers'] {
-  return apiLayers.length > 0 && apiLayers.every((l) => !isAPIesqlXYLayer(l));
+function areAllDataLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYConfigNoESQL['layers'] {
+  const dataLayers = apiLayers.filter(isAPIDataLayer);
+  return dataLayers.length > 0 && dataLayers.every((l) => !isAPIesqlXYLayer(l));
 }
 
 export function buildVisualizationAPI(
@@ -210,16 +241,14 @@ export function buildVisualizationAPI(
     resolveAxisId
   );
   if (apiLayers.length === 0) {
-    throw new Error(
-      'No layers could be built: datasource layers may be missing or have incompatible types'
-    );
+    throw new DatasourceNotFoundError();
   }
 
   const axis = convertAxisSettingsToAPIFormat(config, layers, usedModes);
   const styling = convertStylingToAPIFormat(config, seriesTypes);
   const legend = convertLegendToAPIFormat(config.legend);
 
-  if (areAllLayersEsql(apiLayers)) {
+  if (areAllDataLayersEsql(apiLayers)) {
     return {
       type: 'xy',
       layers: apiLayers,
@@ -228,7 +257,7 @@ export function buildVisualizationAPI(
       ...legend,
     };
   }
-  if (areAllLayersNoEsql(apiLayers)) {
+  if (areAllDataLayersNoEsql(apiLayers)) {
     return {
       type: 'xy',
       layers: apiLayers,
@@ -237,7 +266,7 @@ export function buildVisualizationAPI(
       ...legend,
     };
   }
-  throw new Error('Mixed ESQL and non-ESQL layers are not supported');
+  throw new Error('Mixed ESQL and non-ESQL data layers are not supported');
 }
 
 function convertDomainStateToAPIFormat(
@@ -438,7 +467,7 @@ function buildXYLayerAPI(
   for (const visLayer of visualization.layers) {
     if (visLayer.layerType === 'referenceLine') {
       const datasourceLayer = layers[visLayer.layerId];
-      if (isFormBasedLayer(datasourceLayer)) {
+      if (isTextBasedLayer(datasourceLayer) || isFormBasedLayer(datasourceLayer)) {
         apiLayers.push(
           buildAPIReferenceLinesLayer(
             visLayer,

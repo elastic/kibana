@@ -8,10 +8,10 @@
 import type { CoreStart, IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { aiopsLogRateAnalysisSchemaV2 } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
 import { aiopsLogRateAnalysisSchemaV3 } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
+import type { AiopsUsage } from '../../lib/track_route_usage';
 
 import type { AiopsLicense } from '../../types';
 
@@ -28,7 +28,7 @@ export const defineRoute = (
   license: AiopsLicense,
   logger: Logger,
   coreStart: CoreStart,
-  usageCounter?: UsageCounter
+  aiopsUsage: AiopsUsage
 ) => {
   router.versioned
     .post({
@@ -51,7 +51,7 @@ export const defineRoute = (
           },
         },
       },
-      routeHandlerFactory('2', license, logger, coreStart, usageCounter)
+      routeHandlerFactory('2', license, logger, coreStart, aiopsUsage)
     )
     .addVersion(
       {
@@ -62,6 +62,6 @@ export const defineRoute = (
           },
         },
       },
-      routeHandlerFactory('3', license, logger, coreStart, usageCounter)
+      routeHandlerFactory('3', license, logger, coreStart, aiopsUsage)
     );
 };

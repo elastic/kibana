@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
 import {
@@ -16,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { getInheritedViewMode } from '@kbn/presentation-publishing';
-import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ON_OPEN_PANEL_MENU,
@@ -26,6 +25,7 @@ import {
   ON_CLICK_VALUE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UrlDrilldownConfig, UrlDrilldownGlobalScope } from './types';
+import type { UrlTemplateEditorVariable } from './components/url_template_editor';
 import {
   DEFAULT_ENCODE_URL,
   DEFAULT_OPEN_IN_NEW_TAB,
@@ -156,6 +156,29 @@ export function getUrlDrilldown(deps: {
         }
       },
       getHref,
+      MenuItem: ({ drilldownState, context }) => {
+        const [title, setTitle] = useState(drilldownState.label);
+
+        useEffect(() => {
+          let canceled = false;
+          compile(drilldownState.label, getRuntimeVariables(context), false)
+            .then((result) => {
+              if (!canceled) setTitle(result);
+            })
+            .catch((e) =>
+              // eslint-disable-next-line no-console
+              console.warn(
+                `URL drilldown: failed to compile name template "${drilldownState.label}":`,
+                e
+              )
+            );
+          return () => {
+            canceled = true;
+          };
+        }, [drilldownState.label, context]);
+
+        return <span>{title}</span>;
+      },
       isCompatible: async (drilldownState: UrlDrilldownState, context: ExecutionContext) => {
         const viewMode = getInheritedViewMode(context.embeddable);
         if (viewMode === 'edit') {

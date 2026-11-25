@@ -7,26 +7,56 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ESQLEditorDeps } from '../types';
 
+let enterpriseLicense: boolean | undefined;
+let enterpriseLicenseRequest: Promise<boolean> | undefined;
+
+const loadEnterpriseLicense = (
+  getLicense: NonNullable<ESQLEditorDeps['esql']>['getLicense']
+): Promise<boolean> => {
+  enterpriseLicenseRequest ??= getLicense()
+    .then((license) => {
+      enterpriseLicense = Boolean(
+        license && license.status === 'active' && license.hasAtLeast('enterprise')
+      );
+      return enterpriseLicense;
+    })
+    .catch(() => {
+      enterpriseLicense = false;
+      return false;
+    });
+  return enterpriseLicenseRequest;
+};
+
+/** Drops the cached license so tests can change the result. */
+export const clearNlToEsqlLicenseCache = (): void => {
+  enterpriseLicense = undefined;
+  enterpriseLicenseRequest = undefined;
+};
+
 export const useNlToEsqlCheck = (): boolean => {
-  const kibana = useKibana<ESQLEditorDeps>();
-  const { esql } = kibana.services;
+  const esql = useKibana<ESQLEditorDeps>().services.esql;
   const getLicense = esql?.getLicense;
-  const [hasValidLicense, setHasValidLicense] = useState(false);
-  const licenseCheckRef = useRef(false);
+  const isInferenceAvailable = esql?.isInferenceAvailable ?? false;
+  const [hasValidLicense, setHasValidLicense] = useState(enterpriseLicense ?? false);
 
   useEffect(() => {
-    if (!getLicense || licenseCheckRef.current) return;
-    licenseCheckRef.current = true;
-    getLicense().then((license) => {
-      setHasValidLicense(
-        Boolean(license && license.status === 'active' && license.hasAtLeast('enterprise'))
-      );
+    if (!getLicense || !isInferenceAvailable) {
+      return;
+    }
+    let cancelled = false;
+    loadEnterpriseLicense(getLicense).then((isEnterprise) => {
+      if (!cancelled) {
+        setHasValidLicense(isEnterprise);
+      }
     });
-  }, [getLicense]);
+    return () => {
+      cancelled = true;
+    };
+  }, [getLicense, isInferenceAvailable]);
 
-  return hasValidLicense;
+  return isInferenceAvailable && hasValidLicense;
 };

@@ -6,12 +6,15 @@
  */
 
 import { createKiVerifierRegistry } from './create_registry';
-import { ESQL_VALID_SYNTAX_VERIFIER_ID } from './verifiers';
+import { ESQL_VALID_RUNTIME_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID } from './verifiers';
 
 describe('createKiVerifierRegistry', () => {
   it('registers the built-in verifiers', () => {
     const registry = createKiVerifierRegistry();
 
-    expect(registry.getAll().map(({ id }) => id)).toEqual([ESQL_VALID_SYNTAX_VERIFIER_ID]);
+    expect(registry.getAll().map(({ id }) => id)).toEqual([
+      ESQL_VALID_SYNTAX_VERIFIER_ID,
+      ESQL_VALID_RUNTIME_VERIFIER_ID,
+    ]);
   });
 });

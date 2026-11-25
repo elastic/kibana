@@ -36,6 +36,8 @@ import { showProjectRoutingChangeConfirmModal } from '../../../../application/jo
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../common/constants/cps';
 import { useMlKibana, useNotifications } from '../../../../application/contexts/kibana';
 import { useJobsApiService } from '../../../../application/services/ml_api_service/jobs';
+import { getIsMlCpsEnabled } from '../../../../application/services/ml_server_info';
+import { loadMlServerInfo } from '../../../../application/services/ml_server_info';
 
 interface Props {
   onClose: () => void;
@@ -80,6 +82,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   const jobsApi = useJobsApiService();
   const cpsManager = cps?.cpsManager;
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
+  const isMlCpsEnabled = getIsMlCpsEnabled();
 
   const [loadError, setLoadError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,8 +97,11 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   const [hasInitializedProjectRouting, setHasInitializedProjectRouting] = useState(false);
 
   const fetchProjectsByRouting = useCallback(
-    (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
-    [cpsManager]
+    (routing?: ProjectRouting) =>
+      isMlCpsEnabled && cpsManager
+        ? cpsManager?.fetchProjects(routing) ?? Promise.resolve(null)
+        : Promise.resolve(null),
+    [cpsManager, isMlCpsEnabled]
   );
 
   const defaultProjectRoutingGetter = useCallback(() => {
@@ -115,7 +121,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
       try {
         const manager = cps?.cpsManager;
         if (manager) {
-          await manager.whenReady();
+          await Promise.all([manager.whenReady(), loadMlServerInfo(services.mlServices.mlApi)]);
         }
         if (cancelled) {
           return;
@@ -161,7 +167,14 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
     return () => {
       cancelled = true;
     };
-  }, [cps, jobsApi, initialJobIds, selectedProjectRouting, hasInitializedProjectRouting]);
+  }, [
+    cps,
+    jobsApi,
+    initialJobIds,
+    selectedProjectRouting,
+    hasInitializedProjectRouting,
+    services.mlServices.mlApi,
+  ]);
 
   const onUpdateProjectRouting = useCallback(async () => {
     if (jobIds.length === 0 || !cpsManager) {

@@ -37,8 +37,7 @@ jest.mock('../hooks/use_inference_endpoint_mutation', () => ({
   })),
 }));
 
-// FLAKY: https://github.com/elastic/kibana/issues/253507
-describe.skip('InferenceFlyout', () => {
+describe('InferenceFlyout', () => {
   const Wrapper = ({ children }: { children: React.ReactElement }) => {
     const queryClient = new QueryClient({
       defaultOptions: {
@@ -89,18 +88,69 @@ describe.skip('InferenceFlyout', () => {
   });
 
   it('submits form with correct data', async () => {
+    const user = userEvent.setup();
     renderComponent();
-    await userEvent.click(screen.getByTestId('provider-select'));
-    await userEvent.click(screen.getByText('Elasticsearch'));
-    await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
+    await user.click(screen.getByTestId('provider-select'));
+    await user.click(await screen.findByText('Elasticsearch'));
+    await user.click(screen.getByTestId('inference-endpoint-submit-button'));
 
-    expect(mockMutationFn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        config: expect.objectContaining({
-          provider: 'elasticsearch',
+    await waitFor(() =>
+      expect(mockMutationFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            provider: 'elasticsearch',
+          }),
         }),
-      }),
-      false
+        false
+      )
+    );
+  });
+
+  it('omits empty optional fields when creating an endpoint', async () => {
+    const user = userEvent.setup();
+    renderComponent();
+    await user.click(screen.getByTestId('provider-select'));
+    await user.click(await screen.findByTestId('Hugging Face-provider'));
+    await user.type(screen.getByTestId('api_key-password'), 'test-key');
+    await user.click(screen.getByTestId('inference-endpoint-submit-button'));
+
+    await waitFor(() => expect(mockMutationFn).toHaveBeenCalled());
+    const [submittedData, isEditing] = mockMutationFn.mock.calls[0];
+    expect(isEditing).toBe(false);
+    expect(submittedData.config.providerConfig).toEqual({
+      url: 'https://api.openai.com/v1/embeddings',
+    });
+    expect(submittedData.secrets.providerSecrets).toEqual({ api_key: 'test-key' });
+  });
+
+  it('keeps empty fields when editing an endpoint', async () => {
+    const user = userEvent.setup();
+    const mockEndpoint = {
+      config: {
+        inferenceId: 'test-id',
+        provider: 'elasticsearch',
+        taskType: 'text_embedding',
+        providerConfig: {
+          model_id: '.elser_model_2',
+          num_allocations: 1,
+          num_threads: 2,
+          'rate_limit.requests_per_minute': null,
+        },
+      },
+      secrets: {
+        providerSecrets: {},
+      },
+    };
+
+    renderComponent({ isEdit: true, inferenceEndpoint: mockEndpoint });
+    await user.click(screen.getByTestId('inference-endpoint-submit-button'));
+
+    await waitFor(() => expect(mockMutationFn).toHaveBeenCalled());
+    const [submittedData, isEditing] = mockMutationFn.mock.calls[0];
+    expect(isEditing).toBe(true);
+    expect(submittedData.config.providerConfig).toHaveProperty(
+      ['rate_limit.requests_per_minute'],
+      null
     );
   });
 

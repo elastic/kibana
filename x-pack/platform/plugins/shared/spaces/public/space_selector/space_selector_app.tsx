@@ -14,11 +14,17 @@ interface CreateDeps {
   application: ApplicationSetup;
   spacesManager: SpacesManager;
   getStartServices: StartServicesAccessor;
+  initialSolutionSetupEnabled: boolean;
 }
 
 export const spaceSelectorApp = Object.freeze({
   id: 'space_selector',
-  create({ application, getStartServices, spacesManager }: CreateDeps) {
+  create({
+    application,
+    getStartServices,
+    spacesManager,
+    initialSolutionSetupEnabled,
+  }: CreateDeps) {
     application.register({
       id: this.id,
       title: i18n.translate('xpack.spaces.spaceSelector.appTitle', {
@@ -38,6 +44,7 @@ export const spaceSelectorApp = Object.freeze({
             spacesManager,
             serverBasePath: coreStart.http.basePath.serverBasePath,
             customBranding$: coreStart.customBranding.customBranding$,
+            initialSolutionSetupEnabled,
           }
         );
       },

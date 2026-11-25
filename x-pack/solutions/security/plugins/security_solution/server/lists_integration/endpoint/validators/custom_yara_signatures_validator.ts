@@ -14,39 +14,27 @@ import type {
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { getYaraEngineVersion, validateYaraRule } from '../../../endpoint/lib/libyara';
+import { getYaraEngineVersion } from '../../../endpoint/lib/libyara';
+import {
+  validateCustomYaraRule,
+  validateYaraRuleContentByteLength,
+  YARA_ENGINE_INTERNAL_ERROR_MESSAGE,
+} from '../../../endpoint/lib/custom_yara_signatures';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import type { ExceptionItemLikeOptions } from '../types';
 
-/**
- * Maximum YARA rule text size stored in the value field.
- * Upper-bounded by Elasticsearch `keyword` (32766 UTF-8 bytes). Reused as
- * `schema.string()` `maxLength` for greppable input bounds: JS string length is
- * always ≤ UTF-8 byte length, so ASCII can still use the full 32766 bytes.
- * Multi-byte content is constrained by `validateYaraRuleContentByteLength`.
- */
-export const MAX_YARA_RULE_CONTENT_BYTE_LENGTH = 32766;
-
-const validateYaraRuleContentByteLength = (value: string): string | void => {
-  const byteLength = Buffer.byteLength(value, 'utf8');
-
-  if (byteLength > MAX_YARA_RULE_CONTENT_BYTE_LENGTH) {
-    return `YARA rule content must not exceed ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes (got ${byteLength} bytes)`;
-  }
-};
+export { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from '../../../endpoint/lib/custom_yara_signatures';
 
 const YaraEntrySchema = schema.object({
   field: schema.literal(CUSTOM_YARA_SIGNATURE_FIELD_TYPE),
   operator: schema.literal('included'),
   type: schema.literal('match'),
-  value: schema.string({
+  value: schema.unboundedString({
+    reason:
+      'Size is enforced in bytes by validateYaraRuleContentByteLength; a character-based maxLength would return a misleading error message',
     minLength: 1,
-    // maxLength is only set for auditing purposes, the actual validation is done by validateYaraRuleContentByteLength.
-    // We set it to Infinity in order to not mix error messages between the two validatiors: this way we always show the
-    // correct error message mentioning `bytes` instead of `characters` coming from validateYaraRuleContentByteLength.
-    maxLength: Number.POSITIVE_INFINITY,
     validate: validateYaraRuleContentByteLength,
   }),
 });
@@ -211,15 +199,13 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
     }
 
     let errors;
+    let errorCount;
     try {
       // Only errors are rejected on create/update.
-      ({ errors } = await validateYaraRule(ruleText));
+      ({ errors, errorCount } = await validateCustomYaraRule(ruleText, item.osTypes));
     } catch (error) {
       this.logger.error(error);
-      throw new EndpointArtifactExceptionValidationError(
-        'Unable to validate YARA rule due to an internal error. Please try again later.',
-        500
-      );
+      throw new EndpointArtifactExceptionValidationError(YARA_ENGINE_INTERNAL_ERROR_MESSAGE, 500);
     }
 
     if (errors.length > 0) {
@@ -231,10 +217,12 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
       }
 
       const details = errors
-        .map((e) => (e.line > 0 ? `line ${e.line}: ${e.message}` : e.message))
+        .map((e) => (e.line > 0 ? `[line ${e.line}] ${e.message}` : e.message))
         .join('; ');
       throw new EndpointArtifactExceptionValidationError(
-        `Invalid YARA rule (libyara ${libyaraVersion}): ${details}`
+        `Invalid YARA rules (libyara ${libyaraVersion}), ${errorCount} error${
+          errorCount > 1 ? 's' : ''
+        } found: ${details}`
       );
     }
   }

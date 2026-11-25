@@ -6,6 +6,7 @@
  */
 
 import { createResponseSkillInvocationEvaluator } from './skill_invoked_evaluator';
+import { EMPTY_RETRIEVAL_EVIDENCE } from '../types';
 import type {
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput,
@@ -25,15 +26,19 @@ const loadSkillStep = (skillId: string) => ({
   results: [],
 });
 
-const baseOutput = (steps: AttackDiscoveryAgentBuilderTaskOutput['steps']) => ({
+const baseOutput = (
+  steps: AttackDiscoveryAgentBuilderTaskOutput['steps']
+): AttackDiscoveryAgentBuilderTaskOutput => ({
   messages: [],
   steps,
   errors: [],
   workflow: {
     stages: [],
     retrievedAlertCount: null,
+    retrievedAlertCountSource: 'none',
     passedAlertCount: null,
     validatedDiscoveryCount: null,
+    retrievalEvidence: EMPTY_RETRIEVAL_EVIDENCE,
   },
 });
 

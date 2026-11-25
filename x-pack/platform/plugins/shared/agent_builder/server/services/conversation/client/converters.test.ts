@@ -5,32 +5,47 @@
  * 2.0.
  */
 
-import type { Conversation, ExecutionFailedEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationEvent,
+  PreExecutionWorkflowStep,
+  CurrentUser,
+  ExecutionFailedEvent,
+  TimelineEvent,
+} from '@kbn/agent-builder-common';
 import {
   AgentBuilderErrorCode,
   CONVERSATION_SCHEMA_VERSION,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
+  ConversationActivityEventType,
   ConversationRoundStatus,
   ConversationOriginType,
   EventActorType,
+  LEGACY_TODOS_STEP_TYPE,
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   TimelineEventType,
   ToolOrigin,
+  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
   ConversationRoundStepType,
   ToolResultType,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import { roundsToEvents } from './rounds_to_events';
+import { eventsToRounds } from './events_to_rounds';
 import {
   fromEs,
+  fromEsWithoutRounds,
+  toAttachmentSummaries,
   toEs,
+  toConversationResponse,
+  toConversationResponseFromDocument,
   createRequestToEs,
-  isEventsNativeVersion,
   updateConversation,
   type Document as ConversationDocument,
 } from './converters';
@@ -55,6 +70,8 @@ const createTestState = () => ({
     'security.alerts',
   ],
 });
+
+const requestingUser: CurrentUser = { id: 'user_id', username: 'user_name', isAdmin: false };
 
 describe('conversation model converters', () => {
   const creationDate = '2024-09-04T06:44:17.944Z';
@@ -108,7 +125,7 @@ describe('conversation model converters', () => {
     it('deserializes the conversation with new conversation_rounds field', () => {
       const serialized = documentBase();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized).toEqual({
         id: 'conv_id',
@@ -125,6 +142,10 @@ describe('conversation model converters', () => {
         read_only: false,
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
+        read: false,
+        read_by: [],
+        pinned: false,
+        pinned_by: [],
         rounds: [
           {
             id: 'round-1',
@@ -155,6 +176,76 @@ describe('conversation model converters', () => {
       expect(deserialized.events?.[0]?.id).toBe('round-1::user_message');
     });
 
+    it('seeds read_by for a legacy owner-read document', () => {
+      const serialized = documentBase();
+      serialized._source.read = true;
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.read).toBe(true);
+      expect(deserialized.read_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves owner read_by for a legacy read document viewed by a non-owner', () => {
+      const serialized = documentBase();
+      serialized._source.read = true;
+
+      const deserialized = fromEs(serialized, {
+        id: 'other_user_id',
+        username: 'other_user_name',
+        isAdmin: false,
+      });
+
+      expect(deserialized.read).toBe(false);
+      expect(deserialized.read_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves explicit read_by instead of overwriting it from the legacy read flag', () => {
+      const serialized = documentBase();
+      serialized._source.read = true;
+      serialized._source.read_by = [{ userId: 'other_user_id' }];
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.read).toBe(false);
+      expect(deserialized.read_by).toEqual([{ userId: 'other_user_id' }]);
+    });
+
+    it('seeds pinned_by for a legacy owner-pinned document', () => {
+      const serialized = documentBase();
+      serialized._source.pinned = true;
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.pinned).toBe(true);
+      expect(deserialized.pinned_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves owner pinned_by for a legacy pinned document viewed by a non-owner', () => {
+      const serialized = documentBase();
+      serialized._source.pinned = true;
+
+      const deserialized = fromEs(serialized, {
+        id: 'other_user_id',
+        username: 'other_user_name',
+        isAdmin: false,
+      });
+
+      expect(deserialized.pinned).toBe(false);
+      expect(deserialized.pinned_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves explicit pinned_by instead of overwriting it from the legacy pinned flag', () => {
+      const serialized = documentBase();
+      serialized._source.pinned = true;
+      serialized._source.pinned_by = [{ userId: 'other_user_id' }];
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.pinned).toBe(false);
+      expect(deserialized.pinned_by).toEqual([{ userId: 'other_user_id' }]);
+    });
+
     it('deserializes the conversation with legacy rounds field', () => {
       const serialized = documentBase();
       // @ts-ignore simulating legacy document
@@ -183,7 +274,7 @@ describe('conversation model converters', () => {
       ];
       serialized._source!.state = createTestState();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized).toEqual({
         id: 'conv_id',
@@ -200,6 +291,10 @@ describe('conversation model converters', () => {
         read_only: false,
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
+        read: false,
+        read_by: [],
+        pinned: false,
+        pinned_by: [],
         rounds: [
           {
             id: 'round-legacy',
@@ -248,7 +343,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.rounds[0].steps).toEqual([
         {
@@ -275,6 +370,28 @@ describe('conversation model converters', () => {
       ]);
     });
 
+    it('round-trips a pre-execution workflow step through Elasticsearch conversion', () => {
+      const conversation = fromEs(documentBase(), requestingUser);
+      const workflowStep: PreExecutionWorkflowStep = {
+        type: ConversationRoundStepType.preExecutionWorkflow,
+        model_context: '<system_update>workflow context</system_update>',
+        workflow_context: {
+          'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory-1'] } },
+        },
+      };
+      conversation.rounds[0].steps = [workflowStep];
+
+      const roundTripped = fromEs(
+        {
+          ...documentBase(),
+          _source: toEs(conversation, 'space'),
+        },
+        requestingUser
+      );
+
+      expect(roundTripped.rounds[0].steps).toEqual([workflowStep]);
+    });
+
     it('adds tool_call_id for results without it', () => {
       const serialized = documentBase();
       serialized._source!.conversation_rounds[0].steps = [
@@ -294,7 +411,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const results = deserialized.rounds[0].steps
         .filter(isToolCallStep)
@@ -331,7 +448,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const results = deserialized.rounds[0].steps
         .filter(isToolCallStep)
@@ -362,7 +479,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBe(ToolOrigin.internal);
@@ -380,7 +497,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBe(ToolOrigin.internal);
@@ -398,7 +515,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBeUndefined();
@@ -417,7 +534,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBe(ToolOrigin.registry);
@@ -443,7 +560,7 @@ describe('conversation model converters', () => {
       ];
       serialized._source!.state = createTestState();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.attachments).toEqual([
         {
@@ -468,7 +585,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       // No attachments field - old format
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.attachments).toBeUndefined();
     });
@@ -477,7 +594,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       serialized._source!.state = createTestState();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.state).toEqual(serialized._source!.state);
     });
@@ -486,7 +603,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       // No state field - old format
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.state).toBeUndefined();
     });
@@ -494,7 +611,7 @@ describe('conversation model converters', () => {
     it('defaults access control to private for legacy conversations', () => {
       const serialized = documentBase();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Private,
@@ -508,7 +625,7 @@ describe('conversation model converters', () => {
         access_mode: ConversationAccessControlMode.Public,
       };
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
@@ -530,7 +647,7 @@ describe('conversation model converters', () => {
         ],
       };
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
@@ -551,7 +668,7 @@ describe('conversation model converters', () => {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       };
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.origin).toEqual({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -561,7 +678,7 @@ describe('conversation model converters', () => {
     it('defaults read_only to false when the document has no such field', () => {
       const serialized = documentBase();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.read_only).toBe(false);
     });
@@ -570,7 +687,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       serialized._source!.read_only = true;
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.read_only).toBe(true);
     });
@@ -586,7 +703,7 @@ describe('conversation model converters', () => {
         type: ConversationOriginType.Slack,
       };
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.rounds[0].origin).toEqual({
         type: 'slack',
@@ -621,7 +738,7 @@ describe('conversation model converters', () => {
       serialized._source!.schema_version = 1;
       serialized._source!.events = storedEvents;
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.schema_version).toBe(1);
       expect(deserialized.events).toEqual(storedEvents);
@@ -632,7 +749,7 @@ describe('conversation model converters', () => {
       serialized._source!.schema_version = 1;
       serialized._source!.events = [];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       // Version still lands on the domain object so subsequent writes stay events-native.
       expect(deserialized.schema_version).toBe(1);
@@ -643,7 +760,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       serialized._source!.schema_version = 1;
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.schema_version).toBe(1);
       expect(deserialized.events?.[0]?.id).toBe('round-1::user_message');
@@ -652,7 +769,7 @@ describe('conversation model converters', () => {
     it('does not set schema_version on the domain object for legacy docs', () => {
       const serialized = documentBase();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.schema_version).toBeUndefined();
       // Legacy docs still get a derived timeline on read for API compatibility.
@@ -674,47 +791,371 @@ describe('conversation model converters', () => {
         } as TimelineEvent,
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.schema_version).toBeUndefined();
       // Derived from rounds, not the orphan stored event.
       expect(deserialized.events?.[0]?.id).toBe('round-1::user_message');
     });
+
+    describe('legacy todo steps', () => {
+      const reasoning = { type: ConversationRoundStepType.reasoning, reasoning: 'thinking' };
+      /** A step persisted by the removed todo tool, as found in documents stored before its removal. */
+      const legacyTodos = {
+        type: LEGACY_TODOS_STEP_TYPE,
+        todos: [{ content: 'x', status: 'pending' }],
+      };
+      const stepTypes = (steps: Array<{ type: string }> | undefined) =>
+        (steps ?? []).map((step) => step.type);
+
+      const withLegacyRounds = (document: ConversationDocument): ConversationDocument => {
+        document._source!.conversation_rounds[0].steps = [
+          legacyTodos,
+          reasoning,
+          legacyTodos,
+        ] as never;
+        return document;
+      };
+
+      it('drops them from the rounds of a rounds-only document and from the events derived from it', () => {
+        const deserialized = fromEs(withLegacyRounds(documentBase()), requestingUser);
+
+        expect(stepTypes(deserialized.rounds[0].steps)).toEqual([
+          ConversationRoundStepType.reasoning,
+        ]);
+        const stepEvents = (deserialized.events ?? []).filter(
+          (event) => event.type === TimelineEventType.executionStep
+        );
+        expect(
+          stepEvents.map((event) => (event as { data: { step: { type: string } } }).data.step.type)
+        ).toEqual([ConversationRoundStepType.reasoning]);
+      });
+
+      it('drops them from the step events and terminal snapshots of an events-native document', () => {
+        const serialized = withLegacyRounds(documentBase());
+        const agent = { type: EventActorType.agent, id: 'agent_id' };
+        serialized._source!.schema_version = CONVERSATION_SCHEMA_VERSION;
+        serialized._source!.events = [
+          {
+            id: 'round-1::user_message',
+            type: TimelineEventType.userMessage,
+            created_at: roundCreationDate,
+            actor: { type: EventActorType.user, id: 'user_id' },
+            data: { message: 'some message' },
+          },
+          {
+            id: 'round-1::execution_started',
+            type: TimelineEventType.executionStarted,
+            created_at: roundCreationDate,
+            actor: agent,
+            execution_id: 'round-1::execution',
+            trigger_event_id: 'round-1::user_message',
+            data: { trigger_type: 'user_message' },
+          },
+          {
+            id: 'round-1::execution_step::0',
+            type: TimelineEventType.executionStep,
+            created_at: roundCreationDate,
+            actor: agent,
+            execution_id: 'round-1::execution',
+            trigger_event_id: 'round-1::user_message',
+            data: { step: legacyTodos, sequence: 0 },
+          },
+          {
+            id: 'round-1::execution_step::1',
+            type: TimelineEventType.executionStep,
+            created_at: roundCreationDate,
+            actor: agent,
+            execution_id: 'round-1::execution',
+            trigger_event_id: 'round-1::user_message',
+            data: { step: reasoning, sequence: 1 },
+          },
+          {
+            id: 'round-1::execution_terminated',
+            type: TimelineEventType.executionTerminated,
+            created_at: roundCreationDate,
+            actor: agent,
+            execution_id: 'round-1::execution',
+            trigger_event_id: 'round-1::user_message',
+            data: {
+              steps: [legacyTodos, reasoning],
+              model_usage: {
+                connector_id: 'unknown',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+              time_to_first_token: 1,
+              time_to_last_token: 2,
+              outcome: { type: 'responded', response: { message: 'some response' } },
+            },
+          },
+        ] as unknown as ConversationEvent[];
+
+        const deserialized = fromEs(serialized, requestingUser);
+        const events = (deserialized.events ?? []) as TimelineEvent[];
+
+        expect(events.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_started',
+          'round-1::execution_step::1',
+          'round-1::execution_terminated',
+        ]);
+        const terminated = events.at(-1) as { data: { steps: Array<{ type: string }> } };
+        expect(stepTypes(terminated.data.steps)).toEqual([ConversationRoundStepType.reasoning]);
+        expect(stepTypes(deserialized.rounds[0].steps)).toEqual([
+          ConversationRoundStepType.reasoning,
+        ]);
+        // readers above the converter fold clean events
+        expect(stepTypes(eventsToRounds(events)[0].steps)).toEqual([
+          ConversationRoundStepType.reasoning,
+        ]);
+      });
+    });
+  });
+
+  const conversationBase = (): Conversation => {
+    return {
+      id: 'conv_id',
+      agent_id: 'agent_id',
+      user: { id: 'user_id', username: 'user_name' },
+      title: 'conv_title',
+      created_at: creationDate,
+      updated_at: updateDate,
+      rounds: [
+        {
+          id: 'round-1',
+          status: ConversationRoundStatus.completed,
+          input: {
+            message: 'some message',
+          },
+          steps: [],
+          response: {
+            message: 'some response',
+          },
+          started_at: roundCreationDate,
+          time_to_first_token: 42,
+          time_to_last_token: 100,
+          model_usage: {
+            connector_id: 'unknown',
+            llm_calls: 1,
+            input_tokens: 12,
+            output_tokens: 42,
+          },
+        },
+      ],
+    };
+  };
+
+  describe('attachment summaries', () => {
+    const documentWithAttachments = (attachments: VersionedAttachment[]): ConversationDocument => ({
+      _id: 'conv_id',
+      _seq_no: 1,
+      _primary_term: 1,
+      _source: {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        user_id: 'user_id',
+        user_name: 'user_name',
+        space: 'space',
+        conversation_rounds: [],
+        created_at: creationDate,
+        updated_at: updateDate,
+        attachments,
+      },
+    });
+
+    const textAttachment = (id: string, active?: boolean): VersionedAttachment => ({
+      id,
+      type: 'text',
+      versions: [
+        {
+          version: 1,
+          data: { content: 'Hello' },
+          created_at: creationDate,
+          content_hash: 'abc123',
+          estimated_tokens: 5,
+        },
+      ],
+      current_version: 1,
+      ...(active === undefined ? {} : { active }),
+    });
+
+    it('reduces attachments to id and type, dropping version content', () => {
+      expect(toAttachmentSummaries([textAttachment('att-1'), textAttachment('att-2')])).toEqual([
+        { id: 'att-1', type: 'text' },
+        { id: 'att-2', type: 'text' },
+      ]);
+    });
+
+    it('treats an attachment with no active field as active', () => {
+      expect(toAttachmentSummaries([textAttachment('att-1')])).toEqual([
+        { id: 'att-1', type: 'text' },
+      ]);
+    });
+
+    it('omits soft-deleted attachments', () => {
+      expect(
+        toAttachmentSummaries([textAttachment('att-1', true), textAttachment('att-2', false)])
+      ).toEqual([{ id: 'att-1', type: 'text' }]);
+    });
+
+    it('summarizes a conversation with no attachments to nothing', () => {
+      expect(toAttachmentSummaries([])).toEqual([]);
+      expect(toAttachmentSummaries(undefined)).toEqual([]);
+    });
+
+    it('leaves the rounds-less row itself free of attachments', () => {
+      const deserialized = fromEsWithoutRounds(
+        documentWithAttachments([textAttachment('att-1')]),
+        requestingUser
+      );
+
+      expect(deserialized).not.toHaveProperty('attachments');
+    });
+
+    it('keeps soft-deleted attachments on the full conversation', () => {
+      const deserialized = fromEs(
+        documentWithAttachments([textAttachment('att-1'), textAttachment('att-2', false)]),
+        requestingUser
+      );
+
+      expect(deserialized.attachments).toEqual([
+        expect.objectContaining({ id: 'att-1', current_version: 1 }),
+        expect.objectContaining({ id: 'att-2', active: false }),
+      ]);
+    });
+  });
+
+  describe('toConversationResponse', () => {
+    it('strips internal fields from normalized conversations', () => {
+      const response = toConversationResponse({
+        conversation: {
+          ...conversationBase(),
+          read: true,
+          read_by: [{ userId: 'user_id' }],
+          pinned: true,
+          pinned_by: [{ userId: 'user_id' }],
+          access_control: {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [],
+          },
+          read_only: false,
+          events: [],
+        },
+        resolveTemplate: jest.fn(),
+      });
+
+      expect(response).not.toHaveProperty('read_by');
+      expect(response).not.toHaveProperty('pinned_by');
+      expect(response.read).toBe(true);
+      expect(response.pinned).toBe(true);
+    });
+
+    it('deserializes template metadata through the injected resolver', () => {
+      const response = toConversationResponse({
+        conversation: {
+          ...conversationBase(),
+          read: false,
+          read_by: [],
+          access_control: {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [],
+          },
+          read_only: false,
+          template_id: 'test-template',
+          metadata: { is_urgent: 'true' },
+          events: [],
+        },
+        resolveTemplate: () => ({
+          id: 'test-template',
+          name: 'Test template',
+          version: 1,
+          fields: {
+            is_urgent: { input_type: 'TOGGLE' },
+          },
+        }),
+      });
+
+      expect(response.metadata).toEqual({ is_urgent: true });
+    });
+
+    it('strips internal fields from document responses', () => {
+      const response = toConversationResponseFromDocument({
+        document: {
+          _id: 'conv_id',
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: {
+            ...toEs(
+              {
+                ...conversationBase(),
+                read: true,
+                read_by: [{ userId: 'user_id' }],
+                pinned: true,
+                pinned_by: [{ userId: 'user_id' }],
+                access_control: {
+                  access_mode: ConversationAccessControlMode.Private,
+                  entries: [],
+                },
+                read_only: false,
+                events: [],
+              },
+              'space'
+            ),
+            read_by: [{ userId: 'user_id' }],
+            pinned_by: [{ userId: 'user_id' }],
+          },
+        },
+        user: requestingUser,
+        resolveTemplate: jest.fn(),
+      });
+
+      expect(response).not.toHaveProperty('read_by');
+      expect(response).not.toHaveProperty('pinned_by');
+      expect(response.read).toBe(true);
+      expect(response.pinned).toBe(true);
+    });
   });
 
   describe('toEs', () => {
-    const conversationBase = (): Conversation => {
-      return {
-        id: 'conv_id',
+    it('keeps the owner principal type across writes', () => {
+      const conversation = {
+        id: 'conv-1',
         agent_id: 'agent_id',
-        user: { id: 'user_id', username: 'user_name' },
         title: 'conv_title',
         created_at: creationDate,
-        updated_at: updateDate,
-        rounds: [
-          {
-            id: 'round-1',
-            status: ConversationRoundStatus.completed,
-            input: {
-              message: 'some message',
-            },
-            steps: [],
-            response: {
-              message: 'some response',
-            },
-            started_at: roundCreationDate,
-            time_to_first_token: 42,
-            time_to_last_token: 100,
-            model_usage: {
-              connector_id: 'unknown',
-              llm_calls: 1,
-              input_tokens: 12,
-              output_tokens: 42,
-            },
-          },
-        ],
+        updated_at: creationDate,
+        rounds: [],
+        user: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account' as const,
+        },
       };
-    };
+
+      const serialized = toEs(conversation as never, 'space');
+
+      expect(serialized.user_type).toBe('service_account');
+    });
+
+    it('persists the per-user lists and clears the legacy read and pinned booleans', () => {
+      const serialized = toEs(
+        {
+          ...conversationBase(),
+          read: true,
+          read_by: [{ userId: 'user_id' }],
+          pinned: true,
+          pinned_by: [{ userId: 'user_id' }],
+        },
+        'space'
+      );
+
+      expect(serialized.read_by).toEqual([{ userId: 'user_id' }]);
+      expect(serialized.pinned_by).toEqual([{ userId: 'user_id' }]);
+      expect(serialized.read).toBeUndefined();
+      expect(serialized.pinned).toBeUndefined();
+    });
 
     it('serializes the conversation using new conversation_rounds field', () => {
       const conversation = conversationBase();
@@ -754,6 +1195,8 @@ describe('conversation model converters', () => {
         attachments: [],
         // Legacy field explicitly set to undefined
         rounds: undefined,
+        read_by: [],
+        pinned_by: [],
         access_control: {
           access_mode: ConversationAccessControlMode.Private,
           entries: [],
@@ -937,12 +1380,15 @@ describe('conversation model converters', () => {
       const conversation = conversationBase();
       conversation.read_only = true;
 
-      const roundTripped = fromEs({
-        _id: conversation.id,
-        _seq_no: 1,
-        _primary_term: 1,
-        _source: toEs(conversation, 'space'),
-      });
+      const roundTripped = fromEs(
+        {
+          _id: conversation.id,
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: toEs(conversation, 'space'),
+        },
+        requestingUser
+      );
 
       expect(roundTripped.read_only).toBe(true);
     });
@@ -1033,6 +1479,57 @@ describe('conversation model converters', () => {
   });
 
   describe('createRequestToEs', () => {
+    it('records the owner principal type', () => {
+      const serialized = createRequestToEs({
+        conversation: { agent_id: 'agent_id', title: 'conv_title', rounds: [] },
+        space: 'space',
+        currentUser: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+        },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.user_id).toBe('service_account:kibana/automation');
+      expect(serialized.user_type).toBe('service_account');
+    });
+
+    it('records no principal type for an owner override that has none', () => {
+      const serialized = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'conv_title',
+          rounds: [],
+          user: { id: 'user_id', username: 'user_name' },
+        },
+        space: 'space',
+        currentUser: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+        },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.user_id).toBe('user_id');
+      expect(serialized.user_type).toBeUndefined();
+    });
+
+    it('creates an unpinned, unread conversation with empty per-user lists', () => {
+      const serialized = createRequestToEs({
+        conversation: { agent_id: 'agent_id', title: 'conv_title', rounds: [] },
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.read_by).toEqual([]);
+      expect(serialized.pinned_by).toEqual([]);
+      expect(serialized.read).toBeUndefined();
+      expect(serialized.pinned).toBeUndefined();
+    });
+
     it('includes state property when creating new conversation', () => {
       const conversation = {
         agent_id: 'agent_id',
@@ -1171,9 +1668,13 @@ describe('conversation model converters', () => {
 
     // --- Single promoter to events-native -----------------------------------
     // `createRequestToEs` is the only place that stamps `schema_version`; new
-    // conversations are always events-native from round 1. It also *derives*
-    // `events` from the caller's rounds rather than trusting an array off the
-    // request, so each field has exactly one writer.
+    // conversations are always events-native from round 1. It derives `events`
+    // from the caller's rounds when no `events` array is supplied; when the
+    // caller provides `events`, it is serialized verbatim and the round-derived
+    // projection is NOT re-composed on top — matching the update converter's
+    // contract. Callers that need both a round and additive events (e.g.
+    // attachment events at round-complete time) are responsible for composing
+    // the full events array themselves.
 
     it('stamps schema_version at CONVERSATION_SCHEMA_VERSION on every create', () => {
       const conversation = {
@@ -1196,7 +1697,7 @@ describe('conversation model converters', () => {
       expect(serialized.events).toEqual([]);
     });
 
-    it('derives events from rounds on create (never trusts a supplied events array)', () => {
+    it('derives events from rounds on create when no explicit events are supplied', () => {
       const conversation: Parameters<typeof createRequestToEs>[0]['conversation'] = {
         agent_id: 'agent_id',
         title: 'conv_title',
@@ -1229,6 +1730,170 @@ describe('conversation model converters', () => {
 
       // Ids match the round-derived shape exactly.
       expect(serialized.events?.map((event) => event.id)).toEqual([
+        'round-seed::user_message',
+        'round-seed::execution_started',
+        'round-seed::execution_terminated',
+      ]);
+    });
+
+    it('seeds the timeline from a caller-supplied events array when rounds is empty (atomic create-with-event path)', () => {
+      const seedEvent: TimelineEvent = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { message: 'hello', attachment_refs: [] },
+      };
+      const conversation: Parameters<typeof createRequestToEs>[0]['conversation'] = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        events: [seedEvent],
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      // Caller-supplied events win over the empty round-derived projection.
+      expect(serialized.events?.map((event) => event.id)).toEqual(['round-1::user_message']);
+    });
+
+    it('serializes caller-supplied events verbatim when both events and rounds are provided (caller composes)', () => {
+      // Contract: when both are supplied, `events` is the full stored projection; the round is
+      // only serialized to `conversation_rounds`. Callers needing composition (e.g.
+      // `createConversation$` at round-complete time) must pre-compose the events array.
+      const attachmentAddedEvent: TimelineEvent = {
+        id: 'att-evt-1',
+        type: TimelineEventType.attachmentAdded,
+        created_at: '2025-01-01T00:00:11.000Z',
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        execution_id: 'round-seed::execution',
+        data: {
+          attachment_id: 'att-1',
+          attachment_type: 'text',
+          current_version: 1,
+          render_inline: false,
+          source: 'chat_input',
+        },
+      } as TimelineEvent;
+
+      const conversation: Parameters<typeof createRequestToEs>[0]['conversation'] = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [
+          {
+            id: 'round-seed',
+            status: ConversationRoundStatus.completed,
+            input: { message: 'hello' },
+            response: { message: 'hi' },
+            steps: [],
+            started_at: roundCreationDate,
+            time_to_first_token: 10,
+            time_to_last_token: 50,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 3,
+              output_tokens: 4,
+            },
+          },
+        ],
+        events: [attachmentAddedEvent],
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      // Events written verbatim — the round's derived events are NOT re-composed here.
+      expect(serialized.events?.map((event) => event.id)).toEqual(['att-evt-1']);
+      // The round is still serialized to `conversation_rounds`, so read-through-rounds is intact.
+      expect(serialized.conversation_rounds).toHaveLength(1);
+      expect(serialized.conversation_rounds[0].id).toBe('round-seed');
+    });
+
+    it('stores leading events ahead of caller-supplied events', () => {
+      const createdEvent: ConversationEvent = {
+        id: 'created-1',
+        type: ConversationActivityEventType.conversationCreated,
+        created_at: creationDate,
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { agent_id: 'agent_id', access_mode: ConversationAccessControlMode.Private },
+      };
+      const seedEvent: TimelineEvent = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { message: 'hello', attachment_refs: [] },
+      };
+
+      const serialized = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'conv_title',
+          rounds: [],
+          events: [seedEvent],
+        },
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+        leadingEvents: [createdEvent],
+      });
+
+      expect(serialized.events?.map((event) => event.id)).toEqual([
+        'created-1',
+        'round-1::user_message',
+      ]);
+    });
+
+    it('still projects rounds to events when the caller supplied none, after the leading events', () => {
+      const createdEvent: ConversationEvent = {
+        id: 'created-1',
+        type: ConversationActivityEventType.conversationCreated,
+        created_at: creationDate,
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { agent_id: 'agent_id', access_mode: ConversationAccessControlMode.Private },
+      };
+      const serialized = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'conv_title',
+          rounds: [
+            {
+              id: 'round-seed',
+              status: ConversationRoundStatus.completed,
+              input: { message: 'hello' },
+              response: { message: 'hi' },
+              steps: [],
+              started_at: roundCreationDate,
+              time_to_first_token: 10,
+              time_to_last_token: 50,
+              model_usage: {
+                connector_id: 'unknown',
+                llm_calls: 1,
+                input_tokens: 3,
+                output_tokens: 4,
+              },
+            },
+          ],
+        },
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+        leadingEvents: [createdEvent],
+      });
+
+      // Leading events are not caller events, so they do not suppress the rounds projection.
+      expect(serialized.events?.map((event) => event.id)).toEqual([
+        'created-1',
         'round-seed::user_message',
         'round-seed::execution_started',
         'round-seed::execution_terminated',
@@ -1350,6 +2015,183 @@ describe('conversation model converters', () => {
       expect(updated.events?.map((event) => event.id)).toEqual(originalEventIds);
     });
 
+    const multiExecutionTimeline = () => {
+      const actor = { type: 'user', id: 'u1' } as never;
+      const agent = { type: 'agent', id: 'a1' } as never;
+      const summary = {
+        model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+        time_to_first_token: 1,
+        time_to_last_token: 2,
+      };
+      return [
+        {
+          id: 'mr::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: '2025-08-04T07:00:00.000Z',
+          actor,
+          data: { message: 'do it' },
+        },
+        {
+          id: 'mr::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:00:00.000Z',
+          actor: agent,
+          execution_id: 'mr::execution',
+          trigger_event_id: 'mr::user_message',
+          data: { trigger_type: 'user_message' },
+        },
+        {
+          id: 'mr::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:00:01.000Z',
+          actor: agent,
+          execution_id: 'mr::execution',
+          trigger_event_id: 'mr::user_message',
+          data: {
+            ...summary,
+            outcome: {
+              type: 'prompt_requested',
+              prompts: [{ type: AgentPromptType.confirmation, id: 'p1' }],
+            },
+          },
+        },
+        {
+          id: 'mr::prompt_response::1',
+          type: TimelineEventType.promptResponse,
+          created_at: '2025-08-04T07:05:00.000Z',
+          actor,
+          data: {
+            prompt_requested_event_id: 'mr::execution_terminated',
+            responses: { p1: { allow: true } },
+            // the resume carried its own message; the folded round.input.message becomes this
+            input: { message: 'resume follow-up' },
+          },
+        },
+        {
+          id: 'mr::execution::1::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:05:00.000Z',
+          actor: agent,
+          execution_id: 'mr::execution::1',
+          trigger_event_id: 'mr::prompt_response::1',
+          data: { trigger_type: 'prompt_response' },
+        },
+        {
+          id: 'mr::execution::1::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:05:01.000Z',
+          actor: agent,
+          execution_id: 'mr::execution::1',
+          trigger_event_id: 'mr::prompt_response::1',
+          data: { ...summary, outcome: { type: 'responded', response: { message: 'done' } } },
+        },
+      ] as never[];
+    };
+
+    it('preserves a multi-execution (resumed HITL) timeline on a rounds-path update', () => {
+      // A round that paused (exec_0, prompt_requested) and resumed (prompt_response + exec_1). A
+      // rounds-path write (e.g. markRead / rename) must NOT collapse it back to a single execution.
+      const events = multiExecutionTimeline();
+
+      const base = eventsNativeStored();
+      const conversation: Conversation = {
+        ...base,
+        id: 'conv-multi-exec',
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        events,
+        rounds: eventsToRounds(events),
+      };
+
+      const updated = updateConversation({
+        conversation,
+        update: { id: conversation.id, read: true },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      const updatedIds = updated.events?.map((event) => event.id) ?? [];
+      // The resume execution + prompt_response survive — the pause history is not collapsed.
+      expect(updatedIds).toEqual(expect.arrayContaining(['mr::prompt_response::1']));
+      expect(updatedIds).toEqual(expect.arrayContaining(['mr::execution::1::execution_started']));
+      expect(updatedIds).toEqual(
+        expect.arrayContaining(['mr::execution::1::execution_terminated'])
+      );
+    });
+
+    it.each([{ read: true }, { pinned: true }, { title: 'renamed' }])(
+      'preserves the full resumed timeline on a metadata update: %j',
+      (metadata) => {
+        const initialRef = { attachment_id: 'attachment-a', version: 1 };
+        const resumeRef = { attachment_id: 'attachment-b', version: 1 };
+        const storedEvents: TimelineEvent[] = multiExecutionTimeline();
+        const events = storedEvents.map((event): TimelineEvent => {
+          if (event.type === TimelineEventType.userMessage) {
+            return { ...event, data: { ...event.data, attachment_refs: [initialRef] } };
+          }
+          if (event.type === TimelineEventType.promptResponse) {
+            return {
+              ...event,
+              data: {
+                ...event.data,
+                input: { message: 'resume follow-up', attachment_refs: [resumeRef] },
+              },
+            };
+          }
+          return event;
+        });
+        const conversation = updateConversation({
+          conversation: eventsNativeStored(),
+          update: { id: 'conv-multi-exec', events },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+        expect(conversation.rounds[0].input.attachment_refs).toEqual([initialRef, resumeRef]);
+        const originalEvents = structuredClone(conversation.events);
+
+        const updated = updateConversation({
+          conversation,
+          update: { id: conversation.id, ...metadata },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+
+        expect(updated).toMatchObject(metadata);
+        expect(toEs(updated, 'space').events).toEqual(originalEvents);
+      }
+    );
+
+    it('keeps the preserved user_message unchanged when a rounds-path input change hits a resumed round', () => {
+      const events = multiExecutionTimeline();
+
+      const rounds = eventsToRounds(events);
+      const conversation: Conversation = {
+        ...eventsNativeStored(),
+        id: 'conv-multi-exec-refresh',
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        events,
+        rounds,
+      };
+
+      // Simulate addAttachmentsToLastRound: the round's input gains new attachment_refs.
+      const withRefs = {
+        ...rounds[0],
+        input: { ...rounds[0].input, attachment_refs: [{ attachment_id: 'att-1', version: 1 }] },
+      };
+
+      const updated = updateConversation({
+        conversation,
+        update: { id: conversation.id, rounds: [withRefs] },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.events?.map((e) => e.id)).toEqual(
+        expect.arrayContaining(['mr::execution::1::execution_terminated'])
+      );
+      const userMessage = updated.events?.find((e) => e.id === 'mr::user_message');
+      expect(userMessage).toEqual(conversation.events?.find((e) => e.id === 'mr::user_message'));
+    });
+
     it('regenerates round-derived events when rounds change', () => {
       const conversation = eventsNativeStored();
       const newRound = {
@@ -1406,6 +2248,85 @@ describe('conversation model converters', () => {
       ]);
     });
 
+    describe('interrupted round blocks on a rounds-path write', () => {
+      const failedBlock = (conversation: Conversation): TimelineEvent[] => [
+        {
+          id: 'round-2::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.user, id: conversation.user.id },
+          data: { message: 'second' },
+        } as TimelineEvent,
+        {
+          id: 'round-2::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.agent, id: 'agent_id' },
+          execution_id: 'round-2::execution',
+          trigger_event_id: 'round-2::user_message',
+          data: { trigger_type: 'user_message' },
+        } as TimelineEvent,
+        {
+          id: 'round-2::execution_failed',
+          type: TimelineEventType.executionFailed,
+          created_at: '2025-08-04T07:42:31.000Z',
+          actor: { type: EventActorType.agent, id: 'agent_id' },
+          execution_id: 'round-2::execution',
+          trigger_event_id: 'round-2::user_message',
+          data: {
+            time_to_last_token: 0,
+            error: { code: AgentBuilderErrorCode.internalError, message: 'boom' },
+          },
+        } as TimelineEvent,
+      ];
+
+      it('keeps an interrupted block the stored rounds never materialised (stale rounds)', () => {
+        const conversation = eventsNativeStored();
+        // Document written before interrupted executions folded into rounds: `rounds` only
+        // knows round-1, the failed round-2 exists only as events.
+        conversation.events = [...conversation.events!, ...failedBlock(conversation)];
+
+        const updated = updateConversation({
+          conversation,
+          update: { id: conversation.id, rounds: [conversation.rounds[0]] },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+
+        expect(updated.events?.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_started',
+          'round-1::execution_terminated',
+          'round-2::user_message',
+          'round-2::execution_started',
+          'round-2::execution_failed',
+        ]);
+      });
+
+      it('drops a materialised interrupted round the caller removed', () => {
+        const conversation = eventsNativeStored();
+        conversation.events = [...conversation.events!, ...failedBlock(conversation)];
+        // Current document: the failed round-2 is materialised in the stored rounds.
+        conversation.rounds = eventsToRounds(conversation.events);
+        expect(conversation.rounds.map((round) => round.id)).toEqual(['round-1', 'round-2']);
+        expect(conversation.rounds[1].interruption?.type).toBe('failed');
+
+        const updated = updateConversation({
+          conversation,
+          update: { id: conversation.id, rounds: [conversation.rounds[0]] },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+
+        expect(updated.events?.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_started',
+          'round-1::execution_terminated',
+        ]);
+        expect(updated.rounds.map((round) => round.id)).toEqual(['round-1']);
+      });
+    });
+
     it('preserves additive events (reconcile/additive-survival)', () => {
       // This is the core new invariant. Step 2 will wire error production; the
       // machinery has to be ready to preserve additive events (ids without a
@@ -1423,6 +2344,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: {
             code: AgentBuilderErrorCode.internalError,
             message: 'boom',
@@ -1433,7 +2355,7 @@ describe('conversation model converters', () => {
 
       const updated = updateConversation({
         conversation,
-        update: { id: conversation.id, title: 'renamed' },
+        update: { id: conversation.id, rounds: conversation.rounds },
         space: 'space',
         updateDate: new Date(updateDate),
       });
@@ -1457,6 +2379,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: {
             code: AgentBuilderErrorCode.internalError,
             message: 'boom',
@@ -1516,6 +2439,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: { code: AgentBuilderErrorCode.internalError, message: 'boom' },
         },
       };
@@ -1524,7 +2448,7 @@ describe('conversation model converters', () => {
 
       const updated = updateConversation({
         conversation,
-        update: { id: conversation.id, title: 'unchanged' },
+        update: { id: conversation.id, rounds: conversation.rounds },
         space: 'space',
         updateDate: new Date(updateDate),
       });
@@ -1540,26 +2464,18 @@ describe('conversation model converters', () => {
       ]);
     });
 
-    it('discards events and schema_version supplied in the update payload', () => {
+    it('discards a schema_version supplied in the update payload (version is server-owned)', () => {
       const conversation = eventsNativeStored();
-      const injectedEvent: TimelineEvent = {
-        id: 'injected::user_message',
-        type: TimelineEventType.userMessage,
-        created_at: roundCreationDate,
-        actor: { type: EventActorType.user, id: 'attacker' },
-        data: { message: 'should be discarded' },
-      };
+      const originalEventIds = conversation.events!.map((event) => event.id);
 
       const updated = updateConversation({
         conversation,
-        // Cast: routes never accept these, but the strip must be defensive.
+        // Cast: routes never accept schema_version, but the strip must be defensive.
         update: {
           id: conversation.id,
           title: 'renamed',
-          events: [injectedEvent],
           schema_version: 42,
         } as Parameters<typeof updateConversation>[0]['update'] & {
-          events: TimelineEvent[];
           schema_version: number;
         },
         space: 'space',
@@ -1569,42 +2485,105 @@ describe('conversation model converters', () => {
       // Version comes from the stored conversation (re-stamped at the current
       // format), never from the payload.
       expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      // Injected event never appears in the reconciled output.
-      expect(updated.events?.some((event) => event.id === 'injected::user_message')).toBe(false);
+      // Reconciled events come from rounds; the same ids as before the update.
+      expect(updated.events?.map((event) => event.id)).toEqual(originalEventIds);
     });
 
-    it('does not promote a legacy conversation even if events/schema_version are supplied in the update', () => {
-      const conversation = legacyStored();
+    it('trusts events supplied in the update payload (appendEvents path derives rounds from them)', () => {
+      const conversation = eventsNativeStored();
+      const appended: TimelineEvent = {
+        id: 'appended::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: roundCreationDate,
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { message: 'from appendEvents' },
+      };
 
       const updated = updateConversation({
         conversation,
-        // Same defensive strip on the legacy path: a payload cannot escalate.
         update: {
           id: conversation.id,
-          title: 'renamed',
-          events: [
-            {
-              id: 'attempt::user_message',
-              type: TimelineEventType.userMessage,
-              created_at: roundCreationDate,
-              actor: { type: EventActorType.user, id: 'attacker' },
-              data: { message: 'attempt' },
-            },
-          ],
-          schema_version: CONVERSATION_SCHEMA_VERSION,
+          events: [...conversation.events!, appended],
         } as Parameters<typeof updateConversation>[0]['update'] & {
           events: TimelineEvent[];
-          schema_version: number;
         },
         space: 'space',
         updateDate: new Date(updateDate),
       });
 
-      expect(updated.schema_version).toBeUndefined();
-      // Legacy conversations do not reconcile — they stay rounds-only end to
-      // end. `toEs` will further guarantee no events/schema_version are
-      // persisted for these docs.
-      expect(updated.events).toBeUndefined();
+      expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(updated.events?.some((event) => event.id === 'appended::user_message')).toBe(true);
+    });
+
+    it('honors caller-supplied rounds alongside events, skipping the rounds rebuild (step-only appendEvents batches)', () => {
+      const conversation = eventsNativeStored();
+      const passedThroughRounds = [
+        { ...conversation.rounds[0], response: { message: 'stored truth' } },
+      ];
+
+      const updated = updateConversation({
+        conversation,
+        update: {
+          id: conversation.id,
+          events: conversation.events!,
+          rounds: passedThroughRounds,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(updated.rounds[0].response?.message).toBe('stored truth');
+    });
+
+    it('honors caller-supplied rounds when events are also provided (step-only appendEvents)', () => {
+      const base = eventsNativeStored();
+      const callerRounds = [{ ...base.rounds[0], response: { message: 'updated response' } }];
+
+      const updated = updateConversation({
+        conversation: base,
+        update: {
+          id: base.id,
+          events: base.events!,
+          rounds: callerRounds,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.rounds[0].response?.message).toBe('updated response');
+    });
+
+    it('promotes a legacy conversation to events-native when a caller supplies events (appendEvents on a legacy doc)', () => {
+      const conversation = legacyStored();
+      const seededEvents: TimelineEvent[] = [
+        {
+          id: 'seed::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: roundCreationDate,
+          actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+          data: { message: 'seed' },
+        },
+      ];
+
+      const updated = updateConversation({
+        conversation,
+        update: {
+          id: conversation.id,
+          events: seededEvents,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(updated.events?.map((event) => event.id)).toEqual(['seed::user_message']);
     });
 
     it('keeps events-native docs stamped with the native marker on update', () => {
@@ -1668,7 +2647,7 @@ describe('conversation model converters', () => {
           },
         };
 
-        const result = fromEs(doc);
+        const result = fromEs(doc, requestingUser);
 
         expect(result.template_id).toBe('phishing');
         expect(result.template_version).toBe(2);
@@ -1692,7 +2671,7 @@ describe('conversation model converters', () => {
           },
         };
 
-        const result = fromEs(doc);
+        const result = fromEs(doc, requestingUser);
 
         expect(result.template_id).toBeUndefined();
         expect(result.template_version).toBeUndefined();
@@ -1782,6 +2761,81 @@ describe('conversation model converters', () => {
         expect(result.template_version).toBeUndefined();
         expect(result.metadata).toBeUndefined();
       });
+    });
+  });
+
+  describe('active_execution', () => {
+    const activeExecution = {
+      execution_id: 'execution-1',
+      started_at: creationDate,
+    };
+
+    const documentWith = (
+      source: Partial<ConversationDocument['_source']>
+    ): ConversationDocument => ({
+      _id: 'conv-active',
+      _seq_no: 1,
+      _primary_term: 1,
+      _source: {
+        agent_id: 'agent_id',
+        title: 'Active conv',
+        user_id: 'user_id',
+        user_name: 'user_name',
+        space: 'space',
+        conversation_rounds: [],
+        created_at: creationDate,
+        updated_at: updateDate,
+        ...source,
+      },
+    });
+
+    it('active_execution round-trips through fromEs and toEs', () => {
+      const conversation = fromEs(
+        documentWith({ active_execution: activeExecution }),
+        requestingUser
+      );
+
+      expect(conversation.active_execution).toEqual(activeExecution);
+      expect(toEs(conversation, 'space').active_execution).toEqual(activeExecution);
+    });
+
+    it('leaves active_execution undefined when absent', () => {
+      const conversation = fromEs(documentWith({}), requestingUser);
+
+      expect(conversation.active_execution).toBeUndefined();
+      expect(toEs(conversation, 'space').active_execution).toBeUndefined();
+    });
+
+    it('is not exposed on list rows', () => {
+      expect(
+        fromEsWithoutRounds(documentWith({ active_execution: activeExecution }), requestingUser)
+      ).not.toHaveProperty('active_execution');
+    });
+
+    it('is kept on responses', () => {
+      const response = toConversationResponseFromDocument({
+        document: documentWith({ active_execution: activeExecution }),
+        user: requestingUser,
+        resolveTemplate: () => undefined,
+      });
+
+      expect(response.active_execution).toEqual(activeExecution);
+    });
+
+    it('createRequestToEs writes active_execution when present', () => {
+      const result = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'Active conv',
+          rounds: [],
+          active_execution: activeExecution,
+        },
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(result.active_execution).toEqual(activeExecution);
     });
   });
 });

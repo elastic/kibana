@@ -9,13 +9,14 @@ import { schema } from '@kbn/config-schema';
 import type { UMServerLibs } from '../../lib/lib';
 import type { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../../common/constants';
+import { MAX_ID_LENGTH, boundedString } from '../schema_limits';
 
 export const createNetworkEventsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.NETWORK_EVENTS,
   validate: {
     query: schema.object({
-      checkGroup: schema.string(),
+      checkGroup: boundedString(MAX_ID_LENGTH),
       stepIndex: schema.number(),
     }),
   },

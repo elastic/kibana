@@ -40,7 +40,8 @@ export const getMonitorAlertDocument = (
   locationIds: string[],
   useLatestChecks: boolean,
   threshold: number,
-  grouping?: Record<string, unknown>
+  grouping?: Record<string, unknown>,
+  evaluationValue?: number
 ) => ({
   [MONITOR_ID]: monitorSummary.monitorId,
   [MONITOR_TYPE]: monitorSummary.monitorType,
@@ -61,7 +62,9 @@ export const getMonitorAlertDocument = (
   configId: monitorSummary.configId,
   'kibana.alert.evaluation.threshold': threshold,
   'kibana.alert.evaluation.value':
-    (useLatestChecks ? monitorSummary.checks?.downWithinXChecks : monitorSummary.checks?.down) ?? 1,
+    evaluationValue ??
+    (useLatestChecks ? monitorSummary.checks?.downWithinXChecks : monitorSummary.checks?.down) ??
+    1,
   'monitor.tags': monitorSummary.monitorTags ?? [],
   'monitor.failed_step_info': monitorSummary.failedStepInfo,
   ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),
@@ -113,23 +116,26 @@ export const getMonitorSummary = ({
   params,
   failedStepInfo = '',
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
-  const { downThreshold } = getConditionType(params?.condition);
+  const { downThreshold, pendingThreshold } = getConditionType(params?.condition);
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
   const locationName = monitorInfo?.observer?.geo?.name ?? UNNAMED_LOCATION;
   const formattedLocationName = Array.isArray(locationName)
     ? locationName.join(` ${AND_LABEL} `)
     : locationName;
 
-  // When the monitor is pending there is no timestamp for the last ping
-  const { timestamp, checkedAt } =
-    monitorInfo && '@timestamp' in monitorInfo
-      ? {
-          timestamp: monitorInfo['@timestamp'],
-          checkedAt: moment(monitorInfo['@timestamp'])
-            .tz(tz || 'UTC')
-            .format(dateFormat),
-        }
-      : { timestamp: undefined, checkedAt: undefined };
+  // Pending monitors have no ping. An absent or unparseable time stays empty
+  // rather than becoming the string "undefined" or "Invalid date".
+  const pingTimestamp =
+    monitorInfo && '@timestamp' in monitorInfo ? monitorInfo['@timestamp'] : undefined;
+  const timestamp =
+    typeof pingTimestamp === 'string' && moment(pingTimestamp, moment.ISO_8601, true).isValid()
+      ? pingTimestamp
+      : undefined;
+  const checkedAt = timestamp
+    ? moment(timestamp)
+        .tz(tz || 'UTC')
+        .format(dateFormat)
+    : undefined;
 
   const typeToLabelMap: Record<string, string> = {
     http: 'HTTP',
@@ -176,6 +182,7 @@ export const getMonitorSummary = ({
     }),
     checks,
     downThreshold,
+    pendingThreshold,
     timestamp,
     monitorTags: monitorInfo.tags,
     failedStepInfo,
@@ -205,6 +212,8 @@ export const getUngroupedReasonMessage = ({
       let downCount = 1;
       if ('checks' in c) {
         downCount = useLatestChecks ? c.checks?.downWithinXChecks : c.checks?.down;
+      } else if ('pendingCount' in c) {
+        downCount = c.pendingCount ?? 1;
       }
       return i18n.translate(
         'xpack.synthetics.alertRules.monitorStatus.reasonMessage.locationDetails',

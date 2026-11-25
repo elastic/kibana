@@ -22,7 +22,6 @@ import {
   EuiSpacer,
   EuiToolTip,
   copyToClipboard,
-  useEuiTheme,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
   type EuiTableSelectionType,
@@ -36,6 +35,7 @@ import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import { resolvePrUrl } from '../../utils/pr_url';
 import { CopyableDetail } from './copyable_detail';
 import { LinkDetail } from './link_detail';
+import { pickBaselineAndTarget } from './pick_baseline_and_target';
 import * as i18n from './translations';
 
 const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({ item }) => {
@@ -137,7 +137,6 @@ const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({
 export const ExperimentsListPage: React.FC = () => {
   const history = useHistory();
   const { services } = useKibana();
-  const { euiTheme } = useEuiTheme();
   const savedWorkflowsHref = services.http?.basePath.prepend(
     '/app/workflows?tags=evals-experiment'
   );
@@ -323,10 +322,11 @@ export const ExperimentsListPage: React.FC = () => {
   const handleCompare = useCallback(() => {
     if (!canCompare) return;
     const [a, b] = selectedExperiments;
+    const { baseline, target } = pickBaselineAndTarget(a, b);
     // Rows are aggregated by execution id, so always compare execution-vs-execution;
     // the row's `experiment_id` isn't on the score docs and would filter to a 404.
-    const baselineId = a.execution_id ?? a.experiment_id;
-    const targetId = b.execution_id ?? b.experiment_id;
+    const baselineId = baseline.execution_id ?? baseline.experiment_id;
+    const targetId = target.execution_id ?? target.experiment_id;
     const params = new URLSearchParams({
       type: 'execution',
       baseline: baselineId,
@@ -337,7 +337,7 @@ export const ExperimentsListPage: React.FC = () => {
   }, [canCompare, selectedExperiments, history]);
 
   return (
-    <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+    <EuiPageSection paddingSize="none">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFieldSearch

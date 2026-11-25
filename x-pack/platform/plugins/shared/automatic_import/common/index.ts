@@ -6,12 +6,26 @@
  */
 
 export {
+  UPLOAD_SAMPLES_MAX_LINE_LENGTH,
   UPLOAD_SAMPLES_MAX_LINES,
+  UPLOAD_SAMPLES_MAX_REQUEST_BYTES,
   normalizeLogSamplesFromFileContent,
   normalizeLogLinesForUpload,
 } from './upload_samples_limits';
 
 export type { NormalizeLogSamplesResult } from './upload_samples_limits';
+
+export {
+  LOG_SAMPLE_SIGNATURE_BYTES,
+  validateLogSampleContent,
+  validateLogSampleFileName,
+  validateLogSampleFileSignature,
+} from './log_sample_validation';
+
+export type {
+  LogSampleContentValidationResult,
+  LogSampleValidationResult,
+} from './log_sample_validation';
 
 export type {
   ApproveIntegrationRequest,
@@ -83,7 +97,7 @@ export {
   type AutomaticImportTelemetryEventPayload,
 } from './telemetry/types';
 
-export { MAX_STRING_LENGTH } from './constants';
+export { MAX_STRING_LENGTH, MAX_USER_CONTEXT_DESCRIPTION_LENGTH } from './constants';
 
 export {
   DATA_STREAM_PHASES,

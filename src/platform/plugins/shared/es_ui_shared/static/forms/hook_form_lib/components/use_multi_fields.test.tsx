@@ -82,7 +82,7 @@ describe('<UseMultiFields />', () => {
   test('it should keep a stable ref of initial fields passed', async () => {
     render(<TestComp onFields={onFieldsMock} />);
 
-    expect(onFieldsMock).toBeCalledTimes(1);
+    expect(onFieldsMock).toHaveBeenCalledTimes(1);
     let fieldsReturned = onFieldsMock.mock.calls[0][0] as { [key: string]: FieldHook };
     let paths = Object.values(fieldsReturned).map(({ path }) => path);
     expect(paths).toEqual(['bar', 'foo']);

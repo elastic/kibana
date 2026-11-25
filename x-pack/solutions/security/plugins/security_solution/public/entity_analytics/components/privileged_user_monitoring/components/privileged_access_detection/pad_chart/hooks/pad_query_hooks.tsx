@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
+import { prettifyQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { ML_ANOMALIES_INDEX } from '../../../../../../../../common/constants';
@@ -14,11 +14,24 @@ import { useEsqlGlobalFilterQuery } from '../../../../../../../common/hooks/esql
 import { esqlResponseToRecords } from '../../../../../../../common/utils/esql';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../../../common/hooks/use_error_toast';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../../../common/utils/execution_context';
 import type { AnomalyBand } from '../../../../../recent_anomalies';
 import {
   usePadAnomalyDataEsqlSource,
   usePadTopAnomalousUsersEsqlSource,
 } from './pad_esql_source_query_hooks';
+
+const PAD_CHART_TOP_USERS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pad_chart_top_users'
+);
+const PAD_CHART_ANOMALIES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pad_chart_anomalies'
+);
 
 interface ESQLRawAnomalyRecord extends Record<string, string | number> {
   '@timestamp': number | string;
@@ -40,7 +53,7 @@ const usePrivilegedAccessDetectionTopUsersQuery = (params: {
   spaceId: string;
   anomalyBands: AnomalyBand[];
 }) => {
-  const search = useKibana().services.data.search.search;
+  const search = useKibana().services.data.search;
 
   const filterQuery = useEsqlGlobalFilterQuery();
 
@@ -52,16 +65,11 @@ const usePrivilegedAccessDetectionTopUsersQuery = (params: {
   const { isLoading, data, isError } = useQuery(
     [filterQuery, padTopAnomalousUsersEsqlSource],
     async ({ signal }) => {
-      return esqlResponseToRecords<{ 'user.name': string }>(
-        (
-          await getESQLResults({
-            esqlQuery: padTopAnomalousUsersEsqlSource,
-            search,
-            signal,
-            filter: filterQuery,
-          })
-        )?.response
+      const { rawResponse } = await search.esql(
+        { query: padTopAnomalousUsersEsqlSource, filter: filterQuery },
+        { abortSignal: signal, executionContext: PAD_CHART_TOP_USERS_CONTEXT }
       );
+      return esqlResponseToRecords<{ 'user.name': string }>(rawResponse);
     }
   );
   return {
@@ -76,7 +84,7 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
   spaceId: string;
   anomalyBands: AnomalyBand[];
 }) => {
-  const search = useKibana().services.data.search.search;
+  const search = useKibana().services.data.search;
   const filterQuery = useEsqlGlobalFilterQuery();
 
   const {
@@ -102,19 +110,16 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
       if (!padAnomalyDataEsqlSource || !userNames || userNames.length === 0) {
         return { anomalyRecords: [], userNames: [] };
       }
-      const anomalyRecords = esqlResponseToRecords<ESQLRawAnomalyRecord>(
-        (
-          await getESQLResults({
-            esqlQuery: padAnomalyDataEsqlSource, // here
-            search,
-            signal,
-            filter: filterQuery,
-          })
-        ).response
-      ).map((eachRawRecord) => ({
-        ...eachRawRecord,
-        '@timestamp': new Date(eachRawRecord['@timestamp']).getTime(),
-      }));
+      const { rawResponse } = await search.esql(
+        { query: padAnomalyDataEsqlSource, filter: filterQuery },
+        { abortSignal: signal, executionContext: PAD_CHART_ANOMALIES_CONTEXT }
+      );
+      const anomalyRecords = esqlResponseToRecords<ESQLRawAnomalyRecord>(rawResponse).map(
+        (eachRawRecord) => ({
+          ...eachRawRecord,
+          '@timestamp': new Date(eachRawRecord['@timestamp']).getTime(),
+        })
+      );
       return {
         anomalyRecords: anomalyRecords ?? [],
         userNames: userNames ?? [],

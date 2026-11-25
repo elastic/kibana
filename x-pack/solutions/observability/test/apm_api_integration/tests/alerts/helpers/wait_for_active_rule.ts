@@ -10,7 +10,6 @@ import type SuperTest from 'supertest';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 
 const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
-const retryCount = 10;
 
 export async function waitForActiveRule({
   ruleId,
@@ -33,6 +32,5 @@ export async function waitForActiveRule({
 
       return status;
     },
-    retryCount,
   });
 }

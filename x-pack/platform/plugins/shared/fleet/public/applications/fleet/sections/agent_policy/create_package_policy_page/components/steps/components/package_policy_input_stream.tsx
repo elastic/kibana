@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiLink,
-  EuiRadioGroup,
   EuiSwitch,
   EuiText,
   EuiSpacer,
@@ -54,17 +53,15 @@ import type {
   RegistryStreamWithDataStream,
   RegistryVarsEntry,
 } from '../../../../../../types';
-import { InlineReleaseBadge } from '../../../../../../components';
+import { DataStreamTypeSelector, InlineReleaseBadge } from '../../../../../../components';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
 import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelines';
 import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings';
-import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
-import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { useCreatePackagePolicyFormContext } from '../../../contexts/create_package_policy_form_context';
 
@@ -92,6 +89,15 @@ interface Props {
   showConditionField?: boolean;
   hasStreamToggle?: boolean;
   varGroupSelections?: Record<string, string>;
+  /**
+   * Whether this policy uses the agentless deployment mode. This is the
+   * policy's own mode (from the setup-technology step), not "agentless is
+   * available in this deployment" — the two differ on Cloud with agentless
+   * enabled for an agent-based policy, and the var_group defaults must
+   * follow the policy, exactly like validation derives its mode from
+   * `packagePolicy.supports_agentless`.
+   */
+  isAgentless?: boolean;
   /** Parent input's `policy_template`; required for correct composable multi-template matching. */
   inputPolicyTemplate?: string;
 }
@@ -109,17 +115,13 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     showConditionField = false,
     hasStreamToggle = true,
     varGroupSelections = {},
+    isAgentless = false,
     inputPolicyTemplate,
   }) => {
     const { docLinks } = useStartServices();
-    const { isAgentlessEnabled } = useAgentless();
     const formContext = useCreatePackagePolicyFormContext();
-    const { enableVarGroups } = ExperimentalFeaturesService.get();
-
-    const pkgVarGroups =
-      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
-    const streamVarGroups =
-      enableVarGroups && packageInputStream.var_groups ? packageInputStream.var_groups : undefined;
+    const pkgVarGroups = packageInfo.var_groups;
+    const streamVarGroups = packageInputStream.var_groups;
 
     const {
       params: { packagePolicyId },
@@ -165,14 +167,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       customDataStreamTypeVarValue
     );
 
-    const dataStreamTypeOptions = useMemo(() => {
-      return [
-        { id: 'logs', label: 'Logs' },
-        { id: 'metrics', label: 'Metrics' },
-        { id: 'traces', label: 'Traces' },
-      ];
-    }, []);
-
     const { exists: indexTemplateExists, isLoading: isLoadingIndexTemplate } =
       useIndexTemplateExists(
         getRegistryDataStreamAssetBaseName({
@@ -207,8 +201,16 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     } = useVarGroupSelections({
       varGroups: hasStreamLevelVarGroups ? streamVarGroups : undefined,
       savedSelections: packagePolicyInputStream.var_group_selections,
-      isAgentlessEnabled,
+      isAgentlessEnabled: isAgentless,
       onSelectionsChange: updatePackagePolicyInputStream,
+      // Clear the populated vars of deselected options on a stream-level
+      // selection change, so stale values don't leak into the agent template
+      streamVars: packagePolicyInputStream.vars,
+      // On the edit page, infer the selection from this stream's own vars so
+      // the form agrees with validation (which infers from the same vars);
+      // without this the form always defaulted to the first visible option.
+      varsForInference: packagePolicyInputStream.vars,
+      isEditPage,
     });
 
     // Use stream-level selections, or fall back to package-level prop
@@ -450,7 +452,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       varGroup={varGroup}
                       selectedOptionName={streamVarGroupSelections[varGroup.name]}
                       onSelectionChange={handleStreamVarGroupSelectionChange}
-                      isAgentlessEnabled={isAgentlessEnabled}
+                      isAgentlessEnabled={isAgentless}
                     />
                   </EuiFlexItem>
                 ))}
@@ -565,13 +567,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         !dynamicSignalTypes &&
                         !isUnmanagedDataStreamType && (
                           <EuiFlexItem>
-                            <EuiFormRow
-                              label={
-                                <FormattedMessage
-                                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeInputLabel"
-                                  defaultMessage="Data Stream Type"
-                                />
-                              }
+                            <DataStreamTypeSelector
+                              value={customDataStreamTypeVarValue}
+                              disabled={isEditPage}
                               helpText={
                                 isEditPage ? (
                                   <FormattedMessage
@@ -598,26 +596,18 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                   />
                                 )
                               }
-                            >
-                              <EuiRadioGroup
-                                data-test-subj="packagePolicyDataStreamType"
-                                disabled={isEditPage}
-                                idSelected={customDataStreamTypeVarValue}
-                                options={dataStreamTypeOptions}
-                                onChange={(type: string) => {
-                                  updatePackagePolicyInputStream({
-                                    vars: {
-                                      ...packagePolicyInputStream.vars,
-                                      [DATA_STREAM_TYPE_VAR_NAME]: {
-                                        type: 'string',
-                                        value: type,
-                                      },
+                              onChange={(type: string) => {
+                                updatePackagePolicyInputStream({
+                                  vars: {
+                                    ...packagePolicyInputStream.vars,
+                                    [DATA_STREAM_TYPE_VAR_NAME]: {
+                                      type: 'string',
+                                      value: type,
                                     },
-                                  });
-                                }}
-                                name="dataStreamType"
-                              />
-                            </EuiFormRow>
+                                  },
+                                });
+                              }}
+                            />
                           </EuiFlexItem>
                         )}
                       {isShowingAdvanced && showConditionField && (

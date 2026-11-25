@@ -68,7 +68,6 @@
     "@kbn/cloud-security-posture",
     "@kbn/analytics",
     "@kbn/management-settings-ids",
-    "@kbn/expandable-flyout",
     "@kbn/code-editor-mock",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/licensing-types",
@@ -80,7 +79,10 @@
     "@kbn/entity-store",
     "@kbn/logging-mocks",
     "@kbn/core-spaces-common",
-    "@kbn/app-header"
+    "@kbn/es-errors",
+    "@kbn/app-header",
+    "@kbn/app-menu",
+    "@kbn/security-solution-features"
   ],
   "exclude": ["target/**/*"]
 }

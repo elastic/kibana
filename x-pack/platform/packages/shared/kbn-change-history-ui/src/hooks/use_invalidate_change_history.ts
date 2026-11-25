@@ -15,17 +15,17 @@ import {
 
 export const useInvalidateChangeHistory = () => {
   const queryClient = useQueryClient();
-  const { scope } = useChangeHistoryConfig();
+  const { scope, supports } = useChangeHistoryConfig();
 
   return useCallback(
     async (objectId?: string): Promise<void> => {
       await queryClient.invalidateQueries({
         queryKey: objectId
-          ? changeHistoryObjectQueryKeyPrefix(objectId, scope)
-          : changeHistoryScopeQueryKeyPrefix(scope),
+          ? changeHistoryObjectQueryKeyPrefix(objectId, scope, supports)
+          : changeHistoryScopeQueryKeyPrefix(scope, supports),
         refetchType: 'active',
       });
     },
-    [queryClient, scope]
+    [queryClient, scope, supports]
   );
 };

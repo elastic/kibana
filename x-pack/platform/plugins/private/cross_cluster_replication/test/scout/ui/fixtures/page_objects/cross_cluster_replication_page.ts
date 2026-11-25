@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Locator, ScoutPage } from '@kbn/scout';
 
 const CCR_FOLLOWER_INDICES_PATH = 'management/data/cross_cluster_replication/follower_indices';
@@ -14,9 +15,8 @@ const CCR_CREATE_FOLLOWER_PATH = 'management/data/cross_cluster_replication/foll
 const CCR_CREATE_AUTO_FOLLOW_PATH =
   'management/data/cross_cluster_replication/auto_follow_patterns/add';
 
-// The follower-index list and detail views issue a CCR stats request on load,
-// which can exceed the default action timeout; only those waits need to opt into
-// a longer timeout. Everything else relies on Scout's default (10s).
+// The follower index detail flyout fetches per-shard CCR stats when it opens, which
+// can exceed the default action timeout (10s), so that wait opts into a longer one.
 const CCR_STATS_WAIT_TIMEOUT = 30_000;
 
 export class CrossClusterReplicationPage {
@@ -35,7 +35,7 @@ export class CrossClusterReplicationPage {
   readonly closeFlyoutButton;
 
   constructor(private readonly page: ScoutPage) {
-    this.appTitle = page.testSubj.locator('appTitle');
+    this.appTitle = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.followerIndicesTab = page.testSubj.locator('followerIndicesTab');
     this.autoFollowPatternsTab = page.testSubj.locator('autoFollowPatternsTab');
     this.createFollowerIndexButton = page.testSubj.locator('createFollowerIndexButton');
@@ -50,34 +50,33 @@ export class CrossClusterReplicationPage {
     this.closeFlyoutButton = page.testSubj.locator('closeFlyoutButton');
   }
 
+  // Every route waits on the permissions check before it renders, and then on its own
+  // request (CCR stats, auto-follow patterns or remote clusters). Gating the navigation on
+  // the element behind those requests gives the whole app boot one ready timeout.
   async goto(): Promise<void> {
-    await this.page.gotoApp(CCR_FOLLOWER_INDICES_PATH);
-    // The follower indices list issues a CCR stats request on load; wait for the
-    // empty prompt to render before asserting page content.
-    await this.emptyPrompt.waitFor({ state: 'visible', timeout: CCR_STATS_WAIT_TIMEOUT });
+    await this.page.gotoApp(CCR_FOLLOWER_INDICES_PATH, { readyWhen: this.emptyPrompt });
   }
 
   async gotoFollowerIndicesList(): Promise<void> {
-    await this.page.gotoApp(CCR_FOLLOWER_INDICES_PATH);
-    await this.followerIndexListTable.waitFor({
-      state: 'visible',
-      timeout: CCR_STATS_WAIT_TIMEOUT,
+    await this.page.gotoApp(CCR_FOLLOWER_INDICES_PATH, {
+      readyWhen: this.followerIndexListTable,
     });
   }
 
   async gotoAutoFollowPatternsList(): Promise<void> {
-    await this.page.gotoApp(CCR_AUTO_FOLLOW_PATTERNS_PATH);
-    await this.autoFollowPatternListTable.waitFor();
+    await this.page.gotoApp(CCR_AUTO_FOLLOW_PATTERNS_PATH, {
+      readyWhen: this.autoFollowPatternListTable,
+    });
   }
 
   async gotoCreateFollowerIndex(): Promise<void> {
-    await this.page.gotoApp(CCR_CREATE_FOLLOWER_PATH);
-    await this.followerIndexForm.waitFor();
+    await this.page.gotoApp(CCR_CREATE_FOLLOWER_PATH, { readyWhen: this.followerIndexForm });
   }
 
   async gotoCreateAutoFollowPattern(): Promise<void> {
-    await this.page.gotoApp(CCR_CREATE_AUTO_FOLLOW_PATH);
-    await this.autoFollowPatternForm.waitFor();
+    await this.page.gotoApp(CCR_CREATE_AUTO_FOLLOW_PATH, {
+      readyWhen: this.autoFollowPatternForm,
+    });
   }
 
   async openAutoFollowPatternsTab(): Promise<void> {

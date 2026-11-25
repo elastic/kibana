@@ -9,6 +9,8 @@ import React from 'react';
 import { render, screen, waitFor, within, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+jest.setTimeout(15 * 1000);
+
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule, StepAboutRuleReadOnly } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
@@ -251,11 +253,13 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is invalid if no "name" is present', async () => {
-    const { user } = setup(<TestComp />);
-
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+    setup(
+      <TestComp
+        aboutStepDefaultOverride={{
+          ...stepAboutDefaultValue,
+          description: 'Test description text',
+        }}
+      />
     );
 
     await submitForm();

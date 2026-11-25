@@ -1,0 +1,87 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  VISUALIZATION_ATTACHMENT_TYPE,
+  getEffectiveRenderer,
+  isCustomContentVisualization,
+  readAttachmentQueries,
+  type VisualizationAttachmentData,
+  type VisualizationRenderer,
+} from '@kbn/agent-builder-visualizations-common';
+import {
+  getRequestPanelEmbeddableType,
+  type PanelContent,
+  type PanelContentAttempt,
+  type RequestPanelType,
+} from '@kbn/dashboard-agent-authoring';
+
+const PANEL_TYPE_BY_RENDERER: Readonly<Record<VisualizationRenderer, RequestPanelType>> = {
+  lens: 'vis',
+  vega: 'vega',
+  custom_content: 'custom_content',
+};
+
+/** Maps a stored visualization payload onto the embeddable that renders it. */
+const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
+  const type = getRequestPanelEmbeddableType(PANEL_TYPE_BY_RENDERER[getEffectiveRenderer(data)]);
+
+  // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
+  if (isCustomContentVisualization(data)) {
+    const esqlQueries = readAttachmentQueries(data);
+    return {
+      type,
+      config: {
+        template: data.visualization.template,
+        esql_query: esqlQueries.length ? esqlQueries : undefined,
+      },
+    };
+  }
+
+  return { type, config: data.visualization };
+};
+
+/**
+ * Reads a visualization attachment from the conversation and turns its latest version into panel
+ * content, so the model can place a visualization it already created without copying the payload
+ * back through a tool call. Failures are returned, not thrown, so one bad attachment fails only its
+ * own panel — the same way an unresolvable panel request behaves.
+ */
+export const createAttachmentPanelResolver = ({
+  attachments,
+}: {
+  attachments: AttachmentStateManager;
+}) => {
+  return (attachmentId: string): PanelContentAttempt => {
+    const fail = (error: string): PanelContentAttempt => ({ type: 'failure', error });
+
+    const record = attachments.getAttachmentRecord(attachmentId);
+    if (!record) {
+      return fail(`Attachment "${attachmentId}" not found in this conversation.`);
+    }
+
+    if (record.type !== VISUALIZATION_ATTACHMENT_TYPE) {
+      return fail(
+        `Attachment "${attachmentId}" is a "${record.type}" attachment; only ${VISUALIZATION_ATTACHMENT_TYPE} attachments can be added as panels.`
+      );
+    }
+
+    const latestVersion = getLatestVersion(record);
+    const data = latestVersion?.data as VisualizationAttachmentData | undefined;
+    if (!data?.visualization) {
+      return fail(`Attachment "${attachmentId}" has no readable visualization data.`);
+    }
+
+    return {
+      type: 'success',
+      panelContent: toPanelContent(data),
+      ...(isCustomContentVisualization(data) ? { heightHint: data.visualization.height } : {}),
+    };
+  };
+};

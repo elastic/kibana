@@ -13,6 +13,7 @@ export type IndexSearchToolConfig = {
   pattern: string;
   row_limit?: number;
   custom_instructions?: string;
+  include_frozen?: boolean;
 };
 
 export type IndexSearchToolDefinition = ToolDefinition<

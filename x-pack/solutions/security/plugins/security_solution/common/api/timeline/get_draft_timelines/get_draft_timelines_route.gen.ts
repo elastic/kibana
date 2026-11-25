@@ -23,7 +23,9 @@ export const GetDraftTimelinesRequestQuery = lazySchema(() =>
     /**
      * Which draft to load (`default` investigation timeline or `template` timeline template).
      */
-    timelineType: TimelineType,
+    timelineType: TimelineType.describe(
+      'Which draft to load (`default` investigation timeline or `template` timeline template).'
+    ),
   })
 );
 export type GetDraftTimelinesRequestQuery = z.infer<typeof GetDraftTimelinesRequestQuery>;

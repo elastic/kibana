@@ -50,12 +50,15 @@ export type {
   RelayClientContract,
   RelayInstallRequest,
   RelayInstallResponse,
+  RelayTriggerInput,
+  RelayTriggerResponse,
 } from './lib/relay';
 
 export {
   asSavedObjectExecutionSource,
   asHttpRequestExecutionSource,
   asNotificationExecutionSource,
+  asAgentBuilderExecutionSource,
   isNotificationExecutionSource,
   getBasicAuthHeader,
   NOTIFICATIONS_REQUESTER_ID,

@@ -7,13 +7,15 @@
 
 import type { LensSerializedState } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
-import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
-import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
+import {
+  LENS_UNKNOWN_VIS,
+  dropLegacyAggregateQuerySlot,
+  type LensByValueSerializedState,
+} from '@kbn/lens-common';
 import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { flow } from 'lodash';
-import { transformToV1LensItemAttributes } from '../content_management/v1';
-import { transformToV2LensItemAttributes } from '../content_management/v2';
+import { upgradeLensItemAttributes } from '../content_management/upgrade';
 import { injectLensReferences } from '../references';
 import type {
   LensByRefTransformOutResult,
@@ -21,7 +23,6 @@ import type {
   LensTransformOut,
 } from './types';
 import { findLensReference } from './utils';
-import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
 import { stripInheritedContext } from './helpers';
 
 /**
@@ -126,7 +127,7 @@ export const getTransformOut = (
 };
 
 /**
- * Handles transforming old lens SO in dashboard to v1 Lens SO
+ * Handles transforming old lens SO in dashboard to the latest Lens SO version
  */
 export function migrateAttributes(
   attributes: LensByValueSerializedState['attributes']
@@ -141,16 +142,14 @@ export function migrateAttributes(
     throw new Error('Missing visualizationType');
   }
 
-  const newAttributes = { ...attributes, visualizationType };
-  if (isLensAttributesV0(newAttributes) || isLensAttributesV1(newAttributes)) {
-    const v1Attributes = transformToV1LensItemAttributes(newAttributes);
-    const v2Attributes = transformToV2LensItemAttributes({ ...v1Attributes, visualizationType });
-    return {
-      ...attributes,
-      ...v2Attributes,
-      version: LENS_ITEM_VERSION_V2 as LensAttributes['version'],
-    };
-  }
+  const upgradedAttributes = upgradeLensItemAttributes({
+    ...attributes,
+    visualizationType,
+  });
 
-  return newAttributes as LensAttributes;
+  return dropLegacyAggregateQuerySlot({
+    ...attributes,
+    ...upgradedAttributes,
+    visualizationType,
+  } as LensAttributes);
 }

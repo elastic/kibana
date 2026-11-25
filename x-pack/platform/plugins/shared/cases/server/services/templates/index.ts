@@ -31,6 +31,7 @@ import {
 } from '../../../common/types/domain/template/strict_fields';
 import { getYamlDefaultAsString, normalizeFieldDefinitionName } from '../../../common/utils';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
+import { assertCanStoreExtractObservables } from '../../common/assert_can_store_extract_observables';
 import {
   CASE_TEMPLATE_SAVED_OBJECT,
   MAX_EXTENDED_FIELD_VALUE_BYTES,
@@ -378,6 +379,7 @@ export class TemplatesService {
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
     this.assertDefinitionLengthWithinLimit(normalizedDefinition);
+    this.assertExtractObservablesAllowed(input.owner, parsedDefinition);
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -445,6 +447,10 @@ export class TemplatesService {
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
     this.assertDefinitionLengthWithinLimit(normalizedDefinition);
+    this.assertExtractObservablesAllowed(input.owner, parsedDefinition, {
+      owner: currentTemplate.attributes.owner,
+      definition: currentTemplate.attributes.definition,
+    });
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -541,7 +547,16 @@ export class TemplatesService {
     return [...new Set(authors)].sort();
   }
 
-  async incrementUsageStats(templateId: string): Promise<void> {
+  /**
+   * Adds `caseCount` uses to a template's running tally, defaulting to a single use.
+   *
+   * The tally counts uses, not distinct cases: a case that loses this template and gets it again
+   * adds a second use. It is cumulative and never decreases, so clearing a template from a case, or
+   * deleting the case, leaves it untouched. It is also a read-then-write rather than an atomic
+   * increment, so concurrent callers can overwrite each other. Treat it as an approximate
+   * popularity signal, not an exact count.
+   */
+  async incrementUsageStats(templateId: string, caseCount: number = 1): Promise<void> {
     const template = await this._getTemplate(templateId);
 
     if (!template) {
@@ -554,7 +569,7 @@ export class TemplatesService {
           id: template.id,
           type: CASE_TEMPLATE_SAVED_OBJECT,
           attributes: {
-            usageCount: (template.attributes.usageCount ?? 0) + 1,
+            usageCount: (template.attributes.usageCount ?? 0) + caseCount,
             lastUsedAt: new Date().toISOString(),
           },
         },
@@ -664,6 +679,13 @@ export class TemplatesService {
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
     this.assertDefinitionLengthWithinLimit(normalizedDefinition);
+    this.assertExtractObservablesAllowed(
+      input.owner,
+      parsedDefinition,
+      currentOwner !== undefined && existingDefinition !== undefined
+        ? { owner: currentOwner, definition: existingDefinition }
+        : undefined
+    );
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -674,6 +696,44 @@ export class TemplatesService {
     const isCreate = excludeTemplateId === undefined;
     if (isCreate || (currentOwner !== undefined && input.owner !== currentOwner)) {
       await this.assertOwnerTemplateCountWithinLimit(input.owner);
+    }
+  }
+
+  /**
+   * Rejects a definition that stores `settings.extractObservables: true` for an owner that cannot
+   * auto-extract observables. Enforced on every write path — create, update, and the `dry_run`
+   * preflight — but never on read. On update, `stored` is the template's current version: a true
+   * that the stored version already holds for the same owner is kept. A change of owner counts as
+   * a new true.
+   */
+  private assertExtractObservablesAllowed(
+    owner: string,
+    parsedDefinition: ParsedTemplate['definition'],
+    stored?: { owner: string; definition: string }
+  ): void {
+    const extractObservables = parsedDefinition.settings?.extractObservables;
+    if (extractObservables !== true) {
+      return;
+    }
+
+    if (stored?.owner === owner && this.getExistingExtractObservables(stored.definition) === true) {
+      return;
+    }
+
+    assertCanStoreExtractObservables({ owner, extractObservables });
+  }
+
+  /**
+   * Best-effort: the `settings.extractObservables` value in a template's currently-stored
+   * `definition`. Falls back to `undefined` if the stored YAML fails to parse against the lenient
+   * schema, which can only make the check MORE restrictive.
+   */
+  private getExistingExtractObservables(definition: string): boolean | undefined {
+    try {
+      return ParsedTemplateDefinitionSchema.parse(parseYaml(definition)).settings
+        ?.extractObservables;
+    } catch {
+      return undefined;
     }
   }
 

@@ -7,8 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { editableToolTypes } from '@kbn/agent-builder-common';
+import { editableToolTypes, toAutoApprovedApis } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
+import { autoApprovedApisSchema } from './approvals_schema';
 import { getHandlerWrapper } from './wrap_handler';
 import { toDescriptor, toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
 import { TOOL_USED_BY_AGENTS_ERROR_CODE } from '../../common/http_api/tools';
@@ -458,6 +459,26 @@ export function registerToolsRoutes({
                   },
                 })
               ),
+              approvals: schema.maybe(
+                schema.object(
+                  {
+                    auto_approved_apis: schema.maybe(
+                      autoApprovedApisSchema({
+                        scope: 'this run',
+                        description:
+                          'Destructive Elasticsearch or Kibana APIs the tool may call without a user confirmation, keyed by backend. A tool run has no live user to answer the confirmation prompt, so a destructive API is refused unless it is listed here.',
+                        knownApisOnly: true,
+                      })
+                    ),
+                  },
+                  {
+                    meta: {
+                      description:
+                        'Actions the tool run may take that would otherwise need a live user to approve them. Applies to this run and any sub-agents it spawns.',
+                    },
+                  }
+                )
+              ),
             }),
           },
         },
@@ -470,6 +491,7 @@ export function registerToolsRoutes({
           tool_id: id,
           tool_params: toolParams,
           connector_id: defaultConnectorId,
+          approvals,
         } = request.body;
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
@@ -489,6 +511,9 @@ export function registerToolsRoutes({
           toolParams,
           source: 'user',
           defaultConnectorId,
+          ...(approvals?.auto_approved_apis
+            ? { approvals: { autoApprovedApis: toAutoApprovedApis(approvals.auto_approved_apis) } }
+            : {}),
         });
 
         return response.ok({

@@ -164,7 +164,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockSavedObjectClient.find).toBeCalledWith(
+      expect(mockSavedObjectClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           namespaces: ['*'],
           hasReference: [
@@ -198,12 +198,14 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
-      expect(mockEndpointContext.service.savedObjects.createInternalScopedSoClient).toBeCalledWith({
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(
+        mockEndpointContext.service.savedObjects.createInternalScopedSoClient
+      ).toHaveBeenCalledWith({
         spaceId: DEFAULT_SPACE_ID,
         readonly: false,
       });
-      expect(mockSavedObjectClient.create).toBeCalledWith(
+      expect(mockSavedObjectClient.create).toHaveBeenCalledWith(
         'policy-settings-protection-updates-note',
         { note: 'note' },
         {
@@ -236,8 +238,10 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
-      expect(mockSavedObjectClient.update).toBeCalledWith(...mockedSOSuccessfulUpdateResponse);
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
+        ...mockedSOSuccessfulUpdateResponse
+      );
     });
 
     it('should update a legacy note using a writable client scoped to the note namespace', async () => {
@@ -262,13 +266,19 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
-      expect(mockEndpointContext.service.getInternalFleetServices).toBeCalledWith('request-space');
-      expect(mockEndpointContext.service.savedObjects.createInternalScopedSoClient).toBeCalledWith({
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(
+        'request-space'
+      );
+      expect(
+        mockEndpointContext.service.savedObjects.createInternalScopedSoClient
+      ).toHaveBeenCalledWith({
         spaceId: 'legacy-space',
         readonly: false,
       });
-      expect(mockSavedObjectClient.update).toBeCalledWith(...mockedSOSuccessfulUpdateResponse);
+      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
+        ...mockedSOSuccessfulUpdateResponse
+      );
     });
 
     it('should return the note if one exists', async () => {
@@ -287,7 +297,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as { note: string };
       expect(result.note).toEqual('note');
     });
@@ -308,7 +318,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as { note: string };
       expect(result.note).toEqual('note');
     });
@@ -329,7 +339,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalledWith({ body: { note: 'default space note' } });
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { note: 'default space note' } });
     });
 
     it('should return notFound if no note exists', async () => {
@@ -348,7 +358,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.notFound).toBeCalled();
+      expect(mockResponse.notFound).toHaveBeenCalled();
     });
 
     describe('with space awareness enabled', () => {
@@ -373,7 +383,7 @@ describe('test protection updates note handler', () => {
           mockRequest,
           mockResponse
         );
-        expect(mockEnsureInCurrentSpace).toBeCalledWith({
+        expect(mockEnsureInCurrentSpace).toHaveBeenCalledWith({
           integrationPolicyIds: ['integration-policy-id'],
         });
       });
@@ -396,11 +406,11 @@ describe('test protection updates note handler', () => {
           mockResponse
         );
 
-        expect(mockSavedObjectClient.find).not.toBeCalled();
-        expect(mockSavedObjectClient.create).not.toBeCalled();
-        expect(mockSavedObjectClient.update).not.toBeCalled();
-        expect(mockResponse.ok).not.toBeCalled();
-        expect(mockResponse.customError).toBeCalledWith(
+        expect(mockSavedObjectClient.find).not.toHaveBeenCalled();
+        expect(mockSavedObjectClient.create).not.toHaveBeenCalled();
+        expect(mockSavedObjectClient.update).not.toHaveBeenCalled();
+        expect(mockResponse.ok).not.toHaveBeenCalled();
+        expect(mockResponse.customError).toHaveBeenCalledWith(
           expect.objectContaining({ statusCode: 500 })
         );
       });

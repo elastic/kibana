@@ -24,6 +24,7 @@ import {
   i18nServiceMock,
   themeServiceMock,
   analyticsServiceMock,
+  chromeServiceMock,
 } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { init as initHttp } from '../../public/application/services/http';
@@ -50,6 +51,7 @@ const startServicesMock = {
   i18n: i18nServiceMock.createStartContract(),
   theme: themeServiceMock.createStartContract(),
   analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+  chrome: chromeServiceMock.createStartContract(),
 };
 
 export const WithAppDependencies =

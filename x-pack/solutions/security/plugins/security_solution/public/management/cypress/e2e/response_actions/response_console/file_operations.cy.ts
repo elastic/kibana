@@ -94,8 +94,8 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
 
       // verify that the file was retrieved
       // and that the file download link is available
-      cy.getByTestSubj('getFileSuccess').within(() => {
-        cy.contains('File retrieved from the host.');
+      cy.getByTestSubj('getFile-success').within(() => {
+        cy.contains('get-file completed successfully');
         cy.contains('(ZIP file passcode: elastic)');
         cy.contains(
           'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
@@ -108,17 +108,9 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       // wait for file to be downloaded
       cy.readFile(`${downloadsFolder}/upload.zip`, { timeout: 120000 }).should('exist');
 
-      // move the zip file to VM
-      cy.task('uploadFileToEndpoint', {
-        hostname: createdHost.hostname,
-        srcPath: `${downloadsFolder}/upload.zip`,
-        destPath: `${homeFilePath}/upload.zip`,
-      });
-
-      // unzip the file and read its content
-      cy.task('readZippedFileContentOnEndpoint', {
-        hostname: createdHost.hostname,
-        path: `${homeFilePath}/upload.zip`,
+      // unzip the downloaded file and read its content
+      cy.task('readZippedFileContent', {
+        path: `${downloadsFolder}/upload.zip`,
         password: 'elastic',
       }).then((unzippedFileContent) => {
         expect(unzippedFileContent).to.contain(fileContent);

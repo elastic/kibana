@@ -23,6 +23,9 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
+// OTX documents no indicator length limit; URL indicators returned by getPulse can exceed 2048 characters.
+const MAX_INDICATOR_LENGTH = 8192;
+
 export const AlienVaultOTXConnector: ConnectorSpec = {
   metadata: {
     id: '.alienvault-otx',
@@ -41,6 +44,10 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
   actions: {
     getIndicator: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Look up threat intelligence for a single indicator (IP, domain, hostname, URL, or file hash) in AlienVault OTX. ' +
+        'Returns the requested section of indicator data (defaults to "general"); use getRelatedPulses to list the pulses referencing it.',
       input: lazySchema(() =>
         z.object({
           indicatorType: z
@@ -55,8 +62,14 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
               'FileHash-SHA256',
             ])
             .describe('Indicator type'),
-          indicator: z.string().describe('Indicator value'),
-          section: z.string().optional().describe('Specific section to retrieve'),
+          indicator: z.string().max(MAX_INDICATOR_LENGTH).describe('Indicator value'),
+          section: z
+            .string()
+            .max(50)
+            .optional()
+            .describe(
+              'Specific section to retrieve (e.g. general, reputation, geo, malware, url_list, passive_dns, analysis). Defaults to general'
+            ),
         })
       ),
       handler: async (ctx, input) => {
@@ -75,9 +88,13 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     searchPulses: {
       isTool: true,
+      scope: 'read',
+      description:
+        'List threat pulses from the OTX feeds the API key is subscribed to, optionally filtered by a search query. ' +
+        'Returns a paginated list with total count and a next-page link; use getPulse for full details of one pulse.',
       input: lazySchema(() =>
         z.object({
-          query: z.string().optional().describe('Search query'),
+          query: z.string().max(2000).optional().describe('Search query'),
           page: z.number().int().min(1).optional().default(1).describe('Page number'),
           limit: z
             .number()
@@ -111,9 +128,12 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     getPulse: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Get the full details of a single OTX pulse by ID, including name, description, author, timestamps, tags, and its indicators of compromise.',
       input: lazySchema(() =>
         z.object({
-          pulseId: z.string().describe('Pulse ID'),
+          pulseId: z.string().max(200).describe('Pulse ID'),
         })
       ),
       handler: async (ctx, input) => {
@@ -136,6 +156,10 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     getRelatedPulses: {
       isTool: true,
+      scope: 'read',
+      description:
+        'List the OTX pulses that reference a given indicator (IP, domain, hostname, URL, or file hash). ' +
+        'Use this to find threat campaigns associated with an indicator; returns the pulse count and pulse summaries.',
       input: lazySchema(() =>
         z.object({
           indicatorType: z
@@ -150,7 +174,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
               'FileHash-SHA256',
             ])
             .describe('Indicator type'),
-          indicator: z.string().describe('Indicator value'),
+          indicator: z.string().max(MAX_INDICATOR_LENGTH).describe('Indicator value'),
         })
       ),
       handler: async (ctx, input) => {

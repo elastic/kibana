@@ -25,7 +25,7 @@ describe('useHistoryBlock', () => {
       const { location } = renderer.mountHistory;
       expect(location.pathname).toBe('/test');
       expect(location.search).toBe('');
-      expect(renderer.startServices.overlays.openConfirm).not.toBeCalled();
+      expect(renderer.startServices.overlays.openConfirm).not.toHaveBeenCalled();
     });
 
     it('should block if edited', async () => {
@@ -38,8 +38,8 @@ describe('useHistoryBlock', () => {
       // needed because we have an async useEffect
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(renderer.startServices.overlays.openConfirm).toBeCalled();
-      expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
+      expect(renderer.startServices.overlays.openConfirm).toHaveBeenCalled();
+      expect(renderer.startServices.application.navigateToUrl).toHaveBeenCalledWith(
         '/mock/mock/test',
         expect.anything()
       );
@@ -55,8 +55,8 @@ describe('useHistoryBlock', () => {
       // needed because we have an async useEffect
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(renderer.startServices.overlays.openConfirm).toBeCalled();
-      expect(renderer.startServices.application.navigateToUrl).not.toBeCalled();
+      expect(renderer.startServices.overlays.openConfirm).toHaveBeenCalled();
+      expect(renderer.startServices.application.navigateToUrl).not.toHaveBeenCalled();
     });
   });
   describe('with search params', () => {
@@ -70,7 +70,7 @@ describe('useHistoryBlock', () => {
       const { location } = renderer.mountHistory;
       expect(location.pathname).toBe('/test');
       expect(location.search).toBe('?param=test');
-      expect(renderer.startServices.overlays.openConfirm).not.toBeCalled();
+      expect(renderer.startServices.overlays.openConfirm).not.toHaveBeenCalled();
     });
 
     it('should block if edited and navigate on confirm', async () => {
@@ -83,8 +83,8 @@ describe('useHistoryBlock', () => {
       // needed because we have an async useEffect
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(renderer.startServices.overlays.openConfirm).toBeCalled();
-      expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
+      expect(renderer.startServices.overlays.openConfirm).toHaveBeenCalled();
+      expect(renderer.startServices.application.navigateToUrl).toHaveBeenCalledWith(
         '/mock/mock/test?param=test',
         expect.anything()
       );
@@ -100,8 +100,8 @@ describe('useHistoryBlock', () => {
       // needed because we have an async useEffect
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(renderer.startServices.overlays.openConfirm).toBeCalled();
-      expect(renderer.startServices.application.navigateToUrl).not.toBeCalled();
+      expect(renderer.startServices.overlays.openConfirm).toHaveBeenCalled();
+      expect(renderer.startServices.application.navigateToUrl).not.toHaveBeenCalled();
     });
   });
 
@@ -116,7 +116,7 @@ describe('useHistoryBlock', () => {
       const { location } = renderer.mountHistory;
       expect(location.pathname).toBe('/test');
       expect(location.hash).toBe('#/hash');
-      expect(renderer.startServices.overlays.openConfirm).not.toBeCalled();
+      expect(renderer.startServices.overlays.openConfirm).not.toHaveBeenCalled();
     });
 
     it('should block if edited and navigate on confirm', async () => {
@@ -129,8 +129,8 @@ describe('useHistoryBlock', () => {
       // needed because we have an async useEffect
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(renderer.startServices.overlays.openConfirm).toBeCalled();
-      expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
+      expect(renderer.startServices.overlays.openConfirm).toHaveBeenCalled();
+      expect(renderer.startServices.application.navigateToUrl).toHaveBeenCalledWith(
         '/mock/mock/test#/hash',
         expect.anything()
       );
@@ -146,8 +146,8 @@ describe('useHistoryBlock', () => {
       // needed because we have an async useEffect
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(renderer.startServices.overlays.openConfirm).toBeCalled();
-      expect(renderer.startServices.application.navigateToUrl).not.toBeCalled();
+      expect(renderer.startServices.overlays.openConfirm).toHaveBeenCalled();
+      expect(renderer.startServices.application.navigateToUrl).not.toHaveBeenCalled();
     });
   });
 });

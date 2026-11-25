@@ -297,7 +297,7 @@ describe('#incrementCounter', () => {
         id: string,
         field: Array<string | SavedObjectsIncrementCounterField>
       ) => {
-        await expect(repository.incrementCounter(type, id, field)).rejects.toThrowError(
+        await expect(repository.incrementCounter(type, id, field)).rejects.toThrow(
           createUnsupportedTypeErrorPayload(type)
         );
       };
@@ -307,7 +307,7 @@ describe('#incrementCounter', () => {
           repository.incrementCounter(type, id, counterFields, {
             namespace: ALL_NAMESPACES_STRING,
           })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`throws when type is not a string`, async () => {
@@ -315,7 +315,7 @@ describe('#incrementCounter', () => {
           await expect(
             // @ts-expect-error type is supposed to be a string
             repository.incrementCounter(type, id, counterFields)
-          ).rejects.toThrowError(`"type" argument must be a string`);
+          ).rejects.toThrow(`"type" argument must be a string`);
           expect(client.update).not.toHaveBeenCalled();
         };
 
@@ -326,7 +326,7 @@ describe('#incrementCounter', () => {
       });
 
       it(`throws when id is empty`, async () => {
-        await expect(repository.incrementCounter(type, '', counterFields)).rejects.toThrowError(
+        await expect(repository.incrementCounter(type, '', counterFields)).rejects.toThrow(
           createBadRequestErrorPayload('id cannot be empty')
         );
         expect(client.update).not.toHaveBeenCalled();
@@ -337,7 +337,7 @@ describe('#incrementCounter', () => {
           await expect(
             // @ts-expect-error field is of wrong type
             repository.incrementCounter(type, id, field)
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             `"counterFields" argument must be of type Array<string | { incrementBy?: number; fieldName: string }>`
           );
           expect(client.update).not.toHaveBeenCalled();
@@ -374,7 +374,7 @@ describe('#incrementCounter', () => {
           repository.incrementCounter(MULTI_NAMESPACE_ISOLATED_TYPE, id, counterFields, {
             namespace,
           })
-        ).rejects.toThrowError(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.update).not.toHaveBeenCalled();
@@ -393,7 +393,7 @@ describe('#incrementCounter', () => {
           repository.incrementCounter(MULTI_NAMESPACE_ISOLATED_TYPE, id, counterFields, {
             namespace,
           })
-        ).rejects.toThrowError(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.update).not.toHaveBeenCalled();
@@ -490,8 +490,8 @@ describe('#incrementCounter', () => {
       it('increments counter by incrementBy config', async () => {
         await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 3 }]);
 
-        expect(client.update).toBeCalledTimes(1);
-        expect(client.update).toBeCalledWith(
+        expect(client.update).toHaveBeenCalledTimes(1);
+        expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
               params: expect.objectContaining({
@@ -507,8 +507,8 @@ describe('#incrementCounter', () => {
       it('does not increment counter when incrementBy is 0', async () => {
         await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 0 }]);
 
-        expect(client.update).toBeCalledTimes(1);
-        expect(client.update).toBeCalledWith(
+        expect(client.update).toHaveBeenCalledTimes(1);
+        expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
               params: expect.objectContaining({

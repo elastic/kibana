@@ -31,7 +31,7 @@ describe('createInitializeChartFunction', () => {
       dataGridAttrs: undefined,
       isInitialized: false,
       currentAttributes: {
-        state: { needsRefresh: false, query: { esql: '' } },
+        state: { needsRefresh: false },
       } as TypedLensSerializedState['attributes'], // Minimal mock
       prevQueryRef: mockPrevQueryRef,
       setErrors: mockSetErrors,
@@ -115,7 +115,7 @@ describe('createInitializeChartFunction', () => {
     const args = {
       ...defaultArgs,
       currentAttributes: {
-        state: { needsRefresh: true, query: { esql: '' } },
+        state: { needsRefresh: true },
       } as TypedLensSerializedState['attributes'],
     };
     const initializeChart = createInitializeChartFunction(args);

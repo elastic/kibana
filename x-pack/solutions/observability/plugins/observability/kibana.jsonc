@@ -40,9 +40,10 @@
       "esql",
       "savedObjectsTagging",
       "streams",
-      "kql"
+      "kql",
     ],
     "optionalPlugins": [
+      "alertingVTwo",
       "observabilityAgentBuilder",
       "agentBuilder",
       "aiops",
@@ -59,7 +60,9 @@
       "investigate",
       "cps",
       "ingestHub",
-      "significantEvents"
+      "significantEvents",
+      "nightshiftInvestigations",
+      "entityInventoryApp",
     ],
     "requiredBundles": [
       "aiops",
@@ -72,8 +75,8 @@
       "kibanaUtils",
       "significantEvents",
       "stackAlerts",
-      "observabilityAgentBuilder"
+      "observabilityAgentBuilder",
     ],
-    "extraPublicDirs": ["common"]
-  }
+    "extraPublicDirs": ["common"],
+  },
 }

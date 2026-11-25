@@ -47,6 +47,19 @@ describe('ElasticAgentCard', () => {
       expect(component).toMatchSnapshot();
     });
 
+    test('target and rel are forwarded to the footer button', () => {
+      const component = shallow(
+        <ElasticAgentCard
+          href="#"
+          target="_blank"
+          rel="noopener"
+          button="Button"
+          solution="Solution"
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
     test('category', () => {
       const component = shallow(<ElasticAgentCard category="custom" solution="Solution" />);
       expect(component).toMatchSnapshot();

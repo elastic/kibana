@@ -24,6 +24,36 @@ import type { SideNavigationSection } from '@kbn/core-chrome-browser/src/project
 
 const wrapIdx = (index: number): string => `[${index}]`;
 
+/** Minimal structural shape of a navigation node needed to walk `link`/`children`. */
+interface NavTreeNodeLike {
+  link?: string;
+  children?: NavTreeNodeLike[];
+}
+
+/**
+ * Recursively collect every `link` target referenced by a navigation tree definition. A target is
+ * either an application id (e.g. `"discover"`) or a deep-link id (e.g. `"management:transform"`).
+ *
+ * Used, in development builds only, to attribute a solution nav tree's cross-plugin navigation
+ * references (see https://github.com/elastic/kibana/issues/66682).
+ */
+export const collectNavTreeLinks = (navTree: NavigationTreeDefinition): string[] => {
+  const links = new Set<string>();
+
+  const visit = (node: NavTreeNodeLike): void => {
+    if (typeof node.link === 'string') {
+      links.add(node.link);
+    }
+    node.children?.forEach(visit);
+  };
+
+  [...(navTree.body ?? []), ...(navTree.footer ?? [])].forEach((node) =>
+    visit(node as unknown as NavTreeNodeLike)
+  );
+
+  return [...links];
+};
+
 /**
  * Flatten the navigation tree into a record of path => node
  * for quicker access when detecting the active path
@@ -56,6 +86,64 @@ function truncateAt(str: string, divider: string): string {
 }
 
 export const stripQueryParams = (url: string) => truncateAt(url, '?');
+
+function isAppLevelNavLink(id: string): boolean {
+  return !id.includes(':');
+}
+
+function getPathname(url: string): string | undefined {
+  if (!url) {
+    return undefined;
+  }
+  try {
+    const pathname = new URL(url, 'http://localhost').pathname.replace(/\/$/, '');
+    return pathname || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * App-level links store `defaultPath` on `url`. Active matching uses `baseUrl` so sibling
+ * app routes stay active. Deep links keep matching `url`.
+ */
+function getNodeMatchPath(node: ChromeProjectNavigationNode):
+  | {
+      path: string;
+      matchAppRoot: boolean;
+    }
+  | undefined {
+  const deepLink = node.deepLink;
+  if (!deepLink) {
+    return undefined;
+  }
+  if (isAppLevelNavLink(deepLink.id)) {
+    const appPath = getPathname(deepLink.baseUrl);
+    if (appPath) {
+      return { path: appPath, matchAppRoot: true };
+    }
+  }
+  if (!deepLink.url) {
+    return undefined;
+  }
+  return { path: stripQueryParams(deepLink.url), matchAppRoot: false };
+}
+
+function pathMatchesNode(
+  currentPathname: string,
+  nodePath: string,
+  matchAppRoot: boolean
+): boolean {
+  const current = stripQueryParams(currentPathname);
+  if (matchAppRoot) {
+    return (
+      current === nodePath ||
+      current.startsWith(`${nodePath}/`) ||
+      current.startsWith(`${nodePath}#`)
+    );
+  }
+  return current.startsWith(nodePath);
+}
 
 /**
  * Extract the parent paths from a key
@@ -121,19 +209,15 @@ export const findActiveNodes = (
       return;
     }
 
-    const nodePath = node.deepLink?.url ? stripQueryParams(node.deepLink.url) : undefined;
+    const matchPath = getNodeMatchPath(node);
 
-    if (nodePath) {
-      const match = currentPathname.startsWith(nodePath);
-
-      if (match) {
-        const { length } = nodePath;
-        const bucket = matchesByLength.get(length) ?? [];
-        bucket.push(key);
-        bucket.sort((a, b) => b.length - a.length);
-        matchesByLength.set(length, bucket);
-        if (length > maxLength) maxLength = length;
-      }
+    if (matchPath && pathMatchesNode(currentPathname, matchPath.path, matchPath.matchAppRoot)) {
+      const { length } = matchPath.path;
+      const bucket = matchesByLength.get(length) ?? [];
+      bucket.push(key);
+      bucket.sort((a, b) => b.length - a.length);
+      matchesByLength.set(length, bucket);
+      if (length > maxLength) maxLength = length;
     }
   });
 
@@ -294,8 +378,6 @@ const initNavNode = <
  * Returns the top-level body nodes that the sidebar will actually render, in
  * order. Specifically it prunes:
  *
- * - The home/logo node (`renderAs === 'home'`), unless `isHomeCustomizable` is
- *   true — then home is a regular customizable item and is kept
  * - Nodes explicitly hidden from the side nav (`sideNavStatus === 'hidden'`)
  * - Panel-opener nodes whose every descendant leaf has been removed or hidden
  *   (i.e. the user has no access to any item inside them)
@@ -310,8 +392,7 @@ const initNavNode = <
  * Icon resolution for the same nodes lives in `@kbn/core-chrome-browser-navigation-utils`.
  */
 export const getRenderableNodes = (
-  nodes: ChromeProjectNavigationNode[],
-  isHomeCustomizable: boolean = false
+  nodes: ChromeProjectNavigationNode[]
 ): ChromeProjectNavigationNode[] => {
   const hasVisibleLeaf = (node: ChromeProjectNavigationNode): boolean => {
     if (node.sideNavStatus === 'hidden') return false;
@@ -320,7 +401,6 @@ export const getRenderableNodes = (
   };
 
   return nodes.filter((node) => {
-    if (!isHomeCustomizable && node.renderAs === 'home') return false;
     if (node.sideNavStatus === 'hidden') return false;
     if (!hasVisibleLeaf(node)) return false;
     return true;

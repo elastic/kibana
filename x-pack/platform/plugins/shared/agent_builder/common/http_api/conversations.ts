@@ -6,34 +6,36 @@
  */
 
 import type {
-  Conversation,
+  UserMessageEvent,
   ConversationAccessControl,
   ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
-  ConversationWithoutRounds,
+  ConversationAddEventInput,
+  ConversationEvent,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
 
-export interface ConversationPermissions {
-  rename: boolean;
-  delete: boolean;
-  update_access_control: boolean;
-}
-
-export type ConversationWithPermissions = Conversation & {
-  permissions: ConversationPermissions;
-};
-
-export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
-  permissions: ConversationPermissions;
-};
+export type {
+  ConversationPermissions,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
 
 export type GetConversationResponse = ConversationWithPermissions;
 
 export type ListConversationsResponseItem = ConversationWithoutRoundsWithPermissions;
 
 export interface ListConversationsResponse {
+  pagination: {
+    total: number;
+    page: number;
+    per_page: number;
+  };
   results: ListConversationsResponseItem[];
 }
+
+export type SearchConversationsResponse = ListConversationsResponse;
 
 export interface DeleteConversationResponse {
   success: boolean;
@@ -56,9 +58,30 @@ export interface MarkPinnedConversationResponse {
 
 export type CreateConversationResponse = ConversationWithPermissions;
 
+export interface SteerConversationRequestBody {
+  message: string;
+  /** Client-generated idempotency key. */
+  event_id: string;
+}
+
+/** Returns the canonical stored event. */
+export interface SteerConversationResponse {
+  event: UserMessageEvent;
+  /** Present and true when an earlier request already stored this `event_id`. */
+  already_stored?: boolean;
+}
+
 export interface UpdateConversationAccessControlRequestBody {
   access_mode: ConversationAccessControlMode;
   entries: ConversationAccessControlEntryInput[];
 }
 
 export type UpdateConversationAccessControlResponse = ConversationAccessControl;
+
+export interface AddConversationEventsRequestBody {
+  events: ConversationAddEventInput[];
+}
+
+export interface AddConversationEventsResponse {
+  events: ConversationEvent[];
+}

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- `extends` needs the value
 import { VegaBaseView } from './vega_base_view';
 
 export class VegaView extends VegaBaseView {}

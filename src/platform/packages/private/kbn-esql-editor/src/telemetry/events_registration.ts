@@ -26,7 +26,10 @@ export const ESQL_CONTROL_CANCELLED = 'esql.control_cancelled';
 export const ESQL_CONTROL_SAVED = 'esql.control_saved';
 export const ESQL_RESOURCE_BROWSER_OPENED = 'esql.resource_browser_opened';
 export const ESQL_RESOURCE_BROWSER_ITEM_TOGGLED = 'esql.resource_browser_item_toggled';
+export const ESQL_VIEW_SELECTED = 'esql.view_selected';
+export const ESQL_VIEW_CREATED = 'esql.view_created';
 export const ESQL_VISOR_NL_SUBMITTED = 'esql.visor_nl_submitted';
+export const ESQL_VISOR_NL_REVIEWED = 'esql.visor_nl_reviewed';
 export const ESQL_COMMENT_TO_ESQL_SUBMITTED = 'esql.comment_to_esql_submitted';
 export const ESQL_COMMENT_TO_ESQL_REVIEWED = 'esql.comment_to_esql_reviewed';
 export const ESQL_FIX_WITH_AI_SUBMITTED = 'esql.fix_with_ai_submitted';
@@ -100,7 +103,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         type: 'keyword',
         _meta: {
           description:
-            'The source of the execution. Possible values are: manual|help|history|starred|autocomplete|quick_search|search_button|time_filter',
+            'The source of the execution. Possible values are: manual|help|history|starred|autocomplete|quick_search_kql|quick_search_nl|search_button|time_filter',
         },
       },
       query_length: {
@@ -252,6 +255,41 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
     },
   });
 
+  // Registered here rather than in the esql_views plugin: views can be created from the editor
+  // even when the Stack Management UI is disabled, and this registration always runs.
+  analytics.registerEventType({
+    eventType: ESQL_VIEW_CREATED,
+    schema: {
+      source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The UI control the view was created from. Possible values are: editor_menu|query_history|stack_management',
+        },
+      },
+      has_description: {
+        type: 'boolean',
+        _meta: { description: 'Whether the created view has a description.' },
+      },
+      query_length: {
+        type: 'long',
+        _meta: { description: 'Character count of the query of the created view.' },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: ESQL_VIEW_SELECTED,
+    schema: {
+      source: {
+        type: 'keyword',
+        _meta: {
+          description: 'The UI control the view was selected from, e.g. resource_browser.',
+        },
+      },
+    },
+  });
+
   analytics.registerEventType({
     eventType: ESQL_VISOR_NL_SUBMITTED,
     schema: {
@@ -281,6 +319,20 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
           optional: true,
           description: 'Character count of the generated query on success.',
         },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: ESQL_VISOR_NL_REVIEWED,
+    schema: {
+      action: {
+        type: 'keyword',
+        _meta: { description: 'User decision on the generated query. accept|reject' },
+      },
+      lines_changed: {
+        type: 'long',
+        _meta: { description: 'Number of lines in the generated suggestion.' },
       },
     },
   });

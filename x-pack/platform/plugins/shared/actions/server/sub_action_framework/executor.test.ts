@@ -159,7 +159,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError('You should register at least one subAction for your connector type');
+    ).rejects.toThrow('You should register at least one subAction for your connector type');
   });
 
   it('throws if the sub action is not registered', async () => {
@@ -176,7 +176,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Sub action "not-exist" is not registered. Connector id: test-action-id. Connector name: Test. Connector type: .test'
     );
   });
@@ -217,7 +217,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Method "not-exist" does not exists in service. Sub action: "testUrl". Connector id: test-action-id. Connector name: Test. Connector type: .test'
     );
   });
@@ -236,7 +236,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Method "notAFunction" must be a function. Connector id: test-action-id. Connector name: Test. Connector type: .test'
     );
   });
@@ -301,6 +301,48 @@ describe('Executor', () => {
       expect(error.message).toMatch(/✖|Invalid input|expected string|received/);
       expect(error.message).toMatch(/→ at|id/);
     });
+  });
+
+  it('forwards connectorVersion from executor options to getService', async () => {
+    const getService = jest.fn(
+      (serviceParams: ServiceParams<TestConfig, TestSecrets>) => new TestExecutor(serviceParams)
+    );
+    const connector = {
+      id: '.test',
+      name: 'Test',
+      minimumLicenseRequired: 'basic' as const,
+      supportedFeatureIds: ['alerting'],
+      schema: {
+        config: TestConfigSchema,
+        secrets: TestSecretsSchema,
+      },
+      getService,
+    };
+
+    const executor = buildExecutor({
+      configurationUtilities: mockedActionsConfig,
+      logger,
+      connector,
+    });
+
+    await executor({
+      actionId,
+      params: { subAction: 'echo', subActionParams: { id: 'test-id' } },
+      config,
+      secrets,
+      services,
+      configurationUtilities: mockedActionsConfig,
+      logger,
+      connectorUsageCollector,
+      connectorVersion: 'WzEsMV0=',
+    });
+
+    expect(getService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connector: { id: actionId, type: '.test' },
+        connectorVersion: 'WzEsMV0=',
+      })
+    );
   });
 
   it('Passes connectorUsageCollector to the subAction method as a second param', async () => {

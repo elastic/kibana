@@ -6,8 +6,8 @@
  */
 
 import { registerAssetCriticalityRoutes } from './asset_criticality/routes';
-import { registerRiskScoreRoutes } from './risk_score/routes';
 import { registerRiskEngineRoutes } from './risk_engine/routes';
+import { registerRiskScoreRoutes } from './risk_score/routes';
 import type { EntityAnalyticsRoutesDeps } from './types';
 import { registerPrivilegeMonitoringRoutes } from './privilege_monitoring/routes/register_privilege_monitoring_routes';
 import { registerMigrationsRoutes } from './migrations/routes';
@@ -17,11 +17,12 @@ import { registerWatchlistRoutes } from './watchlists/register_watchlist_routes'
 import { registerEntityResolutionRoutes } from './entity_resolution/routes/register_entity_resolution_routes';
 import { registerAnomalySummaryRoutes } from './anomaly_summary';
 import { registerRiskScoreHistoryRoute } from './risk_score/routes/register_risk_score_history_route';
+import { registerEntityCaseCountsRoute } from './entity_case_counts/route';
 
 export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {
   registerAssetCriticalityRoutes(routeDeps);
-  registerRiskScoreRoutes(routeDeps);
   registerRiskEngineRoutes(routeDeps);
+  registerRiskScoreRoutes(routeDeps);
   registerMigrationsRoutes(routeDeps);
   registerPrivilegeMonitoringRoutes(routeDeps);
 
@@ -35,6 +36,7 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
   }
 
   registerEntityResolutionRoutes(routeDeps);
+  registerEntityCaseCountsRoute(routeDeps);
 
   if (routeDeps.config.experimentalFeatures.entityAnalyticsAnomalyDetails) {
     registerAnomalySummaryRoutes(routeDeps);

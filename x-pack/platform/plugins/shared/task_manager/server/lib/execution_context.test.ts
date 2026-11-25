@@ -26,7 +26,7 @@ describe('execution_context', () => {
       const result = await runner.run(async () => Promise.resolve(42));
       expect(result).toBe(42);
 
-      expect(contextSetup.withContext).toBeCalledWith(
+      expect(contextSetup.withContext).toHaveBeenCalledWith(
         {
           id: 'foo',
           name: 'bar',
@@ -47,7 +47,7 @@ describe('execution_context', () => {
       const result = await runner.run(() => 42 as any);
       expect(result).toBe(42);
 
-      expect(contextSetup.withContext).toBeCalledWith(
+      expect(contextSetup.withContext).toHaveBeenCalledWith(
         {
           id: 'foo',
           name: 'bar',
@@ -68,7 +68,7 @@ describe('execution_context', () => {
       });
       expect(result).toBe(42);
 
-      expect(contextSetup.withContext).toBeCalledWith(
+      expect(contextSetup.withContext).toHaveBeenCalledWith(
         {
           type: 'task manager',
         },
@@ -87,7 +87,7 @@ describe('execution_context', () => {
       });
       expect(result).toBe(42);
 
-      expect(contextSetup.withContext).toBeCalledWith(
+      expect(contextSetup.withContext).toHaveBeenCalledWith(
         {
           type: 'task manager',
           id: 'kinda global',
@@ -103,7 +103,7 @@ describe('execution_context', () => {
       const result = await runner.run(async () => Promise.resolve(42));
       expect(result).toBe(42);
 
-      expect(contextSetup.withContext).toBeCalledWith(
+      expect(contextSetup.withContext).toHaveBeenCalledWith(
         {
           type: 'task manager',
         },
@@ -118,7 +118,7 @@ describe('execution_context', () => {
       const result = await runner.run(async () => Promise.resolve(42), { id: 'foo' });
       expect(result).toBe(42);
 
-      expect(contextSetup.withContext).toBeCalledWith(
+      expect(contextSetup.withContext).toHaveBeenCalledWith(
         {
           type: 'task manager',
           id: 'foo',

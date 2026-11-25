@@ -36,4 +36,15 @@ describe('BodySchema historySnapshot', () => {
     expect(BodySchema.safeParse({ logExtraction: { lookbackPeriod: '12h' } }).success).toBe(true);
     expect(BodySchema.safeParse({ historySnapshot: { frequency: '1h' } }).success).toBe(true);
   });
+
+  it('accepts a valid retentionDays', () => {
+    expect(BodySchema.safeParse({ historySnapshot: { retentionDays: 30 } }).success).toBe(true);
+    expect(BodySchema.safeParse({ historySnapshot: { retentionDays: 1 } }).success).toBe(true);
+  });
+
+  it('rejects retentionDays below 1 or above the max', () => {
+    expect(BodySchema.safeParse({ historySnapshot: { retentionDays: 0 } }).success).toBe(false);
+    expect(BodySchema.safeParse({ historySnapshot: { retentionDays: 3651 } }).success).toBe(false);
+    expect(BodySchema.safeParse({ historySnapshot: { retentionDays: 1.5 } }).success).toBe(false);
+  });
 });

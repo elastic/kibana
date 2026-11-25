@@ -54,7 +54,20 @@ describe('FirecrawlConnector', () => {
     expect(FirecrawlConnector.auth?.types).toContain('bearer');
   });
 
+  it('supports Context Engine alongside workflows and Agent Builder', () => {
+    expect(FirecrawlConnector.metadata.supportedFeatureIds).toContain('workflows');
+    expect(FirecrawlConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+    expect(FirecrawlConnector.metadata.supportedFeatureIds).toContain('contextEngine');
+  });
+
   describe('scrape action', () => {
+    it('should accept a waitFor up to the 60000 ms Firecrawl allows, and no more', () => {
+      const { input } = FirecrawlConnector.actions.scrape;
+
+      expect(input.safeParse({ url: 'https://example.com', waitFor: 60_000 }).success).toBe(true);
+      expect(input.safeParse({ url: 'https://example.com', waitFor: 60_001 }).success).toBe(false);
+    });
+
     it('should scrape URL and return response data', async () => {
       const mockData = { success: true, data: { markdown: '# Hello' } };
       mockClient.post.mockResolvedValue({ data: mockData });

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { KQLSyntaxError } from '@kbn/es-query';
 import type { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
 
 const USER_ERRORS_EXCEPTIONS = [
@@ -12,19 +13,40 @@ const USER_ERRORS_EXCEPTIONS = [
   'verification_exception',
   'parsing_exception',
   'x_content_parse_exception',
+  'number_format_exception',
+  // Raised when the rule owner's credentials are not authorized for the search, e.g. a missing
+  // `read` index privilege or a cross-project search linked project that rejects the request.
+  'security_exception',
 ];
 
-// illegal_argument_exception is too broad to classify as a user error globally (ES itself
-// can produce it from framework-generated queries). These reason substrings identify cases
-// that are unambiguously caused by user data or configuration.
-const ILLEGAL_ARGUMENT_USER_REASON_SUBSTRINGS = [
+// illegal_argument_exception and query_shard_exception are too broad to classify as user
+// errors globally (ES itself can produce them from framework-generated queries). These reason
+// substrings identify cases that ES only produces when evaluating user-supplied query text
+// against the target field mapping, and they arrive wrapped in different exception types
+// depending on the search path (an illegal_argument_exception caused_by on a shard failure, or
+// a query_shard_exception root cause of a search_phase_execution_exception), so they are
+// matched regardless of the wrapper. When adding a new substring, verify that
+// framework-generated queries cannot emit it before landing.
+const USER_ERROR_REASON_SUBSTRINGS = [
   'is not an IP string literal',
-  'Fielddata is disabled on',
+  'Can only use prefix queries on keyword, text and wildcard fields',
+  // number_format_exception reason, which can arrive without the exception type.
+  'is neither a decimal digit number, decimal point, nor "e" notation exponential mark',
+  // Elasticsearch before 9.7 rejects wildcard queries on a key of a flattened field. Remove this
+  // entry once 9.7 is the minimum Elasticsearch version supported for rule searches.
+  '[wildcard] queries are not currently supported on keyed [flattened] fields',
 ];
 
-const isIllegalArgumentUserError = (errorString: string): boolean =>
+// Fielddata errors can also be emitted for framework-generated aggregations and sorts, so they
+// are only classified as user errors when accompanied by illegal_argument_exception, which is
+// how the known user-driven variants have been observed to arrive in shard failures.
+const isFielddataUserError = (errorString: string): boolean =>
   errorString.includes('illegal_argument_exception') &&
-  ILLEGAL_ARGUMENT_USER_REASON_SUBSTRINGS.some((reason) => errorString.includes(reason));
+  errorString.includes('Fielddata is disabled on');
+
+const isUserErrorReason = (errorString: string): boolean =>
+  USER_ERROR_REASON_SUBSTRINGS.some((reason) => errorString.includes(reason)) ||
+  isFielddataUserError(errorString);
 
 /**
  *
@@ -47,6 +69,11 @@ export const isMlJobMissingError = (error: unknown): boolean => {
  * user errors are excluded from SLO dashboards
  */
 export const checkErrorDetails = (error: unknown): { isUserError: boolean } => {
+  // Thrown in Kibana while the rule query is parsed, before any search runs.
+  if (error instanceof KQLSyntaxError) {
+    return { isUserError: true };
+  }
+
   const errorType = (error as KbnSearchError)?.errBody?.error?.type;
   if (USER_ERRORS_EXCEPTIONS.includes(errorType)) {
     return { isUserError: true };
@@ -66,8 +93,8 @@ export const checkErrorDetails = (error: unknown): { isUserError: boolean } => {
       USER_ERRORS_EXCEPTIONS.some((exception) => error.message.includes(exception))) ||
     (typeof error === 'string' &&
       USER_ERRORS_EXCEPTIONS.some((exception) => error.includes(exception))) ||
-    (error instanceof Error && isIllegalArgumentUserError(error.message)) ||
-    (typeof error === 'string' && isIllegalArgumentUserError(error));
+    (error instanceof Error && isUserErrorReason(error.message)) ||
+    (typeof error === 'string' && isUserErrorReason(error));
 
   return { isUserError };
 };

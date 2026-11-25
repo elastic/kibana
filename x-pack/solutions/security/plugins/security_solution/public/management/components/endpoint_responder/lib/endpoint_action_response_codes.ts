@@ -82,6 +82,36 @@ const CODES = Object.freeze({
     { defaultMessage: 'Not enough free disk space to process the action' }
   ),
 
+  /** file is locked by the OS and could not be read in full. On Windows, `--force` reads it from a volume snapshot */
+  'ra_get-file_error_file-locked': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.fileLocked',
+    {
+      defaultMessage:
+        'The file is locked by the operating system and could not be read in full. On Windows, the --force parameter reads a locked file from a volume snapshot',
+    }
+  ),
+
+  /** `data.credentials` missing, malformed or still an unresolved secret reference */
+  'ra_get-file_error_credential': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.credentialError',
+    { defaultMessage: 'The storage credential for the export was missing or invalid' }
+  ),
+
+  /** `parameters.export` is not the id of a provider in the policy */
+  'ra_get-file_error_export-provider-not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.exportProviderNotFound',
+    { defaultMessage: "The export provider was not found in the host's Elastic Defend policy" }
+  ),
+
+  /** the storage service returned 403: wrong key, expired SAS or network rules */
+  'ra_get-file_error_export-denied': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.exportDenied',
+    {
+      defaultMessage:
+        "The storage service rejected the upload. Check the export provider's account key and the storage account's network rules",
+    }
+  ),
+
   // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------
@@ -136,7 +166,12 @@ const CODES = Object.freeze({
   // -----------------------------------------------------------------
   'ra_kill-process_success_done': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.successDone',
-    { defaultMessage: 'Action completed successfully' }
+    { defaultMessage: 'Killed' }
+  ),
+
+  'ra_kill-process_success_partial-descendants': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.successPartialDescendants',
+    { defaultMessage: 'Action completed successfully, but some descendants were not killed' }
   ),
 
   /**
@@ -181,6 +216,53 @@ const CODES = Object.freeze({
   'ra_kill-process_error_failure': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.failure',
     { defaultMessage: 'Failed to kill the process' }
+  ),
+
+  'ra_kill-process_error_partial-descendants': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.failurePartialDescendants',
+    {
+      defaultMessage:
+        'Failed to kill the provided process, but some descendant processes were killed',
+    }
+  ),
+
+  // ---------------[ Codes for kill-process descendant processes ]------------ \\
+
+  'ra_kill-process_descendant_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantSuccessDone',
+    { defaultMessage: 'Killed' }
+  ),
+
+  /**
+   * Used with descendant processes. The Process was identified as a descendant of the provided root
+   * process but was not found when Endpoint attempted to terminate it. We should not show this one
+   * as an error in the UI - just regular text.
+   */
+  'ra_kill-process_descendant_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantNotFound',
+    { defaultMessage: 'Process was not found (may have terminated prior to action being taken)' }
+  ),
+
+  'ra_kill-process_descendant_error_failure': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantFailureGeneric',
+    { defaultMessage: 'Failed to kill process' }
+  ),
+
+  'ra_kill-process_descendant_error_not-permitted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantErrorNotPermitted',
+    { defaultMessage: 'Process cannot be killed' }
+  ),
+
+  'ra_kill-process_descendant_error_not-supported': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantErrorNotSupported',
+    { defaultMessage: 'Process is not supported by kill-process' }
+  ),
+
+  'ra_kill-process_descendant_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantErrorInvalidInput',
+    {
+      defaultMessage: 'Invalid input',
+    }
   ),
 
   // -----------------------------------------------------------------
@@ -469,6 +551,27 @@ const CODES = Object.freeze({
   'ra_memory-dump_error_not-enough-free-space': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.memoryDump.insufficientDiskSpaceError',
     { defaultMessage: 'Host does not have sufficient disk space to capture a memory dump' }
+  ),
+
+  // DEV: `data.credentials` missing, malformed or still an unresolved secret reference
+  'ra_memory-dump_error_credential': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.credentialError',
+    { defaultMessage: 'The storage credential for the export was missing or invalid' }
+  ),
+
+  // DEV: `parameters.export` is not the id of a provider in the policy
+  'ra_memory-dump_error_export-provider-not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.exportProviderNotFound',
+    { defaultMessage: "The export provider was not found in the host's Elastic Defend policy" }
+  ),
+
+  // DEV: the storage service returned 403: wrong key, expired SAS or network rules
+  'ra_memory-dump_error_export-denied': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.exportDenied',
+    {
+      defaultMessage:
+        "The storage service rejected the upload. Check the export provider's account key and the storage account's network rules",
+    }
   ),
 
   // -----------------------------------------------------------------

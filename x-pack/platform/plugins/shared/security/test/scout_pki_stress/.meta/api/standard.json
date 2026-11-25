@@ -1,8 +1,7 @@
 {
-  "sha1": "",
+  "sha1": "6f5eaf7eab8147d4c3f4acdc58237af9bd505dfe",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_pki_stress/api/tests/pki_http2_stream_cancel.spec.ts",
-        "line": 35,
+        "line": 41,
         "column": 5
       }
     }

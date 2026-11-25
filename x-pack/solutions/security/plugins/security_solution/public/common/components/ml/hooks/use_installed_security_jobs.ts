@@ -20,6 +20,8 @@ export interface UseInstalledSecurityJobsReturn {
   jobs: MlSummaryJob[];
   isMlUser: boolean;
   isLicensed: boolean;
+  /** The jobs could not be fetched, so `jobs` is empty without meaning that none are installed. */
+  isError: boolean;
 }
 
 /**
@@ -38,7 +40,11 @@ export const useInstalledSecurityJobs = (): UseInstalledSecurityJobsReturn => {
   const isMlUser = hasMlUserPermissions(mlCapabilities);
   const isLicensed = hasMlLicense(mlCapabilities);
 
-  const { isFetching, data: jobs = [] } = useFetchJobsSummaryQuery(
+  const {
+    isFetching,
+    isError,
+    data: jobs = [],
+  } = useFetchJobsSummaryQuery(
     {},
     {
       enabled: isMlUser && isLicensed,
@@ -50,14 +56,14 @@ export const useInstalledSecurityJobs = (): UseInstalledSecurityJobsReturn => {
 
   const securityJobs = jobs.filter(isSecurityJob);
 
-  return { isLicensed, isMlUser, jobs: securityJobs, loading: isFetching };
+  return { isLicensed, isMlUser, isError, jobs: securityJobs, loading: isFetching };
 };
 
 export const useInstalledSecurityJobsIds = () => {
-  const { jobs, loading } = useInstalledSecurityJobs();
+  const { jobs, loading, isMlUser, isLicensed, isError } = useInstalledSecurityJobs();
   const jobIds = useMemo(() => jobs.map((job) => job.id), [jobs]);
 
-  return { jobIds, loading };
+  return { jobIds, loading, isMlUser, isLicensed, isError };
 };
 
 export const useInstalledSecurityJobNameById = () => {

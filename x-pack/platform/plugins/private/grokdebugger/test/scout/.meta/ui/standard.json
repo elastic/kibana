@@ -1,5 +1,8 @@
 {
-  "sha1": "7967c419c1130973bdd480ccf57fb34a28f5b9f4",
+  "sha1": "816c5c77e81d07c5eb559d2842fdc5898c93d245",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "0cae6b496fe9def-9b6d4b58dd229bb",
@@ -15,8 +18,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/ui/tests/grok_debugger.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 20,
+        "column": 59
       }
     },
     {
@@ -33,8 +36,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/ui/tests/grok_debugger.spec.ts",
-        "line": 27,
-        "column": 7
+        "line": 23,
+        "column": 5
       }
     },
     {
@@ -51,8 +54,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/ui/tests/grok_debugger.spec.ts",
-        "line": 36,
-        "column": 7
+        "line": 38,
+        "column": 13
       }
     }
   ]

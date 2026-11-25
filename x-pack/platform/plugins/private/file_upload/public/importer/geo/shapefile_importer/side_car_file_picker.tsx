@@ -9,6 +9,12 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 
+const getSelectFileLabel = (ext: string) =>
+  i18n.translate('xpack.fileUpload.shapefile.sideCarFilePicker.promptText', {
+    defaultMessage: `Select ''{ext}'' file`,
+    values: { ext },
+  });
+
 export function getFileNameWithoutExt(fileName: string) {
   const splits = fileName.split('.');
   if (splits.length > 1) {
@@ -72,13 +78,8 @@ export class SideCarFilePicker extends Component<Props, State> {
     return (
       <EuiFormRow isInvalid={this.state.isInvalid} error={this.state.error}>
         <EuiFilePicker
-          initialPromptText={i18n.translate(
-            'xpack.fileUpload.shapefile.sideCarFilePicker.promptText',
-            {
-              defaultMessage: `Select ''{ext}'' file`,
-              values: { ext: this.props.ext },
-            }
-          )}
+          aria-label={getSelectFileLabel(this.props.ext)}
+          initialPromptText={getSelectFileLabel(this.props.ext)}
           onChange={this._onSelect}
           accept={this.props.ext}
           display="default"

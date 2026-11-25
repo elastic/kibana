@@ -28,6 +28,7 @@ const createAction = (
 ): EpisodeAction => ({
   displayName: overrides.id,
   iconType: 'star',
+  enforcesOwnPrivileges: false,
   isCompatible: () => true,
   execute: jest.fn(async () => {}),
   ...overrides,
@@ -135,6 +136,31 @@ describe('getEpisodeHeaderMenu', () => {
       id: 'ALERTING_V2_UNRESOLVE_EPISODE',
       overflow: true,
       testId: 'episodeActionsBar-overflow-ALERTING_V2_UNRESOLVE_EPISODE',
+    });
+  });
+
+  it('disables an incompatible action and shows its tooltip', () => {
+    const execute = jest.fn(async () => {});
+    const actions = [
+      createAction({
+        id: 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
+        order: 51,
+        isCompatible: () => false,
+        disabledTooltip: 'Discover with ES|QL is required to open alert events history.',
+        execute,
+      }),
+    ];
+
+    const menu = getEpisodeHeaderMenu({
+      actions,
+      episode: mockEpisode,
+      onSuccess: jest.fn(),
+    });
+
+    expect(menu.items?.[0]).toMatchObject({
+      id: 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
+      disableButton: true,
+      tooltipContent: 'Discover with ES|QL is required to open alert events history.',
     });
   });
 

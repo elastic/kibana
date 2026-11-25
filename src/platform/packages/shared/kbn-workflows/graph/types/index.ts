@@ -26,8 +26,11 @@ export type {
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowAwaitExecutionsGraphNode,
+  WorkflowAwaitExecutionsGraphNodeSchema,
   WorkflowOutputGraphNode,
   WorkflowOutputGraphNodeSchema,
+  SyntheticGraphNode,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,
@@ -112,6 +115,7 @@ export type { GraphNodeUnion } from './nodes/union';
 export type { WorkflowGraphType } from './graph';
 
 export {
+  isSynthetic,
   isAtomic,
   isDataSet,
   isElasticsearch,
@@ -120,6 +124,7 @@ export {
   isWaitForInput,
   isWaitForApproval,
   isWorkflowOutput,
+  isWorkflowExecute,
   isEnterForeach,
   isEnterWhile,
   isEnterIf,

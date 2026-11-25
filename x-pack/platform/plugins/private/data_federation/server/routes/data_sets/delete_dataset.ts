@@ -7,12 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import type { License } from '@kbn/license-api-guard-plugin/server';
 
 import { DATA_SET_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSetsClient } from '../../data_sets_client';
 import { getRouteErrorMessage } from '../../get_route_error_message';
 
-export function registerDeleteDataSet(router: IRouter): void {
+export function registerDeleteDataSet(router: IRouter, license: License): void {
   router.delete(
     {
       path: DATA_SET_BY_ID_ROUTE_PATH,
@@ -31,20 +32,22 @@ export function registerDeleteDataSet(router: IRouter): void {
         }),
       },
     },
-    router.handleLegacyErrors(async (context, request, response) => {
-      const { id } = request.params;
-      const { client } = (await context.core).elasticsearch;
-      const dataSetsClient = new DataSetsClient(client.asCurrentUser);
-      try {
-        await dataSetsClient.delete(id);
-        return response.ok();
-      } catch (error) {
-        return response.badRequest({
-          body: {
-            message: getRouteErrorMessage(error),
-          },
-        });
-      }
-    })
+    router.handleLegacyErrors(
+      license.guardApiRoute(async (context, request, response) => {
+        const { id } = request.params;
+        const { client } = (await context.core).elasticsearch;
+        const dataSetsClient = new DataSetsClient(client.asCurrentUser);
+        try {
+          await dataSetsClient.delete(id);
+          return response.ok();
+        } catch (error) {
+          return response.badRequest({
+            body: {
+              message: getRouteErrorMessage(error),
+            },
+          });
+        }
+      })
+    )
   );
 }

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import type { ToolRegistry } from '@kbn/agent-builder-server';
+import type { InternalSkillDefinition, SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { ToolRegistry, AvailabilityContext } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { createSkillRegistry } from './skill_registry';
 import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
+import { createBuiltinSkillProvider } from './builtin/provider';
+import { AvailabilityCache } from '../common/availability_cache';
 
 const createMockInternalSkillDefinition = (
   overrides: Partial<InternalSkillDefinition> = {}
@@ -91,6 +95,11 @@ const createMockPersistedProvider = (
 const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
     has: jest.fn(async (id: string) => toolIds.includes(id)),
+    // Like the real registry, `get` throws for a tool that is not registered or not available.
+    get: jest.fn(async (id: string) => {
+      if (!toolIds.includes(id)) throw new Error(`Tool ${id} is not available`);
+      return { id };
+    }),
   } as unknown as ToolRegistry);
 
 describe('createSkillRegistry', () => {
@@ -371,6 +380,61 @@ describe('createSkillRegistry', () => {
 
       await registry.list({ type: 'built-in', summaryOnly: true });
       expect(builtinProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+    });
+  });
+
+  describe('hidden skills', () => {
+    const hiddenSkill = createMockInternalSkillDefinition({
+      id: 'hidden-skill',
+      name: 'hidden-skill-name',
+      hidden: true,
+    });
+
+    const createRegistry = () =>
+      createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1, hiddenSkill]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+    it('are left out of list()', async () => {
+      const result = await createRegistry().list();
+      expect(result.map((s) => s.id)).toEqual(['builtin-skill-1', 'custom-skill-1']);
+    });
+
+    it('are left out of list() filtered by type', async () => {
+      const result = await createRegistry().list({ type: 'built-in' });
+      expect(result.map((s) => s.id)).toEqual(['builtin-skill-1']);
+    });
+
+    it('are included in list() when includeHidden is true', async () => {
+      const result = await createRegistry().list({ includeHidden: true });
+      expect(result.map((s) => s.id)).toEqual([
+        'builtin-skill-1',
+        'hidden-skill',
+        'custom-skill-1',
+      ]);
+    });
+
+    it('does not forward includeHidden to the providers', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1, hiddenSkill]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      await registry.list({ includeHidden: true, summaryOnly: true });
+      expect(builtinProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+    });
+
+    it('stay resolvable by id through has, get and bulkGet', async () => {
+      const registry = createRegistry();
+      expect(await registry.has('hidden-skill')).toBe(true);
+      expect(await registry.get('hidden-skill')).toEqual(hiddenSkill);
+      expect((await registry.bulkGet(['hidden-skill'])).get('hidden-skill')).toEqual(hiddenSkill);
     });
   });
 
@@ -832,6 +896,262 @@ describe('createSkillRegistry', () => {
 
       expect(await registry.has('agent-builder-traces')).toBe(true);
       expect(await registry.get('agent-builder-traces')).toEqual(tracesSkill);
+    });
+  });
+
+  describe('requiresAllRegistryTools', () => {
+    const toolA = 'tool.a';
+    const toolB = 'tool.b';
+    const gated = (id: string, tools: string[]) =>
+      createMockInternalSkillDefinition({
+        id,
+        name: id,
+        requiresAllRegistryTools: true,
+        getRegistryTools: () => tools,
+      });
+    const plain = createMockInternalSkillDefinition({
+      id: 'plain-skill',
+      name: 'plain-skill',
+      getRegistryTools: () => [toolA],
+    });
+    const gatedSkills = [gated('gated-1', [toolA]), gated('gated-2', [toolA, toolB])];
+    const createRegistry = (availableToolIds: string[]) => {
+      const toolRegistry = createMockToolRegistry(availableToolIds);
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([...gatedSkills, plain]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry,
+        experimentalFeaturesEnabled: false,
+      });
+      return { registry, toolRegistry };
+    };
+    const ids = [...gatedSkills, plain].map(({ id }) => id);
+
+    it('offers the skills when every registry tool is available, looking each tool up once', async () => {
+      const { registry, toolRegistry } = createRegistry([toolA, toolB]);
+
+      expect((await registry.bulkGet(ids)).size).toBe(3);
+      expect((await registry.list()).map(({ id }) => id).sort()).toEqual(ids.slice().sort());
+      expect(toolRegistry.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('hides the skills when a registry tool is unavailable, and keeps unrelated skills', async () => {
+      const { registry } = createRegistry([toolA]);
+
+      expect(await registry.has('gated-1')).toBe(true);
+      expect(await registry.has('gated-2')).toBe(false);
+      expect(await registry.get('gated-2')).toBeUndefined();
+      expect([...(await registry.bulkGet(ids)).keys()].sort()).toEqual(['gated-1', 'plain-skill']);
+      expect((await registry.list()).map(({ id }) => id).sort()).toEqual([
+        'gated-1',
+        'plain-skill',
+      ]);
+    });
+
+    it('hides a skill whose registry tools cannot be resolved, and keeps the others', async () => {
+      const broken = createMockInternalSkillDefinition({
+        id: 'broken',
+        name: 'broken',
+        requiresAllRegistryTools: true,
+        getRegistryTools: () => Promise.reject(new Error('cannot resolve tools')),
+      });
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([broken, plain]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry([toolA]),
+        experimentalFeaturesEnabled: false,
+      });
+
+      expect((await registry.list()).map(({ id }) => id)).toEqual(['plain-skill']);
+      expect([...(await registry.bulkGet(['broken', 'plain-skill'])).keys()]).toEqual([
+        'plain-skill',
+      ]);
+      expect(await registry.has('broken')).toBe(false);
+    });
+
+    it('applies the flag from a public built-in skill definition through the built-in provider', async () => {
+      const definition = (id: string, requiresAllRegistryTools: boolean): SkillDefinition =>
+        ({
+          id,
+          name: id,
+          basePath: 'skills/platform',
+          description: 'd',
+          content: 'c',
+          requiresAllRegistryTools,
+          getRegistryTools: () => [toolA],
+        } as unknown as SkillDefinition);
+      const createWith = (availableToolIds: string[]) =>
+        createSkillRegistry({
+          builtinProvider: createBuiltinSkillProvider(
+            [definition('opted-in', true), definition('not-opted-in', false)],
+            new AvailabilityCache()
+          ),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(availableToolIds),
+          experimentalFeaturesEnabled: false,
+        });
+
+      expect((await createWith([toolA]).list()).map(({ id }) => id).sort()).toEqual([
+        'not-opted-in',
+        'opted-in',
+      ]);
+      const withoutTool = createWith([]);
+      expect((await withoutTool.list()).map(({ id }) => id)).toEqual(['not-opted-in']);
+      expect(await withoutTool.get('opted-in')).toBeUndefined();
+    });
+
+    it('hides every gated skill when no registry tool is available', async () => {
+      const { registry } = createRegistry([]);
+
+      expect(await registry.has('gated-1')).toBe(false);
+      expect(await registry.get('gated-1')).toBeUndefined();
+      expect([...(await registry.bulkGet(ids)).keys()]).toEqual(['plain-skill']);
+      expect((await registry.list()).map(({ id }) => id)).toEqual(['plain-skill']);
+    });
+  });
+
+  describe('availability filtering', () => {
+    const availabilityContext: AvailabilityContext = {
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'default',
+      uiSettings: uiSettingsServiceMock.createClient(),
+    };
+
+    const availableSkill = createMockInternalSkillDefinition({
+      id: 'available-skill',
+      name: 'available-skill',
+      isAvailable: jest.fn().mockResolvedValue({ status: 'available' }),
+    });
+
+    const unavailableSkill = createMockInternalSkillDefinition({
+      id: 'unavailable-skill',
+      name: 'unavailable-skill',
+      isAvailable: jest
+        .fn()
+        .mockResolvedValue({ status: 'unavailable', reason: 'not in this space' }),
+    });
+
+    const noAvailabilitySkill = createMockInternalSkillDefinition({
+      id: 'no-availability-skill',
+      name: 'no-availability-skill',
+    });
+
+    it('has() returns false for unavailable builtin skills', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([unavailableSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+        availabilityContext,
+      });
+
+      expect(await registry.has('unavailable-skill')).toBe(false);
+    });
+
+    it('has() returns true for available builtin skills', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([availableSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+        availabilityContext,
+      });
+
+      expect(await registry.has('available-skill')).toBe(true);
+    });
+
+    it('has() returns false for unavailable persisted skills', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([unavailableSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+        availabilityContext,
+      });
+
+      expect(await registry.has('unavailable-skill')).toBe(false);
+    });
+
+    it('get() returns undefined for unavailable skills', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([unavailableSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+        availabilityContext,
+      });
+
+      expect(await registry.get('unavailable-skill')).toBeUndefined();
+    });
+
+    it('get() returns available skills', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([availableSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+        availabilityContext,
+      });
+
+      expect(await registry.get('available-skill')).toEqual(availableSkill);
+    });
+
+    it('bulkGet() omits unavailable skills', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([availableSkill, unavailableSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+        availabilityContext,
+      });
+
+      const result = await registry.bulkGet(['available-skill', 'unavailable-skill']);
+      expect(result.size).toBe(1);
+      expect(result.has('available-skill')).toBe(true);
+      expect(result.has('unavailable-skill')).toBe(false);
+    });
+
+    it('list() excludes unavailable skills', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([availableSkill, unavailableSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+        availabilityContext,
+      });
+
+      const result = await registry.list();
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('available-skill');
+    });
+
+    it('skills without isAvailable are always included', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([noAvailabilitySkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+        availabilityContext,
+      });
+
+      expect(await registry.has('no-availability-skill')).toBe(true);
+      expect(await registry.get('no-availability-skill')).toEqual(noAvailabilitySkill);
+      const result = await registry.list();
+      expect(result).toHaveLength(1);
+    });
+
+    it('skills with isAvailable pass through when availabilityContext is not provided', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([unavailableSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      expect(await registry.has('unavailable-skill')).toBe(true);
+      expect(await registry.get('unavailable-skill')).toEqual(unavailableSkill);
+      const result = await registry.list();
+      expect(result).toHaveLength(1);
     });
   });
 });

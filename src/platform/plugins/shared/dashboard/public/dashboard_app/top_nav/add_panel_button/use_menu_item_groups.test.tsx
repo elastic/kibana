@@ -120,7 +120,7 @@ describe('useMenuItemGroups', () => {
     expect(groups![0].items.length).toBe(1);
     expect(groups![1].title).toBe('My group');
     expect(groups![1].items.length).toBe(1);
-    expect(mockGetAction).not.toBeCalled();
+    expect(mockGetAction).not.toHaveBeenCalled();
   });
 
   test('updates disabled state when `disabledStateChangesSubject` fires', async () => {

@@ -13,7 +13,7 @@ import { BULK_RESPONSE, SAMPLE_ACTION_POLICY_ID } from './action_policy_oas_shar
 
 export const BULK_SNOOZE_ACTION_POLICIES_REQUEST: BulkSnoozeActionPoliciesBody = {
   ids: [SAMPLE_ACTION_POLICY_ID, 'action-policy-2'],
-  snoozed_until: '2026-01-16T12:00:00.000Z',
+  snoozed_until: '2099-01-16T12:00:00.000Z',
 };
 
 export const bulkSnoozeActionPoliciesOasExamples = (): AlertingOasOperationObject =>

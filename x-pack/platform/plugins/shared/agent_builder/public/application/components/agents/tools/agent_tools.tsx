@@ -83,34 +83,35 @@ const ActiveToolsList: React.FC<{
         const isBuiltIn = defaultToolIdSet.has(tool.id);
         const isAutoIncluded = enableElasticCapabilities && isBuiltIn;
         return (
-          <ActiveItemRow
-            key={tool.id}
-            id={tool.id}
-            name={tool.id}
-            isSelected={selectedToolId === tool.id}
-            onSelect={() => onSelect(tool.id)}
-            onRemove={() => onRemove(tool)}
-            isRemoving={isRemoving}
-            removeAriaLabel={labels.agentTools.removeToolAriaLabel}
-            readOnlyContent={
-              isAutoIncluded ? (
-                <EuiBadge color="hollow">
-                  {labels.agentTools.elasticCapabilitiesReadOnlyBadge}
-                </EuiBadge>
-              ) : undefined
-            }
-            canEditAgent={canEditAgent}
-            ebtProps={getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_DETAIL_VIEW,
-              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
-            })}
-            removeEbtProps={getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE,
-              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
-            })}
-          />
+          <EuiFlexItem key={tool.id} grow={false}>
+            <ActiveItemRow
+              id={tool.id}
+              name={tool.id}
+              isSelected={selectedToolId === tool.id}
+              onSelect={() => onSelect(tool.id)}
+              onRemove={() => onRemove(tool)}
+              isRemoving={isRemoving}
+              removeAriaLabel={labels.agentTools.removeToolAriaLabel}
+              readOnlyContent={
+                isAutoIncluded ? (
+                  <EuiBadge color="hollow">
+                    {labels.agentTools.elasticCapabilitiesReadOnlyBadge}
+                  </EuiBadge>
+                ) : undefined
+              }
+              canEditAgent={canEditAgent}
+              ebtProps={getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_DETAIL_VIEW,
+                detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              })}
+              removeEbtProps={getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE,
+                detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              })}
+            />
+          </EuiFlexItem>
         );
       })}
     </>
@@ -372,7 +373,7 @@ export const AgentTools: React.FC = () => {
                 />
               </div>
 
-              <div css={styles.scrollableList}>
+              <EuiFlexGroup direction="column" gutterSize="xs" css={styles.scrollableList}>
                 <ActiveToolsList
                   filteredActiveTools={filteredActiveTools}
                   searchQuery={searchQuery}
@@ -384,7 +385,7 @@ export const AgentTools: React.FC = () => {
                   onRemove={handleRemoveToolWithDeselect}
                   canEditAgent={canEditAgent}
                 />
-              </div>
+              </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiFlexItem css={styles.detailPanelWrapper}>

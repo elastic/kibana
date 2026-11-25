@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
-import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api/attachment/v2';
+import type { BulkCreateUnifiedAttachmentsRequest } from '@kbn/cases-plugin/common/types/api/attachment/v2';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -418,7 +418,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       agentType: this.agentType,
     }));
 
-    const attachments: BulkCreateAttachmentsRequestV2 = [
+    const attachments: BulkCreateUnifiedAttachmentsRequest = [
       {
         type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
         attachmentId: actionId,

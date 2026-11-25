@@ -11,6 +11,8 @@ import { useCallback } from 'react';
 import { useContentListState } from '../../state/use_content_list_state';
 import { useContentListConfig } from '../../context';
 import { CONTENT_LIST_ACTIONS } from '../../state/types';
+import { setPersistedSort } from './persist';
+import type { SortDirection } from './types';
 
 /**
  * Return type for the `useContentListSort` hook.
@@ -19,9 +21,9 @@ export interface UseContentListSortReturn {
   /** Current sort field name. */
   field: string;
   /** Current sort direction. */
-  direction: 'asc' | 'desc';
-  /** Updates the sort configuration. No-op if sorting is disabled. */
-  setSort: (field: string, direction: 'asc' | 'desc') => void;
+  direction: SortDirection;
+  /** Updates the sort configuration and persists it to `localStorage`. No-op if sorting is disabled. */
+  setSort: (field: string, direction: SortDirection) => void;
   /** Whether sorting is supported (enabled via features). */
   isSupported: boolean;
 }
@@ -48,7 +50,7 @@ export interface UseContentListSortReturn {
  *       value={`${field}-${direction}`}
  *       onChange={(e) => {
  *         const [newField, newDirection] = e.target.value.split('-');
- *         setSort(newField, newDirection as 'asc' | 'desc');
+ *         setSort(newField, newDirection as SortDirection);
  *       }}
  *       options={[
  *         { value: 'title-asc', text: 'Title A-Z' },
@@ -61,17 +63,18 @@ export interface UseContentListSortReturn {
  * ```
  */
 export const useContentListSort = (): UseContentListSortReturn => {
-  const { supports } = useContentListConfig();
+  const { supports, queryKeyScope } = useContentListConfig();
   const { state, dispatch } = useContentListState();
 
   const setSort = useCallback(
-    (field: string, direction: 'asc' | 'desc') => {
+    (field: string, direction: SortDirection) => {
       if (!supports.sorting) {
         return;
       }
+      setPersistedSort(queryKeyScope, { field, direction });
       dispatch({ type: CONTENT_LIST_ACTIONS.SET_SORT, payload: { field, direction } });
     },
-    [dispatch, supports.sorting]
+    [dispatch, supports.sorting, queryKeyScope]
   );
 
   return {

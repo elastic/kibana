@@ -17,7 +17,7 @@ export class ValidateRuleStep implements RuleExecutionStep {
     return guardedMapStep(streamState, ['rule'], (state) => {
       if (!state.rule.enabled) {
         state.logger.withLabels({ step: this.name }).debug({
-          message: `[${this.name}] Rule ${state.input.ruleId} is disabled, halting`,
+          message: 'Rule is disabled, halting',
         });
 
         return { type: 'halt', reason: 'rule_disabled', state };

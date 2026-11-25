@@ -9,7 +9,7 @@
 
 /**
  * Filtering the doc-viewer fields table in classic data-view mode: field search,
- * type filters, and the hide-null-values switch.
+ * type filters, the hide-null-values switch, and virtualized row rendering.
  *
  * Sibling specs cover the rest of the fields table:
  * - `doc_viewer_fields_table_esql.spec.ts` — the ES|QL counterparts
@@ -94,4 +94,21 @@ spaceTest.describe('Discover doc viewer - fields table', { tag: '@local-stateful
     await docViewer.toggleHideNullValues();
     await expect(docViewer.getFieldNames()).toHaveCount(8);
   });
+
+  spaceTest(
+    'renders a field row that was not initially mounted once scrolled into view',
+    async ({ pageObjects }) => {
+      const { docViewer } = pageObjects;
+
+      await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+
+      // Rows are sorted by field name, so `xss` is last and therefore outside the
+      // initially mounted window of the virtualized grid.
+      await expect(docViewer.getFieldValue('xss')).toBeHidden();
+
+      await docViewer.scrollFieldsTableToBottom();
+
+      await expect(docViewer.getFieldValue('xss')).toBeVisible();
+    }
+  );
 });

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const MAX_EXPRESSION_LENGTH: number;
+export function getUnquoted(input: string): string;
+
 export function parse(expression: string): TinymathAST;
 export function evaluate(
   expression: string | null,

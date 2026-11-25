@@ -43,18 +43,18 @@ beforeEach(() => {
 });
 
 describe('getCreateAlertEventStepDefinition', () => {
-  it('returns group_hash and episode_id on success', async () => {
-    const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'abc123', episode_id: 'ep-456' });
+  it('returns group_hash and alert_id on success', async () => {
+    const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'abc123', alert_id: 'ep-456' });
     const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: mockIngest });
 
     const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);
     const result = await handler(createMockContext());
 
-    expect(result).toEqual({ output: { group_hash: 'abc123', episode_id: 'ep-456' } });
+    expect(result).toEqual({ output: { group_hash: 'abc123', alert_id: 'ep-456' } });
   });
 
   it('calls the factory with the result of getFakeRequest()', async () => {
-    const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'h', episode_id: 'e' });
+    const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'h', alert_id: 'e' });
     const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: mockIngest });
 
     const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);
@@ -65,7 +65,7 @@ describe('getCreateAlertEventStepDefinition', () => {
   });
 
   it('passes abortSignal to createAlertEvent', async () => {
-    const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'h', episode_id: 'e' });
+    const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'h', alert_id: 'e' });
     const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: mockIngest });
 
     const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);

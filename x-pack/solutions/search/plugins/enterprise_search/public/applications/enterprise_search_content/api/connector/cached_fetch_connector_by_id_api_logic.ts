@@ -41,6 +41,7 @@ export interface CachedFetchConnectorByIdApiLogicActions {
   setTimeoutId(id: NodeJS.Timeout): { id: NodeJS.Timeout };
   startPolling(connectorId: string): { connectorId: string };
   stopPolling(): void;
+  updateConnectorData(update: Partial<Connector>): Partial<Connector>;
 }
 export interface CachedFetchConnectorByIdApiLogicValues {
   connectorData: Connector | null;
@@ -61,6 +62,7 @@ export const CachedFetchConnectorByIdApiLogic = kea<
     setTimeoutId: (id) => ({ id }),
     startPolling: (connectorId) => ({ connectorId }),
     stopPolling: true,
+    updateConnectorData: (update) => update,
   },
   connect: {
     actions: [FetchConnectorByIdApiLogic, ['apiSuccess', 'apiError', 'apiReset', 'makeRequest']],
@@ -121,6 +123,13 @@ export const CachedFetchConnectorByIdApiLogic = kea<
           return isEqual(currentState, newConnectorData.connector)
             ? currentState
             : newConnectorData.connector ?? null;
+        },
+        updateConnectorData: (currentState, update) => {
+          if (!currentState) {
+            return currentState;
+          }
+          const nextState = { ...currentState, ...update };
+          return isEqual(currentState, nextState) ? currentState : nextState;
         },
       },
     ],

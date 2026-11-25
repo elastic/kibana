@@ -121,6 +121,7 @@ const createPlugin = (
     },
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,
+    initialization: Promise.withResolvers<void>(),
   });
 };
 
@@ -796,8 +797,8 @@ describe('PluginsService', () => {
         ]),
       });
       await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
-      expect(configService.setSchema).toBeCalledWith('path-preboot', configSchema);
-      expect(configService.setSchema).toBeCalledWith('path-standard', configSchema);
+      expect(configService.setSchema).toHaveBeenCalledWith('path-preboot', configSchema);
+      expect(configService.setSchema).toHaveBeenCalledWith('path-standard', configSchema);
     });
 
     it('registers plugin config deprecation provider in config service', async () => {
@@ -834,11 +835,11 @@ describe('PluginsService', () => {
         ]),
       });
       await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
-      expect(configService.addDeprecationProvider).toBeCalledWith(
+      expect(configService.addDeprecationProvider).toHaveBeenCalledWith(
         'config-path-preboot',
         prebootDeprecationProvider
       );
-      expect(configService.addDeprecationProvider).toBeCalledWith(
+      expect(configService.addDeprecationProvider).toHaveBeenCalledWith(
         'config-path-standard',
         standardDeprecationProvider
       );
@@ -1055,7 +1056,6 @@ describe('PluginsService', () => {
       const prebootUIConfig$ = preboot.uiPlugins.browserConfigs.get('plugin-with-expose-preboot')!;
       await expect(prebootUIConfig$.pipe(take(1)).toPromise()).resolves.toEqual({
         browserConfig: { sharedProp: 'sharedProp default value plugin-with-expose-preboot' },
-        exposedConfigKeys: { sharedProp: 'string?' },
       });
 
       const standardUIConfig$ = standard.uiPlugins.browserConfigs.get(
@@ -1063,7 +1063,6 @@ describe('PluginsService', () => {
       )!;
       await expect(standardUIConfig$.pipe(take(1)).toPromise()).resolves.toEqual({
         browserConfig: { sharedProp: 'sharedProp default value plugin-with-expose-standard' },
-        exposedConfigKeys: { sharedProp: 'string?' },
       });
     });
 

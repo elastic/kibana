@@ -8,12 +8,12 @@
 import expect from '@kbn/expect';
 
 import { OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
+import { buildUnifiedAlertReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
   deleteAllCaseItems,
   bulkCreateAttachments,
+  createComment,
   getCase,
 } from '../../../../common/lib/api';
 
@@ -79,13 +79,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-1',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });
@@ -105,6 +103,55 @@ export default ({ getService }: FtrProviderContext): void => {
         ).to.be(true);
       });
 
+      it('returns the extracted observables in the bulkCreate response', async () => {
+        const theCase = await createCase(
+          supertest,
+          getPostCaseRequest({ settings: { syncAlerts: false, extractObservables: true } })
+        );
+
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: theCase.id,
+          params: [
+            buildUnifiedAlertReq('securitySolutionFixture', {
+              alertId: 'ext-alert-1',
+              index: alertIndex,
+              rule: { id: 'rule-1', name: 'Rule 1' },
+            }),
+          ],
+          expectedHttpCode: 200,
+        });
+
+        const refreshedCase = await getCase({ supertest, caseId: theCase.id });
+
+        expect(updatedCase.observables.length).to.be(2);
+        expect(updatedCase.total_observables).to.be(2);
+        expect(updatedCase.version).to.be(refreshedCase.version);
+      });
+
+      it('returns the extracted observables in the legacy comments API response', async () => {
+        const theCase = await createCase(
+          supertest,
+          getPostCaseRequest({ settings: { syncAlerts: false, extractObservables: true } })
+        );
+
+        const updatedCase = await createComment({
+          supertest,
+          caseId: theCase.id,
+          params: buildUnifiedAlertReq('securitySolutionFixture', {
+            alertId: 'ext-alert-1',
+            index: alertIndex,
+            rule: { id: 'rule-1', name: 'Rule 1' },
+          }),
+        });
+
+        const refreshedCase = await getCase({ supertest, caseId: theCase.id });
+
+        expect(updatedCase.observables.length).to.be(2);
+        expect(updatedCase.total_observables).to.be(2);
+        expect(updatedCase.version).to.be(refreshedCase.version);
+      });
+
       it('deduplicates observables when the same alert is attached more than once', async () => {
         const theCase = await createCase(
           supertest,
@@ -116,13 +163,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-2',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });
@@ -132,13 +177,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-2',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });
@@ -161,13 +204,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-no-ecs',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });
@@ -187,20 +228,16 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-1',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
-            {
-              type: AttachmentType.alert,
+            }),
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-2',
               index: alertIndex,
               rule: { id: 'rule-2', name: 'Rule 2' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });
@@ -224,13 +261,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-1',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });

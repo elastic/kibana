@@ -552,6 +552,153 @@ describe('WatchlistEntitySourceClient', () => {
     });
   });
 
+  describe('rotateApiKey', () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    const mockSourcesById = (sources: Record<string, Record<string, unknown>>) => {
+      soClient.get.mockImplementation(async (_type: string, id: string) => {
+        const attributes = sources[id];
+        if (!attributes) throw new Error(`Saved object [${id}] not found`);
+        return { id, type: watchlistEntitySourceTypeName, references: [], attributes } as never;
+      });
+      soClient.update.mockImplementation(
+        async (_type: string, id: string, attrs: Record<string, unknown>) =>
+          ({ id, attributes: { ...sources[id], ...attrs } } as never)
+      );
+    };
+
+    const indexSource = (overrides: Record<string, unknown> = {}) => ({
+      type: 'index',
+      name: 'My Source',
+      indexPattern: 'logs-*',
+      apiKeyId: 'old-kid',
+      ...overrides,
+    });
+
+    it('replaces an existing key: persists the new key, then invalidates the old one', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+
+      const result = await client.rotateApiKey('source-1', request);
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        watchlistEntitySourceTypeName,
+        'source-1',
+        mockedApiKey,
+        expect.anything()
+      );
+      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
+        mockSecurity,
+        'old-kid',
+        logger
+      );
+      // grant-first: the old key is only invalidated once the new one is saved
+      expect(soClient.update.mock.invocationCallOrder[0]).toBeLessThan(
+        mockInvalidateEntitySourceApiKey.mock.invocationCallOrder[0]
+      );
+      expect(result.apiKeyId).toBe(mockedApiKey.apiKeyId);
+    });
+
+    it('also grants a key to a source that has none', async () => {
+      mockSourcesById({ 'source-1': indexSource({ apiKeyId: undefined }) });
+
+      await client.rotateApiKey('source-1', request);
+
+      expect(soClient.update).toHaveBeenCalled();
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('keeps the old key untouched when the grant fails', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      mockGrantEntitySourceApiKey.mockRejectedValue(new Error('grant failed'));
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow('grant failed');
+
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('discards the new key and keeps the old one when saving the source fails', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      soClient.update.mockRejectedValue(new Error('conflict'));
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow('conflict');
+
+      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledTimes(1);
+      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
+        mockSecurity,
+        mockedApiKey.apiKeyId,
+        logger
+      );
+    });
+
+    it('keeps the new key when the save fails after the write was applied', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      soClient.update.mockImplementation(async () => {
+        // the write is committed but the response never arrives
+        soClient.get.mockResolvedValue({
+          id: 'source-1',
+          type: watchlistEntitySourceTypeName,
+          references: [],
+          attributes: indexSource({ apiKeyId: mockedApiKey.apiKeyId }),
+        } as never);
+        throw new Error('connection lost');
+      });
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow('connection lost');
+
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('does not invalidate the new key when it cannot confirm what was saved', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      soClient.update.mockImplementation(async () => {
+        soClient.get.mockRejectedValue(new Error('unavailable'));
+        throw new Error('connection lost');
+      });
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow('connection lost');
+
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('rejects a caller who cannot read the index, without granting anything', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      mockValidateIndexPermissions.mockRejectedValue(new Error('Insufficient privileges'));
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow(
+        'Insufficient privileges'
+      );
+
+      expect(mockValidateIndexPermissions).toHaveBeenCalledWith(esClient, 'logs-*');
+      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects sources that are not index-type', async () => {
+      mockSourcesById({ 'source-1': { type: 'store', name: 'Store' } });
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow(/index-type/);
+      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws when encrypted saved objects are not available', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      const noEncryptionClient = new WatchlistEntitySourceClient({
+        soClient,
+        namespace: 'default',
+        esClient,
+        getStartServices: mockGetStartServices as never,
+        logger,
+        hasEncryptionKey: false,
+      });
+
+      await expect(noEncryptionClient.rotateApiKey('source-1', request)).rejects.toThrow(
+        /encrypted saved objects/
+      );
+      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+  });
+
   describe('get', () => {
     it('delegates to soClient.get and returns the source with id', async () => {
       soClient.get.mockResolvedValue({
@@ -652,6 +799,114 @@ describe('WatchlistEntitySourceClient', () => {
         }),
         { refresh: 'wait_for' }
       );
+    });
+  });
+
+  describe('list by ids', () => {
+    it('returns no sources when the id list is empty', async () => {
+      const result = await client.list({}, []);
+
+      expect(soClient.bulkGet).not.toHaveBeenCalled();
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(result).toEqual({ sources: [], page: 1, per_page: 10, total: 0 });
+    });
+
+    it('loads the requested saved objects directly and skips missing ones', async () => {
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'src-1',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'store', name: 'Entity Store' },
+          },
+          {
+            id: 'missing',
+            type: watchlistEntitySourceTypeName,
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+          },
+        ],
+      } as never);
+
+      const result = await client.list({}, ['src-1', 'missing']);
+
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: watchlistEntitySourceTypeName, id: 'src-1' },
+        { type: watchlistEntitySourceTypeName, id: 'missing' },
+      ]);
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(result.sources).toEqual([{ id: 'src-1', type: 'store', name: 'Entity Store' }]);
+      expect(result.total).toBe(1);
+    });
+
+    it('sorts the matched sources by sort_field/sort_order before paginating', async () => {
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'src-b',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'store', name: 'Bravo' },
+          },
+          {
+            id: 'src-a',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'store', name: 'Alpha' },
+          },
+          {
+            id: 'src-c',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'store', name: 'Charlie' },
+          },
+        ],
+      } as never);
+
+      const result = await client.list({ sort_field: 'name', sort_order: 'asc' }, [
+        'src-b',
+        'src-a',
+        'src-c',
+      ]);
+
+      expect(result.sources.map((source) => source.name)).toEqual(['Alpha', 'Bravo', 'Charlie']);
+
+      const descResult = await client.list({ sort_field: 'name', sort_order: 'desc' }, [
+        'src-b',
+        'src-a',
+        'src-c',
+      ]);
+
+      expect(descResult.sources.map((source) => source.name)).toEqual([
+        'Charlie',
+        'Bravo',
+        'Alpha',
+      ]);
+    });
+
+    it('defaults to 10 per page', async () => {
+      const twelveSources = Array.from({ length: 12 }, (_, i) => ({
+        id: `src-${i}`,
+        type: watchlistEntitySourceTypeName,
+        references: [],
+        attributes: { type: 'store' as const, name: `Source ${i}` },
+      }));
+      soClient.bulkGet.mockResolvedValue({ saved_objects: twelveSources } as never);
+
+      const result = await client.list(
+        {},
+        twelveSources.map((s) => s.id)
+      );
+
+      expect(result.per_page).toBe(10);
+      expect(result.sources).toHaveLength(10);
+      expect(result.total).toBe(12);
+
+      const secondPage = await client.list(
+        { page: 2 },
+        twelveSources.map((s) => s.id)
+      );
+      expect(secondPage.sources).toHaveLength(2);
     });
   });
 });

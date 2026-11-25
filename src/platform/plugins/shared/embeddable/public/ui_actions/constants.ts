@@ -13,6 +13,8 @@ export const DRILLDOWN_ACTION_GROUP = { id: 'drilldown', order: 3 } as const;
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
+export const APPROXIMATION_APPLIED_BADGE = 'APPROXIMATION_APPLIED_BADGE';
+
 export const EXPORT_ACTION_GROUP = {
   id: 'export_actions',
   order: 9,

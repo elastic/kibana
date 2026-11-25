@@ -1,0 +1,58 @@
+{
+  "10.5.0": [
+    {
+      "createdAt": "2025-05-06T21:10:17.137Z",
+      "createdBy": "elastic",
+      "enabled": true,
+      "jobType": "printable_pdf_v2",
+      "meta": {
+        "isDeprecated": false,
+        "layout": "preserve_layout",
+        "objectType": "dashboard"
+      },
+      "migrationVersion": "9.1.0",
+      "notification": {
+        "email": {
+          "to": ["user@elastic.co"]
+        }
+      },
+      "payload": "{}",
+      "schedule": {
+        "rrule": {
+          "freq": 3,
+          "interval": 1,
+          "tzid": "UTC"
+        }
+      },
+      "title": "[Logs] Web Traffic"
+    }
+  ],
+  "10.6.0": [
+    {
+      "createdAt": "2025-05-06T21:10:17.137Z",
+      "createdBy": "elastic",
+      "enabled": true,
+      "jobType": "printable_pdf_v2",
+      "meta": {
+        "isDeprecated": false,
+        "layout": "preserve_layout",
+        "objectType": "dashboard"
+      },
+      "migrationVersion": "9.1.0",
+      "notification": {
+        "email": {
+          "to": ["user@elastic.co"]
+        }
+      },
+      "payload": "{}",
+      "schedule": {
+        "rrule": {
+          "freq": 3,
+          "interval": 1,
+          "tzid": "UTC"
+        }
+      },
+      "title": "[Logs] Web Traffic"
+    }
+  ]
+}

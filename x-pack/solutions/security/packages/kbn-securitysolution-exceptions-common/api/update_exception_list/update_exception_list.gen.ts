@@ -45,7 +45,12 @@ export const UpdateExceptionListRequestBody = lazySchema(() =>
     /**
      * The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
      */
-    _version: z.string().optional(),
+    _version: z
+      .string()
+      .optional()
+      .describe(
+        'The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.'
+      ),
   })
 );
 export type UpdateExceptionListRequestBody = z.infer<typeof UpdateExceptionListRequestBody>;

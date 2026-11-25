@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/chart-expressions-common",
   "owner": [
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "shared"

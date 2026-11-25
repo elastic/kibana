@@ -15,7 +15,7 @@ import { AgentPolicyGeneralFields } from './agent_policy_general_fields';
 import { AgentPolicyFormSystemMonitoringCheckbox } from './agent_policy_system_monitoring_field';
 import type { ValidationResults } from './agent_policy_validation';
 
-interface Props {
+export interface AgentPolicyIntegrationFormProps {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   withSysMonitoring: boolean;
@@ -23,13 +23,9 @@ interface Props {
   validation: ValidationResults;
 }
 
-export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
-  agentPolicy,
-  updateAgentPolicy,
-  withSysMonitoring,
-  updateSysMonitoring,
-  validation,
-}) => {
+export const AgentPolicyIntegrationForm: React.FunctionComponent<
+  AgentPolicyIntegrationFormProps
+> = ({ agentPolicy, updateAgentPolicy, withSysMonitoring, updateSysMonitoring, validation }) => {
   return (
     <EuiForm>
       <EuiDescribedFormGroup

@@ -175,7 +175,10 @@ export interface HttpServerSetup {
    * Register a static directory to be served by the Kibana server
    * @note Static assets may be served over CDN
    */
-  registerStaticDir: (path: string, dirPath: string) => void;
+  registerStaticDir: (
+    path: string,
+    dirPath: string | ((request: Request) => string | Error)
+  ) => void;
   staticAssets: InternalStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
@@ -600,7 +603,9 @@ export class HttpServer {
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
       const app = request.app as KibanaRequestState;
-      app.httpSpan?.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+      if (app.httpSpan?.isRecording()) {
+        app.httpSpan.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+      }
 
       const stop = app.measureElu;
 
@@ -753,8 +758,10 @@ export class HttpServer {
               roles: user.roles ? [...user.roles] : undefined,
             }
           : undefined,
-        session: {
-          id: redactedSessionId,
+        kibana: {
+          session: {
+            id: redactedSessionId,
+          },
         },
         http: {
           request: {
@@ -968,7 +975,8 @@ export class HttpServer {
           }
 
           if (requestHeaders) {
-            this.authRequestHeaders.set(req, requestHeaders);
+            // Each raw request owns its header generation, even when a provider reuses its result.
+            this.authRequestHeaders.set(req, { ...requestHeaders });
             // we mutate headers only for the backward compatibility with the legacy platform.
             // where some plugin read directly from headers to identify whether a user is authenticated.
             Object.assign(req.headers, requestHeaders);
@@ -988,6 +996,8 @@ export class HttpServer {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
     });
+
+    return { get: this.authRequestHeaders.get, set: this.authRequestHeaders.set };
   }
 
   public getRouters({ pluginId }: GetRoutersOptions = {}): {
@@ -1022,7 +1032,10 @@ export class HttpServer {
     return routers;
   }
 
-  private registerStaticDir(path: string, dirPath: string) {
+  private registerStaticDir(
+    path: string,
+    dirPath: string | ((request: Request) => string | Error)
+  ) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }

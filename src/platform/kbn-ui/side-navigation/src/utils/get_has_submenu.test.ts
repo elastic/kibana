@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MenuItem } from '../../types';
+import type { MenuItem, SecondaryMenuSection } from '../../types';
 
-import { getHasSubmenu } from './get_has_submenu';
+import { getHasMoreSubmenu, getHasSubmenu } from './get_has_submenu';
 
 const createItem = (sections?: MenuItem['sections']): MenuItem => ({
   id: 'id',
@@ -17,6 +17,11 @@ const createItem = (sections?: MenuItem['sections']): MenuItem => ({
   href: '/label',
   iconType: 'empty',
   sections,
+});
+
+const section = (id: string): SecondaryMenuSection => ({
+  id,
+  items: [{ id: `${id}-item`, label: id, href: `/${id}` }],
 });
 
 describe('getHasSubmenu', () => {
@@ -39,5 +44,30 @@ describe('getHasSubmenu', () => {
     ]);
 
     expect(getHasSubmenu(item)).toBe(true);
+  });
+
+  it('returns true when the item has supplementary sections', () => {
+    expect(
+      getHasSubmenu({ ...createItem(), supplementarySections: [section('supplementary')] })
+    ).toBe(true);
+  });
+});
+
+describe('getHasMoreSubmenu', () => {
+  it('returns true only for structural sections', () => {
+    expect(getHasMoreSubmenu(createItem())).toBe(false);
+    expect(
+      getHasMoreSubmenu({ ...createItem(), supplementarySections: [section('supplementary')] })
+    ).toBe(false);
+    expect(
+      getHasMoreSubmenu(
+        createItem([
+          {
+            id: 'section-1',
+            items: [{ id: 'child-1', label: 'Child', href: '/child' }],
+          },
+        ])
+      )
+    ).toBe(true);
   });
 });

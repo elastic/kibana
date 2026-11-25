@@ -15,6 +15,37 @@ import { useAlertsActions } from '../../../../detections/components/alerts_table
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 
+// The real `FormattedFieldValue` pulls in the entity-store, endpoint, and network field renderers,
+// making it by far the heaviest thing rendered in this suite. For the status field it only ever
+// renders a plain `EuiBadge`, so we mock it down to that badge (preserving the click handler and the
+// `chevronSingleDown` icon the popover-open assertions rely on) to keep each render within the 5s budget.
+jest.mock('../../../../timelines/components/timeline/body/renderers/formatted_field', () => {
+  const { EuiBadge } = jest.requireActual('@elastic/eui');
+  return {
+    FormattedFieldValue: ({
+      value,
+      isButton,
+      onClick,
+      onClickAriaLabel,
+    }: {
+      value: string;
+      isButton?: boolean;
+      onClick?: () => void;
+      onClickAriaLabel?: string;
+    }) => (
+      <EuiBadge
+        color="default"
+        onClick={onClick}
+        onClickAriaLabel={onClickAriaLabel}
+        iconType={isButton ? 'chevronSingleDown' : undefined}
+        iconSide={isButton ? 'right' : undefined}
+      >
+        {value}
+      </EuiBadge>
+    ),
+  };
+});
+
 const mockReportActionClicked = jest.fn();
 const mockReportHeaderItemClicked = jest.fn();
 jest.mock('../../../shared/hooks/use_flyout_telemetry');
@@ -112,6 +143,25 @@ describe('StatusPopoverButton', () => {
     );
 
     getByText('open');
+  });
+
+  test('decorates status items with coloured dot icons', async () => {
+    (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+    const { getByText, getByTestId } = render(
+      <TestProviders>
+        <StatusPopoverButton {...props} />
+      </TestProviders>
+    );
+
+    getByText('open').click();
+    await waitForEuiPopoverOpen();
+
+    expect(
+      getByTestId('acknowledged-alert-status').querySelector('[data-euiicon-type="dot"]')
+    ).toBeInTheDocument();
+    expect(
+      getByTestId('alert-close-context-menu-item').querySelector('[data-euiicon-type="dot"]')
+    ).toBeInTheDocument();
   });
 
   test('it shows the correct options when clicked', async () => {

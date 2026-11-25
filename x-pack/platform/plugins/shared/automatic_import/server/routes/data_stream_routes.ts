@@ -19,7 +19,19 @@ import {
   ReanalyzeDataStreamRequestBody,
   UploadSamplesToDataStreamRequestBody,
   UpdateDataStreamPipelineRequestBody,
+  UPLOAD_SAMPLES_MAX_REQUEST_BYTES,
+  validateLogSampleContent,
+  type LogSampleContentValidationResult,
 } from '../../common';
+
+const INVALID_SAMPLES_MESSAGES: Record<
+  Extract<LogSampleContentValidationResult, { valid: false }>['code'],
+  string
+> = {
+  binary_content: 'Samples appear to contain binary data, not text logs.',
+  script_content: 'Samples appear to be a script or source code, not logs.',
+  empty: 'Samples do not contain any log lines.',
+};
 
 export const registerDataStreamRoutes = (
   router: IRouter<AutomaticImportPluginRequestHandlerContext>,
@@ -45,6 +57,7 @@ const uploadSamplesRoute = (
           requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
         },
       },
+      options: { body: { maxBytes: UPLOAD_SAMPLES_MAX_REQUEST_BYTES } },
     })
     .addVersion(
       {
@@ -97,6 +110,12 @@ const uploadSamplesRoute = (
               });
             }
           } else if (samples && samples.length > 0) {
+            const validation = validateLogSampleContent(samples);
+            if (!validation.valid) {
+              return response.badRequest({
+                body: INVALID_SAMPLES_MESSAGES[validation.code],
+              });
+            }
             rawSamples = samples;
           } else {
             return response.badRequest({

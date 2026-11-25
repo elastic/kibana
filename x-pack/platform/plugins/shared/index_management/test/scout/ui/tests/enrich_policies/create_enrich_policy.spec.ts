@@ -36,10 +36,9 @@ test.describe('Create enrich policy', { tag: tags.deploymentAgnostic }, () => {
     await cleanup(esClient);
   });
 
-  test('shows create enrich policies page and docs link', async ({ page }) => {
+  test('shows create enrich policies page and docs link', async ({ page, pageObjects }) => {
     await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Create enrich policy');
-    // At Scout's viewport the Documentation link is collapsed into the app-menu overflow popover.
-    await page.testSubj.locator('app-menu-overflow-button').click();
+    await pageObjects.appMenu.revealItem('appHeaderMenuDocumentation');
     await expect(page.testSubj.locator('appHeaderMenuDocumentation')).toBeVisible();
   });
 

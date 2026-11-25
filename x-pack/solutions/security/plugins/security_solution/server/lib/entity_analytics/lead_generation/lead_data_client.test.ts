@@ -8,12 +8,15 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 
+const mockCreateIndex = jest.fn().mockResolvedValue(undefined);
+const mockCreateLeadIndexService = jest.fn((_deps: unknown) => ({
+  createIndex: mockCreateIndex,
+  doesIndexExist: jest.fn().mockResolvedValue(true),
+  deleteIndex: jest.fn(),
+}));
+
 jest.mock('./indices/lead_index_service', () => ({
-  createLeadIndexService: () => ({
-    createIndex: jest.fn().mockResolvedValue(undefined),
-    doesIndexExist: jest.fn().mockResolvedValue(true),
-    deleteIndex: jest.fn(),
-  }),
+  createLeadIndexService: (deps: unknown) => mockCreateLeadIndexService(deps),
 }));
 
 import { createLeadDataClient } from './lead_data_client';
@@ -57,6 +60,9 @@ const makeTestLead = (overrides: Partial<SynthesizedLead> = {}): SynthesizedLead
     priority: 8,
     chatRecommendations: ['What alerts exist?', 'Check risk score history'],
     staleness: 'fresh',
+    topRelatedEntities: [],
+    relatedEntityCounts: {},
+    origin: 'observations',
     ...overrides,
     entity: { ...entity, record: {} },
     observations,
@@ -69,14 +75,16 @@ describe('LeadDataClient', () => {
   const indexName = getLeadsIndexName(spaceId);
 
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let internalEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let client: LeadDataClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
+    internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
-    client = createLeadDataClient({ esClient, logger, spaceId });
+    client = createLeadDataClient({ esClient, internalEsClient, logger, spaceId });
   });
 
   const toCandidate = (lead: SynthesizedLead) => ({
@@ -256,6 +264,44 @@ describe('LeadDataClient', () => {
       expect(esClient.bulk).not.toHaveBeenCalled();
     });
 
+    it('reconciles the index mapping even when the index already exists', async () => {
+      const lead = makeTestLead();
+      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
+
+      await client.persistLeads({
+        executionId: 'exec-mapping',
+        sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        refreshes: [],
+        creates: [lead],
+        updates: [],
+      });
+
+      expect(mockCreateIndex).toHaveBeenCalled();
+    });
+
+    it('provisions the index with the internal client and writes leads with the current-user client', async () => {
+      const lead = makeTestLead();
+      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
+
+      await client.persistLeads({
+        executionId: 'exec-clients',
+        sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        refreshes: [],
+        creates: [lead],
+        updates: [],
+      });
+
+      expect(mockCreateLeadIndexService).toHaveBeenCalledWith({
+        esClient: internalEsClient,
+        logger,
+        spaceId,
+      });
+      expect(esClient.bulk).toHaveBeenCalled();
+      expect(internalEsClient.bulk).not.toHaveBeenCalled();
+    });
+
     it('handles leads creation successfully', async () => {
       const lead = makeTestLead();
       const entityKey = hashEuid(lead.entity.id);
@@ -277,6 +323,48 @@ describe('LeadDataClient', () => {
           update: expect.objectContaining({ _index: indexName, _id: entityKey }),
         })
       );
+    });
+
+    it('converts topRelatedEntities to snake_case script params on create', async () => {
+      const lead = makeTestLead({
+        topRelatedEntities: [
+          {
+            id: 'host:web-01',
+            type: 'host',
+            name: 'web-01',
+            kinds: ['administers'],
+            riskLevel: 'High',
+            criticality: 'extreme_impact',
+            interactedWithAtLeast: 4,
+          },
+        ],
+        relatedEntityCounts: { administers: 1 },
+      });
+      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
+
+      await client.persistLeads({
+        executionId: 'exec-related',
+        sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        refreshes: [],
+        creates: [lead],
+        updates: [],
+      });
+
+      const body = esClient.bulk.mock.calls[0][0].body as Array<Record<string, unknown>>;
+      const script = body[1].script as { params: Record<string, unknown> };
+      expect(script.params.top_related_entities).toEqual([
+        {
+          id: 'host:web-01',
+          type: 'host',
+          name: 'web-01',
+          kinds: ['administers'],
+          risk_level: 'High',
+          criticality: 'extreme_impact',
+          interacted_with_at_least: 4,
+        },
+      ]);
+      expect(script.params.related_entity_counts).toEqual([{ kind: 'administers', count: 1 }]);
     });
 
     it('returns the failed item count when bulk has errors', async () => {
@@ -350,6 +438,24 @@ describe('LeadDataClient', () => {
       await expect(
         client.persistLeads({
           executionId: 'exec-403',
+          sourceType: 'adhoc',
+          timestamp: new Date().toISOString(),
+          refreshes: [],
+          creates: [makeTestLead()],
+          updates: [],
+        })
+      ).rejects.toBe(securityException);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('re-throws when index creation fails with a security_exception, instead of silently reporting no leads persisted', async () => {
+      const securityException = makeEsSecurityException();
+      mockCreateIndex.mockRejectedValueOnce(securityException);
+
+      await expect(
+        client.persistLeads({
+          executionId: 'exec-index-403',
           sourceType: 'adhoc',
           timestamp: new Date().toISOString(),
           refreshes: [],
@@ -466,6 +572,98 @@ describe('LeadDataClient', () => {
         name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
         id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
       });
+    });
+
+    it('converts top_related_entities back to camelCase', async () => {
+      const esDoc = {
+        id: 'lead-related',
+        title: 'Test Lead',
+        byline: 'Entity X',
+        description: 'Details',
+        entity: { type: 'user', name: 'admin', id: 'user:admin' },
+        tags: [],
+        priority: 8,
+        chat_recommendations: [],
+        timestamp: new Date().toISOString(),
+        staleness: 'fresh',
+        status: 'active',
+        observations: [],
+        top_related_entities: [
+          {
+            id: 'host:web-01',
+            type: 'host',
+            name: 'web-01',
+            kinds: ['administers'],
+            risk_level: 'High',
+            criticality: 'extreme_impact',
+            interacted_with_at_least: 4,
+          },
+        ],
+        related_entity_counts: [{ kind: 'administers', count: 1 }],
+        execution_uuid: 'exec-uuid',
+        source_type: 'adhoc',
+        created_at: '2026-03-10T00:00:00.000Z',
+        changed_at: '2026-03-10T00:00:00.000Z',
+        version: 1,
+        content_hash: 'hash-related',
+      };
+
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _source: esDoc, _id: 'lead-related', _index: indexName }],
+        },
+      } as never);
+
+      const result = await client.findLeads({ page: 1, perPage: 10 });
+
+      expect(result.leads[0].topRelatedEntities).toEqual([
+        {
+          id: 'host:web-01',
+          type: 'host',
+          name: 'web-01',
+          kinds: ['administers'],
+          riskLevel: 'High',
+          criticality: 'extreme_impact',
+          interactedWithAtLeast: 4,
+        },
+      ]);
+      expect(result.leads[0].relatedEntityCounts).toEqual({ administers: 1 });
+    });
+
+    it('defaults topRelatedEntities to [] for leads persisted before the field existed', async () => {
+      const esDoc = {
+        id: 'lead-legacy',
+        title: 'Test Lead',
+        byline: 'Entity X',
+        description: 'Details',
+        entity: { type: 'user', name: 'admin', id: 'user:admin' },
+        tags: [],
+        priority: 8,
+        chat_recommendations: [],
+        timestamp: new Date().toISOString(),
+        staleness: 'fresh',
+        status: 'active',
+        observations: [],
+        execution_uuid: 'exec-uuid',
+        source_type: 'adhoc',
+        created_at: '2026-03-10T00:00:00.000Z',
+        changed_at: '2026-03-10T00:00:00.000Z',
+        version: 1,
+        content_hash: 'hash-legacy',
+      };
+
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _source: esDoc, _id: 'lead-legacy', _index: indexName }],
+        },
+      } as never);
+
+      const result = await client.findLeads({ page: 1, perPage: 10 });
+
+      expect(result.leads[0].topRelatedEntities).toEqual([]);
+      expect(result.leads[0].relatedEntityCounts).toEqual({});
     });
 
     it('applies status filter when provided', async () => {

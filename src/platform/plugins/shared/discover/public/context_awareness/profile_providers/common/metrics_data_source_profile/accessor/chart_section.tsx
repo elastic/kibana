@@ -44,6 +44,13 @@ const MetricsExperienceGridWrapper = (
   const { discoverShared, dataViews, notifications, docLinks, logger, core, storage } =
     useDiscoverServices();
 
+  const onBreakdownFieldChange = useCallback(
+    (nextBreakdownField?: string) => {
+      dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
+    },
+    [dispatch, updateAppState]
+  );
+
   const metricsState = useObservable(
     metricsStateAdapter.getState$(),
     metricsStateAdapter.getState()
@@ -54,11 +61,17 @@ const MetricsExperienceGridWrapper = (
       counterAggregation: metricsState.counterAggregation,
       gaugeAggregation: metricsState.gaugeAggregation,
       histogramPercentile: metricsState.histogramPercentile,
+      histogramVisualization: metricsState.histogramVisualization,
+      dimensions: metricsState.dimensions,
+      searchTerm: metricsState.searchTerm,
     }),
     [
       metricsState.counterAggregation,
       metricsState.gaugeAggregation,
       metricsState.histogramPercentile,
+      metricsState.histogramVisualization,
+      metricsState.dimensions,
+      metricsState.searchTerm,
     ]
   );
 
@@ -82,13 +95,6 @@ const MetricsExperienceGridWrapper = (
       metricsStateAdapter.updateState(next);
     },
     [metricsStateAdapter]
-  );
-
-  const onBreakdownFieldChange = useCallback(
-    (nextBreakdownField?: string) => {
-      dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
-    },
-    [dispatch, updateAppState]
   );
 
   const recentMetricsStorage = useMemo(

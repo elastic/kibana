@@ -16,7 +16,7 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { LOGSTASH_TIME_RANGE, test } from '../fixtures';
+import { test } from '../fixtures';
 
 const SESSION_API_PATH = '/internal/session';
 const SESSION_API_VERSION = '1';
@@ -57,21 +57,20 @@ test.describe('Search session example', { tag: '@local-stateful-classic' }, () =
     await deleteAllSearchSessions(kbnClient);
   });
 
-  test.afterAll(async ({ kbnClient, isSnapshotBuild }) => {
-    if (!isSnapshotBuild) {
-      return;
-    }
-    await deleteAllSearchSessions(kbnClient);
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     // Privileged: saving/restoring sessions needs more than viewer.
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.searchExamples.gotoSearchSessions();
-    await pageObjects.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
   });
 
   test.afterEach(async ({ kbnClient }) => {
+    await deleteAllSearchSessions(kbnClient);
+  });
+
+  test.afterAll(async ({ kbnClient, isSnapshotBuild }) => {
+    if (!isSnapshotBuild) {
+      return;
+    }
     await deleteAllSearchSessions(kbnClient);
   });
 
@@ -86,7 +85,7 @@ test.describe('Search session example', { tag: '@local-stateful-classic' }, () =
 
     await test.step('start search and save session', async () => {
       await searchExamples.startSearch.click();
-      await searchExamples.saveBackgroundSearchButton.click();
+      await searchExamples.saveBackgroundSearch();
       // shard_delay keeps the search in-flight until save/restore finish
       await expect(searchExamples.restoreSearch).toBeVisible({ timeout: 120_000 });
     });

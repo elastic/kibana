@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { licenseService, useAuthz, useLink, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { SERVERLESS_PRIVATE_OUTPUT_ID } from '../../../../../../../common/constants';
+import { isBeatsOutput, isOtlpOutput } from '../../../../../../../common/services/output_helpers';
 
 function getPrivateLinkProvider(urls: string[]): string {
   const url = urls[0] ?? '';
@@ -51,6 +52,13 @@ const FlexGroupWithMinWidth = styled(EuiFlexGroup)`
   min-width: 0px;
 `;
 
+function getOutputHosts(output: Output): string[] {
+  if (isOtlpOutput(output)) {
+    return output.otlp_exporter?.endpoint ? [output.otlp_exporter.endpoint] : [];
+  }
+  return isBeatsOutput(output) ? output.hosts ?? [] : [];
+}
+
 function displayOutputType(type: string) {
   switch (type) {
     case 'elasticsearch':
@@ -60,6 +68,10 @@ function displayOutputType(type: string) {
     case 'remote_elasticsearch':
       return i18n.translate('xpack.fleet.settings.outputsTable.remoteElasticsearchTypeLabel', {
         defaultMessage: 'Remote Elasticsearch',
+      });
+    case 'otlp':
+      return i18n.translate('xpack.fleet.settings.outputsTable.otlpTypeLabel', {
+        defaultMessage: 'OTLP',
       });
     default:
       return type;
@@ -107,11 +119,17 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
                     {
                       defaultMessage:
                         'This output uses {provider} for private network connectivity.',
-                      values: { provider: getPrivateLinkProvider(output.hosts ?? []) },
+                      values: {
+                        provider: getPrivateLinkProvider(
+                          isBeatsOutput(output) ? output.hosts ?? [] : []
+                        ),
+                      },
                     }
                   )}
                 >
-                  <EuiBadge tabIndex={0}>{getPrivateLinkProvider(output.hosts ?? [])}</EuiBadge>
+                  <EuiBadge tabIndex={0}>
+                    {getPrivateLinkProvider(isBeatsOutput(output) ? output.hosts ?? [] : [])}
+                  </EuiBadge>
                 </EuiToolTip>
               </EuiFlexItem>
             )}
@@ -133,7 +151,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         truncateText: true,
         render: (output: Output) => (
           <FlexGroupWithMinWidth direction="column" gutterSize="xs">
-            {(output.hosts || []).map((host) => (
+            {getOutputHosts(output).map((host) => (
               <EuiFlexItem key={host}>
                 <p title={host} className={`eui-textTruncate`}>
                   {host}

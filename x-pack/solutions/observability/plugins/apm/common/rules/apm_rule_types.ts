@@ -297,6 +297,7 @@ export const ANOMALY_DETECTOR_SELECTOR_OPTIONS = [
   AnomalyDetectorType.txLatency,
   AnomalyDetectorType.txThroughput,
   AnomalyDetectorType.txFailureRate,
+  AnomalyDetectorType.txLowCount,
 ].map((type) => ({ type, label: getApmMlDetectorLabel(type) }));
 
 // Server side registrations

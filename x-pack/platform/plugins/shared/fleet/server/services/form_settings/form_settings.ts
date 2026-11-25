@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { type Props, schema } from '@kbn/config-schema';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 
-import type { SettingsConfig, SettingsSection } from '../../../common/settings/types';
+import type { SettingsDefinition, SettingsSection } from '../../../common/settings/types';
 import { getAgentPolicyAdvancedSettings } from '../../../common/settings';
 import type { AgentPolicy } from '../../types';
 
@@ -20,7 +20,7 @@ export function getSettingsAPISchema(settingSection: SettingsSection) {
   return _getSettingsAPISchema(settings);
 }
 
-export function _getSettingsAPISchema(settings: SettingsConfig[]): Props {
+export function _getSettingsAPISchema(settings: SettingsDefinition[]): Props {
   const validations: Props = {};
   settings.forEach((setting) => {
     if (!setting.api_field) {
@@ -74,7 +74,7 @@ export function getSettingsValuesForAgentPolicy(
 }
 
 export function _getSettingsValuesForAgentPolicy(
-  settings: SettingsConfig[],
+  settings: SettingsDefinition[],
   agentPolicy: AgentPolicy
 ) {
   const settingsValues: { [k: string]: any } = {};
@@ -85,7 +85,10 @@ export function _getSettingsValuesForAgentPolicy(
 
     const val = agentPolicy.advanced_settings?.[setting.api_field.name];
     if (val !== undefined && val !== '') {
-      settingsValues[setting.name] = convertValue(val, setting.type);
+      const convertedVal = convertValue(val, setting.type);
+      if (convertedVal !== undefined) {
+        settingsValues[setting.name] = convertedVal;
+      }
     }
   });
   return settingsValues;
@@ -94,11 +97,13 @@ export function _getSettingsValuesForAgentPolicy(
 function convertValue(val: any, type?: string) {
   if (type === 'yaml') {
     const valJs = parse(val);
+    if (valJs == null) {
+      return undefined;
+    }
     if (valJs.agent?.internal) {
       return valJs.agent.internal;
-    } else {
-      return valJs;
     }
+    return valJs;
   }
   return val;
 }

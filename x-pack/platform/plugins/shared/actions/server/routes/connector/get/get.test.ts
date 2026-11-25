@@ -12,6 +12,13 @@ import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { createMockConnector } from '../../../application/connector/mocks';
+import { actionsConfigMock } from '../../../actions_config.mock';
+
+const actionsConfigUtils = (inboundEventsFeatureEnabled = false) => {
+  const utils = actionsConfigMock.create();
+  utils.isInboundEventsEnabled.mockReturnValue(inboundEventsFeatureEnabled);
+  return utils;
+};
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -27,7 +34,7 @@ describe('getConnectorRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorRoute(router, licenseState);
+    getConnectorRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -92,7 +99,7 @@ describe('getConnectorRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorRoute(router, licenseState);
+    getConnectorRoute(router, licenseState, actionsConfigUtils());
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -118,6 +125,62 @@ describe('getConnectorRoute', () => {
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
 
+  it('maps isInboundEventsEnabled to is_inbound_events_enabled when the inbound events flag is on', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getConnectorRoute(router, licenseState, actionsConfigUtils(true));
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.inboundWebhook',
+        name: 'inbound',
+        isInboundEventsEnabled: true,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: { id: '1' } }, [
+      'ok',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        is_inbound_events_enabled: true,
+      }),
+    });
+  });
+
+  it('omits is_inbound_events_enabled from the response when the inbound events flag is off', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getConnectorRoute(router, licenseState, actionsConfigUtils());
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.inboundWebhook',
+        name: 'inbound',
+        isInboundEventsEnabled: true,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: { id: '1' } }, [
+      'ok',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.not.objectContaining({ is_inbound_events_enabled: expect.anything() }),
+    });
+  });
+
   it('ensures the license check prevents getting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -126,7 +189,7 @@ describe('getConnectorRoute', () => {
       throw new Error('OMG');
     });
 
-    getConnectorRoute(router, licenseState);
+    getConnectorRoute(router, licenseState, actionsConfigUtils());
 
     const [, handler] = router.get.mock.calls[0];
 

@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const MigrationFinalizationResult = lazySchema(() =>
   z.object({
@@ -24,7 +24,7 @@ export const MigrationFinalizationResult = lazySchema(() =>
     status: z.enum(['success', 'failure', 'pending']),
     sourceIndex: z.string(),
     version: z.string(),
-    updated: z.string().datetime(),
+    updated: isoDateTime(),
     error: z
       .object({
         message: z.string(),
@@ -40,7 +40,7 @@ export const FinalizeAlertsMigrationRequestBody = lazySchema(() =>
     /**
      * Array of `migration_id`s to finalize.
      */
-    migration_ids: z.array(z.string()).min(1),
+    migration_ids: z.array(z.string()).min(1).describe('Array of `migration_id`s to finalize.'),
   })
 );
 export type FinalizeAlertsMigrationRequestBody = z.infer<typeof FinalizeAlertsMigrationRequestBody>;

@@ -17,8 +17,15 @@ project:
   owner: '@elastic/kibana-security'
   sourceRoot: x-pack/platform/plugins/shared/security
 dependsOn:
+  - '@kbn/ols'
+  - '@kbn/app-header'
   - '@kbn/cloud-plugin'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/es-query'
   - '@kbn/features-plugin'
+  - '@kbn/content-sanitization'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/core-spaces-common'
@@ -51,6 +58,7 @@ dependsOn:
   - '@kbn/utils'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/core-test-helpers-model-versions'
   - '@kbn/utility-types-jest'
   - '@kbn/es-errors'
   - '@kbn/logging'
@@ -75,7 +83,6 @@ dependsOn:
   - '@kbn/code-editor-mock'
   - '@kbn/core-security-browser'
   - '@kbn/core-security-server'
-  - '@kbn/core-http-router-server-internal'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-security-common'
   - '@kbn/core-i18n-browser-mocks'
@@ -103,6 +110,8 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
   - '@kbn/scout'
+  - '@kbn/es'
+  - '@kbn/test-es-server'
   - '@kbn/dev-utils'
   - '@kbn/security-api-integration-helpers'
   - '@kbn/mock-idp-utils'
@@ -118,12 +127,15 @@ dependsOn:
   - '@kbn/projects-solutions-groups'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/ui-callout'
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -132,6 +144,4 @@ fileGroups:
     - test/**/*
     - __mocks__/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

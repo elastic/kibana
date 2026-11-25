@@ -32,7 +32,7 @@ import {
   openEventsViewerFieldsBrowser,
   waitsForEventsToBeLoaded,
 } from '../../../tasks/hosts/events';
-import { kqlSearch } from '../../../tasks/security_header';
+import { kqlSearchGlobalBar } from '../../../tasks/security_header';
 
 import { hostsUrl } from '../../../urls/navigation';
 import { resetFields } from '../../../tasks/timeline';
@@ -125,7 +125,7 @@ describe('Events Viewer', { tags: ['@ess', '@serverless'] }, () => {
     it('filters the events by applying filter criteria from the search bar at the top of the page', () => {
       const filterInput = 'aa7ca589f1b8220002f2fc61c64cfbf1'; // this will never match real data
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
-      kqlSearch(`${filterInput}{enter}`);
+      kqlSearchGlobalBar(`${filterInput}{enter}`);
       cy.get(SERVER_SIDE_EVENT_COUNT).should('not.exist');
       cy.get(DATA_GRID_EMPTY_STATE).should('exist');
     });

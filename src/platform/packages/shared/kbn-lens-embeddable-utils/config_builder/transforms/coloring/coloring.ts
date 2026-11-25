@@ -13,8 +13,10 @@ import {
   DEFAULT_COLOR_STEPS,
   LEGACY_COMPLIMENTARY_PALETTE,
   COMPLEMENTARY_PALETTE,
+  SINGLE_VALUE_PALETTE_RANGE_FACTOR,
 } from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
+import { getPalettes } from '@kbn/palettes';
 import type {
   AllColoringTypes,
   AutoColorType,
@@ -31,7 +33,7 @@ import type {
   UnassignedColorType,
 } from '../../schema/color';
 export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
-import type { SerializableValueType } from '../../schema/serializedValue';
+import type { RangeKeyType, SerializableValueType } from '../../schema/serializedValue';
 import type { PaletteId } from '../../schema/constants';
 import { PALETTE_IDS } from '../../schema/constants';
 import { getReversibleMappings } from '../charts/utils';
@@ -125,15 +127,13 @@ function buildNamedPaletteLensState({
     name: palette,
     params: {
       name: palette,
-      progression: 'fixed', // to be removed
-      reverse: false, // always applied to steps during transform
+      reverse: false, // the stops own the color order, the reverse flag is a no-op
       rangeType: useNumericRange ? 'number' : 'percent',
       // distributed palettes span the full domain; the recalculated min/max act as bounds except for the cases
       // where we use a user-defined max or min. In those cases, we need to open both ends to ensure that
       // values outside the range are still colored.
       continuity: 'all',
       steps: numberOfBands,
-      maxSteps: Math.max(DEFAULT_COLOR_STEPS, numberOfBands),
     },
   };
 }
@@ -142,7 +142,8 @@ function buildNamedPaletteLensState({
  * API -> Lens state for a `distributed_palette` or the deprecated `legacy_dynamic`.
  * - `continuity` is always `all`; opening both bounds keeps values outside the effective range
  *   (e.g. above a metric's user-defined max) colored with the nearest band.
- * - `numberOfBands` is the per-chart default band count used to split the domain.
+ * - `numberOfBands` is the per-chart default band count used to split the domain, unless the
+ *   config carries its own `steps`.
  * - `useNumericRange` defaults to `false` (`percent`). Single-value charts (metric without
  *   a max or breakdown, and legacy metric) pass `true` (`number`) instead, since they color a
  *   single value across an absolute range where percentages are meaningless.
@@ -155,7 +156,8 @@ function fromColorByValuePaletteAPIToLensState(
   const { palette } = config;
   return buildNamedPaletteLensState({
     palette,
-    numberOfBands,
+    numberOfBands:
+      (config.type === 'distributed_palette' ? config.steps : undefined) ?? numberOfBands,
     useNumericRange,
   });
 }
@@ -209,8 +211,7 @@ export function fromColorByValueAPIToLensState(
     name: CUSTOM_PALETTE,
     params: {
       name: CUSTOM_PALETTE,
-      progression: 'fixed', // to be removed
-      reverse: false, // always applied to steps during transform
+      reverse: false, // the stops own the color order, the reverse flag is a no-op
       // @ts-expect-error - This can be null
       rangeMin,
       // @ts-expect-error - This can be null
@@ -219,8 +220,6 @@ export function fromColorByValueAPIToLensState(
       stops,
       colorStops,
       continuity: getContinuity(rangeMin, rangeMax),
-      steps: stops.length,
-      maxSteps: Math.max(5, stops.length), // TODO: point this to a constant or a common default
     },
   };
 }
@@ -233,13 +232,16 @@ export function getRangeValue(value?: number | null): number | null {
 /**
  * Lens state -> API for color by value; inverse of {@link fromColorByValueAPIToLensState}.
  * - A named (non-custom) palette becomes a `distributed_palette`: per-band stops are dropped
- *   since the palette service owns the band distribution.
+ *   since the palette service owns the band distribution. Its band count (`steps`) is kept
+ *   unless it equals `defaultBandCount`, the chart's default that API -> state applies.
  * - A custom palette becomes a `dynamic` config, rematerializing each stop as a
- *   `{ gte, lt | lte, color }` step and applying `reverse` to the stop colors first.
+ *   `{ gte, lt | lte, color }` step. The stored stops already own the color order, so the
+ *   historical `reverse` flag is ignored.
  */
 export function fromColorByValueLensStateToAPI(
-  config: PaletteOutput<CustomPaletteParams> | undefined
-): ColorByValueType | undefined {
+  config: PaletteOutput<CustomPaletteParams> | undefined,
+  defaultBandCount?: number
+): Exclude<ColorByValueType, { type: 'legacy_dynamic' }> | undefined {
   const colorParams = config?.params;
 
   if (!colorParams) return;
@@ -249,7 +251,8 @@ export function fromColorByValueLensStateToAPI(
   const rangeMax = getRangeValue(colorParams.rangeMax);
 
   // A named (non-custom) palette maps to a `distributed_palette`, where the palette
-  // service owns the individual bands, so the per-band stops are dropped.
+  // service owns the individual bands, so the per-band stops are dropped. Only the band
+  // count (`steps`) is kept.
   if (palette !== CUSTOM_PALETTE) {
     // `complimentary` is the legacy misspelling of `complementary`
     // (https://github.com/elastic/kibana/issues/161194). Runtime canonicalizes it before rendering,
@@ -262,29 +265,26 @@ export function fromColorByValueLensStateToAPI(
     return {
       type: 'distributed_palette',
       palette: canonicalPalette,
+      // `steps` is only written when it differs from the chart default, which API -> SO restores
+      ...(colorParams.steps != null &&
+        colorParams.steps !== defaultBandCount && { steps: colorParams.steps }),
     };
   }
 
-  const { rangeType, reverse, continuity: rawContinuity } = colorParams;
-  const originalStops = colorParams.stops ?? [];
+  const { rangeType, continuity: rawContinuity } = colorParams;
+  // The stops are the only source of color order. The `reverse` flag is a historical memo that the
+  // transform must not apply. Every editor that ever wrote `reverse: true` also saved the
+  // stops already reversed, so re-applying it here would double-reverse migrated panels.
+  const stops = colorParams.stops ?? [];
   // Continuity drives the open/closed bounds on the first and last API steps.
   // An open bound (no gte/lte) signals that the color extends beyond the defined range.
   // When the SO omits `continuity` (common for older/real panels), fall back to deriving
-  // it from the range bounds, matching `getContinuity` used by the reverse transform.
+  // it from the range bounds.
   const continuity = rawContinuity ?? getContinuity(rangeMin, rangeMax);
   const isOpenBelow = continuity === 'below' || continuity === 'all';
   const isOpenAbove = continuity === 'above' || continuity === 'all';
 
   const range = paletteRangeCompat.toAPI(rangeType) ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
-  const stops = !reverse
-    ? originalStops
-    : originalStops
-        .slice()
-        .reverse()
-        .map(({ color }, i) => ({
-          ...originalStops[i],
-          color,
-        }));
   const mappedSteps = stops.map((step, i): ColorByValueStep => {
     const { stop: currentStop, color } = step;
     if (i === 0) {
@@ -335,6 +335,51 @@ export function fromColorByValueLensStateToAPI(
   };
 }
 
+/**
+ * Where a single value with no max and no breakdown sits in the palette's percent range: the
+ * metric runtime colors it against bounds of `[0, SINGLE_VALUE_PALETTE_RANGE_FACTOR * value]`
+ * (see `getDataBoundsForPalette`), so the value is always at the same percent of the range.
+ */
+const SINGLE_VALUE_PERCENT = 100 / SINGLE_VALUE_PALETTE_RANGE_FACTOR;
+
+/**
+ * The color a percent-ranged palette paints a single value. Such a palette can't respond to the
+ * data, so it is equivalent to a static color.
+ * - custom: the band that contains 50%.
+ * - named: the band that contains 50% when `steps` uniform bands span the range.
+ *
+ * This is a best-effort conversion and is not theme-aware: named palette colors come from the
+ * default (Borealis) palettes, so another theme's variants (e.g. legacy `amsterdam`) are not
+ * reflected. It returns `undefined`, and the caller falls back to no color, when there is no
+ * palette, the palette can't be resolved, or 50% falls outside every band.
+ */
+export function getSingleValuePercentColor(
+  palette: PaletteOutput<CustomPaletteParams> | undefined
+): string | undefined {
+  const colorByValue = fromColorByValueLensStateToAPI(palette);
+
+  if (colorByValue?.type === 'distributed_palette') {
+    const bands = palette?.params?.steps || palette?.params?.stops?.length || DEFAULT_COLOR_STEPS;
+    const colors = getPalettes(false).query(colorByValue.palette)?.colors(bands);
+    if (!colors?.length) {
+      return;
+    }
+    // Same rule as the runtime's uniform band lookup (`findColorSegment`)
+    const step = 100 / colors.length;
+    return colors[colors.findIndex((_, i) => SINGLE_VALUE_PERCENT <= (1 + i) * step)];
+  }
+
+  if (colorByValue?.type !== 'dynamic') {
+    return;
+  }
+
+  return colorByValue.steps.find(
+    ({ gte, lt, lte }) =>
+      (gte == null || gte <= SINGLE_VALUE_PERCENT) &&
+      (lt != null ? SINGLE_VALUE_PERCENT < lt : lte == null || SINGLE_VALUE_PERCENT <= lte)
+  )?.color;
+}
+
 export function fromStaticColorLensStateToAPI(
   color: string | undefined
 ): StaticColorType | undefined {
@@ -371,14 +416,52 @@ function fromColorLensStateToAPI(
   };
 }
 
+// Mirrors `SerializedRangeKey` from `@kbn/data-plugin/common`.
+interface SerializedRangeKey {
+  type: 'rangeKey';
+  from: string | number | null;
+  to: string | number | null;
+  ranges: Array<
+    Partial<{
+      from: string | number | null;
+      to: string | number | null;
+      label: string;
+    }>
+  >;
+}
+
+// The SO stores an open-ended range bound as `null`. The API omits it.
+const toAPIRangeBounds = ({
+  from,
+  to,
+}: Partial<Pick<SerializedRangeKey, 'from' | 'to'>>): Pick<RangeKeyType, 'from' | 'to'> => ({
+  ...(from != null && { from }),
+  ...(to != null && { to }),
+});
+
+const toStateRangeBounds = ({
+  from,
+  to,
+}: Pick<RangeKeyType, 'from' | 'to'>): Pick<SerializedRangeKey, 'from' | 'to'> => ({
+  from: from ?? null,
+  to: to ?? null,
+});
+
 function mapSerializedValueToAPI(value: unknown): SerializableValueType {
   if (value !== null && typeof value === 'object' && 'type' in value) {
-    const typed = value as { type: string };
-    if (typed.type === 'multiFieldKey') {
-      return { ...typed, type: 'multi_field_key' } as SerializableValueType;
+    if (value.type === 'multiFieldKey') {
+      return { ...value, type: 'multi_field_key' } as SerializableValueType;
     }
-    if (typed.type === 'rangeKey') {
-      return { ...typed, type: 'range_key' } as SerializableValueType;
+    if (value.type === 'rangeKey') {
+      const { from, to, ranges } = value as SerializedRangeKey;
+      return {
+        type: 'range_key',
+        ...toAPIRangeBounds({ from, to }),
+        ranges: ranges.map(({ label, ...bounds }) => ({
+          ...toAPIRangeBounds(bounds),
+          label: label ?? '',
+        })),
+      } satisfies SerializableValueType;
     }
   }
   return value as SerializableValueType;
@@ -386,12 +469,17 @@ function mapSerializedValueToAPI(value: unknown): SerializableValueType {
 
 function mapSerializedValueFromAPI(value: SerializableValueType): unknown {
   if (value !== null && typeof value === 'object' && 'type' in value) {
-    const typed = value as { type: string };
-    if (typed.type === 'multi_field_key') {
-      return { ...typed, type: 'multiFieldKey' };
+    if (value.type === 'multi_field_key') {
+      return { ...value, type: 'multiFieldKey' };
     }
-    if (typed.type === 'range_key') {
-      return { ...typed, type: 'rangeKey' };
+    if (value.type === 'range_key') {
+      const { from, to, ranges } = value as RangeKeyType;
+      const stateValue: SerializedRangeKey = {
+        type: 'rangeKey',
+        ...toStateRangeBounds({ from, to }),
+        ranges: ranges.map(({ label, ...bounds }) => ({ ...toStateRangeBounds(bounds), label })),
+      };
+      return stateValue;
     }
   }
   return value;
@@ -543,7 +631,6 @@ function fromAPIMappingToAssignments(
       return {
         rules: fromRulesAPIToLensState(assignment.values),
         color: fromColorDefAPIToLensState(assignment.color),
-        touched: false,
       };
     });
   }
@@ -551,7 +638,6 @@ function fromAPIMappingToAssignments(
     return {
       rules: fromRulesAPIToLensState(assignment.values),
       color: { type: 'gradient' },
-      touched: false,
     };
   });
 }
@@ -578,7 +664,6 @@ export function fromColorMappingAPIToLensState(
       color: colorMapping.unassigned
         ? fromColorDefAPIToLensState(colorMapping.unassigned)
         : { type: 'loop' },
-      touched: false,
     },
   ];
   const assignments = fromAPIMappingToAssignments(colorMapping);
@@ -587,10 +672,7 @@ export function fromColorMappingAPIToLensState(
       ? { type: colorMapping.mode }
       : {
           type: colorMapping.mode,
-          steps: (colorMapping.gradient?.map(fromColorDefAPIToLensState) ?? []).map((step) => ({
-            ...step,
-            touched: false,
-          })),
+          steps: colorMapping.gradient?.map(fromColorDefAPIToLensState) ?? [],
           sort: colorMapping.sort ?? 'asc',
         };
 

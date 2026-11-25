@@ -82,23 +82,6 @@ export const updateClassicStreamRequest: Streams.ClassicStream.UpsertRequest = {
 };
 
 // ---------------------------------------------------------------------------
-// PUT /api/streams/{name}  –  query stream
-// ---------------------------------------------------------------------------
-
-export const createQueryStreamRequest: Streams.QueryStream.UpsertRequest = {
-  stream: {
-    description: 'All error-level logs across every stream',
-    type: 'query',
-    query: {
-      view: 'logs.errors-view',
-      esql: 'FROM logs* | WHERE log.level == "error"',
-    },
-  },
-  dashboards: [],
-  rules: [],
-};
-
-// ---------------------------------------------------------------------------
 // POST /api/streams/{name}/_fork
 // ---------------------------------------------------------------------------
 
@@ -175,22 +158,6 @@ export const upsertWiredIngestRequest: WiredIngestUpsertRequestBody = {
         },
       ],
     },
-  },
-};
-
-// ---------------------------------------------------------------------------
-// PUT /api/streams/{name}/_query  –  query stream upsert
-// ---------------------------------------------------------------------------
-
-export interface QueryStreamUpsertRequestBody {
-  query: {
-    esql: string;
-  };
-}
-
-export const upsertQueryStreamRequest: QueryStreamUpsertRequestBody = {
-  query: {
-    esql: 'FROM logs* | WHERE log.level == "error" | KEEP @timestamp, message, host.name, log.level',
   },
 };
 
@@ -290,40 +257,6 @@ export const getWiredIngestResponse: { ingest: Streams.WiredStream.Definition['i
 };
 
 // ---------------------------------------------------------------------------
-// PUT /api/streams/{name}/queries/{queryId}
-// ---------------------------------------------------------------------------
-
-export const upsertStreamQueryRequest = {
-  title: 'Error count by host',
-  description: 'Count error-level log events grouped by host name',
-  esql: {
-    query: 'FROM logs* | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
-  },
-};
-
-// ---------------------------------------------------------------------------
-// POST /api/streams/{name}/queries/_bulk
-// ---------------------------------------------------------------------------
-
-export const bulkStreamQueriesRequest = {
-  operations: [
-    {
-      index: {
-        id: 'error-count-by-host',
-        title: 'Error count by host',
-        description: 'Count error-level log events grouped by host name',
-        esql: {
-          query: 'FROM logs* | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
-        },
-      },
-    },
-    {
-      delete: { id: 'old-query-id' },
-    },
-  ],
-};
-
-// ---------------------------------------------------------------------------
 // POST /api/streams/{name}/content/export
 // ---------------------------------------------------------------------------
 
@@ -415,16 +348,6 @@ export const listStreamsResponse: { streams: Streams.all.Definition[] } = {
         settings: {},
         failure_store: { disabled: {} },
         classic: {},
-      },
-    },
-    {
-      name: 'logs.errors',
-      description: 'All error-level logs across every stream',
-      type: 'query',
-      updated_at: '2025-01-20T14:00:00.000Z',
-      query: {
-        view: 'logs.errors-view',
-        esql: 'FROM logs* | WHERE log.level == "error"',
       },
     },
   ],

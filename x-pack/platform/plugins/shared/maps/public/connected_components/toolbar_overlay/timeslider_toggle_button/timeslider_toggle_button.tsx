@@ -40,6 +40,7 @@ export function TimesliderToggleButton(props: Props) {
         disableScreenReaderOutput
         anchorClassName={classNames({
           'mapToolbarOverlay__buttonIcon-empty': !props.isTimesliderOpen,
+          'mapToolbarOverlay__buttonAnchor--fill': props.isTimesliderOpen,
         })}
       >
         <EuiButtonIcon

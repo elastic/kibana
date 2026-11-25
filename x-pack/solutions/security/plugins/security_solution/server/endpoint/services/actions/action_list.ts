@@ -270,6 +270,7 @@ const getActionDetailsList = async ({
         endpointService,
         spaceId,
         agentIds,
+        scoped,
       }),
     ]);
   } catch (error) {

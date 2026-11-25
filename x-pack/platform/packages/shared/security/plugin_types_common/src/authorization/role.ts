@@ -23,6 +23,8 @@ export interface RoleRemoteIndexPrivilege extends RoleIndexPrivilege {
   clusters: string[];
 }
 
+export type RoleDataSourcePrivilege = estypes.SecurityDataSourcePrivileges;
+
 export interface RoleKibanaPrivilege {
   spaces: string[];
   base: string[];
@@ -57,6 +59,7 @@ export interface Role {
     indices: RoleIndexPrivilege[];
     remote_indices?: RoleRemoteIndexPrivilege[];
     run_as: string[];
+    global?: estypes.SecurityGlobalPrivilege;
   };
   kibana: RoleKibanaPrivilege[];
   metadata?: {

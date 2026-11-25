@@ -63,8 +63,10 @@ describe('<FollowerIndicesList />', () => {
       expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
     });
 
-    test('should have a button to create a follower index', () => {
-      expect(screen.getByTestId('createFollowerIndexButton')).toBeInTheDocument();
+    test('should have a button to create a follower index in the empty prompt', () => {
+      expect(
+        within(screen.getByTestId('emptyPrompt')).getByTestId('createFollowerIndexButton')
+      ).toBeInTheDocument();
     });
   });
 
@@ -132,8 +134,8 @@ describe('<FollowerIndicesList />', () => {
       expect(screen.queryByTestId('emptyPrompt')).not.toBeInTheDocument();
     });
 
-    test('should have a button to create a follower index', () => {
-      expect(screen.getByTestId('createFollowerIndexButton')).toBeInTheDocument();
+    test('should not render a table create button; that action lives on the home header', () => {
+      expect(screen.queryByTestId('createFollowerIndexButton')).not.toBeInTheDocument();
     });
 
     test('should list the follower indices in the table', () => {

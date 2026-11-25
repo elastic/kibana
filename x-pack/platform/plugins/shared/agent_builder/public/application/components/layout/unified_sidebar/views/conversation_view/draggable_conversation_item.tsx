@@ -31,10 +31,9 @@ export const DraggableConversationItem: React.FC<DraggableConversationItemProps>
   routeConversationId,
   onItemClick,
 }) => {
-  const { activeStreams, byConversationId } = useStreamingContext();
+  const { activeStreams } = useStreamingContext();
   const isStreaming = activeStreams.has(conversation.id);
-  const hasError = Boolean(byConversationId[conversation.id]?.error);
-  const status = deriveDisplayStatus(conversation, isStreaming, hasError, isActive);
+  const status = deriveDisplayStatus(conversation, isStreaming, isActive);
 
   return (
     <EuiDraggable

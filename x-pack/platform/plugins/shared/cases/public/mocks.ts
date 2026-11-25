@@ -74,7 +74,6 @@ export const mockCasesContract = (): CaseUiClientMock => ({
     attachmentsEnabled: false,
     chatEnabled: false,
     runWorkflowsEnabled: false,
-    casesRedesign: { list: false, details: false, settings: false },
   },
 });
 

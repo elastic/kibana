@@ -9,8 +9,14 @@ import expect from '@kbn/expect';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
+  OSQUERY_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import type {
+  AttachmentPatchRequest,
+  AttachmentRequestV2,
+} from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
@@ -19,6 +25,7 @@ import {
   deleteAllCaseItems,
   bulkCreateAttachments,
   getComment,
+  updateComment,
   deleteComment,
   deleteAllComments,
   getCase,
@@ -49,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('legacy user comment interop', () => {
-      it('reads a legacy `user` comment through the v2 read path (legacy type preserved in legacy mode)', async () => {
+      it('reads a legacy `user` comment through the v2 read path (public GET rebuilds the v1 wire shape)', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await createComment({
           supertest,
@@ -64,8 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
           commentId,
         });
 
-        // The legacy `/comments/{id}` route reads with mode=legacy, which preserves
-        // the legacy `user` type; unified projection only happens on mode=unified reads.
+        // Public GET /comments rebuilds the v1 `user` wire shape at the route.
         expect(fetched.type).to.be('user');
         expect(getCommentContent(fetched as unknown as Record<string, unknown>)).to.be(
           postCommentUserReq.comment
@@ -352,6 +358,104 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           expectedHttpCode: 400,
         });
+      });
+    });
+
+    // Public POST /comments decodes the v1|unified union then converts to unified.
+    // A v1-only decoder here would 400 every unified body — guards the type narrowing.
+    describe('public POST /comments accepts unified bodies', () => {
+      it('200s for a unified value comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: 'comment' as const,
+            data: { content: 'unified via public POST' },
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        expect(updatedCase.comments?.length).to.be(1);
+        expect(updatedCase.totalComment).to.be(1);
+      });
+
+      it('200s for a unified reference (osquery) attachment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: OSQUERY_ATTACHMENT_TYPE,
+            attachmentId: 'osquery-public-post',
+            metadata: { agentIds: ['agent-1'], queryId: 'query-1' },
+            owner: 'securitySolutionFixture',
+          } as AttachmentRequestV2,
+        });
+
+        expect(updatedCase.comments?.length).to.be(1);
+      });
+    });
+
+    // Public PATCH /comments has the same union decode as POST; a v1-only decoder
+    // would 400 a unified patch body. Round-trip both shapes through the boundary.
+    describe('public PATCH /comments accepts unified and legacy bodies', () => {
+      it('round-trips a legacy v1 `user` comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const created = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+        const { id, version } = created.comments![0];
+
+        await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            id,
+            version,
+            type: AttachmentType.user,
+            comment: 'updated legacy comment',
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        const fetched = await getComment({ supertest, caseId: postedCase.id, commentId: id });
+        expect(getCommentContent(fetched as unknown as Record<string, unknown>)).to.be(
+          'updated legacy comment'
+        );
+      });
+
+      it('round-trips a unified value comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const created = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: 'comment' as const,
+            data: { content: 'unified original' },
+            owner: 'securitySolutionFixture',
+          },
+        });
+        const { id, version } = created.comments![0];
+
+        await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            id,
+            version,
+            type: 'comment',
+            data: { content: 'unified updated' },
+            owner: 'securitySolutionFixture',
+          } as unknown as AttachmentPatchRequest,
+        });
+
+        const fetched = await getComment({ supertest, caseId: postedCase.id, commentId: id });
+        expect(getCommentContent(fetched as unknown as Record<string, unknown>)).to.be(
+          'unified updated'
+        );
       });
     });
   });

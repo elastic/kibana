@@ -5,34 +5,40 @@
  * 2.0.
  */
 
-import { humanizeTagType, signalSummary, tagDescription } from './signal_format';
+import { SIGNAL_TAGS } from '../../../../common/http_api/signals';
+import { signalSummary, signalTitle, tagDescription, tagLabel } from './signal_format';
 import { buildSignal } from './signal_test_fixtures';
 
 describe('tagDescription', () => {
-  it('returns a curated one-line description for a known tag', () => {
+  it('describes every tag in one line', () => {
     expect(tagDescription('query_error')).toMatch(/failed/i);
     expect(tagDescription('empty_retrieval')).toMatch(/no rows/i);
     expect(tagDescription('coverage_gap')).toMatch(/raw index access/i);
   });
+});
 
-  it('falls back to a generic description (with the humanized label) for an unknown tag', () => {
-    expect(tagDescription('some_new_tag')).toContain('Some New Tag');
+describe('tagLabel', () => {
+  it('labels every tag', () => {
+    expect(tagLabel('query_error')).toBe('Query error');
+    expect(tagLabel('empty_retrieval')).toBe('Empty retrieval');
+    expect(tagLabel('coverage_gap')).toBe('Coverage gap');
+  });
+
+  it('leaves no tag without a label or a description', () => {
+    for (const tag of SIGNAL_TAGS) {
+      expect(tagLabel(tag)).toBeTruthy();
+      expect(tagDescription(tag)).toBeTruthy();
+    }
   });
 });
 
-describe('humanizeTagType', () => {
-  it('uses the curated label for a known tag', () => {
-    expect(humanizeTagType('query_error')).toBe('Query error');
-    expect(humanizeTagType('empty_retrieval')).toBe('Empty retrieval');
-    expect(humanizeTagType('coverage_gap')).toBe('Coverage gap');
+describe('signalTitle', () => {
+  it('titles a signal by its first tag', () => {
+    expect(signalTitle(buildSignal({}, ['query_error']))).toBe('Query error · ai-index-ds-support');
   });
 
-  it('title-cases an unknown snake_case tag', () => {
-    expect(humanizeTagType('some_new_tag')).toBe('Some New Tag');
-  });
-
-  it('falls back to "Signal" for an empty tag', () => {
-    expect(humanizeTagType('')).toBe('Signal');
+  it('titles an untagged signal generically', () => {
+    expect(signalTitle(buildSignal({}, []))).toBe('Signal · ai-index-ds-support');
   });
 });
 
