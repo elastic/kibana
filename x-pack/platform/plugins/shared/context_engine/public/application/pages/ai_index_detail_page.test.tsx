@@ -752,7 +752,6 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    // `notifyOnError` only picks who shows the error toast, it is not part of the request.
     const requests = mockUseListKi.mock.calls.map(([args]) => ({
       ...args,
       notifyOnError: undefined,
@@ -859,7 +858,6 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextOverviewRecentDocuments')).toBeInTheDocument();
     expect(screen.getByTestId('contextOverviewDocumentsChart')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexDetailTab-sources')).toHaveTextContent(/^Sources$/);
-    // The summary does not wait for the AI index, and stays quiet about errors until it exists.
     expect(mockUseListKi).toHaveBeenCalledWith(
       expect.objectContaining({ aiIndexId: aiIndex.id, notifyOnError: false })
     );

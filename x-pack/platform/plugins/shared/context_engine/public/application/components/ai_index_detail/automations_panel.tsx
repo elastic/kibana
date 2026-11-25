@@ -234,7 +234,6 @@ export const AutomationsPanel = ({
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
-            {/* `tabIndex={-1}`: links can focus the heading, but Tab does not stop on it. */}
             <h2 id={AUTOMATIONS_HEADING_ID} tabIndex={-1}>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {
                 defaultMessage: 'Automations',
@@ -270,7 +269,6 @@ export const AutomationsPanel = ({
       {isLoading || isLoadingSummaries ? (
         <>
           <EuiSpacer size="m" />
-          {/* Shaped like the empty state, so a new AI index keeps the panel height after loading. */}
           <AiIndexDetailPanelEmptyStateSkeleton dataTestSubj="contextAiIndexAutomationsLoading" />
         </>
       ) : (

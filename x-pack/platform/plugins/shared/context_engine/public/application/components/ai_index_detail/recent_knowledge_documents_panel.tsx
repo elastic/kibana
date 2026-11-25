@@ -41,10 +41,7 @@ const headerStyle = css({ flexGrow: 0 });
 
 export const RECENT_KNOWLEDGE_DOCUMENTS_SIZE = 5;
 
-/**
- * Request for the newest documents. The Overview page asks with the same values for its counts,
- * so both share one request: the response has the counts whatever the size.
- */
+/** Also used by the Overview page for its counts, so both share one request. */
 export const RECENT_KNOWLEDGE_DOCUMENTS_QUERY = {
   size: RECENT_KNOWLEDGE_DOCUMENTS_SIZE,
   status: KI_NOT_DELETED_STATUSES,
@@ -93,7 +90,6 @@ const RecentKnowledgeDocumentRow = ({
             <EuiTextTruncate text={getKiDisplayTitle(title)} />
           </EuiLink>
         </EuiFlexItem>
-        {/* A long type name must not push the title out: the badge cuts its text with "…". */}
         <EuiFlexItem grow={false} css={badgeItemCss}>
           <KiTypeDisplay as="badge" type={type} />
         </EuiFlexItem>

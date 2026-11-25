@@ -30,7 +30,6 @@ export const useKiHistogram = (aiIndexId: string): UseKiHistogramResult => {
   const { data, isLoading, error } = useQuery<KiHistogramResponse, Error>({
     queryKey: contextEngineQueryKeys.aiIndex.kiHistogram(aiIndexId),
     queryFn: ({ signal }) => getKiHistogram(http, { aiIndexId, signal }),
-    // Counts per day change slowly; a refetch on every tab focus only adds load and errors.
     refetchOnWindowFocus: false,
   });
 

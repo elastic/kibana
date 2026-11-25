@@ -19,10 +19,8 @@ import { hasReadableWorkflow, useWorkflowSummaries } from '../../hooks/use_workf
 import { getWorkflowExecutionPath } from '../../utils/get_workflow_execution_path';
 import { goToAutomations } from './automations_panel_id';
 
-// The small callout shows its text inline after the title, so CSS cannot clamp it to lines.
-// About 2 lines at the callout's maximum width.
+// The small callout shows its text inline, so CSS cannot clamp it. 200 chars is about 2 lines.
 const MAX_MESSAGE_LENGTH = 200;
-// A long word without spaces (a URL, a stack frame) must wrap instead of leaving the callout.
 const messageStyle = css({ overflowWrap: 'anywhere' });
 
 const shortenMessage = (message: string): string =>
@@ -61,7 +59,6 @@ export const FailedAutomationRunsCallout = ({ workflowIds }: FailedAutomationRun
       })
     : name;
 
-  // Several failed runs: one error would not describe them all, so the link to the list is enough.
   const text =
     failedRuns.length > 1 ? (
       <p>

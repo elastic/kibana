@@ -137,7 +137,6 @@ export const AiIndexDetailPage = () => {
   } = useListKi({
     // The URL id, so the summary loads in parallel with the AI index instead of after it.
     aiIndexId: id,
-    // Same request as the Recent documents panel, so the Overview sends it only once.
     ...RECENT_KNOWLEDGE_DOCUMENTS_QUERY,
     // No toast for an AI index that does not exist: the page shows that error.
     notifyOnError: aiIndex !== undefined,
@@ -333,7 +332,6 @@ export const AiIndexDetailPage = () => {
           <EuiSpacer size="l" />
         </>
       )}
-      {/* Next to the automations it is about, and below the sections that are always there. */}
       {aiIndex && !isManaged && <FailedAutomationRunsCallout workflowIds={visibleWorkflowIds} />}
       <AutomationsSection
         isLoading={isLoading}

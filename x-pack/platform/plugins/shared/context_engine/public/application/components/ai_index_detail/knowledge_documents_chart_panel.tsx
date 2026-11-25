@@ -72,7 +72,6 @@ export const KnowledgeDocumentsChartPanel = ({ aiIndexId }: KnowledgeDocumentsCh
         />
       );
     }
-    // A failed refetch keeps the chart it already has.
     if (error && buckets.length === 0) {
       return (
         <OverviewPanelEmptyState

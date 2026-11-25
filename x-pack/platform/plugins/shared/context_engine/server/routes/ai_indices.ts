@@ -839,7 +839,6 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Count knowledge documents added per day. A static segment wins over `{kiId}` in hapi routing.
   router.versioned
     .get({
       path: AI_INDEX_KI_HISTOGRAM_PATH,

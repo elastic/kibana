@@ -58,12 +58,11 @@ export const AiIndexDetailPanelEmptyState = ({
   );
 };
 
-// The centered prompt shrinks its content to fit, and the skeleton line has no content of its
-// own, so a box with a width keeps the line visible.
+// Without a width, the centered prompt shrinks the empty skeleton line to nothing.
 const skeletonMessageStyle = css({ width: 240 });
 const skeletonIconStyle = css({ margin: '0 auto' });
 
-/** Loading version of the empty state: same layout and sizes, so the panel keeps its height. */
+/** Loading version of the empty state, with the same size. */
 export const AiIndexDetailPanelEmptyStateSkeleton = ({
   dataTestSubj,
 }: {

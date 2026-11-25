@@ -11,13 +11,10 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
 
-/** Body height of the Overview panels that sit side by side (Recent documents and the chart). */
 export const OVERVIEW_PANEL_BODY_HEIGHT = 200;
 
-// In a column panel, `marginTop: auto` keeps the box at the bottom, so the empty states of panels
-// side by side line up even when only one panel has a description. `flexGrow: 0` stops the
-// flex group from taking the free space instead.
-// `minHeight`, so a long text (or a long translation) makes the box taller instead of overflowing.
+// `marginTop: auto` keeps the box at the bottom of a column panel, so boxes side by side line up
+// when only one panel has a description. `flexGrow: 0` stops the flex group taking that space.
 const emptyStateBoxStyle = css({
   minHeight: OVERVIEW_PANEL_BODY_HEIGHT,
   marginTop: 'auto',
@@ -30,10 +27,7 @@ interface OverviewPanelEmptyStateProps {
   message: string;
 }
 
-/**
- * Centered icon and text with the height of a loaded panel body, so the panel keeps its size.
- * Used for empty and error states.
- */
+/** Centered icon and text, as tall as a loaded panel body, for empty and error states. */
 export const OverviewPanelEmptyState = ({
   iconType,
   dataTestSubj,
