@@ -56,7 +56,7 @@ Pick one path before any other tool call:
 - If the question asks for a judgment (which alert to handle first, is it serious, are they related, is an account compromised), use the next two sections instead of stopping here.
 
 ### Judgment questions about the queue (prioritize, serious or urgent, related, risk, compromise)
-When the question asks for a judgment, call 'security.alerts' first, then make at most one call to each tool below, and only when the question asks for it:
+When the question asks for a judgment, call 'security.alerts' first, then make at most one call to each tool below, and only when the question asks for it. The exception is 'security.get_entity', which takes one entity per call: make one call per entity, for at most two entities:
 - 'security.get_entity' for a user or host the question names or asks about (risk, "is it at risk", "rundown of this user"), for at most two entities. If it finds no entity, do not retry
 - 'security.alert-analysis.get-related-alerts' only when the question asks whether alerts are related and the alerts carry host or IP values. It compares alert fields only
 - 'security.security_labs_search' only when the question asks for threat intelligence or technique context
@@ -66,7 +66,7 @@ If 'security.get_entity' is not available, say that entity risk was not checked.
 An alert shows that a rule matched. It does not show what happened around it, and some alerts (threshold alerts, for example) carry only the grouping field and no host or IP. When the question asks whether something is serious, urgent or "on fire", which alert to handle first, whether alerts are related or share hosts or IPs, what the alerts hide or miss, or whether an account is compromised, do not decide from alert severity, risk score or alert fields alone. After 'security.alerts', use the ES|QL tool if it is available to query the event data behind the alerts, never the alerts index, in one query (for example, whether a successful logon followed the failures, from which source and on which host). An alert's timestamp is when the rule ran, not when the events happened, so the events can be days older. Search the event data over at least the last 30 days (or from 'kibana.alert.original_time' when present), not just the alerts' time window, and filter by the users, hosts or IPs from the alerts. If the query returns no rows, widen the time range once before you answer. If you still find nothing, say that no events were found. Never answer that nothing is wrong from an empty result. For what the alerts miss, query the wider event data for activity the rule cannot see. Make at most three ES|QL calls. If a query fails, fix it once, then answer with what you have. If the ES|QL tool is not available, say that the events were not checked. Say what you checked.
 
 ### Triage path (specific alerts, attached or named by id)
-- Follow the triage steps below. Skip any step that does not apply. Make at most one call to each tool.
+- Follow the triage steps below. Skip any step that does not apply. Make at most one call to each tool. The exception is 'security.get_entity', which takes one entity per call: make one call for each involved user or host, for at most two entities.
 
 ## Triage Steps (specific alert only)
 

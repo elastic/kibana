@@ -163,9 +163,24 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     );
 
     expect(judgment).toMatch(/at most one call to each tool/i);
+    expect(judgment).toMatch(/exception is 'security\.get_entity'[^\n]*one call per entity/i);
     expect(judgment).toMatch(/'security\.get_entity'[^\n]*at most two entities/i);
     expect(judgment).toMatch(/get-related-alerts'[^\n]*carry host or IP values/i);
     expect(judgment).toMatch(/security_labs_search'[^\n]*threat intelligence/i);
+  });
+
+  // Why: security.get_entity takes one entityId per call, so a one-call cap per tool would stop triage
+  // from checking both the user and the host.
+  it('allows one get_entity call per entity on the triage path', () => {
+    const { content } = alertAnalysisSkill;
+    const triage = content.slice(
+      content.indexOf('### Triage path'),
+      content.indexOf('## Triage Steps')
+    );
+
+    expect(triage).toMatch(
+      /exception is 'security\.get_entity'[^\n]*one call for each involved user or host/i
+    );
   });
 
   // Why: security.get_entity exists only when the Entity Store V2 index exists. Where it is missing,
