@@ -54,3 +54,31 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 3
+
+      - label: 'Evals: Nightshift Investigations reply writeup'
+        key: kbn-evals-daily-nightshift-investigations-writeup
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          # Its own suite, so PR runs (labelled by .github/paths-labeller.yml) compare against these.
+          EVAL_SUITE_ID: 'nightshift-investigations-writeup'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet'
+          # The suite's defaultJudge only applies to PR runs, so the daily step names it too.
+          EVAL_CONNECTOR_ID: 'eis-openai-gpt-6-sol'
+          KBN_EVALS_DAILY: '1'
+          EVAL_SLACK_NOTIFICATION_CHANNEL: '#nightshift-alerts'
+        timeout_in_minutes: 30
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3

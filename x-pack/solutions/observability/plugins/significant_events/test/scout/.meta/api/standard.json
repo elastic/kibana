@@ -1,5 +1,5 @@
 {
-  "sha1": "bbeb41a2652f3a4db1a4d1a368d117050fdadb17",
+  "sha1": "da89530ddfb0f604b8c0192c71cce592f453bed6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -928,8 +928,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 22,
-        "column": 5
+        "line": 28,
+        "column": 7
       }
     },
     {
@@ -944,8 +944,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 45,
-        "column": 9
+        "line": 52,
+        "column": 13
       }
     },
     {
@@ -960,8 +960,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 54,
-        "column": 15
+        "line": 57,
+        "column": 32
       }
     },
     {

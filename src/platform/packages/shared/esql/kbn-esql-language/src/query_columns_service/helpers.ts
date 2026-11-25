@@ -8,7 +8,7 @@
  */
 import type { ESQLCallbacks, ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
 import type { ESQLAstJoinCommand, ESQLAstPromqlCommand, ESQLAstCommand } from '@elastic/esql/types';
-import { BasicPrettyPrinter, isSource, synth, Walker } from '@elastic/esql';
+import { BasicPrettyPrinter, isSource, isSubQuery, synth, Walker } from '@elastic/esql';
 import { esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '../..';
 import {
   UnmappedFieldsStrategy,
@@ -142,6 +142,12 @@ export function getUnmappedFields(
   const columsSet = new Set(previousPipeFields.map((col) => col.name));
 
   Walker.walk(command, {
+    // FORK branches belong to this pipeline; an IN subquery has its own columns.
+    visitParens: (node, parent, walker) => {
+      if (isSubQuery(node) && parent !== command) {
+        walker.skipChildren();
+      }
+    },
     visitColumn: (node) => {
       if (
         !columnIsPresent(node, columsSet) &&

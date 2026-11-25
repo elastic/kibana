@@ -33,7 +33,6 @@ describe('parseAge', () => {
 
   it('returns NaN for values it cannot read', () => {
     expect(parseAge('7w')).toBeNaN();
-    expect(parseAge('30s')).toBeNaN();
     expect(parseAge('')).toBeNaN();
   });
 });

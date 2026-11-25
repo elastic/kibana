@@ -1,5 +1,5 @@
 {
-  "sha1": "eeb4381deb00bb53ddf7a265ee2d3ef480b55016",
+  "sha1": "ec57e6c98a24392ee874daf10fe694836b3a010e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -653,8 +653,68 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_composition.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 206,
+        "column": 20
+      }
+    },
+    {
+      "id": "139b76514d3069c-6f240dfec815edc",
+      "title": "Workflow composition async join: awaits every child started in a foreach and returns their results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_composition.spec.ts",
+        "line": 229,
+        "column": 91
+      }
+    },
+    {
+      "id": "139b76514d3069c-1e68af4ab9a2ef7",
+      "title": "Workflow composition async join: fails fast when a child fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_composition.spec.ts",
+        "line": 243,
+        "column": 18
+      }
+    },
+    {
+      "id": "139b76514d3069c-4725e013a09fa5f",
+      "title": "Workflow composition async join (settled): completes and reports the failed children in results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_composition.spec.ts",
+        "line": 260,
+        "column": 31
       }
     },
     {
@@ -673,8 +733,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_composition.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 280,
+        "column": 26
       }
     },
     {
@@ -693,7 +753,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_composition.spec.ts",
-        "line": 183,
+        "line": 290,
         "column": 12
       }
     },
