@@ -200,7 +200,7 @@ Prompt bodies and the guidelines are loaded at run time, so a merged change take
 
    ### Review notes
 
-   - <when a workflow prompt changed: "Before merging, run `gh aw compile <workflow>` for <each edited workflow> and push the lock files. The lock validation check fails until then." Otherwise: "No lock file recompile is needed: only files without a lock changed.">
+   - <when a workflow prompt changed: "Before merging, run `node scripts/ensure_gh_aw_version.js` to get the repo-pinned compiler, then `gh aw compile <workflow>` for <each edited workflow>, and push the lock files. The lock validation check fails until then." Otherwise: "No lock file recompile is needed: only files without a lock changed.">
    - <any file you considered editing but did not, and why>
    ```
 
