@@ -19,6 +19,8 @@ const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
  *  - calls `filestore.read` on a `/<name>/SKILL.md` path.
  * The name must be preceded by `"` or `/` and followed by `"` or `/SKILL.md`, so
  * `alert-analysis-extra` and `pre-alert-analysis` do not satisfy `alert-analysis`.
+ * Whitespace around the name is tolerated because `resolveSkill` trims its input:
+ * `{"skill":" alert-analysis "}` is a successful activation, not a miss.
  */
 export function createSkillInvocationEvaluator({
   traceEsClient,
@@ -53,12 +55,7 @@ export function createSkillInvocationEvaluator({
       )
       OR (
         attributes.gen_ai.tool.name == "load_skill"
-          AND (
-            attributes.gen_ai.tool.call.arguments LIKE "*\\"${skillName}\\"*"
-            OR attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}\\"*"
-            OR attributes.gen_ai.tool.call.arguments LIKE "*\\"${skillName}/SKILL.md\\"*"
-            OR attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md\\"*"
-          )
+          AND attributes.gen_ai.tool.call.arguments RLIKE ".*(\\"|/)[ \\\\t]*${skillName}([ \\\\t]*\\"|/SKILL.md[ \\\\t]*\\").*"
       ),
       1,
       NULL

@@ -66,7 +66,7 @@ describe('createSkillInvocationEvaluator', () => {
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "load_skill"');
     expect(calledQuery).toContain('*/endpoint-forensic-analysis/SKILL.md*');
-    expect(calledQuery).toContain('*\\"endpoint-forensic-analysis\\"*');
+    expect(calledQuery).toContain('RLIKE ".*(\\"|/)');
   });
 
   it('returns 1 when load_skill invoked the skill', async () => {
@@ -182,6 +182,15 @@ describe('createSkillInvocationEvaluator', () => {
       return markers.some((marker, i) => {
         if (marker[1] !== call.tool) return false;
         const segment = clause.slice(marker.index, markers[i + 1]?.index ?? clause.length);
+        const rlikeMatch = segment.match(
+          /attributes\.gen_ai\.tool\.call\.arguments RLIKE "((?:[^"\\]|\\.)*)"/
+        );
+        if (rlikeMatch) {
+          // ES|QL RLIKE uses Java regex; decode the ES|QL string literal once
+          // (\\ -> \, \" -> ") to get the pattern the regex engine sees, e.g. [ \t].
+          const pattern = unescapeEsql(rlikeMatch[1]);
+          return new RegExp(pattern).test(serializedArgs);
+        }
         const patterns = [
           ...segment.matchAll(
             /attributes\.gen_ai\.tool\.call\.arguments LIKE "((?:[^"\\]|\\.)*)"/g
@@ -197,6 +206,8 @@ describe('createSkillInvocationEvaluator', () => {
       ['skill folder path', { skill: 'skills/security/alerts/alert-analysis' }],
       ['leading-slash name', { skill: '/alert-analysis' }],
       ['name with SKILL.md suffix', { skill: 'alert-analysis/SKILL.md' }],
+      ['name with leading/trailing spaces', { skill: ' alert-analysis ' }],
+      ['name with leading space and SKILL.md suffix', { skill: ' alert-analysis/SKILL.md ' }],
     ])('counts load_skill by %s', async (_label, args) => {
       expect(await countsAsInvocation('alert-analysis', { tool: 'load_skill', args })).toBe(true);
     });
@@ -208,6 +219,7 @@ describe('createSkillInvocationEvaluator', () => {
       ['load_skill', { skill: '/skills/security/alerts/pre-alert-analysis/SKILL.md' }],
       ['filestore.read', { path: '/skills/security/alerts/pre-alert-analysis/SKILL.md' }],
       ['filestore.read', { path: '/skills/security/alerts/alert-analysis-extra/SKILL.md' }],
+      ['load_skill', { skill: ' pre-alert-analysis ' }],
     ])('does not count %s of a look-alike skill: %j', async (tool, args) => {
       expect(await countsAsInvocation('alert-analysis', { tool, args })).toBe(false);
     });
@@ -220,15 +232,13 @@ describe('createSkillInvocationEvaluator', () => {
       expect(query).toMatch(
         /attributes\.gen_ai\.tool\.name == "filestore\.read"\s+AND attributes\.gen_ai\.tool\.call\.arguments LIKE/
       );
-      expect(query).toMatch(/attributes\.gen_ai\.tool\.name == "load_skill"\s+AND \(/);
+      expect(query).toMatch(
+        /attributes\.gen_ai\.tool\.name == "load_skill"\s+AND attributes\.gen_ai\.tool\.call\.arguments RLIKE/
+      );
 
       const loadSkillClause = query.slice(query.indexOf('"load_skill"'));
-      const loadSkillForms = loadSkillClause.slice(
-        loadSkillClause.indexOf('('),
-        loadSkillClause.indexOf(')')
-      );
-      expect(loadSkillForms).not.toMatch(/\bAND\b/);
-      expect(loadSkillForms.match(/\bOR\b/g)).toHaveLength(3);
+      expect(loadSkillClause).toContain('RLIKE');
+      expect(loadSkillClause).not.toMatch(/(?<!R)LIKE "/);
     });
 
     it('counts filestore.read of the SKILL.md path', async () => {
