@@ -14,6 +14,7 @@ import { MOBILE_CRASHES_EBT_ELEMENTS } from '../../../ebt_constants';
 import { useQueryParam } from '../../../hooks/use_query_param';
 import { MobileToolbar, useMobileFilters } from '../mobile_overview/mobile_toolbar';
 import type { MobileKpisState } from '../mobile_overview/use_mobile_kpis';
+import { MobileCrashFlyout } from './mobile_crash_flyout';
 import { MobileCrashGroupsTable } from './mobile_crash_groups_table';
 import { useMobileCrashGroups } from './use_mobile_crash_groups';
 
@@ -58,7 +59,7 @@ export function MobileCrashesTab({
   const { response, isLoading, error, refresh } = useMobileCrashGroups(serviceName);
   const { isFiltered, clearFiltersButton } = useMobileFilters();
   // In the URL, so a reload or a shared link reopens the group's detail.
-  const { setValue: setCrashGroup } = useQueryParam('crashGroup');
+  const { value: crashGroup, setValue: setCrashGroup } = useQueryParam('crashGroup');
   const refreshAll = () => {
     kpisState.refresh();
     refresh();
@@ -117,6 +118,14 @@ export function MobileCrashesTab({
         </>
       )}
       {renderContent()}
+      {crashGroup && (
+        <MobileCrashFlyout
+          serviceName={serviceName}
+          fingerprint={crashGroup}
+          group={response?.crashGroups.find(({ fingerprint }) => fingerprint === crashGroup)}
+          onClose={() => setCrashGroup(undefined)}
+        />
+      )}
     </>
   );
 }

@@ -13,6 +13,7 @@ import type { MobileCrashGroup } from '../../../../common/types/mobile';
 import { useQueryParam } from '../../../hooks/use_query_param';
 import { MobileToolbar, useMobileFilters } from '../mobile_overview/mobile_toolbar';
 import type { MobileKpisState } from '../mobile_overview/use_mobile_kpis';
+import { MobileCrashFlyout } from './mobile_crash_flyout';
 import { MobileCrashGroupsTable } from './mobile_crash_groups_table';
 import { MobileCrashesTab } from './mobile_crashes_tab';
 import { useMobileCrashGroups, type MobileCrashGroupsState } from './use_mobile_crash_groups';
@@ -26,6 +27,13 @@ jest.mock('../mobile_overview/mobile_toolbar', () => ({
     </button>
   )),
   useMobileFilters: jest.fn(),
+}));
+jest.mock('./mobile_crash_flyout', () => ({
+  MobileCrashFlyout: jest.fn(({ onClose }: { onClose: () => void }) => (
+    <button type="button" data-test-subj="crashFlyout" onClick={onClose}>
+      Flyout
+    </button>
+  )),
 }));
 jest.mock('./mobile_crash_groups_table', () => ({
   MobileCrashGroupsTable: jest.fn(({ onSelect }: { onSelect: (fingerprint: string) => void }) => (
@@ -148,5 +156,22 @@ describe('MobileCrashesTab', () => {
       'matches the selected environment, OS and release'
     );
     expect(screen.getByRole('button', { name: 'Clear filters' })).toBeInTheDocument();
+  });
+
+  it("opens the URL's crash group in the flyout, with the group the list has, and closes it", () => {
+    jest.mocked(useQueryParam).mockReturnValue({ value: 'npe', setValue: setCrashGroup });
+    renderTab();
+
+    expect(jest.mocked(MobileCrashFlyout).mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ serviceName: 'trailmap-android', fingerprint: 'npe', group: GROUP })
+    );
+    fireEvent.click(screen.getByTestId('crashFlyout'));
+    expect(setCrashGroup).toHaveBeenCalledWith(undefined);
+  });
+
+  it('opens no flyout without a crash group in the URL', () => {
+    renderTab();
+
+    expect(screen.queryByTestId('crashFlyout')).toBeNull();
   });
 });
