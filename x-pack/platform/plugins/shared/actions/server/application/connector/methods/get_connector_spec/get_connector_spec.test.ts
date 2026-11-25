@@ -249,25 +249,44 @@ describe('getConnectorSpecAsJsonSchema', () => {
       expect(result.metadata.specVersion).toBeUndefined();
     });
 
-    it.each([
+    describe.each([
       { name: 'no versioned specs', specs: undefined },
       { name: 'an empty versioned specs map', specs: new Map<string, ConnectorSpec>() },
-    ])(
-      'falls back to the unversioned spec when the catalog is enabled but the type has $name',
-      async ({ specs }) => {
+    ])('when the catalog is enabled but the type has $name', ({ specs }) => {
+      beforeEach(() => {
         actionTypeRegistry.get.mockReturnValue(
           getConnectorType({ id: catalogOnly.metadata.id, spec: catalogOnly, specs })
         );
-        const result = await getConnectorSpecAsJsonSchema({
-          context: createContext(),
-          id: catalogOnly.metadata.id,
-          specVersion: '1',
-          configurationUtilities: { ...configurationUtilities, isCatalogEnabled: () => true },
-        });
+      });
 
-        expect(result.metadata.specVersion).toBeUndefined();
-      }
-    );
+      it.each([undefined, '1'])(
+        'falls back to the unversioned spec for selector %s',
+        async (specVersion) => {
+          const result = await getConnectorSpecAsJsonSchema({
+            context: createContext(),
+            id: catalogOnly.metadata.id,
+            specVersion,
+            configurationUtilities: catalogConfigurationUtilities,
+          });
+
+          expect(result.metadata).toEqual({ ...catalogOnly.metadata, specVersion: undefined });
+        }
+      );
+
+      it.each(['', 'latest', '01', '1.x', '2.2.0'])(
+        'rejects invalid version %j instead of serving the unversioned spec',
+        async (specVersion) => {
+          await expect(
+            getConnectorSpecAsJsonSchema({
+              context: createContext(),
+              id: catalogOnly.metadata.id,
+              specVersion,
+              configurationUtilities: catalogConfigurationUtilities,
+            })
+          ).rejects.toMatchObject({ output: { statusCode: 400 } });
+        }
+      );
+    });
   });
 
   describe('authorization', () => {

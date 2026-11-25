@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import { resolveConnectorSpecVersion } from '../../../../lib/resolve_connector_spec_version';
+import {
+  parseSpecVersion,
+  resolveConnectorSpecVersion,
+} from '../../../../lib/resolve_connector_spec_version';
 import { getRegisteredSpec } from '../../../../specs_client/lib/get_registered_spec';
 import { serializeSpecDetail } from '../../../../specs_client/lib/serialize_spec_detail';
 import type { GetConnectorSpecParams, GetConnectorSpecResult } from './types';
@@ -31,8 +36,19 @@ export async function getConnectorSpecAsJsonSchema({
 
   const registered = getRegisteredSpec(context.actionTypeRegistry, id);
   const actionType = context.actionTypeRegistry.get(id);
+
+  if (specVersion !== undefined && parseSpecVersion(specVersion) === undefined) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.actions.serverSideErrors.invalidSpecVersionErrorMessage', {
+        defaultMessage:
+          'Invalid spec_version "{version}". Use a major version such as "1" or an exact version such as "1.3".',
+        values: { version: specVersion },
+      })
+    );
+  }
+
   const { resolvedSpecVersion, selectedSpec } =
-    configurationUtilities.isCatalogEnabled() && actionType?.specs?.size
+    configurationUtilities.isCatalogEnabled() && actionType?.specs?.size! > 0
       ? resolveConnectorSpecVersion({ actionType, specVersion, configurationUtilities })
       : { resolvedSpecVersion: undefined, selectedSpec: registered.spec };
 

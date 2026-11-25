@@ -14,6 +14,9 @@ import type { ActionType } from '../types';
 import { generateConfigSchema } from './single_file_connectors/generate_config_schema';
 import { generateSecretsSchema } from './single_file_connectors/generate_secrets_schema';
 
+/** Major version selector used when a request does not specify one. */
+export const DEFAULT_CONNECTOR_SPEC_VERSION = '1';
+
 const isValidVersionSegment = (part?: string): boolean => {
   const value = Number(part);
   return Number.isSafeInteger(value) && value >= 0 && String(value) === part;
@@ -55,7 +58,7 @@ export const resolveConnectorSpecVersion = ({
   }
 
   let resolvedSpecVersion: string | undefined;
-  const requestedVersion = specVersion ?? '1';
+  const requestedVersion = specVersion ?? DEFAULT_CONNECTOR_SPEC_VERSION;
   const { major, minor } = parseSpecVersion(requestedVersion) ?? {};
 
   if (major === undefined) {
