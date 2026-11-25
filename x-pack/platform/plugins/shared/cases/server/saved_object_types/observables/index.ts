@@ -15,7 +15,6 @@ import { modelVersion1 } from './model_versions/model_version_1';
  * `observables` field stay there.
  *
  * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
- * Remove these comments when https://github.com/elastic/kibana/issues/152756 is resolved.
  */
 export const createCaseObservableSavedObjectType = (): SavedObjectsType => ({
   name: CASE_OBSERVABLE_SAVED_OBJECT,
