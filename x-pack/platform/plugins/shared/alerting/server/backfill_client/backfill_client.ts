@@ -27,6 +27,7 @@ import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server
 import { isNumber, chunk } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type {
   ScheduleBackfillError,
   ScheduleBackfillParams,
@@ -44,11 +45,11 @@ import { AdHocRunAuditAction, adHocRunAuditEvent } from '../rules_client/common/
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { TaskRunnerFactory } from '../task_runner';
 import type { RuleTypeRegistry } from '../types';
-import { createBackfillError } from './lib';
+import { createBackfillError, getBackfillActions, getBackfillRuleError } from './lib';
 import { SCHEDULE_TRUNCATED_WARNING } from './lib/calculate_schedule';
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { denormalizeActions } from '../rules_client/lib/denormalize_actions';
-import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../rules_client';
+import type { DenormalizedAction } from '../rules_client';
 import type { Gap } from '../lib/rule_gaps/gap';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
@@ -107,7 +108,8 @@ export class BackfillClient {
     opts.taskManagerSetup.registerTaskDefinitions({
       [BACKFILL_TASK_TYPE]: {
         title: 'Alerting Backfill Rule Run',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
+        taskTypeGroup: TaskTypeGroup.Alerting,
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });
@@ -527,29 +529,32 @@ export class BackfillClient {
     namespace,
     unsecuredSavedObjectsClient,
   }: DeleteBackfillForRulesOpts) {
-    try {
-      // query for all ad hoc runs that reference this ruleId
-      const adHocRunFinder = await unsecuredSavedObjectsClient.createPointInTimeFinder<AdHocRunSO>({
-        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        perPage: 100,
-        hasReference: ruleIds.map((ruleId) => ({ id: ruleId, type: RULE_SAVED_OBJECT_TYPE })),
-        ...(namespace ? { namespaces: [namespace] } : undefined),
-      });
+    await withSpan({ name: 'backfillClient.deleteBackfillForRules', type: 'rule' }, async () => {
+      try {
+        // query for all ad hoc runs that reference this ruleId
+        const adHocRunFinder =
+          await unsecuredSavedObjectsClient.createPointInTimeFinder<AdHocRunSO>({
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            perPage: 100,
+            hasReference: ruleIds.map((ruleId) => ({ id: ruleId, type: RULE_SAVED_OBJECT_TYPE })),
+            ...(namespace ? { namespaces: [namespace] } : undefined),
+          });
 
-      const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
-      for await (const response of adHocRunFinder.find()) {
-        adHocRuns.push(...response.saved_objects);
+        const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
+        for await (const response of adHocRunFinder.find()) {
+          adHocRuns.push(...response.saved_objects);
+        }
+        await adHocRunFinder.close();
+        await this.deleteAdHocRunsAndTasks({
+          unsecuredSavedObjectsClient,
+          adHocRuns,
+        });
+      } catch (error) {
+        this.logger.warn(
+          `Error deleting backfill jobs for rule IDs: ${ruleIds.join(',')} - ${error.message}`
+        );
       }
-      await adHocRunFinder.close();
-      await this.deleteAdHocRunsAndTasks({
-        unsecuredSavedObjectsClient,
-        adHocRuns,
-      });
-    } catch (error) {
-      this.logger.warn(
-        `Error deleting backfill jobs for rule IDs: ${ruleIds.join(',')} - ${error.message}`
-      );
-    }
+    });
   }
 
   public async deleteBackfillsByInitiatorId({
@@ -658,31 +663,8 @@ function getRuleOrError({ ruleId, rules, ruleTypeRegistry }: GetRuleOrErrorOpts)
     };
   }
 
-  // if rule exists, check that it is enabled
-  if (!rule.enabled) {
-    return { error: createBackfillError(`Rule ${ruleId} is disabled`, ruleId, rule.name) };
-  }
-
-  // check that the rule type is supported
-  const isLifecycleRule = ruleTypeRegistry.get(rule.alertTypeId).autoRecoverAlerts ?? true;
-  if (isLifecycleRule) {
-    return {
-      error: createBackfillError(
-        `Rule type "${rule.alertTypeId}" for rule ${ruleId} is not supported`,
-        ruleId,
-        rule.name
-      ),
-    };
-  }
-
-  // check that the API key is not null
-  if (!rule.apiKey) {
-    return {
-      error: createBackfillError(`Rule ${ruleId} has no API key`, ruleId, rule.name),
-    };
-  }
-
-  return { rule };
+  const error = getBackfillRuleError({ rule, ruleTypeRegistry });
+  return error ? { error } : { rule };
 }
 
 interface ExtractRuleActions {
@@ -709,30 +691,9 @@ async function extractRuleActions({
     return { hasUnsupportedActions: false, actions: [], references: [] };
   }
 
-  const ruleLevelNotifyWhen = rule.notifyWhen;
-  const normalizedActions = [];
-  for (const action of rule.actions) {
-    // if action level frequency is not defined and rule level notifyWhen is, set the action level frequency
-    if (!action.frequency && ruleLevelNotifyWhen) {
-      normalizedActions.push({
-        ...action,
-        frequency: { notifyWhen: ruleLevelNotifyWhen, summary: false, throttle: null },
-      });
-    } else {
-      normalizedActions.push(action);
-    }
-  }
+  const { actions: backfillActions, hasUnsupportedActions } = getBackfillActions(rule);
 
-  const hasUnsupportedActions = normalizedActions.some(
-    (action) => action.frequency?.notifyWhen !== 'onActiveAlert'
-  );
-
-  const allActions = [
-    ...normalizedActions.filter((action) => action.frequency?.notifyWhen === 'onActiveAlert'),
-    ...(rule.systemActions ?? []),
-  ] as NormalizedAlertActionWithGeneratedValues[];
-
-  const { references, actions } = await denormalizeActions(actionsClient, allActions);
+  const { references, actions } = await denormalizeActions(actionsClient, backfillActions);
 
   return { hasUnsupportedActions, actions, references };
 }

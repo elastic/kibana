@@ -14,6 +14,7 @@ import {
   type ValidateResponse,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
@@ -51,7 +52,11 @@ const getRemediation = (unmetPaths: string[], profile: string): string | undefin
   return 'evidence not present in trace';
 };
 
-export const registerValidateRoute = ({ router, evaluatorRegistry }: RouteDependencies) => {
+export const registerValidateRoute = ({
+  router,
+  evaluatorRegistry,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .post({
       path: EVALS_VALIDATE_URL,
@@ -85,12 +90,15 @@ export const registerValidateRoute = ({ router, evaluatorRegistry }: RouteDepend
           });
         }
 
+        const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+        const scopedRegistry = evaluatorRegistry.asScoped({ spaceId });
+
         const resolvedEvaluators: Array<{
           config: (typeof evaluators)[number];
           definition: EvaluatorDefinition;
         }> = [];
         for (const config of evaluators) {
-          const definition = evaluatorRegistry.get(config.name, config.version);
+          const definition = await scopedRegistry.get(config.name, config.version);
           if (!definition) {
             const message = config.version
               ? `Evaluator not found: ${config.name}@${config.version}`
@@ -113,8 +121,15 @@ export const registerValidateRoute = ({ router, evaluatorRegistry }: RouteDepend
         const coreContext = await context.core;
         const traceAccessor = createTraceAccessor({
           traceId,
-          esClient: coreContext.elasticsearch.client.asInternalUser,
+          // Reports only whether evidence is present, but that is still the caller asking
+          // about a trace, so it reads under their privileges like `_test` and
+          // `_resolve_instrumentation`.
+          esClient: coreContext.elasticsearch.client.asCurrentUser,
         });
+
+        // A dry run, so it neither waits for the trace nor requires one to exist: callers use
+        // it to check whether an evaluator's evidence requirements *could* be satisfied, and
+        // an absent trace is reported per evaluator as unmet rather than as a failed request.
         const round = await normalizeEvidence(traceAccessor, resolvedMapping);
 
         const validationResults: ValidateResponse['evaluators'] = resolvedEvaluators.map(

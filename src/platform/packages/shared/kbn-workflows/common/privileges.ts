@@ -23,6 +23,7 @@ export enum WorkflowsManagementApiActions {
   'readExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:readExecution`,
   'readManagedExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:managed:readExecution`,
   'cancelExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:cancelExecution`,
+  'managePages' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:pages:manage`,
 }
 
 /**
@@ -55,12 +56,20 @@ export const WorkflowsManagementOperationPrivileges = {
   // Resuming acts on an execution that is already running, so it rides on `execute` until the
   // resume-specific privilege model is defined.
   resumeExecution: [WorkflowsManagementApiActions.execute],
-  readExecution: [WorkflowsManagementApiActions.readExecution],
+  // `readExecution` is an extension of `read`: reading execution details also requires read access
+  // to the workflow definition (the executed YAML snapshot is part of the execution document).
+  readExecution: [WorkflowsManagementApiActions.read, WorkflowsManagementApiActions.readExecution],
   readManagedExecution: [
+    WorkflowsManagementApiActions.read,
     WorkflowsManagementApiActions.readExecution,
     WorkflowsManagementApiActions.readManagedExecution,
   ],
   cancelExecution: [WorkflowsManagementApiActions.cancelExecution],
+  // Anyone who can run the workflow can copy its page link and see the page status.
+  readPage: [WorkflowsManagementApiActions.execute],
+  // Changing a page needs `execute` too, so a page manager never gets a link to a workflow that
+  // they cannot run. It does not edit the workflow, so it needs no `update`.
+  managePage: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.managePages],
 } as const satisfies Record<string, readonly WorkflowsManagementApiActions[]>;
 
 // The UI actions (aka capabilities) added by feature privileges, to be checked in the UI components.
@@ -76,4 +85,5 @@ export enum WorkflowsManagementUiActions {
   'readExecution' = 'readWorkflowExecution',
   'readManagedExecution' = 'readManagedWorkflowExecution',
   'cancelExecution' = 'cancelWorkflowExecution',
+  'managePages' = 'manageWorkflowPages',
 }

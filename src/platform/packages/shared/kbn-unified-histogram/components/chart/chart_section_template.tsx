@@ -15,6 +15,12 @@ import { i18n } from '@kbn/i18n';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 
+// min-width: 0 overrides the flex default of `auto`,
+// allowing the item to shrink past its content's default width
+const minWidthZeroCss = css`
+  min-width: 0;
+`;
+
 export interface ChartSectionTemplateProps {
   id: string;
   toolbarCss?: SerializedStyles;
@@ -110,7 +116,7 @@ export const ChartSectionTemplate = ({
           )}
 
           {leftSide && (
-            <EuiFlexItem grow data-toolbar-section="left">
+            <EuiFlexItem grow data-toolbar-section="left" css={minWidthZeroCss}>
               <EuiFlexGroup
                 direction="row"
                 gutterSize="s"
@@ -122,6 +128,7 @@ export const ChartSectionTemplate = ({
                     grow={false}
                     key={i}
                     className="unifiedHistogram__leftSideToolbarItem"
+                    css={minWidthZeroCss}
                   >
                     {child}
                   </EuiFlexItem>
@@ -132,7 +139,12 @@ export const ChartSectionTemplate = ({
 
           {(rightSide.length > 0 || toolbar?.additionalControls?.prependRight) && (
             <EuiFlexItem grow={false} data-toolbar-section="right">
-              <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="none"
+                responsive={false}
+                alignItems="center"
+              >
                 {toolbar?.additionalControls?.prependRight && (
                   <EuiFlexItem grow={false}>{toolbar.additionalControls.prependRight}</EuiFlexItem>
                 )}

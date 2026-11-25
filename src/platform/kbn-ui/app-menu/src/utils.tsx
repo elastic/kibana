@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type MouseEvent, type ReactNode } from 'react';
+import React, { type MouseEvent } from 'react';
 import { css } from '@emotion/react';
 import { isArray, isFunction, upperFirst } from 'lodash';
 import {
@@ -23,6 +23,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { AppMenuBadge } from './components/app_menu_badge';
+import { AppMenuItemLabel } from './components/app_menu_item_label';
 import { AppMenuPopoverActionButtons } from './components/app_menu_popover_action_buttons';
 import type {
   AppMenuConfig,
@@ -34,6 +35,7 @@ import type {
   AppMenuSwitch,
 } from './types';
 import { APP_MENU_EBT_ELEMENT, APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+import { asOptionalPlainText, asPlainText } from './as_plain_text';
 import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
 
 /**
@@ -53,10 +55,12 @@ export const getAppMenuEbtDomProps = (
     return undefined;
   }
 
+  const detail = asOptionalPlainText(ebt.detail);
+
   return {
-    'data-ebt-action': ebt.action,
+    'data-ebt-action': asPlainText(ebt.action),
     'data-ebt-element': APP_MENU_EBT_ELEMENT,
-    ...(ebt.detail ? { 'data-ebt-detail': ebt.detail } : {}),
+    ...(detail ? { 'data-ebt-detail': detail } : {}),
   };
 };
 
@@ -211,8 +215,8 @@ export const getTooltip = ({
   const title = isFunction(tooltipTitle) ? tooltipTitle() : tooltipTitle;
 
   return {
-    title,
-    content,
+    title: asOptionalPlainText(title),
+    content: asOptionalPlainText(content),
   };
 };
 
@@ -273,24 +277,43 @@ export const mapAppMenuItemToPanelItem = (
       : { onClick: hasClickHandler ? handleClick : undefined };
 
   const itemTestSubj = item.testId ?? getAppMenuItemTestSubj(item.id);
+  const itemDisabled = isDisabled(item?.disableButton) || loading;
 
   const showAsSelected = Boolean(item.isSelected);
 
-  const itemName: ReactNode = item.labelBadgeText ? (
+  const label = asPlainText(item.label);
+  const description = asOptionalPlainText(item.description);
+  const labelBadgeText = asOptionalPlainText(item.labelBadgeText);
+
+  const labelNode = labelBadgeText ? (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>{upperFirst(item.label)}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{upperFirst(label)}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AppMenuBadge text={item.labelBadgeText} data-test-subj={`${itemTestSubj}-badge`} />
+        <AppMenuBadge text={labelBadgeText} data-test-subj={`${itemTestSubj}-badge`} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    upperFirst(item.label)
+    upperFirst(label)
+  );
+
+  const itemLabel = description ? (
+    <AppMenuItemLabel
+      label={upperFirst(label)}
+      description={description}
+      labelBadgeText={labelBadgeText}
+      iconType={item.iconType}
+      isDisabled={itemDisabled}
+      isLoading={loading}
+      testId={itemTestSubj}
+    />
+  ) : (
+    labelNode
   );
 
   return {
     key: item.id,
-    name: itemName,
-    icon: loading ? (
+    name: itemLabel,
+    icon: description ? undefined : loading ? (
       <EuiLoadingSpinner size="m" data-test-subj={`${itemTestSubj}-loading`} />
     ) : (
       item?.iconType
@@ -298,7 +321,7 @@ export const mapAppMenuItemToPanelItem = (
     ...linkProps,
     href: item?.href,
     target: item?.href ? item?.target : undefined,
-    disabled: isDisabled(item?.disableButton) || loading,
+    disabled: itemDisabled,
     'data-test-subj': itemTestSubj,
     ...getAppMenuEbtDomProps(item.ebt),
     toolTipContent: content,
@@ -389,7 +412,7 @@ export const getPopoverSwitchItems = ({
         const switchElement = (
           <EuiSwitch
             id={switchConfig.id}
-            label={switchConfig.label}
+            label={asPlainText(switchConfig.label)}
             labelProps={switchConfig.labelProps}
             checked={switchConfig.checked}
             onChange={(e) => switchConfig.onChange(e.target.checked)}
@@ -474,7 +497,7 @@ export const getPopoverPanels = ({
         processItems({
           itemsToProcess: item.items,
           panelId: childPanelId,
-          parentTitle: item.label,
+          parentTitle: asPlainText(item.label),
           parentPopoverTestId: item.popoverTestId,
           parentPopoverWidth: itemPopoverWidth ?? DEFAULT_POPOVER_WIDTH,
         });

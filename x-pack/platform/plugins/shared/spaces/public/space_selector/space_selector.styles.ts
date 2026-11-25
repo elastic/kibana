@@ -24,6 +24,12 @@ export const headerStyles = css`
   }
 `;
 
+// Overrides the stacking order from `kbnFullScreenBgCss` so the graphic sits behind the page content
+export const backgroundStyles = css`
+  z-index: -1;
+  pointer-events: none;
+`;
+
 export const spacesLoadingSpinnerStyles = css`
   display: flex;
   justify-content: center;

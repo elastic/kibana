@@ -14,7 +14,7 @@ import { workflowTools } from '../../common/constants';
 
 type GetRegisteredTriggersApi = Pick<
   WorkflowsServerPluginSetup['management'],
-  'getRegisteredTriggers'
+  'getRegisteredTriggers' | 'getTriggerSchemaOptions'
 >;
 
 export function registerGetTriggerDefinitionsTool(
@@ -24,6 +24,13 @@ export function registerGetTriggerDefinitionsTool(
   agentBuilder.tools.register({
     id: workflowTools.getTriggerDefinitions,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Trigger Definitions',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Get available workflow trigger types with schemas and YAML examples.
 
 **When to use:** To learn how to configure the \`triggers\` section of a workflow, or to understand what \`{{ event.* }}\` variables are available at runtime for a given trigger type.
@@ -45,6 +52,7 @@ Returns built-in trigger types (manual, scheduled, alert) plus event-driven trig
           type: 'other' as const,
           data: lookupTriggerDefinitionsForAgent({
             registeredTriggers: await api.getRegisteredTriggers(),
+            triggerSchemaOptions: api.getTriggerSchemaOptions(),
             triggerType,
           }),
         },

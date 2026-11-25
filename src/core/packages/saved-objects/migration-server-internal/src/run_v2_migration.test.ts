@@ -143,8 +143,8 @@ describe('runV2Migration', () => {
     const options = mockOptions();
     options.documentMigrator.prepareMigrations();
     await runV2Migration(options);
-    expect(createIndexMap).toBeCalledTimes(1);
-    expect(createIndexMap).toBeCalledWith({
+    expect(createIndexMap).toHaveBeenCalledTimes(1);
+    expect(createIndexMap).toHaveBeenCalledWith({
       kibanaIndexName: options.kibanaIndexPrefix,
       indexMap: options.mappingProperties,
       registry: options.typeRegistry,
@@ -231,7 +231,7 @@ describe('runV2Migration', () => {
     const options = mockOptions();
     options.documentMigrator.prepareMigrations();
 
-    await expect(runV2Migration(options)).rejects.toThrowError(myTaskIndexMigratorError);
+    await expect(runV2Migration(options)).rejects.toThrow(myTaskIndexMigratorError);
   });
 
   describe('when the instance is memory constrained', () => {

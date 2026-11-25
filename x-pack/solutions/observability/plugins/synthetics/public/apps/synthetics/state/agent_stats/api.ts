@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import type { LocationAgentStats } from '../../../../../common/types';
+import type { LocationAgentStats, MonitorLocationAssignment } from '../../../../../common/types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service/api_service';
 
 export const fetchPrivateLocationAgentStats = async (): Promise<LocationAgentStats[]> => {
   return await apiService.get(SYNTHETICS_API_URLS.PRIVATE_LOCATION_AGENT_STATS);
+};
+
+export const fetchMonitorAgentAssignments = async (
+  monitorId: string
+): Promise<MonitorLocationAssignment[]> => {
+  return await apiService.get(
+    SYNTHETICS_API_URLS.MONITOR_AGENT_ASSIGNMENT.replace(
+      '{monitorId}',
+      encodeURIComponent(monitorId)
+    )
+  );
 };

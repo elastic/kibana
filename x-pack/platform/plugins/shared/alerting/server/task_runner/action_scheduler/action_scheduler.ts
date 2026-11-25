@@ -21,7 +21,8 @@ import type {
   RuleAlertData,
 } from '../../../common';
 import { getSummaryActionsFromTaskState } from './lib';
-import { withAlertingSpan } from '../lib';
+import { createTaskRunnerLogger, withAlertingSpan } from '../lib';
+import { translations } from '../../constants/translations';
 import * as schedulers from './schedulers';
 
 const BULK_SCHEDULE_CHUNK_SIZE = 1000;
@@ -109,16 +110,41 @@ export class ActionScheduler<
       }
       if (enqueueResponse.errors) {
         bulkScheduleResponse = bulkScheduleResponse.concat(
-          enqueueResponse.items.filter(
-            (i) => i.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
-          )
+          enqueueResponse.items.filter((i) => i.response !== ExecutionResponseType.SUCCESS)
         );
       }
     }
 
     const actionsToNotLog: string[] = [];
+    const logger = createTaskRunnerLogger({
+      logger: this.context.logger,
+      labels: {
+        ruleId: this.context.rule.id,
+        ruleType: this.context.rule.alertTypeId,
+        spaceId: this.context.taskInstance.params.spaceId,
+        executionId: this.context.executionId,
+        taskInstanceId: this.context.taskInstance.id,
+      },
+    });
+
     if (bulkScheduleResponse.length) {
+      const notFoundConnectorIds = new Set<string>();
       for (const r of bulkScheduleResponse) {
+        if (r.response === ExecutionResponseType.CONNECTOR_NOT_FOUND_ERROR) {
+          notFoundConnectorIds.add(r.id);
+          this.context.ruleRunMetricsStore.decrementNumberOfTriggeredActions();
+          this.context.ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(
+            r.actionTypeId
+          );
+
+          logger.debug(
+            `Rule "${this.context.rule.id}" skipped scheduling action "${r.id}" because the connector no longer exists.`
+          );
+
+          if (r.uuid) {
+            actionsToNotLog.push(r.uuid);
+          }
+        }
         if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
           this.context.ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
           this.context.ruleRunMetricsStore.decrementNumberOfTriggeredActions();
@@ -130,7 +156,7 @@ export class ActionScheduler<
             status: ActionsCompletion.PARTIAL,
           });
 
-          this.context.logger.debug(
+          logger.debug(
             `Rule "${this.context.rule.id}" skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
           );
 
@@ -141,6 +167,14 @@ export class ActionScheduler<
             actionsToNotLog.push(uuid);
           }
         }
+      }
+
+      if (notFoundConnectorIds.size > 0) {
+        this.context.ruleResultService
+          .getLastRunSetters()
+          .addLastRunWarning(
+            translations.taskRunner.warning.connectorNotFound([...notFoundConnectorIds].join(', '))
+          );
       }
     }
 

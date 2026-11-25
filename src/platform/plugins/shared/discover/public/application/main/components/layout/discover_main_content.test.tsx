@@ -32,12 +32,12 @@ jest.mock('../../../../components/view_mode_toggle', () => ({
 }));
 
 jest.mock('./discover_documents', () => ({
-  DiscoverDocuments: jest.fn(({ viewModeToggle }) => (
+  DiscoverDocuments: jest.fn(({ renderViewModeToggle }) => (
     <div
       data-test-subj="discoverDocumentsMock"
-      data-has-view-mode-toggle={String(Boolean(viewModeToggle))}
+      data-has-view-mode-toggle={String(Boolean(renderViewModeToggle))}
     >
-      {viewModeToggle}
+      {renderViewModeToggle?.()}
     </div>
   )),
 }));

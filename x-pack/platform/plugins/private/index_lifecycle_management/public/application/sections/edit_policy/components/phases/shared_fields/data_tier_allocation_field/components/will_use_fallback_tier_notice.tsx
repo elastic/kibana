@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { PhaseWithAllocation, DataTierRole } from '../../../../../../../../../common/types';
 import { nodeRoleToFallbackTierMap } from './node_role_to_fallback_tier_map';
@@ -43,8 +43,10 @@ interface Props {
 
 export const WillUseFallbackTierNotice: FunctionComponent<Props> = ({ phase, targetNodeRole }) => {
   return (
-    <EuiCallOut data-test-subj="willUseFallbackTierNotice" title={i18nTexts[phase].title}>
-      {i18nTexts[phase].body(targetNodeRole)}
-    </EuiCallOut>
+    <KbnInfoCallout
+      data-test-subj="willUseFallbackTierNotice"
+      title={i18nTexts[phase].title}
+      text={i18nTexts[phase].body(targetNodeRole)}
+    />
   );
 };

@@ -10,6 +10,7 @@
 import React, { type MouseEventHandler } from 'react';
 import { EuiSplitButton, EuiIcon, EuiIconTip, useEuiTheme, type IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { asOptionalPlainText, asPlainText } from '../as_plain_text';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 export interface SplitButtonWithNotificationProps {
@@ -19,6 +20,9 @@ export interface SplitButtonWithNotificationProps {
   isDisabled?: boolean;
   isLoading?: boolean;
   isMainButtonLoading?: boolean;
+  isMainButtonDisabled?: boolean;
+  mainButtonTooltipContent?: string;
+  mainButtonTooltipTitle?: string;
   isSelected?: boolean;
   href?: string;
   target?: string;
@@ -28,6 +32,8 @@ export interface SplitButtonWithNotificationProps {
   'aria-haspopup'?: 'menu';
 
   secondaryButtonAriaLabel: string;
+  secondaryButtonIconType?: IconType;
+  secondaryButtonTooltipContent?: string;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
   isSecondaryButtonDisabled?: boolean;
 
@@ -44,24 +50,38 @@ export const SplitButtonWithNotification = ({
   onClick,
   iconType,
   isMainButtonLoading = false,
+  isMainButtonDisabled,
+  mainButtonTooltipContent,
+  mainButtonTooltipTitle,
   isSelected,
   href,
   target,
   id,
   'aria-haspopup': ariaHasPopup,
   secondaryButtonAriaLabel,
+  secondaryButtonIconType = 'chevronSingleDown',
+  secondaryButtonTooltipContent,
   onSecondaryButtonClick,
   isSecondaryButtonDisabled,
   showNotificationIndicator = false,
   notificationIndicatorTooltipContent,
 }: SplitButtonWithNotificationProps) => {
   const { euiTheme } = useEuiTheme();
+  const buttonLabel = asPlainText(label);
+  const secondaryAriaLabel = asPlainText(secondaryButtonAriaLabel);
+  const notificationTooltip = asOptionalPlainText(notificationIndicatorTooltipContent);
+  const mainTooltipContent = asOptionalPlainText(mainButtonTooltipContent);
+  const mainTooltipTitle = asOptionalPlainText(mainButtonTooltipTitle);
+  const hasMainTooltip = Boolean(mainTooltipContent || mainTooltipTitle);
+  const secondaryTooltipContent = asOptionalPlainText(secondaryButtonTooltipContent);
 
   return (
     <EuiSplitButton
       color="text"
       size="s"
       isDisabled={isDisabled}
+      // Must be set here: EUI overrides `hasAriaDisabled` on each action with this value.
+      hasAriaDisabled={hasMainTooltip || Boolean(secondaryTooltipContent)}
       isLoading={isLoading}
       css={
         fullWidth &&
@@ -76,6 +96,10 @@ export const SplitButtonWithNotification = ({
         id={id}
         onClick={onClick as MouseEventHandler}
         isLoading={isMainButtonLoading}
+        isDisabled={isMainButtonDisabled}
+        tooltipProps={
+          hasMainTooltip ? { content: mainTooltipContent, title: mainTooltipTitle } : undefined
+        }
         isSelected={isSelected}
         href={href}
         target={target}
@@ -109,31 +133,21 @@ export const SplitButtonWithNotification = ({
                 }}
               >
                 <span css={{ pointerEvents: 'auto' }}>
-                  <EuiIconTip
-                    type="dot"
-                    size="m"
-                    color="primary"
-                    content={notificationIndicatorTooltipContent}
-                    iconProps={{
-                      onClick:
-                        isDisabled || isLoading || isMainButtonLoading
-                          ? undefined
-                          : (onClick as MouseEventHandler),
-                    }}
-                  />
+                  <EuiIconTip type="dot" size="m" color="primary" content={notificationTooltip} />
                 </span>
               </div>
             )}
           </span>
         )}
-        {label}
+        {buttonLabel}
       </EuiSplitButton.ActionPrimary>
       <EuiSplitButton.ActionSecondary
         data-test-subj={dataTestSubj ? `${dataTestSubj}-secondary-button` : undefined}
-        iconType="chevronSingleDown"
-        aria-label={secondaryButtonAriaLabel}
+        iconType={secondaryButtonIconType}
+        aria-label={secondaryAriaLabel}
         onClick={onSecondaryButtonClick}
         isDisabled={isSecondaryButtonDisabled}
+        tooltipProps={secondaryTooltipContent ? { content: secondaryTooltipContent } : undefined}
         isSelected={isSelected}
       />
     </EuiSplitButton>

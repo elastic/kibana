@@ -22,7 +22,6 @@ import {
   EuiSpacer,
   EuiToolTip,
   copyToClipboard,
-  useEuiTheme,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
   type EuiTableSelectionType,
@@ -32,9 +31,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
 import { useEvaluationExperiments } from '../../hooks/use_evals_api';
 import { NewExperimentFlyout } from '../../components/new_experiment_flyout/new_experiment_flyout';
+import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import { resolvePrUrl } from '../../utils/pr_url';
 import { CopyableDetail } from './copyable_detail';
 import { LinkDetail } from './link_detail';
+import { pickBaselineAndTarget } from './pick_baseline_and_target';
 import * as i18n from './translations';
 
 const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({ item }) => {
@@ -68,7 +69,7 @@ const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({
       button={
         <EuiToolTip content={i18n.ROW_DETAILS_ARIA} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="boxesVertical"
+            iconType="ellipsis"
             color="text"
             aria-label={i18n.ROW_DETAILS_ARIA}
             onClick={(event: React.MouseEvent) => {
@@ -136,7 +137,6 @@ const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({
 export const ExperimentsListPage: React.FC = () => {
   const history = useHistory();
   const { services } = useKibana();
-  const { euiTheme } = useEuiTheme();
   const savedWorkflowsHref = services.http?.basePath.prepend(
     '/app/workflows?tags=evals-experiment'
   );
@@ -194,7 +194,7 @@ export const ExperimentsListPage: React.FC = () => {
         name: i18n.COLUMN_NAME,
         sortable: true,
         truncateText: true,
-        width: '200px',
+        width: '28%',
         render: (_name: string | null | undefined, item: EvaluationExperimentSummary) => {
           const isSuiteRun = !!item.suite_id;
           const displayName = isSuiteRun
@@ -225,7 +225,7 @@ export const ExperimentsListPage: React.FC = () => {
       {
         field: 'experiment_count',
         name: i18n.COLUMN_EXPERIMENTS,
-        width: '150px',
+        width: '11%',
         render: (count: number | undefined) => {
           const c = count ?? 1;
           return (
@@ -239,19 +239,23 @@ export const ExperimentsListPage: React.FC = () => {
         field: 'timestamp',
         name: i18n.COLUMN_TIMESTAMP,
         sortable: true,
+        width: '15%',
         render: (timestamp: string) => (timestamp ? new Date(timestamp).toLocaleString() : '-'),
       },
       {
         field: 'task_model',
         name: i18n.COLUMN_TASK_MODEL,
+        width: '19%',
         render: (model: EvaluationExperimentSummary['task_model']) =>
           model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
       },
       {
-        field: 'evaluator_model',
+        field: 'evaluator_models',
         name: i18n.COLUMN_EVALUATOR_MODEL,
-        render: (model: EvaluationExperimentSummary['evaluator_model']) =>
-          model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-',
+        width: '19%',
+        render: (models: EvaluationExperimentSummary['evaluator_models']) => (
+          <EvaluatorModelsBadge models={models} />
+        ),
       },
       {
         field: 'total_repetitions',
@@ -318,10 +322,11 @@ export const ExperimentsListPage: React.FC = () => {
   const handleCompare = useCallback(() => {
     if (!canCompare) return;
     const [a, b] = selectedExperiments;
+    const { baseline, target } = pickBaselineAndTarget(a, b);
     // Rows are aggregated by execution id, so always compare execution-vs-execution;
     // the row's `experiment_id` isn't on the score docs and would filter to a 404.
-    const baselineId = a.execution_id ?? a.experiment_id;
-    const targetId = b.execution_id ?? b.experiment_id;
+    const baselineId = baseline.execution_id ?? baseline.experiment_id;
+    const targetId = target.execution_id ?? target.experiment_id;
     const params = new URLSearchParams({
       type: 'execution',
       baseline: baselineId,
@@ -332,7 +337,7 @@ export const ExperimentsListPage: React.FC = () => {
   }, [canCompare, selectedExperiments, history]);
 
   return (
-    <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+    <EuiPageSection paddingSize="none">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFieldSearch

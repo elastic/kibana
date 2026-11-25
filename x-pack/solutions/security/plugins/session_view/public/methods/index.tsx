@@ -6,8 +6,10 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SessionViewIndex } from '../../common/types/v1';
@@ -61,20 +63,64 @@ export const getIndexPattern = (eventIndex?: string | null) => {
   return clusterStr + index;
 };
 
+/**
+ * Session View cannot yet fan a session's reads out across CPS-linked projects: the process tree
+ * reads and the alert overlay resolve against the origin project only, so a session that lives in a
+ * linked project (its `index` carries a project prefix) would render an incomplete and
+ * potentially misleading view. This is only shown when CPS is enabled: on CCS deployments the
+ * `cluster:index` prefix is expected, alerts are stored locally and the remote cluster is read
+ * through the preserved prefix. Until cross-project support lands, surface a clear "unsupported"
+ * message instead of a partial tree.
+ */
+const CrossProjectUnsupportedPrompt = () => (
+  <EuiEmptyPrompt
+    data-test-subj="sessionView:crossProjectUnsupported"
+    iconType="info"
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.sessionView.crossProjectUnsupportedTitle"
+          defaultMessage="Session View is not available for linked projects"
+        />
+      </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.sessionView.crossProjectUnsupportedBody"
+          defaultMessage="This session is in a linked project. Open it from that project to view it (cross-project search isn't supported yet)."
+        />
+      </p>
+    }
+  />
+);
+
 export const getSessionViewLazy = (
-  props: SessionViewDeps & { usageCollection?: UsageCollectionStart }
+  props: SessionViewDeps & { usageCollection?: UsageCollectionStart; isCpsEnabled?: boolean }
 ) => {
-  const index = getIndexPattern(props.index);
+  const { isCpsEnabled = false, ...sessionViewProps } = props;
+  const index = getIndexPattern(sessionViewProps.index);
+
+  // `isNonLocalIndexName` matches both CCS remote clusters and CPS linked projects, so it must be
+  // gated on CPS being enabled to avoid a false positive on CCS deployments.
+  if (isCpsEnabled && isNonLocalIndexName(index)) {
+    return <CrossProjectUnsupportedPrompt />;
+  }
+
   const trackEvent = (key: SessionViewTelemetryKey) => {
-    if (props.usageCollection) {
-      props.usageCollection.reportUiCounter(USAGE_COLLECTION_APP_NAME, METRIC_TYPE.CLICK, key);
+    if (sessionViewProps.usageCollection) {
+      sessionViewProps.usageCollection.reportUiCounter(
+        USAGE_COLLECTION_APP_NAME,
+        METRIC_TYPE.CLICK,
+        key
+      );
     }
   };
 
   return (
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <SessionViewLazy {...props} index={index} trackEvent={trackEvent} />
+        <SessionViewLazy {...sessionViewProps} index={index} trackEvent={trackEvent} />
       </Suspense>
     </QueryClientProvider>
   );

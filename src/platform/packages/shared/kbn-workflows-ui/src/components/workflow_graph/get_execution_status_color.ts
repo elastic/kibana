@@ -38,7 +38,7 @@ export function getExecutionStatusVisual(
       return {
         color: euiTheme.colors.danger,
         bg: euiTheme.colors.backgroundBaseDanger,
-        iconType: 'crossInACircleFilled',
+        iconType: 'error',
       };
     case ExecutionStatus.RUNNING:
       return {
@@ -64,7 +64,7 @@ export function getExecutionStatusVisual(
       return {
         color: euiTheme.colors.textSubdued,
         bg: euiTheme.colors.backgroundBaseSubdued,
-        iconType: 'crossInACircleFilled',
+        iconType: 'error',
       };
     case ExecutionStatus.PENDING:
       return {

@@ -66,11 +66,15 @@ export class SearchCursorPit extends SearchCursor {
       );
       pitId = response.id;
     } catch (err) {
-      this.logger.error(err);
+      const message = `Error opening PIT for index pattern [${this.indexPatternTitle}]: ${err.message}`;
+      this.logger.error(message);
+      throw new Error(message, { cause: err });
     }
 
     if (!pitId) {
-      throw new Error(`Could not receive a PIT ID!`);
+      throw new Error(
+        `Unable to get PIT for index pattern: [${this.indexPatternTitle}], no errors were thrown`
+      );
     }
 
     this.logger.debug(`Opened PIT ID: ${this.formatCursorId(pitId)}`);

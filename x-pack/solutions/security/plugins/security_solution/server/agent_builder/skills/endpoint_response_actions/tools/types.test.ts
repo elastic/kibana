@@ -1,0 +1,1104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  buildResponseActionComment,
+  canonicalizeIp,
+  endpointNotFoundData,
+  formatForConfirmationCard,
+  formatHostForConfirmationCard,
+  insufficientPrivilegesResult,
+  licenseLimitOf,
+  licenseTierRequiredResult,
+  licenseUnavailableResult,
+  productFeatureDisabledResult,
+  resolveAgentTypeFromPackages,
+  responseActionErrorResult,
+  responseActionsProductFeatureEnabled,
+  summarizeActionHosts,
+  summarizeActionOutputs,
+  summarizeAgentState,
+  waitForActionCompletion,
+  GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS,
+  MAX_ACTION_ERRORS,
+  MAX_ACTION_HOSTS,
+  MAX_AGENT_STATE_ENTRIES,
+  MAX_AGENT_STATE_TOTAL_CHARS,
+  MAX_OUTPUT_AGENTS,
+  MAX_OUTPUT_DEPTH,
+  MAX_OUTPUT_ENTRIES_PER_AGENT,
+  MAX_OUTPUT_STRING_LENGTH,
+  MAX_OUTPUT_TOTAL_CHARS,
+  MAX_PARAMETER_KEYS,
+} from './types';
+import { getDefaultEuiMarkdownParsingPlugins } from '@elastic/eui';
+import unified from 'unified';
+import { ToolResultType } from '@kbn/agent-builder-common';
+import type { RunContext } from '@kbn/agent-builder-server';
+import type { Logger } from '@kbn/logging';
+import type { ActionDetails } from '../../../../../common/endpoint/types';
+import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import { getActionDetailsById } from '../../../../endpoint/services/actions';
+
+jest.mock('../../../../endpoint/services/actions', () => ({
+  getActionDetailsById: jest.fn(),
+}));
+
+const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
+
+/**
+ * A license service stand-in that only answers the questions
+ * `licenseLimitOf` asks: the tier checks and the license information.
+ */
+const licenseServiceWith = (
+  license: { isAvailable: boolean; isActive: boolean } | null
+): Parameters<typeof licenseLimitOf>[0] =>
+  ({
+    isPlatinumPlus: () => false,
+    isEnterprise: () => false,
+    getLicenseInformation: () => license,
+  } as unknown as Parameters<typeof licenseLimitOf>[0]);
+
+describe('response action error helpers', () => {
+  it('responseActionErrorResult returns a typed error envelope', () => {
+    const result = responseActionErrorResult('unknown_error', 'Action missing');
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual({
+      error: 'unknown_error',
+      message: 'Action missing',
+    });
+  });
+
+  it('insufficientPrivilegesResult includes the privilege field', () => {
+    const result = insufficientPrivilegesResult('canIsolateHost');
+
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'insufficient_privileges',
+        privilege: 'canIsolateHost',
+      })
+    );
+  });
+
+  it('licenseTierRequiredResult reports the tier, not a grant, as the fix', () => {
+    const result = licenseTierRequiredResult('canWriteScanOperations', 'enterprise');
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'license_tier_required',
+        privilege: 'canWriteScanOperations',
+        requiredLicenseTier: 'enterprise',
+      })
+    );
+    // The whole point of the split: a privilege grant cannot satisfy a license
+    // gate, so the message must not send the analyst looking for one.
+    const message = (result.results[0].data as { message: string }).message;
+    expect(message).not.toContain('Ask an administrator to grant');
+    expect(message).not.toContain('Security UI');
+  });
+
+  it('licenseLimitOf attributes an active-but-low license to the tier', () => {
+    const limit = licenseLimitOf(
+      licenseServiceWith({ isAvailable: true, isActive: true }),
+      'platinum'
+    );
+
+    expect(limit).toEqual({ kind: 'tier', tier: 'platinum' });
+  });
+
+  it('licenseLimitOf attributes an expired license to its state, not the tier', () => {
+    // An expired Enterprise license fails `isEnterprise()` exactly like a
+    // Gold one; the license information is what separates the two causes.
+    const limit = licenseLimitOf(
+      licenseServiceWith({ isAvailable: true, isActive: false }),
+      'enterprise'
+    );
+
+    expect(limit).toEqual({ kind: 'state', expired: true });
+  });
+
+  it('licenseLimitOf reports an unreadable license as unavailable, not expired', () => {
+    const limit = licenseLimitOf(licenseServiceWith(null), 'platinum');
+
+    expect(limit).toEqual({ kind: 'state', expired: false });
+  });
+
+  it('licenseLimitOf raises no limit when the license already satisfies the tier', () => {
+    expect(
+      licenseLimitOf(
+        {
+          isPlatinumPlus: () => true,
+          isEnterprise: () => true,
+          getLicenseInformation: () => null,
+        } as unknown as Parameters<typeof licenseLimitOf>[0],
+        'platinum'
+      )
+    ).toBeUndefined();
+  });
+
+  it('licenseUnavailableResult names renewal for an expired license, not a tier upgrade', () => {
+    const result = licenseUnavailableResult('canIsolateHost', true);
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'license_unavailable',
+        privilege: 'canIsolateHost',
+        licenseState: 'expired',
+      })
+    );
+    const message = (result.results[0].data as { message: string }).message;
+    expect(message).toContain('expired');
+    expect(message).toContain('Renewing');
+    // The point of the split: an expired license is renewed, not upgraded.
+    expect(message).not.toContain('need to upgrade');
+    expect(message).not.toContain('Ask an administrator to grant');
+  });
+
+  it('licenseUnavailableResult distinguishes an unreadable license from an expired one', () => {
+    const result = licenseUnavailableResult('canGetRunningProcesses', false);
+
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'license_unavailable',
+        licenseState: 'unavailable',
+      })
+    );
+    expect((result.results[0].data as { message: string }).message).toContain('could not be read');
+  });
+
+  it('productFeatureDisabledResult names the product tier, not a grant or license, as the fix', () => {
+    const result = productFeatureDisabledResult('canIsolateHost');
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'product_feature_disabled',
+        privilege: 'canIsolateHost',
+        productFeature: 'endpoint_response_actions',
+      })
+    );
+    // The point of the split: neither a role grant nor a license change can
+    // satisfy a product-configuration gate.
+    const message = (result.results[0].data as { message: string }).message;
+    expect(message).not.toContain('Ask an administrator to grant');
+    expect(message).not.toContain('upgrade the Elastic license');
+    expect(message).not.toContain('Security UI');
+  });
+
+  it('responseActionsProductFeatureEnabled reports the feature and tolerates an unconfigured service', () => {
+    expect(responseActionsProductFeatureEnabled({ isEnabled: () => true }, 'canIsolateHost')).toBe(
+      true
+    );
+    expect(responseActionsProductFeatureEnabled({ isEnabled: () => false }, 'canIsolateHost')).toBe(
+      false
+    );
+    // `isEnabled` throws before `setProductFeaturesConfigurator` has run; the
+    // helper must surface "unknown", not crash the gate it feeds.
+    const unconfigured = {
+      isEnabled: () => {
+        throw new Error('not configured');
+      },
+    };
+    expect(responseActionsProductFeatureEnabled(unconfigured, 'canIsolateHost')).toBeUndefined();
+  });
+
+  it('responseActionsProductFeatureEnabled is privilege-specific: release registers under host isolation too', () => {
+    const essentialsFeatures = {
+      isEnabled: (key: string) => key === 'endpoint_host_isolation',
+    };
+    expect(responseActionsProductFeatureEnabled(essentialsFeatures, 'canUnIsolateHost')).toBe(true);
+    expect(responseActionsProductFeatureEnabled(essentialsFeatures, 'canIsolateHost')).toBe(false);
+    expect(responseActionsProductFeatureEnabled(essentialsFeatures, 'canWriteScanOperations')).toBe(
+      false
+    );
+  });
+
+  it('endpointNotFoundData reports a hostname miss without fabricating host state', () => {
+    const data = endpointNotFoundData({ hostName: 'lost-host' });
+    expect(data).toEqual({
+      kind: 'response_action_result',
+      hostName: 'lost-host',
+      found: false,
+      reason: 'endpoint_not_found',
+      message: "No endpoint found with hostname 'lost-host'.",
+    });
+    // No host was observed, so no status/isolation/last-seen may be reported.
+    expect(data).not.toHaveProperty('isolated');
+    expect(data).not.toHaveProperty('status');
+    expect(data).not.toHaveProperty('lastSeen');
+  });
+
+  it('endpointNotFoundData labels an ID-only miss as an agent ID, not a hostname', () => {
+    expect(endpointNotFoundData({ agentId: 'agent-404' })).toEqual({
+      kind: 'response_action_result',
+      agentId: 'agent-404',
+      found: false,
+      reason: 'endpoint_not_found',
+      message: "No endpoint found with agent ID 'agent-404'.",
+    });
+  });
+
+  // Labelling an IP miss as a hostname led the agent to retry by hostname.
+  it('endpointNotFoundData labels an IP miss as an IP address, not a hostname', () => {
+    expect(endpointNotFoundData({ ip: '10.42.0.15' })).toEqual({
+      kind: 'response_action_result',
+      ip: '10.42.0.15',
+      found: false,
+      reason: 'endpoint_not_found',
+      message: "No endpoint found with IP address '10.42.0.15'.",
+    });
+  });
+});
+
+describe('formatForConfirmationCard', () => {
+  it('escapes newline, tab, NUL and DEL as visible escapes', () => {
+    expect(formatForConfirmationCard('/tmp/a\nb')).toBe('"/tmp/a\\nb"');
+    expect(formatForConfirmationCard('/tmp/a\tb')).toBe('"/tmp/a\\tb"');
+    expect(formatForConfirmationCard('/tmp/a\u0000b')).toBe('"/tmp/a\\u{0000}b"');
+    expect(formatForConfirmationCard('/tmp/a\u007fb')).toBe('"/tmp/a\\u{007F}b"');
+  });
+
+  it('escapes bidi controls including RTLO and zero-width characters', () => {
+    expect(formatForConfirmationCard('/tmp/a\u202eb.exe')).toBe('"/tmp/a\\u{202E}b.exe"');
+    expect(formatForConfirmationCard('/tmp/a\u200bb')).toBe('"/tmp/a\\u{200B}b"');
+    expect(formatForConfirmationCard('/tmp/a\ufeffb')).toBe('"/tmp/a\\u{FEFF}b"');
+  });
+
+  it('keeps Windows backslashes as single, literal backslashes', () => {
+    expect(formatForConfirmationCard('C:\\Users\\x\\evil.exe')).toBe('"C:\\Users\\x\\evil.exe"');
+  });
+
+  it('keeps ordinary text and padding whitespace exactly as typed inside quotes', () => {
+    expect(formatForConfirmationCard('/tmp/payload ')).toBe('"/tmp/payload "');
+    expect(formatForConfirmationCard('  /tmp/x')).toBe('"  /tmp/x"');
+  });
+
+  it('escapes a backtick so the confirmation code span cannot be broken', () => {
+    expect(formatForConfirmationCard('/tmp/a`b')).toBe('"/tmp/a\\u{0060}b"');
+  });
+
+  it('escapes the default-ignorable and tag code points that render as nothing', () => {
+    // Unicode tag characters spell hidden ASCII; a host name or comment
+    // carrying them reads as one string and records another.
+    expect(formatForConfirmationCard(`a\u{e0061}\u{e0062}b`)).toBe('"a\\u{E0061}\\u{E0062}b"');
+    expect(formatForConfirmationCard(`a\u{fe0f}b`)).toBe('"a\\u{FE0F}b"');
+    expect(formatForConfirmationCard(`a\u{00ad}b`)).toBe('"a\\u{00AD}b"');
+    // Line and paragraph separators still break the line in some renderers.
+    expect(formatForConfirmationCard(`a\u{2028}b`)).toBe('"a\\u{2028}b"');
+    expect(formatForConfirmationCard(`a\u{2029}b`)).toBe('"a\\u{2029}b"');
+    expect(formatForConfirmationCard(`a\u{2060}b`)).toBe('"a\\u{2060}b"');
+    // Arabic letter mark: a bidi control outside the U+202A–U+202E range.
+    expect(formatForConfirmationCard(`a\u{061c}b`)).toBe('"a\\u{061C}b"');
+    expect(formatForConfirmationCard(`a\u{3164}b`)).toBe('"a\\u{3164}b"');
+    expect(formatForConfirmationCard(`a\u{115f}b`)).toBe('"a\\u{115F}b"');
+  });
+
+  it('escapes every format and default-ignorable code point, not a hand-kept subset', () => {
+    // Ranges an earlier enumerated list missed. Each is invisible when
+    // rendered, so unescaped it would let the displayed text differ from the
+    // text that is recorded.
+    const previouslyMissed = [
+      0x0600, // Arabic number sign
+      0x070f, // Syriac abbreviation mark
+      0x0890, // Arabic pound mark above
+      0x08e2, // Arabic disambiguation mark bottom
+      0x180b, // Mongolian free variation selector
+      0x2065, // reserved
+      0x206a, // deprecated format character
+      0xfff0, // reserved
+      0x110bd, // Kaithi number sign
+      0x13430, // Egyptian hierograph format character
+      0x1d173, // musical symbol begin beam
+      0xe0080, // reserved tag
+      0xe01f0, // reserved variation selector
+    ];
+    for (const cp of previouslyMissed) {
+      expect(formatForConfirmationCard(`a${String.fromCodePoint(cp)}b`)).toBe(
+        `"a\\u{${cp.toString(16).toUpperCase().padStart(4, '0')}}b"`
+      );
+    }
+  });
+
+  it('leaves visible, non-ASCII text exactly as typed', () => {
+    // Only invisible or misleading code points are escaped. Combining marks
+    // are part of the letter they follow, and escaped they would make a
+    // legitimate non-ASCII hostname unreadable.
+    expect(formatForConfirmationCard('café')).toBe('"café"');
+    expect(formatForConfirmationCard('z\u0301')).toBe('"z\u0301"');
+    expect(formatForConfirmationCard('主机')).toBe('"主机"');
+    expect(formatForConfirmationCard('Δelta')).toBe('"Δelta"');
+  });
+
+  it('renders a forged multi-line comment as one escaped line', () => {
+    expect(formatForConfirmationCard('x"\n\n---\n\n**Correction:** stale label')).toBe(
+      '"x"\\n\\n---\\n\\n**Correction:** stale label"'
+    );
+  });
+});
+
+interface MdastNode {
+  type: string;
+  value?: unknown;
+  url?: string;
+  children?: MdastNode[];
+}
+
+describe('formatHostForConfirmationCard', () => {
+  it('shows an ordinary hostname unchanged', () => {
+    expect(formatHostForConfirmationCard('web-01')).toBe('web-01');
+    expect(formatHostForConfirmationCard('db.example.internal')).toBe('db\\.example\\.internal');
+  });
+
+  it('keeps hyphens, and escapes dots and underscores, in a hostname', () => {
+    // An underscore only opens emphasis around word boundaries in CommonMark,
+    // but it is escaped rather than reasoned about: the label must not depend
+    // on the renderer's emphasis rules.
+    expect(formatHostForConfirmationCard('db_01')).toBe('db\\_01');
+    expect(formatHostForConfirmationCard('host-7f3a')).toBe('host-7f3a');
+    expect(formatHostForConfirmationCard('10.0.0.1')).toBe('10\\.0\\.0\\.1');
+  });
+
+  it('shows Markdown emphasis, links, autolinks and strikethrough in a hostname as plain text', () => {
+    expect(formatHostForConfirmationCard('web-01** [ok](https://evil.example)')).toBe(
+      'web-01\\*\\* \\[ok\\](https&#58;//evil\\.example)'
+    );
+    expect(formatHostForConfirmationCard('~prod~')).toBe('\\~prod\\~');
+    expect(formatHostForConfirmationCard('`prod`')).toBe('\\`prod\\`');
+    // Angle brackets would form an autolink or raw HTML. A backslash does not
+    // escape `<` in the renderer's parser, so it is written as an entity.
+    expect(formatHostForConfirmationCard('<b>prod</b>')).toBe('&lt;b\\>prod&lt;/b\\>');
+  });
+
+  it('escapes the dots a bare URL, www host or email address needs, keeping the name readable', () => {
+    expect(formatHostForConfirmationCard('https://evil.example/approved')).toBe(
+      'https&#58;//evil\\.example/approved'
+    );
+    expect(formatHostForConfirmationCard('www.evil.example')).toBe('www\\.evil\\.example');
+    expect(formatHostForConfirmationCard('ops@evil.example')).toBe('ops@evil\\.example');
+    expect(formatHostForConfirmationCard('web-01.corp.local')).toBe('web-01\\.corp\\.local');
+  });
+
+  it('writes the colon of an emoji shortcode as an entity so it renders literally', () => {
+    expect(formatHostForConfirmationCard('a:fire:b')).toBe('a&#58;fire&#58;b');
+    expect(formatHostForConfirmationCard('x:+1:')).toBe('x&#58;+1&#58;');
+    expect(formatHostForConfirmationCard('web:smile:01')).toBe('web&#58;smile&#58;01');
+    expect(formatHostForConfirmationCard('db:warning:')).toBe('db&#58;warning&#58;');
+  });
+
+  describe('as rendered by the card pipeline (EuiMarkdownFormat default parsing plugins)', () => {
+    // The same parser and transformers EuiMarkdownFormat runs on the card
+    // message: remark-parse-no-trim (gfm), remark-emoji, remark-breaks, etc.
+    const processor = unified().use(getDefaultEuiMarkdownParsingPlugins());
+    const pipeline = (markdown: string) =>
+      processor.runSync(processor.parse(markdown)) as MdastNode;
+
+    const walkNodes = (node: MdastNode, visit: (n: MdastNode) => void) => {
+      visit(node);
+      (node.children ?? []).forEach((child) => walkNodes(child, visit));
+    };
+
+    // Mirrors how the card places the label: inside a bold span. Any node the
+    // label should not produce (link, html, emoji glyph node, ...) fails loudly
+    // instead of silently dropping text.
+    const render = (name: string, allowedTypes: string[] = []) => {
+      const types: string[] = [];
+      const codeValues: string[] = [];
+      let text = '';
+      walkNodes(pipeline(`**${formatHostForConfirmationCard(name)}**`), (node) => {
+        types.push(node.type);
+        if (node.type === 'text') text += String(node.value);
+        if (node.type === 'inlineCode') codeValues.push(String(node.value));
+      });
+      const allowed = ['root', 'paragraph', 'strong', 'text', ...allowedTypes];
+      expect(types.filter((type) => !allowed.includes(type))).toEqual([]);
+      return { types, text, codeValues };
+    };
+
+    it.each([
+      'https://evil.example/approved',
+      'HTTP://evil.example',
+      'www.evil.example',
+      'ops@evil.example',
+      '<https://evil.example>',
+      '<b>prod</b>',
+      'web-01** [ok](https://evil.example)',
+      'web&#x202E;01',
+      'web-01.corp.local',
+      'db_01.corp.local',
+      '10.0.0.1',
+      'a:fire:b',
+      'x:+1:',
+      'web:smile:01',
+      'db:warning:',
+      '::fire::',
+    ])('shows %p as exactly that text with no link, raw HTML or emoji', (name) => {
+      expect(render(name).text).toBe(name);
+    });
+
+    it('shows a misleading code point as an escape in a code span, not as the character', () => {
+      const { types, text, codeValues } = render('web\u202E01', ['inlineCode']);
+
+      expect(types).toContain('inlineCode');
+      expect(codeValues).toEqual(['\\u{202E}']);
+      expect(text).toBe('web01');
+    });
+
+    it('would link or emojify these names if they were not escaped (the pipeline really does)', () => {
+      const unescaped = (name: string) => {
+        const types: string[] = [];
+        let text = '';
+        walkNodes(pipeline(`**${name}**`), (node) => {
+          types.push(node.type);
+          if (node.type === 'text') text += String(node.value);
+        });
+        return { types, text };
+      };
+
+      expect(unescaped('https://evil.example/approved').types).toContain('link');
+      expect(unescaped('www.evil.example').types).toContain('link');
+      expect(unescaped('ops@evil.example').types).toContain('link');
+      expect(unescaped('a:fire:b').text).toBe('a🔥b');
+      expect(unescaped('x:+1:').text).toBe('x👍');
+      expect(unescaped('web:smile:01').text).toBe('web😄01');
+      expect(unescaped('db:warning:').text).toBe('db⚠️');
+    });
+  });
+
+  it('neutralises a forged trailing bold so the label cannot be closed early', () => {
+    // Closing the bold span lets the rest of a hostname start new card lines
+    // outside the heading the analyst reads as the target.
+    expect(formatHostForConfirmationCard('web-01**\n\nIgnore the card')).toBe(
+      'web-01\\*\\*`\\n\\n`Ignore the card'
+    );
+  });
+
+  it('escapes a backslash so a Markdown escape cannot be forged', () => {
+    expect(formatHostForConfirmationCard('web\\*01')).toBe('web\\\\\\*01');
+  });
+
+  it('escapes an ampersand so a character reference cannot be decoded', () => {
+    // Decoded by the renderer, `&#x202E;` would display the RTLO character the
+    // predicate above refuses — shown as literal text instead.
+    expect(formatHostForConfirmationCard('web&#x202E;01')).toBe('web&amp;#x202E;01');
+    expect(formatHostForConfirmationCard('a&b')).toBe('a&amp;b');
+  });
+
+  it('shows invisible and tag code points in a hostname as escapes', () => {
+    expect(formatHostForConfirmationCard(`web\u{202e}01`)).toBe('web`\\u{202E}`01');
+    expect(formatHostForConfirmationCard(`web\u{e0067}01`)).toBe('web`\\u{E0067}`01');
+    expect(formatHostForConfirmationCard(`web\u{fe0f}01`)).toBe('web`\\u{FE0F}`01');
+    // A range the enumerated list that preceded the property-based predicate
+    // missed: an Arabic number sign between two visible characters.
+    expect(formatHostForConfirmationCard(`web\u{0600}01`)).toBe('web`\\u{0600}`01');
+  });
+
+  it('renders an invisible code point differently from a name that literally spells its escape', () => {
+    // Markdown turns `\\\\` back into one backslash, so without the code span
+    // both labels would display the same `\\u{202E}` text.
+    const invisible = formatHostForConfirmationCard('web\u{202e}01');
+    const literal = formatHostForConfirmationCard('web\\u{202E}01');
+
+    expect(invisible).not.toBe(literal);
+    expect(invisible).toContain('`\\u{202E}`');
+    expect(literal).toBe('web\\\\u{202E}01');
+  });
+
+  it('groups adjacent escapes in one code span so backticks cannot merge', () => {
+    expect(formatHostForConfirmationCard('a\u{200b}\u{202e}b')).toBe('a`\\u{200B}\\u{202E}`b');
+  });
+
+  it('leaves a non-ASCII hostname exactly as typed', () => {
+    expect(formatHostForConfirmationCard('café.internal')).toBe('café\\.internal');
+    expect(formatHostForConfirmationCard('主机')).toBe('主机');
+  });
+});
+
+describe('canonicalizeIp', () => {
+  it.each([
+    ['FE80:0:0:0:0:0:0:1', 'fe80::1'],
+    ['fe80::0001', 'fe80::1'],
+    ['10.0.0.7', '10.0.0.7'],
+  ])('writes %s as %s', (ip, expected) => {
+    expect(canonicalizeIp(ip)).toBe(expected);
+  });
+
+  it('returns a legacy IPv4 form unchanged instead of retargeting it', () => {
+    expect(canonicalizeIp('010.0.0.1')).toBe('010.0.0.1');
+  });
+});
+
+describe('resolveAgentTypeFromPackages', () => {
+  it('defaults to endpoint when packages is undefined', () => {
+    expect(resolveAgentTypeFromPackages(undefined)).toBe('endpoint');
+  });
+
+  it('defaults to endpoint when packages is empty', () => {
+    expect(resolveAgentTypeFromPackages([])).toBe('endpoint');
+  });
+
+  it('defaults to endpoint when no known package is present', () => {
+    expect(resolveAgentTypeFromPackages(['some_other_integration'])).toBe('endpoint');
+  });
+
+  it('resolves endpoint from the endpoint package', () => {
+    expect(resolveAgentTypeFromPackages(['endpoint'])).toBe('endpoint');
+  });
+
+  it('resolves sentinel_one from the sentinel_one package', () => {
+    expect(resolveAgentTypeFromPackages(['sentinel_one'])).toBe('sentinel_one');
+  });
+
+  it('resolves crowdstrike from the crowdstrike package', () => {
+    expect(resolveAgentTypeFromPackages(['crowdstrike'])).toBe('crowdstrike');
+  });
+
+  it('resolves microsoft_defender_endpoint from the microsoft_defender_endpoint package', () => {
+    expect(resolveAgentTypeFromPackages(['microsoft_defender_endpoint'])).toBe(
+      'microsoft_defender_endpoint'
+    );
+  });
+
+  it('resolves microsoft_defender_endpoint from the legacy m365_defender package', () => {
+    expect(resolveAgentTypeFromPackages(['m365_defender'])).toBe('microsoft_defender_endpoint');
+  });
+
+  it('resolves the matching agent type when multiple unrelated packages are installed', () => {
+    expect(resolveAgentTypeFromPackages(['fleet_server', 'sentinel_one', 'system'])).toBe(
+      'sentinel_one'
+    );
+  });
+});
+
+describe('GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS', () => {
+  it('covers the capped sections at 4 characters per token (derivation in the constant JSDoc)', () => {
+    const cappedChars =
+      MAX_OUTPUT_TOTAL_CHARS +
+      MAX_AGENT_STATE_TOTAL_CHARS +
+      MAX_PARAMETER_KEYS * MAX_OUTPUT_STRING_LENGTH +
+      MAX_ACTION_ERRORS * MAX_OUTPUT_STRING_LENGTH;
+
+    expect(cappedChars).toBe(228_000);
+    expect(GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS * 4).toBeGreaterThan(cappedChars);
+  });
+});
+
+describe('summarizeActionOutputs', () => {
+  it('keeps the first agent summary even when it alone exceeds the total budget', () => {
+    const oversized = Object.fromEntries(
+      Array.from({ length: 50 }, (_, i) => [`key-${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+    );
+    const result = summarizeActionOutputs({ 'agent-1': oversized })!;
+    expect(result.agents).toHaveLength(1);
+    expect(result.agents[0].agentId).toBe('agent-1');
+  });
+
+  it('shrinks an over-budget first agent to fit and names what it shortened', () => {
+    const oversized = Object.fromEntries(
+      Array.from({ length: 50 }, (_, i) => [`key-${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+    );
+
+    const result = summarizeActionOutputs({ 'agent-1': oversized })!;
+
+    expect(JSON.stringify(result.agents[0]).length).toBeLessThanOrEqual(MAX_OUTPUT_TOTAL_CHARS);
+    expect(result.retainedOverBudget).toBeUndefined();
+    expect(result.summaryTruncated).toBeUndefined();
+    expect(result.agents[0].truncatedFields).toContain('key-0');
+    // The earliest keys survive; the dropped tail is named, not silent.
+    expect(result.agents[0]).toHaveProperty('key-0');
+    expect(result.agents[0]).not.toHaveProperty('key-49');
+    expect(result.agents[0].truncatedFields).toContain('key-49');
+  });
+
+  it('fits a first agent whose size comes from nested list entries', () => {
+    const entries = Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT }, () =>
+      Object.fromEntries(
+        Array.from({ length: 50 }, (_, i) => [`k${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+      )
+    );
+
+    const result = summarizeActionOutputs({ 'agent-1': { content: { entries } } })!;
+
+    expect(JSON.stringify(result.agents[0]).length).toBeLessThanOrEqual(MAX_OUTPUT_TOTAL_CHARS);
+    expect(result.retainedOverBudget).toBeUndefined();
+    expect(result.agents[0].totalEntries).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT);
+    expect(result.agents[0].truncatedFields).toContain('entries');
+  });
+
+  it('reduces to a bounded path sample when even the path list is irreducible', () => {
+    const entries = Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT }, () =>
+      Object.fromEntries(
+        Array.from({ length: 50 }, (_, i) => [`k${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+      )
+    );
+    const wideKeys = Object.fromEntries(
+      Array.from({ length: 50 }, (_, i) => [`${'w'.repeat(1500)}${i}`, 'x'.repeat(10)])
+    );
+
+    const result = summarizeActionOutputs({
+      'agent-1': { content: { entries, ...wideKeys }, ...wideKeys },
+    })!;
+
+    expect(JSON.stringify(result.agents[0]).length).toBeLessThanOrEqual(MAX_OUTPUT_TOTAL_CHARS);
+    expect(result.agents[0].totalEntries).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT);
+    expect(result.agents[0].truncatedFields!.length).toBeLessThanOrEqual(20);
+  });
+
+  it('does not flag retainedOverBudget when the retained summaries fit the budget', () => {
+    const result = summarizeActionOutputs({ 'agent-1': { stdout: 'ok' } })!;
+
+    expect(result.retainedOverBudget).toBeUndefined();
+  });
+
+  it('drops trailing agents once the cumulative budget is exceeded and reports summaryTruncated', () => {
+    const big = Object.fromEntries(
+      Array.from({ length: 20 }, (_, i) => [`key-${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+    );
+
+    const result = summarizeActionOutputs({ 'agent-1': big, 'agent-2': big, 'agent-3': big })!;
+
+    expect(result.agents.map((agent) => agent.agentId)).toEqual(['agent-1']);
+    expect(result.summaryTruncated).toBe(true);
+    expect(result.totalAgents).toBe(3);
+    expect(result.agentsTruncated).toBe(2);
+    expect(result.retainedOverBudget).toBeUndefined();
+  });
+
+  it('returns undefined when there are no outputs', () => {
+    expect(summarizeActionOutputs(undefined)).toBeUndefined();
+    expect(summarizeActionOutputs(null)).toBeUndefined();
+  });
+
+  it('passes small outputs through unchanged', () => {
+    const result = summarizeActionOutputs({
+      'agent-1': { type: 'json', content: { entries: [{ stdout: 'ok' }] } },
+    });
+
+    expect(result).toEqual({
+      agents: [
+        {
+          agentId: 'agent-1',
+          type: 'json',
+          entries: [{ stdout: 'ok' }],
+          totalEntries: 1,
+        },
+      ],
+      totalAgents: 1,
+    });
+  });
+
+  it('caps the number of agents and reports how many were dropped', () => {
+    const outputs: Record<string, unknown> = {};
+    for (let i = 0; i < MAX_OUTPUT_AGENTS + 3; i++) {
+      outputs[`agent-${i}`] = { content: { entries: [] } };
+    }
+
+    const result = summarizeActionOutputs(outputs)!;
+
+    expect(result.agents).toHaveLength(MAX_OUTPUT_AGENTS);
+    expect(result.totalAgents).toBe(MAX_OUTPUT_AGENTS + 3);
+    expect(result.agentsTruncated).toBe(3);
+  });
+
+  it('caps entries per agent and reports the dropped count', () => {
+    const entries = Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT + 5 }, (_, i) => ({ i }));
+
+    const result = summarizeActionOutputs({ 'agent-1': { content: { entries } } })!;
+
+    expect(result.agents[0].entries).toHaveLength(MAX_OUTPUT_ENTRIES_PER_AGENT);
+    expect(result.agents[0].entries).toEqual(entries.slice(0, MAX_OUTPUT_ENTRIES_PER_AGENT));
+    expect(result.agents[0].totalEntries).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT + 5);
+    expect(result.agents[0].entriesTruncated).toBe(5);
+    expect(result.agents[0].truncatedFields).toBeUndefined();
+  });
+
+  it('caps get-file contents per agent and reports the dropped count', () => {
+    const contents = Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT + 3 }, (_, i) => ({
+      path: `/tmp/file-${i}`,
+    }));
+
+    const result = summarizeActionOutputs({ 'agent-1': { content: { code: 'ok', contents } } })!;
+
+    expect(result.agents[0].contents).toHaveLength(MAX_OUTPUT_ENTRIES_PER_AGENT);
+    expect(result.agents[0].totalContents).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT + 3);
+    expect(result.agents[0].contentsTruncated).toBe(3);
+    expect(result.agents[0].content).toEqual({ code: 'ok' });
+  });
+
+  it('truncates oversized string fields and names them', () => {
+    const longOutput = 'x'.repeat(MAX_OUTPUT_STRING_LENGTH + 100);
+
+    const result = summarizeActionOutputs({ 'agent-1': { stdout: longOutput } })!;
+
+    const stdout = result.agents[0].stdout as string;
+    expect(stdout.length).toBeLessThan(longOutput.length);
+    expect(stdout).toContain('100 more characters');
+    expect(result.agents[0].truncatedFields).toEqual(['stdout']);
+  });
+
+  it('does not flag fields that are within the bound', () => {
+    const result = summarizeActionOutputs({ 'agent-1': { stdout: 'short' } })!;
+
+    expect(result.agents[0].stdout).toBe('short');
+    expect(result.agents[0].truncatedFields).toBeUndefined();
+  });
+
+  describe('nested payloads', () => {
+    it('bounds stdout nested under content', () => {
+      // The production shape nests the payload one level down
+      // (`{ type, content: { stdout } }`), so a top-level-only bound left the
+      // multi-MB output unbounded — the bug this covers.
+      const longOutput = 'x'.repeat(MAX_OUTPUT_STRING_LENGTH + 100);
+
+      const result = summarizeActionOutputs({
+        'agent-1': { type: 'json', content: { stdout: longOutput } },
+      })!;
+
+      const content = result.agents[0].content as { stdout: string };
+      expect(content.stdout.length).toBeLessThan(longOutput.length);
+      expect(content.stdout).toContain('100 more characters');
+      expect(result.agents[0].truncatedFields).toEqual(['content.stdout']);
+    });
+
+    it('bounds an entries array nested under content', () => {
+      const entries = Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT + 5 }, (_, i) => ({
+        pid: i,
+      }));
+
+      const result = summarizeActionOutputs({ 'agent-1': { content: { entries } } })!;
+
+      // No marker string is appended into the process list.
+      expect(result.agents[0].entries).toHaveLength(MAX_OUTPUT_ENTRIES_PER_AGENT);
+      expect(result.agents[0].entries!.every((entry) => typeof entry === 'object')).toBe(true);
+      expect(result.agents[0].totalEntries).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT + 5);
+      expect(result.agents[0].entriesTruncated).toBe(5);
+    });
+
+    it('bounds oversized strings inside kept entries and names the path', () => {
+      const result = summarizeActionOutputs({
+        'agent-1': {
+          content: {
+            entries: [{ pid: 1 }, { command: 'x'.repeat(MAX_OUTPUT_STRING_LENGTH + 10) }],
+          },
+        },
+      })!;
+
+      // Named as the model sees it: the list is lifted to the top level of the
+      // agent summary, so there is no `content.` prefix.
+      expect(result.agents[0].truncatedFields).toEqual(['entries[1].command']);
+      expect(result.agents[0]).not.toHaveProperty('content');
+      expect(result.agents[0].totalEntries).toBe(2);
+    });
+
+    it('serializes values nested deeper than the depth limit instead of walking them', () => {
+      // Short leaf: neither the string bound nor the overall size can trigger,
+      // so only the depth limit explains the serialized value.
+      let nested: unknown = { leaf: 'ok' };
+      for (let level = 0; level < MAX_OUTPUT_DEPTH; level++) {
+        nested = { [`level${level}`]: nested };
+      }
+
+      const result = summarizeActionOutputs({ 'agent-1': { content: nested } })!;
+
+      const content = result.agents[0].content as Record<string, unknown>;
+      let cursor: unknown = content;
+      for (let level = MAX_OUTPUT_DEPTH - 1; level >= 1; level--) {
+        cursor = (cursor as Record<string, unknown>)[`level${level}`];
+      }
+      expect(typeof (cursor as Record<string, unknown>).level0).toBe('string');
+      expect((cursor as Record<string, unknown>).level0).toBe('{"leaf":"ok"}');
+      expect(result.agents[0].truncatedFields).toBeUndefined();
+    });
+
+    it('serializes an array nested deeper than the depth limit', () => {
+      let nested: unknown = [1, 2, 3];
+      for (let level = 0; level < MAX_OUTPUT_DEPTH; level++) {
+        nested = { [`level${level}`]: nested };
+      }
+
+      const result = summarizeActionOutputs({ 'agent-1': { content: nested } })!;
+
+      let cursor = result.agents[0].content as Record<string, unknown>;
+      for (let level = MAX_OUTPUT_DEPTH - 1; level >= 1; level--) {
+        cursor = cursor[`level${level}`] as Record<string, unknown>;
+      }
+      expect(cursor.level0).toBe('[1,2,3]');
+    });
+
+    it('reports the path of an oversized value found beyond the depth limit', () => {
+      let nested: unknown = { stdout: 'x'.repeat(MAX_OUTPUT_STRING_LENGTH + 500) };
+      for (let level = 0; level < MAX_OUTPUT_DEPTH; level++) {
+        nested = { [`level${level}`]: nested };
+      }
+
+      const result = summarizeActionOutputs({ 'agent-1': { content: nested } })!;
+
+      expect(JSON.stringify(result).length).toBeLessThan(MAX_OUTPUT_STRING_LENGTH * 3);
+      expect(result.agents[0].truncatedFields).toEqual([
+        `content.${Array.from(
+          { length: MAX_OUTPUT_DEPTH },
+          (_, i) => `level${MAX_OUTPUT_DEPTH - 1 - i}`
+        ).join('.')}`,
+      ]);
+    });
+
+    it('leaves small nested payloads unchanged', () => {
+      const result = summarizeActionOutputs({
+        'agent-1': { type: 'json', content: { code: 'success', entries: [{ pid: 1 }] } },
+      })!;
+
+      expect(result.agents[0].content).toEqual({ code: 'success' });
+      expect(result.agents[0].entries).toEqual([{ pid: 1 }]);
+      expect(result.agents[0].truncatedFields).toBeUndefined();
+    });
+  });
+});
+
+describe('summarizeActionHosts', () => {
+  it('bounds oversized host values like the other summarizers', () => {
+    const hugeName = 'h'.repeat(MAX_OUTPUT_STRING_LENGTH + 500);
+    const result = summarizeActionHosts({ 'agent-1': { name: hugeName } })!;
+    const name = (result.hosts['agent-1'] as { name: string }).name;
+    expect(name.length).toBeLessThan(hugeName.length);
+  });
+
+  it('returns undefined when there are no hosts', () => {
+    expect(summarizeActionHosts(undefined)).toBeUndefined();
+    expect(summarizeActionHosts(null)).toBeUndefined();
+  });
+
+  it('keeps the hosts record shape and reports the total', () => {
+    expect(summarizeActionHosts({ 'agent-1': { name: 'host-a' } })).toEqual({
+      hosts: { 'agent-1': { name: 'host-a' } },
+      totalHosts: 1,
+    });
+  });
+
+  it('caps the hosts of a fan-out action and reports the drop', () => {
+    // A batch isolate targets one entry per host; reporting all of them would
+    // inject thousands of records into the model context.
+    const hosts: Record<string, unknown> = {};
+    for (let i = 0; i < MAX_ACTION_HOSTS + 7; i++) {
+      hosts[`agent-${i}`] = { name: `host-${i}` };
+    }
+
+    const result = summarizeActionHosts(hosts)!;
+
+    expect(Object.keys(result.hosts)).toHaveLength(MAX_ACTION_HOSTS);
+    expect(result.totalHosts).toBe(MAX_ACTION_HOSTS + 7);
+    expect(result.hostsTruncated).toBe(7);
+  });
+});
+
+describe('summarizeAgentState', () => {
+  it('flags when the single retained agent state still exceeds the total budget', () => {
+    const oversized = Object.fromEntries(
+      Array.from({ length: 50 }, (_, i) => [`key-${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+    );
+    const result = summarizeAgentState({ 'agent-1': oversized })!;
+    expect(Object.keys(result.agentState)).toEqual(['agent-1']);
+    expect(result.agentStateRetainedOverBudget).toBe(true);
+  });
+
+  it('returns undefined when there is no agent state', () => {
+    expect(summarizeAgentState(undefined)).toBeUndefined();
+  });
+
+  it('keeps per-agent completion visible for a small fan-out', () => {
+    expect(
+      summarizeAgentState({
+        'agent-1': { isCompleted: true, wasSuccessful: true, wasCanceled: false },
+      })
+    ).toEqual({
+      agentState: { 'agent-1': { isCompleted: true, wasSuccessful: true, wasCanceled: false } },
+      agentStateTotal: 1,
+    });
+  });
+
+  it('caps per-agent states and reports the drop', () => {
+    const agentState: Record<string, unknown> = {};
+    for (let i = 0; i < MAX_AGENT_STATE_ENTRIES + 2; i++) {
+      agentState[`agent-${i}`] = { isCompleted: true, wasSuccessful: true, wasCanceled: false };
+    }
+
+    const result = summarizeAgentState(agentState)!;
+
+    expect(Object.keys(result.agentState)).toHaveLength(MAX_AGENT_STATE_ENTRIES);
+    expect(result.agentStateTotal).toBe(MAX_AGENT_STATE_ENTRIES + 2);
+    expect(result.agentStateTruncated).toBe(2);
+  });
+
+  it('enforces the cumulative serialized budget across retained agent states', () => {
+    const agentState: Record<string, unknown> = {};
+    for (let i = 0; i < MAX_AGENT_STATE_ENTRIES; i++) {
+      agentState[`agent-${i}`] = {
+        errors: Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT }, () => 'e'.repeat(5_000)),
+      };
+    }
+
+    const result = summarizeAgentState(agentState)!;
+
+    // The budget drops whole agents from the tail but always keeps at least
+    // one, so the serialized size is bounded by the budget OR one full agent
+    // (plus the map-key wrapper around it).
+    expect(Object.keys(result.agentState).length).toBeLessThan(MAX_AGENT_STATE_ENTRIES);
+    const oneAgentOverhead =
+      JSON.stringify(result.agentState).length -
+      JSON.stringify(result.agentState[Object.keys(result.agentState)[0]]).length;
+    expect(JSON.stringify(result.agentState).length).toBeLessThanOrEqual(
+      Math.max(
+        MAX_AGENT_STATE_TOTAL_CHARS,
+        JSON.stringify(result.agentState['agent-0']).length + oneAgentOverhead
+      )
+    );
+    expect(result.agentStateTotal).toBe(MAX_AGENT_STATE_ENTRIES);
+    expect(result.agentStateTruncatedByBudget).toBeGreaterThan(0);
+    expect(result.agentStateTruncated).toBe(
+      MAX_AGENT_STATE_ENTRIES - Object.keys(result.agentState).length
+    );
+  });
+
+  it('bounds oversized error strings inside a per-agent state', () => {
+    const result = summarizeAgentState({
+      'agent-1': { isCompleted: false, errors: ['e'.repeat(MAX_OUTPUT_STRING_LENGTH + 50)] },
+    })!;
+
+    const state = result.agentState['agent-1'] as { errors: string[] };
+    expect(state.errors[0].length).toBeLessThan(MAX_OUTPUT_STRING_LENGTH + 50);
+  });
+});
+
+describe('waitForActionCompletion', () => {
+  const logger = { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as Logger;
+  const service = {} as unknown as EndpointAppContextService;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('returns the action details as soon as the action is completed', async () => {
+    mockGetActionDetailsById.mockResolvedValue({ id: 'a-1', isCompleted: true });
+
+    const result = await waitForActionCompletion(service, 'default', 'a-1', logger);
+
+    expect(result).toEqual({ id: 'a-1', isCompleted: true });
+    expect(mockGetActionDetailsById).toHaveBeenCalledTimes(1);
+    expect(mockGetActionDetailsById).toHaveBeenCalledWith(service, 'default', 'a-1', {
+      bypassSpaceValidation: true,
+    });
+  });
+
+  it('keeps polling while the action is pending and returns once it completes', async () => {
+    mockGetActionDetailsById
+      .mockResolvedValueOnce({ id: 'a-1', isCompleted: false })
+      .mockResolvedValueOnce({ id: 'a-1', isCompleted: false })
+      .mockResolvedValue({ id: 'a-1', isCompleted: true, wasSuccessful: true });
+
+    const pending = waitForActionCompletion(service, 'default', 'a-1', logger);
+    await jest.advanceTimersByTimeAsync(10_000);
+
+    await expect(pending).resolves.toEqual({ id: 'a-1', isCompleted: true, wasSuccessful: true });
+    expect(mockGetActionDetailsById).toHaveBeenCalledTimes(3);
+  });
+
+  it('returns the last known pending details when the retry budget is exhausted', async () => {
+    mockGetActionDetailsById.mockResolvedValue({ id: 'a-1', isCompleted: false });
+
+    const pending = waitForActionCompletion(service, 'default', 'a-1', logger);
+    await jest.advanceTimersByTimeAsync(5 * 60_000);
+
+    await expect(pending).resolves.toEqual({ id: 'a-1', isCompleted: false });
+    // initial attempt + 20 retries
+    expect(mockGetActionDetailsById).toHaveBeenCalledTimes(21);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('returns the last known details when a later poll throws', async () => {
+    mockGetActionDetailsById
+      .mockResolvedValueOnce({ id: 'a-1', isCompleted: false })
+      .mockRejectedValue(new Error('es unavailable'));
+
+    const pending = waitForActionCompletion(service, 'default', 'a-1', logger);
+    await jest.advanceTimersByTimeAsync(5 * 60_000);
+
+    await expect(pending).resolves.toEqual({ id: 'a-1', isCompleted: false });
+  });
+
+  it('returns the dispatch snapshot when no completion read ever succeeded (the action is queued, not failed)', async () => {
+    mockGetActionDetailsById.mockRejectedValue(new Error('es unavailable'));
+    const dispatched = { id: 'a-1', isCompleted: false, status: 'pending' } as ActionDetails;
+
+    const pending = waitForActionCompletion(service, 'default', 'a-1', logger, dispatched);
+    await jest.advanceTimersByTimeAsync(5 * 60_000);
+
+    await expect(pending).resolves.toBe(dispatched);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('a-1'));
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('prefers a later successful read over the dispatch snapshot', async () => {
+    mockGetActionDetailsById.mockResolvedValue({ id: 'a-1', isCompleted: true });
+    const dispatched = { id: 'a-1', isCompleted: false, status: 'pending' } as ActionDetails;
+
+    await expect(
+      waitForActionCompletion(service, 'default', 'a-1', logger, dispatched)
+    ).resolves.toEqual({ id: 'a-1', isCompleted: true });
+  });
+
+  it('logs and rethrows when no poll ever succeeded', async () => {
+    mockGetActionDetailsById.mockRejectedValue(new Error('es unavailable'));
+
+    const pending = waitForActionCompletion(service, 'default', 'a-1', logger);
+    const assertion = expect(pending).rejects.toThrow('es unavailable');
+    await jest.advanceTimersByTimeAsync(5 * 60_000);
+
+    await assertion;
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to fetch completion status for action [a-1]')
+    );
+  });
+});
+
+describe('buildResponseActionComment', () => {
+  const runContext = {
+    runId: 'run-1',
+    stack: [{ type: 'agent', agentId: 'agent-1', conversationId: 'conv-1' }],
+  } as unknown as RunContext;
+
+  it('marks the comment as executed by the AI agent and anchors it to the conversation', () => {
+    expect(buildResponseActionComment('Isolated via AI agent: host-1', runContext)).toBe(
+      'Isolated via AI agent: host-1 [Executed by AI agent] [AI agent conversation: conv-1]'
+    );
+  });
+
+  it('keeps the analyst comment and still marks it as executed by the AI agent', () => {
+    const comment = buildResponseActionComment('default', runContext, 'malware detected');
+
+    expect(comment).toBe('malware detected [Executed by AI agent] [AI agent conversation: conv-1]');
+  });
+
+  it('falls back to the run id when there is no conversation id', () => {
+    const noConversation = { runId: 'run-9', stack: [] } as unknown as RunContext;
+
+    expect(buildResponseActionComment('x', noConversation)).toBe(
+      'x [Executed by AI agent] [AI agent conversation: run-9]'
+    );
+  });
+
+  it('is still marked when no correlation id exists', () => {
+    const none = { runId: '', stack: [] } as unknown as RunContext;
+
+    expect(buildResponseActionComment('x', none)).toBe('x [Executed by AI agent]');
+  });
+});

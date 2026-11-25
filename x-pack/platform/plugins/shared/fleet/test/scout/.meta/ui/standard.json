@@ -1,8 +1,7 @@
 {
-  "sha1": "1249c0d8a98ee6d30603e1b8d1d584e62ae200d9",
+  "sha1": "0cb6386e89da5a7cb529e4b77c0dd0bb15797ea7",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 35,
-        "column": 52
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -43,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 42,
+        "line": 29,
         "column": 5
       }
     },
@@ -57,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 54,
+        "line": 39,
         "column": 11
       }
     },
@@ -72,6 +71,34 @@
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/copy_integration.spec.ts",
         "line": 130,
         "column": 5
+      }
+    },
+    {
+      "id": "405128a68c1c281-d1349f6c1402fdd",
+      "title": "Integration tile navigation clicking a tile with data streams opens the add-integration page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/integration_tile_navigation.spec.ts",
+        "line": 21,
+        "column": 45
+      }
+    },
+    {
+      "id": "405128a68c1c281-77486d9fb19bffd",
+      "title": "Integration tile navigation clicking a tile as a user without integrations write privileges opens the overview page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/integration_tile_navigation.spec.ts",
+        "line": 33,
+        "column": 9
       }
     },
     {
@@ -121,12 +148,13 @@
       "title": "When the user has Fleet Agents Read built-in role is accessible but user cannot perform any write actions on agent tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
-        "line": 15,
-        "column": 3
+        "line": 14,
+        "column": 14
       }
     },
     {
@@ -134,12 +162,13 @@
       "title": "When the user has Fleet Agents Read built-in role is accessible and user only see agents tab",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
-        "line": 26,
-        "column": 23
+        "line": 27,
+        "column": 24
       }
     },
     {
@@ -147,11 +176,12 @@
       "title": "When the user has All privilege for Fleet but None for integrations Fleet is accessible",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_none.spec.ts",
-        "line": 13,
+        "line": 14,
         "column": 14
       }
     },
@@ -165,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_read.spec.ts",
-        "line": 35,
+        "line": 38,
         "column": 7
       }
     },
@@ -179,7 +209,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_read.spec.ts",
-        "line": 51,
+        "line": 54,
         "column": 24
       }
     },

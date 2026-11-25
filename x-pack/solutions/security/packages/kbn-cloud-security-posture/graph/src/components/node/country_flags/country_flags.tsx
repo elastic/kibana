@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexItem, EuiText, useEuiFontSize, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiFontSize, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -95,42 +95,49 @@ export const CountryFlags = memo(({ countryCodes, onCountryClick }: CountryFlags
 
   const counter =
     validCodes.length > VISIBLE_FLAGS_LIMIT ? (
-      onCountryClick ? (
-        <EuiButtonEmpty
-          size="xs"
-          color="text"
-          data-test-subj={GRAPH_FLAGS_PLUS_COUNT_BUTTON_ID}
-          onClick={onCountryClick}
-          aria-label={popoverAriaLabel}
-          flush="both"
-          css={css`
-            font-weight: medium;
-          `}
-        >
-          {'+'}
-          {validCodes.length - VISIBLE_FLAGS_LIMIT}
-        </EuiButtonEmpty>
-      ) : (
-        <EuiText
-          size="xs"
-          color="subdued"
-          data-test-subj={GRAPH_FLAGS_PLUS_COUNT_ID}
-          css={css`
-            font-weight: medium;
-            ${xsFontSize};
-          `}
-        >
-          {'+'}
-          {validCodes.length - VISIBLE_FLAGS_LIMIT}
-        </EuiText>
-      )
+      <RoundedBadge data-test-subj={GRAPH_FLAGS_PLUS_COUNT_ID}>
+        {onCountryClick ? (
+          <EuiButtonEmpty
+            size="xs"
+            color="text"
+            data-test-subj={GRAPH_FLAGS_PLUS_COUNT_BUTTON_ID}
+            onClick={onCountryClick}
+            aria-label={popoverAriaLabel}
+            flush="both"
+            css={css`
+              font-weight: medium;
+            `}
+          >
+            {'+'}
+            {validCodes.length - VISIBLE_FLAGS_LIMIT}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={css`
+              font-weight: medium;
+              ${xsFontSize};
+            `}
+          >
+            {'+'}
+            {validCodes.length - VISIBLE_FLAGS_LIMIT}
+          </EuiText>
+        )}
+      </RoundedBadge>
     ) : null;
 
   return (
-    <RoundedBadge data-test-subj={GRAPH_FLAGS_BADGE_ID}>
+    <EuiFlexGroup
+      responsive={false}
+      gutterSize="xs"
+      alignItems="center"
+      wrap={false}
+      data-test-subj={GRAPH_FLAGS_BADGE_ID}
+    >
       {visibleFlags}
-      {counter}
-    </RoundedBadge>
+      {counter && <EuiFlexItem grow={false}>{counter}</EuiFlexItem>}
+    </EuiFlexGroup>
   );
 });
 

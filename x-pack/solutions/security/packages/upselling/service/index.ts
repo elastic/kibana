@@ -9,6 +9,8 @@ export type {
   MessageUpsellings,
   PageUpsellings,
   SectionUpsellings,
+  UpsellingPageComponent,
+  UpsellingPageProps,
   UpsellingSectionId,
   UpsellingMessageId,
 } from './types';

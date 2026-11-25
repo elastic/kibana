@@ -61,6 +61,22 @@ describe('HeaderMenu', () => {
     expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
   });
 
+  it('should expose the visible text as the accessible name for the empty button, not the popover aria-label', () => {
+    const wrapper = render(
+      <HeaderMenu
+        disableActions={false}
+        emptyButton
+        actions={null}
+        text="Affects 3 rules"
+        ariaLabel="View affected rules"
+      />
+    );
+
+    expect(wrapper.getByRole('button', { name: 'Affects 3 rules' })).toBe(
+      wrapper.getByTestId('EmptyButton')
+    );
+  });
+
   it('should render empty button icon with actions and open the popover when clicked', () => {
     const wrapper = render(
       <HeaderMenu
@@ -106,7 +122,7 @@ describe('HeaderMenu', () => {
     const wrapper = render(<HeaderMenu disableActions={false} actions={actions} />);
     fireEvent.click(wrapper.getByTestId('ButtonIcon'));
     fireEvent.click(wrapper.getByTestId('ActionItemedit'));
-    expect(onEdit).toBeCalled();
+    expect(onEdit).toHaveBeenCalled();
   });
 
   it('should render custom Actions', () => {

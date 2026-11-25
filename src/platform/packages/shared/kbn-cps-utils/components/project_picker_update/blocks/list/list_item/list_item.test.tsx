@@ -20,14 +20,21 @@ const defaultProject: ProjectPickerListItemProps['project'] = {
   _organisation: 'org-1',
 };
 
-const createDefaultProps = (): ProjectPickerListItemProps => ({
-  isSelected: true,
+const createDefaultProps = (
+  props: Pick<ProjectPickerListItemProps, 'isOriginProject' | 'isSelected' | 'isToggleDisabled'> = {
+    isSelected: true,
+    isOriginProject: false,
+    isToggleDisabled: false,
+  }
+): ProjectPickerListItemProps => ({
+  controlsState: 'enabled',
   isToggleDisabled: false,
   project: defaultProject,
   toggleDisabledMessage: 'You must be searching a minimum of one project.',
   onContextMenu: jest.fn() as ProjectPickerListItemProps['onContextMenu'],
   onToggle: jest.fn() as ProjectPickerListItemProps['onToggle'],
   onLabelClick: jest.fn() as ProjectPickerListItemProps['onLabelClick'],
+  ...props,
 });
 
 const renderComponent = (props: Partial<ProjectPickerListItemProps> = {}) => {
@@ -46,17 +53,6 @@ describe('ProjectPickerListItem', () => {
     expect(screen.getByTestId('projectPickerListItem')).toBeInTheDocument();
   });
 
-  it('toggling the switch should invokes the onToggle function', async () => {
-    const user = userEvent.setup();
-
-    const { props } = renderComponent({
-      isSelected: false,
-    });
-
-    await user.click(screen.getByTestId('projectPickerListItemSwitch-1'));
-    expect(props.onToggle).toHaveBeenCalledWith(props.project, true);
-  });
-
   it('should render the project icon with the correct type', () => {
     renderComponent({
       project: {
@@ -69,14 +65,40 @@ describe('ProjectPickerListItem', () => {
     expect(item.querySelector('[data-euiicon-type="logoElasticsearch"]')).toBeInTheDocument();
   });
 
-  it('should render the context menu button', async () => {
-    const user = userEvent.setup();
+  describe('cloud provider and region', () => {
+    it('should render a friendly provider and region', () => {
+      renderComponent({ project: { ...defaultProject, _csp: 'aws', _region: 'eu-west-1' } });
 
-    const { props } = renderComponent();
+      expect(screen.getByTestId('projectPickerListItem')).toHaveTextContent(
+        'AWS, Ireland (eu-west-1)'
+      );
+    });
 
-    await user.click(screen.getByTestId('projectPickerListItemContextMenu-1'));
+    it('should ignore a provider prefix on the region', () => {
+      renderComponent({ project: { ...defaultProject, _csp: 'gcp', _region: 'gcp-us-central1' } });
 
-    expect(props.onContextMenu).toHaveBeenCalledWith(props.project, expect.any(Object));
+      expect(screen.getByTestId('projectPickerListItem')).toHaveTextContent(
+        'GCP, Iowa (us-central1)'
+      );
+    });
+
+    it('should render the bare region when its location is unknown', () => {
+      renderComponent({ project: { ...defaultProject, _csp: 'azure', _region: 'newregion' } });
+
+      expect(screen.getByTestId('projectPickerListItem')).toHaveTextContent('Azure, newregion');
+    });
+
+    it('should not render the provider and region when the region is missing', () => {
+      renderComponent({ project: { ...defaultProject, _csp: 'aws' } });
+
+      expect(screen.getByTestId('projectPickerListItem')).not.toHaveTextContent('AWS');
+    });
+
+    it('should not render the provider and region when the provider is missing', () => {
+      renderComponent({ project: { ...defaultProject, _region: 'eu-west-1' } });
+
+      expect(screen.getByTestId('projectPickerListItem')).not.toHaveTextContent('eu-west-1');
+    });
   });
 
   it('should not render a tags badge when the project has no custom tags', () => {
@@ -97,32 +119,67 @@ describe('ProjectPickerListItem', () => {
     expect(screen.getByTestId('projectPickerListItemTags')).toHaveTextContent('2');
   });
 
-  it('should invoke onLabelClick when the tags badge is clicked', async () => {
-    const user = userEvent.setup();
-
-    const { props } = renderComponent({
+  it('should hide the tags badge when project tags are disabled', () => {
+    renderComponent({
       project: {
         ...defaultProject,
         env: 'prod',
-        team: 'search',
       },
+      showProjectTags: false,
     });
 
-    await user.click(screen.getByTestId('projectPickerListItemTags'));
-
-    expect(props.onLabelClick).toHaveBeenCalledWith(props.project, expect.any(Object));
+    expect(screen.queryByTestId('projectPickerListItemTags')).not.toBeInTheDocument();
   });
 
-  describe('read-only mode', () => {
+  describe('enabled controls state', () => {
+    it('toggling the switch should invokes the onToggle function', async () => {
+      const user = userEvent.setup();
+
+      const { props } = renderComponent({
+        isSelected: false,
+      });
+
+      await user.click(screen.getByTestId('projectPickerListItemSwitch-1'));
+      expect(props.onToggle).toHaveBeenCalledWith(props.project, true);
+    });
+
+    it('should render the context menu button', async () => {
+      const user = userEvent.setup();
+
+      const { props } = renderComponent();
+
+      await user.click(screen.getByTestId('projectPickerListItemContextMenu-1'));
+
+      expect(props.onContextMenu).toHaveBeenCalledWith(props.project, expect.any(Object));
+    });
+
+    it('should invoke onLabelClick when the tags badge is clicked', async () => {
+      const user = userEvent.setup();
+
+      const { props } = renderComponent({
+        project: {
+          ...defaultProject,
+          env: 'prod',
+          team: 'search',
+        },
+      });
+
+      await user.click(screen.getByTestId('projectPickerListItemTags'));
+
+      expect(props.onLabelClick).toHaveBeenCalledWith(props.project, expect.any(Object));
+    });
+  });
+
+  describe('disabled controls state', () => {
     const projectWithTags = {
       ...defaultProject,
       env: 'prod',
       team: 'search',
     };
 
-    it('does not render the inclusion switch or context menu', () => {
+    it('renders the inclusion switch and context menu as disabled when controls state is disabled', () => {
       renderComponent({
-        isReadOnly: true,
+        controlsState: 'disabled',
         project: projectWithTags,
       });
 
@@ -130,11 +187,11 @@ describe('ProjectPickerListItem', () => {
       expect(screen.queryByTestId('projectPickerListItemContextMenu-1')).toBeDisabled();
     });
 
-    it('still renders the tags badge and invokes onLabelClick when clicked', async () => {
+    it('still renders the tags badge when controls state is disabled and invokes onLabelClick when clicked', async () => {
       const user = userEvent.setup();
 
       const { props } = renderComponent({
-        isReadOnly: true,
+        controlsState: 'disabled',
         project: projectWithTags,
       });
 

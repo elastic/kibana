@@ -7,16 +7,58 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import {
+  conversationMetadataUpdatedTriggerCommonDefinition,
+  conversationUpdatedTriggerCommonDefinition,
+  attachmentTriggerCommonDefinitions,
+} from '../../common/workflows/triggers';
 
 export function registerWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
   core: CoreSetup
 ): void {
-  // Register steps
   workflowsExtensions.registerStepDefinition(() =>
     import('./run_agent_step').then((m) => m.createRunAgentStepDefinition(core))
   );
   workflowsExtensions.registerStepDefinition(() =>
     import('./rerank_step').then((m) => m.createRerankStepDefinition(core))
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversations').then((m) => m.getConversationMetadataStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversations').then((m) => m.updateConversationMetadataStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversations').then((m) => m.addConversationEventStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversations').then((m) => m.addUserMessageStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversations').then((m) => m.createConversationStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./attachments').then((m) => m.addAttachmentStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./attachments').then((m) => m.updateAttachmentStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./attachments').then((m) => m.deleteAttachmentStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./attachments').then((m) => m.readAttachmentStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./attachments').then((m) => m.listAttachmentsStepDefinition)
+  );
+
+  workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
+  workflowsExtensions.registerTriggerDefinition(conversationUpdatedTriggerCommonDefinition);
+  for (const definition of attachmentTriggerCommonDefinitions) {
+    workflowsExtensions.registerTriggerDefinition(definition);
+  }
 }

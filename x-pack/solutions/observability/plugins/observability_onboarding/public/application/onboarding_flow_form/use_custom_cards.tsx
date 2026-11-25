@@ -9,8 +9,7 @@ import React from 'react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { useHistory } from 'react-router-dom';
-import { useLocation } from 'react-router-dom-v5-compat';
+import { useHistory, useLocation } from 'react-router-dom';
 import { syntheticsAddMonitorLocatorID } from '@kbn/observability-plugin/common';
 import {
   INGEST_HUB_ONBOARDING_ENABLED_FLAG,
@@ -47,7 +46,7 @@ export function useCustomCards(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
-  const isIngestHubOnboardingEnabled = featureFlags.getBooleanValue(
+  const isIngestHubOnboardingEnabled = featureFlags.useBooleanValue(
     INGEST_HUB_ONBOARDING_ENABLED_FLAG,
     false
   );

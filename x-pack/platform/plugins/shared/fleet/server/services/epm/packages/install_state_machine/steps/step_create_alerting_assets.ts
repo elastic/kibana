@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ruleLastRunOutcomeValues } from '@kbn/alerting-plugin/common/routes/rule/common';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID, brandSpaceId } from '@kbn/core-spaces-common';
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -34,6 +35,39 @@ function getRuleId({
   spaceId?: string;
 }) {
   return `fleet-${spaceId ? spaceId : DEFAULT_SPACE_ID}-${pkgName}-${templateId}`;
+}
+
+type ExistingRule = Awaited<ReturnType<RulesClientApi['get']>>;
+
+// Rules created as enabled before OOTB rules defaulted to disabled may keep failing every run when their
+// data does not exist. Disable the ones the user never touched.
+async function disableUntouchedFailingRule(
+  { rulesClient, logger }: { rulesClient: RulesClientApi; logger: InstallContext['logger'] },
+  {
+    ruleId,
+    rule,
+  }: { ruleId: string; rule: Pick<ExistingRule, 'enabled' | 'createdAt' | 'updatedAt' | 'lastRun'> }
+) {
+  const { enabled, createdAt, updatedAt, lastRun } = rule;
+  if (!enabled || !createdAt || !updatedAt) {
+    return;
+  }
+  if (new Date(createdAt).getTime() !== new Date(updatedAt).getTime()) {
+    return;
+  }
+  if (lastRun?.outcome !== ruleLastRunOutcomeValues.FAILED) {
+    return;
+  }
+  if (!lastRun.outcomeMsg?.some((message) => message.includes('verification_exception'))) {
+    return;
+  }
+
+  try {
+    await rulesClient.disableRule({ id: ruleId });
+    logger.info(`Disabled rule ${ruleId}: failing with verification_exception and never modified`);
+  } catch (e) {
+    logger.warn(`Error disabling failing rule ${ruleId}`, { error: e });
+  }
 }
 
 export async function createAlertingRuleFromTemplate(
@@ -79,6 +113,7 @@ export async function createAlertingRuleFromTemplate(
     });
     // Already created
     if (rule) {
+      await disableUntouchedFailingRule({ rulesClient, logger }, { ruleId, rule });
       return {
         id: ruleId,
         type: KibanaSavedObjectType.alert,
@@ -98,6 +133,7 @@ export async function createAlertingRuleFromTemplate(
         consumer: 'alerts',
       }, // what value for consumer will make sense?
       options: { id: ruleId },
+      templateId: alertTemplateArchiveAsset.id,
     });
 
     return {
@@ -175,10 +211,9 @@ export async function createInactivityMonitoringTemplate(
 
       // Check if the template already exists
       const existing = await internalSoClient
-        .get<{ params?: Record<string, unknown> }>(
-          KibanaSavedObjectType.alertingRuleTemplate,
-          templateId
-        )
+        .get<{
+          params?: Record<string, unknown>;
+        }>(KibanaSavedObjectType.alertingRuleTemplate, templateId)
         .catch((err) => {
           if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
             return undefined;
@@ -345,7 +380,7 @@ export async function stepCreateAlertingAssets(
     const rulesClient = context.request
       ? await appContextService
           .getAlertingStart()
-          ?.getRulesClientWithRequestInSpace(context.request, spaceId)
+          ?.getRulesClientWithRequestInSpace(context.request, brandSpaceId(spaceId))
       : undefined;
 
     const alertTemplateAssets: ArchiveAsset[] = [];

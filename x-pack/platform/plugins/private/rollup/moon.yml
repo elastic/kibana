@@ -41,12 +41,14 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/data-view-validation'
   - '@kbn/index-management-shared-types'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -54,6 +56,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

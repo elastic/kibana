@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
-import { AttachmentType, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import React, { useCallback } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -15,10 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { JsonValue } from '@kbn/utility-types';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { useKibana } from '../common/lib/kibana';
-import { AlertAttachmentContext } from '../common/contexts';
+import { useAddToCaseAction } from './use_add_to_case_action';
 
 const ADD_TO_CASE = i18n.translate(
   'xpack.osquery.pack.queriesTable.addToCaseResultsActionAriaLabel',
@@ -54,62 +50,13 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   onMenuItemClick,
   size = 'xs',
 }) => {
-  const { cases } = useKibana().services;
-  const ecsData = useContext(AlertAttachmentContext);
-  const alertAttachments = useMemo(
-    () =>
-      ecsData?._id
-        ? [
-            {
-              alertId: ecsData?._id ?? '',
-              index: ecsData?._index ?? '',
-              rule: cases.helpers.getRuleIdFromEvent({
-                ecs: ecsData,
-                data: [],
-              }),
-              type: AttachmentType.alert as const,
-            },
-          ]
-        : [],
-    [cases.helpers, ecsData]
-  );
-
-  const casePermissions = cases.helpers.canUseCases();
-  const hasCasesPermissions =
-    casePermissions.read && casePermissions.update && casePermissions.push;
-  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
-
-  const handleClick = useCallback(() => {
-    const metadata: Record<string, JsonValue> = { actionId, agentIds, queryId };
-    if (scheduleId) {
-      metadata.scheduleId = scheduleId;
-    }
-
-    if (executionCount != null) {
-      metadata.executionCount = executionCount;
-    }
-
-    const attachments: CaseAttachmentsWithoutOwner = [
-      ...alertAttachments,
-      {
-        type: OSQUERY_ATTACHMENT_TYPE,
-        attachmentId: actionId,
-        metadata,
-      },
-    ];
-    if (hasCasesPermissions) {
-      selectCaseModal.open({ getAttachments: () => attachments });
-    }
-  }, [
+  const { hasCasesPermissions, handleClick } = useAddToCaseAction({
     actionId,
     agentIds,
-    alertAttachments,
-    executionCount,
-    hasCasesPermissions,
     queryId,
     scheduleId,
-    selectCaseModal,
-  ]);
+    executionCount,
+  });
 
   const handleMenuItemClick = useCallback(() => {
     onMenuItemClick?.();

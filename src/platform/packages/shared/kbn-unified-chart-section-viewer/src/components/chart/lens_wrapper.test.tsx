@@ -96,6 +96,21 @@ describe('LensWrapper', () => {
       expect(embeddableElement).toHaveAttribute('data-title-highlight', 'cpu');
     });
 
+    it('passes multiple title highlights to EmbeddableComponent', () => {
+      render(
+        <EuiThemeProvider>
+          <LensWrapper {...defaultProps} titleHighlight={['system', 'usage']} />
+        </EuiThemeProvider>
+      );
+
+      expect(mockEmbeddableComponent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          titleHighlight: ['system', 'usage'],
+        }),
+        expect.anything()
+      );
+    });
+
     it('passes titleHighlight when undefined', () => {
       render(
         <EuiThemeProvider>
@@ -191,12 +206,35 @@ describe('LensWrapper', () => {
           onFilter,
           abortController,
           withDefaultActions: true,
-          disabledActions: expect.arrayContaining([
+          disabledActions: [
             'ACTION_CUSTOMIZE_PANEL',
             'ACTION_EXPORT_CSV',
             'ACTION_FILTERS_NOTIFICATION',
+            'ACTION_ESQL_NOTIFICATION',
             'alertRule',
-          ]),
+          ],
+        }),
+        expect.anything()
+      );
+    });
+
+    it('appends extraDisabledActions after the default disabled actions', () => {
+      render(
+        <EuiThemeProvider>
+          <LensWrapper {...defaultProps} extraDisabledActions={['ACTION_OPEN_IN_DISCOVER']} />
+        </EuiThemeProvider>
+      );
+
+      expect(mockEmbeddableComponent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          disabledActions: [
+            'ACTION_CUSTOMIZE_PANEL',
+            'ACTION_EXPORT_CSV',
+            'ACTION_FILTERS_NOTIFICATION',
+            'ACTION_ESQL_NOTIFICATION',
+            'alertRule',
+            'ACTION_OPEN_IN_DISCOVER',
+          ],
         }),
         expect.anything()
       );
@@ -328,7 +366,16 @@ describe('LensWrapper', () => {
                 ...mockLensProps.attributes,
                 state: {
                   ...mockLensProps.attributes.state,
-                  query: { esql: 'FROM traces-apm* | WHERE ?event_type == "Bad"' },
+                  datasourceStates: {
+                    textBased: {
+                      layers: {
+                        layer1: {
+                          query: { esql: 'FROM traces-apm* | WHERE ?event_type == "Bad"' },
+                          columns: [],
+                        },
+                      },
+                    },
+                  },
                 },
               },
             }}

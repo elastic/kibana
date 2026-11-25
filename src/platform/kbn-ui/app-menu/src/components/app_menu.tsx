@@ -8,21 +8,21 @@
  */
 
 import React, { useState } from 'react';
-import { EuiHeaderLinks, type EuiBreakpointSize, useCurrentEuiBreakpoint } from '@elastic/eui';
-import { useCurrentChromeApplicationBreakpoint } from '@kbn/ui-chrome-layout-utils';
-import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
 import { AppMenuOverflowButton } from './app_menu_overflow_button';
 import { AppMenuSwitchComponent } from './app_menu_switch';
 import type { AppMenuConfig, AppMenuStaticItem } from '../types';
-import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
+import { AppMenuHistoryComponent } from './app_menu_history';
+import {
+  AppMenuApplicationResponsiveContent,
+  AppMenuViewportResponsiveContent,
+  type AppMenuBreakpointSource,
+  type AppMenuLayout,
+} from './app_menu_responsive';
 
-const secondaryActionsCss = css`
-  display: flex;
-  align-items: center;
-`;
+export type { AppMenuBreakpointSource };
 
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
@@ -34,78 +34,8 @@ export interface AppMenuItemsProps {
   staticItems?: AppMenuStaticItem[];
 }
 
-export type AppMenuBreakpointSource = 'application' | 'viewport';
-
-type AppMenuLayout = 'collapsed' | 'minimal' | 'expanded';
-
-const APPLICATION_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
-  xs: 'collapsed',
-  s: 'minimal',
-  m: 'expanded',
-  l: 'expanded',
-  xl: 'expanded',
-};
-
-const VIEWPORT_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
-  xs: 'collapsed',
-  s: 'collapsed',
-  m: 'minimal',
-  l: 'minimal',
-  xl: 'expanded',
-};
-
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.switch;
-
-const AppMenuHeaderLinks = ({ children }: { children: React.ReactNode }) => (
-  <EuiHeaderLinks
-    data-test-subj={APP_MENU_TEST_SUBJECTS.root}
-    gutterSize="xs"
-    popoverBreakpoints="none"
-    className="kbnTopNavMenu__wrapper"
-  >
-    {children}
-  </EuiHeaderLinks>
-);
-
-interface AppMenuResponsiveContentProps {
-  content: Record<AppMenuLayout, React.ReactNode>;
-}
-
-type AppMenuResolvedResponsiveContentProps = AppMenuResponsiveContentProps & {
-  breakpoint: EuiBreakpointSize | undefined;
-  source: AppMenuBreakpointSource;
-};
-
-const AppMenuResponsiveContent = ({
-  content,
-  breakpoint,
-  source,
-}: AppMenuResolvedResponsiveContentProps) => {
-  const layouts = source === 'application' ? APPLICATION_LAYOUTS : VIEWPORT_LAYOUTS;
-  const layout = breakpoint ? layouts[breakpoint] : 'collapsed';
-
-  return <AppMenuHeaderLinks>{content[layout]}</AppMenuHeaderLinks>;
-};
-
-const AppMenuApplicationResponsiveContent = (props: AppMenuResponsiveContentProps) => {
-  const applicationBreakpoint = useCurrentChromeApplicationBreakpoint();
-  const viewportBreakpoint = useCurrentEuiBreakpoint();
-
-  return (
-    <AppMenuResponsiveContent
-      {...props}
-      breakpoint={applicationBreakpoint ?? viewportBreakpoint}
-      source={applicationBreakpoint === undefined ? 'viewport' : 'application'}
-    />
-  );
-};
-
-const AppMenuViewportResponsiveContent = (props: AppMenuResponsiveContentProps) => {
-  const breakpoint = useCurrentEuiBreakpoint();
-
-  return <AppMenuResponsiveContent {...props} breakpoint={breakpoint} source="viewport" />;
-};
 
 export const AppMenuComponent = ({
   config,
@@ -134,6 +64,7 @@ export const AppMenuComponent = ({
 
   const primaryActionItem = config?.primaryActionItem;
   const switchConfig = config?.switch;
+  const historyConfig = config?.historyConfig;
   const showMoreButtonId = 'show-more';
   const processedStaticItems = processStaticItems(staticItems);
   const hasStaticItems = processedStaticItems.length > 0;
@@ -178,35 +109,30 @@ export const AppMenuComponent = ({
     const inlineItems = displayedItems.slice(0, inlineItemLimit);
     const responsiveOverflowItems = [...displayedItems.slice(inlineItemLimit), ...overflowItems];
     const shouldShowOverflow = responsiveOverflowItems.length > 0 || hasStaticItems;
-    const hasSecondaryActions =
-      Boolean(switchConfig) || inlineItems.length > 0 || shouldShowOverflow;
 
     return (
       <>
-        {hasSecondaryActions && (
-          <div css={secondaryActionsCss}>
-            {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-            {inlineItems.map((menuItem) => (
-              <AppMenuItem
-                key={menuItem.id}
-                {...menuItem}
-                isPopoverOpen={openPopoverId === menuItem.id}
-                onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
-                onPopoverClose={handleOnPopoverClose}
-              />
-            ))}
-            {shouldShowOverflow && (
-              <AppMenuOverflowButton
-                items={responsiveOverflowItems}
-                staticItems={processedStaticItems}
-                isPopoverOpen={openPopoverId === showMoreButtonId}
-                onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-                onPopoverClose={handleOnPopoverClose}
-              />
-            )}
-          </div>
-        )}
+        {historyConfig && <AppMenuHistoryComponent historyConfig={historyConfig} />}
+        {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+        {inlineItems.map((menuItem) => (
+          <AppMenuItem
+            key={menuItem.id}
+            {...menuItem}
+            isPopoverOpen={openPopoverId === menuItem.id}
+            onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
+            onPopoverClose={handleOnPopoverClose}
+          />
+        ))}
         {primaryActionComponent}
+        {shouldShowOverflow && (
+          <AppMenuOverflowButton
+            items={responsiveOverflowItems}
+            staticItems={processedStaticItems}
+            isPopoverOpen={openPopoverId === showMoreButtonId}
+            onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+            onPopoverClose={handleOnPopoverClose}
+          />
+        )}
       </>
     );
   };

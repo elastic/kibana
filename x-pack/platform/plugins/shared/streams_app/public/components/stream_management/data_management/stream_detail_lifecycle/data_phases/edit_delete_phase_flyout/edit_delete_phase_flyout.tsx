@@ -38,6 +38,7 @@ import {
   type EditDeletePhaseFlyoutForm,
 } from './form';
 import { getMaximumRetentionMessage, parseInterval, zodResolver } from '../shared';
+import { useStreamsPrivileges } from '../../../../../../hooks/use_streams_privileges';
 
 const isEditDeletePhaseFlyoutForm = (data: unknown): data is EditDeletePhaseFlyoutForm => {
   if (!data || typeof data !== 'object') return false;
@@ -67,6 +68,9 @@ export const EditDeletePhaseFlyout = ({
   const dataTestSubj = dataTestSubjProp ?? 'streamsEditDeletePhaseFlyout';
   const { footerStyles, headerStyles, sectionStyles } = useEditDeletePhaseFlyoutStyles();
   const { focusProps } = usePushFlyoutFocus();
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   const schema = useMemo(
     () => getEditDeletePhaseFlyoutFormSchema({ maximumRetentionPeriod }),
@@ -249,7 +253,7 @@ export const EditDeletePhaseFlyout = ({
 
   return (
     <EuiFlyout
-      type="push"
+      type={canvas.enabled ? 'overlay' : 'push'}
       size={400}
       paddingSize="none"
       ownFocus={false}

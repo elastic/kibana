@@ -35,18 +35,21 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/css-utils'
   - '@kbn/shared-ux-utility'
+  - '@kbn/scout'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+    - '!test/plugins/**/*'
 tasks: {}

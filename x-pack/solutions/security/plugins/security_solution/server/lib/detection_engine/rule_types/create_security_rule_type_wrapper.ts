@@ -30,6 +30,7 @@ import { runExecutionValidation } from './validation';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
+import { checkErrorDetails } from './utils/check_error_details';
 // eslint-disable-next-line no-restricted-imports
 import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
@@ -44,7 +45,7 @@ import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_ma
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
 import { sendGapDetectedTelemetryEvent } from './utils/telemetry/send_gap_detected_telemetry_event';
-import { createResponseActionsParamsAuthorizer } from './utils/authorize_rule_response_actions';
+import { createSecurityRuleParamsAuthorizer } from './utils/authorize_rule_response_actions';
 import type { RuleParams } from '../rule_schema';
 import {
   SECURITY_FROM,
@@ -112,6 +113,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     scheduleNotificationResponseActionsService,
     endpointAppContextService,
     getEntityStore,
+    getRulesAuthz,
     getOsqueryResponseActionsAuthzChecker,
   }) =>
   (type) => {
@@ -126,12 +128,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
     return persistenceRuleType({
       ...type,
-      // Authorize privileged `responseActions` params on every rule write path,
-      // including writes made through the generic Alerting APIs (which bypass the
-      // Detection Engine's own routes).
+      // Authorize privileged params on every rule write path, including the generic
+      // Alerting APIs.
       authorize: {
-        params: createResponseActionsParamsAuthorizer({
+        params: createSecurityRuleParamsAuthorizer({
           endpointAppContextService,
+          getRulesAuthz,
           getOsqueryResponseActionsAuthzChecker,
         }),
       },
@@ -419,6 +421,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   state: runState,
                   sharedParams: {
                     completeRule,
+                    // Only pass analytics for real runs so preview executions report no telemetry.
+                    analytics: isPreview ? undefined : analytics,
                     inputIndex,
                     exceptionFilter,
                     unprocessedExceptions,
@@ -449,6 +453,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     eventsTelemetry,
                     licensing,
                     scheduleNotificationResponseActionsService: responseActionsService,
+                    cpsData: options.cpsData,
                   },
                 });
 
@@ -538,7 +543,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               ruleExecutionLogger.warn(disabledActionsWarning);
             }
           } catch (error) {
-            ruleExecutionLogger.error(error.message ?? '(no error message given)');
+            ruleExecutionLogger.error(error.message ?? '(no error message given)', {
+              userError: checkErrorDetails(error).isUserError,
+            });
           } finally {
             await ruleExecutionLogger.close();
           }

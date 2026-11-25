@@ -20,6 +20,7 @@ export const LinksEditorEmptyPrompt = ({ addLink }: { addLink: () => Promise<voi
         <EuiEmptyPrompt
           color="plain"
           hasShadow={false}
+          hasBorder={false}
           paddingSize="none"
           body={
             <>

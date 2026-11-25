@@ -1,0 +1,10 @@
+import { Application } from '@kbn/core-di-browser';
+import { ContainerModule } from 'inversify';
+import { Main } from './main';
+import { ExampleApiService } from './service';
+
+export const module = new ContainerModule(({ bind }) => {
+  bind(Main).toSelf().inRequestScope();
+  bind(ExampleApiService).toSelf().inSingletonScope();
+  bind(Application).toConstantValue(Main);
+});

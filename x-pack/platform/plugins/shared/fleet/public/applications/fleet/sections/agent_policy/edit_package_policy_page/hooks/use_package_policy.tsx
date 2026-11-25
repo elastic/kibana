@@ -25,8 +25,10 @@ import {
   sendUpdateAgentlessPolicy,
   sendUpdatePackagePolicy,
   sendUpgradePackagePolicyDryRun,
+  useStartServices,
 } from '../../../../hooks';
 import type { RequestError } from '../../../../hooks';
+import { IAC_TEMPLATE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
 import type {
   PackagePolicyConfigRecord,
   UpdatePackagePolicy,
@@ -119,6 +121,11 @@ export function usePackagePolicyWithRelatedData(
   const isAgentlessOption = agentlessUIEnabled && (options.isAgentless ?? false);
   const isAgentlessPolicy = isAgentlessOption || (agentlessUIEnabled && detectedAgentless);
   const yaml = useYaml();
+  const { notifications } = useStartServices();
+  // The policy is saved either way; only the identity's template details is missing.
+  const iacPersistOptions = {
+    onIacPersistError: () => notifications.toasts.addWarning(IAC_TEMPLATE_WRITE_FAILED_TOAST),
+  };
 
   // Form state
   const [isEdited, setIsEdited] = useState(false);
@@ -126,7 +133,12 @@ export function usePackagePolicyWithRelatedData(
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const savePackagePolicy = async (packagePolicyOverride?: Partial<PackagePolicy>) => {
+  const savePackagePolicy = async (
+    packagePolicyOverride?: Partial<PackagePolicy>,
+    {
+      acknowledgeAgentVersionIncompatibility,
+    }: { acknowledgeAgentVersionIncompatibility?: boolean } = {}
+  ) => {
     setFormState('LOADING');
     // Wrap the whole save  so *every* failure resolves to the `{ data, error }` shape `onSubmit` expects.
     try {
@@ -159,21 +171,29 @@ export function usePackagePolicyWithRelatedData(
             })
           );
         }
-        const { enableVarGroups } = ExperimentalFeaturesService.get();
-        const varGroups =
-          enableVarGroups && packageInfo?.var_groups ? packageInfo.var_groups : undefined;
+        const varGroups = packageInfo?.var_groups;
         const { item } = await sendUpdateAgentlessPolicy(
           packagePolicyId,
           // Pass `packageInfo` so the write-side input/stream allow-check matches the read path
           // (`agentlessPolicyToPackagePolicy`); without it an unedited load→save could flip input
           // enablement for deployment-mode-restricted packages.
-          toNewAgentlessPolicy(restPackagePolicy as NewPackagePolicy, varGroups, packageInfo)
+          toNewAgentlessPolicy(restPackagePolicy as NewPackagePolicy, varGroups, packageInfo),
+          iacPersistOptions
         );
         setFormState('SUBMITTED');
         return { data: { item }, error: null };
       }
 
-      const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
+      const result = await sendUpdatePackagePolicy(
+        packagePolicyId,
+        {
+          ...restPackagePolicy,
+          ...(acknowledgeAgentVersionIncompatibility && {
+            acknowledge_agent_version_incompatibility: true,
+          }),
+        },
+        iacPersistOptions
+      );
 
       setFormState('SUBMITTED');
 
@@ -357,6 +377,8 @@ export function usePackagePolicyWithRelatedData(
             updated_by,
             updated_at,
             secret_references,
+            // Read-only: set by Fleet, rejected in update requests.
+            onboarding_deployment_id: onboardingDeploymentId,
             ...restOfPackagePolicy
           } = basePolicy;
 
@@ -515,6 +537,8 @@ export function usePackagePolicyWithRelatedData(
           created_by: agentlessPolicy.created_by,
           updated_at: agentlessPolicy.updated_at,
           updated_by: agentlessPolicy.updated_by,
+          // Read-only, so kept out of the form policy (the update request rejects it).
+          onboarding_deployment_id: agentlessPolicy.onboarding_deployment_id,
         } as PackagePolicy);
 
         const newValidationResults = validatePackagePolicy(

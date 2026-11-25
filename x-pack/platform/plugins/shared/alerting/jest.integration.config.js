@@ -6,7 +6,8 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration',
+  preset: '@kbn/jest/jest_integration',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/alerting'],
+  testPathIgnorePatterns: ['/node_modules/', '/registry_checks/'],
 };

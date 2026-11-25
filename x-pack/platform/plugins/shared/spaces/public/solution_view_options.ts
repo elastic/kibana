@@ -1,0 +1,88 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+import type { InitialSolutionSetupView } from '../common';
+
+export const SOLUTION_VIEW_OPTIONS = [
+  {
+    value: 'es',
+    name: i18n.translate(
+      'xpack.spaces.management.manageSpacePage.solutionViewSelect.searchOptionLabel',
+      {
+        defaultMessage: 'Elasticsearch',
+      }
+    ),
+    initialSetupName: i18n.translate('xpack.spaces.solutionViewOptions.esInitialSetupLabel', {
+      defaultMessage: 'Elasticsearch',
+    }),
+    description: i18n.translate('xpack.spaces.solutionViewOptions.esDescription', {
+      defaultMessage: 'Build search and vector database applications.',
+    }),
+    icon: 'logoElasticsearch',
+    dataTestSubj: 'solutionViewEsOption',
+  },
+  {
+    value: 'oblt',
+    name: i18n.translate(
+      'xpack.spaces.management.manageSpacePage.solutionViewSelect.obltOptionLabel',
+      {
+        defaultMessage: 'Observability',
+      }
+    ),
+    initialSetupName: i18n.translate('xpack.spaces.solutionViewOptions.obltInitialSetupLabel', {
+      defaultMessage: 'Elastic for Observability',
+    }),
+    description: i18n.translate('xpack.spaces.solutionViewOptions.obltDescription', {
+      defaultMessage: 'Monitor the health of your applications.',
+    }),
+    icon: 'logoObservability',
+    dataTestSubj: 'solutionViewObltOption',
+  },
+  {
+    value: 'security',
+    name: i18n.translate(
+      'xpack.spaces.management.manageSpacePage.solutionViewSelect.securityOptionLabel',
+      {
+        defaultMessage: 'Security',
+      }
+    ),
+    initialSetupName: i18n.translate('xpack.spaces.solutionViewOptions.securityInitialSetupLabel', {
+      defaultMessage: 'Elastic for Security',
+    }),
+    description: i18n.translate('xpack.spaces.solutionViewOptions.securityDescription', {
+      defaultMessage: 'Detect threats and protect your systems.',
+    }),
+    icon: 'logoSecurity',
+    dataTestSubj: 'solutionViewSecurityOption',
+  },
+  {
+    value: 'classic',
+    name: i18n.translate(
+      'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicOptionLabel',
+      {
+        defaultMessage: 'Classic',
+      }
+    ),
+    initialSetupName: i18n.translate('xpack.spaces.solutionViewOptions.classicInitialSetupLabel', {
+      defaultMessage: 'Classic (legacy)',
+    }),
+    description: i18n.translate('xpack.spaces.solutionViewOptions.classicDescription', {
+      defaultMessage: 'Use the legacy Kibana experience with the full navigation.',
+    }),
+    icon: 'logoElasticStack',
+    dataTestSubj: 'solutionViewClassicOption',
+  },
+] satisfies Array<{
+  value: InitialSolutionSetupView;
+  name: string;
+  initialSetupName: string;
+  description: string;
+  icon: string;
+  dataTestSubj: string;
+}>;

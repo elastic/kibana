@@ -11,6 +11,8 @@ applies_to:
 
 The Prometheus connector spans two related self-hosted services under one connector: the [Prometheus server HTTP API](https://prometheus.io/docs/prometheus/latest/querying/api/) for PromQL reads, and the [Alertmanager HTTP API v2](https://github.com/prometheus/alertmanager/blob/main/api/v2/openapi.yaml) for the actionable alert lifecycle. Prometheus has no incident object of its own, so a workflow's incident lifecycle is Alertmanager silences plus alert-state reads.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 Use the connector's PromQL actions to check a live metric or a trend over time, and its Alertmanager actions to read what is firing and mute expected noise — for example, during a deploy or maintenance window — without opening the Prometheus or Alertmanager UI or hand-writing API calls. Alertmanager's core lifecycle primitive is the silence: mute a set of alerts matching label matchers for a time window, then let it expire (or expire it early) to allow those alerts to fire again.
 
 Prometheus and Alertmanager are self-hosted, so the target instance(s) must be network-reachable from {{kib}}.

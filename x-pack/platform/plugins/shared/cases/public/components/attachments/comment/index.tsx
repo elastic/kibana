@@ -11,7 +11,7 @@ import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachment
 import {
   CommentAttachmentPayloadSchema,
   type CommentAttachmentData,
-} from '../../../../common/types/domain_zod/attachment/comment/v2';
+} from '../../../../common/types/domain/attachment/comment/v2';
 import {
   AttachmentActionType,
   defineAttachment,
@@ -44,6 +44,15 @@ const CommentTimelineAvatarLazy = React.lazy(() =>
   }))
 );
 
+const CommentTimelineAvatarIcon: React.FC<Pick<CommentViewProps, 'createdBy'>> = ({
+  createdBy,
+}) => (
+  <React.Suspense fallback={null}>
+    <CommentTimelineAvatarLazy createdBy={createdBy} />
+  </React.Suspense>
+);
+CommentTimelineAvatarIcon.displayName = 'CommentTimelineAvatarIcon';
+
 const CommentActionsLazy = React.lazy(() =>
   import('./comment_actions').then(({ CommentActions }) => ({
     default: CommentActions,
@@ -70,17 +79,12 @@ const getCommentClassName = (props: CommentViewProps): string | undefined => {
   });
 };
 
-const getCommentAttachmentViewObject = (props: CommentViewProps) => {
+const getCommentCreationActivity = (props: CommentViewProps) => {
   const className = getCommentClassName(props);
   const css = createCommentActionCss(props.rowContext.euiTheme);
 
   return {
     event: ADDED_COMMENT,
-    timelineAvatar: (
-      <React.Suspense fallback={null}>
-        <CommentTimelineAvatarLazy createdBy={props.createdBy} />
-      </React.Suspense>
-    ),
     children: CommentAttachmentChildrenLazy,
     hideDefaultActions: true,
     getActions: (viewProps: CommentViewProps) => [
@@ -111,9 +115,9 @@ const getCommentAttachmentViewObject = (props: CommentViewProps) => {
 export const getCommentAttachmentType = () =>
   defineAttachment({
     id: COMMENT_ATTACHMENT_TYPE,
-    icon: 'comment',
-    displayName: COMMENT,
-    getAttachmentViewObject: getCommentAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: REMOVED_COMMENT_LABEL_TITLE }),
+    getIcon: (props) => <CommentTimelineAvatarIcon createdBy={props.createdBy} />,
+    getLabel: () => COMMENT,
+    getCreationActivity: getCommentCreationActivity,
+    getRemovalActivity: () => ({ event: REMOVED_COMMENT_LABEL_TITLE }),
     schema: CommentAttachmentPayloadSchema,
   });

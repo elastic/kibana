@@ -10,15 +10,18 @@ import type {
   MessageChunkEvent,
   MessageCompleteEvent,
   ReasoningEvent,
+  ModelReasoningChunkEvent,
+  ModelReasoningEvent,
   ThinkingCompleteEvent,
   ToolCallEvent,
   PromptRequestEvent,
   BrowserToolCallEvent,
   ToolResultEvent,
   BackgroundAgentCompleteEvent,
+  SubagentRosterUpdatedEvent,
 } from '@kbn/agent-builder-common/chat/events';
 import { ChatEventType, type ToolOrigin, type ToolType } from '@kbn/agent-builder-common';
-import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
+import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequestSource, PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 
@@ -53,6 +56,7 @@ export const createToolCallEvent = (data: {
   toolCallGroupId?: string;
   toolOrigin?: ToolOrigin;
   toolType?: ToolType;
+  intent?: string;
 }): ToolCallEvent => {
   return {
     type: ChatEventType.toolCall,
@@ -63,6 +67,7 @@ export const createToolCallEvent = (data: {
       tool_call_group_id: data.toolCallGroupId,
       tool_origin: data.toolOrigin,
       tool_type: data.toolType,
+      ...(data.intent ? { intent: data.intent } : {}),
     },
   };
 };
@@ -159,6 +164,33 @@ export const createReasoningEvent = (
   };
 };
 
+export const createModelReasoningChunkEvent = (
+  chunk: string,
+  { messageId = 'unknown' }: { messageId?: string } = {}
+): ModelReasoningChunkEvent => {
+  return {
+    type: ChatEventType.modelReasoningChunk,
+    data: {
+      message_id: messageId,
+      text_chunk: chunk,
+    },
+  };
+};
+
+export const createModelReasoningEvent = (
+  reasoning: string,
+  { messageId = 'unknown', toolCallGroupId }: { messageId?: string; toolCallGroupId?: string } = {}
+): ModelReasoningEvent => {
+  return {
+    type: ChatEventType.modelReasoning,
+    data: {
+      message_id: messageId,
+      reasoning,
+      tool_call_group_id: toolCallGroupId,
+    },
+  };
+};
+
 export const createThinkingCompleteEvent = (timeToFirstToken: number): ThinkingCompleteEvent => {
   return {
     type: ChatEventType.thinkingComplete,
@@ -174,5 +206,14 @@ export const createBackgroundAgentCompleteEvent = (
   return {
     type: ChatEventType.backgroundAgentComplete,
     data: { execution },
+  };
+};
+
+export const createSubagentRosterUpdatedEvent = (
+  roster: SubagentRosterEntry[]
+): SubagentRosterUpdatedEvent => {
+  return {
+    type: ChatEventType.subagentRosterUpdated,
+    data: { roster },
   };
 };

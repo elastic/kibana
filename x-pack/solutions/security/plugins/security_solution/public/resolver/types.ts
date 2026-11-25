@@ -197,6 +197,13 @@ export interface TreeFetcherParameters {
   databaseDocumentID: string;
 
   /**
+   * The `@timestamp` (in milliseconds since epoch) of the analyzed document itself, as opposed to the tree
+   * query's own timestamp for the origin node. Used to label ancestor nodes with the process name in effect
+   * when the analyzed event happened, invariant of the date-picker range.
+   */
+  databaseDocumentTimestamp?: number;
+
+  /**
    * The indices that the backend will use to search for the document ID.
    */
   indices: string[];
@@ -821,7 +828,7 @@ export interface TimeFilters {
  */
 export interface ResolverProps {
   /**
-   * Used by `styled-components`.
+   * Used by `@emotion/styled`.
    */
   className?: string;
   /**
@@ -829,6 +836,12 @@ export interface ResolverProps {
    * Used as the origin of the Resolver graph.
    */
   databaseDocumentID: string;
+
+  /**
+   * The `@timestamp` (in milliseconds since epoch) of the analyzed document itself. Used to label ancestor
+   * nodes with the process name in effect at that time, rather than the origin node's own tree-query timestamp.
+   */
+  databaseDocumentTimestamp?: number;
 
   /**
    * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
@@ -856,10 +869,6 @@ export interface ResolverProps {
    * Optional callback invoked after alert mutations in nested flyouts.
    */
   onAlertUpdated?: () => void;
-  /**
-   * Use the legacy expandable flyout behavior for resolver panels.
-   */
-  useLegacyExpandableFlyout?: boolean;
 }
 
 /**

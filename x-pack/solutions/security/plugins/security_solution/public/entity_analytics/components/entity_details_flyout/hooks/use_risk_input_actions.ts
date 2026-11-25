@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { get, noop } from 'lodash/fp';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { get } from 'lodash/fp';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
@@ -18,18 +18,19 @@ import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
  */
 export const useRiskInputActions = (inputs: InputAlert[], closePopover: () => void) => {
   const { cases: casesService } = useKibana().services;
-  const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess: noop });
   const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal();
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(
     () =>
       inputs.map(({ input, alert }: InputAlert) => ({
-        alertId: input.id,
-        index: input.index,
-        type: AttachmentType.alert,
-        rule: {
-          id: get(ALERT_RULE_UUID, alert) ?? null,
-          name: get(ALERT_RULE_NAME, alert) ?? null,
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: input.id,
+        metadata: {
+          index: input.index,
+          rule: {
+            id: get(ALERT_RULE_UUID, alert) ?? null,
+            name: get(ALERT_RULE_NAME, alert) ?? null,
+          },
         },
       })),
     [inputs]
@@ -37,15 +38,11 @@ export const useRiskInputActions = (inputs: InputAlert[], closePopover: () => vo
 
   return useMemo(
     () => ({
-      addToExistingCase: () => {
+      addToCase: () => {
         closePopover();
         selectCaseModal.open({ getAttachments: () => caseAttachments });
       },
-      addToNewCaseClick: () => {
-        closePopover();
-        createCaseFlyout.open({ attachments: caseAttachments });
-      },
     }),
-    [caseAttachments, closePopover, createCaseFlyout, selectCaseModal]
+    [caseAttachments, closePopover, selectCaseModal]
   );
 };

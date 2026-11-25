@@ -8,6 +8,12 @@
  */
 
 /**
+ * Max length for `ConnectorSpec.metadata.id` (action / connector type id, e.g. `.slack2`).
+ * Distinct from Actions saved-object connector instance ids (`CONNECTOR_ID_MAX_LENGTH` = 36).
+ */
+export const MAX_CONNECTOR_TYPE_ID_LENGTH = 64;
+
+/**
  * Connector eventId namespace — strips leading dot.
  * `.myConnector` → `myConnector`
  */
@@ -15,7 +21,7 @@ export const connectorTypeToEventNamespace = (connectorTypeId: string): string =
   connectorTypeId.startsWith('.') ? connectorTypeId.slice(1) : connectorTypeId;
 
 /**
- * URL `{typeId}` → canonical actionTypeId for connector SO lookup.
+ * URL `{connector_type_id}` → canonical actionTypeId for connector SO lookup.
  * `myConnector` → `.myConnector`
  */
 export const normalizeConnectorTypeId = (typeId: string): string =>

@@ -30,8 +30,10 @@ export type {
   ValidateWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,
+  WorkflowAccessControlUpdateResponseDto,
   WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
+  WorkflowExecutionExecutedByUser,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowExecutionListItemDto,
@@ -46,6 +48,7 @@ export type {
   WorkflowStatsDto,
   WorkflowStepExecutionListDto,
   WorkflowMgetResponseDto,
+  WorkflowTemplateOrigin,
   ChildWorkflowExecutionItem,
   WorkflowExecutionCollapseField,
   WorkflowExecutionSortField,

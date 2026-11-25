@@ -1,0 +1,318 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { buildLogsExtractionEsqlQuery } from './logs_extraction_query_builder';
+import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import { EntityType } from '../../../common/domain/definitions/entity_schema';
+import { validateQuery } from '@kbn/esql-language';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
+
+describe('buildLogsExtractionEsqlQuery', () => {
+  Object.values(EntityType.enum).forEach((type) => {
+    it(`generates the expected query for ${type} entity description`, async () => {
+      const query = buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition(type, 'default'),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+      });
+      expect(query).toMatchSnapshot();
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+  });
+
+  it(`generates the expected query for host with pagination`, async () => {
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('host', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      pagination: {
+        idCursor: '123',
+      },
+    });
+    expect(query).toMatchSnapshot();
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+  });
+
+  describe('entity id cursor placement', () => {
+    const ID_COLUMN = 'recent.entity.EngineMetadata.UntypedId';
+    const CURSOR_FILTER = `| WHERE ${ID_COLUMN} > "cursor-id"`;
+    const buildWithCursor = (type: EntityType, withCursor = true) =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition(type, 'default'),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+        ...(withCursor ? { pagination: { idCursor: 'cursor-id' } } : {}),
+      });
+
+    it.each(['host', 'user'] as const)(
+      '%s: the cursor filters raw rows before STATS and LOOKUP JOIN, and only once',
+      async (type) => {
+        const query = buildWithCursor(type);
+        const cursorIdx = query.indexOf(CURSOR_FILTER);
+        expect(cursorIdx).toBeGreaterThan(query.indexOf(`${ID_COLUMN} = `));
+        expect(cursorIdx).toBeLessThan(query.indexOf('| STATS'));
+        expect(cursorIdx).toBeLessThan(query.indexOf('LOOKUP JOIN'));
+        expect(query.split(CURSOR_FILTER)).toHaveLength(2);
+        await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+      }
+    );
+
+    it.each(['host', 'user'] as const)('%s: no cursor filter on the first page', (type) => {
+      expect(buildWithCursor(type, false)).not.toContain(`${ID_COLUMN} >`);
+    });
+
+    it('user (postAggFilter): SORT and LIMIT stay after the postAggFilter', () => {
+      const query = buildWithCursor('user');
+      const lookupIdx = query.indexOf('LOOKUP JOIN');
+      const sortIdx = query.indexOf(`| SORT ${ID_COLUMN} ASC`);
+      expect(getEntityDefinition('user', 'default').extraction.postAggFilter).toBeDefined();
+      expect(sortIdx).toBeGreaterThan(lookupIdx);
+      expect(query.indexOf('| LIMIT 10000')).toBeGreaterThan(sortIdx);
+    });
+
+    it('host (no postAggFilter): SORT and LIMIT stay before LOOKUP JOIN', () => {
+      const query = buildWithCursor('host');
+      expect(query.indexOf('| LIMIT 10000')).toBeLessThan(query.indexOf('LOOKUP JOIN'));
+      expect(query.indexOf('| LIMIT 10000')).toBeGreaterThan(
+        query.indexOf(`| SORT ${ID_COLUMN} ASC`)
+      );
+    });
+  });
+
+  it('excludes managed fields from STATS, merge EVAL, and produces a valid query', async () => {
+    const base = getEntityDefinition('host', 'default');
+    // Inject a managed field alongside a normal log-derived field to verify orthogonality.
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: {
+        ...base,
+        extraction: {
+          ...base.extraction,
+          fields: [
+            ...base.extraction.fields,
+            {
+              source: 'test.api_only_field',
+              destination: 'test.api_only_field',
+              mapping: { type: 'keyword' },
+              retention: { operation: 'managed' },
+              allowAPIUpdate: true,
+            },
+            {
+              source: 'test.log_field',
+              destination: 'test.log_field',
+              mapping: { type: 'keyword' },
+              retention: { operation: 'prefer_newest_value' },
+            },
+          ],
+        },
+      },
+      docsLimit: 100,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+    });
+    // managed field must not appear in STATS or the merge EVAL
+    expect(query).not.toContain('test.api_only_field');
+    // log-derived field must be present
+    expect(query).toContain('test.log_field');
+    // Query must remain syntactically valid (no dangling recent.* references)
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+  });
+
+  describe('single-mode guard: the process split must not reach the single process', () => {
+    it.each(Object.values(EntityType.enum))(
+      '%s: single mode renders no extraction gate',
+      (type) => {
+        const query = buildLogsExtractionEsqlQuery({
+          indexPatterns: ['test-index-*'],
+          latestIndex: 'latest-index',
+          entityDefinition: getEntityDefinition(type, 'default'),
+          docsLimit: 10000,
+          fromDateISO: '2022-01-01T00:00:00.000Z',
+          toDateISO: '2022-01-01T23:59:59.999Z',
+        });
+        // The gate is the only clause the dual-process modes add to the source WHERE, so an unchanged
+        // source clause is what keeps the single process byte-identical.
+        const sourceClause = query.split('| EVAL')[0];
+        expect(sourceClause).not.toContain('event.kind');
+      }
+    );
+  });
+
+  describe('user extraction modes', () => {
+    const buildForMode = (extractionMode: 'single' | 'priority' | 'nonPriority') =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition('user', 'default', extractionMode),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+      });
+
+    const sourceClauseOf = (query: string) => query.split('| EVAL')[0];
+
+    it('priority gates on asset documents', () => {
+      expect(sourceClauseOf(buildForMode(EXTRACTION_MODE.priority))).toContain(
+        'AND (MV_CONTAINS(TO_STRING(event.kind), "asset"))'
+      );
+    });
+
+    /**
+     * A document with no `event.kind` belongs to the non-priority process, so the gate has to let
+     * it through. In ES|QL, `NOT (MV_CONTAINS(event.kind, "asset"))` is neither true nor false when
+     * the field is missing, and the document is dropped. The `IS NULL` part is what keeps it.
+     *
+     * This checks the generated ES|QL text on purpose. Running the condition through our in-memory
+     * evaluator would report the document as matching either way, and so would not catch the bug.
+     */
+    it('nonPriority gates on the complement, including documents without event.kind', () => {
+      expect(sourceClauseOf(buildForMode(EXTRACTION_MODE.nonPriority))).toContain(
+        'AND (TO_STRING(event.kind) IS NULL OR NOT (MV_CONTAINS(TO_STRING(event.kind), "asset")))'
+      );
+    });
+
+    it('both modes differ from single only in the source WHERE clause', () => {
+      const single = buildForMode('single');
+      const afterSourceClause = (query: string) => query.slice(sourceClauseOf(query).length);
+
+      expect(afterSourceClause(buildForMode(EXTRACTION_MODE.priority))).toBe(
+        afterSourceClause(single)
+      );
+      expect(afterSourceClause(buildForMode(EXTRACTION_MODE.nonPriority))).toBe(
+        afterSourceClause(single)
+      );
+    });
+  });
+
+  it.each(Object.values(EXTRACTION_MODE))(
+    '%s applies custom user exclusions while generating the extraction query',
+    async (extractionMode) => {
+      const query = buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition('user', 'default', extractionMode, {
+          excludedUserNames: ['svc-deploy'],
+        }),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+        samplingRate: extractionMode === EXTRACTION_MODE.nonPriority ? 0.2 : undefined,
+      });
+
+      expect(query).toContain('"svc-deploy"');
+      expect(query).toContain('"root"');
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    }
+  );
+
+  describe('sampling stage', () => {
+    // Built with the non-priority definition since that is the only process the caller samples;
+    // the builder itself is mode-agnostic and just renders the rate it is given.
+    const buildWith = (samplingRate?: number) =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition('user', 'default', EXTRACTION_MODE.nonPriority),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+        samplingRate,
+      });
+
+    it('emits SAMPLE after the source clause and before EVAL when the rate is below 1', async () => {
+      const query = buildWith(0.2);
+
+      const sampleIdx = query.indexOf('| SAMPLE 0.2');
+      const evalIdx = query.indexOf('| EVAL');
+      const whereIdx = query.indexOf('| WHERE');
+      expect(sampleIdx).toBeGreaterThan(whereIdx);
+      expect(sampleIdx).toBeLessThan(evalIdx);
+      expect(query).toMatchSnapshot();
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+
+    it('a rate of 1 emits no SAMPLE stage - byte-identical to no rate at all', () => {
+      const withRateOne = buildWith(1);
+      const withoutRate = buildWith(undefined);
+
+      expect(withRateOne).toBe(withoutRate);
+      expect(withRateOne).not.toContain('SAMPLE');
+    });
+
+    it.each([0, -0.5, 1.5, NaN])('rejects out-of-range rate %p', (samplingRate) => {
+      expect(() => buildWith(samplingRate)).toThrow(/must be in \(0, 1\]/);
+    });
+  });
+
+  describe('latest index created before the definition stored a field', () => {
+    const buildFor = (type: 'user' | 'host') =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition(type, 'default'),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+      });
+
+    it('sets user.entity.id to null right before the join so an unmapped lookup column resolves', async () => {
+      const query = buildFor('user');
+
+      const placeholder =
+        '| EVAL user.entity.id = TO_STRING(null)\n| LOOKUP JOIN _coordinator:latest-index';
+      expect(query).toContain(placeholder);
+      expect(query.indexOf(placeholder)).toBeGreaterThan(query.indexOf('| STATS'));
+      expect(query.split('TO_STRING(null)')).toHaveLength(2);
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+
+    it('adds no placeholder to a definition that does not store the field', () => {
+      expect(buildFor('host')).not.toContain('TO_STRING(null)');
+    });
+  });
+
+  it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {
+    const base = getEntityDefinition('host', 'default');
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: {
+        ...base,
+        extraction: {
+          ...base.extraction,
+          whenConditionTrueSetFieldsAfterStats: [
+            {
+              condition: { field: 'host.name', eq: 'server1' },
+              fields: { 'host.name': { source: 'host.id' } },
+            },
+          ],
+        },
+      },
+      docsLimit: 100,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+    });
+    const statsIdx = query.indexOf('| STATS');
+    const lookupIdx = query.indexOf('LOOKUP JOIN');
+    const afterStatsEvalIdx = query.indexOf('recent.host.name = CASE(');
+    const mergeCoalesceIdx = query.indexOf('entity.name = COALESCE(');
+    expect(statsIdx).toBeGreaterThan(-1);
+    expect(lookupIdx).toBeGreaterThan(statsIdx);
+    expect(afterStatsEvalIdx).toBeGreaterThan(lookupIdx);
+    expect(mergeCoalesceIdx).toBeGreaterThan(afterStatsEvalIdx);
+  });
+});

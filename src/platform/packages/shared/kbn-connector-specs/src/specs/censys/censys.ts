@@ -180,6 +180,7 @@ export const CensysConnector: ConnectorSpec = {
   actions: {
     getHost: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the full enrichment record for a single host by IP address. Returns services, ports, location, ASN, and last-scan metadata. This is the credit-consuming deep-dive lookup; prefer getHostEnrichment for high-volume alert triage.',
       input: GetHostInputSchema,
@@ -197,6 +198,7 @@ export const CensysConnector: ConnectorSpec = {
 
     getHostEnrichment: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve a compact, SOC-optimized enrichment record for a single host by IP address. Returns a fixed subset of the latest-scan host data (location, WHOIS, ASN, DNS, services, labels, reputation, and threat fields) under `result.resource`, shaped like getHost. This lookup is credit-free and built for high-volume alert triage; use getHost for a full deep-dive record. Requires a Censys Core plan or higher.',
       input: GetHostInputSchema,
@@ -214,6 +216,7 @@ export const CensysConnector: ConnectorSpec = {
 
     getWebProperty: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve enrichment data for a web property identified by hostname or IP and port. Returns banner data, certificates, software, and HTTP response metadata observed on the listener.',
       input: GetWebPropertyInputSchema,
@@ -234,6 +237,7 @@ export const CensysConnector: ConnectorSpec = {
 
     getCertificate: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve a certificate record by its SHA-256 fingerprint. Returns subject, issuer, validity window, parsed fields, and Censys observation metadata.',
       input: GetCertificateInputSchema,
@@ -253,6 +257,7 @@ export const CensysConnector: ConnectorSpec = {
 
     getHostHistory: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the chronological scan timeline for a host over a time window. Use to see how services, banners, and certificates on the host changed between startTime and endTime.',
       input: GetHostHistoryInputSchema,
@@ -278,6 +283,7 @@ export const CensysConnector: ConnectorSpec = {
 
     rescan: {
       isTool: true,
+      scope: 'write',
       description:
         'Submit a host service (IP+port+protocol+transportProtocol) or a web property (hostname-or-IP+port) for a fresh scan. Returns a scan ID; poll scanStatus until the scan completes.',
       input: RescanInputSchema,
@@ -315,6 +321,7 @@ export const CensysConnector: ConnectorSpec = {
 
     scanStatus: {
       isTool: true,
+      scope: 'read',
       description:
         'Poll the status of a rescan submitted via rescan. Returns a `result` object with `completed`, `tracked_scan_id`, per-task `tasks[].status`, and the rescan `target`. Poll until `result.completed` is true.',
       input: ScanStatusInputSchema,
@@ -332,6 +339,7 @@ export const CensysConnector: ConnectorSpec = {
 
     censEyeCreateAnalysisJob: {
       isTool: true,
+      scope: 'write',
       description:
         'Submit a Censeye related-infrastructure threat-hunting job for a host, web property, or certificate. Returns a job ID; poll censEyeJobStatus, then call censEyeJobResult to fetch the pivots.',
       input: CensEyeCreateAnalysisJobInputSchema,
@@ -350,6 +358,7 @@ export const CensysConnector: ConnectorSpec = {
 
     censEyeJobStatus: {
       isTool: true,
+      scope: 'read',
       description:
         'Poll the status of a Censeye job submitted via censEyeCreateAnalysisJob. Returns a `result` object with `state` ("started", "completed", "failed", "unknown"), `result_count`, and job metadata. Poll until `result.state` is "completed".',
       input: CensEyeJobStatusInputSchema,
@@ -369,6 +378,7 @@ export const CensysConnector: ConnectorSpec = {
 
     censEyeJobResult: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve results from a completed Censeye job. Returns a `result` object with `results[]` entries containing `count` and `field_value_pairs` (related-infrastructure pivots). Call only after `censEyeJobStatus` reports `result.state` of "completed".',
       input: CensEyeJobResultInputSchema,

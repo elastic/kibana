@@ -6,40 +6,84 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { BehaviorSubject, type Observable } from 'rxjs';
+import { ACTION_POLICY_ATTACHMENT_TYPE, type ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { MockLocatorProvider } from '../../../test_utils/test_providers';
 import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 
 const ELASTIC_UID = 'elastic_uid';
+const ELASTIC_ACTOR = { profile_uid: ELASTIC_UID };
+
+interface MockAgentBuilder {
+  openChat?: jest.Mock;
+  addAttachment?: jest.Mock;
+  events?: { ui: { activeConversation$: Observable<{ id: string } | null> } };
+}
 
 const mockBulkGet = jest.fn();
+let mockCanReadRules = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return {
-        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
-      };
-    }
-    if (token === 'settings') {
-      return {
-        client: { get: () => 'YYYY-MM-DD HH:mm' },
-      };
-    }
-    if (token === 'userProfile') {
-      return { bulkGet: mockBulkGet };
-    }
-    if (token === 'http') {
-      return {
-        basePath: { prepend: (path: string) => `/base${path}` },
-      };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../../services/user_capabilities'
+  );
+  let agentBuilder: MockAgentBuilder = {};
+  let agentBuilderShow = false;
+  return {
+    useService: (token: string | symbol) => {
+      if (token === ActualUserCapabilities) {
+        return new ActualUserCapabilities({
+          capabilities: { alerting_v2_rules: { read: mockCanReadRules } },
+        });
+      }
+      if (token === Symbol.for('plugin.start.agentBuilder')) {
+        return agentBuilder;
+      }
+      if (token === 'application') {
+        return {
+          getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+          capabilities: { agentBuilder: { show: agentBuilderShow } },
+        };
+      }
+      if (token === 'settings') {
+        return {
+          client: { get: () => 'YYYY-MM-DD HH:mm' },
+        };
+      }
+      if (token === 'userProfile') {
+        return { bulkGet: mockBulkGet };
+      }
+      if (token === 'http') {
+        return {
+          basePath: { prepend: (path: string) => `/base${path}` },
+        };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+    setMockAgentBuilder: (next: MockAgentBuilder) => {
+      agentBuilder = next;
+    },
+    setMockAgentBuilderShow: (show: boolean) => {
+      agentBuilderShow = show;
+    },
+  };
+});
+
+const { setMockAgentBuilder, setMockAgentBuilderShow } = jest.requireMock(
+  '@kbn/core-di-browser'
+) as {
+  setMockAgentBuilder: (agentBuilder: MockAgentBuilder) => void;
+  setMockAgentBuilderShow: (show: boolean) => void;
+};
+
+let mockIsLicenseValid = true;
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
 }));
 
 jest.mock('../../../hooks/use_fetch_workflow', () => ({
@@ -49,19 +93,25 @@ jest.mock('../../../hooks/use_fetch_workflow', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/use_fetch_matching_rules', () => ({
+  useFetchMatchingRules: () => ({
+    data: { items: [], total: 0, page: 1, per_page: 10 },
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+  }),
+}));
+
 const TEST_SUBJ = {
   flyout: 'actionPolicyDetailsFlyout',
-  title: 'actionPolicyDetailsFlyoutTitle',
-  closeButton: 'detailsFlyoutCloseButton',
-  editButton: 'detailsFlyoutEditButton',
-  actionsMenuButton: 'detailsFlyoutActionsMenuButton',
+  closeIcon: 'euiFlyoutCloseButton',
+  takeActionButton: 'detailsFlyoutTakeActionButton',
 } as const;
 
 const futureIso = (): string => new Date(Date.now() + 1000 * 60 * 60).toISOString();
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
-  version: 'v1',
   name: 'Critical alerts policy',
   description: 'Routes critical alerts to the oncall workflow',
   enabled: true,
@@ -69,17 +119,13 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
     { type: 'workflow', id: 'wf-1' },
     { type: 'workflow', id: 'wf-2' },
   ],
-  matcher: 'data.severity : "critical"',
-  groupBy: ['host.name', 'service.name'],
-  tags: ['production', 'oncall'],
-  groupingMode: 'per_field',
+  matcher: { expression: 'data.severity : "critical"' },
+  grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozedUntil: null,
-  auth: { owner: 'elastic', createdByUser: true },
-  createdBy: ELASTIC_UID,
-  createdAt: '2026-03-01T10:00:00.000Z',
-  updatedBy: ELASTIC_UID,
-  updatedAt: '2026-03-02T11:00:00.000Z',
+  created_by: ELASTIC_ACTOR,
+  created_at: '2026-03-01T10:00:00.000Z',
+  updated_by: ELASTIC_ACTOR,
+  updated_at: '2026-03-02T11:00:00.000Z',
   ...overrides,
 });
 
@@ -93,6 +139,8 @@ const createQueryClient = () =>
 interface RenderProps {
   policy?: ActionPolicyResponse;
   canWrite?: boolean;
+  isStateLoading?: boolean;
+  size?: 's' | 'm';
   onClose?: jest.Mock;
   onEdit?: jest.Mock;
   onClone?: jest.Mock;
@@ -120,22 +168,48 @@ const renderFlyout = (props: RenderProps = {}) => {
 
   render(
     <QueryClientProvider client={createQueryClient()}>
-      <I18nProvider>
-        <ActionPolicyDetailsFlyout
-          policy={policy}
-          canWrite={props.canWrite ?? true}
-          {...handlers}
-        />
-      </I18nProvider>
+      <MockLocatorProvider>
+        <I18nProvider>
+          <ActionPolicyDetailsFlyout
+            policy={policy}
+            canWrite={props.canWrite ?? true}
+            isStateLoading={props.isStateLoading}
+            size={props.size}
+            {...handlers}
+          />
+        </I18nProvider>
+      </MockLocatorProvider>
     </QueryClientProvider>
   );
 
   return { policy, handlers };
 };
 
+const toPolicyAttachment = (policy: ActionPolicyResponse) => ({
+  id: `action_policy:${policy.id}`,
+  type: ACTION_POLICY_ATTACHMENT_TYPE,
+  origin: policy.id,
+  data: {
+    id: policy.id,
+    name: policy.name,
+    description: policy.description,
+    destinations: policy.destinations,
+    matcher: policy.matcher,
+    grouping: policy.grouping,
+    throttle: policy.throttle,
+    enabled: policy.enabled,
+    snoozed_until: policy.snoozed_until,
+    updated_at: policy.updated_at,
+  },
+});
+
 describe('ActionPolicyDetailsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockAgentBuilder({});
+    setMockAgentBuilderShow(false);
+    mockIsLicenseValid = true;
+    mockCanReadRules = true;
     mockBulkGet.mockResolvedValue([
       { uid: ELASTIC_UID, user: { username: 'elastic', full_name: 'Elastic User' } },
     ]);
@@ -146,52 +220,166 @@ describe('ActionPolicyDetailsFlyout', () => {
       renderFlyout();
 
       expect(screen.getByTestId(TEST_SUBJ.flyout)).toBeInTheDocument();
-      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Critical alerts policy');
-      expect(screen.getByText('Enabled')).toBeInTheDocument();
+      expect(screen.getByText('Critical alerts policy')).toBeInTheDocument();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutEnabledBadge')).toBeInTheDocument();
+    });
+
+    it('accepts a "s" size override (used when nested inside another flyout)', () => {
+      // Regression test: this flyout is rendered nested inside the rule summary
+      // flyout (which uses size "m"). EUI's managed-flyout validation throws
+      // "Parent and child flyouts cannot both be size 'm'" if both resolve to
+      // the same size, so this flyout must stay able to render at size "s".
+      renderFlyout({ size: 's' });
+
+      expect(screen.getByTestId(TEST_SUBJ.flyout)).toBeInTheDocument();
     });
 
     it('renders a disabled state badge when the policy is disabled', () => {
       renderFlyout({ policy: createPolicy({ enabled: false }) });
 
-      expect(screen.getByText('Disabled')).toBeInTheDocument();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutDisabledBadge')).toBeInTheDocument();
     });
 
-    it('renders a snoozed-until chip for readers when the policy is actively snoozed', () => {
-      renderFlyout({ canWrite: false, policy: createPolicy({ snoozedUntil: futureIso() }) });
-
+    it('renders a snoozed-until chip when the policy is actively snoozed (regardless of canWrite)', () => {
+      renderFlyout({ policy: createPolicy({ snoozed_until: futureIso() }) });
       expect(screen.getByText(/Snoozed until/i)).toBeInTheDocument();
     });
 
-    it('does not render a snoozed-until chip when snoozedUntil is null or in the past', () => {
-      renderFlyout({ canWrite: false, policy: createPolicy({ snoozedUntil: null }) });
+    it('renders a snoozed-until chip for readers when the policy is actively snoozed', () => {
+      renderFlyout({ canWrite: false, policy: createPolicy({ snoozed_until: futureIso() }) });
+      expect(screen.getByText(/Snoozed until/i)).toBeInTheDocument();
+    });
+
+    it('does not render a snoozed-until chip when the policy is not snoozed or the snooze expired', () => {
+      renderFlyout({ canWrite: false, policy: createPolicy() });
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
     });
 
-    it('replaces the chip with the interactive unsnooze button for writers', () => {
-      renderFlyout({ policy: createPolicy({ snoozedUntil: futureIso() }) });
-
-      expect(screen.getByTestId('actionPolicyUnsnoozeButton')).toBeInTheDocument();
-      expect(screen.queryByText(/^Snoozed until/i)).not.toBeInTheDocument();
-    });
-
-    it('renders the snooze bell for writers on an enabled policy', () => {
+    it('does not render the snooze bell or the header kebab menu', () => {
       renderFlyout();
 
-      expect(screen.getByTestId('actionPolicySnoozeButton')).toBeInTheDocument();
-    });
-
-    it('does not render the snooze bell for readers', () => {
-      renderFlyout({ canWrite: false });
-
       expect(screen.queryByTestId('actionPolicySnoozeButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('actionPolicyUnsnoozeButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('detailsFlyoutActionsMenuButton')).not.toBeInTheDocument();
     });
 
-    it('unsnoozes from the header when the policy is snoozed', async () => {
-      const { handlers } = renderFlyout({ policy: createPolicy({ snoozedUntil: futureIso() }) });
+    it('keeps the close icon in the header', () => {
+      renderFlyout();
+      expect(screen.getByTestId(TEST_SUBJ.closeIcon)).toBeInTheDocument();
+    });
 
-      await userEvent.click(screen.getByTestId('actionPolicyUnsnoozeButton'));
+    it('calls onClose when the close icon is clicked', () => {
+      const { handlers } = renderFlyout();
+      fireEvent.click(screen.getByTestId(TEST_SUBJ.closeIcon));
+      expect(handlers.onClose).toHaveBeenCalledTimes(1);
+    });
+  });
 
-      expect(handlers.onCancelSnooze).toHaveBeenCalledWith('policy-1');
+  describe('enabled switch', () => {
+    it('renders the switch checked when the policy is enabled', () => {
+      renderFlyout({ policy: createPolicy({ enabled: true }) });
+      const toggle = screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch');
+      expect(toggle).toBeChecked();
+    });
+
+    it('renders the switch unchecked when the policy is disabled', () => {
+      renderFlyout({ policy: createPolicy({ enabled: false }) });
+      const toggle = screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch');
+      expect(toggle).not.toBeChecked();
+    });
+
+    it('calls onDisable when the switch is toggled off on an enabled policy', () => {
+      const onDisable = jest.fn();
+      renderFlyout({ policy: createPolicy({ enabled: true }), onDisable });
+      fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch'));
+      expect(onDisable).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('calls onEnable when the switch is toggled on on a disabled policy', () => {
+      const onEnable = jest.fn();
+      renderFlyout({ policy: createPolicy({ enabled: false }), onEnable });
+      fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch'));
+      expect(onEnable).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('disables the switch when canWrite is false', () => {
+      renderFlyout({ canWrite: false });
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch')).toBeDisabled();
+    });
+
+    it('disables the switch on a disabled policy when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      renderFlyout({ policy: createPolicy({ enabled: false }) });
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch')).toBeDisabled();
+    });
+
+    it('keeps the switch enabled on an enabled policy when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      const onDisable = jest.fn();
+      renderFlyout({ policy: createPolicy({ enabled: true }), onDisable });
+      fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch'));
+      expect(onDisable).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('renders a loading spinner instead of the switch when isStateLoading is true', () => {
+      renderFlyout({ isStateLoading: true });
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutEnabledSwitch')
+      ).not.toBeInTheDocument();
+      // EuiLoadingSpinner renders a role="progressbar"
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+  });
+
+  describe('body section containers', () => {
+    it('renders the Definition section', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutDefinition')).toBeInTheDocument();
+    });
+
+    it('renders the Notification section', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutNotification')).toBeInTheDocument();
+    });
+
+    it('renders the Destinations section', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutDestinations')).toBeInTheDocument();
+    });
+
+    it('renders the Description subsection', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutDescriptionBlock')).toBeInTheDocument();
+    });
+
+    it('renders the Policy scope subsection', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutPolicyScopeBlock')).toBeInTheDocument();
+    });
+
+    it('renders the Dispatch mode subsection', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutDispatchModeBlock')).toBeInTheDocument();
+    });
+
+    it('renders the Frequency subsection', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutFrequencyBlock')).toBeInTheDocument();
+    });
+
+    it('renders the Group by subsection when grouping mode is per_field', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutGroupByBlock')).toBeInTheDocument();
+    });
+
+    it('does not render the Group by column when grouping mode is per_alert', () => {
+      renderFlyout({
+        policy: createPolicy({
+          grouping: { mode: 'per_alert' },
+          throttle: { strategy: 'on_status_change' },
+        }),
+      });
+      expect(screen.queryByTestId('actionPolicyDetailsFlyoutGroupByBlock')).not.toBeInTheDocument();
     });
   });
 
@@ -200,23 +388,6 @@ describe('ActionPolicyDetailsFlyout', () => {
       renderFlyout();
 
       expect(screen.getByText('Routes critical alerts to the oncall workflow')).toBeInTheDocument();
-      expect(screen.getByText('production')).toBeInTheDocument();
-    });
-
-    it('renders a expandable list of tags when there are more than one', () => {
-      renderFlyout();
-
-      expect(screen.getByText('production')).toBeInTheDocument();
-      expect(screen.getByText('+1')).toBeInTheDocument();
-    });
-
-    it('opens the tags popover when the "+N" button is clicked', async () => {
-      const user = userEvent.setup();
-      renderFlyout();
-
-      await user.click(screen.getByText('+1'));
-
-      expect(screen.getByText('oncall')).toBeInTheDocument();
     });
 
     it('renders the matcher as the KQL string when provided', () => {
@@ -225,8 +396,8 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('data.severity : "critical"')).toBeInTheDocument();
     });
 
-    it('renders a fallback when the matcher is null', () => {
-      renderFlyout({ policy: createPolicy({ matcher: null }) });
+    it('renders a fallback when the policy has no matcher', () => {
+      renderFlyout({ policy: createPolicy({ matcher: undefined }) });
 
       expect(screen.getByText(/Matches all alerts/i)).toBeInTheDocument();
     });
@@ -235,21 +406,21 @@ describe('ActionPolicyDetailsFlyout', () => {
       renderFlyout();
 
       expect(screen.getByText('Group')).toBeInTheDocument();
-      expect(screen.getByText('At most once every...')).toBeInTheDocument();
+      expect(screen.getByText('At most once every 5 minutes')).toBeInTheDocument();
       expect(screen.getByText('host.name')).toBeInTheDocument();
       expect(screen.getByText('service.name')).toBeInTheDocument();
     });
 
-    it('does not render the group-by row when grouping mode is per_episode', () => {
+    it('does not render group-by field badges when grouping mode is per_alert', () => {
       renderFlyout({
         policy: createPolicy({
-          groupingMode: 'per_episode',
-          groupBy: null,
-          throttle: { strategy: 'on_status_change', interval: null },
+          grouping: { mode: 'per_alert' },
+          throttle: { strategy: 'on_status_change' },
         }),
       });
 
       expect(screen.queryByText('host.name')).not.toBeInTheDocument();
+      expect(screen.getByText('On status change')).toBeInTheDocument();
     });
 
     it('renders each destination with its workflow name', () => {
@@ -286,103 +457,251 @@ describe('ActionPolicyDetailsFlyout', () => {
     });
   });
 
-  describe('footer actions', () => {
-    it('calls onClose when the Close button is clicked', async () => {
-      const user = userEvent.setup();
-      const { handlers } = renderFlyout();
-
-      await user.click(screen.getByTestId(TEST_SUBJ.closeButton));
-
-      expect(handlers.onClose).toHaveBeenCalledTimes(1);
+  describe('affected rules', () => {
+    const tagScopedPolicy = createPolicy({
+      matcher: { tags: ['prod'], expression: 'data.severity : "critical"' },
     });
 
-    it('closes the flyout and calls onEdit when Edit is clicked', async () => {
-      const user = userEvent.setup();
+    it.each<[string, ActionPolicyResponse['matcher']]>([
+      ['rule tags', { tags: ['prod'] }],
+      [
+        'rule tags and a matching query',
+        { tags: ['prod'], expression: 'data.severity : "critical"' },
+      ],
+    ])('renders the See all affected rules link when the scope has %s', (_, matcher) => {
+      renderFlyout({ policy: createPolicy({ matcher }) });
+
+      expect(
+        within(screen.getByTestId('actionPolicyDetailsFlyoutPolicyScopeBlock')).getByTestId(
+          'actionPolicyDetailsFlyoutSeeAffectedRulesLink'
+        )
+      ).toHaveTextContent('See all affected rules');
+    });
+
+    it.each<[string, ActionPolicyResponse['matcher']]>([
+      ['a catch-all policy', undefined],
+      [
+        'a policy with a matching query and no rule tags',
+        { expression: 'data.severity : "critical"' },
+      ],
+    ])('hides the link for %s', (_, matcher) => {
+      renderFlyout({ policy: createPolicy({ matcher }) });
+
+      expect(screen.getByText('Policy scope')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the link when the user cannot read rules', () => {
+      mockCanReadRules = false;
+      renderFlyout({ policy: tagScopedPolicy });
+
+      expect(screen.getByText('Policy scope')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink')
+      ).not.toBeInTheDocument();
+    });
+
+    it('opens the Affected rules flyout when the link is clicked', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      renderFlyout({ policy: tagScopedPolicy });
+
+      await user.click(screen.getByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink'));
+
+      const affectedRulesFlyout = await screen.findByTestId('actionPolicyAffectedRulesFlyout');
+      expect(within(affectedRulesFlyout).getByText('Affected rules')).toBeInTheDocument();
+      expect(
+        within(affectedRulesFlyout).getByText('data.severity : "critical"')
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('footer', () => {
+    it('renders the Take action button for writers', () => {
+      renderFlyout();
+      expect(screen.getByTestId(TEST_SUBJ.takeActionButton)).toBeInTheDocument();
+    });
+
+    it('closes the flyout and calls onEdit when Edit is clicked in the Take action menu', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.editButton));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('editActionPolicy-policy-1'));
 
       expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onEdit).toHaveBeenCalledWith('policy-1');
     });
-  });
 
-  describe('actions menu', () => {
-    it('renders the actions menu trigger next to the close icon', () => {
-      renderFlyout();
-
-      expect(screen.getByTestId(TEST_SUBJ.actionsMenuButton)).toBeInTheDocument();
-    });
-
-    it('calls onClone without closing the flyout', async () => {
+    it('calls onClone when Clone is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Clone'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('cloneActionPolicy-policy-1'));
 
       expect(handlers.onClone).toHaveBeenCalledWith(policy);
-      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onDelete without closing the flyout', async () => {
+    it('calls onDisable when Disable is clicked in the Take action menu on an enabled policy', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const { handlers } = renderFlyout();
+
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('toggleEnabledActionPolicy-policy-1'));
+
+      expect(handlers.onDisable).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('calls onEnable when Enable is clicked in the Take action menu on a disabled policy', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const { handlers } = renderFlyout({ policy: createPolicy({ enabled: false }) });
+
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('toggleEnabledActionPolicy-policy-1'));
+
+      expect(handlers.onEnable).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('calls onUpdateApiKey when Update API key is clicked in the Take action menu', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const { handlers } = renderFlyout();
+
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('updateApiKeyActionPolicy-policy-1'));
+
+      expect(handlers.onUpdateApiKey).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('calls onDelete when Delete is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Delete'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('deleteActionPolicy-policy-1'));
 
       expect(handlers.onDelete).toHaveBeenCalledWith(policy);
-      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onDisable without closing the flyout when Disable is selected on an enabled policy', async () => {
+    it('opens the snooze modal when Snooze is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const { handlers, policy } = renderFlyout();
+      renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Disable'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('snoozeActionPolicy-policy-1'));
 
-      expect(handlers.onDisable).toHaveBeenCalledWith(policy.id);
-      expect(handlers.onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('actionPolicySnoozeModal')).toBeInTheDocument();
     });
 
-    it('calls onEnable without closing the flyout when Enable is selected on a disabled policy', async () => {
+    it('calls onSnooze when the snooze modal is applied', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const { handlers, policy } = renderFlyout({ policy: createPolicy({ enabled: false }) });
+      const { handlers } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Enable'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('snoozeActionPolicy-policy-1'));
+      await user.click(screen.getByTestId('actionPolicySnoozeModalApply'));
 
-      expect(handlers.onEnable).toHaveBeenCalledWith(policy.id);
-      expect(handlers.onClose).not.toHaveBeenCalled();
+      expect(handlers.onSnooze).toHaveBeenCalledTimes(1);
+      expect(handlers.onSnooze.mock.calls[0][0]).toBe('policy-1');
     });
 
-    it('calls onUpdateApiKey without closing the flyout', async () => {
+    it('calls onCancelSnooze when Unsnooze is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const { handlers, policy } = renderFlyout();
+      const { handlers } = renderFlyout({ policy: createPolicy({ snoozed_until: futureIso() }) });
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Update API key'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('unsnoozeActionPolicy-policy-1'));
 
-      expect(handlers.onUpdateApiKey).toHaveBeenCalledWith(policy.id);
-      expect(handlers.onClose).not.toHaveBeenCalled();
+      expect(handlers.onCancelSnooze).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('hides Add to chat when Agent Builder cannot open chat', () => {
+      setMockAgentBuilderShow(true);
+
+      renderFlyout();
+
+      expect(screen.getByTestId(TEST_SUBJ.takeActionButton)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutAddToChatButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides Add to chat when the user cannot show Agent Builder', () => {
+      setMockAgentBuilder({
+        openChat: jest.fn(),
+        addAttachment: jest.fn(),
+        events: { ui: { activeConversation$: new BehaviorSubject(null) } },
+      });
+
+      renderFlyout();
+
+      expect(screen.getByTestId(TEST_SUBJ.takeActionButton)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutAddToChatButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('opens a new conversation with the action policy when chat is unbound', () => {
+      setMockAgentBuilderShow(true);
+      const openChat = jest.fn();
+      const addAttachment = jest.fn();
+      setMockAgentBuilder({
+        openChat,
+        addAttachment,
+        events: { ui: { activeConversation$: new BehaviorSubject(null) } },
+      });
+
+      const { policy } = renderFlyout();
+
+      const footer = screen.getByTestId('actionPolicyDetailsFlyoutFooter');
+      const text = footer.textContent ?? '';
+      expect(text.indexOf('Add to chat')).toBeLessThan(text.indexOf('Take action'));
+
+      fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutAddToChatButton'));
+
+      expect(openChat).toHaveBeenCalledWith({
+        autoSendInitialMessage: false,
+        newConversation: true,
+        attachments: [toPolicyAttachment(policy)],
+      });
+      expect(addAttachment).not.toHaveBeenCalled();
+    });
+
+    it('attaches the action policy to the bound conversation', () => {
+      setMockAgentBuilderShow(true);
+      const openChat = jest.fn();
+      const addAttachment = jest.fn();
+      setMockAgentBuilder({
+        openChat,
+        addAttachment,
+        events: { ui: { activeConversation$: new BehaviorSubject({ id: 'conv-1' }) } },
+      });
+
+      const { policy } = renderFlyout();
+
+      fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutAddToChatButton'));
+
+      expect(addAttachment).toHaveBeenCalledWith(toPolicyAttachment(policy));
+      expect(openChat).not.toHaveBeenCalled();
     });
   });
 
   describe('when the user only has read privilege', () => {
-    it('hides the actions menu and the Edit footer button but keeps Close', () => {
+    it('offers only the test notification in the Take action menu', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
       renderFlyout({ canWrite: false });
 
-      expect(screen.queryByTestId(TEST_SUBJ.actionsMenuButton)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(TEST_SUBJ.editButton)).not.toBeInTheDocument();
-      expect(screen.getByTestId(TEST_SUBJ.closeButton)).toBeInTheDocument();
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+
+      expect(screen.getByTestId('sendTestNotificationActionPolicy-policy-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('editActionPolicy-policy-1')).not.toBeInTheDocument();
     });
 
     it('still renders the policy details', () => {
       renderFlyout({ canWrite: false });
 
-      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Critical alerts policy');
+      expect(screen.getByText('Critical alerts policy')).toBeInTheDocument();
       expect(screen.getByText('data.severity : "critical"')).toBeInTheDocument();
     });
   });

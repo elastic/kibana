@@ -13,6 +13,7 @@ export { DashboardListingTable } from '../dashboard_listing/dashboard_listing_ta
 export { ClonePanelAction } from '../dashboard_actions/clone_panel_action';
 export { ExpandPanelAction } from '../dashboard_actions/expand_panel_action';
 export { FiltersNotificationAction } from '../dashboard_actions/filters_notification_action';
+export { esqlNotificationAction } from '../dashboard_actions/esql_notification_action';
 export { ExportCSVAction } from '../dashboard_actions/export_csv_action';
 export { ExportJSONAction } from '../dashboard_actions/export_json_action';
 export { AddToLibraryAction } from '../dashboard_actions/library_add_action';
@@ -22,3 +23,4 @@ export { AddSectionAction } from '../dashboard_actions/add_section_action';
 export { dashboardDrilldown } from '../dashboard_drilldown/dashboard_drilldown';
 export { exportJsonConfig } from '../dashboard_app/top_nav/share/export_json/export_json_config';
 export { initializeDashboardApiServices } from '../services/dashboard_api_services';
+export { areEqual } from '../../common/dashboard_state/are_equal';

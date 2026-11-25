@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import { css } from '@emotion/react';
@@ -99,6 +99,10 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   const styles = useMemoCss(componentStyles);
 
   const displayName = field.displayName || field.name;
+  const searchHighlight = useMemo(
+    () => getFieldSearchMatchingHighlight(displayName, fieldSearchHighlight),
+    [displayName, fieldSearchHighlight]
+  );
   const title =
     displayName !== field.name && field.name !== '___records___'
       ? i18n.translate('unifiedFieldList.fieldItemButton.fieldTitle', {
@@ -243,7 +247,8 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       }
       fieldName={
         <EuiHighlight
-          search={getFieldSearchMatchingHighlight(displayName, fieldSearchHighlight)}
+          search={searchHighlight}
+          highlightAll
           title={title}
           data-test-subj={`field-${field.name}`}
         >

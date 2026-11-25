@@ -9,11 +9,11 @@ import { tags } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import { mockEcfOnlyServicePackages, mockEcfTemplateVersion } from '../helpers/ecf_only_services';
+import { expectOnboardingStepVisible } from '../helpers/onboarding';
 
-// Both services are in the default "Security, Identity and Compliance" category,
+// Both services are in the "security_identity_compliance" category,
 // visible without switching signal filter or category.
-//   guardduty → cloud_forwarder (non-agentless): needsDeploySettingsStep = false
-//   inspector → agentless:                       needsDeploySettingsStep = true
 const NON_AGENTLESS_ID = 'guardduty';
 const AGENTLESS_ID = 'inspector';
 
@@ -23,21 +23,23 @@ async function seedSessionStorage(
   page: ScoutPage,
   {
     selectedServiceIds,
+    dataFormat,
     stepState,
   }: {
     selectedServiceIds: string[];
+    dataFormat?: 'ecs' | 'otel';
     stepState: Record<string, 'complete' | 'incomplete'>;
   }
 ) {
   await page.addInitScript(
-    ({ ids, state }) => {
+    ({ ids, format, state }) => {
       sessionStorage.setItem(
         'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ids })
+        JSON.stringify({ selectedServiceIds: ids, ...(format ? { dataFormat: format } : {}) })
       );
       sessionStorage.setItem('onboarding.aws.stepState', JSON.stringify(state));
     },
-    { ids: selectedServiceIds, state: stepState }
+    { ids: selectedServiceIds, format: dataFormat, state: stepState }
   );
 }
 
@@ -86,13 +88,13 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
       stepState: {
         services: 'complete',
         'service-settings': 'complete',
-        'deploy-settings': 'incomplete',
-        'deploy-and-detect': 'incomplete',
+        'authenticate-and-deploy': 'incomplete',
+        'detect-and-review': 'incomplete',
       },
     });
     await page.gotoApp('onboarding/aws#services');
 
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     // Confirm service-settings starts as complete.
     await expect(page.testSubj.locator('onboardingStepIndicator-service-settings')).toHaveAttribute(
@@ -110,42 +112,34 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
     );
   });
 
-  // Path 2: with only non-agentless services selected, the services step auto-marks
-  // deploy-settings complete and skips it. Adding an agentless service (which requires
-  // credentials) must immediately invalidate that stale flag so the credentials step
-  // can no longer be bypassed, preventing a deploy with no auth configured.
-  test('path 2 — deploy-settings indicator loses checkmark when agentless service is added', async ({
+  // Path 2: on Step 3 the user switches to agent-based. ECF-only services leave the selection, which
+  // changes it, so service-settings must lose its checkmark as well.
+  test('path 2 — switching to agent-based marks service-settings incomplete', async ({
     browserAuth,
     page,
   }) => {
+    await mockEcfOnlyServicePackages(page);
+    await mockEcfTemplateVersion(page);
     await browserAuth.loginAsAdmin();
-    // Seed before navigation so react-use picks up the values on first mount.
     await seedSessionStorage(page, {
-      selectedServiceIds: [NON_AGENTLESS_ID],
+      dataFormat: 'otel',
+      selectedServiceIds: ['cloudtrail_otel', 'ec2_otel'],
       stepState: {
         services: 'complete',
         'service-settings': 'complete',
-        'deploy-settings': 'complete',
-        'deploy-and-detect': 'incomplete',
+        'authenticate-and-deploy': 'incomplete',
+        'detect-and-review': 'incomplete',
       },
     });
-    await page.gotoApp('onboarding/aws#services');
+    await page.gotoApp('onboarding/aws#authenticate-and-deploy');
+    await expectOnboardingStepVisible(page, 'authenticate-and-deploy');
 
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    const settingsIndicator = page.testSubj.locator('onboardingStepIndicator-service-settings');
+    await expect(settingsIndicator).toHaveAttribute('data-step-status', 'complete');
 
-    // Confirm deploy-settings starts as complete (stale from the auto-skip).
-    await expect(page.testSubj.locator('onboardingStepIndicator-deploy-settings')).toHaveAttribute(
-      'data-step-status',
-      'complete'
-    );
+    await page.testSubj.locator('deploymentMethodCard-agent_based').click();
+    await page.testSubj.locator('confirmModalConfirmButton').click();
 
-    // Add an agentless service — flips needsDeploySettingsStep to true.
-    await page.testSubj.locator(`servicesStep-toggle-${AGENTLESS_ID}`).click();
-
-    // deploy-settings indicator must immediately become incomplete.
-    await expect(page.testSubj.locator('onboardingStepIndicator-deploy-settings')).toHaveAttribute(
-      'data-step-status',
-      'incomplete'
-    );
+    await expect(settingsIndicator).toHaveAttribute('data-step-status', 'incomplete');
   });
 });

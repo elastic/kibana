@@ -20,6 +20,7 @@ export const createCostPerAlertEvaluator = (): Evaluator<
   return {
     name: COST_PER_ALERT_EVALUATOR_NAME,
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const toolCalls = getToolCallSteps(output).length;
       const passedAlertCount = output?.workflow?.passedAlertCount ?? null;

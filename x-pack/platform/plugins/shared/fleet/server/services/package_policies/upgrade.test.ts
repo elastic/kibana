@@ -22,11 +22,14 @@ import { auditLoggingService } from '../audit_logging';
 import { agentPolicyService } from '../agent_policy';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
+import { getPackageInfo } from '../epm/packages';
 
+import { getAgentVersionBlocks } from './agent_version_guard';
 import {
   _getUpgradePackagePolicyInfo,
   _packagePoliciesBulkUpgrade,
   _packagePoliciesGetUpgradeDryRunDiff,
+  _packagePoliciesGetUpgradeDryRunDiffs,
   _packagePoliciesUpgrade,
 } from './upgrade';
 
@@ -34,12 +37,38 @@ jest.mock('../spaces/helpers');
 
 jest.mock('../license');
 
+jest.mock('./agent_version_guard', () => {
+  const mockGetAgentVersionBlocks = jest.fn().mockResolvedValue(new Map());
+  return {
+    ...jest.requireActual('./agent_version_guard'),
+    getAgentVersionBlocks: mockGetAgentVersionBlocks,
+    // Same as the actual function, on top of the mocked `getAgentVersionBlocks`
+    getAgentVersionBlocksOrErrors: async (
+      items: Array<{ key: string; pkgInfo: { conditions?: { agent?: { version?: string } } } }>
+    ) => {
+      try {
+        return { blocks: await mockGetAgentVersionBlocks(items), errors: new Map() };
+      } catch (error) {
+        return {
+          blocks: new Map(),
+          errors: new Map(
+            items
+              .filter(({ pkgInfo }) => pkgInfo.conditions?.agent?.version)
+              .map(({ key }) => [key, error])
+          ),
+        };
+      }
+    },
+  };
+});
+
 async function mockedGetInstallation(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
   if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
   if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
   if (params.pkgName === 'test') pkg = { version: '0.0.1' };
+  if (params.pkgName === 'test-var-groups') pkg = { version: '2.0.0' };
   return Promise.resolve(pkg);
 }
 
@@ -51,6 +80,13 @@ async function mockedGetPackageInfo(params: any) {
   if (params.pkgName === 'test') {
     pkg = {
       version: '1.0.2',
+    };
+  }
+  if (params.pkgName === 'test-agent-condition') {
+    pkg = {
+      name: 'test-agent-condition',
+      version: '1.0.2',
+      conditions: { agent: { version: '^9.4.0' } },
     };
   }
   if (params.pkgName === 'test-conflict') {
@@ -71,6 +107,35 @@ async function mockedGetPackageInfo(params: any) {
                   type: 'integer',
                 },
               ],
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  if (params.pkgName === 'test-var-groups') {
+    // Mirrors the aws package's credential_type var_group introduced in 7.0.0
+    pkg = {
+      name: 'test-var-groups',
+      version: '2.0.0',
+      var_groups: [
+        {
+          name: 'credential_type',
+          title: 'Setup Access',
+          selector_title: 'Preferred method',
+          required: true,
+          options: [
+            {
+              name: 'identity_federation',
+              title: 'Identity Federation',
+              vars: ['role_arn', 'supports_identity_federation'],
+              provider: 'aws',
+            },
+            {
+              name: 'direct_access_key',
+              title: 'Direct Access Keys',
+              vars: ['access_key_id', 'secret_access_key'],
             },
           ],
         },
@@ -275,6 +340,141 @@ describe('Upgrade', () => {
       });
 
       expect(res.hasErrors).toBeFalsy();
+      expect(res.agent_version_block).toBeUndefined();
+    });
+
+    it('should report the agents blocking the upgrade without an error', async () => {
+      const agentVersionBlock = {
+        package_name: 'test',
+        package_version: '1.0.2',
+        version_condition: '^9.4.0',
+        blocked_count: 2,
+        observed_versions: ['9.3.1'],
+        min_version: '9.4.0',
+      };
+      jest
+        .mocked(getAgentVersionBlocks)
+        .mockResolvedValueOnce(new Map([['package-policy-id', agentVersionBlock]]));
+
+      const res = await _packagePoliciesGetUpgradeDryRunDiff({
+        id: 'package-policy-id',
+        soClient: savedObjectsClient,
+        packagePolicyService,
+        packagePolicy: {
+          id: '123',
+          name: 'test-123',
+          package: { title: 'test', name: 'test', version: '1.0.1' },
+          namespace: 'default',
+          policy_ids: ['agent-policy-1'],
+          inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+        } as any,
+        pkgVersion: '1.0.2',
+      });
+
+      expect(res.hasErrors).toBeFalsy();
+      expect(res.statusCode).toBeUndefined();
+      expect(res.agent_version_block).toEqual(agentVersionBlock);
+      expect(getAgentVersionBlocks).toHaveBeenCalledWith([
+        expect.objectContaining({
+          key: 'package-policy-id',
+          pkgInfo: expect.objectContaining({ version: '1.0.2' }),
+          agentPolicyIds: ['agent-policy-1'],
+        }),
+      ]);
+    });
+
+    it('should pass the condition of the current package version', async () => {
+      // Both package versions have an agent version condition
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => ({
+        ...(await mockedGetPackageInfo(params)),
+        conditions: { agent: { version: params.pkgVersion === '1.0.2' ? '^9.4.0' : '^9.3.0' } },
+      }));
+      try {
+        await _packagePoliciesGetUpgradeDryRunDiff({
+          id: 'package-policy-id',
+          soClient: savedObjectsClient,
+          packagePolicyService,
+          packagePolicy: {
+            id: '123',
+            name: 'test-123',
+            package: { title: 'test', name: 'test', version: '1.0.1' },
+            namespace: 'default',
+            policy_ids: ['agent-policy-1'],
+            inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+          } as any,
+          pkgVersion: '1.0.2',
+        });
+      } finally {
+        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+      }
+
+      expect(getAgentVersionBlocks).toHaveBeenLastCalledWith([
+        expect.objectContaining({
+          key: 'package-policy-id',
+          currentCondition: { versionCondition: '^9.3.0', agentPolicyIds: ['agent-policy-1'] },
+        }),
+      ]);
+    });
+
+    it('should check the agents of several package policies with a single query', async () => {
+      jest.mocked(getAgentVersionBlocks).mockClear();
+      const getPackagePolicy = jest.fn(
+        async (_soClient: unknown, id: string) =>
+          ({
+            id,
+            name: `test-${id}`,
+            package: { title: 'test', name: 'test', version: '1.0.1' },
+            namespace: 'default',
+            policy_ids: [`agent-policy-${id}`],
+            inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+          } as any)
+      );
+
+      const res = await _packagePoliciesGetUpgradeDryRunDiffs({
+        ids: ['1', '2'],
+        soClient: savedObjectsClient,
+        packagePolicyService: { ...packagePolicyService, get: getPackagePolicy } as any,
+        pkgVersion: '1.0.2',
+      });
+
+      expect(res).toHaveLength(2);
+      expect(getAgentVersionBlocks).toHaveBeenCalledTimes(1);
+      expect(getAgentVersionBlocks).toHaveBeenCalledWith([
+        expect.objectContaining({ key: '1', agentPolicyIds: ['agent-policy-1'] }),
+        expect.objectContaining({ key: '2', agentPolicyIds: ['agent-policy-2'] }),
+      ]);
+    });
+
+    it('should only fail the upgrades that needed the agents when they cannot be checked', async () => {
+      jest.mocked(getAgentVersionBlocks).mockRejectedValueOnce(new FleetError('boom'));
+      const packagePolicyOf = (id: string, pkgName: string) =>
+        ({
+          id,
+          name: `test-${id}`,
+          package: { title: pkgName, name: pkgName, version: '1.0.1' },
+          namespace: 'default',
+          policy_ids: [`agent-policy-${id}`],
+          inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+        } as any);
+      const getPackagePolicy = jest.fn(async (_soClient: unknown, id: string) =>
+        id === 'with-condition'
+          ? packagePolicyOf(id, 'test-agent-condition')
+          : packagePolicyOf(id, 'test')
+      );
+
+      const [withoutCondition, withCondition] = await _packagePoliciesGetUpgradeDryRunDiffs({
+        ids: ['without-condition', 'with-condition'],
+        soClient: savedObjectsClient,
+        packagePolicyService: { ...packagePolicyService, get: getPackagePolicy } as any,
+        pkgVersion: '1.0.2',
+      });
+
+      // The package without agent version condition didn't need the agents
+      expect(withoutCondition.hasErrors).toBe(false);
+      expect(withoutCondition.diff).toHaveLength(2);
+      // The upgrade that needed them is not presented as eligible
+      expect(withCondition.hasErrors).toBe(true);
+      expect(withCondition.body?.message).toBe('boom');
     });
 
     it('should return errors if there is a conflict to upgrade', async () => {
@@ -475,11 +675,104 @@ describe('Upgrade', () => {
         },
       ]);
 
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         'ingest-package-policies',
         'package-policy-id-test-spaceId',
         expect.not.objectContaining({
           spaceIds: expect.anything(),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should infer var_group_selections from existing vars when the policy has none', async () => {
+      // A pre-var_groups policy configured with direct access keys must not end up
+      // presented as identity_federation (the first option) after upgrade
+      mockAgentPolicyService.get.mockResolvedValue(createAgentPolicyMock());
+      soClient.bulkGet.mockImplementation((objects) =>
+        Promise.resolve({
+          saved_objects: objects.map(({ id }) => ({
+            id,
+            type: 'abcd',
+            references: [],
+            version: '0.9.0',
+            attributes: {
+              ...createPackagePolicyMock(),
+              name: id,
+              package: { name: 'test-var-groups', title: 'Test Var Groups', version: '1.0.0' },
+              vars: {
+                access_key_id: { type: 'text', value: 'AKIA123' },
+                secret_access_key: { type: 'password', value: 'secret' },
+                role_arn: { type: 'text', value: '' },
+              },
+            },
+          })),
+        })
+      );
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const res = await _packagePoliciesUpgrade({
+        packagePolicyService,
+        soClient,
+        esClient,
+        id: 'package-policy-id-test-var-groups',
+      });
+
+      expect(res).toEqual([
+        {
+          id: 'package-policy-id-test-var-groups',
+          name: 'package-policy-id-test-var-groups',
+          success: true,
+        },
+      ]);
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        'ingest-package-policies',
+        'package-policy-id-test-var-groups',
+        expect.objectContaining({
+          var_group_selections: { credential_type: 'direct_access_key' },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should preserve existing var_group_selections on upgrade', async () => {
+      mockAgentPolicyService.get.mockResolvedValue(createAgentPolicyMock());
+      soClient.bulkGet.mockImplementation((objects) =>
+        Promise.resolve({
+          saved_objects: objects.map(({ id }) => ({
+            id,
+            type: 'abcd',
+            references: [],
+            version: '0.9.0',
+            attributes: {
+              ...createPackagePolicyMock(),
+              name: id,
+              package: { name: 'test-var-groups', title: 'Test Var Groups', version: '1.0.0' },
+              vars: {
+                // Access keys populated, but the user explicitly saved identity_federation:
+                // the stored selection must win over inference
+                access_key_id: { type: 'text', value: 'AKIA123' },
+                secret_access_key: { type: 'password', value: 'secret' },
+                role_arn: { type: 'text', value: 'arn:aws:iam::123:role/x' },
+              },
+              var_group_selections: { credential_type: 'identity_federation' },
+            },
+          })),
+        })
+      );
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await _packagePoliciesUpgrade({
+        packagePolicyService,
+        soClient,
+        esClient,
+        id: 'package-policy-id-test-var-groups-saved',
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        'ingest-package-policies',
+        'package-policy-id-test-var-groups-saved',
+        expect.objectContaining({
+          var_group_selections: { credential_type: 'identity_federation' },
         }),
         expect.anything()
       );

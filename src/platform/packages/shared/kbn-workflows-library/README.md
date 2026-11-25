@@ -16,7 +16,7 @@ dependency on `workflows_management`.
 - `src/schemas/` — Zod schemas mirroring the types, used both at runtime (server
   validates catalogs fetched from the CDN) and in CI (the `elastic/workflows`
   catalog generator validates authored YAML against the same schemas).
-- `src/yaml/parse_template.ts` — `parseTemplateYaml(raw)`: js-yaml load +
+- `src/yaml/parse_template.ts` — `parseTemplateYaml(raw)`: `yaml` parse +
   Zod-validated `template-metadata` block + the rest of the workflow body
   preserved untouched.
 

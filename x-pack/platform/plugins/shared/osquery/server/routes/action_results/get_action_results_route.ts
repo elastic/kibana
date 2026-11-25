@@ -75,6 +75,7 @@ export const getActionResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           let integrationNamespaces: Record<string, string[]> = {};
 
           const logger = osqueryContext.logFactory.get('get_action_results');
@@ -102,23 +103,27 @@ export const getActionResultsRoute = (
           const search = await getScopedSearch(
             context,
             request,
-            osqueryContext.cpsEnabled,
+            cpsActive,
             osqueryContext.getStartServices
           );
 
-          if (osqueryContext.cpsEnabled) {
-            const [coreStartServices] = await osqueryContext.getStartServices();
-            const clusterClient = coreStartServices.elasticsearch.client;
-            const readEsClient = getReadEsClient(clusterClient, request, true);
-            const actionsIndexExists = await clusterClient.asInternalUser.indices.exists({
-              index: `${ACTIONS_INDEX}*`,
-            });
+          const [coreStartServices] = await osqueryContext.getStartServices();
+          const clusterClient = coreStartServices.elasticsearch.client;
+          const actionsIndexExists = await clusterClient.asInternalUser.indices.exists({
+            index: `${ACTIONS_INDEX}*`,
+          });
 
+          // Mirrors the search strategy's gate: without an osquery actions index and
+          // without CPS fan-out, live actions live only on `.fleet-actions`, and the
+          // strategy keeps the data-document space filter for that read. Passing the
+          // request lets the strategy's own check reuse this lookup.
+          if (actionsIndexExists || cpsActive) {
             const hasMetadata = await findOsqueryActionMetadata({
-              esClient: readEsClient,
+              esClient: getReadEsClient(clusterClient, request, cpsActive),
               spaceId,
               actionId: request.params.actionId,
               actionsIndexExists,
+              request,
             });
 
             if (!hasMetadata) {

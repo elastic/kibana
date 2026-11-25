@@ -17,10 +17,12 @@ export {
   getAttackDiscoveryApiService,
   getCorrelationsApiService,
   getPrevalenceApiService,
+  getThreatIntelligenceApiService,
   getAnalyzerApiService,
   getNetworkApiService,
   getHostApiService,
   getUserApiService,
+  getEndpointArtifactsApiService,
 } from './apis';
 export type {
   DetectionRuleApiService,
@@ -31,8 +33,10 @@ export type {
   AttackDiscoveryApiService,
   CorrelationsApiService,
   PrevalenceApiService,
+  ThreatIntelligenceApiService,
   AnalyzerApiService,
   NetworkApiService,
   HostApiService,
   UserApiService,
+  EndpointArtifactsApiService,
 } from './apis';

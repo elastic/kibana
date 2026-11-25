@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -17,28 +17,30 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import type { ProductFeaturesService } from '../../../lib/product_features_service';
 import { securityTool } from '../constants';
 import { buildRenderAttachmentTag } from './attachment_utils';
-import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
-import { resolveSingleEntity } from './entity_resolution';
+import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
+import { requireResolvedEntity } from './entity_resolution';
 import {
   buildEntityGraphAttachmentId,
   ensureEntityGraphAttachment,
 } from './entity_graph_attachment_utils';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
-const schema = z.object({
-  entityType: IdentifierType.describe(
-    'The type of entity: host, user, service, or generic'
-  ).optional(),
-  entityId: z
-    .string()
-    .min(1)
-    .describe(
-      'The entity id (EUID), canonical entity.name, or user.full_name to render the relationship graph for. ' +
-        'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
-        '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name). ' +
-        'When a security.entity attachment identifies the target, use its prefixed entity id here.'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe(
+      'The type of entity: host, user, service, or generic'
+    ).optional(),
+    entityId: z
+      .string()
+      .min(1)
+      .describe(
+        'The entity id (EUID), canonical entity.name, or user.full_name to render the relationship graph for. ' +
+          'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
+          '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name). ' +
+          'When a security.entity attachment identifies the target, use its prefixed entity id here.'
+      ),
+  })
+);
 
 const DEFAULT_ENTITY_GRAPH_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
 
@@ -60,18 +62,26 @@ This tool resolves the entity, then stores a \`security.entity_graph\` attachmen
 When the id/name resolves to multiple candidate entities, no attachment is stored, no \`renderTag\` is returned, and you must NOT emit a render tag — instead ask the user to supply the exact entity id (EUID) from the returned candidates. This tool renders a compact preview; the full interactive graph investigation lives in the Security UI and is reachable from the preview's "Open full graph" affordance.`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics', 'graph'],
+    annotations: {
+      title: 'Get Entity Graph',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
-        const entityStoreAvailability = await getEntityStoreV2ToolAvailability({
+        const entityAnalyticsAvailability = await getEntityAnalyticsToolAvailability({
           core,
           request,
           spaceId,
           experimentalFeatures,
           logger,
+          minLicense: 'platinum',
         });
-        if (entityStoreAvailability.status !== 'available') {
-          return entityStoreAvailability;
+        if (entityAnalyticsAvailability.status !== 'available') {
+          return entityAnalyticsAvailability;
         }
 
         try {
@@ -79,15 +89,6 @@ When the id/name resolves to multiple candidate entities, no attachment is store
             return {
               status: 'unavailable',
               reason: 'The entity relationship graph is not enabled for this project tier.',
-            };
-          }
-
-          const [, startPlugins] = await core.getStartServices();
-          const license = await startPlugins.licensing.getLicense();
-          if (!license.hasAtLeast('platinum')) {
-            return {
-              status: 'unavailable',
-              reason: 'The entity relationship graph requires a Platinum license or above.',
             };
           }
         } catch (error) {
@@ -119,57 +120,21 @@ When the id/name resolves to multiple candidate entities, no attachment is store
 
       try {
         const client = esClient.asCurrentUser;
-        const resolved = await resolveSingleEntity({
+        const resolved = await requireResolvedEntity({
           esClient: client,
           spaceId,
           entityId,
           entityType,
         });
-
-        if (resolved.status === 'not_found') {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: { message: `No entity found for id: ${entityId}` },
-              },
-            ],
-          };
+        if (!resolved.ok) {
+          if (resolved.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolved.result.data.message);
+          }
+          return { results: [resolved.result] };
         }
 
-        if (resolved.status === 'ambiguous') {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.other,
-                data: {
-                  message: `Multiple entities matched "${entityId}". Ask the user to provide the exact entity id (EUID) to render the graph, then call this tool again.`,
-                  candidateEntityIds: resolved.candidateEntityIds,
-                },
-              },
-            ],
-          };
-        }
-
-        if (resolved.status === 'no_identity' || !resolved.identity.entityStoreId) {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: {
-                  message: `Resolved an entity for "${entityId}" but it has no canonical entity.id, so the relationship graph cannot be rendered.`,
-                },
-              },
-            ],
-          };
-        }
-
-        const { identifierType, identifier } = resolved.identity;
-        const entityStoreId = resolved.identity.entityStoreId;
-        const attachmentLabel = `Graph — ${identifierType}: ${identifier}`;
+        const { identifierType, identifier, entityStoreId } = resolved.identity;
+        const attachmentLabel = `${identifierType}: ${identifier}`;
 
         const attachmentResult = await ensureEntityGraphAttachment({
           attachments,

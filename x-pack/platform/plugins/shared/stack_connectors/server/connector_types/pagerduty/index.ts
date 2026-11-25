@@ -251,7 +251,7 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): Page
   };
 
   if (params.links) {
-    data.links = params.links;
+    data.links = params.links.filter(({ href }) => !!href && href.trim() !== '');
   }
 
   return data;

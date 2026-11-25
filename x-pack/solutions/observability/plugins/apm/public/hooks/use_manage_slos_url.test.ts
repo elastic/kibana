@@ -8,7 +8,7 @@
 import type { Filter } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { getManageSlosUrl } from './use_manage_slos_url';
 

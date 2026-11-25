@@ -1755,6 +1755,122 @@ describe('featurePrivilegeIterator', () => {
     ]);
   });
 
+  describe('aiIndex', () => {
+    const buildFeatureWithAiIndexSubFeature = (
+      subFeaturePrivilege: Pick<SubFeaturePrivilegeConfig, 'includeIn' | 'aiIndex'>,
+      primaryAiIndex?: FeatureKibanaPrivileges['aiIndex']
+    ) =>
+      new KibanaFeature({
+        id: 'foo',
+        name: 'foo',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            ...(primaryAiIndex ? { aiIndex: primaryAiIndex } : {}),
+            savedObject: { all: [], read: [] },
+            ui: [],
+          },
+          read: {
+            savedObject: { all: [], read: [] },
+            ui: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'sub feature 1',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub-feature-priv-1',
+                    name: 'first sub feature privilege',
+                    savedObject: { all: [], read: [] },
+                    ui: [],
+                    ...subFeaturePrivilege,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+    const getAiIndex = (feature: KibanaFeature) =>
+      Array.from(
+        getFeaturePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: true,
+          licenseType: 'basic',
+        })
+      ).reduce<Record<string, FeatureKibanaPrivileges['aiIndex']>>(
+        (acc, { privilegeId, privilege }) => {
+          acc[privilegeId] = privilege.aiIndex;
+          return acc;
+        },
+        {}
+      );
+
+    it('unions aiIndex.read from included sub-feature privileges', () => {
+      const feature = buildFeatureWithAiIndexSubFeature(
+        { includeIn: 'all', aiIndex: { read: ['lens'] } },
+        { read: ['dashboard'] }
+      );
+
+      const aiIndex = getAiIndex(feature);
+
+      expect(aiIndex.all?.read).toEqual(['dashboard', 'lens']);
+      expect(aiIndex.read?.read).toEqual(undefined);
+    });
+
+    it('rolls up `aiIndex.read` into a primary privilege that declares none of its own', () => {
+      const feature = buildFeatureWithAiIndexSubFeature({
+        includeIn: 'all',
+        aiIndex: { read: ['lens'] },
+      });
+
+      const aiIndex = getAiIndex(feature);
+
+      expect(aiIndex.all).toEqual({ read: ['lens'] });
+      expect(aiIndex.read).toBeUndefined();
+    });
+
+    it('rolls up an `includeIn: "read"` sub-feature privilege into both the `all` and `read` privileges', () => {
+      const feature = buildFeatureWithAiIndexSubFeature({
+        includeIn: 'read',
+        aiIndex: { read: ['workflow'] },
+      });
+
+      const aiIndex = getAiIndex(feature);
+
+      expect(aiIndex.all).toEqual({ read: ['workflow'] });
+      expect(aiIndex.read).toEqual({ read: ['workflow'] });
+    });
+
+    it('does not roll up an `includeIn: "none"` sub-feature privilege', () => {
+      const feature = buildFeatureWithAiIndexSubFeature({
+        includeIn: 'none',
+        aiIndex: { read: ['workflow'] },
+      });
+
+      const aiIndex = getAiIndex(feature);
+
+      expect(aiIndex.all).toBeUndefined();
+      expect(aiIndex.read).toBeUndefined();
+    });
+
+    it('de-duplicates a KI type the primary privilege already grants', () => {
+      const feature = buildFeatureWithAiIndexSubFeature(
+        { includeIn: 'all', aiIndex: { read: ['dashboard'] } },
+        { read: ['dashboard'] }
+      );
+
+      const aiIndex = getAiIndex(feature);
+
+      expect(aiIndex.all).toEqual({ read: ['dashboard'] });
+    });
+  });
+
   describe('alerts', () => {
     const buildFeatureWithAlertsSubFeature = (
       subFeaturePrivilege: Pick<SubFeaturePrivilegeConfig, 'includeIn' | 'alerts'>

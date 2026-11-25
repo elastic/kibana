@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 import { OptimizedAccordion } from './optimized_accordion';
 
@@ -29,7 +28,7 @@ describe('OptimizedAccordion', () => {
 
     expect(screen.getByText('content')).toBeInTheDocument();
   });
-  it('should render children content when accordion opened', async () => {
+  it('should render children content when accordion opened', () => {
     render(
       <OptimizedAccordion id="test" buttonContent={'accordion button'}>
         <span>{'content'}</span>
@@ -37,11 +36,11 @@ describe('OptimizedAccordion', () => {
     );
 
     const toggleButton = screen.getByText('accordion button');
-    await userEvent.click(toggleButton);
+    fireEvent.click(toggleButton);
 
     expect(screen.getByText('content')).toBeVisible();
   });
-  it('should not destroy children content when accordion closed', async () => {
+  it('should not destroy children content when accordion closed', () => {
     render(
       <OptimizedAccordion id="test" buttonContent={'accordion button'}>
         <span>{'content'}</span>
@@ -49,11 +48,11 @@ describe('OptimizedAccordion', () => {
     );
 
     const toggleButton = screen.getByText('accordion button');
-    await userEvent.click(toggleButton);
+    fireEvent.click(toggleButton);
 
     expect(screen.getByText('content')).toBeVisible();
 
-    await userEvent.click(toggleButton);
+    fireEvent.click(toggleButton);
     expect(screen.getByText('content')).not.toBeVisible();
   });
 });

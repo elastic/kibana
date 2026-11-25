@@ -13,6 +13,7 @@ export const transformAttackDiscoveryAlertToApi = (
 ): AttackDiscoveryApiAlert => ({
   alert_ids: attackDiscoveryAlert.alertIds,
   alert_rule_uuid: attackDiscoveryAlert.alertRuleUuid,
+  alert_workflow_reason: attackDiscoveryAlert.alertWorkflowReason,
   alert_workflow_status: attackDiscoveryAlert.alertWorkflowStatus,
   connector_id: attackDiscoveryAlert.connectorId,
   connector_name: attackDiscoveryAlert.connectorName,

@@ -54,3 +54,17 @@ const SavedObjectAddedEventComponent: React.FC<SavedObjectAddedEventProps> = ({
 SavedObjectAddedEventComponent.displayName = 'SavedObjectAddedEvent';
 
 export const SavedObjectAddedEvent = React.memo(SavedObjectAddedEventComponent);
+
+/** Deletion event; the saved object outlives the attachment, so the title stays linked. */
+export const getSavedObjectDeletedEvent = ({
+  attachmentId,
+  title,
+  ...rest
+}: Omit<SavedObjectAddedEventProps, 'attachmentId'> & {
+  attachmentId?: string;
+}): React.ReactNode =>
+  attachmentId && title ? (
+    <SavedObjectAddedEvent attachmentId={attachmentId} title={title} {...rest} />
+  ) : (
+    rest.label
+  );

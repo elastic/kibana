@@ -13,10 +13,10 @@ import { injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import type { ReactNode } from 'react';
 import React, { useRef } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { FilterItems, type FilterItemsProps } from './filter_item/filter_items';
 
 import { filterBarStyles } from './filter_bar.styles';
@@ -28,7 +28,7 @@ export interface Props {
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   className?: string;
-  indexPatterns: DataView[];
+  indexPatterns: FilterableSource[];
   timeRangeForSuggestionsOverride?: boolean;
   intl: IntlShape;
   filtersForSuggestions?: Filter[];

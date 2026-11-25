@@ -10,7 +10,14 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { HTTPError } from '../../common/error';
 import { createCaseError } from '../../common/error';
 import { createTypedApiError } from '../../common/api_errors';
-import { extractWarningValueFromWarningHeader, logDeprecatedEndpoint, wrapError } from './utils';
+import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
+import {
+  extractWarningValueFromWarningHeader,
+  getAttachmentRequestType,
+  logDeprecatedEndpoint,
+  throwIfFileAttachment,
+  wrapError,
+} from './utils';
 
 describe('Utils', () => {
   describe('wrapError', () => {
@@ -93,6 +100,22 @@ describe('Utils', () => {
       });
     });
 
+    it('serializes the field_representations_conflict attributes into a 400 body', () => {
+      const error = createTypedApiError({
+        statusCode: 400,
+        message: 'The request supplies conflicting values for the linked field "Priority".',
+        attributes: { code: 'field_representations_conflict', fields: ['Priority'] },
+      });
+
+      const res = wrapError(error);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        message: 'The request supplies conflicting values for the linked field "Priority".',
+        attributes: { code: 'field_representations_conflict', fields: ['Priority'] },
+      });
+    });
+
     it('does not attach attributes for a plain boom with unrelated data', () => {
       const error = boomify(new Error('Something happened'), { statusCode: 400 });
       error.data = { some: 'unrelated' };
@@ -126,6 +149,60 @@ describe('Utils', () => {
       expect(extractWarningValueFromWarningHeader(`299 Kibana-8.1.0 "Deprecation endpoint"`)).toBe(
         'Deprecation endpoint'
       );
+    });
+  });
+
+  describe('getAttachmentRequestType', () => {
+    it('returns the type of a unified attachment', () => {
+      expect(
+        getAttachmentRequestType({
+          type: 'security.alert',
+          attachmentId: 'alert-1',
+          owner: 'securitySolution',
+        })
+      ).toBe('security.alert');
+    });
+
+    it('returns the type of a legacy user comment', () => {
+      expect(
+        getAttachmentRequestType({ type: AttachmentType.user, comment: 'hi', owner: 'cases' })
+      ).toBe('user');
+    });
+
+    it('appends the subtype id to a legacy external reference', () => {
+      expect(
+        getAttachmentRequestType({
+          type: AttachmentType.externalReference,
+          externalReferenceId: 'ref-1',
+          externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+          externalReferenceAttachmentTypeId: 'indicator',
+          externalReferenceMetadata: null,
+          owner: 'securitySolution',
+        })
+      ).toBe('externalReference:indicator');
+    });
+
+    it('appends the subtype id to a legacy persistable state', () => {
+      expect(
+        getAttachmentRequestType({
+          type: AttachmentType.persistableState,
+          persistableStateAttachmentTypeId: '.lens',
+          persistableStateAttachmentState: {},
+          owner: 'cases',
+        })
+      ).toBe('persistableState:.lens');
+    });
+  });
+
+  describe('throwIfFileAttachment', () => {
+    it('throws for a file attachment', () => {
+      expect(() => throwIfFileAttachment({ type: 'file' })).toThrow(
+        "This API doesn't support file attachments. To attach a file, use POST /api/cases/{case_id}/files."
+      );
+    });
+
+    it('does not throw for other attachment types', () => {
+      expect(() => throwIfFileAttachment({ type: 'comment' })).not.toThrow();
     });
   });
 });

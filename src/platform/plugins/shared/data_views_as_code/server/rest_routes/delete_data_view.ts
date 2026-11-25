@@ -23,12 +23,15 @@ export const registerDeleteDataViewAsCodeRoute = ({
   router.versioned
     .delete({
       path: DELETE_DATA_VIEW_AS_CODE_PATH,
-      access: 'internal',
-      description: 'Delete a data view by id',
+      access: 'public',
+      enableQueryVersion: true,
+      summary: 'Delete a data view',
+      description: "Permanently deletes a data view by ID. You can't recover a deleted data view.",
       options: {
+        tags: ['oas-tag:data-views-v2'],
         availability: {
-          stability: 'tech_preview',
-          since: '9.5.0',
+          stability: 'stable',
+          since: '9.6.0',
         },
       },
       security: {
@@ -46,11 +49,14 @@ export const registerDeleteDataViewAsCodeRoute = ({
               id: schema.string({
                 minLength: 1,
                 maxLength: 1_000,
+                meta: {
+                  description: 'The ID of the data view to delete.',
+                },
               }),
             }),
           },
           response: {
-            200: {
+            204: {
               description: 'deleted',
             },
             403: {
@@ -68,6 +74,6 @@ export const registerDeleteDataViewAsCodeRoute = ({
         const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
         await dataViewsAsCodeService.delete(id);
 
-        return res.ok();
+        return res.noContent();
       })
     );

@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
+  EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -37,7 +38,7 @@ const labels = {
     defaultMessage: 'Toggle sidebar',
   }),
   newConversation: i18n.translate('xpack.agentBuilder.sidebar.header.newConversation', {
-    defaultMessage: 'New conversation',
+    defaultMessage: 'New chat',
   }),
 };
 
@@ -57,18 +58,25 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   onToggleCondensed,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const navigate = useNavigate();
+  const history = useHistory();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
+  // Matches the compact app header beside it: a 48px row plus its 1px bottom border.
+  // Inline padding lines the title up with the section labels and items below.
   const headerStyles = css`
     gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.base};
-    padding-left: ${euiTheme.size.l};
+    justify-content: center;
+    min-block-size: calc(${euiTheme.size.xxxl} + ${euiTheme.border.width.thin});
+    padding: 0 calc(${euiTheme.size.m} + ${euiTheme.size.s});
     flex-grow: 0;
   `;
 
+  const headingColorStyles = css`
+    color: ${euiTheme.colors.textHeading};
+  `;
+
   const condensedHeaderStyles = css`
-    padding: ${euiTheme.size.base} 0;
+    padding: ${euiTheme.size.s} 0;
     flex-grow: 0;
     align-items: center;
   `;
@@ -88,6 +96,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               aria-label={labels.toggleSidebar}
               aria-expanded={false}
               color="text"
+              css={headingColorStyles}
               size="s"
               onClick={onToggleCondensed}
               {...getEbtProps({
@@ -133,12 +142,14 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               iconType="chevronSingleLeft"
+              iconSize="s"
               iconSide="left"
               size="s"
               flush="both"
               color="text"
+              css={headingColorStyles}
               onClick={() => {
-                navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
+                history.push(appPaths.agent.root({ agentId: getLastAgentId() }));
               }}
               {...getEbtProps({
                 element: AGENT_BUILDER_UI_EBT.element.sidebar,
@@ -146,7 +157,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 detail: AGENT_BUILDER_UI_EBT.detail.layerTransition.BACK_CLICK,
               })}
             >
-              {labels.manageComponents}
+              <EuiTitle size="xxs">
+                <span>{labels.manageComponents}</span>
+              </EuiTitle>
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
@@ -158,7 +171,8 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 aria-label={labels.toggleSidebar}
                 aria-expanded={true}
                 color="text"
-                size="s"
+                css={headingColorStyles}
+                size="xs"
                 onClick={onToggleCondensed}
                 {...getEbtProps({
                   element: AGENT_BUILDER_UI_EBT.element.sidebar,

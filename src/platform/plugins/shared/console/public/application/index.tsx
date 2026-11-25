@@ -34,6 +34,10 @@ import { ServicesContextProvider, EditorContextProvider, RequestContextProvider 
 import { createApi, createEsHostService } from './lib';
 import type { ConsoleStartServices } from '../types';
 
+// The spec definitions are fetched before React mounts, so the status lives on the mount
+// point rather than on a rendered component.
+const ACTIVE_API_STATUS_ATTRIBUTE = 'data-console-active-api-status';
+
 const RedirectToShell = () => {
   const location = useLocation();
   return <Redirect to={`/console/shell${location.search}`} />;
@@ -52,6 +56,7 @@ export interface BootDependencies extends ConsoleStartServices {
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
   isDevMode: boolean;
+  defaultEditorContent?: string;
 }
 
 export async function renderApp({
@@ -67,12 +72,15 @@ export async function renderApp({
   docLinks,
   autocompleteInfo,
   isDevMode,
+  defaultEditorContent,
   ...startServices
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
 
-  await loadActiveApi(http);
+  element.setAttribute(ACTIVE_API_STATUS_ATTRIBUTE, 'pending');
+  const activeApiLoaded = await loadActiveApi(http);
+  element.setAttribute(ACTIVE_API_STATUS_ATTRIBUTE, activeApiLoaded ? 'complete' : 'failed');
   const storage = createStorage({
     engine: window.localStorage,
     prefix: 'sense:',
@@ -110,6 +118,7 @@ export async function renderApp({
           },
           config: {
             isDevMode,
+            defaultEditorContent,
           },
         }}
       >

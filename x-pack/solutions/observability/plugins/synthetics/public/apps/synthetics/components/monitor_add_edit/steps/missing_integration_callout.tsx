@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 import { getStatusLabel } from '../../common/hooks/status_labels';
@@ -48,41 +49,36 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
 
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         title={CALLOUT_TITLE}
-        color="warning"
-        iconType="warning"
         data-test-subj="syntheticsMissingIntegrationCallout"
+        actionProps={
+          canReset
+            ? {
+                primary: {
+                  'data-test-subj': 'syntheticsMissingIntegrationResetButton',
+                  onClick: handleReset,
+                  isLoading: isResetting,
+                  children: RESET_BUTTON_LABEL,
+                },
+              }
+            : undefined
+        }
       >
         {missingStatuses.length > 0 && (
-          <EuiText size="s">
-            <ul>
-              {missingStatuses.map((s) => {
-                const label = getStatusLabel(s.status);
-                return (
-                  <li key={s.locationId}>
-                    <strong>{s.locationLabel}</strong>
-                    {label ? `: ${label}` : ''}
-                  </li>
-                );
-              })}
-            </ul>
-          </EuiText>
+          <ul>
+            {missingStatuses.map((s) => {
+              const label = getStatusLabel(s.status);
+              return (
+                <li key={s.locationId}>
+                  <strong>{s.locationLabel}</strong>
+                  {label ? `: ${label}` : ''}
+                </li>
+              );
+            })}
+          </ul>
         )}
-        {canReset && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiButton
-              data-test-subj="syntheticsMissingIntegrationResetButton"
-              color="warning"
-              onClick={handleReset}
-              isLoading={isResetting}
-            >
-              {RESET_BUTTON_LABEL}
-            </EuiButton>
-          </>
-        )}
-      </EuiCallOut>
+      </KbnWarningCallout>
       <EuiSpacer size="m" />
     </>
   );

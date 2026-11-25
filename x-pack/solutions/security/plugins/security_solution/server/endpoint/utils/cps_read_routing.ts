@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isNonLocalIndexName } from '@kbn/es-query';
+
 /**
  * Index owner classifiers used to decide which client a Defend read uses under CPS: Defend-owned
  * indices are read as the request user and fan out, everything else stays on the internal client.
@@ -41,11 +43,13 @@ export const shouldUseInternalSearchClient = (indices: string[], cpsRead: boolea
 
 /**
  * Elasticsearch prefixes the index of a hit that came from a linked project with its alias, so a
- * colon in a hit's `_index` is the only signal that the document did not come from this project.
+ * non-local `_index` is the only signal that the document did not come from this project.
  * Verified against a live fanned-in document rather than assumed; the same prefix is what
  * `expandIndexPatternsForCps` relies on for Lens.
  *
  * Read it off a hit only. Whether a *query* on `_index` sees the prefix is a different question and
- * is not relied on anywhere.
+ * is not relied on anywhere. Delegates to `isNonLocalIndexName` so the CCS/CPS colon-prefix rule
+ * has a single definition shared with the rest of Kibana.
  */
-export const isFannedInHit = (hitIndex?: string): boolean => Boolean(hitIndex?.includes(':'));
+export const isFannedInHit = (hitIndex?: string): boolean =>
+  Boolean(hitIndex && isNonLocalIndexName(hitIndex));

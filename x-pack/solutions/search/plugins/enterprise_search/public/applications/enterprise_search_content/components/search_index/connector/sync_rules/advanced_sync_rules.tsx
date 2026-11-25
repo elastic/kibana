@@ -9,11 +9,12 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCallOut, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { isAdvancedSyncRuleSnippetEmpty } from '../../../../utils/sync_rules_helpers';
 
@@ -69,21 +70,19 @@ export const AdvancedSyncRules: React.FC = () => {
       </EuiFormRow>
 
       {(!isAdvancedSnippetEmpty || !isLocalSnippetEmpty) && (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           title={i18n.translate(
             'xpack.enterpriseSearch.content.index.connector.syncRules.advancedTabCallout.title',
             { defaultMessage: 'Configuration warning' }
           )}
-          color="warning"
-        >
-          <p>
+          text={
             <FormattedMessage
               id="xpack.enterpriseSearch.editSyncRulesFlyout.advancedTablCallout.description"
               defaultMessage="This advanced sync rule might override some configuration fields."
             />
-          </p>
-        </EuiCallOut>
+          }
+        />
       )}
     </>
   );

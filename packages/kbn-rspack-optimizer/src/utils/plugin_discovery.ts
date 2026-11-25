@@ -11,6 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import type { PluginPackage } from '@kbn/repo-packages';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import type { PluginEntry } from '../types';
 
 export type { PluginEntry };
@@ -19,6 +20,14 @@ export interface DiscoverPluginsOptions {
   repoRoot: string;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Include `devOnly` plugins */
+  devOnly?: boolean;
+  /** Explicit plugin paths passed via --plugin-path */
+  paths?: string[];
+  /** Directories scanned for plugins */
+  parentDirs?: string[];
+  /** Restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
 }
 
 const isDefaultPlugin = getPluginPackagesFilter();
@@ -50,9 +59,24 @@ function toPluginEntry(repoRoot: string, pkg: PluginPackage): PluginEntry | null
  * Discover all Kibana plugins with UI bundles using the repo package map.
  */
 export async function discoverPlugins(options: DiscoverPluginsOptions): Promise<PluginEntry[]> {
-  const { repoRoot, examples = false, testPlugins = false } = options;
-
-  const pluginFilter = getPluginPackagesFilter({ examples, testPlugins, browser: true });
+  const {
+    repoRoot,
+    examples = false,
+    testPlugins = false,
+    devOnly = false,
+    paths,
+    parentDirs,
+    allowlistPluginGroups,
+  } = options;
+  const pluginFilter = getPluginPackagesFilter({
+    examples,
+    testPlugins,
+    devOnly,
+    browser: true,
+    paths,
+    parentDirs,
+    allowlistPluginGroups,
+  });
 
   const plugins: PluginEntry[] = [];
   for (const pkg of getPackages(repoRoot)) {
@@ -84,7 +108,7 @@ export function createCoreEntry(repoRoot: string): PluginEntry {
   return {
     id: 'core',
     pkgId: '@kbn/core',
-    contextDir: Path.resolve(repoRoot, 'src/core'),
+    contextDir: Path.resolve(repoRoot, 'src/core/packages/core'),
     targets: ['public'],
     requiredPlugins: [],
     requiredBundles: [],

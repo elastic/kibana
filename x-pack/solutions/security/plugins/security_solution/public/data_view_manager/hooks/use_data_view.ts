@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux-v7';
 import { type FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { PageScope } from '../constants';
-import { sourcererAdapterSelector } from '../redux/selectors';
+import { scopedDataViewSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
 
 const INITIAL_DV = new DataView({
@@ -35,7 +35,7 @@ export const useDataView = (
   } = useKibana();
 
   const { dataViewId, status: internalStatus } = useSelector(
-    sourcererAdapterSelector(dataViewManagerScope)
+    scopedDataViewSelector(dataViewManagerScope)
   );
   const [localStatus, setLocalStatus] =
     useState<SharedDataViewSelectionState['status']>('pristine');

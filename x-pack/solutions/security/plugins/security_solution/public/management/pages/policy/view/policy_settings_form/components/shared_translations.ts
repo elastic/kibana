@@ -8,13 +8,8 @@
 import { i18n } from '@kbn/i18n';
 
 /**
- * Shared translations for user notification components across different protection types
+ * Shared translations for policy settings form components across different protection types
  */
-
-export const NOTIFY_USER_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.userNotification',
-  { defaultMessage: 'User notification' }
-);
 
 export const NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policyDetail.notifyUser',
@@ -23,16 +18,46 @@ export const NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
   }
 );
 
-export const NOTIFICATION_MESSAGE_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.notificationMessage',
+export const CUSTOM_YARA_SIGNATURES_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.protections.customYaraSignaturesLabel',
   {
-    defaultMessage: 'Notification message',
+    defaultMessage: 'Apply custom YARA signatures in detection mode',
   }
 );
 
-export const CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification',
+export const CUSTOM_YARA_SIGNATURES_HINT = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetailsConfig.customYaraSignaturesTooltip',
   {
-    defaultMessage: 'Customize notification message',
+    defaultMessage:
+      'Endpoints enabled with this policy will apply custom YARA signatures from the Custom YARA signatures page. Signatures only detect threats and do not block them, even when the protection level is Prevent.',
+  }
+);
+
+export const CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.protections.customYaraSignaturesLicenseTooltip',
+  {
+    defaultMessage: 'Custom YARA signatures require an Enterprise license.',
+  }
+);
+
+export const REGISTRY_CREDENTIAL_HARDENING_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.registryCredentialHardening',
+  {
+    defaultMessage: 'Registry credential hardening',
+  }
+);
+
+export const REGISTRY_CREDENTIAL_HARDENING_HINT = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetailsConfig.registryCredentialHardeningTooltip',
+  {
+    defaultMessage:
+      'Blocks saving the SAM, SECURITY and SYSTEM registry hives, a common credential-dumping technique. Trusted applications are allowed.',
+  }
+);
+
+export const REGISTRY_CREDENTIAL_HARDENING_LICENSE_UPSELL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.protections.registryCredentialHardeningLicenseTooltip',
+  {
+    defaultMessage: 'Registry credential hardening requires an Enterprise license.',
   }
 );

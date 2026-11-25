@@ -98,7 +98,7 @@ describe('ES|QL async search strategy', () => {
           )
           .toPromise();
 
-        expect(mockAsyncQuery).toBeCalled();
+        expect(mockAsyncQuery).toHaveBeenCalled();
         const request = mockAsyncQuery.mock.calls[0][0];
         expect(request.query).toEqual(params.query);
         expect(request).toHaveProperty('keep_alive', '60000ms');
@@ -114,26 +114,25 @@ describe('ES|QL async search strategy', () => {
 
         await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
-        expect(mockAsyncQueryGet).toBeCalled();
+        expect(mockAsyncQueryGet).toHaveBeenCalled();
         const request = mockAsyncQueryGet.mock.calls[0][0];
         expect(request.id).toBe('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
-      it('allows overriding keep_alive and wait_for_completion_timeout', async () => {
+      it('allows overriding keep_alive, and wait_for_completion_timeout via pollLength', async () => {
         mockAsyncQueryGet.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = {
           query: 'from logs* | limit 10',
-          wait_for_completion_timeout: '10s',
           keep_alive: '5m',
         };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
-        await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+        await esSearch.search({ id: 'foo', params }, { pollLength: '10s' }, mockDeps).toPromise();
 
-        expect(mockAsyncQueryGet).toBeCalled();
+        expect(mockAsyncQueryGet).toHaveBeenCalled();
         const request = mockAsyncQueryGet.mock.calls[0][0];
         expect(request.id).toBe('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout', '10s');
@@ -194,7 +193,7 @@ describe('ES|QL async search strategy', () => {
 
         await esSearch.search({ params }, {}, mockDeps).toPromise();
 
-        expect(mockAsyncQuery).toBeCalled();
+        expect(mockAsyncQuery).toHaveBeenCalled();
         const request = mockAsyncQuery.mock.calls[0][0];
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive');
@@ -219,7 +218,7 @@ describe('ES|QL async search strategy', () => {
           )
           .toPromise();
 
-        expect(mockAsyncQueryStop).toBeCalled();
+        expect(mockAsyncQueryStop).toHaveBeenCalled();
         expect(mockAsyncQueryStop).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({ id }),
@@ -258,9 +257,9 @@ describe('ES|QL async search strategy', () => {
         } catch (e) {
           err = e;
         }
-        expect(mockAsyncQuery).toBeCalled();
+        expect(mockAsyncQuery).toHaveBeenCalled();
         expect(err).not.toBeUndefined();
-        expect(mockAsyncQuery).toBeCalled();
+        expect(mockAsyncQuery).toHaveBeenCalled();
       });
     });
 
@@ -354,7 +353,7 @@ describe('ES|QL async search strategy', () => {
       } catch (e) {
         err = e;
       }
-      expect(mockAsyncQuery).toBeCalled();
+      expect(mockAsyncQuery).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
@@ -377,7 +376,7 @@ describe('ES|QL async search strategy', () => {
       } catch (e) {
         err = e;
       }
-      expect(mockAsyncQuery).toBeCalled();
+      expect(mockAsyncQuery).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
@@ -394,7 +393,7 @@ describe('ES|QL async search strategy', () => {
 
       await esSearch.cancel!(id, {}, mockDeps);
 
-      expect(mockAsyncQueryDelete).toBeCalled();
+      expect(mockAsyncQueryDelete).toHaveBeenCalled();
       const request = mockAsyncQueryDelete.mock.calls[0][0];
       expect(request.id).toBe(id);
     });
@@ -419,7 +418,7 @@ describe('ES|QL async search strategy', () => {
         err = e;
       }
 
-      expect(mockAsyncQueryDelete).toBeCalled();
+      expect(mockAsyncQueryDelete).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(400);
       expect(err?.message).toBe(errResponse.message);
@@ -437,7 +436,7 @@ describe('ES|QL async search strategy', () => {
 
       await esSearch.extend!(id, keepAlive, {}, mockDeps);
 
-      expect(mockAsyncQueryGet).toBeCalled();
+      expect(mockAsyncQueryGet).toHaveBeenCalled();
       const request = mockAsyncQueryGet.mock.calls[0][0];
       expect(request).toEqual({ id, keep_alive: keepAlive });
     });
@@ -457,7 +456,7 @@ describe('ES|QL async search strategy', () => {
         err = e;
       }
 
-      expect(mockAsyncQueryGet).toBeCalled();
+      expect(mockAsyncQueryGet).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);

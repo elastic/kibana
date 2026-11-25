@@ -7,48 +7,82 @@
 
 import type { Indicator } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { UseFormGetValues } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
+import type { CreateSLOForm } from '../types';
 
-export function useDebouncedGetPreviewData(
-  isIndicatorValid: boolean,
-  indicator: Indicator,
-  range: { from: Date; to: Date },
-  groupBy?: string | string[]
-) {
-  const serializedIndicator = JSON.stringify(indicator);
-  const [indicatorState, setIndicatorState] = useState<string>(serializedIndicator);
+interface PreviewParams {
+  indicator: Indicator;
+  groupBy: string[];
+  projectRoutings?: string | null;
+}
 
-  const serializedGroupBy = JSON.stringify([groupBy].flat());
-  const [groupByState, setGroupByState] = useState<string>(serializedGroupBy);
+interface CommittedPreviewParams {
+  key: string;
+  params: PreviewParams;
+}
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const store = useCallback(
-    debounce((value: string) => setIndicatorState(value), 800),
-    []
+const serializePreviewParams = (getValues: UseFormGetValues<CreateSLOForm>): string => {
+  const [indicator, groupBy, projectRoutings] = getValues([
+    'indicator',
+    'groupBy',
+    'settings.projectRoutings',
+  ]);
+  return JSON.stringify({ indicator, groupBy: [groupBy].flat(), projectRoutings });
+};
+
+const toCommitted = (key: string): CommittedPreviewParams => ({ key, params: JSON.parse(key) });
+
+const PREVIEW_FIELDS = ['indicator', 'groupBy', 'settings.projectRoutings'] as const;
+
+// A change without a name (reset, unregister) or on a path overlapping a preview field may change the params.
+const affectsPreviewParams = (name?: string): boolean =>
+  name === undefined ||
+  PREVIEW_FIELDS.some(
+    (field) => name === field || name.startsWith(`${field}.`) || field.startsWith(`${name}.`)
   );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const storeGroupBy = useCallback(
-    debounce((value: string) => setGroupByState(value), 800),
-    []
+
+export function useDebouncedGetPreviewData({
+  isIndicatorValid,
+  range,
+}: {
+  isIndicatorValid: boolean;
+  range: { from: Date; to: Date };
+}) {
+  const { watch, getValues } = useFormContext<CreateSLOForm>();
+
+  const [committed, setCommitted] = useState(() => toCommitted(serializePreviewParams(getValues)));
+
+  const [commit] = useState(() =>
+    debounce(() => {
+      const key = serializePreviewParams(getValues);
+      setCommitted((previous) => (previous.key === key ? previous : toCommitted(key)));
+    }, 800)
   );
 
   useEffect(() => {
-    if (indicatorState !== serializedIndicator) {
-      store(serializedIndicator);
-    }
-  }, [indicatorState, serializedIndicator, store]);
-
-  useEffect(() => {
-    if (groupByState !== serializedGroupBy) {
-      storeGroupBy(serializedGroupBy);
-    }
-  }, [groupByState, serializedGroupBy, storeGroupBy]);
+    // The callback form of `watch` subscribes to value changes without registering a global watch,
+    // so it does not re-render the form root (react-hook-form 7.44.3).
+    const subscription = watch((_values, { name }) => {
+      if (affectsPreviewParams(name)) {
+        commit();
+      }
+    });
+    // Values set by sibling effects during the first mount are emitted before this subscription exists.
+    commit();
+    return () => {
+      subscription.unsubscribe();
+      commit.cancel();
+    };
+  }, [watch, commit]);
 
   return useGetPreviewData({
     isValid: isIndicatorValid,
-    indicator: JSON.parse(indicatorState),
+    indicator: committed.params.indicator,
     range,
-    groupBy: JSON.parse(groupByState),
+    groupBy: committed.params.groupBy,
+    projectRoutings: committed.params.projectRoutings,
   });
 }

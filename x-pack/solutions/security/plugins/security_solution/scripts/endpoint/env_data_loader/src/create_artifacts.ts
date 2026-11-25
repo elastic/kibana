@@ -20,8 +20,10 @@ import { EventFiltersGenerator } from '../../../../common/endpoint/data_generato
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import {
   createBlocklist,
+  createCustomYaraSignature,
   createEventFilter,
   createHostIsolationException,
+  createEndpointException,
   createTrustedApp,
 } from '../../common/endpoint_artifact_services';
 import type { ReportProgressCallback } from './types';
@@ -220,6 +222,54 @@ export const createBlocklists = async ({
   });
 };
 
+export const createCustomYaraSignatures = async ({
+  kbnClient,
+  log,
+  count,
+  reportProgress,
+  throttler,
+  policyIds,
+  globalArtifactRatio,
+}: ArtifactCreationOptions): Promise<void> => {
+  const generate = new ExceptionsListItemGenerator();
+  const { global: globalCount, perPolicy } = calculateGlobalAndPerPolicyCounts(
+    count,
+    globalArtifactRatio
+  );
+  let globalDone = 0;
+  let doneCount = 0;
+  let errorCount = 0;
+
+  log.info(
+    `Custom YARA Signatures: Creating ${globalCount} global and ${perPolicy} per-policy artifacts`
+  );
+
+  loop(count, () => {
+    throttler.addToQueue(async () => {
+      let tags = [GLOBAL_ARTIFACT_TAG];
+
+      if (globalDone < globalCount) {
+        globalDone++;
+      } else {
+        tags = generatePerPolicyEffectiveScope(policyIds);
+      }
+
+      await createCustomYaraSignature(
+        kbnClient,
+        generate.generateCustomYaraSignatureForCreate({ tags })
+      )
+        .catch((e) => {
+          errorCount++;
+          logError(log, 'Custom YARA Signature', e);
+        })
+        .finally(() => {
+          doneCount++;
+          reportProgress({ doneCount, errorCount });
+        });
+    });
+  });
+};
+
 export const createHostIsolationExceptions = async ({
   kbnClient,
   log,
@@ -281,7 +331,7 @@ export const createEndpointExceptions = async ({
 
   loop(count, () => {
     throttler.addToQueue(async () => {
-      await createHostIsolationException(kbnClient, generate.generateEndpointExceptionForCreate())
+      await createEndpointException(kbnClient, generate.generateEndpointExceptionForCreate())
         .catch((e) => {
           errorCount++;
           logError(log, 'Endpoint Exception', e);

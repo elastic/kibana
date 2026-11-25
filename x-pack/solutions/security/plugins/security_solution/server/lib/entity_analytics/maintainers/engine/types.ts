@@ -80,7 +80,8 @@ export interface CustomActorBinding {
    * Used by `kind: 'standard'` and `kind: 'bucketed'` configs. Override
    * configs compute the actor EUID inside their override fn — set `fields`
    * here for Step 1 narrowing parity, but `evalOverride` is unused for them.
-   * Defaults to `euid.esql.getEuidEvaluation('user', { withTypeId: true })`.
+   * Defaults to `euid.esql.getEuidEvaluation(getBuiltInEntityDefinition('user'),
+   * ENGINE_COLUMNS.actor, { withTypeId: true })`.
    *
    * Identifiers must follow the quoting convention described at the top of
    * this file (backticks required for dotted-numeric or reserved-word
@@ -166,6 +167,20 @@ interface RelationshipIntegrationBase {
    */
   disableLookbackWindow?: boolean;
   /**
+   * Clear this config's `relationshipKey` on all entities from `entitySource`
+   * before processing any page, so the run repopulates from a clean slate.
+   *
+   * ONLY for sources that emit a COMPLETE snapshot of the relationship set each
+   * cycle (e.g. Workday's 24h user inventory). On an event-stream source
+   * (`accesses`, `communicates_with`) absence means "not seen in this window",
+   * never "no longer true" — clearing there would erase real observations.
+   *
+   * Safe only while a source's actors are namespace-partitioned into their own
+   * entity documents; otherwise this would delete another source's contribution
+   * to the same `ids` array.
+   */
+  resetRelationshipsBeforeRun?: { entitySource: string };
+  /**
    * Declares that every document this integration reads describes a *host-scoped*
    * (non-IDP) user — an identity meaningful only within one host, keyed by
    * `user.name` + `host.id` — and always carries `host.id`. This is an assertion
@@ -210,7 +225,8 @@ interface StandardBuilderFields {
   esqlWhereClause: string;
   /**
    * Optional ESQL expression for the target entity ID.
-   * Defaults to euid.esql.getEuidEvaluation(targetEntityType, { withTypeId: true }).
+   * Defaults to euid.esql.getEuidEvaluation(getBuiltInEntityDefinition(targetEntityType),
+   * 'targetEntityId', { withTypeId: true }).
    * Required for integrations with non-standard target fields (e.g. okta,
    * aws_cloudtrail communicates_with).
    *
@@ -279,7 +295,23 @@ export interface BucketedRelationshipIntegrationConfig
 export interface OverrideRelationshipIntegrationConfig extends RelationshipIntegrationBase {
   kind: 'override';
   relationshipKey: EntityRelationshipKey;
-  esqlQueryOverride: (namespace: string) => string;
+  /**
+   * `pageActorValues` is passed only when `scopeToPageActorValues` is set; the
+   * query must then reference exactly one positional `?` param per value.
+   */
+  esqlQueryOverride: (namespace: string, pageActorValues?: readonly string[]) => string;
+  /**
+   * When true, the engine passes the page's distinct actor values (every non-null
+   * `customActor.fields` value across the page's buckets, see `getPageActorValues`)
+   * to `esqlQueryOverride` and binds the same array, in order, as ES|QL positional
+   * params.
+   *
+   * For overrides whose Step 2 can emit actors that are not page buckets: the
+   * page filter is an OR across actor fields, so a document matched through one
+   * field also contributes its other fields' values. Filtering the grouped rows
+   * to the page's values bounds the row count by the page instead of by the data.
+   */
+  scopeToPageActorValues?: true;
 }
 
 /**
@@ -306,8 +338,8 @@ export type RelationshipIntegrationConfig =
  * Output record from the relationship-maintainer postprocessor.
  *
  * `entityType` is currently fixed to `'user'` because every shipped config
- * computes its actor EUID via `getEuidEvaluation('user', …)` and the engine
- * hardcodes `'user'` at every producer/builder site. Broadening to
+ * computes its actor EUID via `getEuidEvaluation(getBuiltInEntityDefinition('user'), …)` and
+ * the engine hardcodes `'user'` at every producer/builder site. Broadening to
  * `'user' | 'host' | 'service'` is tracked under the actorEntityType
  * follow-up (#266748). Agents/engineers implementing #266748 should change
  * **all** of these sites in lockstep — `grep -rn "266748"` from the
@@ -318,7 +350,8 @@ export type RelationshipIntegrationConfig =
  *   2. `engine/build_actor_discovery_query.ts` — Step 1 user-EUID existence
  *      filter is parameterized on entity type.
  *   3. `engine/build_targets_per_actor_query.ts` — Step 2 actor EVAL uses
- *      `getEuidEvaluation('user', …)`; thread the configured type through.
+ *      `getEuidEvaluation(getBuiltInEntityDefinition('user'), …)`; thread the configured
+ *      type through.
  *   4. `engine/parse_targets_per_actor_rows.ts` — drop the `'user' as const`
  *      on the produced records.
  *   5. `engine/update_entities.ts` — drop `type: 'user'` on the

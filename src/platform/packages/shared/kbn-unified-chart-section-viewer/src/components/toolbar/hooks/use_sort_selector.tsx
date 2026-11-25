@@ -32,7 +32,7 @@ export const useSortSelector = ({
   sort,
   onChange,
 }: UseSortSelectorParams): UseSortSelectorResult => {
-  const [sortBy, direction] = sort;
+  const { sortField: sortBy, sortDirection: direction } = sort;
 
   const options = useMemo<SelectableEntry[]>(
     () =>
@@ -62,17 +62,18 @@ export const useSortSelector = ({
   const handleSortByChange = useCallback(
     (chosenOption?: SelectableEntry) => {
       const nextSortBy = (chosenOption?.value as MetricsSortBy) ?? sortBy;
-      onChange([
-        nextSortBy,
-        nextSortBy === METRICS_SORT_BY.recency ? METRICS_SORT_DIRECTION.asc : direction,
-      ]);
+      onChange({
+        sortField: nextSortBy,
+        sortDirection:
+          nextSortBy === METRICS_SORT_BY.recency ? METRICS_SORT_DIRECTION.asc : direction,
+      });
     },
     [onChange, sortBy, direction]
   );
 
   const handleDirectionChange = useCallback(
     (nextDirection: MetricsSortDirection) => {
-      onChange([sortBy, nextDirection]);
+      onChange({ sortField: sortBy, sortDirection: nextDirection });
     },
     [onChange, sortBy]
   );

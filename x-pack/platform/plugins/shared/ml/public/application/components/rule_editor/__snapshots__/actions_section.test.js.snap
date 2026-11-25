@@ -3,7 +3,7 @@
 exports[`ActionsSection renders with no actions selected 1`] = `
 <div>
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       Choose the actions to take when the job rule matches an anomaly.
@@ -123,7 +123,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
 exports[`ActionsSection renders with skip_result and skip_model_update selected 1`] = `
 <div>
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       Choose the actions to take when the job rule matches an anomaly.
@@ -245,7 +245,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
 exports[`ActionsSection renders with skip_result selected 1`] = `
 <div>
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       Choose the actions to take when the job rule matches an anomaly.

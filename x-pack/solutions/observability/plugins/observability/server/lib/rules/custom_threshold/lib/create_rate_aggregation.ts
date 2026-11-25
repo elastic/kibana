@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { DslQuery } from '@kbn/es-query';
 import { calculateRateTimeranges } from '../utils';
 export const createRateAggsBucketScript = (
   timeframe: { start: number; end: number },
@@ -22,7 +23,9 @@ export const createRateAggsBucketScript = (
           first: `${id}_first_bucket.maxValue`,
           second: `${id}_second_bucket.maxValue`,
         },
-        script: `params.second > 0.0 && params.first > 0.0 && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds}: 0`,
+        // Allow previous max of 0 (e.g. counter 0 → N). Reject missing values and non-increases
+        // (counter resets) so rate is only computed when both windows have a max and it rose.
+        script: `params.first != null && params.second != null && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds} : 0`,
       },
     },
   };
@@ -32,34 +35,39 @@ export const createRateAggsBuckets = (
   timeframe: { start: number; end: number },
   id: string,
   timeFieldName: string,
-  field: string
+  field: string,
+  filterQuery?: DslQuery
 ) => {
   const { firstBucketRange, secondBucketRange } = calculateRateTimeranges({
     to: timeframe.end,
     from: timeframe.start,
   });
 
+  // Combines the time range of each window with the metric's KQL filter, when there is one
+  const withMetricFilter = (rangeQuery: DslQuery) =>
+    filterQuery ? { bool: { must: [rangeQuery, filterQuery] } } : rangeQuery;
+
   return {
     [`${id}_first_bucket`]: {
-      filter: {
+      filter: withMetricFilter({
         range: {
           [timeFieldName]: {
             gte: moment(firstBucketRange.from).toISOString(),
             lt: moment(firstBucketRange.to).toISOString(),
           },
         },
-      },
+      }),
       aggs: { maxValue: { max: { field } } },
     },
     [`${id}_second_bucket`]: {
-      filter: {
+      filter: withMetricFilter({
         range: {
           [timeFieldName]: {
             gte: moment(secondBucketRange.from).toISOString(),
             lt: moment(secondBucketRange.to).toISOString(),
           },
         },
-      },
+      }),
       aggs: { maxValue: { max: { field } } },
     },
   };

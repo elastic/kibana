@@ -13,7 +13,7 @@ import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { parseTemplate } from './parse_template';
-import { validateTemplateDefinition } from './validate_template_input';
+import { validateTemplateStructure } from './validate_template_input';
 import { PublicTemplateWriteBodySchema } from './public_template_write_body';
 
 /**
@@ -53,7 +53,10 @@ export const putPublicTemplateRoute = createCasesRoute({
       }
       const input = bodyResult.data;
 
-      const definitionValidation = validateTemplateDefinition(input.definition);
+      // Structural check only — the authoring-charset check runs inside `updateTemplate` /
+      // `validateUpdateTemplate`, which (unlike this route) have the existing template needed to
+      // grandfather field names that predate the rule. See `validateTemplateStructure`'s doc.
+      const definitionValidation = validateTemplateStructure(input.definition);
       if (!definitionValidation.valid) {
         return response.badRequest({ body: { message: definitionValidation.message } });
       }

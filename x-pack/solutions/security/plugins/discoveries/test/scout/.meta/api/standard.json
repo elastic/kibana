@@ -1,6 +1,20 @@
 {
-  "sha1": "6f49d4eb423df10a8faa5af26bbee313ed50287c",
+  "sha1": "45867ff845c1f7ef8567b2635f9ce8dd0329b47e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "8eaeb7426bd188c-13f03690a25c91b",
+      "title": "Enable the Attack Discovery workflows feature flag",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
     {
       "id": "e40d1127a3731e3-cab47c3899b36f2",
       "title": "Workflow schedule API - create should create a schedule with all fields",
@@ -13,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/create.spec.ts",
-        "line": 33,
-        "column": 10
+        "line": 27,
+        "column": 39
       }
     },
     {
@@ -29,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/create.spec.ts",
-        "line": 61,
-        "column": 10
+        "line": 48,
+        "column": 12
       }
     },
     {
@@ -45,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/create.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 54,
+        "column": 12
       }
     },
     {
@@ -61,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/create.spec.ts",
-        "line": 81,
-        "column": 10
+        "line": 62,
+        "column": 68
       }
     },
     {
@@ -77,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/create.spec.ts",
-        "line": 93,
-        "column": 10
+        "line": 66,
+        "column": 19
       }
     },
     {
@@ -93,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/create.spec.ts",
-        "line": 105,
-        "column": 10
+        "line": 74,
+        "column": 11
       }
     },
     {
@@ -109,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/create.spec.ts",
-        "line": 117,
-        "column": 10
+        "line": 79,
+        "column": 46
       }
     },
     {
@@ -125,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/create.spec.ts",
-        "line": 143,
-        "column": 10
+        "line": 99,
+        "column": 27
       }
     },
     {
@@ -141,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/delete.spec.ts",
-        "line": 33,
-        "column": 10
+        "line": 26,
+        "column": 39
       }
     },
     {
@@ -157,8 +171,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/delete.spec.ts",
-        "line": 49,
-        "column": 10
+        "line": 34,
+        "column": 18
       }
     },
     {
@@ -173,8 +187,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/disable.spec.ts",
-        "line": 33,
-        "column": 10
+        "line": 26,
+        "column": 39
       }
     },
     {
@@ -189,8 +203,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/disable.spec.ts",
-        "line": 50,
-        "column": 10
+        "line": 38,
+        "column": 6
       }
     },
     {
@@ -205,8 +219,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/enable.spec.ts",
-        "line": 33,
-        "column": 10
+        "line": 26,
+        "column": 39
       }
     },
     {
@@ -221,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/enable.spec.ts",
-        "line": 51,
-        "column": 10
+        "line": 39,
+        "column": 12
       }
     },
     {
@@ -237,8 +251,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/find.spec.ts",
-        "line": 33,
-        "column": 10
+        "line": 26,
+        "column": 39
       }
     },
     {
@@ -253,8 +267,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/find.spec.ts",
-        "line": 45,
-        "column": 10
+        "line": 33,
+        "column": 11
       }
     },
     {
@@ -269,8 +283,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/find.spec.ts",
-        "line": 74,
-        "column": 10
+        "line": 57,
+        "column": 60
       }
     },
     {
@@ -285,8 +299,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/find.spec.ts",
-        "line": 102,
-        "column": 10
+        "line": 85,
+        "column": 29
       }
     },
     {
@@ -301,8 +315,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/find.spec.ts",
-        "line": 130,
-        "column": 10
+        "line": 110,
+        "column": 5
       }
     },
     {
@@ -317,8 +331,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/get.spec.ts",
-        "line": 33,
-        "column": 10
+        "line": 26,
+        "column": 39
       }
     },
     {
@@ -333,8 +347,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/get.spec.ts",
-        "line": 52,
-        "column": 10
+        "line": 41,
+        "column": 11
       }
     },
     {
@@ -349,8 +363,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/rbac.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 82,
+        "column": 19
       }
     },
     {
@@ -365,8 +379,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/rbac.spec.ts",
-        "line": 81,
-        "column": 10
+        "line": 92,
+        "column": 28
       }
     },
     {
@@ -381,8 +395,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/rbac.spec.ts",
-        "line": 108,
-        "column": 10
+        "line": 119,
+        "column": 25
       }
     },
     {
@@ -397,8 +411,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/rbac.spec.ts",
-        "line": 123,
-        "column": 10
+        "line": 136,
+        "column": 14
       }
     },
     {
@@ -413,8 +427,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/rbac.spec.ts",
-        "line": 140,
-        "column": 10
+        "line": 152,
+        "column": 4
       }
     },
     {
@@ -429,8 +443,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/rbac.spec.ts",
-        "line": 162,
-        "column": 10
+        "line": 175,
+        "column": 3
       }
     },
     {
@@ -445,8 +459,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/rbac.spec.ts",
-        "line": 181,
-        "column": 10
+        "line": 193,
+        "column": 3
       }
     },
     {
@@ -461,24 +475,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/rbac.spec.ts",
-        "line": 192,
-        "column": 10
-      }
-    },
-    {
-      "id": "e7343167cc7b951-b282f1b777835c5",
-      "title": "Workflow schedule API - scaffold verification scaffold: can import test utilities without errors",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/scaffold_verification.spec.ts",
-        "line": 37,
-        "column": 10
+        "line": 202,
+        "column": 14
       }
     },
     {
@@ -493,8 +491,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/update.spec.ts",
-        "line": 33,
-        "column": 10
+        "line": 27,
+        "column": 39
       }
     },
     {
@@ -509,8 +507,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/update.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 57,
+        "column": 45
       }
     },
     {
@@ -525,8 +523,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/update.spec.ts",
-        "line": 97,
-        "column": 10
+        "line": 83,
+        "column": 21
       }
     },
     {
@@ -541,8 +539,19 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/update.spec.ts",
-        "line": 119,
-        "column": 10
+        "line": 103,
+        "column": 13
+      }
+    },
+    {
+      "id": "5516e84a006be3e-dc890e80bfb5944",
+      "title": "Revert the Attack Discovery workflows feature flag",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

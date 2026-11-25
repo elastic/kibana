@@ -124,6 +124,8 @@ const createAppDependencies = (httpSetup: HttpSetup): AppDependencies => {
       enforceAdaptiveAllocations: false,
       enableFailureStoreRetentionDisabling: true,
       enableIndexMode: true,
+      enableVectorCount: false,
+      showManagedDataStreamsByDefault: true,
       isServerless: false,
     },
     overlays: coreMock.createStart().overlays,

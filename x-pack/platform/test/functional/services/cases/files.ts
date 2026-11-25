@@ -30,8 +30,12 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
       await common.setFileInputPath(fileInputPath);
       await testSubjects.click('uploadButton');
 
-      // hide the upload notification
-      await (await find.byCssSelector('[data-test-subj="toastCloseButton"]')).click();
+      // wait for the toast that confirms createAttachments() resolved; if this times out instead of
+      // the modal check below, it indicates the API call failed (not just slow)
+      await testSubjects.existOrFail('toastCloseButton', { timeout: 10000 });
+      await testSubjects.click('toastCloseButton');
+
+      await testSubjects.missingOrFail('cases-files-add-modal', { timeout: 10000 });
     },
 
     async searchByFileName(fileName: string) {
@@ -62,6 +66,9 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
       await (await testSubjects.find('cases-files-delete-button', 1000)).click();
 
       await testSubjects.click('confirmModalConfirmButton');
+
+      // wait for the confirm modal (and its overlay mask) to be removed so the next test's click isn't intercepted
+      await testSubjects.missingOrFail('confirmModalConfirmButton');
     },
 
     async openFilePreview(index: number = 0) {

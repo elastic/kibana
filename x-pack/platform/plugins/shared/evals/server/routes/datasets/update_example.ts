@@ -21,8 +21,8 @@ import {
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
-import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
-import { ExampleNotFoundError } from '../../storage/example_not_found_error';
+import { ExampleAlreadyExistsError } from '../../storage/datasets/example_already_exists_error';
+import { ExampleNotFoundError } from '../../storage/datasets/example_not_found_error';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerUpdateExampleRoute = ({

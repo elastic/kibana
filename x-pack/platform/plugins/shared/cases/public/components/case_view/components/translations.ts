@@ -30,6 +30,12 @@ export const ATTACH_MENU_SAVED_OBJECT = i18n.translate(
   }
 );
 
+export const ATTACH_TIMELINE_SUCCESS_TITLE = (objectTitle: string): string =>
+  i18n.translate('xpack.cases.caseView.attach.timeline.successAddedToCase', {
+    defaultMessage: 'Added timeline {objectTitle} to case',
+    values: { objectTitle },
+  });
+
 export const NO_SEARCH_RESULTS_TITLE = i18n.translate(
   'xpack.cases.caseView.attachments.noSearchResults.title',
   {
@@ -73,3 +79,15 @@ export const NO_COLLAPSIBLE_ATTACHMENTS = i18n.translate(
   'xpack.cases.caseView.attachments.noCollapsibleAttachments',
   { defaultMessage: 'No collapsible attachments available' }
 );
+
+export const ATTACHMENTS_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.caseView.attachments.attachmentsCount', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# attachment} other {# attachments}}',
+  });
+
+export const REMOVE_ATTACHMENTS_TITLE = (attachments: string) =>
+  i18n.translate('xpack.cases.caseView.attachments.removeAttachmentsTitle', {
+    values: { attachments },
+    defaultMessage: 'Remove {attachments}?',
+  });

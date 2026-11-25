@@ -25,8 +25,13 @@ import type {
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { isRefField } from '../../../common/types/domain/template/fields';
+import {
+  buildStrictFieldsArraySchema,
+  collectExistingFieldNames,
+} from '../../../common/types/domain/template/strict_fields';
 import { getYamlDefaultAsString, normalizeFieldDefinitionName } from '../../../common/utils';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
+import { assertCanStoreExtractObservables } from '../../common/assert_can_store_extract_observables';
 import {
   CASE_TEMPLATE_SAVED_OBJECT,
   MAX_EXTENDED_FIELD_VALUE_BYTES,
@@ -370,9 +375,11 @@ export class TemplatesService {
       );
     }
 
+    this.assertFieldNamesAreAuthorable(parsedDefinition.fields);
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
     this.assertDefinitionLengthWithinLimit(normalizedDefinition);
+    this.assertExtractObservablesAllowed(input.owner, parsedDefinition);
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -433,9 +440,17 @@ export class TemplatesService {
       );
     }
 
+    this.assertFieldNamesAreAuthorable(
+      parsedDefinition.fields,
+      this.getExistingFieldNames(currentTemplate.attributes.definition)
+    );
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
     this.assertDefinitionLengthWithinLimit(normalizedDefinition);
+    this.assertExtractObservablesAllowed(input.owner, parsedDefinition, {
+      owner: currentTemplate.attributes.owner,
+      definition: currentTemplate.attributes.definition,
+    });
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -532,7 +547,16 @@ export class TemplatesService {
     return [...new Set(authors)].sort();
   }
 
-  async incrementUsageStats(templateId: string): Promise<void> {
+  /**
+   * Adds `caseCount` uses to a template's running tally, defaulting to a single use.
+   *
+   * The tally counts uses, not distinct cases: a case that loses this template and gets it again
+   * adds a second use. It is cumulative and never decreases, so clearing a template from a case, or
+   * deleting the case, leaves it untouched. It is also a read-then-write rather than an atomic
+   * increment, so concurrent callers can overwrite each other. Treat it as an approximate
+   * popularity signal, not an exact count.
+   */
+  async incrementUsageStats(templateId: string, caseCount: number = 1): Promise<void> {
     const template = await this._getTemplate(templateId);
 
     if (!template) {
@@ -545,7 +569,7 @@ export class TemplatesService {
           id: template.id,
           type: CASE_TEMPLATE_SAVED_OBJECT,
           attributes: {
-            usageCount: (template.attributes.usageCount ?? 0) + 1,
+            usageCount: (template.attributes.usageCount ?? 0) + caseCount,
             lastUsedAt: new Date().toISOString(),
           },
         },
@@ -614,18 +638,28 @@ export class TemplatesService {
    * Parses through the zod schema (not a raw `parseYaml` cast) for the same reason `createTemplate`
    * /`updateTemplate` do: field-level defaults must be resolved identically so the default-value
    * size check below sees what the real write would persist. Safe to re-parse here — the route
-   * layer already ran the input through `ParsedTemplateDefinitionSchema` via
-   * `validateTemplateDefinition` before calling into this preflight.
+   * layer already ran the input through `ParsedTemplateDefinitionSchema` (via
+   * `validateTemplateDefinition` for create, `validateTemplateStructure` for update) before
+   * calling into this preflight; the authoring-charset check for update is enforced here, not at
+   * the route, because only this method's caller has the existing template to grandfather names
+   * against (see `existingDefinition`).
    *
    * `excludeTemplateId` is passed for the update preflight (it excludes the template being edited
    * from the uniqueness check); its presence also marks this as an update. `currentOwner` — the
    * template's owner before this write — is passed alongside it so an owner-changing update can be
    * detected. The per-owner count cap is asserted on the target owner whenever this is a create, or
    * an update that changes owner, matching which cap each real write path enforces.
+   *
+   * `existingDefinition` — the update preflight's current stored definition — grandfathers field
+   * names that predate the authoring-charset rule, mirroring `updateTemplate`. Omitted on create.
    */
   async validateWriteInput(
     input: Pick<CreateTemplateInput, 'name' | 'owner' | 'definition'>,
-    { excludeTemplateId, currentOwner }: { excludeTemplateId?: string; currentOwner?: string } = {}
+    {
+      excludeTemplateId,
+      currentOwner,
+      existingDefinition,
+    }: { excludeTemplateId?: string; currentOwner?: string; existingDefinition?: string } = {}
   ): Promise<void> {
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = ParsedTemplateDefinitionSchema.parse(parseYaml(normalizedDefinition));
@@ -638,9 +672,20 @@ export class TemplatesService {
 
     // Keep dry_run faithful to the real write: mirror the same resource-limit assertions each write
     // path runs (including the SO `definition` maxLength, which otherwise only surfaces on apply).
+    this.assertFieldNamesAreAuthorable(
+      parsedDefinition.fields,
+      existingDefinition !== undefined ? this.getExistingFieldNames(existingDefinition) : undefined
+    );
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
     this.assertDefinitionLengthWithinLimit(normalizedDefinition);
+    this.assertExtractObservablesAllowed(
+      input.owner,
+      parsedDefinition,
+      currentOwner !== undefined && existingDefinition !== undefined
+        ? { owner: currentOwner, definition: existingDefinition }
+        : undefined
+    );
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -655,6 +700,44 @@ export class TemplatesService {
   }
 
   /**
+   * Rejects a definition that stores `settings.extractObservables: true` for an owner that cannot
+   * auto-extract observables. Enforced on every write path — create, update, and the `dry_run`
+   * preflight — but never on read. On update, `stored` is the template's current version: a true
+   * that the stored version already holds for the same owner is kept. A change of owner counts as
+   * a new true.
+   */
+  private assertExtractObservablesAllowed(
+    owner: string,
+    parsedDefinition: ParsedTemplate['definition'],
+    stored?: { owner: string; definition: string }
+  ): void {
+    const extractObservables = parsedDefinition.settings?.extractObservables;
+    if (extractObservables !== true) {
+      return;
+    }
+
+    if (stored?.owner === owner && this.getExistingExtractObservables(stored.definition) === true) {
+      return;
+    }
+
+    assertCanStoreExtractObservables({ owner, extractObservables });
+  }
+
+  /**
+   * Best-effort: the `settings.extractObservables` value in a template's currently-stored
+   * `definition`. Falls back to `undefined` if the stored YAML fails to parse against the lenient
+   * schema, which can only make the check MORE restrictive.
+   */
+  private getExistingExtractObservables(definition: string): boolean | undefined {
+    try {
+      return ParsedTemplateDefinitionSchema.parse(parseYaml(definition)).settings
+        ?.extractObservables;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
    * Mirrors the saved-object `definition` maxLength so create/update/`dry_run` reject oversized
    * YAML with an actionable 400 before the SO layer. Measured after `trimFieldDefaults` — the same
    * string that would be persisted.
@@ -664,6 +747,47 @@ export class TemplatesService {
       throw Boom.badRequest(
         `Template definition exceeds the maximum length of ${MAX_TEMPLATE_DEFINITION_LENGTH} characters.`
       );
+    }
+  }
+
+  /**
+   * Rejects field names whose derived `<name>_as_<type>` storage key falls outside the authoring
+   * charset (`AUTHORABLE_SNAKE_KEY`), unless the name is in `grandfatheredNames`. Enforced on
+   * every write path — create, update, and the `dry_run` preflight — but never on read, so a
+   * template stored before this rule still loads. Runs after the lenient
+   * `ParsedTemplateDefinitionSchema` parse so the message names the offending field instead of
+   * surfacing as a generic schema failure.
+   *
+   * `grandfatheredNames` is omitted on create (nothing to grandfather) and set on update to the
+   * names already present in the template's currently-stored definition (see
+   * `getExistingFieldNames`), so editing a template that predates this rule doesn't lock it —
+   * only a genuinely new or renamed invalid name is rejected.
+   */
+  private assertFieldNamesAreAuthorable(
+    fields: ParsedTemplate['definition']['fields'],
+    grandfatheredNames?: ReadonlySet<string>
+  ): void {
+    const result = buildStrictFieldsArraySchema(grandfatheredNames).safeParse(fields);
+    if (!result.success) {
+      throw Boom.badRequest(
+        result.error.issues[0]?.message ?? 'One or more field names are invalid.'
+      );
+    }
+  }
+
+  /**
+   * Best-effort: the field names/aliases already present in a template's currently-stored
+   * `definition`, for grandfathering on update (see `assertFieldNamesAreAuthorable`). Falls back
+   * to an empty set (no grandfathering — fully strict) if the stored YAML fails to parse against
+   * the lenient schema; that can only make the check MORE restrictive, never let a genuinely new
+   * invalid name through unnoticed.
+   */
+  private getExistingFieldNames(definition: string): ReadonlySet<string> {
+    try {
+      const parsed = ParsedTemplateDefinitionSchema.parse(parseYaml(definition));
+      return collectExistingFieldNames(parsed.fields);
+    } catch {
+      return new Set();
     }
   }
 

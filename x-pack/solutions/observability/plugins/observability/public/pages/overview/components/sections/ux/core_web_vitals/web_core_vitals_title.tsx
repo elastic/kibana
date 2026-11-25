@@ -20,6 +20,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+export type CoreVitalsHeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
 const CORE_WEB_VITALS = i18n.translate('xpack.observability.ux.coreWebVitals', {
   defaultMessage: 'Core web vitals',
 });
@@ -39,7 +41,9 @@ export function WebCoreVitalsTitle({
   coreVitalPages,
   totalPageViews = 0,
   displayTrafficMetric,
+  headingLevel: Heading = 'h3',
 }: {
+  headingLevel?: CoreVitalsHeadingLevel;
   loading: boolean;
   coreVitalPages?: number;
   totalPageViews?: number;
@@ -59,7 +63,7 @@ export function WebCoreVitalsTitle({
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h3>{CORE_WEB_VITALS}</h3>
+            <Heading>{CORE_WEB_VITALS}</Heading>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

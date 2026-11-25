@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -18,18 +18,20 @@ import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 
-const schema = z.object({
-  nameContains: z
-    .string()
-    .min(1)
-    .describe(
-      'Optional case-insensitive substring filter on the watchlist name. ' +
-        'Pass this when the user named a watchlist (or part of one) to narrow the result. ' +
-        'e.g. user asks about "the Privileged Users watchlist": first try nameContains: "Privileged Users" (verbatim phrase), ' +
-        'then retry with a shorter distinctive token (e.g. nameContains: "privileged") if no watchlists match.'
-    )
-    .optional(),
-});
+const schema = lazySchema(() =>
+  z.object({
+    nameContains: z
+      .string()
+      .min(1)
+      .describe(
+        'Optional case-insensitive substring filter on the watchlist name. ' +
+          'Pass this when the user named a watchlist (or part of one) to narrow the result. ' +
+          'e.g. user asks about "the Privileged Users watchlist": first try nameContains: "Privileged Users" (verbatim phrase), ' +
+          'then retry with a shorter distinctive token (e.g. nameContains: "privileged") if no watchlists match.'
+      )
+      .optional(),
+  })
+);
 
 export const SECURITY_LIST_WATCHLISTS_TOOL_ID = securityTool('list_watchlists');
 
@@ -61,6 +63,13 @@ Use this tool when the user asks to discover or enumerate watchlists, for exampl
 Do NOT use this tool to find out which watchlists a specific entity belongs to — that information is already available on a single entity's profile via \`security.get_entity\` (\`entity.attributes.watchlists\`).`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'List Watchlists',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

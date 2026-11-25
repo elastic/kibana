@@ -6,12 +6,14 @@
  */
 
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { omitBy } from 'lodash';
 import { isEmpty } from 'lodash/fp';
 import { FieldType } from '../types/types';
-import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
+import type { Config, ConfigEntryView, InferenceEndpoint, InferenceProvider } from '../types/types';
 import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
 import {
+  CHAT_COMPLETION_TASK_TYPE,
   PROVIDER_CONFIG,
   PROVIDER_SECRETS,
   SERVICE_SETTINGS,
@@ -25,8 +27,19 @@ export interface TaskTypeOption {
   label: string;
 }
 
+/** Orders task types so that `chat_completion` is first (and therefore the default) when supported. */
+export const orderTaskTypes = (taskTypes: string[]): string[] => {
+  if (!taskTypes.includes(CHAT_COMPLETION_TASK_TYPE)) {
+    return taskTypes;
+  }
+  return [
+    CHAT_COMPLETION_TASK_TYPE,
+    ...taskTypes.filter((taskType) => taskType !== CHAT_COMPLETION_TASK_TYPE),
+  ];
+};
+
 export const getTaskTypeOptions = (taskTypes: string[]): TaskTypeOption[] =>
-  taskTypes.map((taskType) => ({
+  orderTaskTypes(taskTypes).map((taskType) => ({
     id: taskType,
     label: taskType,
     value: taskType,
@@ -38,6 +51,28 @@ export const generateInferenceEndpointId = (config: Config) => {
     .toString(36)
     .slice(2)}`;
   return inferenceEndpointId;
+};
+
+const isEmptyFieldValue = (value: unknown): boolean =>
+  value === null || value === undefined || value === '';
+
+export const omitEmptyFieldValues = (inferenceEndpoint: InferenceEndpoint): InferenceEndpoint => {
+  const { config, secrets } = inferenceEndpoint;
+  const { providerConfig, taskTypeConfig } = config;
+  const { providerSecrets } = secrets;
+
+  return {
+    ...inferenceEndpoint,
+    config: {
+      ...config,
+      ...(providerConfig && { providerConfig: omitBy(providerConfig, isEmptyFieldValue) }),
+      ...(taskTypeConfig && { taskTypeConfig: omitBy(taskTypeConfig, isEmptyFieldValue) }),
+    },
+    secrets: {
+      ...secrets,
+      ...(providerSecrets && { providerSecrets: omitBy(providerSecrets, isEmptyFieldValue) }),
+    },
+  };
 };
 
 export const getNonEmptyValidator = (

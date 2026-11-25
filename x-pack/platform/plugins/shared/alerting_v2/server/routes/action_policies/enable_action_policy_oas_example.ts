@@ -7,6 +7,7 @@
 
 import type { AlertingOasOperationObject } from '../oas_types';
 import {
+  ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
   INVALID_QUERY_PARAMETERS_RESPONSE,
@@ -21,6 +22,7 @@ export const enableActionPolicyOasExamples = (): AlertingOasOperationObject =>
         enabled: true,
       }),
       400: INVALID_QUERY_PARAMETERS_RESPONSE,
+      403: ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
       404: ACTION_POLICY_NOT_FOUND_RESPONSE,
       409: ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
     },

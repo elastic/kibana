@@ -15,7 +15,7 @@ import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, getByLabelText, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { DashboardState } from '../../../common';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import {
   DashboardContext,
   useDashboardApi as mockUseDashboardApi,
@@ -36,7 +36,7 @@ jest.mock('uuid', () => ({
 
 jest.mock('./dashboard_grid_item', () => {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     DashboardGridItem: require('react').forwardRef(
       (props: DashboardGridItemProps, ref: HTMLDivElement) => {
         const dashboardApi = mockUseDashboardApi();

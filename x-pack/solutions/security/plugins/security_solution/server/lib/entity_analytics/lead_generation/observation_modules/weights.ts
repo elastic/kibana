@@ -11,16 +11,17 @@
  * The engine multiplies each observation's `score * confidence` by its module
  * weight when ranking entities (see `lead_generation_engine.ts`). Keeping every
  * weight in one place makes the relative influence of each signal explicit and
- * tunable, so alert volume no longer dominates the risk, anomaly, and profile
- * signals that make for prioritizable hunting leads.
+ * tunable, so alert volume no longer dominates the risk, anomaly, relationship,
+ * and attribute signals that make for prioritizable hunting leads.
  *
  * Keys MUST match each module's `MODULE_ID`.
  */
 export const OBSERVATION_MODULE_WEIGHTS = {
   risk_analysis: 0.9,
   anomaly_detection: 0.8,
+  entity_relationships: 0.6,
   temporal_state_analysis: 0.5,
-  entity_profile: 0.5,
+  entity_attributes: 0.4,
   behavioral_analysis: 0.4,
 } as const;
 

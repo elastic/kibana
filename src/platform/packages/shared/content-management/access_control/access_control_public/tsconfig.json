@@ -27,5 +27,6 @@
     "@kbn/security-plugin",
     "@kbn/user-profile-components",
     "@kbn/test-jest-helpers",
+    "@kbn/core-http-browser-mocks",
   ]
 }

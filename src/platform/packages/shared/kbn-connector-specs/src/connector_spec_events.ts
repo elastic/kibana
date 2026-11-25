@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectorEventTopicDefinition } from '@kbn/connector-topics';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
+import type { HandleEventsResult } from './handle_events_result';
+
+export type {
+  EventPayload,
+  HandleEventsHttpResponse,
+  HandleEventsResult,
+} from './handle_events_result';
 
 /**
  * Context passed to ConnectorSpecEvents.handleEvents after hub verification.
  *
- * Signed webhook verification is hub-orchestrated (fail closed before this
- * handler runs).
+ * Ingress auth (ingest token, provider signatures) is hub-orchestrated and
+ * fail-closed before this handler runs.
  */
 export interface ConnectorIngressContext {
   readonly spaceId: string;
@@ -23,24 +31,12 @@ export interface ConnectorIngressContext {
   readonly connectorTypeId: string;
   readonly config: Record<string, unknown>;
   readonly rawBody: unknown;
-}
-
-export interface EventPayload {
-  readonly eventId: string;
-  readonly correlationKey: string;
-  readonly payload: Record<string, unknown>;
-}
-
-/**
- * Result of handleEvents: publish each payload.
- *
- * Before publish, the actions hub must run `validateEmittedEvents` so every
- * emitted `eventId` exists in `definitions` and each `payload` matches the
- * corresponding `eventSchema`.
- */
-export interface HandleEventsResult {
-  type: 'emit';
-  events: EventPayload[];
+  /**
+   * Query parameters other than the ingest token, copied after that token is verified.
+   */
+  readonly query?: Readonly<Record<string, string>>;
+  /** Request headers named in `ConnectorSpecEvents.headers`. */
+  readonly headers?: Readonly<Record<string, string | string[] | undefined>>;
 }
 
 /**
@@ -59,7 +55,28 @@ export interface EventDefinition {
   readonly eventSchema: z.ZodObject;
 }
 
+/** Maps a topic's event id and spoke schema onto a spec event. Title and description stay on the spec. */
+export const toConnectorSpecEvent = (
+  definition: ConnectorEventTopicDefinition,
+  presentation: { readonly title: string; readonly description: string }
+): EventDefinition => ({
+  eventId: definition.name,
+  title: presentation.title,
+  description: presentation.description,
+  eventSchema: definition.eventSchema,
+});
+
+/**
+ * Spoke events contract.
+ *
+ * `handleEvents` returns an HTTP ack, or an emit. An emit may include
+ * `httpResponse` when the vendor must receive that response and the events
+ * must still be scheduled. The hub must run `parseHandleEventsResult`
+ * (and `validateEmittedEvents` on emit).
+ */
 export interface ConnectorSpecEvents {
   readonly definitions: Record<string, EventDefinition>;
+  /** Lowercase request header names the hub forwards to `handleEvents`. Never list credentials. */
+  readonly headers?: readonly string[];
   handleEvents(ctx: ConnectorIngressContext): Promise<HandleEventsResult>;
 }

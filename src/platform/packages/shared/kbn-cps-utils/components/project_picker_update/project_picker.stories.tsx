@@ -7,12 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentProps } from 'react';
+import React, { useCallback, useState, type ComponentProps } from 'react';
 import type { StoryObj, Meta } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { faker } from '@faker-js/faker';
+import type { ProjectRouting } from '@kbn/es-query';
+import type { CPSProject } from '../../types';
 import { ProjectPicker } from './project_picker';
 
-const createProjects = (projectCount: number = 100) => {
+/**
+ * Emulates a well-behaved consumer: every routing reported through `onProjectRoutingChange`
+ * is fed back into `projectRouting`.
+ */
+const RoutingRoundTripProjectPicker = ({
+  projectRouting,
+  onProjectRoutingChange,
+  ...rest
+}: ComponentProps<typeof ProjectPicker>) => {
+  const [projectRoutingString, setProjectRoutingString] =
+    useState<NonNullable<ProjectRouting>>(projectRouting);
+
+  const handleProjectRoutingChange = useCallback(
+    (routing: ProjectRouting) => {
+      setProjectRoutingString(routing!);
+      onProjectRoutingChange(routing);
+    },
+    [onProjectRoutingChange]
+  );
+
+  return (
+    <ProjectPicker
+      {...rest}
+      projectRouting={projectRoutingString}
+      onProjectRoutingChange={handleProjectRoutingChange}
+    />
+  );
+};
+
+const createProjects = (projectCount: number = 100): CPSProject[] => {
   return Array.from({ length: projectCount }, () => {
     const tagKeys = ['configVersion', 'costCenter', 'environment'] as const;
     const tagsValueMap: Record<(typeof tagKeys)[number], string[]> = {
@@ -45,26 +77,65 @@ export default {
   title: 'Project Picker/Picker',
 } satisfies Meta<typeof ProjectPicker>;
 
+const projectPickerStoryProjects = createProjects();
+
 export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> = {
   name: 'ProjectPicker',
-  args: {
-    availableProjects: createProjects(),
+  argTypes: {
+    projectRoutingStrategy: {
+      control: 'select',
+      options: ['dynamic', 'snapshot'],
+    },
   },
-  render: (props) => <ProjectPicker {...props} />,
+  args: {
+    projectRoutingStrategy: 'dynamic',
+    availableProjects: projectPickerStoryProjects,
+    projectRouting: '_alias:origin',
+    onProjectRoutingChange: action('onProjectRoutingChange'),
+    fetchProjectsByRouting: async (routing: ProjectRouting) => {
+      action('fetchProjectsByRouting')(routing);
+
+      return {
+        origin: projectPickerStoryProjects[0],
+        // TODO: attempt to filter from the actual routing value on the client
+        linkedProjects: faker.helpers.arrayElements(projectPickerStoryProjects, {
+          min: 10,
+          max: 50,
+        }),
+      };
+    },
+    originProjectId: projectPickerStoryProjects[0]._id,
+  },
+  render: (props) => <RoutingRoundTripProjectPicker {...props} />,
 };
+
+const projectPickerReadOnlyStoryProjects = createProjects(50);
 
 export const ProjectPickerReadOnlyStory: StoryObj<ComponentProps<typeof ProjectPicker>> = {
   name: 'ProjectPickerReadOnly',
   argTypes: {
-    isReadOnly: {
-      control: {
-        type: 'boolean',
-      },
+    controlsState: {
+      control: 'select',
+      options: ['disabled', 'enabled', 'hidden'],
     },
   },
   args: {
-    isReadOnly: true,
-    availableProjects: createProjects(100),
+    controlsState: 'disabled',
+    availableProjects: projectPickerReadOnlyStoryProjects,
+    projectRouting: '_alias:origin',
+    onProjectRoutingChange: action('onProjectRoutingChange'),
+    fetchProjectsByRouting: async (routing: ProjectRouting) => {
+      action('fetchProjectsByRouting')(routing);
+
+      return {
+        origin: projectPickerReadOnlyStoryProjects[0],
+        linkedProjects: faker.helpers.arrayElements(projectPickerReadOnlyStoryProjects, {
+          min: 5,
+          max: 35,
+        }),
+      };
+    },
+    originProjectId: projectPickerReadOnlyStoryProjects[0]._id,
   },
-  render: (props) => <ProjectPicker {...props} />,
+  render: (props) => <RoutingRoundTripProjectPicker {...props} />,
 };

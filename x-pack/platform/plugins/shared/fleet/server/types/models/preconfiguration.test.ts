@@ -27,7 +27,7 @@ describe('Test preconfiguration schema', () => {
             hosts: ['http://test.fr:9200'],
           },
         ]);
-      }).toThrowError('preconfigured outputs can only have one default output.');
+      }).toThrow('preconfigured outputs can only have one default output.');
     });
 
     it('should not allow multiple default monitoring output', () => {
@@ -48,7 +48,7 @@ describe('Test preconfiguration schema', () => {
             hosts: ['http://test.fr:9200'],
           },
         ]);
-      }).toThrowError('preconfigured outputs can only have one default monitoring output.');
+      }).toThrow('preconfigured outputs can only have one default monitoring output.');
     });
 
     it('should not allow multiple output with same ids', () => {
@@ -67,7 +67,7 @@ describe('Test preconfiguration schema', () => {
             hosts: ['http://test.fr:9200'],
           },
         ]);
-      }).toThrowError('preconfigured outputs need to have unique ids.');
+      }).toThrow('preconfigured outputs need to have unique ids.');
     });
 
     it('should not allow multiple output with same names', () => {
@@ -86,7 +86,7 @@ describe('Test preconfiguration schema', () => {
             hosts: ['http://test.fr:9200'],
           },
         ]);
-      }).toThrowError('preconfigured outputs need to have unique names.');
+      }).toThrow('preconfigured outputs need to have unique names.');
     });
 
     it('should allow logstash type outputs', () => {
@@ -107,7 +107,7 @@ describe('Test preconfiguration schema', () => {
             },
           },
         ]);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
 
     it('should allow kafka type outputs', () => {
@@ -128,7 +128,7 @@ describe('Test preconfiguration schema', () => {
             },
           },
         ]);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
 
     it('should allow remote elasticsearch type outputs', () => {
@@ -144,11 +144,48 @@ describe('Test preconfiguration schema', () => {
             },
           },
         ]);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
 
   describe('PreconfiguredAgentPoliciesSchema', () => {
+    // Rejecting them would fail kibana.yml validation and stop Kibana from starting after an
+    // upgrade. They are stripped when the full agent policy is built instead.
+    it('should not reject OTel collector keys in overrides', () => {
+      expect(() => {
+        PreconfiguredAgentPoliciesSchema.validate([
+          {
+            id: 'policy-1',
+            name: 'Policy 1',
+            overrides: { 'extensions.pprof.save_to_file': '/tmp/x', receivers: { otlp: {} } },
+          },
+        ]);
+      }).not.toThrow();
+    });
+
+    it('should keep rejecting inputs overrides', () => {
+      expect(() => {
+        PreconfiguredAgentPoliciesSchema.validate([
+          { id: 'policy-1', name: 'Policy 1', overrides: { 'inputs.foo': 'bar' } },
+        ]);
+      }).toThrow('inputs overrides is not allowed');
+    });
+
+    it('should still allow outputs and agent overrides', () => {
+      expect(() => {
+        PreconfiguredAgentPoliciesSchema.validate([
+          {
+            id: 'policy-1',
+            name: 'Policy 1',
+            overrides: {
+              outputs: { default: { hosts: ['https://es:9200'] } },
+              'agent.logging.level': 'debug',
+            },
+          },
+        ]);
+      }).not.toThrow();
+    });
+
     it('should allow basic agent policy only with id and name', () => {
       expect(() => {
         PreconfiguredAgentPoliciesSchema.validate([
@@ -157,7 +194,7 @@ describe('Test preconfiguration schema', () => {
             name: 'test agent policy',
           },
         ]);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
 });

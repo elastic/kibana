@@ -13,7 +13,7 @@ import type {
 } from '../../api_schemas/start_transforms';
 import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
-import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
+import { isRequestTimeout, fillResultsWithTimeouts, getErrorBody } from '../../utils/error_utils';
 
 export async function startTransforms(
   transformsInfo: StartTransformsRequestSchema,
@@ -37,7 +37,7 @@ export async function startTransforms(
           action: TRANSFORM_ACTIONS.START,
         });
       }
-      results[transformId] = { success: false, error: e.meta.body.error };
+      results[transformId] = { success: false, error: getErrorBody(e) };
     }
   }
   return results;

@@ -28,6 +28,36 @@ viewport breakpoint using the previous viewport mapping: `xs` and `s` collapse, 
 the medium layout, and `xl` shows the full menu. Menus that should preserve viewport-based behavior,
 such as the Classic and legacy Project Chrome headers, set `breakpointSource="viewport"`.
 
+## Loading skeleton
+
+`AppMenuLoading` skeletons the same responsive layouts. Mount it in the same slot as
+`AppMenuComponent` while the menu config is not ready. It defaults to one overflow-style
+placeholder plus a primary-action rectangle; `buttonCount` is clamped to `APP_MENU_ITEM_LIMIT`.
+
+```tsx
+<AppMenuLoading />
+<AppMenuLoading buttonCount={2} hasPrimary={false} />
+```
+
+Collapsed breakpoints show only the overflow placeholder (the primary action lives inside that
+menu). Minimal shows primary + overflow. Expanded shows `buttonCount - 1` icon placeholders, then
+primary, then overflow.
+
+## Strict props
+
+The public types are the contract. A type assertion can still pass a React node as a `label`, or
+extra keys that get spread into EUI, and the menu paints custom UI.
+
+The renderer only uses declared fields, and only as real strings. A non-string becomes empty (or is
+omitted if optional); leftover keys are dropped. In development this logs a one-time `console.warn`.
+Do not pass `FormattedMessage` or other nodes.
+
 ## Compatibility
 
 `@kbn/core-chrome-app-menu-components` re-exports this package for existing consumers.
+
+## Standalone package
+
+This package is also built as a standalone npm package for applications outside Kibana (e.g. Cloud UI, design prototypes), so they can use the real app menu instead of re-creating it. The publish pipeline builds and publishes it to the internal Artifactory registry on merge to `main` whenever this package changes.
+
+See [packaging/README.md](./packaging/README.md) for how it is built, its peer dependencies, and how to use it.

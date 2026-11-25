@@ -8,11 +8,10 @@
  */
 
 import type { Filter, TimeRange } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { IEsqlSearchOptions, IEsqlSearchParams, ISearchMethods } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { getESQLResults } from '@kbn/esql-utils';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
@@ -28,9 +27,10 @@ import { getMetricsExecutionContext } from './execution_context';
 
 export interface ExecuteEsqlParams {
   esqlQuery: string;
-  search: ISearchGeneric;
+  search: Pick<ISearchMethods, 'esql'>;
+  sessionId?: string;
   signal?: AbortSignal;
-  dataView: DataView;
+  timeFieldName?: string;
   timeRange?: TimeRange;
   filters?: Filter[];
   variables?: ESQLControlVariable[];
@@ -41,24 +41,18 @@ export interface ExecuteEsqlParams {
    * error telemetry filterable by the same profile.
    */
   profileId: string;
+  /** Names the request in the APM `page` label. Defaults to the metrics info fetch. */
+  executionContextName?: MetricsExecutionContextName;
+  /**
+   * When provided, `search.esql` logs the request it actually sends (including the resolved
+   * project routing) and its response to this Inspector adapter.
+   */
+  inspector?: IEsqlSearchOptions['inspector'];
 }
-
-export const fetchEsqlResponseOrThrow = async (
-  params: Parameters<typeof getESQLResults>[0]
-): Promise<Awaited<ReturnType<typeof getESQLResults>>> => {
-  const result = await getESQLResults(params);
-  const embedded = extractEsqlEmbeddedError(result.response as object);
-  if (embedded) {
-    throw new EsqlResponseError(embedded.cause, { status: embedded.status });
-  }
-
-  return result;
-};
 
 export interface ExecuteEsqlResult<TDocument> {
   documents: TDocument[];
-  rawResponse: object;
-  requestParams: { query: string; filter?: object };
+  rawResponse: ESQLSearchResponse;
 }
 
 /**
@@ -68,18 +62,21 @@ export interface ExecuteEsqlResult<TDocument> {
 export async function executeEsqlQuery<TDocument extends object = Record<string, unknown>>({
   esqlQuery,
   search,
+  sessionId,
   signal,
-  dataView,
+  timeFieldName,
   timeRange,
   filters = [],
   variables,
   uiSettings,
   profileId,
+  executionContextName = MetricsExecutionContextName.METRICS_INFO,
+  inspector,
 }: ExecuteEsqlParams): Promise<ExecuteEsqlResult<TDocument>> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
-    timeRange && dataView?.timeFieldName
-      ? getTime(dataView, timeRange, { fieldName: dataView.timeFieldName })
+    timeRange && timeFieldName
+      ? getTime(undefined, timeRange, { fieldName: timeFieldName })
       : undefined;
   const filtersWithTime = [...(timeFilter ? [timeFilter] : []), ...filters];
   const filter =
@@ -87,23 +84,28 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
       ? buildEsQuery(undefined, [], filtersWithTime, esQueryConfig)
       : undefined;
 
-  const { response, params } = await fetchEsqlResponseOrThrow({
-    esqlQuery,
-    search,
-    signal,
-    filter,
-    timeRange,
-    variables,
-    ...getMetricsExecutionContext(
-      MetricsExecutionContextAction.FETCH,
-      MetricsExecutionContextName.METRICS_INFO,
-      { profile_id: profileId }
-    ),
-  });
+  const { rawResponse } = await search.esql(
+    {
+      query: esqlQuery,
+      filter: filter as IEsqlSearchParams['filter'],
+      kibanaQueryContext: { timeRange, esqlVariables: variables },
+    },
+    {
+      abortSignal: signal,
+      sessionId,
+      inspector,
+      ...getMetricsExecutionContext(MetricsExecutionContextAction.FETCH, executionContextName, {
+        profile_id: profileId,
+      }),
+    }
+  );
+  const embedded = extractEsqlEmbeddedError(rawResponse);
+  if (embedded) {
+    throw new EsqlResponseError(embedded.cause, { status: embedded.status });
+  }
 
   return {
-    documents: esqlResultToPlainObjects<TDocument>(response),
-    rawResponse: { ...response, requestParams: params },
-    requestParams: { query: esqlQuery, ...(filter ? { filter } : {}) },
+    documents: esqlResultToPlainObjects<TDocument>(rawResponse),
+    rawResponse,
   };
 }

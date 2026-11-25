@@ -33,13 +33,8 @@ import type {
 } from '@kbn/ai-assistant-management-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { RootCauseAnalysisContainer } from './components/rca/rca_container';
-
-export interface ObservabilityAIAssistantAppPublicStart {
-  RootCauseAnalysisContainer: React.ExoticComponent<
-    React.ComponentProps<typeof RootCauseAnalysisContainer>
-  >;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ObservabilityAIAssistantAppPublicStart {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppPublicSetup {}
 

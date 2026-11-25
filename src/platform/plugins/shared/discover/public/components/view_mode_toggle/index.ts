@@ -8,3 +8,4 @@
  */
 
 export { DocumentViewModeToggle } from './view_mode_toggle';
+export type { RenderViewModeToggle, RenderViewModeToggleOptions } from './view_mode_toggle';

@@ -19,6 +19,8 @@ import {
   GetLatestOutputHealthRequestSchema,
   GetLatestOutputHealthResponseSchema,
   GetOneOutputRequestSchema,
+  GetOutputAgentPolicyCountRequestSchema,
+  GetOutputAgentPolicyCountResponseSchema,
   GetOutputsRequestSchema,
   GetOutputsResponseSchema,
   OutputResponseSchema,
@@ -36,6 +38,7 @@ import {
   putOutputHandler,
   postLogstashApiKeyHandler,
   getLatestOutputHealth,
+  getOutputAgentPolicyCountHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -130,14 +133,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
       security: {
         authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: [
-                FLEET_API_PRIVILEGES.SETTINGS.ALL,
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
-              ],
-            },
-          ],
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
         },
       },
       summary: 'Update output',
@@ -319,5 +315,45 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       getLatestOutputHealth
+    );
+
+  router.versioned
+    .get({
+      path: OUTPUT_API_ROUTES.GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.SETTINGS.READ,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+            FLEET_API_PRIVILEGES.AGENTS.READ,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+          ],
+        },
+      },
+      summary: 'Get output agent and policy count',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetOutputAgentPolicyCountRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetOutputAgentPolicyCountResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            404: {
+              description: 'Not found.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getOutputAgentPolicyCountHandler
     );
 };

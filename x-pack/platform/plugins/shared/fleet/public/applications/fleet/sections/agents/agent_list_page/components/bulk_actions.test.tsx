@@ -13,6 +13,10 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { LicenseService } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
 import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
+import {
+  AgentForceUnenrollModal,
+  AgentUnenrollAgentModal,
+} from '../../components/agent_unenroll_modal';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useLicense } from '../../../../../../hooks/use_license';
 import { useStartServices } from '../../../../../../hooks/use_core';
@@ -24,6 +28,11 @@ jest.mock('../../../../../../hooks/use_license');
 jest.mock('../../../../../../hooks/use_authz');
 jest.mock('../../../../../../hooks/use_core');
 jest.mock('../../components/agent_reassign_policy_modal');
+jest.mock('../../components/agent_unenroll_modal', () => ({
+  ...jest.requireActual('../../components/agent_unenroll_modal'),
+  AgentForceUnenrollModal: jest.fn().mockReturnValue(null),
+  AgentUnenrollAgentModal: jest.fn().mockReturnValue(null),
+}));
 jest.mock('../hooks/export_csv', () => ({
   useExportCSV: jest.fn().mockReturnValue({
     generateReportingJobCSV: jest.fn(),
@@ -46,6 +55,7 @@ const defaultProps = {
   agentPolicies: [],
   unsupportedMigrateAgents: [],
   unsupportedPrivilegeLevelChangeAgents: [],
+  selectionHasFleetServer: false,
 };
 
 /**
@@ -86,6 +96,9 @@ describe('AgentBulkActions', () => {
         isServerlessEnabled,
       },
       reporting: {},
+      featureFlags: {
+        useBooleanValue: jest.fn().mockReturnValue(true),
+      },
     });
   };
 
@@ -191,6 +204,24 @@ describe('AgentBulkActions', () => {
         results.getByText('Request diagnostics for 2 agents').closest('button')!
       ).toBeEnabled();
       expect(results.getByText('Migrate 2 agents').closest('button')!).toBeEnabled();
+    });
+
+    it('should show restart agents item as top-level action', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      expect(results.getByText('Restart 2 agents').closest('button')!).toBeEnabled();
     });
 
     it('should show security and removal submenu items', async () => {
@@ -318,6 +349,71 @@ describe('AgentBulkActions', () => {
       expect(results.queryByText('Upgrade management')).toBeNull();
       expect(results.queryByText('Maintenance and diagnostics')).toBeNull();
       expect(results.queryByText('Security and removal')).toBeNull();
+    });
+  });
+
+  describe('Unenroll', () => {
+    it.each([true, false])(
+      'should pass selectionHasFleetServer=%s to the unenroll modal',
+      async (selectionHasFleetServer) => {
+        jest.mocked(AgentUnenrollAgentModal).mockClear();
+        const results = render({
+          ...defaultProps,
+          selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+          selectionHasFleetServer,
+        });
+        await act(async () => {
+          fireEvent.click(results.getByTestId('agentBulkActionsButton'));
+        });
+        await navigateToSubmenu(results, 'Security and removal');
+        await act(async () => {
+          fireEvent.click(results.getByTestId('agentBulkActionsUnenroll'));
+        });
+
+        expect(jest.mocked(AgentUnenrollAgentModal)).toHaveBeenCalledWith(
+          expect.objectContaining({ hasFleetServer: selectionHasFleetServer }),
+          expect.anything()
+        );
+      }
+    );
+  });
+
+  describe('Force unenroll', () => {
+    const openForceUnenrollModal = async (props: any) => {
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+        ...props,
+      });
+      await act(async () => {
+        fireEvent.click(results.getByTestId('agentBulkActionsButton'));
+      });
+      await navigateToSubmenu(results, 'Security and removal');
+      await act(async () => {
+        fireEvent.click(results.getByTestId('agentBulkActionsForceUnenroll'));
+      });
+    };
+
+    beforeEach(() => {
+      jest.mocked(AgentForceUnenrollModal).mockClear();
+    });
+
+    it('should warn about Fleet Server when the selection includes it', async () => {
+      await openForceUnenrollModal({ selectionHasFleetServer: true });
+
+      expect(jest.mocked(AgentForceUnenrollModal)).toHaveBeenCalledWith(
+        expect.objectContaining({ hasFleetServer: true }),
+        expect.anything()
+      );
+    });
+
+    it('should not warn about Fleet Server when the selection does not include it', async () => {
+      await openForceUnenrollModal({ selectionHasFleetServer: false });
+
+      expect(jest.mocked(AgentForceUnenrollModal)).toHaveBeenCalledWith(
+        expect.objectContaining({ hasFleetServer: false }),
+        expect.anything()
+      );
     });
   });
 

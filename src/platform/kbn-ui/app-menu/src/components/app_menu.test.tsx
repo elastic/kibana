@@ -17,7 +17,7 @@ import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 let mockCurrentBreakpoint: EuiBreakpointSize | undefined = 'xl';
 let mockViewportBreakpoint: EuiBreakpointSize = 'xl';
 
-jest.mock('@kbn/ui-chrome-layout-utils', () => ({
+jest.mock('@kbn/ui-chrome-layout', () => ({
   useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
 }));
 
@@ -77,6 +77,27 @@ describe('AppMenu', () => {
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
     });
+
+    it('does not render a React node passed as an item label', () => {
+      render(
+        <AppMenuComponent
+          config={{
+            items: [
+              {
+                id: 'hack',
+                label: <span data-test-subj="hacked-menu-label">hack</span>,
+                run: jest.fn(),
+                iconType: 'gear',
+              } as unknown as AppMenuItemType,
+              { id: 'ok', label: 'Settings', run: jest.fn(), iconType: 'gear' },
+            ],
+          }}
+        />
+      );
+
+      expect(screen.queryByTestId('hacked-menu-label')).not.toBeInTheDocument();
+      expect(screen.getByText('Settings')).toBeInTheDocument();
+    });
   });
 
   describe('action items', () => {
@@ -93,6 +114,47 @@ describe('AppMenu', () => {
       render(<AppMenuComponent config={configWithPrimary} />);
 
       expect(screen.getByText('Save')).toBeInTheDocument();
+    });
+
+    it('should render the overflow button after the primary action item', () => {
+      const configWithPrimaryAndOverflow: AppMenuConfig = {
+        items: [
+          ...defaultItems,
+          {
+            id: 'item3',
+            label: 'Item 3',
+            run: jest.fn(),
+            iconType: 'copy',
+            order: 3,
+            overflow: true,
+          },
+        ],
+        primaryActionItem: {
+          id: 'save',
+          label: 'Save',
+          run: jest.fn(),
+          iconType: 'save',
+        },
+      };
+
+      for (const breakpoint of ['s', 'xl'] as const) {
+        mockCurrentBreakpoint = breakpoint;
+
+        const { unmount } = render(<AppMenuComponent config={configWithPrimaryAndOverflow} />);
+
+        const elements = Array.from(
+          screen.getByTestId(APP_MENU_TEST_SUBJECTS.root).querySelectorAll('*')
+        );
+        const primaryActionIndex = elements.indexOf(screen.getByText('Save'));
+        const overflowButtonIndex = elements.indexOf(
+          screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)
+        );
+
+        expect(primaryActionIndex).toBeGreaterThan(-1);
+        expect(overflowButtonIndex).toBeGreaterThan(primaryActionIndex);
+
+        unmount();
+      }
     });
   });
 

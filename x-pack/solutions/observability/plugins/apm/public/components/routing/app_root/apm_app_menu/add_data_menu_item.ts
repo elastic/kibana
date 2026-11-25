@@ -25,7 +25,7 @@ export function getAddDataMenuItem({
   return {
     id: 'addData',
     label: addDataLabel,
-    iconType: 'plusInCircle',
+    iconType: 'plusCircle',
     href,
     ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.ADD_DATA),
     testId: 'apmAddDataHeaderLink',

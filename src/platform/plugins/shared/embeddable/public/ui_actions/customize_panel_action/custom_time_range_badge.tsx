@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PrettyDuration } from '@elastic/eui';
+import { EuiBadge, usePrettyDuration } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
 import type {
   Action,
   ActionExecutionMeta,
@@ -23,6 +24,32 @@ import { map } from 'rxjs';
 import { ACTION_CUSTOMIZE_PANEL, CUSTOM_TIME_RANGE_BADGE } from './constants';
 import { core, uiActions } from '../../kibana_services';
 
+const CustomTimeRangeBadgeContent = ({
+  timeRange,
+  onClick,
+  dataTestSubj,
+}: {
+  timeRange: TimeRange;
+  onClick: () => void;
+  dataTestSubj?: string;
+}) => {
+  const prettyDuration = usePrettyDuration({
+    timeFrom: timeRange.from,
+    timeTo: timeRange.to,
+    dateFormat: core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT) ?? 'Browser',
+  });
+  return (
+    <EuiBadge
+      iconType="calendar"
+      onClick={onClick}
+      onClickAriaLabel={prettyDuration}
+      data-test-subj={dataTestSubj}
+    >
+      {prettyDuration}
+    </EuiBadge>
+  );
+};
+
 export class CustomTimeRangeBadge
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
 {
@@ -32,14 +59,17 @@ export class CustomTimeRangeBadge
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
-    /**
-     * WARNING!! We would not normally return an empty string here - but in order for i18n to be
-     * handled properly by the `PrettyDuration` component, we need it to handle the aria label.
-     */
+    // The localized label is rendered by `MenuItem` via `usePrettyDuration`.
     return '';
   }
 
-  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
+  public readonly MenuItem = ({
+    context,
+    dataTestSubj,
+  }: {
+    context: EmbeddableApiContext;
+    dataTestSubj?: string;
+  }) => {
     const { embeddable } = context;
     if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
 
@@ -48,10 +78,10 @@ export class CustomTimeRangeBadge
       throw new IncompatibleActionError();
     }
     return (
-      <PrettyDuration
-        timeTo={timeRange.to}
-        timeFrom={timeRange.from}
-        dateFormat={core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT) ?? 'Browser'}
+      <CustomTimeRangeBadgeContent
+        timeRange={timeRange}
+        onClick={() => this.execute(context as Parameters<typeof this.execute>[0])}
+        dataTestSubj={dataTestSubj}
       />
     );
   };

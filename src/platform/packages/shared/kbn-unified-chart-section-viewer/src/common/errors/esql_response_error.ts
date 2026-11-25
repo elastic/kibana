@@ -74,6 +74,7 @@ export class EsqlResponseError extends Error {
   public readonly type?: string;
   public readonly reason?: string;
   public readonly rootCause?: EsqlResponseErrorCause[];
+  public readonly causedBy?: EsqlResponseErrorCause;
   public readonly status?: number;
 
   constructor(errorCause: EsqlResponseErrorCause, options?: { status?: number }) {
@@ -82,6 +83,7 @@ export class EsqlResponseError extends Error {
     this.type = errorCause.type;
     this.reason = errorCause.reason ?? undefined;
     this.rootCause = errorCause.root_cause;
+    this.causedBy = errorCause.caused_by;
     this.status = options?.status;
 
     // Set the prototype explicitly, see:

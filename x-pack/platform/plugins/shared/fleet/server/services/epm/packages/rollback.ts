@@ -25,8 +25,8 @@ import {
 } from '../../../../common';
 import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../../common/constants/agent_policy';
 import {
-  buildVersionVariantsKueryFragment,
-  buildVersionVariantsEsFilter,
+  buildAgentVersionVariantsKueryFragment,
+  buildAgentVersionVariantsEsFilter,
 } from '../../../../common/services/version_specific_policies_utils';
 import type { RollbackResult } from '../../package_policy_service';
 import { getAgentsByKuery, reassignAgents } from '../../agents';
@@ -560,7 +560,7 @@ async function cleanupVersionSpecificPoliciesAfterRollback(
     );
     if (stillHasVersionConditions) continue;
 
-    const variantKuery = buildVersionVariantsKueryFragment(parentId);
+    const variantKuery = buildAgentVersionVariantsKueryFragment(parentId);
     const { total: variantAgentCount } = await getAgentsByKuery(esClient, soClient, {
       kuery: variantKuery,
       showInactive: false,
@@ -596,7 +596,7 @@ async function cleanupVersionSpecificPoliciesAfterRollback(
       await esClient.deleteByQuery({
         index: AGENT_POLICY_INDEX,
         ignore_unavailable: true,
-        query: buildVersionVariantsEsFilter(parentId),
+        query: buildAgentVersionVariantsEsFilter(parentId),
         refresh: true,
       });
     }

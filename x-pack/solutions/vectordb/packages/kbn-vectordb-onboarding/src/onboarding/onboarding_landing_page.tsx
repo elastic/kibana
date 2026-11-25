@@ -10,6 +10,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPageTemplate,
@@ -24,6 +25,7 @@ import { markOnboardingSeen } from '../first_load';
 import { ConnectToProject } from '../connection_details/connect_to_project';
 import { useOnboardingCredentials } from '../hooks/use_onboarding_credentials';
 import { OnboardingPaths } from './components/onboarding_paths';
+import { OnboardingOptions } from './components/onboarding_options';
 import { useKibana } from '../services';
 
 export const OnboardingLandingPage = () => {
@@ -31,7 +33,8 @@ export const OnboardingLandingPage = () => {
   const { euiTheme } = useEuiTheme();
   const { elasticsearchUrl, apiKey, isLoading } = useOnboardingCredentials();
   const { services } = useKibana();
-  const vectorDatabaseDocsUrl = services.docLinks.links.enterpriseSearch.vectorDatabaseGetStarted;
+  const vectorDatabaseDocsUrl =
+    services.docLinks.links.enterpriseSearch.vectorDatabaseFullTextSearch;
 
   useEffect(() => {
     markOnboardingSeen();
@@ -65,7 +68,6 @@ export const OnboardingLandingPage = () => {
                 elasticsearchUrl={elasticsearchUrl}
                 apiKey={apiKey}
                 isLoading={isLoading}
-                telemetryPage="pathSelection"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -73,6 +75,11 @@ export const OnboardingLandingPage = () => {
           <EuiFlexItem>
             <OnboardingPaths />
           </EuiFlexItem>
+          <EuiSpacer size="m" />
+          <EuiFlexItem>
+            <OnboardingOptions elasticsearchUrl={elasticsearchUrl} />
+          </EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
 
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -84,7 +91,7 @@ export const OnboardingLandingPage = () => {
                 data-telemetry-id="vectordbOnboarding-pathSelection-documentation"
               >
                 {i18n.translate('vectordbOnboarding.pathSelection.documentation', {
-                  defaultMessage: 'Vector Database documentation',
+                  defaultMessage: 'Learn more about Elasticsearch Vector Database',
                 })}
               </EuiLink>
             </EuiFlexItem>

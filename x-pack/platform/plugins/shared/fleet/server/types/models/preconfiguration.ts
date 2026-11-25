@@ -188,6 +188,9 @@ export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
 );
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
+  // `overrides` keeps the permissive base validation on purpose: this schema validates kibana.yml at
+  // startup, so rejecting the OpenTelemetry collector keys here would stop Kibana from starting
+  // after an upgrade. Those keys are stripped, with a warning, when the full agent policy is built.
   AgentPolicySchemaV3.extends({
     space_id: schema.maybe(schema.string()),
     namespace: schema.maybe(AgentPolicyNamespaceSchema),
@@ -254,6 +257,25 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     defaultValue: [],
     maxSize: 1000,
   }
+);
+
+export const PreconfiguredDownloadSourcesSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    host: schema.string(),
+    is_default: schema.boolean({ defaultValue: false }),
+    proxy_id: schema.maybe(schema.nullable(schema.string())),
+    reserve_diskspace: schema.maybe(schema.boolean()),
+    ssl: schema.maybe(
+      schema.object({
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+        certificate: schema.maybe(schema.string()),
+        key: schema.maybe(schema.string()),
+      })
+    ),
+  }),
+  { defaultValue: [], maxSize: 100 }
 );
 
 export const PreconfiguredSpaceSettingsSchema = schema.arrayOf(

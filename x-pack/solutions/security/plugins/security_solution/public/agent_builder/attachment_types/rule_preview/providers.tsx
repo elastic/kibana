@@ -9,18 +9,17 @@ import React, { useEffect, useState } from 'react';
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useDarkMode } from '@kbn/kibana-react-plugin/public';
-import { useSelector } from 'react-redux-v7';
-import type { SecurityAppStore, State } from '../../../common/store/types';
+import type { SecurityAppStore } from '../../../common/store/types';
 import type { StartServices } from '../../../types';
 import { useInitDataViewManager } from '../../../data_view_manager/hooks/use_init_data_view_manager';
+import { useDataViewManagerStatus } from '../../../data_view_manager/hooks/use_data_view_manager_status';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
-import { SecuritySolutionFlyout } from '../../../flyout';
 import { RulePreviewAttachmentErrorCallout } from './error_callout';
 import type { RulePreviewAttachmentServices } from './types';
 
 export const RulePreviewAttachmentDataViewBootstrap = () => {
   const initDataViewManager = useInitDataViewManager();
-  const sharedStatus = useSelector((state: State) => state.dataViewManager.shared.status);
+  const sharedStatus = useDataViewManagerStatus();
 
   useEffect(() => {
     if (sharedStatus === 'pristine' || sharedStatus === 'error') {
@@ -83,11 +82,6 @@ export const RulePreviewAttachmentSecurityProviders: React.FC<
   return flyoutProviders({
     services: securityContext.services,
     store: securityContext.store,
-    children: (
-      <RulePreviewAttachmentThemeProvider>
-        {children}
-        <SecuritySolutionFlyout />
-      </RulePreviewAttachmentThemeProvider>
-    ),
+    children: <RulePreviewAttachmentThemeProvider>{children}</RulePreviewAttachmentThemeProvider>,
   });
 };

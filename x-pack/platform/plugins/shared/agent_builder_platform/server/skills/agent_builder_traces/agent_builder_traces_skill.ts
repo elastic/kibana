@@ -51,7 +51,7 @@ messages** — for example:
 
 Do **not** use this skill when:
 - The user wants to query their *own* data indices (use the general data-exploration tools).
-- The user wants to build or modify a dashboard (use the dashboard-management skill).
+- The user wants to build or modify a dashboard (use the dashboards skill).
 
 ## Data Source
 

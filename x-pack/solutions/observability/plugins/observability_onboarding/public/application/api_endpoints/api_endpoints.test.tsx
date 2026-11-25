@@ -76,14 +76,17 @@ describe('ApiEndpoints', () => {
       popoverEndpoints: [],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
     mockUseApiKeys.mockReturnValue({
       encodedApiKeys: {},
+      apiKeyIds: {},
       keyCreatedBeforeByEndpointId: {},
       createApiKey: jest.fn(),
     });
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: { useBooleanValue: jest.fn().mockReturnValue(false) },
         application: {
           capabilities: {
             api_keys: {
@@ -109,6 +112,26 @@ describe('ApiEndpoints', () => {
     } as unknown as ReturnType<typeof useKibana>);
   });
 
+  it('renders the section title as an h3 by default, for the V1 page', () => {
+    renderApiEndpoints();
+
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Connect directly to the endpoint' })
+    ).toBeInTheDocument();
+  });
+
+  it('renders the section title as an h2 when titleTag="h2" is passed, for the V2 page', () => {
+    render(
+      <I18nProvider>
+        <ApiEndpoints titleTag="h2" />
+      </I18nProvider>
+    );
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Connect directly to the endpoint' })
+    ).toBeInTheDocument();
+  });
+
   it('describes managed inputs and links to managed inputs documentation', () => {
     const { container } = renderApiEndpoints();
     const learnMoreLink = container.querySelector(
@@ -119,6 +142,64 @@ describe('ApiEndpoints', () => {
       screen.getByText(/Send data to your deployment's managed inputs, using an API key./)
     ).toBeInTheDocument();
     expect(learnMoreLink).toHaveAttribute('href', 'https://ela.st/managed-inputs');
+  });
+
+  it('explains missing privileges instead of asking for a refresh when the request is forbidden', () => {
+    mockUseApiEndpoints.mockReturnValue({
+      endpoints: [
+        {
+          id: ApiEndpointId.Elasticsearch,
+          label: 'Elasticsearch',
+          euiIconType: 'logoElasticsearch',
+          usesManagedInput: false,
+          additionalEndpoints: [],
+        },
+      ],
+      popoverEndpoints: [],
+      isLoading: false,
+      isError: false,
+      isForbidden: true,
+    });
+
+    renderApiEndpoints();
+
+    expect(
+      screen.getByText(
+        "You don't have permission to view endpoint details. Contact your administrator."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Could not load endpoint details. Refresh the page to try again.')
+    ).not.toBeInTheDocument();
+  });
+
+  it('asks for a refresh when loading endpoint details fails for another reason', () => {
+    mockUseApiEndpoints.mockReturnValue({
+      endpoints: [
+        {
+          id: ApiEndpointId.Elasticsearch,
+          label: 'Elasticsearch',
+          euiIconType: 'logoElasticsearch',
+          usesManagedInput: false,
+          additionalEndpoints: [],
+        },
+      ],
+      popoverEndpoints: [],
+      isLoading: false,
+      isError: true,
+      isForbidden: false,
+    });
+
+    renderApiEndpoints();
+
+    expect(
+      screen.getByText('Could not load endpoint details. Refresh the page to try again.')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "You don't have permission to view endpoint details. Contact your administrator."
+      )
+    ).not.toBeInTheDocument();
   });
 
   it('describes direct endpoints when managed OTLP is unavailable', () => {
@@ -136,6 +217,7 @@ describe('ApiEndpoints', () => {
       popoverEndpoints: [],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
 
     const { container } = renderApiEndpoints();
@@ -172,6 +254,7 @@ describe('ApiEndpoints', () => {
       popoverEndpoints: [],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
 
     const { container } = renderApiEndpoints();
@@ -213,6 +296,7 @@ describe('ApiEndpoints', () => {
       popoverEndpoints: [],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
 
     renderApiEndpoints();
@@ -261,7 +345,7 @@ describe('ApiEndpoints', () => {
           id: ApiEndpointId.Prometheus,
           label: 'Prometheus',
           logo: 'prometheus',
-          url: 'https://otlp.example.com:443/api/v1/write',
+          url: 'https://otlp.example.com:443/inputs/prometheus-remote-write/_default_/api/v1/write',
           usesManagedInput: true,
           additionalEndpoints: [],
         },
@@ -269,6 +353,7 @@ describe('ApiEndpoints', () => {
       popoverEndpoints: [],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
 
     renderApiEndpoints();
@@ -318,6 +403,7 @@ describe('ApiEndpoints', () => {
       ],
       isLoading: false,
       isError: false,
+      isForbidden: false,
     });
 
     renderApiEndpoints();

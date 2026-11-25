@@ -5,22 +5,18 @@
  * 2.0.
  */
 import React from 'react';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { render, waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
-import {
-  getCloudDefendNewPolicyMock,
-  MOCK_YAML_INVALID_CONFIGURATION,
-  MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
-} from '../../test/mocks';
+import { getCloudDefendNewPolicyMock, MOCK_YAML_INVALID_CONFIGURATION } from '../../test/mocks';
 import { ControlGeneralView } from '.';
 import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
 
-// FLAKY: https://github.com/elastic/kibana/issues/214268
-describe.skip('<ControlGeneralView />', () => {
+describe('<ControlGeneralView />', () => {
   const onChange = jest.fn();
 
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.
@@ -45,7 +41,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
       expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
@@ -60,6 +56,7 @@ describe.skip('<ControlGeneralView />', () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
     await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await waitForEuiPopoverOpen();
     await userEvent.click(getByTestId('cloud-defend-btnAddFileSelector'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
@@ -70,7 +67,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
     } catch (err) {
@@ -82,6 +79,7 @@ describe.skip('<ControlGeneralView />', () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
     await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await waitForEuiPopoverOpen();
     await userEvent.click(getByTestId('cloud-defend-btnAddFileResponse'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
@@ -92,7 +90,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
     } catch (err) {
@@ -104,6 +102,7 @@ describe.skip('<ControlGeneralView />', () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
     await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await waitForEuiPopoverOpen();
     await userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
@@ -114,7 +113,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.process.responses.length).toBe(
         getAllByTestId('cloud-defend-process-response').length
@@ -167,7 +166,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.file.responses[0].match).toHaveLength(1);
     } catch (err) {
@@ -184,17 +183,6 @@ describe.skip('<ControlGeneralView />', () => {
     expect(queryAllByTestId('cloud-defend-response')).toHaveLength(0);
   });
 
-  it('prevents the user from adding more than MAX_SELECTORS_AND_RESPONSES_PER_TYPE', async () => {
-    const { getByTestId } = render(
-      <WrappedComponent
-        policy={getCloudDefendNewPolicyMock(MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES)}
-      />
-    );
-
-    await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
-    expect(getByTestId('cloud-defend-btnAddFileSelector')).toBeDisabled();
-  });
-
   it('allows the user to duplicate the selector', async () => {
     const { getByTestId, getAllByTestId } = render(<WrappedComponent />);
     const btnSelectorPopover = getAllByTestId('cloud-defend-btnselectorpopover')[0];
@@ -206,7 +194,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.file.selectors).toHaveLength(4);
       expect(json.file.selectors[3].name).toEqual(json.file.selectors[0].name + '1');

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiPagination,
   EuiScreenReaderLive,
   EuiSkeletonText,
   EuiSpacer,
@@ -22,10 +23,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-// Provisional pending final designs: two rows of three cards, then a Show more
-// button. Page size is a prop so a host can shrink it in a narrower slot.
-const DEFAULT_PAGE_SIZE = 6;
 const COLUMNS = 3;
+const VISIBLE_ROWS = 2;
+const PAGE_SIZE = COLUMNS * VISIBLE_ROWS;
 
 export interface AddDataSearchResultsProps<TItem extends { id: string }> {
   searchTerm: string;
@@ -34,7 +34,6 @@ export interface AddDataSearchResultsProps<TItem extends { id: string }> {
   isError?: boolean;
   onRetry?: () => void;
   renderCard: (item: TItem) => React.ReactNode;
-  pageSize?: number;
 }
 
 export function AddDataSearchResults<TItem extends { id: string }>({
@@ -44,33 +43,16 @@ export function AddDataSearchResults<TItem extends { id: string }>({
   isError = false,
   onRetry,
   renderCard,
-  pageSize = DEFAULT_PAGE_SIZE,
 }: AddDataSearchResultsProps<TItem>) {
   const countId = useGeneratedHtmlId({ prefix: 'addDataSearchResultsCount' });
-  const [visibleCount, setVisibleCount] = useState(pageSize);
-  const [focusIndex, setFocusIndex] = useState<number | null>(null);
-  const [previousSearchTerm, setPreviousSearchTerm] = useState(searchTerm);
-  const [previousPageSize, setPreviousPageSize] = useState(pageSize);
-
-  // Adjusted during render, not in an effect: an effect resets one commit too
-  // late, so extra cards flash and can log usage impressions on mount.
-  if (searchTerm !== previousSearchTerm || pageSize !== previousPageSize) {
-    setPreviousSearchTerm(searchTerm);
-    setPreviousPageSize(pageSize);
-    setVisibleCount(pageSize);
-    setFocusIndex(null);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pagedTerm, setPagedTerm] = useState(searchTerm);
+  const isNewTerm = pagedTerm !== searchTerm;
+  // Reset during render (not an effect) so the stale page never paints for the new term.
+  if (isNewTerm) {
+    setPagedTerm(searchTerm);
+    setPageIndex(0);
   }
-
-  // The last Show more click unmounts the button, which would drop focus to the
-  // document body. Move it onto the first card the click revealed instead.
-  const focusRevealedCard = useCallback((node: HTMLDivElement | null) => {
-    node?.focus();
-  }, []);
-
-  const showMore = () => {
-    setFocusIndex(visibleCount);
-    setVisibleCount((count) => count + pageSize);
-  };
 
   if (isError) {
     return (
@@ -113,24 +95,52 @@ export function AddDataSearchResults<TItem extends { id: string }>({
   }
 
   const isEmpty = items.length === 0;
+  const pageCount = Math.ceil(items.length / PAGE_SIZE);
+  const lastPageIndex = Math.max(pageCount - 1, 0);
+  // Clamp from the reset value, not the stale `pageIndex`: both writes land on this
+  // same render pass and React applies them in order, so starting from `pageIndex`
+  // here would let the shrink clamp overwrite the term-change reset above.
+  const requestedPageIndex = isNewTerm ? 0 : pageIndex;
+  const safePageIndex = Math.min(requestedPageIndex, lastPageIndex);
+  if (pageIndex !== safePageIndex) {
+    setPageIndex(safePageIndex);
+  }
+  const visibleItems = items.slice(safePageIndex * PAGE_SIZE, (safePageIndex + 1) * PAGE_SIZE);
+  const from = safePageIndex * PAGE_SIZE + 1;
+  const to = safePageIndex * PAGE_SIZE + visibleItems.length;
+  const isPaginated = items.length > PAGE_SIZE;
+
   const emptyLabel = i18n.translate(
     'xpack.observability_onboarding.addDataGrid.searchResults.emptyTitle',
     { defaultMessage: 'No results for {searchTerm}', values: { searchTerm } }
   );
-  const countLabel = i18n.translate(
-    'xpack.observability_onboarding.addDataGrid.searchResults.countHeader',
-    {
-      defaultMessage: 'Showing {count, plural, one {# result} other {# results}}',
-      values: { count: items.length },
-    }
+  const countContent = isPaginated ? (
+    <FormattedMessage
+      id="xpack.observability_onboarding.addDataGrid.searchResults.countHeaderPaginated"
+      defaultMessage="Showing <strong>{from}-{to} of {total, plural, one {# integration} other {# integrations}}</strong>"
+      values={{
+        from,
+        to,
+        total: items.length,
+        strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.observability_onboarding.addDataGrid.searchResults.countHeader"
+      defaultMessage="Showing <strong>{count, plural, one {# integration} other {# integrations}}</strong>"
+      values={{
+        count: items.length,
+        strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+      }}
+    />
   );
-  const visibleItems = items.slice(0, visibleCount);
 
   // The live region stays mounted across the empty/results swap: a region that
   // mounts already holding its text is not reliably announced.
   return (
     <>
-      <EuiScreenReaderLive>{isEmpty ? emptyLabel : countLabel}</EuiScreenReaderLive>
+      <EuiScreenReaderLive>{isEmpty ? emptyLabel : countContent}</EuiScreenReaderLive>
       {isEmpty ? (
         <EuiEmptyPrompt
           titleSize="xs"
@@ -139,37 +149,32 @@ export function AddDataSearchResults<TItem extends { id: string }>({
         />
       ) : (
         <section aria-labelledby={countId} data-test-subj="addDataSearchResults">
-          <EuiText size="s" id={countId} data-test-subj="addDataSearchResultsCount">
-            <strong>{countLabel}</strong>
+          <EuiText size="s" color="subdued" id={countId} data-test-subj="addDataSearchResultsCount">
+            {countContent}
           </EuiText>
           <EuiSpacer size="m" />
           <EuiFlexGrid columns={COLUMNS} gutterSize="m">
-            {visibleItems.map((item, index) => {
-              const isFocusTarget = index === focusIndex;
-              return (
-                <EuiFlexItem
-                  key={item.id}
-                  ref={isFocusTarget ? focusRevealedCard : undefined}
-                  tabIndex={isFocusTarget ? -1 : undefined}
-                >
-                  {renderCard(item)}
-                </EuiFlexItem>
-              );
-            })}
+            {visibleItems.map((item) => (
+              <EuiFlexItem key={item.id}>{renderCard(item)}</EuiFlexItem>
+            ))}
           </EuiFlexGrid>
-          {visibleCount < items.length && (
+          {isPaginated && (
             <>
               <EuiSpacer size="m" />
-              <EuiButtonEmpty
-                onClick={showMore}
-                iconType="arrowDown"
-                data-test-subj="addDataSearchResultsShowMore"
-              >
-                <FormattedMessage
-                  id="xpack.observability_onboarding.addDataGrid.searchResults.showMoreButtonLabel"
-                  defaultMessage="Show more"
-                />
-              </EuiButtonEmpty>
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiPagination
+                    aria-label={i18n.translate(
+                      'xpack.observability_onboarding.addDataGrid.searchResults.paginationAriaLabel',
+                      { defaultMessage: 'Search results pages' }
+                    )}
+                    pageCount={pageCount}
+                    activePage={safePageIndex}
+                    onPageClick={setPageIndex}
+                    data-test-subj="addDataSearchResultsPagination"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </>
           )}
         </section>

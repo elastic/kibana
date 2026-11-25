@@ -35,13 +35,7 @@ test.describe(
 
       await expect(page.testSubj.locator('projectLevelRetentionLink')).toBeVisible();
       await expect(page.testSubj.locator('projectLevelRetentionCallout')).toBeVisible();
-      // The callout is announced on mount, which mirrors its content into a `role="status"` live
-      // region, so `cloudLinkButton` exists twice. Scope to the callout's own content.
-      await expect(
-        page.testSubj
-          .locator('projectLevelRetentionCallout__content')
-          .locator('[data-test-subj="cloudLinkButton"]')
-      ).toBeVisible();
+      await expect(page.testSubj.locator('cloudLinkButton')).toBeVisible();
     });
   }
 );

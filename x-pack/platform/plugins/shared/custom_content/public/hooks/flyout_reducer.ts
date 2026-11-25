@@ -5,40 +5,81 @@
  * 2.0.
  */
 
-import type { EsqlDataResult } from '../utils/fetch_esql_data';
+import type { EsqlDataResult } from '@kbn/custom-content-renderer';
 
-interface FlyoutReducerState {
-  draftEsqlQuery: string;
+/** One of the panel's queries being edited. The id keeps its editor and preview with it when another is removed. */
+export interface DraftQuery {
+  id: number;
+  text: string;
+  isDataLoading: boolean;
+  esqlData: EsqlDataResult | null;
+  esqlDataError: string | null;
+}
+
+export const createDraftQuery = (id: number, text: string): DraftQuery => ({
+  id,
+  text,
+  isDataLoading: false,
+  esqlData: null,
+  esqlDataError: null,
+});
+
+export interface FlyoutReducerState {
+  /** The queries being edited, the first of which is `rows` in the template. Never empty. */
+  draftQueries: DraftQuery[];
+  nextQueryId: number;
   draftTemplate: string;
-  isPreviewLoading: boolean;
-  previewData: EsqlDataResult | null;
-  previewError: string | null;
+  isRenderLoading: boolean;
+  /** Why "Run preview" failed. Kept apart from the data preview of any one query. */
+  renderError: string | null;
 }
 
 export type FlyoutAction =
-  | { type: 'SET_ESQL_QUERY'; payload: string }
+  | { type: 'ADD_QUERY' }
+  | { type: 'REMOVE_QUERY'; id: number }
+  /** Changes some fields of one query: its text, or the state of its data preview. */
+  | { type: 'PATCH_QUERY'; id: number; patch: Partial<Omit<DraftQuery, 'id'>> }
   | { type: 'SET_TEMPLATE'; payload: string }
-  | { type: 'PREVIEW_START' }
-  | { type: 'PREVIEW_SUCCESS'; payload: EsqlDataResult }
-  | { type: 'PREVIEW_ERROR'; payload: string }
-  | { type: 'PREVIEW_DONE' };
+  | { type: 'RENDER_START' }
+  | { type: 'RENDER_DONE' }
+  | { type: 'RENDER_ERROR'; payload: string };
+
+const updateQuery = (
+  state: FlyoutReducerState,
+  id: number,
+  update: Partial<DraftQuery>
+): FlyoutReducerState => ({
+  ...state,
+  draftQueries: state.draftQueries.map((draft) =>
+    draft.id === id ? { ...draft, ...update } : draft
+  ),
+});
 
 export const flyoutReducer = (
   state: FlyoutReducerState,
   action: FlyoutAction
 ): FlyoutReducerState => {
   switch (action.type) {
-    case 'SET_ESQL_QUERY':
-      return { ...state, draftEsqlQuery: action.payload };
+    case 'ADD_QUERY':
+      return {
+        ...state,
+        draftQueries: [...state.draftQueries, createDraftQuery(state.nextQueryId, '')],
+        nextQueryId: state.nextQueryId + 1,
+      };
+    case 'REMOVE_QUERY':
+      return {
+        ...state,
+        draftQueries: state.draftQueries.filter((draft) => draft.id !== action.id),
+      };
+    case 'PATCH_QUERY':
+      return updateQuery(state, action.id, action.patch);
     case 'SET_TEMPLATE':
       return { ...state, draftTemplate: action.payload };
-    case 'PREVIEW_START':
-      return { ...state, isPreviewLoading: true, previewError: null, previewData: null };
-    case 'PREVIEW_SUCCESS':
-      return { ...state, previewData: action.payload };
-    case 'PREVIEW_ERROR':
-      return { ...state, previewError: action.payload, previewData: null };
-    case 'PREVIEW_DONE':
-      return { ...state, isPreviewLoading: false };
+    case 'RENDER_START':
+      return { ...state, isRenderLoading: true, renderError: null };
+    case 'RENDER_DONE':
+      return { ...state, isRenderLoading: false };
+    case 'RENDER_ERROR':
+      return { ...state, renderError: action.payload };
   }
 };

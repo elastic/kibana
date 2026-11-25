@@ -144,6 +144,21 @@ const throwIfCredentialProblem = (error: unknown, endpoint: string): void => {
   );
 };
 
+/**
+ * Fail before sending a request urlscan is certain to refuse: the result and DOM endpoints are
+ * authentication-only since 2026-05-04 (https://urlscan.io/blog/2026/03/18/api-auth-required/),
+ * and submission has always needed a key.
+ */
+const requireApiKey = (ctx: ActionContext, endpoint: string): void => {
+  if (ctx.secrets?.authType === 'api_key_header') {
+    return;
+  }
+  throw new Error(
+    `urlscan.io requires an API key for ${endpoint}, and the connector has none. ` +
+      'Set the API key authentication type on the connector, with the UUID-shaped key from your urlscan account.'
+  );
+};
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
@@ -481,7 +496,7 @@ export const UrlscanIo: ConnectorSpec = {
   metadata: {
     id: '.urlscan_io',
     displayName: 'URLScan.io',
-    description: i18n.translate('core.kibanaConnectorSpecs.urlscanIo.metadata.description', {
+    description: i18n.translate('connectorSpecs.urlscanIo.metadata.description', {
       defaultMessage:
         'Submit URLs for scanning, read maliciousness verdicts, and search historical scans on URLScan.io',
     }),
@@ -517,7 +532,7 @@ export const UrlscanIo: ConnectorSpec = {
         isRecommended: true,
         defaults: { headerField: 'api-key' },
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.urlscanIo.auth.apiKeyHeader.label', {
+          label: i18n.translate('connectorSpecs.urlscanIo.auth.apiKeyHeader.label', {
             defaultMessage: 'API key (required for scanning, results, and DOM)',
           }),
           meta: {
@@ -532,7 +547,7 @@ export const UrlscanIo: ConnectorSpec = {
         type: 'none',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.urlscanIo.auth.none.label', {
+          label: i18n.translate('connectorSpecs.urlscanIo.auth.none.label', {
             defaultMessage: 'No authentication (search, screenshots, and quota only)',
           }),
         },
@@ -569,6 +584,7 @@ Gotchas that matter:
   actions: {
     searchScans: {
       isTool: true,
+      scope: 'read',
       description:
         'Search historical URLScan.io scans with an Elasticsearch query-string query. Returns one row per prior scan: uuid, URL, title, domain, IP, ASN, country, TLS issuer, domain age, and a link to the full result and screenshot. ' +
         'Call this BEFORE submitting a new scan: a recent prior sighting answers the question without spending scan quota, and it is the primary way to check whether an indicator has been seen before. ' +
@@ -608,6 +624,7 @@ Gotchas that matter:
 
     getResult: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the result of a finished scan by uuid. Returns the verdict block (malicious flag, score from -100 to 100, categories, impersonated brands), the page identity (final URL, title, IP, ASN, country, TLS issuer, domain age), scan stats, the full lists of contacted domains, IPs, ASNs and response hashes, and any files the page downloaded. ' +
         'Use it to read a scan submitted earlier by scanUrl, or to re-read one found by searchScans. ' +
@@ -616,6 +633,7 @@ Gotchas that matter:
         'The contacted domains, IPs, ASNs, and hashes are the pivot points for finding related infrastructure.',
       input: GetResultInputSchema,
       handler: async (ctx, input: GetResultInput) => {
+        requireApiKey(ctx, 'GET /api/v1/result/{uuid}/');
         try {
           const response = await ctx.client.get(`${API}/result/${encodeURIComponent(input.uuid)}/`);
           return {
@@ -656,6 +674,7 @@ Gotchas that matter:
       // Spends submission quota and puts a URL into urlscan's public corpus when visibility
       // is public, so it is not something an agent should do unsupervised.
       isTool: false,
+      scope: 'write',
       description:
         'Submit a URL to URLScan.io for scanning. Returns the scan uuid and the result API link immediately; the scan itself takes roughly 10 to 30 seconds, so the result is not available yet. ' +
         'Use this when you want to submit now and collect later, for example fanning out many URLs then reading results in a second pass. For a single URL where you need the verdict in one step, use scanUrlAndWait instead. ' +
@@ -663,6 +682,7 @@ Gotchas that matter:
         'Consider calling searchScans first: a recent prior scan answers the question without spending quota.',
       input: ScanUrlInputSchema,
       handler: async (ctx, input: ScanUrlInput) => {
+        requireApiKey(ctx, 'POST /api/v1/scan/');
         try {
           const response = await ctx.client.post(`${API}/scan/`, submissionBody(input), {
             headers: { 'Content-Type': 'application/json' },
@@ -681,6 +701,7 @@ Gotchas that matter:
     scanUrlAndWait: {
       // Same quota and publication consequences as scanUrl, plus it holds a step open.
       isTool: false,
+      scope: 'write',
       description:
         'Submit a URL and poll until the scan finishes, returning the completed result in one step. The action a triage workflow should use to detonate a URL, since it avoids hand-rolling a poll loop. ' +
         'Returns the same trimmed result as getResult: verdict, page identity, stats, contacted indicators, and downloaded files. ' +
@@ -688,6 +709,7 @@ Gotchas that matter:
         'Choose visibility deliberately: "public" makes the URL and its scan publicly visible.',
       input: ScanUrlAndWaitInputSchema,
       handler: async (ctx, input: ScanUrlAndWaitInput) => {
+        requireApiKey(ctx, 'POST /api/v1/scan/');
         let submission: SubmissionResponse;
         try {
           const response = await ctx.client.post(`${API}/scan/`, submissionBody(input), {
@@ -800,6 +822,7 @@ Gotchas that matter:
 
     getScreenshot: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the PNG screenshot of a finished scan, base64-encoded, so it can be attached to a case or shown to an analyst. Returns the base64 data, its byte length, and the public screenshot URL. ' +
         'WARNING: this returns a base64 image payload, typically tens to hundreds of kilobytes. Only call it when you have somewhere to put the image (a case attachment, an Elasticsearch ingest pipeline). Do not call it to "look at" a page, and never include the base64 blob in a chat response. ' +
@@ -845,6 +868,7 @@ Gotchas that matter:
 
     getDom: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the rendered DOM snapshot of a finished scan as text, for phishing and content analysis: credential-harvesting form markup, obfuscated scripts, or an exfiltration endpoint that never appears in the request list. ' +
         'Truncated to 50000 characters by default because a rendered DOM is frequently over a megabyte; the response reports the full length and whether it was truncated, and maxLength raises the cap. ' +
@@ -853,6 +877,7 @@ Gotchas that matter:
         'Returns found: false when urlscan stored no DOM for that scan, which is a normal outcome rather than an error.',
       input: GetDomInputSchema,
       handler: async (ctx, input: GetDomInput) => {
+        requireApiKey(ctx, 'GET /dom/{uuid}/');
         const uuid = encodeURIComponent(input.uuid);
         // The DOM endpoint also lives on the site root rather than under /api/v1.
         const domUrl = `${BASE_URL}/dom/${uuid}/`;
@@ -888,6 +913,7 @@ Gotchas that matter:
 
     getQuota: {
       isTool: true,
+      scope: 'read',
       description:
         'Read the account rate limits and remaining quota, broken out per action (search, retrieve, public, unlisted, private, livescan) and per window (minute, hour, day). Also returns the search-result ceiling, the scan retention period, and which visibility levels this account can query. ' +
         'Call it before a batch of scans or searches so a workflow can throttle or defer instead of hitting a 429 partway through. It is also the cheapest way to confirm the API key is valid and to see which tier it grants.',
@@ -940,7 +966,7 @@ Gotchas that matter:
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.urlscanIo.test.description', {
+    description: i18n.translate('connectorSpecs.urlscanIo.test.description', {
       defaultMessage:
         'Verifies connectivity, and the API key when one is configured, by reading the account quotas. Consumes no scan quota.',
     }),

@@ -8,6 +8,7 @@
 import { render, screen, within } from '@testing-library/react';
 import React, { type ComponentProps } from 'react';
 
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 
@@ -22,7 +23,7 @@ const defaultProps: Pick<
   | 'currentSpace'
 > = {
   currentSpace: {
-    id: 'odyssey',
+    id: asSpaceId('odyssey'),
     name: 'Odyssey',
     disabledFeatures: [],
   },

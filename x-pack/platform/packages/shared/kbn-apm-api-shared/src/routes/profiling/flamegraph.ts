@@ -9,6 +9,7 @@ import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { profilingSchemaQuerySchema } from './profiling_schema_query';
 
 export type ServicesFlamegraphResponse = BaseFlameGraph;
 
@@ -21,7 +22,8 @@ export const servicesFlamegraphRoute = defineRoute<ServicesFlamegraphResponse>()
         .merge(environmentSchema)
         .merge(rangeSchema)
         .merge(z.object({ transactionName: z.string().optional() }))
-        .merge(z.object({ transactionType: z.string() })),
+        .merge(z.object({ transactionType: z.string() }))
+        .merge(profilingSchemaQuerySchema),
     })
   ),
 });

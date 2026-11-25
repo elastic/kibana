@@ -5,32 +5,21 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { OmitUpsertProps } from './core';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace BaseStream {
-  export interface QueryStreamReference {
-    name: string;
-  }
-
   export interface Definition {
     name: string;
     description: string;
     updated_at: string;
-    /**
-     * Child query streams (virtual, read-only ES|QL view streams) that belong to this stream.
-     * Names must follow the parent.childname naming convention. These are not significant-event
-     * queries (`StreamQuery`); those live outside the stream payload (see `GetResponse`).
-     */
-    query_streams?: QueryStreamReference[];
   }
 
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
 
   /**
-   * Stream read model. Significant-event queries are intentionally not included here; fetch
-   * them via `GET /api/streams/{name}/queries`.
+   * Stream read model. Significant-event queries are intentionally not included here.
    */
   export interface GetResponse<TDefinition extends Definition = Definition> {
     dashboards: string[];
@@ -39,15 +28,21 @@ export namespace BaseStream {
   }
 
   /**
-   * Stream write model. Significant-event queries are intentionally not part of the upsert;
-   * manage them via the `/api/streams/{name}/queries` endpoints. The `PUT` routes validate the
-   * body with `DeepStrict`, so a stray `queries` field is rejected as an unrecognized key (HTTP
-   * 400); the GET→PUT converter (`convertGetResponseIntoUpsertRequest`) never emits one.
+   * Stream write model. Significant-event queries are intentionally not part of the upsert.
+   * The `PUT` routes validate the body with `DeepStrict`, so a stray `queries` field is
+   * rejected as an unrecognized key (HTTP 400); the GET→PUT converter
+   * (`convertGetResponseIntoUpsertRequest`) never emits one.
    */
   export interface UpsertRequest<TDefinition extends Definition = Definition> {
     dashboards: string[];
     rules: string[];
-    stream: OmitUpsertProps<TDefinition>;
+    stream: OmitUpsertProps<TDefinition> & {
+      /**
+       * @deprecated Query streams have been removed. Accepted for backwards compatibility
+       * with clients that round-trip older GET responses, and ignored.
+       */
+      query_streams?: Array<{ name: string }>;
+    };
   }
 
   export interface Model {
@@ -58,18 +53,13 @@ export namespace BaseStream {
   }
 }
 
-export const baseStreamDefinitionSchema = z.object({
-  name: z.string(),
-  description: z.string(),
-  updated_at: z.iso.datetime(),
-  query_streams: z
-    .array(
-      z.object({
-        name: z.string(),
-      })
-    )
-    .optional(),
-});
+export const baseStreamDefinitionSchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    description: z.string(),
+    updated_at: isoDateTime(),
+  })
+);
 
 export const baseStreamGetResponseSchema = z.object({
   dashboards: z.array(z.string()),
@@ -81,7 +71,20 @@ export const baseStreamUpsertRequestSchema = z.object({
   rules: z.array(z.string()),
 });
 
-export const baseStreamUpsertDefinitionSchema = baseStreamDefinitionSchema.omit({
-  name: true,
-  updated_at: true,
-});
+export const baseStreamUpsertDefinitionSchema = lazySchema(() =>
+  baseStreamDefinitionSchema
+    .omit({
+      name: true,
+      updated_at: true,
+    })
+    .extend({
+      query_streams: z
+        .array(z.object({ name: z.string() }))
+        .optional()
+        .meta({
+          deprecated: true,
+          description:
+            'Deprecated. Query streams have been removed; this field is accepted for backwards compatibility and ignored.',
+        }),
+    })
+);

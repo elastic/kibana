@@ -7,8 +7,9 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 interface Props {
   formattedDate: string;
@@ -20,33 +21,39 @@ export const DurationClarificationCallOut: React.FunctionComponent<Props> = ({
 }) => {
   return (
     <>
-      <EuiCallOut color="primary" data-test-subj="dataStreamMigrationWarningsCallout">
-        <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.indicesNeedReindexing"
-          defaultMessage="Indices created on or before {formattedDate} need to be reindexed to a compatible format or set to read-only."
-          values={{ formattedDate }}
-        />
-        <br />
-        <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.backingIndicesUnfrozen"
-          defaultMessage="If any of the backing indices of the data stream are frozen, they will be converted to non-frozen indices during the update process."
-        />
-        <br />
-        <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.suggestReadOnly"
-          defaultMessage="Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed. {learnMoreHtml}"
-          values={{
-            learnMoreHtml: (
-              <EuiLink href={learnMoreUrl} target="_blank">
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.learnMoreLink"
-                  defaultMessage="Learn more"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
+      <KbnInfoCallout
+        data-test-subj="dataStreamMigrationWarningsCallout"
+        title={
+          <FormattedMessage
+            id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.indicesNeedReindexing"
+            defaultMessage="Indices created on or before {formattedDate} need to be reindexed to a compatible format or set to read-only."
+            values={{ formattedDate }}
+          />
+        }
+        text={
+          <>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.backingIndicesUnfrozen"
+              defaultMessage="If any of the backing indices of the data stream are frozen, they will be converted to non-frozen indices during the update process."
+            />
+            <br />
+            <FormattedMessage
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.suggestReadOnly"
+              defaultMessage="Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed. {learnMoreHtml}"
+              values={{
+                learnMoreHtml: (
+                  <EuiLink href={learnMoreUrl} target="_blank">
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.learnMoreLink"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </>
+        }
+      />
       <EuiSpacer size="m" />
     </>
   );

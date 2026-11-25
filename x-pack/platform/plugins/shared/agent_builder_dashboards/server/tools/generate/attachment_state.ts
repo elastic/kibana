@@ -16,9 +16,9 @@ import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-com
 /**
  * Retrieves and validates the latest version of a dashboard attachment by ID.
  *
- * Kibana-specific I/O: reads from the conversation attachment store. The
- * generate core never calls this — the tool wrapper resolves the prior
- * dashboard payload here before handing it to the pure core.
+ * Kibana-specific I/O: reads from the conversation attachment store. Dashboard
+ * authoring never calls this — the tool wrapper resolves the prior
+ * dashboard payload here before handing it to the authoring package.
  */
 export const retrieveLatestVersion = (
   attachments: AttachmentStateManager,

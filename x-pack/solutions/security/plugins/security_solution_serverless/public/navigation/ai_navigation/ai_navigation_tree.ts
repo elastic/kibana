@@ -7,44 +7,19 @@
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
-
-import { AiNavigationIcon } from './icon';
-
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.aiNavigation.projectType.title',
-  { defaultMessage: 'Elastic AI SOC Engine' }
-);
 
 export const createAiNavigationTree = (
   core: CoreStart,
   chatExperience: AIChatExperience = AIChatExperience.Classic,
-  workflowsUiEnabled: boolean = false,
-  showAgentBuilderNavAtTop: boolean = false
+  workflowsUiEnabled: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
-    {
-      id: 'ease_home',
-      link: securityLink(SecurityPageName.landing),
-      title: SOLUTION_NAME,
-      icon: AiNavigationIcon,
-      renderAs: 'home',
-    },
-    ...(chatExperience === AIChatExperience.Agent && showAgentBuilderNavAtTop
-      ? [
-          {
-            icon: 'productAgent',
-            link: 'agent_builder' as AppDeepLinkId,
-          },
-        ]
-      : []),
     {
       id: SecurityPageName.alertSummary,
       link: securityLink(SecurityPageName.alertSummary),
@@ -95,8 +70,7 @@ export const createAiNavigationTree = (
           link: 'discover' as AppDeepLinkId,
           icon: 'productDiscover',
         },
-        // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
-        ...(chatExperience === AIChatExperience.Agent && !showAgentBuilderNavAtTop
+        ...(chatExperience === AIChatExperience.Agent
           ? [
               {
                 icon: 'productAgent',
@@ -152,6 +126,7 @@ export const createAiNavigationTree = (
           title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
           children: [
             { link: 'management:index_management' },
+            { link: 'management:esql_views' },
             { link: 'management:transform' },
             { link: 'management:data_quality' },
           ],
@@ -169,6 +144,7 @@ export const createAiNavigationTree = (
           children: [
             { link: 'management:api_keys' },
             { link: 'management:application_connections' },
+            { link: 'management:service_accounts' },
             { link: 'management:roles' },
           ],
         },
@@ -184,7 +160,6 @@ export const createAiNavigationTree = (
             },
           ],
         },
-        ...getAlertingV2ManagementNavPanel(core),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           children: [
@@ -216,6 +191,7 @@ export const createAiNavigationTree = (
           breadcrumbStatus: 'hidden',
           children: [
             { link: 'management:genAiSettings' },
+            { link: 'management:aiAnonymizationSettings' },
             { link: 'management:securityAiAssistantManagement' },
           ],
         },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getAttackDiscoveryEventOwnerFilter } from '@kbn/discoveries';
+
 import { getSuccessfulGenerationsQuery, DEFAULT_START, DEFAULT_END } from '.';
 
 import {
@@ -69,11 +71,12 @@ describe('getSuccessfulGenerationsQuery', () => {
     expect(query.aggs?.successfull_generations_by_connector_id?.terms?.size).toEqual(10);
   });
 
-  it('returns a query with the expected user.name filter', () => {
+  it("returns a query for the user's own events, plus events written by a service account", () => {
     const query = getSuccessfulGenerationsQuery({ ...defaultProps });
-    const userTerm = findTerm(getMustClauses(query), 'user.name');
 
-    expect(userTerm?.term['user.name']).toEqual(mockAuthenticatedUser.username);
+    expect(getMustClauses(query)).toContainEqual(
+      getAttackDiscoveryEventOwnerFilter(mockAuthenticatedUser.username)
+    );
   });
 
   it('returns a query with the expected spaceId filter', () => {

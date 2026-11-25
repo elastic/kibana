@@ -27,5 +27,18 @@ describe('caseFieldDefinitionSavedObjectType', () => {
       const so = { attributes: { name: 'incident_type' } } as never;
       expect(caseFieldDefinitionSavedObjectType.management?.getTitle?.(so)).toBe('incident_type');
     });
+
+    it('strips legacyKey on export (defense-in-depth for a direct/API export of this type)', async () => {
+      const so = {
+        id: 'fd-1',
+        attributes: { name: 'incident_type', legacyKey: 'cf_incident_type' },
+      } as never;
+
+      const result = await caseFieldDefinitionSavedObjectType.management?.onExport?.({} as never, [
+        so,
+      ]);
+
+      expect(result?.[0].attributes).not.toHaveProperty('legacyKey');
+    });
   });
 });

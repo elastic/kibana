@@ -21,3 +21,6 @@ subs:
 toc:
   - file: index.md
   - toc: kbn-ui
+  - toc: chrome
+  - toc: feedback
+  - toc: event-bus

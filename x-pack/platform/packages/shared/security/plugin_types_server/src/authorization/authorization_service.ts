@@ -6,7 +6,7 @@
  */
 
 import type { Actions } from './actions';
-import type { CheckPrivilegesWithRequest } from './check_privileges';
+import type { CheckPrivilegesWithRequest, CheckUserProfilesPrivileges } from './check_privileges';
 import type { CheckPrivilegesDynamicallyWithRequest } from './check_privileges_dynamically';
 import type { CheckSavedObjectsPrivilegesWithRequest } from './check_saved_objects_privileges';
 import type { AuthorizationMode } from './mode';
@@ -22,6 +22,7 @@ export interface AuthorizationServiceSetup {
    */
   actions: Actions;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  checkUserProfilesPrivileges: (uids: Set<string>) => CheckUserProfilesPrivileges;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
   checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
   mode: AuthorizationMode;

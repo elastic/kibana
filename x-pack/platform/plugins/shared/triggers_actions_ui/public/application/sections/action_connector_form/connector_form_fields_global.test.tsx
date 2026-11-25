@@ -267,4 +267,31 @@ describe('ConnectorFormFieldsGlobal', () => {
       expect(idValue.endsWith('-')).toBe(false);
     });
   });
+
+  it('removes the trailing hyphen when truncation cuts the ID at a hyphen', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const nameInput = screen.getByTestId('nameInput');
+    // The first 36 characters of the slug end with a hyphen
+    await userEvent.type(nameInput, 'Runbooks API (HTTP) - incident runbooks per service');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('connectorIdInput')).toHaveValue(
+        'runbooks-api-http-incident-runbooks'
+      );
+    });
+
+    await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: expect.objectContaining({ id: 'runbooks-api-http-incident-runbooks' }),
+        isValid: true,
+      });
+    });
+  });
 });

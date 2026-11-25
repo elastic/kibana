@@ -12,6 +12,10 @@ export type {
   RelayCallbackResponse,
   RelayClaimResponse,
   RelayClientContract,
+  RelayApiKeyInstallRequest,
   RelayInstallRequest,
+  RelayServiceAccountInstallRequest,
   RelayInstallResponse,
+  RelayTriggerInput,
+  RelayTriggerResponse,
 } from './types';

@@ -16,10 +16,10 @@ export interface IntegrationGroup {
 }
 
 /**
- * Static descriptors for the initial set of integration collection tiles.
- * Keys match the `group` field value in the member package manifests.
- * Adding a new group requires a corresponding PR to elastic/integrations to tag
- * the member packages with `group: <id>` in their manifests.
+ * Static descriptors for the initial set of integration collection tiles, and the
+ * allowlist for grouping: manifest groups without an entry here stay ungrouped.
+ * Keys match the `group` field value in the member package manifests, so adding a
+ * group requires a matching elastic/integrations PR tagging the members.
  */
 export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
   nginx: {
@@ -28,7 +28,7 @@ export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
     }),
     description: i18n.translate('xpack.fleet.integrationGroups.nginx.description', {
       defaultMessage:
-        'Collect logs and metrics from Nginx web servers using Elastic Agent. Choose from ECS-based, OTel-based, or Nginx Ingress Controller collection.',
+        'Collect logs and metrics from Nginx web servers using Elastic Agent. Choose from ECS-based or OTel-based collection.',
     }),
     icons: [],
   },
@@ -38,7 +38,7 @@ export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
     }),
     description: i18n.translate('xpack.fleet.integrationGroups.redis.description', {
       defaultMessage:
-        'Collect logs and metrics from Redis using Elastic Agent. Choose from Redis (OSS) or Redis Enterprise collection.',
+        'Collect logs and metrics from Redis using Elastic Agent. Choose from ECS-based or OTel-based collection.',
     }),
     icons: [],
   },
@@ -58,17 +58,7 @@ export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
     }),
     description: i18n.translate('xpack.fleet.integrationGroups.mysql.description', {
       defaultMessage:
-        'Collect logs and metrics from MySQL using Elastic Agent. Choose from MySQL, MySQL Enterprise, or OTel-based collection.',
-    }),
-    icons: [],
-  },
-  kafka: {
-    title: i18n.translate('xpack.fleet.integrationGroups.kafka.title', {
-      defaultMessage: 'Kafka',
-    }),
-    description: i18n.translate('xpack.fleet.integrationGroups.kafka.description', {
-      defaultMessage:
-        'Collect logs and metrics from Apache Kafka using Elastic Agent. Choose from ECS-based, OTel-based, Kafka Connect, or log consumer collection.',
+        'Collect logs and metrics from MySQL using Elastic Agent. Choose from ECS-based or OTel-based collection.',
     }),
     icons: [],
   },
@@ -94,11 +84,11 @@ export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
   },
   apache: {
     title: i18n.translate('xpack.fleet.integrationGroups.apache.title', {
-      defaultMessage: 'Apache',
+      defaultMessage: 'Apache HTTP Server',
     }),
     description: i18n.translate('xpack.fleet.integrationGroups.apache.description', {
       defaultMessage:
-        'Collect logs and metrics from Apache technologies using Elastic Agent. Choose from Apache HTTP Server, Apache Tomcat, or Apache Spark collection.',
+        'Collect logs and metrics from Apache HTTP Server using Elastic Agent. Choose from ECS-based or OTel-based collection.',
     }),
     icons: [],
   },

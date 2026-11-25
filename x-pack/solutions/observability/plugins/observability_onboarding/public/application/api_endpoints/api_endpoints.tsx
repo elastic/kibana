@@ -31,6 +31,7 @@ import { EndpointField } from './endpoint_field';
 import { MoreEndpointsPopover } from './more_endpoints_popover';
 import { useApiEndpoints } from './use_api_endpoints';
 import { useApiKeys } from './use_api_keys';
+import { useIngestReceiptToast } from './use_ingest_receipt_toast';
 import { SecurityCallout } from './security_callout';
 import { useSecurityCalloutDismissal } from './use_security_callout_dismissal';
 
@@ -40,15 +41,26 @@ const MANAGED_INPUTS_DOCS_LINK = 'https://ela.st/managed-inputs';
 const API_ENDPOINTS_SECTION_ID = 'apiEndpoints';
 const TITLE_ID = `${API_ENDPOINTS_SECTION_ID}Title`;
 
-export const ApiEndpoints = () => {
+export interface ApiEndpointsProps {
+  /** Heading tag for the section title. Defaults to `h3`, V2 passes `h2`. */
+  titleTag?: 'h2' | 'h3';
+}
+
+export const ApiEndpoints = ({ titleTag: TitleTag = 'h3' }: ApiEndpointsProps) => {
   const {
     services: { share, application },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
-  const { endpoints, popoverEndpoints, isLoading, isError } = useApiEndpoints();
-  const { encodedApiKeys, keyCreatedBeforeByEndpointId, creatingEndpointId, createApiKey } =
-    useApiKeys();
+  const { endpoints, popoverEndpoints, isLoading, isError, isForbidden } = useApiEndpoints();
+  const {
+    encodedApiKeys,
+    apiKeyIds,
+    keyCreatedBeforeByEndpointId,
+    creatingEndpointId,
+    createApiKey,
+  } = useApiKeys();
+  useIngestReceiptToast(apiKeyIds);
   const { dismissedByEndpointId, dismissCallout } = useSecurityCalloutDismissal();
   const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>(undefined);
@@ -91,11 +103,11 @@ export const ApiEndpoints = () => {
       <EuiHorizontalRule margin="xl" />
       <section id={API_ENDPOINTS_SECTION_ID} aria-labelledby={TITLE_ID}>
         <EuiTitle size="s">
-          <h3 id={TITLE_ID}>
+          <TitleTag id={TITLE_ID}>
             {i18n.translate('xpack.observability_onboarding.apiEndpoints.title', {
               defaultMessage: 'Connect directly to the endpoint',
             })}
-          </h3>
+          </TitleTag>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
@@ -168,7 +180,7 @@ export const ApiEndpoints = () => {
               </EuiLink>
             )}
           </EuiFlexGroup>
-          {isError && (
+          {(isError || isForbidden) && (
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
@@ -176,14 +188,28 @@ export const ApiEndpoints = () => {
                 color="warning"
                 iconType="warning"
                 size="s"
-                title={i18n.translate(
-                  'xpack.observability_onboarding.apiEndpoints.fetchErrorTitle',
-                  {
-                    defaultMessage:
-                      'Could not load endpoint details. Refresh the page to try again.',
-                  }
-                )}
-                data-test-subj="observabilityOnboardingApiEndpointsFetchError"
+                title={
+                  isForbidden
+                    ? i18n.translate(
+                        'xpack.observability_onboarding.apiEndpoints.noViewPermissionTitle',
+                        {
+                          defaultMessage:
+                            "You don't have permission to view endpoint details. Contact your administrator.",
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.observability_onboarding.apiEndpoints.fetchErrorTitle',
+                        {
+                          defaultMessage:
+                            'Could not load endpoint details. Refresh the page to try again.',
+                        }
+                      )
+                }
+                data-test-subj={
+                  isForbidden
+                    ? 'observabilityOnboardingApiEndpointsNoViewPermission'
+                    : 'observabilityOnboardingApiEndpointsFetchError'
+                }
               />
             </>
           )}

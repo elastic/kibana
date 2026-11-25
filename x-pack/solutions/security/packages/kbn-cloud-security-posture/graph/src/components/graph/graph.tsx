@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useEffect, useRef, memo, useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { size, isEmpty, isEqual, xorWith } from 'lodash';
 import {
   Background,
@@ -16,30 +17,38 @@ import {
   useNodesState,
 } from '@xyflow/react';
 import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
-import { useGeneratedHtmlId } from '@elastic/eui';
-import type { CommonProps } from '@elastic/eui';
-import { SvgDefsMarker } from '../edge/markers';
 import {
-  HexagonNode,
-  PentagonNode,
-  EllipseNode,
-  RectangleNode,
-  DiamondNode,
-  LabelNode,
-  EdgeGroupNode,
-  RelationshipNode,
-} from '../node';
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { SvgDefsMarker } from '../edge/markers';
+import { EntityCardNode, EventNode, EdgeGroupNode, RelationshipNode } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
-import { isConnectorShape } from '../utils';
+import { isConnectorKind } from '../utils';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
+import { GRAPH_DISPLAY_OPTIONS_STORAGE_KEY } from '../../common/constants';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
 import { Controls } from '../controls/controls';
-import { GRAPH_ID } from '../test_ids';
+import { LayersPanel } from '../controls/layers_panel';
+import {
+  GraphDisplayOptionsContext,
+  DEFAULT_GRAPH_DISPLAY_OPTIONS,
+  type GraphDisplayOptions,
+} from './graph_display_options_context';
+import { GRAPH_CONTROLS_LAYERS_ID, GRAPH_ID } from '../test_ids';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -81,13 +90,9 @@ export interface GraphProps extends CommonProps {
 }
 
 const nodeTypes = {
-  hexagon: HexagonNode,
-  pentagon: PentagonNode,
-  ellipse: EllipseNode,
-  rectangle: RectangleNode,
-  diamond: DiamondNode,
-  label: LabelNode,
-  group: EdgeGroupNode,
+  entity: EntityCardNode,
+  event: EventNode,
+  connectorGroup: EdgeGroupNode,
   relationship: RelationshipNode,
 };
 
@@ -98,6 +103,10 @@ const edgeTypes = {
 const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
   duration: 200,
 };
+
+const LayersLabel = i18n.translate('securitySolutionPackages.csp.graph.controls.layers', {
+  defaultMessage: 'Layers',
+});
 
 const nonInteractiveFitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
   ...fitViewOptions,
@@ -129,7 +138,22 @@ export const Graph = memo<GraphProps>(
     onCenterGraphAfterRefresh,
     ...rest
   }: GraphProps) => {
+    const { euiTheme } = useEuiTheme();
     const backgroundId = useGeneratedHtmlId();
+    const [storedDisplayOptions, setStoredDisplayOptions] = useLocalStorage(
+      GRAPH_DISPLAY_OPTIONS_STORAGE_KEY,
+      DEFAULT_GRAPH_DISPLAY_OPTIONS
+    );
+    // Merge with defaults so new fields added in future releases are always visible
+    // even for users who have an older stored value missing those keys.
+    const displayOptions: GraphDisplayOptions = {
+      highlightOrigin:
+        storedDisplayOptions?.highlightOrigin ?? DEFAULT_GRAPH_DISPLAY_OPTIONS.highlightOrigin,
+      entity: { ...DEFAULT_GRAPH_DISPLAY_OPTIONS.entity, ...storedDisplayOptions?.entity },
+      event: { ...DEFAULT_GRAPH_DISPLAY_OPTIONS.event, ...storedDisplayOptions?.event },
+    };
+    const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
+    const setDisplayOptions = (opts: GraphDisplayOptions) => setStoredDisplayOptions(opts);
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
@@ -280,53 +304,95 @@ export const Graph = memo<GraphProps>(
     );
 
     return (
-      <div {...rest}>
-        <SvgDefsMarker />
-        <ReactFlow
-          key={reactFlowKey}
-          data-test-subj={GRAPH_ID}
-          fitView={true}
-          fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
-          onInit={onInitCallback}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          nodes={nodesState}
-          edges={edgesState}
-          nodesConnectable={false}
-          edgesFocusable={false}
-          // Disable React Flow's built-in selection/focus in non-interactive mode (e.g. flyout
-          // preview) so nodes never receive a selected/focused state through keyboard focus or
-          // programmatic selection, which would otherwise show selection visuals.
-          nodesFocusable={interactive}
-          elementsSelectable={interactive}
-          onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
-          snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
-          snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          proOptions={{ hideAttribution: true }}
-          panOnDrag={isGraphInteractive && !isLocked}
-          zoomOnScroll={isGraphInteractive && !isLocked}
-          zoomOnPinch={isGraphInteractive && !isLocked}
-          zoomOnDoubleClick={isGraphInteractive && !isLocked}
-          preventScrolling={interactive}
-          nodesDraggable={interactive && isGraphInteractive && !isLocked}
-          maxZoom={1.3}
-          minZoom={0.1}
-        >
-          {interactive && (
-            <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
-            </Panel>
-          )}
-          {children}
-          <Background id={backgroundId} />
-          {interactive && showMinimap && (
-            <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
-          )}
-        </ReactFlow>
-        <GlobalGraphStyles />
-      </div>
+      <GraphDisplayOptionsContext.Provider value={displayOptions}>
+        <div {...rest}>
+          <SvgDefsMarker />
+          <ReactFlow
+            key={reactFlowKey}
+            data-test-subj={GRAPH_ID}
+            fitView={true}
+            fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
+            onInit={onInitCallback}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            nodes={nodesState}
+            edges={edgesState}
+            nodesConnectable={false}
+            edgesFocusable={false}
+            // Disable React Flow's built-in selection/focus in non-interactive mode (e.g. flyout
+            // preview) so nodes never receive a selected/focused state through keyboard focus or
+            // programmatic selection, which would otherwise show selection visuals.
+            nodesFocusable={interactive}
+            elementsSelectable={interactive}
+            onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
+            snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
+            snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            proOptions={{ hideAttribution: true }}
+            panOnDrag={isGraphInteractive && !isLocked}
+            zoomOnScroll={isGraphInteractive && !isLocked}
+            zoomOnPinch={isGraphInteractive && !isLocked}
+            zoomOnDoubleClick={isGraphInteractive && !isLocked}
+            preventScrolling={interactive}
+            nodesDraggable={interactive && isGraphInteractive && !isLocked}
+            maxZoom={1.3}
+            minZoom={0.1}
+          >
+            {interactive && (
+              <Panel position="bottom-left">
+                <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
+              </Panel>
+            )}
+            {interactive && (
+              <Panel position="bottom-center">
+                <EuiFlexGroup
+                  direction="row"
+                  gutterSize="none"
+                  css={css`
+                    border: ${euiTheme.border.thin};
+                    border-radius: ${euiTheme.border.radius.medium};
+                    background-color: ${euiTheme.colors.backgroundBasePlain};
+                  `}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      aria-label={LayersLabel}
+                      isOpen={isLayersPanelOpen}
+                      closePopover={() => setIsLayersPanelOpen(false)}
+                      anchorPosition="upCenter"
+                      panelPaddingSize="none"
+                      button={
+                        <EuiToolTip content={LayersLabel} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            iconType="layers"
+                            aria-label={LayersLabel}
+                            size="m"
+                            color={isLayersPanelOpen ? 'primary' : 'text'}
+                            data-test-subj={GRAPH_CONTROLS_LAYERS_ID}
+                            css={css`
+                              border-radius: ${euiTheme.border.radius.medium};
+                            `}
+                            onClick={() => setIsLayersPanelOpen((prev) => !prev)}
+                          />
+                        </EuiToolTip>
+                      }
+                    >
+                      <LayersPanel displayOptions={displayOptions} onChange={setDisplayOptions} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </Panel>
+            )}
+            {children}
+            <Background id={backgroundId} />
+            {interactive && showMinimap && (
+              <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
+            )}
+          </ReactFlow>
+          <GlobalGraphStyles />
+        </div>
+      </GraphDisplayOptionsContext.Provider>
     );
   }
 );
@@ -348,19 +414,19 @@ const processGraph = (
 
     const node: Node<NodeViewModel> = {
       id: nodeData.id,
-      type: nodeData.shape,
+      type: nodeData.kind,
       data: { ...nodeData, interactive },
       position: { x: 0, y: 0 }, // Default position, should be updated later
       className: interactive ? undefined : 'non-interactive',
     };
 
-    if (node.type === 'group' && nodeData.shape === 'group') {
+    if (node.type === 'connectorGroup' && nodeData.kind === 'connectorGroup') {
       node.sourcePosition = Position.Right;
       node.targetPosition = Position.Left;
       node.resizing = false;
       node.focusable = false;
     } else if (
-      (nodeData.shape === 'label' || nodeData.shape === 'relationship') &&
+      (nodeData.kind === 'event' || nodeData.kind === 'relationship') &&
       nodeData.parentId
     ) {
       node.parentId = nodeData.parentId;
@@ -375,13 +441,13 @@ const processGraph = (
   const initialEdges: Array<Edge<EdgeViewModel>> = edgesModel
     .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])
     .map((edgeData) => {
-      const sourceShape = nodesById[edgeData.source].shape;
-      const targetShape = nodesById[edgeData.target].shape;
+      const sourceKind = nodesById[edgeData.source].kind;
+      const targetKind = nodesById[edgeData.target].kind;
 
-      const isIn = !isConnectorShape(sourceShape) && targetShape === 'group';
-      const isInside = sourceShape === 'group' && isConnectorShape(targetShape);
-      const isOut = isConnectorShape(sourceShape) && targetShape === 'group';
-      const isOutside = sourceShape === 'group' && !isConnectorShape(targetShape);
+      const isIn = !isConnectorKind(sourceKind) && targetKind === 'connectorGroup';
+      const isInside = sourceKind === 'connectorGroup' && isConnectorKind(targetKind);
+      const isOut = isConnectorKind(sourceKind) && targetKind === 'connectorGroup';
+      const isOutside = sourceKind === 'connectorGroup' && !isConnectorKind(targetKind);
 
       return {
         id: edgeData.id,
@@ -395,9 +461,9 @@ const processGraph = (
         deletable: false,
         data: {
           ...edgeData,
-          sourceShape: nodesById[edgeData.source].shape,
+          sourceKind: nodesById[edgeData.source].kind,
           sourceColor: nodesById[edgeData.source].color,
-          targetShape: nodesById[edgeData.target].shape,
+          targetKind: nodesById[edgeData.target].kind,
           targetColor: nodesById[edgeData.target].color,
         },
       };

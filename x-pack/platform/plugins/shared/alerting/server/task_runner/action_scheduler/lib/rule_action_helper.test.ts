@@ -358,7 +358,8 @@ describe('rule_action_helper', () => {
         action: mockSummaryAction,
       });
       expect(logger.debug).toHaveBeenCalledWith(
-        '(5) alerts have been filtered out for: slack:111-111'
+        '(5) alerts have been filtered out for: slack:111-111',
+        { labels: { actionId: '1', actionTypeId: 'slack' } }
       );
     });
 

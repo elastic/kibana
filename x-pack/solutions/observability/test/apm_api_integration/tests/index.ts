@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import globby from 'globby';
+import { globbySync } from 'globby';
 import path from 'path';
 import type { FtrProviderContext } from '../common/ftr_provider_context';
 
@@ -31,7 +31,7 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
   // Instead skip (flaky) tests individually
   describe('APM API tests', function () {
     const filePattern = getGlobPattern();
-    const tests = globby.sync(filePattern, { cwd });
+    const tests = globbySync(filePattern, { cwd });
 
     if (envGrepFiles) {
       // eslint-disable-next-line no-console

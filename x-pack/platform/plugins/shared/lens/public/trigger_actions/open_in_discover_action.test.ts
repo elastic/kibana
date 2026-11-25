@@ -135,7 +135,7 @@ describe('open in discover action', () => {
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
     expect(locator.getRedirectUrl).toHaveBeenCalledWith({
       ...viewUnderlyingDataArgs,
-      isApproximate: false,
+      esqlApproximation: false,
     });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
@@ -186,7 +186,7 @@ describe('open in discover action', () => {
       ...viewUnderlyingDataArgs,
       filters: [],
       query: { esql: 'FROM logs\n| WHERE `host.name` : "web-1"' },
-      isApproximate: false,
+      esqlApproximation: false,
     });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
@@ -236,7 +236,7 @@ describe('open in discover action', () => {
       ...viewUnderlyingDataArgs,
       filters: [],
       query: { esql: 'FROM logs\n| WHERE KQL("""host.name : "web-1"""")' },
-      isApproximate: false,
+      esqlApproximation: false,
     });
   });
 
@@ -280,12 +280,12 @@ describe('open in discover action', () => {
     expect(locator.getRedirectUrl).toHaveBeenCalledWith({
       ...viewUnderlyingDataArgs,
       filters: [],
-      isApproximate: false,
+      esqlApproximation: false,
     });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
 
-  it('passes isApproximate to the locator when parentApi publishes approximation', async () => {
+  it('passes esqlApproximation to the locator when parentApi publishes approximation', async () => {
     const viewUnderlyingDataArgs = {
       dataViewSpec: { id: 'index-pattern-id' },
       timeRange: {},
@@ -325,7 +325,7 @@ describe('open in discover action', () => {
     } as ActionExecutionContext<EmbeddableApiContext>);
 
     expect(locator.getRedirectUrl).toHaveBeenCalledWith(
-      expect.objectContaining({ isApproximate: true })
+      expect.objectContaining({ esqlApproximation: true })
     );
   });
 });

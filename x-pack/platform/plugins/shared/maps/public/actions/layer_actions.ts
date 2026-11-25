@@ -19,11 +19,14 @@ import {
   getLayerList,
   getLayerListRaw,
   getMapColors,
-  getMapReady,
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
+import {
+  cancelRequest,
+  getInspectorAdapters,
+  getMapReady,
+} from '../reducers/non_serializable_instances';
 import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,

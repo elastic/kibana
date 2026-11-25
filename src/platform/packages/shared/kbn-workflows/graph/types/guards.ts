@@ -12,9 +12,11 @@ import type {
   DataSetGraphNode,
   ElasticsearchGraphNode,
   KibanaGraphNode,
+  SyntheticGraphNode,
   WaitForApprovalGraphNode,
   WaitForInputGraphNode,
   WaitGraphNode,
+  WorkflowExecuteGraphNode,
   WorkflowOutputGraphNode,
 } from './nodes/base';
 import type {
@@ -55,6 +57,9 @@ import type { GraphNodeUnion } from './nodes/union';
 import type { LoopStepType } from '../../spec/schema';
 import { LoopStepTypes } from '../../spec/schema';
 
+export const isSynthetic = (node: GraphNodeUnion): node is SyntheticGraphNode =>
+  'isSynthetic' in node && node.isSynthetic === true;
+
 export const isAtomic = (node: GraphNodeUnion): node is AtomicGraphNode => node.type === 'atomic';
 
 export const isElasticsearch = (node: GraphNodeUnion): node is ElasticsearchGraphNode =>
@@ -76,6 +81,9 @@ export const isDataSet = (node: GraphNodeUnion): node is DataSetGraphNode =>
 
 export const isWorkflowOutput = (node: GraphNodeUnion): node is WorkflowOutputGraphNode =>
   node.type === 'workflow.output';
+
+export const isWorkflowExecute = (node: GraphNodeUnion): node is WorkflowExecuteGraphNode =>
+  node.type === 'workflow.execute';
 
 export const isEnterIf = (node: GraphNodeUnion): node is EnterIfNode => node.type === 'enter-if';
 

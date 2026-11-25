@@ -7,24 +7,47 @@
 
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
+import {
+  bulkIndexEntities,
+  deleteEntityEngines,
+  installEntityStoreV2AndWait,
+} from '../../src/setup_helpers';
 
 /**
  * Entity Store V2 - get_entity tool routing evals.
  *
  * These specs validate that the entity-analytics skill correctly routes known-entity
  * lookup queries to the `security.get_entity` tool when Entity Store V2 is enabled.
- * This includes profile retrieval, risk score history over an interval, and
- * point-in-time profile snapshots on a specific date (new capability in V2).
+ * This includes profile retrieval, point-in-time profile snapshots on a specific
+ * date, and alert contribution questions. Risk-score *time series* / chart
+ * prompts belong in `entity_store_v2_get_entity_risk_score_history.spec.ts`
+ * (`security.get_entity_risk_score_history`) — `get_entity`'s
+ * profile_history is entity-store attribute snapshots, not the risk score series.
  *
- * Tool routing assertions work without pre-seeded data; the tool may return
+ * Most tool routing assertions work without pre-seeded data; the tool may return
  * "entity not found" but the call itself must still be made. For grounded
  * criteria (verifying actual profile fields, risk inputs, etc.) seed the entity
  * store using the security-documents-generator populate script.
  */
+const RISKY_USER_EUID = 'user:critical-alice';
+
 evaluate.describe(
   'SIEM Entity Analytics V2 Skill - Get Entity',
   { tag: tags.serverless.security.complete },
   () => {
+    evaluate.beforeAll(async ({ log, esClient, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log });
+
+      await bulkIndexEntities({
+        esClient,
+        entities: [{ euid: RISKY_USER_EUID, riskLevel: 'Critical', riskScoreNorm: 96 }],
+      });
+    });
+
+    evaluate.afterAll(async ({ log, supertest }) => {
+      await deleteEntityEngines({ supertest, log });
+    });
+
     evaluate('entity store v2: get entity questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
@@ -55,34 +78,13 @@ evaluate.describe(
             },
             {
               input: {
-                question: "Has Cielo39's risk score changed significantly over the last 90 days?",
-              },
-              output: {
-                criteria: [
-                  "Analyse Cielo39's risk score history over the last 90 days and state whether the change is significant (greater than 20 points), or clearly state the entity was not found.",
-                  'Include previous and current risk scores where available.',
-                  'Do not fabricate entity or risk data.',
-                ],
-                toolCalls: [
-                  {
-                    id: 'security.get_entity',
-                    criteria: [
-                      'The tool is called with an entityId matching "Cielo39" and an interval parameter of "90d" or equivalent.',
-                    ],
-                  },
-                ],
-              },
-              metadata: { query_intent: 'Factual' },
-            },
-            {
-              input: {
                 question:
-                  "Show me user jsmith123's full profile including their last 30 days of risk history",
+                  "Show me user jsmith123's full profile including changes in criticality and watchlists over the last 30 days",
               },
               output: {
                 criteria: [
-                  "Retrieve jsmith123's profile with risk score history over the last 30 days, or clearly state the entity was not found.",
-                  'Summarise any notable changes in risk score, asset criticality, watchlists, or behaviors over the interval.',
+                  "Retrieve jsmith123's profile with attribute history over the last 30 days, or clearly state the entity was not found.",
+                  'Summarise any notable changes in asset criticality, watchlists, or behaviors over the interval.',
                   'Do not fabricate entity data.',
                 ],
                 toolCalls: [
@@ -187,5 +189,43 @@ evaluate.describe(
         },
       });
     });
+
+    evaluate(
+      'entity store v2: suggests a watchlist for a risky entity',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'entity-analytics-v2: watchlist suggestion + handoff',
+            description:
+              'When a risky entity comes up and the user wants ongoing visibility, the agent should suggest a watchlist and hand off to the manage-watchlists skill rather than fabricating a watchlist action itself.',
+            examples: [
+              {
+                input: {
+                  question: `Tell me about ${RISKY_USER_EUID} — I want to keep an eye on them going forward.`,
+                },
+                output: {
+                  criteria: [
+                    `Look up ${RISKY_USER_EUID} and report that they are high/critical risk.`,
+                    'Because the user wants ongoing visibility into this entity: if the profile shows no existing watchlist membership, suggest putting it on a watchlist as a way to track it over time. If the profile already shows it is a member of one or more watchlists (entity.attributes.watchlists), acknowledge that existing membership instead of suggesting a watchlist from scratch, and optionally offer to verify coverage or add it to a different watchlist.',
+                    'Do not claim a watchlist was created or that the entity was newly added to one — no watchlist mutation tool was called in this turn, so any watchlist action should be offered/asked, not asserted as completed. Reporting pre-existing membership as a fact from the profile is fine.',
+                    'Do not fabricate a watchlist name or id.',
+                  ],
+                  toolCalls: [
+                    {
+                      id: 'security.get_entity',
+                      acceptableAlternativeToolIds: ['security.search_entities'],
+                      criteria: [
+                        `The tool is called for ${RISKY_USER_EUID} (or an equivalent lookup).`,
+                      ],
+                    },
+                  ],
+                },
+                metadata: { query_intent: 'Watchlist Suggestion' },
+              },
+            ],
+          },
+        });
+      }
+    );
   }
 );

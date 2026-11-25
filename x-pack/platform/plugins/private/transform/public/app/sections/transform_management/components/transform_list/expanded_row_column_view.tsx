@@ -9,16 +9,17 @@ import type { FC } from 'react';
 import React, { Fragment } from 'react';
 
 import {
-  EuiCallOut,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiTitle,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export interface SectionItem {
   title: string | JSX.Element;
@@ -36,17 +37,30 @@ interface SectionProps {
 }
 
 export const Section: FC<SectionProps> = ({ section }) => {
+  const { euiTheme } = useEuiTheme();
+
   if (section.items.length === 0) {
     return null;
   }
 
   return (
-    <EuiPanel>
-      <EuiTitle size="xs">
+    <section>
+      <EuiTitle size="xxs">
         <span>{section.title}</span>
       </EuiTitle>
-      <EuiDescriptionList compressed type="column" listItems={section.items} />
-    </EuiPanel>
+      <EuiSpacer size="xs" />
+      <EuiDescriptionList
+        compressed
+        type="column"
+        columnWidths={[1, 2]}
+        listItems={section.items}
+        titleProps={{
+          css: {
+            fontSize: euiTheme.font.scale.xs * euiTheme.base,
+          },
+        }}
+      />
+    </section>
   );
 };
 
@@ -61,42 +75,63 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
   showErrorCallout = false,
   dataTestSubj,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const leftSections = sections.filter(
+    (section) => section.position === 'left' && section.items.length > 0
+  );
+  const rightSections = sections.filter(
+    (section) => section.position === 'right' && section.items.length > 0
+  );
+  const hasTwoColumns = leftSections.length > 0 && rightSections.length > 0;
+  const columnStyles = {
+    left: css`
+      padding-block: ${euiTheme.base}px;
+      padding-inline-end: ${euiTheme.size.l};
+    `,
+    right: css`
+      border-inline-start: ${euiTheme.border.thin};
+      padding-block: ${euiTheme.base}px;
+      padding-inline-start: ${euiTheme.size.l};
+    `,
+  };
+
+  const renderSections = (columnSections: SectionConfig[]) =>
+    columnSections.map((section, index) => (
+      <Fragment key={section.title}>
+        {index > 0 && <EuiSpacer size="s" />}
+        <Section section={section} />
+      </Fragment>
+    ));
+
   return (
     <div data-test-subj={dataTestSubj ?? 'transformDetailsTabContent'}>
       {showErrorCallout && (
         <>
           <EuiSpacer size={'s'} />
-          <EuiCallOut announceOnMount color="warning" iconType="warning" size="m">
-            <p>
+          <KbnWarningCallout
+            announceOnMount
+            size="m"
+            title={
               <FormattedMessage
                 id="xpack.transform.list.extendedStatsError"
                 defaultMessage="An error occurred fetching the extended stats for this transform. Basic stats are displayed instead."
               />
-            </p>
-          </EuiCallOut>
+            }
+          />
         </>
       )}
-      <EuiFlexGroup>
-        <EuiFlexItem style={{ width: '50%' }}>
-          {sections
-            .filter((s) => s.position === 'left')
-            .map((s) => (
-              <Fragment key={s.title}>
-                <EuiSpacer size="s" />
-                <Section section={s} />
-              </Fragment>
-            ))}
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexItem css={columnStyles.left} data-test-subj="transformExpandedRowColumn">
+          {renderSections(leftSections.length > 0 ? leftSections : rightSections)}
         </EuiFlexItem>
-        <EuiFlexItem style={{ width: '50%' }}>
-          {sections
-            .filter((s) => s.position === 'right')
-            .map((s) => (
-              <Fragment key={s.title}>
-                <EuiSpacer size="s" />
-                <Section section={s} />
-              </Fragment>
-            ))}
-        </EuiFlexItem>
+        {hasTwoColumns && (
+          <EuiFlexItem
+            css={columnStyles.right}
+            data-test-subj="transformExpandedRowColumnWithDivider"
+          >
+            {renderSections(rightSections)}
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );

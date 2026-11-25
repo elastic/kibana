@@ -43,7 +43,6 @@ export const navigateToLensForAnnotationGroup = async ({
     path: '',
     state: {
       originatingApp: currentApp,
-      originatingPath: window.location.hash,
       breadcrumbs,
     },
   });

@@ -24,6 +24,11 @@ jest.mock('../entity_sources/entity_source_api_key', () => ({
   invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
 }));
 
+const mockCreateOrUpdateIndex = jest.fn();
+jest.mock('../../utils/create_or_update_index', () => ({
+  createOrUpdateIndex: (...args: unknown[]) => mockCreateOrUpdateIndex(...args),
+}));
+
 describe('WatchlistConfigClient', () => {
   let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -50,6 +55,42 @@ describe('WatchlistConfigClient', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('create', () => {
+    const SO_ID = 'new-watchlist-id';
+    const attrs = { name: 'Test Watchlist', riskModifier: 0 };
+    const savedObjectResult = {
+      id: SO_ID,
+      type: 'watchlist-config',
+      references: [],
+      attributes: attrs,
+    };
+
+    beforeEach(() => {
+      soClientMock.create.mockResolvedValue(savedObjectResult);
+      mockCreateOrUpdateIndex.mockResolvedValue(undefined);
+    });
+
+    it('creates the saved object and index, then returns the watchlist', async () => {
+      const result = await client.create(attrs);
+
+      expect(soClientMock.create).toHaveBeenCalledTimes(1);
+      expect(mockCreateOrUpdateIndex).toHaveBeenCalledTimes(1);
+      expect(result).toMatchObject({ id: SO_ID, name: 'Test Watchlist' });
+    });
+
+    it('deletes the saved object when index creation fails', async () => {
+      const indexError = new Error('Index creation failed');
+      mockCreateOrUpdateIndex.mockRejectedValueOnce(indexError);
+      soClientMock.delete.mockResolvedValue({});
+
+      await expect(client.create(attrs)).rejects.toThrow('Index creation failed');
+
+      expect(soClientMock.delete).toHaveBeenCalledWith('watchlist-config', SO_ID, {
+        refresh: 'wait_for',
+      });
+    });
   });
 
   describe('getEntityCounts', () => {

@@ -17,6 +17,7 @@ import { act } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { SpaceAvatarInternal } from '@kbn/spaces-plugin/public/space_avatar/space_avatar_internal';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
@@ -27,18 +28,18 @@ import { SpacesPopoverList } from './spaces_popover_list';
 
 const mockSpaces = [
   {
-    id: 'default',
+    id: asSpaceId('default'),
     name: 'Default Space',
     description: 'this is your default space',
     disabledFeatures: [],
   },
   {
-    id: 'space-1',
+    id: asSpaceId('space-1'),
     name: 'Space 1',
     disabledFeatures: [],
   },
   {
-    id: 'space-2',
+    id: asSpaceId('space-2'),
     name: 'Space 2',
     disabledFeatures: [],
   },
@@ -91,27 +92,27 @@ describe('SpacesPopoverList', () => {
   it('should render a search box when there are 8 or more spaces', async () => {
     const eightSpaces = mockSpaces.concat([
       {
-        id: 'space-3',
+        id: asSpaceId('space-3'),
         name: 'Space-3',
         disabledFeatures: [],
       },
       {
-        id: 'space-4',
+        id: asSpaceId('space-4'),
         name: 'Space 4',
         disabledFeatures: [],
       },
       {
-        id: 'space-5',
+        id: asSpaceId('space-5'),
         name: 'Space 5',
         disabledFeatures: [],
       },
       {
-        id: 'space-6',
+        id: asSpaceId('space-6'),
         name: 'Space 6',
         disabledFeatures: [],
       },
       {
-        id: 'space-7',
+        id: asSpaceId('space-7'),
         name: 'Space 7',
         disabledFeatures: [],
       },
@@ -128,22 +129,22 @@ describe('SpacesPopoverList', () => {
   it('should NOT render a search box when there are less than 8 spaces', async () => {
     const sevenSpaces = mockSpaces.concat([
       {
-        id: 'space-3',
+        id: asSpaceId('space-3'),
         name: 'Space-3',
         disabledFeatures: [],
       },
       {
-        id: 'space-4',
+        id: asSpaceId('space-4'),
         name: 'Space 4',
         disabledFeatures: [],
       },
       {
-        id: 'space-5',
+        id: asSpaceId('space-5'),
         name: 'Space 5',
         disabledFeatures: [],
       },
       {
-        id: 'space-6',
+        id: asSpaceId('space-6'),
         name: 'Space 6',
         disabledFeatures: [],
       },

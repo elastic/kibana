@@ -24,6 +24,12 @@ const createSetupContractMock = () => {
     getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
     getKibanaBranch: jest.fn(),
     getElasticsearchInfo: jest.fn(),
+    getI18nInfo: jest.fn().mockReturnValue({
+      locale: 'en',
+      browserPreferredLocale: undefined,
+      localeSource: 'default',
+      configDefaultLocale: 'en',
+    }),
     getCspConfig: jest.fn().mockReturnValue({ warnLegacyBrowsers: true }),
     getExternalUrlConfig: jest.fn().mockReturnValue({ policy: [] }),
     getAnonymousStatusPage: jest.fn().mockReturnValue(false),

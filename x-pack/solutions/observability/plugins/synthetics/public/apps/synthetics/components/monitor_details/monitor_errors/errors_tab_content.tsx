@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FailedTestsByStep } from './failed_tests_by_step';
 import type { PingState } from '../../../../../../common/runtime_types';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
-import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
+import { MonitorErrorsCount, ERROR_STATES_TOOLTIP } from '../monitor_summary/monitor_errors_count';
 import { FailedTestsCount } from './failed_tests_count';
 import { MonitorFailedTests } from './failed_tests';
 import { ErrorsList } from './errors_list';
@@ -35,10 +35,10 @@ export const ErrorsTabContent = ({
           <PanelWithTitle title={OVERVIEW_LABEL} titleLeftAlign css={{ minWidth: 260 }}>
             <EuiFlexGroup wrap={true} responsive={false}>
               <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
-                <MonitorErrorsCount from={time.from} to={time.to} id="monitorsErrorsCountErrors" />
+                <FailedTestsCount from={time.from} to={time.to} id="failedTestsCountErrors" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
-                <FailedTestsCount from={time.from} to={time.to} id="failedTestsCountErrors" />
+                <MonitorErrorsCount from={time.from} to={time.to} id="monitorsErrorsCountErrors" />
               </EuiFlexItem>
             </EuiFlexGroup>
           </PanelWithTitle>
@@ -52,7 +52,7 @@ export const ErrorsTabContent = ({
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" wrap={true}>
         <EuiFlexItem grow={2} css={{ minWidth: 260 }}>
-          <PanelWithTitle title={ERRORS_LABEL}>
+          <PanelWithTitle title={ERRORS_LABEL} helpText={ERROR_STATES_TOOLTIP}>
             <ErrorsList errorStates={errorStates} upStates={upStates} loading={loading} />
           </PanelWithTitle>
         </EuiFlexItem>
@@ -62,8 +62,8 @@ export const ErrorsTabContent = ({
   );
 };
 
-const ERRORS_LABEL = i18n.translate('xpack.synthetics.errors.label', {
-  defaultMessage: 'Errors',
+const ERRORS_LABEL = i18n.translate('xpack.synthetics.errors.errorStatesLabel', {
+  defaultMessage: 'Error states',
 });
 
 const OVERVIEW_LABEL = i18n.translate('xpack.synthetics.errors.overview', {

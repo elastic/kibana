@@ -208,9 +208,9 @@ describe('getEntityGraphTool', () => {
           identifier: 'server1',
           entityStoreId: 'host:server1',
           timeRange: defaultTimeRange,
-          attachmentLabel: 'Graph — host: server1',
+          attachmentLabel: 'host: server1',
         },
-        description: 'Graph — host: server1',
+        description: 'host: server1',
       });
       expect(context.attachments.update).not.toHaveBeenCalled();
 

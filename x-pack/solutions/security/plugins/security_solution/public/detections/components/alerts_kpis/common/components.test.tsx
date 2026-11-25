@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { matchers as emotionMatchers } from '@emotion/jest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
-import 'jest-styled-components';
+expect.extend(emotionMatchers);
 
 import { TestProviders } from '../../../../common/mock';
 import { KpiPanel, StackByComboBox } from './components';
@@ -100,6 +100,24 @@ describe('components', () => {
 
       expect(screen.getByTestId('test')).toHaveStyleRule('overflow-y', 'auto');
     });
+
+    test('it does NOT forward the `$overflowY` and `$toggleStatus` props to the DOM', () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      render(
+        <TestProviders>
+          <KpiPanel data-test-subj="test" $overflowY="auto" $toggleStatus={true}>
+            {'test'}
+          </KpiPanel>
+        </TestProviders>
+      );
+
+      const loggedArgs = consoleErrorSpy.mock.calls.flat();
+      consoleErrorSpy.mockRestore();
+
+      expect(loggedArgs).not.toContain('$overflowY');
+      expect(loggedArgs).not.toContain('$toggleStatus');
+    });
   });
 
   describe('StackByComboBox', () => {
@@ -127,7 +145,7 @@ describe('components', () => {
       const option = await screen.findByText(optionToSelect);
       fireEvent.click(option);
 
-      expect(onSelect).toBeCalledWith(optionToSelect);
+      expect(onSelect).toHaveBeenCalledWith(optionToSelect);
     });
 
     test('it does NOT disable the combo box by default', () => {

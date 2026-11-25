@@ -16,7 +16,7 @@ import { useHttp } from '../../../../common/lib/kibana';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useQuery } from '@kbn/react-query';
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
-import { mockStatsNode } from '../../../../flyout/document_details/right/mocks/mock_analyzer_data';
+import { mockStatsNode } from '../mocks/mock_analyzer_data';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../timelines/containers/use_timeline_data_filters');
@@ -52,7 +52,7 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     jest.clearAllMocks();
   });
 
-  it('should return all properties when query is loading', () => {
+  it('should return an error when entity lookup found nothing even if the tree query still reports loading', () => {
     (useQuery as jest.Mock).mockReturnValue({
       isLoading: true,
       data: {},
@@ -75,10 +75,10 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     expect(useQuery).toHaveBeenCalledWith(
       ['getAlertPrevalenceFromProcessTree', null, 'index'],
       expect.any(Function),
-      expect.any(Object)
+      expect.objectContaining({ enabled: false })
     );
-    expect(hookResult.result.current.loading).toEqual(true);
-    expect(hookResult.result.current.error).toEqual(false);
+    expect(hookResult.result.current.loading).toEqual(false);
+    expect(hookResult.result.current.error).toEqual(true);
     expect(hookResult.result.current.alertIds).toEqual(undefined);
     expect(hookResult.result.current.statsNodes).toEqual(undefined);
   });
@@ -120,9 +120,9 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     (useAlertDocumentAnalyzerSchema as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
-      id: null,
-      schema: null,
-      agentId: null,
+      id: 'id',
+      schema: { id: 'a', parent: 'b' },
+      agentId: 'agentId',
     });
 
     hookResult = renderHook(() =>

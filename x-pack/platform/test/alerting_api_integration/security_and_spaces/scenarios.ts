@@ -74,6 +74,42 @@ export const GlobalRead: User = {
   },
 };
 
+// Global read plus the security rules "exceptions" sub-feature edit privilege.
+// This is the user the read-auth params edit exists for: read access to rules
+// combined with the ability to edit a rule's exception lists.
+export const RulesReadExceptionsAll: User = {
+  username: 'rules_read_exceptions_all',
+  fullName: 'rules_read_exceptions_all',
+  password: 'rules_read_exceptions_all-password',
+  role: {
+    name: 'rules_read_exceptions_all_role',
+    kibana: [
+      {
+        feature: {
+          actions: ['read'],
+          alertsFixture: ['read'],
+          alertsRestrictedFixture: ['read'],
+          actionsSimulators: ['read'],
+          rulesSettings: ['read', READ_FLAPPING_SETTINGS_SUB_FEATURE_ID],
+          maintenanceWindow: ['read'],
+          siem: ['read'],
+          stackAlerts: ['read'],
+          securitySolutionRulesV4: ['read', 'security_solution_exceptions_all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 const Space1All: User = {
   username: 'space_1_all',
   fullName: 'space_1_all',
@@ -160,7 +196,7 @@ const Space1AllWithRestrictedFixture: User = {
 
 /**
  * This user is needed to test system actions.
- * In x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/action_types.ts
+ * In x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/action_types.ts
  * we registered a system action type which requires access to Cases. This user has
  * access to Cases only in the Stack Management. The tests use this user to
  * execute the system action and verify that the authorization is performed
@@ -384,6 +420,7 @@ export const Users: User[] = [
   NoKibanaPrivileges,
   Superuser,
   GlobalRead,
+  RulesReadExceptionsAll,
   Space1All,
   Space1AllWithRestrictedFixture,
   Space1AllAlertingNoneActions,

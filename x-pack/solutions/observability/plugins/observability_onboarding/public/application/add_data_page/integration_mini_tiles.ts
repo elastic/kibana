@@ -12,47 +12,74 @@ export interface IntegrationMiniTileData {
   id: string;
   title: string;
   logo: SupportedLogo;
+  /** EPR package whose integrations detail page the tile opens. */
+  eprPackage?: string;
+  /** Internal onboarding-app route the tile opens. */
+  route?: string;
+  /** Fleet integration group whose chooser this tile opens instead of navigating,
+   * falling back to its normal navigation when Fleet has no card for the group. */
+  collectionGroup?: string;
+  /** Limits the tile to a pricing state: 'metrics' renders only when metrics
+   * onboarding is available, 'logs-essentials' only when it is not.
+   * Omitted tiles render on every tier. */
+  visibleOn?: 'metrics' | 'logs-essentials';
 }
 
 export const INTEGRATION_MINI_TILES: readonly IntegrationMiniTileData[] = [
   {
-    id: 'confluence',
+    id: 'opentelemetry',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.confluence.title',
-      { defaultMessage: 'Confluence' }
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.opentelemetry.title',
+      { defaultMessage: 'OpenTelemetry' }
     ),
-    logo: 'confluence',
+    logo: 'opentelemetry',
+    // Stands in for the Applications category, which is hidden on Logs Essentials.
+    visibleOn: 'logs-essentials',
   },
   {
-    id: 'salesforce',
+    id: 'prometheus',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.salesforce.title',
-      { defaultMessage: 'Salesforce' }
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.prometheus.title',
+      { defaultMessage: 'Prometheus' }
     ),
-    logo: 'salesforce',
+    logo: 'prometheus',
+    eprPackage: 'prometheus',
+    collectionGroup: 'prometheus',
+    visibleOn: 'metrics',
   },
   {
-    id: 'slack',
+    id: 'supabase',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.slack.title',
-      { defaultMessage: 'Slack' }
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.supabase.title',
+      { defaultMessage: 'Supabase' }
     ),
-    logo: 'slack',
+    logo: 'supabase',
+    eprPackage: 'supabase',
+    visibleOn: 'metrics',
   },
   {
-    id: 'splunk',
+    id: 'auto_import',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.splunk.title',
-      { defaultMessage: 'Splunk' }
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.autoImport.title',
+      { defaultMessage: 'Auto Import' }
     ),
-    logo: 'splunk',
+    logo: 'auto_import',
   },
   {
-    id: 'jira',
+    id: 'upload_file',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.jira.title',
-      { defaultMessage: 'Jira' }
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.uploadFile.title',
+      { defaultMessage: 'Upload a file' }
     ),
-    logo: 'jira',
+    logo: 'upload_file',
+  },
+  {
+    id: 'custom_logs',
+    title: i18n.translate(
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.customLogs.title',
+      { defaultMessage: 'Custom logs' }
+    ),
+    logo: 'custom_logs',
+    route: '/otel-logs',
   },
 ] as const;

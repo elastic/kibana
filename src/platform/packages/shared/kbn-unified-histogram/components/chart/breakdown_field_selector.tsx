@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiTextTruncate, type EuiSelectableOption } from '@elastic/eui';
 import {
   FieldIcon,
   getFieldIconProps,
@@ -18,10 +18,12 @@ import {
 } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import { isESQLColumnGroupable } from '@kbn/esql-utils';
-import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EMPTY_OPTION,
   ToolbarSelector,
@@ -42,37 +44,83 @@ const BREAKDOWN_EBT_BASE = {
   element: CHARTS_TOOLBAR_EBT_ELEMENT,
 } as const;
 
+// Caps how wide the field name can render within the button,
+// so a long name doesn't grow the button unbounded
+const FIELD_NAME_MAX_WIDTH = 300;
+
+const fieldNameWrapperCss = css`
+  position: relative;
+  max-width: ${FIELD_NAME_MAX_WIDTH}px;
+  overflow: hidden;
+  pointer-events: none;
+  text-align: left;
+`;
+
+const fieldNameGhostCss = css`
+  visibility: hidden;
+  white-space: nowrap;
+`;
+
+const fieldNameVisibleCss = css`
+  position: absolute;
+  inset: 0;
+`;
+
+/**
+ * A hidden "ghost" copy of the field name sizes the wrapper via normal flow,
+ * giving EuiTextTruncate a real, non-circular width to truncate against.
+ */
+const FieldNameTruncate = ({ text }: { text: string }) => (
+  <span css={fieldNameWrapperCss}>
+    <span aria-hidden="true" css={fieldNameGhostCss}>
+      {text}
+    </span>
+    <span css={fieldNameVisibleCss}>
+      <EuiTextTruncate text={text} truncation="middle" />
+    </span>
+  </span>
+);
+
 export interface BreakdownFieldSelectorProps {
-  dataView: DataView;
+  dataSource: DataSource;
   breakdown: UnifiedHistogramBreakdownContext;
+  /** Restricts the dropdown to this list. Omit it to use the source's own columns. */
   esqlColumns?: DatatableColumn[];
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   recommendedFields?: ReadonlyArray<string>;
   fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
-const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
+const toBreakdownFields = (columns: readonly DatatableColumn[]) =>
+  // filter out unsupported field types and counter time series metrics
+  columns
+    .filter(isESQLColumnGroupable)
+    .map((column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)));
+
+const mapToDropdownFields = (dataSource: DataSource, esqlColumns?: DatatableColumn[]) => {
   if (esqlColumns) {
-    return (
-      // filter out unsupported field types and counter time series metrics
-      esqlColumns
-        .filter(isESQLColumnGroupable)
-        .map((column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)))
-    );
+    return toBreakdownFields(esqlColumns);
   }
 
-  return dataView.fields.filter(fieldSupportsBreakdown);
+  if (dataSource.kind === 'esql') {
+    return toBreakdownFields(dataSource.resultColumns);
+  }
+
+  return dataSource.getDataView().fields.filter(fieldSupportsBreakdown);
 };
 
 export const BreakdownFieldSelector = ({
-  dataView,
+  dataSource,
   breakdown,
   esqlColumns,
   onBreakdownFieldChange,
   recommendedFields,
   fieldsMetadata,
 }: BreakdownFieldSelectorProps) => {
-  const fields = useMemo(() => mapToDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
+  const fields = useMemo(
+    () => mapToDropdownFields(dataSource, esqlColumns),
+    [dataSource, esqlColumns]
+  );
   const fieldNames = useMemo(() => fields.map((f) => f.name), [fields]);
   const ecsFieldNames = useEcsFieldNames(fieldNames, fieldsMetadata);
 
@@ -173,16 +221,19 @@ export const BreakdownFieldSelector = ({
       data-selected-value={breakdown?.field?.name}
       searchable
       buttonLabel={
-        breakdown?.field?.displayName
-          ? i18n.translate('unifiedHistogram.breakdownFieldSelector.breakdownByButtonLabel', {
-              defaultMessage: 'Breakdown by {fieldName}',
-              values: {
-                fieldName: breakdown?.field?.displayName,
-              },
-            })
-          : i18n.translate('unifiedHistogram.breakdownFieldSelector.noBreakdownButtonLabel', {
-              defaultMessage: 'No breakdown',
-            })
+        breakdown?.field?.displayName ? (
+          <FormattedMessage
+            id="unifiedHistogram.breakdownFieldSelector.breakdownByButtonLabel"
+            defaultMessage="Breakdown by {fieldName}"
+            values={{
+              fieldName: <FieldNameTruncate text={breakdown.field.displayName} />,
+            }}
+          />
+        ) : (
+          i18n.translate('unifiedHistogram.breakdownFieldSelector.noBreakdownButtonLabel', {
+            defaultMessage: 'No breakdown',
+          })
+        )
       }
       popoverTitle={i18n.translate(
         'unifiedHistogram.breakdownFieldSelector.breakdownFieldPopoverTitle',

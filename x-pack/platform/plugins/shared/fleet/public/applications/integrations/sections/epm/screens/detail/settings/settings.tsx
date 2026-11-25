@@ -9,6 +9,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
+import semverValid from 'semver/functions/valid';
 
 import {
   EuiTitle,
@@ -18,8 +19,8 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPortal,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
@@ -143,10 +144,27 @@ export const SettingsPage: React.FC<Props> = memo(
 
     const {
       changelog,
-      breakingChanges,
       isLoading: isChangelogLoading,
       error: changelogError,
     } = useChangelog(name, latestVersion, version);
+
+    // Package policies can lag behind the installed version, and upgrading them applies the
+    // breaking changes from their own version. The acknowledgement must cover the whole range,
+    // as the policy upgrade APIs check it from each policy version.
+    const breakingChangesFromVersion = useMemo(
+      () =>
+        (packagePoliciesData?.items ?? []).reduce((oldestVersion, packagePolicy) => {
+          const policyVersion = packagePolicy.package?.version;
+          return policyVersion &&
+            semverValid(policyVersion) &&
+            semverValid(oldestVersion) &&
+            semverLt(policyVersion, oldestVersion)
+            ? policyVersion
+            : oldestVersion;
+        }, version),
+      [packagePoliciesData, version]
+    );
+    const { breakingChanges } = useChangelog(name, latestVersion, breakingChangesFromVersion);
 
     // Agentless package policies must upgrade through the agentless API, not the
     // (deprecated-for-agentless) package-policy API. Partition by whether each policy is
@@ -558,6 +576,9 @@ export const SettingsPage: React.FC<Props> = memo(
                           setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                           startServices={startServices}
                           isDisabled={Boolean(breakingChanges) && !isBreakingChangesUnderstood}
+                          acknowledgeBreakingChanges={
+                            Boolean(breakingChanges) && isBreakingChangesUnderstood
+                          }
                         />
                       </p>
                     </>
@@ -605,10 +626,8 @@ export const SettingsPage: React.FC<Props> = memo(
                           </EuiFlexGroup>
                         </>
                       ) : (
-                        <EuiCallOut
+                        <KbnWarningCallout
                           announceOnMount
-                          color="warning"
-                          iconType="lock"
                           data-test-subj="installPermissionCallout"
                           title={
                             <FormattedMessage
@@ -616,12 +635,13 @@ export const SettingsPage: React.FC<Props> = memo(
                               defaultMessage="Permission required"
                             />
                           }
-                        >
-                          <FormattedMessage
-                            id="xpack.fleet.integrations.settings.installPermissionRequired"
-                            defaultMessage="You do not have permission to install this integration. Contact your administrator."
-                          />
-                        </EuiCallOut>
+                          text={
+                            <FormattedMessage
+                              id="xpack.fleet.integrations.settings.installPermissionRequired"
+                              defaultMessage="You do not have permission to install this integration. Contact your administrator."
+                            />
+                          }
+                        />
                       )}
                     </div>
                   ) : (

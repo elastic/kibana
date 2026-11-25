@@ -28,27 +28,27 @@ dependsOn:
   - '@kbn/console-plugin'
   - '@kbn/core-chrome-browser'
   - '@kbn/cloud-plugin'
-  - '@kbn/shared-components'
-  - '@kbn/shared-ux-router'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/shared-ux-router'
   - '@kbn/vectordb-onboarding'
+  - '@kbn/elasticsearch-home'
   - '@kbn/react-query'
   - '@kbn/i18n'
   - '@kbn/core-application-browser'
   - '@kbn/deeplinks-management'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
-  - '@kbn/alerting-v2-utils'
   - '@kbn/deeplinks-workflows'
   - '@kbn/data-views-plugin'
   - '@kbn/navigation-plugin'
-  - '@kbn/announcement-banner'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
   - group-vectordb
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -56,7 +56,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

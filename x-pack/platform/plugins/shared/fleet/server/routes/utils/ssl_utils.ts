@@ -10,12 +10,13 @@ import Boom from '@hapi/boom';
 import { validateSslCertPath } from '../../../common/services';
 
 export function throwIfSslPathInvalid(
-  paths: Array<string | Record<string, unknown> | undefined | null>
+  paths: Array<string | Record<string, unknown> | undefined | null>,
+  toError: (message: string) => Error = (m) => Boom.badRequest(m)
 ) {
   for (const p of paths) {
     // SOSecret values can be a plain string or a { id } secret reference — skip references
     if (!p || typeof p === 'object') continue;
     const err = validateSslCertPath(p);
-    if (err) throw Boom.badRequest(err);
+    if (err) throw toError(err);
   }
 }

@@ -33,12 +33,14 @@ export function openSaveModal({
   workspace,
   saveWorkspace,
   services,
+  onClose,
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
   workspace: GraphWorkspaceSavedObject;
   saveWorkspace: SaveWorkspaceHandler;
   services: SaveWorkspaceServices;
+  onClose: () => void;
 }) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.description;
@@ -71,7 +73,7 @@ export function openSaveModal({
       savePolicy={savePolicy}
       hasData={hasData}
       onSave={onSave}
-      onClose={() => {}}
+      onClose={onClose}
       title={workspace.title}
       description={workspace.description}
       showCopyOnSave={Boolean(workspace.id)}

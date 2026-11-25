@@ -14,7 +14,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { merge } from 'lodash';
-import globby = require('globby');
+import { globbySync } from 'globby';
 
 type EndpointsAvailability = 'stack' | 'serverless';
 
@@ -182,9 +182,9 @@ class StandaloneSpecDefinitionsService {
     const manualPath = path.join(jsonPath, 'manual');
 
     // Use globby to find files
-    const generatedFiles = globby.sync(path.join(generatedPath, '*.json'));
-    const overrideFiles = globby.sync(path.join(overridesPath, '*.json'));
-    const manualFiles = globby.sync(path.join(manualPath, '*.json'));
+    const generatedFiles = globbySync(path.join(generatedPath, '*.json'));
+    const overrideFiles = globbySync(path.join(overridesPath, '*.json'));
+    const manualFiles = globbySync(path.join(manualPath, '*.json'));
 
     const jsonDefinitions: Record<string, EndpointDescription> = {};
 
@@ -239,7 +239,7 @@ class StandaloneSpecDefinitionsService {
       // Load the JS spec loaders
       // Dynamic require is necessary here because the path is determined at runtime based on version directories
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const loadedModule: unknown = require(jsIndexPath);
       const jsSpecLoaders = isRecord(loadedModule) ? loadedModule.jsSpecLoaders : undefined;
 

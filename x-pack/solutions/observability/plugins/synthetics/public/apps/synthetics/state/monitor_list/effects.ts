@@ -110,6 +110,9 @@ export function* upsertMonitorEffect() {
             yield put(
               quietFetchOverviewStatusAction.get({
                 pageState: monitorState.pageState,
+                // Preserve any accumulated infinite-scroll window in the card
+                // view instead of collapsing it back to a single page.
+                silent: true,
               })
             );
           }

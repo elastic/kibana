@@ -10,8 +10,13 @@ paths:
       x-internal: true
       x-codegen-enabled: true
       operationId: CreatePrivilegesImportIndex
+      deprecated: true
       summary: Create an index for Privileges Monitoring import
-      
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+        Create an index for Privileges Monitoring import.
+
       requestBody:
         description: Schema for the entity store initialization
         required: true
@@ -19,17 +24,17 @@ paths:
           application/json:
             schema:
               type: object
-              properties:      
+              properties:
                 name:
                   type: string
                   description: The index name to create
-                mode: 
+                mode:
                   type: string
                   enum: [standard, lookup]
                   description: The mode of index creation, either 'standard' or 'lookup'
               required:
                 - name
-                - mode                
+                - mode
       responses:
         '200':
           description: Successful response

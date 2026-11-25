@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
+  DynamicSchemaBuiltinToolDefinition,
   StaticEsqlTool,
   StaticIndexSearchTool,
   StaticWorkflowTool,
@@ -17,6 +18,14 @@ import { convertTool } from './converter';
 import { ToolAvailabilityCache } from './availability_cache';
 import type { BuiltinToolTypeDefinition, ToolTypeDefinition } from '../tool_types/definitions';
 
+const defaultAnnotations = {
+  title: 'Test Tool',
+  readOnlyHint: true as const,
+  destructiveHint: false as const,
+  idempotentHint: true as const,
+  openWorldHint: false as const,
+};
+
 const makeBuiltinRegistration = (
   overrides: Partial<BuiltinToolDefinition> = {}
 ): BuiltinToolDefinition => ({
@@ -24,9 +33,22 @@ const makeBuiltinRegistration = (
   type: ToolType.builtin,
   description: 'A test tool',
   tags: [],
+  annotations: defaultAnnotations,
   schema: z.object({}),
   handler: (async () => ({ results: [] })) as any,
   ...overrides,
+});
+
+const makeDynamicSchemaBuiltinRegistration = (
+  getSchema: DynamicSchemaBuiltinToolDefinition['getSchema']
+): DynamicSchemaBuiltinToolDefinition => ({
+  id: 'platform.test.tool',
+  type: ToolType.builtin,
+  description: 'A test tool',
+  tags: [],
+  annotations: defaultAnnotations,
+  getSchema,
+  handler: (async () => ({ results: [] })) as any,
 });
 
 const builtinDefinition: BuiltinToolTypeDefinition = {
@@ -131,7 +153,7 @@ describe('convertTool (builtin)', () => {
     expect(result.annotations).toEqual(annotations);
   });
 
-  it('leaves annotations undefined when not set on builtin tool', () => {
+  it('propagates annotations from builtin tool', () => {
     const tool = makeBuiltinRegistration();
     const result = convertTool({
       tool,
@@ -139,7 +161,48 @@ describe('convertTool (builtin)', () => {
       context: baseContext,
       cache: new ToolAvailabilityCache(),
     });
-    expect(result.annotations).toBeUndefined();
+    expect(result.annotations).toEqual(defaultAnnotations);
+  });
+
+  it('uses the static schema of the tool', async () => {
+    const schema = z.object({ foo: z.string() });
+    const tool = makeBuiltinRegistration({ schema });
+    const result = convertTool({
+      tool,
+      definition: builtinDefinition,
+      context: baseContext,
+      cache: new ToolAvailabilityCache(),
+    });
+    expect(await result.getSchema()).toBe(schema);
+  });
+
+  it('resolves the dynamic schema with the schema context', async () => {
+    const dynamicSchema = z.object({ bar: z.string() });
+    const getSchema = jest.fn().mockResolvedValue(dynamicSchema);
+    const schemaContext = { ...baseContext, uiSettings: {} as any };
+    const tool = makeDynamicSchemaBuiltinRegistration(getSchema);
+    const result = convertTool({
+      tool,
+      definition: builtinDefinition,
+      context: baseContext,
+      getSchemaContext: () => schemaContext,
+      cache: new ToolAvailabilityCache(),
+    });
+
+    expect(await result.getSchema()).toBe(dynamicSchema);
+    expect(getSchema).toHaveBeenCalledWith(schemaContext);
+  });
+
+  it('throws when converting a dynamic schema tool without a schema context', () => {
+    const tool = makeDynamicSchemaBuiltinRegistration(jest.fn());
+    expect(() =>
+      convertTool({
+        tool,
+        definition: builtinDefinition,
+        context: baseContext,
+        cache: new ToolAvailabilityCache(),
+      })
+    ).toThrow(/has a dynamic schema but no schema context is set/);
   });
 });
 
@@ -191,7 +254,7 @@ describe('convertTool (static/non-builtin) — default annotations', () => {
       readOnlyHint: false,
       destructiveHint: true,
       idempotentHint: false,
-      openWorldHint: false,
+      openWorldHint: true,
     });
   });
 

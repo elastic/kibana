@@ -8,7 +8,10 @@
 import type { PolicyConfig } from '../types';
 import { AntivirusRegistrationModes, DeviceControlAccessLevel, ProtectionModes } from '../types';
 
-import { isBillablePolicy } from './policy_config_helpers';
+import {
+  isBillablePolicy,
+  removeCustomYaraSignaturesAdvancedSettings,
+} from './policy_config_helpers';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -60,6 +63,7 @@ export const policyFactory = ({
       memory_protection: {
         mode: ProtectionModes.prevent,
         supported: true,
+        custom_yara_signatures: true,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
@@ -99,6 +103,12 @@ export const policyFactory = ({
         credential_hardening: {
           enabled: true,
         },
+        registry_credential_hardening: {
+          enabled: true,
+        },
+      },
+      ai_data_collection: {
+        enabled: true,
       },
     },
     mac: {
@@ -115,7 +125,7 @@ export const policyFactory = ({
         on_write_scan: true,
       },
       ransomware: {
-        mode: ProtectionModes.off,
+        mode: ProtectionModes.prevent,
         supported: true,
       },
       device_control: {
@@ -130,6 +140,7 @@ export const policyFactory = ({
       memory_protection: {
         mode: ProtectionModes.prevent,
         supported: true,
+        custom_yara_signatures: true,
       },
       popup: {
         malware: {
@@ -159,6 +170,9 @@ export const policyFactory = ({
       advanced: {
         capture_env_vars: 'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
       },
+      ai_data_collection: {
+        enabled: true,
+      },
     },
     linux: {
       events: {
@@ -174,6 +188,10 @@ export const policyFactory = ({
         blocklist: true,
         on_write_scan: true,
       },
+      ransomware: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       behavior_protection: {
         mode: ProtectionModes.prevent,
         reputation_service: cloud, // Defaults to true if on cloud
@@ -182,9 +200,14 @@ export const policyFactory = ({
       memory_protection: {
         mode: ProtectionModes.prevent,
         supported: true,
+        custom_yara_signatures: true,
       },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        ransomware: {
           message: '',
           enabled: true,
         },
@@ -203,6 +226,9 @@ export const policyFactory = ({
       advanced: {
         capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
       },
+      ai_data_collection: {
+        enabled: true,
+      },
     },
   };
   policy.meta.billable = isBillablePolicy(policy);
@@ -211,13 +237,39 @@ export const policyFactory = ({
 };
 
 /**
+ * Custom YARA signatures must end up off below Enterprise, but an absent field means "never
+ * configured" rather than "disabled", so a downgrade must not materialize one: that would opt a
+ * legacy policy out of the future backfill for a feature it never had access to.
+ */
+const clearedCustomYaraSignatures = ({
+  custom_yara_signatures: customYaraSignatures,
+}: {
+  custom_yara_signatures?: boolean;
+}): { custom_yara_signatures?: boolean } =>
+  customYaraSignatures === undefined ? {} : { custom_yara_signatures: false };
+
+/**
+ * Registry credential hardening must end up off below Enterprise. An absent field means never
+ * configured and is already treated as disabled, so a downgrade keeps it absent instead of
+ * materializing `false`.
+ */
+const clearedRegistryCredentialHardening = ({
+  registry_credential_hardening: registryCredentialHardening,
+}: {
+  registry_credential_hardening?: { enabled: boolean };
+}): { registry_credential_hardening?: { enabled: boolean } } =>
+  registryCredentialHardening === undefined
+    ? {}
+    : { registry_credential_hardening: { enabled: false } };
+
+/**
  * Strips paid features from an existing or new `PolicyConfig` for license below enterprise
  */
 
 export const policyFactoryWithoutPaidEnterpriseFeatures = (
   policy: PolicyConfig = policyFactory()
 ): PolicyConfig => {
-  return {
+  const withoutPaidEnterpriseFeatures: PolicyConfig = {
     ...policy,
     global_manifest_version: 'latest',
     windows: {
@@ -225,6 +277,14 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
       device_control: {
         enabled: false,
         usb_storage: DeviceControlAccessLevel.audit,
+      },
+      memory_protection: {
+        ...policy.windows.memory_protection,
+        ...clearedCustomYaraSignatures(policy.windows.memory_protection),
+      },
+      attack_surface_reduction: {
+        ...policy.windows.attack_surface_reduction,
+        ...clearedRegistryCredentialHardening(policy.windows.attack_surface_reduction),
       },
       popup: {
         ...policy.windows.popup,
@@ -240,6 +300,10 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
         enabled: false,
         usb_storage: DeviceControlAccessLevel.audit,
       },
+      memory_protection: {
+        ...policy.mac.memory_protection,
+        ...clearedCustomYaraSignatures(policy.mac.memory_protection),
+      },
       popup: {
         ...policy.mac.popup,
         device_control: {
@@ -248,7 +312,16 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
         },
       },
     },
+    linux: {
+      ...policy.linux,
+      memory_protection: {
+        ...policy.linux.memory_protection,
+        ...clearedCustomYaraSignatures(policy.linux.memory_protection),
+      },
+    },
   };
+
+  return removeCustomYaraSignaturesAdvancedSettings(withoutPaidEnterpriseFeatures);
 };
 
 /**
@@ -265,7 +338,7 @@ export const policyFactoryWithoutPaidFeatures = (
     },
   };
 
-  return {
+  const withoutPaidFeatures: PolicyConfig = {
     ...policy,
     global_manifest_version: 'latest',
     windows: {
@@ -292,6 +365,7 @@ export const policyFactoryWithoutPaidFeatures = (
       memory_protection: {
         mode: ProtectionModes.off,
         supported: false,
+        ...clearedCustomYaraSignatures(policy.windows.memory_protection),
       },
       behavior_protection: {
         mode: ProtectionModes.off,
@@ -299,9 +373,11 @@ export const policyFactoryWithoutPaidFeatures = (
         supported: false,
       },
       attack_surface_reduction: {
+        ...policy.windows.attack_surface_reduction,
         credential_hardening: {
           enabled: false,
         },
+        ...clearedRegistryCredentialHardening(policy.windows.attack_surface_reduction),
       },
       device_control: {
         enabled: false,
@@ -345,6 +421,7 @@ export const policyFactoryWithoutPaidFeatures = (
       memory_protection: {
         mode: ProtectionModes.off,
         supported: false,
+        ...clearedCustomYaraSignatures(policy.mac.memory_protection),
       },
       device_control: {
         enabled: false,
@@ -376,6 +453,14 @@ export const policyFactoryWithoutPaidFeatures = (
     },
     linux: {
       ...policy.linux,
+      // An absent field must stay absent: materializing it would add it where
+      // `linuxRansomwareProtection` is off.
+      ...(policy.linux.ransomware && {
+        ransomware: {
+          mode: ProtectionModes.off,
+          supported: false,
+        },
+      }),
       behavior_protection: {
         mode: ProtectionModes.off,
         reputation_service: false,
@@ -384,6 +469,7 @@ export const policyFactoryWithoutPaidFeatures = (
       memory_protection: {
         mode: ProtectionModes.off,
         supported: false,
+        ...clearedCustomYaraSignatures(policy.linux.memory_protection),
       },
       popup: {
         ...policy.linux.popup,
@@ -391,6 +477,13 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: true, // disabling/configuring malware popup is a paid feature
         },
+        // Mirrors `linux.ransomware`: an absent branch must stay absent.
+        ...(policy.linux.popup?.ransomware && {
+          ransomware: {
+            message: '',
+            enabled: false,
+          },
+        }),
         memory_protection: {
           message: '',
           enabled: false,
@@ -402,6 +495,8 @@ export const policyFactoryWithoutPaidFeatures = (
       },
     },
   };
+
+  return removeCustomYaraSignaturesAdvancedSettings(withoutPaidFeatures);
 };
 
 /**
@@ -434,7 +529,7 @@ export const policyFactoryWithSupportedFeatures = (
         supported: true,
       },
       behavior_protection: {
-        ...policy.windows.behavior_protection,
+        ...policy.mac.behavior_protection,
         supported: true,
       },
       memory_protection: {
@@ -444,8 +539,14 @@ export const policyFactoryWithSupportedFeatures = (
     },
     linux: {
       ...policy.linux,
+      ...(policy.linux.ransomware && {
+        ransomware: {
+          ...policy.linux.ransomware,
+          supported: true,
+        },
+      }),
       behavior_protection: {
-        ...policy.windows.behavior_protection,
+        ...policy.linux.behavior_protection,
         supported: true,
       },
       memory_protection: {

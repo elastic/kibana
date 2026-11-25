@@ -16,8 +16,14 @@ import { isDisplayOnlyField, isInlineField } from '../../../common/types/domain/
 import { patchCase } from '../../containers/api';
 import { casesMutationsKeys } from '../../containers/constants';
 import { useCasesToast } from '../../common/use_cases_toast';
+import type { TemplateChangeEntryPoint } from '../../analytics/templates/use_template_apply_ebt';
+import {
+  useTemplateAppliedEBT,
+  useTemplateClearedEBT,
+} from '../../analytics/templates/use_template_apply_ebt';
 import type { ServerError } from '../../types';
 import { getFieldCamelKey, getFieldSnakeKey } from '../../../common/utils';
+import { canStoreExtractObservablesTrue } from '../../../common/utils/case_settings';
 import { getYamlDefaultAsString } from '../templates_v2/utils';
 import * as i18n from './translations';
 
@@ -46,15 +52,27 @@ interface ChangeAppliedTemplateArgs {
    * `computeNewExtendedFields`. Only meaningful when `newTemplate` is non-null.
    */
   extendedFields?: Record<string, string>;
+  /**
+   * The UI surface the change was confirmed from, reported on the resulting telemetry event. Omit it
+   * to report nothing: the deprecated legacy case view passes no entry point, so its writes stay out
+   * of the browser telemetry. Removing this argument removes the reporting with it.
+   */
+  entryPoint?: TemplateChangeEntryPoint;
 }
 
 /**
  * A template is authoritative for the case's settings: keys it declares are applied and keys it
- * omits (or a template with no settings block) default to off, matching the create flow.
+ * omits (or a template with no settings block) default to off, matching the create flow. An owner
+ * that cannot store `extractObservables: true` always gets false, because the server rejects true.
  */
-const buildTemplateSettings = (settings: TemplateSettings | undefined): CaseSettings => ({
+const buildTemplateSettings = (
+  settings: TemplateSettings | undefined,
+  owner: string
+): CaseSettings => ({
   syncAlerts: settings?.syncAlerts ?? false,
-  extractObservables: settings?.extractObservables ?? false,
+  extractObservables: canStoreExtractObservablesTrue(owner)
+    ? settings?.extractObservables ?? false
+    : false,
 });
 
 export const computeNewExtendedFields = (
@@ -86,6 +104,8 @@ export const computeNewExtendedFields = (
 
 export const useChangeAppliedTemplate = () => {
   const { showErrorToast, showInfoToast } = useCasesToast();
+  const reportTemplateApplied = useTemplateAppliedEBT();
+  const reportTemplateCleared = useTemplateClearedEBT();
 
   return useMutation(
     ({ caseData, newTemplate, extendedFields }: ChangeAppliedTemplateArgs) => {
@@ -101,14 +121,14 @@ export const useChangeAppliedTemplate = () => {
           // The applied template owns the case settings (a template that declares none, or removing
           // the template, resets them to off). The case's connector is intentionally NOT changed
           // here — applying a template never reassigns an existing case's connector.
-          settings: buildTemplateSettings(newTemplate?.settings),
+          settings: buildTemplateSettings(newTemplate?.settings, caseData.owner),
         },
         version: caseData.version,
       });
     },
     {
       mutationKey: casesMutationsKeys.changeAppliedTemplate,
-      onSuccess: () => {
+      onSuccess: (_data, { caseData, newTemplate, entryPoint }) => {
         // Applying a template changes case fields and settings that several independently-cached
         // components render. Rather than forcing a disruptive automatic reload, surface a persistent
         // notification with a "Reload page" action so the user can refresh when ready to see all of
@@ -126,6 +146,19 @@ export const useChangeAppliedTemplate = () => {
           // Keep the toast until the user reloads or dismisses it.
           { toastLifeTimeMs: Infinity }
         );
+
+        // Reported from the mutation's own callback, and last: React Query skips a per-call callback
+        // once the caller unmounts, and routes a throw from here to onError.
+        if (entryPoint) {
+          if (!newTemplate) {
+            reportTemplateCleared({ entryPoint });
+          } else {
+            reportTemplateApplied({
+              entryPoint,
+              applyMode: caseData.template ? 'replacement' : 'initial',
+            });
+          }
+        }
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_CHANGING_TEMPLATE });

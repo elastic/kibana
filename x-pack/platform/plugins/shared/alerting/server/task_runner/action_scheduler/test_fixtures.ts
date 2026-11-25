@@ -14,15 +14,15 @@ import type {
 import type { RuleTypeParams, SanitizedRule } from '@kbn/alerting-types';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { ActionsClient, PluginStartContract } from '@kbn/actions-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RuleAlertData, RuleTypeState } from '../../../common';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import type { NormalizedRuleType } from '../../rule_type_registry';
-import type { TaskRunnerContext } from '../types';
+import type { RuleTaskInstance, TaskRunnerContext } from '../types';
 import type { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
 import { Alert } from '../../alert';
+import { RuleResultService } from '../../monitoring/rule_result_service';
 
 const apiKey = Buffer.from('123:abc').toString('base64');
 
@@ -204,7 +204,8 @@ export const getDefaultSchedulerContext = <
   previousStartedAt: null,
   taskInstance: {
     params: { spaceId: 'test1', alertId: '1' },
-  } as unknown as ConcreteTaskInstance,
+  } as unknown as RuleTaskInstance,
   actionsClient: actionsClientMock,
   alertsClient: alertsClientMock,
+  ruleResultService: new RuleResultService(),
 });

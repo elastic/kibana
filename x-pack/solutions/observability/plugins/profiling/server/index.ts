@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { profilingElasticsearchConfigSchema } from '@kbn/profiling-data-access-plugin/server';
 
 /**
  * These properties are used to create both the Collector and the Symbolizer integrations
@@ -31,18 +32,7 @@ const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   symbolizer: schema.maybe(packageInputSchema),
   collector: schema.maybe(packageInputSchema),
-  elasticsearch: schema.conditional(
-    schema.contextRef('dist'),
-    schema.literal(true),
-    schema.never(),
-    schema.maybe(
-      schema.object({
-        hosts: schema.string(),
-        username: schema.string(),
-        password: schema.string(),
-      })
-    )
-  ),
+  elasticsearch: profilingElasticsearchConfigSchema,
 });
 
 export type ProfilingConfig = TypeOf<typeof configSchema>;

@@ -31,7 +31,7 @@ import type {
   GroupPanelRenderer,
   ParsedGroupingAggregation,
 } from '@kbn/grouping/src';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import type { PageScope } from '../../../data_view_manager/constants';
 import type { GroupTakeActionItems } from './types';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
@@ -143,7 +143,6 @@ export const DEFAULT_GROUP_STATS_RENDERER: GetGroupStats<AlertsGroupingAggregati
     title: i18n.STATS_GROUP_ALERTS,
     badge: {
       value: bucket.doc_count,
-      width: 50,
       color: '#a83632',
     },
   },

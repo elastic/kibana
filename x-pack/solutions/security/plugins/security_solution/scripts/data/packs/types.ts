@@ -24,8 +24,8 @@ export interface PackEventSource {
   version: string;
   dataStream: string;
   fidelity: 'authored';
-  upstreamCommit: string;
-  upstreamScenarioId: string;
+  upstreamCommit?: string;
+  upstreamScenarioId?: string;
 }
 
 export interface TechnologyWatchPack {

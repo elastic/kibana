@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiText, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -62,7 +63,7 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiCallOut
+      <KbnSuccessCallout
         data-test-subj="IncomingDataConfirmedCallOut"
         title={i18n.translate('xpack.fleet.confirmIncomingData.title', {
           defaultMessage:
@@ -72,8 +73,6 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
             enrolledAgents,
           },
         })}
-        color="success"
-        iconType="check"
       />
       {installedPolicy && (
         <>

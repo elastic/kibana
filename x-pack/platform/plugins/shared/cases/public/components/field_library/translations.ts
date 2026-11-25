@@ -356,3 +356,40 @@ export const FIELD_IDENTITY_NAME_CHANGED_ERROR = (name: string) =>
       'The field name is permanent. Restore the name to "{name}" to save your changes.',
     values: { name },
   });
+
+export const FIELD_IDENTITY_CREATE_NOTICE_TITLE = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldIdentityCreateNoticeTitle',
+  {
+    defaultMessage: 'The name and type are permanent once saved',
+  }
+);
+
+export const FIELD_IDENTITY_CREATE_NOTICE = (name: string, type: string) =>
+  i18n.translate('xpack.cases.fieldLibrary.fieldIdentityCreateNotice', {
+    defaultMessage:
+      'Saving sets "{name}" ({type}) as this field\'s permanent key in case data and Cases analytics. To use a different name or type later, create a new field.',
+    values: { name, type },
+  });
+
+export const REQUIRED_NO_DEFAULT_WARNING_TITLE = i18n.translate(
+  'xpack.cases.fieldLibrary.requiredNoDefaultWarningTitle',
+  {
+    defaultMessage: 'Required field without a default value',
+  }
+);
+
+export const REQUIRED_NO_DEFAULT_WARNING_GLOBAL = i18n.translate(
+  'xpack.cases.fieldLibrary.requiredNoDefaultWarningGlobal',
+  {
+    defaultMessage:
+      "Automated case creation (for example, from alert rules) can't fill this field. Because it's a global field, it will be empty on every automatically created case in this space until someone edits the case. Set a default value to make sure it's always filled.",
+  }
+);
+
+export const REQUIRED_NO_DEFAULT_WARNING = i18n.translate(
+  'xpack.cases.fieldLibrary.requiredNoDefaultWarning',
+  {
+    defaultMessage:
+      "Automated case creation (for example, from alert rules) can't fill this field. It will be empty on cases created automatically from any template that includes it, until someone edits the case. Set a default value to make sure it's always filled.",
+  }
+);

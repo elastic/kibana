@@ -81,7 +81,8 @@ export interface AgentClient {
    */
   getAgentStatusForAgentPolicy(
     agentPolicyId?: string,
-    filterKuery?: string
+    filterKuery?: string,
+    agentPolicyIds?: string[]
   ): Promise<GetAgentStatusResponse['results']>;
 
   /**
@@ -97,6 +98,16 @@ export interface AgentClient {
       pitId?: string;
       pitKeepAlive?: string;
       getStatusSummary?: boolean;
+      /**
+       * When false, skip the agent-status runtime field and the inactivity-timeout SO scan it
+       * requires. Defaults to true. Forced on when `getStatusSummary` is true or the kuery
+       * references `status`.
+       *
+       * Opting out replaces `NOT status:unenrolled` with the stored `active:true` field, so
+       * unenrolled agents stay excluded. `showInactive: false` cannot exclude `status:inactive`
+       * without the runtime field (inactivity is policy-timeout based).
+       */
+      includeStatusRuntimeField?: boolean;
     }
   ): Promise<{
     agents: Agent[];
@@ -143,6 +154,7 @@ class AgentClientImpl implements AgentClient {
       pitId?: string;
       pitKeepAlive?: string;
       getStatusSummary?: boolean;
+      includeStatusRuntimeField?: boolean;
     }
   ) {
     await this.#runPreflight();
@@ -170,14 +182,19 @@ class AgentClientImpl implements AgentClient {
     return getAgentStatusById(this.internalEsClient, this.soClient, agentId);
   }
 
-  public async getAgentStatusForAgentPolicy(agentPolicyId?: string, filterKuery?: string) {
+  public async getAgentStatusForAgentPolicy(
+    agentPolicyId?: string,
+    filterKuery?: string,
+    agentPolicyIds?: string[]
+  ) {
     await this.#runPreflight();
     return getAgentStatusForAgentPolicy(
       this.internalEsClient,
       this.soClient,
       agentPolicyId,
       filterKuery,
-      this.spaceId
+      this.spaceId,
+      agentPolicyIds
     );
   }
 

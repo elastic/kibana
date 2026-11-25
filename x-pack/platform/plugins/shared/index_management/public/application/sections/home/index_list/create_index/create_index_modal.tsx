@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiSuperSelect,
   EuiForm,
@@ -33,6 +32,7 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   LOOKUP_INDEX_MODE,
   STANDARD_INDEX_MODE,
@@ -156,22 +156,19 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
       <EuiModalBody>
         {createError && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
-              color="danger"
-              iconType="error"
               title={i18n.translate('xpack.idxMgmt.createIndex.modal.error.title', {
                 defaultMessage: 'Error creating index',
               })}
-            >
-              <EuiText>
+              text={
                 <FormattedMessage
                   id="xpack.idxMgmt.createIndex.modal.error.description"
                   defaultMessage="Error creating index: {errorMessage}"
                   values={{ errorMessage: createError }}
                 />
-              </EuiText>
-            </EuiCallOut>
+              }
+            />
             <EuiSpacer />
           </>
         )}

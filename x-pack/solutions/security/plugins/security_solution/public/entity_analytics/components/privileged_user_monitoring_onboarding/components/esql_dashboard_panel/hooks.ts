@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getESQLResults, getIndexPatternFromESQLQuery, prettifyQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, prettifyQuery } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 
@@ -15,7 +15,16 @@ import { useGlobalTime } from '../../../../../common/containers/use_global_time'
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useKibana } from '../../../../../common/lib/kibana';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 import type { EsqlQueryOrInvalidFields } from '../../../privileged_user_monitoring/queries/helpers';
+
+const PUM_ONBOARDING_DASHBOARD_PANEL_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pum_onboarding_dashboard_panel'
+);
 
 export const DASHBOARD_TABLE_QUERY_ID = 'privmonDashboardTableQueryId';
 
@@ -40,12 +49,11 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
         return null;
       }
 
-      return getESQLResults({
-        esqlQuery: tableQuery.right,
-        search: data.search.search,
-        signal,
-        filter: filterQuery,
-      });
+      const { rawResponse } = await data.search.esql(
+        { query: tableQuery.right, filter: filterQuery },
+        { abortSignal: signal, executionContext: PUM_ONBOARDING_DASHBOARD_PANEL_CONTEXT }
+      );
+      return rawResponse;
     },
     {
       refetchOnWindowFocus: false,
@@ -55,7 +63,7 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
 
   const { deleteQuery, setQuery } = useGlobalTime();
 
-  const response = result?.response;
+  const response = result ?? undefined;
 
   const inspect = useMemo(() => {
     if (isLeft(tableQuery)) {

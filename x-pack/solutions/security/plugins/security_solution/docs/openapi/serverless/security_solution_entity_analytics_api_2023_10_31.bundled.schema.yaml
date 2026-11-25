@@ -324,8 +324,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/delete:
     delete:
-      description: Deletes the Privilege Monitoring Engine and optionally removes all
-        associated privileged user data.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine
+        and optionally removes all associated privileged user data.'
       operationId: DeleteMonitoringEngine
       parameters:
         - description: Whether to delete all the privileged user data
@@ -357,8 +358,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/disable:
     post:
-      description: Disables the Privilege Monitoring Engine, stopping all monitoring
-        activity without removing data.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine,
+        stopping all monitoring activity without removing data.'
       operationId: DisableMonitoringEngine
       responses:
         '200':
@@ -377,8 +379,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/init:
     post:
-      description: Initializes the Privilege Monitoring Engine, setting up the
-        required resources and starting the engine.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Initializes the Privilege Monitoring
+        Engine, setting up the required resources and starting the engine.'
       operationId: InitMonitoringEngine
       responses:
         '200':
@@ -410,8 +413,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/schedule_now:
     post:
-      description: Schedules the Privilege Monitoring Engine to run as soon as
-        possible, triggering an immediate monitoring cycle.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine
+        to run as soon as possible, triggering an immediate monitoring cycle.'
       operationId: ScheduleMonitoringEngine
       responses:
         '200':
@@ -449,9 +453,10 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/health:
     get:
-      description: Returns the current health status of the Privilege Monitoring
-        Engine, including engine status, error details, and user count
-        statistics.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Returns the current health status of the
+        Privilege Monitoring Engine, including engine status, error details, and
+        user count statistics.'
       operationId: PrivMonHealth
       responses:
         '200':
@@ -498,8 +503,13 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      description: Check if the current user has all required permissions for
-        Privilege Monitoring
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+
+        Check if the current user has all required permissions for Privilege
+        Monitoring.
       operationId: PrivMonPrivileges
       responses:
         '200':
@@ -523,7 +533,12 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
     post:
-      description: Creates a new privileged user to be monitored by the Privilege
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+
+        Creates a new privileged user to be monitored by the Privilege
         Monitoring Engine.
       operationId: CreatePrivMonUser
       requestBody:
@@ -571,8 +586,13 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/_csv:
     post:
-      description: Bulk upserts privileged users by uploading a CSV file. Returns
-        per-row errors and aggregate upload statistics.
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+
+        Bulk upserts privileged users by uploading a CSV file. Returns per-row
+        errors and aggregate upload statistics.
       operationId: PrivmonBulkUploadUsersCSV
       requestBody:
         content:
@@ -631,7 +651,11 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/{id}:
     delete:
-      description: Removes a privileged user from monitoring by their document ID.
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+        Removes a privileged user from monitoring by their document ID.
       operationId: DeletePrivMonUser
       parameters:
         - description: The document ID of the monitored user to delete
@@ -667,8 +691,13 @@ paths:
       tags:
         - Security Entity Analytics API
     put:
-      description: Updates the details of an existing monitored privileged user by
-        their document ID.
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+
+        Updates the details of an existing monitored privileged user by their
+        document ID.
       operationId: UpdatePrivMonUser
       parameters:
         - description: The document ID of the monitored user to update
@@ -723,7 +752,12 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/list:
     get:
-      description: Returns a list of all privileged users currently being monitored.
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+
+        Returns a list of all privileged users currently being monitored.
         Supports optional KQL filtering.
       operationId: ListPrivMonUsers
       parameters:
@@ -1423,8 +1457,10 @@ paths:
       x-state: Technical Preview
   /api/risk_score/engine/dangerously_delete_data:
     delete:
-      description: Cleaning up the the Risk Engine by removing the indices, mapping
-        and transforms
+      description: Stops risk scoring for the space. Removes the risk score data
+        stream, the lookup index and its template, the risk engine
+        configuration, and the risk score maintainer task, and clears risk
+        fields stored on entity documents.
       operationId: CleanUpRiskEngine
       responses:
         '200':
@@ -1587,61 +1623,6 @@ paths:
                 $ref: '#/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse'
           description: Unexpected error
       summary: Configure the Risk Engine Saved Object
-      tags:
-        - Security Entity Analytics API
-  /api/risk_score/engine/schedule_now:
-    post:
-      description: Schedule the risk scoring engine to run as soon as possible. You
-        can use this to recalculate entity risk scores after updating their
-        asset criticality.
-      operationId: ScheduleRiskEngineNow
-      requestBody:
-        content:
-          application/json:
-            examples:
-              emptyRequest:
-                summary: No request body
-                value: {}
-            schema:
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                ScheduleRiskEngineNowResponse:
-                  summary: Successful schedule response
-                  value:
-                    success: true
-              schema:
-                $ref: '#/components/schemas/RiskEngineScheduleNowResponse'
-          description: Successful response
-        '400':
-          content:
-            application/json:
-              examples:
-                taskManagerUnavailable:
-                  summary: Task manager is unavailable
-                  value:
-                    message: Task Manager is unavailable, but is required by the risk engine. Please
-                      enable the taskManager plugin and try again.
-                    status_code: 400
-              schema:
-                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
-          description: Task manager is unavailable
-        default:
-          content:
-            application/json:
-              examples:
-                scheduleNowError:
-                  summary: Schedule now failed
-                  value:
-                    full_error: '{}'
-                    message: Internal server error
-              schema:
-                $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
-          description: Unexpected error
-      summary: Run the risk scoring engine
       tags:
         - Security Entity Analytics API
   /api/risk_score/history:
@@ -2239,21 +2220,6 @@ components:
         - uploaded
         - failedOperations
         - totalOperations
-    RiskEngineScheduleNowErrorResponse:
-      type: object
-      properties:
-        full_error:
-          type: string
-        message:
-          type: string
-      required:
-        - message
-        - full_error
-    RiskEngineScheduleNowResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
     RiskScoreHistoryEntry:
       type: object
       properties:

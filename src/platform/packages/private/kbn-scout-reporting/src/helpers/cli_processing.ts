@@ -11,18 +11,14 @@ import { ScoutTestTarget } from '@kbn/scout-info';
 
 export const stripRunCommand = (commandArgs: string[]): string => {
   if (!Array.isArray(commandArgs) || commandArgs.length < 3) {
-    throw new Error(
-      `Invalid command arguments: must include at least 'node scripts/playwright test'`
-    );
+    throw new Error(`Invalid command arguments: expected 'node scripts/playwright test'`);
   }
 
   const isNodeCommand = commandArgs[0].endsWith('node');
   const isNpxCommand = commandArgs[0] === 'npx' && commandArgs[1] === 'playwright';
 
   if (!isNodeCommand && !isNpxCommand) {
-    throw new Error(
-      'Invalid command structure: Expected "node <playwright_path> test" or "npx playwright test".'
-    );
+    throw new Error(`Invalid command arguments: expected 'node scripts/playwright test'`);
   }
 
   const restArgs = commandArgs.slice(2);

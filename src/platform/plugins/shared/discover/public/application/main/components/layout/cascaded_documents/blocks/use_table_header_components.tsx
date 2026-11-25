@@ -17,18 +17,17 @@ import {
   EuiFilterGroup,
   EuiDataGridToolbarControl,
   EuiToolTip,
-  EuiBadge,
 } from '@elastic/eui';
 import type { DataCascadeProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { styles as toolbarStyles } from '@kbn/unified-data-table/src/components/custom_toolbar/render_custom_toolbar';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { css } from '@emotion/react';
+import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 import type { ESQLDataGroupNode } from './types';
 
 interface UseTableHeaderProps {
-  viewModeToggle: React.ReactElement | undefined;
+  renderViewModeToggle: CascadedDocumentsContext['renderViewModeToggle'];
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
 }
 
@@ -101,10 +100,10 @@ function CascadeGroupingSelectionPopover({
       panelPaddingSize="s"
       button={
         <EuiToolTip
-          title={i18n.translate('discover.dataCascade.header.techPreviewLabel', {
-            defaultMessage: 'Grouped results (technical preview)',
+          title={i18n.translate('discover.dataCascade.toggleButton.heading', {
+            defaultMessage: 'Grouped results',
           })}
-          content={i18n.translate('discover.dataCascade.header.techPreviewTooltip', {
+          content={i18n.translate('discover.dataCascade.toggleButton.tagline', {
             defaultMessage: 'Results are grouped when running a Stats BY',
           })}
         >
@@ -116,25 +115,10 @@ function CascadeGroupingSelectionPopover({
               badgeContent={currentSelectedColumns.length}
               data-test-subj="discoverEnableCascadeLayoutSwitch"
             >
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem>
-                  <FormattedMessage
-                    id="discover.dataCascade.header.layoutSwitchLabel"
-                    defaultMessage="Group by"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge
-                    color="hollow"
-                    iconType="flask"
-                    css={({ euiTheme }) => css`
-                      width: ${euiTheme.size.l};
-                      height: ${euiTheme.size.l};
-                      align-content: center;
-                    `}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <FormattedMessage
+                id="discover.dataCascade.header.layoutSwitchLabel"
+                defaultMessage="Group by"
+              />
             </EuiDataGridToolbarControl>
           </EuiFilterGroup>
         </EuiToolTip>
@@ -178,7 +162,7 @@ export function useGetGroupBySelectorRenderer({
 }
 
 export function useEsqlDataCascadeHeaderComponent({
-  viewModeToggle,
+  renderViewModeToggle,
   cascadeGroupingChangeHandler,
 }: UseTableHeaderProps) {
   const groupBySelectorRenderer = useGetGroupBySelectorRenderer({
@@ -191,21 +175,12 @@ export function useEsqlDataCascadeHeaderComponent({
     ({ currentSelectedColumns, availableColumns }) => {
       return (
         <EuiFlexGroup
-          justifyContent={viewModeToggle ? 'spaceBetween' : 'flexEnd'}
+          justifyContent={renderViewModeToggle ? 'spaceBetween' : 'flexEnd'}
           alignItems="center"
           responsive={false}
         >
-          {viewModeToggle && (
-            <EuiFlexItem>
-              {React.cloneElement(viewModeToggle!, {
-                hitCounterLabel: i18n.translate('discover.dataCascade.header.resultLabel', {
-                  defaultMessage: 'group',
-                }),
-                hitCounterPluralLabel: i18n.translate('discover.dataCascade.header.resultsLabel', {
-                  defaultMessage: 'groups',
-                }),
-              })}
-            </EuiFlexItem>
+          {renderViewModeToggle && (
+            <EuiFlexItem>{renderViewModeToggle({ hitsCounterVariant: 'groups' })}</EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
             {groupBySelectorRenderer(availableColumns, currentSelectedColumns)}
@@ -213,6 +188,6 @@ export function useEsqlDataCascadeHeaderComponent({
         </EuiFlexGroup>
       );
     },
-    [groupBySelectorRenderer, viewModeToggle]
+    [groupBySelectorRenderer, renderViewModeToggle]
   );
 }

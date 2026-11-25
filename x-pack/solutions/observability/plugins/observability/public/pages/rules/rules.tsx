@@ -37,9 +37,8 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     notifications: { toasts },
     observabilityAIAssistant,
     application,
-    triggersActionsUi: { ruleTypeRegistry, getRulesSettingsLink: RulesSettingsLink },
+    triggersActionsUi: { ruleTypeRegistry },
     serverless,
-    cps,
   } = services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
@@ -134,7 +133,6 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         defaultMessage="Create rule"
       />
     </EuiButton>,
-    <RulesSettingsLink />,
     <EuiButtonEmpty
       data-test-subj="documentationLink"
       href={docLinks.links.observability.createAlerts}
@@ -189,7 +187,6 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
           toasts={toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={filteredRuleTypes}
-          cps={cps}
         />
       )}
     </ObservabilityPageTemplate>

@@ -19,6 +19,7 @@ import type {
   XYVisualizationState,
 } from '@kbn/lens-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
+import { DEFAULT_AREAS_FILL } from '../transforms/charts/xy/defaults';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import type {
   BuildDependencies,
@@ -38,12 +39,17 @@ function normalizeBreakdown(
 }
 
 function buildVisualizationState(config: LensXYConfig): XYVisualizationState {
+  const hasAreaSeries = config.layers.some(
+    (layer) => layer.type === 'series' && layer.seriesType === 'area'
+  );
   return {
     axisTitlesVisibilitySettings: {
       x: config.axisTitleVisibility?.showXAxisTitle ?? true,
       yLeft: config.axisTitleVisibility?.showYAxisTitle ?? true,
       yRight: config.axisTitleVisibility?.showYRightAxisTitle ?? true,
     },
+    ...(config.xTitle !== undefined ? { xTitle: config.xTitle } : {}),
+    ...(config.yTitle !== undefined ? { yTitle: config.yTitle } : {}),
     legend: {
       isVisible: config.legend?.show ?? true,
       position: config.legend?.position ?? 'left',
@@ -54,6 +60,9 @@ function buildVisualizationState(config: LensXYConfig): XYVisualizationState {
     valueLabels: config.valueLabels ?? 'hide',
     emphasizeFitting: config?.emphasizeFitting ?? true,
     fittingFunction: config?.fittingFunction ?? 'Linear',
+    ...(config.areaFill || hasAreaSeries
+      ? { areaFill: config.areaFill ?? DEFAULT_AREAS_FILL }
+      : {}),
     yLeftExtent: {
       mode: config.yBounds?.mode ?? 'full',
       lowerBound: config.yBounds?.lowerBound,

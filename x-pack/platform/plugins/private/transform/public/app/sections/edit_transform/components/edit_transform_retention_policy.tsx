@@ -7,16 +7,21 @@
 
 import React, { useEffect, useMemo, type FC } from 'react';
 
-import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiCheckbox, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 
 import type { PostTransformsPreviewRequestSchema } from '../../../../../server/routes/api_schemas/transforms';
 import { isLatestTransform, isPivotTransform } from '../../../../../common/types/transform';
 import { getErrorMessage } from '../../../../../common/utils/errors';
 
-import { useToastNotifications } from '../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../app_dependencies';
 import { useGetTransformsPreview } from '../../../hooks';
+import {
+  isLinkedProjectScopedSourceIndexUnavailableError,
+  isProjectScopedSourceIndexUnavailableError,
+} from '../../../hooks/use_transform_config_data';
 import { useToastNotificationText } from '../../../components';
 
 import {
@@ -24,16 +29,21 @@ import {
   useEditTransformFlyoutContext,
 } from '../state_management/edit_transform_flyout_state';
 import { useFormSections } from '../state_management/selectors/form_sections';
+import { useHasAttemptedSubmit } from '../state_management/selectors/has_attempted_submit';
 import { useRetentionPolicyField } from '../state_management/selectors/retention_policy_field';
 
+import { EditTransformDurationInput } from './edit_transform_duration_input';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 
 export const EditTransformRetentionPolicy: FC = () => {
+  const { cps } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const getToastNotificationText = useToastNotificationText();
+  const cpsManager = cps?.cpsManager;
 
   const { config, dataViewId } = useEditTransformFlyoutContext();
   const formSections = useFormSections();
+  const hasAttemptedSubmit = useHasAttemptedSubmit();
   const retentionPolicyField = useRetentionPolicyField();
   const { setFormField, setFormSection } = useEditTransformFlyoutActions();
 
@@ -45,8 +55,11 @@ export const EditTransformRetentionPolicy: FC = () => {
     };
   }, [config]);
 
-  const { error: transformsPreviewError, data: transformPreview } =
-    useGetTransformsPreview(previewRequest);
+  const {
+    error: transformsPreviewError,
+    data: transformPreview,
+    isLoading: isTransformPreviewLoading,
+  } = useGetTransformsPreview(previewRequest);
 
   const destIndexAvailableTimeFields = useMemo<string[]>(() => {
     if (transformPreview?.generated_dest_index) {
@@ -61,62 +74,109 @@ export const EditTransformRetentionPolicy: FC = () => {
   }, [transformPreview]);
 
   useEffect(() => {
-    if (transformsPreviewError !== null) {
+    if (transformsPreviewError === null) {
+      return;
+    }
+
+    const addPreviewErrorToast = () => {
       toastNotifications.addDanger({
         title: i18n.translate('xpack.transform.transformList.errorGettingTransformPreview', {
           defaultMessage: 'An error occurred fetching the transform preview',
         }),
         ...getToastNotificationText(getErrorMessage(transformsPreviewError)),
       });
+    };
+
+    const projectRouting = config.source.project_routing;
+    const isProjectScopedSourceIndexError = isProjectScopedSourceIndexUnavailableError(
+      transformsPreviewError,
+      projectRouting
+    );
+
+    if (!isProjectScopedSourceIndexError) {
+      addPreviewErrorToast();
+      return;
     }
+
+    if (projectRouting === PROJECT_ROUTING.ORIGIN) {
+      addPreviewErrorToast();
+      return;
+    }
+
+    if (!cpsManager) {
+      addPreviewErrorToast();
+      return;
+    }
+
+    let isMounted = true;
+
+    void cpsManager
+      .fetchProjects(PROJECT_ROUTING.ORIGIN)
+      .then((projectsData) => {
+        const shouldSuppressErrorToast = isLinkedProjectScopedSourceIndexUnavailableError(
+          transformsPreviewError,
+          projectRouting,
+          projectsData?.origin?._id
+        );
+
+        if (isMounted && !shouldSuppressErrorToast) {
+          addPreviewErrorToast();
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          addPreviewErrorToast();
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transformsPreviewError]);
 
   const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
+  const hasExistingRetentionPolicy = config.retention_policy !== undefined;
+  const shouldShowRetentionPolicy =
+    isRetentionPolicyAvailable ||
+    (hasExistingRetentionPolicy && (isTransformPreviewLoading || transformsPreviewError !== null));
   const retentionDateFieldOptions = useMemo(() => {
     return Array.isArray(destIndexAvailableTimeFields)
       ? destIndexAvailableTimeFields.map((text: string) => ({ text, value: text }))
       : [];
   }, [destIndexAvailableTimeFields]);
 
+  if (!shouldShowRetentionPolicy) {
+    return null;
+  }
+
   return (
     <>
-      <EuiFormRow
-        helpText={
-          isRetentionPolicyAvailable === false
-            ? i18n.translate('xpack.transform.transformList.editFlyoutFormEetentionPolicyError', {
-                defaultMessage:
-                  'Retention policy settings are not available for indices without date fields.',
-              })
-            : ''
-        }
-      >
-        <EuiSwitch
-          name="transformEditRetentionPolicySwitch"
-          label={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
-            {
-              defaultMessage: 'Retention policy',
-            }
-          )}
-          checked={formSections.retentionPolicy.enabled}
-          onChange={(e) =>
-            setFormSection({
-              section: 'retentionPolicy',
-              enabled: e.target.checked,
-            })
+      <EuiCheckbox
+        id="transformEditRetentionPolicyCheckbox"
+        name="transformEditRetentionPolicyCheckbox"
+        label={i18n.translate(
+          'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
+          {
+            defaultMessage: 'Enable custom retention',
           }
-          disabled={!isRetentionPolicyAvailable}
-          data-test-subj="transformEditRetentionPolicySwitch"
-        />
-      </EuiFormRow>
+        )}
+        checked={formSections.retentionPolicy.enabled}
+        onChange={(event) =>
+          setFormSection({
+            section: 'retentionPolicy',
+            enabled: event.target.checked,
+          })
+        }
+        data-test-subj="transformEditRetentionPolicySwitch"
+      />
       {formSections.retentionPolicy.enabled && (
         <div data-test-subj="transformEditRetentionPolicyContent">
           <EuiSpacer size="m" />
           {
             // If data view or date fields info not available
             // gracefully defaults to text input
-            dataViewId ? (
+            dataViewId && retentionDateFieldOptions.length > 0 ? (
               <EuiFormRow
                 label={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
@@ -124,8 +184,10 @@ export const EditTransformRetentionPolicy: FC = () => {
                     defaultMessage: 'Field',
                   }
                 )}
-                isInvalid={retentionPolicyField.errorMessages.length > 0}
-                error={retentionPolicyField.errorMessages}
+                isInvalid={hasAttemptedSubmit && retentionPolicyField.errorMessages.length > 0}
+                error={hasAttemptedSubmit ? retentionPolicyField.errorMessages : []}
+                fullWidth
+                display="rowCompressed"
                 helpText={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyDateFieldHelpText',
                   {
@@ -135,7 +197,8 @@ export const EditTransformRetentionPolicy: FC = () => {
                 )}
               >
                 <EuiSelect
-                  isInvalid={retentionPolicyField.errorMessages.length > 0}
+                  compressed
+                  isInvalid={hasAttemptedSubmit && retentionPolicyField.errorMessages.length > 0}
                   aria-label={i18n.translate(
                     'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldSelectAriaLabel',
                     {
@@ -143,6 +206,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                     }
                   )}
                   data-test-subj="transformEditFlyoutRetentionPolicyFieldSelect"
+                  fullWidth
                   options={retentionDateFieldOptions}
                   value={retentionPolicyField.value}
                   onChange={(e) =>
@@ -158,6 +222,7 @@ export const EditTransformRetentionPolicy: FC = () => {
             ) : (
               <EditTransformFlyoutFormTextInput
                 field="retentionPolicyField"
+                showErrors={hasAttemptedSubmit}
                 label={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
                   {
@@ -167,14 +232,17 @@ export const EditTransformRetentionPolicy: FC = () => {
               />
             )
           }
-          <EditTransformFlyoutFormTextInput
+          <EditTransformDurationInput
+            defaultUnit="d"
             field="retentionPolicyMaxAge"
+            showErrors={hasAttemptedSubmit}
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel',
               {
                 defaultMessage: 'Max age',
               }
             )}
+            units={['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']}
           />
         </div>
       )}

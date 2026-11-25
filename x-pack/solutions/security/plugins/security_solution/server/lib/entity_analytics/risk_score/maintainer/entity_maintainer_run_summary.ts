@@ -6,7 +6,7 @@
  */
 
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
-import type { RunMetrics } from './utils/run_metrics_tracker';
+import type { RunMetrics } from './instrumentation/run_metrics_tracker';
 import type { BuildLookupIndexResult } from './steps/build_lookup_index';
 
 type EntityMaintainerRunSummary = Parameters<
@@ -14,7 +14,7 @@ type EntityMaintainerRunSummary = Parameters<
 >[0];
 
 export interface RiskScoreFrameworkStageSummary {
-  name: 'base' | 'resolution' | 'reset_to_zero';
+  name: 'base' | 'resolution' | 'reset_to_zero' | 'score_distributions' | 'prune';
   status: 'success' | 'error' | 'skipped';
   durationMs: number;
   applied?: number;
@@ -88,23 +88,7 @@ export const buildRiskScorePhase0EntityMaintainerRunSummary = ({
   };
 };
 
-/**
- * Builds the entity-maintainers framework run-summary payload for one
- * risk-score entity-type sub-run.
- *
- * Funnel is the base-scoring entity-store path only
- * - stages[] = base / resolution / reset_to_zero applied + status/duration
- *
- * TODO - after #280948 (create-if-missing):
- * - scanned           = scores calculated from alerts          (unchanged)
- * - applied           = scores written (updates only)
- *                     → scores written (update or create)
- * - droppedNotInStore = absent → hard drop
- *                     → absent at lookup (before create)
- * - skipped           = (unset)
- *                     → absent + policy rejected (score not written)
- * - optional breakdown for skip/create reasons (e.g. created, skip_host_name_only)
- */
+/** Builds an entity-type summary whose funnel covers base-scoring entity-store outcomes and keeps create failures qualified rather than skipped. */
 export const buildRiskScoreEntityMaintainerRunSummary = ({
   entityType,
   metrics,
@@ -114,17 +98,22 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
   metrics: RunMetrics;
   stages: RiskScoreFrameworkStageSummary[];
 }): EntityMaintainerRunSummary => {
-  const qualifiedBase = metrics.scoresCalculatedBase - metrics.scoresDroppedNotInStore;
+  const skipped = metrics.scoresDroppedNotInStore - metrics.entitiesCreateFailed;
+  const qualifiedBase = metrics.scoresCalculatedBase - skipped;
+  const appliedBase = metrics.scoresWrittenEntityStoreBase + metrics.entitiesCreated;
+  const failedBase = metrics.scoresFailedBase + metrics.entitiesCreateFailed;
 
+  // `droppedNotInStore` is reserved for write-time 404s; lookup misses are emitted separately
+  // from `metrics.scoresMissingFromStoreBase` as `phase1_base_scoring.scoresMissingFromStore`.
   return {
     scope: { kind: 'entity_type', value: entityType },
     iterations: metrics.pagesProcessed,
     funnel: {
       scanned: metrics.scoresCalculatedBase,
       qualified: qualifiedBase,
-      applied: metrics.scoresWrittenEntityStoreBase,
-      droppedNotInStore: metrics.scoresDroppedNotInStore,
-      failed: metrics.scoresFailedBase,
+      applied: appliedBase,
+      skipped,
+      failed: failedBase,
     },
     stages,
   };

@@ -19,6 +19,7 @@ import { transformStateSchema, runtimeMappingsSchema } from './common';
 // GET transform nodes
 export interface GetTransformNodesResponseSchema {
   count: number;
+  isCrossProjectEnabled: boolean;
 }
 
 // GET transforms
