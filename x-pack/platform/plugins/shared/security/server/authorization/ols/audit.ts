@@ -29,6 +29,8 @@ export interface OlsAuditEventParams {
   type: string;
   /** Object ID, or `undefined` for a list that relied on recovery or a new object without one. */
   id?: string;
+  /** The object's display name, recorded as the Saved Objects audit events record it. */
+  name?: string;
   /** The space of the object. */
   spaceId: string;
   /** The operation that was decided, such as `view`, `use`, or `manage_access`. */
@@ -78,6 +80,7 @@ export const olsAuditEvent = ({
   action,
   type,
   id,
+  name,
   spaceId,
   operation,
   principal,
@@ -96,7 +99,7 @@ export const olsAuditEvent = ({
     },
     kibana: {
       space_id: spaceId,
-      ...(id && { saved_object: { type, id } }),
+      ...(id && { saved_object: { type, id, ...(name && { name }) } }),
     },
     // ECS `user.entity.type` keeps a service account from reading as a user.
     ...(principal && { user: { id: principal.id, entity: { type: principal.type } } }),

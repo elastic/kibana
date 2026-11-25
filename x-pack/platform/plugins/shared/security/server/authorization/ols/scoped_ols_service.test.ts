@@ -271,6 +271,26 @@ describe('ScopedOlsService', () => {
       expect(authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
     });
 
+    it('records the object name in audit events', async () => {
+      await createOlsService()
+        .asScoped(request)
+        .authorizeObjectAccess({
+          type: TYPE,
+          spaceId: 'default',
+          operation: 'use',
+          objects: [{ id: 'widget-1', name: 'My widget', acl: PRIVATE_ACL }],
+        });
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kibana: {
+            space_id: 'default',
+            saved_object: { type: TYPE, id: 'widget-1', name: 'My widget' },
+          },
+        })
+      );
+    });
+
     it('allows a grantee to use the object', async () => {
       asPrincipal(GRANTEE);
 
@@ -999,6 +1019,38 @@ describe('ScopedOlsService', () => {
       expect(auditLogger.log.mock.calls[0][0]).toMatchObject({
         event: { outcome: 'failure' },
         kibana: { saved_object: { type: TYPE, id: 'widget-1' } },
+      });
+    });
+
+    it('records the object name in the audit events of a change and of a denial', async () => {
+      const scoped = createOlsService().asScoped(request);
+      const params = { type: TYPE, id: 'widget-1', name: 'My widget', spaceId: 'default' };
+
+      const { auditEvents } = await scoped.authorizeChange({
+        ...params,
+        acl: PRIVATE_ACL,
+        change: { kind: 'replace', general: { access: 'edit' }, entries: [] },
+      });
+      expect(auditEvents[0].kibana?.saved_object).toEqual({
+        type: TYPE,
+        id: 'widget-1',
+        name: 'My widget',
+      });
+
+      asPrincipal(GRANTEE);
+      await expect(
+        createOlsService()
+          .asScoped(request)
+          .authorizeChange({
+            ...params,
+            acl: SHARED_ACL,
+            change: { kind: 'transfer', owner: GRANTEE },
+          })
+      ).rejects.toEqual(expect.objectContaining({ code: 'forbidden' }));
+      expect(auditLogger.log.mock.calls[0][0]?.kibana?.saved_object).toEqual({
+        type: TYPE,
+        id: 'widget-1',
+        name: 'My widget',
       });
     });
 

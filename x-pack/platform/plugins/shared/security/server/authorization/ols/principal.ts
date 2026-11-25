@@ -94,7 +94,9 @@ export const resolvePrincipal = async ({
   if (authorization?.scheme.toLowerCase() === 'apikey') {
     const profileId = await getApiKeyProfileId(request);
     if (!profileId) {
-      logger.debug('No user created the API key the request carries.');
+      logger.debug(
+        'No profile found for the creator of the API key the request carries: no user created it, the user has no profile yet, or the key is not searchable yet.'
+      );
     }
     return profileId ? { type: 'user', id: profileId } : undefined;
   }

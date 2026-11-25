@@ -29,6 +29,26 @@ describe('olsAuditEvent', () => {
     });
   });
 
+  it('records the object name with the object, but not in the message', () => {
+    const event = olsAuditEvent({
+      action: 'ols_update',
+      type: 'action',
+      id: 'connector-1',
+      name: 'Production Slack',
+      spaceId: 'space-a',
+      operation: 'manage_access',
+    });
+
+    expect(event.message).toBe(
+      'User has changed access to action [id=connector-1] (operation: manage_access)'
+    );
+    expect(event.kibana?.saved_object).toEqual({
+      type: 'action',
+      id: 'connector-1',
+      name: 'Production Slack',
+    });
+  });
+
   it('describes a list that relied on recovery without an object', () => {
     const event = olsAuditEvent({
       action: 'ols_admin_override',

@@ -51,8 +51,8 @@ export interface OlsObjectAccessParams {
   spaceId: string;
   /** The operation to decide, as named by the type's access policy. */
   operation: string;
-  /** The objects, each with its stored ACL. */
-  objects: Array<{ id: string; acl?: StoredAcl }>;
+  /** The objects, each with its stored ACL and its display name for audit events. */
+  objects: Array<{ id: string; name?: string; acl?: StoredAcl }>;
 }
 
 /**
@@ -120,6 +120,8 @@ export interface OlsAuthorizeChangeParams {
   type: string;
   /** The object ID. */
   id: string;
+  /** The object's display name, for audit events. */
+  name?: string;
   /** The space the object is in. */
   spaceId: string;
   /** The object's stored ACL. */
@@ -357,14 +359,14 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
     // Viewing comes with every access, so only an operation that needs more is audited.
     const needsMoreThanView =
       operation in policy.operations && !getOperationsAtAccess(policy, 'view').has(operation);
-    for (const { id, acl } of objectsToCheck) {
+    for (const { id, name, acl } of objectsToCheck) {
       this.reportInvalidAcl(type, id, acl);
 
       let decision = evaluateAcl({ policy, acl, principal });
       if (decision.operations.has(operation)) {
         // Access that relied on ownership or a named grant, rather than on general access.
         if (needsMoreThanView) {
-          this.audit({ action: 'ols_access', type, id, spaceId, operation, principal });
+          this.audit({ action: 'ols_access', type, id, name, spaceId, operation, principal });
         }
         continue;
       }
@@ -381,6 +383,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
         action: objectDecision.status === 'allowed' ? 'ols_admin_override' : 'ols_denied',
         type,
         id,
+        name,
         spaceId,
         operation,
         principal,
@@ -561,6 +564,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
   public async authorizeChange({
     type,
     id,
+    name,
     spaceId,
     acl,
     change,
@@ -594,7 +598,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
         error instanceof AclChangeError &&
         (error.code === 'forbidden' || error.code === 'not_found')
       ) {
-        this.audit({ action: 'ols_denied', type, id, spaceId, operation, principal });
+        this.audit({ action: 'ols_denied', type, id, name, spaceId, operation, principal });
       }
       throw error;
     }
@@ -606,6 +610,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
               action: 'ols_update',
               type,
               id,
+              name,
               spaceId,
               operation,
               principal,
@@ -615,6 +620,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
               action: 'ols_transfer',
               type,
               id,
+              name,
               spaceId,
               operation,
               principal,
@@ -634,6 +640,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
           action: 'ols_admin_override',
           type,
           id,
+          name,
           spaceId,
           operation,
           principal,

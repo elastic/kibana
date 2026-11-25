@@ -75,9 +75,9 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
    * through Elasticsearch, and a UIAM key through UIAM. Unlike `getCurrentProfileId`, it reads only
    * the key, never a session or the user bound to a fake request.
    * @param request The request that carries the API key.
-   * @returns The profile ID, or `undefined` when the request carries no API key, the key can no
-   *   longer read itself, or no user created it.
-   * @throws When the Elasticsearch lookup fails for any other reason.
+   * @returns The profile ID, or `undefined` when the request carries no API key, the key no longer
+   *   authenticates or can't read itself, or no user created it.
+   * @throws When the lookup fails for any other reason.
    */
   getApiKeyProfileId(request: KibanaRequest): Promise<string | undefined>;
 }
@@ -353,14 +353,18 @@ export class UserProfileService {
     clusterClient: IClusterClient,
     request: UserProfileGetCurrentParams['request']
   ): Promise<Pick<ResolvedCurrentUserProfileId, 'profileId' | 'profileIdIsDerived'>> {
+    const isUiamApiKey = this.isUiamApiKeyRequest(request);
     try {
-      const profileId = await this.getApiKeyProfileId(clusterClient, request);
-      return this.isUiamApiKeyRequest(request)
-        ? { profileId, profileIdIsDerived: true }
-        : { profileId };
+      return {
+        profileId: await this.getApiKeyProfileId(clusterClient, request),
+        profileIdIsDerived: isUiamApiKey,
+      };
     } catch (error) {
+      const message = getDetailedErrorMessage(error);
       this.logger.error(
-        `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(error)}`
+        isUiamApiKey
+          ? `Failed to resolve the creator of a UIAM API key for user profile retrieval: ${message}`
+          : `Failed to retrieve API key for user profile retrieval: ${message}`
       );
       return {};
     }
@@ -397,10 +401,18 @@ export class UserProfileService {
       }
       return apiKeys[0].profile_uid;
     } catch (error) {
-      // A key that can no longer read itself, for example because it was invalidated, has no profile.
+      // A key that no longer authenticates, for example because it was invalidated, has no profile.
+      // That is expected for a task that outlives its key, and the task's own calls fail the same way.
       const statusCode = getErrorStatusCode(error);
+      if (statusCode === 401) {
+        this.logger.debug(`The API key no longer authenticates, cannot retrieve profile id.`);
+        return;
+      }
+
+      // An API key can always read itself, so this is unexpected. The request itself still works,
+      // but without a profile, so it is logged where an operator can see it.
       if (statusCode === 403 || statusCode === 404) {
-        this.logger.debug(
+        this.logger.warn(
           `API key cannot read itself to retrieve its profile id: ${getDetailedErrorMessage(error)}`
         );
         return;

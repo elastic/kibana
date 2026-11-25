@@ -7,11 +7,17 @@
 
 import type { Actions } from '@kbn/security-authorization-core';
 
+import { MANAGE_ACCESS_CONTROL_ACTION } from '../../saved_objects/access_control_service';
+
 /**
  * Privilege operation that grants recovery authority over objects of a type in a space. No feature
  * privilege includes it: only wildcard application privileges, such as those of `superuser`, do.
+ *
+ * It is the same operation that the Saved Objects access control uses as its admin override. A type
+ * uses either that access control or OLS, never both, so a role that holds the override keeps it
+ * when the type moves to OLS.
  */
-export const RECOVERY_OPERATION = 'manage_access_control';
+export const RECOVERY_OPERATION = MANAGE_ACCESS_CONTROL_ACTION;
 
 export const getRecoveryAction = (actions: Pick<Actions, 'savedObject'>, type: string) =>
   actions.savedObject.get(type, RECOVERY_OPERATION);

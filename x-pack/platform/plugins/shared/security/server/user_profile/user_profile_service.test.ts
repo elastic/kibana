@@ -1696,8 +1696,22 @@ describe('UserProfileService', () => {
       expect(getApiKey()).not.toHaveBeenCalled();
     });
 
+    it('resolves nothing at debug level when the key no longer authenticates', async () => {
+      getApiKey().mockRejectedValue(
+        new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
+      );
+
+      await expect(
+        userProfileService.start(mockStartParams).getApiKeyProfileId(apiKeyRequest())
+      ).resolves.toBeUndefined();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'The API key no longer authenticates, cannot retrieve profile id.'
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
     it.each([403, 404])(
-      'resolves nothing when the key cannot read itself (%s)',
+      'resolves nothing and warns when the key cannot read itself (%s)',
       async (statusCode) => {
         getApiKey().mockRejectedValue(
           new errors.ResponseError(securityMock.createApiResponse({ statusCode, body: {} }))
@@ -1706,6 +1720,9 @@ describe('UserProfileService', () => {
         await expect(
           userProfileService.start(mockStartParams).getApiKeyProfileId(apiKeyRequest())
         ).resolves.toBeUndefined();
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('API key cannot read itself to retrieve its profile id')
+        );
       }
     );
 
@@ -1731,6 +1748,21 @@ describe('UserProfileService', () => {
 
       await expect(startContract.getApiKeyProfileId(request)).rejects.toBe(failure);
       await expect(startContract.getCurrentProfileId({ request })).resolves.toBeNull();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Failed to resolve the creator of a UIAM API key for user profile retrieval'
+        )
+      );
+    });
+
+    it('logs a failed Stack key lookup in getCurrentProfileId and resolves nothing', async () => {
+      getApiKey().mockRejectedValue(
+        new errors.ResponseError(securityMock.createApiResponse({ statusCode: 500, body: {} }))
+      );
+
+      await expect(
+        userProfileService.start(mockStartParams).getCurrentProfileId({ request: apiKeyRequest() })
+      ).resolves.toBeNull();
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to retrieve API key for user profile retrieval')
       );
