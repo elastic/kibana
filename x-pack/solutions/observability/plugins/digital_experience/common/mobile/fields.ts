@@ -83,6 +83,12 @@ export const RESULT_COLUMNS = {
   environmentNames: 'environment_names',
   crashTime: 'crash_time',
   fingerprint: 'fingerprint',
+  events: 'events',
+  exceptionType: 'exception_type',
+  message: 'message',
+  firstRelease: 'first_release',
+  lastRelease: 'last_release',
+  releases: 'releases',
 } as const;
 
 /** A column the mobile queries compute, as an ES|QL column. */

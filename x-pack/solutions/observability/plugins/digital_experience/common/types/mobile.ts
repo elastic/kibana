@@ -70,3 +70,33 @@ export interface MobileKpisResponse {
   /** Environments in the time range, whatever the environment filter. */
   environments: string[];
 }
+
+/** When a crash group first or last crashed, and on which release. */
+export interface CrashGroupSeen {
+  /** ISO 8601. */
+  time: string;
+  release: string | null;
+}
+
+/** Crashes that share a fingerprint: the same crash, whatever build or launch reported it. */
+export interface MobileCrashGroup {
+  fingerprint: string;
+  type: string | null;
+  /** The latest crash's. */
+  message: string | null;
+  /** Installations that crashed, so a device stuck in a crash loop counts once. */
+  users: number;
+  events: number;
+  sessions: number;
+  firstSeen: CrashGroupSeen;
+  lastSeen: CrashGroupSeen;
+  /** The newest release, when no older release crashed this way in the lookback; `null` otherwise. */
+  newInRelease: string | null;
+}
+
+export interface MobileCrashGroupsResponse {
+  /** Most affected users first. */
+  crashGroups: MobileCrashGroup[];
+  /** Whether the user can't read every OTel logs index, so the values may be missing some data. */
+  isPartial: boolean;
+}

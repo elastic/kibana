@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { CRASH_DELAY_MS, crashEvents, withCrashFingerprint } from './crash_groups';
+import {
+  CRASH_DELAY_MS,
+  crashEvents,
+  withCrashFingerprint,
+  withCrashGroupReleases,
+  withCrashGroupStats,
+} from './crash_groups';
 
 const START = Date.parse('2021-01-18T12:00:00.000Z');
 const END = Date.parse('2021-01-18T13:00:00.000Z');
@@ -53,5 +59,41 @@ describe('withCrashFingerprint', () => {
     ).toRequest();
 
     expect(query).toContain('| EVAL fingerprint = COALESCE(`attributes.exception.fingerprint`');
+  });
+});
+
+describe('withCrashGroupStats', () => {
+  const query = withCrashGroupStats(
+    withCrashFingerprint(crashEvents({ serviceName: 'ride-ios', start: START, end: END }))
+  ).print('basic');
+
+  it('counts each group by installations, events and sessions', () => {
+    expect(query).toContain('users = COUNT_DISTINCT(`resource.attributes.app.installation.id`)');
+    expect(query).toContain('events = COUNT(*)');
+    expect(query).toContain('sessions = COUNT_DISTINCT(`attributes.session.id`)');
+  });
+
+  it('reads the first and last crash, and the latest type and message, by crash time', () => {
+    expect(query).toContain('first_seen = MIN(crash_time), last_seen = MAX(crash_time)');
+    expect(query).toContain('message = LAST(`attributes.exception.message`, crash_time)');
+    expect(query).toContain('first_release = FIRST(`service.version`, crash_time)');
+    expect(query).toContain('last_release = LAST(`service.version`, crash_time)');
+    expect(query).toContain('BY fingerprint');
+  });
+
+  it('ranks by affected users, so a crash loop on one device does not lead', () => {
+    expect(query).toContain('| SORT users DESC, events DESC | LIMIT 100');
+  });
+});
+
+describe('withCrashGroupReleases', () => {
+  it('lists the releases of the listed groups only', () => {
+    const query = withCrashGroupReleases(
+      withCrashFingerprint(crashEvents({ serviceName: 'ride-ios', start: START, end: END })),
+      ['abc', 'd"e']
+    ).print('basic');
+
+    expect(query).toContain('| WHERE fingerprint IN ("abc", "d\\"e")');
+    expect(query).toContain('| STATS releases = VALUES(`service.version`) BY fingerprint | LIMIT 2');
   });
 });

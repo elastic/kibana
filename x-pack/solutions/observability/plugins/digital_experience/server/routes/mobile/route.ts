@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../common/otel_data';
 import type { MobileKpisResponse, MobileReleasesResponse } from '../../../common/types/mobile';
-import { MAX_OS_NAME_LENGTH, MAX_RELEASE_LENGTH } from '../../lib/constants';
 import {
   APPLICATION_TAB_ROUTE_OPTIONS,
   APPLICATION_TAB_ROUTE_SECURITY,
@@ -17,41 +16,15 @@ import {
 } from '../application_tab_route';
 import { hasPartialReadAccess } from '../applications/get_partial_access';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-import {
-  START_AFTER_END_ISSUE,
-  isStartBeforeEnd,
-  serviceNameParam,
-  timeRangeShape,
-  timeZoneShape,
-} from '../params';
 import { getMobileKpis } from './get_mobile_kpis';
 import { getMobileReleases } from './get_mobile_releases';
+import { mobileFiltersParams, mobileSeriesParams } from './mobile_params';
 
 export const MOBILE_KPIS_ENDPOINT =
   'GET /internal/digital_experience/mobile_applications/{serviceName}/kpis';
 
 export const MOBILE_RELEASES_ENDPOINT =
   'GET /internal/digital_experience/mobile_applications/{serviceName}/releases';
-
-const mobileFiltersShape = () => ({
-  ...timeRangeShape(),
-  osName: z.string().min(1).max(MAX_OS_NAME_LENGTH).optional(),
-  release: z.string().min(1).max(MAX_RELEASE_LENGTH).optional(),
-});
-
-const mobileFiltersParams = () =>
-  z.object({
-    path: z.object({ serviceName: serviceNameParam() }),
-    query: z.object(mobileFiltersShape()).refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
-  });
-
-const mobileSeriesParams = () =>
-  z.object({
-    path: z.object({ serviceName: serviceNameParam() }),
-    query: z
-      .object({ ...mobileFiltersShape(), ...timeZoneShape() })
-      .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
-  });
 
 const releasesRoute = createDigitalExperienceServerRoute({
   endpoint: MOBILE_RELEASES_ENDPOINT,
