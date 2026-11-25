@@ -17,6 +17,7 @@ import { detectionSnapshotEvent } from './detection_snapshot_event';
 import { investigationEndedEvent } from './investigation_ended_event';
 import { backgroundActivityEvent } from './background_activity_event';
 import { decisionTreeCausalCheckEvent } from './decision_tree_causal_check_event';
+import { alertOutcomeEvent } from './alert_outcome_events';
 
 export const setupNightshiftTelemetry = ({
   analytics,
@@ -36,6 +37,7 @@ export const setupNightshiftTelemetry = ({
   analytics.registerEventType(investigationEndedEvent);
   analytics.registerEventType(backgroundActivityEvent);
   analytics.registerEventType(decisionTreeCausalCheckEvent);
+  analytics.registerEventType(alertOutcomeEvent);
   return new NightshiftTelemetryClient(analytics, logger);
 };
 
@@ -76,6 +78,11 @@ export {
   type BackgroundActivityType,
 } from './background_activity_event';
 export { trackBackgroundActivity } from './track_background_activity';
+export {
+  NIGHTSHIFT_ALERT_OUTCOME_EVENT,
+  type AlertOutcomeEvent,
+  type AlertOutcomeTransition,
+} from './alert_outcome_events';
 export {
   NIGHTSHIFT_ONLINE_EVALS_STEP_FAILED_EVENT,
   type OnlineEvalsStepFailedEvent,

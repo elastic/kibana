@@ -31,6 +31,13 @@ export const NIGHTSHIFT_ENABLED_FLAG = 'nightshift.enabled';
 export const NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG = 'nightshift.onlineEvals.paused';
 
 /**
+ * Turns on alert outcome tracking for investigations started from a post about an alert. Read with
+ * a `false` fallback, so deployments that can't reach LaunchDarkly track nothing. Defined in the
+ * elastic/kibana-feature-flags repository.
+ */
+export const NIGHTSHIFT_ALERT_OUTCOMES_ENABLED_FLAG = 'nightshift.alertOutcomes.enabled';
+
+/**
  * When `true`, online eval score events include the judges' explanations, which may quote customer
  * data. Read with a `false` fallback, so explanations are left out wherever LaunchDarkly is
  * unreachable. Turning it on for a project needs legal approval.
@@ -150,6 +157,7 @@ export {
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
   NIGHTSHIFT_ONLINE_EVALS_USAGE_ID,
+  NIGHTSHIFT_ALERT_OUTCOMES_USAGE_ID,
 } from './src/nightshift_usage_ids';
 
 export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';

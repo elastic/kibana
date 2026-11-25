@@ -246,3 +246,18 @@ steps:
         alert_rule_type: '${{ inputs.context.alerts[0].rule_type_id | default: inputs.context.alert_rule_type }}'
     on-failure:
       continue: true
+
+  # Alert outcomes: identifies and verifies the external alert behind the first round, so a later
+  # failure sweep can queue a recovery round when it recovers. Last, so it delays nothing the
+  # investigation reports. The step reports its own failures and never throws.
+  - name: track_alert_outcome
+    type: nightshift.alertOutcomes.track
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      investigation_started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}'
+      follow_up: '{{ inputs.context.follow_up }}'
+      is_follow_up: '${{ inputs.context.is_follow_up }}'
+      automation_id: '${{ inputs.context.nightshift_automation_id }}'
+      connector_id: '{{ steps.resolve_model.output.connector_id }}'
+    on-failure:
+      continue: true

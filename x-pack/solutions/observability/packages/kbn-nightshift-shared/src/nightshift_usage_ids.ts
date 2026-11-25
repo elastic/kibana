@@ -30,3 +30,6 @@ export const NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID =
   'nightshift_investigation_decision_tree' as const;
 
 export const NIGHTSHIFT_ONLINE_EVALS_USAGE_ID = 'nightshift_online_evals' as const;
+
+/** Extracting the identity of an alert Nightshift did not start, to track its recovery. */
+export const NIGHTSHIFT_ALERT_OUTCOMES_USAGE_ID = 'nightshift_alert_outcomes' as const;
