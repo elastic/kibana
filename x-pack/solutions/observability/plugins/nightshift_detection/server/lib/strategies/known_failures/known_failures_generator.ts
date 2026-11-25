@@ -242,6 +242,10 @@ async function judgeMeasuredFailures({
         readings: history.get(getSeriesKey(series[index])) ?? [],
         ruleId: newest.rule_id,
       });
+      const { start, lastMinute } = getRunWindow(newest);
+      // The rise sits on the newest minute: an earlier tick that already wrote a reading there,
+      // a rise or an unusual minute, keeps the event open, and a second one would replace it.
+      const isRiseMinuteReported = reported.has(lastMinute);
       const judge = (dataFrom?: number) => ({
         unusual: findUnusualMinutes({
           measurements: failure.measurements,
@@ -250,7 +254,7 @@ async function judgeMeasuredFailures({
           reportedCounts,
           dataFrom,
         }),
-        rise: findRise({ measurement: newest, dataFrom }),
+        rise: isRiseMinuteReported ? undefined : findRise({ measurement: newest, dataFrom }),
       });
 
       const unguarded = judge();
@@ -259,9 +263,11 @@ async function judgeMeasuredFailures({
       }
       const { knowledgeIndicator } = failure;
       try {
+        // Read from before the window, so an index that was only quiet in the window's first
+        // minutes is not taken for one whose data had not begun.
         const dataFrom = await readDataFrom({
           esql: knowledgeIndicator.query.esql.query,
-          from: getRunWindow(newest).start,
+          from: start - KNOWN_FAILURES_SETTINGS.data_start_lookback_minutes * MINUTE_MS,
         });
         return { ...failure, ...judge(dataFrom) };
       } catch (error) {
@@ -278,8 +284,8 @@ async function judgeMeasuredFailures({
 }
 
 /**
- * Reads when the data of a knowledge indicator's index begins, from the start of the window on, as
- * the start of that minute, and throws when the window holds no data. Remembered per query for the
+ * Reads when the data of a knowledge indicator's index begins, from `from` on, as the start of that
+ * minute, and throws when there is no data from `from` on. Remembered per query for the
  * tick, so the indicators of one `FROM` whose rules ran in the same minute share one read.
  */
 function memoizeDataStart({ esClient, cpsEnabled, abortSignal }: GeneratorContext) {

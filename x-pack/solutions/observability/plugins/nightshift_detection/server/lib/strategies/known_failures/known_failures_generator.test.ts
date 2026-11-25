@@ -228,11 +228,12 @@ describe('KnownFailuresGenerator', () => {
     );
 
     expect(result.readings).toEqual([]);
+    // An hour before the run's six-hour window, which ends after its newest minute: a sparse index
+    // with no line in the window's first minute still had data when the window began.
+    const lookupFrom = new Date(WINDOW.from + (7 - 360 - 60) * MINUTE_MS).toISOString();
     expect(readDataStart).toHaveBeenCalledWith(
       {
-        query: expect.stringMatching(
-          /^FROM logs\n\| WHERE @timestamp >= ".+"\n\| SORT @timestamp\n\| LIMIT 1/
-        ),
+        query: `FROM logs\n| WHERE @timestamp >= "${lookupFrom}"\n| SORT @timestamp\n| LIMIT 1\n| KEEP @timestamp`,
       },
       expect.anything()
     );
@@ -266,10 +267,12 @@ describe('KnownFailuresGenerator', () => {
   });
 
   // Live, one reported spike of 48 against a normal of 2 hid a burst of 11 for the hour after it.
-  // The spike sits on the first minute of the run's hour, as far back as the history read must go.
+  // The run is the oldest a window can hold: its query read NOW() two minutes before the window,
+  // so its hour starts 70 minutes back, and the spike sits on that hour's first minute, as far back
+  // as the history read must go.
   it('leaves a spike the same rule reported out of the normal level of the hour after it', async () => {
     const mean = (59 * 2 + 48) / 60;
-    const row = createRow(-2, [2, 2, 2, 11, 11, 2, 2], {
+    const row = createRow(-10, [2, 2, 2, 11, 11, 2, 2], {
       baseline_median: 2,
       baseline_mad: 0,
       baseline_mean: mean,
@@ -278,7 +281,7 @@ describe('KnownFailuresGenerator', () => {
     const reportedSpike = {
       status: 'breached',
       rule_id: RULE_ID,
-      bucket_start: WINDOW.from - 62 * MINUTE_MS,
+      bucket_start: WINDOW.from - 70 * MINUTE_MS,
       value: 48,
       details: { check: 'unusual_minute', threshold: 7 },
     } as unknown as DetectionSignalReading;
@@ -292,8 +295,8 @@ describe('KnownFailuresGenerator', () => {
     );
 
     expect(sameRule.readings).toEqual([
-      expect.objectContaining({ value: 11, bucket_start: WINDOW.from + MINUTE_MS }),
-      expect.objectContaining({ value: 11, bucket_start: WINDOW.from + 2 * MINUTE_MS }),
+      expect.objectContaining({ value: 11, bucket_start: WINDOW.from - 7 * MINUTE_MS }),
+      expect.objectContaining({ value: 11, bucket_start: WINDOW.from - 6 * MINUTE_MS }),
     ]);
     expect(oldRule.readings).toEqual([]);
   });

@@ -48,6 +48,12 @@ export const KNOWN_FAILURES_SETTINGS = {
    * rise is reported once per run, so a shorter period would close its event between runs.
    */
   quiet_period_minutes: 10,
+  /**
+   * Minutes before a run's window the data start lookup reads from. A first document before the
+   * window means the source had data when the window began, so its first minutes are only quiet,
+   * and the minutes of a sparse index with no line in them are not taken for minutes without data.
+   */
+  data_start_lookback_minutes: 60,
   /** The baseline check of the prototype: when a minute's count is unusual for the hour before it. */
   baseline: {
     /** Scaled median absolute deviations above the median. */
