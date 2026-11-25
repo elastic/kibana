@@ -199,13 +199,15 @@ steps:
       scan_gap_minutes: "${{ inputs.detectionIntervalMinutes | times: 2 | plus: inputs.targetCoverageMinutes }}"
 
   - name: compute_gate_window
-    # How far back check_last_scan looks. At least the scan lookback, so a rule that went quiet
-    # for longer than the window it is scanned over is not compared with a record that window
-    # cannot contain; and at least the scan gap, so a continuing incident still finds the
-    # previous scan's marker. The scan route has already validated lookback as `now-<N>m`.
+    # How far back check_last_scan looks. At least the critical scan lookback, so a critical rule
+    # that went quiet for longer than the window it is scanned over is not compared with a record
+    # that window cannot contain; and at least the scan gap, so a continuing incident still finds
+    # the previous scan's marker. Default-profile rules are scanned over a fixed, longer window, so
+    # for them only the scan gap holds; a shorter gate window can only cost an extra detection.
+    # The scan route has already validated lookback as `now-<N>m`, case-insensitively and trimmed.
     type: data.set
     with:
-      gate_window_minutes: "${{ inputs.lookback | remove: 'now-' | remove: 'm' | plus: 0 | at_least: variables.scan_gap_minutes }}"
+      gate_window_minutes: "${{ inputs.lookback | strip | downcase | remove: 'now-' | remove: 'm' | plus: 0 | at_least: variables.scan_gap_minutes }}"
 
   # -----------------------------------------------------------------------
   # Step 3: Foreach rule bucket — observe the change_point type and write a DETECTION on transition.
@@ -273,6 +275,8 @@ steps:
           # write, so require error == null.
           # `stationary` (flat alert rate) is overwhelmingly ambient noise and is never written;
           # post-escalation recovery is handled by the judge's re-evaluation queries instead.
+          # A rule flipping between a type and `stationary` writes a detection on every flip back;
+          # discovery's flaky-rule hold-back is what absorbs that.
           is_transition: >-
             ${{ steps.compute_rule_context.output.has_rule_uuid
             and steps.check_last_scan.error == null
