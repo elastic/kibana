@@ -1366,6 +1366,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-proposals-ui'
   - 'x-pack/platform/packages/shared/kbn-sample-parser'
   - 'x-pack/platform/packages/shared/kbn-search-index-documents'
+  - 'x-pack/platform/packages/shared/kbn-secrets'
   - 'x-pack/platform/packages/shared/kbn-shared-components'
   - 'x-pack/platform/packages/shared/kbn-significant-events-schema'
   - 'x-pack/platform/packages/shared/kbn-slo-constants'

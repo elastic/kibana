@@ -1159,6 +1159,7 @@ x-pack/platform/packages/shared/kbn-proposals-common @elastic/alertzero-common-l
 x-pack/platform/packages/shared/kbn-proposals-ui @elastic/alertzero-common-layer
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
+x-pack/platform/packages/shared/kbn-secrets @elastic/workflows-eng
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/nightshift
 x-pack/platform/packages/shared/kbn-slo-constants @elastic/nightshift-sre-agent-team
