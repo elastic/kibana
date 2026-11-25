@@ -357,6 +357,7 @@ describe('buildCoverageDocument facts', () => {
       available_in_workflows: false,
       available_in_agent_builder: false,
       availability: 'neither',
+      total_actions: 1,
       tool_actions: 0,
       oauth_emulation: 'served',
       drift_checkable: true,
@@ -442,5 +443,22 @@ describe('getAvailability', () => {
         facts: facts(),
       })
     ).toMatchObject({ availability: 'both', tool_actions: 1 });
+  });
+
+  it('counts every action a connector declares, tool or not', () => {
+    expect(
+      getAvailability(withFeatures([], { a: { isTool: true }, b: {}, c: { isTool: false } }))
+        .total_actions
+    ).toBe(3);
+  });
+
+  it('counts actions a recorded manifest does not map, which api_type_actions misses', () => {
+    expect(
+      buildCoverageDocument({
+        spec: spec('.figma', ['getMe', 'getFile']),
+        manifest: manifest('openapi'),
+        facts: facts(),
+      })
+    ).toMatchObject({ total_actions: 2, api_type_actions: { openapi: 0 } });
   });
 });
