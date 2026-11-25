@@ -26,7 +26,8 @@ import { IN_PROGRESS_LABEL, moreEntitiesLabel, updatedAgoLabel } from './transla
 
 const MAX_VISIBLE_ENTITIES = 3;
 
-export interface InvestigationCardProps {
+export interface InvestigationCardProps
+  extends Partial<Record<`data-ebt-${string}`, string | undefined>> {
   investigation: InvestigationSummary;
   /** Makes the main card content a button; for example to open the conversation details flyout. */
   onClick?: (investigation: InvestigationSummary) => void;
@@ -91,6 +92,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   actions,
   borderless = false,
   timestamp = 'created',
+  ...ebtProps
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -177,6 +179,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
         aria-label={isInteractive ? title : undefined}
         aria-pressed={isInteractive ? isSelected : undefined}
         data-test-subj={isInteractive ? 'investigationCardButton' : undefined}
+        {...(isInteractive ? ebtProps : {})}
         onClick={isInteractive ? () => onClick(investigation) : undefined}
         onKeyDown={isInteractive ? handleKeyDown : undefined}
         css={css`

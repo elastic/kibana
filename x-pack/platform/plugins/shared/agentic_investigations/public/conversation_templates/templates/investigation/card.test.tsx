@@ -174,6 +174,7 @@ describe('InvestigationCard', () => {
     renderCard({
       investigation: investigation(),
       onClick,
+      'data-ebt-action': 'viewCard',
       actions: (
         <button type="button" data-test-subj="cardAction">
           Action
@@ -183,6 +184,8 @@ describe('InvestigationCard', () => {
 
     const cardButton = screen.getByTestId('investigationCardButton');
     expect(cardButton).not.toContainElement(screen.getByTestId('cardAction'));
+    expect(cardButton).toHaveAttribute('data-ebt-action', 'viewCard');
+    expect(screen.getByTestId('cardAction').closest('[data-ebt-action]')).toBeNull();
 
     fireEvent.click(screen.getByTestId('cardAction'));
 

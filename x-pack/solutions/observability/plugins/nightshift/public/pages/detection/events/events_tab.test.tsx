@@ -142,11 +142,13 @@ describe('EventsTab', () => {
     const windowClick = jest.fn();
     window.addEventListener('click', windowClick);
     const history = renderTab();
+    const entriesBefore = history.length;
 
     fireEvent.click(screen.getByTestId('nightshiftOpenEvent-event-1'));
     window.removeEventListener('click', windowClick);
 
     expect(windowClick).toHaveBeenCalledTimes(1);
+    expect(history.length).toBe(entriesBefore + 1);
     expect(new URLSearchParams(history.location.search).get('eventId')).toBe('event-1');
   });
 

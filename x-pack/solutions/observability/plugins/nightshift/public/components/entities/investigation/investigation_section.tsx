@@ -369,13 +369,6 @@ const SectionRows = ({
             key={investigation.id}
             grow={false}
             data-test-subj="nightshiftInvestigationListItem"
-            {...(onInvestigationClick
-              ? getEbtProps({
-                  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
-                  element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
-                  detail: investigation.in_progress ? 'running' : 'complete',
-                })
-              : {})}
           >
             {InvestigationCard && (
               <InvestigationCard
@@ -384,6 +377,11 @@ const SectionRows = ({
                 timestamp="updated"
                 isSelected={investigation.id === selectedInvestigationId}
                 onClick={onInvestigationClick}
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+                  detail: investigation.in_progress ? 'running' : 'complete',
+                })}
                 actions={
                   <InvestigationCardActions
                     investigation={investigation}

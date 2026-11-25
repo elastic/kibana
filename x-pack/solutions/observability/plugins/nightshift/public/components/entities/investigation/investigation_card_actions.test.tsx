@@ -87,20 +87,28 @@ describe('InvestigationCardActions', () => {
     expect(openChat).toHaveBeenCalledWith('investigation-1', 'nightshift.investigation');
   });
 
-  it('lets clicks on open in chat and delete confirm reach window so click telemetry fires', async () => {
-    const windowClick = jest.fn();
-    window.addEventListener('click', windowClick);
+  it('lets clicks on open in chat and delete confirm reach window with their click tags', async () => {
+    const actions: Array<string | null> = [];
+    const onWindowClick = (event: MouseEvent) =>
+      actions.push(
+        (event.target as Element).closest('[data-ebt-action]')?.getAttribute('data-ebt-action') ??
+          null
+      );
+    window.addEventListener('click', onWindowClick);
     renderActions();
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationCardOpenInChat'));
-    expect(windowClick).toHaveBeenCalledTimes(1);
-
     fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
     fireEvent.click(screen.getByTestId('nightshiftInvestigationCardDelete'));
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    window.removeEventListener('click', windowClick);
+    window.removeEventListener('click', onWindowClick);
 
-    expect(windowClick).toHaveBeenCalledTimes(4);
+    expect(actions).toEqual([
+      'openInChat',
+      null,
+      'deleteInvestigation',
+      'confirmDeleteInvestigation',
+    ]);
     await waitFor(() => expect(httpDelete).toHaveBeenCalled());
   });
 
