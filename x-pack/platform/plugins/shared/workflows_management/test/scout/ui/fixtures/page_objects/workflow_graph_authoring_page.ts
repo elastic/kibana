@@ -161,6 +161,16 @@ export class WorkflowGraphAuthoringPage {
     this.fitViewButton = this.page.testSubj.locator('workflowCanvas-fit-view');
   }
 
+  /** Every "+" insertion control on the canvas: a trigger's own stub, or the one shared by several. */
+  wireControls(): Locator {
+    return this.page.locator('[data-test-subj^="workflowGraphWireControl-"]');
+  }
+
+  /** The paths that join several triggers into one "+", while no step follows them. */
+  triggerJoin(): Locator {
+    return this.page.testSubj.locator('workflowGraphTriggerJoin');
+  }
+
   /** Opens the trigger picker from the empty-canvas CTA. */
   async openAddTriggerFromEmptyCanvas(): Promise<void> {
     await this.emptyAddTrigger.click();

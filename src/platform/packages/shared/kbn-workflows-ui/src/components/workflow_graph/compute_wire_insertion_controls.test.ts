@@ -276,6 +276,113 @@ describe('computeWireInsertionControls', () => {
     ).toHaveLength(0);
   });
 
+  describe('triggers with no step yet', () => {
+    const trigger = (id: string, x: number, height = 48): Node => ({
+      id,
+      type: 'trigger',
+      position: { x, y: 0 },
+      width: 200,
+      height,
+      data: { stepType: id, label: id },
+    });
+    const insertionFor = (ids: string[]): InsertionPoints => ({
+      byNodeId: new Map(ids.map((id) => [id, { step: { sourceNodeId: id, isTerminal: true } }])),
+      topLevelStepNodeIds: [],
+    });
+    const controlsFor = (triggerNodes: Node[], direction: 'TB' | 'LR' = 'TB') =>
+      computeWireInsertionControls({
+        nodes: triggerNodes,
+        edges: [],
+        insertionPoints: insertionFor(triggerNodes.map((n) => n.id)),
+        direction,
+      });
+
+    it('gives one trigger its own stub and +, as before', () => {
+      const controls = controlsFor([trigger('manual', 0)]);
+
+      expect(controls.map((c) => c.id)).toEqual(['terminal:manual:step']);
+      expect(controls[0].joinSources).toBeUndefined();
+    });
+
+    it('joins two triggers into a single + below both, instead of a stub and + for each', () => {
+      const controls = controlsFor([trigger('manual', 0), trigger('scheduled', 220)]);
+
+      expect(controls.map((c) => c.id)).toEqual(['terminal:trigger-join']);
+      const [join] = controls;
+      expect(join.kind).toBe('terminal');
+      // The same context a trigger's own + has: the first step goes after the triggers.
+      expect(join.insertContext).toEqual({ mode: 'prepend-step' });
+      // Each trigger's exit, and the + centred between them, one stub below the lowest.
+      expect(join.joinSources).toEqual([
+        { x: 100, y: 48 },
+        { x: 320, y: 48 },
+      ]);
+      expect(join.centre).toEqual({ x: 210, y: 48 + TERMINAL_STUB_PX });
+      expect(join.segmentEnd).toEqual(join.centre);
+    });
+
+    it('joins three triggers, with the + centred across all of them', () => {
+      const controls = controlsFor([
+        trigger('manual', 0),
+        trigger('scheduled', 220),
+        trigger('alert', 440),
+      ]);
+
+      expect(controls.map((c) => c.id)).toEqual(['terminal:trigger-join']);
+      expect(controls[0].joinSources).toHaveLength(3);
+      expect(controls[0].centre.x).toBe(320);
+    });
+
+    it('hangs the + one stub below the lowest trigger when they are not the same height', () => {
+      const controls = controlsFor([trigger('manual', 0, 48), trigger('scheduled', 220, 80)]);
+
+      expect(controls[0].centre.y).toBe(80 + TERMINAL_STUB_PX);
+    });
+
+    it('joins to the right of the triggers when the layout runs left to right', () => {
+      const controls = controlsFor(
+        [trigger('manual', 0), { ...trigger('scheduled', 0), position: { x: 0, y: 100 } }],
+        'LR'
+      );
+
+      expect(controls.map((c) => c.id)).toEqual(['terminal:trigger-join']);
+      expect(controls[0].centre).toEqual({ x: 200 + TERMINAL_STUB_PX, y: (24 + 124) / 2 });
+    });
+
+    it('leaves a trigger that already has a step after it alone', () => {
+      const triggerNodes = [trigger('manual', 0), trigger('scheduled', 220)];
+      const controls = computeWireInsertionControls({
+        nodes: [
+          ...triggerNodes,
+          {
+            id: 'first',
+            type: 'step',
+            position: { x: 110, y: 200 },
+            width: 200,
+            height: 48,
+            data: { stepType: 'slack', label: 'first' },
+          },
+        ],
+        edges: [
+          { id: 'manual-first', source: 'manual', target: 'first', data: { isMerge: true } },
+          { id: 'scheduled-first', source: 'scheduled', target: 'first', data: { isMerge: true } },
+        ],
+        insertionPoints: {
+          byNodeId: new Map([
+            ['manual', { step: { sourceNodeId: 'manual' } }],
+            ['scheduled', { step: { sourceNodeId: 'scheduled' } }],
+            ['first', { step: { sourceNodeId: 'first', stepName: 'first', isTerminal: true } }],
+          ]),
+          topLevelStepNodeIds: ['first'],
+        },
+        direction: 'TB',
+      });
+
+      expect(controls.some((c) => c.id === 'terminal:trigger-join')).toBe(false);
+      expect(controls.filter((c) => c.id === 'wire:trigger-fanin:first')).toHaveLength(1);
+    });
+  });
+
   describe('join-source edges', () => {
     // Virtual join nodes are 1px-thick layout helpers along the main axis.
     const joinNode = (

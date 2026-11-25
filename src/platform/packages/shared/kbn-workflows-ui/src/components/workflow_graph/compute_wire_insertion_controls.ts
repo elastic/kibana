@@ -70,6 +70,12 @@ export interface WireInsertionControl {
   readonly fallbackStepName?: string;
   /** Layout axis. */
   readonly direction: LayoutDirection;
+  /**
+   * Exit points of the nodes this terminal stands for, when it is one + for several of them: the
+   * triggers of a workflow with no step yet. Each is drawn joining into the + (see the overlay);
+   * `segmentStart` is then not a stub start.
+   */
+  readonly joinSources?: readonly WireSegmentPoint[];
 }
 
 /** Midpoint of a segment — the rule every control position must use. */
@@ -454,10 +460,49 @@ export function computeWireInsertionControls(args: {
     forkBranchFloor.set(edge.source, Math.max(current, tgtFloor));
   }
 
+  // Triggers of a workflow with no step yet: with no step to merge into there is no merge edge, so each
+  // would get a stub and + of its own. Two or more share one + below all of them, joined as they are
+  // once a step exists.
+  const joinedTriggerIds = new Set<string>();
+  const joinTriggers = [...insertionPoints.byNodeId].flatMap(([nodeId, ports]) => {
+    const node = byId.get(nodeId);
+    const isOpenTrigger =
+      node?.type === 'trigger' &&
+      ports.step !== undefined &&
+      ports.step.stepName === undefined &&
+      !wiredExits.has(`${nodeId}:step`);
+    return isOpenTrigger
+      ? [{ nodeId, exit: nodeExitPoint(absoluteNodeBounds(node, byId), direction) }]
+      : [];
+  });
+  if (joinTriggers.length >= 2) {
+    const exits = joinTriggers.map(({ exit }) => exit);
+    const isLR = direction === 'LR';
+    const cross = exits.map((exit) => (isLR ? exit.y : exit.x));
+    const main = Math.max(...exits.map((exit) => (isLR ? exit.x : exit.y)));
+    const crossCentre = (Math.min(...cross) + Math.max(...cross)) / 2;
+    const tip = isLR
+      ? { x: main + TERMINAL_STUB_PX, y: crossCentre }
+      : { x: crossCentre, y: main + TERMINAL_STUB_PX };
+    controls.push({
+      id: 'terminal:trigger-join',
+      kind: 'terminal',
+      centre: tip,
+      segmentStart: isLR ? { x: main, y: crossCentre } : { x: crossCentre, y: main },
+      segmentEnd: tip,
+      // The same context each trigger's own + has: the first step goes after the triggers.
+      insertContext: { mode: 'prepend-step' },
+      direction,
+      joinSources: exits,
+    });
+    joinTriggers.forEach(({ nodeId }) => joinedTriggerIds.add(nodeId));
+  }
+
   // Terminals: step / branch exits that have no outgoing non-failure wire.
   const terminalSources = [...insertionPoints.byNodeId].flatMap(([nodeId, ports]) => {
     const sourceNode = byId.get(nodeId);
-    return sourceNode ? [{ nodeId, ports, sourceNode }] : [];
+    // A joined trigger's + is the shared one above.
+    return sourceNode && !joinedTriggerIds.has(nodeId) ? [{ nodeId, ports, sourceNode }] : [];
   });
   for (const { nodeId, ports, sourceNode } of terminalSources) {
     const sourceBounds = absoluteNodeBounds(sourceNode, byId);

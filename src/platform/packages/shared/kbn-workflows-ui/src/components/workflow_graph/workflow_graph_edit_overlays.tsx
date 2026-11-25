@@ -21,9 +21,11 @@ import type { Edge, Node } from '@xyflow/react';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LayoutDirection } from '@kbn/workflows';
+import { buildMergeBusPath } from './compute_edge_path';
 import type { InsertionPoints } from './compute_insertion_points';
 import { computeWireInsertionControls } from './compute_wire_insertion_controls';
 import type { WorkflowGraphEditActions } from './workflow_graph_actions_context';
+import { MERGE_BUS_TRUNK } from './workflow_graph_geometry';
 import { toAnchorRect } from './workflow_graph_insert_control';
 import {
   WIRE_HIT_VAR,
@@ -172,6 +174,30 @@ export function WorkflowGraphEditOverlays({
             const isLr = control.direction === 'LR';
             const x2 = isLr ? control.segmentEnd.x - tipInset : control.segmentEnd.x;
             const y2 = isLr ? control.segmentEnd.y : control.segmentEnd.y - tipInset;
+            if (control.joinSources) {
+              // One + for several triggers: each drops to a shared bus and joins into one trunk, the shape the
+              // triggers have once a step follows them.
+              return (
+                <g key={control.id} data-test-subj="workflowGraphTriggerJoin">
+                  {control.joinSources.map((source) => (
+                    <path
+                      key={`${source.x},${source.y}`}
+                      d={
+                        buildMergeBusPath(
+                          { sourceX: source.x, sourceY: source.y, targetX: x2, targetY: y2 },
+                          isLr,
+                          MERGE_BUS_TRUNK
+                        ).path
+                      }
+                      fill="none"
+                      stroke={stubStroke}
+                      strokeWidth={1}
+                      markerEnd={`url(#${terminalArrowId})`}
+                    />
+                  ))}
+                </g>
+              );
+            }
             return (
               <line
                 key={control.id}
