@@ -35,16 +35,13 @@ export const withSamplingErrorContext = async <T>(
 };
 
 export type SampleColumnsProbe =
-  /** `columns` is absent when the probe could not answer: sampling runs without it. */
   | { kind: 'supported'; columns: EsqlColumnSchema[] | undefined }
   | { kind: 'empty' }
-  /** `problem` is a full sentence naming the source. */
   | { kind: 'unsupported'; problem: string };
 
 interface ProbeSampleColumnsParams {
   esClient: ElasticsearchClient;
   index: string;
-  /** Columns to report besides `@timestamp`. */
   fields?: string[];
   logger: Logger;
   signal: AbortSignal;
@@ -71,11 +68,11 @@ const probeColumns = async ({
   logger,
   signal,
 }: ProbeSampleColumnsParams): Promise<SampleColumnsProbe> => {
-  // Only the columns the caller reads: the full schema of a wide source can time out. No time
-  // range here: a request-level range narrows the lookup to indices with data in the window,
-  // while the sampling query's WHERE does not, so the two could disagree on a column's type.
-  let columns: EsqlColumnSchema[] | undefined;
+  let columns: EsqlColumnSchema[];
   try {
+    // Only the columns the caller reads: the full schema of a wide source can time out. No time
+    // range here: a request-level range narrows the lookup to indices with data in the window,
+    // while the sampling query's WHERE does not, so the two could disagree on a column's type.
     columns = await getEsqlColumnSchema({
       esClient,
       index,
@@ -98,40 +95,34 @@ const probeColumns = async ({
     // A probe that cannot answer must not take sampling down with it: the arms run as they did
     // before the probe existed, the entity arm without its filters.
     logger.warn(`Column probe failed, sampling without it: ${parseError(error).message}`);
+    return { kind: 'supported', columns: undefined };
   }
 
-  // Every arm filters on @timestamp. A narrowed probe drops unmapped columns, so a missing one
-  // looks the same for a source with data but no @timestamp (saved before the source API
-  // required it) and for a wildcard with no index yet. Only the first is the source's fault.
-  if (!columns || !getTimestampColumnProblem(columns)) {
-    return { kind: 'supported', columns };
+  if (columns.some(({ name }) => name === SOURCE_TIMESTAMP_FIELD)) {
+    return checkTimestampColumn(index, columns);
   }
 
-  const isTimestampUnmapped = !columns.some(({ name }) => name === SOURCE_TIMESTAMP_FIELD);
-  // The full schema is the one thing that tells them apart: nothing resolves behind a
-  // wildcard with no index, while an index without @timestamp still reports its columns,
-  // whatever the source's WHERE matches. It is wide, but only runs on a source that is
-  // already wrong.
-  const fullColumns = isTimestampUnmapped
-    ? await getEsqlColumnSchema({ esClient, index, signal })
-    : columns;
-  if (
-    isTimestampUnmapped &&
-    fullColumns.length === 0 &&
-    !(await hasAnyDocument({ esClient, index, signal }))
-  ) {
-    // A source with no index yet, which create accepts. An empty schema alone is not enough,
-    // since an index that holds documents but maps no field reports it too: that one is an
-    // invalid source.
+  // The narrowed probe drops unmapped columns, so a missing @timestamp looks the same for a
+  // source that never returns one (saved before the source API required it) and for a wildcard
+  // with no index yet. The full schema tells them apart: nothing resolves behind a wildcard with
+  // no index, while an index without @timestamp still reports its columns, whatever the
+  // source's WHERE matches. It is wide, but only runs on a source that is already wrong.
+  const fullColumns = await getEsqlColumnSchema({ esClient, index, signal });
+  // An empty schema alone is not enough: an index that holds documents but maps no field
+  // reports it too, and that one is an invalid source.
+  if (fullColumns.length === 0 && !(await hasAnyDocument({ esClient, index, signal }))) {
     return { kind: 'empty' };
   }
-  // The later answer wins: an index created between the two probes shows up in the full
-  // schema with a valid @timestamp, and then there is nothing to reject. Its schema also
-  // carries the entity fields the first, empty answer lacked.
-  const problem = getTimestampColumnProblem(fullColumns);
+  // The later answer wins: an index created between the two probes shows up here with a valid
+  // @timestamp and with the entity fields the first, empty answer lacked.
+  return checkTimestampColumn(index, fullColumns);
+};
+
+const checkTimestampColumn = (index: string, columns: EsqlColumnSchema[]): SampleColumnsProbe => {
+  const problem = getTimestampColumnProblem(columns);
   return problem
     ? { kind: 'unsupported', problem: `Cannot sample [${index}]: ${problem}` }
-    : { kind: 'supported', columns: fullColumns };
+    : { kind: 'supported', columns };
 };
 
 const getVerificationReason = (error: unknown): string | undefined => {
