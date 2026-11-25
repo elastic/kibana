@@ -146,6 +146,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(evidence).toMatch(/at most three ES\|QL calls/i);
     expect(evidence).toMatch(/not when the events happened/i);
     expect(evidence).toMatch(/at least the last 30 days/i);
+    expect(evidence).not.toMatch(/original_time/i);
     expect(evidence).toMatch(/never answer that nothing is wrong from an empty result/i);
     expect(evidence).toMatch(
       /if the ES\|QL tool is not available, say that the events were not checked/i
