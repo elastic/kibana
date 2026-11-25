@@ -9,7 +9,9 @@
 
 import { RELAY_AUTH_ID } from '../../auth_types/relay';
 import type { ActionContext } from '../../connector_spec';
+import { setConnectorActionErrorMeta } from '../../connector_utils';
 import type { RelayActionClient } from '../../relay_action_client';
+import type { SlackDeliveryFailureReason } from './delivery_reason';
 import type {
   SlackGetConversationHistoryInput,
   SlackGetConversationRepliesInput,
@@ -27,8 +29,17 @@ const RELAY_MAX_BINDINGS_PAGE = 200;
 /** Marks results as coming from the connected bindings rather than a `conversations.list` call. */
 const RELAY_CHANNEL_SOURCE = 'relay-bindings' as const;
 
+const createSlackDeliveryError = (message: string, reason: SlackDeliveryFailureReason): Error => {
+  const error = new Error(message);
+  setConnectorActionErrorMeta(error, { slackDeliveryReason: reason });
+  return error;
+};
+
 const createChannelNotConnectedError = (channel: string): Error =>
-  new Error(`Channel ${channel} is not connected. Connect it in the Elastic Slack app settings.`);
+  createSlackDeliveryError(
+    `Channel ${channel} is not connected. Connect it in the Elastic Slack app settings.`,
+    'channel_not_connected'
+  );
 
 export type SlackRelayClient = Omit<RelayActionClient, 'trigger'> & {
   trigger(
@@ -87,11 +98,15 @@ function toUserFacingError(error: unknown, channel?: string): unknown {
         ? createChannelNotConnectedError(channel)
         : new Error('Not allowed to read the connected channels. Reconnect the Elastic Slack app.');
     case 409:
-      return new Error(
-        'The Elastic Slack app is no longer installed in this workspace. Reconnect it.'
+      return createSlackDeliveryError(
+        'The Elastic Slack app is no longer installed in this workspace. Reconnect it.',
+        'app_disconnected'
       );
     case 429:
-      return new Error('Slack rate-limited this request. Try again shortly.');
+      return createSlackDeliveryError(
+        'Slack rate-limited this request. Try again shortly.',
+        'rate_limited'
+      );
     default:
       return error;
   }

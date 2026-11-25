@@ -12,6 +12,7 @@ import { MISSING_NOTIFICATION_THREAD } from './notification_routing';
 import type { NotificationPhase } from './notification_routing';
 import { deliverInvestigationNotifications } from './deliver_investigation_notifications';
 import { createRoutingTestContext, getTestIsomerRuntime } from './notification_routing.mock';
+import { getSlackDeliveryStatus } from './slack_delivery_status';
 
 const destination = {
   type: 'slack',
@@ -308,16 +309,35 @@ describe('investigation notification lifecycle', () => {
 
   it('records findings without a thread as failed in the first write', async () => {
     const { send, execute, client } = setup();
-    execute.mockResolvedValueOnce({ status: 'error', message: 'not_in_channel' } as never);
-    await send('started');
+    const message = 'This Slack channel needs to be linked again.';
+    execute.mockResolvedValueOnce({
+      status: 'error',
+      message,
+      errorMeta: { slackDeliveryReason: 'channel_not_connected' },
+    } as never);
+    expect(await send('started')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+    const started = await client.get();
+    expect(started?.attempts[0]).toMatchObject({
+      phase: 'started',
+      status: 'failed',
+      error: message,
+      reason_code: 'channel_not_connected',
+    });
+    expect(started && getSlackDeliveryStatus(started)).toMatchObject([
+      { phase: 'started', status: 'failed', reason: 'channel_not_connected' },
+    ]);
     const record = jest.spyOn(client, 'record');
 
     expect(await send('completed')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
-    expect((await client.get())?.attempts[1]).toMatchObject({
+    const completed = await client.get();
+    expect(completed?.attempts[1]).toMatchObject({
       phase: 'completed',
       status: 'failed',
       error: MISSING_NOTIFICATION_THREAD,
     });
+    expect(completed && getSlackDeliveryStatus(completed, new Set(['exec-1']))).toMatchObject([
+      { phase: 'completed', status: 'failed', reason: 'channel_not_connected' },
+    ]);
     expect(await send('completed')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
     expect(execute).toHaveBeenCalledTimes(1);
     expect(record).not.toHaveBeenCalled();

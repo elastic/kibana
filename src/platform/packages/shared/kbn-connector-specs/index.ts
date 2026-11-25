@@ -49,6 +49,10 @@ export {
   MAX_HANDSHAKE_CHALLENGE_LENGTH,
 } from './src/specs/inbound_webhook/constants';
 export { SLACK_MESSAGE_EVENT_ID } from './src/specs/slack/constants';
+export {
+  isSlackDeliveryFailureReason,
+  type SlackDeliveryFailureReason,
+} from './src/specs/slack/delivery_reason';
 export { toSlackPlainText } from './src/specs/slack/message_text';
 export { buildSlackThreadUrl } from './src/specs/slack/thread_url';
 export { isToolAction, TEST_CONNECTOR_SUB_ACTION, buildSkill } from './src/connector_spec';

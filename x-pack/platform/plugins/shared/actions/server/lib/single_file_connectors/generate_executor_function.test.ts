@@ -8,7 +8,11 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
-import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import {
+  connectorsSpecs,
+  setConnectorActionErrorMeta,
+  TEST_CONNECTOR_SUB_ACTION,
+} from '@kbn/connector-specs';
 import type {
   ActionContext,
   BuildContext,
@@ -1361,6 +1365,46 @@ describe('generateExecutorFunction', () => {
         },
       });
     });
+
+    it.each([
+      { statusCode: 403, reason: 'channel_not_connected', subAction: 'sendMessage' },
+      { statusCode: 409, reason: 'app_disconnected', subAction: 'updateMessage' },
+      { statusCode: 429, reason: 'rate_limited', subAction: 'sendMessage' },
+    ])(
+      'returns $reason metadata for Slack Relay $statusCode',
+      async ({ statusCode, reason, subAction }) => {
+        const relay = {
+          trigger: jest
+            .fn()
+            .mockRejectedValue(Object.assign(new Error('Relay failure'), { statusCode })),
+          listBindings: jest.fn(),
+          readMessages: jest.fn(),
+          readThread: jest.fn(),
+        };
+        const executor = generateExecutorFunction({
+          actions: connectorsSpecs.Slack.actions,
+          getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+          getCredential: mockGetCredential,
+          getClientLeasePool: () => fakeLeasePool,
+          getRelayClient: () => relay,
+          networkSettings: mockNetwork,
+          platform: mockPlatform,
+        });
+
+        const result = await executor({
+          ...makeExecOptions({
+            subAction,
+            subActionParams: { channel: 'C0123456789', text: 'hello', messageTs: '1700.0001' },
+          }),
+          secrets: { authType: 'relay', tenantKey: 'team-A' },
+        });
+
+        expect(result).toMatchObject({
+          status: 'error',
+          errorMeta: { slackDeliveryReason: reason },
+        });
+      }
+    );
 
     describe('HTTP status and retry date', () => {
       const now = Date.parse('2026-10-23T12:00:00Z');

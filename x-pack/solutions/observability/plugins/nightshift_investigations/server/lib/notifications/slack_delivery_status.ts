@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isSlackDeliveryFailureReason } from '@kbn/connector-specs';
+import type { SlackDeliveryFailureReason } from '@kbn/connector-specs';
 import { MISSING_NOTIFICATION_THREAD, notificationPhaseSchema } from './notification_routing';
 import type {
   NotificationAttempt,
@@ -16,14 +18,15 @@ import { readSlackNotificationParams } from './slack_notification';
 const SENDING_WINDOW_MS = 30_000;
 
 type DeliveryReason =
-  | 'channel_not_connected'
-  | 'app_disconnected'
-  | 'rate_limited'
+  | SlackDeliveryFailureReason
   | 'start_rate_limited'
   | 'thread_missing'
   | 'thread_unconfirmed';
 
-const getDeliveryReason = (error: string | undefined): DeliveryReason | undefined => {
+const getRecordedDeliveryReason = (attempt?: NotificationAttempt): DeliveryReason | undefined => {
+  const reason = attempt?.reason_code;
+  if (isSlackDeliveryFailureReason(reason)) return reason;
+  const error = attempt?.error;
   if (!error) return;
   if (error.includes('is not connected. Connect it in the Elastic Slack app settings.')) {
     return 'channel_not_connected';
@@ -66,6 +69,8 @@ const getAttemptReason = (
   attempts: NotificationAttempt[]
 ): DeliveryReason | undefined => {
   if (attempt.status === 'sent') return;
+  const recordedReason = getRecordedDeliveryReason(attempt);
+  if (recordedReason) return recordedReason;
   if (attempt.status === 'failed' && attempt.error === MISSING_NOTIFICATION_THREAD) {
     const started = attempts.find(
       (entry) =>
@@ -74,11 +79,10 @@ const getAttemptReason = (
         entry.phase === 'started' &&
         entry.status === 'failed'
     );
-    const reason = getDeliveryReason(started?.error);
+    const reason = getRecordedDeliveryReason(started);
     if (reason === 'channel_not_connected' || reason === 'app_disconnected') return reason;
     return reason === 'rate_limited' ? 'start_rate_limited' : 'thread_missing';
   }
-  return getDeliveryReason(attempt.error);
 };
 
 /** Projects recorded Slack outcomes without exposing connector diagnostics. */

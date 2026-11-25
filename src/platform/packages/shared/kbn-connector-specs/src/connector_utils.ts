@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isSlackDeliveryFailureReason } from './specs/slack/delivery_reason';
+import type { SlackDeliveryFailureReason } from './specs/slack/delivery_reason';
+
 /**
  * Runtime utilities for connector error handling and response size estimation.
  * These helpers are used by connector implementations (e.g. Google Drive, S3)
@@ -25,6 +28,7 @@ export interface ConnectorActionErrorMeta {
    * (for example, base64 expansion).
    */
   estimatedOutputBytes?: number;
+  slackDeliveryReason?: SlackDeliveryFailureReason;
 }
 
 const connectorActionErrorMeta = new WeakMap<object, ConnectorActionErrorMeta>();
@@ -106,9 +110,11 @@ export const setConnectorActionErrorMeta = (
 
   const contentLengthBytes = getFinitePositiveNumber(meta.contentLengthBytes);
   const estimatedOutputBytes = getFinitePositiveNumber(meta.estimatedOutputBytes);
+  const { slackDeliveryReason } = meta;
   const sanitizedMeta = {
     ...(contentLengthBytes !== undefined ? { contentLengthBytes } : {}),
     ...(estimatedOutputBytes !== undefined ? { estimatedOutputBytes } : {}),
+    ...(isSlackDeliveryFailureReason(slackDeliveryReason) ? { slackDeliveryReason } : {}),
   };
 
   connectorActionErrorMeta.set(error, {

@@ -7,6 +7,7 @@
 
 import type { JsonObject } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import { isSlackDeliveryFailureReason } from '@kbn/connector-specs';
 import { InvalidNotificationDestinationError } from '../../client/errors';
 import type { NotificationHandler } from './notification_delivery';
 import { renderInvestigationSlackMessage } from './investigation_slack_composition';
@@ -71,9 +72,11 @@ export const slackNotificationHandler: NotificationHandler = {
       params,
       getOutcome: (response) => {
         if (response.status !== 'ok') {
+          const failureReason = response.errorMeta?.slackDeliveryReason;
           return {
             status: 'failed',
             error: response.serviceMessage || response.message || 'Slack delivery failed',
+            ...(isSlackDeliveryFailureReason(failureReason) ? { reason_code: failureReason } : {}),
           };
         }
         const data = response.data;
