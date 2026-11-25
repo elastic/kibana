@@ -91,6 +91,7 @@ describe(
       addFieldToTable('host.name', TIMELINE_DISCOVER_TAB);
       addFieldToTable('user.name', TIMELINE_DISCOVER_TAB);
       addNameAndDescriptionToTimeline(mockTimeline);
+      cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
