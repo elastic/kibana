@@ -6,7 +6,12 @@
  */
 
 import { apiTest as baseApiTest } from '@kbn/scout-oblt';
-import { K8S_ARCHIVE, K8S_TSDS_INDEX, K8S_TSDS_INDEX_TEMPLATE } from './constants';
+import {
+  K8S_ARCHIVE,
+  K8S_STATE_TSDS_INDEX,
+  K8S_TSDS_INDEX,
+  K8S_TSDS_INDEX_TEMPLATE,
+} from './constants';
 
 /**
  * Loads the `k8s_deployment` archive once per worker before any spec runs. The `types` route reads
@@ -15,14 +20,14 @@ import { K8S_ARCHIVE, K8S_TSDS_INDEX, K8S_TSDS_INDEX_TEMPLATE } from './constant
 export const apiTest = baseApiTest.extend<{}, { seedK8sDeployments: void }>({
   seedK8sDeployments: [
     async ({ esArchiver, esClient }, use) => {
-      // Elasticsearch's built-in `metrics-otel@template` creates data streams only and matches the
-      // archive's time-series index, which must be a plain index to keep fixed timestamps. A
-      // higher-priority template without `data_stream` lets the archive create it; esArchiver
-      // cannot load index templates itself. The template only matters while the index is created,
-      // so it is deleted right after the load and never outlives it.
+      // Elasticsearch's built-in `metrics-otel@template` and `metrics` templates create data streams
+      // only and match the archive's time-series indices, which must be plain indices to keep fixed
+      // timestamps. A higher-priority template without `data_stream` lets the archive create them;
+      // esArchiver cannot load index templates itself. The template only matters while the indices
+      // are created, so it is deleted right after the load and never outlives them.
       await esClient.indices.putIndexTemplate({
         name: K8S_TSDS_INDEX_TEMPLATE,
-        index_patterns: [K8S_TSDS_INDEX],
+        index_patterns: [K8S_TSDS_INDEX, K8S_STATE_TSDS_INDEX],
         priority: 500,
         template: {},
       });

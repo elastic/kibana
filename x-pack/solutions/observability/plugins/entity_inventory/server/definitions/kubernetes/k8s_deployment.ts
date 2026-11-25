@@ -61,7 +61,7 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
           {
             name: 'k8s.container.restarts',
             field: 'kubernetes.container.status.restarts',
-            agg: 'max',
+            agg: 'sum_increase',
             unit: 'count',
           },
         ],
@@ -88,7 +88,7 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
           {
             name: 'k8s.container.restarts',
             field: 'k8s.container.restarts',
-            agg: 'max',
+            agg: 'sum_delta',
             unit: 'count',
           },
         ],

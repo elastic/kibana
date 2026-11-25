@@ -821,3 +821,474 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T16:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "gauges"
+        },
+        "deployment": {
+          "name": "restarts-drop",
+          "uid": "uid-gauges-restarts-drop",
+          "available": 1,
+          "desired": 1
+        },
+        "container": {
+          "restarts": 9
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T16:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "gauges"
+        },
+        "deployment": {
+          "name": "restarts-drop",
+          "uid": "uid-gauges-restarts-drop",
+          "available": 1,
+          "desired": 1
+        },
+        "container": {
+          "restarts": 9
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T16:02:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "gauges"
+        },
+        "deployment": {
+          "name": "restarts-drop",
+          "uid": "uid-gauges-restarts-drop",
+          "available": 1,
+          "desired": 1
+        },
+        "container": {
+          "restarts": 4
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:00:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "two-containers"
+        },
+        "container": {
+          "name": "app",
+          "status": {
+            "restarts": 1
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:01:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "two-containers"
+        },
+        "container": {
+          "name": "app",
+          "status": {
+            "restarts": 2
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:02:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "two-containers"
+        },
+        "container": {
+          "name": "app",
+          "status": {
+            "restarts": 4
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:00:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "two-containers"
+        },
+        "container": {
+          "name": "sidecar",
+          "status": {
+            "restarts": 5
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:01:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "two-containers"
+        },
+        "container": {
+          "name": "sidecar",
+          "status": {
+            "restarts": 6
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:02:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "two-containers"
+        },
+        "container": {
+          "name": "sidecar",
+          "status": {
+            "restarts": 6
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:00:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "counter-reset"
+        },
+        "container": {
+          "name": "app",
+          "status": {
+            "restarts": 3
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:01:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "counter-reset"
+        },
+        "container": {
+          "name": "app",
+          "status": {
+            "restarts": 5
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:02:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "counter-reset"
+        },
+        "container": {
+          "name": "app",
+          "status": {
+            "restarts": 0
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:03:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "counter-reset"
+        },
+        "container": {
+          "name": "app",
+          "status": {
+            "restarts": 2
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:00:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "steady"
+        },
+        "container": {
+          "name": "app",
+          "status": {
+            "restarts": 7
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:01:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "steady"
+        },
+        "container": {
+          "name": "app",
+          "status": {
+            "restarts": 7
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "source": {
+      "@timestamp": "2026-11-09T10:02:00.000Z",
+      "metricset": {
+        "name": "state_container"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "counters",
+        "deployment": {
+          "name": "steady"
+        },
+        "container": {
+          "name": "app",
+          "status": {
+            "restarts": 7
+          }
+        }
+      }
+    }
+  }
+}

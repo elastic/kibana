@@ -557,3 +557,106 @@
     }
   }
 }
+
+{
+  "type": "index",
+  "value": {
+    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "metricset": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "orchestrator": {
+          "properties": {
+            "cluster": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "time_series_dimension": true
+                }
+              }
+            }
+          }
+        },
+        "kubernetes": {
+          "properties": {
+            "namespace": {
+              "type": "keyword",
+              "time_series_dimension": true
+            },
+            "labels": {
+              "properties": {
+                "app": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "deployment": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "time_series_dimension": true
+                },
+                "paused": {
+                  "type": "boolean"
+                },
+                "replicas": {
+                  "properties": {
+                    "available": {
+                      "type": "long",
+                      "time_series_metric": "gauge"
+                    },
+                    "desired": {
+                      "type": "long",
+                      "time_series_metric": "gauge"
+                    }
+                  }
+                }
+              }
+            },
+            "container": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "time_series_dimension": true
+                },
+                "status": {
+                  "properties": {
+                    "restarts": {
+                      "type": "long",
+                      "time_series_metric": "counter"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "mode": "time_series",
+        "routing_path": [
+          "orchestrator.cluster.name",
+          "kubernetes.namespace",
+          "kubernetes.deployment.name",
+          "kubernetes.container.name"
+        ],
+        "time_series": {
+          "start_time": "2026-11-09T00:00:00.000Z",
+          "end_time": "2026-11-10T00:00:00.000Z"
+        }
+      }
+    }
+  }
+}
