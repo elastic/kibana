@@ -202,6 +202,10 @@ describe('ExceptionsConditions', () => {
   });
 
   describe('custom fields in the condition builder', () => {
+    beforeEach(() => {
+      jest.mocked(getExceptionBuilderComponentLazy).mockClear();
+    });
+
     const renderConditions = (exceptionListType: ExceptionListTypeEnum): void => {
       render(
         <TestProviders>
