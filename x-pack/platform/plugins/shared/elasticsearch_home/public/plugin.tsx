@@ -13,6 +13,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { ElasticsearchHomeProvider } from './context';
 import { getIntegratedOnboardingEnabled$, useIntegratedOnboardingEnabled } from './feature_flags';
 import type {
+  ElasticsearchHomeAppProps,
   ElasticsearchHomePageProps,
   ElasticsearchHomePublicStart,
   ElasticsearchHomeStartDependencies,
@@ -20,6 +21,10 @@ import type {
 
 const LazyHomePage = dynamic(async () => ({
   default: (await import('./home_page')).HomePage,
+}));
+
+const LazyHomeRoutes = dynamic(async () => ({
+  default: (await import('./home_routes')).HomeRoutes,
 }));
 
 export class ElasticsearchHomePlugin
@@ -44,8 +49,22 @@ export class ElasticsearchHomePlugin
       </QueryClientProvider>
     );
 
+    const HomeApp = (props: ElasticsearchHomeAppProps) => {
+      const { setBreadcrumbs } = props;
+      return (
+        <QueryClientProvider client={queryClient}>
+          <I18nProvider>
+            <ElasticsearchHomeProvider services={services} config={props}>
+              <LazyHomeRoutes setBreadcrumbs={setBreadcrumbs} />
+            </ElasticsearchHomeProvider>
+          </I18nProvider>
+        </QueryClientProvider>
+      );
+    };
+
     return {
       HomePage,
+      HomeApp,
       getIntegratedOnboardingEnabled$: () => getIntegratedOnboardingEnabled$(core.featureFlags),
       useIntegratedOnboardingEnabled: () => useIntegratedOnboardingEnabled(core.featureFlags),
     };

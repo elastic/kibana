@@ -19,6 +19,10 @@ so the page can be the home of more than one product without any of them changin
 are `serverless_vectordb` for VectorDB projects and `search_homepage` for Elasticsearch on
 serverless, Cloud Hosted and self-managed.
 
+With [integrated onboarding](#feature-flags) on, the plugin also owns the routes below the host's
+app root: the home page and one route per onboarding wizard (see [Routes](#routes)). Hosts still own
+app registration, deep links and side nav entries.
+
 The plugin is enabled by default, but `config/serverless.yml` sets
 `xpack.elasticsearchHome.enabled: false`, so serverless project types that render the page have to
 re-enable it in their own `serverless.<project>.yml`. Today those are Elasticsearch and VectorDB.
@@ -71,6 +75,48 @@ Anything that names a product is injected rather than imported:
 Elements this plugin owns namespace their own telemetry ids under `telemetryPrefix`. A
 Host-supplied "Add data" links carry a complete `telemetryId`, because the host already knows its prefix.
 
+### Routes
+
+`HomeApp` takes the same props as `HomePage`, plus an optional `setBreadcrumbs`, and renders
+`HomeRoutes` inside the host's `Router`, so its paths are relative to the host's app root. Links
+between the home page and the wizards are plain `href`s built with `application.getUrlForApp` for
+the current app (`application.currentAppId$`). Core navigates them in-app, so they don't touch the
+router's `history`.
+
+| Path (`HOME_PATHS`) | Renders |
+| --- | --- |
+| `home` (`/`) | The home page with integrated onboarding (`IntegratedHomePage`) |
+| `sampleApp` (`/sample_app`) | The sample app wizard |
+| `guidedApi` (`/guided_api`) | The guided API setup wizard |
+| `uploadFile` (`/upload_file`) | The upload a file wizard |
+
+Any other path redirects to `/`. Each wizard is lazy-loaded on its own, so the home page does not
+download wizard code. The wizards are placeholders until they are built.
+
+```tsx
+const { HomeApp } = elasticsearchHome;
+
+<Router history={history}>
+  <HomeApp {...homeConfig} />
+</Router>;
+```
+
+Each wizard renders an `AppHeader` (from `@kbn/app-header`) with its title and a back link to `Home`,
+so project chrome gets back navigation without breadcrumb overrides.
+
+For classic chrome, which still shows breadcrumbs, pass the host's breadcrumb API as `setBreadcrumbs`,
+e.g. `searchNavigation.breadcrumbs.setSearchBreadCrumbs`. On every route change `HomeApp` calls it
+with `Home` on the home page, and `Home` (linking back) followed by the wizard's title on a wizard. Don't
+pass `serverless.setBreadcrumbs`, which is deprecated.
+
+Hosts don't register deep links for the wizards, so they stay out of global search for now.
+`serverless_vectordb` drops its `getting_started` deep link through its app's `updater$` when the
+flag is on.
+
+`HomePage` stays available for the flag-off path, where the host owns its routes. The two pages
+are separate components, `public/home_page.tsx` and `public/integrated_home_page.tsx`, so the
+integrated page can change behind the flag without affecting the current one.
+
 ### Connection details
 
 The header shows the deployment's Elasticsearch endpoint with a copy button, plus buttons that open
@@ -109,12 +155,12 @@ renders, without the button or the search skills.
 
 ## Public API
 
-`public/index.ts` is the browser-facing surface. `HomePage` and the integrated onboarding flag
-helpers (see [Feature flags](#feature-flags)) reach a host through the start contract, so nothing
-needs importing to render the page or check the flag, and beyond the plugin initializer the barrel
-exports only types: `ElasticsearchHomePageProps`, `ElasticsearchHomePublicStart`,
-`HomeAddDataLink`, `HomeBannerConfig`, `HomeDocsLink` and `HomeIdeSetup`. Those are what let a host
-declare its props in a helper rather than inline.
+`public/index.ts` is the browser-facing surface. `HomePage`, `HomeApp` and the integrated onboarding
+flag helpers (see [Feature flags](#feature-flags)) reach a host through the start contract, so
+nothing needs importing to render the page or check the flag, and beyond the plugin initializer the
+barrel exports only types: `ElasticsearchHomeAppProps`, `ElasticsearchHomePageProps`,
+`ElasticsearchHomePublicStart`, `HomeAddDataLink`, `HomeBannerConfig`, `HomeDocsLink` and
+`HomeIdeSetup`. Those are what let a host declare its props in a helper rather than inline.
 
 `common/index.ts` exports the values hosts share with this plugin, imported from
 `@kbn/elasticsearch-home/common`. Today that is only `INTEGRATED_ONBOARDING_FEATURE_FLAG`.
@@ -125,6 +171,13 @@ declare its props in a helper rather than inline.
 home page with integrated onboarding, which is still in development. It defaults to `false`, and with
 it off both hosts keep their current home page and onboarding. The flag lives here rather than in a
 solution package so that hosts in any solution group can import it.
+
+With it on, both hosts render `HomeApp` at their app root for new and existing users alike:
+
+- `serverless_vectordb` no longer redirects first-time users into the `@kbn/vectordb-onboarding`
+  getting started onboarding or hides the chrome, and removes its `getting_started` deep link and
+  the "Getting started" side nav item.
+- `search_homepage` skips the redirect to the `searchGettingStarted` app.
 
 Hosts read it through the start contract, so every caller uses the same flag and fallback:
 

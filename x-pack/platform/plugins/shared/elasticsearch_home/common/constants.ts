@@ -18,6 +18,12 @@ export const INTEGRATED_ONBOARDING_FEATURE_FLAG = 'elasticsearchHome.integratedO
  */
 export const VECTOR_COUNT_ENABLED = false;
 
+export const HOME_PATHS = {
+  home: '/',
+  sampleApp: '/sample_app',
+  guidedApi: '/guided_api',
+  uploadFile: '/upload_file',
+} as const;
 export const DEPLOYMENT_STATS_PATH = '/internal/elasticsearch_home/deployment_stats';
 export const STARRED_DASHBOARDS_COUNT_PATH =
   '/internal/elasticsearch_home/starred_dashboards_count';
