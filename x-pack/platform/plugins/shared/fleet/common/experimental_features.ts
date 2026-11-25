@@ -11,7 +11,6 @@ const _allowedExperimentalValues = {
   enableAutomaticAgentUpgrades: true,
   enableSyncIntegrationsOnRemote: true,
   enableSSLSecrets: true,
-  installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
   enablePackageRollback: true,
   enableAutoInstallContentPackages: true,
