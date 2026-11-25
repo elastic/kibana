@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { PLUGIN_ID } from '../../common';
 import { useKibana } from '../hooks/use_kibana';
 import { useGettingStartedLoaded } from '../hooks/use_getting_started_loaded';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
@@ -24,6 +25,12 @@ import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
 import { AgentInstallSection } from './agent_install/agent_install';
 import { SearchGettingStartedHeader } from './header';
 import { SampleDataPanelStyle } from './styles';
+
+// Lets the Add data page's back link return here instead of falling back to Integrations.
+const getAddDataPath = (tab: 'sampleData' | 'fileDataViz') => {
+  const params = new URLSearchParams({ returnAppId: PLUGIN_ID, returnPath: '/' });
+  return `#/tutorial_directory/${tab}?${params.toString()}`;
+};
 
 export const SearchGettingStartedPage: React.FC = () => {
   const {
@@ -66,7 +73,7 @@ export const SearchGettingStartedPage: React.FC = () => {
                       data-test-subj="uploadFilesButton"
                       onClick={() => {
                         application.navigateToApp('home', {
-                          path: '#/tutorial_directory/fileDataViz',
+                          path: getAddDataPath('fileDataViz'),
                         });
                       }}
                     >
@@ -86,7 +93,7 @@ export const SearchGettingStartedPage: React.FC = () => {
                       data-test-subj="viewSampleDataButton"
                       onClick={() => {
                         application.navigateToApp('home', {
-                          path: '#/tutorial_directory/sampleData',
+                          path: getAddDataPath('sampleData'),
                         });
                       }}
                     >

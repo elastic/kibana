@@ -133,3 +133,14 @@ describe('Home return params', () => {
     expect(getHashQuery('#/tutorial_directory/sampleData')).toBe('');
   });
 });
+
+describe('Search getting started return params', () => {
+  const hash = '#/tutorial_directory/sampleData?returnAppId=searchGettingStarted&returnPath=%2F';
+
+  it('names Getting started as the back destination', () => {
+    expect(getTutorialDirectoryAppHeaderBack({ hash, addBasePath, getUrlForApp })).toEqual({
+      label: 'Getting started',
+      href: '/app/searchGettingStarted/',
+    });
+  });
+});

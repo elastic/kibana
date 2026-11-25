@@ -21,6 +21,10 @@ const homeLinkText = i18n.translate('home.breadcrumbs.homeLinkText', {
   defaultMessage: 'Home',
 });
 
+const gettingStartedLinkText = i18n.translate('home.breadcrumbs.gettingStartedLinkText', {
+  defaultMessage: 'Getting started',
+});
+
 const previousPageLinkText = i18n.translate('home.breadcrumbs.previousPageLinkText', {
   defaultMessage: 'Previous page',
 });
@@ -80,6 +84,7 @@ function getReturnHref({
 function getReturnAppLinkText(returnAppId: string): string {
   if (returnAppId === 'observabilityOnboarding') return addDataLinkText;
   if (returnAppId === HOME_RETURN_APP_ID) return homeLinkText;
+  if (returnAppId === 'searchGettingStarted') return gettingStartedLinkText;
   return previousPageLinkText;
 }
 
