@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect, useRef, type ChangeEvent } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  type ChangeEvent,
+  type FocusEvent,
+} from 'react';
 import { css } from '@emotion/react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch } from '@elastic/eui';
@@ -37,7 +44,8 @@ export interface RefreshIntervalProps {
   onChange: (value: AutoRefreshSettings) => void;
   /**
    * Lowest interval the user can set, in milliseconds. A lower count is not applied while
-   * typing and is raised to the lowest whole count of the selected unit on blur.
+   * typing and is raised to the lowest whole count of the selected unit once focus leaves the
+   * form, so picking a unit right after typing a count still uses the typed count.
    * @default 0
    */
   minIntervalMs?: number;
@@ -101,13 +109,17 @@ export function RefreshInterval({
     [onChange, value, derived.unit, minIntervalMs]
   );
 
-  const handleCountBlur = useCallback(() => {
-    if (typeof countInput !== 'number' || countInput <= 0) return;
-    if (autoRefreshIntervalToMs(countInput, derived.unit) >= minIntervalMs) return;
+  const handleBlur = useCallback(
+    (e: FocusEvent<HTMLDivElement>) => {
+      if (e.currentTarget.contains(e.relatedTarget)) return;
+      if (typeof countInput !== 'number' || countInput <= 0) return;
+      if (autoRefreshIntervalToMs(countInput, derived.unit) >= minIntervalMs) return;
 
-    setCountInput(minCount);
-    onChange({ ...value, intervalMs: autoRefreshIntervalToMs(minCount, derived.unit) });
-  }, [countInput, derived.unit, minIntervalMs, minCount, onChange, value]);
+      setCountInput(minCount);
+      onChange({ ...value, intervalMs: autoRefreshIntervalToMs(minCount, derived.unit) });
+    },
+    [countInput, derived.unit, minIntervalMs, minCount, onChange, value]
+  );
 
   const handleUnitChange = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
@@ -125,7 +137,7 @@ export function RefreshInterval({
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap onBlur={handleBlur}>
       <EuiFlexItem grow={false}>
         <EuiSwitch
           label={refreshIntervalTexts.label}
@@ -143,7 +155,6 @@ export function RefreshInterval({
           value={countInput}
           min={minCount}
           onChange={handleCountChange}
-          onBlur={handleCountBlur}
           disabled={readOnly || !value.isEnabled}
           aria-label={refreshIntervalTexts.intervalCountAriaLabel}
           data-test-subj="dateRangePickerAutoRefreshIntervalCount"

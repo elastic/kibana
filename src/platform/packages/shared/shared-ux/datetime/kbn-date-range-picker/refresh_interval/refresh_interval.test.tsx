@@ -137,6 +137,31 @@ describe('RefreshInterval', () => {
       expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ intervalMs: 5000 }));
     });
 
+    it('applies the typed count to the unit picked right after it', () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <RefreshInterval
+          value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 's' }}
+          onChange={onChange}
+          minIntervalMs={5000}
+        />
+      );
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      const unit = screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit');
+      fireEvent.change(count, { target: { value: '2' } });
+      fireEvent.blur(count, { relatedTarget: unit });
+
+      expect(count).toHaveValue(2);
+      expect(onChange).not.toHaveBeenCalled();
+
+      fireEvent.change(unit, { target: { value: 'm' } });
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ intervalDisplayUnit: 'm', intervalMs: 2 * 60_000 })
+      );
+    });
+
     it('raises the count to the minimum when switching to a smaller unit', () => {
       const onChange = jest.fn();
       renderWithEuiTheme(
