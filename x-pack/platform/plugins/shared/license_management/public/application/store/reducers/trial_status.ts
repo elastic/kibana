@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import type { Action } from 'redux-actions';
-import { handleActions } from 'redux-actions';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { trialStatusLoaded } from '../actions/start_trial';
 import type { TrialStatusState } from '../types';
 
-export const trialStatus = handleActions<TrialStatusState, boolean>(
-  {
-    [String(trialStatusLoaded)](state: TrialStatusState, { payload }: Action<boolean>) {
-      return {
-        canStartTrial: payload,
-      };
-    },
+const initialState: TrialStatusState = {};
+
+const trialStatusSlice = createSlice({
+  name: 'trialStatus',
+  initialState,
+  reducers: {
+    trialStatusLoaded: (_state, { payload }: PayloadAction<boolean>) => ({
+      canStartTrial: payload,
+    }),
   },
-  {}
-);
+});
+
+export const { trialStatusLoaded } = trialStatusSlice.actions;
+export const trialStatus = trialStatusSlice.reducer;

@@ -104,7 +104,7 @@ const kafkaSectionsLabels = ['Partitioning', 'Topics', 'Headers', 'Compression',
 const remoteEsOutputLabels = ['Hosts', 'Service token'];
 
 describe('EditOutputFlyout', () => {
-  const mockStartServices = (isServerlessEnabled?: boolean) => {
+  const mockStartServices = (isServerlessEnabled?: boolean, managedOtlpUrl?: string) => {
     mockUseStartServices.mockReturnValue({
       notifications: {
         toasts: {
@@ -121,6 +121,7 @@ describe('EditOutputFlyout', () => {
       },
       cloud: {
         isServerlessEnabled,
+        ...(managedOtlpUrl ? { managedOtlp: { url: managedOtlpUrl } } : {}),
       },
     });
   };
@@ -1903,6 +1904,93 @@ describe('EditOutputFlyout', () => {
       });
     });
 
+    describe('otel_disable_beatsauth save payload', () => {
+      const renderEsFlyout = (otelDisableBeatsauth?: boolean | null) => {
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+        mockedUseFleetStatus.mockReturnValue({
+          isLoading: false,
+          isReady: true,
+          isSecretsStorageEnabled: true,
+        } as any);
+
+        return renderFlyout({
+          type: 'elasticsearch',
+          name: 'elasticsearch output',
+          id: 'output123',
+          is_default: false,
+          is_default_monitoring: false,
+          hosts: ['http://localhost:9200'],
+          ...(otelDisableBeatsauth !== undefined
+            ? { otel_disable_beatsauth: otelDisableBeatsauth }
+            : {}),
+        }).utils;
+      };
+
+      const changeNameAndSave = (utils: ReturnType<typeof renderEsFlyout>) => {
+        fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+          target: { value: 'updated output name' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+      };
+
+      it('should send null when the toggle was not touched and the output has it unset', async () => {
+        const utils = renderEsFlyout();
+        changeNameAndSave(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'output123',
+            expect.objectContaining({ otel_disable_beatsauth: null })
+          );
+        });
+      });
+
+      it.each([true, false])(
+        'should re-save the stored %s value when the toggle was not touched',
+        async (stored) => {
+          const utils = renderEsFlyout(stored);
+          changeNameAndSave(utils);
+
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalledWith(
+              'output123',
+              expect.objectContaining({ otel_disable_beatsauth: stored })
+            );
+          });
+        }
+      );
+
+      it('should send true when the toggle is turned on', async () => {
+        const utils = renderEsFlyout();
+        fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otelDisableBeatsauthToggle'));
+        changeNameAndSave(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'output123',
+            expect.objectContaining({ otel_disable_beatsauth: true })
+          );
+        });
+      });
+
+      it('should send false when the toggle is turned on and then off', async () => {
+        const utils = renderEsFlyout();
+        fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+        const toggle = utils.getByTestId('settingsOutputsFlyout.otelDisableBeatsauthToggle');
+        fireEvent.click(toggle);
+        fireEvent.click(toggle);
+        changeNameAndSave(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'output123',
+            expect.objectContaining({ otel_disable_beatsauth: false })
+          );
+        });
+      });
+    });
+
     it.each([
       {
         type: 'elasticsearch' as const,
@@ -2230,6 +2318,257 @@ describe('EditOutputFlyout', () => {
             otlp_exporter: otlpOutput.otlp_exporter,
           })
         );
+      });
+    });
+
+    describe('authentication', () => {
+      const otlpOutputWithAuth: Output = {
+        ...otlpOutput,
+        auth: { type: 'auth_header', scheme: 'bearer_token' },
+        secrets: { auth: { credential: { id: 'credential-secret-id' } } },
+      } as Output;
+
+      it('should create an OTLP output with a custom header', async () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'my otlp' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'custom_header' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthHeaderNameInput'), {
+          target: { value: 'x-api-key' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthCredentialInput'), {
+          target: { value: 'my-key' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPostOutput).toHaveBeenCalledWith(
+            expect.objectContaining({
+              auth: { type: 'custom_header', name: 'x-api-key' },
+              secrets: { auth: { credential: 'my-key' } },
+            })
+          );
+        });
+      });
+
+      it('should trim the credential', async () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'my otlp' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'auth_header' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthCredentialInput'), {
+          target: { value: ' my-token ' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPostOutput).toHaveBeenCalledWith(
+            expect.objectContaining({ secrets: { auth: { credential: 'my-token' } } })
+          );
+        });
+      });
+
+      it('should show an error on a header that the authentication sets', async () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'my otlp' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpHeaderName0'), {
+          target: { value: 'X-Api-Key' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpHeaderValue0'), {
+          target: { value: 'value' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'custom_header' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthHeaderNameInput'), {
+          target: { value: 'x-api-key' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthCredentialInput'), {
+          target: { value: 'my-key' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText('The X-Api-Key header is set by the authentication')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPostOutput).not.toHaveBeenCalled();
+      });
+
+      it('should require a credential', async () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'my otlp' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'auth_header' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(utils.getByText('Credential is required')).toBeInTheDocument();
+        });
+        expect(mockSendPostOutput).not.toHaveBeenCalled();
+      });
+
+      it('should keep the stored credential when it is not edited', async () => {
+        const { utils } = renderFlyout(otlpOutputWithAuth);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'otlp output updated' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.auth).toEqual({ type: 'auth_header', scheme: 'bearer_token' });
+        expect(payload.secrets).toBeUndefined();
+      });
+
+      it('should keep Save disabled for an output that is not edited', () => {
+        expect(
+          renderFlyout(otlpOutputWithAuth).utils.getByTestId('saveApplySettingsBtn')
+        ).toBeDisabled();
+      });
+
+      it('should keep Save disabled for an output without authentication that is not edited', () => {
+        expect(renderFlyout(otlpOutput).utils.getByTestId('saveApplySettingsBtn')).toBeDisabled();
+      });
+
+      it('should require removing the authentication when a signal is sent to the managed OTLP endpoint', async () => {
+        mockStartServices(false, 'https://managed-otlp.ingest.elastic.cloud');
+        const { utils } = renderFlyout({
+          ...otlpOutputWithAuth,
+          otlp_exporter: {
+            protocol: 'http/protobuf',
+            endpoint: 'https://collector.example.com:4318',
+          },
+        } as Output);
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otlpLogsEndpointToggle'));
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpLogsEndpointInput'), {
+          target: { value: 'https://managed-otlp.ingest.elastic.cloud/v1/logs' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText(/The managed OTLP endpoint is authenticated by Fleet/)
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'none' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        expect((mockSendPutOutput.mock.calls[0][1] as any).auth).toBeNull();
+      });
+
+      it('should drop a replacement credential when the authentication is turned off and on', async () => {
+        const { utils } = renderFlyout(otlpOutputWithAuth);
+        fireEvent.click(utils.getByText('Replace Credential'));
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthCredentialInput'), {
+          target: { value: 'unseen-credential' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'none' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'auth_header' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.auth).toEqual({ type: 'auth_header', scheme: 'bearer_token' });
+        expect(payload.secrets).toBeUndefined();
+      });
+
+      it('should restore the saved credential when a blank replacement is discarded', async () => {
+        const { utils } = renderFlyout(otlpOutputWithAuth);
+        fireEvent.click(utils.getByText('Replace Credential'));
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'none' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'auth_header' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'otlp output updated' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.auth).toEqual({ type: 'auth_header', scheme: 'bearer_token' });
+        expect(payload.secrets).toBeUndefined();
+      });
+
+      it('should reject a custom header that gRPC cannot send as metadata', async () => {
+        const { utils } = renderFlyout(otlpOutputWithAuth);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'custom_header' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthHeaderNameInput'), {
+          target: { value: 'x-api+key' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText(/With gRPC, the header name can only contain letters/)
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+
+      it('should remove the stored authentication when None is selected', async () => {
+        const { utils } = renderFlyout(otlpOutputWithAuth);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'none' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.auth).toBeNull();
+        expect(payload.secrets).toBeUndefined();
       });
     });
 

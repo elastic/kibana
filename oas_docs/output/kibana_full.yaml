@@ -24479,7 +24479,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -24497,6 +24497,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists.
+
+        Each ES|QL source added also gets an index metadata automation, installed as a separate workflow and attached to the AI Index as the calling user, who needs the workflow create and update privileges for it; removing the source deletes the workflow, which needs the delete privilege. The save succeeds whether or not that works. When an automation could not be installed or removed, the response lists it under `warnings`.
 
         Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
 
@@ -24794,6 +24796,36 @@ paths:
                     enum:
                       - created
                     type: string
+                  warnings:
+                    description: Things the save was meant to do beyond storing the AI Index that did not happen, such as installing the index metadata automation of an ES|QL source. The AI Index was saved either way. Missing when nothing went wrong.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        message:
+                          description: What did not happen for the source, and why.
+                          type: string
+                        source:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            type:
+                              description: '`esql` for an ES|QL query, or `connector` for a data connector.'
+                              enum:
+                                - esql
+                                - connector
+                              type: string
+                            value:
+                              description: An ES|QL query for `esql`, or a connector ID for `connector`.
+                              type: string
+                          required:
+                            - type
+                            - value
+                      required:
+                        - source
+                        - message
+                    maxItems: 100
+                    type: array
                 required:
                   - status
           description: The AI Index was created.
@@ -24916,7 +24948,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/ai_index" \
+              -X POST "${KIBANA_URL}/api/context_engine/ai_index" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -25170,7 +25202,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/_query" \
+              -X POST "${KIBANA_URL}/api/context_engine/ai_index/_query" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -25344,7 +25376,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X DELETE "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
+              -X DELETE "${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true"
         - lang: Console
@@ -25624,7 +25656,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -25642,6 +25674,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.
+
+        Each ES|QL source added also gets an index metadata automation, installed as a separate workflow and attached to the AI Index as the calling user, who needs the workflow create and update privileges for it; removing the source deletes the workflow, which needs the delete privilege. The save succeeds whether or not that works. When an automation could not be installed or removed, the response lists it under `warnings`.
 
         Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
 
@@ -25929,6 +25963,16 @@ paths:
                   summary: AI Index updated
                   value:
                     status: updated
+                putAiIndexUpdatedWithWarningsExample:
+                  description: The AI Index was replaced, but the index metadata automation of one of its ES|QL sources could not be installed
+                  summary: AI Index updated, with a warning
+                  value:
+                    status: updated
+                    warnings:
+                      - message: No index matching support-cases-* was found, or you do not have read access to it.
+                        source:
+                          type: esql
+                          value: FROM support-cases-* | LIMIT 100
               schema:
                 additionalProperties: false
                 description: Confirms that the AI Index was updated.
@@ -25938,6 +25982,36 @@ paths:
                     enum:
                       - updated
                     type: string
+                  warnings:
+                    description: Things the save was meant to do beyond storing the AI Index that did not happen, such as installing the index metadata automation of an ES|QL source. The AI Index was saved either way. Missing when nothing went wrong.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        message:
+                          description: What did not happen for the source, and why.
+                          type: string
+                        source:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            type:
+                              description: '`esql` for an ES|QL query, or `connector` for a data connector.'
+                              enum:
+                                - esql
+                                - connector
+                              type: string
+                            value:
+                              description: An ES|QL query for `esql`, or a connector ID for `connector`.
+                              type: string
+                          required:
+                            - type
+                            - value
+                      required:
+                        - source
+                        - message
+                    maxItems: 100
+                    type: array
                 required:
                   - status
           description: The AI Index was updated.
@@ -25959,6 +26033,36 @@ paths:
                     enum:
                       - created
                     type: string
+                  warnings:
+                    description: Things the save was meant to do beyond storing the AI Index that did not happen, such as installing the index metadata automation of an ES|QL source. The AI Index was saved either way. Missing when nothing went wrong.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        message:
+                          description: What did not happen for the source, and why.
+                          type: string
+                        source:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            type:
+                              description: '`esql` for an ES|QL query, or `connector` for a data connector.'
+                              enum:
+                                - esql
+                                - connector
+                              type: string
+                            value:
+                              description: An ES|QL query for `esql`, or a connector ID for `connector`.
+                              type: string
+                          required:
+                            - type
+                            - value
+                      required:
+                        - source
+                        - message
+                    maxItems: 100
+                    type: array
                 required:
                   - status
           description: The AI Index was created.
@@ -26081,7 +26185,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X PUT "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+              -X PUT "${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -26321,7 +26425,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -26517,7 +26621,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_forget" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_forget" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -26742,7 +26846,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_remember" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_remember" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -27039,7 +27143,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_save_event" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_save_event" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -64138,7 +64242,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Upgrade a package policy to a newer package version.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.
+        Upgrade a package policy to a newer package version. When some package policies are upgraded and the others are only blocked because some active agents don't satisfy the package's agent version condition, the response is a 200 with a result per package policy: check each item's `success` field. When any other upgrade fails, the response is the first such failure. When none succeeds and every failure is an agent version block, the response is the first block.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.
       operationId: post-fleet-package-policies-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -64366,6 +64470,8 @@ paths:
                         type: array
                       maxItems: 1
                       type: array
+                    agent_version_block:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_agent_version_block'
                     body:
                       additionalProperties: false
                       type: object
@@ -76243,12 +76349,12 @@ paths:
             description: Comma-separated list of user IDs to filter live query history.
             example: elastic,admin
             type: string
-        - description: Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+        - description: Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.
           in: query
           name: sourceFilters
           required: false
           schema:
-            description: Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+            description: Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.
             example: live,scheduled
             type: string
         - description: The start of the time range filter (ISO 8601).
@@ -164213,6 +164319,21 @@ components:
     Kibana_HTTP_APIs_agent_policy_response:
       additionalProperties: false
       properties:
+        active_agents_per_version:
+          description: Number of active agents per version, excluding OpAMP agents. These are the agents package-level agent version conditions apply to.
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              count:
+                type: number
+              version:
+                type: string
+            required:
+              - version
+              - count
+          maxItems: 1000
+          type: array
         advanced_settings:
           additionalProperties: false
           type: object
@@ -164318,12 +164439,14 @@ components:
           nullable: true
           type: string
         download_source_ids:
+          description: An ordered list of agent binary download sources. When downloading an upgrade, Elastic Agent tries them in order until a download succeeds. Elastic Agent versions earlier than 9.6.0 only use the first source. All sources use the first source's proxy, SSL, authentication, and `reserve_diskspace` settings. If the first source uses a proxy, Fleet uses the proxy's SSL settings instead of the source's. An empty list uses the default download source. On update, omitting this field keeps the current list. If you set only the deprecated `download_source_id`, Fleet replaces the list with that source, or clears it if the value is `null`.
           items:
             description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
             maxLength: 500
             type: string
           maxItems: 3
           type: array
+          x-state: Generally available; added in 9.6.0
         fips_agents:
           type: number
         fleet_server_host_id:
@@ -169517,6 +169640,10 @@ components:
     Kibana_HTTP_APIs_create_managed_integration_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -169739,6 +169866,10 @@ components:
     Kibana_HTTP_APIs_create_package_policy_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -170587,6 +170718,11 @@ components:
           additionalProperties: false
           type: object
           properties:
+            attributes:
+              additionalProperties: true
+              description: Details of the error. `type` is `agent_version_incompatible` when the package policy was not upgraded because some active agents do not satisfy the package agent version condition.
+              type: object
+              properties: {}
             message:
               type: string
           required:
@@ -173742,6 +173878,22 @@ components:
                   - message
               name:
                 type: string
+              skipped_package_policies:
+                description: Package policies not upgraded because some of their active agents do not satisfy the agent version condition of the new package version.
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    version_condition:
+                      type: string
+                  required:
+                    - id
+                maxItems: 10000
+                type: array
               success:
                 type: boolean
             required:
@@ -184460,12 +184612,14 @@ components:
           type: string
           x-kibana-planned-max-length: 512
         download_source_ids:
+          description: An ordered list of agent binary download sources. When downloading an upgrade, Elastic Agent tries them in order until a download succeeds. Elastic Agent versions earlier than 9.6.0 only use the first source. All sources use the first source's proxy, SSL, authentication, and `reserve_diskspace` settings. If the first source uses a proxy, Fleet uses the proxy's SSL settings instead of the source's. An empty list uses the default download source. On update, omitting this field keeps the current list. If you set only the deprecated `download_source_id`, Fleet replaces the list with that source, or clears it if the value is `null`.
           items:
             description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
             maxLength: 500
             type: string
           maxItems: 3
           type: array
+          x-state: Generally available; added in 9.6.0
         fleet_server_host_id:
           minLength: 0
           nullable: true
@@ -185310,6 +185464,17 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
+            propertyName: type
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
         id:
           type: string
         is_default:
@@ -185337,6 +185502,27 @@ components:
           additionalProperties: false
           type: object
           properties:
+            auth:
+              additionalProperties: false
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
             otlp_exporter:
               additionalProperties: false
               type: object
@@ -186289,6 +186475,41 @@ components:
         - params
       title: Custom threshold
       type: object
+    Kibana_HTTP_APIs_otlp_auth_header:
+      additionalProperties: false
+      properties:
+        scheme:
+          description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+          enum:
+            - api_key
+            - bearer_token
+          type: string
+        type:
+          enum:
+            - auth_header
+          type: string
+      required:
+        - type
+        - scheme
+      title: otlp_auth_header
+      type: object
+    Kibana_HTTP_APIs_otlp_custom_auth_header:
+      additionalProperties: false
+      properties:
+        name:
+          description: The name of the header that is sent with the credential as value.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom_header
+          type: string
+      required:
+        - type
+        - name
+      title: otlp_custom_auth_header
+      type: object
     Kibana_HTTP_APIs_otlp_grpc_exporter:
       additionalProperties: false
       properties:
@@ -186771,6 +186992,41 @@ components:
         - endpoint
         - protocol
       title: otlp_http_exporter
+      type: object
+    Kibana_HTTP_APIs_otlp_response_auth_header:
+      additionalProperties: true
+      properties:
+        scheme:
+          description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+          enum:
+            - api_key
+            - bearer_token
+          type: string
+        type:
+          enum:
+            - auth_header
+          type: string
+      required:
+        - type
+        - scheme
+      title: otlp_response_auth_header
+      type: object
+    Kibana_HTTP_APIs_otlp_response_custom_auth_header:
+      additionalProperties: true
+      properties:
+        name:
+          description: The name of the header that is sent with the credential as value.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom_header
+          type: string
+      required:
+        - type
+        - name
+      title: otlp_response_custom_auth_header
       type: object
     Kibana_HTTP_APIs_otlp_response_grpc_exporter:
       additionalProperties: true
@@ -187800,6 +188056,17 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_custom_auth_header'
+            propertyName: type
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_custom_auth_header'
         id:
           type: string
         is_default:
@@ -187827,6 +188094,27 @@ components:
           additionalProperties: true
           type: object
           properties:
+            auth:
+              additionalProperties: true
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
             otlp_exporter:
               additionalProperties: true
               type: object
@@ -188649,6 +188937,34 @@ components:
         - has_policies
       title: package_metadata
       type: object
+    Kibana_HTTP_APIs_package_policy_agent_version_block:
+      additionalProperties: false
+      description: Set when some active agents don't satisfy the package-level agent version condition of the target package version.
+      properties:
+        blocked_count:
+          description: Number of active agents that don't satisfy the condition and would stop collecting the integration's data. Omitted when the user can't read agents.
+          type: number
+        min_version:
+          description: Lowest agent version satisfying the condition, when every blocked agent runs below it. Omitted when the user can't read agents.
+          type: string
+        observed_versions:
+          description: Versions reported by those agents. Omitted when the user can't read agents.
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        package_name:
+          type: string
+        package_version:
+          type: string
+        version_condition:
+          type: string
+      required:
+        - package_name
+        - package_version
+        - version_condition
+      title: package_policy_agent_version_block
+      type: object
     Kibana_HTTP_APIs_package_policy_input_deprecation_info:
       additionalProperties: false
       properties:
@@ -189200,6 +189516,11 @@ components:
           additionalProperties: false
           type: object
           properties:
+            attributes:
+              additionalProperties: true
+              description: Details of the error. `type` is `agent_version_incompatible` when the package policy was not upgraded because some active agents do not satisfy the package agent version condition.
+              type: object
+              properties: {}
             message:
               type: string
           required:
@@ -190595,6 +190916,10 @@ components:
     Kibana_HTTP_APIs_simplified_create_package_policy_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -194833,12 +195158,14 @@ components:
           type: string
           x-kibana-planned-max-length: 512
         download_source_ids:
+          description: An ordered list of agent binary download sources. When downloading an upgrade, Elastic Agent tries them in order until a download succeeds. Elastic Agent versions earlier than 9.6.0 only use the first source. All sources use the first source's proxy, SSL, authentication, and `reserve_diskspace` settings. If the first source uses a proxy, Fleet uses the proxy's SSL settings instead of the source's. An empty list uses the default download source. On update, omitting this field keeps the current list. If you set only the deprecated `download_source_id`, Fleet replaces the list with that source, or clears it if the value is `null`.
           items:
             description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
             maxLength: 500
             type: string
           maxItems: 3
           type: array
+          x-state: Generally available; added in 9.6.0
         fleet_server_host_id:
           minLength: 0
           nullable: true
@@ -195644,6 +195971,17 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
+            propertyName: type
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
         id:
           type: string
         is_default:
@@ -195669,6 +196007,28 @@ components:
           additionalProperties: false
           type: object
           properties:
+            auth:
+              additionalProperties: false
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
+                  nullable: true
             otlp_exporter:
               additionalProperties: false
               type: object
@@ -195848,6 +196208,10 @@ components:
     Kibana_HTTP_APIs_update_package_policy_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -196424,6 +196788,10 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         acknowledge_breaking_changes:
           default: false
           description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
@@ -221457,6 +221825,25 @@ components:
             expiration:
               format: date-time
               type: string
+            origin:
+              description: What started the live query. Absent for live queries started from the UI, the API or a rule.
+              type: object
+              properties:
+                run_id:
+                  description: The workflow execution (run) ID that made the request.
+                  type: string
+                type:
+                  description: The kind of origin. `workflow` means a workflow run made the request.
+                  enum:
+                    - workflow
+                  type: string
+                verified:
+                  description: Whether Kibana verified that the run exists and made the request. Always `false` for now.
+                  type: boolean
+              required:
+                - type
+                - run_id
+                - verified
             pack_id:
               type: string
             pack_name:
@@ -222200,6 +222587,9 @@ components:
               additionalProperties: true
               description: ECS mapping configuration used for the query.
               type: object
+            originVerified:
+              description: Set on `Workflow` rows only. Whether Kibana verified that the workflow run made the request. Always `false` until workflow runs can be verified.
+              type: boolean
             queriesTotal:
               description: The total number of sub-queries in the live action.
               type: integer
@@ -222210,10 +222600,11 @@ components:
               description: The saved query ID, if the live query was based on a saved query.
               type: string
             source:
-              description: Whether this was a manually run live query or triggered by a rule.
+              description: Whether the live query was run manually, by a rule, or by a workflow. `Workflow` comes from an unverified request header and is for display only.
               enum:
                 - Live
                 - Rule
+                - Workflow
               type: string
             sourceType:
               description: Identifies this as a live query history row.

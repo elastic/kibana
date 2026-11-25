@@ -93,7 +93,7 @@ describe('useAiIndexDestLinks', () => {
     expect(result.current.destValue).toBe(INDEX_DEST.value);
     expect(result.current.discoverHref).toBe(DISCOVER_HREF);
     expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith({
-      timeRange: { from: 'now-90d', to: 'now' },
+      timeRange: { from: '1970-01-01T00:00:00.000Z', to: 'now' },
       query: { esql: `FROM ${INDEX_DEST.value} | LIMIT 100` },
     });
     await waitFor(() => {

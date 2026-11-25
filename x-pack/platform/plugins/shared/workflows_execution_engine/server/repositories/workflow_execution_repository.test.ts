@@ -484,6 +484,34 @@ describe('WorkflowExecutionRepository', () => {
     });
   });
 
+  describe('getWorkflowExecutionsByIds', () => {
+    beforeEach(() => {
+      workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+        createMockGetExecutionsByIdsResponse([
+          { id: '1', spaceId: 'default' } as any,
+          { id: '2', spaceId: 'other' } as any,
+        ])
+      );
+    });
+
+    it('reads the full documents and leaves out other spaces', async () => {
+      const executions = await repository.getWorkflowExecutionsByIds(['1', '2'], 'default');
+
+      expect([...executions.keys()]).toEqual(['1']);
+      expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['1', '2'], undefined);
+    });
+
+    it('reads only the requested fields', async () => {
+      await repository.getWorkflowExecutionsByIds(['1', '2'], 'default', {
+        sourceIncludes: ['spaceId', 'status'],
+      });
+
+      expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['1', '2'], {
+        sourceIncludes: ['spaceId', 'status'],
+      });
+    });
+  });
+
   describe('updateWorkflowExecution', () => {
     it('should update a workflow execution', async () => {
       const workflowExecution = { id: '1', status: ExecutionStatus.RUNNING };

@@ -25,6 +25,7 @@ import {
 } from '../create_alert_event_log_record_object';
 import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { Gap } from '../rule_gaps/gap';
+import { addCloudApiKeyAuthErrorGuidance } from '../cloud_api_key_auth_error_guidance';
 import type { GapBase } from '../../application/gaps/types';
 import type { GapReason } from '../../../common/constants';
 
@@ -324,7 +325,7 @@ export class AlertingEventLogger {
       message,
       outcome: 'failure',
       alertingOutcome: 'failure',
-      error: errorMessage,
+      error: addCloudApiKeyAuthErrorGuidance(errorMessage),
     });
   }
 

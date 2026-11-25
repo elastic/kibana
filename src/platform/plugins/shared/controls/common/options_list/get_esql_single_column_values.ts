@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISearchGeneric } from '@kbn/search-types';
-import type { TimeRange } from '@kbn/es-query';
-import { getESQLResults, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { IEsqlSearchParams, ISearchMethods } from '@kbn/search-types';
+import { getTimeZoneFromSettings, type TimeRange } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLColumn } from '@kbn/es-types';
 import { isNumericType } from '@kbn/esql-language';
@@ -45,11 +45,11 @@ type GetESQLSingleColumnValuesMultiColumnFailure = Required<GetESQLSingleColumnV
 
 interface GetESQLSingleColumnValuesParams {
   query: string;
-  search: ISearchGeneric;
+  search: Pick<ISearchMethods, 'esql'>;
   signal?: AbortSignal;
   timeRange?: TimeRange;
   /** ES DSL filter applied as `params.filter` on the ES|QL `_query` endpoint to pre-filter the pipeline. */
-  filter?: unknown;
+  filter?: IEsqlSearchParams['filter'];
   esqlVariables: ESQLControlVariable[];
   /** From UI settings `dateFormat:tz` on either client or server. */
   timezone?: string;
@@ -68,25 +68,25 @@ export const getESQLSingleColumnValues = async ({
   GetESQLSingleColumnValuesSuccess | GetESQLSingleColumnValuesFailure
 > => {
   try {
-    const results = await getESQLResults({
-      esqlQuery: query,
-      search,
-      signal,
-      filter,
-      dropNullColumns: true,
-      timeRange,
-      timezone,
-      variables: esqlVariables,
-      projectRouting,
-    });
-    const columns = results.response.columns;
-    const allColumns = results.response.all_columns;
+    const { rawResponse: response } = await search.esql(
+      {
+        query,
+        filter,
+        dropNullColumns: true,
+        timeZone: timezone ? getTimeZoneFromSettings(timezone) : undefined,
+        projectRouting,
+        kibanaQueryContext: { timeRange, esqlVariables },
+      },
+      { abortSignal: signal }
+    );
+    const columns = response.columns;
+    const allColumns = response.all_columns;
 
     const indexPattern = getIndexPatternFromESQLQuery(query);
 
     if (columns.length === 1) {
-      const [column] = results.response.columns;
-      const rawValues = results.response.values
+      const [column] = response.columns;
+      const rawValues = response.values
         .map((value) => value[0])
         .filter((value) => value !== null && value !== undefined);
       return isNumericType(column.type)

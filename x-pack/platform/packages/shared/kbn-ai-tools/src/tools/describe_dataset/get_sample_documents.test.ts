@@ -36,6 +36,17 @@ const createResponse = ({
 const TIME_RANGE =
   '@timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z"';
 
+const SALT_PATTERN = /CONCAT\("([0-9a-f-]{36})", /;
+const getSalt = (query: string) => query.match(SALT_PATTERN)?.[1];
+const maskSalt = (query: string) => query.replace(SALT_PATTERN, 'CONCAT("<salt>", ');
+
+const RANDOM_ORDER = 'SORT HASH("md5", CONCAT("<salt>", @timestamp::STRING))';
+
+const countResponse = (total: number) => ({
+  columns: [{ name: 'total', type: 'long' }],
+  values: [[total]],
+});
+
 describe('getSampleDocumentsEsql', () => {
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -190,20 +201,9 @@ describe('getSampleDocumentsEsql', () => {
     }
   });
 
-  it('uses count, SAMPLE, oversample limit, and client-side trim for random sampling', async () => {
+  it('counts, oversamples with SAMPLE, and keeps sampleSize rows in random order', async () => {
     const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce({ columns: [{ name: 'total', type: 'long' }], values: [[100]] })
-      .mockResolvedValueOnce(
-        createResponse({
-          values: [
-            ['doc-1', { message: 'first' }],
-            ['doc-2', { message: 'second' }],
-            ['doc-3', { message: 'third' }],
-          ],
-        })
-      );
-    jest.spyOn(Math, 'random').mockReturnValue(0);
+    query.mockResolvedValueOnce(countResponse(100_000)).mockResolvedValueOnce(createResponse());
 
     const deadline = timeoutSignal(30_000);
     try {
@@ -219,12 +219,68 @@ describe('getSampleDocumentsEsql', () => {
       expect(query.mock.calls[0][0].query).toBe(
         `FROM logs-* | WHERE ${TIME_RANGE} | STATS total = COUNT(*)`
       );
-      expect(query.mock.calls[1][0].query).toBe(
-        `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | SAMPLE 0.06 | LIMIT 20`
+      expect(maskSalt(query.mock.calls[1][0].query)).toBe(
+        `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | SAMPLE 0.00229 | ${RANDOM_ORDER} | LIMIT 2`
       );
       expect(query.mock.calls[0][0]).not.toHaveProperty('filter');
-      expect(result.hits).toHaveLength(2);
-      expect(result.total).toBe(3);
+      expect(result).toEqual({
+        hits: [
+          { _index: '', _id: 'doc-1', _source: { message: 'first' } },
+          { _index: '', _id: 'doc-2', _source: { message: 'second' } },
+        ],
+        total: 2,
+      });
+    } finally {
+      deadline.dispose();
+    }
+  });
+
+  it('scales the oversampling with sampleSize', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce(countResponse(10_000_000)).mockResolvedValueOnce(createResponse());
+
+    const deadline = timeoutSignal(30_000);
+    try {
+      await getSampleDocumentsEsql({
+        esClient,
+        abortSignal: deadline,
+        index: 'logs-*',
+        start: 100,
+        end: 200,
+        sampleSize: 1000,
+      });
+
+      expect(query.mock.calls[1][0].query).toContain('| SAMPLE 0.00016 | ');
+    } finally {
+      deadline.dispose();
+    }
+  });
+
+  it('salts the random order per request', async () => {
+    const { esClient, query } = createEsClient();
+    query
+      .mockResolvedValueOnce(countResponse(100_000))
+      .mockResolvedValueOnce(createResponse())
+      .mockResolvedValueOnce(countResponse(100_000))
+      .mockResolvedValueOnce(createResponse());
+
+    const deadline = timeoutSignal(30_000);
+    try {
+      const params = {
+        esClient,
+        abortSignal: deadline,
+        index: 'logs-*',
+        start: 100,
+        end: 200,
+        sampleSize: 2,
+      };
+      await getSampleDocumentsEsql(params);
+      await getSampleDocumentsEsql(params);
+
+      const firstSalt = getSalt(query.mock.calls[1][0].query);
+      const secondSalt = getSalt(query.mock.calls[3][0].query);
+      expect(firstSalt).toBeDefined();
+      expect(firstSalt).not.toBe(secondSalt);
     } finally {
       deadline.dispose();
     }
@@ -232,9 +288,7 @@ describe('getSampleDocumentsEsql', () => {
 
   it('sends dslFilter as the request filter while keeping the time range inline', async () => {
     const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce({ columns: [{ name: 'total', type: 'long' }], values: [[10]] })
-      .mockResolvedValueOnce(createResponse());
+    query.mockResolvedValueOnce(countResponse(10)).mockResolvedValueOnce(createResponse());
 
     const dslFilter = { term: { 'service.name': 'checkout' } };
     const deadline = timeoutSignal(30_000);
@@ -253,6 +307,7 @@ describe('getSampleDocumentsEsql', () => {
         `FROM logs-* | WHERE ${TIME_RANGE} | STATS total = COUNT(*)`
       );
       expect(query.mock.calls[0][0].filter).toEqual({ bool: { filter: [dslFilter] } });
+      expect(query.mock.calls[1][0].filter).toEqual({ bool: { filter: [dslFilter] } });
     } finally {
       deadline.dispose();
     }
@@ -260,9 +315,7 @@ describe('getSampleDocumentsEsql', () => {
 
   it('uses the same KQL, where condition, LOAD, and time filter for random count and sample queries', async () => {
     const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce({ columns: [{ name: 'total', type: 'long' }], values: [[10]] })
-      .mockResolvedValueOnce(createResponse());
+    query.mockResolvedValueOnce(countResponse(100_000)).mockResolvedValueOnce(createResponse());
 
     const deadline = timeoutSignal(30_000);
     try {
@@ -281,8 +334,8 @@ describe('getSampleDocumentsEsql', () => {
       expect(query.mock.calls[0][0].query).toBe(
         `SET unmapped_fields = "LOAD"; FROM logs-* | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND service.name == "checkout" | STATS total = COUNT(*)`
       );
-      expect(query.mock.calls[1][0].query).toBe(
-        `SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND service.name == "checkout" | SAMPLE 0.6 | LIMIT 20`
+      expect(maskSalt(query.mock.calls[1][0].query)).toBe(
+        `SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND service.name == "checkout" | SAMPLE 0.00229 | ${RANDOM_ORDER} | LIMIT 2`
       );
     } finally {
       deadline.dispose();
@@ -342,9 +395,7 @@ describe('getSampleDocumentsEsql', () => {
 
   it('omits SAMPLE when the calculated probability reaches one', async () => {
     const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce({ columns: [{ name: 'total', type: 'long' }], values: [[3]] })
-      .mockResolvedValueOnce(createResponse());
+    query.mockResolvedValueOnce(countResponse(3)).mockResolvedValueOnce(createResponse());
 
     const deadline = timeoutSignal(30_000);
     try {
@@ -357,8 +408,8 @@ describe('getSampleDocumentsEsql', () => {
         sampleSize: 2,
       });
 
-      expect(query.mock.calls[1][0].query).toBe(
-        `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | LIMIT 20`
+      expect(maskSalt(query.mock.calls[1][0].query)).toBe(
+        `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | ${RANDOM_ORDER} | LIMIT 2`
       );
     } finally {
       deadline.dispose();
@@ -367,7 +418,7 @@ describe('getSampleDocumentsEsql', () => {
 
   it('short-circuits random sampling when the count query returns zero', async () => {
     const { esClient, query } = createEsClient();
-    query.mockResolvedValueOnce({ columns: [{ name: 'total', type: 'long' }], values: [[0]] });
+    query.mockResolvedValueOnce(countResponse(0));
 
     const deadline = timeoutSignal(30_000);
     try {
