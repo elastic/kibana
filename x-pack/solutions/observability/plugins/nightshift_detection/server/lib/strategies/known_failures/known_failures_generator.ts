@@ -28,16 +28,16 @@ export class KnownFailuresGenerator implements DetectionSignalGenerator {
 }
 
 /**
- * 1. Joins the strategy's enabled rules with the knowledge indicators they watch.
- * 2. Reads the rows those rules wrote in the window, grouped by rule.
+ * Each watched knowledge indicator with the rows its Known failures rule wrote in the window, newest
+ * first. An indicator whose rule wrote nothing in the window is left out.
  */
 async function readMeasuredFailures(context: GeneratorContext): Promise<MeasuredKnownFailure[]> {
   const { spaceId, window, rules, abortSignal } = context;
 
-  // 1.
+  // 1. Joins the strategy's enabled rules with the knowledge indicators they watch.
   const knowledgeIndicatorByRuleId = await readWatchedKnowledgeIndicators(context);
 
-  // 2.
+  // 2. Reads the rows those rules wrote in the window, grouped by rule.
   const rows = await rules.readRows({
     spaceId,
     ruleIds: [...knowledgeIndicatorByRuleId.keys()],
