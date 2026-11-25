@@ -24,7 +24,6 @@ import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
 import { NewExperienceCallout } from './new_experience_callout';
-import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
 
 export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
@@ -55,7 +54,6 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
 
   const {
     ui: { manage: canManageStreamsKibana },
-    features: { queryStreams },
   } = useStreamsPrivileges();
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
@@ -124,8 +122,6 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
   const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
     React.useState(false);
-  const [isQueryStreamCreationFlyoutOpen, setIsQueryStreamCreationFlyoutOpen] =
-    React.useState(false);
 
   const pageTitle = i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
     defaultMessage: 'Streams',
@@ -137,19 +133,6 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
     'xpack.streams.streamsListView.createClassicStreamButtonLabel',
     { defaultMessage: 'Create classic stream' }
   );
-  const createLabel = i18n.translate('xpack.streams.streamsListView.createButtonLabel', {
-    defaultMessage: 'Create',
-  });
-  const queryStreamMenuItemLabel = i18n.translate(
-    'xpack.streams.streamsListView.queryStreamMenuItemLabel',
-    { defaultMessage: 'Query stream' }
-  );
-  const classicStreamMenuItemLabel = i18n.translate(
-    'xpack.streams.streamsListView.classicStreamMenuItemLabel',
-    { defaultMessage: 'Classic stream' }
-  );
-
-  const showQueryStreams = Boolean(queryStreams?.enabled);
   const mapHref = tabs?.find(({ id }) => id === 'map')?.href;
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
 
@@ -166,35 +149,6 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
       },
     ];
 
-    if (showQueryStreams) {
-      return {
-        primaryActionItem: {
-          id: 'createStream',
-          label: createLabel,
-          iconType: 'plus',
-          testId: 'streamsAppCreateStreamButton',
-          items: [
-            {
-              id: 'createClassicStream',
-              order: 1,
-              label: classicStreamMenuItemLabel,
-              run: () => setIsClassicStreamCreationFlyoutOpen(true),
-              disableButton: !canCreateClassicStream,
-              testId: 'streamsAppCreateClassicStreamButton',
-            },
-            {
-              id: 'createQueryStream',
-              order: 2,
-              label: queryStreamMenuItemLabel,
-              run: () => setIsQueryStreamCreationFlyoutOpen(true),
-              testId: 'streamsAppCreateQueryStreamButton',
-            },
-          ],
-        },
-        items,
-      };
-    }
-
     return {
       primaryActionItem: {
         id: 'createClassicStream',
@@ -206,15 +160,7 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
       },
       items,
     };
-  }, [
-    canCreateClassicStream,
-    classicStreamMenuItemLabel,
-    createClassicStreamLabel,
-    createLabel,
-    queryStreamMenuItemLabel,
-    settingsLabel,
-    showQueryStreams,
-  ]);
+  }, [canCreateClassicStream, createClassicStreamLabel, settingsLabel]);
 
   return (
     <>
@@ -259,12 +205,6 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
       )}
       {isClassicStreamCreationFlyoutOpen && (
         <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
-      )}
-      {isQueryStreamCreationFlyoutOpen && (
-        <CreateQueryStreamFlyoutContent
-          onClose={() => setIsQueryStreamCreationFlyoutOpen(false)}
-          onQueryStreamCreated={streamsListFetch.refresh}
-        />
       )}
     </>
   );
