@@ -86,6 +86,10 @@
 
 - [Sublime Security](/reference/connectors-kibana/sublime-security-action-type.md): Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security.
 
+**Endpoint security**
+
+- [Sophos Central](/reference/connectors-kibana/sophos-central-action-type.md): Manage alerts, isolate and scan endpoints, manage IOC block and allow lists, control tamper protection, and query XDR detections in Sophos Central.
+
 **Threat intelligence**
 
 - [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.
