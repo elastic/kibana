@@ -123,6 +123,30 @@ describe('getAxiosConfig', () => {
     });
   });
 
+  it('does not pass a tokenType when none is configured', async () => {
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce('bearer fakeToken');
+
+    await getAxiosConfig(params);
+
+    expect(getOAuthClientCredentialsAccessToken).toHaveBeenCalledWith(
+      expect.objectContaining({ tokenType: undefined })
+    );
+  });
+
+  it('passes the configured tokenType to the token request', async () => {
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce('Bearer fakeToken');
+
+    const [config] = await getAxiosConfig({
+      ...params,
+      config: { ...params.config, tokenType: 'Bearer' },
+    });
+
+    expect(getOAuthClientCredentialsAccessToken).toHaveBeenCalledWith(
+      expect.objectContaining({ tokenType: 'Bearer' })
+    );
+    expect((config as GetAxiosConfigResponse).headers?.Authorization).toBe('Bearer fakeToken');
+  });
+
   it('should return error when access token retrieval fails', async () => {
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(
       new Error('Failed to retrieve access token')
@@ -188,6 +212,16 @@ describe('getAxiosConfig with OAuth2 password grant', () => {
       })
     );
     expect((config as GetAxiosConfigResponse).headers?.Authorization).toBe('Bearer fakeToken');
+  });
+
+  it('passes the configured tokenType to the password token request', async () => {
+    (getOAuthPasswordAccessToken as jest.Mock).mockResolvedValueOnce('Bearer fakeToken');
+
+    await getAxiosConfig({ ...params, config: { ...params.config, tokenType: 'Bearer' } });
+
+    expect(getOAuthPasswordAccessToken).toHaveBeenCalledWith(
+      expect.objectContaining({ tokenType: 'Bearer' })
+    );
   });
 
   it('should return an error when access token retrieval fails', async () => {

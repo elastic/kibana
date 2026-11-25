@@ -1150,6 +1150,11 @@ Object {
     "scope": Object {
       "type": "string",
     },
+    "tokenType": Object {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+    },
     "url": Object {
       "format": "uri",
       "type": "string",

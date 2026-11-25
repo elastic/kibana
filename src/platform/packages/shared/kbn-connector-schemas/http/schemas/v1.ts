@@ -31,6 +31,7 @@ export const ConfigSchema = lazySchema(() =>
       clientId: AuthConfiguration.clientId,
       scope: AuthConfiguration.scope,
       additionalFields: AuthConfiguration.additionalFields,
+      tokenType: z.string().min(1).max(128).optional(),
       proxyUrl: z.string().url().nullable().default(null),
       proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
       hasProxyAuth: z.boolean().default(false),
