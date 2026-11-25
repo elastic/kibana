@@ -109,6 +109,25 @@ export class AlertOutcomeTrackingStore {
     );
   }
 
+  /** Claimed recoveries that never recorded a round since `before`, which a crash can leave. */
+  findStuckRecovering({
+    spaceId,
+    before,
+    size,
+  }: {
+    spaceId: string;
+    before: string;
+    size: number;
+  }): Promise<StoredTrackingRecord[]> {
+    return this.search(
+      spaceId,
+      [{ term: { state: 'recovering' } }, { range: { recovering_since: { lte: before } } }],
+      size,
+      [{ recovering_since: { order: 'asc' } }],
+      [{ exists: { field: 'recovery_execution_id' } }]
+    );
+  }
+
   /**
    * Applies `patch` only if nobody wrote the record since it was read. Resolves to the new stored
    * record, or undefined when another writer got there first.
@@ -139,13 +158,19 @@ export class AlertOutcomeTrackingStore {
     spaceId: string,
     filter: estypes.QueryDslQueryContainer[],
     size: number,
-    sort?: estypes.Sort
+    sort?: estypes.Sort,
+    mustNot?: estypes.QueryDslQueryContainer[]
   ): Promise<StoredTrackingRecord[]> {
     const response = await this.adapter.getClient().search({
       track_total_hits: false,
       size,
       seq_no_primary_term: true,
-      query: { bool: { filter: [{ term: { space_id: spaceId } }, ...filter] } },
+      query: {
+        bool: {
+          filter: [{ term: { space_id: spaceId } }, ...filter],
+          ...(mustNot ? { must_not: mustNot } : {}),
+        },
+      },
       ...(sort ? { sort } : {}),
     });
     return response.hits.hits.flatMap((hit) =>

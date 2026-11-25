@@ -9,13 +9,21 @@ import type { Logger } from '@kbn/core/server';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { getProviderAdapter, type AdapterContext } from './adapters';
 import type { AlertOutcomeTrackingStore, StoredTrackingRecord } from './tracking_store';
-import type { AlertOutcomeSource, CheckResult, StopReason } from './types';
+import type {
+  AlertOutcomeSource,
+  AlertRef,
+  CheckResult,
+  StopReason,
+  TrackingRecord,
+} from './types';
 
 /** Matches the failure sweep's schedule: the first check is the sweep after round 1. */
 export const POLL_INTERVAL_MS = 5 * 60_000;
 export const HARD_CAP_MS = 7 * 24 * 60 * 60_000;
 export const MAX_CONSECUTIVE_FAILURES = 5;
+export const RECOVERING_RETRY_AFTER_MS = 15 * 60_000;
 const DUE_BATCH_SIZE = 200;
+const STUCK_BATCH_SIZE = 20;
 
 export interface PollAlertOutcomesDeps {
   trackingStore: AlertOutcomeTrackingStore;
@@ -23,6 +31,12 @@ export interface PollAlertOutcomesDeps {
   adapterContext: AdapterContext;
   /** Open or closed per investigation; ids that do not exist or are not readable are missing. */
   getInvestigationStatuses: (ids: string[]) => Promise<Map<string, 'open' | 'closed'>>;
+  /** When the investigation's latest alert recovery round started, if it has one. */
+  getLatestRecoveryRoundAt: (investigationId: string) => Promise<string | undefined>;
+  followUpExternalAlertRecovery: (
+    record: TrackingRecord & { ref: AlertRef },
+    checkWindow: { firingAt: string; recoveredBy: string; reportedRecoveredAt?: string }
+  ) => Promise<{ execution_id: string } | undefined>;
   telemetry?: NightshiftTelemetryClient;
   logger: Logger;
   now?: () => number;
@@ -49,8 +63,8 @@ const secondsBetween = (from: string | undefined, to: number): number | undefine
 
 /**
  * Checks the space's due tracking records against their sources, read-only and without an LLM,
- * and records recoveries. Stops at `deadline`; the oldest checks go first, so the next run
- * resumes where this one stopped.
+ * and hands recoveries to a recovery round. Stops at `deadline`; the oldest checks go first, so
+ * the next run resumes where this one stopped.
  */
 export const pollAlertOutcomes = async (
   deps: PollAlertOutcomesDeps,
@@ -97,17 +111,58 @@ export const pollAlertOutcomes = async (
     });
   };
 
-  const markRecovered = async (stored: StoredTrackingRecord, check: CheckResult, at: number) => {
+  /** Queues the round for a claimed record and records its execution; a failure leaves it claimed. */
+  const queueRound = async (
+    claimed: StoredTrackingRecord,
+    checkWindow: { firingAt: string; recoveredBy: string; reportedRecoveredAt?: string },
+    at: number
+  ) => {
+    const { record } = claimed;
+    if (!record.ref) return;
+    try {
+      const queued = await deps.followUpExternalAlertRecovery(
+        { ...record, ref: record.ref },
+        checkWindow
+      );
+      if (!queued) {
+        await stop(claimed, 'investigation_closed', at);
+        return;
+      }
+      await trackingStore.update(claimed, {
+        state: 'recovered',
+        recovery_execution_id: queued.execution_id,
+        updated_at: new Date(at).toISOString(),
+      });
+      result.recovered++;
+      telemetry?.reportAlertOutcome({
+        transition: 'round_queued',
+        ...(record.source ? { source: record.source } : {}),
+        ...(record.automation_id ? { automation_id: record.automation_id } : {}),
+      });
+    } catch (error) {
+      result.errors++;
+      logger.warn(
+        `Could not queue the recovery round of investigation "${
+          record.investigation_id
+        }"; retrying after ${RECOVERING_RETRY_AFTER_MS / 60_000} minutes: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  };
+
+  const handOff = async (stored: StoredTrackingRecord, check: CheckResult, at: number) => {
     const iso = new Date(at).toISOString();
-    const updated = await trackingStore.update(stored, {
-      state: 'recovered',
+    // The claim is what keeps two runs that both see the recovery from queueing two rounds.
+    const claimed = await trackingStore.update(stored, {
+      state: 'recovering',
+      recovering_since: iso,
       recovered_seen_at: iso,
       last_status: 'recovered',
       last_checked_at: iso,
       updated_at: iso,
     });
-    if (!updated) return;
-    result.recovered++;
+    if (!claimed) return;
     const lag = check.status === 'recovered' ? secondsBetween(check.recovered_at, at) : undefined;
     const tracked = secondsBetween(stored.record.post_received_at, at);
     telemetry?.reportAlertOutcome({
@@ -117,9 +172,56 @@ export const pollAlertOutcomes = async (
       ...(lag !== undefined ? { detection_lag_seconds: lag } : {}),
       ...(tracked !== undefined ? { tracked_seconds: tracked } : {}),
     });
+    await queueRound(
+      claimed,
+      {
+        firingAt: stored.record.last_firing_at ?? stored.record.post_received_at,
+        recoveredBy: iso,
+        ...(check.status === 'recovered' && check.recovered_at
+          ? { reportedRecoveredAt: check.recovered_at }
+          : {}),
+      },
+      at
+    );
+  };
+
+  /** Retries claims a crash left without a round, unless the round exists after all. */
+  const retryStuckRecoveries = async () => {
+    const stuck = await trackingStore.findStuckRecovering({
+      spaceId,
+      before: new Date(clock() - RECOVERING_RETRY_AFTER_MS).toISOString(),
+      size: STUCK_BATCH_SIZE,
+    });
+    for (const stored of stuck) {
+      if (!hasTime()) return;
+      const at = clock();
+      const iso = new Date(at).toISOString();
+      const since = stored.record.recovering_since ?? stored.record.updated_at;
+      const latestRound = await deps.getLatestRecoveryRoundAt(stored.record.investigation_id);
+      if (latestRound && Date.parse(latestRound) >= Date.parse(since)) {
+        await trackingStore.update(stored, { state: 'recovered', updated_at: iso });
+        continue;
+      }
+      const reclaimed = await trackingStore.update(stored, {
+        recovering_since: iso,
+        updated_at: iso,
+      });
+      if (!reclaimed) continue;
+      await queueRound(
+        reclaimed,
+        {
+          firingAt: stored.record.last_firing_at ?? stored.record.post_received_at,
+          recoveredBy: stored.record.recovered_seen_at ?? since,
+        },
+        at
+      );
+    }
   };
 
   try {
+    await retryStuckRecoveries();
+    if (!hasTime()) return result;
+
     const due = await trackingStore.findDue({
       spaceId,
       now: new Date(clock()).toISOString(),
@@ -185,7 +287,7 @@ export const pollAlertOutcomes = async (
             break;
           case 'recovered':
             counts.recovered++;
-            await markRecovered(stored, check, at);
+            await handOff(stored, check, at);
             break;
           case 'stale':
             counts.stale++;

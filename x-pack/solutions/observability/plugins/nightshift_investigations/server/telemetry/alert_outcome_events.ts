@@ -15,6 +15,7 @@ export type AlertOutcomeTransition =
   | 'untrackable'
   | 'extract_failed'
   | 'recovered'
+  | 'round_queued'
   | 'stopped';
 
 export interface AlertOutcomeEvent {
@@ -31,7 +32,7 @@ const alertOutcomeSchema: RootSchema<AlertOutcomeEvent> = {
     type: 'keyword',
     _meta: {
       description:
-        'What happened to the tracking record: tracked, untrackable, extract_failed, recovered or stopped.',
+        'What happened to the tracking record: tracked, untrackable, extract_failed, recovered, round_queued or stopped.',
     },
   },
   source: {
