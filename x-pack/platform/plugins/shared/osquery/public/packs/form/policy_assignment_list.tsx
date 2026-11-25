@@ -446,6 +446,19 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
 
   // Shard-targeted policies cannot be assigned here, so they are not part of
   // the "N of M selected" denominator unless they are already selected.
+  const allAssignable = useMemo(
+    () =>
+      allPolicies
+        .filter((policy) => !isRowShardAssigned(policy))
+        .flatMap((policy) => policy.members ?? [policy]),
+    [allPolicies, isRowShardAssigned]
+  );
+
+  const allSelectedCount = useMemo(
+    () => allAssignable.filter((policy) => selectedSet.has(policy.id)).length,
+    [allAssignable, selectedSet]
+  );
+
   const visibleAssignable = useMemo(
     () =>
       visiblePolicies
@@ -467,6 +480,16 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         0
       ),
     [selectedSet, agentPoliciesById]
+  );
+
+  const selectedAgentPoliciesLabelValues = useMemo(
+    () => ({
+      selected: allSelectedCount,
+      total: allAssignable.length,
+      implicit: implicitPolicyIds.size,
+      agents: totalAgents,
+    }),
+    [allSelectedCount, allAssignable.length, implicitPolicyIds.size, totalAgents]
   );
 
   const togglePolicy = useCallback(
@@ -951,30 +974,11 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
             <EuiText size="xs" color="subdued" data-test-subj="policyAssignmentCount">
-              {isFiltered ? (
-                <FormattedMessage
-                  id="xpack.osquery.pack.policyList.selectionCountMatching"
-                  defaultMessage="{selected} of {total} matching | {overall} agent policies selected | {agents, plural, one {# agent} other {# agents}} enrolled"
-                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  values={{
-                    selected: visibleSelectedCount,
-                    total: visibleAssignable.length,
-                    overall: selectedSet.size,
-                    agents: totalAgents,
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.osquery.pack.policyList.selectionCount"
-                  defaultMessage="{selected} of {total} agent policies selected | {agents, plural, one {# agent} other {# agents}} enrolled"
-                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  values={{
-                    selected: visibleSelectedCount,
-                    total: visibleAssignable.length,
-                    agents: totalAgents,
-                  }}
-                />
-              )}
+              <FormattedMessage
+                id="xpack.osquery.pack.policyList.selectedAgentPoliciesLabel"
+                defaultMessage="{selected} of {total} agent policies selected{implicit, plural, =0 {} other { · includes # via a shared integration}} · {agents, plural, one {# agent} other {# agents}} enrolled"
+                values={selectedAgentPoliciesLabelValues}
+              />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

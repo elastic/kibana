@@ -188,12 +188,47 @@ describe('PolicyAssignmentList', () => {
       expect(screen.queryByText('Included via shared integration')).not.toBeInTheDocument();
     });
 
+    it('shows the expanded selection and shared inclusion count', () => {
+      render(<FormWrapper defaultValues={{ policy_ids: ['policy-1'] }} />);
+
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent(
+        '2 of 3 agent policies selected · includes 1 via a shared integration · 15 agents enrolled'
+      );
+    });
+
+    it('hides the shared inclusion segment when all group members are explicit', () => {
+      render(<FormWrapper defaultValues={{ policy_ids: ['policy-1', 'policy-2'] }} />);
+
+      const count = screen.getByTestId('policyAssignmentCount');
+      expect(count).toHaveTextContent('2 of 3 agent policies selected · 15 agents enrolled');
+      expect(count).not.toHaveTextContent('includes');
+    });
+
+    it('keeps the global selection label when a search hides the selected group', () => {
+      render(<FormWrapper defaultValues={{ policy_ids: ['policy-1'] }} />);
+
+      const count = screen.getByTestId('policyAssignmentCount');
+      const expected =
+        '2 of 3 agent policies selected · includes 1 via a shared integration · 15 agents enrolled';
+      expect(count).toHaveTextContent(expected);
+      fireEvent.change(screen.getByTestId('policyAssignmentSearch'), {
+        target: { value: 'Gamma' },
+      });
+
+      expect(screen.queryByText('Alpha Policy')).not.toBeInTheDocument();
+      expect(count).toHaveTextContent(expected);
+      expect(count).not.toHaveTextContent('matching');
+    });
+
     it('does not report a shard-assigned member as included via the shared integration', () => {
       render(
         <FormWrapper defaultValues={{ policy_ids: ['policy-2'], shards: { 'policy-1': 10 } }} />
       );
 
       expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
+      const count = screen.getByTestId('policyAssignmentCount');
+      expect(count).toHaveTextContent('2 of 3 agent policies selected · 15 agents enrolled');
+      expect(count).not.toHaveTextContent('includes');
       expect(screen.queryByText('Included via shared integration')).not.toBeInTheDocument();
       expect(
         screen.queryByTestId('policyAssignmentSharedIntegrationCallout')
@@ -253,7 +288,7 @@ describe('PolicyAssignmentList', () => {
         expect.objectContaining({ policy_ids: ['policy-1', 'policy-2'] })
       );
       expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent(
-        '2 of 3 agent policies selected | 15 agents enrolled'
+        '2 of 3 agent policies selected · 15 agents enrolled'
       );
       fireEvent.click(screen.getByRole('checkbox', { name: groupName }));
       expect(onFormChange).toHaveBeenLastCalledWith(expect.objectContaining({ policy_ids: [] }));
@@ -284,7 +319,9 @@ describe('PolicyAssignmentList', () => {
         expect(onFormChange).toHaveBeenLastCalledWith(
           expect.objectContaining({ policy_ids: ['policy-1', 'policy-2'] })
         );
-        expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('2 of 2 matching');
+        expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent(
+          '2 of 3 agent policies selected · 15 agents enrolled'
+        );
         fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
         expect(onFormChange).toHaveBeenLastCalledWith(expect.objectContaining({ policy_ids: [] }));
       }
@@ -564,7 +601,7 @@ describe('PolicyAssignmentList', () => {
       render(<FormWrapper defaultValues={{ policy_ids: ['policy-1', 'policy-2'] }} />);
       const countEl = screen.getByTestId('policyAssignmentCount');
       // policy-1 (5 agents) + policy-2 (10 agents) = 15
-      expect(countEl).toHaveTextContent('2 of 3 agent policies selected | 15 agents enrolled');
+      expect(countEl).toHaveTextContent('2 of 3 agent policies selected · 15 agents enrolled');
     });
 
     it('hydrates checkboxes from seeded policy_ids', () => {
