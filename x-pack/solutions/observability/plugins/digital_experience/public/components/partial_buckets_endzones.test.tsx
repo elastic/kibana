@@ -82,6 +82,12 @@ describe('PartialBucketsEndzones', () => {
     ]);
   });
 
+  it('shades nothing on lines and areas either when the range matches the bucket edges', () => {
+    renderEndzones({ start: 0, end: 3 * HOUR }, { hasBars: false });
+
+    expect(lastShadedZones()).toEqual([]);
+  });
+
   it('renders nothing without buckets', () => {
     renderEndzones({ start: 0, end: HOUR }, { points: [] });
 

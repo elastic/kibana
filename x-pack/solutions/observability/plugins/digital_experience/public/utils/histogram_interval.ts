@@ -19,6 +19,11 @@ export interface TimeChartXDomain {
   range: Pick<HistogramBuckets, 'start' | 'end'>;
   /** Whether the chart draws bars, whose histogram mode spans each bucket. */
   hasBars: boolean;
+  /**
+   * The start of the last bucket, at least one interval before the range's end: `max` for bars,
+   * one interval before it for lines and areas, where the partial bucket's shading ends.
+   */
+  lastBucketStart: number;
 }
 
 /**
@@ -59,5 +64,6 @@ export const getTimeChartXDomain = ({
     minInterval: unit === 's' ? nominalInterval : getAdjustedInterval(keys, value, unit, timeZone),
     range: { start, end },
     hasBars,
+    lastBucketStart: maxKey,
   };
 };

@@ -27,4 +27,10 @@ describe('getReleaseColors', () => {
       ['', 'euiColorVisGrey2'],
     ]);
   });
+
+  it('keeps a release its colour when the page is filtered to it, by its rank among all of them', () => {
+    const colors = getReleaseColors([row('1.0.0')], TEST_VIS_COLORS, ['2.0.0', '1.0.0']);
+
+    expect(colors.get('1.0.0')).toBe('euiColorVis1');
+  });
 });

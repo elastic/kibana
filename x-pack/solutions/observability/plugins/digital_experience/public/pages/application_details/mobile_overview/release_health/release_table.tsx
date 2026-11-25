@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { orderBy, sumBy } from 'lodash';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiBasicTable, EuiHealth, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { MIN_RELEASE_SESSIONS, OTHER_RELEASE_LABEL } from '../../../../../common/mobile/releases';
+import { MIN_RELEASE_SESSIONS } from '../../../../../common/mobile/releases';
 import type { MobileReleaseRow } from '../../../../../common/types/mobile';
 import {
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
@@ -23,6 +23,7 @@ import {
   MOBILE_ERROR_RATE_DESCRIPTION,
   MOBILE_USERS_DESCRIPTION,
   NOT_ENOUGH_DATA_LABEL,
+  OTHER_RELEASE_LABEL,
 } from '../../../../labels';
 import { metricColumnPreset } from '../../../../utils/column_presets';
 import { formatErrorRate } from '../../../../utils/format_error_rate';
@@ -76,23 +77,25 @@ const filterLabel = (release: string, isSelected: boolean): string =>
         values: { release },
       });
 
-type Sort = NonNullable<Criteria<MobileReleaseRow>['sort']>;
+/** The table's sort: a column and its direction. */
+export type ReleaseSort = NonNullable<Criteria<MobileReleaseRow>['sort']>;
 
 /** Most sessions first, as the route returns them. */
-const DEFAULT_SORT: Sort = { field: 'sessions', direction: 'desc' };
+export const DEFAULT_RELEASE_SORT: ReleaseSort = { field: 'sessions', direction: 'desc' };
 
 /**
  * The rows by `sort`, "Other" always last; a release without an error rate comes after those with
- * one, as it can't be compared.
+ * one, as it can't be compared, and equal ones by release, highest first, as the route ranks them,
+ * so they keep their order across reloads.
  */
 export const sortReleases = (
   releases: readonly MobileReleaseRow[],
-  { field, direction }: Sort
+  { field, direction }: ReleaseSort
 ): MobileReleaseRow[] =>
   orderBy(
     releases,
-    ['isOther', ({ [field]: value }) => value === null, field],
-    ['asc', 'asc', direction]
+    ['isOther', ({ [field]: value }) => value === null, field, 'release'],
+    ['asc', 'asc', direction, 'desc']
   );
 
 /**
@@ -214,21 +217,25 @@ export function ReleaseTable({
   colors,
   selectedRelease,
   onSelectRelease,
+  sort,
+  onSort,
 }: {
   releases: MobileReleaseRow[];
   colors: ReadonlyMap<string, string>;
   /** The release the page is filtered by, if any. */
   selectedRelease: string | undefined;
   onSelectRelease: (release: string | undefined) => void;
+  /** Its sort, which its parent keeps across reloads. */
+  sort: ReleaseSort;
+  onSort: (sort: ReleaseSort) => void;
 }) {
   const formatters = useFormatters();
-  const [sort, setSort] = useState<Sort>(DEFAULT_SORT);
   const totalSessions = selectedRelease === undefined ? sumBy(releases, 'sessions') : undefined;
   const items = useMemo(() => sortReleases(releases, sort), [releases, sort]);
 
   const onChange = ({ sort: nextSort }: Criteria<MobileReleaseRow>) => {
     if (nextSort) {
-      setSort(nextSort);
+      onSort(nextSort);
     }
   };
 

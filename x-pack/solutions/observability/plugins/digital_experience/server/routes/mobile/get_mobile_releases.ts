@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { groupBy, keyBy, sortBy, sortedUniq } from 'lodash';
+import { groupBy, keyBy, orderBy, sortBy, sortedUniq } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { RESULT_COLUMNS } from '../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../common/mobile/filters';
@@ -14,12 +14,14 @@ import {
   MIN_RELEASE_SESSIONS,
   OTHER_RELEASE_KEY,
   TOP_RELEASES,
-  withReleaseFirstSeen,
+  withOtherReleaseStats,
   withReleaseSeries,
-  withReleaseTotals,
-  type ReleaseFirstSeenRow,
+  withReleaseStats,
+  withReleasesSeen,
+  type OtherReleaseStatsRow,
+  type ReleaseSeenRow,
   type ReleaseSeriesRow,
-  type ReleaseTotalsRow,
+  type ReleaseStatsRow,
 } from '../../../common/mobile/releases';
 import type {
   MobileReleaseMarker,
@@ -30,8 +32,6 @@ import type {
 } from '../../../common/types/mobile';
 import { runEsql, timeFilter } from '../../lib/esql';
 import { getBucketTimestamps, getHistogramInterval } from '../../lib/helpers/time_series';
-import { withReleaseCounts } from '../../lib/mobile/queries';
-import type { ReleaseRow } from '../../lib/mobile/rows';
 
 export interface GetMobileReleasesParams {
   esClient: TracedElasticsearchClient;
@@ -43,8 +43,22 @@ export interface GetMobileReleasesParams {
   timeZone: string;
 }
 
-/** How far before the range a release's first document is looked for. */
+/** How far before the range a release's documents are looked for: one seen there has no marker. */
 const FIRST_SEEN_LOOKBACK_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** What the queries after the release stats answer. */
+interface ReleaseDetails {
+  otherRows: OtherReleaseStatsRow[];
+  seriesRows: ReleaseSeriesRow[];
+  seenRows: ReleaseSeenRow[];
+}
+
+/** Every query's rows. */
+interface ReleaseRows extends ReleaseDetails {
+  statsRows: ReleaseStatsRow[];
+}
+
+const NO_DETAILS: ReleaseDetails = { otherRows: [], seriesRows: [], seenRows: [] };
 
 const errorRateOf = (sessions: number, exceptions: number): number | null =>
   sessions > 0 ? exceptions / sessions : null;
@@ -65,57 +79,89 @@ export const getMobileReleases = async ({
   // A new query each time: `pipe` adds to the query it's called on.
   const query = () => mobilePanelQuery(filters);
 
-  const topRows = await runEsql<ReleaseRow>(
-    esClient,
-    'get_mobile_release_top',
-    withReleaseCounts(query(), TOP_RELEASES),
-    timeFilter(start, end, environment)
-  );
-  const top = topRows.flatMap(({ [RESULT_COLUMNS.release]: release }) =>
-    release ? [release] : []
-  );
-  if (top.length === 0) {
+  const rangeFilter = timeFilter(start, end, environment);
+  const statsOf = (limit: number) =>
+    runEsql<ReleaseStatsRow>(
+      esClient,
+      'get_mobile_release_stats',
+      withReleaseStats(query(), limit),
+      rangeFilter
+    );
+
+  /** The rest of the queries, once the releases to show are known. */
+  const detailsOf = async (releases: string[], hasOther: boolean): Promise<ReleaseDetails> => {
+    const [otherRows, seriesRows, seenRows] = await Promise.all([
+      hasOther
+        ? runEsql<OtherReleaseStatsRow>(
+            esClient,
+            'get_mobile_release_other_stats',
+            withOtherReleaseStats(query(), releases),
+            rangeFilter
+          )
+        : [],
+      runEsql<ReleaseSeriesRow>(
+        esClient,
+        'get_mobile_release_series',
+        withReleaseSeries(query(), releases, histogram.interval),
+        rangeFilter,
+        timeZone
+      ),
+      // Only whether they were seen before the range: when they first appear in it comes with
+      // their stats
+      runEsql<ReleaseSeenRow>(
+        esClient,
+        'get_mobile_release_seen_before',
+        withReleasesSeen(query(), releases),
+        timeFilter(start - FIRST_SEEN_LOOKBACK_MS, start, environment)
+      ),
+    ]);
+    return { otherRows, seriesRows, seenRows };
+  };
+
+  /** The release filter is the only group, so its stats and the rest run at once. */
+  const fetchRelease = async (release: string): Promise<ReleaseRows> => {
+    const [statsRows, details] = await Promise.all([statsOf(1), detailsOf([release], false)]);
+    return { statsRows, ...details };
+  };
+
+  /** The top releases first: one more of them tells whether any are left for "Other". */
+  const fetchTopReleases = async (): Promise<ReleaseRows> => {
+    const rows = await statsOf(TOP_RELEASES + 1);
+    const statsRows = rows.slice(0, TOP_RELEASES);
+    if (statsRows.length === 0) {
+      return { statsRows, ...NO_DETAILS };
+    }
+    const releases = statsRows.map(({ [RESULT_COLUMNS.release]: release }) => release);
+    return { statsRows, ...(await detailsOf(releases, rows.length > TOP_RELEASES)) };
+  };
+
+  const { statsRows, otherRows, seriesRows, seenRows } = filters.release
+    ? await fetchRelease(filters.release)
+    : await fetchTopReleases();
+  if (statsRows.length === 0) {
     return { histogram, releases: [], series: [], markers: [] };
   }
 
-  const [totalRows, seriesRows, firstSeenRows] = await Promise.all([
-    runEsql<ReleaseTotalsRow>(
-      esClient,
-      'get_mobile_release_totals',
-      withReleaseTotals(query(), top),
-      timeFilter(start, end, environment)
-    ),
-    runEsql<ReleaseSeriesRow>(
-      esClient,
-      'get_mobile_release_series',
-      withReleaseSeries(query(), top, histogram.interval),
-      timeFilter(start, end, environment),
-      timeZone
-    ),
-    runEsql<ReleaseFirstSeenRow>(
-      esClient,
-      'get_mobile_release_first_seen',
-      withReleaseFirstSeen(query(), top),
-      timeFilter(start - FIRST_SEEN_LOOKBACK_MS, end, environment)
-    ),
-  ]);
-
-  const rows: MobileReleaseRow[] = totalRows.map((row) => {
-    const release = row[RESULT_COLUMNS.releaseGroup] ?? OTHER_RELEASE_KEY;
-    const sessions = row[RESULT_COLUMNS.sessions] ?? 0;
+  const toRow = (release: string, kpis: OtherReleaseStatsRow): MobileReleaseRow => {
+    const sessions = kpis[RESULT_COLUMNS.sessions] ?? 0;
     return {
       release,
       isOther: release === OTHER_RELEASE_KEY,
       sessions,
-      users: row[RESULT_COLUMNS.users] ?? 0,
+      users: kpis[RESULT_COLUMNS.users] ?? 0,
       errorRate:
         sessions >= MIN_RELEASE_SESSIONS
-          ? errorRateOf(sessions, row[RESULT_COLUMNS.exceptions] ?? 0)
+          ? errorRateOf(sessions, kpis[RESULT_COLUMNS.exceptions] ?? 0)
           : null,
     };
-  });
-  // Most sessions first, "Other" always last.
-  const releases = sortBy(rows, [({ isOther }) => isOther, ({ sessions }) => -sessions]);
+  };
+  const rows = [
+    ...statsRows.map((row) => toRow(row[RESULT_COLUMNS.release], row)),
+    ...otherRows.map((row) => toRow(OTHER_RELEASE_KEY, row)),
+  ];
+  // Most sessions first, then the highest release, as the stats query ranks them, so equal
+  // releases keep their order and colours; "Other" always last.
+  const releases = orderBy(rows, ['isOther', 'sessions', 'release'], ['asc', 'desc', 'desc']);
 
   // The query leaves out a bucket a release has no documents in: charts would draw across it, so
   // every release gets every bucket, an empty one with no sessions and no error rate.
@@ -157,13 +203,17 @@ export const getMobileReleases = async ({
     };
   });
 
+  // The first document in the range, unless the release has one before it
+  const seenBefore = new Set(seenRows.map(({ [RESULT_COLUMNS.release]: release }) => release));
   const markers: MobileReleaseMarker[] = sortBy(
-    firstSeenRows.map((row) => ({
-      release: row[RESULT_COLUMNS.release],
-      firstSeen: Date.parse(row[RESULT_COLUMNS.firstSeen]),
-    })),
+    statsRows
+      .filter(({ [RESULT_COLUMNS.release]: release }) => !seenBefore.has(release))
+      .map((row) => ({
+        release: row[RESULT_COLUMNS.release],
+        firstSeen: Date.parse(row[RESULT_COLUMNS.firstSeen]),
+      })),
     'firstSeen'
-  ).filter(({ firstSeen }) => firstSeen >= start);
+  );
 
   return { histogram, releases, series, markers };
 };

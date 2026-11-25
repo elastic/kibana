@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -202,6 +202,11 @@ export function MobileOverview({
   const { value: compare, setValue: setCompare } = useQueryParam('compare');
   const isComparing = compare === 'true';
   const healthSummaryTitleId = useGeneratedHtmlId({ prefix: 'healthSummaryTitle' });
+  // Every release of the OS, most sessions first, whatever the release filter: the colours' order
+  const rankedReleases = useMemo(
+    () => (kpis?.releases ?? []).map(({ key }) => key),
+    [kpis?.releases]
+  );
 
   const hasNoData = currentKpis !== undefined && !currentKpis.hasData;
   const isFiltered = environment !== undefined || osName !== undefined || release !== undefined;
@@ -327,6 +332,7 @@ export function MobileOverview({
               releasesState={releasesState}
               selectedRelease={release}
               onSelectRelease={setRelease}
+              rankedReleases={rankedReleases}
             />
           </>
         ))}

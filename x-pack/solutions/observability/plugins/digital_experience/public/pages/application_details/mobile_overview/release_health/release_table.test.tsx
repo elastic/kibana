@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,7 +15,7 @@ import { createFormatters, useFormatters } from '../../../../hooks/use_formatter
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
 import { getReleaseColors } from './release_colors';
 import { TEST_VIS_COLORS } from './release_colors.test_helpers';
-import { ReleaseTable, sortReleases } from './release_table';
+import { DEFAULT_RELEASE_SORT, ReleaseTable, sortReleases } from './release_table';
 
 jest.mock('../../../../hooks/use_formatters', () => ({
   ...jest.requireActual('../../../../hooks/use_formatters'),
@@ -31,9 +31,15 @@ const RELEASES: MobileReleaseRow[] = [
 
 const onSelectRelease = jest.fn();
 
+/** The table with its sort kept above it, as the release health keeps it. */
+function SortedTable(props: Omit<React.ComponentProps<typeof ReleaseTable>, 'sort' | 'onSort'>) {
+  const [sort, setSort] = useState(DEFAULT_RELEASE_SORT);
+  return <ReleaseTable {...props} sort={sort} onSort={setSort} />;
+}
+
 const renderTable = (selectedRelease?: string) =>
   render(
-    <ReleaseTable
+    <SortedTable
       releases={RELEASES}
       colors={getReleaseColors(RELEASES, TEST_VIS_COLORS)}
       selectedRelease={selectedRelease}
@@ -80,7 +86,7 @@ describe('ReleaseTable', () => {
 
   it('shows a share with one decimal at most, e.g. 91.7%', () => {
     render(
-      <ReleaseTable
+      <SortedTable
         releases={[
           { release: '2.0.0', isOther: false, sessions: 11, users: 1, errorRate: null },
           { release: '1.0.0', isOther: false, sessions: 1, users: 1, errorRate: null },
@@ -156,6 +162,21 @@ describe('ReleaseTable', () => {
 });
 
 describe('sortReleases', () => {
+  it('keeps equal releases in the same order, the highest first, whatever the direction', () => {
+    const equal = ['1.0.0', '2.0.0', '1.5.0'].map((release) => ({
+      release,
+      isOther: false,
+      sessions: 10,
+      users: 1,
+      errorRate: null,
+    }));
+    const order = (direction: 'asc' | 'desc') =>
+      sortReleases(equal, { field: 'sessions', direction }).map(({ release }) => release);
+
+    expect(order('asc')).toEqual(['2.0.0', '1.5.0', '1.0.0']);
+    expect(order('desc')).toEqual(['2.0.0', '1.5.0', '1.0.0']);
+  });
+
   it('puts the releases without an error rate after the others, either way, and "Other" last', () => {
     const order = (direction: 'asc' | 'desc') =>
       sortReleases(RELEASES, { field: 'errorRate', direction }).map(({ release }) => release);

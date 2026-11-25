@@ -31,7 +31,9 @@ export function PartialBucketsEndzones({ xDomain }: { xDomain: TimeChartXDomain 
       domainEnd={range.end}
       interval={xDomain.minInterval}
       domainMin={xDomain.min}
-      domainMax={xDomain.max}
+      // The last bucket's start, not the domain's end, which lines and areas extend by an
+      // interval: a range that ends on a bucket's edge would get a zone otherwise
+      domainMax={xDomain.lastBucketStart}
       hideTooltips={false}
     />
   );

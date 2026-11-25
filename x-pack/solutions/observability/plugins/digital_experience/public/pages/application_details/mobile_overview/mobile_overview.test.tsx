@@ -370,6 +370,8 @@ describe('MobileOverview', () => {
 
     const props = jest.mocked(ReleaseHealth).mock.calls.at(-1)?.[0];
     expect(props?.selectedRelease).toBe('2.0.0');
+    // Every release of the OS, whatever the filter, so a release keeps its colour when picked
+    expect(props?.rankedReleases).toEqual(['2.0.0', '1.9.0']);
     props?.onSelectRelease('1.9.0');
 
     expect(updateUrlQuery).toHaveBeenCalledWith({ release: '1.9.0' });

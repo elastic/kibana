@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   EuiFlexGrid,
@@ -25,7 +25,7 @@ import { MOBILE_APPLICATION_EBT_ELEMENTS } from '../../../../ebt_constants';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { ReleaseAdoptionChart, ReleaseErrorRateChart } from './release_charts';
 import { getReleaseColors } from './release_colors';
-import { ReleaseTable } from './release_table';
+import { DEFAULT_RELEASE_SORT, ReleaseTable, type ReleaseSort } from './release_table';
 import type { MobileReleasesState } from './use_mobile_releases';
 
 /** The height of the loading state, so the page doesn't jump much when the section loads. */
@@ -50,22 +50,36 @@ interface ReleaseFilterProps {
   /** The release the page is filtered by, if any. */
   selectedRelease: string | undefined;
   onSelectRelease: SelectRelease;
+  /** Every release with data, most sessions first, whatever the filter: the colours' order. */
+  rankedReleases: readonly string[];
+}
+
+interface ContentProps extends ReleaseFilterProps {
+  /** The table's sort, kept here so a reload or a new filter doesn't reset it. */
+  sort: ReleaseSort;
+  onSort: (sort: ReleaseSort) => void;
 }
 
 /** The table, and the two charts side by side below it. */
-function ReleaseHealthContent({
+const ReleaseHealthContent = React.memo(function ReleaseHealthContent({
   response: { releases, series, markers, histogram },
   selectedRelease,
   onSelectRelease,
-}: ReleaseFilterProps & { response: MobileReleasesResponse }) {
+  rankedReleases,
+  sort,
+  onSort,
+}: ContentProps & { response: MobileReleasesResponse }) {
   const { euiTheme } = useEuiTheme();
   const { setTimeRange } = useTimeRange();
   // One colour per release, shared by the table and both charts.
   const colors = useMemo(
-    () => getReleaseColors(releases, euiTheme.colors.vis),
-    [releases, euiTheme.colors.vis]
+    () => getReleaseColors(releases, euiTheme.colors.vis, rankedReleases),
+    [releases, euiTheme.colors.vis, rankedReleases]
   );
-  const chartProps = { series, markers, histogram, colors, onTimeRangeSelect: setTimeRange };
+  const chartProps = useMemo(
+    () => ({ series, markers, histogram, colors, onTimeRangeSelect: setTimeRange }),
+    [series, markers, histogram, colors, setTimeRange]
+  );
 
   return (
     <>
@@ -74,6 +88,8 @@ function ReleaseHealthContent({
         colors={colors}
         selectedRelease={selectedRelease}
         onSelectRelease={onSelectRelease}
+        sort={sort}
+        onSort={onSort}
       />
       <EuiSpacer size="m" />
       {/* Side by side, one under the other on narrow screens. */}
@@ -87,11 +103,11 @@ function ReleaseHealthContent({
       </EuiFlexGrid>
     </>
   );
-}
+});
 
 const sectionBody = (
   { releases, isLoading, error, refresh }: MobileReleasesState,
-  releaseFilter: ReleaseFilterProps
+  contentProps: ContentProps
 ): ReactNode => {
   if (error) {
     return (
@@ -102,6 +118,7 @@ const sectionBody = (
         title={LOAD_ERROR_TITLE}
         error={error}
         onRetry={refresh}
+        headingLevel="h3"
       />
     );
   }
@@ -124,7 +141,7 @@ const sectionBody = (
       </EuiText>
     );
   }
-  return <ReleaseHealthContent response={releases} {...releaseFilter} />;
+  return <ReleaseHealthContent response={releases} {...contentProps} />;
 };
 
 /**
@@ -136,6 +153,7 @@ export function ReleaseHealth({
   ...releaseFilter
 }: ReleaseFilterProps & { releasesState: MobileReleasesState }) {
   const titleId = useGeneratedHtmlId({ prefix: 'releaseHealthTitle' });
+  const [sort, setSort] = useState<ReleaseSort>(DEFAULT_RELEASE_SORT);
 
   return (
     <section aria-labelledby={titleId} data-test-subj="digitalExperienceMobileReleaseHealth">
@@ -143,7 +161,7 @@ export function ReleaseHealth({
         <h2 id={titleId}>{TITLE}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      {sectionBody(releasesState, releaseFilter)}
+      {sectionBody(releasesState, { ...releaseFilter, sort, onSort: setSort })}
     </section>
   );
 }

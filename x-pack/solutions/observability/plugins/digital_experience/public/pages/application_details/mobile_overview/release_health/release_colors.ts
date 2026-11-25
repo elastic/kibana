@@ -25,18 +25,24 @@ const categoricalColors = (vis: VisColors): string[] => [
 ];
 
 /**
- * A colour per release by its place in `releases`, from the theme, so the table and both charts
- * agree; "Other" is grey.
+ * A colour per release, from the theme, so the table and both charts agree; "Other" is grey. Each
+ * release takes the colour of its place in `rankedReleases`, every release with data most sessions
+ * first, so it keeps it when the page is filtered to it; one missing from it takes its place in
+ * `releases`.
  */
 export const getReleaseColors = (
   releases: readonly MobileReleaseRow[],
-  vis: VisColors
+  vis: VisColors,
+  rankedReleases: readonly string[] = []
 ): Map<string, string> => {
   const palette = categoricalColors(vis);
   const colors = new Map<string, string>();
   releases
     .filter(({ isOther }) => !isOther)
-    .forEach(({ release }, index) => colors.set(release, palette[index % palette.length]));
+    .forEach(({ release }, index) => {
+      const rank = rankedReleases.indexOf(release);
+      colors.set(release, palette[(rank === -1 ? index : rank) % palette.length]);
+    });
   releases
     .filter(({ isOther }) => isOther)
     .forEach(({ release }) => colors.set(release, vis.euiColorVisGrey2));

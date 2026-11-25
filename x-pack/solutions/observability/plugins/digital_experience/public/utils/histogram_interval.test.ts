@@ -43,7 +43,7 @@ describe('getTimeChartXDomain', () => {
         timeZone: 'UTC',
         hasBars,
       })
-    ).toEqual({ ...xDomain, range, hasBars });
+    ).toEqual({ ...xDomain, range, hasBars, lastBucketStart: 2_000 });
   });
 
   it('reaches the end of a range past the last bucket', () => {

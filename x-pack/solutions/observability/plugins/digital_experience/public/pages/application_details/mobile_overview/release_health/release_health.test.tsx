@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MobileReleasesResponse } from '../../../../../common/types/mobile';
@@ -17,6 +17,7 @@ import { ReleaseTable } from './release_table';
 import type { MobileReleasesState } from './use_mobile_releases';
 
 jest.mock('./release_table', () => ({
+  ...jest.requireActual('./release_table'),
   ReleaseTable: jest.fn(() => <div data-test-subj="digitalExperienceMobileReleaseTable" />),
 }));
 jest.mock('./release_charts', () => ({
@@ -47,27 +48,31 @@ const RELEASES: MobileReleasesResponse = {
   markers: [],
 };
 
+const sectionOf = (state: Partial<MobileReleasesState>) => (
+  <ReleaseHealth
+    releasesState={{
+      releases: undefined,
+      isLoading: false,
+      error: undefined,
+      refresh: jest.fn(),
+      ...state,
+    }}
+    selectedRelease="1.0.0"
+    onSelectRelease={onSelectRelease}
+    rankedReleases={RANKED_RELEASES}
+  />
+);
+
+const RANKED_RELEASES = ['2.0.0', '1.0.0'];
+
 const renderSection = (state: Partial<MobileReleasesState>) =>
-  render(
-    <ReleaseHealth
-      releasesState={{
-        releases: undefined,
-        isLoading: false,
-        error: undefined,
-        refresh: jest.fn(),
-        ...state,
-      }}
-      selectedRelease="1.0.0"
-      onSelectRelease={onSelectRelease}
-    />,
-    {
-      wrapper: ({ children }) => (
-        <I18nProvider>
-          <EuiProvider>{children}</EuiProvider>
-        </I18nProvider>
-      ),
-    }
-  );
+  render(sectionOf(state), {
+    wrapper: ({ children }) => (
+      <I18nProvider>
+        <EuiProvider>{children}</EuiProvider>
+      </I18nProvider>
+    ),
+  });
 
 describe('ReleaseHealth', () => {
   it('shows the title, the table and both charts', () => {
@@ -90,6 +95,25 @@ describe('ReleaseHealth', () => {
         expect.objectContaining({ onTimeRangeSelect: setTimeRange })
       )
     );
+  });
+
+  it("keeps the table's sort across a reload", () => {
+    const { rerender } = renderSection({ releases: RELEASES });
+    const tableProps = () => jest.mocked(ReleaseTable).mock.calls.at(-1)?.[0];
+    act(() => tableProps()?.onSort({ field: 'users', direction: 'asc' }));
+
+    rerender(sectionOf({ isLoading: true }));
+    rerender(sectionOf({ releases: RELEASES }));
+
+    expect(tableProps()?.sort).toEqual({ field: 'users', direction: 'asc' });
+  });
+
+  it('titles its error under the section, as an h3', () => {
+    renderSection({ error: new Error('Internal Server Error') });
+
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Could not load the release health' })
+    ).toBeInTheDocument();
   });
 
   it('shows its own loading state', () => {

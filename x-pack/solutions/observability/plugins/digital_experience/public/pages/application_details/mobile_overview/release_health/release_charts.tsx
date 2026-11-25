@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import {
   AnnotationDomainType,
@@ -16,6 +16,7 @@ import {
   LineAnnotation,
   LineSeries,
   type PartialTheme,
+  type TooltipProps,
   Position,
   ScaleType,
   Settings,
@@ -33,11 +34,7 @@ import {
 import { groupBy, sortBy, sortedLastIndex, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import {
-  MIN_BUCKET_SESSIONS,
-  MIN_RELEASE_SESSIONS,
-  OTHER_RELEASE_LABEL,
-} from '../../../../../common/mobile/releases';
+import { MIN_BUCKET_SESSIONS, MIN_RELEASE_SESSIONS } from '../../../../../common/mobile/releases';
 import type { HistogramBuckets } from '../../../../../common/types/applications';
 import type {
   MobileReleaseMarker,
@@ -47,7 +44,7 @@ import type {
 import { ChartArea } from '../../../../components/chart_area';
 import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
 import { useFormatters } from '../../../../hooks/use_formatters';
-import { MOBILE_ERROR_RATE_DESCRIPTION } from '../../../../labels';
+import { MOBILE_ERROR_RATE_DESCRIPTION, OTHER_RELEASE_LABEL } from '../../../../labels';
 import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../../utils/brush_time_range';
 import { formatErrorRate } from '../../../../utils/format_error_rate';
@@ -57,6 +54,14 @@ import { getTimeChartXDomain } from '../../../../utils/histogram_interval';
 const CHART_HEIGHT = 240;
 
 const HIDDEN_AXIS_LINES = { tickLine: { visible: false }, axisLine: { visible: false } };
+
+// Static chart props, so a render of the page around the charts doesn't redraw them
+const CHART_SIZE = { height: '100%' };
+const GRID_LINE = { visible: true };
+const ERROR_RATE_ACCESSORS = ['errorRate'];
+const SESSIONS_ACCESSORS = ['sessions'];
+const STACK_ACCESSORS = ['timestamp'];
+const AREA_STYLE = { area: { opacity: 0.6 }, point: { visible: 'never' as const } };
 
 /** Room above the plot for the release markers' labels, which would be clipped at its edge. */
 const MARKER_LABEL_ROOM: PartialTheme = { chartMargins: { top: 20 } };
@@ -166,6 +171,16 @@ const markerLabel = (releases: readonly string[]): string =>
         values: { release: releases[0], count: releases.length - 1 },
       });
 
+/** One line, so a label never wraps past the room above the plot. */
+const MARKER_LABEL_CSS = { whiteSpace: 'nowrap' } as const;
+
+/** Every release of a marker and when they first appear, e.g. "First seen Jan 1, …: 2.3.0, 2.2.1". */
+const firstSeenDetails = (releases: readonly string[], date: string): string =>
+  i18n.translate('xpack.digitalExperience.mobile.releases.markerDetails', {
+    defaultMessage: 'First seen {date}: {releases}',
+    values: { date, releases: releases.join(', ') },
+  });
+
 /**
  * A line where releases first appear, labelled with them. Releases first seen in the same bucket
  * share one line, in the colour of the first, so their labels don't overlap.
@@ -178,6 +193,7 @@ function FirstSeenMarkers({
   /** The start of every bucket, sorted. */
   bucketTimestamps: readonly number[];
 }) {
+  const { formatDate } = useFormatters();
   const bucketOf = (time: number) =>
     bucketTimestamps[sortedLastIndex(bucketTimestamps, time) - 1] ?? time;
   const groups = Object.values(
@@ -188,17 +204,24 @@ function FirstSeenMarkers({
     <>
       {groups.map((group) => {
         const [{ release, firstSeen }] = group;
-        const label = markerLabel(group.map((marker) => marker.release));
+        const releases = group.map((marker) => marker.release);
+        // Every release and when, for the tooltip and screen readers; the label may shorten them
+        const details = firstSeenDetails(releases, formatDate(firstSeen));
         return (
           <LineAnnotation
             key={release}
             id={`firstSeen-${release}`}
             domainType={AnnotationDomainType.XDomain}
-            dataValues={[{ dataValue: firstSeen, details: label }]}
+            dataValues={[{ dataValue: firstSeen, details }]}
             style={{ line: { stroke: colors.get(release), strokeWidth: 1, dash: [4, 4] } }}
             marker={
-              <EuiText size="xs" data-test-subj="digitalExperienceMobileReleaseMarker">
-                {label}
+              <EuiText
+                size="xs"
+                css={MARKER_LABEL_CSS}
+                aria-label={details}
+                data-test-subj="digitalExperienceMobileReleaseMarker"
+              >
+                {markerLabel(releases)}
               </EuiText>
             }
             markerPosition={Position.Top}
@@ -229,22 +252,31 @@ function ReleaseChart({
 }) {
   const baseTheme = useElasticChartsTheme();
   const { formatDate, timeZone } = useFormatters();
-  const buckets = sortBy(
-    uniqBy(
-      series.flatMap(({ points }) => points),
-      'timestamp'
-    ),
-    'timestamp'
+  // Derived once per response, not on every render of the page around it
+  const buckets = useMemo(
+    () =>
+      sortBy(
+        uniqBy(
+          series.flatMap(({ points }) => points),
+          'timestamp'
+        ),
+        'timestamp'
+      ),
+    [series]
   );
-  const xDomain = getTimeChartXDomain({
-    points: buckets,
-    histogram,
-    timeZone,
-    hasBars: false,
-  });
+  const bucketTimestamps = useMemo(() => buckets.map(({ timestamp }) => timestamp), [buckets]);
+  const xDomain = useMemo(
+    () => getTimeChartXDomain({ points: buckets, histogram, timeZone, hasBars: false }),
+    [buckets, histogram, timeZone]
+  );
+  const onBrushEnd = useMemo(() => onBrushTimeRange(onTimeRangeSelect), [onTimeRangeSelect]);
+  const headerFormatter = useCallback<NonNullable<TooltipProps['headerFormatter']>>(
+    ({ value }) => formatDate(value),
+    [formatDate]
+  );
 
   return (
-    <Chart size={{ height: '100%' }}>
+    <Chart size={CHART_SIZE}>
       {/* The legend below the plot keeps its width: hover a release to spotlight it, click to hide it. */}
       <Settings
         baseTheme={baseTheme}
@@ -253,24 +285,20 @@ function ReleaseChart({
         xDomain={xDomain}
         showLegend
         legendPosition={Position.Bottom}
-        onBrushEnd={onBrushTimeRange(onTimeRangeSelect)}
+        onBrushEnd={onBrushEnd}
       />
-      <Tooltip headerFormatter={({ value }) => formatDate(value)} />
+      <Tooltip headerFormatter={headerFormatter} />
       <PartialBucketsEndzones xDomain={xDomain} />
       <Axis id="time" position={Position.Bottom} style={HIDDEN_AXIS_LINES} />
       <Axis
         id={yAxisId}
         position={Position.Left}
-        gridLine={{ visible: true }}
+        gridLine={GRID_LINE}
         ticks={3}
         style={HIDDEN_AXIS_LINES}
         tickFormat={formatValue}
       />
-      <FirstSeenMarkers
-        markers={markers}
-        colors={colors}
-        bucketTimestamps={buckets.map(({ timestamp }) => timestamp)}
-      />
+      <FirstSeenMarkers markers={markers} colors={colors} bucketTimestamps={bucketTimestamps} />
       {series.map((item) =>
         renderSeries({ series: item, color: colors.get(item.release), timeZone })
       )}
@@ -280,14 +308,16 @@ function ReleaseChart({
 
 /** The error rate of each release with enough sessions, one line per release. */
 export function ReleaseErrorRateChart({ releases, ...props }: ReleaseChartProps) {
-  const withRate = new Set(
-    releases.filter(({ errorRate }) => errorRate !== null).map(({ release }) => release)
-  );
-  // A release over the range's floor can still have every bucket below the bucket's, so no point
-  const series = props.series.filter(
-    ({ release, points }) =>
-      withRate.has(release) && points.some(({ errorRate }) => errorRate !== null)
-  );
+  const series = useMemo(() => {
+    const withRate = new Set(
+      releases.filter(({ errorRate }) => errorRate !== null).map(({ release }) => release)
+    );
+    // A release over the range's floor can still have every bucket below the bucket's, so no point
+    return props.series.filter(
+      ({ release, points }) =>
+        withRate.has(release) && points.some(({ errorRate }) => errorRate !== null)
+    );
+  }, [releases, props.series]);
 
   return (
     <ChartPanel
@@ -311,7 +341,7 @@ export function ReleaseErrorRateChart({ releases, ...props }: ReleaseChartProps)
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="timestamp"
-            yAccessors={['errorRate']}
+            yAccessors={ERROR_RATE_ACCESSORS}
             data={points}
             curve={CurveType.CURVE_MONOTONE_X}
             timeZone={timeZone}
@@ -348,11 +378,11 @@ export function ReleaseAdoptionChart(props: Omit<ReleaseChartProps, 'releases'>)
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="timestamp"
-            yAccessors={['sessions']}
-            stackAccessors={['timestamp']}
+            yAccessors={SESSIONS_ACCESSORS}
+            stackAccessors={STACK_ACCESSORS}
             data={points}
             curve={CurveType.CURVE_MONOTONE_X}
-            areaSeriesStyle={{ area: { opacity: 0.6 }, point: { visible: 'never' } }}
+            areaSeriesStyle={AREA_STYLE}
             timeZone={timeZone}
           />
         )}

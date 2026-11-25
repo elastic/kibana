@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { isValidElement } from 'react';
 import { render } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import type {
@@ -75,6 +75,10 @@ const props = {
   onTimeRangeSelect: jest.fn(),
 };
 
+// The markers' times as the default date format shows them, in UTC
+const AT_ZERO = 'Jan 1, 1970 @ 00:00:00.000';
+const AT_ONE_HOUR = 'Jan 1, 1970 @ 01:00:00.000';
+
 const renderWithTheme = (ui: React.ReactElement) => render(ui, { wrapper: EuiProvider });
 
 beforeEach(() => {
@@ -117,7 +121,9 @@ describe('release charts', () => {
 
     expect(mockAnnotations).toHaveLength(2);
     mockAnnotations.forEach((annotation) => {
-      expect(annotation.dataValues).toEqual([{ dataValue: 3_600_000, details: '2.0.0' }]);
+      expect(annotation.dataValues).toEqual([
+        { dataValue: 3_600_000, details: `First seen ${AT_ONE_HOUR}: 2.0.0` },
+      ]);
       expect(annotation.style?.line?.stroke).toBe(props.colors.get('2.0.0'));
     });
   });
@@ -202,8 +208,8 @@ describe('release charts', () => {
     );
 
     expect(mockAnnotations.map(({ dataValues }) => dataValues)).toEqual([
-      [{ dataValue: 0, details: '3.0.0' }],
-      [{ dataValue: 3_600_000, details: '2.0.0, 1.0.0' }],
+      [{ dataValue: 0, details: `First seen ${AT_ZERO}: 3.0.0` }],
+      [{ dataValue: 3_600_000, details: `First seen ${AT_ONE_HOUR}: 2.0.0, 1.0.0` }],
     ]);
     // In the colour of the first release of the bucket
     expect(mockAnnotations[1].style?.line?.stroke).toBe(props.colors.get('2.0.0'));
@@ -220,7 +226,21 @@ describe('release charts', () => {
       />
     );
 
-    expect(mockAnnotations[0].dataValues).toEqual([{ dataValue: 3_600_000, details: '2.0.0 +2' }]);
+    // The label is short; the tooltip and screen readers get every release and when
+    const [annotation] = mockAnnotations;
+    expect(annotation.dataValues).toEqual([
+      { dataValue: 3_600_000, details: `First seen ${AT_ONE_HOUR}: 2.0.0, 1.0.0, 0.9.0` },
+    ]);
+    const { marker } = annotation;
+    if (!isValidElement(marker)) {
+      throw new Error('The marker is an element');
+    }
+    const { getByTestId } = render(marker, { wrapper: EuiProvider });
+    expect(getByTestId('digitalExperienceMobileReleaseMarker')).toHaveTextContent('2.0.0 +2');
+    expect(getByTestId('digitalExperienceMobileReleaseMarker')).toHaveAttribute(
+      'aria-label',
+      `First seen ${AT_ONE_HOUR}: 2.0.0, 1.0.0, 0.9.0`
+    );
   });
 
   it("leaves room above the plot for the markers' labels", () => {

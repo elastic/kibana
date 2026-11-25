@@ -149,11 +149,18 @@ on serverless and stateful.
   sessions and exceptions only. Every release gets every bucket of the range: `TBUCKET` leaves out
   the empty ones, which the route fills, in the same time zone, with no sessions and no error rate,
   so the charts never draw across them. A release **first appears** at its first document with
-  that `service.version` in the selected environment, looked up 30 days before the range; one
-  first seen before the range start gets no marker, and releases first seen in the same bucket
+  that `service.version` in the selected environment: its first one in the range, which comes
+  with its stats, unless it has one in the 30 days before the range, which a separate query checks
+  over those days only; one seen before the range start gets no marker, and releases first seen in the same bucket
   share one (e.g. `2.3.0, 2.2.1`, or `2.3.0 +2` for more). The section loads apart from the KPIs
   (`GET .../mobile_applications/{serviceName}/releases`, the KPI route's params and `timeZone`)
-  and has its own error state with a retry; the toolbar's refresh reloads both.
+  and has its own error state with a retry; the toolbar's refresh reloads both. The route ranks
+  the releases with their stats in one query (one more than the top 5, which tells whether any are
+  left for "Other", whose stats a second query counts only then), then reads the series, capped at
+  10,000 rows, and the releases seen before the range; with the release filter, all at once.
+  Releases with equal sessions keep their order (the highest first) and their colours, which follow
+  every release's rank, so a release keeps its colour when the page is filtered to it; the table's
+  sort survives a reload.
   The table, in a bordered panel like the KPIs and charts, shows each release's share of the
   sessions (none while filtered by a release, where it would read 100%), sorts by sessions, users
   or error rate ("Other" stays last) and shows the error rate with two decimals; a release filters

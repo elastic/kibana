@@ -28,6 +28,12 @@ export const getHistogramInterval = (start: number, end: number): HistogramInter
   return { value: Math.max(Math.round(interval?.asSeconds() ?? 0), 1), unit: 's' };
 };
 
+/**
+ * The most buckets `getBucketTimestamps` lists, far above what `getHistogramInterval` picks, so a
+ * hand-made interval over a long range can't expand without bound.
+ */
+const MAX_BUCKETS = 2_000;
+
 /** `time` in `timeZone`: a moment-timezone name, or a UTC offset such as `+05:30`. */
 const inTimeZone = (time: number, timeZone: string): moment.Moment =>
   moment.tz.zone(timeZone) ? moment.tz(time, timeZone) : moment.utc(time).utcOffset(timeZone);
@@ -43,15 +49,19 @@ export const getBucketTimestamps = (
   { value, unit }: HistogramInterval,
   timeZone: string = 'UTC'
 ): number[] => {
+  if (start >= end || value <= 0) {
+    return [];
+  }
   if (unit === 's') {
     const step = value * 1000;
     // Rounded in local time, as Elasticsearch rounds a fixed interval in a time zone
     const offset = inTimeZone(start, timeZone).utcOffset() * 60_000;
-    return range(Math.floor((start + offset) / step) * step - offset, end, step);
+    const first = Math.floor((start + offset) / step) * step - offset;
+    return range(first, Math.min(end, first + MAX_BUCKETS * step), step);
   }
   const timestamps: number[] = [];
   const bucket = inTimeZone(start, timeZone).startOf(unit === 'w' ? 'isoWeek' : unit);
-  while (bucket.valueOf() < end) {
+  while (bucket.valueOf() < end && timestamps.length < MAX_BUCKETS) {
     timestamps.push(bucket.valueOf());
     bucket.add(value, unit);
   }

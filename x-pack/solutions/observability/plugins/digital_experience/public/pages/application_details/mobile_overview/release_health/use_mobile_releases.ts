@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { MobileReleasesResponse } from '../../../../../common/types/mobile';
 import { useApiClient } from '../../../../hooks/use_api_client';
@@ -32,31 +33,36 @@ export const useMobileReleases = (serviceName: string): MobileReleasesState => {
   const { value: release } = useQueryParam('release');
   const { timeZone } = useFormatters();
 
+  const query = useMemo(
+    // The charts' buckets line up with the user's time zone, as the other time charts'
+    () => ({ ...toTimeRangeQuery(timeRange, environment, timeZone), osName, release }),
+    [timeRange, environment, timeZone, osName, release]
+  );
+  // Which params a response is for: a new filter's first render still has the last response
+  const paramsKey = JSON.stringify([serviceName, query]);
+
   const {
-    value: releases,
+    value: fetched,
     loading,
     error,
     refresh,
   } = useAbortableAsync(
-    async ({ signal }) =>
-      apiClient.fetch(
+    async ({ signal }) => ({
+      paramsKey,
+      response: await apiClient.fetch(
         'GET /internal/digital_experience/mobile_applications/{serviceName}/releases',
-        {
-          signal,
-          params: {
-            path: { serviceName },
-            // The charts' buckets line up with the user's time zone, as the other time charts'
-            query: { ...toTimeRangeQuery(timeRange, environment, timeZone), osName, release },
-          },
-        }
+        { signal, params: { path: { serviceName }, query } }
       ),
-    [apiClient, serviceName, timeRange, environment, timeZone, osName, release],
+    }),
+    [apiClient, serviceName, query, paramsKey],
     { unsetValueOnError: true }
   );
-  // Nothing has been fetched before the first request starts.
-  const isLoading = loading || (!releases && !error);
+  // Loading from the render the params change in, not only once the request starts, so the table
+  // never shows the last response with the new filter, e.g. its rows with a new release's pill
+  const isCurrent = fetched?.paramsKey === paramsKey;
+  const isLoading = loading || (!isCurrent && !error);
   return {
-    releases: isLoading ? undefined : releases,
+    releases: isLoading ? undefined : fetched?.response,
     isLoading,
     error: loading ? undefined : error,
     refresh,
