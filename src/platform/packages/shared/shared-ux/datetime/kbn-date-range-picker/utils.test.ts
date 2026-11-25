@@ -438,15 +438,28 @@ describe('msToAutoRefreshInterval (auto unit)', () => {
 });
 
 describe('msToAutoRefreshInterval (preferred unit)', () => {
-  it('uses the preferred unit when the interval is a whole number of it', () => {
+  it('uses the preferred unit when the count has up to two decimals', () => {
     expect(msToAutoRefreshInterval(120_000, 's')).toEqual({ count: 120, unit: 's' });
     expect(msToAutoRefreshInterval(3_600_000, 'm')).toEqual({ count: 60, unit: 'm' });
+    expect(msToAutoRefreshInterval(90_000, 'm')).toEqual({ count: 1.5, unit: 'm' });
+    expect(msToAutoRefreshInterval(1_800_000, 'h')).toEqual({ count: 0.5, unit: 'h' });
   });
 
-  it('falls back to the largest whole unit when the preferred unit would round the interval', () => {
-    expect(msToAutoRefreshInterval(90_000, 'm')).toEqual({ count: 90, unit: 's' });
+  it('falls back to the largest whole unit when the preferred unit needs more decimals', () => {
     expect(msToAutoRefreshInterval(10_000, 'm')).toEqual({ count: 10, unit: 's' });
-    expect(msToAutoRefreshInterval(1_800_000, 'h')).toEqual({ count: 30, unit: 'm' });
+    expect(msToAutoRefreshInterval(59_000, 'm')).toEqual({ count: 59, unit: 's' });
+    expect(msToAutoRefreshInterval(60_000, 'h')).toEqual({ count: 1, unit: 'm' });
+  });
+});
+
+describe('autoRefreshIntervalToMs', () => {
+  it('converts decimal counts without floating-point noise', () => {
+    expect(autoRefreshIntervalToMs(1.1, 'm')).toBe(66_000);
+    expect(autoRefreshIntervalToMs(1.5, 's')).toBe(1_500);
+  });
+
+  it('rounds the count to two decimals', () => {
+    expect(autoRefreshIntervalToMs(1.255, 'm')).toBe(75_000);
   });
 });
 

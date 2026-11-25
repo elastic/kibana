@@ -61,15 +61,15 @@ export interface RefreshIntervalProps {
 const getMinCount = (minIntervalMs: number, unit: AutoRefreshIntervalUnit): number =>
   Math.max(1, Math.ceil(minIntervalMs / autoRefreshIntervalToMs(1, unit)));
 
-/** Whether `count` can be applied as an interval count: a whole number above zero. */
+/** Whether `count` can be applied as an interval count: a number above zero. */
 const isApplicableCount = (count: number | ''): count is number =>
-  typeof count === 'number' && Number.isInteger(count) && count > 0;
+  typeof count === 'number' && count > 0;
 
 /**
  * "Refresh every" form: a switch to turn auto-refresh on and off, an interval count and a unit.
  * Turning auto-refresh on also starts the timer, so a second click on play is not needed.
- * A count that can't be applied (empty, decimal, zero or negative) goes back to the current
- * interval once focus leaves the form.
+ * Counts keep up to two decimals, e.g. 1.5 minutes. Once focus leaves the form, the field shows
+ * the interval in effect, so a count that can't be applied (empty, zero or negative) goes back.
  */
 export function RefreshInterval({
   value,
@@ -79,6 +79,9 @@ export function RefreshInterval({
 }: RefreshIntervalProps) {
   const derived = msToAutoRefreshInterval(value.intervalMs, value.intervalDisplayUnit);
   const minCount = getMinCount(minIntervalMs, derived.unit);
+  // Whole-number `min`, like `EuiRefreshInterval`, so a decimal count such as 0.5 minutes isn't
+  // marked invalid when it's above the minimum.
+  const fieldMin = Math.floor(minIntervalMs / autoRefreshIntervalToMs(1, derived.unit));
 
   const [countInput, setCountInput] = useState<number | ''>(derived.count);
 
@@ -120,18 +123,20 @@ export function RefreshInterval({
     (e: FocusEvent<HTMLDivElement>) => {
       if (e.currentTarget.contains(e.relatedTarget)) return;
       if (countInput === derived.count) return;
-      if (!isApplicableCount(countInput)) {
-        setCountInput(derived.count);
+      if (
+        isApplicableCount(countInput) &&
+        autoRefreshIntervalToMs(countInput, derived.unit) < minIntervalMs
+      ) {
+        setCountInput(minCount);
+        onChange({
+          ...value,
+          intervalMs: autoRefreshIntervalToMs(minCount, derived.unit),
+          intervalDisplayUnit: derived.unit,
+        });
         return;
       }
-      if (autoRefreshIntervalToMs(countInput, derived.unit) >= minIntervalMs) return;
 
-      setCountInput(minCount);
-      onChange({
-        ...value,
-        intervalMs: autoRefreshIntervalToMs(minCount, derived.unit),
-        intervalDisplayUnit: derived.unit,
-      });
+      setCountInput(derived.count);
     },
     [countInput, derived.count, derived.unit, minIntervalMs, minCount, onChange, value]
   );
@@ -168,8 +173,7 @@ export function RefreshInterval({
           compressed
           fullWidth
           value={countInput}
-          min={minCount}
-          step={1}
+          min={fieldMin}
           onChange={handleCountChange}
           disabled={readOnly || !value.isEnabled}
           aria-label={refreshIntervalTexts.intervalCountAriaLabel}

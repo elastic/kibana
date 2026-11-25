@@ -38,14 +38,31 @@ import { MS_PER } from './format/format_duration';
 const pad = (n: number, width: number): string =>
   String(Math.max(0, Math.floor(n))).padStart(width, '0');
 
+/** Auto-refresh counts keep up to two decimals, e.g. 1.5 minutes. */
+const AUTO_REFRESH_COUNT_PRECISION = 100;
+
+/** Milliseconds in one auto-refresh interval unit. */
+const msPerAutoRefreshUnit = (unit: AutoRefreshIntervalUnit): number => {
+  switch (unit) {
+    case 'h':
+      return MS_PER.hour;
+    case 'm':
+      return MS_PER.minute;
+    case 's':
+    default:
+      return MS_PER.second;
+  }
+};
+
 /**
  * Converts an interval in milliseconds to a count and unit for display.
  *
  * @param intervalMs - The interval in milliseconds.
  * @param unit - The preferred unit for the display.
- * `unit` is used when `intervalMs` is a whole number of it. Otherwise, or when `unit` is omitted,
- * picks the largest unit (hours, then minutes, then seconds) that divides `intervalMs` evenly so
- * the count never rounds the interval away (e.g. 90s stays 90s, not 2m; 10s never shows as 0m).
+ * `unit` is used when the interval is a count of it with up to two decimals (e.g. 1.5 minutes).
+ * Otherwise, or when `unit` is omitted, picks the largest unit (hours, then minutes, then seconds)
+ * that divides `intervalMs` evenly so the count never rounds the interval away (e.g. 90s stays
+ * 90s, not 2m; 10s never shows as 0m).
  *
  * @returns The count and unit for the display.
  */
@@ -57,8 +74,8 @@ export function msToAutoRefreshInterval(
     return { count: 0, unit: 's' };
   }
 
-  if (unit && intervalMs % autoRefreshIntervalToMs(1, unit) === 0) {
-    return { count: intervalMs / autoRefreshIntervalToMs(1, unit), unit };
+  if (unit && (intervalMs * AUTO_REFRESH_COUNT_PRECISION) % msPerAutoRefreshUnit(unit) === 0) {
+    return { count: intervalMs / msPerAutoRefreshUnit(unit), unit };
   }
 
   if (intervalMs % MS_PER.hour === 0) {
@@ -75,7 +92,8 @@ export function msToAutoRefreshInterval(
 }
 
 /**
- * Converts a count and unit to milliseconds.
+ * Converts a count and unit to milliseconds. The count is rounded to two decimals, the precision
+ * `msToAutoRefreshInterval` shows, so decimal counts don't pick up floating-point noise.
  *
  * @param count - The count to convert to milliseconds.
  * @param unit - The unit to convert to milliseconds.
@@ -83,15 +101,10 @@ export function msToAutoRefreshInterval(
  * @returns The milliseconds.
  */
 export function autoRefreshIntervalToMs(count: number, unit: AutoRefreshIntervalUnit): number {
-  switch (unit) {
-    case 'h':
-      return count * MS_PER.hour;
-    case 'm':
-      return count * MS_PER.minute;
-    case 's':
-    default:
-      return count * MS_PER.second;
-  }
+  return (
+    (Math.round(count * AUTO_REFRESH_COUNT_PRECISION) * msPerAutoRefreshUnit(unit)) /
+    AUTO_REFRESH_COUNT_PRECISION
+  );
 }
 
 /**

@@ -101,23 +101,78 @@ describe('RefreshInterval', () => {
     expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(60);
   });
 
-  it('does not apply a decimal count', () => {
-    const onChange = jest.fn();
+  describe('with a decimal count', () => {
+    const renderHarness = (onChange: (value: AutoRefreshSettings) => void) => {
+      const Harness = () => {
+        const [value, setValue] = useState<AutoRefreshSettings>({
+          isEnabled: true,
+          isPaused: false,
+          intervalMs: 60_000,
+          intervalDisplayUnit: 'm',
+        });
+
+        return (
+          <RefreshInterval
+            value={value}
+            onChange={(next) => {
+              onChange(next);
+              setValue(next);
+            }}
+          />
+        );
+      };
+
+      renderWithEuiTheme(<Harness />);
+    };
+
+    it('applies it in the shown unit', () => {
+      const onChange = jest.fn();
+      renderHarness(onChange);
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      fireEvent.change(count, { target: { value: '1.5' } });
+      fireEvent.blur(count);
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ intervalMs: 90_000, intervalDisplayUnit: 'm' })
+      );
+      expect(count).toHaveValue(1.5);
+      expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit')).toHaveValue('m');
+    });
+
+    it('rounds it to two decimals', () => {
+      const onChange = jest.fn();
+      renderHarness(onChange);
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      fireEvent.change(count, { target: { value: '1.255' } });
+      fireEvent.blur(count);
+
+      expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ intervalMs: 75_000 }));
+      expect(count).toHaveValue(1.25);
+    });
+  });
+
+  it.each<[string, number, AutoRefreshSettings['intervalDisplayUnit'], string]>([
+    ['without a minimum', 0, 'm', '0'],
+    ['with a minimum in seconds', 5000, 's', '5'],
+    ['with a minimum below one minute', 5000, 'm', '0'],
+  ])('sets the field minimum to a whole count %s', (_, minIntervalMs, unit, expected) => {
     renderWithEuiTheme(
       <RefreshInterval
-        value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 'm' }}
-        onChange={onChange}
+        value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: unit }}
+        onChange={jest.fn()}
+        minIntervalMs={minIntervalMs}
       />
     );
 
-    fireEvent.change(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount'), {
-      target: { value: '0.1' },
-    });
-
-    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveAttribute(
+      'min',
+      expected
+    );
   });
 
-  it.each(['0', '-3', '', '1.5'])(
+  it.each(['0', '-3', ''])(
     'reverts the count "%s" to the current interval once focus leaves the form',
     (typed) => {
       const onChange = jest.fn();
