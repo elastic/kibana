@@ -161,7 +161,6 @@ export class DashboardPlugin
 
     void registerAccessControl({
       http: core.http,
-      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
       getStartServices: () =>
         core.getStartServices().then(([_, { security }]) => ({
           security,

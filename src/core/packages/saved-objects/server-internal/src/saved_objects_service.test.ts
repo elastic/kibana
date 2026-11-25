@@ -91,8 +91,7 @@ describe('SavedObjectsService', () => {
   const createCoreContext = ({
     skipMigration = true,
     env,
-    accessControlEnabled,
-  }: { skipMigration?: boolean; env?: Env; accessControlEnabled?: boolean } = {}) => {
+  }: { skipMigration?: boolean; env?: Env } = {}) => {
     const configService = configServiceMock.create({ atPath: { skip: true } });
     configService.atPath.mockImplementation((path) => {
       if (path === 'migrations') {
@@ -101,7 +100,6 @@ describe('SavedObjectsService', () => {
       return new BehaviorSubject({
         maxImportPayloadBytes: new ByteSizeValue(0),
         maxImportExportSize: 10000,
-        enableAccessControl: accessControlEnabled ?? true, // default to true
       });
     });
     return mockCoreContext.create({ configService, env });
@@ -405,61 +403,45 @@ describe('SavedObjectsService', () => {
       });
     });
 
-    describe('#isAccessControlEnabled', () => {
-      it('returns true by default', async () => {
-        const coreContext = createCoreContext({});
+    describe('#setAccessControlTransforms', () => {
+      it('sets the access control transforms', async () => {
+        const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
-        const { isAccessControlEnabled } = await soService.setup(createSetupDeps());
-        expect(isAccessControlEnabled()).toEqual(true);
+        const setup = await soService.setup(createSetupDeps());
+
+        const accessControlTransforms: SavedObjectsAccessControlTransforms = {
+          createImportTransforms: jest.fn(),
+        };
+
+        setup.setAccessControlTransforms(accessControlTransforms);
+
+        const request = httpServerMock.createKibanaRequest();
+        const start = await soService.start(createStartDeps());
+        start.createImporter(start.getScopedClient(request));
+
+        expect(SavedObjectsImportExportModule.SavedObjectsImporter).toHaveBeenCalledWith(
+          expect.objectContaining({
+            createAccessControlImportTransforms: accessControlTransforms.createImportTransforms,
+          })
+        );
       });
 
-      it('can be set to false', async () => {
-        const coreContext = createCoreContext({ accessControlEnabled: false });
+      it('throws if a factory is already registered', async () => {
+        const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
-        const { isAccessControlEnabled } = await soService.setup(createSetupDeps());
-        expect(isAccessControlEnabled()).toEqual(false);
-      });
+        const setup = await soService.setup(createSetupDeps());
 
-      describe('#setAccessControlTransforms', () => {
-        it('sets the access control transforms', async () => {
-          const coreContext = createCoreContext();
-          const soService = new SavedObjectsService(coreContext);
-          const setup = await soService.setup(createSetupDeps());
+        const accessControlTransforms: SavedObjectsAccessControlTransforms = {
+          // exportTransform: jest.fn(),
+          createImportTransforms: jest.fn(),
+        };
 
-          const accessControlTransforms: SavedObjectsAccessControlTransforms = {
-            createImportTransforms: jest.fn(),
-          };
-
+        setup.setAccessControlTransforms(accessControlTransforms);
+        expect(() => {
           setup.setAccessControlTransforms(accessControlTransforms);
-
-          const request = httpServerMock.createKibanaRequest();
-          const start = await soService.start(createStartDeps());
-          start.createImporter(start.getScopedClient(request));
-
-          expect(SavedObjectsImportExportModule.SavedObjectsImporter).toHaveBeenCalledWith(
-            expect.objectContaining({
-              createAccessControlImportTransforms: accessControlTransforms.createImportTransforms,
-            })
-          );
-        });
-
-        it('throws if a factory is already registered', async () => {
-          const coreContext = createCoreContext();
-          const soService = new SavedObjectsService(coreContext);
-          const setup = await soService.setup(createSetupDeps());
-
-          const accessControlTransforms: SavedObjectsAccessControlTransforms = {
-            // exportTransform: jest.fn(),
-            createImportTransforms: jest.fn(),
-          };
-
-          setup.setAccessControlTransforms(accessControlTransforms);
-          expect(() => {
-            setup.setAccessControlTransforms(accessControlTransforms);
-          }).toThrowErrorMatchingInlineSnapshot(
-            `"access control tranforms have already been set, and can only be set once"`
-          );
-        });
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"access control tranforms have already been set, and can only be set once"`
+        );
       });
     });
 

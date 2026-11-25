@@ -13,7 +13,6 @@ import type { CheckGlobalAccessControlPrivilegeDependencies } from './types';
 
 export const registerAccessControl = async ({
   http,
-  isAccessControlEnabled,
   getStartServices,
 }: CheckGlobalAccessControlPrivilegeDependencies) => {
   const router = http.createRouter();
@@ -44,14 +43,6 @@ export const registerAccessControl = async ({
       },
     },
     async (_ctx, request, response) => {
-      if (!isAccessControlEnabled) {
-        return response.ok({
-          body: {
-            isGloballyAuthorized: true,
-          },
-        });
-      }
-
       const { security } = await getStartServices();
       const contentTypeId = request.params.contentTypeId;
 
@@ -133,10 +124,6 @@ export const registerAccessControl = async ({
       },
     },
     async (ctx, request, response) => {
-      if (!isAccessControlEnabled) {
-        return response.badRequest({ body: 'Access control is not enabled' });
-      }
-
       try {
         const core = await ctx.core;
         const { savedObjects } = core;
@@ -181,11 +168,10 @@ export const registerAccessControl = async ({
     },
     async (_ctx, request, response) => {
       const { security: securityStart } = await getStartServices();
-      const useRbacForRequest = securityStart?.authz.mode.useRbacForRequest(request);
-      const enabled = isAccessControlEnabled && useRbacForRequest;
+      const useRbacForRequest = securityStart?.authz.mode.useRbacForRequest(request) ?? false;
       return response.ok({
         body: {
-          isAccessControlEnabled: enabled,
+          isAccessControlEnabled: useRbacForRequest,
         },
       });
     }

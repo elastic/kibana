@@ -22,18 +22,6 @@ export interface ISavedObjectTypeRegistryInternal extends ISavedObjectTypeRegist
    * @internal
    */
   registerType(type: SavedObjectsType): void;
-  /**
-   * Sets whether access control is enabled
-   *
-   * @internal
-   */
-  setAccessControlEnabled(enabled: boolean): void;
-  /**
-   * Gets whether access control is enabled
-   *
-   * @internal
-   */
-  isAccessControlEnabled(): boolean;
 }
 
 /**
@@ -44,8 +32,6 @@ export interface ISavedObjectTypeRegistryInternal extends ISavedObjectTypeRegist
 export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal {
   private readonly types = new Map<string, SavedObjectsType>();
   private readonly legacyTypesMap: Set<string>;
-
-  private accessControlEnabled: boolean = true;
 
   constructor({ legacyTypes = [] }: SavedObjectTypeRegistryConfig = {}) {
     this.legacyTypesMap = new Set(legacyTypes);
@@ -72,16 +58,13 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal
         `Type ${type.name}: Cannot specify 'supportsAccessControl' as 'true' unless 'namespaceType' is either 'multiple' or 'multiple-isolated'.`
       );
     }
-    const supportsAccessControl = this.accessControlEnabled ? type.supportsAccessControl : false;
-
-    const typeWithAccessControl = { ...type, supportsAccessControl };
 
     validateType(type);
 
     if (process.env.NODE_ENV !== 'production') {
-      deepFreeze(typeWithAccessControl);
+      deepFreeze(type);
     }
-    this.types.set(type.name, typeWithAccessControl);
+    this.types.set(type.name, type);
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getLegacyTypes} */
@@ -162,16 +145,6 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal
 
   public supportsAccessControl(type: string): boolean {
     return this.types.get(type)?.supportsAccessControl ?? false;
-  }
-
-  /** {@inheritDoc ISavedObjectTypeRegistryInternal.setAccessControlEnabled} */
-  public setAccessControlEnabled(enabled: boolean) {
-    this.accessControlEnabled = enabled;
-  }
-
-  /** {@inheritDoc ISavedObjectTypeRegistryInternal.isAccessControlEnabled} */
-  public isAccessControlEnabled() {
-    return this.accessControlEnabled;
   }
 }
 
