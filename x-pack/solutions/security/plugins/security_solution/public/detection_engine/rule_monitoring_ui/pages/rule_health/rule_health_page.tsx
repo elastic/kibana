@@ -35,7 +35,6 @@ export const DetectionEngineRuleHealthPage = memo(
         <>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiSpacer size="m" />
               <EuiSkeletonText lines={2} />
               <EuiSpacer size="m" />
               <EuiSkeletonText lines={4} />
@@ -73,6 +72,7 @@ export const DetectionEngineRuleHealthPage = memo(
       <>
         <SecuritySolutionPageWrapper>
           <RuleHealthAppHeader ruleId={id} />
+          <EuiSpacer size="m" />
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>{isLoading ? skeleton : data}</EuiFlexItem>
           </EuiFlexGroup>
