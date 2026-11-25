@@ -252,6 +252,96 @@ describe('spec connector with API fetch', () => {
     expect(await screen.findByTestId('spec-connector-test-card')).toBeInTheDocument();
   });
 
+  describe('spec version', () => {
+    const exactSpecVersion = '1.3';
+
+    const fillAndSave = async () => {
+      await userEvent.click(await screen.findByTestId('spec-connector-test-card'));
+      await userEvent.type(await screen.findByTestId('nameInput'), 'My spec connector');
+      await userEvent.type(
+        await screen.findByTestId('generator-field-secrets-apiKey'),
+        'my-api-key'
+      );
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+    };
+
+    beforeEach(() => {
+      appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({
+        ...mockSpecResponse,
+        metadata: { ...mockSpecResponse.metadata, spec_version: exactSpecVersion },
+      });
+      appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue({
+        id: 'created-connector-id',
+        name: 'My spec connector',
+        connector_type_id: 'spec-connector-test',
+        config: {},
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        is_system_action: false,
+        spec_version: exactSpecVersion,
+      });
+    });
+
+    it('posts the exact spec version resolved from the major selector on save', async () => {
+      appMockRenderer.coreStart.actions = {
+        ...appMockRenderer.coreStart.actions,
+        isCatalogEnabled: true,
+      };
+
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+        />
+      );
+
+      await fillAndSave();
+
+      expect(appMockRenderer.coreStart.http.get).toHaveBeenCalledWith(
+        '/internal/actions/connector_types/spec-connector-test/spec',
+        expect.objectContaining({ query: { spec_version: '1' } })
+      );
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledTimes(1);
+      });
+      const [, { body }] = (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls[0];
+      expect(JSON.parse(body)).toEqual(
+        expect.objectContaining({
+          connector_type_id: 'spec-connector-test',
+          spec_version: exactSpecVersion,
+        })
+      );
+      expect(onConnectorCreated).toHaveBeenCalledWith(
+        expect.objectContaining({ specVersion: exactSpecVersion })
+      );
+    });
+
+    it('does not post a spec version when the catalog is disabled', async () => {
+      appMockRenderer.coreStart.actions = {
+        ...appMockRenderer.coreStart.actions,
+        isCatalogEnabled: false,
+      };
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+        />
+      );
+
+      await fillAndSave();
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledTimes(1);
+      });
+      const [, { body }] = (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls[0];
+      expect(JSON.parse(body)).not.toHaveProperty('spec_version');
+    });
+  });
+
   describe('documentation link resolution', () => {
     it('derives the docs link from the connector id when the spec has no docsUrl', async () => {
       appMockRenderer.render(
