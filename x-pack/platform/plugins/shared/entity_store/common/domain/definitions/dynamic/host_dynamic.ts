@@ -65,5 +65,9 @@ export const hostDynamicBlock: DynamicBlock = {
       attributes: [{ name: 'k8s.cluster.name', field: 'orchestrator.cluster.name' }],
     },
   ],
+  displayLabels: [
+    { name: 'os.type', label: 'Operating system' },
+    { name: 'cloud.provider', label: 'Cloud provider' },
+  ],
   suggestedFilters: ['os.type', 'cloud.provider'],
 };
