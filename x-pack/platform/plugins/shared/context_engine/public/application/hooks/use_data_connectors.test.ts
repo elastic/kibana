@@ -33,6 +33,7 @@ interface RawActionConnector {
   id: string;
   name: string;
   connector_type_id: string;
+  is_outbound_actions_enabled?: boolean;
 }
 
 const buildRawConnector = (overrides: Partial<RawActionConnector> = {}): RawActionConnector => ({
@@ -165,6 +166,32 @@ describe('useDataConnectors', () => {
       }),
       buildExpectedDataConnector({ id: 'gh-1', name: 'GitHub', actionTypeId: '.github' }),
     ]);
+  });
+
+  it('filters out connectors with outbound actions turned off', async () => {
+    const core = coreMock.createStart();
+    mockHttpGet(core, {
+      connectors: [
+        buildRawConnector({
+          id: 'gh-on',
+          name: 'GitHub on',
+          connector_type_id: '.github',
+          is_outbound_actions_enabled: true,
+        }),
+        buildRawConnector({
+          id: 'gh-off',
+          name: 'GitHub off',
+          connector_type_id: '.github',
+          is_outbound_actions_enabled: false,
+        }),
+        buildRawConnector({ id: 'gd-1', name: 'Google Drive', connector_type_id: '.google_drive' }),
+      ],
+    });
+    const { result } = renderDataConnectors(core);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.connectors.map(({ id }) => id)).toEqual(['gh-on', 'gd-1']);
   });
 
   it('returns every type that the connector-types API reports as supported', async () => {

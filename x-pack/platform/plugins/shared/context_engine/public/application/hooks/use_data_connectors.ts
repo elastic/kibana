@@ -37,7 +37,7 @@ export interface UseDataConnectorsResult {
 }
 
 /**
- * Lists the connectors whose type declares the `contextEngine` feature id.
+ * Lists the connectors whose type declares the `contextEngine` feature id and that can run actions.
  */
 export const useDataConnectors = ({
   enabled = true,
@@ -84,6 +84,8 @@ export const useDataConnectors = ({
     () =>
       (connectorsResponse ?? [])
         .filter((connector) => typeNameById.has(connector.connector_type_id))
+        // A connector with outbound off cannot run, so it is not a data source.
+        .filter((connector) => connector.is_outbound_actions_enabled !== false)
         .map((connector) => ({
           id: connector.id,
           name: connector.name || connector.id,
