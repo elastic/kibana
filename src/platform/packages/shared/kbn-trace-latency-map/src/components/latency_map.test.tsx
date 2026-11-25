@@ -1469,6 +1469,25 @@ describe('LatencyMap', () => {
       expect(view.onSelectionCommit).not.toHaveBeenCalled();
     });
 
+    it('reads out nothing of a region once the same range has no spans left to count', async () => {
+      // The same range keeps its columns, so the region being extended is not reset as it is
+      // for a new grid - and an empty range has a geometry but no cells to count.
+      const idle = 'service.name == "idle"';
+      const runEsql = jest.fn(async (query: string) => {
+        if (query.includes(idle)) return { ...statsTable, values: [[0, 0, 0, 0, 0, 0]] };
+        return query.includes('PERCENTILE') ? statsTable : gridTable(CELLS);
+      });
+      const { rerenderMap } = renderMap({ runEsql });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight', true);
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toBeInTheDocument();
+
+      rerenderMap({ source: { ...source, filters: [idle] } });
+      expect(await screen.findByTestId('traceLatencyMapEmpty')).toBeInTheDocument();
+      expect(screen.queryByTestId('traceLatencyMapCellDetails')).not.toBeInTheDocument();
+    });
+
     it('clears the selection on Escape, only when there is one', async () => {
       const first = renderMap();
       let layer = await getLayer();
