@@ -10,6 +10,7 @@
 import { HTTPAuthorizationHeader } from '../authentication';
 import type { UiamAssertionSigner } from './assertion_signer';
 import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   deriveInternalCallerAttestation,
   deriveUiamAttestationKey,
@@ -22,7 +23,7 @@ const ATTESTATION_KEY = deriveUiamAttestationKey('a'.repeat(32));
 const signer: UiamAssertionSigner = {
   subject: 'spiffe://kibana.test',
   sign: (credential) => `Assertion signed-for(${credential.toString()})`,
-  isOwnAssertion: () => false,
+  isOwnAssertion: (headerValue) => headerValue.startsWith('Assertion signed-for('),
 };
 
 const CONTEXT: UiamClientAuthenticationContext = { signer, attestationKey: ATTESTATION_KEY };
@@ -103,6 +104,60 @@ describe.each(['ApiKey', 'Bearer'] as const)('resolveUiamClientAuthentication (%
         requestHeaders: { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: VALID_ATTESTATION },
       })
     ).toBe('upstream-shared-secret');
+  });
+
+  describe("with Kibana's own assertion as the relayed client authentication", () => {
+    const STALE_OWN_ASSERTION = 'Assertion signed-for(a-credential-held-earlier)';
+
+    it('signs again when the authentication provider set it', () => {
+      expect(
+        resolveUiamClientAuthentication(CONTEXT, {
+          credentialSource: 'inbound',
+          credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: STALE_OWN_ASSERTION,
+          requestHeaders: {},
+        })
+      ).toBe(OWN_ASSERTION);
+    });
+
+    it('signs again when the request carried a different value', () => {
+      expect(
+        resolveUiamClientAuthentication(CONTEXT, {
+          credentialSource: 'inbound',
+          credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: STALE_OWN_ASSERTION,
+          requestHeaders: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-shared-secret' },
+        })
+      ).toBe(OWN_ASSERTION);
+    });
+
+    it.each([
+      ['as the header value', STALE_OWN_ASSERTION],
+      ['as one of the duplicated header values', ['upstream-shared-secret', STALE_OWN_ASSERTION]],
+    ])('forwards it verbatim when it arrived with the request %s', (_label, inbound) => {
+      expect(
+        resolveUiamClientAuthentication(CONTEXT, {
+          credentialSource: 'inbound',
+          credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: STALE_OWN_ASSERTION,
+          requestHeaders: { [ES_CLIENT_AUTHENTICATION_HEADER]: inbound },
+        })
+      ).toBe(STALE_OWN_ASSERTION);
+    });
+
+    it('forwards it verbatim when it arrived with the request, even with a valid attestation', () => {
+      expect(
+        resolveUiamClientAuthentication(CONTEXT, {
+          credentialSource: 'inbound',
+          credential: UIAM_CREDENTIAL,
+          relayedClientAuthentication: STALE_OWN_ASSERTION,
+          requestHeaders: {
+            [ES_CLIENT_AUTHENTICATION_HEADER]: STALE_OWN_ASSERTION,
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: VALID_ATTESTATION,
+          },
+        })
+      ).toBe(STALE_OWN_ASSERTION);
+    });
   });
 
   it('returns undefined for an inbound UIAM credential with no attestation', () => {

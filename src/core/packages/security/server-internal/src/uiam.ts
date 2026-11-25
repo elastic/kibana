@@ -71,7 +71,8 @@ export interface CoreUiamService {
    * presented with client authentication;
    * - inbound UIAM credential -> the relayed client authentication when there is one, even if
    * empty; otherwise Kibana's signed assertion only with a valid attestation, proving the
-   * loopback caller is trusted.
+   * loopback caller is trusted. A relayed assertion that Kibana signed itself and that did not
+   * arrive with the request is signed again, since the one at hand may have expired.
    */
   getElasticsearchClientAuthentication(
     params: UiamClientAuthenticationParams

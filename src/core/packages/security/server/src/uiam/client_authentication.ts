@@ -13,6 +13,7 @@ import type { Headers } from '@kbn/core-http-server';
 import type { HTTPAuthorizationHeader } from '../authentication';
 import type { UiamAssertionSigner } from './assertion_signer';
 import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   deriveInternalCallerAttestation,
 } from './attestation';
@@ -75,6 +76,22 @@ const constantTimeEqual = (a: string, b: string): boolean => {
   return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
 };
 
+const isOwnAssertionSetByKibana = (
+  context: UiamClientAuthenticationContext,
+  relayed: string | string[],
+  requestHeaders: Headers
+): boolean => {
+  if (typeof relayed !== 'string') {
+    return false;
+  }
+
+  const inbound = requestHeaders[ES_CLIENT_AUTHENTICATION_HEADER];
+  const arrivedWithRequest = Array.isArray(inbound)
+    ? inbound.includes(relayed)
+    : inbound === relayed;
+  return !arrivedWithRequest && context.signer.isOwnAssertion(relayed);
+};
+
 /** Resolves the client authentication to attach to a UIAM credential based on its source. */
 export const resolveUiamClientAuthentication = (
   context: UiamClientAuthenticationContext,
@@ -89,19 +106,25 @@ export const resolveUiamClientAuthentication = (
   }
 
   if (params.credentialSource === 'inbound') {
-    // The token may be bound to another client, so whatever already speaks for it is never
-    // replaced by Kibana's own assertion. Checked ahead of the attestation so that, should a
-    // caller ever present both, the outcome is its own client authentication and never Kibana's.
-    if (params.relayedClientAuthentication !== undefined) {
-      return params.relayedClientAuthentication;
-    }
-
-    // The attestation is bound to the credential it rides with, so one captured from another
-    // request (or another credential) does not validate here.
-    const expected = deriveInternalCallerAttestation(context.attestationKey, params.credential);
-    const presented = params.requestHeaders[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER];
-    if (typeof presented !== 'string' || !constantTimeEqual(presented, expected)) {
-      return;
+    const relayed = params.relayedClientAuthentication;
+    if (relayed !== undefined) {
+      // The token may be bound to another client, so whatever already speaks for it is never
+      // replaced by Kibana's own assertion. Checked ahead of the attestation so that, should a
+      // caller ever present both, the outcome is its own client authentication and never
+      // Kibana's. An assertion Kibana signed itself is the exception, unless it arrived with
+      // the request: the authentication provider vouched for the credential, so the assertion
+      // is signed again, since the one at hand may have expired.
+      if (!isOwnAssertionSetByKibana(context, relayed, params.requestHeaders)) {
+        return relayed;
+      }
+    } else {
+      // The attestation is bound to the credential it rides with, so one captured from another
+      // request (or another credential) does not validate here.
+      const expected = deriveInternalCallerAttestation(context.attestationKey, params.credential);
+      const presented = params.requestHeaders[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER];
+      if (typeof presented !== 'string' || !constantTimeEqual(presented, expected)) {
+        return;
+      }
     }
   }
 

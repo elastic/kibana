@@ -19,10 +19,16 @@ import {
 } from '@elastic/elasticsearch';
 import { isUnauthorizedError } from '@kbn/es-errors';
 import type { UnauthorizedError } from '@kbn/es-errors';
+import {
+  HTTPAuthorizationHeader,
+  UIAM_ERROR_CODES,
+  isUiamCredential,
+} from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import { isRetryResult } from './retry_unauthorized';
+import { AUTHORIZATION_HEADER, ES_SECONDARY_AUTH_HEADER } from './headers';
 
 /**
  * Timing context stored in Transport request options for instrumentation
@@ -86,6 +92,15 @@ const isUnauthorizedStreamResponse = (
   return response != null && response.statusCode === 401 && isStreamBody(response.body);
 };
 
+const isUiamAssertionExpiredError = (error: UnauthorizedError): boolean =>
+  error.body?.error?.caused_by?.authentication_error_code === UIAM_ERROR_CODES.ASSERTION_EXPIRED;
+
+const hasUiamCredential = (headers: IncomingHttpHeaders): boolean =>
+  [AUTHORIZATION_HEADER, ES_SECONDARY_AUTH_HEADER].some((headerName) => {
+    const credential = HTTPAuthorizationHeader.parseFromRequest({ headers }, headerName);
+    return credential != null && isUiamCredential(credential);
+  });
+
 const MAX_ERROR_BODY_BYTES = 64 * 1024;
 
 const readStreamBody = async (body: NodeJS.ReadableStream, logger: Logger): Promise<string> => {
@@ -142,12 +157,21 @@ export const createTransport = ({
   scoped = false,
   getExecutionContext = noop,
   getUnauthorizedErrorHandler,
+  getUiamClientAuthenticationHeaders,
   onRequest,
   logger,
 }: {
   scoped?: boolean;
   getExecutionContext?: () => string | undefined;
   getUnauthorizedErrorHandler?: ErrorHandlerAccessor;
+  /**
+   * Resolves the UIAM client authentication headers for the credential in the transport's current
+   * headers. Called only for a UIAM credential, when Elasticsearch reports that the signed
+   * assertion expired.
+   */
+  getUiamClientAuthenticationHeaders?: (
+    headers: IncomingHttpHeaders
+  ) => Record<string, string | string[]>;
   onRequest: OnRequestHandler;
   logger: Logger;
 }): TransportClass => {
@@ -230,12 +254,44 @@ export const createTransport = ({
         throw error;
       };
 
+      const retryUnauthorizedUiamAssertionRequest = async (error: UnauthorizedError) => {
+        const clientAuthenticationHeaders =
+          getUiamClientAuthenticationHeaders?.(this.headers) ?? {};
+        const retryHeaders: IncomingHttpHeaders = {
+          ...this.headers,
+          ...clientAuthenticationHeaders,
+          ...options?.headers,
+        };
+        const isSignedAgain = Object.keys(clientAuthenticationHeaders).some(
+          (name) => retryHeaders[name] !== opts.headers?.[name]
+        );
+        if (!isSignedAgain) {
+          return await retryUnauthorizedRequest(error);
+        }
+
+        this.headers = { ...this.headers, ...clientAuthenticationHeaders };
+        const retryResponse = (await super.request(params, {
+          ...opts,
+          headers: retryHeaders,
+        })) as TransportResult<any, any>;
+        if (isUnauthorizedStreamResponse(retryResponse)) {
+          throw await createUnauthorizedStreamError(retryResponse, logger);
+        }
+
+        return retryResponse;
+      };
+
+      const retryUnauthorized = (error: UnauthorizedError) =>
+        isUiamAssertionExpiredError(error) && hasUiamCredential(this.headers)
+          ? retryUnauthorizedUiamAssertionRequest(error)
+          : retryUnauthorizedRequest(error);
+
       let response: TransportResult<any, any>;
       try {
         response = (await super.request(params, opts)) as TransportResult<any, any>;
       } catch (e) {
         if (isUnauthorizedError(e)) {
-          return await retryUnauthorizedRequest(e);
+          return await retryUnauthorized(e);
         }
 
         throw e;
@@ -247,9 +303,7 @@ export const createTransport = ({
             opts.opaqueId ? ` (opaqueId: ${opts.opaqueId})` : ''
           }, attempting token refresh and retry`
         );
-        return await retryUnauthorizedRequest(
-          await createUnauthorizedStreamError(response, logger)
-        );
+        return await retryUnauthorized(await createUnauthorizedStreamError(response, logger));
       }
 
       return response;

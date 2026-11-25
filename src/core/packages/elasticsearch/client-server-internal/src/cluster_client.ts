@@ -28,12 +28,14 @@ import {
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
   isUiamBearerCredential,
+  type UiamClientAuthenticationParams,
 } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
 import {
   getDefaultHeaders,
+  AUTHORIZATION_HEADER,
   ES_SECONDARY_AUTH_HEADER,
   ES_SECONDARY_CLIENT_AUTH_HEADER,
   ES_CLIENT_AUTHENTICATION_HEADER,
@@ -81,6 +83,13 @@ export type FactoryRoutingOpts =
  */
 export type OnRequestHandlerFactory = (opts: FactoryRoutingOpts) => OnRequestHandler;
 
+type ClientAuthenticationHeaders = Record<string, string | string[]>;
+
+interface ScopedClientHeaders {
+  headers: Headers;
+  getUiamClientAuthenticationHeaders: (headers: Headers) => ClientAuthenticationHeaders;
+}
+
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
   private readonly config: ElasticsearchClientConfig;
@@ -92,6 +101,7 @@ export class ClusterClient implements ICustomClusterClient {
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
   private readonly onRequestHandlerFactory: OnRequestHandlerFactory;
+  private readonly internalUserOnRequest: OnRequestHandler;
   private isClosed = false;
 
   public readonly asInternalUser: Client;
@@ -128,7 +138,7 @@ export class ClusterClient implements ICustomClusterClient {
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
     this.onRequestHandlerFactory = onRequestHandlerFactory;
 
-    const internalUserOnRequest = onRequestHandlerFactory({ logger });
+    this.internalUserOnRequest = onRequestHandlerFactory({ logger });
 
     this.asInternalUser = configureClient(config, {
       logger,
@@ -136,7 +146,7 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
-      onRequest: internalUserOnRequest,
+      onRequest: this.internalUserOnRequest,
     });
     this.rootScopedClient = configureClient(config, {
       scoped: true,
@@ -145,13 +155,13 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
-      onRequest: internalUserOnRequest,
+      onRequest: this.internalUserOnRequest,
     });
   }
 
   asScoped(request: ScopeableRequest, opts?: AsScopedOptions): IScopedClusterClient {
     const createScopedClient = () => {
-      const scopedHeaders = this.getScopedHeaders(request);
+      const { headers, getUiamClientAuthenticationHeaders } = this.getScopedHeaders(request);
       const factoryOpts: FactoryRoutingOpts = opts
         ? { ...opts, logger: this.logger, request }
         : { logger: this.logger, request };
@@ -159,6 +169,7 @@ export class ClusterClient implements ICustomClusterClient {
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
+        getUiamClientAuthenticationHeaders,
         onRequest: this.onRequestHandlerFactory(factoryOpts),
         logger: this.logger,
       });
@@ -167,16 +178,22 @@ export class ClusterClient implements ICustomClusterClient {
       // onRequest handler and lose CPS routing. Consider intercepting child() to extend
       // any custom Transport with our onRequest so routing is always preserved.
       return this.rootScopedClient.child({
-        headers: scopedHeaders,
+        headers,
         Transport: transportClass,
       });
     };
 
     const createSecondaryScopedClient = () => {
-      const secondaryAuthHeaders = this.getSecondaryAuthHeaders(request);
+      const { headers, getUiamClientAuthenticationHeaders } = this.getSecondaryAuthHeaders(request);
 
       return this.asInternalUser.child({
-        headers: secondaryAuthHeaders,
+        headers,
+        Transport: createTransport({
+          getExecutionContext: this.getExecutionContext,
+          getUiamClientAuthenticationHeaders,
+          onRequest: this.internalUserOnRequest,
+          logger: this.logger,
+        }),
       });
     };
 
@@ -209,7 +226,7 @@ export class ClusterClient implements ICustomClusterClient {
       });
   };
 
-  private getScopedHeaders(request: ScopeableRequest): Headers {
+  private getScopedHeaders(request: ScopeableRequest): ScopedClientHeaders {
     let scopedHeaders: Headers;
     let requestHeaders: Headers | undefined;
     let isExternalCredential = false;
@@ -235,38 +252,47 @@ export class ClusterClient implements ICustomClusterClient {
     // The effective credential is whatever ends up in `scopedHeaders`: for real requests the auth
     // provider's post-authentication headers override the one that came in on the wire. The client
     // authentication that travels with it is read from the same object, so a secret the request
-    // already carries is relayed rather than replaced.
-    let clientAuthentication: string | string[] | undefined;
-    if (this.security?.uiam) {
-      const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
-      if (credential) {
-        clientAuthentication = this.security.uiam.getElasticsearchClientAuthentication(
-          requestHeaders
-            ? {
-                credentialSource: 'inbound',
-                credential,
-                relayedClientAuthentication: scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER],
-                requestHeaders,
-              }
-            : {
-                credentialSource: isExternalCredential ? 'external' : 'internal',
-                credential,
-              }
-        );
+    // already carries is relayed rather than replaced. The transport resolves it again, from the
+    // credential the client holds by then, once the assertion expires.
+    const hasCredential = scopedHeaders[AUTHORIZATION_HEADER] !== undefined;
+    const relayedClientAuthentication = scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER];
+    const getUiamClientAuthenticationHeaders = (headers: Headers): ClientAuthenticationHeaders => {
+      const uiam = this.security?.uiam;
+      const credential = hasCredential && HTTPAuthorizationHeader.parseFromRequest({ headers });
+      if (!uiam || !credential) {
+        return {};
       }
-    }
+
+      const clientAuthentication = uiam.getElasticsearchClientAuthentication(
+        requestHeaders
+          ? {
+              credentialSource: 'inbound',
+              credential,
+              relayedClientAuthentication,
+              requestHeaders,
+            }
+          : {
+              credentialSource: isExternalCredential ? 'external' : 'internal',
+              credential,
+            }
+      );
+      return clientAuthentication !== undefined
+        ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }
+        : {};
+    };
 
     return {
-      ...getDefaultHeaders(this.kibanaVersion),
-      ...this.config.customHeaders,
-      ...scopedHeaders,
-      ...(clientAuthentication !== undefined
-        ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }
-        : {}),
+      headers: {
+        ...getDefaultHeaders(this.kibanaVersion),
+        ...this.config.customHeaders,
+        ...scopedHeaders,
+        ...getUiamClientAuthenticationHeaders(scopedHeaders),
+      },
+      getUiamClientAuthenticationHeaders,
     };
   }
 
-  private getSecondaryAuthHeaders(request: ScopeableRequest): Headers {
+  private getSecondaryAuthHeaders(request: ScopeableRequest): ScopedClientHeaders {
     const authHeaders = isRealRequest(request)
       ? this.authHeaders?.get(request) ?? {}
       : request.headers;
@@ -287,7 +313,7 @@ export class ClusterClient implements ICustomClusterClient {
     // could have minted itself earns Kibana's own secret.
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
-    const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication(
+    const clientAuthenticationParams: UiamClientAuthenticationParams =
       isRealRequest(request) && isUiamBearerCredential(authorizationHeader)
         ? {
             credentialSource: 'inbound',
@@ -298,16 +324,24 @@ export class ClusterClient implements ICustomClusterClient {
         : {
             credentialSource: isExternalCredential ? 'external' : 'internal',
             credential: authorizationHeader,
-          }
-    );
+          };
+    const getUiamClientAuthenticationHeaders = (): ClientAuthenticationHeaders => {
+      const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication(
+        clientAuthenticationParams
+      );
+      return clientAuthentication !== undefined
+        ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication }
+        : {};
+    };
 
     return {
-      ...getDefaultHeaders(this.kibanaVersion),
-      ...this.config.customHeaders,
-      [ES_SECONDARY_AUTH_HEADER]: authorizationHeader.toString(),
-      ...(clientAuthentication !== undefined
-        ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication }
-        : {}),
+      headers: {
+        ...getDefaultHeaders(this.kibanaVersion),
+        ...this.config.customHeaders,
+        [ES_SECONDARY_AUTH_HEADER]: authorizationHeader.toString(),
+        ...getUiamClientAuthenticationHeaders(),
+      },
+      getUiamClientAuthenticationHeaders,
     };
   }
 }
