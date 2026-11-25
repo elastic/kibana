@@ -38,11 +38,13 @@ export const clearNlToEsqlLicenseCache = (): void => {
 };
 
 export const useNlToEsqlCheck = (): boolean => {
-  const getLicense = useKibana<ESQLEditorDeps>().services.esql?.getLicense;
+  const esql = useKibana<ESQLEditorDeps>().services.esql;
+  const getLicense = esql?.getLicense;
+  const isInferenceAvailable = esql?.isInferenceAvailable ?? false;
   const [hasValidLicense, setHasValidLicense] = useState(enterpriseLicense ?? false);
 
   useEffect(() => {
-    if (!getLicense) {
+    if (!getLicense || !isInferenceAvailable) {
       return;
     }
     let cancelled = false;
@@ -54,7 +56,7 @@ export const useNlToEsqlCheck = (): boolean => {
     return () => {
       cancelled = true;
     };
-  }, [getLicense]);
+  }, [getLicense, isInferenceAvailable]);
 
-  return hasValidLicense;
+  return isInferenceAvailable && hasValidLicense;
 };

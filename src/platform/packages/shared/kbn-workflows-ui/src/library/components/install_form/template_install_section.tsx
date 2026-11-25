@@ -189,12 +189,16 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
     // Deliberately not gated on form validation: it is the escape hatch for
     // finishing the configuration in the editor — unset fields carry their
     // defaults or `<name>` placeholders.
+    const { slug: templateSlug, version: templateVersion } = template.metadata;
     const handleRemix = useCallback(() => {
       void application.navigateToApp(WORKFLOWS_APP_ID, {
         path: '/create',
-        state: { initialYaml: previewYaml } satisfies WorkflowsCreateRouteState,
+        state: {
+          initialYaml: previewYaml,
+          template: { slug: templateSlug, version: templateVersion },
+        } satisfies WorkflowsCreateRouteState,
       });
-    }, [application, previewYaml]);
+    }, [application, previewYaml, templateSlug, templateVersion]);
 
     const handleSetup = useCallback(() => onStepChange('setup'), [onStepChange]);
 

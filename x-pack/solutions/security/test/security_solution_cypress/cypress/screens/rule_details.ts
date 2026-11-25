@@ -70,8 +70,6 @@ export const LAST_EXECUTION_STATUS_REFRESH_BUTTON =
 export const RULE_NAME_HEADER =
   '[data-test-subj="header-page-title"], [data-test-subj="appHeaderTitle"]';
 
-export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
-
 export const RISK_SCORE_DETAILS = 'Risk score';
 
 export const REFERENCE_URLS_DETAILS = 'Reference URLs';

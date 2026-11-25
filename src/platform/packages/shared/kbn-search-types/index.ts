@@ -30,6 +30,7 @@ export type {
   IDslSearchOptions,
   IDslSearchResult,
   IDslPaginatedSearchParams,
+  IDslUntrackedPaginatedSearchParams,
   IDslPaginatedSearchOptions,
   IDslPaginatedSearchResult,
   IDslPagination,

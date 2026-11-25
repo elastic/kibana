@@ -12,7 +12,7 @@ import {
   CONTEXT_ENGINE_PATHS,
   KI_DOC_QUERY_PARAM,
   getAiIndexKnowledgeDocumentsPath,
-  getKnowledgeDocumentPath,
+  getKnowledgeDocumentLocation,
 } from '../paths';
 
 export interface SelectedKi {
@@ -28,6 +28,8 @@ export interface SelectKiOptions {
 interface UseSelectedKiResult {
   selectedKi: SelectedKi | undefined;
   selectKi: (ki: Pick<KiListItem, 'id' | 'index'>, options?: SelectKiOptions) => void;
+  /** Closes the open document (replaces the history entry). */
+  clearSelectedKi: () => void;
 }
 
 /**
@@ -61,14 +63,8 @@ export const useSelectedKi = (): UseSelectedKiResult => {
       { replace = false }: SelectKiOptions = {}
     ) => {
       // A fresh query: the document is the only page state in the URL.
-      const params = new URLSearchParams({ [KI_DOC_QUERY_PARAM]: id });
-      const location = {
-        pathname:
-          index.length > 0
-            ? getKnowledgeDocumentPath(aiIndexId, index)
-            : getAiIndexKnowledgeDocumentsPath(aiIndexId),
-        search: `?${params}`,
-      };
+      const { path, params } = getKnowledgeDocumentLocation(aiIndexId, { id, index });
+      const location = { pathname: path, search: `?${new URLSearchParams(params)}` };
       if (replace) {
         history.replace(location);
         return;
@@ -78,5 +74,9 @@ export const useSelectedKi = (): UseSelectedKiResult => {
     [aiIndexId, history]
   );
 
-  return { selectedKi, selectKi };
+  const clearSelectedKi = useCallback(() => {
+    history.replace({ pathname: getAiIndexKnowledgeDocumentsPath(aiIndexId), search: '' });
+  }, [aiIndexId, history]);
+
+  return { selectedKi, selectKi, clearSelectedKi };
 };

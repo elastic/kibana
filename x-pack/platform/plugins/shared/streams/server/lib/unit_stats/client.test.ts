@@ -66,6 +66,20 @@ const responses = {
     ],
     values: [['es-dev', 'logs-generic.otel-default', 'security_exception', null, 1.9]],
   },
+  destinationDeliverySeries: {
+    columns: [
+      { name: 'total_items', type: 'double' },
+      { name: 'failed_items', type: 'double' },
+      { name: 'authentication_items', type: 'double' },
+      { name: 'authorization_items', type: 'double' },
+      { name: 'id', type: 'keyword' },
+      { name: 'bucket', type: 'date' },
+    ],
+    values: [
+      [100, 0, null, null, 'es-dev', '2026-10-19T11:46:00.000Z'],
+      [90, 40, 10, 25, 'es-dev', '2026-10-19T11:47:00.000Z'],
+    ],
+  },
   s3FailedUploadRates: {
     columns: [
       { name: 'id', type: 'keyword' },
@@ -128,6 +142,8 @@ const isDestinationSumsQuery = (query: string) =>
 const queryName = (query: string): QueryName => {
   if (query.includes('metrics.streams.source.items')) return 'sourceRate';
   if (!query.includes('scope.attributes.streams.destination.id')) return 'processor';
+  // The delivery series query is the only one with the total, and it buckets like the sums query.
+  if (query.includes('total_items')) return 'destinationDeliverySeries';
   // The S3 query is the only one with a failed rate and no incoming rate or class rates.
   if (
     query.includes('failed_rate') &&
@@ -747,6 +763,135 @@ describe('UnitStatsClient.getStats', () => {
     });
   });
 
+  describe('the delivery series', () => {
+    const asks = (id: string) => ({
+      kind: 'destination' as const,
+      id,
+      include: { delivery_series: true },
+    });
+    const seriesQueries = (esql: jest.Mock) =>
+      statsQueries(esql).filter((query) => query.includes('total_items'));
+
+    it('is not in the result, and is not queried, unless the request asks for it', async () => {
+      const esql = makeEsql();
+
+      const response = await run(esql);
+
+      expect(seriesQueries(esql)).toHaveLength(0);
+      expect(response.components.destinations['es-dev'].events.delivery).toBeUndefined();
+    });
+
+    it('is in the result of the destination that asks, with its counts per bucket, and not in the others', async () => {
+      const esql = makeEsql();
+
+      const response = await run(esql, {
+        components: [asks('es-dev'), { kind: 'destination', id: 'es-prod' }],
+      });
+
+      const { 'es-dev': esDev, 'es-prod': esProd } = response.components.destinations;
+      expect(esDev.events.delivery).toEqual({
+        series: {
+          bucket_ms: expect.any(Number),
+          unit: '{item}',
+          points: [
+            {
+              start: '2026-10-19T11:46:00.000Z',
+              total: 100,
+              failed: 0,
+              authentication: 0,
+              authorization: 0,
+            },
+            {
+              start: '2026-10-19T11:47:00.000Z',
+              total: 90,
+              failed: 40,
+              authentication: 10,
+              authorization: 25,
+            },
+          ],
+        },
+      });
+      expect(esProd.events.delivery).toBeUndefined();
+      expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
+    });
+
+    it('asks one query, for the destinations that ask only, with the bucket of the series of the incoming items', async () => {
+      const esql = makeEsql();
+
+      const response = await run(esql, {
+        components: [asks('es-dev'), asks('es-prod'), { kind: 'destination', id: 'dbg' }],
+      });
+
+      const queries = seriesQueries(esql);
+      expect(queries).toHaveLength(1);
+      expect(queries[0]).toContain(
+        'scope.attributes.streams.destination.id IN ("es-dev", "es-prod")'
+      );
+      expect(response.components.destinations['es-dev'].events.delivery?.series.bucket_ms).toBe(
+        response.components.destinations['es-dev'].events.incoming.series.bucket_ms
+      );
+    });
+
+    it('has no points for a destination that asks and has no rows', async () => {
+      const response = await run(
+        makeEsql({
+          destinationDeliverySeries: () => ({
+            ...responses.destinationDeliverySeries,
+            values: [],
+          }),
+        }),
+        { components: [asks('es-dev')] }
+      );
+
+      expect(response.components.destinations['es-dev'].events.delivery?.series.points).toEqual([]);
+    });
+
+    it('is not in the result of a type that has no way to report one, and is no error', async () => {
+      const esql = makeEsql();
+
+      const response = await run(esql, { components: [asks('dbg')] });
+
+      expect(response.components.destinations.dbg.events.delivery).toBeUndefined();
+      expect(response.components.destinations.dbg.error).toBeUndefined();
+      expect(seriesQueries(esql)).toHaveLength(0);
+    });
+
+    it('keeps the other stats, puts the error on the destinations that asked, and logs once, when its query fails', async () => {
+      const logger = loggingSystemMock.createLogger();
+
+      const response = await run(
+        makeEsql({ destinationDeliverySeries: failWith(responseError(500)) }),
+        { components: [asks('es-dev'), { kind: 'destination', id: 'es-prod' }] },
+        unit,
+        logger
+      );
+
+      const { 'es-dev': esDev, 'es-prod': esProd } = response.components.destinations;
+      // Everything else of the destination is still there, with the failure rates.
+      expect(esDev.events.incoming.rate.value).toBe(4.2);
+      expect(esDev.events.failed.authorization.rate.value).toBe(1.9);
+      expect(esDev.events.delivery).toBeUndefined();
+      expect(esDev.error).toEqual({ code: 'error', reason: expect.any(String) });
+      // A destination that did not ask has no error.
+      expect(esProd.error).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('destination elasticsearch delivery series')
+      );
+      expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
+    });
+
+    it('keeps the series of a destination when the failure queries fail, with their error', async () => {
+      const response = await run(makeEsql({ destinationAuthRates: failWith(responseError(500)) }), {
+        components: [asks('es-dev')],
+      });
+
+      const { 'es-dev': esDev } = response.components.destinations;
+      expect(esDev.events.delivery?.series.points).toHaveLength(2);
+      expect(esDev.error).toEqual({ code: 'error', reason: expect.any(String) });
+    });
+  });
+
   describe('authentication and authorization failures of an S3 destination', () => {
     const requestRate = (value: number | null) => ({ value, unit: '{request}', time_unit: 's' });
     const noS3Failed = {
@@ -836,6 +981,41 @@ describe('UnitStatsClient.getStats', () => {
         unit: '{item}',
         time_unit: 's',
       });
+    });
+
+    it('adds a series of upload attempts, in requests, to an S3 destination that asks for one', async () => {
+      const esql = s3Esql({
+        destinationDeliverySeries: () => ({
+          columns: responses.destinationDeliverySeries.columns,
+          values: [[12, 12, 12, 0, 's3-test', '2026-10-19T11:46:00.000Z']],
+        }),
+      });
+
+      const response = await run(
+        esql,
+        {
+          components: [{ kind: 'destination', id: 's3-test', include: { delivery_series: true } }],
+        },
+        s3Unit
+      );
+
+      expect(response.components.destinations['s3-test'].events.delivery?.series).toEqual({
+        bucket_ms: expect.any(Number),
+        unit: '{request}',
+        points: [
+          {
+            start: '2026-10-19T11:46:00.000Z',
+            total: 12,
+            failed: 12,
+            authentication: 12,
+            authorization: 0,
+          },
+        ],
+      });
+      const seriesQueries = statsQueries(esql).filter((query) => query.includes('total_items'));
+      expect(seriesQueries).toHaveLength(1);
+      expect(seriesQueries[0]).toContain('COUNT(metrics.streams.destination.duration)');
+      expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
     });
 
     it('keeps the latency of an S3 destination that has no items in the window', async () => {
@@ -1025,5 +1205,93 @@ describe('UnitStatsClient.getStats', () => {
         )
       ).rejects.toMatchObject({ code: 'error', statusCode: 500 });
     });
+  });
+});
+
+describe('UnitStatsClient.getDestinationCollections', () => {
+  const window = { start: '2026-10-19T11:45:00.000Z', end: '2026-10-19T12:00:00.000Z' };
+  const collectionsResponse: EsqlResponse = {
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'collection', type: 'keyword' },
+      { name: 'documents', type: 'double' },
+    ],
+    values: [
+      ['es-prod', 'logs-nginx.otel-default', 120],
+      ['es-prod', 'logs-app.otel-default', 30],
+      ['es-dev', 'logs-dev.otel-default', 4],
+      ['es-unknown', 'logs-other.otel-default', 9],
+    ],
+  };
+
+  const collectionsEsql = (respond: () => EsqlResponse = () => collectionsResponse) =>
+    jest.fn(async ({ query }: { query: string }) => (isProbe(query) ? responses.probe : respond()));
+
+  const getCollections = (
+    esql: jest.Mock,
+    destinationIds: string[] = ['es-prod', 'es-dev', 'es-idle'],
+    logger = loggingSystemMock.createLogger()
+  ) =>
+    new UnitStatsClient({
+      esClient: {
+        esql: { query: esql },
+        security: { hasPrivileges },
+      } as unknown as ElasticsearchClient,
+      logger,
+    }).getDestinationCollections({ unitId: 'default', destinationIds, window });
+
+  beforeEach(() => {
+    hasPrivileges.mockReset().mockResolvedValue({ has_all_requested: true });
+  });
+
+  it('lists the collections of each named destination with their documents, and none for one that wrote nothing', async () => {
+    await expect(getCollections(collectionsEsql())).resolves.toEqual({
+      'es-prod': [
+        { name: 'logs-nginx.otel-default', documents: 120 },
+        { name: 'logs-app.otel-default', documents: 30 },
+      ],
+      'es-dev': [{ name: 'logs-dev.otel-default', documents: 4 }],
+      'es-idle': [],
+    });
+  });
+
+  it('queries the window of the request', async () => {
+    const esql = collectionsEsql();
+    await getCollections(esql);
+
+    const [query] = statsQueries(esql);
+    expect(query).toContain(`@timestamp >= "${window.start}" AND @timestamp < "${window.end}"`);
+    expect(query).toContain('attributes.db.collection.name');
+  });
+
+  it('runs no query for no destinations', async () => {
+    const esql = collectionsEsql();
+
+    await expect(getCollections(esql, [])).resolves.toEqual({});
+    expect(esql).not.toHaveBeenCalled();
+  });
+
+  it('gives every destination an empty list while the stats stream does not exist', async () => {
+    const esql = jest.fn(async () => {
+      throw unknownIndexError();
+    });
+
+    await expect(getCollections(esql, ['es-prod'])).resolves.toEqual({ 'es-prod': [] });
+    expect(esql).toHaveBeenCalledTimes(1);
+  });
+
+  it('splits the destinations into requests of at most the component limit', async () => {
+    const esql = collectionsEsql(() => ({ ...collectionsResponse, values: [] }));
+    const ids = Array.from({ length: MAX_STREAMS_UNIT_STATS_COMPONENTS + 1 }, (_, i) => `es-${i}`);
+
+    await getCollections(esql, ids);
+
+    expect(statsQueries(esql)).toHaveLength(2);
+  });
+
+  it('throws a forbidden error when the user cannot read the stats stream', async () => {
+    await expect(
+      getCollections(collectionsEsql(failWith(responseError(403))))
+    ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
   });
 });

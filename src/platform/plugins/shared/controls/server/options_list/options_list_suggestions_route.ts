@@ -14,6 +14,7 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import type { ISearchMethods } from '@kbn/search-types';
 import type { PluginSetup as KqlPluginSetup } from '@kbn/kql/server';
 
 import { SELECTIONS_MAX } from '@kbn/controls-constants';
@@ -220,17 +221,16 @@ const getOptionsListEsqlSuggestions = async ({
 }: {
   request: OptionsListESQLFetchBody;
   abortedEvent$: Observable<void>;
-  searchAsScoped: { search: import('@kbn/search-types').ISearchGeneric };
+  searchAsScoped: Pick<ISearchMethods, 'esql'>;
   uiSettingsClient: { get: <T = unknown>(key: string) => Promise<T> };
 }): Promise<OptionsListResponse> => {
   const abortController = new AbortController();
   abortedEvent$.subscribe(() => abortController.abort());
-
   const timezone = (await uiSettingsClient.get(UI_SETTINGS.DATEFORMAT_TZ)) as string | undefined;
 
   const result = await getESQLSingleColumnValues({
     query: request.esql,
-    search: searchAsScoped.search,
+    search: searchAsScoped,
     signal: abortController.signal,
     timeRange: request.timeRange,
     filter: request.filter,

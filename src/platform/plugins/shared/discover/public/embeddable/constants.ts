@@ -34,5 +34,6 @@ export const EDITABLE_PANEL_KEYS = [
   'description', // panel description
   'time_range', // panel custom time range
   'hide_title', // panel hidden title
+  'hide_border', // panel hidden border
   'drilldowns', // panel drilldowns
 ] as const satisfies ReadonlyArray<keyof SearchEmbeddableState>;

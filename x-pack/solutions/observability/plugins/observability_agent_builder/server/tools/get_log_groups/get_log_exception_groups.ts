@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
@@ -19,6 +19,7 @@ import { getCategorizedLogs, getSamplingProbability } from './get_categorized_lo
 
 export async function getLogExceptionGroups({
   core,
+  request,
   esClient,
   index,
   startMs,
@@ -29,6 +30,7 @@ export async function getLogExceptionGroups({
   fields,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
+  request: KibanaRequest;
   esClient: IScopedClusterClient;
   index: string | undefined;
   startMs: number;
@@ -38,7 +40,7 @@ export async function getLogExceptionGroups({
   logger: Logger;
   fields: string[];
 }) {
-  const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
+  const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, request, logger }));
 
   if (logsIndices.length === 0) {
     logger.debug('No log indices configured, skipping log exceptions query');

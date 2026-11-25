@@ -9,6 +9,9 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemo } from 'react';
 
+/** Below this the title gets too narrow to read next to the Content / Document toggle. */
+const TITLE_MIN_WIDTH = '200px';
+
 export const useKiViewerStyles = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -20,6 +23,11 @@ export const useKiViewerStyles = () => {
       titleRow: css({
         gap: euiTheme.size.m,
         marginBottom: euiTheme.size.m,
+      }),
+      // The title keeps a readable width; when the row is too narrow, the toggle wraps below it.
+      titleItem: css({
+        flex: `1 1 ${TITLE_MIN_WIDTH}`,
+        minWidth: 0,
       }),
       title: css({
         overflowWrap: 'anywhere',

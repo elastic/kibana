@@ -181,19 +181,19 @@ Even the simple case of updating the Elasticsearch index using data from a datab
   },
   paramsSchema: z.union([
     z.object({
-      ...getShapeAt(index_request, 'body'),
-      ...getShapeAt(index_request, 'path'),
       ...getShapeAt(index_request, 'query'),
+      ...getShapeAt(index_request, 'path'),
+      ...getShapeAt(index_request, 'body'),
     }),
     z.object({
-      ...getShapeAt(index1_request, 'body'),
-      ...getShapeAt(index1_request, 'path'),
       ...getShapeAt(index1_request, 'query'),
+      ...getShapeAt(index1_request, 'path'),
+      ...getShapeAt(index1_request, 'body'),
     }),
     z.object({
-      ...getShapeAt(index2_request, 'body'),
-      ...getShapeAt(index2_request, 'path'),
       ...getShapeAt(index2_request, 'query'),
+      ...getShapeAt(index2_request, 'path'),
+      ...getShapeAt(index2_request, 'body'),
     }),
   ]),
   outputSchema: z.union([index_response, index1_response, index2_response]),

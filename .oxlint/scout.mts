@@ -99,8 +99,8 @@ export const scoutOverrides: OxlintOverride[] = [
   {
     // Workflows API tests use WorkflowsApiService (wrapping kbnClient/API) for workflow operations
     files: [
-      'src/platform/plugins/shared/workflows_management/test/scout/api/**/*.ts',
-      'src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/**/*.ts',
+      'x-pack/platform/plugins/shared/workflows_management/test/scout/api/**/*.ts',
+      'x-pack/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/**/*.ts',
     ],
     rules: {
       '@kbn/eslint/scout_require_api_client_in_api_test': 'off',
@@ -128,6 +128,14 @@ export const scoutOverrides: OxlintOverride[] = [
     ],
     rules: {
       '@kbn/eslint/scout_prefer_both_arch_tags': 'warn',
+    },
+  },
+  {
+    // Observability Scout tests: every root describe must declare its tags (including the
+    // single-architecture plugins excluded above)
+    files: ['x-pack/solutions/observability/{packages,plugins}/*/test/{scout,scout_*}/**/*.ts'],
+    rules: {
+      '@kbn/eslint/scout_require_tags': 'error',
     },
   },
 ];

@@ -31,6 +31,7 @@ import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
 import { UniversalAlertingIntroBanner } from './universal_alerting_intro_banner';
+import { RULES_LIST_DEFAULT_SORT } from './rules_list_columns';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -131,7 +132,7 @@ export const RulesListPage = () => {
         dataSource={dataSource}
         features={{
           sorting: {
-            initialSort: { field: 'name', direction: 'asc' },
+            initialSort: RULES_LIST_DEFAULT_SORT,
             fields: [
               {
                 field: 'name',

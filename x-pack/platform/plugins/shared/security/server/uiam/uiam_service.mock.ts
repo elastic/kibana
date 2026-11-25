@@ -17,6 +17,7 @@ export const uiamServiceMock = {
       [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
     })),
     getClientAuthentication: jest.fn(),
+    getApiKeyCreator: jest.fn().mockResolvedValue(undefined),
     getInternalCallerAttestationHeaders: jest.fn().mockReturnValue({
       [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'some-internal-caller-attestation',
     }),

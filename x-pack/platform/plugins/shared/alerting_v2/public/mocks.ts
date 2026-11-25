@@ -19,6 +19,7 @@ const createStartContract = (): AlertingV2PublicStart => ({
   AlertsProvider: jest.fn(({ children }) => children),
   ActionPoliciesPage: jest.fn(() => null),
   ExecutionHistoryPage: jest.fn(() => null),
+  ImportsPage: jest.fn(() => null),
   createAlertingV2HostApp: jest.fn(),
 });
 

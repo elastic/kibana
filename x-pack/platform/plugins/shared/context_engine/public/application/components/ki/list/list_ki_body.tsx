@@ -30,7 +30,7 @@ interface ListKiBodyProps {
   groups: ListKiGroup[];
   selectedKi?: SelectedKi;
   onSelectKi: (ki: KiListItem) => void;
-  onShowMore: (type: string, loadedCount: number) => void;
+  onShowMore: (key: string, loadedCount: number) => void;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
   isLoading: boolean;

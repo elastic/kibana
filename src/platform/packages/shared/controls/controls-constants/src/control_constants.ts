@@ -18,6 +18,13 @@ export const DEFAULT_DATA_CONTROL_STATE = {
   ignore_validations: false,
 };
 
+/**
+ * Where a data control gets its values, as saved in control state:
+ * - FIELD: values come from a field of the selected data source.
+ *   - Data view: values are fetched with a DSL request.
+ *   - ES|QL data source: values are fetched with a generated ES|QL query.
+ * - ESQL: values come from a user supplied query.
+ */
 export enum ControlValuesSource {
   FIELD = 'field',
   ESQL = 'esql',

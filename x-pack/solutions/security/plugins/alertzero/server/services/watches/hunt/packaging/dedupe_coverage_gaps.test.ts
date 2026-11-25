@@ -6,6 +6,7 @@
  */
 
 import { HuntIncompleteReason } from '@kbn/alertzero-common';
+import { describeUnsearched } from '../common/unsearched_patterns';
 import {
   GAP_REASON_PHRASES,
   dedupeCoverageGaps,
@@ -37,6 +38,10 @@ describe('dedupeCoverageGaps', () => {
       'input_truncated',
       'T2',
     ]);
+  });
+
+  it('names an index_not_searched gap with its phrase', () => {
+    expect(GAP_REASON_PHRASES.index_not_searched).toBe('index not searched');
   });
 
   it('treats an absent input as no gaps', () => {
@@ -92,6 +97,53 @@ describe('describeGap', () => {
     expect(describeGap({ reason: 'input_truncated', detail: 'secret detail' })).toBe(
       'input truncated'
     );
+  });
+
+  it('keeps the detail for index_not_searched so the coverage line names the index', () => {
+    expect(
+      describeGap({
+        reason: 'index_not_searched',
+        detail: 'The default data view names `custom-edr-1`, which this hunt could not resolve.',
+      })
+    ).toBe(
+      'The default data view names `custom-edr-1`, which this hunt could not resolve. (index not searched)'
+    );
+  });
+
+  // The detail the coordinator really produces, at each cap a summary renders it under: the
+  // closure line (500) and the Investigation and threat summaries (800).
+  it.each([
+    [
+      'four names',
+      ['logs-custom.edr-production-default', 'winlogbeat-legacy-2025.01', 'a-1', 'b-1'],
+    ],
+    ['twelve names', Array.from({ length: 12 }, (_value, index) => `custom-edr-tenant-${index}`)],
+    ['ten long names', Array.from({ length: 10 }, (_value, index) => `${'x'.repeat(90)}-${index}`)],
+  ])('renders an index_not_searched detail of %s whole', (_label, names) => {
+    const detail = describeUnsearched(names);
+    const deduped = dedupeCoverageGaps([{ reason: 'index_not_searched', detail }]);
+
+    expect(describeGaps(deduped, 500)).toBe(`${detail} (index not searched)`);
+    expect(describeGaps(deduped, 800)).toBe(`${detail} (index not searched)`);
+  });
+
+  it('lists an index_not_searched gap first, so a cut never costs the index names', () => {
+    const detail = describeUnsearched(
+      Array.from({ length: 10 }, (_value, index) => `${'x'.repeat(30)}-${index}`)
+    );
+    const deduped = dedupeCoverageGaps([
+      { reason: 'input_truncated', detail: 'only the first 50 IOCs were hunted' },
+      ...Array.from({ length: 30 }, (_value, index) => ({
+        reason: 'unknown_technique_id',
+        detail: `T${9000 + index}`,
+      })),
+      { reason: 'index_not_searched', detail },
+    ]);
+
+    const described = describeGaps(deduped, 500) ?? '';
+    expect(described.startsWith(`${detail} (index not searched), input truncated`)).toBe(true);
+    expect(described.length).toBeLessThanOrEqual(500);
+    expect(described).toMatch(/\(\+\d+ more\)$/);
   });
 
   it('falls back to the raw reason for one it does not know', () => {

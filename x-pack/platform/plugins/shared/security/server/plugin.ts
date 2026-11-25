@@ -48,6 +48,7 @@ import type { InternalAuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
+import { OlsService } from './authorization/ols/ols_service';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
@@ -235,6 +236,8 @@ export class SecurityPlugin
   private readonly fipsService: FipsService;
   private fipsServiceSetup?: FipsServiceSetupInternal;
 
+  private olsService?: OlsService;
+
   private elasticsearchUrl?: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -349,7 +352,13 @@ export class SecurityPlugin
       getServiceAccounts: () => this.serviceAccountsStart ?? null,
     });
 
-    registerSecurityUsageCollector({ usageCollection, config, license });
+    registerSecurityUsageCollector({
+      usageCollection,
+      config,
+      license,
+      logger: this.logger.get('usage'),
+      getServiceAccounts: () => this.serviceAccountsStart,
+    });
 
     const getCurrentUser = (request: KibanaRequest) =>
       this.getAuthentication().getCurrentUser(request);
@@ -384,6 +393,8 @@ export class SecurityPlugin
       features,
       getCurrentUser,
       customBranding: core.customBranding,
+      // The OLS service exists only after start. Checks made before it skip recovery.
+      getPrivilegeCheckRecovery: () => this.olsService,
     });
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });
@@ -521,18 +532,6 @@ export class SecurityPlugin
     });
     this.session = session;
 
-    this.userProfileStart = this.userProfileService.start({
-      clusterClient,
-      session,
-      getCurrentUser: core.security.authc.getCurrentUser,
-    });
-
-    // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
-    const customLogoutURL =
-      this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
-        ? cloud?.projectsUrl
-        : undefined;
-
     const config = this.getConfig();
 
     const { protocol, hostname, port } = core.http.getServerInfo();
@@ -551,6 +550,19 @@ export class SecurityPlugin
         })
       : undefined;
     this.uiam = uiam;
+
+    this.userProfileStart = this.userProfileService.start({
+      clusterClient,
+      session,
+      getCurrentUser: core.security.authc.getCurrentUser,
+      uiam,
+    });
+
+    // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
+    const customLogoutURL =
+      this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
+        ? cloud?.projectsUrl
+        : undefined;
 
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
@@ -588,6 +600,25 @@ export class SecurityPlugin
       getUserProfiles: (uids) => this.getUserProfileService().bulkGet({ uids }),
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       workloadTypes: this.getWorkloadTypes(),
+    });
+
+    this.olsService = new OlsService({
+      enabled: config.authz.ols.enabled,
+      spacesEnabled: !!spaces,
+      clusterClient,
+      authz: this.authorizationSetup!,
+      audit: this.auditSetup!,
+      // Core does not expose access policies yet, so no type is protected and the service decides
+      // nothing until the Core security delegate reads them from the Saved Objects type registry.
+      policies: { getAccessPolicy: () => undefined, getAllTypes: () => [] },
+      userProfiles: this.userProfileStart,
+      getAuthenticatedPrincipal: core.security.authc.getPrincipal,
+      hasSession: async (request) => !!(await session.getSID(request)),
+      // Service accounts are read as Kibana, for UIAM and Elasticsearch alike. A disabled account
+      // still exists, while a revoked UIAM account doesn't.
+      serviceAccountExists: async (id) =>
+        !!(await this.serviceAccountsStart?.backend.getSummary(id)),
+      logger: this.logger.get('ols'),
     });
 
     this.authorizationService.start({
