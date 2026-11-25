@@ -1031,7 +1031,7 @@ describe('WorkflowCrudService', () => {
         templateOrigin: {
           templateSlug: 'triage-alerts',
           templateVersion: '1.2.0',
-          templateOrigin: 'install',
+          templateOrigin: 'catalog',
         },
       });
 
@@ -1040,14 +1040,14 @@ describe('WorkflowCrudService', () => {
           document: expect.objectContaining({
             templateSlug: 'triage-alerts',
             templateVersion: '1.2.0',
-            templateOrigin: 'install',
+            templateOrigin: 'catalog',
           }),
         })
       );
       expect(result).toMatchObject({
         templateSlug: 'triage-alerts',
         templateVersion: '1.2.0',
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
       });
     });
 

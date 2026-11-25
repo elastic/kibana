@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TemplateOriginFieldsSource } from './pick_template_origin_fields';
 import { parseTemplateOriginFields, pickTemplateOriginFields } from './pick_template_origin_fields';
 
 describe('pickTemplateOriginFields', () => {
@@ -15,12 +16,23 @@ describe('pickTemplateOriginFields', () => {
       pickTemplateOriginFields({
         templateSlug: 'triage-alerts',
         templateVersion: '1.2.0',
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
       })
     ).toEqual({
       templateSlug: 'triage-alerts',
       templateVersion: '1.2.0',
+      templateOrigin: 'catalog',
+    });
+  });
+
+  it('reads the `install` origin stored before the rename as `catalog`', () => {
+    const storedBeforeRename = {
+      templateSlug: 'triage-alerts',
       templateOrigin: 'install',
+    } as unknown as TemplateOriginFieldsSource;
+    expect(pickTemplateOriginFields(storedBeforeRename)).toEqual({
+      templateSlug: 'triage-alerts',
+      templateOrigin: 'catalog',
     });
   });
 
@@ -67,6 +79,20 @@ describe('parseTemplateOriginFields', () => {
       templateSlug: 'triage-alerts',
       templateVersion: '1.2.0',
       templateOrigin: 'import',
+    });
+  });
+
+  it('reads the `install` origin stored before the rename as `catalog`', () => {
+    expect(
+      parseTemplateOriginFields({
+        templateSlug: 'triage-alerts',
+        templateVersion: '1.2.0',
+        templateOrigin: 'install',
+      })
+    ).toEqual({
+      templateSlug: 'triage-alerts',
+      templateVersion: '1.2.0',
+      templateOrigin: 'catalog',
     });
   });
 
