@@ -31,7 +31,7 @@ import type {
 import { EmbeddableEditorPreview, ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import type { VegaByValueState } from '../../server';
 import type { VegaReadResponseBody } from '../../server/api/read/types';
 import {
@@ -39,7 +39,7 @@ import {
   hasTooManyFilters,
   vegaEditorFlyoutBodyCss,
 } from '../components/vega_editor_body';
-import { parseSpec } from '../lib/editor_spec';
+import { parseSpec } from '../lib/parse_spec';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { fromDraft, isSameDraft, toDraft } from '../lib/editable_state';
 import type { VegaDraft, VegaEditableState } from '../lib/editable_state';

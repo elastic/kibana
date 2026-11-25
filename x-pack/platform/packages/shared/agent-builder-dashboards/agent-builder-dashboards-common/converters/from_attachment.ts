@@ -13,7 +13,8 @@ import type {
 import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
-import { buildVegaSavedVis, VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { buildVegaSavedVis } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import type {
   AttachmentPanel,
   DashboardSection as AgentDashboardSection,
@@ -31,7 +32,7 @@ import { EMPTY_DASHBOARD_STATE } from '../dashboard_state_helpers';
  *   be passed through unchanged and this branch removed.
  */
 const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
-  if (type === VEGA_VIS_TYPE) {
+  if (type === VEGA_EMBEDDABLE_TYPE) {
     const { spec, title, description, ...restConfig } = config as {
       spec?: unknown;
       title?: unknown;

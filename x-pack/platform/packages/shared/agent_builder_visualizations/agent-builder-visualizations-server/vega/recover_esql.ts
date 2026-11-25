@@ -5,19 +5,7 @@
  * 2.0.
  */
 
-import { parse as parseHjson } from 'hjson';
-
-/** Read the ES|QL query from a Kibana Vega-Lite `data.url` object, if it is one. */
-const esqlQueryFromUrl = (url: unknown): string | undefined => {
-  if (!url || typeof url !== 'object') {
-    return undefined;
-  }
-  const { '%type%': type, query } = url as Record<string, unknown>;
-  if (type === 'esql' && typeof query === 'string' && query.trim()) {
-    return query;
-  }
-  return undefined;
-};
+import { getEsqlQueriesFromSpec, parseSpec } from '@kbn/vega-utils';
 
 /**
  * Recover the ES|QL query embedded in a Vega-Lite spec's data source so that
@@ -35,12 +23,6 @@ export const extractEsqlFromSpec = (
     return undefined;
   }
 
-  let parsed: unknown;
-  try {
-    parsed = typeof spec === 'string' ? parseHjson(spec) : spec;
-  } catch {
-    return undefined;
-  }
-
-  return esqlQueryFromUrl((parsed as { data?: { url?: unknown } } | null)?.data?.url);
+  const parsed = typeof spec === 'string' ? parseSpec({ format: 'hjson', value: spec }) : spec;
+  return parsed ? getEsqlQueriesFromSpec(parsed).find((query) => query.trim()) : undefined;
 };

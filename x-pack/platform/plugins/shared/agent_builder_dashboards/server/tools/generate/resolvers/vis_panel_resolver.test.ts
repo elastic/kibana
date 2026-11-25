@@ -7,7 +7,7 @@
 
 import { buildLensConfig, buildVegaConfig } from '@kbn/agent-builder-visualizations-server';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -165,7 +165,7 @@ describe('createVisPanelResolver', () => {
     expect(result).toEqual({
       type: 'success',
       panelContent: {
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         config: { spec, title: 'Requests by host' },
       },
       authoringNote: 'Created a bar chart of requests by host with a concise title.',
@@ -209,7 +209,7 @@ describe('createVisPanelResolver', () => {
       type: 'vega',
       existingPanel: {
         id: 'panel-1',
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         config: { spec: existingSpec },
         grid: { w: 24, h: 12, x: 0, y: 0 },
       },
@@ -218,7 +218,7 @@ describe('createVisPanelResolver', () => {
     expect(result).toEqual({
       type: 'success',
       panelContent: {
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         config: { spec: nextSpec },
       },
       authoringNote: 'Changed the panel to a line chart.',
@@ -239,7 +239,7 @@ describe('createVisPanelResolver', () => {
       preserveESQL: true,
       existingPanel: {
         id: 'panel-1',
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         config: { spec: '{"mark":"bar"}' },
         grid: { w: 24, h: 10, x: 0, y: 0 },
       },

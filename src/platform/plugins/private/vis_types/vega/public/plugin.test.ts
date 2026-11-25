@@ -23,7 +23,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 

@@ -29,7 +29,7 @@ import { getMockPresentationContainer } from '@kbn/presentation-publishing/inter
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaRenderDescriptor } from '../data_model/types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
-import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';

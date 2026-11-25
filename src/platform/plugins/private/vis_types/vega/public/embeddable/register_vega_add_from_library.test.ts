@@ -8,7 +8,8 @@
  */
 
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
+import { VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { registerVegaAddFromLibrary } from './register_vega_add_from_library';
 
 describe('registerVegaAddFromLibrary', () => {

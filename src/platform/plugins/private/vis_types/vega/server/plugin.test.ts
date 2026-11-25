@@ -11,7 +11,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { VisTypeVegaPlugin } from './plugin';
-import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 
 describe('VisTypeVegaPlugin (server)', () => {
   test('registers a server definition for vega', () => {

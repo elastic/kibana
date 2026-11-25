@@ -7,9 +7,9 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
+import { parseSpec } from '@kbn/vega-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { parse as parseHjson } from 'hjson';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../resolve_panel';
 import { defineRequestPanelKind } from '../panel_kind';
@@ -128,16 +128,8 @@ export const isEsqlLensPanel = ({ type, config }: AttachmentPanel): boolean => {
 };
 
 /** Parses a Vega panel's HJSON (or JSON) spec string; `undefined` when it does not parse. */
-export const parseVegaSpec = (spec: unknown): unknown => {
-  if (typeof spec !== 'string') {
-    return spec;
-  }
-  try {
-    return parseHjson(spec);
-  } catch {
-    return undefined;
-  }
-};
+export const parseVegaSpec = (spec: unknown): unknown =>
+  typeof spec === 'string' ? parseSpec({ format: 'hjson', value: spec }) : spec;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && !Array.isArray(value);
@@ -172,7 +164,7 @@ const nestedViewDeclaresData = (view: Record<string, unknown>): boolean =>
  * does not parse is blocked too, since its data sources are unknown.
  */
 export const readsDataVegaEditsCannotKeep = ({ type, config }: AttachmentPanel): boolean => {
-  if (type !== VEGA_VIS_TYPE) {
+  if (type !== VEGA_EMBEDDABLE_TYPE) {
     return false;
   }
   const spec = parseVegaSpec(config?.spec);
@@ -197,7 +189,7 @@ export const lensPanelKind = defineRequestPanelKind({
 
 export const vegaPanelKind = defineRequestPanelKind({
   type: 'vega',
-  embeddableType: VEGA_VIS_TYPE,
+  embeddableType: VEGA_EMBEDDABLE_TYPE,
   label: 'Vega',
   selection: {
     priority: 2,

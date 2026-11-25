@@ -18,8 +18,8 @@ import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
+import { vegaFiltersSchema, vegaQuerySchema, vegaSpecSchema } from '@kbn/vega-schemas';
 import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
-import { vegaFiltersSchema, vegaQuerySchema, vegaSpecSchema } from '../api/schema';
 
 const getPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
   z.object({

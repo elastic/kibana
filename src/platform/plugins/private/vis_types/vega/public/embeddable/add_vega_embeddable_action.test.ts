@@ -9,7 +9,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { ADD_CANVAS_ELEMENT_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import { getDefaultSpec } from '../default_spec';
 import { VegaPanelIcon } from '../vega_icon';
 import { getAddVegaEmbeddableAction } from './add_vega_embeddable_action';

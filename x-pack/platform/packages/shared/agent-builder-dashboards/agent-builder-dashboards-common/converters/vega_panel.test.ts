@@ -7,7 +7,8 @@
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
-import { buildVegaSavedVis, VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { buildVegaSavedVis } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import type { DashboardAttachmentData } from '../types';
 import { attachmentDataToDashboardState } from './from_attachment';
 import { dashboardStateToAttachmentData } from './to_attachment';
@@ -26,7 +27,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
       title: 'Dash',
       panels: [
         {
-          type: VEGA_VIS_TYPE,
+          type: VEGA_EMBEDDABLE_TYPE,
           id: 'p1',
           grid,
           config: { spec: SPEC, title: 'Chart', description: 'Desc' },
@@ -72,7 +73,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
 
     expect(attachmentData.panels).toEqual([
       {
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         id: 'p1',
         grid,
         config: { spec: SPEC, title: 'Chart', description: 'Desc' },
@@ -82,7 +83,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
 
   it('round-trips a `vega` attachment panel through dashboard state unchanged', () => {
     const attachmentPanel = {
-      type: VEGA_VIS_TYPE,
+      type: VEGA_EMBEDDABLE_TYPE,
       id: 'p1',
       grid,
       config: { spec: SPEC, title: 'Chart', description: 'Desc' },
@@ -126,7 +127,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
 
     expect(attachmentData.panels).toEqual([
       {
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         id: 'p1',
         grid,
         config: {
@@ -143,7 +144,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
 
   it('round-trips panel-level settings through dashboard state', () => {
     const attachmentPanel = {
-      type: VEGA_VIS_TYPE,
+      type: VEGA_EMBEDDABLE_TYPE,
       id: 'p1',
       grid,
       config: {

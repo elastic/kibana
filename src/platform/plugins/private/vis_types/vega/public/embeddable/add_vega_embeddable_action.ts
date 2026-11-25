@@ -15,7 +15,7 @@ import { apiCanAddNewPanel, type EmbeddableApiContext } from '@kbn/presentation-
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ADD_CANVAS_ELEMENT_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import type { VegaByValueState } from '../../server';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from '../constants';
 import { getDefaultSpec } from '../default_spec';

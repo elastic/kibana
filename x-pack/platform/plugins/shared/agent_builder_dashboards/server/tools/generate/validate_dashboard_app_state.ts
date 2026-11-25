@@ -10,7 +10,7 @@ import type { z } from '@kbn/zod';
 import { getDashboardDataSchema } from '@kbn/as-code-dashboard-schema';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import {
   requiresRegisteredSchema,
   type DashboardValidationIssue,
@@ -68,7 +68,7 @@ export const createDashboardAppStateValidator = ({
   getTransforms,
 }: Pick<EmbeddableStart, 'getTransforms'>): DashboardValidator => ({
   validatePanel: ({ type, config }) => {
-    if (type === VEGA_VIS_TYPE) {
+    if (type === VEGA_EMBEDDABLE_TYPE) {
       return [];
     }
     const transformType = type === LENS_EMBEDDABLE_TYPE ? 'lens-dashboard-app' : type;

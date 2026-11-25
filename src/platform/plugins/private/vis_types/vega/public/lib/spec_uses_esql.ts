@@ -9,33 +9,8 @@
 
 import type { AggregateQuery } from '@kbn/es-query';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { CONSTANTS } from '../data_model/types';
-import type { Data, VegaSpec } from '../data_model/types';
-
-const isEsqlDataObject = (dataObj: Data) =>
-  Boolean(dataObj.url && dataObj.url[CONSTANTS.TYPE] === 'esql');
-
-const getEsqlDataObjects = (spec: VegaSpec): Data[] => {
-  if (!spec.data) return [];
-  const dataObjects = Array.isArray(spec.data) ? spec.data : [spec.data];
-  return dataObjects.filter(isEsqlDataObject);
-};
-
-/**
- * Whether a Vega specification contains at least one ES|QL data source.
- */
-export function specUsesEsql(spec: VegaSpec): boolean {
-  return getEsqlDataObjects(spec).length > 0;
-}
-
-/**
- * ES|QL `data.url.query` strings from the same top-level data sources `specUsesEsql` inspects.
- */
-export function getEsqlQueriesFromSpec(spec: VegaSpec): string[] {
-  return getEsqlDataObjects(spec)
-    .map((dataObj) => dataObj.url?.query)
-    .filter((query): query is string => typeof query === 'string');
-}
+import { getEsqlQueriesFromSpec } from '@kbn/vega-utils';
+import type { VegaSpec } from '../data_model/types';
 
 /**
  * Derived ES|QL query for related-panel highlighting. Multi-source specs publish a synthetic

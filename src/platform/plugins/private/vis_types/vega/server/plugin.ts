@@ -9,12 +9,12 @@
 
 import type { PluginInitializerContext, CoreSetup, Logger, Plugin } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import type {
   VisTypeVegaPluginSetupDependencies,
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
-import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
 import { vegaLibraryItemSavedObjectType } from './vega_saved_object';

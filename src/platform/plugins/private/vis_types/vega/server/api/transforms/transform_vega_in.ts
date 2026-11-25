@@ -10,8 +10,8 @@
 import { extractFilterReferences } from '@kbn/as-code-filters-transforms';
 import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
+import type { VegaLibraryItemState } from '@kbn/vega-schemas';
 import type { StoredVegaLibraryItemState } from '../../vega_saved_object';
-import type { VegaLibraryItemState } from '../schema';
 
 /** Converts Vega library item API state to saved object attributes and references. */
 export const transformVegaIn = (

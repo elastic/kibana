@@ -9,7 +9,7 @@
 
 import { z, lazySchema } from '@kbn/zod';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-import { vegaLibraryItemSchema } from '../schema';
+import { vegaLibraryItemSchema } from '@kbn/vega-schemas';
 import { VEGA_LIBRARY_ITEM_ID_DESCRIPTION } from '../constants';
 
 export const updateRequestParamsSchema = lazySchema(() =>

@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-import { vegaLibraryItemSchema } from '../schema';
+import { vegaLibraryItemSchema } from '@kbn/vega-schemas';
 import {
   VEGA_LIBRARY_ITEM_ID_DESCRIPTION,
   VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION,

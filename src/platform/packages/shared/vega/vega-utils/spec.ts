@@ -8,10 +8,7 @@
  */
 
 import { parse } from 'hjson';
-import type { VegaByValueState } from '../../server';
-import type { VegaSpec as ParsedVegaSpec } from '../data_model/types';
-
-type VegaSpec = VegaByValueState['spec'];
+import type { VegaSpec } from '@kbn/vega-schemas';
 
 /** The text the spec editor shows for a spec. */
 export const specToEditorValue = (spec: VegaSpec): string =>
@@ -29,12 +26,28 @@ export const specFromEditor = (text: string, format: VegaSpec['format']): VegaSp
   return { format: 'hjson', value: text };
 };
 
-/** The spec as an object, or `undefined` when its HJSON doesn't parse. */
-export const parseSpec = (spec: VegaSpec): ParsedVegaSpec | undefined => {
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * The spec as an object, or `undefined` when its HJSON doesn't parse to an object. HJSON without
+ * root braces parses to a string, as it does when the Vega panel renders.
+ */
+export const parseSpec = (spec: VegaSpec): Record<string, unknown> | undefined => {
   if (spec.format === 'json') return spec.value;
   try {
-    return parse(spec.value, { legacyRoot: false, keepWsc: true });
+    const parsed: unknown = parse(spec.value, { legacyRoot: false, keepWsc: true });
+    return isRecord(parsed) ? parsed : undefined;
   } catch {
     return undefined;
   }
 };
+
+/** ES|QL `data.url.query` strings from the top-level data sources of a parsed spec. */
+export const getEsqlQueriesFromSpec = ({ data }: { data?: unknown }): string[] =>
+  [data ?? []].flat().flatMap((source) => {
+    const url = isRecord(source) ? source.url : undefined;
+    return isRecord(url) && url['%type%'] === 'esql' && typeof url.query === 'string'
+      ? [url.query]
+      : [];
+  });

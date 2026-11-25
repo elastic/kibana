@@ -1,0 +1,15 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/zod",
+    "@kbn/as-code-filters-schema",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/vega-constants"
+  ]
+}

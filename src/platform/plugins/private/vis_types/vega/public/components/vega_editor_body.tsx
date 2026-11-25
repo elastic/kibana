@@ -15,7 +15,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { isCombinedFilter, isOfQueryType, type Filter, type Query } from '@kbn/es-query';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { omit } from 'lodash';
-import { VEGA_MAX_FILTERS } from '../../common/constants';
+import { VEGA_MAX_FILTERS } from '@kbn/vega-constants';
 import type { VegaByValueState } from '../../server';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { getData } from '../services';

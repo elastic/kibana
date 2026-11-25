@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, displayName, description, searchFilter, lazySchema } from '@kbn/zod';
+import { z, searchFilter, lazySchema } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-import { asCodeQuerySchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
-import { VEGA_MAX_FILTERS } from '../../common/constants';
+import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
+import { VEGA_MAX_FILTERS } from '@kbn/vega-constants';
 
 export const vegaSpecSchema = z
   .discriminatedUnion('format', [
@@ -39,6 +39,9 @@ export const vegaSpecSchema = z
       'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.',
   });
 
+/** A Vega panel or library item spec: an HJSON string or a JSON object. */
+export type VegaSpec = z.output<typeof vegaSpecSchema>;
+
 // TODO: Remove the expression override once the shared query schema is bounded (https://github.com/elastic/kibana/issues/299890)
 export const vegaQuerySchema = asCodeQuerySchema
   .extend({
@@ -51,24 +54,3 @@ export const vegaQuerySchema = asCodeQuerySchema
 export const vegaFiltersSchema = lazySchema(() =>
   z.array(asCodeFilterSchema).max(VEGA_MAX_FILTERS).optional()
 );
-
-export const vegaLibraryItemSchema = z
-  .object({
-    title: displayName().meta({ description: 'The Vega library item title.' }),
-    description: description()
-      .optional()
-      .meta({ description: 'A short description of the Vega library item.' }),
-    spec: vegaSpecSchema,
-    tags: getAsCodeTagsSchema().optional(),
-    query: vegaQuerySchema.meta({
-      description:
-        'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
-    }),
-    filters: vegaFiltersSchema.meta({
-      description:
-        'Filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
-    }),
-  })
-  .strict();
-
-export type VegaLibraryItemState = z.output<typeof vegaLibraryItemSchema>;

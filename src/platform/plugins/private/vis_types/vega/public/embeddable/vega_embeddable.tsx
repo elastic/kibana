@@ -65,12 +65,14 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
+import { getEsqlQueriesFromSpec } from '@kbn/vega-utils';
+import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaRenderDescriptor } from '../data_model/types';
-import { parseSpec } from '../lib/editor_spec';
+import { parseSpec } from '../lib/parse_spec';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { getDefaultDataView } from '../lib/get_default_data_view';
 import { isVegaByReferenceState } from '../../common/utils';
@@ -80,7 +82,6 @@ import {
   hasVegaLibraryItemWithTitle,
 } from '../library/vega_library_client';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
-import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { getDataViews } from '../services';
 import { createInspectorAdapters } from '../vega_inspector';

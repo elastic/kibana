@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseSpec, specFromEditor, specToEditorValue } from './editor_spec';
+import { getEsqlQueriesFromSpec, parseSpec, specFromEditor, specToEditorValue } from './spec';
 
 describe('editor spec', () => {
   describe('specToEditorValue', () => {
@@ -53,6 +53,67 @@ describe('editor spec', () => {
 
     it('returns undefined for HJSON that does not parse', () => {
       expect(parseSpec({ format: 'hjson', value: '{ mark: ' })).toBeUndefined();
+    });
+
+    it('returns undefined for HJSON without root braces', () => {
+      expect(parseSpec({ format: 'hjson', value: 'mark: bar' })).toBeUndefined();
+    });
+  });
+
+  describe('getEsqlQueriesFromSpec', () => {
+    it('returns the query from a single ES|QL data source', () => {
+      const spec = {
+        data: {
+          url: {
+            '%type%': 'esql',
+            query: 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz',
+          },
+        },
+      };
+
+      expect(getEsqlQueriesFromSpec(spec)).toEqual([
+        'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz',
+      ]);
+    });
+
+    it('returns every ES|QL query from a multi-source spec', () => {
+      const spec = {
+        data: [
+          {
+            url: {
+              '%type%': 'elasticsearch',
+              index: 'logs-*',
+            },
+          },
+          {
+            url: {
+              '%type%': 'esql',
+              query: 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz',
+            },
+          },
+          {
+            url: {
+              '%type%': 'esql',
+              query: 'FROM logs-* | WHERE color.keyword == ?color',
+            },
+          },
+        ],
+      };
+
+      expect(getEsqlQueriesFromSpec(spec)).toEqual([
+        'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz',
+        'FROM logs-* | WHERE color.keyword == ?color',
+      ]);
+    });
+
+    it('returns an empty array when there is no ES|QL source', () => {
+      expect(getEsqlQueriesFromSpec({})).toEqual([]);
+    });
+
+    it('ignores a data url that is a string', () => {
+      expect(getEsqlQueriesFromSpec({ data: { url: 'https://example.com/data.json' } })).toEqual(
+        []
+      );
     });
   });
 });
