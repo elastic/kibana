@@ -139,8 +139,10 @@ const getStateParam = (search: string) => {
   return Array.isArray(param) ? param[0] : param;
 };
 
+const hasStateParam = (search: string) => URL_SEARCH_STATE_KEY in qs.parse(search);
+
 const getStartState = (search: string, fallbackState: UrlSearchState): UrlSearchState =>
-  getStateParam(search) ? DEFAULT_URL_SEARCH_STATE : fallbackState;
+  hasStateParam(search) ? DEFAULT_URL_SEARCH_STATE : fallbackState;
 
 const readUrlSearchState = (
   value: string | null | undefined,

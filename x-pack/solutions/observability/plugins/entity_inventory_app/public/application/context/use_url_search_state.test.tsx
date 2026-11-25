@@ -391,6 +391,16 @@ describe('useUrlSearchState', () => {
       expect(result.current[0].dateRange).toEqual(DEFAULT_TIME_RANGE);
     });
 
+    it.each(['/kubernetes?_a=', '/kubernetes?_a', '/kubernetes?_a=&_a=(dateRange:foo)'])(
+      'uses the default range of the app for an empty _a in %s',
+      (entry) => {
+        const { result, history } = renderUrlState(entry, { defaultDateRange: DEFAULT_RANGE });
+
+        expect(result.current[0].dateRange).toEqual(DEFAULT_TIME_RANGE);
+        expect(readWrittenState(history)).toEqual(DEFAULT_STATE);
+      }
+    );
+
     it('does not use a range that is not allowed', () => {
       const { result, history } = renderUrlState('/kubernetes', {
         defaultDateRange: { from: 'now-7d', to: 'now' },
