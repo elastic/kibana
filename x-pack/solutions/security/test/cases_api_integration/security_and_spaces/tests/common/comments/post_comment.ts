@@ -15,7 +15,10 @@ import type {
   ExternalReferenceSOAttachmentPayload,
   AlertAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
-import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '@kbn/cases-plugin/common/constants';
+import {
+  INDICATOR_ATTACHMENT_TYPE,
+  MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
+} from '@kbn/cases-plugin/common/constants';
 import { AttachmentType, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 import {
@@ -508,6 +511,35 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: postExternalReferenceESReq,
+          expectedHttpCode: 400,
+        })) as unknown as { message: string };
+
+        expect(response.message).to.contain(persistableStateAndExternalReferenceLimitMessage);
+      });
+
+      it('400s when attempting to add a unified external reference to a case that already has 100', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: Array(100).fill(postExternalReferenceESReq),
+          expectedHttpCode: 200,
+        });
+
+        const response = (await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: INDICATOR_ATTACHMENT_TYPE,
+            attachmentId: 'indicator-1',
+            metadata: {
+              indicatorName: 'malware.exe',
+              indicatorType: 'file',
+              indicatorFeedName: '[Filebeat] AbuseCH Malware',
+            },
+            owner: 'securitySolutionFixture',
+          },
           expectedHttpCode: 400,
         })) as unknown as { message: string };
 
