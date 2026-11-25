@@ -2888,6 +2888,198 @@ describe('#checkPrivilegesWithRequest.globally', () => {
   });
 });
 
+describe('#checkPrivilegesWithRequest with recovery', () => {
+  const GET_ACTION = 'saved_object:action/get';
+  const RECOVERY_ACTION = 'saved_object:action/manage_access_control';
+
+  const setup = (
+    applicationResponse: Record<string, Record<string, boolean>>,
+    esResponse: Record<string, unknown> = {}
+  ) => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
+      // Elasticsearch counts every privilege it was asked about, recovery included.
+      has_all_requested: Object.values(applicationResponse).every((privileges) =>
+        Object.values(privileges).every(Boolean)
+      ),
+      username: 'foo-username',
+      application: { [application]: applicationResponse },
+      ...esResponse,
+    });
+    const recovery = {
+      getRecoveryActions: jest.fn().mockReturnValue(new Map([[RECOVERY_ACTION, 'action']])),
+      primeRecovery: jest.fn(),
+    };
+    const prime = recovery.primeRecovery;
+    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
+      mockActions,
+      () => Promise.resolve(mockClusterClient),
+      application,
+      () => recovery
+    );
+    const request = httpServerMock.createKibanaRequest();
+    return {
+      checkPrivileges: checkPrivilegesWithRequest(request),
+      hasPrivileges: mockScopedClusterClient.asCurrentUser.security.hasPrivileges,
+      recovery,
+      prime,
+      request,
+    };
+  };
+
+  test('leaves the check unchanged while there is no recovery to answer', async () => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
+      has_all_requested: true,
+      username: 'foo-username',
+      application: {
+        [application]: { 'space:space_1': { [mockActions.login]: true, [GET_ACTION]: true } },
+      },
+    });
+    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
+      mockActions,
+      () => Promise.resolve(mockClusterClient),
+      application,
+      () => undefined
+    );
+
+    await checkPrivilegesWithRequest(httpServerMock.createKibanaRequest()).atSpace('space_1', {
+      kibana: [GET_ACTION],
+    });
+
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      cluster: undefined,
+      index: [],
+      application: [
+        {
+          application,
+          resources: ['space:space_1'],
+          privileges: uniq([mockActions.login, GET_ACTION]),
+        },
+      ],
+    });
+  });
+
+  test('answers recovery in the same request without changing the result', async () => {
+    const { checkPrivileges, hasPrivileges, recovery, prime, request } = setup({
+      'space:space_1': { [mockActions.login]: true, [GET_ACTION]: true, [RECOVERY_ACTION]: false },
+      'space:space_2': { [mockActions.login]: true, [GET_ACTION]: true, [RECOVERY_ACTION]: true },
+    });
+
+    const result = await checkPrivileges.atSpaces(['space_1', 'space_2'], { kibana: GET_ACTION });
+
+    expect(recovery.getRecoveryActions).toHaveBeenCalledWith([GET_ACTION]);
+    expect(hasPrivileges).toHaveBeenCalledTimes(1);
+    expect(hasPrivileges.mock.calls[0][0]).toMatchObject({
+      application: [{ privileges: [mockActions.login, GET_ACTION, RECOVERY_ACTION] }],
+    });
+    expect(result.hasAllRequested).toBe(true);
+    expect(result.privileges.kibana).toEqual([
+      { resource: 'space_1', privilege: GET_ACTION, authorized: true },
+      { resource: 'space_2', privilege: GET_ACTION, authorized: true },
+    ]);
+    expect(prime).toHaveBeenCalledTimes(2);
+    expect(prime).toHaveBeenCalledWith(request, 'action', ['space_1'], false);
+    expect(prime).toHaveBeenCalledWith(request, 'action', ['space_2'], true);
+  });
+
+  test('answers recovery as missing in a space without the login action', async () => {
+    const { checkPrivileges, prime, request } = setup({
+      'space:space_1': { [mockActions.login]: false, [GET_ACTION]: true, [RECOVERY_ACTION]: true },
+    });
+
+    await checkPrivileges.atSpace('space_1', { kibana: [GET_ACTION] });
+
+    expect(prime).toHaveBeenCalledWith(request, 'action', ['space_1'], false);
+  });
+
+  test('answers no recovery for a check that does not ask for the login action', async () => {
+    const { checkPrivileges, hasPrivileges, recovery } = setup({
+      'space:space_1': { [GET_ACTION]: true },
+    });
+
+    await checkPrivileges.atSpace(
+      'space_1',
+      { kibana: [GET_ACTION] },
+      { requireLoginAction: false }
+    );
+
+    expect(recovery.getRecoveryActions).not.toHaveBeenCalled();
+    expect(hasPrivileges.mock.calls[0][0]).toMatchObject({
+      application: [{ privileges: [GET_ACTION] }],
+    });
+  });
+
+  test('primes recovery for all spaces from a global check', async () => {
+    const { checkPrivileges, prime, request } = setup({
+      [GLOBAL_RESOURCE]: { [mockActions.login]: true, [GET_ACTION]: true, [RECOVERY_ACTION]: true },
+    });
+
+    await checkPrivileges.globally({ kibana: [GET_ACTION] });
+
+    expect(prime).toHaveBeenCalledWith(request, 'action', ['*'], true);
+  });
+
+  test('still reports a missing requested privilege', async () => {
+    const { checkPrivileges } = setup({
+      'space:space_1': { [mockActions.login]: true, [GET_ACTION]: false, [RECOVERY_ACTION]: true },
+    });
+
+    const result = await checkPrivileges.atSpace('space_1', { kibana: [GET_ACTION] });
+
+    expect(result.hasAllRequested).toBe(false);
+  });
+
+  test('reports a missing login', async () => {
+    const { checkPrivileges } = setup({
+      'space:space_1': { [mockActions.login]: false, [GET_ACTION]: true, [RECOVERY_ACTION]: true },
+    });
+
+    const result = await checkPrivileges.atSpace('space_1', { kibana: [GET_ACTION] });
+
+    expect(result.hasAllRequested).toBe(false);
+  });
+
+  test('reports a requested Elasticsearch privilege that has no answer', async () => {
+    const applicationResponse = {
+      'space:space_1': { [mockActions.login]: true, [GET_ACTION]: true, [RECOVERY_ACTION]: false },
+    };
+    const { checkPrivileges } = setup(applicationResponse, {
+      has_all_requested: false,
+      cluster: {},
+      index: { 'index-1': { read: true } },
+    });
+
+    await expect(
+      checkPrivileges.atSpace('space_1', {
+        kibana: [GET_ACTION],
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      })
+    ).resolves.toMatchObject({ hasAllRequested: false });
+    await expect(
+      checkPrivileges.atSpace('space_1', {
+        kibana: [GET_ACTION],
+        elasticsearch: { cluster: [], index: { 'index-1': ['read', 'write'] } },
+      })
+    ).resolves.toMatchObject({ hasAllRequested: false });
+  });
+
+  test('leaves a recovery action the caller requested itself in the result', async () => {
+    const { checkPrivileges, hasPrivileges, prime } = setup({
+      'space:space_1': { [mockActions.login]: true, [RECOVERY_ACTION]: false },
+    });
+
+    const result = await checkPrivileges.atSpace('space_1', { kibana: [RECOVERY_ACTION] });
+
+    expect(hasPrivileges.mock.calls[0][0]).toMatchObject({
+      application: [{ privileges: [mockActions.login, RECOVERY_ACTION] }],
+    });
+    expect(result.hasAllRequested).toBe(false);
+    expect(result.privileges.kibana).toEqual([
+      { resource: 'space_1', privilege: RECOVERY_ACTION, authorized: false },
+    ]);
+    expect(prime).not.toHaveBeenCalled();
+  });
+});
+
 describe('#checkUserProfilesPrivileges.atSpace', () => {
   const checkPrivilegesAtSpaceTest = async (options: {
     spaceId: string;
