@@ -115,7 +115,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
 
   // Why: each security.alerts call runs an NL -> ES|QL generator on a second model. In the 21037 lab it
   // was ~70% of the extra input tokens, and the model called the tool ~2.8 times per run.
-  it('tells the model to call security.alerts once and tally breakdowns itself', () => {
+  it('tells the model to call security.alerts once and ask for grouped breakdowns', () => {
     const { content } = alertAnalysisSkill;
     const queuePath = content.slice(
       content.indexOf('### Queue path'),
@@ -123,7 +123,10 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     );
 
     expect(queuePath).toMatch(/call 'security\.alerts' once/i);
-    expect(queuePath).toMatch(/tally them yourself/i);
+    expect(queuePath).toMatch(/ask for all of it in one question so that the result is grouped/i);
+    expect(queuePath).toMatch(
+      /tally rows yourself only when the result says that they were not cut/i
+    );
   });
 
   // Why: with a hard stop after security.alerts, every skill arm answered "nothing is on fire" from

@@ -49,7 +49,7 @@ Pick one path before any other tool call:
 
 ### Queue path (plain list, count, or summary of many alerts)
 - Call only 'security.alerts'. For a plain list, use detail 'summary'. Keep the default detail when the question needs alert content such as command lines.
-- Call 'security.alerts' once. Each call runs a query generator and costs far more than the other tools. A count or breakdown by several fields (rule, severity, status, user, host) is one call: ask for all of it in one question, or list rows with detail 'summary' and tally them yourself. Call it again only when the first result is empty or failed, or when you need a different time window.
+- Call 'security.alerts' once. Each call runs a query generator and costs far more than the other tools. A count or breakdown by several fields (rule, severity, status, user, host) is one call: ask for all of it in one question so that the result is grouped. Tally rows yourself only when the result says that they were not cut (summary results stop at 100 rows). Call it again only when the first result is empty or failed, or when you need a different time window.
 - Answer from that result, then add one or two sentences on the pattern in the returned alerts (shared rule, host or user, severity trend, timing). Use only what the result shows. Stop.
 - Do NOT call 'security.alert-analysis.get-related-alerts', 'security.security_labs_search', or 'security.get_entity' for list, count, or summary questions.
 - Do NOT run the triage steps below.
