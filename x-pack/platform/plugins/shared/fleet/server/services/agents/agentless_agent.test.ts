@@ -2709,29 +2709,55 @@ describe('createRumClient', () => {
       'the key is missing',
       { url: 'https://agentless.example', tls: { certificate: tls.certificate } },
     ],
-  ])('is not created when %s', (_, api) => {
+  ])('is not configured when %s', async (_, api) => {
     configure(api);
-    expect(agentlessAgentService.createRumClient()).toBeUndefined();
+    const client = agentlessAgentService.createRumClient();
+
+    expect(client.isConfigured()).toBe(false);
+    await expect(client.publish(policy)).rejects.toThrow(
+      'Failed to publish the RUM policy to Agentless API'
+    );
+    expect(axios).not.toHaveBeenCalled();
   });
 
   it('prefers rumUrl, drops any base path, and falls back to url', async () => {
     configure({ url: 'https://agentless.example/api/v1/ess', rumUrl: 'https://rum.example', tls });
     jest.mocked(axios).mockResolvedValue({ status: 204 });
-    await agentlessAgentService.createRumClient()?.publish(policy);
+    await agentlessAgentService.createRumClient().publish(policy);
     expect(lastRequest().url).toBe('https://rum.example/api/v2/rum');
 
     configure({ url: 'https://agentless.example/api/v1/ess', tls });
-    await agentlessAgentService.createRumClient()?.publish(policy);
+    await agentlessAgentService.createRumClient().publish(policy);
     expect(lastRequest().url).toBe('https://agentless.example/api/v2/rum');
+  });
+
+  it('uses the current config on every request', async () => {
+    jest.mocked(axios).mockResolvedValue({ status: 204 });
+    configure({ tls });
+    const client = agentlessAgentService.createRumClient();
+    expect(client.isConfigured()).toBe(false);
+
+    configure({ rumUrl: 'https://rum.example', tls: { ...tls, key: '/path/to/new-key' } });
+    expect(client.isConfigured()).toBe(true);
+    await client.publish(policy);
+    expect(lastRequest().url).toBe('https://rum.example/api/v2/rum');
+    expect(lastRequest().httpsAgent.options.key).toBe('/path/to/new-key');
+
+    configure({ tls });
+    expect(client.isConfigured()).toBe(false);
+    await expect(client.publish(policy)).rejects.toThrow(
+      'Failed to publish the RUM policy to Agentless API'
+    );
+    expect(axios).toHaveBeenCalledTimes(1);
   });
 
   it('forces certificate verification, blocks redirects, and builds TLS per request', async () => {
     configure({ url: 'https://agentless.example', tls });
     jest.mocked(axios).mockResolvedValue({ status: 200 });
     const client = agentlessAgentService.createRumClient();
-    await client?.publish(policy);
+    await client.publish(policy);
     const first = lastRequest();
-    await client?.publish(policy);
+    await client.publish(policy);
     const second = lastRequest();
 
     expect(SslConfig).toHaveBeenCalledTimes(2);
@@ -2747,13 +2773,13 @@ describe('createRumClient', () => {
   it.each([200, 201, 204])('publishes when the API returns %s', async (status) => {
     configure({ url: 'https://agentless.example', tls });
     jest.mocked(axios).mockResolvedValueOnce({ status });
-    await expect(agentlessAgentService.createRumClient()?.publish(policy)).resolves.toBeUndefined();
+    await expect(agentlessAgentService.createRumClient().publish(policy)).resolves.toBeUndefined();
   });
 
   it('rejects an unexpected publish status and logs it', async () => {
     configure({ url: 'https://agentless.example', tls });
     jest.mocked(axios).mockResolvedValueOnce({ status: 202 });
-    await expect(agentlessAgentService.createRumClient()?.publish(policy)).rejects.toThrow(
+    await expect(agentlessAgentService.createRumClient().publish(policy)).rejects.toThrow(
       'Failed to publish the RUM policy to Agentless API'
     );
     expect(mockedLogger.warn).toHaveBeenCalledWith(
@@ -2766,7 +2792,7 @@ describe('createRumClient', () => {
     const controller = new AbortController();
     jest.mocked(axios).mockRejectedValueOnce(new AxiosError('canceled', 'ERR_CANCELED'));
     await expect(
-      agentlessAgentService.createRumClient()?.publish(policy, { signal: controller.signal })
+      agentlessAgentService.createRumClient().publish(policy, { signal: controller.signal })
     ).rejects.toThrow('Failed to publish the RUM policy to Agentless API');
     expect(lastRequest().signal).toBe(controller.signal);
     expect(mockedLogger.warn).not.toHaveBeenCalled();
@@ -2775,7 +2801,7 @@ describe('createRumClient', () => {
   it('mints a token on 201 and ignores unknown response fields', async () => {
     configure({ url: 'https://agentless.example', tls });
     jest.mocked(axios).mockResolvedValueOnce({ status: 201, data: { ...minted, extra: 'field' } });
-    await expect(agentlessAgentService.createRumClient()?.mintToken()).resolves.toEqual(minted);
+    await expect(agentlessAgentService.createRumClient().mintToken()).resolves.toEqual(minted);
     expect(lastRequest()).toMatchObject({
       method: 'POST',
       url: 'https://agentless.example/api/v2/rum/client_tokens',
@@ -2785,7 +2811,7 @@ describe('createRumClient', () => {
   it('rejects a mint response that is not 201', async () => {
     configure({ url: 'https://agentless.example', tls });
     jest.mocked(axios).mockResolvedValueOnce({ status: 200, data: minted });
-    await expect(agentlessAgentService.createRumClient()?.mintToken()).rejects.toThrow(
+    await expect(agentlessAgentService.createRumClient().mintToken()).rejects.toThrow(
       'Failed to mint a RUM token in Agentless API'
     );
   });
@@ -2844,7 +2870,7 @@ describe('createRumClient', () => {
     jest.mocked(SslConfig).mockImplementationOnce(() => {
       throw Object.assign(new Error(`ENOENT: ${tls.key}`), { code: 'ENOENT' });
     });
-    await expect(agentlessAgentService.createRumClient()?.publish(policy)).rejects.toThrow(
+    await expect(agentlessAgentService.createRumClient().publish(policy)).rejects.toThrow(
       'Failed to publish the RUM policy to Agentless API'
     );
     expect(axios).not.toHaveBeenCalled();

@@ -16,6 +16,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { AgentlessRumPolicy } from '@kbn/fleet-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
+import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { RUM_POLICY_TYPE } from './rum_policy_service';
 import { setupRum } from './setup_rum';
@@ -38,14 +39,21 @@ describe('setupRum', () => {
     jest.useRealTimers();
   });
 
-  const setup = (enabled: boolean, { hasAllRequested = true, rumClient = true } = {}) => {
+  const setup = (
+    enabled: boolean,
+    { hasAllRequested = true, configured = true, spaceId = 'default' } = {}
+  ) => {
     const core = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     const router = httpServiceMock.createRouter();
     const taskSetup = taskManagerMock.createSetup();
     const taskStart = taskManagerMock.createStart();
     const logger = loggingSystemMock.createLogger();
-    const agentless = { mintToken: jest.fn(), publish: jest.fn() };
+    const agentless = {
+      isConfigured: jest.fn(() => configured),
+      mintToken: jest.fn(),
+      publish: jest.fn(),
+    };
     const savedObjects = savedObjectsClientMock.create();
     const globally = jest.fn().mockResolvedValue({ hasAllRequested });
     const authz = {
@@ -66,9 +74,10 @@ describe('setupRum', () => {
     core.getStartServices.mockResolvedValue([
       coreStart,
       {
-        fleet: { agentless: { createRumClient: () => (rumClient ? agentless : undefined) } },
+        fleet: { agentless: { createRumClient: () => agentless } },
         taskManager: taskStart,
         security: { authz },
+        spaces: { spacesService: { getSpaceId: () => spaceId } },
       },
       {},
     ]);
@@ -188,6 +197,30 @@ describe('setupRum', () => {
       expect(agentless.publish).not.toHaveBeenCalled();
     });
 
+    it('rejects every route outside the default space', async () => {
+      const { router, savedObjects, agentless, globally, callRoute, start } = setup(true, {
+        spaceId: 'other',
+      });
+      start();
+
+      const handlers = [
+        router.get.mock.calls[0][1],
+        router.put.mock.calls[0][1],
+        router.post.mock.calls[0][1],
+        ...router.delete.mock.calls.map(([, handler]) => handler),
+      ];
+      expect(handlers).toHaveLength(5);
+      for (const handler of handlers) {
+        await expect(callRoute(handler, { id: 'rum_client' }, policy)).rejects.toMatchObject({
+          output: { statusCode: 403 },
+        });
+      }
+      expect(globally).not.toHaveBeenCalled();
+      expect(savedObjects.get).not.toHaveBeenCalled();
+      expect(agentless.mintToken).not.toHaveBeenCalled();
+      expect(agentless.publish).not.toHaveBeenCalled();
+    });
+
     it('allows reads without the global write check', async () => {
       const { router, globally, callRoute, start } = setup(true, { hasAllRequested: false });
       start();
@@ -247,16 +280,29 @@ describe('setupRum', () => {
 
     it.each([
       ['Managed RUM is disabled', false, true],
-      ['the Agentless client is unavailable', true, false],
-    ])('is registered and does nothing when %s', async (_, enabled, rumClient) => {
-      const { agentless, taskSetup, runTask, start } = setup(enabled, { rumClient });
+      ['the Agentless API is not configured', true, false],
+    ])('is registered and does nothing when %s', async (_, enabled, configured) => {
+      const { agentless, taskSetup, runTask, start } = setup(enabled, { configured });
       start();
 
       expect(taskSetup.registerTaskDefinitions).toHaveBeenCalledWith({
-        [TASK_TYPE]: expect.objectContaining({ timeout: '30s' }),
+        [TASK_TYPE]: expect.objectContaining({ timeout: '30s', cost: TaskCost.Tiny }),
       });
       await expect(runTask()).resolves.toBeUndefined();
       expect(agentless.publish).not.toHaveBeenCalled();
+    });
+
+    it('applies an Agentless config that is added after startup', async () => {
+      const { agentless, router, callRoute, runTask, start } = setup(true, { configured: false });
+      start();
+
+      await expect(callRoute(router.get.mock.calls[0][1])).rejects.toMatchObject({
+        output: { statusCode: 503 },
+      });
+      agentless.isConfigured.mockReturnValue(true);
+      expect((await callRoute(router.get.mock.calls[0][1])).ok).toHaveBeenCalled();
+      await runTask();
+      expect(agentless.publish).toHaveBeenCalled();
     });
   });
 });

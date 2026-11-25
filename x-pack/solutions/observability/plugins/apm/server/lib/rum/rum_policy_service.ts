@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import type { Logger, SavedObjectsClientContract, SavedObjectsType } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { schema, urlString } from '@kbn/config-schema';
 import type { AgentlessRumClient, AgentlessRumPolicy } from '@kbn/fleet-plugin/server';
 
 export const RUM_POLICY_TYPE = 'apm-rum-policy';
@@ -19,9 +19,7 @@ const MAX_PUBLISH_ATTEMPTS = 3;
 
 export const rumSettingsSchema = schema.object({
   enabled: schema.boolean(),
-  allowed_origins: schema.arrayOf(schema.string({ minLength: 1, maxLength: 2048 }), {
-    maxSize: MAX_ORIGINS,
-  }),
+  allowed_origins: schema.arrayOf(urlString(), { maxSize: MAX_ORIGINS }),
 });
 
 // Forward compatibility ignores unknown fields at every level, so a rollback can read newer policies.
@@ -78,6 +76,10 @@ export class RumPolicyService {
     private readonly agentless: AgentlessRumClient,
     private readonly logger: Logger
   ) {}
+
+  public isConfigured(): boolean {
+    return this.agentless.isConfigured();
+  }
 
   private async read() {
     try {
@@ -187,6 +189,7 @@ export class RumPolicyService {
    */
   public async publishLatest(signal?: AbortSignal): Promise<boolean> {
     try {
+      signal?.throwIfAborted();
       let saved = await this.read();
       for (let attempt = 0; attempt < MAX_PUBLISH_ATTEMPTS; attempt++) {
         if (!saved) {

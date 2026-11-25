@@ -7,10 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { defer, retry } from 'rxjs';
-import { schema } from '@kbn/config-schema';
+import { boundedString, schema } from '@kbn/config-schema';
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { TaskCost, throwRetryableError } from '@kbn/task-manager-plugin/server';
 import type { APMPluginStartDependencies } from '../../types';
 import { assertDeploymentWideRumWrite } from './rum_authz';
 import {
@@ -43,12 +44,13 @@ export const setupRum = (
   const service = enabled
     ? startServices
         .then(([coreStart, plugins]) => {
-          const agentless = plugins.fleet?.agentless.createRumClient?.();
+          const agentless = plugins.fleet?.agentless.createRumClient();
           if (!agentless || !plugins.taskManager) {
-            logger.warn(
-              'Managed RUM requires the Fleet Agentless mTLS configuration and Task Manager'
-            );
+            logger.warn('Managed RUM requires Fleet and Task Manager');
             return;
+          }
+          if (!agentless.isConfigured()) {
+            logger.warn('Managed RUM requires the Fleet Agentless mTLS configuration');
           }
           return new RumPolicyService(
             coreStart.savedObjects.getUnsafeInternalClient({
@@ -69,11 +71,16 @@ export const setupRum = (
       title: 'Republish the APM RUM policy',
       description: 'Restores the latest saved RUM policy in Agentless API',
       timeout: '30s',
+      cost: TaskCost.Tiny,
       createTaskRunner: ({ signal }: RunContext) => ({
         async run() {
           const policy = await service;
-          if (policy && !(await policy.publishLatest(signal)) && !signal.aborted) {
-            throw new Error('Could not republish the RUM policy');
+          // The Fleet config can be reloaded, so check it on every run.
+          if (!policy?.isConfigured()) {
+            return;
+          }
+          if (!(await policy.publishLatest(signal)) && !signal.aborted) {
+            throwRetryableError(new Error('Could not republish the RUM policy'), true);
           }
         },
       }),
@@ -124,7 +131,7 @@ export const setupRum = (
       await assertDeploymentWideRumWrite(plugins.security?.authz, request);
     }
     const policy = await service;
-    if (!policy) {
+    if (!policy?.isConfigured()) {
       throw Boom.serverUnavailable('Managed RUM is unavailable');
     }
     await ensureRecoveryScheduled();
@@ -185,7 +192,7 @@ export const setupRum = (
     {
       path: `${RUM_PATH}/client_tokens/{id}`,
       validate: {
-        params: schema.object({ id: schema.string({ minLength: 1, maxLength: 128 }) }),
+        params: schema.object({ id: boundedString({ minLength: 1, maxLength: 128 }) }),
       },
       security: writeSecurity,
       options: { access: 'internal' },

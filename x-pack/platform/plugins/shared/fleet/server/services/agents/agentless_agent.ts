@@ -97,6 +97,8 @@ export interface AgentlessRumRequestOptions {
 }
 
 export interface AgentlessRumClient {
+  /** Whether the current Fleet config has an HTTPS Agentless endpoint and mTLS credentials. */
+  isConfigured(): boolean;
   mintToken(): Promise<AgentlessRumToken & { token: string }>;
   publish(policy: AgentlessRumPolicy, options?: AgentlessRumRequestOptions): Promise<void>;
 }
@@ -178,27 +180,21 @@ export interface AgentlessAgentService {
 }
 
 class AgentlessAgentServiceImpl implements AgentlessAgentService {
-  /** Creates the mTLS client for the Agentless RUM API, or undefined when it is not configured. */
-  public createRumClient(): AgentlessRumClient | undefined {
-    const agentlessConfig = appContextService.getConfig()?.agentless;
-    const api = agentlessConfig?.api;
-    const endpoint = api?.rumUrl ?? api?.url;
-    if (!endpoint || !api?.tls?.certificate || !api.tls.key) {
-      return;
-    }
-    const rumUrl = new URL(RUM_API_PATH, endpoint);
-    if (rumUrl.protocol !== 'https:') {
-      return;
-    }
+  /** Creates the mTLS client for the Agentless RUM API. */
+  public createRumClient(): AgentlessRumClient {
     const logger = appContextService.getLogger();
+    // Resolve the endpoint and TLS per request so config reloads and rotated certificates apply.
     const request = (config: AxiosRequestConfig, options?: AgentlessRumRequestOptions) => {
-      // Build TLS per request so rotated certificates are picked up without a restart.
-      const tlsConfig = this.createTlsConfig(agentlessConfig);
+      const endpoint = this.getRumEndpoint();
+      if (!endpoint) {
+        throw new Error('Agentless RUM API is not configured');
+      }
+      const tlsConfig = this.createTlsConfig(endpoint.agentlessConfig);
       tlsConfig.rejectUnauthorized = true;
       return axios({
         ...config,
         ...this.getHeaders(tlsConfig, apm.currentTransaction?.traceparent),
-        url: `${rumUrl.href}${config.url ?? ''}`,
+        url: `${endpoint.url.href}${config.url ?? ''}`,
         maxRedirects: 0,
         timeout: 10_000,
         signal: options?.signal,
@@ -206,6 +202,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     };
 
     return {
+      isConfigured: () => Boolean(this.getRumEndpoint()),
       mintToken: async () => {
         try {
           const { data, status } = await request({ method: 'POST', url: '/client_tokens' });
@@ -233,6 +230,17 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         throw new Error('Failed to publish the RUM policy to Agentless API');
       },
     };
+  }
+
+  private getRumEndpoint() {
+    const agentlessConfig = appContextService.getConfig()?.agentless;
+    const api = agentlessConfig?.api;
+    const endpoint = api?.rumUrl ?? api?.url;
+    if (!endpoint || !api?.tls?.certificate || !api.tls.key) {
+      return;
+    }
+    const url = new URL(RUM_API_PATH, endpoint);
+    return url.protocol === 'https:' ? { url, agentlessConfig } : undefined;
   }
 
   /** Logs only non-sensitive failure details: errors can carry tokens, digests, or TLS material. */

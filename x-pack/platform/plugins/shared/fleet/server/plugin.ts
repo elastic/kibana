@@ -285,7 +285,7 @@ export interface FleetStartContract {
   fleetSetupCompleted: () => Promise<void>;
   agentless: {
     enabled: boolean;
-    createRumClient?: () => AgentlessRumClient | undefined;
+    createRumClient: () => AgentlessRumClient;
   };
   authz: {
     fromRequest(request: KibanaRequest): Promise<FleetAuthz>;

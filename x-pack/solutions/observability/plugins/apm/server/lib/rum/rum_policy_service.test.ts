@@ -41,7 +41,7 @@ describe('RumPolicyService', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     savedObjects = savedObjectsClientMock.create();
-    agentless = { mintToken: jest.fn(), publish: jest.fn() };
+    agentless = { isConfigured: jest.fn(() => true), mintToken: jest.fn(), publish: jest.fn() };
     service = new RumPolicyService(savedObjects, agentless, logger);
   });
 
@@ -199,6 +199,15 @@ describe('RumPolicyService', () => {
 
     await expect(service.publishLatest()).resolves.toBe(false);
     expect(agentless.publish).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not read the policy when the signal is already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(service.publishLatest(controller.signal)).resolves.toBe(false);
+    expect(savedObjects.get).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('does not publish once the signal is aborted', async () => {
