@@ -75,7 +75,7 @@ async function readWatchedKnowledgeIndicators({
 
   return new Map(
     queries
-      .filter(({ query }) => getUnwatchableReason(query) === undefined)
+      .filter((link) => getUnwatchableReason(link) === undefined)
       .map((query): [string, QueryLink] => [
         getKnownFailureRuleId({ spaceId, query, cpsEnabled }),
         query,

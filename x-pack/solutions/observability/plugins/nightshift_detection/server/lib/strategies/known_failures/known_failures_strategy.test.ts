@@ -21,6 +21,7 @@ const createQuery = ({
   type = 'match',
   // The lowest score significant events backs with a rule, so the default fixture sits on the edge.
   severityScore = 60,
+  isRuleBacked = false,
 }: {
   id?: string;
   sourceId?: string;
@@ -28,6 +29,7 @@ const createQuery = ({
   esql?: string;
   type?: QueryType;
   severityScore?: number;
+  isRuleBacked?: boolean;
 } = {}): QueryLink => ({
   query: {
     id,
@@ -38,7 +40,7 @@ const createQuery = ({
     severity_score: severityScore,
   },
   source_id: sourceId,
-  rule_backed: false,
+  rule_backed: isRuleBacked,
   rule_id: `rule-${id}`,
 });
 
@@ -161,7 +163,9 @@ describe('KnownFailuresStrategy', () => {
       expect(resources).toEqual([]);
       expect(skipped).toEqual([]);
       expect(notes).toEqual([
-        expect.stringMatching(/^source-1: .*\[medium\] has a severity score of 59, below 60/),
+        expect.stringMatching(
+          /^source-1: .*\[medium\] has a severity score of 59 and no rule; .* from 60/
+        ),
         expect.stringMatching(/^source-1: .*\[unscored\] has no severity score/),
         expect.stringMatching(/^source-1: .*\[stats\] is a STATS query/),
         expect.stringMatching(/^source-1: .*\[limited\] uses LIMIT/),
@@ -172,6 +176,16 @@ describe('KnownFailuresStrategy', () => {
         expect.stringMatching(/^source-1: .*\[param\] uses \? parameters/),
         expect.stringMatching(/^source-1: .*\[long\] is too long/),
       ]);
+    });
+
+    // Significant events lets an operator promote any match indicator by hand, whatever its score.
+    it('watches a lower-scored knowledge indicator promoted to a rule', async () => {
+      const { resources, notes } = await new KnownFailuresStrategy().resources(
+        createContext([createQuery({ severityScore: 59, isRuleBacked: true })])
+      );
+
+      expect(resources).toHaveLength(1);
+      expect(notes).toEqual([]);
     });
 
     it('keeps the rule of a disabled source, turned off', async () => {
