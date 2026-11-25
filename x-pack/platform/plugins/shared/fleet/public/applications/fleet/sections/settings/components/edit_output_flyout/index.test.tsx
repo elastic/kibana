@@ -2556,12 +2556,26 @@ describe('EditOutputFlyout', () => {
       });
 
       it('should fetch the Fleet status again once when it does not report output secret storage', () => {
+        let fleetStatus = { isLoading: true, refetch: mockRefetchFleetStatus };
+        mockedUseFleetStatus.mockImplementation(() => fleetStatus as any);
+        // any edit renders the flyout again, which reads the current status
+        const setStatusAndRerender = (isLoading: boolean, endpoint: string) => {
+          fleetStatus = { isLoading, refetch: mockRefetchFleetStatus };
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+            target: { value: endpoint },
+          });
+        };
+
         const { utils } = renderFlyout();
         selectOtlpType(utils);
-        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
-          target: { value: 'collector.example.com:4317' },
-        });
+        expect(mockRefetchFleetStatus).not.toHaveBeenCalled();
 
+        setStatusAndRerender(false, 'collector.example.com:4317');
+        expect(mockRefetchFleetStatus).toHaveBeenCalledTimes(1);
+
+        // the refetched status still does not report it: no second refetch
+        setStatusAndRerender(true, 'collector.example.com:4318');
+        setStatusAndRerender(false, 'collector.example.com:4319');
         expect(mockRefetchFleetStatus).toHaveBeenCalledTimes(1);
       });
 
