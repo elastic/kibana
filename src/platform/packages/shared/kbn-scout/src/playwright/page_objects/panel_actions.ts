@@ -102,20 +102,6 @@ export class PanelActions {
   }
 
   /**
-   * Checks if a quick action is currently visible in the panel's hover actions row.
-   *
-   * This is a point-in-time check, not a wait: use it for the current state only, and prefer
-   * `clickHoverAction` when the goal is to interact with the action. Unlike the context menu, there
-   * is no reliable signal that the hover actions have finished loading: `data-actions-loading`
-   * does not cover quick actions that change afterwards (e.g. Edit), so a `false` result can be
-   * a false negative.
-   */
-  async panelHasHoverAction(actionTestSubj: string, title?: string): Promise<boolean> {
-    const panelWrapper = await this.hoverPanel(title);
-    return panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`).isVisible();
-  }
-
-  /**
    * Asserts that a quick action is visible in the panel's hover actions row (throws if not found).
    * Waits for the action to render, so this is safe right after a view mode change, when quick
    * actions are still being resolved.
@@ -126,6 +112,26 @@ export class PanelActions {
   async expectHasHoverAction(actionTestSubj: string, title?: string) {
     const panelWrapper = await this.hoverPanel(title);
     await expect(panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`)).toBeVisible();
+  }
+
+  /**
+   * Asserts that a quick action is NOT visible in the panel's hover actions row.
+   *
+   * Waits for `data-actions-loading="false"`, which is set once the compatibility checks for the
+   * panel's actions have resolved. It does NOT cover quick actions that are added or removed
+   * afterwards by the frequently changing action subscriptions (e.g. Edit and Show configuration,
+   * which follow the view mode). Only use this for an action that cannot become compatible later,
+   * otherwise a `false` result can pass before the action appears.
+   *
+   * @param actionTestSubj - `data-test-subj` of the quick action that must not be in the hover row.
+   * @param title - Panel title. If omitted, uses the first panel.
+   */
+  async expectHasNoHoverAction(actionTestSubj: string, title?: string) {
+    const panelWrapper = await this.hoverPanel(title);
+    await expect(
+      panelWrapper.locator('.embPanel__hoverActions[data-actions-loading="false"]')
+    ).toBeVisible();
+    await expect(panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`)).toBeHidden();
   }
 
   /**
@@ -188,9 +194,9 @@ export class PanelActions {
     try {
       // The context menu is populated asynchronously. The hover actions set
       // `data-actions-loading="false"` once every action's compatibility check has resolved, so a
-      // missing action is a real absence and not a menu that is still loading. This only holds for
-      // the context menu: do not use it to assert on hover actions, which can still change after
-      // it is set.
+      // missing action is a real absence and not a menu that is still loading. The context menu is
+      // not affected by the frequently changing action subscriptions, which only change quick
+      // actions (see `expectHasNoHoverAction`).
       await expect(
         this.getPanelHoverActionsLocator(title).locator(
           '.embPanel__hoverActions[data-actions-loading="false"]'

@@ -991,9 +991,16 @@ export class DashboardApp {
     await this.panelActions.expectHasHoverAction(actionTestSubj, title);
   }
 
-  /** Checks if a quick action is currently visible in the panel's hover actions row. */
-  async panelHasHoverAction(actionTestSubj: string, title?: string): Promise<boolean> {
-    return this.panelActions.panelHasHoverAction(actionTestSubj, title);
+  /**
+   * Asserts that a quick action is NOT visible in the panel's hover actions row. Only use this for
+   * an action that cannot become compatible later: it does not cover quick actions that the
+   * frequently changing action subscriptions add afterwards (e.g. Edit, Show configuration).
+   *
+   * @param actionTestSubj - `data-test-subj` of the quick action that must not be in the hover row.
+   * @param title - Panel title. If omitted, uses the first panel.
+   */
+  async expectHasNoHoverAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.expectHasNoHoverAction(actionTestSubj, title);
   }
 
   /** Asserts that an action is listed in the panel's context menu (throws if not found). */
