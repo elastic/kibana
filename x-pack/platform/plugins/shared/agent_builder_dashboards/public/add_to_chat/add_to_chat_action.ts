@@ -55,6 +55,7 @@ export const DASHBOARD_PANEL_ADD_TO_CHAT_PATHWAY = 'dashboard_panel';
 
 /** How long to wait for the open conversation to load before staging the dashboard anyway. */
 export const CONVERSATION_LOAD_TIMEOUT_MS = 10_000;
+const MAX_CONVERSATION_RESOLVE_ATTEMPTS = 3;
 
 export interface DashboardAddToChatActionDeps {
   agentBuilder: Pick<
@@ -237,31 +238,53 @@ export const createDashboardAddToChatAction = (
         },
       });
 
-      const activeConversation = await getActiveConversation();
-      const conversationDashboards =
-        activeConversation?.conversation?.attachments?.filter(isDashboardAttachment) ?? [];
-      const { origin, attachment: linkedAttachment } = resolveDashboardAttachmentLink({
-        api: dashboardApi,
-        canWriteDashboards,
-        attachments: conversationDashboards,
-        isStagedFromSavedDashboard: stagedDashboards.isStagedFromSavedDashboard,
-      });
-      // an unlinked dashboard, e.g. a managed one, points at the copy it already sent, because the
-      // chat skips a dashboard input whose content it already stores; a copy the dashboard has
-      // since diverged from, e.g. by its filters, is staged again so the agent reads the current one
-      const sentCandidate = linkedAttachment
-        ? undefined
-        : conversationDashboards.findLast(
-            (attachment) =>
-              stagedDashboards.isStagedFrom(attachment.id, dashboardApi) &&
-              hasPanel(attachment, embeddable.uuid)
-          );
-      const sentData = sentCandidate && getLatestVersion(sentCandidate)?.data;
-      const sentAttachment =
-        sentData &&
-        (await isAttachmentShownInDashboard({ areEqual, dashboardState, data: sentData }))
-          ? sentCandidate
-          : undefined;
+      // an unlinked dashboard, e.g. a managed one, points at a copy it already sent that still matches
+      // it, because the chat skips a dashboard input whose content it already stores; a copy the
+      // dashboard has since diverged from, e.g. by its filters, is staged again so the agent reads
+      // the current one
+      const findSentAttachment = async (
+        conversationDashboards: ConversationDashboardAttachment[]
+      ): Promise<ConversationDashboardAttachment | undefined> => {
+        const candidates = conversationDashboards.filter(
+          (attachment) =>
+            stagedDashboards.isStagedFrom(attachment.id, dashboardApi) &&
+            hasPanel(attachment, embeddable.uuid)
+        );
+        for (const candidate of candidates.toReversed()) {
+          const data = getLatestVersion(candidate)?.data;
+          if (data && (await isAttachmentShownInDashboard({ areEqual, dashboardState, data }))) {
+            return candidate;
+          }
+        }
+      };
+      const resolveConversation = async () => {
+        const conversation = await getActiveConversation();
+        const conversationDashboards =
+          conversation?.conversation?.attachments?.filter(isDashboardAttachment) ?? [];
+        const link = resolveDashboardAttachmentLink({
+          api: dashboardApi,
+          canWriteDashboards,
+          attachments: conversationDashboards,
+          isStagedFromSavedDashboard: stagedDashboards.isStagedFromSavedDashboard,
+        });
+        const sent = link.attachment ? undefined : await findSentAttachment(conversationDashboards);
+        return { conversation, link, sent };
+      };
+
+      // the comparison is async: resolve again if the user switched or closed the chat meanwhile, so
+      // the pointer never targets a dashboard id of another conversation
+      let resolved = await resolveConversation();
+      for (let attempt = 1; attempt < MAX_CONVERSATION_RESOLVE_ATTEMPTS; attempt++) {
+        if ((await getActiveConversation())?.id === resolved.conversation?.id) {
+          break;
+        }
+        resolved = await resolveConversation();
+      }
+      const {
+        conversation: activeConversation,
+        link: { origin, attachment: linkedAttachment },
+        sent: sentAttachment,
+      } = resolved;
 
       let attachments: Array<PendingDashboardAttachment | PendingDashboardPanelAttachment>;
       if (sentAttachment) {
