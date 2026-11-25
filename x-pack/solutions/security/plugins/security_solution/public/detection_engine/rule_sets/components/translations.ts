@@ -568,6 +568,28 @@ export const CLEAR_CONDITIONS = i18n.translate(
   { defaultMessage: 'Clear' }
 );
 
+export const MEMBERS_PICKED = (count: number, name: string) =>
+  i18n.translate('xpack.securitySolution.ruleSets.members.picked', {
+    values: { count, name },
+    defaultMessage:
+      '{count, plural, one {# rule is} other {# rules are}} picked into "{name}": in the set even if they do not match its filters. Select rules and "Remove from set" to take them out.',
+  });
+
+export const MEMBERS_LEFT_OUT = (count: number, name: string) =>
+  i18n.translate('xpack.securitySolution.ruleSets.members.leftOut', {
+    values: { count, name },
+    defaultMessage:
+      '{count, plural, one {# rule is} other {# rules are}} left out of "{name}": they match its filters but are not in the set. Select rules and "Put back in the set" to bring them back.',
+  });
+
+export const BACK_TO_SET = i18n.translate('xpack.securitySolution.ruleSets.members.back', {
+  defaultMessage: 'Back to the set',
+});
+
+export const PUT_BACK = i18n.translate('xpack.securitySolution.ruleSets.members.putBack', {
+  defaultMessage: 'Put back in the set',
+});
+
 export const SAVE_AS_RULE_SET_TITLE = i18n.translate(
   'xpack.securitySolution.ruleSets.saveDialog.title',
   { defaultMessage: 'Save as rule set' }

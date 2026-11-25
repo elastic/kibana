@@ -37,7 +37,28 @@ export const RuleSetsUtilityActions = () => {
           ruleRuleIds={selectedRules.map((rule) => rule.rule_id)}
         />
       </EuiFlexItem>
-      {groupId && (
+      {groupId && filterOptions.members === 'left_out' && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="plusCircle"
+            isLoading={isLoading}
+            data-test-subj="ruleSetsPutBack"
+            onClick={async () => {
+              try {
+                await bulkAssign({ ids: selectedRuleIds, add_to: [groupId] });
+                addSuccess(i18n.MENU_APPLIED_TOAST);
+                clearRulesSelection();
+              } catch (error) {
+                addError(error, { title: i18n.SAVE_ERROR });
+              }
+            }}
+          >
+            {i18n.PUT_BACK}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+      {groupId && filterOptions.members !== 'left_out' && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"

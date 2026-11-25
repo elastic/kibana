@@ -59,7 +59,10 @@ export interface RuleQueryParams {
  * Until the set's conditions are in the facets, the saved set.
  */
 export const ruleQueryParams = (filterOptions: FilterOptions): RuleQueryParams => {
-  const { ruleSetId } = filterOptions;
+  const { ruleSetId, members } = filterOptions;
+  if (ruleSetId && members) {
+    return { rule_scope: { rule_set_id: ruleSetId, members } };
+  }
   if (ruleSetId) {
     return {
       rule_scope:

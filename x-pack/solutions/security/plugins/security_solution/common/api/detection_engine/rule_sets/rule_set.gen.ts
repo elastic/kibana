@@ -203,12 +203,22 @@ export type RuleSetConditions = z.infer<typeof RuleSetConditions>;
 (`rule_set_id` and `conditions`: its picked and left-out rules stay, an unsaved change of the
 set); or to a rule set definition that is not saved (`conditions`, `included_rule_ids`,
 `excluded_rule_ids`). `rule_set_id` and the rule id lists do not go together.
+`rule_set_id` with `members` lists only the set's picked or left-out rules.
 
   */
 export const RuleScope = lazySchema(() =>
   z
     .object({
       rule_set_id: RuleSetId.optional(),
+      /**
+       * With `rule_set_id`, only the rules picked into the set or only the rules left out of it.
+       */
+      members: z
+        .enum(['picked', 'left_out'])
+        .optional()
+        .describe(
+          'With `rule_set_id`, only the rules picked into the set or only the rules left out of it.'
+        ),
       conditions: RuleSetConditions.optional(),
       included_rule_ids: z.array(RuleSetRuleId).max(10000).optional(),
       excluded_rule_ids: z.array(RuleSetRuleId).max(10000).optional(),

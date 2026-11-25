@@ -43,15 +43,26 @@ import {
 import { ActiveFacetChips } from '../facets/active_facet_chips';
 import * as i18n from './translations';
 
-/** What a set is: its saved conditions and its picked and left-out rules, in one line. */
+/**
+ * What a set is: its saved conditions and its picked and left-out rules, in one line. The rule
+ * counts are links that list those rules in the table.
+ */
 export const RuleSetDefinitionLine = ({ group }: { group: RuleSetSummary }) => {
+  const {
+    state: { filterOptions },
+    actions: { setFilterOptions },
+  } = useRulesTableContext();
   const integrationTitles = useIntegrationTitles();
-  const parts = [
-    ...describeConditionParts(group.conditions, integrationTitles),
-    ...(group.included_rules_count ? [i18n.PICKED(group.included_rules_count)] : []),
-    ...(group.excluded_rules_count ? [i18n.LEFT_OUT(group.excluded_rules_count)] : []),
+  const conditions = describeConditionParts(group.conditions, integrationTitles);
+  const members = [
+    ...(group.included_rules_count
+      ? [{ kind: 'picked' as const, label: i18n.PICKED(group.included_rules_count) }]
+      : []),
+    ...(group.excluded_rules_count
+      ? [{ kind: 'left_out' as const, label: i18n.LEFT_OUT(group.excluded_rules_count) }]
+      : []),
   ];
-  if (!parts.length) {
+  if (!conditions.length && !members.length) {
     return null;
   }
   return (
@@ -59,10 +70,27 @@ export const RuleSetDefinitionLine = ({ group }: { group: RuleSetSummary }) => {
       <EuiFlexItem grow={false}>
         <EuiIcon type="filter" size="s" color="subdued" aria-hidden />
       </EuiFlexItem>
-      {parts.map((part, index) => (
+      {conditions.map((part, index) => (
         <EuiFlexItem grow={false} key={part}>
           <EuiText size="xs" color="subdued" data-test-subj="ruleSetConditionChip">
             {index > 0 ? `· ${part}` : part}
+          </EuiText>
+        </EuiFlexItem>
+      ))}
+      {members.map(({ kind, label }, index) => (
+        <EuiFlexItem grow={false} key={kind}>
+          <EuiText size="xs" color="subdued">
+            {conditions.length || index > 0 ? '· ' : ''}
+            <EuiButtonEmpty
+              size="xs"
+              flush="both"
+              onClick={() =>
+                setFilterOptions({ members: filterOptions.members === kind ? undefined : kind })
+              }
+              data-test-subj={`ruleSetShowMembers-${kind}`}
+            >
+              {filterOptions.members === kind ? <strong>{label}</strong> : label}
+            </EuiButtonEmpty>
           </EuiText>
         </EuiFlexItem>
       ))}
@@ -299,6 +327,7 @@ export const RulesFilterBar = () => {
   const { browse, ruleSetId } = filterOptions;
   const { data: sets } = useRuleSetsWithCountsQuery();
   const { data: ruleManagementFilters } = useRuleManagementFilters();
+  const { members } = filterOptions;
   const integrationTitles = useIntegrationTitles();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const group = sets?.find(({ id }) => id === ruleSetId);
@@ -307,6 +336,40 @@ export const RulesFilterBar = () => {
   const hasFilters = ruleSetId
     ? isRuleSetChanged(filterOptions, group)
     : Object.keys(filtersToGroupConditions(filterOptions)).length > 0;
+
+  if (group && members) {
+    return (
+      <>
+        <EuiPanel
+          color="primary"
+          paddingSize="s"
+          hasShadow={false}
+          data-test-subj="ruleSetsMembersBar"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiText size="s" data-test-subj="ruleSetsFilterBarSummary">
+                {members === 'picked'
+                  ? i18n.MEMBERS_PICKED(pagination.total, group.name)
+                  : i18n.MEMBERS_LEFT_OUT(pagination.total, group.name)}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="chevronSingleLeft"
+                onClick={() => setFilterOptions({ members: undefined })}
+                data-test-subj="ruleSetsBackToSet"
+              >
+                {i18n.BACK_TO_SET}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiSpacer size="s" />
+      </>
+    );
+  }
 
   if (!hasFilters && !browse) {
     return null;

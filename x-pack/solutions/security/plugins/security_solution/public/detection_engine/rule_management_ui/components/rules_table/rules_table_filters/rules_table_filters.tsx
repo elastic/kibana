@@ -42,7 +42,7 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
   const handleOnSearch = useCallback(
     (filterString: string) => {
       startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-      setFilterOptions({ filter: filterString.trim() });
+      setFilterOptions({ filter: filterString.trim(), members: undefined });
     },
     [setFilterOptions, startTransaction]
   );

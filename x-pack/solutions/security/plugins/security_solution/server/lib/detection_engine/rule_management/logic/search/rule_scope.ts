@@ -26,6 +26,7 @@ export interface RuleScopeMembership {
  * - `rule_set_id`: the saved set;
  * - `rule_set_id` and `conditions`: the saved set's picked and left-out rules with other
  *   conditions, an unsaved change of the set (the rules page edits a set in place);
+ * - `rule_set_id` and `members`: only the set's picked or only its left-out rules;
  * - `conditions`, `included_rule_ids`, `excluded_rule_ids`: a definition that is not saved.
  */
 export const resolveRuleScopeMembership = async (
@@ -37,10 +38,15 @@ export const resolveRuleScopeMembership = async (
   }
   const {
     rule_set_id: ruleSetId,
+    members,
     conditions,
     included_rule_ids: includedRuleIds,
     excluded_rule_ids: excludedRuleIds,
   } = scope;
+
+  if (members && (!ruleSetId || conditions)) {
+    throw new BadRequestError('rule_scope.members needs rule_set_id and no conditions');
+  }
 
   if (ruleSetId) {
     if (includedRuleIds || excludedRuleIds) {
@@ -49,6 +55,13 @@ export const resolveRuleScopeMembership = async (
       );
     }
     const set = await (await getRuleSetsClient()).get(ruleSetId);
+    if (members) {
+      return {
+        conditions: {},
+        included_rule_ids: members === 'picked' ? set.included_rule_ids : set.excluded_rule_ids,
+        excluded_rule_ids: [],
+      };
+    }
     return {
       conditions: conditions ?? set.conditions,
       included_rule_ids: set.included_rule_ids,

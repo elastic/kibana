@@ -20,7 +20,7 @@ import { hasRuleSetConditions } from '../../../../common/detection_engine/rule_s
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRuleSetsQuery } from '../api';
-import { ruleQueryParams } from '../table_query';
+import { isRuleSetChanged, ruleQueryParams, ruleSetFilterState } from '../table_query';
 import { FacetPanel } from './facet_panel';
 import { HideFacetPanelButton } from './facet_panel_visibility';
 import { useFacetCounts } from './use_facet_counts';
@@ -49,7 +49,10 @@ export const RulesFacetPanel = () => {
     window.clearTimeout(scheduled.current);
     requestAnimationFrame(() => {
       window.clearTimeout(scheduled.current);
-      scheduled.current = window.setTimeout(() => setFilterOptions({ conditions: next }), 0);
+      scheduled.current = window.setTimeout(
+        () => setFilterOptions({ conditions: next, members: undefined }),
+        0
+      );
     });
   };
 
@@ -69,7 +72,8 @@ export const RulesFacetPanel = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            {hasRuleSetConditions(shown) && (
+            {/* Inside a set the facets are its conditions: clearing them would empty the set. */}
+            {!set && hasRuleSetConditions(shown) && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
@@ -77,6 +81,18 @@ export const RulesFacetPanel = () => {
                   data-test-subj="ruleFacetClearAll"
                 >
                   {i18n.CLEAR_ALL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            {set && isRuleSetChanged(filterOptions, set) && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="refresh"
+                  onClick={() => setFilterOptions(ruleSetFilterState(set))}
+                  data-test-subj="ruleFacetReset"
+                >
+                  {i18n.RESET}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             )}

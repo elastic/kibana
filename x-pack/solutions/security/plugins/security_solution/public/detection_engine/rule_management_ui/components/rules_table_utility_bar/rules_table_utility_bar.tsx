@@ -122,16 +122,18 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
               >
                 {i18n.REFRESH}
               </UtilityBarAction>
-              {!rulesTableContext.state.isDefault && (
-                <UtilityBarAction
-                  dataTestSubj="clearTableFilters"
-                  iconSide="left"
-                  iconType="cross"
-                  onClick={rulesTableContext.actions.clearFilters}
-                >
-                  {i18n.CLEAR_RULES_TABLE_FILTERS}
-                </UtilityBarAction>
-              )}
+              {/* Inside a set the filters are the set's conditions: Reset is in the filter bar. */}
+              {!rulesTableContext.state.isDefault &&
+                !rulesTableContext.state.filterOptions.ruleSetId && (
+                  <UtilityBarAction
+                    dataTestSubj="clearTableFilters"
+                    iconSide="left"
+                    iconType="cross"
+                    onClick={rulesTableContext.actions.clearFilters}
+                  >
+                    {i18n.CLEAR_RULES_TABLE_FILTERS}
+                  </UtilityBarAction>
+                )}
             </UtilityBarGroup>
           </>
         </UtilityBarSection>

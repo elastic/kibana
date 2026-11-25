@@ -128,6 +128,8 @@ export interface FilterOptions {
   conditions?: RuleSetConditions;
   /** The set whose saved conditions the facets started from; until then the set is shown as saved. */
   draftOf?: string;
+  /** Inside a set: show only its picked or only its left-out rules. */
+  members?: 'picked' | 'left_out';
   /** One value of one facet, picked in "Browse by". */
   browse?: { category: GranularRulesFacetCategory; value: string };
   /** Split the table into sections by this field. */

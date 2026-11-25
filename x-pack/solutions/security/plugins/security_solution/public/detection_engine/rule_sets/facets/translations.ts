@@ -19,6 +19,10 @@ export const CLEAR_ALL = i18n.translate('xpack.securitySolution.ruleSets.facets.
   defaultMessage: 'Clear all',
 });
 
+export const RESET = i18n.translate('xpack.securitySolution.ruleSets.facets.reset', {
+  defaultMessage: 'Reset',
+});
+
 export const INTEGRATION = i18n.translate('xpack.securitySolution.ruleSets.facets.integration', {
   defaultMessage: 'Integration',
 });

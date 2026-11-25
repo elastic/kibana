@@ -196,9 +196,14 @@ components:
         (`rule_set_id` and `conditions`: its picked and left-out rules stay, an unsaved change of the
         set); or to a rule set definition that is not saved (`conditions`, `included_rule_ids`,
         `excluded_rule_ids`). `rule_set_id` and the rule id lists do not go together.
+        `rule_set_id` with `members` lists only the set's picked or left-out rules.
       properties:
         rule_set_id:
           $ref: '#/components/schemas/RuleSetId'
+        members:
+          type: string
+          enum: [picked, left_out]
+          description: With `rule_set_id`, only the rules picked into the set or only the rules left out of it.
         conditions:
           $ref: '#/components/schemas/RuleSetConditions'
         included_rule_ids:

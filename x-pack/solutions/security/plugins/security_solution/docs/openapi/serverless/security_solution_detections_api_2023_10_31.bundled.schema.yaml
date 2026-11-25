@@ -9156,6 +9156,9 @@ components:
 
         `excluded_rule_ids`). `rule_set_id` and the rule id lists do not go
         together.
+
+        `rule_set_id` with `members` lists only the set's picked or left-out
+        rules.
       type: object
       properties:
         conditions:
@@ -9170,6 +9173,13 @@ components:
             $ref: '#/components/schemas/RuleSetRuleId'
           maxItems: 10000
           type: array
+        members:
+          description: With `rule_set_id`, only the rules picked into the set or only the
+            rules left out of it.
+          enum:
+            - picked
+            - left_out
+          type: string
         rule_set_id:
           $ref: '#/components/schemas/RuleSetId'
     RuleSet:
