@@ -6,13 +6,14 @@
  */
 
 import type { KbnClient, ScoutLogger } from '@kbn/scout-security';
-import { apiTest as baseApiTest, PUBLIC_API_HEADERS } from '@kbn/scout-security';
+import { apiTest as baseApiTest } from '@kbn/scout-security';
 import {
   FLEET_AND_HOST_TIMEOUT_MS,
   withEnrolledHost,
   withFleetServerForEndpoint,
   type EnrolledHost,
 } from '../../../fixtures/enrolled_endpoint';
+import { buildRequestHeaders } from '../../../fixtures/request_headers';
 import {
   createProtectedEndpointPolicy,
   createUnprotectedEndpointPolicy,
@@ -96,12 +97,7 @@ export const apiTest = baseApiTest.extend<
           },
         ],
       });
-      await use({
-        ...apiKeyHeader,
-        ...PUBLIC_API_HEADERS,
-        'kbn-xsrf': 'scout-edr-real-fleet',
-        'Content-Type': 'application/json',
-      });
+      await use(buildRequestHeaders(apiKeyHeader));
     },
     { scope: 'worker' },
   ],
