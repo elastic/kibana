@@ -160,3 +160,15 @@ export const valueWithChangeLabel = (value: string, change: string): string =>
 export const COMPARE_LABEL = i18n.translate('xpack.digitalExperience.compare', {
   defaultMessage: 'Compare to the previous period',
 });
+
+/** A value with its share of the total, e.g. "600 (60%)". */
+export const valueWithShareLabel = (value: string, share: string): string =>
+  i18n.translate('xpack.digitalExperience.mobile.valueWithShare', {
+    defaultMessage: '{value} ({share})',
+    values: { value, share },
+  });
+
+/** The release health's group of every release but the top ones. */
+export const OTHER_RELEASE_LABEL = i18n.translate('xpack.digitalExperience.mobile.releases.other', {
+  defaultMessage: 'Other',
+});

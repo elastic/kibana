@@ -26561,6 +26561,8 @@ paths:
 
         After authorization, validation, and feature-flag checks pass, each request writes one `memory_save_event` audit event.
 
+        Returns 429 when Elasticsearch rejects the request because it is overloaded. The whole request is rejected (unlike individual `failed` items in a 200 response); retry with backoff.
+
         Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.
 
         **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): contextEngine:manage_memory.
@@ -26809,6 +26811,34 @@ paths:
                 required:
                   - message
           description: Context Engine or memory is turned off, or an AI index does not exist.
+        '429':
+          content:
+            application/json:
+              examples:
+                tooManyRequestsExample:
+                  description: Elasticsearch rejected the whole request with 429; retry with backoff
+                  summary: Too many requests
+                  value:
+                    error: Too Many Requests
+                    message: 'es_rejected_execution_exception: too many requests'
+                    statusCode: 429
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Elasticsearch rejected the request because it is overloaded. The whole request was rejected (unlike individual `failed` items in a 200 response); retry with backoff.
       summary: Save session events
       tags:
         - context engine
@@ -182577,11 +182607,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
@@ -185169,11 +185202,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
@@ -193035,11 +193071,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
