@@ -1,0 +1,40 @@
+{
+  "sha1": "55f9ab52c74be17117b9aad8e6b4b1361163e030",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a3535936ce1129d-681ec9552c91412",
+      "title": "Get started: integration collection tiles groups packages that share a group into one collection tile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/onboarding/ui/tests/integration_collection_tiles.spec.ts",
+        "line": 59,
+        "column": 82
+      }
+    },
+    {
+      "id": "a3535936ce1129d-435fcc3ad9b1846",
+      "title": "Get started: integration collection tiles opens the chooser and lands on the picked variant with the Security return target",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/onboarding/ui/tests/integration_collection_tiles.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    }
+  ]
+}

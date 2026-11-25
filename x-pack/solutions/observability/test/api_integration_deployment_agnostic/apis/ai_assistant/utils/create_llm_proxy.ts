@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withTimeout } from '@kbn/std';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
 import { isString, once, pull, isFunction, last, first } from 'lodash';
@@ -420,7 +420,7 @@ export class LlmProxy {
 }
 
 export async function createLlmProxy(log: ToolingLog) {
-  const port = await getPort({ port: getPort.makeRange(9000, 9100) });
+  const port = await getPort({ port: portNumbers(9000, 9100) });
   log.debug(`Starting LLM Proxy on port ${port}`);
   return new LlmProxy(port, log);
 }

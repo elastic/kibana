@@ -43,6 +43,16 @@ export interface ArtifactTabCase {
     selector: string;
     value: string;
   };
+  /**
+   * Condition the list-page edit replaces the created one with. Only set for
+   * event filters, whose form `replaceEventFiltersCondition` drives.
+   */
+  updateCriteria?: {
+    field: string;
+    value: string;
+    selector: string;
+    expected: string;
+  };
 }
 
 export const getArtifactTabCase = (kind: PolicyArtifactKind): ArtifactTabCase => {
@@ -114,6 +124,12 @@ export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
     createCriteria: {
       selector: 'EventFiltersListPage-card-criteriaConditions-condition',
       value: 'AND @timestampIS 1234',
+    },
+    updateCriteria: {
+      field: 'agent.name',
+      value: 'test',
+      selector: 'EventFiltersListPage-card-criteriaConditions-condition',
+      expected: 'AND agent.nameIS test',
     },
   },
   {

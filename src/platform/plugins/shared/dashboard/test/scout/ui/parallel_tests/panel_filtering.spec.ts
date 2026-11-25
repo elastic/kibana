@@ -7,31 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardApiDataInput } from '@kbn/as-code-dashboard-schema';
 import { spaceTest, tags } from '@kbn/scout';
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { createMetricPanel, readMetricValue } from '../metric_panel';
 
 const FILTER_FIELD = 'geo.src';
 const FILTER_VALUE = 'US';
 
-const parseMetricValue = (text: string) => Number(text.replace(/[^\d.]/g, ''));
-
 const TIME_RANGE = { from: '2015-09-19T06:31:44.000Z', to: '2015-09-23T18:31:44.000Z' };
-
-const METRIC_PANEL: NonNullable<DashboardApiDataInput['panels']>[number] = {
-  type: 'vis',
-  grid: { x: 0, y: 0, w: 24, h: 10 },
-  config: {
-    type: 'metric',
-    data_source: {
-      type: 'data_view_spec',
-      index_pattern: 'logstash-*',
-      time_field: '@timestamp',
-    },
-    metrics: [{ type: 'primary', operation: 'count' }],
-  },
-};
 
 spaceTest.describe('Panel filtering (dashboard)', { tag: tags.deploymentAgnostic }, () => {
   let filteredDashboardId: string;
@@ -48,7 +31,7 @@ spaceTest.describe('Panel filtering (dashboard)', { tag: tags.deploymentAgnostic
             condition: { field: FILTER_FIELD, operator: 'is', value: FILTER_VALUE },
           },
         ],
-        panels: [METRIC_PANEL],
+        panels: [createMetricPanel('logstash-*')],
       },
       scoutSpace.id
     );
@@ -56,7 +39,7 @@ spaceTest.describe('Panel filtering (dashboard)', { tag: tags.deploymentAgnostic
       {
         title: `Dashboard without filters - ${scoutSpace.id}`,
         time_range: TIME_RANGE,
-        panels: [METRIC_PANEL],
+        panels: [createMetricPanel('logstash-*')],
       },
       scoutSpace.id
     );
@@ -69,16 +52,6 @@ spaceTest.describe('Panel filtering (dashboard)', { tag: tags.deploymentAgnostic
   spaceTest.afterAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
   });
-
-  // The dashboards have a single metric panel with a single tile.
-  const getMetricValueLocator = (page: ScoutPage) =>
-    page.testSubj.locator('mtrVis').locator('.echMetricText__valueBlock');
-
-  const readMetricValue = async (page: ScoutPage) => {
-    const metricValue = getMetricValueLocator(page);
-    await expect(metricValue).toHaveText(/\d/);
-    return parseMetricValue(await metricValue.innerText());
-  };
 
   spaceTest('saved filter can be applied and disabled', async ({ page, pageObjects }) => {
     let filteredValue = 0;
@@ -107,9 +80,7 @@ spaceTest.describe('Panel filtering (dashboard)', { tag: tags.deploymentAgnostic
         expect(await pageObjects.filterBar.hasFilter({ field: FILTER_FIELD, enabled: false })).toBe(
           true
         );
-        await expect
-          .poll(async () => parseMetricValue(await getMetricValueLocator(page).innerText()))
-          .toBeGreaterThan(filteredValue);
+        await expect.poll(() => readMetricValue(page)).toBeGreaterThan(filteredValue);
       }
     );
   });
@@ -126,9 +97,7 @@ spaceTest.describe('Panel filtering (dashboard)', { tag: tags.deploymentAgnostic
     });
     await pageObjects.dashboard.waitForRenderComplete();
 
-    await expect
-      .poll(async () => parseMetricValue(await getMetricValueLocator(page).innerText()))
-      .toBeLessThan(unfilteredValue);
+    await expect.poll(() => readMetricValue(page)).toBeLessThan(unfilteredValue);
   });
 
   spaceTest(

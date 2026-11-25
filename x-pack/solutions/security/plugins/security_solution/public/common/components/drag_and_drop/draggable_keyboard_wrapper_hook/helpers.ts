@@ -9,7 +9,7 @@ import type { Position } from 'css-box-model';
 import type { FluidDragActions } from '@hello-pangea/dnd';
 import { KEYBOARD_DRAG_OFFSET } from '@kbn/securitysolution-t-grid';
 
-import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
+import { stopPropagationAndPreventDefault } from '../../../utils/accessibility';
 
 /**
  * Temporarily disables tab focus on child links of the draggable to work

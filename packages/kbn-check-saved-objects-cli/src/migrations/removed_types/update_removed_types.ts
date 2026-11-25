@@ -37,7 +37,6 @@ export async function updateRemovedTypes(
       ? `SO type '${type}' is no longer registered. Updated 'removed_types.json' to prevent the same name from being reused in the future.`
       : `SO type '${type}' is no longer registered. Please run with --fix to update 'removed_types.json'.`,
     fixHint,
-    docsAnchor: '#defining-model-versions',
   }));
 
   throw new SavedObjectsCheckError(findings);

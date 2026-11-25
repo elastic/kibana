@@ -6,8 +6,6 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { PluginInitializerContext } from '@kbn/core/server';
-import { PluginInitializer } from '@kbn/core-di-server';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type {
   Alert,
@@ -24,9 +22,13 @@ import type { LoggerServiceContract } from '../../services/logger_service/logger
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { isEsqlSubPlanTooLargeError } from '../../errors/esql_sub_plan_too_large_error';
 import { PRE_FETCH_STUCK_ADVANCE_LAG_MS } from '../constants';
-import type { PluginConfig } from '../../../config';
+import { ConfigService } from '../../services/config_service/config_service';
 import { buildAlertDetailsUrl } from '../alert_details_url';
 import { KibanaBaseUrlToken } from '../tokens';
+import {
+  DispatcherTelemetryToken,
+  type DispatcherTelemetryContract,
+} from '../otel/dispatcher_telemetry';
 
 interface RawAlert {
   last_event_timestamp: string;
@@ -47,10 +49,10 @@ export class FetchAlertsStep implements DispatcherStep {
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(KibanaBaseUrlToken) private readonly kibanaBaseUrl: string,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    @inject(ConfigService) configService: ConfigService,
+    @inject(DispatcherTelemetryToken) private readonly telemetry: DispatcherTelemetryContract
   ) {
-    this.alertsPerTick = pluginConfigAccessor.get<PluginConfig>().dispatcher.run.alerts.max;
+    this.alertsPerTick = configService.get('dispatcher.run.alerts.max');
   }
 
   public async execute(
@@ -63,7 +65,7 @@ export class FetchAlertsStep implements DispatcherStep {
 
     let result: RawAlert[];
     try {
-      result = await this.queryService.executeQueryRows<RawAlert>({
+      result = await this.queryService.executeQuery<RawAlert>({
         query: getDispatchableAlertEventsQuery({ gte, lte, limit: this.alertsPerTick }).query,
         // Lucene push-down is lower-bounded only. An `lte: windowEnd` here would
         // drop action docs stamped with `now` (after the settle buffer) and
@@ -102,6 +104,18 @@ export class FetchAlertsStep implements DispatcherStep {
 
     if (alerts.length === 0) {
       return { type: 'halt', reason: 'no_alerts' };
+    }
+
+    if (truncated) {
+      const truncationEdge = alerts[alerts.length - 1].last_event_timestamp;
+      logger.warn({
+        code: ALERTING_LOG_CODES.DISPATCHER_ALERT_SCAN_TRUNCATED,
+        message: () =>
+          `alert scan returned ${this.alertsPerTick} rows (dispatcher.run.alerts.max) for ` +
+          `[${gte}, ${lte}]; the tail is deferred to the next tick and the watermark can ` +
+          `advance at most to the truncation edge ${truncationEdge}.`,
+      });
+      this.telemetry.recordAlertScanTruncated();
     }
 
     return { type: 'continue', data: { scan: AlertScan.of({ alerts, truncated }) } };

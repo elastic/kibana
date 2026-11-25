@@ -21,7 +21,10 @@ import type {
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
-import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
+import {
+  CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+  MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
+} from '../../../../../../common/endpoint/service/artifacts/constants';
 import { CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE } from '../../../../../../common/endpoint/constants';
 import { OS_TITLES } from '../../../../common/translations';
 import { VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS } from '../../hooks/use_validate_custom_yara_signature';
@@ -596,6 +599,34 @@ describe('Custom YARA signatures form', () => {
         expect(
           screen.getByTestId('customYaraSignatures-form-validation-requestError')
         ).toHaveTextContent('Unable to validate YARA signature.');
+      });
+    });
+
+    it('should show a size error and set isValid to false without calling the API if the signature is too large', async () => {
+      const oversizeSignature = 'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH * 3);
+
+      render(
+        createProps({
+          item: createItem({
+            name: 'test name',
+            entries: [createYaraEntry(oversizeSignature)],
+          }),
+        })
+      );
+      flushValidationDebounce();
+
+      expect(screen.getByTestId('customYaraSignatures-form-validation-error')).toHaveTextContent(
+        'Error: Definition must not exceed 32,766 bytes (currently 98,298 bytes)'
+      );
+      expect(
+        screen.queryByTestId('customYaraSignatures-form-validation-requestError')
+      ).not.toBeInTheDocument();
+      expect(mockedContext.coreStart.http.post).not.toHaveBeenCalledWith(
+        CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE,
+        expect.anything()
+      );
+      await waitFor(() => {
+        expect(onChangeSpy).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: false }));
       });
     });
 

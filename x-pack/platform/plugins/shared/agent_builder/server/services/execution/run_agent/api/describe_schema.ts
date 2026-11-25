@@ -9,7 +9,7 @@ import { mapValues, memoize, omit } from 'lodash';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { dedupeInlineDefinitions, INLINE_DEFINITIONS_FILE } from './inline_definitions';
 import { loadSchemaClosure } from './schema_closure';
-import { BODY_ROOT_KEY, isRecord } from './types';
+import { BODY_ROOT_KEY, ROUTING_LOCATION_KEY, isRecord } from './types';
 
 // Character limit for inline definitions
 const MAX_INLINED_DEFINITION_CHARS = 1_200;
@@ -33,7 +33,6 @@ export const EXPANDABLE_KEY = 'x-expandable';
 const PROPERTY_NAMES_KEY = 'x-properties';
 const UNION_BRANCH_NAMES_KEY = 'x-one-of';
 const OMITTED_NAMES_KEY = 'x-omitted';
-const ROUTING_LOCATION_KEY = 'x-found-in';
 const SELF_POINTER = '#';
 
 interface DefinitionRef {

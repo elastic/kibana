@@ -8,8 +8,8 @@
  */
 
 import SLACK_THREAD_WORKFLOW_YAML from './slack_thread_workflow.yaml';
+import { renderRunAs } from '../../../render_bound_yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
-import { renderRunAs } from '../render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID = 'system-nightshift-slack-thread-bound';
 
@@ -31,7 +31,8 @@ export const NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
   // 2: the investigation call inherits the space's agent account (`run-as-mode: inherit`).
-  version: 2,
+  // 3: the investigation call records `context.entry_point: slack`.
+  version: 3,
   billable: false,
   yamlTemplate: renderBoundSlackThreadYaml,
   management: {

@@ -6,26 +6,73 @@
  */
 
 import type { CoreWebVital } from './core_web_vitals';
+import type { FrustrationCounts } from './frustration';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from './otel_data';
 
-/** Bump when the transform pivot, dest pipeline, or dest mappings change. */
+/**
+ * Bump when the summary document or its mappings change: the summaries task then rebuilds every
+ * session into a new index and deletes the older one.
+ */
 export const SESSIONS_VERSION = 1;
 export const SESSIONS_MANAGED_BY = 'digital_experience';
 
 export const SESSIONS_SOURCE_INDICES = [OTEL_TRACES_INDEX, OTEL_LOGS_INDEX] as const;
-export const SESSIONS_TRANSFORM_ID = `digital-experience-sessions-${SESSIONS_VERSION}`;
-export const SESSIONS_TRANSFORM_PATTERN = 'digital-experience-sessions-*';
-export const SESSIONS_INDEX = `digital-experience-sessions-${SESSIONS_VERSION}`;
-export const SESSIONS_INDEX_PATTERN = 'digital-experience-sessions-*';
-export const SESSIONS_INDEX_TEMPLATE_NAME = 'digital-experience-sessions';
-export const SESSIONS_PIPELINE_NAME = `digital-experience-sessions-${SESSIONS_VERSION}`;
+const SESSIONS_INDEX_PREFIX = 'digital-experience-sessions-';
+/** Matches the session summaries of every platform; the documented index privileges name it. */
+export const ALL_SESSIONS_INDEX_PATTERN = `${SESSIONS_INDEX_PREFIX}*`;
+const BROWSER_SESSIONS_BASE_NAME = `${SESSIONS_INDEX_PREFIX}browser`;
+/** The browser session summaries. */
+export const SESSIONS_INDEX = `${BROWSER_SESSIONS_BASE_NAME}-${SESSIONS_VERSION}`;
+/** The browser session summaries of every version: what the readers and the template cover. */
+export const SESSIONS_INDEX_PATTERN = `${BROWSER_SESSIONS_BASE_NAME}-*`;
+/** The browser session summaries index template. */
+export const SESSIONS_INDEX_TEMPLATE_NAME = BROWSER_SESSIONS_BASE_NAME;
 
+export const SESSIONS_TASK_TYPE = 'digital_experience:sessions-summaries';
+export const SESSIONS_TASK_ID = 'digital_experience:sessions-summaries';
+
+/** Bump when the mobile summary document or its mappings change, as `SESSIONS_VERSION`. */
+export const MOBILE_SESSIONS_VERSION = 1;
+const MOBILE_SESSIONS_BASE_NAME = `${SESSIONS_INDEX_PREFIX}mobile`;
+/** The EDOT Android and EDOT iOS session summaries, React Native apps' included. */
+export const MOBILE_SESSIONS_INDEX = `${MOBILE_SESSIONS_BASE_NAME}-${MOBILE_SESSIONS_VERSION}`;
+export const MOBILE_SESSIONS_INDEX_PATTERN = `${MOBILE_SESSIONS_BASE_NAME}-*`;
+export const MOBILE_SESSIONS_INDEX_TEMPLATE_NAME = MOBILE_SESSIONS_BASE_NAME;
+
+export const MOBILE_SESSIONS_TASK_TYPE = 'digital_experience:mobile-sessions-summaries';
+export const MOBILE_SESSIONS_TASK_ID = 'digital_experience:mobile-sessions-summaries';
+
+/**
+ * How often the mobile summaries are rebuilt for the last `MOBILE_SESSIONS_RECONCILE_HOURS`: the
+ * SDKs buffer events on the device and send crashes on the next launch, so events can arrive long
+ * after the regular pass summarized their time.
+ */
+export const MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES = 60;
+/** Events that arrive later than this after their time are not summarized. */
+export const MOBILE_SESSIONS_RECONCILE_HOURS = 24;
+
+/** How often the summaries task runs by default. */
 export const SESSIONS_DEFAULT_FREQUENCY = '1m';
-export const SESSIONS_SYNC_DELAY = '60s';
-/** Changed sessions handled per change-detection round and per composite page. */
-export const SESSIONS_MAX_PAGE_SEARCH_SIZE = 5000;
-export const SESSIONS_MAX_PARTITIONS = 32;
+/**
+ * Summary queries the task runs at once by default, and at most: each holds about 50 MB of Kibana
+ * memory, and four is the most Task Manager's largest task cost budgets for.
+ */
+export const SESSIONS_DEFAULT_CONCURRENCY = 2;
+export const SESSIONS_MAX_CONCURRENCY = 4;
+/** Events this recent are left for the next run, as they may still be arriving. */
+export const SESSIONS_SYNC_DELAY_SECONDS = 60;
+/** Sessions are built from, and kept for, this many days of events. */
 export const SESSIONS_LOOKBACK_DAYS = 30;
+/**
+ * Longest `session.id` that is summarized. The detail route takes ids up to this, so a longer one
+ * would be listed and then fail to open; it also bounds what a summary query inlines.
+ */
+export const SESSIONS_MAX_ID_LENGTH = 256;
+/**
+ * The longest session: EDOT Browser ends one after 4 hours by default and 24 hours at most, so a
+ * changed session is rebuilt from this far back.
+ */
+export const SESSIONS_MAX_SESSION_HOURS = 24;
 /** Max page views kept, in order, for the session journey. */
 export const SESSIONS_JOURNEY_SIZE = 10;
 /**
@@ -33,66 +80,121 @@ export const SESSIONS_JOURNEY_SIZE = 10;
  * URLs that differ only in their query or hash collapse into one page.
  */
 export const SESSIONS_JOURNEY_URL_CANDIDATES = 3 * SESSIONS_JOURNEY_SIZE;
+/** Frustrated element selectors and page paths kept per session, the ones with the most signals. */
+export const SESSIONS_FRUSTRATION_VALUES = 20;
+/** Frustrated URLs collected per session, as URLs that differ in their query or hash share a page. */
+export const SESSIONS_FRUSTRATION_URL_CANDIDATES = 3 * SESSIONS_FRUSTRATION_VALUES;
+/** The longest value the summaries index as a keyword (`ignore_above`). */
+export const SESSIONS_MAX_KEYWORD_LENGTH = 1024;
 
 export const SESSION_SORT_FIELDS = [
   'start_time',
   'duration_ms',
   'page_view_count',
   'click_count',
-  'error_count',
+  'js_error_count',
+  'http_failed_request_count',
+  'frustration_count',
 ] as const;
 export type SessionSortField = (typeof SESSION_SORT_FIELDS)[number];
 
+// The sessions list API's limits, which the app also keeps its URL and inputs to.
+export const SESSIONS_LIST_DEFAULT_PER_PAGE = 25;
+export const SESSIONS_LIST_MAX_PER_PAGE = 100;
+/** The last page, counted from 0. */
+export const SESSIONS_LIST_MAX_PAGE = 1000;
+/** A week; longer sessions only match a lower bound. */
+export const SESSIONS_LIST_MAX_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
+export const SESSIONS_LIST_MAX_SEARCH_LENGTH = 256;
+/** The longest value of each facet filter. */
+export const SESSIONS_LIST_MAX_FACET_LENGTHS = {
+  browser: 256,
+  os: 256,
+  country: 16,
+  entryPage: 1024,
+} as const;
+/** The longest frustrated element selector or page path the list filters by: the summaries' keyword `ignore_above`. */
+export const SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH = SESSIONS_MAX_KEYWORD_LENGTH;
+
 export type SessionWebVitals = Record<CoreWebVital, number | null>;
 
-export type SessionsTransformHealth = 'missing' | 'healthy' | 'lagging' | 'degraded' | 'outdated';
+export type SessionsHealth = 'missing' | 'disabled' | 'healthy' | 'lagging' | 'degraded';
 
 export interface SessionsSettings {
+  /** How often the summaries task runs, as a time value such as `1m`. */
   frequency: string;
-  partitions: number;
 }
 
-/** Whose credentials a transform runs with, as Elasticsearch recorded them on the last update. */
-export interface SessionsTransformAuthorization {
-  roles: string[] | null;
-  apiKeyName: string | null;
-  serviceAccount: string | null;
-}
-
-export interface SessionsTransformStatus {
-  id: string;
-  partition: number | null;
-  version: number | null;
-  frequency: string | null;
-  state: string | null;
-  health: SessionsTransformHealth;
-  lagSeconds: number | null;
-  reason: string | null;
-  /** Username of whoever last enabled sessions, as Kibana recorded it. */
-  enabledBy: string | null;
-  enabledAt: string | null;
-  authorization: SessionsTransformAuthorization | null;
+export interface SessionsRunError {
+  /**
+   * What Elasticsearch or the task reported, for users who may see those details; `null` for
+   * everyone else, who are told a run failed without being told why.
+   */
+  message: string | null;
+  at: string;
 }
 
 export interface SessionsStatus {
+  /** True once sessions are enabled: the summaries task is scheduled. */
   installed: boolean;
-  /** Worst health across the installed transforms. */
-  health: SessionsTransformHealth;
-  state: string | null;
+  /**
+   * True when a user with the manage sessions privilege turned sessions off: the task no longer
+   * runs, the summaries built so far are kept, and only such a user can turn them back on.
+   */
+  disabled: boolean;
+  health: SessionsHealth;
+  /** Version of the summaries the task writes, and of this Kibana's. */
   installedVersion: number | null;
   currentVersion: number;
-  /** True when a user with the manage sessions privilege must enable sessions again. */
-  needsUpdate: boolean;
-  reason: string | null;
-  /** Largest freshness lag across partitions, in seconds. */
+  /**
+   * True until the task has caught up since sessions were enabled or their version changed: the
+   * sessions index is being built, from up to `SESSIONS_LOOKBACK_DAYS` of data, oldest first.
+   */
+  rebuilding: boolean;
+  /**
+   * True when the task's API key was invalidated or expired: it can't run until a user who can set
+   * sessions up enables them again, which the app does by itself.
+   */
+  apiKeyInvalid: boolean;
+  /** How far the summaries are behind, in seconds: every event before `summarizedUntil` is in. */
   lagSeconds: number | null;
-  configured: SessionsSettings;
-  installedPartitions: number;
-  /** Who last enabled sessions, and the credentials the transforms run with since. */
+  summarizedUntil: string | null;
+  lastRunAt: string | null;
+  lastSuccessAt: string | null;
+  /** The last run's failure, until a run succeeds. */
+  lastError: SessionsRunError | null;
+  /** Who last enabled sessions: the task runs with an API key granted on their behalf. */
   enabledBy: string | null;
-  enabledAt: string | null;
-  authorization: SessionsTransformAuthorization | null;
-  transforms: SessionsTransformStatus[];
+  /** Sessions are kept for this many days, so older time ranges have none. */
+  retentionDays: number;
+  /**
+   * True when sessions aren't set up, or their API key no longer works, and the current user has
+   * every privilege enabling checks, so they can set them up. Never once they were turned off.
+   */
+  canEnable: boolean;
+  /**
+   * True when the current user can set sessions up, there are EDOT Browser or mobile events to
+   * summarize, and setting them up hasn't failed on this Kibana in the last hour: the app then sets
+   * them up without asking.
+   */
+  autoEnable: boolean;
+  /**
+   * True when the current user manages sessions in all spaces: they can turn sessions off and back
+   * on, and are told who enabled them and why a run failed.
+   */
+  canManage: boolean;
+  /**
+   * Why nobody can set sessions up, when they need setting up: Kibana has no Task Manager to run
+   * the summaries task, or no encryption key to store its API key.
+   */
+  setUpBlocker: SessionsSetUpBlocker | null;
+}
+
+export type SessionsSetUpBlocker = 'taskManager' | 'encryptionKey';
+
+/** The browser sessions status, and that of the mobile sessions, which their own task builds. */
+export interface SessionsStatusResponse extends SessionsStatus {
+  mobile: SessionsStatus;
 }
 
 const TIME_VALUE = /^([1-9][0-9]*)(s|m|h)$/;
@@ -105,17 +207,11 @@ export const timeValueSeconds = (value: string | null | undefined): number | nul
 };
 
 /**
- * Lag after which the sessions transform counts as lagging: three missed checkpoints plus the
- * sync delay, and never less than five minutes.
+ * Lag after which the summaries count as lagging: three missed runs plus the sync delay, and never
+ * less than five minutes.
  */
 export const sessionsLagThresholdSeconds = (frequency: string | null | undefined): number =>
-  Math.max(300, 3 * (timeValueSeconds(frequency) ?? 60) + 60);
-
-/** Transform id of one partition. A single partition keeps the unsuffixed id. */
-export const sessionsTransformId = (partition: number, partitions: number): string =>
-  partitions === 1
-    ? SESSIONS_TRANSFORM_ID
-    : `${SESSIONS_TRANSFORM_ID}-p${partition}of${partitions}`;
+  Math.max(300, 3 * (timeValueSeconds(frequency) ?? 60) + SESSIONS_SYNC_DELAY_SECONDS);
 
 export interface SessionUserAgent {
   browser: string | null;
@@ -138,12 +234,18 @@ export interface SessionSummary {
   durationMs: number;
   eventCount: number;
   pageViewCount: number;
+  /** Full page loads, as the applications list counts them; page views add in-app navigations. */
+  pageLoadCount: number;
   clickCount: number;
-  errorCount: number;
+  jsErrorCount: number;
+  httpRequestCount: number;
+  failedRequestCount: number;
+  frustration: FrustrationCounts;
   bounced: boolean;
   entryPage: string | null;
   exitPage: string | null;
   journey: string[];
+  environment: string | null;
   user: string | null;
   userAgent: SessionUserAgent;
   geo: SessionGeo;
@@ -167,7 +269,9 @@ export interface SessionListKpis {
   medianDurationMs: number | null;
   avgPageViews: number | null;
   bounceRate: number | null;
-  sessionsWithErrors: number;
+  sessionsWithJsErrors: number;
+  sessionsWithFailedRequests: number;
+  sessionsWithFrustration: number;
   webVitals: SessionWebVitals;
 }
 
@@ -176,44 +280,111 @@ export interface SessionListResponse {
   total: number;
   page: number;
   perPage: number;
-  /**
-   * Sessions in range the dest pipeline couldn't summarize. They're left out of the list and
-   * KPIs, as their counts are missing; see `error.message` in the sessions index.
-   */
-  failedSummaries: number;
+  /** Sessions are kept for this many days, so older time ranges have none. */
+  retentionDays: number;
   facets: SessionListFacets;
   kpis: SessionListKpis;
 }
 
+/** The events the journey lists; the API leaves out all others, which Discover shows. */
 export type SessionTimelineEventKind =
   | 'page_view'
   | 'click'
   | 'error'
   | 'web_vital'
-  | 'span'
-  | 'log';
+  | 'frustration';
 
 export interface SessionTimelineEvent {
   kind: SessionTimelineEventKind;
   name: string;
   timestamp: string;
   offsetMs: number;
-  durationMs: number | null;
   page: string | null;
   detail: string | null;
+  /** The clicks a rage click summarizes; `null` for every other event. */
+  clickCount: number | null;
+  /** The stack trace of an error, when the browser reported one. */
+  stacktrace: string | null;
   traceId: string | null;
   spanId: string | null;
+  /** The uncaught exception behind an error click; unset for every other event. */
+  exception?: SessionTimelineException;
+}
+
+/** The uncaught exception a frustration signal names, as an error click does. */
+export interface SessionTimelineException {
+  type: string | null;
+  message: string | null;
+  stacktrace: string | null;
+}
+
+/** How long each network phase of a request took, in milliseconds; 0 when it didn't happen. */
+export interface SessionRequestPhases {
+  /** Queued before the DNS lookup or the connection started. */
+  queued: number;
+  dns: number;
+  /** TCP connection, TLS included. */
+  connect: number;
+  tls: number;
+  /** From sending the request to the first byte of the response. */
+  waiting: number;
+  download: number;
+}
+
+/** A network request of the session: the page document, a resource, or a fetch/XHR call. */
+export interface SessionRequest {
+  url: string;
+  /** The W3C `initiatorType`, e.g. `script` or `fetch`; `navigation` for the page document. */
+  initiatorType: string;
+  method: string | null;
+  statusCode: number | null;
+  failed: boolean;
+  /** When the request started, placed from the timings relative to its page's time origin. */
+  startTime: string;
+  durationMs: number;
+  /**
+   * The phases, unless the browser withheld them: a cross-origin resource whose server doesn't
+   * send `Timing-Allow-Origin` only reports when it started and ended.
+   */
+  phases: SessionRequestPhases | null;
+  /** The browser withheld the phases and sizes: `Timing-Allow-Origin` is missing. */
+  timingWithheld: boolean;
+  /** Served from the browser cache, without network transfer. */
+  cached: boolean;
+  /** Bytes over the network, headers included. */
+  transferSize: number | null;
+  /** Bytes of the response body after decompression. */
+  decodedBodySize: number | null;
+  renderBlocking: boolean;
+  protocol: string | null;
+  traceId: string | null;
+  spanId: string | null;
+  /** The index of the page visit the request belongs to, in `pageVisits`. */
+  visitIndex: number;
+}
+
+/** The milestones of a full page load, in milliseconds from the start of its navigation. */
+export interface SessionPageLoad {
+  navigationStart: string;
+  /** Time to first byte. */
+  responseStartMs: number | null;
+  domContentLoadedMs: number | null;
+  loadMs: number | null;
 }
 
 export interface SessionPageVisit {
-  page: string;
+  /** `null` when the page view carried no URL, so the page it was on is unknown. */
+  page: string | null;
   url: string | null;
   startTime: string;
   endTime: string;
   durationMs: number;
   clickCount: number;
   errorCount: number;
+  frustrationCount: number;
   webVitals: SessionWebVitals;
+  /** Set on a visit that loaded the page document, rather than an in-app navigation. */
+  load: SessionPageLoad | null;
 }
 
 export interface SessionDetailResponse {
@@ -221,6 +392,8 @@ export interface SessionDetailResponse {
   timeline: SessionTimelineEvent[];
   timelineTruncated: boolean;
   pageVisits: SessionPageVisit[];
+  requests: SessionRequest[];
+  requestsTruncated: boolean;
 }
 
 export const emptyWebVitals = (): SessionWebVitals => ({
@@ -233,8 +406,8 @@ export const emptyWebVitals = (): SessionWebVitals => ({
 
 /**
  * Page label used for journeys: the hash route when present, else the URL path, without query
- * or fragment. A line-by-line port of `pathOf` in the sessions dest pipeline, so the list and the
- * detail label a URL alike; both are checked against `PAGE_PATH_CASES`.
+ * or fragment. The summaries and the detail both label a URL with it, checked against
+ * `PAGE_PATH_CASES`.
  */
 export const toPagePath = (raw: string | null | undefined): string | null => {
   const trimmed = raw?.trim();

@@ -10,6 +10,7 @@ import moment from 'moment';
 import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
 import { createSubjectAttachmentRenderer } from './subject_attachment_definition';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,9 +21,20 @@ import { SubjectList, SubjectView } from './subject_view';
 // The flyout itself is covered by `subject_details_flyout.test.tsx`; here only the row's choice
 // between opening it and following its link matters.
 jest.mock('./subject_details_flyout', () => ({
-  SubjectDetailsFlyout: ({ alertId, detailsHref }: { alertId: string; detailsHref?: string }) => (
+  SubjectDetailsFlyout: ({
+    alertId,
+    detailsHref,
+    onClose,
+  }: {
+    alertId: string;
+    detailsHref?: string;
+    onClose: () => void;
+  }) => (
     <div data-test-subj="subjectFlyoutStub" data-href={detailsHref}>
       {alertId}
+      <button type="button" data-test-subj="subjectFlyoutStubClose" onClick={onClose}>
+        close
+      </button>
     </div>
   ),
 }));
@@ -232,6 +244,32 @@ describe('SubjectView', () => {
   });
 });
 
+describe('SubjectView presentation', () => {
+  it('is presented as a significant event when its source says so', () => {
+    renderView({
+      ...base,
+      subjectType: 'alert',
+      subjectId: 'episode-1',
+      snapshot: { source: 'elastic.significant_events', rule_name: 'Checkout errors' },
+    });
+
+    expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
+      'Trigger · Significant event'
+    );
+  });
+
+  it('shows what its document records the subject came through as a "via" line', () => {
+    renderView({
+      ...base,
+      subjectType: 'alert',
+      subjectId: 'alert-1',
+      via: { label: 'Payments alerts' },
+    });
+
+    expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent('via Payments alerts');
+  });
+});
+
 describe('SubjectView alert flyout', () => {
   const alert = {
     ...base,
@@ -239,6 +277,20 @@ describe('SubjectView alert flyout', () => {
     subjectId: 'alert-1',
     snapshot: { rule_name: 'High latency', url: '/app/observability/alerts/alert-1' },
   };
+
+  it('gives focus back to the row when the flyout closes', async () => {
+    renderView(alert, { http: {} as never });
+
+    const row = screen.getByTestId('investigationSubject-alert');
+    row.focus();
+    fireEvent.click(row);
+    fireEvent.click(await screen.findByTestId('subjectFlyoutStubClose'));
+    // The browser leaves focus on the page body when a flyout without its own focus trap unmounts.
+    (document.activeElement as HTMLElement | null)?.blur();
+
+    await waitFor(() => expect(row).toHaveFocus());
+    expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+  });
 
   it('opens the alert in a flyout instead of navigating, and keeps the href', async () => {
     renderView(alert, { http: {} as never });
@@ -253,6 +305,16 @@ describe('SubjectView alert flyout', () => {
     const flyout = await screen.findByTestId('subjectFlyoutStub');
     expect(flyout).toHaveTextContent('alert-1');
     expect(flyout).toHaveAttribute('data-href', '/app/observability/alerts/alert-1');
+  });
+
+  it('opens the flyout from a button when the alert has no link', async () => {
+    renderView({ ...alert, snapshot: { rule_name: 'High latency' } }, { http: {} as never });
+
+    const row = screen.getByTestId('investigationSubject-alert');
+    expect(row.tagName).toBe('BUTTON');
+    fireEvent.click(row);
+
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('alert-1');
   });
 
   it('lets the browser handle a new-tab click', async () => {
@@ -283,6 +345,90 @@ describe('SubjectView alert flyout', () => {
   });
 });
 
+describe('SubjectView significant event with a registered flyout', () => {
+  const event = {
+    ...base,
+    subjectType: 'alert' as const,
+    subjectId: 'event-1',
+    summary: 'Checkout errors spiked',
+    snapshot: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE },
+  };
+
+  it('opens the flyout on click although the event has no link', async () => {
+    const getAlertFlyout = (source?: string) =>
+      source === SIGNIFICANT_EVENTS_ALERT_SOURCE ? () => null : undefined;
+    renderView(event, { getAlertFlyout });
+
+    const row = screen.getByTestId('investigationSubject-alert');
+    expect(row.tagName).toBe('BUTTON');
+    fireEvent.click(row);
+
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('event-1');
+  });
+});
+
+describe('SubjectView alert with a registered flyout', () => {
+  const sourceAlert = {
+    ...base,
+    subjectType: 'alert' as const,
+    subjectId: 'episode-1',
+    snapshot: { source: 'elastic.example', rule_name: 'Checkout errors' },
+  };
+
+  it('opens the registered flyout in place instead of navigating', async () => {
+    const { services, navigate } = createShare();
+    const getAlertFlyout = jest.fn((source?: string) =>
+      source === 'elastic.example' ? () => null : undefined
+    );
+    renderView(sourceAlert, { ...services, getAlertFlyout });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
+    );
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(true);
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('opens a flyout registered after the row rendered, since it decides when clicked', async () => {
+    const { services, navigate } = createShare();
+    const registry: { flyout?: () => null } = {};
+    renderView(sourceAlert, { ...services, getAlertFlyout: () => registry.flyout });
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
+    );
+
+    registry.flyout = () => null;
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(true);
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('lets the browser handle a new-tab click', async () => {
+    const { services, navigate } = createShare();
+    renderView(sourceAlert, { ...services, getAlertFlyout: () => () => null });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
+    );
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true, metaKey: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(false);
+    expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+});
+
 const alertStart = (id: string): string => `2026-07-28T14:0${id.slice(-1)}:00.000Z`;
 
 const alertSubject = (id: string): SubjectRowData => ({
@@ -307,6 +453,113 @@ const renderList = (subjects: SubjectRowData[], services: SubjectServices = {}) 
   );
 
 describe('SubjectList', () => {
+  describe('with what the subjects came through', () => {
+    const locator = { id: 'SOME_LOCATOR', params: { automationId: 'automation-1' } };
+    const via = { label: 'Payments alerts', locator };
+    const withVia = (subject: SubjectRowData): SubjectRowData => ({ ...subject, via });
+    const locatedHref = `/located/SOME_LOCATOR?${JSON.stringify(locator.params)}`;
+
+    it('adds a "via" line under the trigger that links to the page its locator resolves to', async () => {
+      const { services } = createShare();
+      renderList([withVia(alertSubject('a-1'))], services);
+
+      const link = await screen.findByTestId('investigationSubjectViaLink');
+      // The trigger row keeps its own line; the "via" line is a further line below it.
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
+        /^Rule a-1Trigger · Alert$/
+      );
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
+        'via Payments alerts'
+      );
+      expect(link).toHaveTextContent('Payments alerts');
+      expect(link).toHaveAttribute('href', locatedHref);
+      expect(screen.getByTestId('investigationSubject-alert')).not.toContainElement(link);
+    });
+
+    it('adds it under the "N alerts" row too, once', async () => {
+      const { services } = createShare();
+      renderList([alertSubject('a-1'), alertSubject('a-2')].map(withVia), services);
+
+      await screen.findByTestId('investigationSubjectViaLink');
+      expect(screen.getAllByTestId('investigationSubjectVia')).toHaveLength(1);
+      expect(screen.getByTestId('investigationSubject-alerts')).not.toContainElement(
+        screen.getByTestId('investigationSubjectVia')
+      );
+    });
+
+    it('leaves it off the "N alerts" row when the alerts did not all come through the same thing', async () => {
+      const { services } = createShare();
+      renderList(
+        [
+          withVia(alertSubject('a-1')),
+          { ...alertSubject('a-2'), via: { label: 'Checkout alerts' } },
+          alertSubject('a-3'),
+        ],
+        services
+      );
+
+      await waitFor(() =>
+        expect(screen.getByTestId('investigationSubject-alerts')).toHaveAttribute('href')
+      );
+      expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
+    });
+
+    it('shows it on each listed alert instead when the alerts did not all come through the same thing', () => {
+      renderList([
+        withVia(alertSubject('a-1')),
+        { ...alertSubject('a-2'), via: { label: 'Checkout alerts' } },
+        alertSubject('a-3'),
+      ]);
+
+      expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('investigationSubject-alerts'));
+
+      expect(screen.getAllByTestId('investigationSubjectVia').map((el) => el.textContent)).toEqual([
+        'via Payments alerts',
+        'via Checkout alerts',
+      ]);
+    });
+
+    it('navigates through the locator inside Kibana, and leaves a modified click to the browser', async () => {
+      const { services, navigate } = createShare();
+      renderList([withVia(alertSubject('a-1'))], services);
+      const link = await screen.findByTestId('investigationSubjectViaLink');
+
+      fireEvent.click(link);
+      expect(navigate).toHaveBeenCalledWith(locator.params);
+
+      navigate.mockClear();
+      fireEvent.click(link, { metaKey: true });
+      expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it('shows the label without a link when the locator is not registered', async () => {
+      const services = {
+        share: { url: { locators: { get: () => undefined } } },
+      } as unknown as SubjectServices;
+      renderList([withVia(alertSubject('a-1'))], services);
+
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
+        'via Payments alerts'
+      );
+      expect(screen.queryByTestId('investigationSubjectViaLink')).not.toBeInTheDocument();
+    });
+
+    it('shows the label without a link when the subject records no locator', () => {
+      const { services } = createShare();
+      renderList([{ ...alertSubject('a-1'), via: { label: 'Slack bot' } }], services);
+
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent('via Slack bot');
+      expect(screen.queryByTestId('investigationSubjectViaLink')).not.toBeInTheDocument();
+    });
+
+    it('shows no "via" line for a subject without one', () => {
+      renderList([alertSubject('a-1')], createShare().services);
+
+      expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders one row per subject when there is at most one alert', () => {
     renderList([alertSubject('a-1'), { type: 'manual', id: 'q-1', summary: 'Why is it slow?' }]);
 
@@ -316,6 +569,23 @@ describe('SubjectList', () => {
     );
     expect(screen.getByTestId('investigationSubject-manual')).toHaveTextContent('Why is it slow?');
     expect(screen.queryByTestId('investigationSubject-alerts')).not.toBeInTheDocument();
+  });
+
+  it('hides a Slack thread that no trigger started and keeps one that did', () => {
+    renderList([
+      { type: 'manual', id: 'q-1', summary: 'Why is it slow?' },
+      { type: 'slack_thread', id: 'notification', slack: { channel: 'C1', thread_ts: '1.1' } },
+      {
+        type: 'slack_thread',
+        id: 'trigger',
+        trigger_type: 'automatic',
+        slack: { channel: 'C2', thread_ts: '2.2' },
+      },
+    ]);
+
+    const rows = screen.getAllByTestId('investigationSubject-slack_thread');
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toHaveTextContent('#C2');
   });
 
   it('lists several alerts inline when there is no alerts list to link to', () => {
@@ -385,17 +655,13 @@ describe('SubjectList', () => {
     // The alerts are on that page, not under the row.
     expect(screen.queryByTestId('investigationSubject-alert')).not.toBeInTheDocument();
 
-    fireEvent.click(summary);
+    expect(summary).toHaveAttribute('target', '_blank');
+    expect(summary).toHaveAttribute('rel', 'noopener noreferrer');
+    const click = createEvent.click(summary, { bubbles: true, cancelable: true });
+    fireEvent(summary, click);
 
-    await waitFor(() =>
-      expect(navigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filters: expect.objectContaining({
-            queryString: expect.stringContaining('kibana.alert.uuid: ("a-1" or "a-2" or "a-3")'),
-          }),
-        })
-      )
-    );
+    expect(click.defaultPrevented).toBe(false);
+    expect(navigate).not.toHaveBeenCalled();
   });
 });
 

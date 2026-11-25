@@ -35,7 +35,6 @@ const renderCard = (
       onClickAction={jest.fn()}
       onCopyLink={jest.fn()}
       onOpenChat={jest.fn()}
-      onClickRecommendedAction={jest.fn()}
       renderAssignees={() => null}
       renderInFlightStatus={renderInFlightStatus}
     />
@@ -73,7 +72,6 @@ describe('ConversationCard', () => {
             onClickAction={jest.fn()}
             onCopyLink={jest.fn()}
             onOpenChat={jest.fn()}
-            onClickRecommendedAction={jest.fn()}
             renderAssignees={() => <span>Assignees</span>}
           />
         );
@@ -109,7 +107,6 @@ describe('ConversationCard', () => {
         onClickAction={jest.fn()}
         onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
-        onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}
       />
     );
@@ -125,7 +122,6 @@ describe('ConversationCard', () => {
         onClickAction={jest.fn()}
         onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
-        onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}
       />
     );

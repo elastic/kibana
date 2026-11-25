@@ -57,15 +57,9 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
 jest.mock('../../../../assistant/use_assistant_availability');
 jest.mock('../hooks/use_investigate_attack_in_timeline');
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
-}));
 const mockOpenAttackFlyout = jest.fn();
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({ openAttackFlyout: mockOpenAttackFlyout }),
-}));
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => true,
 }));
 
 /** EUI's own handles on the data grid controls, which have no constant of ours to come from. */
@@ -1038,12 +1032,12 @@ describe('AttackTabContent', () => {
     };
 
     const showTenRowsPerPage = async () => {
-      await user.click(screen.getByTestId(EUI_PAGINATION_TEST_ID));
-      await user.click(await screen.findByTestId(EUI_TEN_ROWS_PER_PAGE_TEST_ID));
+      fireEvent.click(screen.getByTestId(EUI_PAGINATION_TEST_ID));
+      fireEvent.click(await screen.findByTestId(EUI_TEN_ROWS_PER_PAGE_TEST_ID));
     };
 
-    const goToPage = async (pageNumber: number) => {
-      await user.click(screen.getByTestId(euiPaginationButtonTestId(pageNumber)));
+    const goToPage = (pageNumber: number) => {
+      fireEvent.click(screen.getByTestId(euiPaginationButtonTestId(pageNumber)));
     };
 
     it('leads the row, ahead of the actions column', () => {
@@ -1093,11 +1087,11 @@ describe('AttackTabContent', () => {
       renderTwelveAttachments();
       await showTenRowsPerPage();
 
-      await user.click(selectAllCheckbox());
+      fireEvent.click(selectAllCheckbox());
 
       expect(rowCheckbox('so-0')).toBeChecked();
 
-      await goToPage(2);
+      goToPage(2);
 
       expect(rowCheckbox('so-10')).toBeChecked();
       expect(rowCheckbox('so-11')).toBeChecked();
@@ -1117,9 +1111,9 @@ describe('AttackTabContent', () => {
       renderTwelveAttachments();
       await showTenRowsPerPage();
 
-      await user.click(rowCheckbox('so-0'));
-      await goToPage(2);
-      await goToPage(1);
+      fireEvent.click(rowCheckbox('so-0'));
+      goToPage(2);
+      goToPage(1);
 
       expect(rowCheckbox('so-0')).toBeChecked();
     });
@@ -1127,7 +1121,7 @@ describe('AttackTabContent', () => {
     it('clears the selection when the page size changes', async () => {
       renderTwelveAttachments();
 
-      await user.click(rowCheckbox('so-0'));
+      fireEvent.click(rowCheckbox('so-0'));
       expect(rowCheckbox('so-0')).toBeChecked();
 
       await showTenRowsPerPage();

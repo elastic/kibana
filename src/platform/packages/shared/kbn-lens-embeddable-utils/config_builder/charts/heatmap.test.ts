@@ -139,6 +139,82 @@ test('hides the legend when configured', async () => {
   );
 });
 
+test('writes a custom percent palette when cell colors are provided', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      color: {
+        type: 'dynamic',
+        range: 'percentage',
+        steps: [
+          { color: '#d6e8f5', gte: 0, lt: 100 / 3 },
+          { color: '#8ec4ea', gte: 100 / 3, lt: 200 / 3 },
+          { color: '#1ba9f5', gte: 200 / 3, lte: 100 },
+        ],
+      },
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).toEqual(
+    expect.objectContaining({
+      palette: {
+        type: 'palette',
+        name: 'custom',
+        accessor: 'metric_formula_accessor',
+        params: {
+          name: 'custom',
+          reverse: false,
+          rangeType: 'percent',
+          rangeMin: 0,
+          rangeMax: 100,
+          continuity: 'none',
+          stops: [
+            { color: '#d6e8f5', stop: 100 / 3 },
+            { color: '#8ec4ea', stop: 200 / 3 },
+            { color: '#1ba9f5', stop: 100 },
+          ],
+          colorStops: [
+            { color: '#d6e8f5', stop: 0 },
+            { color: '#8ec4ea', stop: 100 / 3 },
+            { color: '#1ba9f5', stop: 200 / 3 },
+          ],
+        },
+      },
+    })
+  );
+});
+
+test('keeps the default palette when color is auto', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      color: { type: 'auto' },
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).not.toHaveProperty('palette');
+});
+
 test('sorts the vertical axis when configured', async () => {
   const { state } = await buildHeatmap(
     {
@@ -194,4 +270,144 @@ test('shows axis labels when configured', async () => {
       }),
     })
   );
+});
+
+test('writes the breakdown format onto the ES|QL Y column', async () => {
+  const result = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'latency',
+      dataset: {
+        esql: 'TS metrics | STATS count = COUNT(latency) BY bucket, TBUCKET(100)',
+      },
+      breakdown: 'bucket',
+      breakdownFormat: {
+        format: 'duration',
+        fromUnit: 'milliseconds',
+        toUnit: 'humanizePrecise',
+        decimals: 0,
+        compactValues: true,
+      },
+      xAxis: 'TBUCKET(100)',
+      value: 'count',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const columns = result.state.datasourceStates.textBased?.layers.layer_0.columns ?? [];
+  const yColumn = columns.find((column) => column.columnId === 'y_metric_formula_accessor');
+  const valueColumn = columns.find((column) => column.columnId === 'metric_formula_accessor');
+
+  expect(yColumn?.meta).toBeUndefined();
+  expect(yColumn?.params?.format).toEqual({
+    id: 'duration',
+    params: {
+      compact: true,
+      decimals: 0,
+      fromUnit: 'milliseconds',
+      toUnit: 'humanizePrecise',
+    },
+  });
+  expect(valueColumn?.params).toBeUndefined();
+});
+
+test('writes a format id when optional breakdown format params are omitted', async () => {
+  const result = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'share',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      breakdownFormat: { format: 'percent' },
+      xAxis: '@timestamp',
+      value: 'count',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const columns = result.state.datasourceStates.textBased?.layers.layer_0.columns ?? [];
+  const yColumn = columns.find((column) => column.columnId === 'y_metric_formula_accessor');
+
+  expect(yColumn?.params?.format).toEqual({ id: 'percent' });
+});
+
+test('writes decimals 0 on the breakdown format', async () => {
+  const result = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'bytes',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      breakdownFormat: { format: 'bytes', decimals: 0 },
+      xAxis: '@timestamp',
+      value: 'count',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const columns = result.state.datasourceStates.textBased?.layers.layer_0.columns ?? [];
+  const yColumn = columns.find((column) => column.columnId === 'y_metric_formula_accessor');
+
+  expect(yColumn?.params?.format).toEqual({
+    id: 'bytes',
+    params: { decimals: 0 },
+  });
+});
+
+test('writes the breakdown format onto the data view Y column', async () => {
+  const result = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'latency',
+      dataset: {
+        index: 'test',
+      },
+      breakdown: 'price',
+      breakdownFormat: {
+        format: 'duration',
+        fromUnit: 'milliseconds',
+        toUnit: 'humanizePrecise',
+        decimals: 0,
+        compactValues: true,
+      },
+      xAxis: '@timestamp',
+      value: 'count()',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const columns = result.state.datasourceStates.formBased?.layers.layer_0.columns;
+  const yColumn = columns?.y_metric_formula_accessor;
+  const valueColumn = columns?.metric_formula_accessor;
+  const yParams = yColumn && 'params' in yColumn ? yColumn.params : undefined;
+  const valueFormat =
+    valueColumn && 'params' in valueColumn ? valueColumn.params?.format : undefined;
+
+  expect(yColumn?.operationType).toBe('range');
+  expect(yParams?.format).toEqual({
+    id: 'duration',
+    params: {
+      compact: true,
+      decimals: 0,
+      fromUnit: 'milliseconds',
+      toUnit: 'humanizePrecise',
+    },
+  });
+  expect(yParams && 'parentFormat' in yParams ? yParams.parentFormat : undefined).toEqual({
+    id: 'range',
+    params: { template: 'arrow_right', replaceInfinity: true },
+  });
+  expect(valueFormat).toBeUndefined();
 });

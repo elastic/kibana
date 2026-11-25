@@ -151,6 +151,14 @@ describe('useEsqlAutocomplete', () => {
     );
   });
 
+  it('passes the rule query to the ES|QL callbacks', () => {
+    const query = 'SET project_routing = "_alias:_origin"; FROM logs-*';
+
+    renderHook(() => useEsqlAutocomplete(services, query));
+
+    expect(useEsqlCallbacks).toHaveBeenCalledWith(expect.objectContaining({ query }));
+  });
+
   it('disposes registered providers on unmount', () => {
     const { unmount } = renderHook(() => useEsqlAutocomplete(services));
 

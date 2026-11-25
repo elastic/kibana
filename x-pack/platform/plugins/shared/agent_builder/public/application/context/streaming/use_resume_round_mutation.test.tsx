@@ -11,9 +11,13 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Subject } from 'rxjs';
 import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
-import { EventsService } from '../../../services/events/events_service';
+import { ChatEventType } from '@kbn/agent-builder-common';
 import { ConversationStreamService } from '../../../services/events/conversation_stream_service';
-import { propagateEvents } from '../../../services/chat/propagate_events';
+import {
+  EXECUTION_STREAMING_EVENT_TYPE,
+  type ExecutionStreamingEvent,
+  type TimelineDisplayEvent,
+} from '../../../services/events/sse_to_events';
 import { createExecutionStartedEvent } from '../../components/conversations/timeline/items/execution_started.factory';
 import { createExecutionTerminatedEvent } from '../../components/conversations/timeline/items/execution_terminated_event.factory';
 import { queryKeys } from '../../query_keys';
@@ -34,24 +38,25 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 const conversationId = 'conv-1';
+const streamId = 'stream-1';
 const vars = {
   prompts: {},
   conversationId,
   agentId: 'agent-1',
   promptRequestedEventId: 'round-1::execution_terminated',
+  streamId,
 };
 const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::execution::1' });
 
 const setup = () => {
-  const eventsService = new EventsService();
-  const conversationStreamService = new ConversationStreamService(eventsService);
+  const conversationStreamService = new ConversationStreamService();
   const bindings = {
     conversationStreamService,
     clearActiveStream: jest.fn(),
     markStreamStarted: jest.fn(),
   };
   const source = new Subject<ChatEvent>();
-  mockResume.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
+  mockResume.mockReturnValue(source);
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -69,9 +74,38 @@ const setup = () => {
   return { bindings, source, result, conversationStreamService, observer };
 };
 
+const chunk = (text: string): ChatEvent =>
+  ({ type: ChatEventType.messageChunk, data: { message_id: 'm', text_chunk: text } } as ChatEvent);
+
+const messageOf = (events: TimelineDisplayEvent[]): string | undefined =>
+  events.find(
+    (event): event is ExecutionStreamingEvent => event.type === EXECUTION_STREAMING_EVENT_TYPE
+  )?.data.message;
+
 describe('useResumeRoundMutation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('adds each streamed chunk to the live events exactly once, before the run ends', async () => {
+    const { source, result, conversationStreamService } = setup();
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockResume).toHaveBeenCalled());
+    act(() => {
+      source.next(
+        createExecutionStartedEvent({
+          id: 'round-1::execution::1::execution_started',
+          execution_id: 'round-1::execution::1',
+          trigger_event_id: 'round-1::prompt_response::1',
+        }) as ChatEvent
+      );
+      source.next(chunk('Hi'));
+    });
+    expect(messageOf(conversationStreamService.getSnapshot(conversationId))).toBe('Hi');
+
+    act(() => source.next(chunk(' there')));
+    expect(messageOf(conversationStreamService.getSnapshot(conversationId))).toBe('Hi there');
   });
 
   it('releases the execution events once the refetch contains the saved execution, keeping the answer', async () => {
@@ -90,7 +124,7 @@ describe('useResumeRoundMutation', () => {
         conversationStreamService.getSnapshot(conversationId).map(({ id, type }) => ({ id, type }))
       ).toEqual([{ id: 'pending::prompt_response', type: 'prompt_response' }])
     );
-    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId);
   });
 
   it('keeps the live events when nobody is looking at the conversation before the resume starts', async () => {
@@ -130,6 +164,33 @@ describe('useResumeRoundMutation', () => {
     await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
   });
 
+  it('skips the release when the connection is closed locally: no refetch, no server abort', async () => {
+    const { bindings, source, result } = setup();
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockResume).toHaveBeenCalled());
+    act(() => {
+      source.next(
+        createExecutionStartedEvent({
+          id: 'round-1::execution::1::execution_started',
+          execution_id: 'round-1::execution::1',
+          trigger_event_id: 'round-1::prompt_response::1',
+        }) as ChatEvent
+      );
+    });
+    act(() => {
+      result.current.detachAll();
+      // The aborted fetch rejects, as core http does once the signal fires.
+      source.error(Object.assign(new Error('The operation was aborted.'), { name: 'AbortError' }));
+    });
+
+    await waitFor(() =>
+      expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId)
+    );
+    expect(mockGet).not.toHaveBeenCalled();
+    expect(mockAbort).not.toHaveBeenCalled();
+  });
+
   it('ends a stream that errors like a completed one: refetch, then release', async () => {
     const { bindings, source, result } = setup();
     mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [] });
@@ -139,6 +200,6 @@ describe('useResumeRoundMutation', () => {
     act(() => source.error(new Error('boom')));
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
-    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId);
   });
 });

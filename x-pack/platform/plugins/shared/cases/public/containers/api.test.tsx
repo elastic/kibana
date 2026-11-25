@@ -72,6 +72,8 @@ import {
   mockCase,
   similarCases,
   similarCasesSnake,
+  elasticUser,
+  elasticUserSnake,
 } from './mock';
 
 import {
@@ -1038,9 +1040,45 @@ describe('Cases API', () => {
   });
 
   describe('createAttachments', () => {
+    const basicAttributesSnake = {
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: elasticUserSnake,
+      owner: SECURITY_SOLUTION_OWNER,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+    };
+    const basicAttributesCamel = {
+      createdAt: '2020-02-19T23:06:33.798Z',
+      createdBy: elasticUser,
+      owner: SECURITY_SOLUTION_OWNER,
+      pushedAt: null,
+      pushedBy: null,
+      updatedAt: null,
+      updatedBy: null,
+    };
+    const createdAttachmentsSnake = [
+      {
+        ...basicAttributesSnake,
+        id: 'comment-id',
+        version: 'WzQ3LDFc',
+        type: COMMENT_ATTACHMENT_TYPE,
+        data: { content: 'comment', some_key: 'kept' },
+      },
+      {
+        ...basicAttributesSnake,
+        id: 'alert-id',
+        version: 'WzQ3LDFd',
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: 'test-id',
+        metadata: { index: 'test-index', rule: { id: 'test-rule', name: 'Test' } },
+      },
+    ];
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(basicCaseSnake);
+      fetchMock.mockResolvedValue(createdAttachmentsSnake);
     });
     const data: BulkCreateUnifiedAttachmentsRequest = [
       {
@@ -1075,23 +1113,29 @@ describe('Cases API', () => {
       );
     });
 
-    it('should return correct response', async () => {
+    it('returns the created attachments in camel case and keeps data intact', async () => {
       const resp = await createAttachments({
         attachments: data,
         caseId: basicCase.id,
         signal: abortCtrl.signal,
       });
-      expect(resp).toEqual(basicCase);
-    });
-
-    it('should not covert to camel case registered attachments', async () => {
-      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
-      const resp = await createAttachments({
-        attachments: data,
-        caseId: basicCase.id,
-        signal: abortCtrl.signal,
-      });
-      expect(resp).toEqual(caseWithRegisteredAttachments);
+      expect(resp).toEqual([
+        {
+          ...basicAttributesCamel,
+          id: 'comment-id',
+          version: 'WzQ3LDFc',
+          type: COMMENT_ATTACHMENT_TYPE,
+          data: { content: 'comment', some_key: 'kept' },
+        },
+        {
+          ...basicAttributesCamel,
+          id: 'alert-id',
+          version: 'WzQ3LDFd',
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentId: 'test-id',
+          metadata: { index: 'test-index', rule: { id: 'test-rule', name: 'Test' } },
+        },
+      ]);
     });
   });
 

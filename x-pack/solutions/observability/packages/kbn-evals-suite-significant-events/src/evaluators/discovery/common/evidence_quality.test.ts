@@ -82,3 +82,28 @@ describe.each(factories.map((factory) => [factory.name, factory] as const))(
     });
   }
 );
+
+describe('createEvidenceDescriptionEvaluator', () => {
+  it('requires partial coverage and sampled messages to remain scoped', async () => {
+    const { criteriaFn } = createJudge();
+    const evaluator = createEvidenceDescriptionEvaluator({
+      criteriaFn: criteriaFn as never,
+    });
+
+    await evaluator.evaluate({
+      input: {},
+      output: { significantEvents: [{ event_id: 'e1' }] } as never,
+      expected: { criteria: [] },
+      metadata: null,
+    });
+
+    expect(criteriaFn).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'evidence_description_coverage_and_sampling_scope',
+          text: expect.stringContaining('`f = 1`'),
+        }),
+      ])
+    );
+  });
+});

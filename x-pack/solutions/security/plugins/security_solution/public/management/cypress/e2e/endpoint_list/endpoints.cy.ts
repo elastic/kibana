@@ -69,7 +69,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
 
   it('Shows endpoint on the list', () => {
     loadPage(APP_ENDPOINTS_PATH);
-    cy.contains('Hosts running Elastic Defend').should('exist');
+    cy.getByTestSubj('appHeaderTitle').should('have.text', 'Endpoints');
     cy.getByTestSubj(AGENT_HOSTNAME_CELL)
       .contains(createdHost.hostname)
       .should('have.text', createdHost.hostname);
@@ -113,8 +113,8 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
     cy.getByTestSubj('policyDetailsConfirmModal').should('be.visible').click();
     cy.getByTestSubj('confirmModalConfirmButton').should('be.visible').click();
     cy.contains(/has been updated/);
-    cy.getByTestSubj('policyDetailsBackLink').scrollIntoView();
-    cy.getByTestSubj('policyDetailsBackLink').should('be.visible').click();
+    cy.getByTestSubj('appHeaderBack').scrollIntoView();
+    cy.getByTestSubj('appHeaderBack').should('be.visible').click();
     cy.location('pathname', { timeout: 20000 }).should('equal', APP_ENDPOINTS_PATH);
 
     // Assert disappearing 'Out-of-date' indicator, Success Policy Status and increased revision number

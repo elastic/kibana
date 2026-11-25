@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
 import {
   REACHES_BACK_COLUMN,
   buildAlertsHistoryReachesBackQuery,
@@ -38,7 +38,7 @@ describe('history checks', () => {
 
     it('asks whether the oldest anomaly record of the installed jobs is older than that', () => {
       const query = buildAnomaliesHistoryReachesBackQuery(range, ['job_a', 'job_b']);
-      expect(query).toContain('FROM .ml-anomalies-shared*');
+      expect(query).toContain('FROM .ml-anomalies-*');
       expect(query).toContain('job_id IN ("job_a", "job_b")');
       expect(query).toContain('result_type == "record" AND is_interim == false');
       expect(query).toContain('| STATS oldest = MIN(@timestamp)');

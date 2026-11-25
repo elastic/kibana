@@ -5,29 +5,8 @@
  * 2.0.
  */
 
-import { encode } from '@kbn/rison';
-import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import { encodeFlyoutV2UrlParam } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { resolveFlyoutParams, resolveFlyoutV2Params } from './utils';
-
-describe('resolveFlyoutParams', () => {
-  it('preserves existing flyout query string', () => {
-    const existing = '(preview:!(),right:(id:other))';
-    expect(resolveFlyoutParams({ index: '.idx', alertId: 'a1' }, existing)).toBe(existing);
-  });
-
-  it('encodes document details flyout when no current params', () => {
-    const expected = encode({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: { id: 'a1', indexName: '.idx', scopeId: 'alerts-page' },
-      },
-      left: undefined,
-      preview: [],
-    });
-    expect(resolveFlyoutParams({ index: '.idx', alertId: 'a1' }, null)).toBe(expected);
-  });
-});
+import { resolveFlyoutV2Params } from './utils';
 
 describe('resolveFlyoutV2Params', () => {
   it('preserves existing flyoutV2 query string', () => {

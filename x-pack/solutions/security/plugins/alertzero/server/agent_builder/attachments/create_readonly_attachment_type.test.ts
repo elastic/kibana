@@ -21,7 +21,6 @@ const attachmentType = createReadonlyAttachmentType({
   schema: fixtureSchema,
   formatForAgent: (data) => `fixture: ${data.value}`,
   describePayload: 'The payload contains: value.',
-  renderNoun: 'fixture widget',
   maxContentLength: 100,
 });
 
@@ -85,13 +84,8 @@ describe('createReadonlyAttachmentType', () => {
   });
 
   describe('getAgentDescription', () => {
-    it('includes describePayload and the render_attachment contract for the given noun', () => {
-      const description = attachmentType.getAgentDescription?.();
-
-      expect(description).toContain('The payload contains: value.');
-      expect(description).toContain('test.fixture');
-      expect(description).toContain('<render_attachment id="ATTACHMENT_ID" version="VERSION" />');
-      expect(description).toContain('fixture widget');
+    it('returns describePayload unchanged', () => {
+      expect(attachmentType.getAgentDescription?.()).toBe('The payload contains: value.');
     });
   });
 });

@@ -15,8 +15,8 @@ settings:
     strategy: drop
     max: 1
   on-failure:
-    # Sub-workflows exit cancelled (idle) or may fail transiently — always continue
-    # so detection failure never blocks discovery and vice-versa.
+    # Sub-workflows may fail transiently, so always continue: detection failure
+    # never blocks discovery and vice-versa.
     continue: true
 triggers:
   - type: manual

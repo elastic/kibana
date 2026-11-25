@@ -9,7 +9,7 @@ import type { JsonObject } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
 import { InvalidNotificationDestinationError } from '../../client/errors';
 import type { NotificationHandler } from './notification_delivery';
-import { renderInvestigationSlackMessage } from './format_investigation_slack_message';
+import { renderInvestigationSlackMessage } from './investigation_slack_composition';
 
 const slackNotificationParamsSchema = z.strictObject({
   channel: z.string().min(1).max(500),
@@ -19,6 +19,12 @@ const slackNotificationParamsSchema = z.strictObject({
     .optional()
     .describe('Parent message ID identifying the reply thread'),
 });
+
+/** The Slack destination's channel and thread, or undefined when its params are invalid. */
+export const readSlackNotificationParams = (params: JsonObject) => {
+  const parsed = slackNotificationParamsSchema.safeParse(params);
+  return parsed.success ? parsed.data : undefined;
+};
 
 const parseSlackNotificationParams = (params: JsonObject) => {
   const parsed = slackNotificationParamsSchema.safeParse(params);
@@ -39,11 +45,13 @@ export const slackNotificationHandler: NotificationHandler = {
     phase,
     reason,
     messageTs: editedMessageTs,
+    runtime,
   }) => {
     const { channel, thread_ts: threadTs } = parseSlackNotificationParams(
       notificationDestination.params
     );
     const { text, blocks } = renderInvestigationSlackMessage({
+      runtime,
       investigation,
       url,
       phase,
@@ -83,6 +91,8 @@ export const slackNotificationHandler: NotificationHandler = {
           data && typeof data === 'object' && 'externalConversationId' in data
             ? data.externalConversationId
             : undefined;
+        const workspace =
+          data && typeof data === 'object' && 'workspace' in data ? data.workspace : undefined;
         return {
           status: 'sent',
           message_ts: messageTs,
@@ -90,6 +100,9 @@ export const slackNotificationHandler: NotificationHandler = {
           externalConversationId.length > 0 &&
           externalConversationId.length <= 500
             ? { external_conversation_id: externalConversationId }
+            : {}),
+          ...(typeof workspace === 'string' && workspace.length > 0 && workspace.length <= 500
+            ? { workspace }
             : {}),
           sent_at: new Date().toISOString(),
           channel:

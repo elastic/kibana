@@ -174,6 +174,16 @@ export class DiscoverPage extends DiscoverApp {
   }
 
   /**
+   * Saves a library session from the embedded Discover editor and returns to the dashboard.
+   * Unlike {@link saveAndReturnToEditor}, a by-reference panel opens the save modal first.
+   */
+  async saveEditorSessionAndReturn() {
+    await this.clickAppMenuItem('discoverSaveButton');
+    await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
+    await this.confirmSaveModal();
+  }
+
+  /**
    * Clicks "Save and return" in the top nav, available when Discover is opened as
    * the editor for a by-value dashboard panel. Transfers the panel state straight
    * back to the dashboard without opening a save modal.
@@ -197,13 +207,37 @@ export class DiscoverPage extends DiscoverApp {
    * panel on a brand-new dashboard, then navigates to that dashboard.
    */
   async saveTableToNewDashboard(title: string) {
-    await this.page.testSubj.click('saveDiscoverTableToDashboardButton');
-    await this.saveModal.modal.waitFor({ state: 'visible' });
-
+    await this.openSaveTableModal();
     // Pick "new" before the title: filling the title re-renders the modal and would reset
     // the radio (confirm stays disabled on "existing" with no pick).
     await this.saveModal.selectNewDashboard();
     await this.saveModal.fillTitle(title);
+    await this.confirmTableSaveAndWaitForDashboard();
+  }
+
+  /**
+   * Saves the current Discover table (including any ES|QL controls) as a by-value
+   * panel on an existing dashboard, then navigates to that dashboard.
+   */
+  async saveTableToExistingDashboard(title: string, dashboardTitle: string) {
+    await this.openSaveTableModal();
+    // Pick the dashboard before the title: filling the title re-renders the modal and would
+    // reset the radio (confirm stays disabled on "existing" with no pick).
+    await this.saveModal.selectExistingDashboard(dashboardTitle);
+    await this.saveModal.fillTitle(title);
+    await this.confirmTableSaveAndWaitForDashboard();
+  }
+
+  private async openSaveTableModal() {
+    await this.page.testSubj.click('saveDiscoverTableToDashboardButton');
+    await this.saveModal.modal.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Confirms the open "save table to dashboard" modal and waits until the dashboard
+   * the table was sent to has loaded.
+   */
+  private async confirmTableSaveAndWaitForDashboard() {
     // Not `saveModal.confirm()`: it waits for the modal to close, which cannot happen yet.
     // Saving navigates away, and a session with unsaved changes raises the app-leave prompt
     // first, which keeps the save modal mounted until it is dismissed below.
@@ -503,6 +537,15 @@ export class DiscoverPage extends DiscoverApp {
       // Fields can appear in both "Popular fields" and the full field list.
       await resolveSelector(this.page, `field-${field}`).dragTo(gridLocator);
     }
+  }
+
+  /**
+   * Drags a sidebar field onto the chart to use it as the breakdown field.
+   */
+  async dragFieldToChart(fieldName: string) {
+    const chartLocator = this.page.testSubj.locator('unifiedHistogramChart');
+    // Fields can appear in both "Popular fields" and the full field list.
+    await resolveSelector(this.page, `field-${fieldName}`).dragTo(chartLocator);
   }
 
   /**

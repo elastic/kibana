@@ -9,6 +9,7 @@ export {
   esqlResponseToJson,
   extractEsqlQueries,
   executeEsql,
+  buildEsqlParams,
   interpolateEsqlQuery,
   validateEsqlQuery,
 } from './esql';

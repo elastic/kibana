@@ -13,8 +13,8 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { VEGA_API_PATH, commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
-import { isVegaApiEnabled } from '../is_vega_api_enabled';
+import { VEGA_API_PATH, VEGA_API_VERSION } from '../../../common/constants';
+import { commonRouteConfig } from '../constants';
 import { read } from './read';
 import { readRequestParamsSchema, readResponseBodySchema } from './schemas';
 
@@ -27,12 +27,13 @@ export const registerReadRoute = (
     path: `${VEGA_API_PATH}/{id}`,
     summary: 'Get a Vega library item',
     ...commonRouteConfig,
-    description: 'Returns a single Vega library item by its ID.',
+    description:
+      'Returns the complete state of a Vega library item, including its spec, query, and filters.',
   });
 
   readRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: VEGA_API_VERSION,
       options: {
         oasOperationObject: async () =>
           (await import('../oas_examples')).readVegaOASOperationObject,
@@ -57,10 +58,6 @@ export const registerReadRoute = (
     },
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter }, async () => {
-        const { core } = await ctx.resolve(['core']);
-        if (!(await isVegaApiEnabled(core.featureFlags))) {
-          return res.notFound();
-        }
         try {
           const result = await read(ctx, req.params.id);
           return res.ok({ body: result });

@@ -41,17 +41,25 @@ interface State {
   isPosting?: boolean;
   // The current conversation's stream is a resume (continuing a paused turn) rather than a send.
   isResuming?: boolean;
+  // The current conversation's stream follows a run started elsewhere (reload, other participant).
+  isAttaching?: boolean;
   items: TimelineItem[];
 }
 
 const setState = (state: State) => {
-  const { isStreaming = false, isResuming = false, items } = state;
+  const { isStreaming = false, isResuming = false, isAttaching = false, items } = state;
   // An explicit `undefined` is the new-conversation page, which has no id yet.
   const conversationId = 'conversationId' in state ? state.conversationId : 'a';
   jest.mocked(useConversationId).mockReturnValue(conversationId);
   // The stream type is already scoped to the current conversation, so a resume elsewhere is simply
   // invisible here: this conversation reads its own `send` (or nothing).
-  const streamType = isResuming ? 'resume' : isStreaming ? 'send' : undefined;
+  const streamType = isAttaching
+    ? 'attach'
+    : isResuming
+    ? 'resume'
+    : isStreaming
+    ? 'send'
+    : undefined;
   jest.mocked(useCurrentConversationStreamType).mockReturnValue(streamType);
   jest.mocked(useTimelineItems).mockReturnValue(items);
 };
@@ -154,6 +162,17 @@ describe('useAnchoredItemKey', () => {
 
     update({ items: [...history, message('answer'), turn('t2')] });
     expect(result.current).toBe('u1');
+  });
+
+  it('does not anchor an attached run: nothing was sent from here', () => {
+    const { result, update } = renderAnchor({ items: history });
+
+    update({ isAttaching: true, isStreaming: true, items: history });
+    update({ isAttaching: true, isStreaming: true, items: [...history, turn('active')] });
+    expect(result.current).toBeUndefined();
+
+    update({ items: [...history, turn('t2')] });
+    expect(result.current).toBeUndefined();
   });
 
   it('latches this conversation own send even while another conversation resumes in parallel', () => {

@@ -532,6 +532,8 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
           body: {
             fromDateISO: FROM_DATE,
             toDateISO: TO_DATE,
+            // Pinned to 'single': the local user is event.kind 'event', which priority mode drops.
+            process: 'single',
           },
         }
       );

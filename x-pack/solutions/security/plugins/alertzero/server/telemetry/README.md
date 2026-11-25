@@ -218,12 +218,12 @@ Emitted by the Alert Triage Worker once for each classified batch, after it tagg
 | Field | Type | Required | Description |
 |---|---|---|---|
 | envelope | | | See above |
-| `alerts_with_strict_key` | long | yes | Classified alerts with a strict pattern key, whatever their verdict. An alert with no identifying field (path) has none |
+| `alerts_with_strict_key` | long | yes | Classified alerts with a strict pattern key, whatever their verdict. An alert has none when it has no identifying field: a path, or for a cloud or identity alert an `event.action` plus a `cloud.account.id` or `user.name` |
 | `strict_keys` | long | yes | Distinct strict keys among those alerts |
 | `strict_keys_single_alert` | long | yes | Strict keys that only one alert of the batch has |
 | `wide_keys` | long | yes | Distinct wide keys among the classified alerts. Every alert has one |
 | `wide_keys_single_alert` | long | yes | Wide keys that only one alert of the batch has |
-| `fp_candidates_on_fallback` | long | yes | False positives at or above the confidence floor that have no strict key, so they group by rule and detection only |
+| `fp_candidates_on_fallback` | long | yes | False positives at or above the confidence floor whose wide key has no condition, so they group by rule and detection only |
 | `grouping` | keyword | yes | `on`, or why the batch was not grouped: `supervised` (supervised autonomy never groups), `flag_off` (the `alertzero.triageGrouping` kill switch), `lookup_incomplete` (the proposal lookup returned fewer proposals than it matched, so the batch got random proposal ids and no joins) or `no_candidates` (nothing to propose) |
 | `alerts_joined` | long | yes | Alerts that joined a proposal an earlier batch opened. `0` when grouping is off |
 | `proposals_created` | long | yes | New closure proposals the batch raised. `0` when grouping is off |
@@ -296,11 +296,11 @@ Emitted by Hunt packaging for one threat report, once packaging has run.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | envelope | | | See above |
-| `hunt_status` | keyword | yes | The hunt child's result status: `success`, `partial`, `failed` or `unknown` |
+| `hunt_status` | keyword | yes | The hunt child's result status: `success`, `partial`, `retired_incomplete` (a settled run that left a gap no rerun can close), `failed` or `unknown` |
 | `has_confirmed_hit` | boolean | yes | Whether the hunt cleared the confirmed-hit bar |
 | `tier2_invoked` | boolean | no | Whether the hunt ran Tier 2 (behavioral queries). Absent when the Worker did not pass it |
 | `package_status` | keyword | yes | Packaging's own status: `success` or `run_incomplete` |
-| `closed_clean` | boolean | yes | Whether a clean run closed the Investigation as benign |
+| `closed_clean` | boolean | yes | Whether a run with no confirmed hit closed the Investigation: as benign, or as `other` for `retired_incomplete`, which is true too |
 | `proposals_prepared` | long | yes | Proposals packaging prepared and launched a gate for |
 | `proposals_dispatch_failed` | long | yes | Proposal gates that failed to launch |
 | `mint_suppression` | keyword | yes | Why packaging held back its Proposals: `none`, `existing_proposals` or `check_failed` |
