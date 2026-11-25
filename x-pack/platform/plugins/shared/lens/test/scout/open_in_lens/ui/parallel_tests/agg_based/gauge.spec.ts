@@ -9,7 +9,7 @@ import { BulletSubtype } from '@elastic/charts';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  canConvertToLensByTitle,
+  expectNoConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
   spaceTest,
@@ -71,9 +71,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
     'should not convert aggregation with not supported field type',
     async ({ pageObjects }) => {
       const { dashboard } = pageObjects;
-      expect(await canConvertToLensByTitle({ dashboard }, 'Gauge - Unsupported field type')).toBe(
-        false
-      );
+      await expectNoConvertToLensByTitle({ dashboard }, 'Gauge - Unsupported field type');
     }
   );
 

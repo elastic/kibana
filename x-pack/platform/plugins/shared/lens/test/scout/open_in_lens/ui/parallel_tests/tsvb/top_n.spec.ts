@@ -7,7 +7,12 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createOpenInLensSuiteSetup, spaceTest, testData } from '../../fixtures';
+import {
+  createOpenInLensSuiteSetup,
+  expectNoConvertToLensByTitle,
+  spaceTest,
+  testData,
+} from '../../fixtures';
 
 spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
@@ -27,40 +32,24 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     const { dashboard } = pageObjects;
 
     await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Top N - Invalid panel'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Top N - Invalid panel');
     });
 
     await spaceTest.step('unsupported aggregations have no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Top N - Unsupported agg'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Top N - Unsupported agg');
     });
 
     await spaceTest.step(
       'sibling pipeline aggregations have no Convert to Lens action',
       async () => {
-        const hasAction = await dashboard.panelHasAction(
-          testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-          'Top N - Sibling pipeline agg'
-        );
-        expect(hasAction).toBe(false);
+        await expectNoConvertToLensByTitle({ dashboard }, 'Top N - Sibling pipeline agg');
       }
     );
 
     await spaceTest.step(
       'parent pipeline aggregations have no Convert to Lens action',
       async () => {
-        const hasAction = await dashboard.panelHasAction(
-          testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-          'Top N - Parent pipeline agg'
-        );
-        expect(hasAction).toBe(false);
+        await expectNoConvertToLensByTitle({ dashboard }, 'Top N - Parent pipeline agg');
       }
     );
   });

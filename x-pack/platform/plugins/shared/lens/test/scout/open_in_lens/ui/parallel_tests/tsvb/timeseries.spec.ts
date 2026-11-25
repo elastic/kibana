@@ -7,7 +7,12 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createOpenInLensSuiteSetup, spaceTest, testData } from '../../fixtures';
+import {
+  createOpenInLensSuiteSetup,
+  expectNoConvertToLensByTitle,
+  spaceTest,
+  testData,
+} from '../../fixtures';
 
 spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
@@ -27,19 +32,11 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     const { dashboard } = pageObjects;
 
     await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Timeseries -  Invalid panel'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Timeseries -  Invalid panel');
     });
 
     await spaceTest.step('unsupported aggregations have no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Timeseries -  Unsupported aggregations'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Timeseries -  Unsupported aggregations');
     });
   });
 

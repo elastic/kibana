@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  canConvertToLensByTitle,
+  expectNoConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
   spaceTest,
@@ -32,31 +32,27 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     const { dashboard } = pageObjects;
 
     await spaceTest.step('dot size aggregation cannot convert', async () => {
-      expect(await canConvertToLensByTitle({ dashboard }, 'XY - Dot size metric')).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'XY - Dot size metric');
     });
 
     await spaceTest.step('split chart cannot convert', async () => {
-      expect(await canConvertToLensByTitle({ dashboard }, 'XY - Split chart')).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'XY - Split chart');
     });
 
     await spaceTest.step('multiple Y axes on the same side cannot convert', async () => {
-      expect(await canConvertToLensByTitle({ dashboard }, 'XY - Multiple Y Axes')).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'XY - Multiple Y Axes');
     });
 
     await spaceTest.step('multiple split series cannot convert', async () => {
-      expect(await canConvertToLensByTitle({ dashboard }, 'XY - Multiple Split Series')).toBe(
-        false
-      );
+      await expectNoConvertToLensByTitle({ dashboard }, 'XY - Multiple Split Series');
     });
 
     await spaceTest.step('sibling pipeline agg with split series cannot convert', async () => {
-      expect(
-        await canConvertToLensByTitle({ dashboard }, 'XY - Sibling pipeline agg w/ split')
-      ).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'XY - Sibling pipeline agg w/ split');
     });
 
     await spaceTest.step('unsupported aggregation cannot convert', async () => {
-      expect(await canConvertToLensByTitle({ dashboard }, 'XY - Unsupported Agg')).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'XY - Unsupported Agg');
     });
   });
 

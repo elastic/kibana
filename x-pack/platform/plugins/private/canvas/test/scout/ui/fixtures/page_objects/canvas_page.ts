@@ -335,9 +335,9 @@ export class CanvasPage {
     await this.panelActions.clickContextMenuAction(actionTestSubj, title);
   }
 
-  /** Whether a panel offers an action, via hover actions or the context menu. */
-  async panelHasAction(actionTestSubj: string, title?: string): Promise<boolean> {
-    return this.panelActions.panelHasAction(actionTestSubj, title);
+  /** Whether a quick action is currently visible in the panel's hover actions row. */
+  async panelHasHoverAction(actionTestSubj: string, title?: string): Promise<boolean> {
+    return this.panelActions.panelHasHoverAction(actionTestSubj, title);
   }
 
   /** Click the "Edit" panel action to open the embeddable's editor (inline or full). */

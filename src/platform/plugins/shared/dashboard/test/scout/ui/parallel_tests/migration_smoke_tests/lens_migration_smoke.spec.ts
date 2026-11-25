@@ -76,7 +76,7 @@ spaceTest.describe('Lens migration smoke (7.12.1)', { tag: tags.stateful.classic
         const panelTitles = await pageObjects.dashboard.getPanelTitles();
         for (const title of panelTitles) {
           expect(
-            await pageObjects.dashboard.panelHasAction(
+            await pageObjects.dashboard.panelHasHoverAction(
               DASHBOARD_EDIT_PANEL_ACTION_TEST_SUBJ,
               title || undefined
             )

@@ -7,7 +7,12 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createOpenInLensSuiteSetup, spaceTest, testData } from '../../fixtures';
+import {
+  createOpenInLensSuiteSetup,
+  expectNoConvertToLensByTitle,
+  spaceTest,
+  testData,
+} from '../../fixtures';
 
 spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
@@ -27,19 +32,11 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
     const { dashboard } = pageObjects;
 
     await spaceTest.step('unsupported metric has no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Metric - Unsupported metric'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Metric - Unsupported metric');
     });
 
     await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Metric - Invalid panel'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Metric - Invalid panel');
     });
   });
 

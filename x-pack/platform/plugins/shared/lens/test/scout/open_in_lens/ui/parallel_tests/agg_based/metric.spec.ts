@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  canConvertToLensByTitle,
+  expectNoConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
   spaceTest,
@@ -111,9 +111,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     'should not convert aggregation with not supported field type',
     async ({ pageObjects }) => {
       const { dashboard } = pageObjects;
-      expect(await canConvertToLensByTitle({ dashboard }, 'Metric - Unsupported field type')).toBe(
-        false
-      );
+      await expectNoConvertToLensByTitle({ dashboard }, 'Metric - Unsupported field type');
     }
   );
 

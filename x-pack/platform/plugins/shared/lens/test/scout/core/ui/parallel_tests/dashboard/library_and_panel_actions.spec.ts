@@ -79,7 +79,7 @@ spaceTest.describe(
         await dashboard.openDashboardWithId(dashboardId);
         await dashboard.waitForPanelsToLoad(1);
 
-        expect(await dashboard.panelHasAction(EXPLORE_DATA_ACTION, xyTitle)).toBe(false);
+        await dashboard.expectHasNoContextMenuAction(EXPLORE_DATA_ACTION, xyTitle);
       }
     );
 
@@ -96,7 +96,7 @@ spaceTest.describe(
         await dashboard.openDashboardWithId(dashboardId);
         await dashboard.waitForPanelsToLoad(1);
 
-        expect(await dashboard.panelHasAction(EXPORT_CSV_ACTION, pieTitle)).toBe(true);
+        await dashboard.expectHasContextMenuAction(EXPORT_CSV_ACTION, pieTitle);
       }
     );
 
@@ -116,12 +116,12 @@ spaceTest.describe(
 
         await spaceTest.step('unlink the panel from the library', async () => {
           await dashboard.unlinkFromLibrary(pieTitle);
-          expect(await dashboard.panelHasAction(SAVE_TO_LIBRARY_ACTION, pieTitle)).toBe(true);
+          await dashboard.expectHasContextMenuAction(SAVE_TO_LIBRARY_ACTION, pieTitle);
         });
 
         await spaceTest.step('save a uniquely named copy back to the library', async () => {
           await dashboard.saveToLibrary(copyTitle, pieTitle);
-          expect(await dashboard.panelHasAction(UNLINK_FROM_LIBRARY_ACTION, copyTitle)).toBe(true);
+          await dashboard.expectHasContextMenuAction(UNLINK_FROM_LIBRARY_ACTION, copyTitle);
         });
 
         await spaceTest.step('original library visualization is still listed', async () => {

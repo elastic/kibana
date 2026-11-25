@@ -10,7 +10,7 @@ import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  canConvertToLensByTitle,
+  expectNoConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
   spaceTest,
@@ -54,11 +54,11 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     const { dashboard } = pageObjects;
 
     await spaceTest.step('hides action when no split slices were defined', async () => {
-      expect(await canConvertToLensByTitle({ dashboard }, 'Pie - No split slices')).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Pie - No split slices');
     });
 
     await spaceTest.step('hides action when more than 3 split slices were defined', async () => {
-      expect(await canConvertToLensByTitle({ dashboard }, 'Pie - 4 layers')).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Pie - 4 layers');
     });
   });
 

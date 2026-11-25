@@ -73,18 +73,6 @@ export class PanelActions {
   }
 
   /**
-   * Checks if a panel action exists as a descendant of the panel wrapper (not globally visible).
-   *
-   * `panelWrapper` must come from `hoverPanel`, which guarantees the hover menu has rendered.
-   */
-  private async panelActionExistsInWrapper(
-    actionTestSubj: string,
-    panelWrapper: Locator
-  ): Promise<boolean> {
-    return panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`).isVisible();
-  }
-
-  /**
    * Clicks a quick action in the panel's hover actions row.
    *
    * The action is scoped to the panel wrapper so another panel's actions are never clicked.
@@ -114,50 +102,92 @@ export class PanelActions {
   }
 
   /**
-   * Checks if a panel has a specific action available.
-   * Checks both hover actions and context menu.
+   * Checks if a quick action is currently visible in the panel's hover actions row.
    *
-   * Uses count() > 0 for the context menu to include hidden elements.
+   * This is a point-in-time check, not a wait: use it for the current state only, and prefer
+   * `clickHoverAction` when the goal is to interact with the action. Unlike the context menu, there
+   * is no reliable signal that the hover actions have finished loading: `data-actions-loading`
+   * does not cover quick actions that change afterwards (e.g. Edit), so a `false` result can be
+   * a false negative.
    */
-  async panelHasAction(actionTestSubj: string, title?: string): Promise<boolean> {
+  async panelHasHoverAction(actionTestSubj: string, title?: string): Promise<boolean> {
     const panelWrapper = await this.hoverPanel(title);
-
-    if (await this.panelActionExistsInWrapper(actionTestSubj, panelWrapper)) {
-      return true;
-    }
-
-    // Check in context menu
-    await this.openPanelContextMenu(title);
-    const count = await this.page.testSubj.locator(actionTestSubj).count();
-
-    // Close menu by pressing Escape
-    await this.page.keyboard.press('Escape');
-    return count > 0;
+    return panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`).isVisible();
   }
 
   /**
-   * Asserts that a panel action exists (throws if not found).
+   * Opens the panel's context menu and waits until all of the given actions are visible in it.
+   *
+   * On success the menu is left open so the caller can check it further, and the caller must
+   * close it. If the actions don't all appear, closes the menu and throws an error listing the
+   * actions that are available.
+   *
+   * @param actionTestSubjs - `data-test-subj` values of the actions to wait for.
+   * @param title - Panel title. If omitted, uses the first panel.
    */
-  async expectExistsPanelAction(actionTestSubj: string, title?: string) {
-    const exists = await this.panelHasAction(actionTestSubj, title);
-    if (!exists) {
-      // Collect available actions for better error message
-      await this.openPanelContextMenu(title);
-      const allActions = await this.page
+  private async waitUntilContextMenuContains(actionTestSubjs: string[], title?: string) {
+    await this.openPanelContextMenu(title);
+    try {
+      for (const actionTestSubj of actionTestSubjs) {
+        // The menu renders in a portal outside the panel, so it cannot be panel-scoped; filtering
+        // to the visible match skips the hidden quick-action buttons that other panels render.
+        await expect(
+          this.page.testSubj.locator(actionTestSubj).filter({ visible: true })
+        ).toBeVisible();
+      }
+    } catch {
+      const availableActions = await this.page
         .locator('[data-test-subj^="embeddablePanelAction-"]')
+        .filter({ visible: true })
         .all();
-      const actionNames: string[] = [];
-      for (const action of allActions) {
-        const testSubj = await action.getAttribute('data-test-subj');
-        if (testSubj) actionNames.push(testSubj);
+      const availableTestSubjs: string[] = [];
+      for (const available of availableActions) {
+        const testSubj = await available.getAttribute('data-test-subj');
+        if (testSubj) availableTestSubjs.push(testSubj);
       }
       await this.page.keyboard.press('Escape');
 
       throw new Error(
-        `Expected panel action "${actionTestSubj}" to exist for panel "${
+        `Expected context menu to contain [${actionTestSubjs.join(', ')}] for panel "${
           title || 'first panel'
-        }". Available actions: [${actionNames.join(', ')}]`
+        }". Available actions: [${availableTestSubjs.join(', ')}]`
       );
+    }
+  }
+
+  /**
+   * Asserts that an action is listed in the panel's context menu (throws if not found).
+   * Waits for the action to render, and lists the available actions in the error message.
+   */
+  async expectHasContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.waitUntilContextMenuContains([actionTestSubj], title);
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * Asserts that an action is NOT listed in the panel's context menu.
+   *
+   * @param actionTestSubj - `data-test-subj` of the action that must not be in the context menu.
+   * @param title - Panel title. If omitted, uses the first panel.
+   */
+  async expectHasNoContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.openPanelContextMenu(title);
+    try {
+      // The context menu is populated asynchronously. The hover actions set
+      // `data-actions-loading="false"` once every action's compatibility check has resolved, so a
+      // missing action is a real absence and not a menu that is still loading. This only holds for
+      // the context menu: do not use it to assert on hover actions, which can still change after
+      // it is set.
+      await expect(
+        this.getPanelHoverActionsLocator(title).locator(
+          '.embPanel__hoverActions[data-actions-loading="false"]'
+        )
+      ).toBeVisible();
+      await expect(
+        this.page.testSubj.locator(actionTestSubj).filter({ visible: true })
+      ).toBeHidden();
+    } finally {
+      await this.page.keyboard.press('Escape');
     }
   }
 }

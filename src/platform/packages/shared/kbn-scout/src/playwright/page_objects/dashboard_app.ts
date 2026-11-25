@@ -981,18 +981,24 @@ export class DashboardApp {
     await this.expectLinkedToLibrary(newTitle);
   }
 
-  /**
-   * Checks if a panel has a specific action available (hover actions or context menu).
-   */
-  async panelHasAction(actionTestSubj: string, title?: string): Promise<boolean> {
-    return this.panelActions.panelHasAction(actionTestSubj, title);
+  /** Checks if a quick action is currently visible in the panel's hover actions row. */
+  async panelHasHoverAction(actionTestSubj: string, title?: string): Promise<boolean> {
+    return this.panelActions.panelHasHoverAction(actionTestSubj, title);
+  }
+
+  /** Asserts that an action is listed in the panel's context menu (throws if not found). */
+  async expectHasContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.expectHasContextMenuAction(actionTestSubj, title);
   }
 
   /**
-   * Asserts that a panel action exists (throws if not found).
+   * Asserts that an action is NOT listed in the panel's context menu.
+   *
+   * @param actionTestSubj - `data-test-subj` of the action that must not be in the context menu.
+   * @param title - Panel title. If omitted, uses the first panel.
    */
-  async expectExistsPanelAction(actionTestSubj: string, title?: string) {
-    await this.panelActions.expectExistsPanelAction(actionTestSubj, title);
+  async expectHasNoContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.expectHasNoContextMenuAction(actionTestSubj, title);
   }
 
   /**
@@ -1003,7 +1009,7 @@ export class DashboardApp {
    * may not be available in view mode.
    */
   async expectLinkedToLibrary(title?: string) {
-    await this.expectExistsPanelAction('embeddablePanelAction-unlinkFromLibrary', title);
+    await this.expectHasContextMenuAction('embeddablePanelAction-unlinkFromLibrary', title);
   }
 
   /**
@@ -1014,7 +1020,7 @@ export class DashboardApp {
    * may not be available in view mode.
    */
   async expectNotLinkedToLibrary(title?: string) {
-    await this.expectExistsPanelAction('embeddablePanelAction-saveToLibrary', title);
+    await this.expectHasContextMenuAction('embeddablePanelAction-saveToLibrary', title);
   }
 
   async openInlineEditor(id: string) {

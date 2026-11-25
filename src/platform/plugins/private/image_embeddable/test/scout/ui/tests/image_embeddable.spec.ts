@@ -55,7 +55,7 @@ test.describe('Image embeddable', { tag: '@local-stateful-classic' }, () => {
     });
 
     await test.step('create a dashboard-to-dashboard drilldown', async () => {
-      await pageObjects.dashboard.expectExistsPanelAction(
+      await pageObjects.dashboard.expectHasContextMenuAction(
         'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN'
       );
       await pageObjects.dashboard.clickContextMenuAction(

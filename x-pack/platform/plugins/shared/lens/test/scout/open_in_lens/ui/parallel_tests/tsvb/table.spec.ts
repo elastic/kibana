@@ -7,7 +7,12 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createOpenInLensSuiteSetup, spaceTest, testData } from '../../fixtures';
+import {
+  createOpenInLensSuiteSetup,
+  expectNoConvertToLensByTitle,
+  spaceTest,
+  testData,
+} from '../../fixtures';
 
 spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
@@ -27,59 +32,35 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     const { dashboard } = pageObjects;
 
     await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Table - Invalid panel'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Table - Invalid panel');
     });
 
     await spaceTest.step('unsupported aggregations have no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Table - Unsupported agg'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Table - Unsupported agg');
     });
 
     await spaceTest.step(
       'sibling pipeline aggregations have no Convert to Lens action',
       async () => {
-        const hasAction = await dashboard.panelHasAction(
-          testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-          'Table - Sibling pipeline agg'
-        );
-        expect(hasAction).toBe(false);
+        await expectNoConvertToLensByTitle({ dashboard }, 'Table - Sibling pipeline agg');
       }
     );
 
     await spaceTest.step(
       'parent pipeline aggregations have no Convert to Lens action',
       async () => {
-        const hasAction = await dashboard.panelHasAction(
-          testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-          'Table - Parent pipeline agg'
-        );
-        expect(hasAction).toBe(false);
+        await expectNoConvertToLensByTitle({ dashboard }, 'Table - Parent pipeline agg');
       }
     );
 
     await spaceTest.step('invalid aggregation function has no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Table - Invalid agg'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Table - Invalid agg');
     });
 
     await spaceTest.step(
       'different aggregation function has no Convert to Lens action',
       async () => {
-        const hasAction = await dashboard.panelHasAction(
-          testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-          'Table - Different agg function'
-        );
-        expect(hasAction).toBe(false);
+        await expectNoConvertToLensByTitle({ dashboard }, 'Table - Different agg function');
       }
     );
   });
