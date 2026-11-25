@@ -17,11 +17,14 @@ import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { ResourceContext } from '../strategies/types';
 import {
   AlertingRuleReconciler,
-  type ReconcileRulesResult,
   type SkippedSource,
   type StrategyAlertingRule,
-  type StrategyError,
 } from '../rules/alerting_rule_reconciler';
+import type {
+  ReconcileRulesResponse,
+  ReconcileRulesResult,
+  StrategyError,
+} from '../../../common/reconcile';
 import { ManagedRuleReader } from '../rules/managed_rule_reader';
 import { SpaceReconcileLock } from './space_reconcile_lock';
 
@@ -35,9 +38,6 @@ import { SpaceReconcileLock } from './space_reconcile_lock';
  */
 const LOCK_WAIT_ATTEMPTS = 12;
 const LOCK_WAIT_INTERVAL_MS = 10_000;
-
-/** What a `_reconcile` call did: the reconciliation, or nothing because another one holds the space. */
-type ReconcileRulesResponse = ({ status: 'completed' } & ReconcileRulesResult) | { status: 'busy' };
 
 /**
  * Reconciles the space's managed rules as the account behind a request: it asks every strategy for

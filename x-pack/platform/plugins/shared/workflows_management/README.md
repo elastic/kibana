@@ -175,6 +175,7 @@ The management plugin follows a layered architecture:
 |--------|---------|
 | `alerting` | Integration with alerting framework |
 | `serverless` | Serverless-specific features |
+| `usageCollection` | Registers the `workflows_library` usage collector (Workflow Template library setting and catalog source) |
 
 ---
 

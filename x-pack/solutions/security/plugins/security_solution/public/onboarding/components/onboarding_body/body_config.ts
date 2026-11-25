@@ -18,6 +18,7 @@ import { integrationsExternalDetectionsCardConfig } from './cards/integrations_e
 import { knowledgeSourceCardConfig } from './cards/knowledge_source';
 import { startRuleMigrationCardConfig } from './cards/siem_migrations/start_migration/rules';
 import { startDashboardMigrationCardConfig } from './cards/siem_migrations/start_migration/dashboards';
+import { startWorkflowMigrationCardConfig } from './cards/siem_migrations/start_migration/workflows';
 
 export const defaultBodyConfig: OnboardingGroupConfig[] = [
   {
@@ -74,6 +75,7 @@ export const siemMigrationsBodyConfig: OnboardingGroupConfig[] = [
       startRuleMigrationCardConfig,
       siemMigrationIntegrationsCardConfig,
       startDashboardMigrationCardConfig,
+      startWorkflowMigrationCardConfig,
     ],
   },
 ];

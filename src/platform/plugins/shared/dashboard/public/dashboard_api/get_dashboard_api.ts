@@ -245,12 +245,12 @@ export function getDashboardApi({
     },
     getState: getHistoryState,
     dataLoading$: combineLatest([
-      layoutManager.internalApi.childrenStateLoading$,
-      layoutManager.internalApi.childrenLoading$,
+      layoutManager.internalApi.applyingChildState$,
+      layoutManager.internalApi.childApisPending$,
       dataLoadingManager.api.dataLoading$,
     ]).pipe(
-      map(([childStateLoading, childrenLoading, dataLoading]) =>
-        Boolean(childStateLoading || childrenLoading || dataLoading)
+      map(([isApplyingChildState, hasPendingChildApis, isDataLoading]) =>
+        Boolean(isApplyingChildState || hasPendingChildApis || isDataLoading)
       )
     ),
     initialState$,
