@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import type { ReactNode } from 'react';
 import React from 'react';
 import {
@@ -20,6 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isRunQuotaReached, type RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { getEbtLabelProps } from '../../../common/ebt_label_props';
 import {
   isDetectionRunQuotaGroup,
   RunQuotaReachedCallout,
@@ -116,6 +119,14 @@ export const RunLimitsSection = ({
                       disabled={!canManage || isSaving}
                       onChange={(event) => setInvestigationLimitsEnabled(event.target.checked)}
                       data-test-subj="nightshiftRunLimitsEnabledSwitch"
+                      {...getEbtProps({
+                        action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_INVESTIGATION_LIMITS,
+                        element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                      })}
+                      labelProps={getEbtLabelProps({
+                        action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_INVESTIGATION_LIMITS,
+                        element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                      })}
                     />
                   </EuiFormRow>
                   <EuiSpacer size="m" />

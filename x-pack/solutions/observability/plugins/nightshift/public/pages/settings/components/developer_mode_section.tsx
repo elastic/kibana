@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { getEbtLabelProps } from '../../../common/ebt_label_props';
 import { SettingsSection, SettingsSectionRow } from './settings_section';
 import type { UseDeveloperModeResult } from '../../../hooks/use_developer_mode';
 
@@ -44,6 +47,14 @@ export const DeveloperModeSection = ({
         <EuiFormRow fullWidth>
           <EuiSwitch
             data-test-subj="nightshiftDeveloperModeSwitch"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_DEVELOPER_MODE,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
+            labelProps={getEbtLabelProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_DEVELOPER_MODE,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
             label={i18n.translate('xpack.nightshift.settings.developerModeToggleSwitch', {
               defaultMessage: 'Enable nightshift developer mode',
             })}

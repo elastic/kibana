@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import { EuiIconTip, EuiSwitch, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -14,6 +15,8 @@ import type {
   CostResponse,
   TokenTrackingCoverage,
 } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { getEbtLabelProps } from '../../../common/ebt_label_props';
 
 type DisplayedCostCaveat = Exclude<CostCaveat, 'usd_assumed'>;
 
@@ -179,6 +182,14 @@ export const TokenTrackingSwitch = ({
         })}
         aria-busy={isUpdatingTracking}
         data-test-subj="nightshiftTokenTrackingSwitch"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_TOKEN_TRACKING,
+          element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+        })}
+        labelProps={getEbtLabelProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_TOKEN_TRACKING,
+          element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+        })}
       />
     </span>
   </EuiToolTip>

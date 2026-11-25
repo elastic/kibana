@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
 import {
   EuiFieldNumber,
   EuiFormHelpText,
@@ -19,6 +20,8 @@ import {
   isInvestigationRunQuotaGroup,
   type RunQuotaGroup,
 } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { getEbtLabelProps } from '../../../common/ebt_label_props';
 import {
   MAX_RUN_LIMIT,
   isValidLimitedRunLimitDraft,
@@ -144,6 +147,14 @@ export const RunLimitRow = ({
               disabled={disabled}
               onChange={(event) => onEnabledChange(event.target.checked)}
               data-test-subj={`nightshiftRunLimitEnabledSwitch-${group}`}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_RUN_LIMIT,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
+              labelProps={getEbtLabelProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_RUN_LIMIT,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
             />
           </EuiFormRow>
 

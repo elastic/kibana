@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
 import {
   EuiBadge,
   EuiButton,
@@ -24,6 +25,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../../../common/ebt_constants';
 import {
   formatChannelValue,
   useAllRelayAppBindings,
@@ -186,6 +191,10 @@ const SlackActionRow = ({
               aria-label={actionLabels.removeNotification}
               onClick={onRemove}
               data-test-subj="automationRemoveSlackAction"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.REMOVE_AUTOMATION_SLACK_ACTION,
+                element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
+              })}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -261,6 +270,10 @@ export const AutomationActionsSection = ({
                       setIsAddOpen(false);
                     }}
                     data-test-subj="automationAddSlackAction"
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.ADD_AUTOMATION_SLACK_ACTION,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
+                    })}
                   >
                     {actionLabels.postInSlack}
                   </EuiContextMenuItem>,

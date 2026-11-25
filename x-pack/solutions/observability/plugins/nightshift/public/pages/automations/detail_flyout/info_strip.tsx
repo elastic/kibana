@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiPanel, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
 
 export const InfoStrip = ({
   items,
@@ -18,6 +19,7 @@ export const InfoStrip = ({
     gap?: 'xs' | 's';
     tooltip?: string;
     onClick?: () => void;
+    ebt?: Parameters<typeof getEbtProps>[0];
   }>;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -44,7 +46,7 @@ export const InfoStrip = ({
         }
       `}
     >
-      {items.map(({ title, value, gap = 's', tooltip, onClick }) => {
+      {items.map(({ title, value, gap = 's', tooltip, onClick, ebt }) => {
         const cell = (
           <>
             <EuiText size="xs" color="subdued">
@@ -62,6 +64,7 @@ export const InfoStrip = ({
               role="button"
               tabIndex={0}
               data-test-subj="automationInfoRuns"
+              {...(ebt && getEbtProps(ebt))}
               css={{ cursor: 'pointer', inlineSize: '100%' }}
               onClick={onClick}
               onKeyDown={(event) => event.key === 'Enter' && onClick()}

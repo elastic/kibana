@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
 import {
   EuiIcon,
   EuiPopover,
@@ -14,6 +15,10 @@ import {
   useEuiTheme,
   type EuiSelectableOption,
 } from '@elastic/eui';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../../../common/ebt_constants';
 import type { SlackTriggerKind, TriggerFormValues } from '../automation_form_values';
 import { triggerLabels } from './translations';
 import { slackTriggerLabels, triggerTypeLabels } from '../../../utils/trigger_display';
@@ -51,6 +56,13 @@ export const TriggerPicker = ({
     },
   ].map((option) => ({
     ...option,
+    ...('kind' in option && option.kind
+      ? getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.SELECT_AUTOMATION_TRIGGER,
+          element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
+          detail: option.kind,
+        })
+      : {}),
     checked: 'kind' in option && option.kind === current ? 'on' : undefined,
   })) as Array<EuiSelectableOption<{ kind?: TriggerFormValues['kind'] }>>;
 

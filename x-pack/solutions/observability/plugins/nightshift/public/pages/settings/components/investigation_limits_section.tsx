@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import type { ReactNode } from 'react';
 import React from 'react';
 import {
@@ -19,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { getEbtLabelProps } from '../../../common/ebt_label_props';
 import {
   INVESTIGATION_QUOTA_GROUPS,
   isValidFiniteInvestigationLimit,
@@ -107,6 +110,14 @@ export const InvestigationLimitsSection = ({
                   disabled={!canManage || isSaving}
                   onChange={(event) => setEnabled(event.target.checked)}
                   data-test-subj="nightshiftRunLimitsEnabledSwitch"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_INVESTIGATION_LIMITS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  })}
+                  labelProps={getEbtLabelProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_INVESTIGATION_LIMITS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  })}
                 />
               </EuiFormRow>
               <EuiSpacer size="m" />

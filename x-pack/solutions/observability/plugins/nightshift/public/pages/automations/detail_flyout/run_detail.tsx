@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
 import {
   EuiButton,
   EuiDescriptionList,
@@ -21,6 +22,7 @@ import type { SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { getNightshiftInvestigationPath } from '../../../common/url_params';
 import { useKibana } from '../../../hooks/use_kibana';
 import { SectionHeader } from '../flyouts/form/section_header';
@@ -110,6 +112,10 @@ const OpenInvestigationButton = ({ investigationId }: { investigationId: string 
     <EuiButton
       size="s"
       data-test-subj="automationRunOpenInvestigation"
+      {...getEbtProps({
+        action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+        element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+      })}
       href={application.getUrlForApp(NIGHTSHIFT_APP_ID, {
         path: getNightshiftInvestigationPath(investigationId),
       })}

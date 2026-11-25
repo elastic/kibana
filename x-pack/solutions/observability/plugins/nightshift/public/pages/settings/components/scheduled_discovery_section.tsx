@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import type { ReactNode } from 'react';
 import React from 'react';
 import {
@@ -24,6 +25,8 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { getEbtLabelProps } from '../../../common/ebt_label_props';
 import { SettingsSectionRow } from './settings_section';
 import type { DetectionSettingsForm } from './use_detection_settings_form';
 
@@ -72,6 +75,14 @@ export const ScheduledDiscoverySection = ({
         <EuiToolTip content={activityBlockTooltip}>
           <EuiSwitch
             data-test-subj="streams-settings-scheduled-discovery-toggle"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SCHEDULED_DISCOVERY,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
+            labelProps={getEbtLabelProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SCHEDULED_DISCOVERY,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
             label={i18n.translate('xpack.nightshift.settings.enableScheduledDiscovery', {
               defaultMessage: 'Enable scheduled discovery',
             })}

@@ -6,8 +6,13 @@
  */
 
 import React from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../../../common/ebt_constants';
 import type { TriggerFormValues } from '../automation_form_values';
 import { triggerLabels } from './translations';
 import { TriggerPicker } from './trigger_picker';
@@ -66,6 +71,10 @@ export const TriggerRow = ({
                   aria-label={triggerLabels.changeTrigger}
                   onClick={toggle}
                   data-test-subj="automationChangeTrigger"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.CHANGE_AUTOMATION_TRIGGER,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
+                  })}
                 />
               </EuiToolTip>
             )}
@@ -81,6 +90,10 @@ export const TriggerRow = ({
               aria-label={triggerLabels.removeTrigger}
               onClick={onRemove}
               data-test-subj="automationRemoveTrigger"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.REMOVE_AUTOMATION_TRIGGER,
+                element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
+              })}
             />
           </EuiToolTip>
         </EuiFlexItem>

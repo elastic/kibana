@@ -549,6 +549,10 @@ export const AutomationDetailFlyout = ({
                         gap: 'xs',
                         tooltip: runsTooltip,
                         onClick: () => navigate(`/automations/${automation.id}/runs`),
+                        ebt: {
+                          action: NIGHTSHIFT_EBT_ACTIONS.VIEW_AUTOMATION_RUNS,
+                          element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                        },
                         value: (
                           <div css={{ inlineSize: '100%' }}>
                             {startedRuns}

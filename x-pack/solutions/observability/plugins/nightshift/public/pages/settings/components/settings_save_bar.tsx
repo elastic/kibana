@@ -16,6 +16,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 
 export const SettingsSaveBar = ({
   hasChanges,
@@ -44,6 +46,10 @@ export const SettingsSaveBar = ({
                 size="s"
                 onClick={onCancel}
                 isDisabled={isSaving}
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_SETTINGS_CHANGES,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                })}
               >
                 {i18n.translate('xpack.nightshift.settings.cancelButton', {
                   defaultMessage: 'Cancel',
@@ -61,6 +67,11 @@ export const SettingsSaveBar = ({
                   isLoading={isSaving}
                   isDisabled={isSaveDisabled}
                   hasAriaDisabled={disabledTooltip !== undefined}
+                  {...(!isSaveDisabled &&
+                    getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.SAVE_SETTINGS,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                    }))}
                 >
                   {i18n.translate('xpack.nightshift.settings.saveChangesButton', {
                     defaultMessage: 'Save changes',

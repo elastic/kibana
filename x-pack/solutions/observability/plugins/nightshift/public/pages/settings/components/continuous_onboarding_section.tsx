@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiFieldNumber, EuiForm, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MIN_EXTRACTION_INTERVAL_HOURS } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { getEbtLabelProps } from '../../../common/ebt_label_props';
 import { SettingsSection, SettingsSectionRow } from './settings_section';
 import type { DetectionSettingsForm } from './use_detection_settings_form';
 
@@ -55,6 +58,14 @@ export const ContinuousOnboardingSection = ({
           <EuiToolTip content={activityBlockTooltip}>
             <EuiSwitch
               data-test-subj="streams-settings-continuous-onboarding-toggle"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_CONTINUOUS_ONBOARDING,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
+              labelProps={getEbtLabelProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_CONTINUOUS_ONBOARDING,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
               label={i18n.translate('xpack.nightshift.settings.enableContinuousKiOnboarding', {
                 defaultMessage: 'Enable continuous KI onboarding',
               })}

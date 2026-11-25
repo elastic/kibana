@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
 import {
   EuiBadge,
   EuiFieldNumber,
@@ -18,6 +19,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../../../common/ebt_constants';
+import { getEbtLabelProps } from '../../../../../common/ebt_label_props';
 import { GlobalLimitCallout } from '../../../list/global_limit_callout';
 import { useGlobalLimit } from '../../../hooks/use_global_limit';
 import { triggerLabels } from './translations';
@@ -70,6 +76,10 @@ export const DailyLimitField = ({
             children: triggerLabels.getRaiseLimit(raisedLimit),
             onClick: () => raise(raisedLimit),
             'data-test-subj': 'automationDailyLimitRaise',
+            ...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.RAISE_AUTOMATION_DAILY_LIMIT,
+              element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
+            }),
           },
         }
       : undefined;
@@ -113,6 +123,14 @@ export const DailyLimitField = ({
                 checked={isUnlimited}
                 onChange={(event) => onChange(event.target.checked ? UNLIMITED_DAILY_LIMIT : '20')}
                 data-test-subj="automationDailyLimitUnlimited"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_AUTOMATION_UNLIMITED_LIMIT,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
+                })}
+                labelProps={getEbtLabelProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_AUTOMATION_UNLIMITED_LIMIT,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
+                })}
               />
             </EuiFlexItem>
             {!isUnlimited && (
