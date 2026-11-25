@@ -24,7 +24,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
-import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { CONTEXT_ENGINE_APP_ID, uiPrivileges } from '../../../common/features';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import {
@@ -186,6 +186,7 @@ const createServices = () => {
   );
   services.application.capabilities = {
     ...services.application.capabilities,
+    contextEngine: { show: true, [uiPrivileges.write]: true },
     workflowsManagement: {
       ...services.application.capabilities.workflowsManagement,
       createWorkflow: true,
@@ -446,6 +447,20 @@ describe('AiIndexDetailPage', () => {
       await waitFor(() =>
         expect(screen.queryByTestId('contextAiIndexOverviewLoading')).not.toBeInTheDocument()
       );
+      expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument();
+    });
+
+    it('shows the normal Overview to a user who cannot write', async () => {
+      const services = createServices();
+      services.application.capabilities = {
+        ...services.application.capabilities,
+        contextEngine: { show: true, [uiPrivileges.write]: false },
+      };
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+      renderWithProviders(services);
+
+      expect(await screen.findByTestId('contextOverviewStatCards')).toBeInTheDocument();
       expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument();
     });
   });

@@ -9,6 +9,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
+import { uiPrivileges } from '../../../common/features';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import {
   SETUP_WIZARD_STORAGE_KEY,
@@ -43,8 +44,12 @@ const defaultParams: Params = {
   isActive: true,
 };
 
-const renderSetupWizard = (params: Partial<Params> = {}) => {
+const renderSetupWizard = (params: Partial<Params> = {}, { canWrite = true } = {}) => {
   const services = coreMock.createStart();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    contextEngine: { show: true, [uiPrivileges.write]: canWrite },
+  };
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
   );
@@ -67,6 +72,12 @@ describe('useSetupWizard', () => {
     rerender({ ...defaultParams, isProgressReady: true });
 
     expect(result.current).toMatchObject({ status: 'shown', currentStep: 'dreaming' });
+  });
+
+  it('hides the wizard right away for a user who cannot write', () => {
+    const { result } = renderSetupWizard({ aiIndex: undefined }, { canWrite: false });
+
+    expect(result.current.status).toBe('hidden');
   });
 
   it('shows the normal Overview when the progress failed to load, even with steps not done', () => {

@@ -20,6 +20,7 @@ import {
   subscribeSetupWizardStorage,
   writeSetupWizardStoredValue,
 } from '../utils/setup_wizard';
+import { useCanWriteContextEngine } from './use_can_write_context_engine';
 import { useKibana } from './use_kibana';
 
 interface UseSetupWizardParams {
@@ -73,6 +74,7 @@ export const useSetupWizard = ({
   const {
     services: { http },
   } = useKibana();
+  const canWrite = useCanWriteContextEngine();
   const basePath = http.basePath.get();
   const aiIndexId = aiIndex?.id ?? urlAiIndexId;
 
@@ -116,6 +118,11 @@ export const useSetupWizard = ({
   const close = useCallback(() => {
     writeSetupWizardStoredValue({ basePath, aiIndexId }, 'closed');
   }, [aiIndexId, basePath]);
+
+  if (!canWrite) {
+    // Every step saves something, so a read-only user would only hit errors.
+    return { status: 'hidden' };
+  }
 
   if (!aiIndex) {
     // A closed wizard never shows, so the page needn't wait for the AI index to know that.
