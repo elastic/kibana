@@ -41,6 +41,14 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
     eventChainDepth: mappings.long(),
     eventChainVisitedWorkflowIds: mappings.keyword(),
     dispatchEventId: mappings.keyword(),
+    // Object rather than nested: queries only ever match a single subfield.
+    executionChain: mappings.object({
+      properties: {
+        executionId: mappings.keyword(),
+        workflowId: mappings.keyword(),
+        invocation: mappings.keyword(),
+      },
+    }),
     concurrencyGroupKey: mappings.keyword(),
     // Aggregated token usage across all token-consuming steps, accumulated
     // incrementally as each step finishes.

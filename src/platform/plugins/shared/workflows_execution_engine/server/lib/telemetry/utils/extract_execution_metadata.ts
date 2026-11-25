@@ -11,10 +11,15 @@ import { ExecutionStatus, isTopLevelWorkflowExecution } from '@kbn/workflows';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  ExecutionChainHop,
   WorkflowExecutionEventDispatchMetadata,
 } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/utils/extract_execution_metadata.ts
 import type { ExecutionChainHop } from '../../../utils';
+=======
+import { getExecutionServiceAccountId } from '../../../service_account_execution';
+>>>>>>> cd74fef14a94 ([Workflows] Index the execution chain on child workflow runs (#307391)):x-pack/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/utils/extract_execution_metadata.ts
 import { hasExecutionChain, parseDuration, toExecutionChainHop } from '../../../utils';
 import type {
   OutputSizeStats,

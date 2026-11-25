@@ -243,6 +243,25 @@ describe('buildWorkflowExecutionDocument', () => {
     });
   });
 
+  describe('execution chain', () => {
+    const hop = { executionId: 'parent-exec', invocation: 'sync', workflowId: 'parent' } as const;
+
+    it('should copy the context execution chain to the indexed root field when the run is a child', () => {
+      const workflowExecution = buildWorkflowExecutionDocument({
+        ...baseParams,
+        context: { executionChain: [{ ...hop, extra: 'dropped' }] },
+      });
+
+      expect(workflowExecution.executionChain).toEqual([hop]);
+    });
+
+    it('should omit the root execution chain when the context has none', () => {
+      const workflowExecution = buildWorkflowExecutionDocument(baseParams);
+
+      expect(workflowExecution).not.toHaveProperty('executionChain');
+    });
+  });
+
   it('copies managed workflow billable metadata', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,

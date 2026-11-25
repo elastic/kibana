@@ -137,6 +137,24 @@ export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 
 export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
 
+<<<<<<< HEAD
+=======
+/** Identity snapshot of the user who triggered an execution, captured at trigger time. */
+export interface WorkflowExecutionExecutedByUser {
+  /** Display name: the user's full name when set, otherwise the username. */
+  name: string;
+  username: string;
+  profileUid?: string;
+}
+
+/** One ancestor in a sub-workflow chain, and how it invoked the next run down. */
+export interface ExecutionChainHop {
+  readonly executionId: string;
+  readonly invocation: 'sync' | 'async';
+  readonly workflowId: string;
+}
+
+>>>>>>> cd74fef14a94 ([Workflows] Index the execution chain on child workflow runs (#307391))
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -191,6 +209,12 @@ export interface EsWorkflowExecution {
   eventChainVisitedWorkflowIds?: string[];
   /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
   dispatchEventId?: string;
+  /**
+   * Every run above this one in a sub-workflow chain, root first and direct parent last.
+   * Indexed copy of `context.executionChain`, so the runs below any run can be queried.
+   * Absent on top-level runs and on child runs created before the field existed.
+   */
+  executionChain?: ExecutionChainHop[];
   /**
    * Aggregated LLM token usage across all token-consuming steps in this
    * execution, accumulated incrementally as each step finishes. Absent when no

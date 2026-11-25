@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ExecutionChainHop } from '@kbn/workflows';
 import { isTopLevelWorkflowExecution } from '@kbn/workflows';
-import type { ExecutionChainHop } from '../../utils';
 import { hasExecutionChain, toExecutionChainHop } from '../../utils';
 
 /**

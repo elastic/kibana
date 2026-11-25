@@ -59,6 +59,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
         context: {},
       },
       node: { stepId: 'sync-step-1' },
+      stepExecutionId: 'sync-step-exec-1',
       abortController: new AbortController(),
       getCurrentStepState: jest.fn().mockReturnValue(undefined),
       setCurrentStepState: jest.fn(),
@@ -120,6 +121,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
           parentWorkflowId: 'parent-workflow-id',
           parentWorkflowExecutionId: 'parent-exec-1',
           parentStepId: 'sync-step-1',
+          parentStepExecutionId: 'sync-step-exec-1',
           parentDepth: 0,
         }),
         mockRequest
