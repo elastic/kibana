@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { ApiServicesFixture, KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
-import type { ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, CONNECTORS_ROLE } from '../fixtures';
+import { test, type ConnectorFlyout } from '../fixtures/connector_flyout';
 
 // Datadog is a dual connector (inbound events plus actions) with a single credentialed auth
 // type, so hiding No authentication leaves its basic-auth fields without a picker.
@@ -16,35 +16,61 @@ const DATADOG_TYPE_ID = '.datadog';
 
 const DATADOG_SECRETS = { username: 'scout-api-key', password: 'scout-app-key' };
 
+const CONNECTORS_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: [], feature: { actions: ['all'] }, spaces: ['*'] }],
+};
+
+const isNamedConnector = (value: unknown): value is { id: string; name: string } => {
+  if (typeof value !== 'object' || value === null || !('id' in value) || !('name' in value)) {
+    return false;
+  }
+  return typeof value.id === 'string' && typeof value.name === 'string';
+};
+
+const listedConnectors = (value: unknown): Array<{ id: string; name: string }> =>
+  Array.isArray(value) ? value.filter(isNamedConnector) : [];
+
+const visibleAfterSave = (
+  flyout: ConnectorFlyout,
+  connectorName: string,
+  signal: 'ingestToken' | 'createdToast'
+) => (signal === 'ingestToken' ? flyout.ingestToken : flyout.createdToast(connectorName));
+
 test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
   const createdConnectorIds: string[] = [];
+  const createdConnectorNames: string[] = [];
 
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(CONNECTORS_ROLE);
   });
 
   test.afterAll(async ({ apiServices }) => {
-    await Promise.allSettled(
-      createdConnectorIds.map((id) => apiServices.alerting.connectors.delete(id))
-    );
+    const listed = listedConnectors(await apiServices.alerting.connectors.getAll());
+    const ids = new Set(createdConnectorIds);
+    for (const connector of listed) {
+      if (createdConnectorNames.includes(connector.name)) {
+        ids.add(connector.id);
+      }
+    }
+    await Promise.allSettled([...ids].map((id) => apiServices.alerting.connectors.delete(id)));
   });
 
   const findSavedConnector = async (apiServices: ApiServicesFixture, name: string) => {
-    const connectors: Array<{ id: string; name: string }> =
-      await apiServices.alerting.connectors.getAll();
-    const created = connectors.find((connector) => connector.name === name);
+    const listed = listedConnectors(await apiServices.alerting.connectors.getAll());
+    const created = listed.find((connector) => connector.name === name);
     expect(created).toBeDefined();
-    const id = created?.id ?? '';
-    createdConnectorIds.push(id);
-    return apiServices.alerting.connectors.get(id);
+    if (!created) {
+      throw new Error(`saved connector ${name} was not found`);
+    }
+    createdConnectorIds.push(created.id);
+    return apiServices.alerting.connectors.get(created.id);
   };
 
   test('does not offer No authentication in the Datadog auth picker', async ({
-    pageObjects,
+    connectorFlyout,
     kbnUrl,
   }) => {
-    const { connectorFlyout } = pageObjects;
-
     await connectorFlyout.openCreate(kbnUrl, DATADOG_TYPE_ID);
     await expect(connectorFlyout.secretsField('username')).toBeVisible();
     await expect(connectorFlyout.authTypeCard('none')).toHaveCount(0);
@@ -52,10 +78,9 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
   });
 
   test('Run actions switch hides and restores the outbound fields', async ({
-    pageObjects,
+    connectorFlyout,
     kbnUrl,
   }) => {
-    const { connectorFlyout } = pageObjects;
     await connectorFlyout.openCreate(kbnUrl, DATADOG_TYPE_ID);
 
     await expect(connectorFlyout.receiveEventsSwitch).not.toBeChecked();
@@ -87,6 +112,7 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
       runActions: false,
       expectedAuthType: 'none',
       expectedSelectedActions: [],
+      savedSignal: 'ingestToken' as const,
     },
     {
       label: 'Receive events on, Run actions on',
@@ -95,6 +121,7 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
       runActions: true,
       expectedAuthType: 'basic',
       expectedSelectedActions: undefined,
+      savedSignal: 'ingestToken' as const,
     },
     {
       label: 'Receive events off, Run actions on',
@@ -103,6 +130,7 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
       runActions: true,
       expectedAuthType: 'basic',
       expectedSelectedActions: undefined,
+      savedSignal: 'createdToast' as const,
     },
     {
       label: 'Receive events off, Run actions off',
@@ -111,6 +139,7 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
       runActions: false,
       expectedAuthType: 'none',
       expectedSelectedActions: [],
+      savedSignal: 'createdToast' as const,
     },
   ];
 
@@ -121,14 +150,15 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
     runActions,
     expectedAuthType,
     expectedSelectedActions,
+    savedSignal,
   } of saveCases) {
     test(`saves a Datadog connector with ${label}`, async ({
-      pageObjects,
+      connectorFlyout,
       kbnUrl,
       apiServices,
     }) => {
-      const { connectorFlyout } = pageObjects;
       const connectorName = `scout-datadog-${slug}-${Date.now()}`;
+      createdConnectorNames.push(connectorName);
 
       await connectorFlyout.openCreate(kbnUrl, DATADOG_TYPE_ID);
       await connectorFlyout.nameInput.fill(connectorName);
@@ -148,7 +178,7 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
       );
       await expect(connectorFlyout.createSaveButton).toBeEnabled();
       await connectorFlyout.createSaveButton.click();
-      await expect(connectorFlyout.toastTitle).toContainText(`Created '${connectorName}'`);
+      await expect(visibleAfterSave(connectorFlyout, connectorName, savedSignal)).toBeVisible();
 
       const saved = await findSavedConnector(apiServices, connectorName);
       expect(saved.connector_type_id).toBe(DATADOG_TYPE_ID);
@@ -159,12 +189,12 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
   }
 
   test('adds credentials to a saved receive-only Datadog connector', async ({
-    pageObjects,
+    connectorFlyout,
     kbnUrl,
     apiServices,
   }) => {
-    const { connectorFlyout } = pageObjects;
     const connectorName = `scout-datadog-receive-only-${Date.now()}`;
+    createdConnectorNames.push(connectorName);
     const { id: connectorId } = await apiServices.alerting.connectors.create({
       name: connectorName,
       connectorTypeId: DATADOG_TYPE_ID,
@@ -190,7 +220,7 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
 
     await expect(connectorFlyout.editSaveButton).toBeEnabled();
     await connectorFlyout.editSaveButton.click();
-    await expect(connectorFlyout.toastTitle).toContainText(`Updated '${connectorName}'`);
+    await expect(connectorFlyout.updatedToast(connectorName)).toBeVisible();
 
     const saved = await apiServices.alerting.connectors.get(connectorId);
     expect(saved.config.authType).toBe('basic');

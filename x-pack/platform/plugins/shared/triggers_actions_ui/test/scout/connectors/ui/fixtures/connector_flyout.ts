@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import { test as baseTest } from '@kbn/scout';
-import type {
-  KibanaRole,
-  KibanaUrl,
-  ScoutPage,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-} from '@kbn/scout';
-
-export const CONNECTORS_APP_PATH =
-  '/app/management/insightsAndAlerting/triggersActionsConnectors' as const;
-
-export const CONNECTORS_ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: { actions: ['all'] }, spaces: ['*'] }],
-};
+import type { KibanaUrl, ScoutPage, ScoutWorkerFixtures } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
+import { test as baseTest, type ExtScoutTestFixtures } from '../../../common/ui/fixtures';
+import { CONNECTORS_APP_PATH } from '../../../common/ui/fixtures/constants';
 
 /** Create and edit flyouts for connectors, including the dual connector Receive events and Run actions switches. */
 export class ConnectorFlyout {
@@ -34,6 +22,7 @@ export class ConnectorFlyout {
   readonly testTab;
   readonly editSaveButton;
   readonly toastTitle;
+  readonly ingestToken;
 
   constructor(private readonly page: ScoutPage) {
     this.nameInput = page.testSubj.locator('nameInput');
@@ -46,6 +35,15 @@ export class ConnectorFlyout {
     this.testTab = page.testSubj.locator('testConnectorTab');
     this.editSaveButton = page.testSubj.locator('edit-connector-flyout-save-btn');
     this.toastTitle = page.testSubj.locator('euiToastHeader__title');
+    this.ingestToken = page.testSubj.locator('inbound-ingress-ingest-token');
+  }
+
+  createdToast(connectorName: string) {
+    return this.toastTitle.filter({ hasText: `Created '${connectorName}'` });
+  }
+
+  updatedToast(connectorName: string) {
+    return this.toastTitle.filter({ hasText: `Updated '${connectorName}'` });
   }
 
   authTypeCard(authTypeId: string) {
@@ -104,12 +102,12 @@ export class ConnectorFlyout {
   }
 }
 
-interface ConnectorFlyoutFixtures extends ScoutTestFixtures {
-  pageObjects: ScoutTestFixtures['pageObjects'] & { connectorFlyout: ConnectorFlyout };
+interface DualConnectorFixtures extends ExtScoutTestFixtures {
+  connectorFlyout: ConnectorFlyout;
 }
 
-export const test = baseTest.extend<ConnectorFlyoutFixtures, ScoutWorkerFixtures>({
-  pageObjects: async ({ pageObjects, page }, use) => {
-    await use({ ...pageObjects, connectorFlyout: new ConnectorFlyout(page) });
+export const test = baseTest.extend<DualConnectorFixtures, ScoutWorkerFixtures>({
+  connectorFlyout: async ({ page }, use) => {
+    await use(createLazyPageObject(ConnectorFlyout, page));
   },
 });

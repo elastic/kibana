@@ -7,8 +7,6 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-// Same 'inbound_hub' config set as the UI suite: inbound events are on, so a
-// dual connector can be saved with receive events without the receive-only auth type.
 export default createPlaywrightConfig({
   testDir: './tests',
 });
