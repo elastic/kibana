@@ -10,6 +10,14 @@ import {
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 
+// A space's entry point, bound to the Nightshift agent service account. Its document id carries
+// the space as a suffix, so it is matched by the managed workflow it was installed from.
+export const isEntryPointExecution = ({
+  originManagedWorkflowId,
+}: {
+  originManagedWorkflowId?: string | null;
+}): boolean => originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID;
+
 export const isInvestigationWorkflowExecution = ({
   workflowId,
   originManagedWorkflowId,
@@ -19,6 +27,4 @@ export const isInvestigationWorkflowExecution = ({
 }): boolean =>
   workflowId === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID ||
   originManagedWorkflowId === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID ||
-  // A space's entry point, bound to the Nightshift agent service account. Its document id carries
-  // the space as a suffix, so it is matched by the managed workflow it was installed from.
-  originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID;
+  isEntryPointExecution({ originManagedWorkflowId });

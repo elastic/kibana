@@ -20,7 +20,6 @@ import {
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
 import {
-  NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
 } from '@kbn/workflows/managed';
@@ -59,7 +58,10 @@ import {
 } from '../lib/notifications/notification_delivery';
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
-import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
+import {
+  isEntryPointExecution,
+  isInvestigationWorkflowExecution,
+} from '../lib/managed_workflows/is_investigation_workflow_execution';
 import {
   getBoundInvestigationWorkflowId,
   getEntryPointServiceAccountId,
@@ -1222,10 +1224,9 @@ export class NightshiftInvestigationsClient {
     if (investigationId.length > 500) throw new InvestigationNotFoundError(executionId);
     const entryPointId = await this.getEntryPointExecutionId(execution);
     if (entryPointId) return this.getUnsuccessfulRun(entryPointId);
-    const child =
-      execution.originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
-        ? await this.readInvestigationChild(investigationId, execution.id)
-        : undefined;
+    const child = isEntryPointExecution(execution)
+      ? await this.readInvestigationChild(investigationId, execution.id)
+      : undefined;
     if (!child) return { execution, investigationId, cause: execution };
     if (child.status === ExecutionStatus.COMPLETED) return undefined;
     if (!TerminalExecutionStatuses.includes(child.status)) {
@@ -1249,10 +1250,7 @@ export class NightshiftInvestigationsClient {
   private async getEntryPointExecutionId(
     execution: WorkflowExecutionDto
   ): Promise<string | undefined> {
-    if (
-      execution.originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID ||
-      !isSyncParentInvocation(execution.context)
-    ) {
+    if (isEntryPointExecution(execution) || !isSyncParentInvocation(execution.context)) {
       return undefined;
     }
     const { workflowsManagement } = this.requireWriteDeps();
@@ -1261,8 +1259,7 @@ export class NightshiftInvestigationsClient {
       this.getSpaceId(),
       { includeOutput: false, omitStepExecutions: true, request: this.request }
     );
-    return parent?.spaceId === this.getSpaceId() &&
-      parent.originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
+    return parent?.spaceId === this.getSpaceId() && isEntryPointExecution(parent)
       ? parent.id
       : undefined;
   }
