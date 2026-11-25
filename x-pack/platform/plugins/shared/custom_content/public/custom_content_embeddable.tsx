@@ -100,11 +100,11 @@ const resolveEsqlSources = async (
 ): Promise<FilterableSource[]> => {
   const sources = await Promise.all(
     queries.map(async (query) => {
-      // A query without a source command (e.g. `ROW`) reads no dataset, so there is nothing to publish.
-      if (!getSourceCommandQueryFromESQLQuery(query)) return undefined;
       // One query that cannot be resolved must not hide the sources of the others, or end the
       // subscription.
       try {
+        // A query without a source command (e.g. `ROW`) reads no dataset, so there is nothing to publish.
+        if (!getSourceCommandQueryFromESQLQuery(query)) return undefined;
         const source = await EsqlSource.forDataset({ query, http, projectRouting });
         return await source.toFilterableSource(http);
       } catch {

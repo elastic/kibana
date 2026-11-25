@@ -122,6 +122,18 @@ const mockTelemetry = {
 
 jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
 
+// Parsing a query can throw, e.g. a pathological one: the marker stands for such a query.
+jest.mock('@kbn/esql-utils', () => {
+  const actual = jest.requireActual('@kbn/esql-utils');
+  return {
+    ...actual,
+    getSourceCommandQueryFromESQLQuery: (query: string) => {
+      if (query.includes('unparseable')) throw new Error('cannot parse the query');
+      return actual.getSourceCommandQueryFromESQLQuery(query);
+    },
+  };
+});
+
 const mockHttpPost = jest.fn();
 
 jest.mock('./services', () => ({
@@ -343,6 +355,37 @@ describe('customContentEmbeddableFactory', () => {
 
       await waitFor(() => expect(titles(embeddable)).toEqual(['metrics']));
       expect(mockForDataset).toHaveBeenCalledTimes(1);
+    });
+
+    it('clears the published sources when a panel changes to a query that reads no dataset', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs']));
+
+      act(() => {
+        embeddable.api.applySerializedState({
+          ...baseState,
+          esql_query: ['ROW greeting = "hello"'],
+        });
+      });
+
+      await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toBeUndefined());
+    });
+
+    it('keeps the other sources, and keeps following the queries, when one cannot be parsed', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM unparseable | LIMIT 1', 'FROM metrics | LIMIT 1'],
+      });
+      await waitFor(() => expect(titles(embeddable)).toEqual(['metrics']));
+
+      act(() => {
+        embeddable.api.applySerializedState({
+          ...baseState,
+          esql_query: ['FROM traces | LIMIT 1'],
+        });
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['traces']));
     });
 
     it('publishes none when no query reads a dataset', async () => {
