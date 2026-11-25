@@ -67,6 +67,17 @@ const isInboundEventsEnabledCreateField = {
   ),
 };
 
+const isOutboundActionsEnabledCreateField = {
+  is_outbound_actions_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'When false, this connector does not run actions, and its credentials and action settings are optional. Only valid for connectors that both send and receive, and at least one of inbound events or outbound actions must be on. Defaults to true.',
+      },
+    })
+  ),
+};
+
 const specVersionCreateField = {
   spec_version: schema.maybe(
     schema.string({
@@ -88,6 +99,7 @@ export const getCreateConnectorRequestBodySchema = (
     {
       ...createConnectorRequestBodyFields,
       ...(includeInboundEventsField ? isInboundEventsEnabledCreateField : {}),
+      ...(includeInboundEventsField ? isOutboundActionsEnabledCreateField : {}),
       ...(includeSpecVersionField ? specVersionCreateField : {}),
     },
     { meta: { id: 'new_connector' } }

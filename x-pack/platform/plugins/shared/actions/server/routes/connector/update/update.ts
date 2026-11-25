@@ -69,6 +69,7 @@ export const updateConnectorRoute = (
             config,
             secrets,
             is_inbound_events_enabled: isInboundEventsEnabled,
+            is_outbound_actions_enabled: isOutboundActionsEnabled,
           }: UpdateConnectorBodyV1 = req.body;
 
           return res.ok({
@@ -80,6 +81,7 @@ export const updateConnectorRoute = (
                   config,
                   secrets,
                   ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),
+                  ...(isOutboundActionsEnabled !== undefined ? { isOutboundActionsEnabled } : {}),
                 },
               }),
               {

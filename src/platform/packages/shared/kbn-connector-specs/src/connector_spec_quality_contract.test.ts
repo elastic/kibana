@@ -13,6 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { z, normalizeJsonSchemaTypeArrays } from '@kbn/zod/v4';
 import * as connectorsSpecs from './all_specs';
 import type { ConnectorSpec } from './connector_spec';
+import { OUTBOUND_ENABLED_CONFIG_KEY } from './outbound_actions';
 
 type JsonSchema = Record<string, unknown>;
 
@@ -332,6 +333,13 @@ describe('connector spec quality contracts', () => {
 
     it.each(allSpecs)('%s describes every action input parameter', (_exportName, spec) => {
       expect(getInputViolations(spec).undescribedParams).toEqual([]);
+    });
+  });
+
+  describe('reserved config keys', () => {
+    it.each(allSpecs)('%s does not define the reserved outboundEnabled config key', (_n, spec) => {
+      const configKeys = Object.keys(spec.schema?.shape ?? {});
+      expect(configKeys).not.toContain(OUTBOUND_ENABLED_CONFIG_KEY);
     });
   });
 

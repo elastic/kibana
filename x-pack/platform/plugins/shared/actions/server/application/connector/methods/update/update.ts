@@ -7,7 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
+import {
+  OUTBOUND_ENABLED_CONFIG_KEY,
+  connectorTypeHasInboundEvents,
+  connectorTypeIsDual,
+} from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { isUndefined, omit, omitBy } from 'lodash';
 import type { Connector } from '../../types';
@@ -35,6 +39,13 @@ import {
   resolveUpdateInboundEventsEnabled,
   shouldMintInboundIdentity,
 } from '../../../../inbound/inbound_events_enabled';
+import {
+  applyOutboundEnabledToConfig,
+  assertInboundOrOutboundEnabled,
+  assertOutboundActionsToggleAllowed,
+  readOutboundActionsEnabled,
+  resolveUpdateOutboundActionsEnabled,
+} from '../../../../lib/outbound_actions_enabled';
 
 const getAuthTypeId = (
   secrets?: Record<string, unknown>,
@@ -85,7 +96,15 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
   const { actionTypeId, authMode } = attributes;
-  const { name, config, secrets, isInboundEventsEnabled: requestedInboundEventsEnabled } = action;
+  const {
+    name,
+    config: requestConfig,
+    secrets,
+    isInboundEventsEnabled: requestedInboundEventsEnabled,
+    isOutboundActionsEnabled: requestedOutboundActionsEnabled,
+  } = action;
+  // The reserved key is set from the top-level switch only. A client value is ignored.
+  const config = omit(requestConfig, OUTBOUND_ENABLED_CONFIG_KEY);
 
   const currentAuthMode = authMode ?? 'shared';
   const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);
@@ -95,6 +114,34 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   assertInboundEventsToggleAllowed({
     actionTypeId,
     requestedEnabled: requestedInboundEventsEnabled,
+  });
+  assertOutboundActionsToggleAllowed({
+    actionTypeId,
+    requestedEnabled: requestedOutboundActionsEnabled,
+  });
+
+  const previouslyInboundEnabled = resolveInboundEventsEnabled({
+    actionTypeId,
+    hasIdentity: hasInboundEventIdentityAttributes(attributes),
+  });
+  const isInboundEventsEnabled = resolveUpdateInboundEventsEnabled({
+    actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
+    previouslyEnabled: previouslyInboundEnabled,
+  });
+  const isOutboundActionsEnabled = resolveUpdateOutboundActionsEnabled({
+    actionTypeId,
+    requestedEnabled: requestedOutboundActionsEnabled,
+    previouslyEnabled:
+      readOutboundActionsEnabled({
+        actionTypeId,
+        config: attributes.config as Record<string, unknown> | undefined,
+      }) ?? true,
+  });
+  assertInboundOrOutboundEnabled({
+    actionTypeId,
+    isInboundEventsEnabled,
+    isOutboundActionsEnabled,
   });
 
   const requestedAuthMode = inferAuthMode({
@@ -172,23 +219,19 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     })
   );
 
-  const configForSave =
+  const configWithAuthType =
     actionType.source === ACTION_TYPE_SOURCES.spec
       ? ensureConfigAuthType(
           validatedActionTypeConfig as Record<string, unknown>,
           validatedActionTypeSecrets as Record<string, unknown>
         )
       : validatedActionTypeConfig;
-
-  const previouslyEnabled = resolveInboundEventsEnabled({
-    actionTypeId,
-    hasIdentity: hasInboundEventIdentityAttributes(attributes),
-  });
-  const isInboundEventsEnabled = resolveUpdateInboundEventsEnabled({
-    actionTypeId,
-    requestedEnabled: requestedInboundEventsEnabled,
-    previouslyEnabled,
-  });
+  const configForSave = connectorTypeIsDual(actionTypeId)
+    ? applyOutboundEnabledToConfig(
+        configWithAuthType as Record<string, unknown>,
+        isOutboundActionsEnabled
+      )
+    : configWithAuthType;
   const shouldDisableInbound =
     connectorTypeIsDual(actionTypeId) && requestedInboundEventsEnabled === false;
 
@@ -323,5 +366,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     authMode: resolvedAuthMode,
     ...(connectorTypeHasInboundEvents(actionTypeId) ? { isInboundEventsEnabled } : {}),
+    ...(connectorTypeIsDual(actionTypeId) ? { isOutboundActionsEnabled } : {}),
   };
 }

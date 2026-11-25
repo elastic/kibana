@@ -6,8 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { connectorTypeHasInboundEvents, connectorTypePublishesKeys } from '@kbn/connector-specs';
+import {
+  OUTBOUND_ENABLED_CONFIG_KEY,
+  connectorTypeHasInboundEvents,
+  connectorTypeIsDual,
+  connectorTypePublishesKeys,
+} from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import {
@@ -43,6 +49,12 @@ import {
   assertInboundEventsToggleAllowed,
   resolveCreateInboundEventsEnabled,
 } from '../../../../inbound/inbound_events_enabled';
+import {
+  applyOutboundEnabledToConfig,
+  assertInboundOrOutboundEnabled,
+  assertOutboundActionsToggleAllowed,
+  resolveCreateOutboundActionsEnabled,
+} from '../../../../lib/outbound_actions_enabled';
 
 export async function create(params: ConnectorCreateParams): Promise<Connector> {
   const { actionTypeId, config, secrets } = params.action;
@@ -74,13 +86,16 @@ async function createConnector({
   action: {
     actionTypeId,
     name,
-    config,
+    config: requestConfig,
     secrets,
     specVersion,
     isInboundEventsEnabled: requestedInboundEventsEnabled,
+    isOutboundActionsEnabled: requestedOutboundActionsEnabled,
   },
   options,
 }: ConnectorCreateParams): Promise<Connector> {
+  // The reserved key is set from the top-level switch only. A client value is ignored.
+  const config = omit(requestConfig, OUTBOUND_ENABLED_CONFIG_KEY);
   const id = options?.id || SavedObjectsUtils.generateId();
 
   try {
@@ -132,6 +147,23 @@ async function createConnector({
   assertInboundEventsToggleAllowed({
     actionTypeId,
     requestedEnabled: requestedInboundEventsEnabled,
+  });
+  assertOutboundActionsToggleAllowed({
+    actionTypeId,
+    requestedEnabled: requestedOutboundActionsEnabled,
+  });
+  const isInboundEventsEnabled = resolveCreateInboundEventsEnabled({
+    actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
+  });
+  const isOutboundActionsEnabled = resolveCreateOutboundActionsEnabled({
+    actionTypeId,
+    requestedEnabled: requestedOutboundActionsEnabled,
+  });
+  assertInboundOrOutboundEnabled({
+    actionTypeId,
+    isInboundEventsEnabled,
+    isOutboundActionsEnabled,
   });
 
   const configurationUtilities = context.actionTypeRegistry.getUtils();
@@ -201,18 +233,19 @@ async function createConnector({
     config,
   });
 
-  const configForSave =
+  const configWithAuthType =
     actionType.source === ACTION_TYPE_SOURCES.spec
       ? ensureConfigAuthType(
           validatedActionTypeConfig as Record<string, unknown>,
           validatedActionTypeSecrets as Record<string, unknown>
         )
       : validatedActionTypeConfig;
-
-  const isInboundEventsEnabled = resolveCreateInboundEventsEnabled({
-    actionTypeId,
-    requestedEnabled: requestedInboundEventsEnabled,
-  });
+  const configForSave = connectorTypeIsDual(actionTypeId)
+    ? applyOutboundEnabledToConfig(
+        configWithAuthType as Record<string, unknown>,
+        isOutboundActionsEnabled
+      )
+    : configWithAuthType;
   const identityAttributes = isInboundEventsEnabled
     ? await mintInboundEventIdentityAttributes(context, {
         connectorId: id,
@@ -326,5 +359,6 @@ async function createConnector({
       : {}),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
     ...(connectorTypeHasInboundEvents(actionTypeId) ? { isInboundEventsEnabled } : {}),
+    ...(connectorTypeIsDual(actionTypeId) ? { isOutboundActionsEnabled } : {}),
   };
 }

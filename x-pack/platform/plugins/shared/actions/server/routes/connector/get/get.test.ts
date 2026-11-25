@@ -181,6 +181,66 @@ describe('getConnectorRoute', () => {
     });
   });
 
+  it('maps isOutboundActionsEnabled to is_outbound_actions_enabled and hides config.outboundEnabled', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getConnectorRoute(router, licenseState, actionsConfigUtils(true));
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.dual',
+        name: 'Datadog prod',
+        config: { site: 'datadoghq.com', outboundEnabled: false },
+        isOutboundActionsEnabled: false,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: { id: '1' } }, [
+      'ok',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        is_outbound_actions_enabled: false,
+        config: { site: 'datadoghq.com' },
+      }),
+    });
+  });
+
+  it('omits is_outbound_actions_enabled from the response when the inbound events flag is off', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getConnectorRoute(router, licenseState, actionsConfigUtils());
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.dual',
+        name: 'Datadog prod',
+        config: { outboundEnabled: false },
+        isOutboundActionsEnabled: false,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: { id: '1' } }, [
+      'ok',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.not.objectContaining({ is_outbound_actions_enabled: expect.anything() }),
+    });
+    expect((res.ok as jest.Mock).mock.calls[0][0].body.config).toEqual({});
+  });
+
   it('ensures the license check prevents getting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

@@ -53,12 +53,24 @@ const isInboundEventsEnabledUpdateField = {
   ),
 };
 
+const isOutboundActionsEnabledUpdateField = {
+  is_outbound_actions_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Turn running outbound actions on or off. Omit to keep the current setting. When false, credentials and action settings are optional. Only valid for connectors that both send and receive, and at least one of inbound events or outbound actions must be on.',
+      },
+    })
+  ),
+};
+
 /** Update-connector body schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
 export const getUpdateConnectorBodySchema = (includeInboundEventsField: boolean) =>
   schema.object(
     {
       ...updateConnectorBodyFields,
       ...(includeInboundEventsField ? isInboundEventsEnabledUpdateField : {}),
+      ...(includeInboundEventsField ? isOutboundActionsEnabledUpdateField : {}),
     },
     { meta: { id: 'update_connector' } }
   );

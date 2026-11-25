@@ -20,6 +20,23 @@ beforeEach(() => {
 });
 
 describe('generateConfigSchema', () => {
+  it('accepts the reserved outboundEnabled key as a boolean', () => {
+    const result = generateConfigSchema(z.object({ apiUrl: z.string() }));
+
+    expect(result.schema.parse({ apiUrl: 'https://example.com', outboundEnabled: false })).toEqual({
+      apiUrl: 'https://example.com',
+      outboundEnabled: false,
+    });
+  });
+
+  it('rejects the reserved outboundEnabled key when it is not a boolean', () => {
+    const result = generateConfigSchema(z.object({ apiUrl: z.string() }));
+
+    expect(() =>
+      result.schema.parse({ apiUrl: 'https://example.com', outboundEnabled: 'false' })
+    ).toThrow();
+  });
+
   it('returns schema with authType when base schema is provided', () => {
     const baseSchema = z.object({ apiUrl: z.string() });
     const result = generateConfigSchema(baseSchema);

@@ -595,6 +595,96 @@ describe('get()', () => {
       expect(getConnectorSoMock).not.toHaveBeenCalled();
     });
 
+    test('reports outbound actions on for a dual connector without the config key', async () => {
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: { name: 'Datadog', actionTypeId: '.dual', config: {}, isMissingSecrets: false },
+        references: [],
+      });
+
+      const result = await get({ context: mockContext, id: '1' });
+
+      expect(result.isOutboundActionsEnabled).toBe(true);
+    });
+
+    test('reports outbound actions off for a dual connector with config.outboundEnabled false', async () => {
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Datadog',
+          actionTypeId: '.dual',
+          config: { outboundEnabled: false },
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
+
+      const result = await get({ context: mockContext, id: '1' });
+
+      expect(result.isOutboundActionsEnabled).toBe(false);
+    });
+
+    test('does not report outbound actions for a connector that is not dual', async () => {
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Slack',
+          actionTypeId: '.slack',
+          config: { outboundEnabled: false },
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
+
+      const result = await get({ context: mockContext, id: '1' });
+
+      expect(result.isOutboundActionsEnabled).toBeUndefined();
+    });
+
+    test('reports outbound actions off for a preconfigured connector with hidden config', async () => {
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      const inMemoryConnector: InMemoryConnector = {
+        id: 'preconfigured-slack',
+        actionTypeId: '.slack2',
+        name: 'Slack',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+        config: { outboundEnabled: false },
+        secrets: {},
+        exposeConfig: false,
+      };
+      connectorFromInMemoryConnectorMock.mockReturnValueOnce({
+        id: 'preconfigured-slack',
+        actionTypeId: '.slack2',
+        name: 'Slack',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+      });
+
+      const result = await get({
+        context: { ...mockContext, inMemoryConnectors: [inMemoryConnector] },
+        id: 'preconfigured-slack',
+      });
+
+      expect(result.isOutboundActionsEnabled).toBe(false);
+      expect(result.config).toBeUndefined();
+    });
+
     test('gets a connector with authMode "shared"', async () => {
       getConnectorSoMock.mockResolvedValueOnce({
         id: '1',

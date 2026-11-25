@@ -1434,4 +1434,221 @@ describe('update()', () => {
       expect(preSaveHook).not.toHaveBeenCalled();
     });
   });
+
+  describe('dual connector outbound actions', () => {
+    const securityService = securityServiceMock.createStart();
+    const dualContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: DEFAULT_SPACE_ID,
+      securityService,
+    };
+
+    const buildExisting = ({
+      outboundEnabled = true,
+      hasInboundEventIdentity = false,
+    }: {
+      outboundEnabled?: boolean;
+      hasInboundEventIdentity?: boolean;
+    }) => ({
+      ...existingRawAction,
+      attributes: {
+        ...existingRawAction.attributes,
+        actionTypeId: '.dual',
+        config: outboundEnabled ? {} : { outboundEnabled: false },
+        hasInboundEventIdentity,
+      },
+    });
+
+    const arrangeExisting = (existing: ReturnType<typeof buildExisting>) => {
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existing as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existing,
+        attributes: {
+          ...existing.attributes,
+          ...(existing.attributes.hasInboundEventIdentity
+            ? { apiKey: encodeApiKey('old-id', 'old-secret') }
+            : {}),
+        },
+      } as never);
+    };
+
+    const savedAction = () =>
+      unsecuredSavedObjectsClient.create.mock.calls.find((call) => call[0] === 'action')?.[1] as {
+        config: Record<string, unknown>;
+      };
+
+    beforeEach(() => {
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual' || actionTypeId === '.inboundWebhook'
+      );
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity connector-id',
+        api_key: 'es-secret',
+      });
+      securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+        invalidated_api_keys: ['old-id'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.dual',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? 'connector-id',
+        type,
+        attributes,
+        references: options?.references ?? [],
+      }));
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({ statuses: [] } as never);
+      arrangeExisting(buildExisting({}));
+    });
+
+    test('omitted field keeps outbound on and writes no config key', async () => {
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      expect(result.isOutboundActionsEnabled).toBe(true);
+      expect(savedAction().config).toEqual({});
+    });
+
+    test('omitted field keeps outbound off', async () => {
+      arrangeExisting(buildExisting({ outboundEnabled: false, hasInboundEventIdentity: true }));
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      expect(result.isOutboundActionsEnabled).toBe(false);
+      expect(savedAction().config).toEqual({ outboundEnabled: false });
+    });
+
+    test('false turns outbound off when inbound is on', async () => {
+      arrangeExisting(buildExisting({ hasInboundEventIdentity: true }));
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isOutboundActionsEnabled: false },
+      });
+
+      expect(result.isOutboundActionsEnabled).toBe(false);
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(savedAction().config).toEqual({ outboundEnabled: false });
+    });
+
+    test('true turns outbound on and removes the key', async () => {
+      arrangeExisting(buildExisting({ outboundEnabled: false, hasInboundEventIdentity: true }));
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isOutboundActionsEnabled: true },
+      });
+
+      expect(result.isOutboundActionsEnabled).toBe(true);
+      expect(savedAction().config).toEqual({});
+    });
+
+    test('rejects outbound off while inbound is off', async () => {
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isOutboundActionsEnabled: false },
+        })
+      ).rejects.toThrow(/at least one of inbound events or outbound actions/);
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    test('rejects inbound off while outbound is off', async () => {
+      arrangeExisting(buildExisting({ outboundEnabled: false, hasInboundEventIdentity: true }));
+
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+        })
+      ).rejects.toThrow(/at least one of inbound events or outbound actions/);
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    test('allows both switches in one request when one stays on', async () => {
+      arrangeExisting(buildExisting({ hasInboundEventIdentity: true }));
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: {
+          name: 'renamed',
+          config: {},
+          secrets: {},
+          isInboundEventsEnabled: false,
+          isOutboundActionsEnabled: true,
+        },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+      expect(result.isOutboundActionsEnabled).toBe(true);
+    });
+
+    test('ignores a client config.outboundEnabled', async () => {
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: { outboundEnabled: false }, secrets: {} },
+      });
+
+      expect(result.isOutboundActionsEnabled).toBe(true);
+      expect(savedAction().config).toEqual({});
+    });
+
+    test('rejects the field on a non-dual type', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingRawAction as never);
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isOutboundActionsEnabled: false },
+        })
+      ).rejects.toThrow(
+        'Outbound actions can only be turned off for connectors that both send and receive.'
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
 });

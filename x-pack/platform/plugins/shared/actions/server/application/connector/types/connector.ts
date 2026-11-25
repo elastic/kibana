@@ -23,6 +23,7 @@ export interface Connector {
   isConnectorTypeDeprecated: ConnectorSchemaType['isConnectorTypeDeprecated'];
   authMode?: ConnectorSchemaType['authMode'];
   isInboundEventsEnabled?: boolean;
+  isOutboundActionsEnabled?: boolean;
   specVersion?: ConnectorSchemaType['specVersion'];
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorSpec } from '@kbn/connector-specs';
+import { OUTBOUND_ENABLED_CONFIG_KEY, type ConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
 
 import type { ActionTypeConfig, ValidatorType } from '../../types';
@@ -18,9 +18,14 @@ export const generateConfigSchema = (
   const authType = z.string().optional();
   // null/absent = recommended (isTool) actions; non-empty array = explicit allowlist.
   const selectedActions = z.array(z.string().max(256)).max(500).nullish();
-  const configSchema = schema
-    ? schema.extend({ authType, selectedActions })
-    : z.object({ authType, selectedActions });
+  // Reserved framework key. Set by the server from `is_outbound_actions_enabled`.
+  const outboundEnabled = z.boolean().optional();
+  const frameworkKeys = {
+    authType,
+    selectedActions,
+    [OUTBOUND_ENABLED_CONFIG_KEY]: outboundEnabled,
+  };
+  const configSchema = schema ? schema.extend(frameworkKeys) : z.object(frameworkKeys);
   const allowedHostsKeys = getAllowedHostsKeysFromShape(configSchema.shape);
   const knownActionNames = new Set(actionNames);
 

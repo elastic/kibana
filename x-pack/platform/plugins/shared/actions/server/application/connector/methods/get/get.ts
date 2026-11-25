@@ -16,6 +16,7 @@ import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memo
 import { getAuthMode } from '../../lib/get_auth_mode';
 import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
 import { readInboundEventsEnabled } from '../../../../inbound/inbound_events_enabled';
+import { readOutboundActionsEnabled } from '../../../../lib/outbound_actions_enabled';
 
 export async function get({
   context,
@@ -113,6 +114,17 @@ export async function get({
   });
   if (isInboundEventsEnabled !== undefined) {
     connector.isInboundEventsEnabled = isInboundEventsEnabled;
+  }
+
+  // An in-memory connector can hide its config, so the state is read from the raw config.
+  const isOutboundActionsEnabled = readOutboundActionsEnabled({
+    actionTypeId: connector.actionTypeId,
+    config: (foundInMemoryConnector?.config ?? connector.config) as
+      | Record<string, unknown>
+      | undefined,
+  });
+  if (isOutboundActionsEnabled !== undefined) {
+    connector.isOutboundActionsEnabled = isOutboundActionsEnabled;
   }
 
   return connector;

@@ -8,6 +8,7 @@
 import type { ConnectorResponseV1 } from '../../../../../common/routes/connector/response';
 import type { Connector } from '../../../../application/connector/types';
 import { omitIngestTokenHashFromConfig } from '../omit_ingest_token_hash';
+import { omitOutboundEnabledFromConfig } from '../omit_outbound_enabled';
 
 export const transformConnectorResponse = (
   {
@@ -22,6 +23,7 @@ export const transformConnectorResponse = (
     isConnectorTypeDeprecated,
     authMode,
     isInboundEventsEnabled,
+    isOutboundActionsEnabled,
     specVersion,
   }: Connector,
   {
@@ -31,7 +33,7 @@ export const transformConnectorResponse = (
 ): ConnectorResponseV1 => ({
   id,
   name,
-  config: omitIngestTokenHashFromConfig(config),
+  config: omitOutboundEnabledFromConfig(omitIngestTokenHashFromConfig(config)),
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
   is_deprecated: isDeprecated,
@@ -41,6 +43,9 @@ export const transformConnectorResponse = (
   ...(authMode !== undefined ? { auth_mode: authMode } : {}),
   ...(includeInboundEventsField && isInboundEventsEnabled !== undefined
     ? { is_inbound_events_enabled: isInboundEventsEnabled }
+    : {}),
+  ...(includeInboundEventsField && isOutboundActionsEnabled !== undefined
+    ? { is_outbound_actions_enabled: isOutboundActionsEnabled }
     : {}),
   ...(includeSpecVersionField && specVersion !== undefined ? { spec_version: specVersion } : {}),
 });

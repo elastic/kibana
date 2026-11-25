@@ -295,4 +295,65 @@ describe('getAllConnectorsRoute', () => {
     const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
     expect(responseBody[0]).not.toHaveProperty('is_inbound_events_enabled');
   });
+
+  it('maps isOutboundActionsEnabled to is_outbound_actions_enabled and hides config.outboundEnabled', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils(true));
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'dual',
+        actionTypeId: '.dual',
+        config: { outboundEnabled: false },
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        isOutboundActionsEnabled: false,
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+    await handler(context, req, res);
+
+    const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
+    expect(responseBody[0]).toEqual(
+      expect.objectContaining({ is_outbound_actions_enabled: false, config: {} })
+    );
+  });
+
+  it('omits is_outbound_actions_enabled from the response when the inbound events flag is off', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils());
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'dual',
+        actionTypeId: '.dual',
+        config: { outboundEnabled: false },
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        isOutboundActionsEnabled: false,
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+    await handler(context, req, res);
+
+    const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
+    expect(responseBody[0]).not.toHaveProperty('is_outbound_actions_enabled');
+    expect(responseBody[0].config).toEqual({});
+  });
 });

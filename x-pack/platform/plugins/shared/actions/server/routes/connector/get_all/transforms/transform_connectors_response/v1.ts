@@ -8,6 +8,7 @@
 import type { ConnectorWithExtraFindData } from '../../../../../application/connector/types';
 import type { GetAllConnectorsResponseV1 } from '../../../../../../common/routes/connector/response';
 import { omitIngestTokenHashFromConfig } from '../../../common_transforms/omit_ingest_token_hash';
+import { omitOutboundEnabledFromConfig } from '../../../common_transforms/omit_outbound_enabled';
 
 export const transformGetAllConnectorsResponse = (
   results: ConnectorWithExtraFindData[],
@@ -27,10 +28,11 @@ export const transformGetAllConnectorsResponse = (
       isConnectorTypeDeprecated,
       authMode,
       isInboundEventsEnabled,
+      isOutboundActionsEnabled,
     }) => ({
       id,
       name,
-      config: omitIngestTokenHashFromConfig(config),
+      config: omitOutboundEnabledFromConfig(omitIngestTokenHashFromConfig(config)),
       connector_type_id: actionTypeId,
       is_preconfigured: isPreconfigured,
       is_deprecated: isDeprecated,
@@ -41,6 +43,9 @@ export const transformGetAllConnectorsResponse = (
       ...(authMode !== undefined ? { auth_mode: authMode } : {}),
       ...(includeInboundEventsField && isInboundEventsEnabled !== undefined
         ? { is_inbound_events_enabled: isInboundEventsEnabled }
+        : {}),
+      ...(includeInboundEventsField && isOutboundActionsEnabled !== undefined
+        ? { is_outbound_actions_enabled: isOutboundActionsEnabled }
         : {}),
     })
   );

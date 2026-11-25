@@ -1005,6 +1005,134 @@ describe('getAll()', () => {
       expect(result[0].isInboundEventsEnabled).toBe(true);
     });
 
+    describe('outbound actions', () => {
+      const buildClient = (inMemoryConnectors: ReturnType<typeof createMockInMemoryConnector>[]) =>
+        new ActionsClient({
+          logger,
+          actionTypeRegistry,
+          authTypeRegistry,
+          unsecuredSavedObjectsClient,
+          scopedClusterClient,
+          kibanaIndices,
+          actionExecutor,
+          bulkExecutionEnqueuer,
+          request,
+          authorization: authorization as unknown as ActionsAuthorization,
+          inMemoryConnectors,
+          connectorTokenClient: connectorTokenClientMock.create(),
+          getEventLogClient,
+          encryptedSavedObjectsClient,
+          isESOCanEncrypt,
+          getAxiosInstanceWithAuth,
+        });
+
+      const savedObject = (id: string, actionTypeId: string, config: Record<string, unknown>) => ({
+        id,
+        type: 'action',
+        attributes: {
+          name: `Connector ${id}`,
+          actionTypeId,
+          isMissingSecrets: false,
+          config,
+          secrets: {},
+        },
+        score: 1,
+        references: [],
+      });
+
+      beforeEach(() => {
+        (connectorTypeIsDual as jest.Mock).mockImplementation(
+          (actionTypeId: string) => actionTypeId === '.dual' || actionTypeId === '.slack2'
+        );
+        scopedClusterClient.asInternalUser.search.mockResponse(
+          // @ts-expect-error not full search response
+          {
+            aggregations: Object.fromEntries(
+              ['a', 'b', 'c', 'pre-off', 'pre-on', 'shared-id'].map((id) => [id, { doc_count: 0 }])
+            ),
+          }
+        );
+      });
+
+      test('reports the saved state for dual connectors and nothing for other types', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+          total: 3,
+          per_page: 10,
+          page: 1,
+          saved_objects: [
+            savedObject('a', '.dual', {}),
+            savedObject('b', '.dual', { outboundEnabled: false }),
+            savedObject('c', '.slack', { outboundEnabled: false }),
+          ],
+        });
+
+        const result = await buildClient([]).getAll();
+
+        expect(result.find((c) => c.id === 'a')?.isOutboundActionsEnabled).toBe(true);
+        expect(result.find((c) => c.id === 'b')?.isOutboundActionsEnabled).toBe(false);
+        expect(result.find((c) => c.id === 'c')?.isOutboundActionsEnabled).toBeUndefined();
+      });
+
+      test('reports the state of a preconfigured connector with hidden config', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+          total: 0,
+          per_page: 10,
+          page: 1,
+          saved_objects: [],
+        });
+
+        const result = await buildClient([
+          createMockInMemoryConnector({
+            id: 'pre-off',
+            actionTypeId: '.slack2',
+            name: 'Slack off',
+            isPreconfigured: true,
+            isDynamic: true,
+            config: { outboundEnabled: false },
+          }),
+          createMockInMemoryConnector({
+            id: 'pre-on',
+            actionTypeId: '.slack2',
+            name: 'Slack on',
+            isPreconfigured: true,
+            isDynamic: true,
+            config: {},
+          }),
+        ]).getAll();
+
+        expect(result.find((c) => c.id === 'pre-off')?.isOutboundActionsEnabled).toBe(false);
+        expect(result.find((c) => c.id === 'pre-off')?.config).toBeUndefined();
+        expect(result.find((c) => c.id === 'pre-on')?.isOutboundActionsEnabled).toBe(true);
+      });
+
+      test('does not copy a preconfigured state onto a saved connector with the same id', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+          total: 1,
+          per_page: 10,
+          page: 1,
+          saved_objects: [savedObject('shared-id', '.slack2', {})],
+        });
+
+        const result = await buildClient([
+          createMockInMemoryConnector({
+            id: 'shared-id',
+            actionTypeId: '.slack2',
+            name: 'Slack preconfigured',
+            isPreconfigured: true,
+            isDynamic: true,
+            config: { outboundEnabled: false },
+          }),
+        ]).getAll();
+
+        expect(result.find((c) => c.isPreconfigured === false)?.isOutboundActionsEnabled).toBe(
+          true
+        );
+        expect(result.find((c) => c.isPreconfigured === true)?.isOutboundActionsEnabled).toBe(
+          false
+        );
+      });
+    });
+
     test('does not copy preconfigured inbound events onto a saved connector with the same id', async () => {
       (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.slack2'

@@ -395,6 +395,114 @@ describe('createConnectorRoute', () => {
     });
   });
 
+  it('maps is_outbound_actions_enabled in and out and hides config.outboundEnabled', async () => {
+    const { handler } = setupRoute({ inboundEventsFeatureEnabled: true });
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.create.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        name: 'Datadog prod',
+        actionTypeId: '.dual',
+        config: { site: 'datadoghq.com', outboundEnabled: false },
+        isInboundEventsEnabled: true,
+        isOutboundActionsEnabled: false,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          name: 'Datadog prod',
+          connector_type_id: '.dual',
+          config: {},
+          secrets: {},
+          is_inbound_events_enabled: true,
+          is_outbound_actions_enabled: false,
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.create).toHaveBeenCalledWith({
+      action: expect.objectContaining({ isOutboundActionsEnabled: false }),
+      options: undefined,
+    });
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        is_outbound_actions_enabled: false,
+        config: { site: 'datadoghq.com' },
+      }),
+    });
+  });
+
+  it('does not forward an omitted is_outbound_actions_enabled', async () => {
+    const { handler } = setupRoute({ inboundEventsFeatureEnabled: true });
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.create.mockResolvedValueOnce(
+      createMockConnector({ id: '1', name: 'Datadog prod', actionTypeId: '.dual' })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      { body: { name: 'Datadog prod', connector_type_id: '.dual', config: {}, secrets: {} } },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.create).toHaveBeenCalledWith({
+      action: expect.not.objectContaining({ isOutboundActionsEnabled: expect.anything() }),
+      options: undefined,
+    });
+  });
+
+  it('rejects is_outbound_actions_enabled as unknown when the inbound events flag is off', () => {
+    expect(() =>
+      getCreateConnectorRequestBodySchemaV1(false, false).validate({
+        name: 'Datadog prod',
+        connector_type_id: '.dual',
+        config: {},
+        secrets: {},
+        is_outbound_actions_enabled: false,
+      })
+    ).toThrow(
+      /\[is_outbound_actions_enabled\]: Additional properties are not allowed \('is_outbound_actions_enabled' was unexpected\)/
+    );
+  });
+
+  it('omits is_outbound_actions_enabled from the response when the inbound events flag is off', async () => {
+    const { handler } = setupRoute();
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.create.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        name: 'Datadog prod',
+        actionTypeId: '.dual',
+        config: { outboundEnabled: false },
+        isOutboundActionsEnabled: false,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      { body: { name: 'Datadog prod', connector_type_id: '.dual', config: {}, secrets: {} } },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.not.objectContaining({ is_outbound_actions_enabled: expect.anything() }),
+    });
+    expect((res.ok as jest.Mock).mock.calls[0][0].body.config).toEqual({});
+  });
+
   test('validates body to prevent empty strings', async () => {
     const body = {
       name: 'My name',

@@ -43,6 +43,12 @@ export {
   connectorTypeIsInboundOnly,
 } from './src/is_inbound_only_connector_spec';
 export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connector_spec';
+export {
+  OUTBOUND_ENABLED_CONFIG_KEY,
+  getUsableSelectedActions,
+  isConnectorOutboundActionsEnabled,
+  type ConnectorOutboundState,
+} from './src/outbound_actions';
 export { connectorTypePublishesKeys } from './src/connector_type_publishes_keys';
 export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,

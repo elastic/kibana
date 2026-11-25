@@ -12,6 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
+import { OUTBOUND_ENABLED_CONFIG_KEY, connectorTypeIsDual } from '@kbn/connector-specs';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { InMemoryConnector } from '../../../..';
 import type { SavedObjectClientForFind } from '../../../../data/connector/types/params';
@@ -28,6 +29,7 @@ import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
 import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
 import { attachInboundEventsEnabled } from '../../../../inbound/inbound_events_enabled';
+import { attachOutboundActionsEnabled } from '../../../../lib/outbound_actions_enabled';
 import type { GetAllUnsecuredParams } from './types/params';
 
 interface GetAllHelperOpts {
@@ -114,6 +116,18 @@ async function getAllHelper({
       .filter((connector) => connector.isInboundEventsEnabled === true)
       .map((connector) => connector.id)
   );
+  // The config of an in-memory connector can be hidden in the result, so its state is read here.
+  const inMemoryConnectorIdsWithOutboundDisabled = new Set(
+    inMemoryConnectors
+      .filter(
+        (connector) =>
+          connectorTypeIsDual(connector.actionTypeId) &&
+          (connector.config as Record<string, unknown> | undefined)?.[
+            OUTBOUND_ENABLED_CONFIG_KEY
+          ] === false
+      )
+      .map((connector) => connector.id)
+  );
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
   ).saved_objects.map((rawAction) => {
@@ -188,10 +202,13 @@ async function getAllHelper({
 
   validateConnectors(connectors, logger);
 
-  return attachInboundEventsEnabled({
-    connectors,
-    connectorIdsWithIdentity,
-    connectorIdsWithEventsEnabled,
+  return attachOutboundActionsEnabled({
+    connectors: attachInboundEventsEnabled({
+      connectors,
+      connectorIdsWithIdentity,
+      connectorIdsWithEventsEnabled,
+    }),
+    inMemoryConnectorIdsWithOutboundDisabled,
   });
 }
 

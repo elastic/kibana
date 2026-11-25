@@ -195,6 +195,86 @@ describe('updateConnectorRoute', () => {
     });
   });
 
+  it('maps is_outbound_actions_enabled in and out and hides config.outboundEnabled', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(router, licenseState, actionsConfigUtils(true));
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.dual',
+        name: 'Datadog prod',
+        config: { outboundEnabled: false },
+        isOutboundActionsEnabled: false,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+        body: {
+          name: 'Datadog prod',
+          config: {},
+          secrets: {},
+          is_outbound_actions_enabled: false,
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.update).toHaveBeenCalledWith({
+      id: '1',
+      action: expect.objectContaining({ isOutboundActionsEnabled: false }),
+    });
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ is_outbound_actions_enabled: false, config: {} }),
+    });
+  });
+
+  it('does not forward an omitted is_outbound_actions_enabled', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(router, licenseState, actionsConfigUtils(true));
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(
+      createMockConnector({ id: '1', actionTypeId: '.dual', name: 'Datadog prod' })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      { params: { id: '1' }, body: { name: 'Datadog prod', config: {}, secrets: {} } },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.update).toHaveBeenCalledWith({
+      id: '1',
+      action: expect.not.objectContaining({ isOutboundActionsEnabled: expect.anything() }),
+    });
+  });
+
+  it('rejects is_outbound_actions_enabled as unknown when the inbound events flag is off', () => {
+    expect(() =>
+      getUpdateConnectorBodySchema(false).validate({
+        name: 'Datadog prod',
+        config: {},
+        secrets: {},
+        is_outbound_actions_enabled: false,
+      })
+    ).toThrow(
+      /\[is_outbound_actions_enabled\]: Additional properties are not allowed \('is_outbound_actions_enabled' was unexpected\)/
+    );
+  });
+
   it('ensures the license allows deleting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

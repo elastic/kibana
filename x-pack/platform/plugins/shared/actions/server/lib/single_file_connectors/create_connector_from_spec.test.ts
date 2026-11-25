@@ -718,6 +718,16 @@ describe('createConnectorTypeFromSpec', () => {
       );
     });
 
+    it('throws when the spec config schema defines the reserved outboundEnabled key', () => {
+      const spec = createMockSpec({
+        schema: z4.object({ outboundEnabled: z4.boolean().optional() }),
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(
+        `Connector spec "${spec.metadata.id}" defines a reserved config key "outboundEnabled".`
+      );
+    });
+
     it('does not mutate spec.actions when augmenting with test handler', () => {
       const actions = {
         testAction: {

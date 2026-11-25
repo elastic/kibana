@@ -7,6 +7,7 @@
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
+  OUTBOUND_ENABLED_CONFIG_KEY,
   TEST_CONNECTOR_SUB_ACTION,
   connectorSpecHasEvents,
   getSandboxHosts,
@@ -31,6 +32,14 @@ import {
   createConnectorNetworkSettings,
   createPlatformServices,
 } from './create_connector_network_settings';
+
+const assertNoReservedConfigKeys = (spec: ConnectorSpec): void => {
+  if (spec.schema && OUTBOUND_ENABLED_CONFIG_KEY in spec.schema.shape) {
+    throw new Error(
+      `Connector spec "${spec.metadata.id}" defines a reserved config key "${OUTBOUND_ENABLED_CONFIG_KEY}".`
+    );
+  }
+};
 
 const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] => {
   if (spec.actions?.[TEST_CONNECTOR_SUB_ACTION]) {
@@ -76,6 +85,8 @@ export const createConnectorTypeFromSpec = (
   if (!hasActions && !hasEvents && !hasTest) {
     throw new Error('No actions or events defined');
   }
+
+  assertNoReservedConfigKeys(spec);
 
   const { signingKey } = spec;
   const executableActions = buildExecutableActions(spec);

@@ -1,0 +1,146 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Boom from '@hapi/boom';
+import { OUTBOUND_ENABLED_CONFIG_KEY, connectorTypeIsDual } from '@kbn/connector-specs';
+import { i18n } from '@kbn/i18n';
+
+/**
+ * Rejects `is_outbound_actions_enabled` on types that are not dual.
+ */
+export const assertOutboundActionsToggleAllowed = ({
+  actionTypeId,
+  requestedEnabled,
+}: {
+  actionTypeId: string;
+  requestedEnabled: boolean | undefined;
+}): void => {
+  if (requestedEnabled === undefined) {
+    return;
+  }
+  if (connectorTypeIsDual(actionTypeId)) {
+    return;
+  }
+  throw Boom.badRequest(
+    i18n.translate('xpack.actions.serverSideErrors.outboundActionsToggleNotDual', {
+      defaultMessage:
+        'Outbound actions can only be turned off for connectors that both send and receive.',
+    })
+  );
+};
+
+/**
+ * Create: omit = on. Only dual types can be off.
+ */
+export const resolveCreateOutboundActionsEnabled = ({
+  actionTypeId,
+  requestedEnabled,
+}: {
+  actionTypeId: string;
+  requestedEnabled: boolean | undefined;
+}): boolean => {
+  if (!connectorTypeIsDual(actionTypeId)) {
+    return true;
+  }
+  return requestedEnabled !== false;
+};
+
+/**
+ * Update: omit = keep previous. Only dual types can be off.
+ */
+export const resolveUpdateOutboundActionsEnabled = ({
+  actionTypeId,
+  requestedEnabled,
+  previouslyEnabled,
+}: {
+  actionTypeId: string;
+  requestedEnabled: boolean | undefined;
+  previouslyEnabled: boolean;
+}): boolean => {
+  if (!connectorTypeIsDual(actionTypeId)) {
+    return true;
+  }
+  return requestedEnabled === undefined ? previouslyEnabled : requestedEnabled;
+};
+
+/**
+ * A dual connector needs at least one direction on.
+ */
+export const assertInboundOrOutboundEnabled = ({
+  actionTypeId,
+  isInboundEventsEnabled,
+  isOutboundActionsEnabled,
+}: {
+  actionTypeId: string;
+  isInboundEventsEnabled: boolean;
+  isOutboundActionsEnabled: boolean;
+}): void => {
+  if (!connectorTypeIsDual(actionTypeId)) {
+    return;
+  }
+  if (isInboundEventsEnabled || isOutboundActionsEnabled) {
+    return;
+  }
+  throw Boom.badRequest(
+    i18n.translate('xpack.actions.serverSideErrors.inboundAndOutboundDisabled', {
+      defaultMessage:
+        'A connector that both sends and receives needs at least one of inbound events or outbound actions turned on.',
+    })
+  );
+};
+
+/** The saved outbound state of a connector, or `undefined` when the type is not dual. */
+export const readOutboundActionsEnabled = ({
+  actionTypeId,
+  config,
+}: {
+  actionTypeId: string;
+  config?: Record<string, unknown>;
+}): boolean | undefined => {
+  if (!connectorTypeIsDual(actionTypeId)) {
+    return undefined;
+  }
+  return config?.[OUTBOUND_ENABLED_CONFIG_KEY] !== false;
+};
+
+/**
+ * Removes any client value of the reserved key, then writes `false` when outbound is off.
+ * On leaves no key, so existing connectors stay unchanged.
+ */
+export const applyOutboundEnabledToConfig = (
+  config: Record<string, unknown>,
+  isOutboundActionsEnabled: boolean
+): Record<string, unknown> => {
+  const { [OUTBOUND_ENABLED_CONFIG_KEY]: _omit, ...rest } = config;
+  return isOutboundActionsEnabled ? rest : { ...rest, [OUTBOUND_ENABLED_CONFIG_KEY]: false };
+};
+
+export const attachOutboundActionsEnabled = <
+  T extends {
+    id: string;
+    actionTypeId: string;
+    isPreconfigured?: boolean;
+    config?: Record<string, unknown>;
+  }
+>({
+  connectors,
+  inMemoryConnectorIdsWithOutboundDisabled,
+}: {
+  connectors: T[];
+  inMemoryConnectorIdsWithOutboundDisabled: ReadonlySet<string>;
+}): T[] =>
+  connectors.map((connector) => {
+    if (!connectorTypeIsDual(connector.actionTypeId)) {
+      return connector;
+    }
+    // A shared id must not copy the state of an in-memory connector onto a saved row, or the reverse.
+    const isInMemory = connector.isPreconfigured === true;
+    const isEnabled = isInMemory
+      ? !inMemoryConnectorIdsWithOutboundDisabled.has(connector.id)
+      : connector.config?.[OUTBOUND_ENABLED_CONFIG_KEY] !== false;
+    return { ...connector, isOutboundActionsEnabled: isEnabled };
+  });

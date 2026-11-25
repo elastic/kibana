@@ -2014,6 +2014,200 @@ describe('create()', () => {
     });
   });
 
+  describe('dual connector outbound actions', () => {
+    const securityService = securityServiceMock.createStart();
+    const dualContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: DEFAULT_SPACE_ID,
+      securityService,
+    };
+
+    beforeEach(() => {
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual' || actionTypeId === '.inboundWebhook'
+      );
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity mock-saved-object-id',
+        api_key: 'es-secret',
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.dual',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? 'mock-saved-object-id',
+        type,
+        attributes,
+        references: options?.references ?? [],
+      }));
+    });
+
+    const savedAction = () =>
+      unsecuredSavedObjectsClient.create.mock.calls.find((call) => call[0] === 'action')?.[1] as {
+        config: Record<string, unknown>;
+      };
+
+    test('is on and writes no config key when the field is omitted', async () => {
+      const result = await create({
+        context: dualContext,
+        action: { name: 'Datadog', actionTypeId: '.dual', config: {}, secrets: {} },
+      });
+
+      expect(result.isOutboundActionsEnabled).toBe(true);
+      expect(savedAction().config).toEqual({});
+    });
+
+    test('is on and writes no config key when the field is true', async () => {
+      const result = await create({
+        context: dualContext,
+        action: {
+          name: 'Datadog',
+          actionTypeId: '.dual',
+          config: {},
+          secrets: {},
+          isOutboundActionsEnabled: true,
+        },
+      });
+
+      expect(result.isOutboundActionsEnabled).toBe(true);
+      expect(savedAction().config).toEqual({});
+    });
+
+    test('writes config.outboundEnabled false when off and inbound is on', async () => {
+      const result = await create({
+        context: dualContext,
+        action: {
+          name: 'Datadog',
+          actionTypeId: '.dual',
+          config: { site: 'datadoghq.com' },
+          secrets: {},
+          isInboundEventsEnabled: true,
+          isOutboundActionsEnabled: false,
+        },
+      });
+
+      expect(result.isOutboundActionsEnabled).toBe(false);
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(savedAction().config).toEqual({ site: 'datadoghq.com', outboundEnabled: false });
+    });
+
+    test('rejects outbound off when inbound is omitted', async () => {
+      await expect(
+        create({
+          context: dualContext,
+          action: {
+            name: 'Datadog',
+            actionTypeId: '.dual',
+            config: {},
+            secrets: {},
+            isOutboundActionsEnabled: false,
+          },
+        })
+      ).rejects.toThrow(/at least one of inbound events or outbound actions/);
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    test('rejects outbound off when inbound is false', async () => {
+      await expect(
+        create({
+          context: dualContext,
+          action: {
+            name: 'Datadog',
+            actionTypeId: '.dual',
+            config: {},
+            secrets: {},
+            isInboundEventsEnabled: false,
+            isOutboundActionsEnabled: false,
+          },
+        })
+      ).rejects.toThrow(/at least one of inbound events or outbound actions/);
+    });
+
+    test('rejects the field on a non-dual type', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.slack',
+          preSaveHook,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await expect(
+        create({
+          context: dualContext,
+          action: {
+            name: 'Slack',
+            actionTypeId: '.slack',
+            config: {},
+            secrets: {},
+            isOutboundActionsEnabled: false,
+          },
+        })
+      ).rejects.toThrow(
+        'Outbound actions can only be turned off for connectors that both send and receive.'
+      );
+      expect(preSaveHook).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    test('ignores a client config.outboundEnabled', async () => {
+      const result = await create({
+        context: dualContext,
+        action: {
+          name: 'Datadog',
+          actionTypeId: '.dual',
+          config: { outboundEnabled: false },
+          secrets: {},
+        },
+      });
+
+      expect(result.isOutboundActionsEnabled).toBe(true);
+      expect(savedAction().config).toEqual({});
+    });
+
+    test('does not write the config key for a type that is not dual', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.slack',
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      const result = await create({
+        context: dualContext,
+        action: {
+          name: 'Slack',
+          actionTypeId: '.slack',
+          config: { outboundEnabled: false },
+          secrets: {},
+        },
+      });
+
+      expect(result.isOutboundActionsEnabled).toBeUndefined();
+      expect(savedAction().config).toEqual({});
+    });
+  });
+
   describe('connectors that publish keys', () => {
     const keyContext: ActionsClientContext = {
       ...mockContext,

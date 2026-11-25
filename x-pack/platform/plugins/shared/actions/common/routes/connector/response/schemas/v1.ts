@@ -62,6 +62,17 @@ const isInboundEventsEnabledResponseField = {
   ),
 };
 
+const isOutboundActionsEnabledResponseField = {
+  is_outbound_actions_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Indicates whether this connector runs outbound actions. Present for connectors that both send and receive. When false, the connector cannot run or test actions.',
+      },
+    })
+  ),
+};
+
 const specVersionResponseField = {
   spec_version: schema.maybe(
     schema.string({
@@ -91,6 +102,7 @@ export const getConnectorResponseSchema = (
     {
       ...connectorResponseFields,
       ...(includeInboundEventsField ? isInboundEventsEnabledResponseField : {}),
+      ...(includeInboundEventsField ? isOutboundActionsEnabledResponseField : {}),
       ...(includeSpecVersionField ? specVersionResponseField : {}),
     },
     { meta: { id: 'connector_response' } }

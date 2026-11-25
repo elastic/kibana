@@ -13,6 +13,7 @@ export interface ConnectorUpdate {
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
   isInboundEventsEnabled?: boolean;
+  isOutboundActionsEnabled?: boolean;
 }
 
 export interface ConnectorUpdateParams {
