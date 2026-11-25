@@ -67,12 +67,13 @@ const buildSetup = (
     internalApi: { unifiedSearchFilters$: new BehaviorSubject<Filter[] | undefined>(undefined) },
   } as unknown as ReturnType<typeof initializeUnifiedSearchManager>;
 
+  const forcePublish$ = new Subject<void>();
   const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(initiallyAwaitingFilters);
   const filtersManager = initializeFiltersManager(
     unifiedSearchManager,
     layoutManager,
     settingsManager,
-    new Subject<void>(),
+    forcePublish$,
     awaitingRequiredFilters$
   );
 
@@ -84,6 +85,7 @@ const buildSetup = (
   return {
     filtersManager,
     awaitingRequiredFilters$,
+    forcePublish$,
     layout$,
     childApisPending$,
     setChildren,
@@ -217,6 +219,39 @@ describe('filters manager: awaiting required filters', () => {
     await flush();
     expect(awaitingRequiredFilters$.value).toBe(false);
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
+  });
+
+  test("a reset publishes the controls' new filters and awaiting state once they have reported", async () => {
+    const { filtersManager, awaitingRequiredFilters$, forcePublish$, setChildren } = buildSetup(
+      ['control1'],
+      false
+    );
+    const region = { meta: { key: 'region' }, query: { match_phrase: { region: 'EU' } } } as Filter;
+    // initial state: a required control with no selection
+    const filtersLoading$ = new BehaviorSubject<boolean>(true);
+    const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+    const awaiting$ = new BehaviorSubject<boolean>(true);
+    setChildren([
+      { uuid: 'control1', awaitingRequiredFilters$: awaiting$, filtersLoading$, appliedFilters$ },
+    ]);
+    await flush();
+    // the control finishes loading, which consumes the one-time initial publish
+    filtersLoading$.next(false);
+    await flush();
+    expect(awaitingRequiredFilters$.value).toBe(true);
+
+    // reset to a state with a saved selection: the mounted control applies it and recomputes its filter later
+    forcePublish$.next();
+    await flush();
+    filtersLoading$.next(true);
+    await flush();
+    appliedFilters$.next([region]);
+    awaiting$.next(false);
+    filtersLoading$.next(false);
+    await flush();
+
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
+    expect(awaitingRequiredFilters$.value).toBe(false);
   });
 
   test('flags an unpublished change when the awaiting state changes but the filters do not', async () => {

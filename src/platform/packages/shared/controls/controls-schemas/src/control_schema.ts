@@ -21,10 +21,16 @@ export const controlTitleSchema = z
  */
 export const pinnedDataControlProps = {
   required: lazySchema(() =>
-    z.boolean().default(DEFAULT_DATA_CONTROL_STATE.required).meta({
-      description:
-        'When `true`, dashboard panels do not render until a selection is made in the control.',
-    })
+    z
+      .boolean()
+      .default(DEFAULT_DATA_CONTROL_STATE.required)
+      .meta({
+        description:
+          'When `true`, dashboard panels do not render until a selection is made in the control. ' +
+          'If the dashboard does not auto-apply filters, the selection must also be applied before panels render. ' +
+          'This does not guarantee that panels never load without a selection. If the control has a blocking error ' +
+          '(for example, a missing data view or field), it can never produce a selection, so panels render without its filter.',
+      })
   ),
 };
 

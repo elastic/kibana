@@ -63,16 +63,25 @@ export const useDashboardMenuItems = ({
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
 
-  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl, canRedo, canUndo] =
-    useBatchedPublishingSubjects(
-      dashboardApi.hasOverlays$,
-      dashboardApi.hasUnsavedChanges$,
-      dashboardApi.savedObjectId$,
-      dashboardApi.viewMode$,
-      dashboardApi.accessControl$,
-      dashboardInternalApi.canRedo$,
-      dashboardInternalApi.canUndo$
-    );
+  const [
+    hasOverlays,
+    hasUnsavedChanges,
+    lastSavedId,
+    viewMode,
+    accessControl,
+    canRedo,
+    canUndo,
+    awaitingRequiredFilters,
+  ] = useBatchedPublishingSubjects(
+    dashboardApi.hasOverlays$,
+    dashboardApi.hasUnsavedChanges$,
+    dashboardApi.savedObjectId$,
+    dashboardApi.viewMode$,
+    dashboardApi.accessControl$,
+    dashboardInternalApi.canRedo$,
+    dashboardInternalApi.canUndo$,
+    dashboardApi.awaitingRequiredFilters$
+  );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
   const { isInEditAccessMode, canManageAccessControl } = useMemo(
@@ -348,7 +357,8 @@ export const useDashboardMenuItems = ({
         iconType: 'plus',
         testId: 'dashboardAddTopNavButton',
         htmlId: 'dashboardAddTopNavButton',
-        disableButton: disableTopNav,
+        // the grid is hidden while required filters are pending, so panels can't register and adding one would hang
+        disableButton: disableTopNav || awaitingRequiredFilters,
         run: openAddPanelFlyout,
         order: 2,
       } as AppMenuItemType,
@@ -436,6 +446,7 @@ export const useDashboardMenuItems = ({
     isQuickSaveButtonDisabled,
     hasUnsavedChanges,
     openAddPanelFlyout,
+    awaitingRequiredFilters,
     resetChangesMenuItem,
     exportItems,
     viewMode,

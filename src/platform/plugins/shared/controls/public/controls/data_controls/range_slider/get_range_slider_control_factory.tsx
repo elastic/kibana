@@ -193,6 +193,8 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
           max: number | undefined;
         }) => {
           if (error) {
+            // a cancelled request is not a failure; keep the current state so required controls stay blocking
+            if (error.name === 'AbortError') return;
             dataControlManager.api.setBlockingError(error);
           }
           max$.next(max !== undefined ? Math.ceil(max) : undefined);

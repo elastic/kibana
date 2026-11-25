@@ -155,6 +155,11 @@ export const initializeFiltersManager = (
       }
     });
 
+  /**
+   * The filters and the awaiting state are emitted back to back on purpose: when a required control is cleared,
+   * the grid is unmounted right after the broader filters are published. Keep them together and in this order,
+   * so mounted panels don't get the chance to fetch with the filters that no longer satisfy the required control.
+   */
   const publishFilters = () => {
     const published = publishedChildFilters$.getValue();
     const unpublished = unpublishedChildFilters$.getValue();
@@ -211,7 +216,9 @@ export const initializeFiltersManager = (
     .pipe(
       switchMap(async () => {
         await new Promise((resolve) => {
-          unpublishedChildFilters$.pipe(first()).subscribe(resolve);
+          // `unpublishedChildFilters$` replays its current (pre-reset) value on subscribe, so skip it and wait
+          // for the next push, which happens once the controls have reported their filters
+          unpublishedChildFilters$.pipe(skip(1), first()).subscribe(resolve);
         });
       })
     )
