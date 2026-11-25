@@ -30,6 +30,7 @@ const transformConnector: RewriteRequestCase<
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   auth_mode: authMode,
   is_inbound_events_enabled: isInboundEventsEnabled,
+  is_outbound_actions_enabled: isOutboundActionsEnabled,
   ...res
 }) => ({
   actionTypeId,
@@ -41,5 +42,6 @@ const transformConnector: RewriteRequestCase<
   isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { authMode } : {}),
   ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),
+  ...(isOutboundActionsEnabled !== undefined ? { isOutboundActionsEnabled } : {}),
   ...res,
 });

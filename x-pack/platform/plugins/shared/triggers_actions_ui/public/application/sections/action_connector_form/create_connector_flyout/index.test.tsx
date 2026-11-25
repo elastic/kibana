@@ -1051,6 +1051,130 @@ describe('CreateConnectorFlyout', () => {
     });
   });
 
+  describe('dual outbound actions', () => {
+    const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.dual',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+      validateParams: jest.fn().mockResolvedValue({ errors: {} }),
+    });
+
+    beforeEach(() => {
+      loadActionTypes.mockResolvedValue([
+        {
+          id: '.dual',
+          enabled: true,
+          name: 'Dual',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+      actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
+      appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+      appMockRenderer.coreStart.application.capabilities = {
+        ...appMockRenderer.coreStart.application.capabilities,
+        actions: { save: true, show: true, execute: true },
+      };
+      appMockRenderer.coreStart.http.post = jest
+        .fn()
+        .mockImplementation((path: string, opts?: { body?: string }) => {
+          if (String(path).includes('_rotate_event_token')) {
+            return Promise.resolve({ ingest_token: 'once-token' });
+          }
+          const body = opts?.body ? JSON.parse(opts.body) : {};
+          return Promise.resolve({
+            ...createConnectorResponse,
+            connector_type_id: '.dual',
+            is_inbound_events_enabled: body.is_inbound_events_enabled === true,
+            is_outbound_actions_enabled: body.is_outbound_actions_enabled !== false,
+          });
+        });
+    });
+
+    const openDualForm = async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('.dual-card'));
+      await waitFor(() => {
+        expect(screen.getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+      await userEvent.click(await screen.findByTestId('nameInput'));
+      await userEvent.paste('My dual');
+    };
+
+    const getCreateBody = () => {
+      const createCall = (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls.find(
+        ([path]) => !String(path).includes('_rotate_event_token')
+      );
+      return JSON.parse(createCall[1].body);
+    };
+
+    it('sends the fields and is_outbound_actions_enabled true when the switch stays on', async () => {
+      await openDualForm();
+      await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+      await userEvent.click(screen.getByTestId('test-connector-text-field'));
+      await userEvent.paste('My text field');
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalled();
+      });
+      expect(getCreateBody()).toEqual(
+        expect.objectContaining({
+          config: { testTextField: 'My text field' },
+          is_outbound_actions_enabled: true,
+        })
+      );
+    });
+
+    it('sends is_outbound_actions_enabled false with empty config and secrets when the switch is off', async () => {
+      await openDualForm();
+      await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+      await userEvent.click(screen.getByTestId('test-connector-text-field'));
+      await userEvent.paste('typed before turning off');
+      await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
+      expect(screen.queryByTestId('test-connector-text-field')).not.toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalled();
+      });
+      expect(getCreateBody()).toEqual(
+        expect.objectContaining({
+          name: 'My dual',
+          config: {},
+          secrets: {},
+          is_inbound_events_enabled: true,
+          is_outbound_actions_enabled: false,
+        })
+      );
+    });
+
+    it('shows Save & test only while the switch is on', async () => {
+      await openDualForm();
+      await userEvent.click(screen.getByTestId('inbound-events-enabled-switch'));
+
+      expect(screen.getByTestId('create-connector-flyout-save-test-btn')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
+
+      expect(screen.queryByTestId('create-connector-flyout-save-test-btn')).not.toBeInTheDocument();
+      expect(screen.getByTestId('create-connector-flyout-save-btn')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
+
+      expect(screen.getByTestId('create-connector-flyout-save-test-btn')).toBeInTheDocument();
+    });
+  });
+
   describe('Save & Test transition', () => {
     const setupSaveAndTest = async () => {
       appMockRenderer.coreStart.application.capabilities = {

@@ -13,7 +13,7 @@ import { useKibana } from '../../common/lib/kibana';
 
 type UpdateConnectorSchema = Pick<
   ActionConnectorWithoutId,
-  'name' | 'config' | 'secrets' | 'isInboundEventsEnabled'
+  'name' | 'config' | 'secrets' | 'isInboundEventsEnabled' | 'isOutboundActionsEnabled'
 > & {
   id: string;
 };

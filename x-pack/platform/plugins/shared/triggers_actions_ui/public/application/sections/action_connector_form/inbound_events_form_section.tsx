@@ -83,8 +83,12 @@ const InboundEventsFormSectionComponent: React.FC<InboundEventsFormSectionProps>
   wasLive,
   settingsContent,
 }) => {
-  const [{ isInboundEventsEnabled }] = useFormData({ watch: ['isInboundEventsEnabled'] });
+  const [{ isInboundEventsEnabled, isOutboundActionsEnabled }] = useFormData({
+    watch: ['isInboundEventsEnabled', 'isOutboundActionsEnabled'],
+  });
   const switchOn = isInboundEventsEnabled === true;
+  // The last direction that is on cannot be turned off.
+  const isLastSwitchOn = switchOn && isOutboundActionsEnabled === false;
 
   return (
     <>
@@ -96,18 +100,28 @@ const InboundEventsFormSectionComponent: React.FC<InboundEventsFormSectionProps>
         {(field) => (
           <EuiFormRow
             fullWidth
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionConnectorForm.receiveEventsHelpDescription',
-              {
-                defaultMessage:
-                  'Accept webhooks on a Kibana URL. Uses an ingest token, not this connector’s outbound keys.',
-              }
-            )}
+            helpText={
+              isLastSwitchOn
+                ? i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorForm.receiveEventsLastSwitchHelpDescription',
+                    {
+                      defaultMessage:
+                        'Turn on Run actions first. A connector needs at least one direction on.',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorForm.receiveEventsHelpDescription',
+                    {
+                      defaultMessage:
+                        'Accept webhooks on a Kibana URL. Uses an ingest token, not this connector’s outbound keys.',
+                    }
+                  )
+            }
           >
             <EuiSwitch
               label={receiveEventsLabel}
               checked={field.value === true}
-              disabled={!canSave}
+              disabled={!canSave || isLastSwitchOn}
               onChange={(event) => field.setValue(event.target.checked)}
               data-test-subj="inbound-events-enabled-switch"
             />

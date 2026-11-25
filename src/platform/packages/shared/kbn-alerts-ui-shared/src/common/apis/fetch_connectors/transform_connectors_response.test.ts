@@ -71,4 +71,40 @@ describe('transformConnectorsResponse', () => {
       },
     ]);
   });
+
+  test('should map is_outbound_actions_enabled to isOutboundActionsEnabled', () => {
+    const result = transformConnectorResponse([
+      {
+        id: 'dual',
+        name: 'Dual',
+        connector_type_id: '.dual',
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        is_system_action: false,
+        referenced_by_count: 0,
+        secrets: {},
+        config: {},
+        is_connector_type_deprecated: false,
+        is_outbound_actions_enabled: false,
+      },
+      {
+        id: 'plain',
+        name: 'Plain',
+        connector_type_id: '.slack',
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        is_system_action: false,
+        referenced_by_count: 0,
+        secrets: {},
+        config: {},
+        is_connector_type_deprecated: false,
+      },
+    ]);
+
+    expect(result[0]).toEqual(expect.objectContaining({ isOutboundActionsEnabled: false }));
+    expect(result[0]).not.toHaveProperty('is_outbound_actions_enabled');
+    expect(result[1]).not.toHaveProperty('isOutboundActionsEnabled');
+  });
 });

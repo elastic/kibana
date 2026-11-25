@@ -10,6 +10,7 @@ import React, { memo, Suspense, useContext } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorTypeIsDual } from '@kbn/connector-specs';
 
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
@@ -20,6 +21,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorContext } from '../../context/connector_context';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 import { InboundEventsFormSection, OutboundSectionTitle } from './inbound_events_form_section';
+import { OutboundActionsFormSection } from './outbound_actions_form_section';
 
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
@@ -30,6 +32,8 @@ interface ConnectorFormFieldsProps {
   settingsContent?: ReactNode;
   /** Saved inbound setting. Used to warn when turning a live dual connector off. */
   savedIsInboundEventsEnabled?: boolean;
+  /** Saved outbound setting. Used to warn when turning a connector that runs actions off. */
+  savedIsOutboundActionsEnabled?: boolean;
   /** False on the add modal, which closes before a one-time ingest token can be shown. */
   showInboundEvents?: boolean;
 }
@@ -41,6 +45,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   authMode,
   settingsContent,
   savedIsInboundEventsEnabled = false,
+  savedIsOutboundActionsEnabled = true,
   showInboundEvents = true,
 }) => {
   const services = useKibana().services;
@@ -63,8 +68,13 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
     !isDual &&
     (settingsContent != null || !Boolean(actionTypeModel?.connectorForm?.hideSettingsTitle));
 
+  // The Run actions switch lives next to the inbound switch. Off unmounts the outbound fields, so
+  // they are neither validated nor sent.
+  const [{ isOutboundActionsEnabled }] = useFormData({ watch: ['isOutboundActionsEnabled'] });
+  const showOutboundFields = !showDualInbound || isOutboundActionsEnabled !== false;
+
   const fieldsComponent =
-    FieldsComponent !== null ? (
+    FieldsComponent !== null && showOutboundFields ? (
       <EuiErrorBoundary>
         <Suspense
           fallback={
@@ -100,7 +110,14 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
             />
           ) : null}
           {isDual && showInboundEvents ? <OutboundSectionTitle /> : null}
-          {showSettingsTitle ? (
+          {showDualInbound ? (
+            <OutboundActionsFormSection
+              canSave={canSave}
+              isEdit={isEdit}
+              wasEnabled={savedIsOutboundActionsEnabled}
+            />
+          ) : null}
+          {showSettingsTitle && showOutboundFields ? (
             <>
               <EuiTitle size="xxs" data-test-subj="connector-settings-label">
                 <h4>

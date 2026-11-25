@@ -57,6 +57,10 @@ import {
   readClusterInboundEventsEnabled,
   isInboundIngressConnector,
 } from '../../../lib/inbound_ingress';
+import {
+  getOutboundSubmitValues,
+  isOutboundActionsEnabledPayload,
+} from '../../../lib/outbound_actions';
 import { useRotateInboundIngress } from '../../../hooks/use_rotate_inbound_ingress';
 
 export interface EditConnectorFlyoutProps {
@@ -270,7 +274,10 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   });
 
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
-  const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
+  // A connector with outbound off cannot run or test actions.
+  const isTestable =
+    (actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId)) &&
+    (formConnector ?? connector).isOutboundActionsEnabled !== false;
 
   const onIngestTokenRotated = useCallback(
     (ingestToken: string) => {
@@ -414,15 +421,32 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-      const { name, config, secrets, isInboundEventsEnabled } = data;
+      const {
+        name,
+        config,
+        secrets,
+        isInboundEventsEnabled,
+        isOutboundActionsEnabled: isOutboundEnabled,
+      } = data;
+      const savedConnectorForSubmit = formConnector ?? connector;
       const validConnector = {
         id: connector.id,
         name: name ?? '',
-        config: config ?? {},
-        secrets: secrets ?? {},
+        ...getOutboundSubmitValues({
+          isOutboundActionsEnabled: isOutboundEnabled,
+          formConfig: config,
+          formSecrets: secrets,
+          savedConfig:
+            'config' in savedConnectorForSubmit ? savedConnectorForSubmit.config : undefined,
+        }),
         ...isInboundEventsEnabledPayload(
           connector.actionTypeId,
           isInboundEventsEnabled,
+          isClusterInboundEventsEnabled
+        ),
+        ...isOutboundActionsEnabledPayload(
+          connector.actionTypeId,
+          isOutboundEnabled,
           isClusterInboundEventsEnabled
         ),
       };

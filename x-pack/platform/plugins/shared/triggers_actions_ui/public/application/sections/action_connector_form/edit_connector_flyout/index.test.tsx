@@ -366,6 +366,132 @@ describe('EditConnectorFlyout', () => {
     expect(screen.getByTestId('inbound-events-disable-warning')).toHaveTextContent('After save,');
   });
 
+  describe('dual outbound actions', () => {
+    const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.dual',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+      validateParams: (): Promise<GenericValidationResult<unknown>> =>
+        Promise.resolve({ errors: {} }),
+    });
+    const savedConfig = { testTextField: 'saved site', selectedActions: ['sendMessage'] };
+
+    const buildDualConnector = (isOutboundActionsEnabled: boolean) =>
+      createMockActionConnector({
+        id: 'dd-1',
+        name: 'Datadog',
+        actionTypeId: '.dual',
+        isInboundEventsEnabled: true,
+        isOutboundActionsEnabled,
+        config: savedConfig,
+        secrets: {},
+      });
+
+    const renderDual = (dualConnector: ActionConnector) =>
+      appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={dualConnector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+    beforeEach(() => {
+      actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
+      appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+    });
+
+    it('hides the Test tab and the outbound fields for a connector with outbound off', async () => {
+      renderDual(buildDualConnector(false));
+
+      expect(await screen.findByTestId('outbound-actions-enabled-switch')).not.toBeChecked();
+      expect(screen.queryByTestId('test-connector-text-field')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('testConnectorTab')).not.toBeInTheDocument();
+      expect(screen.getByTestId('configureConnectorTab')).toBeInTheDocument();
+    });
+
+    it('shows the Test tab and the outbound fields for a connector with outbound on', async () => {
+      renderDual(buildDualConnector(true));
+
+      expect(await screen.findByTestId('outbound-actions-enabled-switch')).toBeChecked();
+      expect(await screen.findByTestId('test-connector-text-field')).toHaveValue('saved site');
+      expect(await screen.findByTestId('testConnectorTab')).toBeInTheDocument();
+    });
+
+    it('sends the saved config and empty secrets when outbound is turned off', async () => {
+      renderDual(buildDualConnector(true));
+      await screen.findByTestId('test-connector-text-field');
+      await userEvent.click(screen.getByTestId('test-connector-text-field'));
+      await userEvent.type(screen.getByTestId('test-connector-text-field'), ' typed');
+
+      await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
+      expect(screen.getByTestId('outbound-actions-disable-warning')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-connector-flyout-save-btn')).toBeEnabled();
+      });
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.put).toHaveBeenCalled();
+      });
+      const [path, options] = (appMockRenderer.coreStart.http.put as jest.Mock).mock.calls[0];
+      expect(path).toContain('/connector/dd-1');
+      expect(JSON.parse(options.body)).toEqual({
+        name: 'Datadog',
+        config: savedConfig,
+        secrets: {},
+        is_inbound_events_enabled: true,
+        is_outbound_actions_enabled: false,
+      });
+    });
+
+    it('shows the fields with the saved config again when outbound is turned on', async () => {
+      renderDual(buildDualConnector(false));
+      await screen.findByTestId('outbound-actions-enabled-switch');
+
+      await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
+
+      expect(await screen.findByTestId('test-connector-text-field')).toHaveValue('saved site');
+      expect(screen.queryByTestId('outbound-actions-disable-warning')).not.toBeInTheDocument();
+    });
+
+    it('sends is_outbound_actions_enabled true and the form fields when outbound is turned on', async () => {
+      renderDual(buildDualConnector(false));
+      await screen.findByTestId('outbound-actions-enabled-switch');
+      await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
+      await userEvent.click(await screen.findByTestId('test-connector-secret-text-field'));
+      await userEvent.type(screen.getByTestId('test-connector-secret-text-field'), 'new key');
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.put).toHaveBeenCalled();
+      });
+      const [, options] = (appMockRenderer.coreStart.http.put as jest.Mock).mock.calls[0];
+      expect(JSON.parse(options.body)).toEqual(
+        expect.objectContaining({
+          config: expect.objectContaining({ testTextField: 'saved site' }),
+          secrets: { secretTextField: 'new key' },
+          is_outbound_actions_enabled: true,
+        })
+      );
+    });
+
+    it('does not send the field for a connector that is not dual', async () => {
+      actionTypeRegistry.get.mockReturnValue(actionTypeModel);
+      renderDual(connector);
+      await userEvent.click(await screen.findByTestId('nameInput'));
+      await userEvent.type(screen.getByTestId('nameInput'), ' renamed');
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.put).toHaveBeenCalled();
+      });
+      const [, options] = (appMockRenderer.coreStart.http.put as jest.Mock).mock.calls[0];
+      expect(JSON.parse(options.body)).not.toHaveProperty('is_outbound_actions_enabled');
+      expect(screen.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
+    });
+  });
+
   it('hides inbound on a dual connector when the cluster flag is off', async () => {
     const dualConnector = createMockActionConnector({
       id: 'dd-1',

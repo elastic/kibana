@@ -24,6 +24,7 @@ const rewriteBodyRes: RewriteRequestCase<
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   auth_mode: authMode,
   is_inbound_events_enabled: isInboundEventsEnabled,
+  is_outbound_actions_enabled: isOutboundActionsEnabled,
   ...res
 }) => ({
   ...res,
@@ -35,6 +36,7 @@ const rewriteBodyRes: RewriteRequestCase<
   isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { authMode } : {}),
   ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),
+  ...(isOutboundActionsEnabled !== undefined ? { isOutboundActionsEnabled } : {}),
 });
 
 export async function updateActionConnector({
@@ -45,7 +47,7 @@ export async function updateActionConnector({
   http: HttpSetup;
   connector: Pick<
     ActionConnectorWithoutId,
-    'name' | 'config' | 'secrets' | 'isInboundEventsEnabled'
+    'name' | 'config' | 'secrets' | 'isInboundEventsEnabled' | 'isOutboundActionsEnabled'
   >;
   id: string;
 }): Promise<ActionConnector> {
@@ -58,6 +60,9 @@ export async function updateActionConnector({
         secrets: connector.secrets,
         ...(connector.isInboundEventsEnabled !== undefined
           ? { is_inbound_events_enabled: connector.isInboundEventsEnabled }
+          : {}),
+        ...(connector.isOutboundActionsEnabled !== undefined
+          ? { is_outbound_actions_enabled: connector.isOutboundActionsEnabled }
           : {}),
       }),
     }

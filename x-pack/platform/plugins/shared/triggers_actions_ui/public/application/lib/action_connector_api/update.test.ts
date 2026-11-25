@@ -14,6 +14,11 @@ const http = httpServiceMock.createStartContract();
 
 beforeEach(() => jest.resetAllMocks());
 
+const getRequestBody = (call: unknown): Record<string, unknown> => {
+  const [, options] = call as [string, { body: string }];
+  return JSON.parse(options.body);
+};
+
 describe('updateActionConnector', () => {
   test('should call the update API', async () => {
     const id = '12/3';
@@ -113,5 +118,67 @@ describe('updateActionConnector', () => {
         },
       ]
     `);
+  });
+
+  test('should map is_outbound_actions_enabled on the request and response', async () => {
+    const id = '123';
+    http.put.mockResolvedValueOnce({
+      connector_type_id: '.dual',
+      is_preconfigured: false,
+      is_deprecated: false,
+      is_system_action: false,
+      is_connector_type_deprecated: false,
+      name: 'My dual',
+      config: {},
+      secrets: {},
+      id,
+      is_inbound_events_enabled: true,
+      is_outbound_actions_enabled: false,
+    });
+
+    const connector: ActionConnectorWithoutId<{}, {}> = createMockActionConnector({
+      actionTypeId: '.dual',
+      name: 'My dual',
+      config: {},
+      secrets: {},
+      isInboundEventsEnabled: true,
+      isOutboundActionsEnabled: false,
+    });
+
+    const result = await updateActionConnector({ http, connector, id });
+
+    expect(result).toMatchObject({ isOutboundActionsEnabled: false });
+    expect(getRequestBody(http.put.mock.calls[0])).toEqual({
+      name: 'My dual',
+      config: {},
+      secrets: {},
+      is_inbound_events_enabled: true,
+      is_outbound_actions_enabled: false,
+    });
+  });
+
+  test('should not send is_outbound_actions_enabled when it is not set', async () => {
+    const id = '123';
+    http.put.mockResolvedValueOnce({
+      connector_type_id: '.slack',
+      is_preconfigured: false,
+      is_deprecated: false,
+      is_system_action: false,
+      is_connector_type_deprecated: false,
+      name: 'Slack',
+      config: {},
+      secrets: {},
+      id,
+    });
+
+    await updateActionConnector({
+      http,
+      connector: createMockActionConnector({ name: 'Slack', config: {}, secrets: {} }),
+      id,
+    });
+
+    expect(getRequestBody(http.put.mock.calls[0])).not.toHaveProperty(
+      'is_outbound_actions_enabled'
+    );
   });
 });

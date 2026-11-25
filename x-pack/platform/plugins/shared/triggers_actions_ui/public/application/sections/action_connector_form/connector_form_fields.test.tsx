@@ -230,6 +230,179 @@ describe('ConnectorFormFields', () => {
       expect(result.getByTestId('inbound-events-disable-warning')).toHaveTextContent('After save,');
     });
 
+    describe('Run actions switch', () => {
+      const renderDual = ({
+        isEdit = false,
+        defaultValue: value = dualDefaultValue,
+        savedIsOutboundActionsEnabled,
+      }: {
+        isEdit?: boolean;
+        defaultValue?: Record<string, unknown>;
+        savedIsOutboundActionsEnabled?: boolean;
+      } = {}) =>
+        appMockRenderer.render(
+          <FormTestProvider onSubmit={onSubmit} defaultValue={value}>
+            <ConnectorFormFields
+              actionTypeModel={dualActionTypeModel}
+              isEdit={isEdit}
+              registerPreSubmitValidator={() => {}}
+              savedIsOutboundActionsEnabled={savedIsOutboundActionsEnabled}
+            />
+          </FormTestProvider>
+        );
+
+      it('shows the switch, on by default, with the outbound fields', async () => {
+        const result = renderDual();
+
+        expect(result.getByTestId('outbound-actions-enabled-switch')).toBeInTheDocument();
+        expect(result.getByTestId('outbound-actions-enabled-switch')).toBeChecked();
+        await waitFor(() => {
+          expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+        });
+      });
+
+      it('unmounts the outbound fields when the switch is off', async () => {
+        const result = renderDual({
+          defaultValue: { ...dualDefaultValue, isInboundEventsEnabled: true },
+        });
+        await waitFor(() => {
+          expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+        });
+
+        await userEvent.click(result.getByTestId('outbound-actions-enabled-switch'));
+
+        expect(result.getByTestId('outbound-actions-enabled-switch')).not.toBeChecked();
+        expect(result.queryByTestId('test-connector-text-field')).not.toBeInTheDocument();
+      });
+
+      it('mounts the outbound fields again when the switch is turned back on', async () => {
+        const result = renderDual({
+          defaultValue: { ...dualDefaultValue, isInboundEventsEnabled: true },
+        });
+        await userEvent.click(result.getByTestId('outbound-actions-enabled-switch'));
+        await userEvent.click(result.getByTestId('outbound-actions-enabled-switch'));
+
+        await waitFor(() => {
+          expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+        });
+      });
+
+      it('disables Run actions while Receive events is off', () => {
+        const result = renderDual();
+
+        expect(result.getByTestId('outbound-actions-enabled-switch')).toBeDisabled();
+        expect(result.getByTestId('inbound-events-enabled-switch')).toBeEnabled();
+      });
+
+      it('enables Run actions once Receive events is on', async () => {
+        const result = renderDual();
+
+        await userEvent.click(result.getByTestId('inbound-events-enabled-switch'));
+
+        expect(result.getByTestId('outbound-actions-enabled-switch')).toBeEnabled();
+      });
+
+      it('disables Receive events while Run actions is off', async () => {
+        const result = renderDual({
+          defaultValue: { ...dualDefaultValue, isInboundEventsEnabled: true },
+        });
+
+        await userEvent.click(result.getByTestId('outbound-actions-enabled-switch'));
+
+        expect(result.getByTestId('inbound-events-enabled-switch')).toBeDisabled();
+        expect(result.getByTestId('inbound-events-enabled-switch')).toBeChecked();
+      });
+
+      it('shows the credentials warning in edit mode when a saved connector that runs actions is turned off', async () => {
+        const result = renderDual({
+          isEdit: true,
+          savedIsOutboundActionsEnabled: true,
+          defaultValue: { ...dualDefaultValue, isInboundEventsEnabled: true },
+        });
+
+        expect(result.queryByTestId('outbound-actions-disable-warning')).not.toBeInTheDocument();
+        await userEvent.click(result.getByTestId('outbound-actions-enabled-switch'));
+
+        expect(result.getByTestId('outbound-actions-disable-warning')).toHaveTextContent(
+          'stored credentials are deleted'
+        );
+      });
+
+      it('does not show the credentials warning in create mode', async () => {
+        const result = renderDual({
+          defaultValue: { ...dualDefaultValue, isInboundEventsEnabled: true },
+        });
+
+        await userEvent.click(result.getByTestId('outbound-actions-enabled-switch'));
+
+        expect(result.queryByTestId('outbound-actions-disable-warning')).not.toBeInTheDocument();
+      });
+
+      it('does not show the credentials warning when the saved state is already off', () => {
+        const result = renderDual({
+          isEdit: true,
+          savedIsOutboundActionsEnabled: false,
+          defaultValue: {
+            ...dualDefaultValue,
+            isInboundEventsEnabled: true,
+            isOutboundActionsEnabled: false,
+          },
+        });
+
+        expect(result.getByTestId('outbound-actions-enabled-switch')).not.toBeChecked();
+        expect(result.queryByTestId('outbound-actions-disable-warning')).not.toBeInTheDocument();
+        expect(result.queryByTestId('test-connector-text-field')).not.toBeInTheDocument();
+      });
+
+      it('has no switch when the cluster flag is off', async () => {
+        appMockRenderer.coreStart.actions.isInboundEventsEnabled = false;
+
+        const result = renderDual();
+
+        expect(result.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
+        await waitFor(() => {
+          expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+        });
+      });
+
+      it('has no switch when the caller cannot reveal the ingest token', async () => {
+        const result = appMockRenderer.render(
+          <FormTestProvider onSubmit={onSubmit} defaultValue={dualDefaultValue}>
+            <ConnectorFormFields
+              actionTypeModel={dualActionTypeModel}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+              showInboundEvents={false}
+            />
+          </FormTestProvider>
+        );
+
+        expect(result.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
+        await waitFor(() => {
+          expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+        });
+      });
+
+      it('has no switch for a type that is not dual', async () => {
+        const result = appMockRenderer.render(
+          <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+            <ConnectorFormFields
+              actionTypeModel={actionTypeRegistryMock.createMockActionTypeModel({
+                actionConnectorFields: lazy(() => import('./connector_mock')),
+              })}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </FormTestProvider>
+        );
+
+        expect(result.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
+        await waitFor(() => {
+          expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+        });
+      });
+    });
+
     it('hides inbound controls when the caller cannot reveal the ingest token', async () => {
       const result = appMockRenderer.render(
         <FormTestProvider onSubmit={onSubmit} defaultValue={dualDefaultValue}>

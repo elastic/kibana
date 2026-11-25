@@ -13,6 +13,14 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { AppMockRenderer } from '../test_utils';
 import { createAppMockRenderer } from '../test_utils';
 
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
+  };
+});
+
 describe('ConnectorForm', () => {
   let appMockRenderer: AppMockRenderer;
   const onChange = jest.fn();
@@ -197,5 +205,68 @@ describe('ConnectorForm', () => {
     });
 
     expect(formSerializer).toHaveBeenCalled();
+  });
+
+  describe('dual connectors', () => {
+    const dualConnector = {
+      ...connector,
+      actionTypeId: '.dual',
+      isInboundEventsEnabled: true,
+      isOutboundActionsEnabled: true,
+    };
+    const dualActionTypeModel = () =>
+      actionTypeRegistryMock.createMockActionTypeModel({
+        id: '.dual',
+        actionConnectorFields: lazy(() => import('./connector_mock')),
+      });
+
+    beforeEach(() => {
+      appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+    });
+
+    it('reports the Run actions switch in onChange', async () => {
+      appMockRenderer.render(
+        <ConnectorForm
+          actionTypeModel={dualActionTypeModel()}
+          isEdit
+          connector={dualConnector}
+          onChange={onChange}
+        />
+      );
+
+      await screen.findByTestId('outbound-actions-enabled-switch');
+      await waitFor(() => {
+        expect(onChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ isOutboundActionsEnabled: true })
+        );
+      });
+
+      await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ isOutboundActionsEnabled: false })
+        );
+      });
+    });
+
+    it('does not report the switch when the form has none', async () => {
+      appMockRenderer.render(
+        <ConnectorForm
+          actionTypeModel={actionTypeRegistryMock.createMockActionTypeModel({
+            actionConnectorFields: lazy(() => import('./connector_mock')),
+          })}
+          isEdit={false}
+          connector={connector}
+          onChange={onChange}
+        />
+      );
+
+      await screen.findByTestId('test-connector-text-field');
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ isOutboundActionsEnabled: undefined })
+      );
+    });
   });
 });

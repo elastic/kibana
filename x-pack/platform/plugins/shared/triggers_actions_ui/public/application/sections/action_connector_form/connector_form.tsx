@@ -12,6 +12,7 @@ import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import {
   Form,
   useForm,
+  useFormData,
   useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
@@ -26,6 +27,8 @@ export interface ConnectorFormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
   isSubmitting: boolean;
+  /** Live value of the Run actions switch. Undefined when the form has no such switch. */
+  isOutboundActionsEnabled?: boolean;
   submit: FormHook<ConnectorFormSchema>['submit'];
   preSubmitValidator: ConnectorValidationFunc | null;
 }
@@ -86,11 +89,32 @@ const ConnectorFormComponent: React.FC<Props> = ({
     discard: ['__internal__', '__internal__.headers__array__'],
   });
 
+  const [{ isOutboundActionsEnabled }] = useFormData({
+    form,
+    watch: ['isOutboundActionsEnabled'],
+  });
+
   useEffect(() => {
     if (onChange) {
-      onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit, preSubmitValidator });
+      onChange({
+        isValid: isFormValid,
+        isSubmitted,
+        isSubmitting,
+        isOutboundActionsEnabled:
+          typeof isOutboundActionsEnabled === 'boolean' ? isOutboundActionsEnabled : undefined,
+        submit,
+        preSubmitValidator,
+      });
     }
-  }, [onChange, isFormValid, isSubmitted, isSubmitting, submit, preSubmitValidator]);
+  }, [
+    onChange,
+    isFormValid,
+    isSubmitted,
+    isSubmitting,
+    isOutboundActionsEnabled,
+    submit,
+    preSubmitValidator,
+  ]);
 
   useEffect(() => {
     if (onFormModifiedChange) {
@@ -127,6 +151,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
         }
         showInboundEvents={showInboundEvents}
         savedIsInboundEventsEnabled={connector.isInboundEventsEnabled === true}
+        savedIsOutboundActionsEnabled={connector.isOutboundActionsEnabled !== false}
       />
       <EuiSpacer size="m" />
       <EncryptedFieldsCallout isEdit={isEdit} isMissingSecrets={connector.isMissingSecrets} />

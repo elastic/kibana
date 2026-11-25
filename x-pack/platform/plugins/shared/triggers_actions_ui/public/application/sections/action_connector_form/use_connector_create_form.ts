@@ -17,6 +17,10 @@ import {
   isInboundEventsEnabledPayload,
   readClusterInboundEventsEnabled,
 } from '../../lib/inbound_ingress';
+import {
+  getOutboundSubmitValues,
+  isOutboundActionsEnabledPayload,
+} from '../../lib/outbound_actions';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorContext } from '../../context/connector_context';
 import { useCreateConnector } from '../../hooks/use_create_connector';
@@ -78,7 +82,13 @@ export const useConnectorCreateForm = ({
     submit: async () => ({ isValid: false, data: {} as ConnectorFormSchema }),
     preSubmitValidator: null,
   });
-  const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
+  const {
+    preSubmitValidator,
+    submit,
+    isValid: isFormValid,
+    isSubmitting,
+    isOutboundActionsEnabled,
+  } = formState;
 
   const {
     actionTypeModel,
@@ -102,7 +112,7 @@ export const useConnectorCreateForm = ({
       isMissingSecrets: false,
       isConnectorTypeDeprecated: false,
       ...(actionTypeId && connectorTypeIsDual(actionTypeId)
-        ? { isInboundEventsEnabled: false }
+        ? { isInboundEventsEnabled: false, isOutboundActionsEnabled: true }
         : {}),
     };
     return initialConnector ? { ...empty, ...initialConnector } : empty;
@@ -131,16 +141,32 @@ export const useConnectorCreateForm = ({
         }
       }
 
-      const { actionTypeId: typeId, name, config, secrets, id, isInboundEventsEnabled } = data;
+      const {
+        actionTypeId: typeId,
+        name,
+        config,
+        secrets,
+        id,
+        isInboundEventsEnabled,
+        isOutboundActionsEnabled: isOutboundEnabled,
+      } = data;
       return createConnector({
         actionTypeId: typeId,
         name: name ?? '',
-        config: config ?? {},
-        secrets: secrets ?? {},
+        ...getOutboundSubmitValues({
+          isOutboundActionsEnabled: isOutboundEnabled,
+          formConfig: config,
+          formSecrets: secrets,
+        }),
         id: id ?? '',
         ...isInboundEventsEnabledPayload(
           typeId,
           isInboundEventsEnabled,
+          isClusterInboundEventsEnabled
+        ),
+        ...isOutboundActionsEnabledPayload(
+          typeId,
+          isOutboundEnabled,
           isClusterInboundEventsEnabled
         ),
       });
@@ -173,6 +199,8 @@ export const useConnectorCreateForm = ({
     isSaving,
     hasErrors,
     isSubmitDisabled,
+    /** Live Run actions switch. `false` hides the test entry points. */
+    isOutboundActionsEnabled,
     // error states
     showFormErrors,
     setShowFormErrors,

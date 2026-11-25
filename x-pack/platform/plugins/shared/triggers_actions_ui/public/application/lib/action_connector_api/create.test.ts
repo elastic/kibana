@@ -13,6 +13,11 @@ const http = httpServiceMock.createStartContract();
 
 beforeEach(() => jest.resetAllMocks());
 
+const getRequestBody = (call: unknown): Record<string, unknown> => {
+  const [, options] = call as [string, { body: string }];
+  return JSON.parse(options.body);
+};
+
 describe('createActionConnector', () => {
   test('should call create action API', async () => {
     const apiResponse = {
@@ -142,5 +147,63 @@ describe('createActionConnector', () => {
         },
       ]
     `);
+  });
+
+  test('should map is_outbound_actions_enabled on the request and response', async () => {
+    http.post.mockResolvedValueOnce({
+      connector_type_id: '.dual',
+      is_preconfigured: false,
+      is_deprecated: false,
+      name: 'My dual',
+      config: {},
+      secrets: {},
+      id: '123',
+      is_inbound_events_enabled: true,
+      is_outbound_actions_enabled: false,
+    });
+
+    const result = await createActionConnector({
+      http,
+      connector: {
+        actionTypeId: '.dual',
+        name: 'My dual',
+        config: {},
+        secrets: {},
+        isInboundEventsEnabled: true,
+        isOutboundActionsEnabled: false,
+      },
+    });
+
+    expect(result).toMatchObject({ isOutboundActionsEnabled: false });
+    expect(getRequestBody(http.post.mock.calls[0])).toEqual({
+      name: 'My dual',
+      config: {},
+      secrets: {},
+      connector_type_id: '.dual',
+      is_inbound_events_enabled: true,
+      is_outbound_actions_enabled: false,
+    });
+  });
+
+  test('should not send is_outbound_actions_enabled when it is not set', async () => {
+    http.post.mockResolvedValueOnce({
+      connector_type_id: '.slack',
+      is_preconfigured: false,
+      is_deprecated: false,
+      name: 'Slack',
+      config: {},
+      secrets: {},
+      id: '123',
+    });
+
+    const result = await createActionConnector({
+      http,
+      connector: { actionTypeId: '.slack', name: 'Slack', config: {}, secrets: {} },
+    });
+
+    expect(result).not.toHaveProperty('isOutboundActionsEnabled');
+    expect(getRequestBody(http.post.mock.calls[0])).not.toHaveProperty(
+      'is_outbound_actions_enabled'
+    );
   });
 });

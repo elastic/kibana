@@ -57,6 +57,8 @@ export interface ActionConnectorProps<Config, Secrets> {
   authMode?: 'shared' | 'per-user';
   userAuthStatus?: ConnectorUserAuthStatus;
   isInboundEventsEnabled?: boolean;
+  /** False when a dual connector does not run outbound actions. Missing means on. */
+  isOutboundActionsEnabled?: boolean;
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {
@@ -100,7 +102,7 @@ export type ConnectorFormSchema<
   Partial<
     Pick<
       UserConfiguredActionConnector<Config, Secrets>,
-      'id' | 'name' | 'authMode' | 'isInboundEventsEnabled'
+      'id' | 'name' | 'authMode' | 'isInboundEventsEnabled' | 'isOutboundActionsEnabled'
     >
   >;
 

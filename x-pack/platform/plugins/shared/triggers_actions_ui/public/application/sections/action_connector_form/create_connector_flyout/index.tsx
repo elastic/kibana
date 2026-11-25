@@ -123,6 +123,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     defaultConnector,
     isSaving,
     isSubmitDisabled: disabled,
+    isOutboundActionsEnabled,
     showFormErrors,
     setShowFormErrors,
     preSubmitValidationErrorMessage,
@@ -193,7 +194,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             isDeprecated: false,
             config: {},
             secrets: {},
-            ...(connectorTypeIsDual(id) ? { isInboundEventsEnabled: false } : {}),
+            ...(connectorTypeIsDual(id)
+              ? { isInboundEventsEnabled: false, isOutboundActionsEnabled: true }
+              : {}),
           },
         });
       }
@@ -242,7 +245,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       onTestConnector(connectorForTest);
     }
 
-    setEditTab(EditConnectorTabs.Test);
+    // A connector with outbound off cannot be tested, so show its settings.
+    setEditTab(
+      connectorForTest.isOutboundActionsEnabled === false
+        ? EditConnectorTabs.Configuration
+        : EditConnectorTabs.Test
+    );
     setConnectorToTest(connectorForTest);
   }, [
     validateAndCreateConnector,
@@ -617,7 +625,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         isSaving={isSaving || isRotating}
         onSubmit={onSubmit}
         testConnector={testConnector}
-        isTestable={isTestable}
+        isTestable={isTestable && isOutboundActionsEnabled !== false}
       />
     </EuiFlyout>
   );

@@ -100,4 +100,47 @@ describe('fetchConnector', () => {
 
     expect(result).toMatchObject({ isInboundEventsEnabled: true });
   });
+
+  it('should map is_outbound_actions_enabled from the API response to isOutboundActionsEnabled', async () => {
+    http.get.mockResolvedValueOnce({
+      id: 'test-connector',
+      name: 'Test',
+      connector_type_id: '.dual',
+      is_preconfigured: false,
+      is_deprecated: false,
+      is_missing_secrets: false,
+      is_system_action: false,
+      referenced_by_count: 0,
+      is_connector_type_deprecated: false,
+      is_inbound_events_enabled: true,
+      is_outbound_actions_enabled: false,
+      secrets: {},
+      config: {},
+    });
+
+    const result = await fetchConnector('test-connector', { http });
+
+    expect(result).toMatchObject({ isOutboundActionsEnabled: false });
+    expect(result).not.toHaveProperty('is_outbound_actions_enabled');
+  });
+
+  it('should not set isOutboundActionsEnabled when the API response has no value', async () => {
+    http.get.mockResolvedValueOnce({
+      id: 'test-connector',
+      name: 'Test',
+      connector_type_id: '.slack',
+      is_preconfigured: false,
+      is_deprecated: false,
+      is_missing_secrets: false,
+      is_system_action: false,
+      referenced_by_count: 0,
+      is_connector_type_deprecated: false,
+      secrets: {},
+      config: {},
+    });
+
+    const result = await fetchConnector('test-connector', { http });
+
+    expect(result).not.toHaveProperty('isOutboundActionsEnabled');
+  });
 });
