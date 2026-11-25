@@ -127,7 +127,7 @@ The TrendAI Vision One connector exposes the following actions:
 * **Filters.** Filter values such as `endpointName` and the free-form `filter` are trimmed. A blank value is ignored like a missing one; spaces inside a value are kept. `agentGuid` is trimmed and must be a UUID, so a blank `agentGuid` is rejected; leave it out instead.
 * **Deprecated fields.** The connector never sends the deprecated `investigationStatus` alert field and removes it from returned alerts. Use `status` and `investigationResult`.
 * **Errors.** A failed request is thrown once and keeps its HTTP status and the response headers, including `Retry-After`, so the agent decides what to do. The connector does not retry. A write that fails with a 5xx or a timeout may already have been applied, so check before repeating it. The connector does not follow redirects: an HTTP 3xx answer fails the action with its status, and nothing is sent to the redirect location.
-* **Limits.** Every request times out after 60 seconds, and responses follow the {{kib}} Actions response size limit (`xpack.actions.maxResponseContentLength`).
+* **Limits.** Every request times out after 60 seconds, except the read of the alert's ETag that `updateAlertStatus` makes when no `etag` is given, which times out after 30 seconds. Responses follow the {{kib}} Actions response size limit (`xpack.actions.maxResponseContentLength`).
 
 ## Required permissions [trend-vision-one-permissions]
 

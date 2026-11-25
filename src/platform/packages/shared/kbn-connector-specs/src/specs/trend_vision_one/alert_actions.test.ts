@@ -18,6 +18,7 @@ import {
   sent,
   vendorError,
 } from './test_helpers';
+import { ETAG_LOOKUP_TIMEOUT_MS, REQUEST_TIMEOUT_MS } from './constants';
 
 resetMocksAroundEachTest();
 
@@ -243,6 +244,29 @@ describe('TrendAI Vision One updateAlertStatus', () => {
       status: 'Closed',
       investigationResult: 'False Positive',
     });
+  });
+
+  it('keeps the two requests under the execute API timeout: the ETag lookup gets 30 s, the PATCH 60 s', async () => {
+    request
+      .mockResolvedValueOnce(ok(alert('WB-1'), { etag: '"e1"' }))
+      .mockResolvedValueOnce(ok(undefined, {}, 204));
+    await run('updateAlertStatus', { id: 'WB-1', status: 'Closed' });
+    expect(sent(0)).toMatchObject({ method: 'GET', timeout: 30_000 });
+    expect(sent(1)).toMatchObject({ method: 'PATCH', timeout: 60_000 });
+    expect(ETAG_LOOKUP_TIMEOUT_MS + REQUEST_TIMEOUT_MS).toBeLessThan(120_000);
+  });
+
+  it('names the shorter timeout when the ETag lookup times out, and sends no PATCH', async () => {
+    request.mockRejectedValueOnce(
+      Object.assign(new Error('timeout of 30000ms exceeded'), {
+        isAxiosError: true,
+        code: 'ECONNABORTED',
+      })
+    );
+    await expect(run('updateAlertStatus', { id: 'WB-1', status: 'Closed' })).rejects.toThrow(
+      'timed out after 30 s'
+    );
+    expect(request).toHaveBeenCalledTimes(1);
   });
 
   it('skips the update when the alert already has the requested values', async () => {

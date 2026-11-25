@@ -170,6 +170,8 @@ export const decodeSegment = (value: string): string | null => {
   }
 };
 
+const DOT_SEGMENT = /^(?:\.|%2e){1,2}$/i;
+
 /**
  * The last non-empty segment of the path of a Location or Operation-Location header value, decoded
  * (the note id of addAlertNote, the task id of a response task).
@@ -177,6 +179,12 @@ export const decodeSegment = (value: string): string | null => {
  * the value cannot be parsed or the segment is malformed.
  */
 export const lastPathSegment = (value: string): string | null => {
+  // A dot segment (`.`, `..` or its encoded form) is removed by the URL parser, which would make the
+  // previous segment look like the id, so a location that ends in one has no id.
+  const lastRaw = value.split(/[?#]/, 1)[0].split('/').filter(Boolean).pop();
+  if (lastRaw !== undefined && DOT_SEGMENT.test(lastRaw)) {
+    return null;
+  }
   let pathname: string;
   try {
     pathname = new URL(value, 'https://placeholder.invalid').pathname;
@@ -200,6 +208,8 @@ export interface VendorRequest {
   data?: unknown;
   headers?: RawAxiosRequestHeaders;
   mutating: boolean;
+  /** Overrides REQUEST_TIMEOUT_MS for this request. */
+  timeoutMs?: number;
   /** Label for a 404, for example "Workbench alert WB-1". */
   notFound?: string;
 }
@@ -221,6 +231,7 @@ export const vendorRequest = async <T = unknown>(
   req: VendorRequest
 ): Promise<AxiosResponse<T>> => {
   const url = req.url ?? `${getApiOrigin(ctx)}${API_PREFIX}${req.path ?? ''}`;
+  const timeoutMs = req.timeoutMs ?? REQUEST_TIMEOUT_MS;
   try {
     return await ctx.client.request<T>({
       method: req.method,
@@ -228,14 +239,14 @@ export const vendorRequest = async <T = unknown>(
       params: req.url ? undefined : dropEmpty(req.params),
       data: req.data,
       headers: req.headers,
-      timeout: REQUEST_TIMEOUT_MS,
+      timeout: timeoutMs,
       // The API does not redirect: a 3xx fails with its status, so no body or key is sent on.
       maxRedirects: 0,
     });
   } catch (error) {
     const axiosError = error as AxiosError;
     const status = axiosError?.response?.status;
-    const failure = toVendorError(req.action, error, req.notFound, REQUEST_TIMEOUT_MS);
+    const failure = toVendorError(req.action, error, req.notFound, timeoutMs);
     const unknownOutcome =
       req.mutating &&
       (axiosError?.isAxiosError || axiosError?.response) &&

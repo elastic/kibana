@@ -165,6 +165,12 @@ describe('TrendAI Vision One id decoding and link normalising', () => {
     ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/%E0%A4%A', null],
     ['https://api.xdr.trendmicro.com/', null],
     ['https://', null],
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/.', null],
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/..', null],
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/%2e%2E', null],
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/./', null],
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/.?x=1', null],
+    ['https://api.xdr.trendmicro.com/v3.0/workbench/alerts/WB-1/notes/a.b', 'a.b'],
   ])('takes the last path segment of %s: %j', (value, expected) => {
     expect(lastPathSegment(value)).toBe(expected);
   });
@@ -347,6 +353,9 @@ describe('TrendAI Vision One task id from the Operation-Location pathname', () =
     [`${base}/a%23b`],
     [`${base}/a%20b`],
     [`${base}/${'a'.repeat(37)}`],
+    [`${base}/.`],
+    [`${base}/..`],
+    [`${base}/%2e`],
   ])('gives null when the id is malformed or rejected by the id check: %s', (value) => {
     expect(taskId(value)).toBeNull();
   });

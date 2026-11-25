@@ -16,7 +16,7 @@ import {
   withoutDeprecated,
 } from './client';
 import { readOnePage } from './list_actions';
-import { VENDOR } from './constants';
+import { ETAG_LOOKUP_TIMEOUT_MS, VENDOR } from './constants';
 import { ACTION_DESCRIPTIONS } from './descriptions';
 import type {
   AddAlertNoteInput,
@@ -36,12 +36,13 @@ const ALERTS_PATH = '/workbench/alerts';
 const alertPath = (id: string): string => `${ALERTS_PATH}/${encodeURIComponent(id)}`;
 
 /** Reads the alert and its ETag; the deprecated investigationStatus field is removed. */
-const readAlert = async (ctx: ActionContext, action: string, id: string) => {
+const readAlert = async (ctx: ActionContext, action: string, id: string, timeoutMs?: number) => {
   const response = await vendorRequest<Record<string, unknown>>(ctx, {
     action,
     method: 'GET',
     path: alertPath(id),
     mutating: false,
+    timeoutMs,
     notFound: `Workbench alert ${id}`,
   });
   return {
@@ -103,7 +104,7 @@ export const alertActions: ConnectorSpec['actions'] = {
       };
       let etag = input.etag;
       if (etag === undefined) {
-        const current = await readAlert(ctx, 'updateAlertStatus', input.id);
+        const current = await readAlert(ctx, 'updateAlertStatus', input.id, ETAG_LOOKUP_TIMEOUT_MS);
         const unchanged = Object.entries(changes).every(
           ([field, value]) => current.alert[field] === value
         );
