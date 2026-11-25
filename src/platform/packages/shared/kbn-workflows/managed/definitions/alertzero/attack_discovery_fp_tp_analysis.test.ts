@@ -46,7 +46,7 @@ interface YamlStep {
 interface YamlWorkflow {
   steps: YamlStep[];
   tags?: string[];
-  consts?: { supported_verdicts?: string[] };
+  consts?: { supported_verdicts?: string[]; event_fields?: string[] };
   outputs?: {
     properties?: Record<string, { type?: string; maxLength?: number }>;
     required?: string[];
@@ -78,6 +78,10 @@ const outputProperties = analysis.outputs?.properties ?? {};
 const outputNames = Object.keys(outputProperties);
 
 describe('Attack Discovery FP/TP analysis workflow', () => {
+  it('bumps to version 4 for the cross-cluster event search', () => {
+    expect(ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.version).toBe(4);
+  });
+
   it('registers under its expected id', () => {
     expect(ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.id).toBe(
       ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID
@@ -532,7 +536,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       'load_events_by_host_id',
       'load_events_by_host_name',
     ] as const)('projects %s so the template payload stays inside the gateway cap', (name) => {
-      expect(stepIn(name)?.with?._source).toEqual(expect.any(Array));
+      const source = stepIn(name)?.with?._source;
+
+      // The event searches read one shared list from `consts.event_fields`.
+      expect(
+        source === '${{ consts.event_fields }}' ? analysis.consts?.event_fields : source
+      ).toEqual(expect.any(Array));
     });
 
     it('returns the entity fields the entity_role check reads', () => {
@@ -732,6 +741,36 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       ).toBe('2026-10-14T21:00:02.000Z');
     });
 
+    it('searches endpoint events on the clusters named by the space data view', () => {
+      expect(stepIn('resolve_endpoint_event_index')?.type).toBe(
+        'alertzero.resolveRemoteIndexTargets'
+      );
+      expect(stepIn('resolve_endpoint_event_index')?.with?.patterns).toEqual([
+        '{{ consts.endpoint_events_index }}',
+      ]);
+      expect(stepIn('resolve_endpoint_event_index')?.['on-failure']?.continue).toBe(true);
+      for (const name of ['load_events_by_host_id', 'load_events_by_host_name'] as const) {
+        expect(stepIn(name)?.with?.index).toBe(
+          '${{ steps.resolve_endpoint_event_index.output.index | default: consts.endpoint_events_index }}'
+        );
+        expect(stepIn(name)?.with?.ignore_unavailable).toBe(true);
+        expect(stepIn(name)?.with?.allow_partial_search_results).toBe(true);
+      }
+    });
+
+    it('retries the local endpoint pattern when a remote search fails', () => {
+      expect(stepIn('load_events_by_host_id_local')?.if).toBe(
+        '${{ steps.load_events_by_host_id.error != null }}'
+      );
+      expect(stepIn('load_events_by_host_name_local')?.if).toBe(
+        '${{ steps.load_events_by_host_name.error != null }}'
+      );
+      expect(stepIn('load_events_by_host_id_local')?.with?.index).toBe(
+        '{{ consts.endpoint_events_index }}'
+      );
+      expect(stepIn('load_events_by_host_name_local')?.['on-failure']?.continue).toBe(true);
+    });
+
     it('searches host.id when the cited alerts have one', () => {
       expect(stepIn('load_events_by_host_id')?.if).toBe(
         '${{ (steps.count_alerts.output.host_ids | size) > 0 }}'
@@ -778,6 +817,17 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       ).toEqual({ total: { value: 3 }, hits: [] });
     });
 
+    it('returns the local host.id hits when the remote search failed', () => {
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(hitsExpression, {
+          steps: {
+            load_events_by_host_id_local: { output: { hits: { total: { value: 4 }, hits: [] } } },
+            load_events_by_host_name: { output: { hits: { total: { value: 9 }, hits: [] } } },
+          },
+        })
+      ).toEqual({ total: { value: 4 }, hits: [] });
+    });
+
     it('returns the host.name hits when the host.id search was skipped', () => {
       expect(
         createWorkflowLiquidEngine().evalValueSync(hitsExpression, {
@@ -786,6 +836,169 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           },
         })
       ).toEqual({ total: { value: 2 }, hits: [] });
+    });
+
+    const eventsFailedExpression = String(stepIn('source_status')?.with?.events_failed)
+      .replace(/^\$\{\{/, '')
+      .replace(/\}\}$/, '')
+      .trim();
+    const searchFailed = { message: 'search failed' };
+
+    const eventsFailed = (stepOutputs: Record<string, unknown>): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(eventsFailedExpression, { steps: stepOutputs });
+
+    it('is false when the local retry succeeds', () => {
+      expect(
+        eventsFailed({
+          load_events_by_host_id: { error: searchFailed },
+          load_events_by_host_id_local: { output: { hits: { total: { value: 1 } } } },
+        })
+      ).toBe(false);
+    });
+
+    it('is true when the primary search and the local retry both fail', () => {
+      expect(
+        eventsFailed({
+          load_events_by_host_id: { error: searchFailed },
+          load_events_by_host_id_local: { error: searchFailed },
+        })
+      ).toBe(true);
+    });
+
+    it('is false when the host searches were skipped', () => {
+      expect(eventsFailed({})).toBe(false);
+    });
+
+    describe('events_degraded', () => {
+      const eventsDegradedExpression = String(stepIn('source_status')?.with?.events_degraded)
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+      const eventsDegraded = (stepOutputs: Record<string, unknown>): unknown =>
+        createWorkflowLiquidEngine().evalValueSync(eventsDegradedExpression, {
+          steps: stepOutputs,
+        });
+      const clusters = (counts: { skipped?: number; partial?: number; failed?: number }) => ({
+        total: 2,
+        successful: 1,
+        skipped: 0,
+        partial: 0,
+        failed: 0,
+        ...counts,
+      });
+      const returned = (counts?: { skipped?: number; partial?: number; failed?: number }) => ({
+        output: {
+          hits: { total: { value: 1 } },
+          ...(counts ? { _clusters: clusters(counts) } : {}),
+        },
+      });
+
+      it('is false when no host search ran', () => {
+        expect(eventsDegraded({})).toBe(false);
+      });
+
+      it('is false for a local-only search with no cluster summary', () => {
+        expect(eventsDegraded({ load_events_by_host_id: returned() })).toBe(false);
+      });
+
+      it('is false when every cluster answered', () => {
+        expect(eventsDegraded({ load_events_by_host_id: returned({}) })).toBe(false);
+      });
+
+      it.each(['skipped', 'partial', 'failed'] as const)(
+        'is true when a remote was %s in the host.id search',
+        (state) => {
+          expect(eventsDegraded({ load_events_by_host_id: returned({ [state]: 1 }) })).toBe(true);
+        }
+      );
+
+      it('is true when a remote was skipped in the host.name search', () => {
+        expect(eventsDegraded({ load_events_by_host_name: returned({ skipped: 1 }) })).toBe(true);
+      });
+
+      const resolved = (clusterAliases: string[], incomplete = false) => ({
+        resolve_endpoint_event_index: {
+          output: { index: 'logs-endpoint.events.*', clusters: clusterAliases, incomplete },
+        },
+      });
+
+      it('is true when the local retry answered a failed search that included a remote, while events_failed stays false', () => {
+        const outputs = {
+          ...resolved(['remote_a']),
+          load_events_by_host_id: { error: searchFailed },
+          load_events_by_host_id_local: returned(),
+        };
+
+        expect(eventsDegraded(outputs)).toBe(true);
+        expect(eventsFailed(outputs)).toBe(false);
+      });
+
+      it.each(['load_events_by_host_id', 'load_events_by_host_name'] as const)(
+        'is false when a local-only %s search failed and its retry answered',
+        (search) => {
+          expect(
+            eventsDegraded({
+              ...resolved([]),
+              [search]: { error: searchFailed },
+              [`${search}_local`]: returned(),
+            })
+          ).toBe(false);
+        }
+      );
+
+      it('is true when a local-only search and its retry both fail', () => {
+        expect(
+          eventsDegraded({
+            ...resolved([]),
+            load_events_by_host_id: { error: searchFailed },
+            load_events_by_host_id_local: { error: searchFailed },
+          })
+        ).toBe(true);
+      });
+
+      it('is true when the resolver could not use the data view in full', () => {
+        expect(eventsDegraded({ ...resolved([], true), load_events_by_host_id: returned() })).toBe(
+          true
+        );
+      });
+
+      it('is true when the resolver step failed', () => {
+        expect(
+          eventsDegraded({
+            resolve_endpoint_event_index: { error: searchFailed },
+            load_events_by_host_id: returned(),
+          })
+        ).toBe(true);
+      });
+
+      it('is false for a complete local-only read', () => {
+        expect(eventsDegraded({ ...resolved([]), load_events_by_host_id: returned() })).toBe(false);
+      });
+
+      it('is true when the combined search and the local retry both fail', () => {
+        expect(
+          eventsDegraded({
+            load_events_by_host_name: { error: searchFailed },
+            load_events_by_host_name_local: { error: searchFailed },
+          })
+        ).toBe(true);
+      });
+    });
+
+    it('reads the same field list in all four event searches', () => {
+      const eventSearches = [
+        'load_events_by_host_id',
+        'load_events_by_host_id_local',
+        'load_events_by_host_name',
+        'load_events_by_host_name_local',
+      ];
+
+      for (const name of eventSearches) {
+        expect(stepIn(name)?.with?._source).toBe('${{ consts.event_fields }}');
+      }
+      expect(analysis.consts?.event_fields).toEqual(
+        expect.arrayContaining(['@timestamp', 'host.id', 'process.parent.name', 'destination.ip'])
+      );
     });
   });
 
@@ -880,6 +1093,75 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('does not mark a complete clear as downgraded', () => {
       expect(evaluate(50, 50, 'false_positive')).toBe(false);
+    });
+
+    describe('when the raw events may be incomplete', () => {
+      const incompleteContext = (verdict: string, degraded: boolean) => ({
+        steps: {
+          load_events: { output: { hits: { total: { value: 3 } } } },
+          load_entities: { output: { hits: { total: { value: 3 } } } },
+          source_status: { output: { events_failed: false, events_degraded: degraded } },
+          analyze: { output: { structured_output: { verdict, summary_markdown: 'Model text.' } } },
+        },
+      });
+      const renderIncomplete = (field: string, verdict: string, degraded: boolean): string =>
+        createWorkflowLiquidEngine().parseAndRenderSync(
+          String(stepIn('block_truncated_clear')?.with?.[field]),
+          incompleteContext(verdict, degraded)
+        );
+
+      it('returns inconclusive instead of false_positive', () => {
+        expect(renderIncomplete('verdict', 'false_positive', true)).toBe('inconclusive');
+      });
+
+      it('says why in the summary', () => {
+        expect(renderIncomplete('summary_markdown', 'false_positive', true)).toBe(
+          'Some endpoint events could not be read from every cluster, so this cannot be cleared as a false positive.'
+        );
+      });
+
+      it('marks the clear as downgraded', () => {
+        const expression = String(stepIn('block_truncated_clear')?.with?.downgraded)
+          .replace(/^\$\{\{/, '')
+          .replace(/\}\}$/, '')
+          .trim();
+
+        expect(
+          createWorkflowLiquidEngine().evalValueSync(
+            expression,
+            incompleteContext('false_positive', true)
+          )
+        ).toBe(true);
+      });
+
+      it('keeps true_positive', () => {
+        expect(renderIncomplete('verdict', 'true_positive', true)).toBe('true_positive');
+        expect(renderIncomplete('summary_markdown', 'true_positive', true)).toBe('Model text.');
+      });
+
+      it('keeps an inconclusive verdict and its summary', () => {
+        expect(renderIncomplete('verdict', 'inconclusive', true)).toBe('inconclusive');
+        expect(renderIncomplete('summary_markdown', 'inconclusive', true)).toBe('Model text.');
+      });
+
+      it('keeps false_positive when the events were read in full', () => {
+        expect(renderIncomplete('verdict', 'false_positive', false)).toBe('false_positive');
+        expect(renderIncomplete('summary_markdown', 'false_positive', false)).toBe('Model text.');
+      });
+
+      it('names truncation first when both apply', () => {
+        expect(
+          createWorkflowLiquidEngine().parseAndRenderSync(
+            String(stepIn('block_truncated_clear')?.with?.summary_markdown),
+            {
+              steps: {
+                ...incompleteContext('false_positive', true).steps,
+                load_events: { output: { hits: { total: { value: 51 } } } },
+              },
+            }
+          )
+        ).toBe('Evidence was truncated, so this cannot be cleared as a false positive.');
+      });
     });
 
     it('replaces the summary when truncation blocks a clear', () => {
