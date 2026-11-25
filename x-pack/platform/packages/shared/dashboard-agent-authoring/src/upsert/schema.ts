@@ -51,6 +51,31 @@ const upsertPanelSchema = lazySchema(() =>
   })
 );
 
+const upsertOptionsSchema = lazySchema(() =>
+  z.looseObject({
+    hide_panel_titles: z.boolean().optional().describe('Hide panel titles. Defaults to false.'),
+    hide_panel_borders: z.boolean().optional().describe('Hide panel borders. Defaults to false.'),
+    use_margins: z
+      .boolean()
+      .optional()
+      .describe('Separate panels with a margin. Defaults to true.'),
+    sync_colors: z
+      .boolean()
+      .optional()
+      .describe('Synchronize colors across panels that share a data source. Defaults to false.'),
+    sync_cursor: z
+      .boolean()
+      .optional()
+      .describe('Synchronize the cursor position across panels. Defaults to true.'),
+    auto_apply_filters: z
+      .boolean()
+      .optional()
+      .describe(
+        'When false, control filter changes apply only after the user clicks the update button. Defaults to true.'
+      ),
+  })
+);
+
 /**
  * The desired changes to a dashboard, keyed by id: dashboard fields, and sections, panels and
  * controls to create or update, and ids to remove.
@@ -70,6 +95,11 @@ export const upsertDashboardSchema = lazySchema(() =>
       .optional()
       .describe(
         'Set ONLY when the user asks for a time window (e.g. "last 7 days"); otherwise omit it and a data-aware default is applied. The screen context time range is not a request unless the user refers to it. Use Kibana date math or ISO 8601, e.g. { from: "now-7d", to: "now" } or { from: "2024-05-20T00:00:00.000Z", to: "2024-05-24T23:59:59.999Z", mode: "absolute" }.'
+      ),
+    options: upsertOptionsSchema
+      .optional()
+      .describe(
+        'Display and behavior settings. Set ONLY the keys the user asks to change; the other keys keep their current values.'
       ),
     sections: z
       .array(upsertSectionSchema)
