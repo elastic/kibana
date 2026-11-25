@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coerce, satisfies } from 'semver';
+import { coerce } from 'semver';
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
@@ -28,6 +28,7 @@ import {
   splitVersionSuffixFromPolicyId,
   hasAgentVersionSuffix,
   classifyPolicyId,
+  agentVersionSatisfiesCondition,
 } from '../../../common/services/version_specific_policies_utils';
 
 /** Field on `.fleet-agents` / `.fleet-policies` holding the canonical (suffix-stripped) policy id. */
@@ -250,7 +251,8 @@ export async function getAgentVersionsForVersionSpecificPolicies(): Promise<stri
 function getInputsForVersion(inputs: FullAgentPolicyInput[], ver: string) {
   return inputs.filter((input) => {
     return (
-      !input.meta?.package?.agentVersion || satisfies(coerce(ver)!, input.meta.package.agentVersion)
+      !input.meta?.package?.agentVersion ||
+      agentVersionSatisfiesCondition(ver, input.meta.package.agentVersion)
     );
   });
 }

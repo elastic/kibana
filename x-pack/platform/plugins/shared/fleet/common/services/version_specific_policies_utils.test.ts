@@ -27,7 +27,38 @@ import {
   buildPolicyBaseIdsWithFallbackEsFilter,
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
+  agentVersionSatisfiesCondition,
 } from './version_specific_policies_utils';
+
+describe('agentVersionSatisfiesCondition', () => {
+  it.each([
+    ['9.4', '^9.4.0', true],
+    ['9.4', '^9.4.4', true],
+    ['9.4', '>=9.4.1', true],
+    ['9.4', '~9.4.6 || ^9.5.0', true],
+    ['9.4', '<9.4.4', true],
+    ['9.4', '>=9.5.0', false],
+    ['9.4', '<9.4.0', false],
+    ['9.4', '^8.19.0', false],
+  ])('treats variant %s as a range over the minor for %s -> %s', (version, condition, expected) => {
+    expect(agentVersionSatisfiesCondition(version, condition)).toBe(expected);
+  });
+
+  it.each([
+    ['9.4.4', '^9.4.4', true],
+    ['9.4.3', '^9.4.4', false],
+    ['9.4.0', '^9.4.0', true],
+    ['9.4.0', '>=9.5.0', false],
+  ])('checks full version %s against %s -> %s', (version, condition, expected) => {
+    expect(agentVersionSatisfiesCondition(version, condition)).toBe(expected);
+  });
+
+  it('returns false for an invalid version or condition', () => {
+    expect(agentVersionSatisfiesCondition('not-a-version', '^9.4.0')).toBe(false);
+    expect(agentVersionSatisfiesCondition('9.4', 'not a range')).toBe(false);
+    expect(agentVersionSatisfiesCondition('9.4.0', 'not a range')).toBe(false);
+  });
+});
 import { POLICY_ID_FIXTURES } from './version_specific_policy_id_fixtures';
 
 describe('removeVersionSuffixFromPolicyId', () => {

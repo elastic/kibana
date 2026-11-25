@@ -112,6 +112,23 @@ describe('getVersionSpecificPolicies', () => {
     ]);
   });
 
+  it('should keep inputs with a patch level condition in the variant of that minor', async () => {
+    const policies = await getVersionSpecificPolicies(
+      soClient,
+      fleetServerPolicy,
+      {
+        id: 'policy1',
+        inputs: [{ meta: { package: { agentVersion: '^9.4.4' } } }],
+      } as any,
+      ['9.5', '9.4', '9.3']
+    );
+    expect(policies.map(({ policy_id: policyId, data }) => [policyId, data.inputs])).toEqual([
+      ['policy1#9.5', [{ meta: { package: { agentVersion: '^9.4.4' } } }]],
+      ['policy1#9.4', [{ meta: { package: { agentVersion: '^9.4.4' } } }]],
+      ['policy1#9.3', []],
+    ]);
+  });
+
   it('should create version specific policies with custom agent versions and package level condition', async () => {
     const policies = await getVersionSpecificPolicies(
       soClient,

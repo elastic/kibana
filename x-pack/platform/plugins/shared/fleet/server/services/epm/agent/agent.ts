@@ -8,8 +8,6 @@
 import Handlebars from '@kbn/handlebars';
 import { parse, stringify } from 'yaml';
 import type { Logger } from '@kbn/core/server';
-import { coerce, satisfies } from 'semver';
-
 import type {
   PackageInfo,
   PackagePolicyConfigRecord,
@@ -17,6 +15,7 @@ import type {
   PackagePolicyInputStream,
 } from '../../../../common/types';
 import { PackagePolicyValidationError } from '../../../../common/errors';
+import { agentVersionSatisfiesCondition } from '../../../../common/services/version_specific_policies_utils';
 import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { appContextService } from '../..';
@@ -328,7 +327,7 @@ function semverSatisfiesHelper(
   if (!agentVersion) {
     return options.inverse(this);
   }
-  return satisfies(coerce(agentVersion)!, versionCondition)
+  return agentVersionSatisfiesCondition(agentVersion, versionCondition)
     ? options.fn(this)
     : options.inverse(this);
 }

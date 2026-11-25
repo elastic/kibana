@@ -772,6 +772,42 @@ describe('semverSatisfies', () => {
     });
   });
 
+  it('should render the block for a major.minor variant when a patch of the minor satisfies the condition', () => {
+    const streamTemplate = `
+    {{#semverSatisfies _meta.agent.version "^9.4.4"}}
+    supported: true
+    {{else}}
+    supported: false
+    {{/semverSatisfies}}`;
+
+    const output = compileTemplate(
+      {},
+      { ...getMockedMetaVariable(), agent: { version: '9.4' } },
+      streamTemplate
+    );
+    expect(output).toEqual({
+      supported: true,
+    });
+  });
+
+  it('should not render the block for a major.minor variant when no patch of the minor satisfies the condition', () => {
+    const streamTemplate = `
+    {{#semverSatisfies _meta.agent.version ">=9.5.0"}}
+    supported: true
+    {{else}}
+    supported: false
+    {{/semverSatisfies}}`;
+
+    const output = compileTemplate(
+      {},
+      { ...getMockedMetaVariable(), agent: { version: '9.4' } },
+      streamTemplate
+    );
+    expect(output).toEqual({
+      supported: false,
+    });
+  });
+
   it('should not render any blocks when the agent version variable is not set', () => {
     const streamTemplate = `
     field: "value"

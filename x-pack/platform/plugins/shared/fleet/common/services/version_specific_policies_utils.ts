@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  coerce as semverCoerce,
+  intersects as semverIntersects,
+  satisfies as semverSatisfies,
+} from 'semver';
+
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 
 import { AGENT_POLICY_SENTINEL_VERSION, AGENT_POLICY_VERSION_SEPARATOR } from '../constants';
@@ -90,6 +96,33 @@ export function splitVersionSuffixFromPolicyId(policyId: string): {
 
 export function removeVersionSuffixFromPolicyId(policyId: string): string {
   return splitVersionSuffixFromPolicyId(policyId).baseId;
+}
+
+const MAJOR_MINOR_VERSION_REGEX = /^(\d+)\.(\d+)$/;
+
+/**
+ * Evaluates an agent version condition (e.g. `^9.4.4`) for a policy variant or an agent version.
+ *
+ * A `major.minor` variant label (e.g. `9.4`) serves every patch of that minor, so it is treated
+ * as the range `9.4.x`: the condition is met if any patch of the minor could satisfy it. This
+ * avoids dropping inputs for agents that satisfy a patch-level condition (e.g. 9.4.4+ for
+ * `^9.4.4`), at the cost of also matching earlier patches of the minor. A full version
+ * (e.g. `9.4.4`) is checked with `satisfies`. Invalid versions or conditions are not met.
+ */
+export function agentVersionSatisfiesCondition(
+  agentVersion: string,
+  versionCondition: string
+): boolean {
+  try {
+    const majorMinor = agentVersion.trim().match(MAJOR_MINOR_VERSION_REGEX);
+    if (majorMinor) {
+      return semverIntersects(`${majorMinor[1]}.${majorMinor[2]}.x`, versionCondition);
+    }
+    const coercedVersion = semverCoerce(agentVersion);
+    return !!coercedVersion && semverSatisfies(coercedVersion, versionCondition);
+  } catch {
+    return false;
+  }
 }
 
 /**
