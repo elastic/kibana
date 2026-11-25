@@ -10,15 +10,18 @@ import { judgeAgreement, pearson } from './judge_agreement';
 import {
   formatReport,
   judgeCoverage,
+  pairedReplies,
   ratchetCandidates,
   toWriteupRows,
   type WriteupResults,
 } from './report';
 import {
+  createReplyVsBaselineEvaluator,
   REPLY_FAITHFULNESS_EVALUATOR,
   REPLY_VS_BASELINE_EVALUATOR,
   REPLY_VS_GOLDEN_EVALUATOR,
 } from './evaluators';
+import type { WriteupExample, WriteupTaskOutput } from './types';
 
 type TaskRun = DatasetRunResult['runs'][string];
 type EvaluationRun = DatasetRunResult['evaluationRuns'][number];
@@ -112,6 +115,58 @@ describe('toWriteupRows and formatReport', () => {
       '| Head to head, wins–losses | 4–0 (0 ties) | 4–0 (0 ties) | 0–0 (0 ties) |'
     );
     expect(report).toContain('- case/r2, sample 0');
+  });
+});
+
+describe('replies on retry', () => {
+  it('counts the replies that needed a second try, for each arm', () => {
+    const retried = (run: TaskRun, baseline: boolean): TaskRun => {
+      const output = run.output as WriteupTaskOutput;
+      return {
+        ...run,
+        output: {
+          ...output,
+          retried: true,
+          ...(baseline ? { baseline: { ...output.baseline!, retried: true } } : {}),
+        },
+      };
+    };
+    const rows = toWriteupRows(
+      {
+        a: retried(taskRun('case/r2', SHORT), true),
+        b: retried(taskRun('other/r2', SHORT), false),
+      },
+      []
+    );
+    expect(rows[0]).toMatchObject({ retried: true, baseline: { retried: true } });
+    const { summary } = formatReport({ ...results('opus', 5, {}), rows });
+    expect(summary).toContain('| current | 2/2 (2 on retry) |');
+    expect(summary).toContain('| main | 2/2 (1 on retry) |');
+  });
+});
+
+describe('reply_vs_baseline without a baseline', () => {
+  const evaluate = (noBaseline?: string) =>
+    createReplyVsBaselineEvaluator({
+      inferenceClient: { chatComplete: jest.fn() },
+      evaluationConnector: { id: 'judge' } as never,
+      votes: 2,
+      noBaseline,
+    }).evaluate({
+      input: taskRun('case/r2', SHORT).input as WriteupExample['input'],
+      expected: taskRun('case/r2', SHORT).expected as WriteupExample['output'],
+      output: { ...(taskRun('case/r2', SHORT).output as WriteupTaskOutput), baseline: undefined },
+      metadata: {},
+    } as never);
+
+  it('says why it was skipped when the run skipped it', async () => {
+    await expect(evaluate('Baseline main has the same prompt (h1).')).resolves.toMatchObject({
+      label: 'n/a',
+      explanation: 'Baseline main has the same prompt (h1).',
+    });
+    await expect(evaluate()).resolves.toMatchObject({
+      explanation: expect.stringContaining('this is not a PR build'),
+    });
   });
 });
 
@@ -217,5 +272,28 @@ describe('judgeAgreement', () => {
 describe('pearson', () => {
   it('is 1 for a perfect linear relation', () => {
     expect(pearson([1, 2, 3], [2, 4, 6])).toBeCloseTo(1);
+  });
+});
+
+describe('pairedReplies', () => {
+  it('counts only rounds with both replies, when each prompt fails on different rounds', () => {
+    // Each prompt replies to 8 of 10 rounds, but only 6 rounds have both: below an 80% bar.
+    const outputs = Array.from({ length: 10 }, (_, i) => ({
+      case_id: `case-${i}`,
+      reply: i < 2 ? undefined : `reply ${i}`,
+      baseline: {
+        reply: i === 2 || i === 3 ? undefined : `baseline ${i}`,
+        error: i === 2 ? 'Model call failed' : undefined,
+        extra_calls: [],
+        prompt_hash: 'base',
+      },
+    }));
+    const paired = pairedReplies(outputs);
+    expect(paired).toMatchObject({ total: 10, compared: 6 });
+    expect(paired.compared / paired.total).toBeLessThan(0.8);
+    expect(paired.baselineMissing).toEqual([
+      { caseId: 'case-2', error: 'Model call failed' },
+      { caseId: 'case-3', error: 'no baseline reply' },
+    ]);
   });
 });

@@ -436,13 +436,12 @@ export const registerSessionMemoryRoutes = ({
           return response.forbidden({ body: { message: resolvedUser.error.message } });
         }
 
-        const scope = {
-          space: resolveSpaceId(await getSpaces(), request),
-          userId: resolvedUser.userId,
-        };
-
         let body: ForgetSessionMemoriesResponse;
         try {
+          const scope = {
+            space: resolveSpaceId(await getSpaces(), request),
+            userId: resolvedUser.userId,
+          };
           const results = await (await getSessionMemoryService()).forget(scope, uniqueIds);
           body = { results };
         } catch (error) {

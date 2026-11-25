@@ -1,5 +1,5 @@
 {
-  "sha1": "5f2bf91b64ff7a308437ce13c09c0d701472f1fa",
+  "sha1": "3e4840d140cbff029d9eff7285aaaaa8458e3580",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -139,6 +139,20 @@
       }
     },
     {
+      "id": "b1c1d174a14ef6b-90fdfb7c74424e0",
+      "title": "Digital Experience mobile applications lists the mobile applications and opens the page of one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/mobile_application.spec.ts",
+        "line": 19,
+        "column": 5
+      }
+    },
+    {
       "id": "97913175702ab23-9128617fe5c2414",
       "title": "Digital Experience navigation when disabled keeps the legacy User Experience navigation",
       "expectedStatus": "passed",
@@ -192,8 +206,8 @@
       }
     },
     {
-      "id": "b1d0dbe7a23ff8e-af2f0e14f2bc0dc",
-      "title": "Digital Experience EDOT Browser application shows the top errors on the Overview, linked to the Errors tab",
+      "id": "b1d0dbe7a23ff8e-1c07d3238d7b92c",
+      "title": "Digital Experience EDOT Browser application lists the frustrated elements, linking to the sessions that hit them",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -206,6 +220,20 @@
       }
     },
     {
+      "id": "b1d0dbe7a23ff8e-af2f0e14f2bc0dc",
+      "title": "Digital Experience EDOT Browser application shows the top errors on the Overview, linked to the Errors tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
+        "line": 64,
+        "column": 10
+      }
+    },
+    {
       "id": "b1d0dbe7a23ff8e-7aad8087fe750f1",
       "title": "Digital Experience EDOT Browser application shows the error groups on the Errors tab, with the stack trace in a flyout",
       "expectedStatus": "passed",
@@ -215,8 +243,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 59,
-        "column": 13
+        "line": 73,
+        "column": 25
       }
     },
     {
@@ -229,8 +257,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 70,
-        "column": 17
+        "line": 95,
+        "column": 22
       }
     },
     {
@@ -243,8 +271,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 82,
-        "column": 11
+        "line": 107,
+        "column": 7
       }
     },
     {
@@ -257,8 +285,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 97,
-        "column": 13
+        "line": 123,
+        "column": 10
       }
     },
     {
@@ -271,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 183,
+        "line": 205,
         "column": 15
       }
     },
@@ -285,8 +313,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 286,
-        "column": 9
+        "line": 306,
+        "column": 13
       }
     },
     {
@@ -299,7 +327,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 318,
+        "line": 339,
         "column": 15
       }
     },
@@ -313,7 +341,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 343,
+        "line": 366,
         "column": 15
       }
     },
@@ -327,8 +355,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 377,
-        "column": 9
+        "line": 394,
+        "column": 13
       }
     },
     {
@@ -341,8 +369,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 456,
-        "column": 10
+        "line": 476,
+        "column": 15
       }
     },
     {
@@ -355,8 +383,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 472,
-        "column": 26
+        "line": 494,
+        "column": 12
       }
     },
     {
@@ -369,8 +397,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 529,
-        "column": 11
+        "line": 553,
+        "column": 13
       }
     },
     {
@@ -383,7 +411,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 591,
+        "line": 611,
         "column": 9
       }
     },
@@ -397,8 +425,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 630,
-        "column": 11
+        "line": 651,
+        "column": 15
       }
     },
     {
@@ -411,7 +439,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/serverless.spec.ts",
         "line": 21,
-        "column": 47
+        "column": 29
       }
     },
     {
@@ -424,7 +452,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/sessions.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 28
       }
     },
@@ -438,8 +466,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/sessions.spec.ts",
-        "line": 34,
-        "column": 8
+        "line": 36,
+        "column": 9
+      }
+    },
+    {
+      "id": "92c1ea566116711-1b59dbdbe9021f2",
+      "title": "Digital Experience sessions counts the frustrated sessions, and keeps only them with the Frustrated filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/sessions.spec.ts",
+        "line": 71,
+        "column": 13
       }
     },
     {
@@ -452,7 +494,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/sessions.spec.ts",
-        "line": 65,
+        "line": 89,
         "column": 13
       }
     },
@@ -466,7 +508,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/global.teardown.ts",
-        "line": 14,
+        "line": 15,
         "column": 35
       }
     },
@@ -481,8 +523,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/global.teardown.ts",
-        "line": 19,
-        "column": 22
+        "line": 36,
+        "column": 1
       }
     }
   ]
