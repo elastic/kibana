@@ -945,6 +945,19 @@ export default function (providerContext: FtrProviderContext) {
           return body.item;
         };
 
+        // the latest revision Fleet published for agents, rather than one compiled on request
+        const getPublishedPolicy = async (policyId: string) => {
+          const res = await es.search<{ revision_idx: number; data: Record<string, any> }>({
+            index: '.fleet-policies',
+            query: { bool: { filter: [{ term: { policy_id: policyId } }] } },
+            sort: [{ revision_idx: { order: 'desc' } }],
+            size: 1,
+          });
+          const published = res.hits.hits[0]?._source;
+          expect(published).to.be.ok();
+          return published!;
+        };
+
         it('compiles the Authorization header with a reference to the credential secret', async () => {
           const { id: outputId, credentialId } = await createOutput({
             otlp_exporter: {
@@ -990,6 +1003,7 @@ export default function (providerContext: FtrProviderContext) {
             secrets: { auth: { credential: 'test-credential-value' } },
           });
           const policyId = await createOtelPolicy(outputId);
+          const { revision_idx: previousRevision } = await getPublishedPolicy(policyId);
 
           const { body: updateBody } = await supertest
             .put(`/api/fleet/outputs/${outputId}`)
@@ -999,11 +1013,15 @@ export default function (providerContext: FtrProviderContext) {
           const newCredentialId: string = updateBody.item.secrets.auth.credential.id;
           expect(newCredentialId).not.to.be(credentialId);
 
-          const fullPolicy = await getFullPolicy(policyId);
-          expect(fullPolicy.exporters[`otlp/${outputId}`].headers).to.eql({
+          // the update publishes a new revision, so agents stop using the deleted secret
+          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
+            policyId
+          );
+          expect(revision).to.be.greaterThan(previousRevision);
+          expect(publishedPolicy.exporters[`otlp/${outputId}`].headers).to.eql({
             Authorization: `ApiKey $co.elastic.secret{${newCredentialId}}`,
           });
-          expect(fullPolicy.secret_references).to.eql([{ id: newCredentialId }]);
+          expect(publishedPolicy.secret_references).to.eql([{ id: newCredentialId }]);
         });
 
         it('compiles neither the header nor the reference once the authentication is removed', async () => {
@@ -1013,6 +1031,7 @@ export default function (providerContext: FtrProviderContext) {
             secrets: { auth: { credential: 'test-credential-value' } },
           });
           const policyId = await createOtelPolicy(outputId);
+          const { revision_idx: previousRevision } = await getPublishedPolicy(policyId);
 
           await supertest
             .put(`/api/fleet/outputs/${outputId}`)
@@ -1020,11 +1039,14 @@ export default function (providerContext: FtrProviderContext) {
             .send({ auth: null })
             .expect(200);
 
-          const fullPolicy = await getFullPolicy(policyId);
-          expect(fullPolicy.exporters[`otlp/${outputId}`]).to.eql({
+          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
+            policyId
+          );
+          expect(revision).to.be.greaterThan(previousRevision);
+          expect(publishedPolicy.exporters[`otlp/${outputId}`]).to.eql({
             endpoint: 'otlp.example.com:4317',
           });
-          expect(fullPolicy.secret_references).to.eql([]);
+          expect(publishedPolicy.secret_references).to.eql([]);
         });
       });
 
