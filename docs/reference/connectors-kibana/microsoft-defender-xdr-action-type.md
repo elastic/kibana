@@ -17,6 +17,44 @@ This connector is currently available in **Agent Builder** only.
 
 You can create connectors in **{{stack-manage-app}}** → **{{connectors-ui}}**.
 
+### Get API credentials [microsoft-defender-xdr-api-credentials]
+
+To use this connector, register an application in Microsoft Entra ID and grant it the required application permissions.
+
+#### Register an app in Microsoft Entra ID
+
+1. Sign in to the [Azure Portal](https://portal.azure.com) and open **Microsoft Entra ID > App registrations**.
+2. Select **New registration**. Enter a name (for example, `Kibana Defender XDR`), choose **Accounts in this organizational directory only**, and select **Register**.
+3. Note the **Application (client) ID** and **Directory (tenant) ID** shown on the **Overview** page.
+
+#### Grant API permissions
+
+1. In your app registration, go to **API permissions > Add a permission > Microsoft Graph > Application permissions**.
+2. Add the following permissions:
+
+   | Permission | Purpose |
+   |---|---|
+   | `SecurityIncident.ReadWrite.All` | Read, update, merge, and comment on incidents |
+   | `SecurityAlert.ReadWrite.All` | Read, update, and comment on alerts |
+   | `ThreatHunting.Read.All` | Run advanced hunting queries |
+   | `CustomDetection.Read.All` | List and read custom detection rules |
+   | `ThreatIntelligence.Read.All` | Threat intelligence enrichment (host details, reputation, passive DNS, WHOIS) |
+   | `SecurityEvents.Read.All` | Read Microsoft Secure Score |
+
+3. Select **Add permissions**, then **Grant admin consent** for your organization.
+
+#### Authenticate with a client secret
+
+1. In your app registration, go to **Certificates & Secrets > Client secrets > New client secret**.
+2. Set a description and expiry, then select **Add**.
+3. Copy the **Value** immediately — it is not shown again after you leave the page.
+
+#### Authenticate with a certificate
+
+1. Generate a self-signed or CA-issued X.509 certificate (PEM format).
+2. In your app registration, go to **Certificates & Secrets > Certificates > Upload certificate** and upload the public certificate (`.pem` or `.crt`).
+3. When configuring the connector, choose the **Certificate** authentication method and upload both the public certificate and the matching private key.
+
 ### Connector configuration [microsoft-defender-xdr-connector-configuration]
 
 Cloud environment
@@ -37,6 +75,9 @@ Client ID
 
 Client Secret
 :   A client secret created for the app registration under **Certificates & Secrets**.
+
+OAuth scope
+:   `https://graph.microsoft.com/.default` for Commercial, `https://graph.microsoft.us/.default` for GCC High, or `https://dod-graph.microsoft.us/.default` for DoD. Must match the cloud environment selected above.
 
 ### Authentication: Certificate (OAuth 2.0 Private Key JWT) [microsoft-defender-xdr-certificate-auth]
 
@@ -153,52 +194,3 @@ The `getAlert` response includes a top-level `evidence` array. The `getIncident`
 
 Pass `mdeDeviceId` to the Microsoft Defender for Endpoint connector to trigger isolate, scan, or live-response actions.
 
-## Get API credentials [microsoft-defender-xdr-api-credentials]
-
-To use this connector, register an application in Microsoft Entra ID and grant it the required application permissions.
-
-### Register an app in Microsoft Entra ID
-
-1. Sign in to the [Azure Portal](https://portal.azure.com) and open **Microsoft Entra ID > App registrations**.
-2. Select **New registration**. Enter a name (for example, `Kibana Defender XDR`), choose **Accounts in this organizational directory only**, and select **Register**.
-3. Note the **Application (client) ID** and **Directory (tenant) ID** shown on the **Overview** page.
-
-### Grant API permissions
-
-1. In your app registration, go to **API permissions > Add a permission > Microsoft Graph > Application permissions**.
-2. Add the following permissions:
-
-   | Permission | Purpose |
-   |---|---|
-   | `SecurityIncident.ReadWrite.All` | Read, update, merge, and comment on incidents |
-   | `SecurityAlert.ReadWrite.All` | Read, update, and comment on alerts |
-   | `ThreatHunting.Read.All` | Run advanced hunting queries |
-   | `CustomDetection.Read.All` | List and read custom detection rules |
-   | `ThreatIntelligence.Read.All` | Threat intelligence enrichment (host details, reputation, passive DNS, WHOIS) |
-   | `SecurityEvents.Read.All` | Read Microsoft Secure Score |
-
-3. Select **Add permissions**, then **Grant admin consent** for your organization.
-
-### Authenticate with a client secret
-
-1. In your app registration, go to **Certificates & Secrets > Client secrets > New client secret**.
-2. Set a description and expiry, then select **Add**.
-3. Copy the **Value** immediately — it is not shown again after you leave the page.
-
-### Authenticate with a certificate
-
-1. Generate a self-signed or CA-issued X.509 certificate (PEM format).
-2. In your app registration, go to **Certificates & Secrets > Certificates > Upload certificate** and upload the public certificate (`.pem` or `.crt`).
-3. When configuring the connector, choose the **Certificate** authentication method and upload both the public certificate and the matching private key.
-
-### Configure the connector
-
-Enter the following in the Kibana connector form:
-
-| Field | Value |
-|---|---|
-| **Cloud environment** | Commercial, GCC High, or DoD depending on your tenant |
-| **Token URL** | `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token` |
-| **OAuth scope** | `https://graph.microsoft.com/.default` for Commercial, `https://graph.microsoft.us/.default` for GCC High, or `https://dod-graph.microsoft.us/.default` for DoD. Must match the selected cloud environment. |
-| **Client ID** | The Application (client) ID from your app registration |
-| **Client Secret** | The client secret value, or upload a certificate instead |
