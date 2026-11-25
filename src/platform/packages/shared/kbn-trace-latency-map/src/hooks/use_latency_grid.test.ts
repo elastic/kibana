@@ -10,6 +10,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { TraceSource } from '../types';
+import { LATENCY_GRID_CACHE_SIZE, clearLatencyGridCaches } from './latency_grid_cache';
 import { useLatencyGrid } from './use_latency_grid';
 
 const source: TraceSource = {
@@ -28,6 +29,9 @@ const createRunner = (stats: ESQLSearchResponse, grid: ESQLSearchResponse) =>
   jest.fn(async (query: string) => (query.includes('PERCENTILE') ? stats : grid));
 
 describe('useLatencyGrid', () => {
+  // Every test loads the same source: none may find the map of the one before it.
+  beforeEach(clearLatencyGridCaches);
+
   it('loads the statistics, then the grid', async () => {
     const runEsql = createRunner(statsTable(100), gridTable([[1, 2, 7, 3]]));
     const { result } = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
@@ -127,6 +131,86 @@ describe('useLatencyGrid', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     rerender({ source: JSON.parse(JSON.stringify(source)) });
     expect(runEsql).toHaveBeenCalledTimes(2);
+  });
+
+  describe('the cache', () => {
+    it('serves a source loaded before at once after a remount, without a query or a loading state', async () => {
+      const runEsql = createRunner(statsTable(100), gridTable([[1, 2, 7, 3]]));
+      const first = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
+      await waitFor(() => expect(first.result.current.isLoading).toBe(false));
+      first.unmount();
+
+      const again = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
+      expect(again.result.current.isLoading).toBe(false);
+      expect(again.result.current.grid?.cells.size).toBe(1);
+      expect(again.result.current.loadedSource).toEqual(source);
+      expect(runEsql).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns to the columns it loaded before without querying again', async () => {
+      const runEsql = createRunner(statsTable(100), gridTable([[1, 2, 7, 3]]));
+      const { result, rerender } = renderHook(
+        (props: { targetBins: number }) => useLatencyGrid({ source, runEsql, ...props }),
+        { initialProps: { targetBins: 60 } }
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      rerender({ targetBins: 120 });
+      await waitFor(() => expect(result.current.timeGrid?.bins).toBe(120));
+      rerender({ targetBins: 60 });
+      expect(result.current.timeGrid?.bins).toBe(60);
+      expect(result.current.isLoading).toBe(false);
+      // Statistics once, then one grid per tier.
+      expect(runEsql).toHaveBeenCalledTimes(3);
+    });
+
+    it('serves an empty range from the cache too', async () => {
+      const runEsql = createRunner(statsTable(0), gridTable([]));
+      const first = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
+      await waitFor(() => expect(first.result.current.isEmpty).toBe(true));
+      first.unmount();
+      const again = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
+      expect(again.result.current.isEmpty).toBe(true);
+      expect(runEsql).toHaveBeenCalledTimes(1);
+    });
+
+    it('caches nothing of a failed load, so the next mount tries again', async () => {
+      const runEsql = jest.fn().mockRejectedValue(new Error('boom'));
+      const first = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
+      await waitFor(() => expect(first.result.current.error?.message).toBe('boom'));
+      first.unmount();
+      const again = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
+      expect(again.result.current.isLoading).toBe(true);
+      await waitFor(() => expect(again.result.current.error?.message).toBe('boom'));
+      expect(runEsql).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps the newest sources only', async () => {
+      const runEsql = createRunner(statsTable(100), gridTable([[1, 2, 7, 3]]));
+      const sources = Array.from({ length: LATENCY_GRID_CACHE_SIZE + 1 }, (_, i) => ({
+        ...source,
+        filters: [`i == ${i}`],
+      }));
+      for (const each of sources) {
+        const { result, unmount } = renderHook(() =>
+          useLatencyGrid({ source: each, runEsql, targetBins: 60 })
+        );
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        unmount();
+      }
+      const calls = runEsql.mock.calls.length;
+      // The newest is still there; the oldest was dropped to make room, and loads again.
+      const newest = renderHook(() =>
+        useLatencyGrid({ source: sources[sources.length - 1], runEsql, targetBins: 60 })
+      );
+      expect(newest.result.current.isLoading).toBe(false);
+      expect(runEsql).toHaveBeenCalledTimes(calls);
+      const oldest = renderHook(() =>
+        useLatencyGrid({ source: sources[0], runEsql, targetBins: 60 })
+      );
+      expect(oldest.result.current.isLoading).toBe(true);
+      await waitFor(() => expect(oldest.result.current.isLoading).toBe(false));
+      expect(runEsql.mock.calls.length).toBeGreaterThan(calls);
+    });
   });
 
   describe('with the operations feature', () => {

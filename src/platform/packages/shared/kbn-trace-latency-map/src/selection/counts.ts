@@ -99,7 +99,8 @@ export function isFailureRegion(
 ): boolean {
   if (region.spans <= 0 || region.failed / region.spans < 0.1) return false;
   const restSpans = map.spans - region.spans;
-  const restFailed = map.failed - region.failed;
-  const restRate = restSpans > 0 ? Math.max(0, restFailed) / restSpans : 0;
+  // A region covering the whole map has nothing outside it to concentrate against.
+  if (restSpans <= 0) return false;
+  const restRate = Math.max(0, map.failed - region.failed) / restSpans;
   return region.failed / region.spans >= 3 * restRate;
 }

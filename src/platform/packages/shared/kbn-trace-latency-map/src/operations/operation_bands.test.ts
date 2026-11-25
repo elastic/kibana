@@ -98,6 +98,16 @@ describe('getMapBands', () => {
     expect(bands.operations[0].share).toBeCloseTo(600 / 1060);
   });
 
+  it('focuses on no operation when most spans of the map have no operation at all', () => {
+    // 95 of the 100 named spans, but a tenth of the map: its bands would cover spans that
+    // are not its, so the map stays mixed.
+    const bands = getMapBands(
+      [bimodalHistogram('cart', 'GET /cart', 95), bimodalHistogram('cart', 'GET /other', 5)],
+      stats
+    );
+    expect(bands.focused).toBeUndefined();
+  });
+
   it('returns nothing for no spans', () => {
     expect(getMapBands([], stats)).toEqual({ operations: [] });
   });

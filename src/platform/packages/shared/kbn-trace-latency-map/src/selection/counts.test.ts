@@ -168,5 +168,11 @@ describe('isFailureRegion', () => {
   it('is false for an empty region, and for the whole map as the region', () => {
     expect(isFailureRegion({ spans: 0, failed: 0 }, map)).toBe(false);
     expect(isFailureRegion(map, map)).toBe(false);
+    // However many of the map's spans failed: there is nothing outside it to concentrate
+    // against, so a region covering it all is about everything, not about failures.
+    const failing = { spans: 1000, failed: 400 };
+    expect(isFailureRegion(failing, failing)).toBe(false);
+    // Rounded counts of a selection can even overshoot the exact totals of the map.
+    expect(isFailureRegion({ spans: 1001, failed: 400 }, failing)).toBe(false);
   });
 });

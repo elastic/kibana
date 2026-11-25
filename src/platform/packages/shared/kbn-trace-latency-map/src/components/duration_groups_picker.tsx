@@ -34,8 +34,9 @@ const describeGroups = ({ bands }: OperationBands) =>
     .join(', ');
 
 /**
- * The operations on a mixed map whose durations fall into distinct groups. Picking one
- * narrows the host to it, where its groups are drawn and can be selected.
+ * Suggestions on a mixed map: the operations whose durations fall into distinct groups, each
+ * described by its groups. Picking one narrows the host to it, where its groups are drawn
+ * and can be selected.
  */
 export function DurationGroupsPicker({
   operations,
@@ -48,7 +49,7 @@ export function DurationGroupsPicker({
   return (
     <EuiPopover
       aria-label={i18n.translate('traceLatencyMap.durationGroups.ariaLabel', {
-        defaultMessage: 'Operations with distinct duration groups',
+        defaultMessage: 'Suggested operations',
       })}
       button={
         <EuiButtonEmpty
@@ -59,7 +60,7 @@ export function DurationGroupsPicker({
           data-test-subj="traceLatencyMapDurationGroups"
         >
           {i18n.translate('traceLatencyMap.durationGroups.button', {
-            defaultMessage: 'Duration groups ({count})',
+            defaultMessage: 'Suggestions ({count})',
             values: { count: operations.length },
           })}
         </EuiButtonEmpty>
@@ -70,7 +71,7 @@ export function DurationGroupsPicker({
     >
       <EuiContextMenuPanel
         title={i18n.translate('traceLatencyMap.durationGroups.title', {
-          defaultMessage: 'Show one operation and its duration groups',
+          defaultMessage: 'Select a suggested operation',
         })}
         items={operations.map((operationBands, index) => {
           const { operation } = operationBands;

@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiSwitch,
   EuiText,
   EuiTextColor,
   EuiToolTip,
@@ -27,7 +28,6 @@ import type { MapSampling } from '../query/latency_map_query';
 import type { LatencyMapOperation, OperationBands } from '../operations/operation_bands';
 import { formatDuration, formatShare } from '../geometry/ticks';
 import { DurationGroupsPicker } from './duration_groups_picker';
-import { ErrorsMenu } from './errors_menu';
 
 export type SlowestPercentile = 90 | 95 | 99;
 export const SLOWEST_PERCENTILES: SlowestPercentile[] = [90, 95, 99];
@@ -56,9 +56,53 @@ function SamplingNote({ stats, sampling }: { stats: DurationStats; sampling: Map
   );
 }
 
-/** The range's statistics, the sampling note, the slowest shortcuts and the errors menu. */
+/**
+ * The errors filter, as the one switch a filter is elsewhere in Discover ("Selected only",
+ * "Hide null fields"): plain, and disabled with the reason while the map has no failed span
+ * to show. On, it stays enabled, so an empty filtered map is a switch away from the spans.
+ */
+function ErrorsSwitch({
+  failedOnly,
+  failedCount,
+  onFailedOnlyChange,
+  isDisabled,
+}: {
+  failedOnly: boolean;
+  failedCount?: number;
+  onFailedOnlyChange: (failedOnly: boolean) => void;
+  isDisabled: boolean;
+}) {
+  const noErrors = failedCount === 0 && !failedOnly;
+  const control = (
+    <EuiSwitch
+      compressed
+      label={i18n.translate('traceLatencyMap.errors.switch', {
+        defaultMessage: 'Errors only',
+      })}
+      checked={failedOnly}
+      onChange={(event) => onFailedOnlyChange(event.target.checked)}
+      // On, it stays usable whatever the map shows: an empty filtered map needs it.
+      disabled={failedOnly ? false : isDisabled || noErrors}
+      data-test-subj="traceLatencyMapFailedOnly"
+    />
+  );
+  return noErrors ? (
+    <EuiToolTip
+      content={i18n.translate('traceLatencyMap.errors.noneTooltip', {
+        defaultMessage: 'No errors in this result set',
+      })}
+    >
+      {control}
+    </EuiToolTip>
+  ) : (
+    control
+  );
+}
+
+/** The range's statistics, the sampling note, the slowest shortcuts and the errors switch. */
 export function MapHeader({
   stats,
+  failedCount,
   failedOnly,
   onFailedOnlyChange,
   onSelectSlowest,
@@ -73,6 +117,8 @@ export function MapHeader({
   onClearOperation,
 }: {
   stats?: DurationStats;
+  /** Failed spans of the whole map, once counted: with none the errors switch is disabled. */
+  failedCount?: number;
   failedOnly: boolean;
   onFailedOnlyChange: (failedOnly: boolean) => void;
   onSelectSlowest: (percentile: SlowestPercentile) => void;
@@ -85,7 +131,7 @@ export function MapHeader({
   selectionSummary?: ReactNode;
   /** With a selection, the Clear button at the far right, by the menus. */
   onClearSelection?: () => void;
-  /** Operations with distinct duration groups, offered in a dropdown while none is focused. */
+  /** Operations with distinct duration groups, suggested in a dropdown while none is focused. */
   operationsWithGroups?: OperationBands[];
   onFocusOperation?: (operation: LatencyMapOperation) => void;
   /** The operation the host is narrowed to, shown as a badge with a way back to all. */
@@ -169,7 +215,7 @@ export function MapHeader({
             data-test-subj="traceLatencyMapSelectSlowest"
           >
             {activeSlowest
-              ? // The active shortcut shows on the button, as the errors menu does.
+              ? // The active shortcut shows on the button, as the errors switch is checked.
                 i18n.translate('traceLatencyMap.header.selectSlowestActive', {
                   defaultMessage: 'Select slowest (p{percentile})',
                   values: { percentile: activeSlowest },
@@ -209,11 +255,14 @@ export function MapHeader({
           ))}
         />
       </EuiPopover>
-      <ErrorsMenu
-        failedOnly={failedOnly}
-        onFailedOnlyChange={onFailedOnlyChange}
-        isDisabled={isDisabled}
-      />
+      <EuiFlexItem grow={false}>
+        <ErrorsSwitch
+          failedOnly={failedOnly}
+          failedCount={failedCount}
+          onFailedOnlyChange={onFailedOnlyChange}
+          isDisabled={isDisabled}
+        />
+      </EuiFlexItem>
       {onClearSelection && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

@@ -73,6 +73,7 @@ export function SelectionOverlay({
   geometry,
   rect,
   hoverRect,
+  activeRect,
   colors,
   width,
   height,
@@ -88,6 +89,8 @@ export function SelectionOverlay({
   rect?: PxRect;
   /** The cell under the pointer. */
   hoverRect?: PxRect;
+  /** The cell whose span the host has open: outlined until the host takes it back. */
+  activeRect?: PxRect;
   colors: LatencyMapColors;
   width: number;
   height: number;
@@ -130,6 +133,19 @@ export function SelectionOverlay({
           strokeWidth={1.5}
           pointerEvents="none"
           data-test-subj="traceLatencyMapHover"
+        />
+      )}
+      {activeRect && (
+        <rect
+          x={activeRect.x0}
+          y={activeRect.y0}
+          width={activeRect.x1 - activeRect.x0}
+          height={activeRect.y1 - activeRect.y0}
+          fill="none"
+          stroke={colors.selectionStroke}
+          strokeWidth={2}
+          pointerEvents="none"
+          data-test-subj="traceLatencyMapActiveCell"
         />
       )}
       {rect && (

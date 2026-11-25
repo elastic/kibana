@@ -18,6 +18,7 @@ import { createMapGeometry } from '../geometry/map_geometry';
 import { GRID_ORIGIN } from '../geometry/plot_calibration';
 import type { PlotArea } from '../geometry/map_geometry';
 import { rangeToHighlight } from '../chart/brush';
+import { clearLatencyGridCaches } from '../hooks/latency_grid_cache';
 import { LatencyMap } from './latency_map';
 import type { LatencyMapProps } from './latency_map';
 
@@ -27,7 +28,9 @@ const mockChart: {
   settings?: any;
   heatmap?: any;
   tooltip?: any;
-} = {};
+  /** How often the chart was given its props: a render the map could have spared. */
+  heatmapRenders: number;
+} = { heatmapRenders: 0 };
 jest.mock('@elastic/charts', () => ({
   Chart: ({ children }: { children: React.ReactNode }) =>
     jest.requireActual('react').createElement('div', { 'data-test-subj': 'mockChart' }, children),
@@ -37,6 +40,7 @@ jest.mock('@elastic/charts', () => ({
   },
   Heatmap: (props: unknown) => {
     mockChart.heatmap = props;
+    mockChart.heatmapRenders += 1;
     return null;
   },
   Tooltip: (props: unknown) => {
@@ -150,11 +154,9 @@ function renderMap(
 
 const waitForChart = async () => screen.findByTestId('mockChart');
 
-/** Flips the failed-only filter: opens the errors menu and clicks its filter entry. */
-const toggleFailedOnly = () => {
-  fireEvent.click(screen.getByTestId('traceLatencyMapErrorsMenu'));
-  fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
-};
+/** Flips the failed-only filter with its switch. */
+const toggleFailedOnly = () => fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+const errorsSwitch = () => screen.getByTestId('traceLatencyMapFailedOnly');
 /** The chart tells of a cell: its hover, which is how the map learns where the plot is. */
 const hover = (xi: number, yi: number) =>
   act(() => mockChart.settings.onElementOver([[chartCell(xi, yi), {}]]));
@@ -169,8 +171,11 @@ const brush = (xs: [number, number], rows: number[]) =>
 
 describe('LatencyMap', () => {
   beforeEach(() => {
-    // Not carried between tests: a test must not read the chart of the one before it.
+    // Not carried between tests: a test must not read the chart of the one before it, nor
+    // the map it loaded.
     mockChart.settings = mockChart.heatmap = mockChart.tooltip = undefined;
+    mockChart.heatmapRenders = 0;
+    clearLatencyGridCaches();
   });
 
   it('loads nothing until the map is measured', async () => {
@@ -214,6 +219,46 @@ describe('LatencyMap', () => {
     } finally {
       mockWidth = 320;
     }
+  });
+
+  it('shows the map at once, without the loading chart, when its source was loaded before', async () => {
+    const first = renderMap();
+    await waitForChart();
+    first.unmount();
+
+    // The view switched away and back, say: the same source in a new mount.
+    const { runEsql } = renderMap();
+    expect(screen.queryByTestId('traceLatencyMapLoading')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockChart')).toBeInTheDocument();
+    expect(runEsql).not.toHaveBeenCalled();
+  });
+
+  it('keeps the handles when the width changes inside a tier', async () => {
+    try {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      const { rerenderMap } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      expect(screen.getByTestId('traceLatencyMapHandle-r')).toBeInTheDocument();
+
+      // A flyout opened beside the map: narrower by a few pixels, the same columns.
+      mockWidth = 321;
+      rerenderMap();
+      expect(screen.getByTestId('traceLatencyMapHandle-r')).toBeInTheDocument();
+    } finally {
+      mockWidth = 320;
+    }
+  });
+
+  it('does not redraw the chart when the host renders again with an equal selection', async () => {
+    const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+    const { rerenderMap } = renderMap({ selection });
+    await screen.findByTestId('traceLatencyMapSelectionBar');
+    const renders = mockChart.heatmapRenders;
+    // The host parses the selection from its query every render: a new object, same cells.
+    rerenderMap({ selection: { ...selection } });
+    rerenderMap({ selection: { ...selection } });
+    expect(mockChart.heatmapRenders).toBe(renders);
   });
 
   it('shows a loading chart, then the heatmap with a legend and a summary', async () => {
@@ -299,9 +344,19 @@ describe('LatencyMap', () => {
     expect(await screen.findByTestId('traceLatencyMapError')).toHaveTextContent('index_not_found');
   });
 
+  it('disables the errors switch, with the reason, while the map has no failed span', async () => {
+    renderMap({}, gridTable([[3, 5, 40, 0]]));
+    await waitForChart();
+    expect(errorsSwitch()).toBeDisabled();
+    expect(errorsSwitch()).not.toBeChecked();
+    fireEvent.mouseOver(errorsSwitch());
+    expect(await screen.findByText('No errors in this result set')).toBeInTheDocument();
+  });
+
   it('keeps the failed spans only with the errors filter on', async () => {
     renderMap();
     await waitForChart();
+    expect(errorsSwitch()).toBeEnabled();
     toggleFailedOnly();
     await waitFor(() =>
       expect(
@@ -534,6 +589,27 @@ describe('LatencyMap', () => {
       );
     });
 
+    it('lets no second pointer move or end the drawing', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      hover(4, 5);
+      const layer = screen.getByTestId('traceLatencyMapLayer');
+
+      fireEvent.pointerDown(layer, { ...centerOf(3, 2), button: 0, pointerId: 1 });
+      // A second finger, anywhere: the region does not follow it, and its release does not
+      // commit.
+      fireEvent.pointerMove(window, { ...centerOf(9, 9), pointerId: 2 });
+      expect(mockChart.heatmap.highlightedData).toBeUndefined();
+      fireEvent.pointerUp(window, { ...centerOf(9, 9), pointerId: 2 });
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+
+      fireEvent.pointerMove(window, { ...centerOf(6, 5), pointerId: 1 });
+      fireEvent.pointerUp(window, { ...centerOf(6, 5), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 3, x1: 7, y0: 2, y1: 6 })
+      );
+    });
+
     it('draws from above the plot, clamped to the top row', async () => {
       const { onSelectionCommit } = renderMap();
       await waitForChart();
@@ -566,6 +642,22 @@ describe('LatencyMap', () => {
         expect.objectContaining({ spans: 40, failed: 10, from: '2026-10-26T10:04:30.000Z' })
       );
       expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
+
+    it('outlines the cell the host has open, apart from the cell under the pointer', async () => {
+      const activeCell = geometry.rangeToSelection({ x0: 3, x1: 4, y0: 5, y1: 6 });
+      const { rerenderMap } = renderMap({ activeCell });
+      await waitForChart();
+      hover(4, 5);
+      const active = screen.getByTestId('traceLatencyMapActiveCell');
+      const rect = geometry.rangeToRect({ x0: 3, x1: 4, y0: 5, y1: 6 });
+      expect(active).toHaveAttribute('x', String(rect.x0));
+      expect(active).toHaveAttribute('y', String(rect.y0));
+      expect(screen.getByTestId('traceLatencyMapHover')).toBeInTheDocument();
+
+      // The host took it back: the flyout closed.
+      rerenderMap({ activeCell: undefined });
+      expect(screen.queryByTestId('traceLatencyMapActiveCell')).not.toBeInTheDocument();
     });
   });
 
@@ -628,6 +720,20 @@ describe('LatencyMap', () => {
       expect(selection.from).toBe(source.timeRange.from);
       expect(selection.to).toBe(source.timeRange.to);
       expect(selection.label).toBe('Fast group');
+    });
+
+    it('reserves no label gutter for a dominant operation without duration groups', async () => {
+      /** One operation holds every span, in one group: nothing to mark. */
+      const singleGroup = {
+        columns: operationsColumns,
+        values: [['cart', 'GET /cart', 5, 350, 30]],
+      } as ESQLSearchResponse;
+      renderMap({ onFocusOperation: jest.fn() }, gridTable(CELLS), singleGroup);
+      await waitForChart();
+      hover(4, 5);
+      await waitFor(() => expect(mockChart.settings.theme.chartMargins.right).toBe(0));
+      expect(screen.queryByTestId('traceLatencyMapBand-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('traceLatencyMapDurationGroups')).not.toBeInTheDocument();
     });
 
     it('selects a band with the keyboard, as a click does', async () => {
@@ -984,9 +1090,7 @@ describe('LatencyMap', () => {
     it('follows the filter of a selection about failures, counting its failed spans', async () => {
       renderMap({ selection: { ...selection, failedOnly: true } });
       const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
-      expect(screen.getByTestId('traceLatencyMapErrorsMenu')).toHaveTextContent(
-        'Errors (filtered)'
-      );
+      expect(errorsSwitch()).toBeChecked();
       expect(summary).toHaveTextContent('10 spans');
       expect(summary).toHaveTextContent('failed only');
     });
@@ -1026,16 +1130,14 @@ describe('LatencyMap', () => {
       toggleFailedOnly();
       expect(onFailedOnlyChange).toHaveBeenCalledWith(true);
       expect(onSelectionCommit).not.toHaveBeenCalled();
-      // The menu shows the host's filter, which has not come back yet.
-      expect(screen.getByTestId('traceLatencyMapErrorsMenu')).not.toHaveTextContent('filtered');
+      // The switch shows the host's filter, which has not come back yet.
+      expect(errorsSwitch()).not.toBeChecked();
     });
 
     it('paints the failed spans alone while the filter is on', async () => {
       renderMap({ failedOnly: true, onFailedOnlyChange: jest.fn() });
       await waitForChart();
-      expect(screen.getByTestId('traceLatencyMapErrorsMenu')).toHaveTextContent(
-        'Errors (filtered)'
-      );
+      expect(errorsSwitch()).toBeChecked();
       expect(
         mockChart.heatmap.data.filter((datum: { spans: number }) => datum.spans > 0)
       ).toHaveLength(2);
@@ -1053,15 +1155,24 @@ describe('LatencyMap', () => {
       expect(condition).not.toContain('event.outcome');
     });
 
-    it('turns on the host filter for a region where failures concentrate', async () => {
+    it('keeps the inferred failure filter on the selection, not on the host filter', async () => {
+      // Clearing the region must take the inference with it; a host filter turned on in
+      // passing would outlive it.
       const onFailedOnlyChange = jest.fn();
       const { onSelectionCommit } = renderMap({ failedOnly: false, onFailedOnlyChange });
       await waitForChart();
       brush([30, 31], [20]);
-      expect(onFailedOnlyChange).toHaveBeenCalledWith(true);
+      expect(onFailedOnlyChange).not.toHaveBeenCalled();
       const [selection, condition] = onSelectionCommit.mock.calls[0];
-      expect(selection.failedOnly).toBeUndefined();
-      expect(condition).not.toContain('event.outcome');
+      expect(selection.failedOnly).toBe(true);
+      expect(condition).toContain('event.outcome == "failure"');
+    });
+
+    it('keeps the errors switch usable while the filter is on, whatever it left to show', async () => {
+      // The host's filter emptied the map: the switch is the way back to the spans.
+      renderMap({ failedOnly: true, onFailedOnlyChange: jest.fn() }, gridTable([]));
+      await screen.findByTestId('traceLatencyMapEmpty');
+      expect(errorsSwitch()).toBeEnabled();
     });
 
     it('counts the failed spans of a selection under the filter and says failed only', async () => {
@@ -1082,9 +1193,7 @@ describe('LatencyMap', () => {
       const { onSelectionCommit } = renderMap({ selection, failedOnly: false, onFailedOnlyChange });
       await screen.findByTestId('traceLatencyMapSelectionBar');
       // The legacy clause shows as failed even though the host filter is off.
-      expect(screen.getByTestId('traceLatencyMapErrorsMenu')).toHaveTextContent(
-        'Errors (filtered)'
-      );
+      expect(errorsSwitch()).toBeChecked();
       toggleFailedOnly();
       expect(onFailedOnlyChange).toHaveBeenCalledWith(false);
       const [next, condition] = onSelectionCommit.mock.calls[0];

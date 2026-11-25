@@ -106,6 +106,11 @@ export interface LatencyMapProps {
   ) => void;
   /** A click on a cell with spans. The selection is left as it is. */
   onCellClick?: (cell: LatencyMapCell) => void;
+  /**
+   * The cell whose span the host has open after `onCellClick` (in a flyout, say): outlined,
+   * apart from the selection, until the host takes it back.
+   */
+  activeCell?: LatencyMapSelection;
   /** The duration statistics of the range once known, and whether the map is sampled. */
   onStats?: (stats: DurationStats & { sampled: boolean }) => void;
   /** The map of a source finished loading. */
@@ -175,6 +180,7 @@ export function LatencyMap({
   onFailedOnlyChange,
   onSelectionCommit,
   onCellClick,
+  activeCell,
   onStats,
   onLoad,
   renderSelectionActions,
@@ -215,9 +221,14 @@ export function LatencyMap({
     () => (operations && stats ? getMapBands(operations, stats) : undefined),
     [operations, stats]
   );
+  // The bands of the one operation the map shows, when its durations fall into groups: an
+  // operation with one group has nothing to mark, and gets no gutter.
+  const focusedBands =
+    mapBands?.focused && mapBands.focused.bands.length > 0 ? mapBands.focused : undefined;
   // Room for the band labels only while bands are drawn. A host focused on one operation
-  // has bands to show, so the room is there from the start and the map does not shift later.
-  const showBands = Boolean(mapBands?.focused ?? focusedOperation);
+  // likely has bands to show, so the room is there from the start and the map does not shift
+  // later; once its histogram says otherwise, the room goes.
+  const showBands = mapBands ? Boolean(focusedBands) : Boolean(focusedOperation);
   const rightMargin = operationsEnabled && showBands ? LAYOUT.bandLabelsWidth : 0;
 
   const callbacks = useRef({ onStats, onLoad });
@@ -230,34 +241,38 @@ export function LatencyMap({
   }, [loadedSource]);
 
   // Where the chart put its cells. Known from the first cell it tells of, and only for as long as
-  // the chart keeps its size and its columns.
-  const plotKey = `${width}x${height}:${timeGrid?.fromMs}:${timeGrid?.binMs}:${timeGrid?.bins}`;
+  // the chart keeps its height and its columns.
+  const plotKey = `${height}:${timeGrid?.fromMs}:${timeGrid?.binMs}:${timeGrid?.bins}`;
   const [calibrated, setCalibrated] = useState<{
     key: string;
     plot: PlotArea;
     rightMargin: number;
+    width: number;
   }>();
   const plot = useMemo(() => {
     if (!calibrated || calibrated.key !== plotKey) return undefined;
-    if (calibrated.rightMargin === rightMargin || !timeGrid) return calibrated.plot;
-    // The band gutter only narrows the grid, so the calibration follows it exactly: same
-    // corner and rows, the columns squeezed by the margin's share of each. The chart's
-    // next event confirms it.
+    const widthDelta = width - calibrated.width;
+    const marginDelta = rightMargin - calibrated.rightMargin;
+    if ((widthDelta === 0 && marginDelta === 0) || !timeGrid) return calibrated.plot;
+    // A resize within a tier (a flyout opening beside the map, say) and the band gutter only
+    // change how wide the columns are, so the calibration follows them exactly: same corner
+    // and rows, each column's share of the change. The chart's next event confirms it.
     return {
       ...calibrated.plot,
-      colWidth: calibrated.plot.colWidth - (rightMargin - calibrated.rightMargin) / timeGrid.bins,
+      colWidth: calibrated.plot.colWidth + (widthDelta - marginDelta) / timeGrid.bins,
     };
-  }, [calibrated, plotKey, rightMargin, timeGrid]);
+  }, [calibrated, plotKey, rightMargin, width, timeGrid]);
   const handlePlot = useCallback(
     (next: PlotArea) =>
       setCalibrated((previous) =>
         previous?.key === plotKey &&
         previous.rightMargin === rightMargin &&
+        previous.width === width &&
         isSamePlot(previous.plot, next)
           ? previous
-          : { key: plotKey, plot: next, rightMargin }
+          : { key: plotKey, plot: next, rightMargin, width }
       ),
-    [plotKey, rightMargin]
+    [plotKey, rightMargin, width]
   );
 
   const geometry = useMemo(
@@ -343,10 +358,28 @@ export function LatencyMap({
     setPendingCommit(undefined);
   }, [gridKey]);
 
-  const committedRange = useMemo(
-    () => (geometry && displaySelection ? geometry.selectionToRange(displaySelection) : undefined),
-    [geometry, displaySelection]
+  // The same object for as long as it covers the same cells: a host handing the selection in
+  // a new object each render (parsed from its query, say) must not redraw the chart.
+  const committedRangeRef = useRef<CellRange>();
+  const committedRange = useMemo(() => {
+    const next =
+      geometry && displaySelection ? geometry.selectionToRange(displaySelection) : undefined;
+    const previous = committedRangeRef.current;
+    if (next && previous && isSameRange(next, previous)) return previous;
+    committedRangeRef.current = next;
+    return next;
+  }, [geometry, displaySelection]);
+  // The cell whose span the host has open, outlined until the host takes it back.
+  const activeRect = useMemo(
+    () =>
+      geometry && plot && activeCell
+        ? geometry.rangeToRect(geometry.selectionToRange(activeCell))
+        : undefined,
+    [geometry, plot, activeCell]
   );
+  // Every span of the map, failed and not: the errors switch needs to know whether there are
+  // any, and a drawn region is read against them.
+  const gridTotals = useMemo(() => (grid ? getGridTotals(grid) : undefined), [grid]);
   // The selection as the chart draws it, by what is on: a move, the keyboard, the selection.
   const highlight = draft ?? (keyboard ? getKeyboardRange(keyboard) : undefined) ?? committedRange;
   const overlayRange = draft ?? committedRange;
@@ -416,13 +449,13 @@ export function LatencyMap({
       // With a host filter the failure clause is the host's, never the selection's.
       let next = geometry.rangeToSelection(range, controlled ? undefined : failedOnly);
       // A region where failures concentrate is about them: the selection says so on its
-      // own, as long as the user has not chosen an outcome with the errors filter.
-      if (!failedOnly && !outcomeChosen.current && grid && timeGrid && stats) {
+      // own, as long as the user has not chosen an outcome with the errors filter. On its
+      // own, under a host filter too: the inference is part of the region drawn, and
+      // clearing the region takes it away, where a host filter turned on in passing would
+      // outlive the selection that caused it.
+      if (!failedOnly && !outcomeChosen.current && grid && timeGrid && stats && gridTotals) {
         const counts = getSelectionCounts({ grid, timeGrid, stats, selection: next });
-        if (isFailureRegion(counts, getGridTotals(grid))) {
-          if (controlled) onFailedOnlyChange?.(true);
-          else next = { ...next, failedOnly: true };
-        }
+        if (isFailureRegion(counts, gridTotals)) next = { ...next, failedOnly: true };
       }
       commit(label ? { ...next, label } : next);
     },
@@ -433,8 +466,8 @@ export function LatencyMap({
       commit,
       failedOnly,
       controlled,
-      onFailedOnlyChange,
       grid,
+      gridTotals,
       timeGrid,
       stats,
     ]
@@ -621,6 +654,8 @@ export function LatencyMap({
     width,
     height,
   };
+  // Stable, so renders that change nothing of the chart do not reach the memoized heatmap.
+  const onBrush = useCallback((range: CellRange) => latestDraw.current.commitRange(range), []);
   useEffect(() => {
     if (!container) return;
     const handlePointerDown = (event: globalThis.PointerEvent) => {
@@ -646,6 +681,7 @@ export function LatencyMap({
       // The grip and the handles take their presses on the overlay instead.
       if (gesture.kind !== 'drawing') return;
       gestureRef.current = gesture;
+      drawingPointerId.current = event.pointerId;
       setIsDrawing(true);
       // The chart reads mouse events for its own brush and click: swallow this press's
       // compatibility mousedown, which follows the pointer event, so only one of us draws.
@@ -657,12 +693,16 @@ export function LatencyMap({
     return () => container.removeEventListener('pointerdown', handlePointerDown, true);
   }, [container]);
 
-  // The drawing pointer may leave the map, so its moves and its release are the window's.
+  // The drawing pointer may leave the map, so its moves and its release are the window's. Only
+  // that pointer's: a second finger, wherever it lands, neither moves nor ends the drawing.
+  const drawingPointerId = useRef<number>();
   useEffect(() => {
+    const isDrawingPointer = (event: globalThis.PointerEvent) =>
+      gestureRef.current?.kind === 'drawing' && event.pointerId === drawingPointerId.current;
     const handlePointerMove = (event: globalThis.PointerEvent) => {
       const gesture = gestureRef.current;
       const { geometry: current, layer: layerEl } = latestDraw.current;
-      if (gesture?.kind !== 'drawing' || !current || !layerEl) return;
+      if (!isDrawingPointer(event) || gesture?.kind !== 'drawing' || !current || !layerEl) return;
       const range = moveGesture(
         gesture,
         toLayerPoint(event, layerEl.getBoundingClientRect()),
@@ -678,7 +718,7 @@ export function LatencyMap({
         commitRange: commitDrawn,
         clickCell: click,
       } = latestDraw.current;
-      if (gesture?.kind !== 'drawing') return;
+      if (!isDrawingPointer(event) || gesture?.kind !== 'drawing') return;
       gestureRef.current = undefined;
       setDraft(undefined);
       setIsDrawing(false);
@@ -691,8 +731,8 @@ export function LatencyMap({
       if (end.type === 'range') commitDrawn(end.range);
       else if (end.type === 'click') click(end.cell);
     };
-    const handlePointerCancel = () => {
-      if (gestureRef.current?.kind !== 'drawing') return;
+    const handlePointerCancel = (event: globalThis.PointerEvent) => {
+      if (!isDrawingPointer(event)) return;
       gestureRef.current = undefined;
       setDraft(undefined);
       setIsDrawing(false);
@@ -817,14 +857,14 @@ export function LatencyMap({
             rightMargin={rightMargin}
             highlight={highlight}
             summary={summary}
-            onBrush={commitRange}
+            onBrush={onBrush}
             onCellClick={clickCell}
             onPlot={handlePlot}
             onCellHover={setHoverCell}
           />
-          {plot && mapBands?.focused && (
+          {plot && focusedBands && (
             <BandMarkers
-              operationBands={mapBands.focused}
+              operationBands={focusedBands}
               geometry={geometry}
               colors={colors}
               width={width}
@@ -836,6 +876,7 @@ export function LatencyMap({
             <SelectionOverlay
               geometry={geometry}
               rect={overlayRange && geometry.rangeToRect(overlayRange)}
+              activeRect={activeRect}
               hoverRect={
                 hoverCell && !draft && !isDrawing && !isMoving
                   ? geometry.rangeToRect({
@@ -947,6 +988,7 @@ export function LatencyMap({
       )}
       <MapHeader
         stats={isEmpty ? undefined : stats}
+        failedCount={gridTotals?.failed}
         failedOnly={failedOnly}
         onFailedOnlyChange={changeFailedOnly}
         onSelectSlowest={selectSlowest}

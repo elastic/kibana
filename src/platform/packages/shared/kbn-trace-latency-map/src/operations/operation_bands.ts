@@ -95,7 +95,13 @@ export function parseOperationHistograms(
  * distinct duration groups are listed, to show one of them.
  */
 export function getMapBands(histograms: OperationHistogram[], stats: DurationStats): MapBands {
-  const total = histograms.reduce((sum, histogram) => sum + histogram.spans, 0);
+  // Against every span of the map, not only the named ones: where most spans have no
+  // operation or service, a small named operation is not the map's, and its bands would be
+  // drawn over spans that are not its.
+  const total = Math.max(
+    stats.spans,
+    histograms.reduce((sum, histogram) => sum + histogram.spans, 0)
+  );
   if (!total) return { operations: [] };
   const toBands = (histogram: OperationHistogram): OperationBands => ({
     operation: histogram.operation,
