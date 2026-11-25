@@ -46,8 +46,9 @@ const toFriendlyError = (error: unknown): Error => {
   if (isHttpFetchError(error)) {
     if (error.response?.status === 409) {
       return new Error(
-        i18n.translate('xpack.proposals.proposalCard.noLongerDecidableError', {
-          defaultMessage: 'This proposal is no longer available to decide.',
+        i18n.translate('xpack.proposals.proposalCard.conflictError', {
+          defaultMessage:
+            'This proposal changed while you were deciding. Check its current status and try again if it is still open.',
         })
       );
     }

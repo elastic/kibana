@@ -546,6 +546,556 @@ describe('useProposal', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toBeInstanceOf(Error);
   });
+
+  describe('when a later revision loads', () => {
+    const mockProposals = (proposals: Record<string, object>) => {
+      const http = makeHttp();
+      http.get.mockImplementation(async (url: string) => {
+        const proposal = proposals[url.split('/').pop() ?? ''];
+        if (proposal instanceof Error) {
+          throw proposal;
+        }
+        return proposal;
+      });
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+      return http;
+    };
+
+    it('refetches the earlier revision in the same chain, so its card reads as replaced', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const earlier = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.data?.status).toBe('pending'));
+
+      proposals['p-1'] = { ...proposals['p-1'], status: 'superseded', supersededBy: 'p-2' };
+      renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(earlier.result.current.data?.status).toBe('superseded'));
+    });
+
+    it('refetches every earlier revision when two revisions land before the card refreshes', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+        'p-3': { id: 'p-3', rootProposalId: 'p-1', revision: 3, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      const second = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
+
+      proposals['p-1'] = { ...proposals['p-1'], status: 'superseded' };
+      proposals['p-2'] = { ...proposals['p-2'], status: 'superseded' };
+      renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+
+      await waitFor(() => {
+        expect(first.result.current.data?.status).toBe('superseded');
+        expect(second.result.current.data?.status).toBe('superseded');
+      });
+    });
+
+    it('does not refetch an earlier revision that already reads as replaced', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': {
+          id: 'p-1',
+          rootProposalId: 'p-1',
+          revision: 1,
+          status: 'superseded',
+          supersededBy: 'p-2',
+        },
+        'p-2': {
+          id: 'p-2',
+          rootProposalId: 'p-1',
+          revision: 2,
+          supersedes: 'p-1',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const replaced = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(replaced.result.current.isSuccess).toBe(true));
+      const latest = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+
+      const fetchesOfReplaced = http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'));
+      expect(fetchesOfReplaced).toHaveLength(1);
+    });
+
+    it('refetches an earlier revision that is marked replaced only by supersededBy', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'no_action' },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const earlier = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.data?.status).toBe('no_action'));
+
+      proposals['p-1'] = { ...proposals['p-1'], supersededBy: 'p-2' };
+      renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(earlier.result.current.data?.supersededBy).toBe('p-2'));
+    });
+
+    it('refreshes all earlier revisions in one call that joins a fetch already in flight', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+        'p-3': { id: 'p-3', rootProposalId: 'p-1', revision: 3, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper, queryClient } = createWrapper();
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      const second = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
+      await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+
+      proposals['p-1'] = { ...proposals['p-1'], status: 'superseded', supersededBy: 'p-3' };
+      proposals['p-2'] = { ...proposals['p-2'], status: 'superseded', supersededBy: 'p-3' };
+      const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(1));
+      expect(invalidateSpy).toHaveBeenCalledWith(expect.any(Object), { cancelRefetch: false });
+    });
+
+    it('lets an earlier revision fetch that is already in flight finish instead of restarting it', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-3': { id: 'p-3', rootProposalId: 'p-1', revision: 3, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper, queryClient } = createWrapper();
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      http.get.mockImplementationOnce(async () => {
+        await gate;
+        return proposals['p-1'];
+      });
+      let isSettled = false;
+      const inFlight = queryClient
+        .refetchQueries({ queryKey: queryKeys.proposals.detail('p-1') })
+        .then(() => {
+          isSettled = true;
+        });
+      const fetchesOfEarlier = () => http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'));
+      await waitFor(() => expect(fetchesOfEarlier()).toHaveLength(2));
+
+      const latest = renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      expect(fetchesOfEarlier()).toHaveLength(2);
+      expect(isSettled).toBe(false);
+      // The new revision marked the card's query invalid, and did not skip it for being in flight.
+      expect(queryClient.getQueryState(queryKeys.proposals.detail('p-1'))?.isInvalidated).toBe(
+        true
+      );
+
+      proposals['p-1'] = { ...proposals['p-1'], status: 'superseded', supersededBy: 'p-3' };
+      release();
+      await act(async () => {
+        await inFlight;
+      });
+
+      expect(isSettled).toBe(true);
+      expect(fetchesOfEarlier()).toHaveLength(2);
+    });
+
+    it('does not refresh a later revision when an earlier revision loads after it', async () => {
+      const proposals: Record<string, object> = {
+        'p-2': {
+          id: 'p-2',
+          rootProposalId: 'p-1',
+          revision: 2,
+          status: 'superseded',
+          supersededBy: 'p-3',
+        },
+        'p-3': { id: 'p-3', rootProposalId: 'p-1', revision: 3, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const current = renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(current.result.current.isSuccess).toBe(true));
+      const earlier = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      expect(http.get.mock.calls.filter(([url]) => url.endsWith('/p-3'))).toHaveLength(1);
+    });
+
+    it('does not repeat the refresh for a card whose own new request still reads open', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const earlier = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.isSuccess).toBe(true));
+      const latest = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      // One read to load it, and one refresh that reads the server again. No second refresh.
+      expect(http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'))).toHaveLength(2);
+    });
+
+    it('refreshes an earlier card whose first read was still loading and reads open when it arrives', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-2': {
+          id: 'p-2',
+          rootProposalId: 'p-1',
+          revision: 2,
+          supersedes: 'p-1',
+          status: 'pending',
+        },
+        'p-3': {
+          id: 'p-3',
+          rootProposalId: 'p-1',
+          revision: 3,
+          supersedes: 'p-2',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+      const fetchesOf = (id: string) => http.get.mock.calls.filter(([url]) => url.endsWith(id));
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+
+      // The first read of p-2 happens before p-3 exists, and answers after p-3 loaded.
+      const staleRead = proposals['p-2'];
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      http.get.mockImplementationOnce(async () => {
+        await gate;
+        return staleRead;
+      });
+      const second = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(fetchesOf('/p-2')).toHaveLength(1));
+
+      proposals['p-1'] = { ...proposals['p-1'], status: 'superseded', supersededBy: 'p-2' };
+      proposals['p-2'] = { ...staleRead, status: 'superseded', supersededBy: 'p-3' };
+      renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(first.result.current.data?.supersededBy).toBe('p-2'));
+      expect(second.result.current.data).toBeUndefined();
+
+      release();
+      await waitFor(() => expect(second.result.current.data?.supersededBy).toBe('p-3'));
+
+      // Each card gets one new read. The card that was refreshed first is not read again.
+      expect(fetchesOf('/p-2')).toHaveLength(2);
+      expect(fetchesOf('/p-1')).toHaveLength(2);
+    });
+
+    it('does not refetch a card that reads replaced when its successor is already cached', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': {
+          id: 'p-1',
+          rootProposalId: 'p-1',
+          revision: 1,
+          status: 'superseded',
+          supersededBy: 'p-2',
+        },
+        'p-2': {
+          id: 'p-2',
+          rootProposalId: 'p-1',
+          revision: 2,
+          supersedes: 'p-1',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const latest = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+      const earlier = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      expect(http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'))).toHaveLength(1);
+    });
+
+    it('refreshes an earlier card whose stale first read arrives after a later revision loaded and the revision between them has no cached card', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-3': {
+          id: 'p-3',
+          rootProposalId: 'p-1',
+          revision: 3,
+          supersedes: 'p-2',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      // The first read of p-1 happens before p-2 and p-3 exist, and answers after p-3 loaded.
+      const staleRead = proposals['p-1'];
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      http.get.mockImplementationOnce(async () => {
+        await gate;
+        return staleRead;
+      });
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+      proposals['p-1'] = { ...staleRead, status: 'superseded', supersededBy: 'p-2' };
+      const latest = renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+
+      release();
+      await waitFor(() => expect(first.result.current.data?.supersededBy).toBe('p-2'));
+    });
+
+    it('does not refetch the current revision when only earlier revisions are cached', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': {
+          id: 'p-1',
+          rootProposalId: 'p-1',
+          revision: 1,
+          status: 'superseded',
+          supersededBy: 'p-2',
+        },
+        'p-2': {
+          id: 'p-2',
+          rootProposalId: 'p-1',
+          revision: 2,
+          supersedes: 'p-1',
+          status: 'superseded',
+          supersededBy: 'p-3',
+        },
+        'p-3': {
+          id: 'p-3',
+          rootProposalId: 'p-1',
+          revision: 3,
+          supersedes: 'p-2',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      const second = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
+      await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+      const latest = renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      expect(http.get).toHaveBeenCalledTimes(3);
+    });
+
+    it('does not refetch a card because a later revision of another chain is already cached', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'q-3': {
+          id: 'q-3',
+          rootProposalId: 'q-1',
+          revision: 3,
+          supersedes: 'q-2',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const other = renderHook(() => useProposal('q-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(other.result.current.isSuccess).toBe(true));
+      const unrelated = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(unrelated.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      expect(http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'))).toHaveLength(1);
+    });
+
+    it('refreshes a decided card that is not marked replaced when its successor is already cached', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': {
+          id: 'p-1',
+          rootProposalId: 'p-1',
+          revision: 1,
+          status: 'no_action',
+          decision: 'approved',
+          supersededBy: 'p-2',
+        },
+        'p-2': {
+          id: 'p-2',
+          rootProposalId: 'p-1',
+          revision: 2,
+          supersedes: 'p-1',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const latest = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+
+      const { supersededBy, ...staleRead } = proposals['p-1'] as Record<string, unknown>;
+      http.get.mockImplementationOnce(async () => staleRead);
+      const earlier = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(earlier.result.current.data?.supersededBy).toBe('p-2'));
+      expect(http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'))).toHaveLength(2);
+    });
+
+    it('refreshes the original of a retried revision, which has the same revision number', async () => {
+      const proposals: Record<string, object> = {
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'failed' },
+        'p-2b': { id: 'p-2b', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const original = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(original.result.current.data?.status).toBe('failed'));
+
+      proposals['p-2'] = { ...proposals['p-2'], supersededBy: 'p-2b' };
+      renderHook(() => useProposal('p-2b'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(original.result.current.data?.supersededBy).toBe('p-2b'));
+    });
+
+    it('checks once more when the refresh returns a state that still reads as open', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-3': { id: 'p-3', rootProposalId: 'p-1', revision: 3, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper, queryClient } = createWrapper();
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+
+      // This request reads the server before the later revision exists, and answers after it.
+      const staleRead = proposals['p-1'];
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      http.get.mockImplementationOnce(async () => {
+        await gate;
+        return staleRead;
+      });
+      const inFlight = queryClient.refetchQueries({
+        queryKey: queryKeys.proposals.detail('p-1'),
+      });
+      const fetchesOfEarlier = () => http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'));
+      await waitFor(() => expect(fetchesOfEarlier()).toHaveLength(2));
+
+      const latest = renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      proposals['p-1'] = { ...staleRead, status: 'superseded', supersededBy: 'p-3' };
+      release();
+      await act(async () => {
+        await inFlight;
+      });
+
+      await waitFor(() => expect(first.result.current.data?.supersededBy).toBe('p-3'));
+      expect(fetchesOfEarlier()).toHaveLength(3);
+    });
+
+    it('refetches an earlier revision whose card shows a load error, even if its old data reads as replaced', async () => {
+      const replaced = {
+        id: 'p-1',
+        rootProposalId: 'p-1',
+        revision: 1,
+        status: 'superseded',
+        supersededBy: 'p-2',
+      };
+      const proposals: Record<string, object> = {
+        'p-1': replaced,
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper, queryClient } = createWrapper();
+
+      const earlier = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.isSuccess).toBe(true));
+
+      proposals['p-1'] = makeHttpFetchError(404);
+      await act(async () => {
+        await queryClient.refetchQueries({ queryKey: queryKeys.proposals.detail('p-1') });
+      });
+      await waitFor(() => expect(earlier.result.current.isError).toBe(true));
+
+      proposals['p-1'] = replaced;
+      renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(earlier.result.current.isError).toBe(false));
+    });
+
+    it('leaves proposals from another chain alone', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'q-2': {
+          id: 'q-2',
+          rootProposalId: 'q-1',
+          revision: 2,
+          supersedes: 'q-1',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const unrelated = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(unrelated.result.current.isSuccess).toBe(true));
+      const other = renderHook(() => useProposal('q-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(other.result.current.isSuccess).toBe(true));
+
+      const fetchesOfUnrelated = http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'));
+      expect(fetchesOfUnrelated).toHaveLength(1);
+    });
+
+    it('does not refetch anything for a first revision', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const { result } = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(http.get).toHaveBeenCalledTimes(1);
+    });
+  });
 });
 
 describe('useApproveProposal', () => {
@@ -1040,6 +1590,69 @@ describe('useDismissProposal', () => {
     ).rejects.toThrow('HTTP 409');
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
   });
+});
+
+describe('when the API answers 409 for a proposal that is on screen', () => {
+  it.each(['approve', 'dismiss'] as const)(
+    '%s waits for the proposal to refetch, so the card shows the settled state',
+    async (kind) => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+      };
+      const http = makeHttp();
+      http.get.mockImplementation(async (url: string) => proposals[url.split('/').pop() ?? '']);
+      http.post.mockRejectedValue(makeHttpFetchError(409));
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+      const { Wrapper, queryClient } = createWrapper();
+      const { result } = renderHook(
+        () => ({
+          proposal: useProposal('p-1'),
+          approve: useApproveProposal(),
+          dismiss: useDismissProposal(),
+        }),
+        { wrapper: Wrapper }
+      );
+      await waitFor(() => expect(result.current.proposal.data?.status).toBe('pending'));
+
+      // The proposal settled behind the card. Every read waits until the test releases it.
+      proposals['p-1'] = { ...proposals['p-1'], status: 'no_action', decision: 'dismissed' };
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      http.get.mockImplementation(async (url: string) => {
+        await gate;
+        return proposals[url.split('/').pop() ?? ''];
+      });
+      const detailKey = queryKeys.proposals.detail('p-1');
+      let isSettled = false;
+      let statusWhenSettled: string | undefined;
+      const decision = (
+        kind === 'approve'
+          ? result.current.approve.mutateAsync({ id: 'p-1', body: {} })
+          : result.current.dismiss.mutateAsync({ id: 'p-1', body: { dismissReason: 'no_reason' } })
+      ).catch(() => {
+        isSettled = true;
+        statusWhenSettled = queryClient.getQueryData<{ status: string }>(detailKey)?.status;
+      });
+      await waitFor(() => expect(http.get.mock.calls.length).toBeGreaterThan(1));
+
+      expect(isSettled).toBe(false);
+      expect(result.current.proposal.data?.status).toBe('pending');
+
+      release();
+      await act(async () => {
+        await decision;
+      });
+
+      // The decision ends only after the refetch, so the cache already shows the settled state.
+      expect(isSettled).toBe(true);
+      expect(statusWhenSettled).toBe('no_action');
+      await waitFor(() => expect(result.current.proposal.data?.status).toBe('no_action'));
+    }
+  );
 });
 
 describe('useIsApprovingProposal / useIsDecliningProposal', () => {

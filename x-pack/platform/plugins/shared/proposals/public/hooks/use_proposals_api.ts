@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import type { MutationKey, QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
 import {
   useInfiniteQuery,
@@ -143,6 +143,113 @@ export const isInFlux = (
 const hasSettlingProposal = (response: ListProposalsResponse | undefined): boolean =>
   response?.proposals.some(isInFlux) ?? false;
 
+const isConflict = (error: unknown): boolean =>
+  isHttpFetchError(error) && error.response?.status === 409;
+
+const isReplacedProposal = (
+  proposal: Pick<ProposalWithMetadata, 'supersededBy' | 'status'> | undefined
+): boolean => Boolean(proposal?.supersededBy) || proposal?.status === 'superseded';
+
+/**
+ * A revision supersedes its predecessors without any event reaching their cards, and a pending
+ * card does not poll. When a later revision shows up, refetch the earlier ones so they read as
+ * replaced (with buttons disabled).
+ */
+const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined): void => {
+  const queryClient = useQueryClient();
+  const id = proposal?.id;
+  const rootProposalId = proposal?.rootProposalId;
+  const revision = proposal?.revision ?? 1;
+  const isRevision = revision > 1;
+
+  useEffect(() => {
+    if (!isRevision || !id || !rootProposalId) {
+      return;
+    }
+    // Cards of the chain that still read as open, or that show a load error.
+    const findStaleQueries = () =>
+      queryClient
+        .getQueriesData<ProposalWithMetadata>({ queryKey: queryKeys.proposals.details })
+        .flatMap(([queryKey, cached]) => {
+          // A retry keeps the revision number of the proposal it copies, so only a strictly
+          // later revision is safe to skip. An earlier proposal never has a later number.
+          const isLater = (cached?.revision ?? 1) > revision;
+          const isOtherInChain =
+            cached?.rootProposalId === rootProposalId && cached.id !== id && !isLater;
+          const isReplaced = isReplacedProposal(cached);
+          // A failed refetch keeps the old data, but the card shows a load error instead of it.
+          const query = queryClient.getQueryCache().find(queryKey, { exact: true });
+          const isShowingError = query?.state.status === 'error';
+          const isShowingReplacement = isReplaced && !isShowingError;
+          return query && isOtherInChain && !isShowingReplacement ? [query] : [];
+        });
+    const hashesOf = (queries: ReturnType<typeof findStaleQueries>): Set<string> =>
+      new Set(queries.map(({ queryHash }) => queryHash));
+
+    // One call scans the cache once. `cancelRefetch: false` joins a request already in flight,
+    // so a decision that waits for its own refresh is not cut short.
+    const refresh = (hashes: Set<string>): Promise<void> =>
+      queryClient.invalidateQueries(
+        {
+          queryKey: queryKeys.proposals.details,
+          predicate: ({ queryHash }) => hashes.has(queryHash),
+        },
+        { cancelRefetch: false }
+      );
+
+    const stale = findStaleQueries();
+    if (stale.length === 0) {
+      return;
+    }
+    // A joined request can return a state that the server read before this revision existed.
+    // Check those cards once more after the refresh. Do not repeat, so the number of requests
+    // stays bounded. A card that got a new request already shows the current server state.
+    const joined = hashesOf(stale.filter(({ state }) => state.fetchStatus === 'fetching'));
+    void refresh(hashesOf(stale)).then(() => {
+      const stillOpen = hashesOf(
+        findStaleQueries().filter(({ queryHash }) => joined.has(queryHash))
+      );
+      return stillOpen.size > 0 ? refresh(stillOpen) : undefined;
+    });
+  }, [queryClient, id, rootProposalId, revision, isRevision]);
+};
+
+/**
+ * The other side of `useRefreshEarlierRevisions`: that one only finds earlier cards that already
+ * have data. A card whose first read was still loading then, and reads open when it arrives,
+ * checks once for a cached later proposal of its chain. The revision between them can be missing
+ * from the cache, so a later revision number counts, not only a direct successor. A retry keeps
+ * the revision number, so it never counts. The check does not repeat, so requests stay bounded.
+ */
+const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): void => {
+  const queryClient = useQueryClient();
+  const id = proposal?.id;
+  const rootProposalId = proposal?.rootProposalId;
+  const revision = proposal?.revision ?? 1;
+  const isOpen = proposal !== undefined && !isReplacedProposal(proposal);
+
+  useEffect(() => {
+    if (!id || !isOpen) {
+      return;
+    }
+    const hasCachedSuccessor = queryClient
+      .getQueriesData<ProposalWithMetadata>({ queryKey: queryKeys.proposals.details })
+      .some(
+        ([, cached]) =>
+          cached?.supersedes === id ||
+          (rootProposalId !== undefined &&
+            cached?.rootProposalId === rootProposalId &&
+            (cached?.revision ?? 1) > revision)
+      );
+    if (hasCachedSuccessor) {
+      void queryClient.invalidateQueries(
+        { queryKey: queryKeys.proposals.detail(id), exact: true },
+        { cancelRefetch: false }
+      );
+    }
+  }, [queryClient, id, rootProposalId, revision, isOpen]);
+};
+
 /**
  * Retries on transient failures (network errors and 5xx responses), stops
  * after 3 attempts. 4xx errors are not transient — they indicate a caller
@@ -259,7 +366,7 @@ export const useProposal = (id: string | undefined) => {
   const { services } = useKibana();
   useProposalDecisionSignal();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: queryKeys.proposals.detail(id),
     queryFn: async (): Promise<ProposalWithMetadata> => {
       if (!id) {
@@ -277,6 +384,11 @@ export const useProposal = (id: string | undefined) => {
       data && isInFlux(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
+
+  useRefreshEarlierRevisions(query.data);
+  useRefreshWhenSuperseded(query.data);
+
+  return query;
 };
 
 /**
@@ -349,7 +461,7 @@ const refreshOnConflict = async (
   error: unknown,
   id: string
 ): Promise<void> => {
-  if (!isHttpFetchError(error) || error.response?.status !== 409) {
+  if (!isConflict(error)) {
     return;
   }
   await invalidateProposals(queryClient);
