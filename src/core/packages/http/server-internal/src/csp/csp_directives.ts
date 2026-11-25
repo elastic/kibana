@@ -83,6 +83,7 @@ export const additionalRules: Partial<Record<CspDirectiveName, string[]>> = {
   'default-src': [`'self'`],
   'font-src': [`'self'`],
   'img-src': [`'self'`],
+  'media-src': [`'self'`],
   'frame-ancestors': [`'self'`],
 };
 

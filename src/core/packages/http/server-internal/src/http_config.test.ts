@@ -1040,7 +1040,7 @@ describe('HttpConfig', () => {
     it('uses a configured csp.media_src instead of the media-src defaults', () => {
       const { csp } = build({ media_src: ['media.example.test'] });
 
-      expect(directive(csp.header, 'media-src')).toBe('media-src media.example.test');
+      expect(directive(csp.header, 'media-src')).toBe(`media-src 'self' media.example.test`);
       expect(directive(csp.header, 'font-src')).toBe(`font-src 'self' data:`);
     });
 

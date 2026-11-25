@@ -259,7 +259,7 @@ groups:
           self: ga
         note: |
           :applies_to: stack: ga 9.6.1!
-          Kibana allows media from `'self'` and `kibana.estccdn.com` by default and blocks media from any other source. If you set `csp.media_src`, those defaults are not applied and only the sources you list are allowed. Include `'self'` and `kibana.estccdn.com` in your list if you need them. If you set `csp.media_src` to an empty list, Kibana does not send a `media-src` directive. Media then uses the `csp.default_src` sources, or has no restriction when `csp.default_src` is not set. On Elastic Cloud Hosted, you can set this from 9.6.1.
+          Kibana allows media from `'self'` and `kibana.estccdn.com` by default and blocks media from any other source. If you set `csp.media_src`, those defaults are not applied and only `'self'` and the sources you list are allowed. Include `kibana.estccdn.com` in your list if you need it. If you set `csp.media_src` to an empty list, Kibana does not send a `media-src` directive. Media then uses the `csp.default_src` sources, or has no restriction when `csp.default_src` is not set. On Elastic Cloud Hosted, you can set this from 9.6.1.
 
       - setting: csp.frame_ancestors
         description: |
