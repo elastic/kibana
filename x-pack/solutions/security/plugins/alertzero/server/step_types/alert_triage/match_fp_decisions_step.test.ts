@@ -982,6 +982,41 @@ describe('triage match decisions step in on mode', () => {
     );
   });
 
+  it('does not read an approved decision once the dismissals used up the notes', async () => {
+    const skipId = decisionId('do_not_propose', hashOf('C:\\skip.exe'));
+    const closeId = decisionId('false_positive', hashOf('C:\\close.exe'));
+    const alerts = [
+      ...Array.from(
+        { length: DECISION_NOTES_PER_SWEEP },
+        (_unused, i): [string, Record<string, unknown>] => [`s${i}`, source('C:\\skip.exe')]
+      ),
+      ...Array.from({ length: 3 }, (_unused, i): [string, Record<string, unknown>] => [
+        `c${i}`,
+        source('C:\\close.exe'),
+      ]),
+    ];
+    const { run, get, callKibanaApi, closes } = setup({
+      mode: 'on',
+      alerts,
+      decisions: { [skipId]: stored('do_not_propose'), [closeId]: stored('false_positive') },
+    });
+
+    const { output } = await run();
+
+    const readIds = get.mock.calls.map(([{ id }]) => id);
+    expect(readIds).toContain(skipId);
+    expect(readIds).not.toContain(closeId);
+    // Neither the daily count nor the verdicts of the approved decision are searched.
+    const searches = callKibanaApi.mock.calls.filter(
+      ([{ path, body }]) => path.endsWith('/signals/search') && (body?.aggs || body?.size === 0)
+    );
+    expect(searches).toEqual([]);
+    expect(closes()).toEqual([]);
+    expect(output).toEqual(
+      expect.objectContaining({ skipped: DECISION_NOTES_PER_SWEEP, closed: 0, left_for_notes: 3 })
+    );
+  });
+
   describe('what moves while the sweep writes', () => {
     const skipTag = (id: string) => `az:skipped_by_decision:${id}`;
 

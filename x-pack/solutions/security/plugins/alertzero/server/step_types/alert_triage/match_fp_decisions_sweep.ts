@@ -402,6 +402,13 @@ export const createDecisionSweep = ({
    * open. When the verdicts or the daily count cannot be read nothing is closed.
    */
   const closeDecision = async (id: string, alertIds: string[]) => {
+    // shortcut: with no note left nothing can be closed, so the decision is not read, and a
+    // decision revoked or newly blocked during the sweep is then counted in `left_for_notes` too.
+    // A decision known to be blocked needs no note, so its matches are still tagged.
+    if (!conflicting.has(id) && notes.take(alertIds).length === 0) {
+      totals.left_for_notes += alertIds.length;
+      return;
+    }
     const progress: CloseProgress = {
       closedIds: [],
       unknownIds: [],
