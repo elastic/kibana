@@ -1353,6 +1353,60 @@ describe('optimistic concurrency on observable writes', () => {
       expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
     });
 
+    it.each([
+      [
+        'addObservable',
+        () =>
+          addObservable(
+            caseSO.id,
+            { observable: newObservablePost },
+            mockClientArgs,
+            mockCasesClient
+          ),
+      ],
+      [
+        'bulkAddObservables',
+        () =>
+          bulkAddObservables(
+            { caseId: caseSO.id, observables: [newObservablePost] },
+            mockClientArgs,
+            mockCasesClient
+          ),
+      ],
+      [
+        'updateObservable',
+        () =>
+          updateObservable(
+            caseSO.id,
+            mockObservable.id,
+            { observable: { value: '192.168.0.9', description: null } },
+            mockClientArgs,
+            mockCasesClient
+          ),
+      ],
+      [
+        'deleteObservable',
+        () => deleteObservable(caseSO.id, mockObservable.id, mockClientArgs, mockCasesClient),
+      ],
+      [
+        'bulkDeleteObservables',
+        () =>
+          bulkDeleteObservables(
+            { caseId: caseSO.id, observableIds: [mockObservable.id] },
+            mockClientArgs
+          ),
+      ],
+    ])('%s fails with a 409 once the attempts are exhausted', async (_name, write) => {
+      // Failure scenario: the request error wrapper must not turn the conflict into a 400.
+      mockCaseService.getCase.mockResolvedValue(versionedCase('v1', [mockObservable]));
+      mockCaseService.patchCase.mockRejectedValue(conflictError());
+
+      const error = await write().catch((e) => e);
+
+      expect(Boom.isBoom(error, 409)).toBe(true);
+      expect(mockCaseService.patchCase).toHaveBeenCalledTimes(3);
+    });
+
     it('rethrows an error that is not a version conflict without retrying', async () => {
       mockCaseService.getCase.mockResolvedValue(versionedCase('v1', []));
       mockCaseService.patchCase.mockRejectedValue(new Error('write failed'));

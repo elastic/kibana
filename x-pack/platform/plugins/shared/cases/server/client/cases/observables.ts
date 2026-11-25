@@ -134,6 +134,12 @@ async function writeObservablesWithRetry<TResult>({
 }
 
 /**
+ * Wraps an observable write failure in a 400, keeping a version conflict's 409 so the caller knows to retry.
+ */
+const toObservableWriteError = (message: string, error: unknown): Boom.Boom =>
+  Boom.isBoom(error, 409) ? error : Boom.badRequest(`${message}: ${error}`);
+
+/**
  * License-agnostic core that dedupes, caps, persists, and records a user action
  * for a set of observables on a case. Callers MUST enforce the Platinum license
  * gate and call notifyUsage themselves.
@@ -304,7 +310,7 @@ export const addObservable = async (
       observablesForEmit: applied.newlyAddedObservables,
     };
   })().catch((error) => {
-    throw Boom.badRequest(`Failed to add observable: ${error}`);
+    throw toObservableWriteError('Failed to add observable', error);
   });
 
   emitObservablesAddedEvent(clientArgs, caseForEmit, observablesForEmit);
@@ -402,7 +408,7 @@ export const updateObservable = async (
 
     return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
-    throw Boom.badRequest(`Failed to update observable: ${error}`);
+    throw toObservableWriteError('Failed to update observable', error);
   }
 };
 
@@ -464,7 +470,7 @@ export const deleteObservable = async (
       },
     });
   } catch (error) {
-    throw Boom.badRequest(`Failed to delete observable id: ${observableId}: ${error}`);
+    throw toObservableWriteError(`Failed to delete observable id: ${observableId}`, error);
   }
 };
 
@@ -527,7 +533,7 @@ export const bulkAddObservables = async (
       observablesForEmit: applied.newlyAddedObservables,
     };
   })().catch((error) => {
-    throw Boom.badRequest(`Failed to add observable: ${error}`);
+    throw toObservableWriteError('Failed to add observable', error);
   });
 
   emitObservablesAddedEvent(clientArgs, caseForEmit, observablesForEmit);
