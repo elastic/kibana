@@ -361,6 +361,19 @@ describe('<SyntheticsPolicyEditExtension />', () => {
       getByText('Synthetic Monitoring is now available out of the box in Synthetics')
     ).toBeInTheDocument();
   });
+
+  it('shows managed policy callout with troubleshooting docs link', () => {
+    const { getByTestId } = render(
+      <WrappedComponent policy={{ ...defaultCurrentPolicy, is_managed: true }} />
+    );
+
+    expect(getByTestId('syntheticsManagedPolicyCallout')).toBeInTheDocument();
+    const docsLink = getByTestId('syntheticsAbandonedPolicyDocsLink');
+    expect(docsLink).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/troubleshoot/observability/troubleshooting-synthetics#synthetics-troubleshooting-delete-abandoned-package-policy'
+    );
+  });
 });
 
 describe('getMonitorRefFromVars', () => {

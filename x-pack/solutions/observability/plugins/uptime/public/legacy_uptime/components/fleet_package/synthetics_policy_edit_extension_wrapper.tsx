@@ -6,7 +6,9 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FleetStartServices } from '@kbn/fleet-plugin/public';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
@@ -43,7 +45,7 @@ export const getMonitorRefFromVars = (
  */
 export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy: currentPolicy, newPolicy, onChange }) => {
-    const { application } = useKibana().services;
+    const { application, docLinks, share } = useKibana<FleetStartServices>().services;
 
     const { package: pkg } = newPolicy;
 
@@ -53,7 +55,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       });
     }, [application, pkg?.name, pkg?.version]);
 
-    const locators = useKibana<FleetStartServices>().services?.share?.url?.locators;
+    const locators = share?.url?.locators;
     const currentInput = currentPolicy.inputs.find((input) => input.enabled === true);
     const vars = currentInput?.streams.find((stream) =>
       Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
@@ -67,11 +69,33 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       locators,
     });
 
+    const troubleshootingDocUrl = docLinks?.links?.synthetics?.deleteAbandonedPackagePolicy;
+
     if (currentPolicy.is_managed) {
       return (
         <KbnInfoCallout
           announceOnMount
           title={<p data-test-subj="syntheticsManagedPolicyCallout">{EDIT_IN_SYNTHETICS_DESC}</p>}
+          text={
+            troubleshootingDocUrl ? (
+              <FormattedMessage
+                id="xpack.uptime.editPackagePolicy.abandonedPolicyTroubleshootingDescription"
+                defaultMessage="If the corresponding monitor no longer exists, see <link>Synthetics troubleshooting</link> for how to remove an abandoned package policy."
+                values={{
+                  link: (chunks) => (
+                    <EuiLink
+                      data-test-subj="syntheticsAbandonedPolicyDocsLink"
+                      href={troubleshootingDocUrl}
+                      target="_blank"
+                      external
+                    >
+                      {chunks}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            ) : undefined
+          }
           actionProps={{
             primary: {
               isLoading: !url,
