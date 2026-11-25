@@ -290,8 +290,48 @@ describe('classifyDetectionsStepDefinition', () => {
         esClient
       );
 
-      expect(output).toMatchObject({ failed: true, row_count: 2, held_back_count: 1 });
+      expect(output).toMatchObject({
+        failed: true,
+        row_count: 2,
+        held_back_count: 1,
+        held_reason_counts: { batch_cap: 1 },
+      });
       expect(agentBatchOf(output)).toEqual(['rule-A', 'rule-B']);
+    });
+
+    it('tells the rows the flaky gate held from the rows the batch limit deferred', async () => {
+      const { definition } = createDefinition();
+      const esClient = {
+        esql: {
+          query: jest.fn(async () => {
+            throw new Error('the cluster is down');
+          }),
+        },
+      };
+
+      const output = await runHandler(
+        definition,
+        {
+          ...settings,
+          batch_max: 1,
+          rows: [
+            heldRow('rule-A'),
+            detectionRow('rule-B'),
+            detectionRow('rule-C'),
+            detectionRow('rule-D'),
+          ],
+        },
+        esClient
+      );
+
+      expect(definition.outputSchema.safeParse(output).success).toBe(true);
+      expect(output).toMatchObject({
+        failed: true,
+        row_count: 1,
+        held_back_count: 3,
+        held_reason_counts: { flaky_rule: 1, batch_cap: 2 },
+      });
+      expect(agentBatchOf(output)).toEqual(['rule-B']);
     });
 
     it('fails open when the rules breaches cannot be read, rather than reading every rule as quiet', async () => {
