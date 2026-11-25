@@ -71,7 +71,17 @@ const CHART_HEIGHT = 220;
  * the Overview's application, environment, filters, KQL query and range, and has Lens's actions
  * (Inspect, Open in Discover, Add to dashboard). None where Lens is disabled.
  */
-export function VitalsTrendPanel({ serviceName }: { serviceName: string }) {
+export function VitalsTrendPanel({
+  serviceName,
+  lastReloadRequestTime,
+}: {
+  serviceName: string;
+  /**
+   * When the Overview's Refresh was last clicked: a relative range like `now-24h` stays the same
+   * strings, so without it the chart would keep its data while the other panels reload.
+   */
+  lastReloadRequestTime?: number;
+}) {
   const { lens } = useKibanaServices();
   const { euiTheme } = useEuiTheme();
   const { environment } = useEnvironment();
@@ -140,6 +150,7 @@ export function VitalsTrendPanel({ serviceName }: { serviceName: string }) {
           id={`digitalExperienceOverviewVitalTrend-${vital}`}
           attributes={attributes}
           timeRange={timeRange}
+          lastReloadRequestTime={lastReloadRequestTime}
           query={query}
           viewMode="view"
           withDefaultActions

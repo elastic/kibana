@@ -66,4 +66,16 @@ describe('vitalTrendAttributes', () => {
     // One ES|QL data source for the line and the thresholds: a data view would add another scale.
     expect(Object.keys(attributes.state.datasourceStates)).toEqual(['textBased']);
   });
+
+  it('keeps the partial time buckets at the edges of the range, so the newest vitals show', () => {
+    const { textBased } = vitalTrendAttributes(configOf('lcp')).state.datasourceStates;
+    const columns = Object.values(textBased?.layers ?? {}).flatMap((layer) => layer.columns);
+
+    expect(columns.find(({ fieldName }) => fieldName === 'time')?.params).toMatchObject({
+      dropPartials: false,
+    });
+    expect(columns.find(({ fieldName }) => fieldName === 'p75')?.params).not.toHaveProperty(
+      'dropPartials'
+    );
+  });
 });

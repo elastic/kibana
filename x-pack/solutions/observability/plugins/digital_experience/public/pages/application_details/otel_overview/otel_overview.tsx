@@ -281,6 +281,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   const searchParams = useOverviewSearchParams();
   const formatters = useFormatters();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  // Refresh reloads the Lens chart through this, as its range doesn't change for a relative one.
+  const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number>();
   // In the URL, so a reload or Share keeps it; the application page's header toggles it.
   const { value: compare } = useQueryParam('compare');
   // Separate requests, so the KPIs never wait on the panels below and a failure replaces only its own.
@@ -304,6 +306,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
     setFilter(name, toggleFilterValue(filters[name] ?? [], value, false));
 
   const refreshAll = () => {
+    setLastReloadRequestTime(Date.now());
     overview.refresh();
     kpis.refresh();
     usage.refresh();
@@ -389,7 +392,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
         />
       )}
       {/* Its own Lens query, so it loads, fails and refreshes apart from the Overview's request. */}
-      <VitalsTrendPanel serviceName={serviceName} />
+      <VitalsTrendPanel serviceName={serviceName} lastReloadRequestTime={lastReloadRequestTime} />
       <EuiSpacer size="m" />
       <UsageAndErrorsPanels
         serviceName={serviceName}

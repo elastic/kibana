@@ -93,6 +93,41 @@ export const vitalTrendConfig = ({
   };
 };
 
+/**
+ * Keeps the time buckets at the edges of the range, which Lens drops by default on an ES|QL date
+ * column: the newest vitals would be hidden, and a little-used app could show no point at all. The
+ * as-code API has no option for it on ES|QL columns, so it's set on the built attributes.
+ */
+const keepPartialTimeBuckets = (attributes: LensAttributes): LensAttributes => {
+  const textBased = attributes.state.datasourceStates.textBased;
+  if (!textBased) {
+    return attributes;
+  }
+  const layers = Object.fromEntries(
+    Object.entries(textBased.layers).map(([layerId, layer]) => [
+      layerId,
+      {
+        ...layer,
+        columns: layer.columns.map((column) =>
+          column.fieldName === VITAL_TREND_COLUMNS.time
+            ? { ...column, params: { ...column.params, dropPartials: false } }
+            : column
+        ),
+      },
+    ])
+  );
+  return {
+    ...attributes,
+    state: {
+      ...attributes.state,
+      datasourceStates: {
+        ...attributes.state.datasourceStates,
+        textBased: { ...textBased, layers },
+      },
+    },
+  };
+};
+
 /** The chart's Lens attributes, for Lens's embeddable. */
 export const vitalTrendAttributes = (config: XYConfigESQL): LensAttributes =>
-  new LensConfigBuilder().fromAPIFormat(config);
+  keepPartialTimeBuckets(new LensConfigBuilder().fromAPIFormat(config));

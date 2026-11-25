@@ -33,6 +33,7 @@ import {
 } from '../../../hooks/use_overview_search';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
+import { VitalsTrendPanel } from './components/vitals_trend_panel';
 import { OtelOverview } from './otel_overview';
 
 const mockBrushEndListeners: BrushEndListener[] = [];
@@ -70,6 +71,10 @@ jest.mock('../../../hooks/use_environment');
 jest.mock('../../../hooks/use_overview_filters');
 jest.mock('../../../hooks/use_overview_search');
 jest.mock('../../../hooks/use_query_param');
+// Its own test covers the chart; here the Overview only has to reload it on Refresh.
+jest.mock('./components/vitals_trend_panel', () => ({
+  VitalsTrendPanel: jest.fn(() => null),
+}));
 // Stand in for the Unified Search bars, which the Overview's own test does not render: the date
 // picker's Refresh button loads the Overview again.
 jest.mock('./components/overview_search_bar', () => ({
@@ -823,6 +828,18 @@ describe('OtelOverview', () => {
     await waitFor(() => {
       return expect(fetch).toHaveBeenCalledTimes(8);
     });
+  });
+
+  it('reloads the vitals chart on Refresh, as a relative range stays the same', async () => {
+    renderOverview();
+    await findPageLoads('1,533');
+    const reloadTime = () =>
+      jest.mocked(VitalsTrendPanel).mock.calls.at(-1)?.[0].lastReloadRequestTime;
+    expect(reloadTime()).toBeUndefined();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+    await waitFor(() => expect(reloadTime()).toEqual(expect.any(Number)));
   });
 
   it('shows the usage panels below the trends', async () => {

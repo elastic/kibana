@@ -26,6 +26,7 @@ interface EmbeddableProps {
   attributes: LensAttributes;
   timeRange: { from: string; to: string };
   query: { language: string; query: string };
+  lastReloadRequestTime?: number;
   withDefaultActions?: boolean;
 }
 
@@ -43,10 +44,10 @@ const lastProps = (): EmbeddableProps => {
 
 const queryOf = (props: EmbeddableProps): string => JSON.stringify(props.attributes.state);
 
-const renderPanel = () =>
+const renderPanel = (lastReloadRequestTime?: number) =>
   render(
     <EuiProvider>
-      <VitalsTrendPanel serviceName="shop" />
+      <VitalsTrendPanel serviceName="shop" lastReloadRequestTime={lastReloadRequestTime} />
     </EuiProvider>
   );
 
@@ -92,6 +93,12 @@ describe('VitalsTrendPanel', () => {
 
     renderPanel();
     expect(queryOf(lastProps())).toContain('== \\"inp\\"');
+  });
+
+  it("reloads the chart when the Overview's Refresh is clicked", () => {
+    renderPanel(1234);
+
+    expect(lastProps().lastReloadRequestTime).toBe(1234);
   });
 
   it('is left out where Lens is disabled', () => {
