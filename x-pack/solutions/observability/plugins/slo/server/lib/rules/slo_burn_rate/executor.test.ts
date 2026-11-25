@@ -284,6 +284,19 @@ describe('BurnRateRuleExecutor', () => {
       expect(result).toEqual({ state: {} });
     });
 
+    it('reports the alert limit is not reached when no instance breaches', async () => {
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['host'] });
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      mockEvaluation(esClientMock, ruleParams, []);
+      alertsClientMock.getAlertLimitValue.mockReturnValue(1000);
+
+      await executeRule(ruleParams);
+
+      expect(alertsClientMock.report).not.toHaveBeenCalled();
+      expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(false);
+    });
+
     it('does not schedule an alert when the candidates long windows burn rates are below the threshold', async () => {
       const slo = createSLO({ objective: { target: 0.9 } });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
@@ -327,7 +340,56 @@ describe('BurnRateRuleExecutor', () => {
       const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['host'] });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      const buckets = [breachingFirstWindowBucket('foo'), breachingFirstWindowBucket('bar')];
+      esClientMock.search
+        .mockResolvedValueOnce(generateCandidatesResponse(buckets, { instanceId: 'bar' }))
+        .mockResolvedValueOnce(generateEsResponse(ruleParams, buckets));
+      alertsClientMock.getAlertLimitValue.mockReturnValue(1);
+      mockReport();
+
+      await executeRule(ruleParams);
+
+      // The next candidates page is not requested once the limit is reached.
+      const candidatesRequests = esClientMock.search.mock.calls.filter(
+        ([request]) => request !== undefined && 'filter_path' in request
+      );
+      expect(candidatesRequests).toHaveLength(1);
+      expect(alertsClientMock.report).toHaveBeenCalledTimes(1);
+      expect(alertsClientMock.report).toHaveBeenCalledWith(expect.objectContaining({ id: 'foo' }));
+      expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(true);
+    });
+
+    it('does not reach the alert limit when as many alerts as the limit are scheduled', async () => {
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['host'] });
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       mockEvaluation(esClientMock, ruleParams, [
+        breachingFirstWindowBucket('foo'),
+        breachingFirstWindowBucket('bar'),
+      ]);
+      alertsClientMock.getAlertLimitValue.mockReturnValue(2);
+      mockReport();
+
+      await executeRule(ruleParams);
+
+      expect(alertsClientMock.report).toHaveBeenCalledTimes(2);
+      expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('evaluates every instance of the dependencies, whatever the alert limit', async () => {
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['host'] });
+      const dependencyRuleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      const ruleParams = someRuleParamsWithWindows({
+        sloId: slo.id,
+        dependencies: [{ ruleId: 'dependency-rule', actionGroupsToSuppressOn: [ALERT_ACTION.id] }],
+      });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      mockEvaluation(esClientMock, ruleParams, [breachingFirstWindowBucket('bar')]);
+      soClientMock.get.mockResolvedValueOnce(
+        createGetRuleResponse('dependency-rule', dependencyRuleParams)
+      );
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      mockEvaluation(esClientMock, dependencyRuleParams, [
         breachingFirstWindowBucket('foo'),
         breachingFirstWindowBucket('bar'),
       ]);
@@ -337,8 +399,10 @@ describe('BurnRateRuleExecutor', () => {
       await executeRule(ruleParams);
 
       expect(alertsClientMock.report).toHaveBeenCalledTimes(1);
-      expect(alertsClientMock.report).toHaveBeenCalledWith(expect.objectContaining({ id: 'foo' }));
-      expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(true);
+      expect(alertsClientMock.report).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'bar', actionGroup: SUPPRESSED_PRIORITY_ACTION.id })
+      );
+      expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(false);
     });
 
     it('sets the context of the recovered alerts', async () => {
@@ -968,12 +1032,13 @@ function mockEvaluation(
   }
 }
 
-function generateCandidatesResponse(buckets: ResponseBucket[]) {
+function generateCandidatesResponse(buckets: ResponseBucket[], afterKey?: { instanceId: string }) {
   return {
     ...commonEsResponse,
     aggregations: {
       instances: {
         buckets: buckets.map(({ instanceId }) => ({ key: { instanceId } })),
+        ...(afterKey ? { after_key: afterKey } : {}),
       },
     },
   };
