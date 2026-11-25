@@ -117,7 +117,9 @@ describe('Enterprise Search - connectors search provider', () => {
     });
 
     it('advertises the content crawler searchable type', () => {
-      expect(connectorsSearchResultProvider.getSearchableTypes()).toEqual(['content crawler']);
+      expect(connectorsSearchResultProvider.getSearchableTypes(mockSearchProviderContext)).toEqual([
+        'content crawler',
+      ]);
     });
 
     it('returns all matched results', async () => {
