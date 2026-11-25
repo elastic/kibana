@@ -34,7 +34,7 @@ export const generateReportHandler: FleetRequestHandler<
   const logger = appContextService.getLogger();
 
   const runtimeFieldsResult = await buildAgentStatusRuntimeField();
-  const runtimeFields = runtimeFieldsResult.status.script?.source ?? 'emit("")';
+  const statusScript = runtimeFieldsResult.status.script;
 
   const reporting = appContextService.getReportingStart();
   if (!reporting) {
@@ -45,14 +45,7 @@ export const generateReportHandler: FleetRequestHandler<
     throw new FleetError('At least one agent id must be provided');
   }
 
-  const reportParams = await getReportParams(
-    agents,
-    fields,
-    runtimeFields,
-    spaceId,
-    timezone,
-    sort
-  );
+  const reportParams = await getReportParams(agents, fields, statusScript, spaceId, timezone, sort);
   const handleResponse: HandleResponseFunc = async (result, err?) => {
     if (err) {
       throw err;
@@ -99,7 +92,7 @@ export const getSortFieldForAPI = (field: string): string => {
 const getReportParams = async (
   agents: string[] | string,
   fields: string[],
-  runtimeFields: string,
+  statusScript: Awaited<ReturnType<typeof buildAgentStatusRuntimeField>>['status']['script'],
   spaceId: string,
   timezone?: string,
   sortOptions?: { field?: string; direction?: string }
@@ -110,9 +103,10 @@ const getReportParams = async (
     runtimeFieldMap: {
       status: {
         type: 'keyword',
-        script: {
-          source: runtimeFields,
-        },
+        // The data view runtime field type only declares `script.source`, but the whole script object
+        // is sent as-is in the search request `runtime_mappings`. The `params` are required: the status
+        // script reads the inactivity cutoffs from them.
+        script: statusScript as unknown as { source: string },
       },
     },
   };

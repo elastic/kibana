@@ -53,9 +53,6 @@ export const config: PluginConfigDescriptor = {
     },
     enableExperimental: true,
     experimentalFeatures: true,
-    developer: {
-      maxAgentPoliciesWithInactivityTimeout: true,
-    },
     internal: {
       fleetServerStandalone: true,
       activeAgentsSoftLimit: true,
@@ -69,6 +66,8 @@ export const config: PluginConfigDescriptor = {
     installIntegrationsKnowledge: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
+    // Removed: the agent status script no longer has a limit on policies with an inactivity timeout
+    unused('developer.maxAgentPoliciesWithInactivityTimeout', { level: 'warning' }),
     // Unused settings before Fleet server exists
     unused('agents.kibana', { level: 'critical' }),
     unused('agents.maxConcurrentConnections', { level: 'critical' }),
@@ -328,7 +327,6 @@ export const config: PluginConfigDescriptor = {
         })
       ),
       developer: schema.object({
-        maxAgentPoliciesWithInactivityTimeout: schema.maybe(schema.number()),
         disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
         allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
         bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),

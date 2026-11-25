@@ -343,10 +343,12 @@ describe('generateReportHandler', () => {
 
     it('should include runtime fields for agent status', async () => {
       const mockRuntimeScript = 'if (doc["last_checkin"].size() > 0) { emit("online") }';
+      const mockParams = { inactivityCutoffs: { policy1: 1234567890123 }, offlineCutoff: 1234567 };
       mockBuildAgentStatusRuntimeField.mockResolvedValue({
         status: {
           script: {
             source: mockRuntimeScript,
+            params: mockParams,
           },
         },
       });
@@ -365,6 +367,8 @@ describe('generateReportHandler', () => {
                   status: expect.objectContaining({
                     script: expect.objectContaining({
                       source: mockRuntimeScript,
+                      // the status script reads the inactivity cutoffs from its params
+                      params: mockParams,
                     }),
                   }),
                 }),

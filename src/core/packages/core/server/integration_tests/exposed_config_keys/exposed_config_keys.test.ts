@@ -212,7 +212,6 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.fleet.internal.excludeDataStreamTypes (array?)',
   'xpack.fleet.internal.fleetServerStandalone (boolean?)',
   'xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions (boolean?)',
-  'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number?)',
   'xpack.fleet.integrationsHomeOverride (string?)',
   'xpack.fleet.prereleaseEnabledByDefault (boolean?)',
   'xpack.fleet.hideDashboards (boolean?)',

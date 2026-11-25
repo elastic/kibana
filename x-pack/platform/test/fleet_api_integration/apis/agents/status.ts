@@ -274,46 +274,39 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.items[0].last_checkin_status).to.eql('disconnected');
     });
 
-    it('should not perform inactivity check if there are too many agent policies with inactivity timeout', async () => {
-      // the test server is started with --xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout=10
-      // so we create 11 policies with inactivity timeout then no agents should turn inactive
+    it('should still mark agents as inactive with more agent policies with inactivity timeout than the previous limit', async function () {
+      // Policy ids used to be written in the status script source, which Elasticsearch limits to 64KB
+      // (~1,600 policies). They are now script params so there is no limit on the number of policies.
+      this.timeout(10 * 60 * 1000);
+      const { body: before } = await supertest.get(`/api/fleet/agent_status`).expect(200);
+      expect(before.results.inactive).to.be.greaterThan(0);
 
-      const policiesToAdd = new Array(11).fill(0).map((_, i) => `policy-inactivity-timeout-${i}`);
+      const policiesToAdd = new Array(1700).fill(0).map((_, i) => `policy-inactivity-timeout-${i}`);
 
-      await Promise.all(
-        policiesToAdd.map((policyId) =>
-          supertest
-            .post(`/api/fleet/agent_policies`)
-            .set('kbn-xsrf', 'xxxx')
-            .send({
-              id: 'fleet-agent-policies:' + policyId,
-              name: policyId,
-              namespace: 'default',
-              description: 'Policy with inactivity timeout',
-              is_default: true,
-              monitoring_enabled: ['logs', 'metrics'],
-              inactivity_timeout: 60,
-            })
-            .expect(200)
-        )
-      );
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agent_status`).expect(200);
-      expect(apiResponse).to.eql({
-        results: {
-          events: 0,
-          other: 0,
-          online: 3,
-          active: 13,
-          all: 14,
-          error: 2,
-          offline: 2,
-          updating: 4,
-          inactive: 0,
-          unenrolled: 1,
-          orphaned: 1,
-          uninstalled: 1,
-        },
-      });
+      const CHUNK_SIZE = 50;
+      for (let i = 0; i < policiesToAdd.length; i += CHUNK_SIZE) {
+        await Promise.all(
+          policiesToAdd.slice(i, i + CHUNK_SIZE).map((policyId) =>
+            supertest
+              .post(`/api/fleet/agent_policies`)
+              .set('kbn-xsrf', 'xxxx')
+              .send({
+                id: 'fleet-agent-policies:' + policyId,
+                name: policyId,
+                namespace: 'default',
+                description: 'Policy with inactivity timeout',
+                is_default: true,
+                monitoring_enabled: ['logs', 'metrics'],
+                inactivity_timeout: 60,
+              })
+              .expect(200)
+          )
+        );
+      }
+
+      // the new policies have no agents, so the status counts must not change
+      const { body: after } = await supertest.get(`/api/fleet/agent_status`).expect(200);
+      expect(after).to.eql(before);
     });
 
     it('should get a list of agent policies by kuery', async () => {

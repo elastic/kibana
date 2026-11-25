@@ -8,168 +8,157 @@
 import type { InactivityTimeouts } from './build_status_runtime_field';
 import { _buildStatusRuntimeField } from './build_status_runtime_field';
 
+// default `script.max_size_in_bytes` in Elasticsearch, only applies to the script source (not params)
+const ES_MAX_SCRIPT_SIZE_IN_BYTES = 65535;
+
 describe('buildStatusRuntimeField', () => {
   const now = 1234567890123;
+  const offlineCutoff = 1234567530123;
   beforeAll(() => {
     global.Date.now = jest.fn(() => now);
   });
-  it('should build the correct runtime field if there are no inactivity timeouts', () => {
-    const inactivityTimeouts: InactivityTimeouts = [];
-    const runtimeField = _buildStatusRuntimeField({ inactivityTimeouts });
-    expect(runtimeField).toMatchInlineSnapshot(`
-      Object {
-        "status": Object {
-          "script": Object {
-            "lang": "painless",
-            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
-          },
-          "type": "keyword",
-        },
-      }
-    `);
-  });
-  it('should build the correct runtime field if there are no inactivity timeouts (prefix)', () => {
-    const inactivityTimeouts: InactivityTimeouts = [];
-    const runtimeField = _buildStatusRuntimeField({ inactivityTimeouts, pathPrefix: 'my.prefix.' });
-    expect(runtimeField).toMatchInlineSnapshot(`
-      Object {
-        "status": Object {
-          "script": Object {
-            "lang": "painless",
-            "source": " long lastCheckinMillis = doc.containsKey('my.prefix.last_checkin') && doc['my.prefix.last_checkin'].size() > 0 ? doc['my.prefix.last_checkin'].value.toInstant().toEpochMilli() : ( doc['my.prefix.enrolled_at'].size() > 0 ? doc['my.prefix.enrolled_at'].value.toInstant().toEpochMilli() : -1 ); if (!doc.containsKey('my.prefix.active') || (doc['my.prefix.active'].size() > 0 && doc['my.prefix.active'].value == false)) { emit('unenrolled'); } else if (doc.containsKey('audit_unenrolled_reason') && doc['my.prefix.audit_unenrolled_reason'].size() > 0 && doc['my.prefix.audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['my.prefix.audit_unenrolled_reason'].size() > 0 && doc['my.prefix.audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['my.prefix.last_checkin_status'].size() > 0 && doc['my.prefix.last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['my.prefix.policy_revision_idx'].size() == 0 || ( doc['my.prefix.upgrade_started_at'].size() > 0 && doc['my.prefix.upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['my.prefix.last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['my.prefix.unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['my.prefix.last_checkin_status'].size() > 0 && doc['my.prefix.last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['my.prefix.last_checkin_status'].size() > 0 && doc['my.prefix.last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
-          },
-          "type": "keyword",
-        },
-      }
-    `);
-  });
-  it('should build the correct runtime field if there is one inactivity timeout', () => {
+
+  it('should build a painless runtime field with the cutoffs as params', () => {
     const inactivityTimeouts: InactivityTimeouts = [
-      {
-        inactivityTimeout: 300,
-        policyIds: ['policy-1'],
-      },
-    ];
-    const runtimeField = _buildStatusRuntimeField({ inactivityTimeouts });
-    expect(runtimeField).toMatchInlineSnapshot(`
-      Object {
-        "status": Object {
-          "script": Object {
-            "lang": "painless",
-            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); String agentPolicyBaseId = doc.containsKey('policy_base_id') && doc['policy_base_id'].size() > 0 ? doc['policy_base_id'].value : ( doc.containsKey('policy_id') && doc['policy_id'].size() > 0 ? doc['policy_id'].value : '' ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (lastCheckinMillis > 0 && agentPolicyBaseId.length() > 0 && (['policy-1'].contains(agentPolicyBaseId) && lastCheckinMillis < 1234567590123L)) {emit('inactive');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
-          },
-          "type": "keyword",
-        },
-      }
-    `);
-  });
-  it('should build the correct runtime field if there are multiple inactivity timeouts with same timeout', () => {
-    const inactivityTimeouts: InactivityTimeouts = [
-      {
-        inactivityTimeout: 300,
-        policyIds: ['policy-1', 'policy-2'],
-      },
-    ];
-    const runtimeField = _buildStatusRuntimeField({ inactivityTimeouts });
-    expect(runtimeField).toMatchInlineSnapshot(`
-      Object {
-        "status": Object {
-          "script": Object {
-            "lang": "painless",
-            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); String agentPolicyBaseId = doc.containsKey('policy_base_id') && doc['policy_base_id'].size() > 0 ? doc['policy_base_id'].value : ( doc.containsKey('policy_id') && doc['policy_id'].size() > 0 ? doc['policy_id'].value : '' ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (lastCheckinMillis > 0 && agentPolicyBaseId.length() > 0 && (['policy-1','policy-2'].contains(agentPolicyBaseId) && lastCheckinMillis < 1234567590123L)) {emit('inactive');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
-          },
-          "type": "keyword",
-        },
-      }
-    `);
-  });
-  it('should not perform inactivity check if there are too many agent policies with an inactivity timeout', () => {
-    const inactivityTimeouts: InactivityTimeouts = [
-      {
-        inactivityTimeout: 300,
-        // default max is 750
-        policyIds: new Array(1000).fill(0).map((_, i) => `policy-${i}`),
-      },
+      { inactivityTimeout: 60, policyIds: ['policy-1', 'policy-2'] },
     ];
 
     const runtimeField = _buildStatusRuntimeField({ inactivityTimeouts });
 
-    expect(runtimeField).not.toContain('policy-');
-    expect(runtimeField).toMatchInlineSnapshot(`
-      Object {
-        "status": Object {
-          "script": Object {
-            "lang": "painless",
-            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
-          },
-          "type": "keyword",
-        },
-      }
-    `);
+    expect(runtimeField.status.type).toBe('keyword');
+    expect(runtimeField.status.script.lang).toBe('painless');
+    expect(runtimeField.status.script.params).toEqual({
+      inactivityCutoffs: { 'policy-1': now - 60_000, 'policy-2': now - 60_000 },
+      offlineCutoff,
+    });
   });
-  it('should build the correct runtime field if there are multiple inactivity timeouts with different timeout', () => {
-    const inactivityTimeouts: InactivityTimeouts = [
-      {
-        inactivityTimeout: 300,
-        policyIds: ['policy-1', 'policy-2'],
-      },
-      {
-        inactivityTimeout: 400,
-        policyIds: ['policy-3'],
-      },
-    ];
-    const runtimeField = _buildStatusRuntimeField({ inactivityTimeouts });
-    expect(runtimeField).toMatchInlineSnapshot(`
-      Object {
-        "status": Object {
-          "script": Object {
-            "lang": "painless",
-            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); String agentPolicyBaseId = doc.containsKey('policy_base_id') && doc['policy_base_id'].size() > 0 ? doc['policy_base_id'].value : ( doc.containsKey('policy_id') && doc['policy_id'].size() > 0 ? doc['policy_id'].value : '' ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (lastCheckinMillis > 0 && agentPolicyBaseId.length() > 0 && (['policy-1','policy-2'].contains(agentPolicyBaseId) && lastCheckinMillis < 1234567590123L || ['policy-3'].contains(agentPolicyBaseId) && lastCheckinMillis < 1234567490123L)) {emit('inactive');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
-          },
-          "type": "keyword",
-        },
-      }
-    `);
+
+  it('should have empty inactivity cutoffs if there are no inactivity timeouts', () => {
+    const { params } = _buildStatusRuntimeField({ inactivityTimeouts: [] }).status.script;
+
+    expect(params).toEqual({ inactivityCutoffs: {}, offlineCutoff });
   });
-  it('should match the inactivity timeout on the base policy id, with a policy_id fallback', () => {
+
+  it('should set a cutoff per policy for multiple inactivity timeouts', () => {
     const inactivityTimeouts: InactivityTimeouts = [
-      {
-        inactivityTimeout: 300,
-        policyIds: ['policy-1'],
-      },
+      { inactivityTimeout: 60, policyIds: ['policy-1', 'policy-2'] },
+      { inactivityTimeout: 120, policyIds: ['policy-3'] },
     ];
 
-    const { source } = _buildStatusRuntimeField({ inactivityTimeouts }).status.script;
+    const { params } = _buildStatusRuntimeField({ inactivityTimeouts }).status.script;
+
+    expect(params.inactivityCutoffs).toEqual({
+      'policy-1': now - 60_000,
+      'policy-2': now - 60_000,
+      'policy-3': now - 120_000,
+    });
+  });
+
+  it('should keep the shortest timeout if a policy is in multiple inactivity timeouts', () => {
+    const inactivityTimeouts: InactivityTimeouts = [
+      { inactivityTimeout: 120, policyIds: ['policy-1'] },
+      { inactivityTimeout: 60, policyIds: ['policy-1'] },
+    ];
+
+    const { params } = _buildStatusRuntimeField({ inactivityTimeouts }).status.script;
+
+    expect(params.inactivityCutoffs).toEqual({ 'policy-1': now - 60_000 });
+  });
+
+  it('should keep policy ids as data, not as part of the script', () => {
+    const inactivityTimeouts: InactivityTimeouts = [
+      { inactivityTimeout: 60, policyIds: [`it's a "weird-id" \\ #1`] },
+    ];
+
+    const { source, params } = _buildStatusRuntimeField({ inactivityTimeouts }).status.script;
+
+    expect(source).not.toContain('weird-id');
+    expect(params.inactivityCutoffs).toEqual({ [`it's a "weird-id" \\ #1`]: now - 60_000 });
+  });
+
+  it('should use the same source whatever the inactivity timeouts and the time are', () => {
+    const withoutTimeouts = _buildStatusRuntimeField({ inactivityTimeouts: [] }).status.script;
+
+    (global.Date.now as jest.Mock).mockReturnValueOnce(now + 1000);
+    const withTimeouts = _buildStatusRuntimeField({
+      inactivityTimeouts: [{ inactivityTimeout: 300, policyIds: ['policy-1'] }],
+    }).status.script;
+
+    expect(withTimeouts.source).toBe(withoutTimeouts.source);
+    expect(withTimeouts.params).not.toEqual(withoutTimeouts.params);
+  });
+
+  it('should keep the source constant with more agent policies than the old limit', () => {
+    // 750 was the previous limit, 2000 is past the 64KB script size limit when inlined in the source
+    const policyIds = new Array(2000).fill(0).map((_, i) => `a-long-agent-policy-id-${i}`);
+    const inactivityTimeouts: InactivityTimeouts = [{ inactivityTimeout: 300, policyIds }];
+
+    const { source, params } = _buildStatusRuntimeField({ inactivityTimeouts }).status.script;
+
+    expect(source).toBe(_buildStatusRuntimeField({ inactivityTimeouts: [] }).status.script.source);
+    expect(source.length).toBeLessThan(ES_MAX_SCRIPT_SIZE_IN_BYTES / 10);
+    expect(Object.keys(params.inactivityCutoffs)).toHaveLength(2000);
+    expect(params.inactivityCutoffs['a-long-agent-policy-id-1999']).toBe(now - 300_000);
+  });
+
+  it('should emit inactive from the cutoff of the base policy id, with a policy_id fallback', () => {
+    const { source } = _buildStatusRuntimeField({ inactivityTimeouts: [] }).status.script;
 
     // agents reassigned to a version-specific variant, e.g. 'policy-1#sentinel', carry the base id
     // in policy_base_id; agents enrolled before that field existed only have the base policy_id
     expect(source).toContain(
       "String agentPolicyBaseId = doc.containsKey('policy_base_id') && doc['policy_base_id'].size() > 0 ? doc['policy_base_id'].value : ( doc.containsKey('policy_id') && doc['policy_id'].size() > 0 ? doc['policy_id'].value : '' );"
     );
-    expect(source).toContain("['policy-1'].contains(agentPolicyBaseId)");
+    expect(source).toContain(
+      'def inactivityCutoff = agentPolicyBaseId.length() > 0 ? params.inactivityCutoffs.get(agentPolicyBaseId) : null;'
+    );
+    expect(source).toContain(
+      "else if (inactivityCutoff != null && lastCheckinMillis > 0 && lastCheckinMillis < ((Number) inactivityCutoff).longValue()) {emit('inactive');}"
+    );
   });
-  it('should prefix the base policy id fields with the path prefix', () => {
-    const inactivityTimeouts: InactivityTimeouts = [
-      {
-        inactivityTimeout: 300,
-        policyIds: ['policy-1'],
-      },
-    ];
 
+  it('should use the offline cutoff param for offline agents', () => {
+    const { source } = _buildStatusRuntimeField({ inactivityTimeouts: [] }).status.script;
+
+    expect(source).toContain('lastCheckinMillis < params.offlineCutoff');
+    expect(source).not.toMatch(/\d{13}L/);
+  });
+
+  it('should emit all the statuses in the same order as before', () => {
+    const { source } = _buildStatusRuntimeField({ inactivityTimeouts: [] }).status.script;
+
+    const emitted = [...source.matchAll(/emit\('(\w+)'\)/g)].map((m) => m[1]);
+
+    expect(emitted).toEqual([
+      'unenrolled',
+      'inactive',
+      'uninstalled',
+      'orphaned',
+      'offline',
+      'offline',
+      'updating',
+      'enrolling',
+      'unenrolling',
+      'error',
+      'degraded',
+      'online',
+    ]);
+  });
+
+  it('should prefix the fields with the path prefix', () => {
     const { source } = _buildStatusRuntimeField({
-      inactivityTimeouts,
+      inactivityTimeouts: [],
       pathPrefix: 'my.prefix.',
     }).status.script;
 
     expect(source).toContain(
       "String agentPolicyBaseId = doc.containsKey('my.prefix.policy_base_id') && doc['my.prefix.policy_base_id'].size() > 0 ? doc['my.prefix.policy_base_id'].value : ( doc.containsKey('my.prefix.policy_id') && doc['my.prefix.policy_id'].size() > 0 ? doc['my.prefix.policy_id'].value : '' );"
     );
+    expect(source).toContain("doc['my.prefix.last_checkin'].size() > 0");
+    expect(source).toContain("doc['my.prefix.active'].size() > 0");
+    expect(source).not.toContain("doc['last_checkin']");
   });
-  it('should not declare the base policy id if there are no inactivity timeouts', () => {
-    const { source } = _buildStatusRuntimeField({ inactivityTimeouts: [] }).status.script;
 
-    expect(source).not.toContain('agentPolicyBaseId');
-  });
   it('should build the same runtime field if path ends with. or not', () => {
     const inactivityTimeouts: InactivityTimeouts = [];
     const runtimeFieldWithDot = _buildStatusRuntimeField({

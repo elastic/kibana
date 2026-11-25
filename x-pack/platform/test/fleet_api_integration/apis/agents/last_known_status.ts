@@ -31,7 +31,6 @@ export default function (providerContext: FtrProviderContext) {
         {},
         _buildStatusRuntimeField({
           inactivityTimeouts: [],
-          logger: undefined,
         }),
         HAS_CHANGED_RUNTIME_FIELD
       );
