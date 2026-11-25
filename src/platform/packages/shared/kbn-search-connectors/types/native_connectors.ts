@@ -3422,6 +3422,29 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      skip_extension_filter: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate('searchConnectors.nativeConnectors.networkDrive.skipExtensionFilterLabel', {
+          defaultMessage: 'Attempt extraction for all file types',
+        }),
+        options: [],
+        order: 10,
+        required: false,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.networkDrive.skipExtensionFilterTooltip',
+          {
+            defaultMessage:
+              'Skips the file extension check, so every file within the size limit is downloaded and extraction is attempted. This can significantly slow down syncs.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [SYNC_RULES]: {
