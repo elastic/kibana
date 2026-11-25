@@ -1,0 +1,38 @@
+overlay: 1.0.0
+info:
+  title: Sophos Central API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths
+    description: >-
+      The whoami endpoint is not in the published Sophos API specs. See
+      https://developer.sophos.com/getting-started/api/getting-started-api for the documentation.
+      It lives on the global API (api.central.sophos.com) rather than the per-region common API,
+      so it gets its own path-level servers entry. The pattern on apiHosts.dataRegion lets the
+      sampler generate a valid regional URL without pinning an example that projectSpec would strip.
+    update:
+      /whoami/v1:
+        servers:
+          - url: https://api.central.sophos.com
+        get:
+          operationId: whoami
+          responses:
+            '200':
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      idType:
+                        type: string
+                        enum:
+                          - tenant
+                      apiHosts:
+                        type: object
+                        properties:
+                          dataRegion:
+                            type: string
+                            pattern: '^https://api(-[a-z0-9]+)?\.central\.sophos\.com$'
+            '401': {}

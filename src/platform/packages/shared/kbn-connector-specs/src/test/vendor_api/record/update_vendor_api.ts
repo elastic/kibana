@@ -581,17 +581,13 @@ export const updateVendorApi = async ({
             ],
             recording.namedTypes[name]
           )
-        : isCaptured(name)
-          ? // A captured snapshot is hand-maintained; preserve its documentation (examples,
-            // descriptions) as written rather than stripping them with projectSpec.
-            toStableJson(raw[name])
-          : toStableJson(
-              projectSpec(
-                raw[name],
-                used.flatMap((call) => (isNamedCall(call) ? [] : [call])),
-                overlayRefs
-              )
-            );
+        : toStableJson(
+            projectSpec(
+              raw[name],
+              used.flatMap((call) => (isNamedCall(call) ? [] : [call])),
+              overlayRefs
+            )
+          );
     const unchanged = (await read(file)) === files[file];
     const apiVersion = loaded.has(name) ? loaded.get(name) : previous?.sources[name]?.apiVersion;
     const pages = isMarkdownFormat(formats[name]) ? pagesOf(name) : undefined;

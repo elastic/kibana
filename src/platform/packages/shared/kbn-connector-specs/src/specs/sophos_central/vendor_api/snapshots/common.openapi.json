@@ -923,6 +923,48 @@
           }
         }
       }
+    },
+    "/whoami/v1": {
+      "get": {
+        "operationId": "whoami",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "apiHosts": {
+                      "properties": {
+                        "dataRegion": {
+                          "pattern": "^https://api(-[a-z0-9]+)?\\.central\\.sophos\\.com$",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "idType": {
+                      "enum": [
+                        "tenant"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        }
+      },
+      "servers": [
+        {
+          "url": "https://api.central.sophos.com"
+        }
+      ]
     }
   },
   "security": [

@@ -15,7 +15,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const uuidString = (desc: string) =>
-  z.string().regex(UUID_RE, 'Must be a valid UUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)').describe(desc);
+  z.string().max(36).regex(UUID_RE, 'Must be a valid UUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)').describe(desc);
 
 /**
  * Alert lifecycle action values exposed to Agent Builder agents.
@@ -260,7 +260,7 @@ export const AddAllowedItemInputSchema = lazySchema(() =>
       .enum(['path', 'sha256', 'certificateSigner', 'posixPath'])
       .describe('The type of item to allow: path, sha256, certificateSigner, or posixPath.'),
     properties: z
-      .record(z.string(), z.string().max(2048))
+      .record(z.string().max(256), z.string().max(2048))
       .describe('Properties matching the type, e.g. { path: "C:\\\\example" } or { sha256: "abc..." }.'),
     comment: z
       .string()

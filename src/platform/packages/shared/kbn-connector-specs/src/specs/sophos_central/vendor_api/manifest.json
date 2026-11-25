@@ -9,7 +9,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "actOnAlertsBulk": [
@@ -21,7 +21,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "addAllowedItem": [
@@ -33,7 +33,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "addBlockedItem": [
@@ -45,7 +45,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "deisolateEndpoint": [
@@ -57,7 +57,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "deleteBlockedItem": [
@@ -69,7 +69,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "getAlert": [
@@ -81,7 +81,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "getEndpoint": [
@@ -93,7 +93,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "getTamperProtection": [
@@ -105,7 +105,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "isolateEndpoint": [
@@ -117,7 +117,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "listAlerts": [
@@ -141,7 +141,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "listBlockedItems": [
@@ -164,7 +164,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "listDetections": [
@@ -198,7 +198,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "listEndpoints": [
@@ -222,7 +222,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "scanEndpoint": [
@@ -234,7 +234,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ],
     "updateTamperProtection": [
@@ -246,7 +246,7 @@
       {
         "method": "get",
         "path": "/whoami/v1",
-        "source": "global"
+        "source": "common"
       }
     ]
   },
@@ -268,14 +268,6 @@
       "fetchedAt": "2026-11-24T12:51:24.509Z",
       "format": "openapi",
       "url": "https://developer.sophos.com/assets/specs/endpoint-v1.yaml"
-    },
-    "global": {
-      "apiVersion": "1.0.0",
-      "captured": true,
-      "fetchedAt": "2026-11-24T13:47:13.024Z",
-      "format": "openapi",
-      "note": "The Sophos Central whoami endpoint is not published as a machine-readable spec; this snapshot is maintained manually from the documentation at https://developer.sophos.com/getting-started/api/getting-started-api.",
-      "url": "https://developer.sophos.com/getting-started/api/getting-started-api"
     }
   }
 }
