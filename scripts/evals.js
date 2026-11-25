@@ -185,7 +185,7 @@ function runFastCiMap(repoRoot, args) {
   entries.push({
     label: 'evals:all',
     suiteId: '*',
-    command: 'Run all eval suites in PR CI',
+    command: 'Run all eval suites in PR CI, except suites marked excludeFromEvalsAll',
   });
   for (var i = 0; i < metadata.length; i++) {
     var suite = metadata[i];

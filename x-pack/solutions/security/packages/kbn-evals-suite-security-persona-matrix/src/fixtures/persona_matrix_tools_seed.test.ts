@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
@@ -386,7 +387,7 @@ describe('persona_matrix_tools_seed', () => {
       const order = calls(client)
         .filter((req) => req.method === 'POST')
         .map((req) => `${req.path}#${req.body?.id}`);
-      const workflowIds = ['vt-hash-lookup', 'create-case', 'create-channel'];
+      const workflowIds = ['vt-hash-lookup', 'create-case', 'create-channel', 'write-todos'];
       for (const workflowId of workflowIds) {
         expect(order).toContain(`/api/workflows/workflow#${workflowId}`);
       }
@@ -411,6 +412,7 @@ describe('persona_matrix_tools_seed', () => {
         'create.case',
         'create.channel',
         'vt.hash.lookup',
+        'write_todos',
       ]);
       for (const req of workflowTools) {
         expect(seededWorkflowIds).toContain(req.body?.configuration?.workflow_id);
@@ -450,7 +452,7 @@ describe('persona_matrix_tools_seed', () => {
   });
 
   describe("profile: 'chrysalis-parity'", () => {
-    it('creates the parity agent with the five parity tools and does not touch the default agent', async () => {
+    it('creates the parity agent with the six parity tools and does not touch the default agent', async () => {
       const { seedPersonaMatrixTools, PERSONA_MATRIX_PARITY_TOOL_IDS } = await load('parity');
       const client = createClient();
 
@@ -474,7 +476,7 @@ describe('persona_matrix_tools_seed', () => {
 
       await seedPersonaMatrixTools({ kbnClient: asKbn(client), log, profile: 'chrysalis-parity' });
 
-      expect(posts(client, '/api/workflows/workflow')).toHaveLength(3);
+      expect(posts(client, '/api/workflows/workflow')).toHaveLength(4);
       expect(posts(client, '/api/agent_builder/agents')).toHaveLength(1);
     });
 
@@ -560,7 +562,7 @@ describe('persona_matrix_tools_seed', () => {
       const toolIds = [...mod.PERSONA_MATRIX_TOOL_IDS, ...mod.PERSONA_MATRIX_PARITY_TOOL_IDS];
       const expected = [
         ...toolIds.map((id) => `/api/agent_builder/tools/${encodeURIComponent(id)}?force=true`),
-        ...['vt-hash-lookup', 'create-case', 'create-channel'].map(
+        ...['vt-hash-lookup', 'create-case', 'create-channel', 'write-todos'].map(
           (id) => `/api/workflows/workflow/${id}?force=true&acknowledgeAclLoss=true`
         ),
         PARITY_AGENT_PATH,
@@ -575,6 +577,103 @@ describe('persona_matrix_tools_seed', () => {
         })
       );
       expect(log.warning).not.toHaveBeenCalled();
+    });
+
+    it('deletes only todo documents this run added (ids not in the pre-seed snapshot)', async () => {
+      const mod = await load('parity');
+      const client = createClient();
+      // ES 8+ rejects a sort on `_id` (fielddata disabled) and a `_shard_doc` sort
+      // outside a point-in-time; the mock throws on both, as ES does.
+      const pitSearch = (pages: Array<Array<{ _id: string; sort: string[] }>>) =>
+        jest.fn(async (body: { pit?: { id: string }; sort?: string[] }) => {
+          if (JSON.stringify(body.sort ?? []).includes('_id')) {
+            throw new Error('Fielddata access on the _id field is disallowed');
+          }
+          if (!body.pit) {
+            throw new Error('[_shard_doc] sort field cannot be used without [point in time]');
+          }
+          return { hits: { hits: pages.shift() ?? [] } };
+        });
+      const pitClient = (search: jest.Mock, extras: Record<string, unknown> = {}) =>
+        ({
+          search,
+          openPointInTime: jest.fn(async () => ({ id: 'pit-1' })),
+          closePointInTime: jest.fn(async () => ({ succeeded: true })),
+          ...extras,
+        } as unknown as EsClient);
+      const deleteByQuery = jest.fn(async () => ({}));
+      // Snapshot taken at seed time: only this doc pre-exists the run.
+      const seedSearch = pitSearch([[{ _id: 'old-1', sort: ['0'] }], []]);
+      await mod.seedPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        esClient: pitClient(seedSearch),
+        profile: 'chrysalis-parity',
+      });
+      expect(seedSearch).toHaveBeenCalled();
+      // Cleanup: the seeded id survived plus two run-added docs, split over two pages.
+      const cleanupSearch = pitSearch([
+        [
+          { _id: 'old-1', sort: ['0'] },
+          { _id: 'new-1', sort: ['1'] },
+        ],
+        [{ _id: 'new-2', sort: ['2'] }],
+        [],
+      ]);
+      await mod.cleanupPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        esClient: pitClient(cleanupSearch, { deleteByQuery }),
+      });
+      expect(log.warning).not.toHaveBeenCalled();
+      expect(deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: 'persona-matrix-todos',
+          query: { ids: { values: ['new-1', 'new-2'] } },
+        })
+      );
+    });
+
+    it('deletes no todo documents when the pre-seed snapshot could not be read', async () => {
+      const mod = await load('parity');
+      const client = createClient();
+      const deleteByQuery = jest.fn(async () => ({}));
+      await mod.seedPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        esClient: {
+          openPointInTime: jest.fn(async () => {
+            throw new Error('search_phase_execution_exception');
+          }),
+        } as unknown as EsClient,
+        profile: 'chrysalis-parity',
+      });
+      expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('todo cleanup disabled'));
+      await mod.cleanupPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        esClient: { deleteByQuery } as unknown as EsClient,
+      });
+      expect(deleteByQuery).not.toHaveBeenCalled();
+    });
+
+    it('leaves todo documents alone when write-todos pre-existed (not this run)', async () => {
+      const mod = await load('parity');
+      const client = createClient({ postBehavior: 'conflict' });
+      const deleteByQuery = jest.fn(async () => ({}));
+      await mod.seedPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        esClient: { search: jest.fn() } as unknown as EsClient,
+        profile: 'chrysalis-parity',
+      });
+      await mod.cleanupPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        esClient: { deleteByQuery } as unknown as EsClient,
+      });
+      expect(deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('keeps pre-existing tools, workflows and agent (create answered "already exists")', async () => {

@@ -54,6 +54,18 @@ const SUITES = {
       configPath: 'x-pack/pinned-judge/playwright.config.ts',
       defaultJudge: 'eis-abc-1',
     },
+    {
+      id: 'persona-matrix',
+      name: 'Persona Matrix',
+      ciLabels: ['evals:persona-matrix'],
+      configPath: 'x-pack/persona-matrix/playwright.config.ts',
+    },
+    {
+      id: 'persona-matrix-parity',
+      name: 'Persona Matrix (parity)',
+      ciLabels: ['evals:persona-matrix-parity'],
+      configPath: 'x-pack/persona-matrix/parity.playwright.config.ts',
+    },
   ],
 };
 
@@ -199,6 +211,28 @@ describe('eval_pipeline', () => {
       expect(getForwardablePrLabels('evals:smoke-tests,evals:skip-smoke-tests')).toBe(
         'evals:smoke-tests,evals:skip-smoke-tests'
       );
+    });
+  });
+
+  describe('`evals:all` with the persona-matrix parity suite', () => {
+    const MODELS = 'models:eis/openai-gpt-5.4';
+
+    it('includes the parity suite alongside the other persona suite', () => {
+      const yaml = getEvalPipeline(`evals:all,${MODELS}`) as string;
+
+      expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix-parity"');
+      expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix"');
+      expect(yaml).toContain('EVAL_SUITE_ID: "agent-builder"');
+    });
+
+    it('drops only the parity suite when its skip label accompanies `evals:all`', () => {
+      const yaml = getEvalPipeline(
+        `evals:all,evals:skip-persona-matrix-parity,${MODELS}`
+      ) as string;
+
+      expect(yaml).not.toContain('persona-matrix-parity');
+      expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix"');
+      expect(yaml).toContain('EVAL_SUITE_ID: "agent-builder"');
     });
   });
 

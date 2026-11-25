@@ -14,3 +14,6 @@ export { parseMatrixConfig } from './src/matrix/load_matrix_config';
 
 // Generic per-example report model + pluggable output adapters (HTML, JSON fallback)
 export * from './src/report';
+
+// Security-owned Relevance evaluator (code-derived label, empty response scores 0)
+export * from './src/relevance';

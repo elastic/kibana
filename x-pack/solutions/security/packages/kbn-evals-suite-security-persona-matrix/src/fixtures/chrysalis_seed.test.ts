@@ -10,9 +10,13 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
 
-const loadProfile = (profile: 'minimal' | 'parity') => {
+const loadProfile = (profile?: 'minimal' | 'parity') => {
   jest.resetModules();
-  process.env.SEED_PROFILE = profile;
+  if (profile) {
+    process.env.SEED_PROFILE = profile;
+  } else {
+    delete process.env.SEED_PROFILE;
+  }
   // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   return require('./chrysalis_seed') as typeof import('./chrysalis_seed');
 };
@@ -32,6 +36,7 @@ const asEs = (client: MockClient) => client as unknown as EsClient;
 describe('chrysalis_seed', () => {
   afterEach(() => {
     delete process.env.SEED_PROFILE;
+    delete process.env.EVAL_SUITE_ID;
     jest.clearAllMocks();
   });
 
@@ -57,6 +62,16 @@ describe('chrysalis_seed', () => {
     it('resolves explicit minimal and parity', () => {
       expect(loadProfile('minimal').seedProfile).toBe('minimal');
       expect(loadProfile('parity').seedProfile).toBe('parity');
+    });
+
+    it('resolves the parity seed from the parity suite id without SEED_PROFILE', () => {
+      process.env.EVAL_SUITE_ID = 'security-persona-matrix-parity';
+      expect(loadProfile().seedProfile).toBe('parity');
+    });
+
+    it('throws when SEED_PROFILE conflicts with the parity suite id', () => {
+      process.env.EVAL_SUITE_ID = 'security-persona-matrix-parity';
+      expect(() => loadProfile('minimal')).toThrow(/SEED_PROFILE='minimal'/);
     });
 
     it('throws for the removed enriched profile instead of silently falling back', () => {
@@ -155,6 +170,26 @@ describe('chrysalis_seed', () => {
       // Offset is a real shift to ~now (positive, large).
       const now = Date.now();
       expect(Date.parse(seeded!['@timestamp'] as string)).toBeGreaterThan(now - 10 * 60 * 1000);
+    });
+  });
+
+  describe('parity epoch', () => {
+    it('keeps the inlined-alert epoch fixed at seed time, not at query time', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(Date.parse('2026-11-13T12:00:00.000Z'));
+        const { seedChrysalisAlerts, getParityEpochMs } = loadProfile('parity');
+        await seedChrysalisAlerts({ esClient: asEs(createClient()), log });
+        const seededAt = getParityEpochMs();
+
+        // A later prompt (long matrix run) must still re-stamp relative to the seed instant,
+        // otherwise the prompt's alert drifts away from the seeded corpus.
+        jest.setSystemTime(Date.parse('2026-11-13T14:00:00.000Z'));
+        expect(getParityEpochMs()).toBe(seededAt);
+        expect(seededAt).toBe(Date.parse('2026-11-13T12:00:00.000Z'));
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 

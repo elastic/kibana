@@ -12,6 +12,12 @@ export {
   createCachedTokensEvaluator,
 } from './tokens';
 export { createEstimatedCostEvaluator, ESTIMATED_COST_EVALUATOR_NAME } from './cost';
+export {
+  estimateCostUsd,
+  getModelPrice,
+  PRICE_TABLE_VERSION,
+  type ModelPrice,
+} from './model_prices';
 export { createLatencyEvaluator, createSpanLatencyEvaluator } from './latency';
 export { createChatCallsEvaluator } from './chat_calls';
 export { createToolCallsEvaluator } from './tool_calls';

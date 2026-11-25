@@ -99,7 +99,7 @@ export const runPersonaRubricJudge = async ({
     return unavailable(reason);
   }
   const toolCalls = getToolCallsWithResults(judgeOutput);
-  const judge = countingJudgeClient(inferenceClient);
+  const judge = countingJudgeClient(inferenceClient, { log });
   try {
     const response = await executeUntilValid({
       prompt: PersonaRubricPrompt,

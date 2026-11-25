@@ -184,13 +184,19 @@ export class PersonaMatrixChatClient {
       let pending = getConfirmationPrompts(lastResponse);
       let rounds = 0;
 
+      let stuckAgentError: { message: string } | null = null;
       while (Object.keys(pending).length > 0) {
         if (rounds >= MAX_AUTO_CONFIRM_ROUNDS) {
-          throw new Error(
-            `persona-matrix: exceeded ${MAX_AUTO_CONFIRM_ROUNDS} auto-confirm continuation rounds. ` +
+          // Fail soft: the trajectory up to the loop is real agent behaviour the
+          // deterministic evaluators can score; throwing here discards the whole
+          // run, not just this example.
+          stuckAgentError = {
+            message:
+              `persona-matrix: exceeded ${MAX_AUTO_CONFIRM_ROUNDS} auto-confirm continuation rounds. ` +
               `Outstanding prompt ids: ${Object.keys(pending).join(', ')}. ` +
-              `This indicates a stuck agent.`
-          );
+              `This indicates a stuck agent.`,
+          };
+          break;
         }
         const continuation = await post({
           agent_id: this.agentId,
@@ -221,6 +227,9 @@ export class PersonaMatrixChatClient {
             )}`,
           },
         }));
+      if (stuckAgentError) {
+        errors.unshift({ type: 'error', error: stuckAgentError });
+      }
       // Final-answer fallback: some models end on a tool call (no closing
       // assistant turn), so response.message is "". Downstream, a blank final
       // message renders "No final answer message captured" and the answer-
