@@ -334,6 +334,10 @@ describe('spec connector with API fetch', () => {
 
       await fillAndSave();
 
+      const [getPath, getOptions] = (appMockRenderer.coreStart.http.get as jest.Mock).mock.calls[0];
+      expect(getPath).toBe('/internal/actions/connector_types/spec-connector-test/spec');
+      expect(getOptions).not.toHaveProperty(['query', 'spec_version']);
+
       await waitFor(() => {
         expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledTimes(1);
       });
