@@ -46,6 +46,9 @@ export const CRASH_FRAME_RULES = {
 
 export type CrashKind = keyof typeof CRASH_FRAME_RULES;
 
+/** Longest crash fingerprint a route or URL takes: a computed one is 64 characters. */
+export const MAX_CRASH_FINGERPRINT_LENGTH = 256;
+
 /** `exception.type` suffix of the JavaScript errors React Native reports as crashes. */
 export const JAVASCRIPT_EXCEPTION_SUFFIX = 'JavascriptException';
 /** A line only PLCrashReporter reports have. */

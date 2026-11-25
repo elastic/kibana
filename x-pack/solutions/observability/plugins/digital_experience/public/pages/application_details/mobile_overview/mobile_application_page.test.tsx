@@ -15,6 +15,7 @@ import { useRouteBreadcrumb } from '../../../breadcrumbs/use_route_breadcrumb';
 import { useApplicationLinks } from '../../../hooks/use_application_links';
 import { useShareAction } from '../../../hooks/use_share_action';
 import { MobileApplicationPage } from './mobile_application_page';
+import { MobileCrashesTab } from '../mobile_crashes/mobile_crashes_tab';
 import { MobileOverview } from './mobile_overview';
 import { useMobileReleases } from './release_health/use_mobile_releases';
 import type { MobileReleasesState } from './release_health/use_mobile_releases';
@@ -38,6 +39,9 @@ jest.mock('./use_mobile_kpis');
 jest.mock('./release_health/use_mobile_releases');
 jest.mock('./mobile_overview', () => ({
   MobileOverview: jest.fn(() => <div data-test-subj="mobileOverview" />),
+}));
+jest.mock('../mobile_crashes/mobile_crashes_tab', () => ({
+  MobileCrashesTab: jest.fn(() => <div data-test-subj="mobileCrashesTab" />),
 }));
 
 const OVERVIEW_PATH = '/shop-mobile?applicationType=mobile&source=otel';
@@ -86,6 +90,7 @@ beforeEach(() => {
     networkHref: '/network-href',
     reportsHref: '/reports-href',
     frustrationHref: '/frustration-href',
+    crashesHref: '/crashes-href',
     sessionsHref: () => '/sessions-href',
     sessionHref: () => '/session-href',
   });
@@ -106,12 +111,16 @@ describe('MobileApplicationPage', () => {
     expect(useApplicationLinks).toHaveBeenCalledWith('shop-mobile', 'otel');
   });
 
-  it('has the Overview as its only tab, and its breadcrumb', () => {
+  it('has the Overview and Crashes tabs, and the selected one in the breadcrumb', () => {
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
 
     expect(screen.getByTestId('digitalExperienceTab-overview')).toHaveAttribute(
       'href',
       '/overview-href'
+    );
+    expect(screen.getByTestId('digitalExperienceTab-crashes')).toHaveAttribute(
+      'href',
+      '/crashes-href'
     );
     ['errors', 'network', 'sessions', 'reports'].forEach((tab) =>
       expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).toBeNull()
@@ -155,7 +164,7 @@ describe('MobileApplicationPage', () => {
   });
 
   it.each(['sessions', 'errors', 'network', 'reports'] as const)(
-    'replaces the %s route with the Overview, its only tab, without rendering it',
+    "replaces a web application's %s route with the Overview, without rendering it",
     (tab) => {
       render(<MobileApplicationPage serviceName="shop-mobile" selectedTab={tab} />);
 
@@ -193,6 +202,22 @@ describe('MobileApplicationPage', () => {
     await openAppMenuOverflow();
 
     expect(screen.queryByTestId('digitalExperienceMobileCompareToggle')).toBeNull();
+  });
+
+  it('renders the Crashes tab, with the KPIs for its filters, its breadcrumb and Share', () => {
+    render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="crashes" />);
+
+    expect(historyReplace).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mobileOverview')).toBeNull();
+    expect(jest.mocked(MobileCrashesTab).mock.calls.at(-1)?.[0]).toEqual({
+      serviceName: 'shop-mobile',
+      kpisState: KPIS_STATE,
+    });
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([
+      { text: 'shop-mobile', href: '/overview-href' },
+      { text: 'Crashes' },
+    ]);
+    expect(useShareAction).toHaveBeenCalledWith(expect.objectContaining({ tab: 'crashes' }));
   });
 
   it('gives the Overview the KPIs and the release health the page fetched', () => {

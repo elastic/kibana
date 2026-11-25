@@ -140,6 +140,9 @@ export const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
   reports: i18n.translate('xpack.digitalExperience.application.tabs.reports', {
     defaultMessage: 'Reports',
   }),
+  crashes: i18n.translate('xpack.digitalExperience.application.tabs.crashes', {
+    defaultMessage: 'Crashes',
+  }),
 };
 
 /** The header action that opens a page's events in Discover. */

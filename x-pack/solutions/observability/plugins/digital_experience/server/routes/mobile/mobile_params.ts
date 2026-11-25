@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_CRASH_FINGERPRINT_LENGTH } from '../../../common/mobile/crash_fingerprint';
 import { MAX_OS_NAME_LENGTH, MAX_RELEASE_LENGTH } from '../../lib/constants';
 import {
   START_AFTER_END_ISSUE,
@@ -14,9 +15,6 @@ import {
   timeRangeShape,
   timeZoneShape,
 } from '../params';
-
-/** Longest crash fingerprint a route takes: a computed one is 64 characters, a stored one shorter. */
-export const MAX_CRASH_FINGERPRINT_LENGTH = 256;
 
 /** The mobile application page's time range and filters. */
 export const mobileFiltersShape = () => ({

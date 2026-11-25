@@ -48,6 +48,9 @@ describe('DigitalExperienceLocatorDefinition', () => {
     expect(await pathOf({ serviceName: 'storefront-web', tab: 'reports' })).toBe(
       '/storefront-web/reports'
     );
+    expect(await pathOf({ serviceName: 'shop-mobile', tab: 'crashes' })).toBe(
+      '/shop-mobile/crashes'
+    );
   });
 
   it('opens the Overview for a tab it does not know', async () => {
