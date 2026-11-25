@@ -108,6 +108,54 @@ export default function ({ getService }: FtrProviderContext) {
       expect(agent.access_api_key_id).to.eql('api-key-2');
     });
 
+    describe('free text kuery', () => {
+      const agentId = 'agent-free-text-markers';
+
+      before(async () => {
+        await es.index({
+          index: AGENTS_INDEX,
+          id: agentId,
+          refresh: 'wait_for',
+          document: {
+            type: 'PERMANENT',
+            active: true,
+            enrolled_at: new Date().toISOString(),
+            last_checkin: new Date().toISOString(),
+            policy_id: 'policy1',
+            agent: { id: agentId, version: '9.0.0' },
+            local_metadata: { host: { hostname: 'allowedmarkerhost' } },
+            upgrade_details: {
+              action_id: 'action-1',
+              state: 'UPG_FAILED',
+              target_version: '9.1.0',
+              metadata: { reason: 'excludedmarkerreason' },
+            },
+          },
+        });
+      });
+
+      after(async () => {
+        await es.delete({ index: AGENTS_INDEX, id: agentId, refresh: 'wait_for' });
+      });
+
+      const searchAgentIds = async (kuery: string): Promise<string[]> => {
+        const { body: apiResponse } = await supertest
+          .get(`/api/fleet/agents?kuery=${encodeURIComponent(kuery)}`)
+          .expect(200);
+        return apiResponse.items.map(({ id }: Agent) => id);
+      };
+
+      it('should match free text on a queryable agent field', async () => {
+        expect(await searchAgentIds('allowedmarkerhost')).to.eql([agentId]);
+        expect(await searchAgentIds('allowedmarker*')).to.eql([agentId]);
+      });
+
+      it('should not match free text on a field outside the queryable agent fields', async () => {
+        expect(await searchAgentIds('excludedmarkerreason')).to.eql([]);
+        expect(await searchAgentIds('excludedmarker*')).to.eql([]);
+      });
+    });
+
     it('should return a 400 when given an invalid "sortField" value', async () => {
       await supertest
         .get(`/api/fleet/agents?sortField=invalid_field`)
