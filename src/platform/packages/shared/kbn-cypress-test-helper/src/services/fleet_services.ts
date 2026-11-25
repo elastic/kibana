@@ -8,7 +8,7 @@
  */
 
 import { memoize } from 'lodash';
-import type { KbnClient } from '@kbn/kbn-client';
+import type { KbnClient } from '@kbn/test';
 import { catchAxiosErrorFormatAndThrow } from '../error';
 
 /**

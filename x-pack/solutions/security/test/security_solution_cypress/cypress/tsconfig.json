@@ -18,7 +18,7 @@
     "@kbn/core-http-common",
     "@kbn/data-views-plugin",
     "@kbn/es-archiver",
-    "@kbn/kbn-client",
+    "@kbn/test",
     "@kbn/tooling-log",
     "@kbn/fleet-plugin",
     "@kbn/cases-components",

@@ -7,8 +7,8 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import type { HostOptions } from '@kbn/test-saml-auth';
-import { SamlSessionManager } from '@kbn/test-saml-auth';
+import type { HostOptions } from '@kbn/test';
+import { SamlSessionManager } from '@kbn/test';
 import type { SecurityRoleName } from '../../../../common/test';
 import { resolveCloudUsersFilePath } from '../../../../scripts/endpoint/common/roles_users/serverless';
 
