@@ -6,11 +6,11 @@
  */
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { setupTestServers } from './lib';
-import type { RuleTypeRegistry } from '../rule_type_registry';
+import { setupTestServers } from '../lib';
+import type { RuleTypeRegistry } from '../../rule_type_registry';
 
-jest.mock('../rule_type_registry', () => {
-  const actual = jest.requireActual('../rule_type_registry');
+jest.mock('../../rule_type_registry', () => {
+  const actual = jest.requireActual('../../rule_type_registry');
   return {
     ...actual,
     RuleTypeRegistry: jest.fn().mockImplementation((opts) => {
@@ -78,7 +78,7 @@ describe('Alert as data fields checks', () => {
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
 
-    const mockedRuleTypeRegistry = jest.requireMock('../rule_type_registry');
+    const mockedRuleTypeRegistry = jest.requireMock('../../rule_type_registry');
     expect(mockedRuleTypeRegistry.RuleTypeRegistry).toHaveBeenCalledTimes(1);
     ruleTypeRegistry = mockedRuleTypeRegistry.RuleTypeRegistry.mock.results[0].value;
   });
