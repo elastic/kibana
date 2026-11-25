@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { App } from './components/app';
+import { App } from './components/external_inference/app';
 import { useBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useKibana } from './hooks/use_kibana';
 import { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
