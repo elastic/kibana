@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ActiveConversation, AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { AnalyticsServiceStart } from '@kbn/core/public';
+import type { AnalyticsServiceStart, NotificationsStart } from '@kbn/core/public';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_PANEL_ATTACHMENT_TYPE,
@@ -68,6 +68,7 @@ export interface DashboardAddToChatActionDeps {
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
   stagedDashboards: StagedDashboards;
+  toasts: NotificationsStart['toasts'];
 }
 
 type ConversationDashboardAttachment = VersionedAttachment<
@@ -166,6 +167,7 @@ export const createDashboardAddToChatAction = (
     canWriteDashboards,
     draftAttachmentId,
     stagedDashboards,
+    toasts,
   } = deps;
 
   const getPointableDashboard = async (embeddable: unknown): Promise<DashboardApi | undefined> => {
@@ -293,6 +295,14 @@ export const createDashboardAddToChatAction = (
         }
       }
       if (!resolved) {
+        toasts.addWarning({
+          title: i18n.translate('xpack.agentBuilderDashboards.addToChat.conversationChangedTitle', {
+            defaultMessage: "Couldn't add the panel to the chat",
+          }),
+          text: i18n.translate('xpack.agentBuilderDashboards.addToChat.conversationChangedText', {
+            defaultMessage: 'The conversation changed while the panel was being added. Try again.',
+          }),
+        });
         return;
       }
       const {

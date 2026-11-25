@@ -144,6 +144,7 @@ const createAction = ({
     canWriteDashboards,
     draftAttachmentId,
     stagedDashboards: createStagedDashboards(),
+    toasts: { addWarning: jest.fn() } as unknown as DashboardAddToChatActionDeps['toasts'],
   });
   return { action, dashboardApi, openChat, addAttachment, reportEvent };
 };

@@ -90,6 +90,7 @@ export class AgentBuilderDashboardsPlugin
           canWriteDashboards,
           draftAttachmentId,
           stagedDashboards,
+          toasts: core.notifications.toasts,
         });
       });
       plugins.uiActions.attachAction(ON_OPEN_PANEL_MENU, ADD_TO_CHAT_ACTION_ID);
