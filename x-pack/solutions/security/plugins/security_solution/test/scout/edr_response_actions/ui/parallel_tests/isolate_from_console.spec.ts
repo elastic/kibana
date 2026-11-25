@@ -10,15 +10,17 @@ import { spaceTest, tags } from '../fixtures';
 import { captureEndpointAction } from '../fixtures/page_objects/host_isolation_form';
 import { seedEndpointHosts, type SeededEndpointHosts } from '../../common/seed_endpoint_hosts';
 import {
-  completeHostAction,
+  completeHostIsolationAction,
   deleteSubmittedHostActions,
-  waitForHostIsolation,
+  HOST_ISOLATION_LOCK_WAIT_MS,
 } from '../../common/complete_host_action';
 import { PARALLEL_HOST_SEED_TIMEOUT_MS, requireHost } from '../../common/get_file_spec_helpers';
 import { runCleanups } from '../../common/run_cleanups';
 
-// Submit, the action-details poll, the agent-status poll and the list reload do not fit in the default 60s.
-const ISOLATE_FLOW_TIMEOUT_MS = 240_000;
+// Submit, the action-details poll, the agent-status poll and the list reload do not fit in the
+// default 60s. Completing the action can first wait for the other worker's host seed to release
+// the metadata-transform lock.
+const ISOLATE_FLOW_TIMEOUT_MS = HOST_ISOLATION_LOCK_WAIT_MS + 240_000;
 
 spaceTest.describe(
   'Response console isolate from the endpoint list',
@@ -87,20 +89,22 @@ spaceTest.describe(
         });
 
         await spaceTest.step('the agent response completes the action', async () => {
-          await completeHostAction({ esClient, config, action });
+          // Returns once agent status reports the host isolated: the endpoint list reads it
+          // once on load, so the reload below shows the new state.
+          await completeHostIsolationAction({
+            esClient,
+            kbnClient,
+            config,
+            spaceId: scoutSpace.id,
+            agentId: host.agentId,
+            action,
+          });
           await expect(responseConsole.hostStatusFor('isolate', 'success')).toHaveText(
             'isolate completed successfully'
           );
         });
 
         await spaceTest.step('the endpoint list shows the host as isolated', async () => {
-          // The list reads agent status once on load; reload only after it reports isolated.
-          await waitForHostIsolation({
-            kbnClient,
-            spaceId: scoutSpace.id,
-            agentId: host.agentId,
-            isolated: true,
-          });
           await endpointList.goto();
           await expect(endpointList.actionStatusesFor(host.hostname)).toHaveText('Isolated');
         });
