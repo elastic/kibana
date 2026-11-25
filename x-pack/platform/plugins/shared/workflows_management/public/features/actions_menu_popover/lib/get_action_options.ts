@@ -11,7 +11,7 @@ import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { HardcodedIcons, ParallelIcon } from '@kbn/workflows-ui';
 import { buildBuiltInTriggerOptions, buildRegisteredTriggerOptions } from './build_trigger_options';
-import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
+import { getAllConnectors, getStepExposure, isDeprecatedStepType } from '../../../../common/schema';
 import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData, IconVariant } from '../types';
@@ -70,7 +70,14 @@ function firstSentence(text: string | undefined): string | undefined {
 function getBuiltInNestedFlowControlStepOptions(
   euiTheme: UseEuiTheme['euiTheme']
 ): ActionOptionData[] {
-  return (['waitForApproval', 'workflow.execute', 'workflow.executeAsync'] as const)
+  return (
+    [
+      'waitForApproval',
+      'workflow.execute',
+      'workflow.executeAsync',
+      'workflow.awaitExecutions',
+    ] as const
+  )
     .map((stepId) => getBuiltInStepDefinition(stepId))
     .filter((def): def is NonNullable<typeof def> => def !== undefined)
     .map((def) => ({
@@ -385,7 +392,7 @@ export function getActionOptions(
   const baseTypeInstancesCount: Record<string, number> = {};
 
   for (const connector of connectors) {
-    if (!isDeprecatedStepType(connector.type)) {
+    if (!isDeprecatedStepType(connector.type) && getStepExposure(connector.type) === 'open') {
       const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
       if (customStepDefinition) {
         const group = stepGroups[customStepDefinition.category];

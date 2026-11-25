@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { EuiSelectableProps } from '@elastic/eui';
 import React from 'react';
-import type { ShallowWrapper } from 'enzyme';
-import { shallow, mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 
 import { SortFieldTimelineEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';
@@ -33,41 +31,20 @@ describe('SelectableTimeline', () => {
   };
 
   describe('should render', () => {
-    let wrapper: ShallowWrapper;
-
-    describe('timeline', () => {
-      beforeAll(() => {
-        wrapper = shallow(<SelectableTimeline {...props} />);
-      });
-
-      afterAll(() => {
-        jest.clearAllMocks();
-      });
-
-      test('render placeholder', () => {
-        const searchProps: EuiSelectableProps['searchProps'] = wrapper
-          .find('[data-test-subj="selectable-input"]')
-          .prop('searchProps');
-        expect(searchProps?.placeholder).toEqual('e.g. Timeline name or description');
-      });
+    afterEach(() => {
+      jest.clearAllMocks();
     });
 
-    describe('timeline template', () => {
-      const templateTimelineProps = { ...props, timelineType: TimelineTypeEnum.template };
-      beforeAll(() => {
-        wrapper = shallow(<SelectableTimeline {...templateTimelineProps} />);
-      });
+    test('timeline: render placeholder', () => {
+      render(<SelectableTimeline {...props} />);
+      expect(screen.getByPlaceholderText('e.g. Timeline name or description')).toBeInTheDocument();
+    });
 
-      afterAll(() => {
-        jest.clearAllMocks();
-      });
-
-      test('render placeholder', () => {
-        const searchProps: EuiSelectableProps['searchProps'] = wrapper
-          .find('[data-test-subj="selectable-input"]')
-          .prop('searchProps');
-        expect(searchProps?.placeholder).toEqual('e.g. Timeline template name or description');
-      });
+    test('timeline template: render placeholder', () => {
+      render(<SelectableTimeline {...props} timelineType={TimelineTypeEnum.template} />);
+      expect(
+        screen.getByPlaceholderText('e.g. Timeline template name or description')
+      ).toBeInTheDocument();
     });
   });
 
@@ -87,7 +64,7 @@ describe('SelectableTimeline', () => {
       timelineType: TimelineTypeEnum.default,
     };
     beforeAll(() => {
-      mount(<SelectableTimeline {...props} />);
+      render(<SelectableTimeline {...props} />);
     });
 
     afterAll(() => {

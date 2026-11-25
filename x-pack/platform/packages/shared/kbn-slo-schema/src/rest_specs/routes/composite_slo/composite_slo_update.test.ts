@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Duration, DurationUnit } from '../../../models/duration';
 import { updateCompositeSLOParamsSchema } from './composite_slo_update';
 
 const buildRequest = (members?: Array<{ sloId: string; weight: number; instanceId?: string }>) => ({
@@ -25,6 +26,16 @@ describe('UpdateCompositeSLO schema validation', () => {
 
     expect(parse(valid).success).toBe(true);
     expect(parse(tooLong).success).toBe(false);
+  });
+
+  it('decodes the time window duration into a Duration', () => {
+    const result = updateCompositeSLOParamsSchema.parse({
+      path: { id: 'composite-slo-id' },
+      body: { timeWindow: { duration: '7d', type: 'rolling' } },
+    });
+
+    expect(result.body.timeWindow?.duration).toBeInstanceOf(Duration);
+    expect(result.body.timeWindow?.duration.isEqual(new Duration(7, DurationUnit.Day))).toBe(true);
   });
 
   it('accepts a request without members', () => {

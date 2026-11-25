@@ -41,6 +41,7 @@ import {
   setActiveTab,
   setExecution,
   setIsTestModalOpen,
+  setRemixTemplate,
   setReplayExecutionId,
 } from '../../../entities/workflows/store';
 import {
@@ -54,6 +55,7 @@ import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowChangeHistoryProvider } from '../../../features/change_history';
+import { getRecentlyViewedWorkflowPath } from '../../../features/recently_viewed_workflows/model/recently_viewed_workflows';
 import { WorkflowDependentsProvider } from '../../../features/workflow_dependents/ui/workflow_dependents_provider';
 import { WorkflowExecutionFlyout } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail_old';
@@ -99,7 +101,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const [loadWorkflow, { isLoading: isLoadingWorkflow, error }] =
     useAsyncThunkState(loadWorkflowThunk);
   const telemetry = useTelemetry();
-  const { application } = useKibana().services;
+  const { application, workflowsManagement } = useKibana().services;
   const location = useLocation<WorkflowDetailLocationState | undefined>();
   const { euiTheme } = useEuiTheme();
 
@@ -152,6 +154,13 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     }
   }, [isReady, workflowId, activeTab, telemetry]);
 
+  // The store still holds the previous workflow until the new one loads.
+  useEffect(() => {
+    if (id && workflowId === id && workflowName) {
+      workflowsManagement.recentlyViewed.add(getRecentlyViewedWorkflowPath(id), workflowName, id);
+    }
+  }, [id, workflowId, workflowName, workflowsManagement.recentlyViewed]);
+
   useEffect(() => {
     loadConnectors(); // dispatch load connectors on mount
     loadWorkflows(); // dispatch load workflows on mount
@@ -178,7 +187,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // history entry, not the URL, so plain `/create` links and shared URLs
   // fall back to the default YAML. The effect below depends on this value, not
   // on `location.state`, which `useWorkflowUrlState` rewrites on URL updates.
-  const { initialYaml } = location.state ?? {};
+  // A remix also hands over its template, recorded on save as the template origin.
+  const { initialYaml, template: remixTemplate } = location.state ?? {};
+  const remixTemplateSlug = remixTemplate?.slug;
+  const remixTemplateVersion = remixTemplate?.version;
 
   // Load workflow when id changes; seed create once.
   useEffect(() => {
@@ -198,10 +210,18 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     dispatch(
       seedCreateYaml(initialYaml || (isVisual ? workflowDefaultYaml : workflowYamlEditorSeedYaml))
     );
+    // Reset on every create session, so a plain create never inherits an earlier remix.
+    dispatch(
+      setRemixTemplate(
+        initialYaml && remixTemplateSlug && remixTemplateVersion
+          ? { slug: remixTemplateSlug, version: remixTemplateVersion }
+          : undefined
+      )
+    );
     telemetry.reportWorkflowCreateOpened({
       editorType: isVisual && editorViewRef.current === 'graph' ? 'visual' : 'yaml',
     });
-  }, [loadWorkflow, id, dispatch, telemetry, initialYaml]);
+  }, [loadWorkflow, id, dispatch, telemetry, initialYaml, remixTemplateSlug, remixTemplateVersion]);
 
   // The store tab picks what the editor shows: a run snapshot only once a run is selected.
   // The open execution list alone keeps the editable draft.

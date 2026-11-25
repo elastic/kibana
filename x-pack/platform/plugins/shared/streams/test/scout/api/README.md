@@ -26,7 +26,7 @@ api/
 │   └── streams_api_service.ts   # Streams API helper service
 └── tests/
     ├── global.setup.ts          # Global setup (enables Streams)
-    ├── streams/                 # Processing, routing, schema, lifecycle, query streams
+    ├── streams/                 # Processing, routing, schema, lifecycle
     ├── lifecycle/               # Failure store, ILM stats/policies, snapshot repositories
     └── data_quality/            # Doc counts (total, ingestion, degraded, failed)
 ```

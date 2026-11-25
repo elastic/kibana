@@ -15,7 +15,7 @@ import type { GetStepPropertyHandler } from './suggestions/step_property/get_ste
 import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
 import type { WorkflowEsqlCompletionServices } from './suggestions/workflow_esql_completion_services';
 import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
-import { isDeprecatedStepType } from '../../../../../common/schema';
+import { getStepExposure, isDeprecatedStepType } from '../../../../../common/schema';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 import { resolveFocusForLine } from '../../../../entities/workflows/store/workflow_detail/utils/trigger_finder';
 import {
@@ -122,8 +122,16 @@ function getDeduplicationKey(suggestion: monaco.languages.CompletionItem): strin
 }
 
 /**
+ * Deprecated step types and steps that aren't `open` (`internal`, `managed_only`)
+ * still validate, but users shouldn't be nudged toward them, so they are never suggested.
+ */
+function isSuggestableKey(key: string): boolean {
+  return !isDeprecatedStepType(key) && getStepExposure(key) === 'open';
+}
+
+/**
  * Add suggestions to a deduplicated map, preferring suggestions with snippets over plain text.
- * Filters out deprecated step types so they don't appear in autocomplete.
+ * Filters out deprecated, internal and managed-only step types so they don't appear in autocomplete.
  */
 function mapSuggestions(
   map: Map<string, monaco.languages.CompletionItem>,
@@ -132,9 +140,7 @@ function mapSuggestions(
   for (const suggestion of suggestions) {
     const key = getDeduplicationKey(suggestion);
 
-    // Skip deprecated step types - they still work for backward compatibility
-    // but we don't want to suggest them to users
-    if (!isDeprecatedStepType(key)) {
+    if (isSuggestableKey(key)) {
       const existing = map.get(key);
 
       if (existing) {
@@ -251,7 +257,7 @@ export function getCompletionItemProvider(
     // Workflow suggestions always win over YAML duplicates.
     for (const suggestion of workflowSuggestions) {
       const key = getDeduplicationKey(suggestion);
-      if (!isDeprecatedStepType(key)) {
+      if (isSuggestableKey(key)) {
         deduplicatedMap.set(key, suggestion);
       }
     }

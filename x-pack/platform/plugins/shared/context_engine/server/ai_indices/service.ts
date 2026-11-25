@@ -104,6 +104,11 @@ const keptFields = (
 
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
 
+export interface AiIndexSpendTarget {
+  id: string;
+  automationWorkflowIds: string[];
+}
+
 export interface AiIndexManagedBootstrap {
   isManaged: (id: string) => boolean;
   getManagedIds: () => string[];
@@ -348,6 +353,29 @@ export class AiIndexService {
     await this.writeDocument(aiIndexId, spaceId, { ...existing.document, dreaming }, existing);
 
     return dreaming;
+  }
+
+  /** Every AI index in the space with the workflow ids of its automations, for spend attribution. */
+  async listSpendTargets(spaceId: string): Promise<AiIndexSpendTarget[]> {
+    const response = await this.storageClient.search({
+      size: MAX_AI_INDICES,
+      track_total_hits: false,
+      query: createSpaceDslFilter(spaceId),
+    });
+    return response.hits.hits.flatMap((hit) => {
+      if (!hit._source || hit._id === undefined) {
+        return [];
+      }
+      const document = toAiIndexDocument(hit._source, hit._id);
+      return [
+        {
+          id: document.id,
+          automationWorkflowIds: document.automations
+            .filter(({ type }) => type === 'workflow')
+            .map(({ value }) => value),
+        },
+      ];
+    });
   }
 
   async get(aiIndexId: string, spaceId: string): Promise<AiIndexItem> {
