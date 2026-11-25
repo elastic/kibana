@@ -31,7 +31,7 @@ import type {
   RunEsql,
   TraceSource,
 } from '../types';
-import { LATENCY_MAP_INNER_ROWS, durationToRow, rowToDuration } from '../query/duration_rows';
+import { LATENCY_MAP_INNER_ROWS, rowToDuration } from '../query/duration_rows';
 import { getMapSource } from '../query/latency_map_query';
 import { getCellKey } from '../query/parse';
 import { getTimeGridKey } from '../query/time_grid';
@@ -53,13 +53,14 @@ import type { DurationBand } from '../operations/detect_bands';
 import { getKeyboardRange, reduceKeyboard } from '../selection/keyboard';
 import type { KeyboardState } from '../selection/keyboard';
 import { getGridTotals, getSelectionCounts, isFailureRegion } from '../selection/counts';
+import { findSlowestPercentile, getSlowestRange } from '../selection/slowest';
+import type { SlowestPercentile } from '../selection/slowest';
 import { selectionToEsqlCondition } from '../selection/to_esql';
 import { BandMarkers } from './band_markers';
 import { CellDetails } from './cell_details';
 import { LatencyHeatmap } from './latency_heatmap';
 import { LatencyMapLegend } from './legend';
-import { MapHeader, percentileDuration } from './map_header';
-import type { SlowestPercentile } from './map_header';
+import { MapHeader } from './map_header';
 import { SelectionSummary } from './selection_summary';
 import { SelectionOverlay } from './selection_overlay';
 import { getCountText, getSlowestLabel } from './unit_text';
@@ -519,16 +520,7 @@ export function LatencyMap({
   const selectSlowest = (percentile: SlowestPercentile) => {
     if (!geometry || !stats) return;
     setChosenSlowest(percentile);
-    const row = Math.floor(durationToRow(percentileDuration(stats, percentile), stats));
-    commitRange(
-      {
-        x0: 0,
-        x1: geometry.bins,
-        y0: Math.min(geometry.rows - 1, Math.max(0, row)),
-        y1: geometry.rows,
-      },
-      getSlowestLabel(unit, percentile)
-    );
+    commitRange(getSlowestRange(stats, percentile, geometry), getSlowestLabel(unit, percentile));
   };
 
   const changeFailedOnly = (next: boolean) => {
@@ -801,29 +793,15 @@ export function LatencyMap({
     />
   );
 
-  // The slowest shortcut the committed selection matches, shown on the menu's button. The
-  // same snapping `selectSlowest` writes. Percentiles that coincide on the same rows (a spike
-  // holding most spans) all match: the one the user picked wins, so the menu answers the
-  // click even when the query it commits is unchanged; without a pick (a restored URL), the
-  // higher percentile is named.
-  const activeSlowest = useMemo((): SlowestPercentile | undefined => {
-    if (!committedRange || !geometry || !stats) return undefined;
-    if (
-      committedRange.x0 !== 0 ||
-      committedRange.x1 !== geometry.bins ||
-      committedRange.y1 !== geometry.rows
-    ) {
-      return undefined;
-    }
-    const matches = ([99, 95, 90] as SlowestPercentile[]).filter((percentile) => {
-      const row = Math.min(
-        geometry.rows - 1,
-        Math.max(0, Math.floor(durationToRow(percentileDuration(stats, percentile), stats)))
-      );
-      return committedRange.y0 === row;
-    });
-    return chosenSlowest && matches.includes(chosenSlowest) ? chosenSlowest : matches[0];
-  }, [committedRange, geometry, stats, chosenSlowest]);
+  // The slowest shortcut the committed selection matches, shown on the menu's button: the
+  // percentile the user picked on the menu when several coincide on the same rows.
+  const activeSlowest = useMemo(
+    () =>
+      committedRange && geometry && stats
+        ? findSlowestPercentile(committedRange, stats, geometry, chosenSlowest)
+        : undefined,
+    [committedRange, geometry, stats, chosenSlowest]
+  );
 
   return (
     <div

@@ -27,13 +27,9 @@ import type { DurationStats } from '../types';
 import type { MapSampling } from '../query/latency_map_query';
 import type { LatencyMapOperation, OperationBands } from '../operations/operation_bands';
 import { formatDuration, formatShare } from '../geometry/ticks';
+import { SLOWEST_PERCENTILES, percentileDuration } from '../selection/slowest';
+import type { SlowestPercentile } from '../selection/slowest';
 import { DurationGroupsPicker } from './duration_groups_picker';
-
-export type SlowestPercentile = 90 | 95 | 99;
-export const SLOWEST_PERCENTILES: SlowestPercentile[] = [90, 95, 99];
-
-export const percentileDuration = (stats: DurationStats, percentile: SlowestPercentile) =>
-  percentile === 99 ? stats.p99 : percentile === 95 ? stats.p95 : stats.p90;
 
 /** Says what a sampled map draws exactly and what it estimates. */
 function SamplingNote({ stats, sampling }: { stats: DurationStats; sampling: MapSampling }) {
