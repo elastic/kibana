@@ -6,9 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+
+const rejectForwardSlash = (name: string) =>
+  name.includes('/')
+    ? i18n.translate('xpack.idxMgmt.componentTemplates.validation.nameForwardSlashError', {
+        defaultMessage: 'A component template name must not contain the character "/"',
+      })
+    : undefined;
+
+export const componentTemplateNameSchema = schema.string({
+  maxLength: 1000,
+  validate: rejectForwardSlash,
+});
 
 export const componentTemplateSchema = schema.object({
-  name: schema.string({ maxLength: 1000 }),
+  name: componentTemplateNameSchema,
   template: schema.object({
     settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     aliases: schema.maybe(schema.object({}, { unknowns: 'allow' })),

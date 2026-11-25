@@ -11,8 +11,9 @@ import type { ValidationFunc } from '../../hook_form_lib';
 import type { ERROR_CODE } from './types';
 
 /**
- * Matches Elasticsearch `MetadataIndexTemplateService#validate(...)` name checks:
- * - must not contain: space, ",", "#", "*"
+ * Matches Elasticsearch `MetadataIndexTemplateService#validate(...)` name checks
+ * and prevents path-breaking forward slashes:
+ * - must not contain: space, ",", "#", "*", "/"
  * - must not start with "_"
  * - must be lower cased
  */
@@ -62,6 +63,19 @@ export const indexTemplateNameField =
         message: i18n.translate('esUi.forms.fieldValidation.indexTemplateName.asteriskError', {
           defaultMessage: "Name must not contain a '*'.",
         }),
+      };
+    }
+
+    if (value.includes('/')) {
+      return {
+        code: 'ERR_FIELD_FORMAT',
+        formatType: 'INDEX_TEMPLATE_NAME',
+        message: i18n.translate(
+          'esUi.forms.fieldValidation.indexTemplateName.forwardSlashError',
+          {
+            defaultMessage: "Name must not contain a '/'.",
+          }
+        ),
       };
     }
 

@@ -67,6 +67,14 @@ describe('indexTemplateNameField', () => {
     });
   });
 
+  test('should error when name contains a forward slash', () => {
+    expect(validate('a/b')).toMatchObject({
+      code: 'ERR_FIELD_FORMAT',
+      formatType: 'INDEX_TEMPLATE_NAME',
+      message: "Name must not contain a '/'.",
+    });
+  });
+
   test('should error when name starts with underscore', () => {
     expect(validate('_starts_with_underscore')).toMatchObject({
       code: 'ERR_FIELD_FORMAT',
