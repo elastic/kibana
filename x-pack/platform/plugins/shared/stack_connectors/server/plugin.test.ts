@@ -57,7 +57,7 @@ describe('Stack Connectors Plugin', () => {
           (!spec.signingKey ||
             Boolean(actionsConfigurationUtilities.isConnectorSigningKeysEnabled()))
       );
-      const builtInConnectorTypesCount = 18;
+      const builtInConnectorTypesCount = 19;
 
       expect(actionsSetup.registerType).toHaveBeenCalledTimes(
         builtInConnectorTypesCount + specConnectorTypes.length
@@ -179,6 +179,13 @@ describe('Stack Connectors Plugin', () => {
         expect.objectContaining({
           id: '.torq',
           name: 'Torq',
+        })
+      );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        19,
+        expect.objectContaining({
+          id: '.rootly_alerts',
+          name: 'Rootly Alerts',
         })
       );
 

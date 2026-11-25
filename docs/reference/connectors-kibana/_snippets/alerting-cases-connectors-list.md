@@ -9,6 +9,7 @@
 * [Microsoft Teams](/reference/connectors-kibana/teams-action-type.md): Send a message to a Microsoft Teams channel.
 * [{{opsgenie}}](/reference/connectors-kibana/opsgenie-action-type.md): Create or close an alert in {{opsgenie}}.
 * [PagerDuty](/reference/connectors-kibana/pagerduty-action-type.md): Send an event in PagerDuty.
+* [Rootly Alerts](/reference/connectors-kibana/rootly-alerts-action-type.md): Send an alert to Rootly.
 * [SentinelOne](/reference/connectors-kibana/sentinelone-action-type.md): Send a request to SentinelOne.
 * [{{sn-itsm}}](/reference/connectors-kibana/servicenow-action-type.md): Create an incident in {{sn}}.
 * [{{sn-itom}}](/reference/connectors-kibana/servicenow-itom-action-type.md): Create an event in {{sn}}.

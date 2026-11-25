@@ -118,6 +118,7 @@ Documents are indexed using a preconfigured schema that captures the [action var
 * [Microsoft Teams connectors](#preconfigured-teams-configuration)
 * [{{opsgenie}} connectors](#preconfigured-opsgenie-configuration)
 * [PagerDuty connectors](#preconfigured-pagerduty-configuration)
+* [Rootly Alerts connectors](#preconfigured-rootly-alerts-configuration)
 * [Server log connectors](#preconfigured-server-log-configuration)
 * [{{sn-itom}} connectors](#preconfigured-servicenow-itom-configuration)
 * [{{sn-itsm}} connectors](#preconfigured-servicenow-configuration)
@@ -457,6 +458,25 @@ xpack.actions.preconfigured:
 1. The PagerDuty event URL.
 2. A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
+
+
+### Rootly Alerts connectors [preconfigured-rootly-alerts-configuration]
+
+The following example creates a [Rootly Alerts connector](/reference/connectors-kibana/rootly-alerts-action-type.md):
+
+```text
+xpack.actions.preconfigured:
+  my-rootly-alerts:
+    name: preconfigured-rootly-alerts-connector-type
+    actionTypeId: .rootly_alerts
+    config:
+      webhookUrl: <ROOTLY_ALERT_SOURCE_WEBHOOK_URL> <1>
+    secrets:
+      secret: myrootlysecret <2>
+```
+
+1. The webhook URL of the Rootly alert source, without the secret.
+2. The secret of the Rootly alert source.
 
 
 ### Server log connectors [preconfigured-server-log-configuration]

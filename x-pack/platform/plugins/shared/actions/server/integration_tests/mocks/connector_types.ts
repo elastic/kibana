@@ -22,6 +22,7 @@ export const connectorTypes: string[] = [
   '.jira',
   '.teams',
   '.torq',
+  '.rootly_alerts',
   '.opsgenie',
   '.jira-service-management',
   '.mcp',

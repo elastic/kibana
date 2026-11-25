@@ -13,6 +13,7 @@ enum:
   - .opsgenie
   - .pagerduty
   - .resilient
+  - .rootly_alerts
   - .sentinelone
   - .servicenow
   - .servicenow-itom

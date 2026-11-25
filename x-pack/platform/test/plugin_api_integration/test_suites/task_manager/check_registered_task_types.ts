@@ -99,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.opsgenie',
         'actions:.pagerduty',
         'actions:.resilient',
+        'actions:.rootly_alerts',
         `actions:.sentinelone`,
         'actions:.server-log',
         'actions:.servicenow',

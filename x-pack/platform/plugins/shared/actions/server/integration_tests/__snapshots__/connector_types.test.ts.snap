@@ -2573,6 +2573,162 @@ Object {
 }
 `;
 
+exports[`Connector type config checks detect connector type changes for: .rootly_alerts 1`] = `
+Object {
+  "additionalProperties": false,
+  "properties": Object {
+    "webhookUrl": Object {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "webhookUrl",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .rootly_alerts 2`] = `
+Object {
+  "additionalProperties": false,
+  "properties": Object {
+    "secret": Object {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "secret",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .rootly_alerts 3`] = `
+Object {
+  "additionalProperties": false,
+  "properties": Object {
+    "alertId": Object {
+      "type": "string",
+    },
+    "customDetails": Object {
+      "type": "string",
+    },
+    "dedupKey": Object {
+      "type": "string",
+    },
+    "description": Object {
+      "type": "string",
+    },
+    "evaluationTime": Object {
+      "type": "string",
+    },
+    "event": Object {
+      "enum": Array [
+        "trigger",
+        "resolve",
+      ],
+      "type": "string",
+    },
+    "labels": Object {
+      "items": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "key": Object {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string",
+          },
+          "value": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "key",
+          "value",
+        ],
+        "type": "object",
+      },
+      "maxItems": 100,
+      "type": "array",
+    },
+    "match": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "catalog": Object {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string",
+        },
+        "on": Object {
+          "enum": Array [
+            "service",
+            "team",
+            "functionality",
+            "catalog",
+            "custom",
+          ],
+          "type": "string",
+        },
+        "value": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "on",
+      ],
+      "type": "object",
+    },
+    "ruleId": Object {
+      "type": "string",
+    },
+    "ruleName": Object {
+      "type": "string",
+    },
+    "space": Object {
+      "type": "string",
+    },
+    "target": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "id": Object {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string",
+        },
+        "type": Object {
+          "enum": Array [
+            "service",
+            "team",
+            "escalation_policy",
+            "user",
+            "functionality",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "type",
+      ],
+      "type": "object",
+    },
+    "title": Object {
+      "type": "string",
+    },
+    "urgency": Object {
+      "type": "string",
+    },
+    "url": Object {
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
 exports[`Connector type config checks detect connector type changes for: .sentinelone 1`] = `
 Object {
   "additionalProperties": false,

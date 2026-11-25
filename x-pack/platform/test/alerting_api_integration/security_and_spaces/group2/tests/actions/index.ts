@@ -43,5 +43,6 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/openai'));
     loadTestFile(require.resolve('./connector_types/opsgenie'));
     loadTestFile(require.resolve('./connector_types/pagerduty'));
+    loadTestFile(require.resolve('./connector_types/rootly_alerts'));
   });
 }
