@@ -169,6 +169,25 @@ export const fillMissingHeatmapYBuckets = (
   const presentIndexSet = new Set(presentIndexes);
   const yIsRange = typeof template[yAccessor] === 'string';
   const inserted = new Set<number>();
+  let coveredSpans: Array<{ low: number; high: number }> = [];
+  const spanIsCovered = (low: number, high: number) =>
+    coveredSpans.some((span) => span.low <= low && span.high >= high);
+  const coverSpan = (low: number, high: number) => {
+    let mergedLow = low;
+    let mergedHigh = high;
+    const remaining: Array<{ low: number; high: number }> = [];
+    for (const span of coveredSpans) {
+      if (span.high < mergedLow || span.low > mergedHigh) {
+        remaining.push(span);
+        continue;
+      }
+      mergedLow = Math.min(mergedLow, span.low);
+      mergedHigh = Math.max(mergedHigh, span.high);
+    }
+    remaining.push({ low: mergedLow, high: mergedHigh });
+    coveredSpans = remaining;
+  };
+
   const filled: Datatable['rows'] = [];
   let previousIndex: number | undefined;
   for (let position = 0; position < rows.length; position++) {
@@ -176,20 +195,26 @@ export const fillMissingHeatmapYBuckets = (
     const index = rowIndexes[position];
     // Place each missing step between the buckets that surround it, following the
     // direction of the rows. The first histogram row is already written by then, so
-    // the copied X value is on the axis and X order stays unchanged.
+    // the copied X value is on the axis and X order stays unchanged. A span that was
+    // already walked, including the same gap crossed once per X value, is skipped.
     if (index != null && previousIndex != null && index !== previousIndex) {
-      const step = index > previousIndex ? 1 : -1;
-      for (let bucketIndex = previousIndex + step; bucketIndex !== index; bucketIndex += step) {
-        if (presentIndexSet.has(bucketIndex) || inserted.has(bucketIndex)) {
-          continue;
+      const low = Math.min(previousIndex, index);
+      const high = Math.max(previousIndex, index);
+      if (high - low > 1 && !spanIsCovered(low, high)) {
+        const step = index > previousIndex ? 1 : -1;
+        for (let bucketIndex = previousIndex + step; bucketIndex !== index; bucketIndex += step) {
+          if (presentIndexSet.has(bucketIndex) || inserted.has(bucketIndex)) {
+            continue;
+          }
+          inserted.add(bucketIndex);
+          const lower = bucketIndex * interval;
+          filled.push({
+            ...template,
+            [yAccessor]: yIsRange ? `${lower}..${(bucketIndex + 1) * interval}` : lower,
+            [valueAccessor]: null,
+          });
         }
-        inserted.add(bucketIndex);
-        const lower = bucketIndex * interval;
-        filled.push({
-          ...template,
-          [yAccessor]: yIsRange ? `${lower}..${(bucketIndex + 1) * interval}` : lower,
-          [valueAccessor]: null,
-        });
+        coverSpan(low, high);
       }
     }
     filled.push(row);

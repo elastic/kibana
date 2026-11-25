@@ -361,6 +361,21 @@ describe('fillMissingHeatmapYBuckets', () => {
     expect(firstAppearance(filled, 'x')).toEqual(['a', 'b']);
   });
 
+  it('fills a gap once when later X values cross the same Y buckets', () => {
+    const rows = [
+      { x: 'a', y: 0, value: 1 },
+      { x: 'a', y: 3, value: 2 },
+      { x: 'b', y: 0, value: 3 },
+      { x: 'b', y: 3, value: 4 },
+    ];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(filled.map((entry) => entry.y)).toEqual([0, 1, 2, 3, 0, 3]);
+    expect(filled.filter((entry) => entry.value == null)).toHaveLength(2);
+    expect(firstAppearance(filled, 'x')).toEqual(['a', 'b']);
+    expect(filled.find((entry) => entry.y === 1)).toMatchObject({ x: 'a', value: null });
+  });
+
   it('leaves a NaN Y key in place and still fills a real gap', () => {
     const rows = [
       { x: 'a', y: NaN, value: 9 },
