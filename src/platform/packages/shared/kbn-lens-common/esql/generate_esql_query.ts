@@ -957,7 +957,9 @@ export function generateEsqlQuery(
           );
         } else {
           // Nested Top values: Other on the outer (first) dimension remaps via a typed key;
-          // Other on an inner dimension is gated above.
+          // Other on an inner dimension is gated above, as is any bucket between the two Top
+          // values, so when set this is the only outer bucket and `LIMIT n BY` groups by its
+          // key alone.
           const outerOtherBucket = outerBuckets
             .map(([index, bucketExpr]) => {
               const [, col] = bucketEsAggsEntries[index];
