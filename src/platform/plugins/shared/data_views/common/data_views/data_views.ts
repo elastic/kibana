@@ -99,6 +99,22 @@ export interface DataViewListItem {
 /**
  * Data views API service dependencies
  */
+interface NotFoundLike {
+  name?: string;
+  statusCode?: number;
+  output?: { statusCode?: number };
+  body?: { statusCode?: number };
+}
+
+// Saved object "not found" surfaces differently on server (Boom output) and browser (HTTP / KbnError)
+const isNotFoundError = (e: unknown): boolean => {
+  const err = e as NotFoundLike | null;
+  return (
+    err?.name === 'SavedObjectNotFound' ||
+    [err?.statusCode, err?.output?.statusCode, err?.body?.statusCode].includes(404)
+  );
+};
+
 export interface DataViewsServiceDeps {
   /**
    * UiSettings service instance wrapped in a common interface
@@ -234,7 +250,8 @@ export interface DataViewsServicePublicMethods {
    */
   getDefaultId: () => Promise<string | null>;
   /**
-   * Get default data view, if it doesn't exist, choose and save new default data view and return it.
+   * Get the configured default data view; if none is configured (or it no longer exists), fall back to
+   * the oldest data view. The fallback is NOT persisted, and creating a data view no longer sets the default.
    * @param {Object} options
    * @param {boolean} options.refreshFields - If true, will refresh the fields of the default data view
    * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
@@ -553,11 +570,12 @@ export class DataViewsService {
     if (defaultIndexPatternId) {
       try {
         return await this.get(defaultIndexPatternId, displayErrors);
-      } catch {
+      } catch (e) {
         // The setting may point to a data view which no longer exists,
         // which is not repaired automatically anymore, so a stale default
-        // is treated like no default being configured
-        return null;
+        // is treated like no default being configured. Other errors propagate.
+        if (isNotFoundError(e)) return null;
+        throw e;
       }
     }
     return null;
@@ -1417,12 +1435,14 @@ export class DataViewsService {
     if (!this.savedObjectsCache) {
       await this.refreshSavedObjectsCache();
     }
-    if (!this.savedObjectsCache || this.savedObjectsCache.length === 0) {
+    // local snapshot: clearCache() may null the field while awaiting below
+    const savedObjects = this.savedObjectsCache;
+    if (!savedObjects || savedObjects.length === 0) {
       return null;
     }
     const configuredDefaultId = await this.getDefaultId();
     if (configuredDefaultId) {
-      const exists = this.savedObjectsCache.some((obj) => obj.id === configuredDefaultId);
+      const exists = savedObjects.some((obj) => obj.id === configuredDefaultId);
       if (exists) return configuredDefaultId;
     }
     // On the server the saved objects client returns `created_at`, while in the browser
@@ -1430,7 +1450,7 @@ export class DataViewsService {
     // to keep the fallback consistent across environments
     const getCreatedAt = (savedObject: SavedObject<DataViewSavedObjectAttrs>) =>
       savedObject.created_at ?? (savedObject as { createdAt?: string }).createdAt;
-    const sorted = [...this.savedObjectsCache].sort((a, b) => {
+    const sorted = [...savedObjects].sort((a, b) => {
       const createdAtDiff =
         new Date(getCreatedAt(a) || 0).getTime() - new Date(getCreatedAt(b) || 0).getTime();
       // break ties deterministically (e.g. objects imported in the same bulk request

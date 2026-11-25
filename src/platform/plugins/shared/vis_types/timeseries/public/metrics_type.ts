@@ -52,10 +52,11 @@ export const withReplacedIds = (
 async function withDefaultIndexPattern(
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
 ): Promise<Vis<TimeseriesVisParams>> {
+  if (vis.params.index_pattern) return vis;
   const dataViews = getDataViewsStart();
 
   const defaultIndex = await dataViews.getDefaultDataView();
-  if (!defaultIndex || !defaultIndex.id || vis.params.index_pattern) return vis;
+  if (!defaultIndex || !defaultIndex.id) return vis;
   vis.params.index_pattern = {
     id: defaultIndex.id,
   };

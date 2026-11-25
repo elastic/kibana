@@ -578,6 +578,8 @@ describe('IndexPatterns', () => {
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
     expect(indexPatterns.createSavedObject).toHaveBeenCalled();
+    expect(indexPatterns.setDefault).not.toHaveBeenCalled();
+    expect(uiSettings.set).not.toHaveBeenCalled();
   });
 
   test('createAndSave DataViewLazy', async () => {
@@ -588,6 +590,8 @@ describe('IndexPatterns', () => {
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSaveDataViewLazy({ title });
     expect(indexPatterns.createSavedObject).toHaveBeenCalled();
+    expect(indexPatterns.setDefault).not.toHaveBeenCalled();
+    expect(uiSettings.set).not.toHaveBeenCalled();
   });
 
   test('createAndSave will throw if insufficient access', async () => {
@@ -988,9 +992,18 @@ describe('IndexPatterns', () => {
 
     test('returns null when the configured default no longer exists', async () => {
       uiSettings.get = jest.fn().mockResolvedValue('deleted-id');
-      savedObjectsClient.get = jest.fn().mockRejectedValue(new Error('Not Found'));
+      savedObjectsClient.get = jest
+        .fn()
+        .mockRejectedValue(Object.assign(new Error('Not Found'), { statusCode: 404 }));
 
       expect(await indexPatterns.getDefault()).toBeNull();
+    });
+
+    test('rethrows errors other than not found', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue('some-id');
+      savedObjectsClient.get = jest.fn().mockRejectedValue(new Error('network down'));
+
+      await expect(indexPatterns.getDefault()).rejects.toThrow('network down');
     });
 
     test('returns null when no default is configured', async () => {

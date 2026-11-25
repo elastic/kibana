@@ -8,7 +8,11 @@
  */
 
 import type { ScoutParallelWorkerFixtures } from '@kbn/scout';
-import { CONTEXT_AWARENESS_KBN_ARCHIVE, CONTEXT_AWARENESS_TIME_RANGE } from './constants';
+import {
+  CONTEXT_AWARENESS_DATA_VIEWS,
+  CONTEXT_AWARENESS_KBN_ARCHIVE,
+  CONTEXT_AWARENESS_TIME_RANGE,
+} from './constants';
 
 /**
  * Import the `my-example-*` data views and default Discover to the time window the context
@@ -17,6 +21,8 @@ import { CONTEXT_AWARENESS_KBN_ARCHIVE, CONTEXT_AWARENESS_TIME_RANGE } from './c
  */
 export async function setupContextAwareness(scoutSpace: ScoutParallelWorkerFixtures['scoutSpace']) {
   const importedSavedObjects = await scoutSpace.savedObjects.load(CONTEXT_AWARENESS_KBN_ARCHIVE);
+  // imports no longer pick a default data view, and the oldest-view fallback would open `my-example-logs`
+  await scoutSpace.savedObjects.setDefaultIndex(CONTEXT_AWARENESS_DATA_VIEWS.ALL);
   await scoutSpace.uiSettings.setDefaultTime(CONTEXT_AWARENESS_TIME_RANGE);
 
   return importedSavedObjects;
@@ -25,6 +31,6 @@ export async function setupContextAwareness(scoutSpace: ScoutParallelWorkerFixtu
 export async function teardownContextAwareness(
   scoutSpace: ScoutParallelWorkerFixtures['scoutSpace']
 ) {
-  await scoutSpace.uiSettings.unset('timepicker:timeDefaults');
+  await scoutSpace.uiSettings.unset('timepicker:timeDefaults', 'defaultIndex');
   await scoutSpace.savedObjects.cleanStandardList();
 }
