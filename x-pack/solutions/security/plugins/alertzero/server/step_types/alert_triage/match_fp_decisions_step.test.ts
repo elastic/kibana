@@ -953,6 +953,35 @@ describe('triage match decisions step in on mode', () => {
     expect(output).toEqual(expect.objectContaining({ skipped: 0, left_for_notes: 0 }));
   });
 
+  it('does not read a dismissal once the notes are used up, so the reads do not eat the work budget', async () => {
+    const fullId = decisionId('do_not_propose', hashOf('C:\\full.exe'));
+    const lateId = decisionId('do_not_propose', hashOf('C:\\late.exe'));
+    const alerts = [
+      ...Array.from(
+        { length: DECISION_NOTES_PER_SWEEP },
+        (_unused, i): [string, Record<string, unknown>] => [`f${i}`, source('C:\\full.exe')]
+      ),
+      ...Array.from({ length: 3 }, (_unused, i): [string, Record<string, unknown>] => [
+        `l${i}`,
+        source('C:\\late.exe'),
+      ]),
+    ];
+    const { run, get } = setup({
+      mode: 'on',
+      alerts,
+      decisions: { [fullId]: stored('do_not_propose'), [lateId]: stored('do_not_propose') },
+    });
+
+    const { output } = await run();
+
+    const readIds = get.mock.calls.map(([{ id }]) => id);
+    expect(readIds).toContain(fullId);
+    expect(readIds).not.toContain(lateId);
+    expect(output).toEqual(
+      expect.objectContaining({ skipped: DECISION_NOTES_PER_SWEEP, left_for_notes: 3 })
+    );
+  });
+
   describe('what moves while the sweep writes', () => {
     const skipTag = (id: string) => `az:skipped_by_decision:${id}`;
 

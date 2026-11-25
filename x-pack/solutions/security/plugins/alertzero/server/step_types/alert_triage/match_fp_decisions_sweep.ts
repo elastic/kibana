@@ -477,6 +477,13 @@ export const createDecisionSweep = ({
 
   /** Keeps the open alerts of one dismissed pattern out of analysis, chunk by chunk. */
   const skipDecision = async (id: string, alertIds: string[]) => {
+    // shortcut: with no note left nothing can be skipped, so the status is not read, and a
+    // dismissal revoked during the sweep is then counted in `left_for_notes` too. Read the statuses
+    // in one batch if that count must be exact.
+    if (notes.take(alertIds).length === 0) {
+      totals.left_for_notes += alertIds.length;
+      return;
+    }
     const skipTag = skippedByDecisionTag(id);
     const skipTags = [VERDICT_INCONCLUSIVE_TAG, skipTag];
     const kept: string[] = [];
