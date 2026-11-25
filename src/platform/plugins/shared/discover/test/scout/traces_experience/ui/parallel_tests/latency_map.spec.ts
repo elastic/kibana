@@ -132,7 +132,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'focusing an operation from the duration groups dropdown narrows the query',
+      'focusing an operation from the suggestions dropdown narrows the query',
       async ({ pageObjects }) => {
         const { charts } = pageObjects.tracesExperience;
         const { discover } = pageObjects;
@@ -142,7 +142,8 @@ spaceTest.describe(
 
         await spaceTest.step('picking the mixed operation writes its WHERE clause', async () => {
           await charts.latencyMapDurationGroups.click();
-          await charts.latencyMapDurationGroup(1).click();
+          // By name: the dropdown ranks the suggestions by span count, not by fixture order.
+          await charts.latencyMapSuggestion(LATENCY_TRACE.TRANSACTION_NAME_MIXED).click();
           await expect
             .poll(async () => discover.getEsqlQueryValue())
             .toContain(`transaction.name == "${LATENCY_TRACE.TRANSACTION_NAME_MIXED}"`);
@@ -177,10 +178,19 @@ spaceTest.describe(
       // The map is the default view.
       await charts.waitForLatencyMapReady();
 
-      // The middle of the map sits in the dense 100ms band of the test data.
+      // The middle of the map sits in the dense 100ms band of the test data: the cell under
+      // the pointer says so before it is clicked, so a layout change cannot turn the click
+      // into a press on an empty cell.
+      await charts.hoverLatencyMap();
+      await expect(charts.latencyMapCellDetails).toContainText(/[1-9]\d* spans?\b/);
       await charts.clickLatencyMapCell();
 
       await pageObjects.docViewer.waitForFlyoutOpen();
+      // On the traces Overview, which the map asks for, not the field table.
+      await expect(pageObjects.tracesExperience.flyout.overviewTab).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
       await expect(pageObjects.docViewer.getFlyout()).toContainText(LATENCY_TRACE.SERVICE_NAME);
     });
   }

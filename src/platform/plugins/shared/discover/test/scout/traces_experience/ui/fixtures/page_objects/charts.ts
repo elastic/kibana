@@ -25,6 +25,10 @@ export interface TracesCharts {
   readonly latencyMapSelectionBar: Locator;
   readonly latencyMapClearSelection: Locator;
   readonly latencyMapDurationGroups: Locator;
+  /** The details of the cell under the pointer: its bounds and counts. */
+  readonly latencyMapCellDetails: Locator;
+  /** One entry of the suggestions dropdown, by the operation's name. */
+  latencyMapSuggestion(name: string): Locator;
   readonly latencyMapOperationBadge: Locator;
   /** The nth entry of the duration-groups dropdown. */
   latencyMapDurationGroup(n: number): Locator;
@@ -73,6 +77,8 @@ export function createTracesCharts(page: ScoutPage): TracesCharts {
     latencyMapSelectionBar: page.testSubj.locator('traceLatencyMapSelectionBar'),
     latencyMapClearSelection: page.testSubj.locator('traceLatencyMapClearSelection'),
     latencyMapDurationGroups: page.testSubj.locator('traceLatencyMapDurationGroups'),
+    latencyMapCellDetails: page.testSubj.locator('traceLatencyMapCellDetails'),
+    latencyMapSuggestion: (name: string) => page.getByRole('button', { name }),
     latencyMapOperationBadge: page.testSubj.locator('traceLatencyMapOperationBadge'),
     latencyMapDurationGroup: (n: number) =>
       page.testSubj.locator(`traceLatencyMapDurationGroup-${n}`),

@@ -23,8 +23,8 @@ globalSetupHook(
   'Setup traces experience tests data',
   async ({ esClient, apiServices, config, log, kbnUrl }) => {
     // The latency map next to the RED charts. The flag is server-wide, so it is set once
-    // for the whole suite; the RED charts stay the default view, which
-    // red_metrics_charts.spec.ts keeps asserting.
+    // for the whole suite, and with it the map is the default view of an ES|QL traces
+    // session: red_metrics_charts.spec.ts switches to the Health metrics view first.
     await apiServices.core.settings({
       'feature_flags.overrides': {
         'observability.tracesLatencyMapEnabled': true,

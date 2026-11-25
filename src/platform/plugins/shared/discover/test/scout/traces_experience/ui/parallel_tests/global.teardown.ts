@@ -8,6 +8,7 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout';
+import { LATENCY_TRACE } from '../fixtures';
 
 globalTeardownHook(
   'Teardown traces experience tests data',
@@ -28,6 +29,23 @@ globalTeardownHook(
       .then(() => log.debug('[teardown:traces] Deleted traces-test.otel-default data stream'))
       .catch((err) =>
         log.warning(`[teardown:traces] Failed to delete traces-test.otel-default: ${err.message}`)
+      );
+
+    // The latency map fixtures share the APM streams with the other traces fixtures, under
+    // their own service: taken out by service, so that a later run against the same cluster
+    // does not count this run's spans twice.
+    await esClient
+      .deleteByQuery({
+        index: 'traces-apm*',
+        query: { term: { 'service.name': LATENCY_TRACE.SERVICE_NAME } },
+        refresh: true,
+        conflicts: 'proceed',
+      })
+      .then(() => log.debug(`[teardown:traces] Deleted ${LATENCY_TRACE.SERVICE_NAME} traces`))
+      .catch((err) =>
+        log.warning(
+          `[teardown:traces] Failed to delete ${LATENCY_TRACE.SERVICE_NAME} traces: ${err.message}`
+        )
       );
   }
 );

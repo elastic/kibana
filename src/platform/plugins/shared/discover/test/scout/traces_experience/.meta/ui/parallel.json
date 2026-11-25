@@ -1,5 +1,5 @@
 {
-  "sha1": "234db8f1bb87153ee42fae6172f726352c1cdb67",
+  "sha1": "7c5ab073dbdacfe2ffdb398a266fa40f41ec33ec",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -272,8 +272,8 @@
       }
     },
     {
-      "id": "ca8a0d625d823f2-367eca5593ea09b",
-      "title": "Traces in Discover - latency map shows the RED charts by default and the latency map on demand",
+      "id": "ca8a0d625d823f2-342e4b3387b8fa6",
+      "title": "Traces in Discover - latency map shows the latency map by default and the RED charts on demand",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -299,7 +299,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
-        "line": 52,
+        "line": 51,
         "column": 15
       }
     },
@@ -315,8 +315,24 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
-        "line": 74,
-        "column": 22
+        "line": 94,
+        "column": 15
+      }
+    },
+    {
+      "id": "ca8a0d625d823f2-c0769ca6f0131c6",
+      "title": "Traces in Discover - latency map focusing an operation from the suggestions dropdown narrows the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
+        "line": 105,
+        "column": 85
       }
     },
     {
@@ -331,8 +347,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
-        "line": 92,
-        "column": 24
+        "line": 136,
+        "column": 34
       }
     },
     {
@@ -687,7 +703,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 54,
+        "line": 59,
         "column": 40
       }
     },
@@ -703,7 +719,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 72,
+        "line": 81,
         "column": 9
       }
     },
@@ -719,7 +735,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 84,
+        "line": 93,
         "column": 7
       }
     },
@@ -735,7 +751,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 99,
+        "line": 108,
         "column": 11
       }
     },
@@ -751,8 +767,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 122,
-        "column": 27
+        "line": 132,
+        "column": 44
       }
     },
     {
