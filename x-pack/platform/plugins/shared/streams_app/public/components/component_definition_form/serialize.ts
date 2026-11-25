@@ -283,7 +283,7 @@ const initialFieldValue = (
   if (field.type === 'array' && field.required && (field.min_items ?? 0) > 0) {
     return Array.from({ length: field.min_items ?? 0 }, () =>
       createInitialItem(field.items, context)
-    ).flatMap((item) => (item === undefined ? [] : [item]));
+    );
   }
   return undefined;
 };
@@ -326,12 +326,12 @@ export const createInitialObject = (
 export const createInitialItem = (
   field: CatalogueFieldDefinition,
   context: FormContextValues
-): FormValue | undefined =>
+): FormValue =>
   field.type === 'object'
     ? createInitialObject(field.fields, field.choice_groups, context)
-    : initialFieldValue(field, context, false);
+    : createChoiceValue(field, context);
 
-/** A present-but-unfilled value, used when a choice group member is picked. */
+/** A present-but-unfilled value, for a choice group member that was picked or a new list item. */
 export const createChoiceValue = (
   field: CatalogueFieldDefinition,
   context: FormContextValues

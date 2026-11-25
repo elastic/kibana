@@ -38,7 +38,13 @@ test.describe(
       pageObjects: { digitalExperience },
     }) => {
       await test.step('opens the Classic Overview from a Classic row', async () => {
+        // The applications and the sessions status land in separate renders, and picking a source
+        // across one of them loses the click to the re-render, leaving the list unfiltered.
+        await expect(digitalExperience.sessionsRetention).toBeVisible();
+        await expect(digitalExperience.applicationSource(SERVICE_NAME)).toHaveText('EDOT Browser');
+
         await digitalExperience.selectSource('Classic RUM');
+        await expect(digitalExperience.applicationSource(SERVICE_NAME)).toHaveText('Classic RUM');
         await digitalExperience.applicationLink(SERVICE_NAME).click();
 
         await expect(digitalExperience.overviewTab).toBeVisible();
@@ -51,7 +57,7 @@ test.describe(
       await test.step('goes back to the list with the same time range and filters', async () => {
         await digitalExperience.breadcrumbLink('Applications').click();
 
-        await expect(digitalExperience.applicationRow(SERVICE_NAME)).toContainText('Classic RUM');
+        await expect(digitalExperience.applicationSource(SERVICE_NAME)).toHaveText('Classic RUM');
         await expect(page).toHaveURL(hasTimeRange);
         await expect(page).toHaveURL(/sourceFilter=classic/);
       });

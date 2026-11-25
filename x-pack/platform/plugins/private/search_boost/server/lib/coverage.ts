@@ -12,6 +12,7 @@ import type {
   BoostRuleListItem,
   BoostRuleMatch,
 } from '../../common/types';
+import type { TargetDetails } from './target_details';
 
 /** What `GET _boost/explain` says about an index or data stream. */
 export interface BoostExplanation {
@@ -28,7 +29,8 @@ export interface BoostExplanation {
 export const getRuleListItems = (
   rules: BoostRule[],
   profiles: BoostProfile[],
-  explanations: BoostExplanation[]
+  explanations: BoostExplanation[],
+  details: Map<string, TargetDetails> = new Map()
 ): BoostRuleListItem[] => {
   const matchesByRule = new Map(rules.map(({ name }): [string, BoostRuleMatch[]] => [name, []]));
 
@@ -37,6 +39,7 @@ export const getRuleListItems = (
     matchedRuleNames.forEach((ruleName) => {
       matchesByRule.get(ruleName)?.push({
         name,
+        ...details.get(name),
         outrankedByRuleName: ruleName === appliedRuleName ? undefined : appliedRuleName,
       });
     });

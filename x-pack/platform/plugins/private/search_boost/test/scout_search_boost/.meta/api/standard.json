@@ -1,5 +1,5 @@
 {
-  "sha1": "3e86d2e3ca23c3fc156e2f1025fd783f8a7d2b63",
+  "sha1": "e77713758889e41a47b3140ba200b3c780e37c0c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
-        "line": 37,
-        "column": 48
+        "line": 41,
+        "column": 13
       }
     },
     {
@@ -26,8 +26,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
-        "line": 52,
-        "column": 11
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "f9ac18ac047ec3d-af3396f594dc169",
+      "title": "Search boost list API adds the storage size and retention of each match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
+        "line": 109,
+        "column": 27
       }
     },
     {
@@ -39,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
-        "line": 94,
-        "column": 76
+        "line": 125,
+        "column": 28
       }
     },
     {
@@ -52,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
-        "line": 125,
-        "column": 7
+        "line": 159,
+        "column": 21
       }
     },
     {
@@ -65,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
-        "line": 150,
-        "column": 5
+        "line": 185,
+        "column": 53
       }
     },
     {
@@ -78,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
-        "line": 150,
-        "column": 5
+        "line": 185,
+        "column": 53
       }
     },
     {

@@ -14,7 +14,9 @@ export const config: PluginConfigDescriptor<SearchBoostConfigType> = {
   schema: configSchema,
 };
 
-export const plugin: PluginInitializer<void, void, SearchBoostSetupDependencies> = async () => {
+export const plugin: PluginInitializer<void, void, SearchBoostSetupDependencies> = async (
+  initializerContext
+) => {
   const { SearchBoostPlugin } = await import('./plugin');
-  return new SearchBoostPlugin();
+  return new SearchBoostPlugin(initializerContext);
 };
