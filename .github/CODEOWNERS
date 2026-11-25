@@ -2702,6 +2702,7 @@ src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
 src/platform/packages/shared/kbn-connector-specs/src/lib/clients/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/generic_db_connector* @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/mssql_sql* @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/oracle_sql* @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/mcp/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
@@ -2763,6 +2764,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/one_drive/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/argocd/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/opensearch_aws_opensearch_service/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/oracle/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/prometheus/** @elastic/nightshift

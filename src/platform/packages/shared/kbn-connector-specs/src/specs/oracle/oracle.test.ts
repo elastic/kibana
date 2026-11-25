@@ -179,6 +179,77 @@ describe('OracleConnector', () => {
     });
   });
 
+  describe('action input bounds', () => {
+    const accepts = (name: string, input: Record<string, unknown>) =>
+      action(name).input.safeParse(input).success;
+    const longName = 'a'.repeat(129);
+
+    it.each([
+      ['an empty sql', { sql: '' }],
+      ['sql over 10,000 characters', { sql: 'S'.repeat(10001) }],
+      ['maxRows below 1', { sql: 'SELECT 1 FROM DUAL', maxRows: 0 }],
+      ['maxRows above 1,000', { sql: 'SELECT 1 FROM DUAL', maxRows: 1001 }],
+      ['a fractional maxRows', { sql: 'SELECT 1 FROM DUAL', maxRows: 1.5 }],
+    ])('query rejects %s', (_, input) => {
+      expect(accepts('query', input)).toBe(false);
+    });
+
+    it('query accepts the boundary values', () => {
+      expect(accepts('query', { sql: 'S'.repeat(10000), maxRows: 1000 })).toBe(true);
+      expect(accepts('query', { sql: 'S', maxRows: 1 })).toBe(true);
+    });
+
+    it('executeSql rejects an empty or over-long statement', () => {
+      expect(accepts('executeSql', { sql: '' })).toBe(false);
+      expect(accepts('executeSql', { sql: 'S'.repeat(10001) })).toBe(false);
+      expect(accepts('executeSql', { sql: 'S'.repeat(10000) })).toBe(true);
+    });
+
+    it.each([
+      ['listTables', { schema: longName }],
+      ['describeTable', { table: longName }],
+      ['describeTable', { table: 'T', schema: longName }],
+      ['describeTable', { table: '' }],
+    ])('%s rejects an identifier that is empty or over 128 characters', (name, input) => {
+      expect(accepts(name, input)).toBe(false);
+    });
+
+    it('accepts a 128-character identifier', () => {
+      expect(accepts('describeTable', { table: 'a'.repeat(128) })).toBe(true);
+    });
+
+    const search = (overrides: Record<string, unknown>) => ({
+      table: 'T',
+      searchTerm: 'x',
+      columns: ['C'],
+      ...overrides,
+    });
+
+    it.each([
+      ['an empty search term', { searchTerm: '' }],
+      ['a search term over 500 characters', { searchTerm: 'x'.repeat(501) }],
+      ['no columns', { columns: [] }],
+      ['more than 50 columns', { columns: Array.from({ length: 51 }, (_, i) => `C${i}`) }],
+      ['an over-long column name', { columns: [longName] }],
+      ['maxRows above 1,000', { maxRows: 1001 }],
+    ])('searchRows rejects %s', (_, overrides) => {
+      expect(accepts('searchRows', search(overrides))).toBe(false);
+    });
+
+    it('searchRows accepts the boundary values', () => {
+      expect(
+        accepts(
+          'searchRows',
+          search({
+            searchTerm: 'x'.repeat(500),
+            columns: Array.from({ length: 50 }, (_, i) => `C${i}`),
+            maxRows: 1000,
+          })
+        )
+      ).toBe(true);
+    });
+  });
+
   describe('tool exposure and scope', () => {
     it.each(['query', 'listSchemas', 'listTables', 'describeTable', 'searchRows'])(
       '%s is an agent tool with read scope',
