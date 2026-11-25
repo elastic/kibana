@@ -728,7 +728,7 @@ describe('WorkflowExecutionState', () => {
       );
     });
 
-    it('should load existing step executions with input and output excluded', async () => {
+    it('should load existing step executions with output excluded', async () => {
       underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
       (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
         {
@@ -749,7 +749,7 @@ describe('WorkflowExecutionState', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['11', '22'],
         undefined,
-        ['input', 'output']
+        ['output']
       );
       expect(underTest.getLatestStepExecution('testStep')).toEqual(
         expect.objectContaining({

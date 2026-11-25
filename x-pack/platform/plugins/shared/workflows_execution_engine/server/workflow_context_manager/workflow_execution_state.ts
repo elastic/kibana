@@ -497,7 +497,7 @@ export class WorkflowExecutionState {
     const docs = await this.stepExecutionRepository.getStepExecutionsByIds(
       stepExecutionIds,
       undefined,
-      ['input', 'output']
+      ['output']
     );
 
     const metadata: StepExecutionMetadata[] = [];

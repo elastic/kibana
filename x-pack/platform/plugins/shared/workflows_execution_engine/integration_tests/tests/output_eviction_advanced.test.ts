@@ -260,12 +260,12 @@ steps:
       expect(finalStep?.status).toBe(ExecutionStatus.COMPLETED);
     });
 
-    it('resume load() fetched steps with input and output excluded (memory optimization)', () => {
+    it('resume load() fetched steps with output excluded', () => {
       // The first call to getStepExecutionsByIds is from load(), which uses
-      // sourceExcludes: ['input', 'output'].
+      // sourceExcludes: ['output']. Inputs come back so a running foreach keeps its items.
       const loadCall = getByIdsSpy.mock.calls[0];
       expect(loadCall[1]).toBeUndefined(); // sourceIncludes: undefined
-      expect(loadCall[2]).toEqual(['input', 'output']);
+      expect(loadCall[2]).toEqual(['output']);
     });
 
     it('setup_step and then_step were rehydrated for final_step', () => {
