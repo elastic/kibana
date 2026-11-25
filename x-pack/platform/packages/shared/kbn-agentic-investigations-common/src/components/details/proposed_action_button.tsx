@@ -170,11 +170,12 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
 
     const pendingCaption = getProposalCaption(proposal) && <ProposalCaption proposal={proposal} />;
 
-    // A decision with no `actorName` is a terminal state nobody actually decided (expired,
-    // chiefly), so this only names "who • when" when there is a real actor to name. An expired
+    // A decision with no `actorName` is a terminal state nobody actually decided (expired or
+    // aborted), so this only names "who • when" when there is a real actor to name. Such a
     // proposal says why it can no longer be decided instead, since the badge already says
-    // "Expired".
+    // "Expired" or "Aborted".
     const isExpired = decision?.status === 'expired';
+    const isAborted = decision?.status === 'aborted';
     const hasNoType = !decision && !pendingCaption;
     const caption =
       decision?.actorName && ACTOR_CAPTION_PHASES.has(decision.status) ? (
@@ -185,6 +186,8 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
         />
       ) : isExpired ? (
         proposal.rationale || DETAILS_FLYOUT_LABELS.proposedAction.expiredCaption
+      ) : isAborted ? (
+        proposal.rationale || DETAILS_FLYOUT_LABELS.proposedAction.abortedCaption
       ) : hasNoType ? (
         DETAILS_FLYOUT_LABELS.proposedAction.noTypeCaption
       ) : (
@@ -221,7 +224,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             <span ref={setCaptionElement} css={captionText !== undefined && styles.title}>
               <EuiText
                 size="xs"
-                color={isExpired ? 'warning' : 'subdued'}
+                color={isExpired || isAborted ? 'warning' : 'subdued'}
                 component="span"
                 css={hasNoType && styles.noType}
               >

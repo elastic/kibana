@@ -9,6 +9,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   settleIncompleteProposalStatusSchema,
   settleIncompleteProposalStepCommonDefinition,
+  undecidedEndStatus,
 } from '@kbn/proposals-common';
 import type { ProposalsService } from '../services/proposals_service';
 import { parseStepInput } from './parse_step_input';
@@ -44,7 +45,9 @@ export const getSettleIncompleteProposalStepDefinition = ({
         const latest = await service.getLatestRevision(input.proposalId, spaceId);
         const proposal = await service.get(latest.proposalId, spaceId, request);
 
-        const status = input.status ?? (proposal.decision !== undefined ? 'failed' : 'expired');
+        const status =
+          input.status ??
+          (proposal.decision !== undefined ? 'failed' : undecidedEndStatus(proposal, Date.now()));
 
         const updated = await service.update(
           {

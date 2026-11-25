@@ -1301,23 +1301,26 @@ describe('ProposalsService', () => {
       expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalled();
     });
 
-    it('should reject a proposal the workflow already settled without a decision', async () => {
-      // Attempt exhaustion and a failure before anyone decided both settle the
-      // record as `expired` with no decision on it, and can do so long before
-      // the deadline passes.
-      const storage = createStorage(
-        baseDocument({
-          status: 'expired',
-          decision: undefined,
-          expiresAt: '2099-01-01T00:00:00.000Z',
-        })
-      );
-      const { service } = createService(storage);
+    it.each(['expired', 'aborted'] as const)(
+      'should reject a proposal the workflow already settled as %s without a decision',
+      async (status) => {
+        // Attempt exhaustion and a failure before anyone decided both settle the
+        // record with no decision on it, and can do so long before the deadline
+        // passes. Records settled before `aborted` existed read `expired`.
+        const storage = createStorage(
+          baseDocument({
+            status,
+            decision: undefined,
+            expiresAt: '2099-01-01T00:00:00.000Z',
+          })
+        );
+        const { service } = createService(storage);
 
-      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
-        ProposalConflictError
-      );
-    });
+        await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
+          ProposalConflictError
+        );
+      }
+    );
 
     it('should reject when the execution is no longer waiting for input', async () => {
       const storage = createStorage(baseDocument());
@@ -1380,7 +1383,7 @@ describe('ProposalsService', () => {
       const [[indexArgs]] = storage.index.mock.calls;
       expect(indexArgs.document).toEqual(
         expect.objectContaining({
-          status: 'expired',
+          status: 'aborted',
           decidedAt: expect.any(String),
           executionError: expect.stringContaining('cancelled'),
         })
@@ -1841,10 +1844,10 @@ describe('ProposalsService', () => {
       const { service } = createService(storage);
 
       // `chartsSummary` reads `decidedAt` as the "closed" event. A malfunction
-      // settling a proposal `expired` while its deadline is still in the future
+      // settling a proposal `aborted` while its deadline is still in the future
       // would otherwise read as open until that deadline arrived.
       const proposal = await service.update(
-        { id: 'proposal-1', status: 'expired' },
+        { id: 'proposal-1', status: 'aborted' },
         SPACE_ID,
         CALLER
       );
@@ -1976,6 +1979,7 @@ describe('ProposalsService', () => {
     it.each([
       [undefined, 'pending'],
       [undefined, 'expired'],
+      [undefined, 'aborted'],
       ['dismissed', 'no_action'],
       ['approved', 'no_action'],
       ['approved', 'executing'],
@@ -2001,13 +2005,15 @@ describe('ProposalsService', () => {
       ['dismissed', 'failed'],
       ['dismissed', 'expired'],
       ['approved', 'expired'],
+      ['dismissed', 'aborted'],
+      ['approved', 'aborted'],
     ] as const)('should reject the invalid pair %s + %s', async (decision, status) => {
       const storage = createStorage(baseDocument({ decision, status: 'pending' }));
       const { service } = createService(storage);
 
       // `dismissed` + `executing` would claim an action is running for a
-      // proposal that was declined; `expired` means nobody answered, which a
-      // decision contradicts.
+      // proposal that was declined; `expired` and `aborted` mean nobody
+      // answered, which a decision contradicts.
       await expect(service.update({ id: 'proposal-1', status }, SPACE_ID, CALLER)).rejects.toThrow(
         ProposalConflictError
       );
@@ -2299,6 +2305,7 @@ describe('ProposalsService', () => {
       ['an action that succeeded', { decision: 'approved' as const, status: 'succeeded' as const }],
       ['a dismissal', { decision: 'dismissed' as const, status: 'no_action' as const }],
       ['an expired proposal', { decision: undefined, status: 'expired' as const }],
+      ['an aborted proposal', { decision: undefined, status: 'aborted' as const }],
     ])('should refuse to clone %s', async (_label, overrides) => {
       const storage = createStorage(baseDocument(overrides));
       const { service } = createService(storage);
@@ -3549,30 +3556,37 @@ describe('ProposalsService', () => {
       { id, workflowId: 'system-create-proposal', status },
     ];
 
-    it('should settle a pending proposal as expired when its gate execution was cancelled', async () => {
-      const storage = createStorage(baseDocument({ expiresAt: '2099-01-01T00:00:00.000Z' }));
-      const { service, workflowsApi } = createService(storage);
-      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(
-        gateStatus(ExecutionStatus.CANCELLED)
-      );
+    it.each([
+      ['aborted', 'its deadline is still ahead', '2099-01-01T00:00:00.000Z'],
+      ['aborted', 'it has no deadline', undefined],
+      ['expired', 'its deadline has passed', PAST_DEADLINE],
+    ] as const)(
+      'should settle a pending proposal as %s when its gate execution was cancelled and %s',
+      async (expected, _, expiresAt) => {
+        const storage = createStorage(baseDocument({ expiresAt }));
+        const { service, workflowsApi } = createService(storage);
+        workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(
+          gateStatus(ExecutionStatus.CANCELLED)
+        );
 
-      const proposal = await service.get('proposal-1', SPACE_ID, request);
+        const proposal = await service.get('proposal-1', SPACE_ID, request);
 
-      expect(workflowsApi.getWorkflowExecutionStatuses).toHaveBeenCalledWith(
-        [EXECUTION_ID],
-        SPACE_ID,
-        { request }
-      );
-      expect(proposal.status).toBe('expired');
-      expect(proposal.executionError).toBe(
-        'The gate execution ended as cancelled before it settled the proposal.'
-      );
-      expect(storage.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ status: 'expired', decidedAt: expect.any(String) }),
-        })
-      );
-    });
+        expect(workflowsApi.getWorkflowExecutionStatuses).toHaveBeenCalledWith(
+          [EXECUTION_ID],
+          SPACE_ID,
+          { request }
+        );
+        expect(proposal.status).toBe(expected);
+        expect(proposal.executionError).toBe(
+          'The gate execution ended as cancelled before it settled the proposal.'
+        );
+        expect(storage.index).toHaveBeenCalledWith(
+          expect.objectContaining({
+            document: expect.objectContaining({ status: expected, decidedAt: expect.any(String) }),
+          })
+        );
+      }
+    );
 
     it('should settle an executing proposal as failed when its gate execution timed out', async () => {
       const storage = createStorage(
@@ -3826,7 +3840,7 @@ describe('ProposalsService', () => {
 
       const { proposals, total } = await service.list(listQuery(), SPACE_ID, request);
 
-      expect(proposals).toEqual([expect.objectContaining({ id: 'proposal-1', status: 'expired' })]);
+      expect(proposals).toEqual([expect.objectContaining({ id: 'proposal-1', status: 'aborted' })]);
       expect(total).toBe(1);
     });
 
@@ -3910,7 +3924,7 @@ describe('ProposalsService', () => {
 
         expect(proposals).toEqual([]);
         expect(total).toBe(2);
-        expect(documents['orphan-0'].status).toBe('expired');
+        expect(documents['orphan-0'].status).toBe('aborted');
       });
 
       it('should fill an opened page with live proposals when the first rows have ended gates', async () => {

@@ -112,7 +112,7 @@ export class ConversationProposalsService {
         origin: ALERTZERO_PROPOSAL_ORIGIN,
         // A failed attempt that a retry replaced is not shown: the retry carries its error
         // as `previousExecutionError`. Earlier revisions go too, since settling one as
-        // `expired` stamps `decidedAt`, so the recency window alone would let it in.
+        // `expired` or `aborted` stamps `decidedAt`, so the recency window alone would let it in.
         excludeSuperseded: true,
         excludeExpired: false,
         size,

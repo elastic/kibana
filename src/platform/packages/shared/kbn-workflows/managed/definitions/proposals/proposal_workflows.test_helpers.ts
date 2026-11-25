@@ -112,7 +112,7 @@ export const stepsOfType = (workflow: ParsedWorkflow, type: string): WorkflowSte
  * error.
  */
 export const VALID_STATUSES: Record<string, readonly string[]> = {
-  undecided: ['pending', 'expired'],
+  undecided: ['pending', 'expired', 'aborted'],
   dismissed: ['no_action'],
   approved: ['no_action', 'executing', 'succeeded', 'failed'],
 };

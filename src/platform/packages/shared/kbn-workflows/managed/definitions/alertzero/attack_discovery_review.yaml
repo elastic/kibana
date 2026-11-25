@@ -1270,7 +1270,8 @@ steps:
   # The gate reports two independent axes: `decision` is what a human concluded
   # (`approved` / `dismissed`, absent until someone decides) and `status` is how far
   # the proposal got (`succeeded` once the action ran, `no_action` when a dismissal
-  # left nothing to run, `expired` when nobody answered). Read separately, because
+  # left nothing to run, `expired` when nobody answered by the deadline, `aborted` when the
+  # gate stopped before it; both take the expired arm). Read separately, because
   # the pair is what distinguishes a decline from a lapse — a single field cannot,
   # which is why this used to need `decidedBy` as a tiebreaker.
   #
@@ -1288,7 +1289,7 @@ steps:
         ${{ steps.escalation_gate.output.decision == 'approved'
           and steps.escalation_gate.output.status == 'succeeded' }}
       declined: "${{ steps.escalation_gate.output.decision == 'dismissed' }}"
-      expired: "${{ steps.escalation_gate.output.status == 'expired' }}"
+      expired: "${{ steps.escalation_gate.output.status == 'expired' or steps.escalation_gate.output.status == 'aborted' }}"
 
   # Only for an escalated review; the outcome follows the journal note's order.
   - name: report_handoff_resolved

@@ -1023,23 +1023,31 @@ describe('proposals.settleIncompleteProposal step', () => {
     });
   });
 
-  it('should expire an undecided proposal when status is omitted', async () => {
-    const service = {
-      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
-      get: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' }),
-      update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'expired' }),
-    };
+  it.each([
+    ['its deadline has passed', '2000-01-01T00:00:00.000Z', 'expired'],
+    ['its deadline is still ahead', '2099-01-01T00:00:00.000Z', 'aborted'],
+    ['it has no deadline', undefined, 'aborted'],
+  ] as const)(
+    'should settle an undecided proposal when status is omitted and %s',
+    async (_, expiresAt, expected) => {
+      const service = {
+        getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+        get: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending', expiresAt }),
+        update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: expected }),
+      };
 
-    await settleDefinition(service).handler(
-      createContext({ proposalId: 'proposal-1', executionError: 'workflow failed' })
-    );
+      const result = await settleDefinition(service).handler(
+        createContext({ proposalId: 'proposal-1', executionError: 'workflow failed' })
+      );
 
-    expect(service.update).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'expired' }),
-      SPACE_ID,
-      CALLER
-    );
-  });
+      expect(service.update).toHaveBeenCalledWith(
+        expect.objectContaining({ status: expected }),
+        SPACE_ID,
+        CALLER
+      );
+      expect(result.output?.status).toBe(expected);
+    }
+  );
 
   it('should fail a decided proposal when status is omitted', async () => {
     const service = {

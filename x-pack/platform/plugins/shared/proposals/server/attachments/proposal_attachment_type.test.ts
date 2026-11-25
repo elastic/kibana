@@ -204,6 +204,20 @@ describe('proposalAttachmentType', () => {
       expect(value).not.toContain('deadline has passed');
     });
 
+    it('should say the workflow stopped, not that it expired, once the proposal is aborted', async () => {
+      const { type, get } = createType();
+      get.mockResolvedValue(proposal({ status: 'aborted', expiresAt: '2099-01-01T00:00:00.000Z' }));
+
+      const { value } = (await represent(type)) as { value: string };
+
+      expect(value).toContain(
+        'ABORTED: the workflow behind this proposal stopped before a decision; it can no longer be decided.'
+      );
+      expect(value).not.toContain('EXPIRED');
+      expect(value).not.toContain('Decision: aborted');
+      expect(value).not.toContain('Awaiting a human decision');
+    });
+
     it.each<Partial<ProposalWithMetadata>>([
       { status: 'superseded', supersededBy: 'proposal-2' },
       { status: 'failed', decision: 'approved', supersededBy: 'proposal-2' },

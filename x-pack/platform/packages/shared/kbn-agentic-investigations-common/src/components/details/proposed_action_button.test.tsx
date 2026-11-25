@@ -352,4 +352,25 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
     });
   });
+
+  describe('an aborted proposal', () => {
+    // Nobody decided it — the workflow behind it stopped before the deadline.
+    const abortedProposal: ApprovalProposal = { ...mockProposal, status: 'aborted' };
+
+    it('shows an Aborted badge and says it stopped, though nobody ever decided it', () => {
+      renderButton({ proposal: abortedProposal });
+
+      expect(screen.getByText('Aborted')).toBeInTheDocument();
+      expect(screen.getByText('Stopped before a decision')).toBeInTheDocument();
+      expect(screen.queryByText('Expired')).not.toBeInTheDocument();
+      expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    });
+
+    it('captions the reason the workflow saved for it', () => {
+      renderButton({ proposal: { ...abortedProposal, rationale: 'The rule was deleted.' } });
+
+      expect(screen.getByText('The rule was deleted.')).toBeInTheDocument();
+      expect(screen.queryByText('Stopped before a decision')).not.toBeInTheDocument();
+    });
+  });
 });

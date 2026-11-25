@@ -479,6 +479,7 @@ describe('Forensics close investigation gate', () => {
       const approvedButFailed = wrapped({ decision: 'approved', status: 'failed' });
       const dismissed = wrapped({ decision: 'dismissed', status: 'no_action' });
       const expired = wrapped({ status: 'expired' });
+      const aborted = wrapped({ status: 'aborted' });
 
       expect(evaluate(decision.approved, approved)).toBe(true);
       expect(evaluate(decision.approved, approvedButFailed)).toBe(false);
@@ -486,6 +487,8 @@ describe('Forensics close investigation gate', () => {
       expect(evaluate(decision.dismissed, dismissed)).toBe(true);
       expect(evaluate(decision.dismissed, approved)).toBe(false);
       expect(evaluate(decision.expired, expired)).toBe(true);
+      // A gate that stopped before its deadline decided nothing either.
+      expect(evaluate(decision.expired, aborted)).toBe(true);
       expect(evaluate(decision.expired, approved)).toBe(false);
     });
 

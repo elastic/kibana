@@ -615,6 +615,23 @@ describe('ApprovalContent', () => {
     );
   });
 
+  it('explains that the workflow stopped, and why, once the proposal is aborted', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'aborted',
+        executionError: 'The gate execution ended as cancelled before it settled the proposal.',
+      },
+    });
+
+    const callout = screen.getByTestId('approvalContent-aborted');
+    expect(callout).toHaveTextContent('Stopped before a decision and can no longer be applied');
+    expect(callout).toHaveTextContent(
+      'The gate execution ended as cancelled before it settled the proposal.'
+    );
+    expect(screen.queryByTestId('approvalContent-expired')).not.toBeInTheDocument();
+  });
+
   it('shows why the proposal expired', () => {
     const reason =
       "The rule was deleted after this proposal was created, so this tuning can't be applied.";
@@ -801,6 +818,15 @@ describe('ApprovalContent', () => {
       expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(
         'Expired and can no longer be applied'
       );
+    });
+
+    it('shows the Aborted badge instead of Needs review, hiding the actions, once the workflow settles it as aborted', () => {
+      renderContent({ onDismiss: jest.fn(), proposal: { ...baseProposal, status: 'aborted' } });
+      expect(screen.getByText('Aborted')).toBeInTheDocument();
+      expect(screen.queryByText('Expired')).not.toBeInTheDocument();
+      expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
     });
   });
 

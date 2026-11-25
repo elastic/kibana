@@ -127,6 +127,13 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
         defaultMessage: 'Can no longer be applied',
       }
     ),
+    /** An aborted proposal that saved no reason: the workflow behind it stopped before a decision. */
+    abortedCaption: i18n.translate(
+      'xpack.agenticInvestigations.detailsFlyout.proposedAction.abortedCaption',
+      {
+        defaultMessage: 'Stopped before a decision',
+      }
+    ),
     reversible: i18n.translate(
       'xpack.agenticInvestigations.detailsFlyout.proposedAction.reversible',
       {

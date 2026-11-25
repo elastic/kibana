@@ -14,6 +14,10 @@ const EXPIRED = i18n.translate('xpack.alertzero.proposalOutcome.expired', {
   defaultMessage: 'Expired',
 });
 
+const ABORTED = i18n.translate('xpack.alertzero.proposalOutcome.aborted', {
+  defaultMessage: 'Aborted',
+});
+
 const DECLINED = i18n.translate('xpack.alertzero.proposalOutcome.declined', {
   defaultMessage: 'Declined',
 });
@@ -45,7 +49,8 @@ export const proposalOutcome = ({
 }: ProposalItem): string | undefined => {
   // Nobody answered, so there is no decision to attribute.
   if (!decision) {
-    return status === 'expired' ? EXPIRED : undefined;
+    if (status === 'expired') return EXPIRED;
+    return status === 'aborted' ? ABORTED : undefined;
   }
 
   // Nothing writes a synthetic system user, so an unattributed approval is the only

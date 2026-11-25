@@ -30,6 +30,7 @@ import {
   PROPOSAL_CATEGORY_TODO,
   PROPOSAL_ATTACHMENT_TYPE,
   PROPOSALS_RESUME_CHANNEL,
+  undecidedEndStatus,
 } from '@kbn/proposals-common';
 import type {
   CreateProposalRequest,
@@ -841,7 +842,7 @@ export class ProposalsService {
      *
      * The second half is what `chartsSummary` needs: it reads `decidedAt` as the
      * "closed" event, and a proposal the workflow terminated early — a
-     * malfunction settling it `expired` while its deadline is still in the
+     * malfunction settling it `aborted` while its deadline is still in the
      * future — would otherwise read as open until that deadline arrived.
      */
     const settledAt =
@@ -1607,7 +1608,7 @@ export class ProposalsService {
    * to run, so a status check alone would let a second approver through.
    *
    * The `status` catches what the decision cannot: the workflow settles an
-   * undecided proposal as `expired` on attempt exhaustion or a failure before
+   * undecided proposal as `aborted` on attempt exhaustion or a failure before
    * anyone decided, which leaves no decision behind. A deadline that has
    * passed but not yet been settled still reads `pending` here, so
    * `releaseGate` checks `expiresAt` itself.
@@ -1864,7 +1865,10 @@ export class ProposalsService {
       return await this.applyUpdate(stored, {
         id,
         // `executing` is only ever approved, and `pending` only ever undecided.
-        status: stored.proposal.status === 'executing' ? 'failed' : 'expired',
+        status:
+          stored.proposal.status === 'executing'
+            ? 'failed'
+            : undecidedEndStatus(stored.proposal, Date.now()),
         executionError: gateEndedError(gateStatus),
       });
     } catch (error) {
@@ -2072,7 +2076,7 @@ const isPastDeadline = ({ status, expiresAt }: Proposal, now: number): boolean =
  * dismissal, or an approval of a proposal that carries nothing to run.
  */
 const VALID_STATUSES: Record<'undecided' | ProposalDecision, readonly ProposalStatus[]> = {
-  undecided: ['pending', 'expired', 'superseded'],
+  undecided: ['pending', 'expired', 'aborted', 'superseded'],
   dismissed: ['no_action'],
   approved: ['no_action', 'executing', 'succeeded', 'failed'],
 };

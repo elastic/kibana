@@ -247,7 +247,8 @@ steps:
     with:
       proposal_status: "{{ steps.create_and_gate_proposal.output.status }}"
       proposal_decision: "{{ steps.create_and_gate_proposal.output.decision }}"
-      proposal_expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' }}"
+      # `aborted`: the gate stopped before its deadline. Nobody decided it either.
+      proposal_expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' or steps.create_and_gate_proposal.output.status == 'aborted' }}"
 
   # Two calls, not a conditional retry: `!= filter chain -> comparison` in one
   # expression is illegal in this engine, so an "only requery again if the first

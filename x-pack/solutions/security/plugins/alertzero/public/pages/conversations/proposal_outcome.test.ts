@@ -97,4 +97,8 @@ describe('proposalOutcome', () => {
     // `expired` rows reach the closed queue with a decidedAt but never a decision.
     expect(proposalOutcome({ ...baseProposal, status: 'expired' })).toBe('Expired');
   });
+
+  it('reports an aborted proposal as Aborted, not Expired, since its workflow stopped early', () => {
+    expect(proposalOutcome({ ...baseProposal, status: 'aborted' })).toBe('Aborted');
+  });
 });
