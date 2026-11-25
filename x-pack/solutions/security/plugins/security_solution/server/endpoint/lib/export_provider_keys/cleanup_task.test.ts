@@ -91,7 +91,11 @@ describe('ExportProviderKeyCleanupTask class', () => {
   });
 
   describe('#start()', () => {
-    it('schedules the task with a 1 hour interval', async () => {
+    it('schedules the task with a 1 hour interval when the feature flag is on', async () => {
+      endpointAppContextMock.experimentalFeatures = {
+        ...endpointAppContextMock.experimentalFeatures,
+        responseActionsEndpointFileExport: true,
+      };
       taskInstance.setup({ taskManager: taskManagerMock.createSetup() });
       const taskManagerStartContractMock = taskManagerMock.createStart();
 
@@ -106,10 +110,27 @@ describe('ExportProviderKeyCleanupTask class', () => {
         params: {},
       });
     });
+
+    it("doesn't schedule the task when the feature flag is off", async () => {
+      endpointAppContextMock.experimentalFeatures = {
+        ...endpointAppContextMock.experimentalFeatures,
+        responseActionsEndpointFileExport: false,
+      };
+      taskInstance.setup({ taskManager: taskManagerMock.createSetup() });
+      const taskManagerStartContractMock = taskManagerMock.createStart();
+
+      await taskInstance.start({ taskManager: taskManagerStartContractMock });
+
+      expect(taskManagerStartContractMock.ensureScheduled).not.toHaveBeenCalled();
+    });
   });
 
   describe('#stop()', () => {
     it('keeps the scheduled task, which other Kibana nodes still run', async () => {
+      endpointAppContextMock.experimentalFeatures = {
+        ...endpointAppContextMock.experimentalFeatures,
+        responseActionsEndpointFileExport: true,
+      };
       taskInstance.setup({ taskManager: taskManagerMock.createSetup() });
       const taskManagerStartContractMock = taskManagerMock.createStart();
       await taskInstance.start({ taskManager: taskManagerStartContractMock });

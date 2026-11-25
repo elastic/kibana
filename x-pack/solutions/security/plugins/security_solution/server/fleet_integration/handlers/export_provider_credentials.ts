@@ -20,6 +20,7 @@ import {
 import { EndpointIntegrationFleetError } from './errors';
 import {
   POLICY_OPERATING_SYSTEMS,
+  RESPONSE_ACTIONS_CONFIG_PATH_PATTERN,
   getExportProviderCredentialsReferenceMessage,
   getProviderLabel,
   isExportProviderCredentialsReference,
@@ -54,9 +55,6 @@ const getOsExportProvidersFrom = (policyValue: unknown, os: PolicyOperatingSyste
   return getOsExportProviders((policyValue as Record<string, unknown>)[os]);
 };
 
-/** Matches `policy.<os>.response_actions`, or anything nested under it, in a flattened path */
-const RESPONSE_ACTIONS_OVERRIDE_PATH = /^policy\.(windows|mac|linux)\.response_actions(\.|$)/;
-
 /**
  * Recursively replaces every own-enumerable *empty* plain object with a sentinel value.
  * `getFlattenedObject` emits no leaf for an empty object (its loop over the object's entries
@@ -89,7 +87,7 @@ const hasResponseActionsOverride = (input: Record<string, unknown>): boolean => 
   const flattened = getFlattenedObject(markEmptyObjects(input) as Record<string, unknown>);
 
   return Object.entries(flattened).some(
-    ([path, value]) => value !== undefined && RESPONSE_ACTIONS_OVERRIDE_PATH.test(path)
+    ([path, value]) => value !== undefined && RESPONSE_ACTIONS_CONFIG_PATH_PATTERN.test(path)
   );
 };
 

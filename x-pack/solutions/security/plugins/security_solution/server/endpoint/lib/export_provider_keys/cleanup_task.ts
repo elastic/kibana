@@ -159,8 +159,9 @@ export interface ExportProviderKeyCleanupTaskConstructorOptions {
 
 /**
  * Task Manager task that periodically deletes export provider key objects nothing references any
- * more. Registered and scheduled regardless of the `responseActionsEndpointFileExport` feature
- * flag, so keys created while it was on are still cleaned up after it is turned off.
+ * more. Scheduled only with the `responseActionsEndpointFileExport` feature flag on; the definition
+ * is always registered, so once scheduled the task keeps running after the flag is turned off and
+ * still cleans up the keys created while it was on.
  */
 export class ExportProviderKeyCleanupTask {
   private readonly log: Logger;
@@ -218,6 +219,10 @@ export class ExportProviderKeyCleanupTask {
     }
 
     this.wasStarted = true;
+
+    if (!this.options.endpointAppContext.experimentalFeatures.responseActionsEndpointFileExport) {
+      return;
+    }
 
     try {
       await taskManager.ensureScheduled({

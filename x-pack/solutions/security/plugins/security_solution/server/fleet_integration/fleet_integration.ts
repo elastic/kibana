@@ -41,9 +41,8 @@ import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
-  removeDottedResponseActionsKeys,
-  validateExportProviders,
-  validateNoDottedResponseActionsKeys,
+  removeExportProviderSettings,
+  validateExportProviderSettings,
 } from './handlers/validate_export_providers';
 import {
   filterExportProviderKeyReferences,
@@ -51,7 +50,6 @@ import {
   rejectResponseActionsInOverrides,
   validateExportProviderCredentials,
 } from './handlers/export_provider_credentials';
-import { removeExportProviders } from '../../common/endpoint/models/export_providers';
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
@@ -74,7 +72,10 @@ import type { IRequestContextFactory } from '../request_context_factory';
 import { installEndpointSecurityPrebuiltRule } from '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
-import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
+import {
+  validateExportProvidersAgainstLicense,
+  validatePolicyAgainstLicense,
+} from './handlers/validate_policy_against_license';
 import { validateIntegrationConfig } from './handlers/validate_integration_config';
 import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
 import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
@@ -151,6 +152,23 @@ const isExportProvidersEnabled = (
   experimentalFeatures.responseActionsEndpointFileExport;
 
 /**
+ * Fleet merges `overrides` into the agent policy after every callback check, so `response_actions`
+ * there would bypass them. Like the rest of the feature, checked only with export providers enabled.
+ */
+const rejectResponseActionsInOverridesIfEnabled = (
+  packagePolicy: NewPackagePolicy,
+  productFeatures: ProductFeaturesService,
+  experimentalFeatures: ExperimentalFeatures
+): void => {
+  if (
+    isEndpointPackagePolicy(packagePolicy) &&
+    isExportProvidersEnabled(productFeatures, experimentalFeatures)
+  ) {
+    rejectResponseActionsInOverrides(packagePolicy);
+  }
+};
+
+/**
  * Callback to handle creation of PackagePolicies in Fleet
  */
 export const getPackagePolicyCreateCallback = (
@@ -171,12 +189,12 @@ export const getPackagePolicyCreateCallback = (
     context,
     request
   ): Promise<NewPackagePolicy> => {
-    // Checked first, even without a request: the early return below keeps the incoming policy as it
-    // is, overrides bypass every other check, and the plaintext key must never reach the policy.
-    if (isEndpointPackagePolicy(newPackagePolicy)) {
-      rejectResponseActionsInOverrides(newPackagePolicy);
-      rejectExportProviderCredentialsOnCreate(newPackagePolicy.inputs?.[0]?.config?.policy?.value);
-    }
+    // Both paths below keep `overrides` (with a request only `inputs` is replaced)
+    rejectResponseActionsInOverridesIfEnabled(
+      newPackagePolicy,
+      productFeatures,
+      experimentalFeatures
+    );
 
     // callback is called outside request context
     if (!context || !request) {
@@ -186,13 +204,15 @@ export const getPackagePolicyCreateCallback = (
       const incomingPolicyValue = endpointPolicyData.inputs?.[0]?.config?.policy?.value;
 
       // The incoming policy is kept here (with a request it's replaced by the defaults below),
-      // so it gets the export provider gating of an update
+      // so it gets the export provider checks and gating of an update
       if (isEndpointPackagePolicy(newPackagePolicy) && incomingPolicyValue) {
         if (isExportProvidersEnabled(productFeatures, experimentalFeatures)) {
-          validateNoDottedResponseActionsKeys(incomingPolicyValue);
+          rejectExportProviderCredentialsOnCreate(incomingPolicyValue);
+          validateExportProviderSettings(endpointPolicyData.inputs[0].config);
+          validateExportProvidersAgainstLicense(incomingPolicyValue, licenseService, logger);
         } else {
-          endpointPolicyData.inputs[0].config.policy.value = removeExportProviders(
-            removeDottedResponseActionsKeys(incomingPolicyValue)
+          endpointPolicyData.inputs[0].config = removeExportProviderSettings(
+            endpointPolicyData.inputs[0].config
           );
         }
       }
@@ -335,8 +355,11 @@ export const getPackagePolicyUpdateCallback = (
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
 
     try {
-      // overrides are merged into the agent policy after every other check in this callback
-      rejectResponseActionsInOverrides(newPackagePolicy);
+      rejectResponseActionsInOverridesIfEnabled(
+        newPackagePolicy,
+        productFeatures,
+        experimentalFeatures
+      );
 
       // The advanced settings UI may delete mac.ransomware.mode when cleared;
       // restore the default before validation so the typed field is never missing.
@@ -402,10 +425,8 @@ export const getPackagePolicyUpdateCallback = (
         !isExportProvidersEnabled(productFeatures, experimentalFeatures) &&
         endpointIntegrationData.inputs?.[0]?.config?.policy?.value
       ) {
-        endpointIntegrationData.inputs[0].config.policy.value = removeExportProviders(
-          removeDottedResponseActionsKeys(
-            endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
-          )
+        endpointIntegrationData.inputs[0].config = removeExportProviderSettings(
+          endpointIntegrationData.inputs[0].config
         );
       }
 
@@ -427,8 +448,6 @@ export const getPackagePolicyUpdateCallback = (
         const policyConfig = endpointIntegrationData.inputs[0].config.policy;
         const packagePolicyId = endpointIntegrationData.id as string;
         const exportProvidersPolicyValue = policyConfig.value as PolicyConfig;
-
-        validateNoDottedResponseActionsKeys(exportProvidersPolicyValue);
 
         // Reject a plaintext key or a malformed reference before deciding which references to keep
         validateExportProviderCredentials(exportProvidersPolicyValue);
@@ -455,7 +474,7 @@ export const getPackagePolicyUpdateCallback = (
 
         policyConfig.value = filteredPolicyValue;
 
-        validateExportProviders(filteredPolicyValue);
+        validateExportProviderSettings(endpointIntegrationData.inputs[0].config);
       }
     } catch (error) {
       // Fleet swallows callback errors lacking `apiPassThrough` and persists the payload unvalidated,

@@ -74,6 +74,7 @@ import type {
 import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
 import type {
   GetAgentPoliciesResponseItem,
+  PackagePolicyConfigRecord,
   PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
@@ -263,6 +264,28 @@ describe('Fleet integrations', () => {
           experimentalFeatures
         );
 
+      const createPackagePolicyWithCredentials = (): NewPackagePolicy => ({
+        ...createNewPackagePolicyMock(),
+        inputs: [
+          {
+            type: 'endpoint',
+            enabled: true,
+            streams: [],
+            config: {
+              policy: {
+                value: setExportProviders(policyFactory(), [
+                  { ...provider, credentials: { type: 'account_key', key_id: 'key-1' } },
+                ]),
+              },
+            },
+          },
+        ],
+      });
+
+      beforeEach(() => {
+        experimentalFeatures = { ...experimentalFeatures, responseActionsEndpointFileExport: true };
+      });
+
       it.each<[string, boolean, Record<string, unknown>]>([
         [
           'the nested form, with a request',
@@ -318,42 +341,71 @@ describe('Fleet integrations', () => {
         }
       );
 
-      it.each<[string, boolean]>([
-        ['with a request', true],
-        ['without a request', false],
-      ])('rejects credentials on a provider, %s', async (_, withRequest) => {
-        const newPackagePolicy = {
-          ...createNewPackagePolicyMock(),
-          inputs: [
-            {
-              type: 'endpoint',
-              enabled: true,
-              streams: [],
-              config: {
-                policy: {
-                  value: setExportProviders(policyFactory(), [
-                    { ...provider, credentials: { type: 'account_key', key_id: 'key-1' } },
-                  ]),
-                },
-              },
-            },
-          ],
-        };
-
+      it('rejects credentials on a provider without a request', async () => {
         await expect(
-          buildCallback()(
-            newPackagePolicy,
-            soClient,
-            esClient,
-            withRequest ? requestContextMock.convertContext(ctx) : undefined,
-            withRequest ? req : undefined
-          )
+          buildCallback()(createPackagePolicyWithCredentials(), soClient, esClient)
         ).rejects.toMatchObject({
           statusCode: 400,
           apiPassThrough: true,
           message:
             `export_providers[0] "azure-1": credentials can't be set when the policy is created; ` +
             `set the key with PUT ${EXPORT_PROVIDER_KEY_ROUTE}`,
+        });
+      });
+
+      it('replaces a provider with credentials by the default policy with a request', async () => {
+        const packagePolicy = await buildCallback()(
+          createPackagePolicyWithCredentials(),
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+        const policy: PolicyConfig = packagePolicy.inputs[0].config!.policy.value;
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(policy[os]).not.toHaveProperty('response_actions');
+        }
+      });
+
+      describe('when the feature flag is off', () => {
+        beforeEach(() => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            responseActionsEndpointFileExport: false,
+          };
+        });
+
+        it.each<[string, boolean]>([
+          ['with a request', true],
+          ['without a request', false],
+        ])('leaves response_actions in overrides alone, %s', async (_, withRequest) => {
+          const overrides = {
+            inputs: { endpoint: { policy: { windows: { response_actions: {} } } } },
+          };
+
+          const packagePolicy = await buildCallback()(
+            { ...createNewPackagePolicyMock(), overrides },
+            soClient,
+            esClient,
+            withRequest ? requestContextMock.convertContext(ctx) : undefined,
+            withRequest ? req : undefined
+          );
+
+          expect(packagePolicy.overrides).toEqual(overrides);
+        });
+
+        it('strips a provider with credentials without a request', async () => {
+          const packagePolicy = await buildCallback()(
+            createPackagePolicyWithCredentials(),
+            soClient,
+            esClient
+          );
+          const policy: PolicyConfig = packagePolicy.inputs[0].config!.policy.value;
+
+          for (const os of ['windows', 'mac', 'linux'] as const) {
+            expect(policy[os]).not.toHaveProperty('response_actions');
+          }
         });
       });
     });
@@ -597,7 +649,10 @@ describe('Fleet integrations', () => {
 
     describe('export providers without a request context', () => {
       // Without a request context, the incoming policy is kept instead of being replaced by the defaults
-      const invokeWithoutRequest = (policyValue: PolicyConfig): Promise<NewPackagePolicy> => {
+      const invokeWithoutRequest = (
+        policyValue: PolicyConfig,
+        otherConfig: PackagePolicyConfigRecord = {}
+      ): Promise<NewPackagePolicy> => {
         const callback = getPackagePolicyCreateCallback(
           logger,
           buildManifestManagerMock(),
@@ -618,7 +673,7 @@ describe('Fleet integrations', () => {
                 type: 'endpoint',
                 enabled: true,
                 streams: [],
-                config: { policy: { value: policyValue } },
+                config: { ...otherConfig, policy: { value: policyValue } },
               },
             ],
           },
@@ -646,13 +701,64 @@ describe('Fleet integrations', () => {
           [provider],
         ],
       ];
+      const responseActionsConfigKey = {
+        'policy.windows.response_actions': { value: { export_providers: [provider] } },
+      };
 
       describe('when export providers are enabled', () => {
         beforeEach(() => {
+          licenseEmitter.next(Enterprise);
           experimentalFeatures = {
             ...experimentalFeatures,
             responseActionsEndpointFileExport: true,
           };
+        });
+
+        it('should reject an input config key that sets response_actions', async () => {
+          await expect(
+            invokeWithoutRequest(policyFactory(), responseActionsConfigKey)
+          ).rejects.toMatchObject({
+            statusCode: 400,
+            apiPassThrough: true,
+            message:
+              'response_actions can\'t be set through the input config key "policy.windows.response_actions"',
+          });
+        });
+
+        it('should reject invalid export providers', async () => {
+          await expect(
+            invokeWithoutRequest(
+              setExportProviders(policyFactory(), [
+                { ...provider, service_url: 'https://example.com' },
+              ])
+            )
+          ).rejects.toMatchObject({
+            statusCode: 400,
+            apiPassThrough: true,
+            message:
+              'export_providers[0] "azure-1": service_url must be an Azure Blob Storage endpoint (*.blob.core.windows.net, *.blob.core.usgovcloudapi.net or *.blob.core.chinacloudapi.cn)',
+          });
+        });
+
+        it('should reject export providers below an Enterprise license', async () => {
+          licenseEmitter.next(Platinum);
+
+          await expect(
+            invokeWithoutRequest(setExportProviders(policyFactory(), [provider]))
+          ).rejects.toMatchObject({
+            statusCode: 403,
+            apiPassThrough: true,
+            message: 'Platinum license does not support this action. Please upgrade your license.',
+          });
+        });
+
+        it('should not check the rest of the policy against the license', async () => {
+          licenseEmitter.next(Gold);
+          const policyValue = policyFactory();
+
+          const packagePolicy = await invokeWithoutRequest(policyValue);
+
+          expect(packagePolicy.inputs[0].config!.policy.value).toBe(policyValue);
         });
 
         it.each(dottedKeyCases)('should reject the dotted key %s', async (key, path, value) => {
@@ -719,6 +825,18 @@ describe('Fleet integrations', () => {
           for (const os of ['windows', 'mac', 'linux'] as const) {
             expect(policy[os]).not.toHaveProperty('response_actions');
           }
+        });
+
+        it('should remove an input config key that sets response_actions without an error', async () => {
+          const packagePolicy = await invokeWithoutRequest(
+            policyFactory(),
+            responseActionsConfigKey
+          );
+
+          expect(packagePolicy.inputs[0].config).not.toHaveProperty([
+            'policy.windows.response_actions',
+          ]);
+          expect(packagePolicy.inputs[0].config!.policy.value).toEqual(policyFactory());
         });
       });
     });
@@ -2249,7 +2367,14 @@ describe('Fleet integrations', () => {
         ],
       ];
 
-      const runUpdate = async (policy: PolicyConfig): Promise<PolicyConfig> => {
+      const responseActionsConfigKey = {
+        'policy.windows.response_actions': { value: { export_providers: [provider] } },
+      };
+
+      const runUpdateWithConfig = async (
+        policy: PolicyConfig,
+        otherConfig: PackagePolicyConfigRecord = {}
+      ): Promise<PackagePolicyConfigRecord> => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
@@ -2257,6 +2382,7 @@ describe('Fleet integrations', () => {
           experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
+        Object.assign(policyConfig.inputs[0]!.config!, otherConfig);
         policyConfig.inputs[0]!.config!.policy.value = policy;
 
         const updatedPolicyConfig = await callback(
@@ -2267,8 +2393,11 @@ describe('Fleet integrations', () => {
           req
         );
 
-        return updatedPolicyConfig.inputs[0]!.config!.policy.value;
+        return updatedPolicyConfig.inputs[0]!.config!;
       };
+
+      const runUpdate = async (policy: PolicyConfig): Promise<PolicyConfig> =>
+        (await runUpdateWithConfig(policy)).policy.value;
 
       beforeEach(() => {
         licenseEmitter.next(Enterprise);
@@ -2333,6 +2462,13 @@ describe('Fleet integrations', () => {
             expect(policy.windows.malware).toEqual(policyFactory().windows.malware);
           }
         );
+
+        it('should remove an input config key that sets response_actions without an error', async () => {
+          const config = await runUpdateWithConfig(policyFactory(), responseActionsConfigKey);
+
+          expect(config).not.toHaveProperty(['policy.windows.response_actions']);
+          expect(config.artifact_manifest).toBeDefined();
+        });
       });
 
       it('should save valid export providers on every OS', async () => {
@@ -2385,6 +2521,35 @@ describe('Fleet integrations', () => {
           apiPassThrough: true,
           message: `Package policy overrides can't set response_actions`,
         });
+      });
+
+      it('should leave response_actions in overrides alone when the feature flag is off', async () => {
+        experimentalFeatures = {
+          ...experimentalFeatures,
+          responseActionsEndpointFileExport: false,
+        };
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = policyFactory();
+        const overrides = {
+          inputs: { endpoint: { policy: { windows: { response_actions: {} } } } },
+        };
+        policyConfig.overrides = overrides;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(updatedPolicyConfig.overrides).toEqual(overrides);
       });
 
       describe('credentials key references', () => {
@@ -2632,6 +2797,17 @@ describe('Fleet integrations', () => {
           statusCode: 400,
           apiPassThrough: true,
           message: `response_actions can't be set with a dotted key ("${key}")`,
+        });
+      });
+
+      it('should reject an input config key that sets response_actions', async () => {
+        await expect(
+          runUpdateWithConfig(policyFactory(), responseActionsConfigKey)
+        ).rejects.toMatchObject({
+          statusCode: 400,
+          apiPassThrough: true,
+          message:
+            'response_actions can\'t be set through the input config key "policy.windows.response_actions"',
         });
       });
     });
