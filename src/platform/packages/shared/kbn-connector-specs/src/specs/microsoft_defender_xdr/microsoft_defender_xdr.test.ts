@@ -8,7 +8,12 @@
  */
 
 import { MicrosoftDefenderXdr } from './microsoft_defender_xdr';
-import { UpdateAlertInputSchema, UpdateIncidentInputSchema } from './types';
+import {
+  CreateDetectionRuleInputSchema,
+  UpdateAlertInputSchema,
+  UpdateDetectionRuleInputSchema,
+  UpdateIncidentInputSchema,
+} from './types';
 import type { AuthTypeDef, ConnectorSpec } from '../../connector_spec';
 
 const isAuthTypeDef = (t: string | AuthTypeDef): t is AuthTypeDef => typeof t === 'object';
@@ -610,6 +615,68 @@ describe('createDetectionRule handler', () => {
     );
     expect(result).toMatchObject({ id: '99', displayName: 'New Rule' });
   });
+
+  it('schema accepts a tactic with technique and sub-technique', () => {
+    const result = CreateDetectionRuleInputSchema.safeParse({
+      displayName: 'Tactic Rule',
+      queryText: 'DeviceEvents | limit 1',
+      period: 'PT1H',
+      alertTemplate: {
+        title: 'Tactic Alert',
+        severity: 'high',
+        tactics: [
+          {
+            tactic: 'Execution',
+            techniques: [{ technique: 'T1059', subTechniques: ['T1059.001'] }],
+          },
+        ],
+      },
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.alertTemplate.tactics).toEqual([
+      {
+        tactic: 'Execution',
+        techniques: [{ technique: 'T1059', subTechniques: ['T1059.001'] }],
+      },
+    ]);
+  });
+
+  it('schema rejects tactics supplied as plain strings', () => {
+    const result = CreateDetectionRuleInputSchema.safeParse({
+      displayName: 'Bad Rule',
+      queryText: 'DeviceEvents | limit 1',
+      period: 'PT1H',
+      alertTemplate: {
+        title: 'Bad Alert',
+        severity: 'high',
+        tactics: ['T1059'],
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('sends tactics verbatim under detectionAction.alertTemplate.tactics', async () => {
+    const client = makeClient();
+    client.post = jest.fn().mockResolvedValue({ data: { id: '100', displayName: 'Tactic Rule' } });
+    const ctx = makeCtx(client);
+    const action = MicrosoftDefenderXdr.actions?.createDetectionRule;
+    const tactics = [
+      {
+        tactic: 'Execution',
+        techniques: [{ technique: 'T1059', subTechniques: ['T1059.001'] }],
+      },
+    ];
+    await action?.handler(ctx as never, {
+      displayName: 'Tactic Rule',
+      queryText: 'DeviceEvents | limit 1',
+      period: 'PT1H',
+      alertTemplate: { title: 'Tactic Alert', severity: 'high', tactics },
+    });
+    const body = client.post.mock.calls[0][1] as Record<string, unknown>;
+    expect(
+      (body.detectionAction as Record<string, unknown>)?.alertTemplate as Record<string, unknown>
+    ).toMatchObject({ tactics });
+  });
 });
 
 // ---- updateDetectionRule handler ----
@@ -637,6 +704,50 @@ describe('updateDetectionRule handler', () => {
     const body = client.patch.mock.calls[0][1] as Record<string, unknown>;
     expect(body).not.toHaveProperty('queryText');
     expect(body).not.toHaveProperty('period');
+  });
+
+  it('schema accepts an alertTemplate with a populated tactic', () => {
+    const result = UpdateDetectionRuleInputSchema.safeParse({
+      ruleId: '42',
+      alertTemplate: {
+        title: 'Updated Alert',
+        severity: 'medium',
+        tactics: [
+          {
+            tactic: 'Persistence',
+            techniques: [{ technique: 'T1053', subTechniques: ['T1053.005'] }],
+          },
+        ],
+      },
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.alertTemplate?.tactics).toEqual([
+      {
+        tactic: 'Persistence',
+        techniques: [{ technique: 'T1053', subTechniques: ['T1053.005'] }],
+      },
+    ]);
+  });
+
+  it('sends tactics under detectionAction.alertTemplate.tactics when alertTemplate includes tactics', async () => {
+    const client = makeClient();
+    client.patch = jest.fn().mockResolvedValue({ data: { id: '42' } });
+    const ctx = makeCtx(client);
+    const action = MicrosoftDefenderXdr.actions?.updateDetectionRule;
+    const tactics = [
+      {
+        tactic: 'Persistence',
+        techniques: [{ technique: 'T1053', subTechniques: ['T1053.005'] }],
+      },
+    ];
+    await action?.handler(ctx as never, {
+      ruleId: '42',
+      alertTemplate: { title: 'Updated Alert', severity: 'medium', tactics },
+    });
+    const body = client.patch.mock.calls[0][1] as Record<string, unknown>;
+    expect(
+      (body.detectionAction as Record<string, unknown>)?.alertTemplate as Record<string, unknown>
+    ).toMatchObject({ tactics });
   });
 });
 
