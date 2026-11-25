@@ -49,6 +49,28 @@ describe('collectCoverage', () => {
     }
   });
 
+  it('reports the actions each connector declares, which api_type_actions does not', async () => {
+    const documents = await collectCoverage(REPO_ROOT);
+    const declared = new Map(
+      (await listConnectors()).map(({ connector }) => [
+        connector.metadata.id,
+        Object.keys(connector.actions).length,
+      ])
+    );
+
+    for (const { connector_id: id, total_actions: total } of documents) {
+      expect(total).toBe(declared.get(id));
+    }
+    // An action can call two kinds of API, or only endpoints no spec describes, so the
+    // buckets neither sum to the action count nor stay within it.
+    expect(
+      documents.some(
+        ({ api_type_actions: counts, total_actions: total }) =>
+          Object.values(counts).reduce((sum, count) => sum + count, 0) !== total
+      )
+    ).toBe(true);
+  });
+
   it('counts a connector as drift-protected exactly when it is emulated', async () => {
     const documents = await collectCoverage(REPO_ROOT);
 

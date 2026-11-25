@@ -91,11 +91,11 @@ export interface ConnectorCoverageDocument {
   readonly available_in_agent_builder: boolean;
   readonly availability: Availability;
   /**
-   * Every action the connector declares. `api_type_actions` does not answer this: an action
-   * calling two kinds of API counts under both, so its values do not sum to a count, and for a
-   * recorded connector it counts only the actions the manifest maps or lists as unmatched, so
-   * an action the manifest never mentions is missing from it. This is the denominator to
-   * measure vendor API coverage against.
+   * Every action the connector declares. `api_type_actions` answers a different question and
+   * cannot stand in for this: an action calling two kinds of API counts under both, and an
+   * action whose requests the manifest only lists as unmatched falls into a bucket just when
+   * those requests are MCP, so its values both double-count and omit. urlscan.io declares 7
+   * actions and buckets 3. This is the denominator to measure vendor API coverage against.
    */
   readonly total_actions: number;
   /** The actions an agent may call as tools (`isTool`). */

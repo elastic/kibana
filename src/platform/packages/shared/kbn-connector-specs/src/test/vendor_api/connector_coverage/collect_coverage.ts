@@ -12,6 +12,7 @@ import path from 'path';
 import { vendorApiExemptionsSchema } from '../exemptions';
 import { listConnectors } from '../find_connector';
 import { parseManifest } from '../manifest';
+import { readOptional } from '../spec/load_vendor_specs';
 import type { ConnectorCoverageDocument } from './connector_coverage';
 import { buildCoverageDocument, getAuthTypeFacts } from './connector_coverage';
 
@@ -62,10 +63,11 @@ export const collectCoverage = async (
   );
   const documents: ConnectorCoverageDocument[] = [];
   for (const { connector, directory } of await listConnectors()) {
-    const manifest = await fs
-      .readFile(path.join(directory, 'manifest.json'), 'utf8')
-      .then(parseManifest)
-      .catch(() => undefined);
+    // Only a missing manifest means "not recorded". A malformed one, or one the schema no
+    // longer accepts, has to fail the run: swallowing it would report the connector as
+    // unrecorded and send the dashboard wrong data with no error.
+    const manifestText = await readOptional(path.join(directory, 'manifest.json'));
+    const manifest = manifestText === undefined ? undefined : parseManifest(manifestText);
     documents.push(
       buildCoverageDocument({
         spec: connector,

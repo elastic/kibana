@@ -123,7 +123,15 @@ run(
     }
 
     if (flagsReader.boolean('coverage')) {
-      if (check || refresh || flagsReader.boolean('inspect') || flagsReader.boolean('drift')) {
+      // --surface reads --report, where --coverage writes it, so running both would
+      // overwrite the drift report instead of surfacing it.
+      if (
+        check ||
+        refresh ||
+        flagsReader.boolean('inspect') ||
+        flagsReader.boolean('drift') ||
+        flagsReader.boolean('surface')
+      ) {
         throw createFlagError(
           '--coverage reads the committed artifacts and writes only the report'
         );
