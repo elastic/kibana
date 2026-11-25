@@ -28,7 +28,8 @@ export interface TermsConversionContext {
   termsBucketCount: number;
   /**
    * When true, `otherBucket` on this column can be expressed: the column is the first bucket
-   * (single Top values, Top values above a date histogram, or the outer of two Top values).
+   * (single Top values, Top values above a date histogram, or directly above a second Top
+   * values).
    */
   supportsOtherBucket?: boolean;
 }

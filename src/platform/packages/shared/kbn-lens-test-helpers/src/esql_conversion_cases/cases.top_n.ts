@@ -498,6 +498,34 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         reason: 'terms_other_bucket_not_supported',
       },
     },
+    // The nested Other path limits by the outer key only, so a bucket between the two Top
+    // values would pick the inner top N across every date bucket instead of per date bucket.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description:
+        'nested terms with a date histogram between and other bucket on the outer dimension is not convertible',
+      columns: {
+        col1: terms('machine.os.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col4' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col4' },
+          orderDirection: 'desc',
+        }),
+        col4: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3', 'col4'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_not_supported',
+      },
+    },
     {
       group: 'top_n',
       dataset: logs,

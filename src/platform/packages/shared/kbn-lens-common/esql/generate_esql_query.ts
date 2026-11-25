@@ -465,9 +465,13 @@ export function generateEsqlQuery(
   const hasUnsupportedDateHistogramNesting =
     hasOuterTermsBelowOtherBucket || (hasTrailingBuckets && leadingBucketEntries.length > 0);
 
-  // Other is supported when this terms column is the first bucket: alone, above a date
-  // histogram, or the outer of two Top values. An inner Top values Other (or terms under a
-  // date histogram) stays gated — DSL builds one Other per parent bucket.
+  // Other is supported on the first bucket when the inner Top values is that column or sits
+  // directly below it: alone, above a date histogram, or the outer of two adjacent Top values.
+  // A bucket between two Top values stays gated: the nested path limits by the outer key only.
+  // An inner Top values Other (or terms under a date histogram) also stays gated — DSL builds
+  // one Other per parent bucket.
+  const hasBucketBetweenTermsDimensions = leadingBucketEntries.length > 1;
+
   // Fail fast on terms blockers before building bucket expressions; metric
   // failures above still take precedence. One reason per terms column; take the first.
   const termsFailureReason = termsBuckets
@@ -475,7 +479,7 @@ export function generateEsqlQuery(
       getTermsConversionFailure(col, {
         hasUnsupportedDateHistogramNesting,
         termsBucketCount: termsBuckets.length,
-        supportsOtherBucket: index === 0 && !hasUnsupportedDateHistogramNesting,
+        supportsOtherBucket: index === 0 && !hasBucketBetweenTermsDimensions,
       })
     )
     .find((reason): reason is EsqlConversionFailureReason => reason !== undefined);
