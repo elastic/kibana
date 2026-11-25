@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { listConnectors } from '../find_connector';
-import { collectCoverage, serializeCoverage } from './collect_coverage';
+import { collectCoverage, readManifest, serializeCoverage } from './collect_coverage';
 
 describe('collectCoverage', () => {
   it('describes every connector in all_specs.ts once', async () => {
@@ -61,14 +64,19 @@ describe('collectCoverage', () => {
     for (const { connector_id: id, total_actions: total } of documents) {
       expect(total).toBe(declared.get(id));
     }
-    // An action can call two kinds of API, or only endpoints no spec describes, so the
-    // buckets neither sum to the action count nor stay within it.
-    expect(
-      documents.some(
-        ({ api_type_actions: counts, total_actions: total }) =>
-          Object.values(counts).reduce((sum, count) => sum + count, 0) !== total
-      )
-    ).toBe(true);
+  });
+
+  // An exemption's API type is read from its free-text reason, so rewording one can drop it
+  // into the catch-all without anyone noticing. This fails when that happens.
+  it('classifies every exempt connector by its reason, never as a catch-all', async () => {
+    const documents = await collectCoverage(REPO_ROOT);
+    const exempt = documents.filter(({ exemption_reason: reason }) => reason !== undefined);
+
+    expect(exempt.length).toBeGreaterThan(0);
+    for (const { connector_id: id, api_types: types } of exempt) {
+      expect({ id, types }).toEqual({ id, types: expect.not.arrayContaining(['other']) });
+      expect({ id, types }).toEqual({ id, types: expect.not.arrayContaining(['unexplained']) });
+    }
   });
 
   it('counts a connector as drift-protected exactly when it is emulated', async () => {
@@ -79,5 +87,36 @@ describe('collectCoverage', () => {
     for (const { emulated, drift_protection: driftProtection } of documents) {
       expect(driftProtection).toBe(emulated ? 'full' : 'none');
     }
+  });
+});
+
+describe('readManifest', () => {
+  let directory: string;
+
+  beforeEach(async () => {
+    directory = await fs.mkdtemp(path.join(os.tmpdir(), 'connector-coverage-'));
+  });
+
+  afterEach(async () => {
+    await fs.rm(directory, { recursive: true, force: true });
+  });
+
+  it('reports no manifest when the connector has none', async () => {
+    await expect(readManifest(directory)).resolves.toBeUndefined();
+  });
+
+  it('fails on a malformed manifest rather than reporting the connector as unrecorded', async () => {
+    await fs.writeFile(path.join(directory, 'manifest.json'), '{ "sources": ');
+
+    await expect(readManifest(directory)).rejects.toThrow(path.join(directory, 'manifest.json'));
+  });
+
+  it('fails on a manifest the schema rejects, naming the file', async () => {
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      JSON.stringify({ sources: 'not an object', operations: {} })
+    );
+
+    await expect(readManifest(directory)).rejects.toThrow(path.join(directory, 'manifest.json'));
   });
 });

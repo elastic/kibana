@@ -22,6 +22,36 @@ interface OpenApiSecurityScheme {
   flows?: Record<string, { tokenUrl?: string }>;
 }
 
+interface SnapshotDocument {
+  servers?: Array<{ url?: string }>;
+  components?: { securitySchemes?: Record<string, OpenApiSecurityScheme> };
+}
+
+/**
+ * A spec may declare `tokenUrl` relative to its servers, as Okta's and Datadog's do. Taking it
+ * verbatim would compare `/oauth2/v1/token` with a connector's absolute token URL and never
+ * match, so the connector would be reported as not served when the emulator does serve it.
+ */
+const resolveAgainstServers = (
+  tokenUrl: string,
+  servers: SnapshotDocument['servers']
+): string[] => {
+  if (/^https?:\/\//i.test(tokenUrl)) return [tokenUrl];
+  const resolved = (servers ?? [])
+    .map(({ url }) => url)
+    .filter((url): url is string => typeof url === 'string' && /^https?:\/\//i.test(url))
+    .map((url) => {
+      try {
+        return new URL(tokenUrl, url.endsWith('/') ? url : `${url}/`).toString();
+      } catch {
+        return undefined;
+      }
+    })
+    .filter((url): url is string => url !== undefined);
+  // With no server to resolve against the raw value is still the best description of it.
+  return resolved.length > 0 ? resolved : [tokenUrl];
+};
+
 const exists = (file: string): Promise<boolean> =>
   fs.access(file).then(
     () => true,
@@ -40,18 +70,42 @@ const readServedTokenUrls = async (directory: string): Promise<string[]> => {
   const files = await fs.readdir(snapshots).catch(() => [] as string[]);
   const urls = new Set<string>();
   for (const file of files.filter((name) => name.endsWith('.json'))) {
-    const snapshot: { components?: { securitySchemes?: Record<string, OpenApiSecurityScheme> } } =
-      await fs
-        .readFile(path.join(snapshots, file), 'utf8')
-        .then(JSON.parse)
-        .catch(() => ({}));
+    const snapshot: SnapshotDocument = await fs
+      .readFile(path.join(snapshots, file), 'utf8')
+      .then(JSON.parse)
+      .catch(() => ({}));
     for (const scheme of Object.values(snapshot.components?.securitySchemes ?? {})) {
       for (const { tokenUrl } of Object.values(scheme.flows ?? {})) {
-        if (tokenUrl) urls.add(tokenUrl);
+        if (tokenUrl) {
+          for (const url of resolveAgainstServers(tokenUrl, snapshot.servers)) urls.add(url);
+        }
       }
     }
   }
   return [...urls];
+};
+
+/**
+ * The connector's committed manifest, or `undefined` when it has none.
+ *
+ * Only a missing file means "not recorded". A malformed manifest, or one the schema no longer
+ * accepts, fails the run: swallowing it would report the connector as unrecorded and send the
+ * dashboard wrong data with no error. The error names the file, because one bad manifest stops
+ * the report for all of them and the JSON or schema message alone does not say whose it is.
+ */
+export const readManifest = async (
+  directory: string
+): Promise<ReturnType<typeof parseManifest> | undefined> => {
+  const file = path.join(directory, 'manifest.json');
+  const text = await readOptional(file);
+  if (text === undefined) return undefined;
+  try {
+    return parseManifest(text);
+  } catch (error) {
+    throw new Error(`${file}: ${error instanceof Error ? error.message : String(error)}`, {
+      cause: error,
+    });
+  }
 };
 
 /** One coverage document per connector in `all_specs.ts`, read from its committed artifacts. */
@@ -63,11 +117,7 @@ export const collectCoverage = async (
   );
   const documents: ConnectorCoverageDocument[] = [];
   for (const { connector, directory } of await listConnectors()) {
-    // Only a missing manifest means "not recorded". A malformed one, or one the schema no
-    // longer accepts, has to fail the run: swallowing it would report the connector as
-    // unrecorded and send the dashboard wrong data with no error.
-    const manifestText = await readOptional(path.join(directory, 'manifest.json'));
-    const manifest = manifestText === undefined ? undefined : parseManifest(manifestText);
+    const manifest = await readManifest(directory);
     documents.push(
       buildCoverageDocument({
         spec: connector,

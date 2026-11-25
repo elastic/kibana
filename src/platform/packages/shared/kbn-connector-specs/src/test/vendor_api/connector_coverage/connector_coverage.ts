@@ -369,11 +369,11 @@ export const buildCoverageDocument = ({
     realistic_mocks: facts.hasRecordings || facts.hasEmulatorResponses,
     spec_directory: facts.specDirectory,
   };
-  if (manifest) {
+  if (emulated) {
     return {
       ...base,
       ...describeApiTypes(getRecordedApiTypeActions(manifest)),
-      emulated: true,
+      emulated,
       drift_protection: 'full',
     };
   }
@@ -384,7 +384,7 @@ export const buildCoverageDocument = ({
         spec.actions
       ).length,
     }),
-    emulated: false,
+    emulated,
     drift_protection: 'none',
     ...(exemptionReason ? { exemption_reason: exemptionReason } : {}),
   };
