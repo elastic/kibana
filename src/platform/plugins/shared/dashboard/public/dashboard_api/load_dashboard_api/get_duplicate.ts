@@ -24,31 +24,31 @@ export type PanelsCache = Map<string, CachedPanel[]>;
 
 /** Returns the existing grid or pinned panel that the incoming embeddable duplicates, if any. */
 export const getDuplicate = (
-  { embeddableId, serializedState, type }: EmbeddablePackageState,
+  embeddable: EmbeddablePackageState,
   embeddableDefinition: EmbeddablePublicDefinition | undefined,
-  dashboardState: Pick<DashboardState, 'panels' | 'pinned_panels'>,
+  initialState: Pick<DashboardState, 'panels' | 'pinned_panels'>,
   cache: PanelsCache
 ): CachedPanel | undefined => {
+  const { embeddableId, serializedState, type } = embeddable;
   // An embeddableId already targets a panel, so it needs no duplicate check.
-  const isDuplicate = embeddableDefinition?.isDuplicate;
-  if (embeddableId || !isDuplicate) return undefined;
+  if (embeddableId || !embeddableDefinition?.isDuplicate) return undefined;
 
-  // An isDuplicate error means no duplicate, so the dashboard still opens.
   try {
     let panels = cache.get(type);
     if (!panels) {
       // Incoming panels are placed at the top level, so panels scoped to a section are not valid duplicate targets.
       panels = [
-        ...(dashboardState.pinned_panels ?? []),
-        ...(dashboardState.panels ?? []).filter(isDashboardPanel),
+        ...(initialState.pinned_panels ?? []),
+        ...(initialState.panels ?? []).filter(isDashboardPanel),
       ]
         .filter((panel) => panel.type === type)
         .map(({ type: panelType, id, config }) => ({ type: panelType, id, state: config }));
       cache.set(type, panels);
     }
 
-    return panels.find(({ state }) => isDuplicate(serializedState, state));
+    return panels.find(({ state }) => embeddableDefinition.isDuplicate?.(serializedState, state));
   } catch {
+    // An isDuplicate error means no duplicate, so the dashboard still opens.
     return undefined;
   }
 };
