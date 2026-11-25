@@ -95,8 +95,9 @@ jest.mock('react-router-dom', () => ({
 const { mockTimelineSearchSubscription } = getMockTimelineSearchSubscription();
 
 // These tests can take more than standard timeout of 5s
-// that is why we are increasing it.
-const SPECIAL_TEST_TIMEOUT = 50000;
+// that is why we are increasing the timeout (higher under parallel Jest workers).
+// The tests that mount the real data grid take about 40 to 60 s on CI.
+const SPECIAL_TEST_TIMEOUT = 90000;
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
   return allowedExperimentalValues[feature];
