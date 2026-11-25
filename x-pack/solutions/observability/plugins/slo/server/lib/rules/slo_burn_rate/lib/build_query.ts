@@ -22,7 +22,6 @@ export interface EvaluationAfterKey {
 }
 
 export const EVALUATION_PAGE_SIZE = 1000;
-const CANDIDATES_PAGE_SIZE = 1000;
 
 export const LONG_WINDOW = 'LONG';
 export const SHORT_WINDOW = 'SHORT';
@@ -209,7 +208,7 @@ function buildSloRevisionFilter(slo: SLODefinition, dateRange: { from: Date; to:
 }
 
 /**
- * Builds the query listing the instances whose short window burn rate reaches the threshold of at least one window.
+ * Builds the query listing the instances whose short window burn rate reaches the threshold of at least one window, with the response trimmed to their keys and the search time.
  */
 export function buildCandidatesQuery(
   startedAt: Date,
@@ -230,6 +229,7 @@ export function buildCandidatesQuery(
 
   return {
     size: 0,
+    filter_path: ['took', 'aggregations.instances.after_key', 'aggregations.instances.buckets.key'],
     query: {
       bool: {
         filter: [
@@ -246,7 +246,7 @@ export function buildCandidatesQuery(
       instances: {
         composite: {
           ...(afterKey ? { after: afterKey } : {}),
-          size: CANDIDATES_PAGE_SIZE,
+          size: EVALUATION_PAGE_SIZE,
           sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
         },
         aggs: {

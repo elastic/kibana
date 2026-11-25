@@ -152,6 +152,10 @@ overrides:
   'gaxios>node-fetch': '2.7.0'
   'glob-stream': '8.0.0'
   'module-replacements': '2.3.2'
+  # lmdb (latest included) declares msgpackr ^1.11.2, so a re-lock stays on the 1.x
+  # line. Pin every 1.x copy to the 2.x line; lmdb's JSON and msgpack encodings
+  # work with it. Drop this once the branch no longer depends on lmdb.
+  'msgpackr@^1': '2.1.4'
   'node-jose>uuid': '11.1.1'
   'nwsapi': '2.2.2'
   'react-focus-lock': '2.9.5'

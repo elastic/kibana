@@ -108,3 +108,25 @@ describe('bulk action request schemas validate the `agents` KQL string', () => {
     ).toThrow();
   });
 });
+
+describe('GetAgentsRequestSchema sortField validation', () => {
+  it.each(['default_api_key', 'access_api_key', 'default_api_key.keyword', 'not_a_field'])(
+    'rejects sorting by the field %s, which is not in the agent mappings',
+    (sortField) => {
+      expect(() => GetAgentsRequestSchema.query.validate({ sortField })).toThrow(
+        /is not supported/
+      );
+    }
+  );
+
+  it.each([
+    'enrolled_at',
+    'local_metadata.host.hostname',
+    'local_metadata.host.hostname.keyword',
+    'local_metadata.elastic.agent.version.keyword',
+    'default_api_key_id',
+    'policy_id',
+  ])('allows sorting by the mapped field %s', (sortField) => {
+    expect(() => GetAgentsRequestSchema.query.validate({ sortField })).not.toThrow();
+  });
+});
