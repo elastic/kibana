@@ -38,7 +38,8 @@ const setup = (spaceId = 'default') => {
   const send = (
     phase: NotificationPhase,
     executionId = 'exec-1',
-    destinations: InvestigationNotificationDestination[] = [destination]
+    destinations: InvestigationNotificationDestination[] = [destination],
+    signal = controller.signal
   ) =>
     deliverInvestigationNotifications({
       investigation,
@@ -51,7 +52,7 @@ const setup = (spaceId = 'default') => {
       routingClient: context.client,
       getExecute,
       getIsomerRuntime: getTestIsomerRuntime,
-      signal: controller.signal,
+      signal,
       logger,
     });
   return { ...context, controller, execute, getExecute, logger, send };
@@ -388,16 +389,23 @@ describe('investigation notification lifecycle', () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
-  it('cancellation after claiming skips the connector and remains unconfirmed', async () => {
+  it('cancellation before posting skips the connector and lets a failure start the thread', async () => {
     const { send, controller, execute, client } = setup();
     const claim = client.claim.bind(client);
-    jest.spyOn(client, 'claim').mockImplementation(async (...args) => {
+    jest.spyOn(client, 'claim').mockImplementationOnce(async (...args) => {
       const attempt = await claim(...args);
       controller.abort();
       return attempt;
     });
-    expect(await send('started')).toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+    expect(await send('started')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
     expect(execute).not.toHaveBeenCalled();
+
+    expect(await send('failed', 'exec-1', [destination], new AbortController().signal)).toEqual({
+      sent: 1,
+      failed: 0,
+      unconfirmed: 0,
+    });
+    expect(execute.mock.calls[0][0].params.subActionParams).not.toHaveProperty('threadTs');
   });
 
   it('cancellation during posting passes the signal and stops later destinations', async () => {
