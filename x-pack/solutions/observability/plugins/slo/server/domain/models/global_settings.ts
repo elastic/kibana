@@ -6,11 +6,16 @@
  */
 
 import type { z } from '@kbn/zod';
-import type { sliRetentionSchema, sloGlobalSettingsSchema } from '@kbn/slo-schema';
+import type {
+  sliRetentionSchema,
+  sloGlobalSettingsSchema,
+  sloGlobalSettingsUpdateSchema,
+} from '@kbn/slo-schema';
 
 type SliRetention = z.output<typeof sliRetentionSchema>;
 type SLOGlobalSettings = z.output<typeof sloGlobalSettingsSchema>;
 type StoredSLOGlobalSettings = z.input<typeof sloGlobalSettingsSchema>;
+type SLOGlobalSettingsUpdate = z.output<typeof sloGlobalSettingsUpdateSchema>;
 
 type EffectiveSettingSource = 'default' | 'settings' | 'config';
 
@@ -22,6 +27,7 @@ export type {
   SliRetention,
   SLOGlobalSettings,
   StoredSLOGlobalSettings,
+  SLOGlobalSettingsUpdate,
   EffectiveSettingSource,
   EffectiveSliRetention,
 };

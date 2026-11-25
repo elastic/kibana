@@ -58,9 +58,19 @@ describe('DefaultSLOGlobalSettingsRepository', () => {
       });
     });
 
+    it('returns a stored value outside the current input bounds', async () => {
+      soClient.get.mockResolvedValueOnce(
+        aSavedObject({ sliRetention: { enabled: true, periodDays: 30, updatedAt: UPDATED_AT } })
+      );
+
+      await expect(repository.get()).resolves.toEqual({
+        sliRetention: { enabled: true, periodDays: 30, updatedAt: new Date(UPDATED_AT) },
+      });
+    });
+
     it('returns no settings and logs a warning when the stored settings are invalid', async () => {
       soClient.get.mockResolvedValueOnce(
-        aSavedObject({ sliRetention: { enabled: true, periodDays: 1, updatedAt: UPDATED_AT } })
+        aSavedObject({ sliRetention: { enabled: true, periodDays: 0, updatedAt: UPDATED_AT } })
       );
 
       await expect(repository.get()).resolves.toEqual({});
@@ -77,11 +87,21 @@ describe('DefaultSLOGlobalSettingsRepository', () => {
   });
 
   describe('save', () => {
-    it('writes the given blocks with their dates encoded as a partial update with upsert', async () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date(UPDATED_AT));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('writes the given blocks stamped with the current date as a partial update with upsert', async () => {
       const expected = { sliRetention: { enabled: true, periodDays: 200, updatedAt: UPDATED_AT } };
       soClient.update.mockResolvedValueOnce(aSavedObject(expected));
 
-      await repository.save({
+      await expect(
+        repository.save({ sliRetention: { enabled: true, periodDays: 200 } })
+      ).resolves.toEqual({
         sliRetention: { enabled: true, periodDays: 200, updatedAt: new Date(UPDATED_AT) },
       });
 

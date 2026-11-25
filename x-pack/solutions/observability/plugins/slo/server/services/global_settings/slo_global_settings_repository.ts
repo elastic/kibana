@@ -9,12 +9,16 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/core/server';
 import { sloGlobalSettingsSchema } from '@kbn/slo-schema';
-import type { SLOGlobalSettings, StoredSLOGlobalSettings } from '../../domain/models';
+import type {
+  SLOGlobalSettings,
+  SLOGlobalSettingsUpdate,
+  StoredSLOGlobalSettings,
+} from '../../domain/models';
 import { SLO_GLOBAL_SETTINGS_ID, SO_SLO_GLOBAL_SETTINGS_TYPE } from '../../saved_objects';
 
 export interface SLOGlobalSettingsRepository {
   get(): Promise<SLOGlobalSettings>;
-  save(settings: SLOGlobalSettings): Promise<void>;
+  save(update: SLOGlobalSettingsUpdate): Promise<SLOGlobalSettings>;
 }
 
 export class DefaultSLOGlobalSettingsRepository implements SLOGlobalSettingsRepository {
@@ -36,8 +40,12 @@ export class DefaultSLOGlobalSettingsRepository implements SLOGlobalSettingsRepo
     return result.data;
   }
 
-  /** Writes the given setting blocks, leaving the other stored blocks untouched. */
-  async save(settings: SLOGlobalSettings): Promise<void> {
+  /** Writes the given setting blocks stamped with the current date, leaving the other stored blocks untouched. */
+  async save({ sliRetention }: SLOGlobalSettingsUpdate): Promise<SLOGlobalSettings> {
+    const updatedAt = new Date();
+    const settings: SLOGlobalSettings = {
+      ...(sliRetention && { sliRetention: { ...sliRetention, updatedAt } }),
+    };
     const toStore = sloGlobalSettingsSchema.encode(settings);
 
     await this.soClient.update<StoredSLOGlobalSettings>(
@@ -46,6 +54,8 @@ export class DefaultSLOGlobalSettingsRepository implements SLOGlobalSettingsRepo
       toStore,
       { upsert: toStore }
     );
+
+    return settings;
   }
 
   private async findStored(): Promise<StoredSLOGlobalSettings | undefined> {

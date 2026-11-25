@@ -23,11 +23,21 @@ const sliRetentionSchema = lazySchema(() =>
   })
 );
 
-// Each setting block is written on its own and carries the date it was last written.
-const sloGlobalSettingsSchema = lazySchema(() =>
+// The setting blocks a caller writes; the bounds apply here, at the input edge.
+const sloGlobalSettingsUpdateSchema = lazySchema(() =>
   z.object({
-    sliRetention: sliRetentionSchema.extend({ updatedAt: dateType }).optional(),
+    sliRetention: sliRetentionSchema.optional(),
   })
 );
 
-export { sliRetentionSchema, sloGlobalSettingsSchema };
+// The stored setting blocks, each with the date it was last written. Shape only: a value
+// stored under older bounds must still be read after the bounds change.
+const sloGlobalSettingsSchema = lazySchema(() =>
+  z.object({
+    sliRetention: sliRetentionSchema
+      .extend({ periodDays: z.number().int().positive(), updatedAt: dateType })
+      .optional(),
+  })
+);
+
+export { sliRetentionSchema, sloGlobalSettingsSchema, sloGlobalSettingsUpdateSchema };
