@@ -34,6 +34,8 @@ interface UnmappedDetectionFields {
   alert_index?: string;
   workflow_execution_id?: string;
   scanned_by?: string;
+  /** The type a scan marker's scan observed; read by the Detection workflow's write gate, never by discovery. */
+  observed_change_point_type?: string;
   /** Why the classifier closed the detection; only `event_id` is mapped, `checked_at` is the marker's own timestamp. */
   skip?: Omit<DetectionSkip, 'checked_at'>;
 }
