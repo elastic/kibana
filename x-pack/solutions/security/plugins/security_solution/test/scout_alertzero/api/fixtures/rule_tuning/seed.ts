@@ -17,7 +17,6 @@ export const FP_ALERT_COUNT = 10;
 export const FP_PROCESS_NAME = 'nginx';
 const TP_PROCESS_NAME = 'ncat';
 export const TP_EVENT_COUNT = 2;
-/** Total source events: one per false positive, plus the true positives. */
 export const SEEDED_EVENT_COUNT = FP_ALERT_COUNT + TP_EVENT_COUNT;
 /**
  * How long before the test the seeded history happened. The rule looks back 6 minutes, so its

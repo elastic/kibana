@@ -57,7 +57,6 @@ export const readBacktest = (review: WorkflowExecutionDto): BacktestOutcome | un
   };
 };
 
-/** Reads the rule by its saved-object id. */
 export const readRule = async ({
   apiClient,
   headers,

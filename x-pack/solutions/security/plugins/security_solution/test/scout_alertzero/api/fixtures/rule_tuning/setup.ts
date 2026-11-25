@@ -57,7 +57,8 @@ export const pinModelToProxy = async ({
   expectStatus('Create the proxy connector', connector);
   const { id: connectorId } = connector.body;
 
-  // The review's diagnosis runs on the balanced feature, and the worker checks the parent one.
+  // The diagnosis runs on the balanced feature. The parent feature is pinned too, so enabling the
+  // worker is not blocked for lack of a model.
   const settingsUrl = spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId);
   const current = await apiClient.get<InferenceSettings>(settingsUrl, {
     headers: { ...headers, ...INTERNAL_V1_HEADERS },
@@ -122,7 +123,6 @@ export const deleteServiceAccount = async ({
   expectStatus('Delete the worker service account', deleted, [200, 204, 404]);
 };
 
-/** Turns the space's rule tuning worker on or off, optionally with new settings. */
 export const setRuleTuningWorker = async ({
   apiClient,
   headers,

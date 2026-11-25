@@ -21,7 +21,6 @@ export const INTERNAL_V1_HEADERS = {
   'elastic-api-version': '1',
 };
 
-/** Throws with `what`, the status and the body unless the response status is accepted. */
 export const expectStatus = <TBody>(
   what: string,
   { statusCode, body }: { statusCode: number; body: TBody },
@@ -36,7 +35,6 @@ export const expectStatus = <TBody>(
 export const isTransientStatus = (statusCode: number): boolean =>
   statusCode === 404 || statusCode >= 500;
 
-/** The output of a step of the execution, when it is a JSON object. */
 export const findStepOutputObject = (
   execution: WorkflowExecutionDto,
   stepId: string
