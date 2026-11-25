@@ -8,19 +8,25 @@
  */
 import { walk } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
+import { getFieldPatternMatcher } from '../../definitions/utils/regex';
 import type { ESQLColumnData } from '../types';
 
 export const columnsAfter = (command: ESQLCommand, previousColumns: ESQLColumnData[]) => {
-  const columnsToDrop: string[] = [];
+  const exactNames = new Set<string>();
+  const patterns: Array<(name: string) => boolean> = [];
 
   walk(command, {
     visitColumn: (node) => {
-      columnsToDrop.push(node.parts.join('.'));
+      const matcher = getFieldPatternMatcher(node.text);
+      if (matcher) {
+        patterns.push(matcher);
+      } else {
+        exactNames.add(node.parts.join('.'));
+      }
     },
   });
 
-  return previousColumns.filter((field) => {
-    // if the field is not in the columnsToDrop, keep it
-    return !columnsToDrop.some((column) => column === field.name);
-  });
+  return previousColumns.filter(
+    ({ name }) => !exactNames.has(name) && !patterns.some((match) => match(name))
+  );
 };

@@ -17,33 +17,32 @@ export const columnsAfter = (
   query: string
 ) => {
   const columnsByName = new Map(previousColumns.map((column) => [column.name, column]));
-  const columns = [...columnsByName.values()];
-  const selections: ESQLColumnData[][] = [];
-  const winners = new Map<string, { precedence: number; index: number }>();
+  const groups: ESQLColumnData[][] = [];
+  const winners = new Map<string, { precedence: number; group: ESQLColumnData[] }>();
 
   walk(command, {
     visitColumn: (node) => {
+      const group: ESQLColumnData[] = [];
+      groups.push(group);
       const matcher = getFieldPatternMatcher(node.text);
-      const precedence = node.text === '*' ? 0 : matcher ? 1 : 2;
-      const column = columnsByName.get(node.parts.join('.'));
-      const selected = matcher
-        ? columns.filter((field) => matcher(field.name))
-        : column
-        ? [column]
-        : [];
-      const index = selections.push(selected) - 1;
+      if (!matcher) {
+        winners.set(node.parts.join('.'), { precedence: 2, group });
+        return;
+      }
 
       // Exact names outrank partial patterns, which outrank '*'. Ties go to the rightmost selector.
-      for (const { name } of selected) {
+      const selector = { precedence: node.text === '*' ? 0 : 1, group };
+      for (const name of columnsByName.keys()) {
         const prior = winners.get(name);
-        if (!prior || precedence >= prior.precedence) {
-          winners.set(name, { precedence, index });
+        if ((!prior || selector.precedence >= prior.precedence) && matcher(name)) {
+          winners.set(name, selector);
         }
       }
     },
   });
 
-  return selections.flatMap((selected, index) =>
-    selected.filter(({ name }) => winners.get(name)?.index === index)
-  );
+  for (const column of columnsByName.values()) {
+    winners.get(column.name)?.group.push(column);
+  }
+  return groups.flat();
 };
