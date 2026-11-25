@@ -2494,6 +2494,46 @@ describe('EditOutputFlyout', () => {
         expect((mockSendPutOutput.mock.calls[0][1] as any).auth).toBeNull();
       });
 
+      describe('without output secret storage', () => {
+        beforeEach(() => {
+          mockedUseFleetStatus.mockReturnValue({ isOutputSecretsStorageEnabled: false } as any);
+        });
+
+        it('should only allow None and explain why', () => {
+          const { utils } = renderFlyout();
+          selectOtlpType(utils);
+
+          expect(utils.getByTestId('otlpAuthSecretStorageCallout')).toBeInTheDocument();
+          const options = utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput')
+            .children as HTMLCollectionOf<HTMLOptionElement>;
+          expect(Array.from(options).map((option) => [option.value, option.disabled])).toEqual([
+            ['none', false],
+            ['auth_header', true],
+            ['custom_header', true],
+          ]);
+        });
+
+        it('should require removing a saved authentication', async () => {
+          const { utils } = renderFlyout(otlpOutputWithAuth);
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => {
+            expect(utils.getByText(/Authentication requires secret storage\./)).toBeInTheDocument();
+          });
+          expect(mockSendPutOutput).not.toHaveBeenCalled();
+
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+            target: { value: 'none' },
+          });
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalled();
+          });
+          expect((mockSendPutOutput.mock.calls[0][1] as any).auth).toBeNull();
+        });
+      });
+
       it('should drop a replacement credential when the authentication is turned off and on', async () => {
         const { utils } = renderFlyout(otlpOutputWithAuth);
         fireEvent.click(utils.getByText('Replace Credential'));

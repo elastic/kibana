@@ -118,6 +118,7 @@ import {
   buildOtlpAuth,
   getSelectedOtlpAuthHeaderName,
   isOtlpAuthAvailable,
+  isOtlpAuthSecretStorageAvailable,
   isOtlpAuthSelected,
   useOtlpAuthInputs,
   validateOtlpAuthInputs,
@@ -808,10 +809,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       managedOtlpUrl: cloud?.managedOtlp?.url,
     }
   );
-  const isOtlpAuthEnabled = isOtlpAuthAvailable(
-    getOtlpInputEndpoints(otlpInputs),
-    cloud?.managedOtlp?.url
-  );
+  // the credential is only stored as a secret: without output secret storage the API rejects it
+  const isOtlpAuthEnabled =
+    isOtlpAuthAvailable(getOtlpInputEndpoints(otlpInputs), cloud?.managedOtlp?.url) &&
+    isOtlpAuthSecretStorageAvailable(fleetStatus.isOutputSecretsStorageEnabled);
 
   const inputs: OutputFormInputsType = {
     nameInput,
@@ -933,7 +934,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       return [
         nameInputValid,
         validateOtlpInputs(otlpInputs),
-        // an authentication that is kept for the managed OTLP endpoint has to be removed explicitly
+        // an authentication that is kept for the managed OTLP endpoint, or without output secret
+        // storage, has to be removed explicitly
         isOtlpAuthEnabled
           ? validateOtlpAuthInputs(otlpAuthInputs, otlpInputs.otlpProtocolInput.value)
           : !isOtlpAuthSelected(otlpAuthInputs),

@@ -88,6 +88,14 @@ export type OtlpAuthInputs = ReturnType<typeof useOtlpAuthInputs>;
 export const isOtlpAuthAvailable = (endpoints: string[], managedOtlpUrl: string | undefined) =>
   !sendsToManagedOtlpHost(endpoints, managedOtlpUrl);
 
+/**
+ * Whether the credential can be stored: it is only stored as a secret. While the status is not
+ * known yet, the authentication is available, the API rejects it if secret storage is disabled.
+ */
+export const isOtlpAuthSecretStorageAvailable = (
+  isOutputSecretsStorageEnabled: boolean | undefined
+) => isOutputSecretsStorageEnabled !== false;
+
 export const isOtlpAuthSelected = (inputs: OtlpAuthInputs) =>
   inputs.otlpAuthTypeInput.value !== OTLP_AUTH_TYPE_NONE;
 

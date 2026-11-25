@@ -6,11 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFieldPassword, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFieldPassword, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { otlpAuthScheme, otlpAuthType } from '../../../../../../../common/constants';
+import {
+  OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  otlpAuthScheme,
+  otlpAuthType,
+} from '../../../../../../../common/constants';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { OTLP_AUTH_TYPE_NONE, isOtlpAuthSelected } from './use_otlp_auth_inputs';
@@ -51,8 +55,37 @@ export const OtlpAuthentication: React.FunctionComponent<{
   inputs: OutputFormInputsType;
   /** Whether the output sends data to the managed OTLP endpoint, which has no authentication. */
   isManagedEndpoint: boolean;
-}> = ({ inputs, isManagedEndpoint }) => {
+  /** Whether output secret storage is enabled: the credential is only stored as a secret. */
+  isSecretStorageAvailable: boolean;
+}> = ({ inputs, isManagedEndpoint, isSecretStorageAvailable }) => {
   const isCustomHeader = inputs.otlpAuthTypeInput.value === otlpAuthType.CustomHeader;
+  const isAuthSelected = isOtlpAuthSelected(inputs);
+  // without secret storage, only None can be selected; a saved authentication can be removed
+  const authTypeOptions = isSecretStorageAvailable
+    ? AUTH_TYPE_OPTIONS
+    : AUTH_TYPE_OPTIONS.map((option) => ({
+        ...option,
+        disabled: option.value !== OTLP_AUTH_TYPE_NONE,
+      }));
+
+  const getAuthTypeError = () => {
+    if (!isAuthSelected) {
+      return undefined;
+    }
+    if (isManagedEndpoint) {
+      return i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpAuthManagedEndpointError', {
+        defaultMessage:
+          'The managed OTLP endpoint is authenticated by Fleet. Select None to remove this authentication, or use another endpoint.',
+      });
+    }
+    if (!isSecretStorageAvailable) {
+      return i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpAuthSecretStorageError', {
+        defaultMessage:
+          'Authentication requires secret storage. Select None to remove this authentication.',
+      });
+    }
+    return undefined;
+  };
 
   return (
     <OtlpSettingsGroup
@@ -64,6 +97,29 @@ export const OtlpAuthentication: React.FunctionComponent<{
         />
       }
     >
+      {!isSecretStorageAvailable && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="lock"
+            data-test-subj="otlpAuthSecretStorageCallout"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.otlpAuthSecretStorageCalloutTitle"
+                defaultMessage="Authentication requires secret storage"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.otlpAuthSecretStorageCalloutDescription"
+              defaultMessage="The credential is only stored as a secret. Secret storage for outputs is enabled once all Fleet Servers are on version {version} or later."
+              values={{ version: OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION }}
+            />
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <OtlpSelectSetting
         label={
           <FormattedMessage
@@ -79,17 +135,10 @@ export const OtlpAuthentication: React.FunctionComponent<{
         }
         input={inputs.otlpAuthTypeInput}
         testSubj="otlpAuthTypeInput"
-        options={AUTH_TYPE_OPTIONS}
-        error={
-          isManagedEndpoint && isOtlpAuthSelected(inputs)
-            ? i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpAuthManagedEndpointError', {
-                defaultMessage:
-                  'The managed OTLP endpoint is authenticated by Fleet. Select None to remove this authentication, or use another endpoint.',
-              })
-            : undefined
-        }
+        options={authTypeOptions}
+        error={getAuthTypeError()}
       />
-      {isOtlpAuthSelected(inputs) && (
+      {isAuthSelected && (
         <>
           {isCustomHeader ? (
             <OtlpTextSetting

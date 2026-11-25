@@ -13,6 +13,7 @@ responses:
               is_secrets_storage_enabled: true
               is_space_awareness_enabled: false
               is_ssl_secrets_storage_enabled: false
+              is_output_secrets_storage_enabled: true
               is_action_secrets_storage_enabled: true
               package_verification_key_id: 'D88DB4CC'
           agentsSetupNotReadyExample:
@@ -27,6 +28,7 @@ responses:
               is_secrets_storage_enabled: false
               is_space_awareness_enabled: false
               is_ssl_secrets_storage_enabled: false
+              is_output_secrets_storage_enabled: false
               is_action_secrets_storage_enabled: false
   400:
     description: 'Bad Request'
