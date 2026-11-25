@@ -97,6 +97,8 @@ describe('ServiceGroupNode', () => {
 
     const shape = screen.getByTestId('serviceMapNodeServiceGroupShape');
     expect(shape).toHaveAttribute('role', 'button');
+    // closed, and opens when activated
+    expect(shape).toHaveAttribute('aria-expanded', 'false');
     expect(shape).toHaveAttribute(
       'aria-label',
       expect.stringContaining('Service group: shop, 3 services')

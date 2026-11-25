@@ -287,14 +287,14 @@ describe('frustrationLabelOf', () => {
   });
 
   it.each([
-    ['browser.frustration.rage_click', 5, 'Rage click (5 clicks)'],
-    ['browser.frustration.rage_click', 1, 'Rage click (1 click)'],
-    ['browser.frustration.rage_click', null, 'Rage click'],
-    ['browser.frustration.rage_click', 0, 'Rage click'],
-    ['browser.frustration.dead_click', null, 'Dead click'],
-    ['browser.frustration.dead_click', 3, 'Dead click'],
-    ['browser.frustration.error_click', null, 'Error click'],
-    ['browser.frustration.something_new', null, 'Frustration'],
+    ['elastic.frustration.rage_click', 5, 'Rage click (5 clicks)'],
+    ['elastic.frustration.rage_click', 1, 'Rage click (1 click)'],
+    ['elastic.frustration.rage_click', null, 'Rage click'],
+    ['elastic.frustration.rage_click', 0, 'Rage click'],
+    ['elastic.frustration.dead_click', null, 'Dead click'],
+    ['elastic.frustration.dead_click', 3, 'Dead click'],
+    ['elastic.frustration.error_click', null, 'Error click'],
+    ['elastic.frustration.something_new', null, 'Frustration'],
   ])('labels %s (%s clicks) as "%s"', (name, clickCount, label) => {
     expect(frustrationLabelOf(frustration(name, clickCount))).toBe(label);
   });

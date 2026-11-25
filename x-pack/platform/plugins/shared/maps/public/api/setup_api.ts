@@ -10,5 +10,7 @@ import type { LayerWizard } from '../classes/layers';
 
 export interface MapsSetupApi {
   registerLayerWizard(layerWizard: LayerWizard): void;
-  registerSource(entry: SourceRegistryEntry): void;
+  registerSource<TSourceDescriptor extends object>(
+    entry: SourceRegistryEntry<TSourceDescriptor>
+  ): void;
 }

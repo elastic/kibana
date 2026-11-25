@@ -17,7 +17,6 @@ const {
   runOrca,
   runConnectorProbes,
   runWikiOptimize,
-  runWriteup,
   runReinforcement,
   storedDatasetIds,
 } = resolveEvalSelection();
@@ -45,7 +44,8 @@ export default createPlaywrightEvalsConfig({
     ...(runConnectorProbes ? [] : ['**/connector_probe/connector_probe.spec.ts']),
     ...(runStoredConnectorProbes ? [] : ['**/connector_probe/stored.spec.ts']),
     ...(runWikiOptimize ? [] : ['**/wiki_optimize/**']),
-    ...(runWriteup ? [] : ['**/writeup/**']),
+    // The writeup eval has its own suite and config: writeup.playwright.config.ts.
+    '**/writeup/**',
     ...(runReinforcement ? [] : ['**/reinforcement/**']),
   ],
 });
