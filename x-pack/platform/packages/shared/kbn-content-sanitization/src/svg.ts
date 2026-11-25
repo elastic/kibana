@@ -78,19 +78,22 @@ const limitUseReferences = (root: Element, window: DOMWindow): void => {
     // An href and its xlink:href fallback that name the same target render it once.
     const targetIds = new Set(hrefs.map(({ value }) => getFragmentId(value)));
     let isAllowed = references <= MAX_USE_REFERENCES;
+    let useCopiedElements = 0;
     for (const id of targetIds) {
       const target = id === undefined ? undefined : elementsById.get(id);
+      const remaining = MAX_USE_COPIED_ELEMENTS - copiedElements - useCopiedElements;
       const count =
-        isAllowed && target
-          ? countCopiedElements(target, MAX_USE_COPIED_ELEMENTS - copiedElements, window)
-          : undefined;
+        isAllowed && target ? countCopiedElements(target, remaining, window) : undefined;
       if (count === undefined) {
         isAllowed = false;
         break;
       }
-      copiedElements += count;
+      useCopiedElements += count;
     }
-    if (!isAllowed) {
+    // A <use> that loses its hrefs renders nothing, so only an allowed one is charged.
+    if (isAllowed) {
+      copiedElements += useCopiedElements;
+    } else {
       hrefs.forEach((href) => use.removeAttributeNode(href));
     }
   }

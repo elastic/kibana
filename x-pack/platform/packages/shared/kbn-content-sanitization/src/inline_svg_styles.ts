@@ -700,12 +700,15 @@ const collectDependencies = (
       continue;
     }
     // A subtree is contiguous in document order.
-    const subtree = elements.slice(start, start + count + 1);
-    dependencies.set(id, { elements: count, useReferences: subtree.filter(isUseReference).length });
-    for (const element of subtree) {
+    let useReferences = 0;
+    for (let index = start; index <= start + count; index++) {
+      const element = elements[index];
       steps += 1;
       if (steps > MAX_RESOLUTION_STEPS) {
         return undefined;
+      }
+      if (isUseReference(element)) {
+        useReferences++;
       }
       if (scanned.has(element)) {
         continue;
@@ -736,6 +739,7 @@ const collectDependencies = (
         }
       }
     }
+    dependencies.set(id, { elements: count, useReferences });
   }
   return dependencies;
 };

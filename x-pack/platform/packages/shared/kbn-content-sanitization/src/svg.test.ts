@@ -302,6 +302,17 @@ describe('sanitizeSvg', () => {
       ).toBe(1);
     });
 
+    it('does not charge a <use> whose hrefs are removed', () => {
+      const svg =
+        `<svg xmlns:xlink="http://www.w3.org/1999/xlink"><g id="group">${'<rect/>'.repeat(
+          999
+        )}</g>` +
+        `<g id="nested"><use/></g>${'<use href="#group"/>'.repeat(9)}` +
+        '<use href="#group" xlink:href="#nested"/><use href="#group"/></svg>';
+
+      expect(countKeptUses(svg)).toBe(10);
+    });
+
     it('keeps at most 256 references', () => {
       const svg = `<svg><path id="shape" d="M0 0h1v1z"/>${'<use href="#shape"/>'.repeat(
         300
