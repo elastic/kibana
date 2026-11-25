@@ -21,13 +21,26 @@ const MAX_USE_COPIED_ELEMENTS = 10_000;
 const isSafeHref = (tagName: string, value: string): boolean =>
   getFragmentId(value) !== undefined || (tagName === 'image' && RASTER_DATA_URI.test(value));
 
+const collectElements = (root: Element, window: DOMWindow): Element[] => {
+  // Prototype method, because a parsed element can shadow a document's methods by name.
+  const walker = window.Document.prototype.createTreeWalker.call(
+    root.ownerDocument,
+    root,
+    window.NodeFilter.SHOW_ELEMENT
+  );
+  const elements: Element[] = [];
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    elements.push(node as Element);
+  }
+  return elements;
+};
+
 // Undefined when the copy would contain another <use>, which includes a <use> inside what it references.
 const countCopiedElements = (
   target: Element,
   budget: number,
   window: DOMWindow
 ): number | undefined => {
-  // Prototype methods, because a parsed element can shadow a document's methods by name.
   const walker = window.Document.prototype.createTreeWalker.call(
     target.ownerDocument,
     target,
@@ -43,33 +56,44 @@ const countCopiedElements = (
   return count;
 };
 
-const createUseBudget = (window: DOMWindow) => {
+// Runs on the sanitized tree, so every target checked is the element the browser will find for that id.
+const limitUseReferences = (root: Element, window: DOMWindow): void => {
+  const elements = collectElements(root, window);
+  const elementsById = new Map<string, Element>();
+  for (const element of elements) {
+    const id = element.getAttribute('id');
+    if (id && !elementsById.has(id)) {
+      elementsById.set(id, element);
+    }
+  }
+
   let references = 0;
   let copiedElements = 0;
-  return {
-    reset: () => {
-      references = 0;
-      copiedElements = 0;
-    },
-    // A <use> whose target can't be found is refused too: the browser might decode the id and find one.
-    allows: (use: Element, value: string): boolean => {
-      const id = getFragmentId(value);
-      references++;
-      if (id === undefined || references > MAX_USE_REFERENCES) {
-        return false;
-      }
-      const target = window.Document.prototype.getElementById.call(use.ownerDocument, id);
-      if (!target) {
-        return false;
-      }
-      const count = countCopiedElements(target, MAX_USE_COPIED_ELEMENTS - copiedElements, window);
+  for (const use of elements.filter(({ localName }) => localName === 'use')) {
+    const hrefs = Array.from(use.attributes).filter(({ localName }) => localName === 'href');
+    if (hrefs.length === 0) {
+      continue;
+    }
+    references++;
+    // An href and its xlink:href fallback that name the same target render it once.
+    const targetIds = new Set(hrefs.map(({ value }) => getFragmentId(value)));
+    let isAllowed = references <= MAX_USE_REFERENCES;
+    for (const id of targetIds) {
+      const target = id === undefined ? undefined : elementsById.get(id);
+      const count =
+        isAllowed && target
+          ? countCopiedElements(target, MAX_USE_COPIED_ELEMENTS - copiedElements, window)
+          : undefined;
       if (count === undefined) {
-        return false;
+        isAllowed = false;
+        break;
       }
       copiedElements += count;
-      return true;
-    },
-  };
+    }
+    if (!isAllowed) {
+      hrefs.forEach((href) => use.removeAttributeNode(href));
+    }
+  }
 };
 
 export function isBase64Encoded(str: unknown): boolean {
@@ -124,7 +148,8 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
     const window = new JSDOM('').window;
     const purify = DOMPurify(window);
 
-    // Configure DOMPurify for SVG
+    // Configure DOMPurify for SVG. RETURN_DOM lets the <use> limits run on the final tree; DOMPurify's own string
+    // output is the same tree's innerHTML.
     purify.setConfig({
       USE_PROFILES: { svg: true, svgFilters: true },
       ADD_TAGS: ['svg', 'path', 'circle', 'rect', 'line', 'g', 'defs', 'use'],
@@ -140,23 +165,24 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
         'src',
         'data',
       ],
+      RETURN_DOM: true,
     });
-    const useBudget = createUseBudget(window);
     purify.addHook('uponSanitizeAttribute', (node, data) => {
-      if (!HREF_ATTRIBUTES.has(data.attrName)) {
-        return;
+      if (HREF_ATTRIBUTES.has(data.attrName)) {
+        data.keepAttr = isSafeHref(node.nodeName.toLowerCase(), data.attrValue);
       }
-      const tagName = node.nodeName.toLowerCase();
-      data.keepAttr =
-        isSafeHref(tagName, data.attrValue) &&
-        (tagName !== 'use' || useBudget.allows(node, data.attrValue));
     });
 
     // Sanitize and convert the result back to a Buffer
     return Buffer.from(
       sanitizeWithInlinedStyles(contentToSanitize, window, (svg) => {
-        useBudget.reset();
-        return purify.sanitize(svg);
+        // setConfig doesn't narrow the return type the way a per-call RETURN_DOM does.
+        const body = purify.sanitize(svg) as unknown as Element | null;
+        if (!body) {
+          return '';
+        }
+        limitUseReferences(body, window);
+        return body.innerHTML;
       }),
       'utf8'
     );

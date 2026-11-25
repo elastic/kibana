@@ -471,12 +471,15 @@ const getHrefTarget = (
   return href.startsWith('#') ? elementsById.get(href.slice(1)) : undefined;
 };
 
-// Undefined unless the <use> has exactly one href and sanitization could keep it, as it trims the value first.
+// Undefined unless every href of the <use> is one that sanitization could keep (it trims values first) and
+// all of them name the same target.
 const getUseTargetId = (use: Element): string | undefined => {
-  const hrefs = Array.from(use.attributes).filter(
-    ({ localName }) => toAsciiLowerCase(localName) === 'href'
+  const ids = new Set(
+    Array.from(use.attributes)
+      .filter(({ localName }) => toAsciiLowerCase(localName) === 'href')
+      .map(({ value }) => getFragmentId(value.trim()))
   );
-  return hrefs.length === 1 ? getFragmentId(hrefs[0].value.trim()) : undefined;
+  return ids.size === 1 ? ids.values().next().value : undefined;
 };
 
 interface Copy {
@@ -662,20 +665,27 @@ interface InlinedReference {
 interface InlinedSvg {
   readonly svg: string;
   readonly references: readonly InlinedReference[];
-  // Element count of everything the references reach; fewer after sanitization means content was removed.
-  readonly dependencies: ReadonlyMap<string, number>;
+  readonly dependencies: ReadonlyMap<string, Dependency>;
 }
+
+// Counts for everything a reference reaches; fewer after sanitization means content was removed.
+interface Dependency {
+  readonly elements: number;
+  readonly useReferences: number;
+}
+
+const isUseReference = (element: Element): boolean => kindOf(element) === 'use' && hasHref(element);
 
 // Undefined when anything reachable still needs an href that sanitization may strip.
 const collectDependencies = (
   ids: readonly string[],
   elements: readonly Element[],
   resolvedGradients: ReadonlySet<Element>
-): Map<string, number> | undefined => {
+): Map<string, Dependency> | undefined => {
   const elementsById = indexById(elements, collectForeignElements(elements));
   const descendants = countDescendants(elements);
   const positions = new Map(elements.map((element, index) => [element, index]));
-  const dependencies = new Map<string, number>();
+  const dependencies = new Map<string, Dependency>();
   // Iterating a Set also visits the ids added to it during the loop.
   const pending = new Set(ids);
   // Subtrees of nested ids overlap, so each element's attributes are read only the first time.
@@ -684,13 +694,15 @@ const collectDependencies = (
   for (const id of pending) {
     const target = elementsById.get(id);
     const count = (target && descendants.get(target)) ?? 0;
-    dependencies.set(id, count);
     const start = target && positions.get(target);
     if (start === undefined) {
+      dependencies.set(id, { elements: count, useReferences: 0 });
       continue;
     }
     // A subtree is contiguous in document order.
-    for (const element of elements.slice(start, start + count + 1)) {
+    const subtree = elements.slice(start, start + count + 1);
+    dependencies.set(id, { elements: count, useReferences: subtree.filter(isUseReference).length });
+    for (const element of subtree) {
       steps += 1;
       if (steps > MAX_RESOLUTION_STEPS) {
         return undefined;
@@ -877,17 +889,17 @@ const breaksReference = (
     elementsById,
   };
   // Sanitization can strip the href of a <use> it keeps, which leaves the element but draws nothing.
-  const keepsUseReferences = (target: Element): boolean =>
-    [target, ...tree.subtree(target)].every(
-      (element) => kindOf(element) !== 'use' || getHrefTarget(element, elementsById) !== undefined
-    );
-  const isIntact = (id: string, before: number): boolean => {
+  const countResolvedUseReferences = (target: Element): number =>
+    [target, ...tree.subtree(target)].filter(
+      (element) => kindOf(element) === 'use' && getHrefTarget(element, elementsById) !== undefined
+    ).length;
+  const isIntact = (id: string, before: Dependency): boolean => {
     const target = elementsById.get(id);
     return (
       target !== undefined &&
       isRenderableTarget(target, tree) &&
-      (descendants.get(target) ?? 0) === before &&
-      keepsUseReferences(target)
+      (descendants.get(target) ?? 0) === before.elements &&
+      countResolvedUseReferences(target) === before.useReferences
     );
   };
   return (

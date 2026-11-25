@@ -273,6 +273,35 @@ describe('sanitizeSvg', () => {
       ).toBe(0);
     });
 
+    it('checks the element the id names after sanitization, not a decoy that sanitization removes', () => {
+      for (const decoy of ['<script id="L1"></script>', '<unknown id="L1"></unknown>']) {
+        expect(
+          countKeptUses(
+            `<svg><path id="shape" d="M0 0h1v1z"/><use href="#L1"/>${decoy}` +
+              '<g id="L1"><use href="#shape"/><use href="#shape"/></g></svg>'
+          )
+        ).toBe(2);
+      }
+    });
+
+    it('charges an href and a matching xlink:href fallback once', () => {
+      const svg =
+        `<svg xmlns:xlink="http://www.w3.org/1999/xlink"><g id="group">${'<rect/>'.repeat(
+          999
+        )}</g>` + `${'<use href="#group" xlink:href="#group"/>'.repeat(10)}</svg>`;
+
+      expect(countKeptUses(svg)).toBe(10);
+    });
+
+    it('removes both hrefs when they name different targets and one is not allowed', () => {
+      expect(
+        countKeptUses(
+          '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><path id="shape" d="M0 0h1v1z"/>' +
+            '<g id="group"><use href="#shape"/></g><use href="#shape" xlink:href="#group"/></svg>'
+        )
+      ).toBe(1);
+    });
+
     it('keeps at most 256 references', () => {
       const svg = `<svg><path id="shape" d="M0 0h1v1z"/>${'<use href="#shape"/>'.repeat(
         300
@@ -1003,6 +1032,17 @@ describe('sanitizeSvg style inlining', () => {
 
       expect(result).toMatch(/<rect class="a"[^>]*clip-path="url\(#clip\)"/);
       expect(elementMarkup(result, 'clipPath', 'clip')).toContain('<use xlink:href="#shape" x="5"');
+    });
+
+    it('keeps styles when a referenced clip path contains a <use> that never had an href', () => {
+      const result = sanitize(
+        '<svg><defs><style>.a{clip-path:url(#clip)}.b{fill:#f00}</style><clipPath id="clip">' +
+          '<rect width="5" height="10"/><use x="5"/></clipPath></defs>' +
+          '<rect class="a b" width="20" height="10"/></svg>'
+      );
+
+      expect(result).toMatch(/<rect class="a b"[^>]*clip-path="url\(#clip\)"/);
+      expect(result).toMatch(/<rect class="a b"[^>]*fill="#f00"/);
     });
 
     it('falls back when a clip path uses a <use> that does not reference a shape', () => {
