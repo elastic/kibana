@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { act, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { useApiClient } from '../hooks/use_api_client';
-import { STATUS_REFRESH_MS } from '../pages/sessions/hooks/use_sessions_status';
 import { SessionsStatusProvider, useSessionsStatus } from './sessions_status_provider';
 
 jest.mock('../hooks/use_api_client');
@@ -19,8 +18,8 @@ const STATUS_ENDPOINT = 'GET /internal/digital_experience/sessions/status';
 
 const statusRequests = () => fetch.mock.calls.filter(([endpoint]) => endpoint === STATUS_ENDPOINT);
 
-function WebPage({ enabled, poll }: { enabled?: boolean; poll?: boolean }) {
-  const { loading } = useSessionsStatus({ enabled, poll });
+function WebPage({ enabled }: { enabled?: boolean }) {
+  const { loading } = useSessionsStatus({ enabled });
   return <div data-test-subj="webPage">{String(loading)}</div>;
 }
 
@@ -63,28 +62,5 @@ describe('SessionsStatusProvider', () => {
 
     await waitFor(() => expect(getByTestId('webPage')).toHaveTextContent('false'));
     expect(statusRequests()).toHaveLength(0);
-  });
-
-  it.each([
-    ['checks it back', true, 2],
-    ['checks it no more', false, 1],
-  ])('%s while sessions rebuild when the page polls: %s', async (_, poll, requests) => {
-    jest.useFakeTimers();
-    fetch.mockResolvedValue({ installed: true, rebuilding: true });
-    const { getByTestId } = render(
-      <SessionsStatusProvider>
-        <WebPage poll={poll} />
-      </SessionsStatusProvider>
-    );
-    // Answered, so the page knows sessions rebuild
-    await waitFor(() => expect(getByTestId('webPage')).toHaveTextContent('false'));
-    expect(statusRequests()).toHaveLength(1);
-
-    await act(async () => {
-      jest.advanceTimersByTime(STATUS_REFRESH_MS);
-    });
-
-    expect(statusRequests()).toHaveLength(requests);
-    jest.useRealTimers();
   });
 });

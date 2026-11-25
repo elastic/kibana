@@ -54,6 +54,29 @@ describe('getBucketTimestamps', () => {
     ]);
   });
 
+  it('keeps fixed buckets on local times across a daylight saving change, as Elasticsearch does', () => {
+    // New York moves from 02:00 EST to 03:00 EDT on 2026-03-08; Elasticsearch's 3-hour buckets
+    // then start at 21:00, 00:00 EST, 03:00 and 06:00 EDT, the one across the change 2 hours long.
+    expect(
+      getBucketTimestamps(
+        Date.parse('2026-03-08T04:30:00.000Z'),
+        Date.parse('2026-03-08T12:00:00.000Z'),
+        { value: 3 * 3600, unit: 's' },
+        'America/New_York'
+      )
+    ).toEqual([
+      Date.parse('2026-03-07T21:00:00.000-05:00'),
+      Date.parse('2026-03-08T00:00:00.000-05:00'),
+      Date.parse('2026-03-08T03:00:00.000-04:00'),
+      Date.parse('2026-03-08T06:00:00.000-04:00'),
+    ]);
+  });
+
+  it('has no bucket for an empty range or an interval of nothing', () => {
+    expect(getBucketTimestamps(HOUR, HOUR, { value: 60, unit: 's' })).toEqual([]);
+    expect(getBucketTimestamps(0, HOUR, { value: 0, unit: 'd' })).toEqual([]);
+  });
+
   it('aligns fixed buckets in local time, e.g. 3 hours on a half-hour offset', () => {
     expect(
       getBucketTimestamps(

@@ -39,6 +39,38 @@ const inTimeZone = (time: number, timeZone: string): moment.Moment =>
   moment.tz.zone(timeZone) ? moment.tz(time, timeZone) : moment.utc(time).utcOffset(timeZone);
 
 /**
+ * Buckets of `step` milliseconds aligned in local time, as Elasticsearch rounds a fixed interval
+ * in a time zone. A zone keeps local wall-clock times across a daylight saving change (e.g. 00:00
+ * then 03:00), so the bucket that spans it is shorter or longer; a UTC offset has none.
+ */
+const fixedBucketTimestamps = (
+  start: number,
+  end: number,
+  step: number,
+  timeZone: string
+): number[] => {
+  const offset = inTimeZone(start, timeZone).utcOffset() * 60_000;
+  const firstWallClock = Math.floor((start + offset) / step) * step;
+  if (!moment.tz.zone(timeZone)) {
+    // A fixed offset has no daylight saving: every bucket is `step` long
+    const first = firstWallClock - offset;
+    return range(first, Math.min(end, first + MAX_BUCKETS * step), step);
+  }
+  const timestamps: number[] = [];
+  for (let wallClock = firstWallClock; timestamps.length < MAX_BUCKETS; wallClock += step) {
+    // This local wall-clock time in the zone; one a change skips moves on to the next bucket's
+    const time = moment.tz(moment.utc(wallClock).toArray(), timeZone).valueOf();
+    if (time >= end) {
+      break;
+    }
+    if (time !== timestamps[timestamps.length - 1]) {
+      timestamps.push(time);
+    }
+  }
+  return timestamps;
+};
+
+/**
  * The start of every bucket of `interval` that covers `[start, end)` in `timeZone`, as an ES|QL
  * `TBUCKET` with that `time_zone` lines them up (local midnight for calendar units), so a series
  * can fill the buckets its query left out for having no documents.
@@ -53,11 +85,7 @@ export const getBucketTimestamps = (
     return [];
   }
   if (unit === 's') {
-    const step = value * 1000;
-    // Rounded in local time, as Elasticsearch rounds a fixed interval in a time zone
-    const offset = inTimeZone(start, timeZone).utcOffset() * 60_000;
-    const first = Math.floor((start + offset) / step) * step - offset;
-    return range(first, Math.min(end, first + MAX_BUCKETS * step), step);
+    return fixedBucketTimestamps(start, end, value * 1000, timeZone);
   }
   const timestamps: number[] = [];
   const bucket = inTimeZone(start, timeZone).startOf(unit === 'w' ? 'isoWeek' : unit);

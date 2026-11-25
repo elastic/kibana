@@ -8,12 +8,20 @@
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { MobileReleasesResponse } from '../../../../common/types/mobile';
-import { EARLIER_TIMESTAMP, MOBILE_APPS, TIMESTAMP } from '../../common/fixtures/mobile_data';
+import {
+  BUSY_RELEASE,
+  BUSY_SESSIONS,
+  EARLIER_TIMESTAMP,
+  LATER_TIMESTAMP,
+  MOBILE_APPS,
+  TIMESTAMP,
+} from '../../common/fixtures/mobile_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
-const { COMMON_HEADERS, TIME_RANGE, mobileReleasesPath } = testData;
+const { COMMON_HEADERS, NEW_YORK_TIME_ZONE, THIRTY_DAYS, TIME_RANGE, mobileReleasesPath } =
+  testData;
 
 apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
@@ -108,6 +116,75 @@ apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERI
         false,
         true,
       ]);
+      // The tail's session in each bucket it has a document in: 2.10.0 at one time, 2.010.0 later
+      const otherSeries = series[5];
+      expect(otherSeries.points.filter(({ sessions }) => sessions > 0)).toStrictEqual([
+        { timestamp: Date.parse(TIMESTAMP), sessions: 1, errorRate: null },
+        { timestamp: Date.parse(LATER_TIMESTAMP), sessions: 1, errorRate: null },
+      ]);
+    }
+  );
+
+  apiTest(
+    'computes the error rate of a release and of its time bucket alike, above both floors',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+      const response = await apiClient.get(mobileReleasesPath(MOBILE_APPS.busyAndroid), {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const { releases, series } = response.body as MobileReleasesResponse;
+      // An exception in every tenth of its sessions, all in the same minute
+      expect(releases).toStrictEqual([
+        {
+          release: BUSY_RELEASE,
+          isOther: false,
+          sessions: BUSY_SESSIONS,
+          users: BUSY_SESSIONS,
+          errorRate: 0.1,
+        },
+      ]);
+      expect(series[0].points.filter(({ sessions }) => sessions > 0)).toStrictEqual([
+        { timestamp: Date.parse(TIMESTAMP), sessions: BUSY_SESSIONS, errorRate: 0.1 },
+      ]);
+    }
+  );
+
+  apiTest(
+    "lines the buckets up with the user's time zone, the empty ones too",
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+      const response = await apiClient.get(
+        mobileReleasesPath(MOBILE_APPS.busyAndroid, {
+          start: THIRTY_DAYS.start,
+          end: THIRTY_DAYS.end,
+          timeZone: NEW_YORK_TIME_ZONE,
+        }),
+        { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      const { histogram, series } = response.body as MobileReleasesResponse;
+      // 12-hour buckets from New York's midnight and noon (05:00 and 17:00 UTC in January)
+      expect(histogram.interval).toStrictEqual({ value: 12 * 60 * 60, unit: 's' });
+      const [{ points }] = series;
+      expect(points.filter(({ sessions }) => sessions > 0)).toStrictEqual([
+        {
+          timestamp: Date.parse('2021-01-18T05:00:00.000Z'),
+          sessions: BUSY_SESSIONS,
+          errorRate: 0.1,
+        },
+      ]);
+      const twelveHours = 12 * 60 * 60 * 1000;
+      expect(
+        points.every(
+          ({ timestamp }) => (timestamp - Date.parse(THIRTY_DAYS.start)) % twelveHours === 0
+        )
+      ).toBe(true);
     }
   );
 

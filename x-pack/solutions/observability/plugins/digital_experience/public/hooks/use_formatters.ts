@@ -12,16 +12,8 @@ import { getUserTimeZone } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { NumberFormat, PercentFormat } from '@kbn/field-formats-plugin/common';
+import { toElasticsearchTimeZone } from '../../common/time_zone';
 import { useKibanaServices } from './use_kibana_services';
-
-// Every `moment.tz.names()` entry (and so `dateFormat:tz` option) that an Elasticsearch 9.7
-// `date_histogram` rejects, as the zone it links to.
-const ES_TIME_ZONE_OF: Readonly<Record<string, string>> = {
-  EST: 'America/Panama',
-  HST: 'Pacific/Honolulu',
-  MST: 'America/Phoenix',
-  ROC: 'Asia/Taipei',
-};
 
 const COMPACT_NUMBER_PATTERN = '0,0.[0]';
 const COMPACT_PERCENT_PATTERN = '0,0.[0]%';
@@ -69,7 +61,7 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
   const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
   // As Kibana's own date histograms do: `Browser` becomes the browser's IANA time zone.
   const userTimeZone = getUserTimeZone((key) => uiSettings.get(key));
-  const timeZone = ES_TIME_ZONE_OF[userTimeZone] ?? userTimeZone;
+  const timeZone = toElasticsearchTimeZone(userTimeZone);
 
   return {
     formatNumber: (value) => number.convertToText(value),

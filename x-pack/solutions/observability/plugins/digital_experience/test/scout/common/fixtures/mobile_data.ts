@@ -14,7 +14,7 @@ const TRACES_INDEX = 'traces-generic.otel-default';
 export const TIMESTAMP = '2021-01-18T12:30:00.000Z';
 /** Inside `TIME_RANGE`, before and after `TIMESTAMP`, for releases that show up apart. */
 export const EARLIER_TIMESTAMP = '2021-01-18T12:10:00.000Z';
-const LATER_TIMESTAMP = '2021-01-18T12:45:00.000Z';
+export const LATER_TIMESTAMP = '2021-01-18T12:45:00.000Z';
 
 /**
  * The edges of `TIME_RANGE` (12:00 to 13:00) and of the hour before it, the previous period. Both

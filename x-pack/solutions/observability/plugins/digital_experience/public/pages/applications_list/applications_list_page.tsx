@@ -285,18 +285,16 @@ export function ApplicationsListPage() {
   const selectedType = applicationType ?? typeWithData;
   const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
 
-  // Sessions are web only. The Mobile tab the URL picks requests no status; the one the list opens
-  // by itself, with only mobile rows, requests it once, for its Web tab, but doesn't poll it.
+  // Sessions are web only: the Mobile tab the URL picks requests no status. The one the list
+  // opens by itself, with only mobile rows, does: while sessions rebuild, it checks back so the list
+  // fetches again, with their Web applications, once they're built.
   const {
     status: sessionsStatus,
     refresh: refreshSessionsStatus,
     enable: enableSessions,
     enabling: enablingSessions,
     enableError: enableSessionsError,
-  } = useSessionsStatus({
-    enabled: applicationType !== APPLICATION_TYPE.mobile,
-    poll: !isMobileTab,
-  });
+  } = useSessionsStatus({ enabled: applicationType !== APPLICATION_TYPE.mobile });
   // Once sessions are set up and built, the list has applications it was fetched without.
   const sessionsReady = sessionsStatus
     ? sessionsStatus.installed && !sessionsStatus.rebuilding

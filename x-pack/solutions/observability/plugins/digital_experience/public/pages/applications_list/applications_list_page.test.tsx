@@ -313,12 +313,12 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.getByTestId('digitalExperienceApplicationTypeTab-web')).toBeVisible();
   });
 
-  it('requests the sessions status, without polling it, on the Mobile tab it opens by itself', async () => {
+  it('requests the sessions status on the Mobile tab it opens by itself, to show their Web applications once built', async () => {
     respondWith([mobileApp()]);
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
-    expect(useSessionsStatus).toHaveBeenLastCalledWith({ enabled: true, poll: false });
+    expect(useSessionsStatus).toHaveBeenLastCalledWith({ enabled: true });
   });
 
   it('shows no empty Web tab on the Mobile tab the URL picks once sessions are known to be ready', async () => {
