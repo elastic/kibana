@@ -43,7 +43,6 @@
 - [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
 - [Jira Cloud](/reference/connectors-kibana/jira-cloud-action-type.md): Search issues with JQL, retrieve project and issue details, and look up users in Jira Cloud.
 - [Kubernetes](/reference/connectors-kibana/kubernetes-action-type.md): Read and modify resources in a Kubernetes cluster through its REST API.
-- [Microsoft Defender XDR](/reference/connectors-kibana/microsoft-defender-xdr-action-type.md): Manage incidents and alerts, run advanced hunting KQL queries, and triage threats in Microsoft Defender XDR.
 - [Microsoft SQL Server](/reference/connectors-kibana/microsoft-sql-server-action-type.md): Query tables, search rows, explore schema, and execute SQL in a Microsoft SQL Server database.
 - [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md): Search messages and browse teams, channels, and chats in Microsoft Teams, and start a workflow from channel, chat, and team events.
 - [Monday.com](/reference/connectors-kibana/monday-com-action-type.md): Search boards, read and create items, post updates, and manage workspaces in Monday.com.
@@ -89,6 +88,7 @@
 
 **Endpoint security**
 
+- [Microsoft Defender XDR](/reference/connectors-kibana/microsoft-defender-xdr-action-type.md): Manage incidents and alerts, run advanced hunting KQL queries, and triage threats in Microsoft Defender XDR.
 - [SentinelOne (v2)](/reference/connectors-kibana/sentinelone-v2-action-type.md): Find and isolate endpoints, triage and mitigate threats, run remote scripts, retrieve files, and manage blocklists, exclusions, indicators, firewall and detection rules.
 
 **Threat intelligence**
