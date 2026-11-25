@@ -2704,6 +2704,7 @@ describe('createRumClient', () => {
     ['there is no endpoint', { tls }],
     ['the endpoint is not HTTPS', { url: 'http://agentless.example', tls }],
     ['the RUM endpoint is not HTTPS', { rumUrl: 'http://rum.example', tls }],
+    ['the RUM endpoint cannot be parsed', { rumUrl: 'https://rum.example:65536', tls }],
     ['the certificate is missing', { url: 'https://agentless.example', tls: { key: tls.key } }],
     [
       'the key is missing',

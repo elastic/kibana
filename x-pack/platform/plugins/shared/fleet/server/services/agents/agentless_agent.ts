@@ -239,8 +239,9 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     if (!endpoint || !api?.tls?.certificate || !api.tls.key) {
       return;
     }
-    const url = new URL(RUM_API_PATH, endpoint);
-    return url.protocol === 'https:' ? { url, agentlessConfig } : undefined;
+    // The config schema accepts some URIs that URL rejects, such as ports above 65535.
+    const url = URL.canParse(endpoint) ? new URL(RUM_API_PATH, endpoint) : undefined;
+    return url?.protocol === 'https:' ? { url, agentlessConfig } : undefined;
   }
 
   /** Logs only non-sensitive failure details: errors can carry tokens, digests, or TLS material. */
