@@ -219,7 +219,7 @@ const resolveVariantStyles = (
         buttonBackground: 'transparent',
         hoverBackground: hoverGradient,
         labelColor: defaultLabelColor,
-        labelCss: plainLabelCss(euiTheme, defaultLabelColor),
+        labelCss: gradientLabelCss(euiTheme, labelGradient, `${hoverGradient}, ${labelGradient}`),
       };
 
     case 'outlined':
@@ -236,7 +236,7 @@ const resolveVariantStyles = (
           }
         ),
         labelColor: defaultLabelColor,
-        labelCss: gradientLabelCss(euiTheme, labelGradient),
+        labelCss: gradientLabelCss(euiTheme, labelGradient, `${hoverGradient}, ${labelGradient}`),
       };
 
     case 'accent': {
