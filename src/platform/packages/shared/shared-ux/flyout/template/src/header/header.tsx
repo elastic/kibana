@@ -148,14 +148,23 @@ const badgeGroupStyles = () => ({
 });
 
 /** Overflow badge that reveals the collapsed badges in a popover. */
-const BadgeOverflow = ({ badges, isHidden }: { badges: ReactNode[]; isHidden: boolean }) => {
+const BadgeOverflow = ({
+  badges,
+  isForcedCollapsed,
+}: {
+  badges: ReactNode[];
+  isForcedCollapsed: boolean;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // The panel is portalled, so a collapse hides the anchor without touching it, leaving the badges
-  // floating over a control the user can no longer see or return focus to.
+  // The scroll guard keeps the header expanded while this popover is open, so only the
+  // `collapsed` prop can hide its trigger, and the portalled panel must not outlive it.
   useEffect(() => {
-    if (isHidden) setIsOpen(false);
-  }, [isHidden]);
+    if (isForcedCollapsed) {
+      setIsOpen(false);
+    }
+  }, [isForcedCollapsed]);
+
   const label = i18n.translate('sharedUXPackages.flyoutTemplate.header.badgeOverflowLabel', {
     defaultMessage: '+{count} more',
     values: { count: badges.length },
@@ -224,9 +233,11 @@ type HeaderZoneProps = FlyoutHeaderProps & {
 export const HeaderZone = ({
   title,
   titleText,
+  titleElement: TitleElement = 'h2',
   titleIcon,
   titleTooltip,
   isLoading = false,
+  loadingLabel,
   description,
   collapsed = false,
   children,
@@ -248,7 +259,7 @@ export const HeaderZone = ({
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
-  const titleLoadingNode = renderTitleLoading(isLoading);
+  const titleLoadingNode = renderTitleLoading(isLoading, loadingLabel);
   // The collapsed title truncates, so a string title gets a native hover reveal. A node title is
   // left untitled: a native `title` on its ancestor would cover any tooltip the node renders.
   const collapsedTitleText = typeof title === 'string' ? titleText ?? title : undefined;
@@ -308,13 +319,13 @@ export const HeaderZone = ({
               >
                 <EuiFlexItem grow={false} css={collapseStyles.collapsedTitleItem}>
                   <EuiTitle size="xs">
-                    <h3
+                    <TitleElement
                       id={flyoutTitleId}
                       css={[titleCss, collapseStyles.collapsedTitle]}
                       title={collapsedTitleText}
                     >
                       {title}
-                    </h3>
+                    </TitleElement>
                   </EuiTitle>
                 </EuiFlexItem>
                 {titleIconNode && <EuiFlexItem grow={false}>{titleIconNode}</EuiFlexItem>}
@@ -322,10 +333,10 @@ export const HeaderZone = ({
               </EuiFlexGroup>
             ) : (
               renderTitleWithAdornments(
-                <EuiTitle size="m">
-                  <h3 id={flyoutTitleId} css={titleCss}>
+                <EuiTitle size="s">
+                  <TitleElement id={flyoutTitleId} css={titleCss}>
                     {title}
-                  </h3>
+                  </TitleElement>
                 </EuiTitle>,
                 titleIconNode,
                 titleLoadingNode
@@ -373,7 +384,7 @@ export const HeaderZone = ({
                   <EuiBadgeGroup gutterSize="s" css={badgeStyles.group}>
                     {visibleBadges}
                     {overflowBadges.length > 0 && (
-                      <BadgeOverflow badges={overflowBadges} isHidden={isCollapsed} />
+                      <BadgeOverflow badges={overflowBadges} isForcedCollapsed={collapsed} />
                     )}
                   </EuiBadgeGroup>
                 </>

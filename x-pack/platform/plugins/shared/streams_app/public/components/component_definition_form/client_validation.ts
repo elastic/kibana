@@ -15,7 +15,7 @@ import type {
 import { resolveEnumOptions } from '../../services/component_catalogue';
 import { findChoiceGroup, isUnselectedChoice } from './choice_groups';
 import { isFieldAvailable, isFieldRequired } from './conditions';
-import type { FormContextValues } from './serialize';
+import { canonicalValue, mapItemScopes, readItemScope, type FormContextValues } from './serialize';
 import {
   isEmptyValue,
   isObjectValue,
@@ -38,11 +38,6 @@ const messages = {
     i18n.translate('xpack.streams.componentDefinitionForm.validation.maxLength', {
       defaultMessage: 'Enter at most {count, plural, one {# character} other {# characters}}',
       values: { count },
-    }),
-  pattern: (pattern: string) =>
-    i18n.translate('xpack.streams.componentDefinitionForm.validation.pattern', {
-      defaultMessage: 'Must match the pattern {pattern}',
-      values: { pattern },
     }),
   integer: i18n.translate('xpack.streams.componentDefinitionForm.validation.integer', {
     defaultMessage: 'Enter a whole number',
@@ -70,16 +65,80 @@ const messages = {
   uniqueItems: i18n.translate('xpack.streams.componentDefinitionForm.validation.uniqueItems', {
     defaultMessage: 'Items must be unique',
   }),
+  minEntries: (count: number) =>
+    i18n.translate('xpack.streams.componentDefinitionForm.validation.minEntries', {
+      defaultMessage: 'Add at least {count, plural, one {# entry} other {# entries}}',
+      values: { count },
+    }),
+  maxEntries: (count: number) =>
+    i18n.translate('xpack.streams.componentDefinitionForm.validation.maxEntries', {
+      defaultMessage: 'Add at most {count, plural, one {# entry} other {# entries}}',
+      values: { count },
+    }),
+  keyRequired: i18n.translate('xpack.streams.componentDefinitionForm.validation.keyRequired', {
+    defaultMessage: 'Enter a key',
+  }),
   invalidOption: i18n.translate('xpack.streams.componentDefinitionForm.validation.invalidOption', {
     defaultMessage: 'Choose one of the available options',
   }),
+  itemTelemetry: i18n.translate('xpack.streams.componentDefinitionForm.validation.itemTelemetry', {
+    defaultMessage:
+      'Applies to signals this processor no longer handles. Change it or remove the item.',
+  }),
 };
 
-const safeRegExp = (pattern: string): RegExp | undefined => {
-  try {
-    return new RegExp(pattern);
-  } catch {
-    return undefined;
+/** An item scoped to a signal the component no longer handles would silently stop applying. */
+const fitsTelemetry = (scope: FormValue, context: FormContextValues): boolean =>
+  readItemScope(scope).every((signal) => context.telemetry.some((allowed) => allowed === signal));
+
+/**
+ * Flags array items scoped to signals the component no longer applies to. Without any signals
+ * chosen there is nothing to compare against, so nothing is flagged.
+ */
+export const validateItemScopes = (
+  fields: readonly CatalogueNamedFieldDefinition[],
+  values: ObjectValue,
+  context: FormContextValues
+): FieldErrors => {
+  const errors: FieldErrors = {};
+  if (context.telemetry.length > 0) {
+    mapItemScopes(fields, values, (scope, pointer) => {
+      if (!fitsTelemetry(scope, context)) {
+        errors[pointer] = messages.itemTelemetry;
+      }
+      return scope;
+    });
+  }
+  return errors;
+};
+
+/**
+ * What is wrong with the key of a map entry, if anything. A `key_pattern` is left for the
+ * distributor, as is the `pattern` of a string: it checks both and says the same.
+ */
+export const mapKeyError = (key: string): string | undefined =>
+  key === '' ? messages.keyRequired : undefined;
+
+/** A map without entries is not written, so a required one counts as missing. */
+const isEmptyMap = (field: CatalogueFieldDefinition, value: FormValue | undefined): boolean =>
+  field.type === 'map' && isObjectValue(value) && Object.keys(value).length === 0;
+
+/**
+ * Asks for a value that would not be written, such as a map without entries, unless something
+ * inside it is already flagged. Without this the row would go missing without a word once saved.
+ */
+const requireWrittenValue = (
+  field: CatalogueFieldDefinition,
+  value: FormValue,
+  pointer: string,
+  context: FormContextValues,
+  errors: FieldErrors
+): void => {
+  const isFlagged = Object.keys(errors).some(
+    (key) => key === pointer || key.startsWith(`${pointer}/`)
+  );
+  if (!isFlagged && canonicalValue(field, value, context.telemetry) === undefined) {
+    errors[pointer] = messages.required;
   }
 };
 
@@ -102,8 +161,6 @@ const validateValue = (
         errors[pointer] = messages.minLength(field.min_length);
       } else if (field.max_length !== undefined && value.length > field.max_length) {
         errors[pointer] = messages.maxLength(field.max_length);
-      } else if (field.pattern !== undefined && !safeRegExp(field.pattern)?.test(value)) {
-        errors[pointer] = messages.pattern(field.pattern);
       }
       return;
     }
@@ -143,27 +200,58 @@ const validateValue = (
         errors[pointer] = messages.maxItems(field.max_items);
       } else if (
         field.unique_items &&
-        value.some((item, index) => value.findIndex((other) => isEqual(other, item)) !== index)
+        value.some(
+          (item, index) =>
+            !isEmptyValue(item) && value.findIndex((other) => isEqual(other, item)) !== index
+        )
       ) {
         errors[pointer] = messages.uniqueItems;
       }
       value.forEach((item, index) => {
         const itemPointer = joinPointer(pointer, index);
-        if (field.items.type === 'object' && isEmptyValue(item)) {
+        // An empty row is not written, so it would go missing without a word once saved.
+        if (isEmptyValue(item)) {
           errors[itemPointer] = messages.required;
           return;
         }
         validateValue(field.items, item, itemPointer, context, errors);
+        // An object row is written even when nothing in it is.
+        if (field.items.type !== 'object') {
+          requireWrittenValue(field.items, item, itemPointer, context, errors);
+        }
       });
       return;
     }
-    case 'map':
-      if (isObjectValue(value)) {
-        for (const [key, item] of Object.entries(value)) {
-          validateValue(field.value_schema, item, joinPointer(pointer, key), context, errors);
+    case 'map': {
+      if (!isObjectValue(value)) {
+        return;
+      }
+      const entries = Object.entries(value);
+      // A map without entries is not written, so only a required one has to have some.
+      if (entries.length === 0) {
+        return;
+      }
+      if (field.min_entries !== undefined && entries.length < field.min_entries) {
+        errors[pointer] = messages.minEntries(field.min_entries);
+      } else if (field.max_entries !== undefined && entries.length > field.max_entries) {
+        errors[pointer] = messages.maxEntries(field.max_entries);
+      }
+      for (const [key, item] of entries) {
+        // A key has no pointer of its own; like the distributor, its error goes on the entry.
+        const entryPointer = joinPointer(pointer, key);
+        const keyError = mapKeyError(key);
+        if (keyError !== undefined) {
+          errors[entryPointer] = keyError;
+        } else if (isEmptyValue(item)) {
+          // As with a list row, an entry without a value is not written.
+          errors[entryPointer] = messages.required;
+        } else {
+          validateValue(field.value_schema, item, entryPointer, context, errors);
+          requireWrittenValue(field.value_schema, item, entryPointer, context, errors);
         }
       }
       return;
+    }
     default:
       return;
   }
@@ -190,7 +278,7 @@ export const validateObject = (
     const required =
       isFieldRequired(field, value, context.telemetry) ||
       findChoiceGroup(choiceGroups, field.name)?.min_selected === 1;
-    if (required && isEmptyValue(fieldValue)) {
+    if (required && (isEmptyValue(fieldValue) || isEmptyMap(field, fieldValue))) {
       errors[fieldPointer] = messages.required;
       continue;
     }
@@ -209,11 +297,13 @@ export const validateValues = (
   values: ObjectValue,
   context: FormContextValues,
   suppliedElsewhere: ReadonlySet<string> = new Set()
-): FieldErrors =>
-  validateObject(
+): FieldErrors => ({
+  ...validateObject(
     fields.filter(({ name }) => !(suppliedElsewhere.has(name) && isEmptyValue(values[name]))),
     undefined,
     values,
     '',
     context
-  );
+  ),
+  ...validateItemScopes(fields, values, context),
+});

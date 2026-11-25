@@ -19,8 +19,17 @@ export const STREAMS_METADATA_REFERENCE_NAME = 'streamsMetadata';
 /** V1 has a single authored unit; callers should use this id until multiple units exist. */
 export const STREAMS_DEFAULT_UNIT_ID = 'default';
 
+/** Max data stream names in one request to the POST variants of the bulk stats endpoints. */
+export const MAX_STATS_STREAM_NAMES = 1000;
+
+/** Classic data stream the V2 backend writes unit telemetry to, in the project itself. */
+export const UNIT_METRICS_STREAM = 'metrics-streams.otel-default';
+
 export const getStreamsUiMetadataSavedObjectId = (configurationSavedObjectId: string): string =>
   `${configurationSavedObjectId}-streams-ui-metadata`;
+
+/** `attributes.data.reason` of a 404 for a stream whose type (query or draft) was removed. */
+export const REMOVED_STREAM_TYPE_NOT_FOUND_REASON = 'removed_stream_type';
 
 export const STREAMS_API_PRIVILEGES = {
   read: 'read_stream',
@@ -28,6 +37,25 @@ export const STREAMS_API_PRIVILEGES = {
 } as const;
 
 export const STREAMS_UI_PRIVILEGES = {
+  manage: 'manage',
+  show: 'show',
+} as const;
+
+/** Kibana feature for Streams V2 (map, sources, destinations). */
+export const STREAMS_V2_FEATURE_ID = 'streamsV2';
+
+/** API privilege names are global, so these must stay distinct from `STREAMS_API_PRIVILEGES`. */
+export const STREAMS_V2_API_PRIVILEGES = {
+  read: 'read_streams_v2',
+  manage: 'manage_streams_v2',
+} as const;
+
+/** Data stream stats routes are shared by both experiences, so either read privilege grants them. */
+export const STREAMS_STATS_READ_PRIVILEGE = {
+  anyRequired: [STREAMS_API_PRIVILEGES.read, STREAMS_V2_API_PRIVILEGES.read],
+};
+
+export const STREAMS_V2_UI_PRIVILEGES = {
   manage: 'manage',
   show: 'show',
 } as const;

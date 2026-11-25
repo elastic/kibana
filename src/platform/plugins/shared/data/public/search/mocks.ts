@@ -46,6 +46,8 @@ function createStartContract(
   return {
     aggs: searchAggsStartMock(),
     search: jest.fn(),
+    hasResponseCacheForSession: jest.fn().mockReturnValue(false),
+    evictResponseCacheForSession: jest.fn(),
     dsl: jest.fn(),
     dslPaginated: jest.fn(),
     esql: jest.fn(),

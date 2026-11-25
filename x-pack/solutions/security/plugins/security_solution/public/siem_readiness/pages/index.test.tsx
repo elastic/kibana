@@ -39,6 +39,9 @@ jest.mock('./components/configuration_panel', () => ({
   CategoryConfigurationPanel: () => null,
   ACTIVE_CATEGORIES_STORAGE_KEY: 'test-key',
 }));
+jest.mock('./siem_readiness_header', () => ({
+  SiemReadinessHeader: () => null,
+}));
 
 const mockPush = jest.fn();
 const mockReportEvent = jest.fn();

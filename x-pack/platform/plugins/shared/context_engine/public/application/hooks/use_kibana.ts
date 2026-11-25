@@ -20,6 +20,7 @@ export interface ContextEngineServices extends ContextEngineAppServices {
   data: ContextEngineStartDependencies['data'];
   share: ContextEngineStartDependencies['share'];
   triggersActionsUi: ContextEngineStartDependencies['triggersActionsUi'];
+  cloud?: ContextEngineStartDependencies['cloud'];
   console?: ContextEngineStartDependencies['console'];
   spaces?: ContextEngineStartDependencies['spaces'];
   /**

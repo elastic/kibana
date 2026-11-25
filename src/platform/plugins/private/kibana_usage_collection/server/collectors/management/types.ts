@@ -91,7 +91,6 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
-  'securitySolution:enableNewFlyout': boolean;
   'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:excludeColdAndFrozenTiersInPrevalence': boolean;
@@ -104,6 +103,7 @@ export interface UsageStats {
   'securitySolution:defaultValueReportTitle': string;
   'securitySolution:enableAttackDiscoveryWorkflows': boolean;
   'securitySolution:enableRuleChangesHistory': boolean;
+  'securitySolution:enableAlertZero': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -209,9 +209,7 @@ export interface UsageStats {
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];
   'observability:streamsEnableContentPacks': boolean;
-  'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
-  'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsEnableCanvas': boolean;
   'observability:nightshiftContinuousOnboardingEnabled': boolean;
   'observability:nightshiftContinuousOnboardingIntervalHours': number;

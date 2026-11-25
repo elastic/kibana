@@ -16,8 +16,8 @@ import type {
 } from '../../services/api';
 
 export interface ParsedAutoFollowPattern extends AutoFollowPattern {
-  followIndexPatternPrefix?: string;
-  followIndexPatternSuffix?: string;
+  followIndexPatternPrefix: string;
+  followIndexPatternSuffix: string;
 }
 
 export interface AutoFollowPatternState {

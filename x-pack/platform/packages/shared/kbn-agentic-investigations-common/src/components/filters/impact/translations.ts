@@ -8,25 +8,25 @@
 import { i18n } from '@kbn/i18n';
 
 export const IMPACT_LABELS = Object.freeze({
-  title: i18n.translate('xpack.alertzero.impact.title', {
-    defaultMessage: 'Impact',
+  title: i18n.translate('xpack.agenticInvestigations.impact.title', {
+    defaultMessage: 'Impacted entities',
   }),
   showMore: (count: number) =>
-    i18n.translate('xpack.alertzero.impact.showMore', {
+    i18n.translate('xpack.agenticInvestigations.impact.showMore', {
       defaultMessage: '+{count}',
       values: { count },
     }),
   showMoreAriaLabel: (count: number) =>
-    i18n.translate('xpack.alertzero.impact.showMoreAriaLabel', {
+    i18n.translate('xpack.agenticInvestigations.impact.showMoreAriaLabel', {
       defaultMessage: 'Show {count} more',
       values: { count },
     }),
   reachLimit: (limit: number, count: number) =>
-    i18n.translate('xpack.alertzero.impact.reachLimit', {
+    i18n.translate('xpack.agenticInvestigations.impact.reachLimit', {
       defaultMessage: 'Only the first {limit} entities can be listed; {count} more are not shown.',
       values: { limit, count },
     }),
-  showFewer: i18n.translate('xpack.alertzero.impact.showFewer', {
+  showFewer: i18n.translate('xpack.agenticInvestigations.impact.showFewer', {
     defaultMessage: 'Show fewer',
   }),
 });

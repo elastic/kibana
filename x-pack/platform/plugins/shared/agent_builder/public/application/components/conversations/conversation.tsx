@@ -24,6 +24,7 @@ import { useConversationId } from '../../context/conversation/use_conversation_i
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useAnchoredItemKey } from '../../hooks/use_anchored_item_key';
 import { useOnMessageFromOtherParticipant } from '../../hooks/use_on_message_from_other_participant';
+import { useAttachToActiveExecution } from '../../hooks/use_attach_to_active_execution';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 import {
@@ -77,6 +78,8 @@ export const Conversation: React.FC<{}> = () => {
     scrollContainerHeight,
     timelineContent,
     anchoredItemKey,
+    // Keeps the sent message off the header's bottom border.
+    anchoredItemGap: parseFloat(euiTheme.size.s),
   });
 
   const stagedAttachmentIds = useMemo(() => {
@@ -101,6 +104,7 @@ export const Conversation: React.FC<{}> = () => {
   }, [staleAttachments, conversationId]);
 
   useOnMessageFromOtherParticipant(stopFollowingBottom);
+  useAttachToActiveExecution();
 
   // Stick to bottom when opening a conversation, once its data has loaded
   useEffect(() => {
@@ -122,25 +126,15 @@ export const Conversation: React.FC<{}> = () => {
     ${fullWidthAndHeightStyles}
     position: relative;
     min-height: 0;
-
-    &::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: ${scrollMaskHeight};
-      pointer-events: none;
-      z-index: 1;
-      background: linear-gradient(to top, ${euiTheme.colors.backgroundBasePlain}, transparent);
-    }
   `;
 
+  // Fades the bottom of the scrolling content into whatever background sits behind it.
   const scrollableStyles = css`
     ${useEuiScrollBar()}
     ${useEuiOverflowScroll('y')}
     scrollbar-gutter: stable both-edges;
     overflow-anchor: none;
+    mask-image: linear-gradient(to bottom, black calc(100% - ${scrollMaskHeight}), transparent);
   `;
 
   const inputPaddingStyles = css`

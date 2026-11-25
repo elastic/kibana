@@ -39,7 +39,6 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     application,
     triggersActionsUi: { ruleTypeRegistry },
     serverless,
-    cps,
   } = services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
@@ -188,7 +187,6 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
           toasts={toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={filteredRuleTypes}
-          cps={cps}
         />
       )}
     </ObservabilityPageTemplate>

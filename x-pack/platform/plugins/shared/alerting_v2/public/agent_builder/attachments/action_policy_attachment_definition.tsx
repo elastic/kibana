@@ -20,6 +20,7 @@ export { ACTION_POLICY_ATTACHMENT_TYPE };
 import { Context } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { Container } from 'inversify';
+import { hasUnsavedChanges, UNSAVED_CHANGES_BADGE } from './attachment_save_state';
 import { ActionPolicyInlineContent } from './action_policy_inline_content';
 import { ActionPolicyCanvasContent } from './action_policy_canvas_content';
 
@@ -36,8 +37,11 @@ export const createActionPolicyAttachmentDefinition = ({
   container,
 }: ActionPolicyAttachmentDefinitionServices): AttachmentUIDefinition<ActionPolicyAttachment> => ({
   getLabel: (attachment) => attachment.data.name ?? 'Action Policy',
-  getIcon: () => 'reporter',
-  getHeader: () => ({ icon: 'reporter' }),
+  getIcon: () => 'tablePlay',
+  getHeader: ({ attachment }) => ({
+    icon: 'tablePlay',
+    badges: hasUnsavedChanges(attachment) ? [UNSAVED_CHANGES_BADGE] : undefined,
+  }),
 
   canvasWidth: '40vw',
 

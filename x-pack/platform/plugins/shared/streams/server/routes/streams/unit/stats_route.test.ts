@@ -28,7 +28,7 @@ const unitResponse = {
 };
 
 const statsResponse = {
-  components: { destinations: {}, processors: {} },
+  components: { destinations: {}, processors: {}, sources: {} },
   meta: { window: { start: 'a', end: 'b' } },
 };
 

@@ -83,6 +83,24 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    it('should count cases by the source of extractObservables', async () => {
+      await createCase(supertest, getPostCaseRequest());
+      await createCase(supertest, getPostCaseRequest({ settings: { syncAlerts: true } }));
+      await createCase(supertest, getPostCaseRequest({ settings: { syncAlerts: true } }));
+
+      await runTelemetryTask(supertest);
+
+      await retry.try(async () => {
+        const res = await getTelemetry(supertest);
+        const { all } = getCasesTelemetry(res).cases;
+        expect(all.total).toBe(3);
+        expect(all.extractObservablesSourceExplicit).toBe(1);
+        expect(all.extractObservablesSourceSpaceDefault).toBe(2);
+        expect(all.extractObservablesSourceTemplate).toBe(0);
+        expect(all.extractObservablesSourceRule).toBe(0);
+      });
+    });
+
     it('should return the correct total number of alerts attached to cases', async () => {
       const firstCase = await createCase(
         supertest,

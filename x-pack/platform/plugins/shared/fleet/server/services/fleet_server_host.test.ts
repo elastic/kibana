@@ -416,7 +416,7 @@ describe('bulkCreateForPreconfiguration', () => {
           },
         ]
       )
-    ).rejects.toThrowError('Cannot specify both ssl.key and secrets.ssl.key');
+    ).rejects.toThrow('Cannot specify both ssl.key and secrets.ssl.key');
     expect(soClientMock.bulkCreate).not.toHaveBeenCalled();
   });
 });
@@ -952,7 +952,7 @@ describe('update', () => {
           ssl: { key: 'PLAIN KEY' },
           secrets: { ssl: { key: 'SECRET KEY' } },
         })
-      ).rejects.toThrowError('Cannot specify both ssl.key and secrets.ssl.key');
+      ).rejects.toThrow('Cannot specify both ssl.key and secrets.ssl.key');
     });
 
     describe('a preconfigured update declares every secret', () => {

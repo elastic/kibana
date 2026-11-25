@@ -11,7 +11,6 @@ import { QueryResponseSizeExceededError } from '../../errors/query_response_size
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { coreMock } from '@kbn/core/server/mocks';
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
 import {
   collectStreamResults,
@@ -33,10 +32,11 @@ import type { PluginConfig } from '../../../config';
 import { NON_STREAMING_MAX_ROWS } from '../../services/query_service/formats';
 import type { EsqlResponseFormatName } from '../../services/query_service/formats';
 import { createEsqlResponseFormatService } from '../../services/esql_response_format_service/esql_response_format_service.mock';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 
 const DEFAULT_MAX_ALERTS_PER_RUN = 10000;
 
-const createPluginConfigAccessor = ({
+const createPluginConfigService = ({
   maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN,
 }: {
   maxAlertsPerRun?: number;
@@ -48,7 +48,14 @@ const createPluginConfigAccessor = ({
       ruleEvents: { enabled: false, dataRetention: '90d' },
       alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
     },
-    dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
+    dispatcher: {
+      paused: false,
+      run: {
+        timeout: '1m',
+        alerts: { max: 10000 },
+        hydration: { maxResponseSize: ByteSizeValue.parse('50mb') },
+      },
+    },
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,
@@ -60,7 +67,7 @@ const createPluginConfigAccessor = ({
     },
   };
 
-  return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
+  return createConfigServiceMock(config);
 };
 
 describe('ExecuteRuleQueryStep', () => {
@@ -76,7 +83,7 @@ describe('ExecuteRuleQueryStep', () => {
     return new ExecuteRuleQueryStep(
       mocks.queryService,
       createEsqlResponseFormatService(responseFormat),
-      createPluginConfigAccessor({ maxAlertsPerRun })
+      createPluginConfigService({ maxAlertsPerRun })
     );
   }
 
@@ -348,10 +355,11 @@ describe('ExecuteRuleQueryStep', () => {
     // @ts-expect-error: meta is present on the result
     expect(results[0].meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+      [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
     });
   });
 
-  it('emits rowsReturnedByQuery = 0 when the query returns no rows', async () => {
+  it('emits rowsReturnedByQuery = 0 and no query batch when the query returns no rows', async () => {
     mockEsClient.esql.query.mockResolvedValue(
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [])
     );
@@ -383,6 +391,7 @@ describe('ExecuteRuleQueryStep', () => {
     // @ts-expect-error: meta is present on the result
     expect(result.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+      [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
       [RULE_EXECUTION_COUNTERS.rowsDroppedByLimit]: 1,
     });
 
@@ -413,6 +422,7 @@ describe('ExecuteRuleQueryStep', () => {
     // @ts-expect-error: meta is present on the result
     expect(result.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+      [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
     });
     expect(mockLogger.debug).not.toHaveBeenCalledWith(
       expect.stringContaining('truncated'),
@@ -474,6 +484,7 @@ describe('ExecuteRuleQueryStep', () => {
       // @ts-expect-error: meta is present on the result
       expect(results[0].meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+        [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
       });
 
       expect(results[1].type).toBe('continue');
@@ -481,6 +492,7 @@ describe('ExecuteRuleQueryStep', () => {
       // @ts-expect-error: meta is present on the result
       expect(results[1].meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
+        [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
       });
     });
 
@@ -503,12 +515,14 @@ describe('ExecuteRuleQueryStep', () => {
       // @ts-expect-error: meta is present on the result
       expect(results[0].meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+        [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
       });
 
       // Second batch: cumulative 3 hits the cap, truncation flagged once.
       // @ts-expect-error: meta is present on the result
       expect(results[1].meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
+        [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
         [RULE_EXECUTION_COUNTERS.rowsDroppedByLimit]: 1,
       });
 

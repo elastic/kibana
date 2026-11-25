@@ -8,17 +8,18 @@
  */
 
 /**
- * Performs a lower than comparison between two values.
+ * Checks whether one value is less than another. For arrays, the function returns `true` only if every element is less.
  * @param {number|number[]} a a number or an array of numbers
- * @param {number|number[]} b a number or an array of numbers
- * @return {boolean} Returns true if `a` is lower than `b`, false otherwise.  Returns an array with the lower than comparison of each element if `a` is an array.
+ * @param {number|number[]} b a number, or, if `a` is also an array, an array of numbers with the same length as `a`
+ * @return {boolean} `true` if `a` is less than `b`, `false` otherwise. If `a` is an array, returns `true` only if every element of `a` is less than `b`, or less than the element at the same index of `b` if `b` is an array.
  * @throws `'Missing b value'` if `b` is not provided
- * @throws `'Array length mismatch'` if `args` contains arrays of different lengths
+ * @throws `'Array length mismatch'` if `a` and `b` are arrays of different lengths
  * @example
  * lt(1, 1) // returns false
  * lt(1, 2) // returns true
- * lt([1, 2], 2) // returns [true, false]
- * lt([1, 2], [1, 2]) // returns [false, false]
+ * lt([1, 2], 3) // returns true
+ * lt([1, 2], 2) // returns false
+ * lt([1, 2], [2, 3]) // returns true
  */
 
 function lt(a, b) {

@@ -8,9 +8,13 @@
  */
 
 import type { ESQLCommand } from '@elastic/esql/types';
-import type { ESQLCommandSummary } from '../types';
+import type { ESQLCommandSummary, ESQLCommandSummaryContext } from '../types';
 import { summary as summaryFrom } from '../from/summary';
 
-export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
-  return summaryFrom(command, query);
+export const summary = (
+  command: ESQLCommand,
+  query: string,
+  context: ESQLCommandSummaryContext
+): ESQLCommandSummary => {
+  return summaryFrom(command, query, context);
 };

@@ -83,7 +83,7 @@ export class AgentBuilderWorkflowsPlugin
     agentBuilder.skills.register(workflowAuthoringSkill);
 
     // Workflow SML type for the agent context layer
-    agentBuilderSml.registerType(createWorkflowSmlType(api));
+    agentBuilderSml.registerType(createWorkflowSmlType(api, getSecurity));
 
     // Platform-level workflow execution tools
     const platformTools: Array<BuiltinToolDefinition<any>> = [
@@ -91,7 +91,7 @@ export class AgentBuilderWorkflowsPlugin
       resumeWorkflowExecutionTool({ workflowsManagement, getSecurity }),
       listWorkflowExecutionsTool({ workflowsManagement, getSecurity }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
-      executeWorkflowTool({ workflowsManagement, getSecurity }),
+      executeWorkflowTool({ workflowsManagement, getSecurity, logger: this.logger }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 

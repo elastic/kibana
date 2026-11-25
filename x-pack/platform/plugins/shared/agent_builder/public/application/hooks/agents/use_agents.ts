@@ -19,7 +19,7 @@ export const useAgentBuilderAgents = ({
   const { agentService } = useAgentBuilderServices();
 
   const { data, isLoading, error, isFetched } = useQuery({
-    queryKey: [...queryKeys.agentProfiles.all, { includeHidden }],
+    queryKey: queryKeys.agentProfiles.list({ includeHidden }),
     queryFn: () => agentService.list({ includeHidden }),
   });
 

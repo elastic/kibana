@@ -33,7 +33,7 @@ import { CaseFormFields } from '../case_form_fields';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservablesToggle } from '../case_form_fields/observables_toggle';
 import { getInitialCreateCaseSettings } from './utils';
-import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
+import { canStoreExtractObservablesTrue } from '../../../common/utils/case_settings';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -70,9 +70,9 @@ const transformTemplateCaseFieldsToCaseFormFields = (
     ...caseFields,
     settings: {
       syncAlerts: templateSettings?.syncAlerts ?? ownerSettings.syncAlerts,
-      extractObservables: isObservablesExtractionBlocked(owner)
-        ? false
-        : templateSettings?.extractObservables ?? ownerSettings.extractObservables,
+      extractObservables: canStoreExtractObservablesTrue(owner)
+        ? templateSettings?.extractObservables ?? ownerSettings.extractObservables
+        : false,
     },
     customFields: transFormedCustomFields as CaseUI['customFields'],
   });
@@ -123,9 +123,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       }
       setFieldValue(
         'extractObservables',
-        isObservablesExtractionBlocked(caseOwner)
-          ? false
-          : configuration.extractObservables ?? false
+        canStoreExtractObservablesTrue(caseOwner)
+          ? configuration.extractObservables ?? false
+          : false
       );
     }, [
       caseOwner,

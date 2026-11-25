@@ -52,6 +52,9 @@ export const getStepIconType = (type: string): IconType => {
     case 'workflow.executeAsync':
       iconType = HardcodedIcons['workflow.executeAsync'];
       break;
+    case 'workflow.awaitExecutions':
+      iconType = HardcodedIcons['workflow.awaitExecutions'];
+      break;
     case 'workflow.output':
       iconType = HardcodedIcons['workflow.output'];
       break;
@@ -102,9 +105,6 @@ export const getStepIconType = (type: string): IconType => {
       // Outline-style list icon — matches other tree-row EuiIcons (size m via StepIcon).
       // Avoid tokenNumber: filled token glyphs read too small next to logo/outline icons.
       iconType = 'list';
-      break;
-    case 'merge':
-      iconType = HardcodedIcons.merge;
       break;
     case 'parallel':
     case 'enter-parallel':

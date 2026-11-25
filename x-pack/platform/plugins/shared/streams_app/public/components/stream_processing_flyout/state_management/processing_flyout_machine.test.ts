@@ -9,6 +9,8 @@ import { createActor, setup } from 'xstate';
 import type { DraftProcessor, UnitProcessor } from '../../../services/unit_processing';
 import {
   processingFlyoutMachine,
+  type ProcessingFlyoutActorRef,
+  type ProcessingFlyoutEvent,
   type ProcessingFlyoutInput,
   type ProcessingSaveRequest,
 } from './processing_flyout_machine';
@@ -178,6 +180,18 @@ describe('processingFlyoutMachine', () => {
     expect(context.steps).toHaveLength(2);
   });
 
+  it('remembers a processor committed unchecked until the next save', () => {
+    const { flyout } = startFlyout();
+    flyout.send({ type: 'step.create' });
+    flyout.send({ type: 'step.commit', processor: processor('tier'), unchecked: true });
+    flyout.send({ type: 'step.edit', key: 'step-0' });
+    flyout.send({ type: 'step.commit', processor: processor('renamed') });
+    expect(flyout.getSnapshot().context.validationSkipped).toBe(true);
+
+    flyout.send({ type: 'flyout.save' });
+    expect(flyout.getSnapshot().context.validationSkipped).toBe(false);
+  });
+
   it('does not edit read-only nodes', () => {
     const { flyout } = startFlyout({ editable: false });
     flyout.send({ type: 'step.create' });
@@ -186,5 +200,53 @@ describe('processingFlyoutMachine', () => {
     flyout.send({ type: 'step.deleteAll' });
     expect(flyout.getSnapshot().context.steps).toHaveLength(1);
     expect(flyout.getSnapshot().context.hasChanges).toBe(false);
+  });
+
+  describe('changes not committed from the editor yet', () => {
+    const hasEditorChanges = (flyout: ProcessingFlyoutActorRef) =>
+      flyout.getSnapshot().context.hasEditorChanges;
+
+    const editWithChanges = () => {
+      const { flyout } = startFlyout({
+        processors: [savedProcessor, { ...savedProcessor, id: 'add-fields-2' }],
+      });
+      flyout.send({ type: 'step.edit', key: 'step-0' });
+      flyout.send({ type: 'step.change' });
+      return flyout;
+    };
+
+    it('has none for a processor opened in the editor', () => {
+      const { flyout } = startFlyout();
+      flyout.send({ type: 'step.edit', key: 'step-0' });
+      expect(hasEditorChanges(flyout)).toBe(false);
+    });
+
+    it('has none for a processor the flyout opened straight into creating', () => {
+      const { flyout } = startFlyout({ initialCreate: { position: 'start' } });
+      expect(hasEditorChanges(flyout)).toBe(false);
+    });
+
+    it('has them once the editor reports a change', () => {
+      expect(hasEditorChanges(editWithChanges())).toBe(true);
+    });
+
+    it('ignores a change reported while no editor is open', () => {
+      const { flyout } = startFlyout();
+      flyout.send({ type: 'step.change' });
+      expect(hasEditorChanges(flyout)).toBe(false);
+    });
+
+    it.each<[string, ProcessingFlyoutEvent]>([
+      ['cancelled', { type: 'step.cancel' }],
+      ['committed', { type: 'step.commit', processor: processor('renamed') }],
+      ['deleted', { type: 'step.delete', key: 'step-0' }],
+      ['deleted with all the others', { type: 'step.deleteAll' }],
+      ['left for another processor', { type: 'step.edit', key: 'step-1' }],
+      ['left for a new processor', { type: 'step.create' }],
+    ])('drops them once the processor is %s', (_, event) => {
+      const flyout = editWithChanges();
+      flyout.send(event);
+      expect(hasEditorChanges(flyout)).toBe(false);
+    });
   });
 });

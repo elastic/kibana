@@ -15,15 +15,15 @@ import {
 import { installDiscoveryAgents } from './install_discovery_agents';
 
 describe('installDiscoveryAgents', () => {
-  it('ensures system-owned persisted typed agents in the requested space', async () => {
+  it('ensures system-owned persisted typed agents in the default space', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
     const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
-    await installDiscoveryAgents({ agentBuilder, spaceId: 'space-1', availability });
+    await installDiscoveryAgents({ agentBuilder, spaceId: 'default', availability });
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledTimes(1);
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
-      spaceId: 'space-1',
+      spaceId: 'default',
       availability,
       agent: {
         id: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -40,5 +40,14 @@ describe('installDiscoveryAgents', () => {
         },
       },
     });
+  });
+
+  it('refuses to install the discovery agent in another space', async () => {
+    const agentBuilder = agentBuilderMocks.createStart();
+
+    await expect(installDiscoveryAgents({ agentBuilder, spaceId: 'marketing' })).rejects.toThrow(
+      /only available in the "default" space/
+    );
+    expect(agentBuilder.agents.ensure).not.toHaveBeenCalled();
   });
 });

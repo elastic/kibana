@@ -17,6 +17,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { ToolingLog } from '@kbn/tooling-log';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 type FetchHistoricalSummaryParams = z.input<typeof fetchHistoricalSummaryParamsSchema.shape.body>;
@@ -141,6 +142,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       const { body } = await supertest
         .post(`/internal/observability/slos/_historical_summary`)
         .set('kbn-xsrf', 'foo')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .auth('slo_editor', 'changeme')
         .set('elastic-api-version', '1')
         .send(params);

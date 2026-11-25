@@ -18,6 +18,7 @@ import { chunk } from 'lodash';
 import type { Subscription } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type { ActionCatalogClient } from '@kbn/proposals-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
 import {
@@ -27,7 +28,7 @@ import {
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
-import { TRIAGE_GROUPING_FLAG } from './alert_triage/constants';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -52,8 +53,12 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
-import { ensureFingerprintIndexMapping } from './context_engine/ensure_fingerprint_index';
-import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
+import { ALERTZERO_AI_INDICES, type AlertZeroAiIndexId } from './context_engine/ai_index_registry';
+import { registerAiIndices } from './context_engine/register_ai_indices';
+import {
+  installSpaceScopedIndexTemplates,
+  type AiIndexWriteGates,
+} from './context_engine/write_gate';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
@@ -62,8 +67,12 @@ import { createGetWorkerBlockingReasons } from './services/workers/worker_blocki
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
-import { ActionsService } from './services/actions/actions_service';
-import type { HuntServices } from './services/watches/hunt';
+import { createHuntServices } from './services/watches/hunt';
+import {
+  WORKER_SERVER_DEFINITIONS,
+  createWorkerFeatureFlagValues,
+  type WorkerServerContext,
+} from './workers';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { isSpaceSupported } from './lib/is_space_supported';
 import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertzero_access';
@@ -73,7 +82,6 @@ import { registerAttachments } from './agent_builder/attachments/register_attach
 import type { StoryProposal } from './services/investigation_summary/format_story';
 import { resolveScopedModel } from './routes/hunt/lib/scoped_model';
 import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
-import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 import { enumerateSpaceIds } from './lib/enumerate_space_ids';
 import { ThreatIntelSupplyService } from './services/threat_intel_supply';
 import {
@@ -112,7 +120,7 @@ export class AlertZeroPlugin
 
   /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
-  private actionsService?: ActionsService;
+  private actionsService?: ActionCatalogClient;
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
   private proposals?: AlertZeroStartDependencies['proposals'];
@@ -124,11 +132,16 @@ export class AlertZeroPlugin
   >['attachments'];
   private searchInferenceEndpoints?: AlertZeroStartDependencies['searchInferenceEndpoints'];
   private inference?: AlertZeroStartDependencies['inference'];
-  private huntServices?: HuntServices;
+  private mitreDataClient?: MitreAttackDataClient;
   private fleetAgentService?: AgentService;
   private coreStart?: CoreStart;
-  private triageGroupingEnabled = true;
-  private triageGroupingFlagSubscription?: Subscription;
+  private readonly workerFeatureFlagValues = createWorkerFeatureFlagValues(
+    WORKER_SERVER_DEFINITIONS.flatMap(({ featureFlags = [] }) => featureFlags)
+  );
+  private workerFeatureFlagValuesSubscription?: Subscription;
+  /** Set at the end of `start`, which returns early when a required plugin or service accounts are missing. */
+  private startFinished = false;
+  private readonly workerContext: WorkerServerContext;
   private scanFailuresService?: ScanFailuresService;
   private threatIntelSupplyService?: ThreatIntelSupplyService;
 
@@ -145,6 +158,30 @@ export class AlertZeroPlugin
     this.logger = context.logger.get();
     this.config = context.config.get();
     this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
+    this.workerContext = this.createWorkerServerContext();
+  }
+
+  private createWorkerServerContext(): WorkerServerContext {
+    return {
+      logger: this.logger.get('steps'),
+      getActionsService: () => this.requireActionsService(),
+      getConversations: () => this.requireAgentBuilderConversations(),
+      getProposalsPlugin: () => this.requireProposals(),
+      getInference: () => this.inference,
+      getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+      getMitreDataClient: () => this.mitreDataClient,
+      getFleetAgentService: () => this.fleetAgentService,
+      getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
+      getWorkflowsManagement: () => this.workflowsManagementApi,
+      getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
+      isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
+      assertStarted: () => {
+        if (!this.startFinished) {
+          throw new Error('AlertZero has not finished starting');
+        }
+      },
+      getFeatureFlag: (flag) => this.workerFeatureFlagValues.get(flag),
+    };
   }
 
   private readonly registerThreatIntelSupplyWorkflowInstaller = (
@@ -153,21 +190,16 @@ export class AlertZeroPlugin
     this.threatIntelSupplyWorkflowInstaller = installer;
   };
 
-  /**
-   * False while the fingerprint template install is in flight, and after it fails.
-   * `start` cannot return a promise, so the matcher reads this as it changes.
-   */
-  private fingerprintWritesAllowed = true;
+  /** Unset when the config kill switch is off; every index is then writable. */
+  private aiIndexWriteGates?: AiIndexWriteGates<AlertZeroAiIndexId>;
 
-  private readonly alertZeroStartContract = (): AlertZeroPluginStart => {
-    const plugin = this;
-    return {
-      registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
-      get attackFingerprintWritesAllowed() {
-        return plugin.fingerprintWritesAllowed;
-      },
-    };
-  };
+  private readonly isAiIndexWritable = (aiIndexId: AlertZeroAiIndexId): boolean =>
+    this.aiIndexWriteGates?.isWritable(aiIndexId) ?? true;
+
+  private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
+    registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
+    isAiIndexWritable: this.isAiIndexWritable,
+  });
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
@@ -176,6 +208,7 @@ export class AlertZeroPlugin
       proposals,
       agenticInvestigations,
       contextEngine,
+      cps,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -200,7 +233,7 @@ export class AlertZeroPlugin
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
     if (contextEngine) {
-      registerInvestigationsAiIndex({ contextEngine });
+      registerAiIndices({ contextEngine });
     }
     // Outside the optional-plugin guard below: the browser offers this step whenever AlertZero is
     // enabled, and an unregistered step type fails the run before `on-failure: continue` applies.
@@ -234,8 +267,8 @@ export class AlertZeroPlugin
       });
       agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
       // `ai.conversation.updated` is opt-in, so Agent Builder only emits it where a consumer
-      // subscribes. Scoped per space, like the routes, so spaces without AlertZero, and Classic
-      // spaces, stay quiet.
+      // subscribes. Scoped per space, like the routes, so spaces without AlertZero, and spaces
+      // with a solution view other than Security or Classic, stay quiet.
       agentBuilder.conversations.enableUpdatedTrigger({
         templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
         isEnabled: async (request) => {
@@ -252,28 +285,12 @@ export class AlertZeroPlugin
 
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
     // Steps register during setup but only run after start; deps resolve lazily.
-    const stepsLogger = this.logger.get('steps');
     registerStepDefinitions({
       workflowsExtensions,
-      getActionsService: () => this.requireActionsService(),
-      getConversations: () => this.requireAgentBuilderConversations(),
+      context: this.workerContext,
       resolveChatModel: (request) => this.resolveSummaryChatModel(request),
-      getProposals: (proposalIds, spaceId, request) =>
+      readProposals: (proposalIds, spaceId, request) =>
         this.readProposals(proposalIds, spaceId, request),
-      getHuntServices: () => this.requireHuntServices(),
-      getResolveHostEnrollment: makeScopedResolveHostEnrollment(
-        () => this.fleetAgentService,
-        stepsLogger
-      ),
-      isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
-      getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
-      getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
-      grouping: {
-        getProposals: () => this.requireProposals(),
-        getWorkflowsManagement: () => this.workflowsManagementApi,
-        isGroupingEnabled: async () => this.triageGroupingEnabled,
-      },
-      logger: stepsLogger,
     });
 
     features.registerKibanaFeature({
@@ -320,17 +337,23 @@ export class AlertZeroPlugin
     );
     const router = coreSetup.http.createRouter<AlertZeroRequestHandlerContext>();
 
+    const huntServices = createHuntServices(this.workerContext);
     registerRoutes({
       router,
       logger: this.logger,
       getSpaceId: (request) => this.getSpaceId(request),
+      getClusterClient: () => this.requireCoreStart().elasticsearch.client,
+      isCpsEnabled: () => cps?.getCpsEnabled() ?? false,
       getWatchesService: () => this.requireWatchesService(),
       getWorkersService: () => this.requireWorkersService(),
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
       getAgentBuilderAttachments: () => this.requireAgentBuilderAttachments(),
-      getHuntServices: () => this.requireHuntServices(),
+      getHuntServices: () => {
+        this.workerContext.assertStarted();
+        return huntServices;
+      },
       getScanFailuresService: () => this.requireScanFailuresService(),
       getThreatIntelSupplyService: () => this.threatIntelSupplyService,
       isServerless: this.isServerless,
@@ -351,12 +374,9 @@ export class AlertZeroPlugin
     this.spaces = plugins.spaces;
     this.taskManager = plugins.taskManager;
     this.coreStart = core;
-    // The kill switch for Alert Triage grouping. It stays on where no flag provider exists.
-    this.triageGroupingFlagSubscription = core.featureFlags
-      .getBooleanValue$(TRIAGE_GROUPING_FLAG, true)
-      .subscribe((enabled) => {
-        this.triageGroupingEnabled = enabled;
-      });
+    this.workerFeatureFlagValuesSubscription = this.workerFeatureFlagValues.followCoreFeatureFlags(
+      core.featureFlags
+    );
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
@@ -368,17 +388,11 @@ export class AlertZeroPlugin
       return this.alertZeroStartContract();
     }
 
-    // Plugin start cannot return a promise. Writes stay refused until this settles, so a
-    // worker that runs in that gap reviews every attack and does not auto-create the index.
-    this.fingerprintWritesAllowed = false;
-    void ensureFingerprintIndexMapping(core.elasticsearch.client.asInternalUser, this.logger).then(
-      (allowed) => {
-        this.fingerprintWritesAllowed = allowed;
-      },
-      () => {
-        this.fingerprintWritesAllowed = false;
-      }
-    );
+    this.aiIndexWriteGates = installSpaceScopedIndexTemplates({
+      aiIndices: ALERTZERO_AI_INDICES,
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    });
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 
@@ -416,13 +430,9 @@ export class AlertZeroPlugin
     );
 
     this.watchesService = new WatchesService();
-    this.actionsService = new ActionsService(
-      () =>
-        this.workflowsManagementApi
-          ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
-          : undefined,
-      this.logger
-    );
+    // The catalog is shared with every solution that proposes actions. AlertZero lists only the
+    // managed installs (the default), never the space's own workflows.
+    this.actionsService = { list: proposals.listActions };
     this.threatIntelSupplyService =
       management != null
         ? new ThreatIntelSupplyService({
@@ -463,15 +473,8 @@ export class AlertZeroPlugin
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
 
-    const mitreDataClient = plugins.mitreAttack?.getMitreDataClient?.();
-
-    this.huntServices = {
-      getProposalsService: () => this.requireProposals().getProposalsService(),
-      getProposalPrivileges: () => this.requireProposals().getProposalPrivileges(),
-      getInference: () => plugins.inference,
-      getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
-      mitreDataClient,
-    };
+    this.mitreDataClient = plugins.mitreAttack?.getMitreDataClient?.();
+    this.startFinished = true;
 
     return this.alertZeroStartContract();
   }
@@ -487,7 +490,7 @@ export class AlertZeroPlugin
     return this.requireStarted(this.watchesService, 'Watches service');
   }
 
-  private requireActionsService(): ActionsService {
+  private requireActionsService(): ActionCatalogClient {
     return this.requireStarted(this.actionsService, 'Actions service');
   }
 
@@ -569,10 +572,6 @@ export class AlertZeroPlugin
     }
   }
 
-  private requireHuntServices(): HuntServices {
-    return this.requireStarted(this.huntServices, 'Hunt services');
-  }
-
   private requireCoreStart(): CoreStart {
     return this.requireStarted(this.coreStart, 'CoreStart');
   }
@@ -586,6 +585,6 @@ export class AlertZeroPlugin
   }
 
   stop() {
-    this.triageGroupingFlagSubscription?.unsubscribe();
+    this.workerFeatureFlagValuesSubscription?.unsubscribe();
   }
 }

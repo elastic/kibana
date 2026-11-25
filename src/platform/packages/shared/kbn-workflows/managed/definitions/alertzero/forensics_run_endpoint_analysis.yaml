@@ -74,6 +74,11 @@ consts:
 
   # Cap on the number of containment actions this run can propose.
   max_recommended_actions: 8
+  # Cap on each `iocs` category, matching the `security.investigation.iocs` attachment type.
+  # Enforced after parsing (`cap_iocs`), not as `maxItems` in the model-facing schema: Gemini
+  # answers 400 to the schema once several arrays carry a cap next to the per-item bounds.
+  max_iocs_per_category: 50
+  no_rows: []
   # Fallback when the KI carries no `attributes.autonomy`.
   default_autonomy: manual
   # Written on the attack's detection alerts once the analysis has run, so an
@@ -356,8 +361,8 @@ steps:
                 message: >-
                   No Elastic Defend telemetry was found for `{{ steps.resolve_host.output.host_name }}`
                   in `logs-endpoint.events.*` from {{ consts.telemetry_gate_lookback_hours }}h before the
-                  incident window (`{{ steps.resolve_incident_window.output.start }}` to
-                  `{{ steps.resolve_incident_window.output.end }}`) until now, so endpoint analysis was not run.
+                  incident start (`{{ steps.resolve_incident_window.output.start }}`) until now, so endpoint
+                  analysis was not run.
 
           # Record the attempt before the agent. A later run reads it back from the
           # indicator and does not start another analysis. `attributes` merges, so
@@ -690,7 +695,6 @@ steps:
                       # schema, and reference resolution is not guaranteed across providers.
                       shas:
                         type: array
-                        maxItems: 50
                         description: File hashes.
                         items:
                           type: object
@@ -703,7 +707,6 @@ steps:
                               description: What it was dropped as and on which hosts.
                       ips:
                         type: array
-                        maxItems: 50
                         description: C2 and other network destinations.
                         items:
                           type: object
@@ -716,7 +719,6 @@ steps:
                               description: Which hosts contacted it and over what protocol.
                       file_paths:
                         type: array
-                        maxItems: 50
                         description: Dropped payloads, staging paths, persistence keys.
                         items:
                           type: object
@@ -726,7 +728,6 @@ steps:
                             comment: { type: string, maxLength: 1000 }
                       ransom_note:
                         type: array
-                        maxItems: 50
                         description: Ransom note paths.
                         items:
                           type: object
@@ -736,7 +737,6 @@ steps:
                             comment: { type: string, maxLength: 1000 }
                       encryption_marker:
                         type: array
-                        maxItems: 50
                         description: Markers of encryption, such as a renamed file extension.
                         items:
                           type: object
@@ -746,7 +746,6 @@ steps:
                             comment: { type: string, maxLength: 1000 }
                       malicious_commands:
                         type: array
-                        maxItems: 50
                         description: Command lines attributed to the attack.
                         items:
                           type: object
@@ -756,7 +755,6 @@ steps:
                             comment: { type: string, maxLength: 1000 }
                       compromised_identities:
                         type: array
-                        maxItems: 50
                         description: Accounts used by the attacker or stolen.
                         items:
                           type: object
@@ -769,7 +767,6 @@ steps:
                               description: How it was compromised and what it was then used for.
                       affected_hosts:
                         type: array
-                        maxItems: 50
                         description: Every host the attack touched.
                         items:
                           type: object
@@ -848,6 +845,15 @@ steps:
                             Input for the catalog action, shaped to satisfy that entry's
                             `inputSchema.properties.actionInput`. Do not wrap it in another `actionInput`.
 
+          # Whether the agent produced an analysis. A failed agent step still carries
+          # partial output (an empty message and usage metadata) next to its error, so
+          # `output != null` does not mean it finished. Everything that rests on the
+          # analysis reads this instead; a skipped agent leaves it unset.
+          - name: resolve_agent_result
+            type: data.set
+            with:
+              completed: "${{ steps.forensic_analysis.error == null and steps.forensic_analysis.output.structured_output != null }}"
+
           # Timeline and IoCs are attached to the investigation; the assessment is a
           # journal note rather than an attachment. The forensic agent run itself is
           # ephemeral (no conversation), so its ES|QL transcript never lands there.
@@ -872,20 +878,6 @@ steps:
                   or steps.forensic_analysis.output.structured_output.iocs.compromised_identities.size > 0
                   or steps.forensic_analysis.output.structured_output.iocs.affected_hosts.size > 0 }}
 
-          - name: journal_timeline
-            type: workflow.execute
-            if: "${{ steps.resolve_finding_presence.output.timeline == true }}"
-            on-failure:
-              continue: true
-            with:
-              workflow-id: system-alertzero-journal-note
-              run-as-mode: inherit
-              inputs:
-                author_name: "{{ consts.author_name }}"
-                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-                message: >-
-                  Reconstructed forensic timeline for `{{ steps.resolve_host.output.host_name }}`.
-
           - name: attach_timeline
             type: ai.attachment.add
             if: >-
@@ -900,9 +892,13 @@ steps:
               description: "Attack timeline: {{ steps.resolve_host.output.host_name }} ({{ steps.forensic_analysis.output.structured_output.timeline.window.start }} to {{ steps.forensic_analysis.output.structured_output.timeline.window.end }})"
               data: "${{ steps.forensic_analysis.output.structured_output.timeline }}"
 
-          - name: journal_iocs
+          # Written after the attach, and only when it landed, so the journal never
+          # announces a timeline the investigation does not have.
+          - name: journal_timeline
             type: workflow.execute
-            if: "${{ steps.resolve_finding_presence.output.iocs == true }}"
+            if: >-
+              ${{ steps.resolve_finding_presence.output.timeline == true
+                and steps.attach_timeline.error == null }}
             on-failure:
               continue: true
             with:
@@ -912,7 +908,22 @@ steps:
                 author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
-                  Extracted IoCs during forensic analysis of `{{ steps.resolve_host.output.host_name }}`.
+                  Reconstructed forensic timeline for `{{ steps.resolve_host.output.host_name }}`.
+
+          # The schema sent to the model carries no `maxItems` on the `iocs` categories, so the
+          # attachment type's per-category cap is applied here. `slice` keeps the model's order,
+          # so the first indicators it listed survive.
+          - name: cap_iocs
+            type: data.set
+            with:
+              shas: "${{ steps.forensic_analysis.output.structured_output.iocs.shas | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              ips: "${{ steps.forensic_analysis.output.structured_output.iocs.ips | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              file_paths: "${{ steps.forensic_analysis.output.structured_output.iocs.file_paths | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              ransom_note: "${{ steps.forensic_analysis.output.structured_output.iocs.ransom_note | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              encryption_marker: "${{ steps.forensic_analysis.output.structured_output.iocs.encryption_marker | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              malicious_commands: "${{ steps.forensic_analysis.output.structured_output.iocs.malicious_commands | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              compromised_identities: "${{ steps.forensic_analysis.output.structured_output.iocs.compromised_identities | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              affected_hosts: "${{ steps.forensic_analysis.output.structured_output.iocs.affected_hosts | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
 
           - name: attach_iocs
             type: ai.attachment.add
@@ -926,7 +937,49 @@ steps:
               render_inline: true
               type: security.investigation.iocs
               description: Extracted indicators of compromise
-              data: "${{ steps.forensic_analysis.output.structured_output.iocs }}"
+              data: "${{ steps.cap_iocs.output }}"
+
+          - name: journal_iocs
+            type: workflow.execute
+            if: >-
+              ${{ steps.resolve_finding_presence.output.iocs == true
+                and steps.attach_iocs.error == null }}
+            on-failure:
+              continue: true
+            with:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  Extracted IoCs during forensic analysis of `{{ steps.resolve_host.output.host_name }}`.
+
+          # A rejected attachment does not undo the analysis: the verdict, the
+          # assessment and the containment below still rest on the agent's output.
+          # Says which finding is missing, so the gap is not read as "nothing found".
+          - name: journal_findings_not_attached
+            type: workflow.execute
+            if: >-
+              ${{ steps.resolve_agent_result.output.completed == true
+                and (steps.attach_timeline.error != null or steps.attach_iocs.error != null) }}
+            on-failure:
+              continue: true
+            with:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  {%- if steps.attach_timeline.error != null and steps.attach_iocs.error != null -%}
+                  The forensic timeline and the indicators of compromise
+                  {%- elsif steps.attach_timeline.error != null -%}
+                  The forensic timeline
+                  {%- else -%}
+                  The indicators of compromise
+                  {%- endif %} for `{{ steps.resolve_host.output.host_name }}` could not be attached to this
+                  investigation. The analysis itself finished. [See execution]({{ execution.url }}).
 
           - name: journal_rationale
             type: workflow.execute
@@ -960,7 +1013,7 @@ steps:
           # the acknowledgement.
           - name: reread_attack_status
             type: elasticsearch.search
-            if: "${{ steps.forensic_analysis.output != null }}"
+            if: "${{ steps.resolve_agent_result.output.completed == true }}"
             with:
               index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
               ignore_unavailable: true
@@ -980,7 +1033,7 @@ steps:
           - name: resolve_attack_alerts
             type: data.set
             with:
-              analyzed: "${{ steps.forensic_analysis.output != null }}"
+              analyzed: "${{ steps.resolve_agent_result.output.completed == true }}"
               attack_id: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id }}"
               attack_status: "{{ steps.reread_attack_status.output.hits.hits[0]._source['kibana.alert.workflow_status'] }}"
               has_alerts: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] != blank }}"
@@ -1105,15 +1158,16 @@ steps:
                 message: >-
                   {%- assign retired = steps.resolve_attack_alerts_retired.output -%}
                   {%- if retired.attack_acknowledged == true -%}Acknowledged the attack while this Investigation waits for a decision.
-                  {%- elsif steps.resolve_attack_alerts.output.attack_status == 'open' -%}The attack could not be acknowledged and is still open. See execution `{{ execution.id }}`.
-                  {%- else -%}The attack was already `{{ steps.resolve_attack_alerts.output.attack_status | default: 'not open' }}` and was left as it was.
+                  {%- elsif steps.resolve_attack_alerts.output.attack_status == 'open' -%}The attack could not be acknowledged and is still open. [See execution]({{ execution.url }}).
+                  {%- elsif steps.resolve_attack_alerts.output.attack_status == blank -%}Could not read the attack's status after the analysis, so it was left as it was. [See execution]({{ execution.url }}).
+                  {%- else -%}The attack was already `{{ steps.resolve_attack_alerts.output.attack_status }}` and was left as it was.
                   {%- endif -%}
                   {%- if steps.resolve_attack_alerts.output.has_alerts != true %} It lists no detection alerts.
-                  {%- elsif retired.read != true %} Could not read its {{ retired.requested }} detection alert(s) back, so whether they were tagged `{{ consts.endpoint_analyzed_tag }}` and acknowledged is unknown. See execution `{{ execution.id }}`.
+                  {%- elsif retired.read != true %} Could not read its {{ retired.requested }} detection alert(s) back, so whether they were tagged `{{ consts.endpoint_analyzed_tag }}` and acknowledged is unknown. [See execution]({{ execution.url }}).
                   {%- else %} Tagged {{ retired.tagged }} of its {{ retired.requested }} detection alert(s) `{{ consts.endpoint_analyzed_tag }}`. Acknowledged: {{ retired.acknowledged }}
                   {%- if retired.closed > 0 %}; already closed and left as they were: {{ retired.closed }}{% endif -%}
                   {%- if retired.open > 0 %}; still open, because acknowledging them did not land: {{ retired.open }}{% endif %}.
-                  {%- if retired.tagged < retired.requested or retired.open > 0 %} See execution `{{ execution.id }}`.{% endif -%}
+                  {%- if retired.tagged < retired.requested or retired.open > 0 %} [See execution]({{ execution.url }}).{% endif -%}
                   {%- endif -%}
 
         else:
@@ -1210,6 +1264,11 @@ steps:
       attached: >-
         ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs }}
+      # The agent returned its output in this run. The verdict, the assessment and
+      # the containment rest on that output, not on the attachments, so a rejected
+      # attachment is narrated (`journal_findings_not_attached`) and the analysis
+      # still counts. `attached` stays the marker a later run uses to skip the agent.
+      analyzed: "${{ steps.resolve_agent_result.output.completed == true }}"
       # Findings only exist when a host was known and had Defend telemetry, since
       # that's the only path where the agent runs. So no host, or a host with
       # nothing in `logs-endpoint.events.*`, means no findings is the correct
@@ -1217,24 +1276,28 @@ steps:
       # discovery and its constituent alerts never named, or produce telemetry
       # that was never shipped. `checked` keeps a run that did not look (findings
       # already attached, or a recorded attempt) from reading as "no telemetry".
-      # One of this indicator's attachments is a partial write, not a finished
-      # run. The assessment is a journal note and is not part of this check.
+      # Any of this indicator's findings without agent output in this run is an
+      # earlier run's work, settled as `outcome_unrecorded` below.
       settled: >-
-        ${{ (steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
-          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs)
+        ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
+          or steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
+          or steps.resolve_agent_result.output.completed == true
           or steps.resolve_host.output.host_name == blank
           or (steps.resolve_endpoint_telemetry.output.checked == true
             and steps.resolve_endpoint_telemetry.output.present != true) }}
-      # Both findings are on the investigation, but not from this run: an
-      # earlier run attached them and never recorded how it ended, whether
-      # because its verdict write failed or because it died between the
-      # attachments and the verdict. This run has no agent output to check the
-      # proposals against, so it cannot vouch for them, and must not retire the
-      # indicator as `processed` on their behalf.
+      # Findings are on the investigation, but not from this run: an earlier run
+      # attached them and never recorded how it ended, whether because its
+      # verdict write failed or because it died after attaching. One finding is
+      # enough: a rejected attachment no longer stops the analysis, so an earlier
+      # run with only the IoCs may still have journaled its verdict and raised
+      # proposals. Attachments are only written after `mark_attempted`, so this
+      # also means an attempt was recorded. This run has no agent output to check
+      # the proposals against, so it cannot vouch for them, and must not retire
+      # the indicator as `processed` on their behalf.
       outcome_unrecorded: >-
-        ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
-          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
-          and steps.forensic_analysis.output == null }}
+        ${{ (steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
+          or steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs)
+          and steps.resolve_agent_result.output.completed != true }}
 
   # The worker writes this onto the indicator before dispatch. A missing
   # attribute fails closed to manual.
@@ -1259,7 +1322,7 @@ steps:
   - name: resolve_verdict
     type: data.set
     with:
-      value: "{% if steps.forensic_analysis.output != null %}{{ steps.forensic_analysis.output.structured_output.verdict | default: 'unclear' }}{% endif %}"
+      value: "{% if steps.resolve_agent_result.output.completed == true %}{{ steps.forensic_analysis.output.structured_output.verdict | default: 'unclear' }}{% endif %}"
       not_an_incident: "${{ steps.forensic_analysis.output.structured_output.verdict == 'not_an_incident' }}"
       close_reason: "{% assign verdict = steps.forensic_analysis.output.structured_output.verdict %}{% if verdict == 'not_an_incident' %}false_positive{% elsif verdict == 'confirmed_incident' %}resolved{% else %}other{% endif %}"
       attack_reason: "{% assign verdict = steps.forensic_analysis.output.structured_output.verdict %}{% if verdict == 'not_an_incident' %}false_positive{% elsif verdict == 'confirmed_incident' %}true_positive{% else %}other{% endif %}"
@@ -1283,7 +1346,7 @@ steps:
   - name: resolve_proposal_slots
     type: alertzero.resolveProposals
     if: >-
-      ${{ steps.resolve_run_outcome.output.attached == true
+      ${{ steps.resolve_run_outcome.output.analyzed == true
         and steps.resolve_verdict.output.not_an_incident != true
         and steps.forensic_analysis.output.structured_output.propose == true
         and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
@@ -1317,7 +1380,7 @@ steps:
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
-        and steps.resolve_run_outcome.output.attached == true
+        and steps.resolve_run_outcome.output.analyzed == true
         and steps.resolve_verdict.output.not_an_incident != true
         and steps.forensic_analysis.output.structured_output.propose == true
         and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0
@@ -1342,12 +1405,12 @@ steps:
           {%- endif -%}
           {%- if converged_count > 0 %} {{ converged_count }} already raised by another Investigation.{% endif -%}
           {%- if already_open_count > 0 %} {{ already_open_count }} already open on this investigation.{% endif -%}
-          {%- if new_count > 0 or already_open_count > 0 %} Once every proposal on it has been decided, you are asked whether to close the investigation.{% else %} You are asked next whether to close the investigation.{% endif -%}
+          {%- if new_count > 0 or already_open_count > 0 %} Once every proposal on it has been decided, you are asked whether to close the investigation.{% endif -%}
 
   # Containment is proposed on the investigation, not returned as run output.
   # `executeAsync` so this run does not sit in the 72h approval gate; each
   # gate parks on its own. Continue on failure so a single bad action cannot
-  # fail the run. Runs after investigation items are attached. `parallel` with
+  # fail the run. Runs after the findings are attached, or their failure journaled. `parallel` with
   # `settled` keeps every dispatch's outcome: `foreach` would keep only the last
   # one, and continuing on failure would clear a rejection.
   #
@@ -1435,12 +1498,29 @@ steps:
             conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
             message: "{{ foreach.item.note }}"
 
+  # `0` when the step did not run: no host, findings did not land, the agent
+  # did not propose, or the list was empty. A later check treats only a real
+  # rejection as lost.
+  #
+  # A dispatch is lost two ways. The step fails, or it completes and reports the
+  # gate it started as `failed`: `workflow.executeAsync` does that when the gate
+  # rejects its inputs, so `propose_actions.output.failed` alone reads 0 while
+  # no gate exists. Counted here, before the close question, which needs to know
+  # whether any proposal reached the queue.
+  - name: resolve_proposal_dispatch
+    type: data.set
+    with:
+      failed: >-
+        ${{ steps.propose_actions.output.results
+          | where_exp: 'result', "result.status == 'failed' or result.output.status == 'failed'"
+          | size }}
+
   # The agent said `not_an_incident` and still listed containment.
   # Do not propose any containment actions, but journal that they were listed.
   - name: journal_verdict_dropped_actions
     type: workflow.execute
     if: >-
-      ${{ steps.resolve_run_outcome.output.attached == true
+      ${{ steps.resolve_run_outcome.output.analyzed == true
         and steps.resolve_verdict.output.not_an_incident == true
         and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
     on-failure:
@@ -1455,17 +1535,98 @@ steps:
           Verdict was not an incident; {{ steps.forensic_analysis.output.structured_output.recommendedActions | size }}
           recommended action(s) were not proposed.
 
-  # When the agent proposes no new actions or the verdict is `not_an_incident`,
-  # ask the close question here. Otherwise the close question will get asked by
-  # the containment gate once its proposals are all decided.
+  # An earlier run left findings here and never recorded how it ended, so it may
+  # or may not have reached its close question. Its containment gates ask once
+  # their proposals settle, so the close question is only raised for it when
+  # nothing is pending or executing: an approved containment action is no longer
+  # pending while it runs, and may fail and re-park for approval. The route takes
+  # one `status` per request, hence a read for each. A failed read counts as
+  # open, so nothing is asked.
+  - name: check_pending_proposals
+    type: kibana.request
+    if: "${{ steps.resolve_run_outcome.output.outcome_unrecorded == true }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ steps.resolve_request.output.investigation_id }}"
+        status: pending
+        size: 1
+    on-failure:
+      continue: true
+
+  - name: check_executing_proposals
+    type: kibana.request
+    if: "${{ steps.resolve_run_outcome.output.outcome_unrecorded == true }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ steps.resolve_request.output.investigation_id }}"
+        status: executing
+        size: 1
+    on-failure:
+      continue: true
+
+  # When this run asks whether to close the Investigation. No gate on it will:
+  #   - `after_analysis`: this run analyzed, nothing is open here, and none of its
+  #     new proposals reached the queue. That covers nothing proposed, every
+  #     recommendation held elsewhere, a failed dedup check, and every dispatch
+  #     rejected; the last two are also journaled as lost.
+  #   - `after_unrecorded`: an earlier run's outcome is unrecorded, nothing is
+  #     pending or executing, and the Investigation is still open. An analyst may
+  #     have closed it already, and the close gate's proposal would reopen it. The close gate's own dedup keeps this to one close question.
+  # A partial dispatch is not covered: its surviving gates ask.
+  - name: resolve_close_question
+    type: data.set
+    with:
+      after_analysis: >-
+        ${{ steps.resolve_run_outcome.output.analyzed == true
+          and steps.resolve_agent_result.output.completed == true
+          and steps.resolve_proposal_counts.output.already_open_count == 0
+          and steps.resolve_proposal_counts.output.new_count <= steps.resolve_proposal_dispatch.output.failed }}
+      after_unrecorded: >-
+        ${{ steps.resolve_run_outcome.output.outcome_unrecorded == true
+          and steps.verify_investigation.output.metadata.status != 'closed'
+          and steps.check_pending_proposals.output.total == 0
+          and steps.check_executing_proposals.output.total == 0 }}
+      # What went wrong before the close question, shown first on its card. Approving
+      # a close while containment never reached the queue would drop it silently, so
+      # the card names what to raise by hand. Blank when nothing went wrong.
+      caveat: |-
+        {%- capture caveat -%}
+        {%- if steps.resolve_proposal_counts.output.check_failed == true -%}
+        Containment was never proposed: endpoint analysis could not check whether these proposals already exist, so none was created. Raise them by hand if they are still needed:
+        {% for action in steps.forensic_analysis.output.structured_output.recommendedActions %}
+        - {{ action.title }} (`{{ action.actionWorkflowId }}`)
+        {%- endfor %}
+        {%- elsif steps.resolve_proposal_dispatch.output.failed > 0 -%}
+        {%- assign lost = steps.propose_actions.output.results | where_exp: 'result', "result.status == 'failed' or result.output.status == 'failed'" -%}
+        {{ steps.resolve_proposal_dispatch.output.failed }} containment proposal(s) did not reach the approval queue. Raise them by hand if they are still needed:
+        {% for result in lost %}
+        - {{ result.key.title }} (`{{ result.key.actionWorkflowId }}`)
+        {%- endfor %}
+        {%- elsif steps.resolve_run_outcome.output.outcome_unrecorded == true -%}
+        An earlier endpoint analysis attached findings here but did not record how it ended. Check its assessment and any containment proposals on this investigation before closing.
+        {%- endif -%}
+        {%- endcapture -%}
+        {{ caveat | strip | truncate: 2000 }}
+
+  # When this run analyzed and none of its proposals reached the queue here, say
+  # so; the close gate dispatched next posts the card that asks the close
+  # question. Otherwise the containment gates ask it once their proposals are all
+  # decided. The note does not promise the question: the card states it, and a
+  # rejected dispatch would leave the promise unkept. After an unrecorded outcome
+  # the gate is dispatched without this note: `journal_outcome_unrecorded` says
+  # what is known.
   - name: journal_close_question
     type: workflow.execute
     if: >-
-      ${{ steps.resolve_run_outcome.output.attached == true
-        and steps.forensic_analysis.output != null
-        and steps.resolve_proposal_counts.output.new_count == 0
-        and steps.resolve_proposal_counts.output.already_open_count == 0
-        and steps.resolve_proposal_counts.output.check_failed != true }}
+      ${{ steps.resolve_close_question.output.after_analysis == true }}
     on-failure:
       continue: true
     with:
@@ -1477,21 +1638,17 @@ steps:
         message: >-
           {%- if steps.resolve_verdict.output.not_an_incident == true -%}
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` found no real incident, so
-          no containment was proposed. You are asked next whether to close this investigation, the
-          attack and its alerts as a false positive.
+          no containment was proposed.
           {%- else -%}
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` is done and queued no
-          containment proposal here. You are asked next whether to close this investigation.
+          containment proposal here.
           {%- endif -%}
 
   - name: dispatch_close_gate
     type: workflow.executeAsync
     if: >-
-      ${{ steps.resolve_run_outcome.output.attached == true
-        and steps.forensic_analysis.output != null
-        and steps.resolve_proposal_counts.output.new_count == 0
-        and steps.resolve_proposal_counts.output.already_open_count == 0
-        and steps.resolve_proposal_counts.output.check_failed != true }}
+      ${{ steps.resolve_close_question.output.after_analysis == true
+        or steps.resolve_close_question.output.after_unrecorded == true }}
     on-failure:
       continue: true
     with:
@@ -1504,14 +1661,7 @@ steps:
         attackReason: "{{ steps.resolve_verdict.output.attack_reason }}"
         assessment: "{{ steps.resolve_verdict.output.assessment }}"
         attackAlertCount: "${{ steps.resolve_verdict.output.attack_alert_count }}"
-
-  # `0` when the step did not run: no host, findings did not land, the agent
-  # did not propose, or the list was empty. A later check treats only a real
-  # rejection as lost.
-  - name: resolve_proposal_dispatch
-    type: data.set
-    with:
-      failed: "${{ steps.propose_actions.output.failed | default: 0 }}"
+        caveat: "{{ steps.resolve_close_question.output.caveat }}"
 
   # Counted after the dispatch. Putting this on `resolve_run_outcome` would
   # always see zero failures, and a rejected proposal would still retire the
@@ -1520,13 +1670,25 @@ steps:
   #
   # A failed dedup check counts as lost for the same reason: nothing was
   # created, and a retry would skip the agent and never queue it either.
+  #
+  # So does a close question, raised after this run's analysis, that never
+  # reached its gate: nothing else will ask it, and a processed indicator is
+  # never looked at again. (After an unrecorded outcome the indicator is retired
+  # as failed anyway.)
   - name: resolve_proposals
     type: data.set
     with:
+      close_gate_failed: >-
+        ${{ steps.resolve_close_question.output.after_analysis == true
+          and (steps.dispatch_close_gate.output.status == 'failed'
+            or (steps.dispatch_close_gate.error != nil and steps.dispatch_close_gate.error != empty)) }}
       proposals_lost: >-
-        ${{ steps.forensic_analysis.output.structured_output.propose == true
+        ${{ (steps.forensic_analysis.output.structured_output.propose == true
           and (steps.resolve_proposal_dispatch.output.failed > 0
-            or steps.resolve_proposal_counts.output.check_failed == true) }}
+            or steps.resolve_proposal_counts.output.check_failed == true))
+          or (steps.resolve_close_question.output.after_analysis == true
+            and (steps.dispatch_close_gate.output.status == 'failed'
+              or (steps.dispatch_close_gate.error != nil and steps.dispatch_close_gate.error != empty))) }}
 
   # Telemetry: the verdict this run reached, decided by this point and in the same order as the
   # `mark_*` writes below. Before them because a write that fails the run would otherwise lose
@@ -1562,10 +1724,11 @@ steps:
       iocs_found: "${{ steps.resolve_finding_presence.output.iocs == true }}"
       findings_attached: "${{ steps.resolve_run_outcome.output.attached == true }}"
       actions_recommended: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | size }}"
-      proposals_dispatched: "${{ steps.propose_actions.output.succeeded | default: 0 }}"
+      # Gates that actually started: a dispatch that reports its gate as `failed` started none.
+      proposals_dispatched: "${{ steps.resolve_proposal_counts.output.new_count | default: 0 | minus: steps.resolve_proposal_dispatch.output.failed | at_least: 0 }}"
       proposals_dispatch_failed: "${{ steps.resolve_proposal_dispatch.output.failed | default: 0 }}"
       # Only a gate a proposal reached was asked to auto-approve.
-      auto_approve_requested: "${{ steps.resolve_autonomy.output.level == 'supervised' and steps.propose_actions.output.succeeded > 0 }}"
+      auto_approve_requested: "${{ steps.resolve_autonomy.output.level == 'supervised' and steps.resolve_proposal_counts.output.new_count > steps.resolve_proposal_dispatch.output.failed }}"
 
   # Retiring the indicator so that the sweep stops picking it up.
   # The verdict writes below do not continue on failure. Instead of swallowing
@@ -1618,15 +1781,37 @@ steps:
       inputs:
         author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-        message: >-
+        # Each lost recommendation is listed by its card title, which names the action
+        # and its target, so the analyst knows what to raise by hand: the agent's list
+        # when the dedup check failed, the rejected dispatches otherwise. A gate that started and
+        # failed (it rejected its inputs) is linked to its execution, built like
+        # `execution.url`: the gate runs in this run's space.
+        message: |-
           {%- if steps.resolve_proposal_counts.output.check_failed == true -%}
-          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached its findings
-          and found containment worth proposing, but could not check whether those proposals
-          already exist, so none was created. The indicator was retired and will not be retried.
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` finished and found containment worth proposing, but could not check whether those proposals already exist, so none was created:
+          {% for action in steps.forensic_analysis.output.structured_output.recommendedActions %}
+          - {{ action.title }} (`{{ action.actionWorkflowId }}`)
+          {%- endfor %}
+          {%- if steps.resolve_proposals.output.close_gate_failed == true %}
+
+          The question whether to close this investigation could not be raised either, so nothing will ask it.
+          {%- endif %}
+
+          The indicator was retired and will not be retried.
+          {%- elsif steps.resolve_proposal_dispatch.output.failed > 0 -%}
+          {%- assign lost = steps.propose_actions.output.results | where_exp: 'result', "result.status == 'failed' or result.output.status == 'failed'" -%}
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` finished, but {{ steps.resolve_proposal_dispatch.output.failed }} containment proposal(s) did not reach the approval queue:
+          {% for result in lost %}
+          - {{ result.key.title }} (`{{ result.key.actionWorkflowId }}`){% if result.output.executionId != blank %}: its approval gate failed. [See the gate execution]({{ kibanaUrl }}{% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/workflows/{{ result.output.workflowId }}?executionId={{ result.output.executionId }}&tab=executions){% endif %}.
+          {%- endfor %}
+          {%- if steps.resolve_proposals.output.close_gate_failed == true %}
+
+          The question whether to close this investigation could not be raised either, so nothing will ask it.
+          {%- endif %}
+
+          The indicator was retired and will not be retried.
           {%- else -%}
-          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached its findings,
-          but {{ steps.resolve_proposal_dispatch.output.failed }} containment proposal(s) did not
-          reach the approval queue. The indicator was retired and will not be retried.
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` is done, but the question whether to close this investigation could not be raised, so nothing will ask it. The indicator was retired and will not be retried.
           {%- endif -%}
 
   - name: mark_proposals_failed
@@ -1651,12 +1836,21 @@ steps:
             {%- if steps.resolve_proposal_counts.output.check_failed == true -%}
             Could not check for existing proposals on investigation
             {{ steps.resolve_request.output.investigation_id }}, so none was created
-            {%- else -%}
+            {%- if steps.resolve_proposals.output.close_gate_failed == true %}
+            and could not raise the close question
+            {%- endif -%}
+            {%- elsif steps.resolve_proposal_dispatch.output.failed > 0 -%}
             Containment proposals did not reach the queue for investigation
+            {{ steps.resolve_request.output.investigation_id }}
+            {%- if steps.resolve_proposals.output.close_gate_failed == true %}
+            and could not raise the close question
+            {%- endif -%}
+            {%- else -%}
+            Could not raise the close question on investigation
             {{ steps.resolve_request.output.investigation_id }}
             {%- endif -%}
 
-  # An earlier run attached the findings and never recorded its verdict. The
+  # An earlier run attached findings and never recorded its verdict. The
   # assessment note and the containment proposals exist only in that run's
   # agent output; this run cannot re-check or redo them (a redo would duplicate
   # whichever proposals did land). So it does not claim `processed`: it says
@@ -1677,7 +1871,7 @@ steps:
         author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
-          An earlier endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached its
+          An earlier endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached
           findings here but did not record how it ended. Its assessment and any containment
           proposals should be checked against the notes above. The indicator was retired and
           will not be retried.
@@ -1727,12 +1921,11 @@ steps:
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` left no findings on this investigation.
-          {% if steps.forensic_analysis.error != null %}The forensic agent failed.{% elsif steps.resolve_request.output.forensic_attempted_at != blank %}A previous attempt did not finish, so this run did not start another analysis.{% else %}The analysis finished but none of its findings could be attached.{% endif %}
-          See execution `{{ execution.id }}` ([full per-stage detail]({{ execution.url }})).
+          {% if steps.forensic_analysis.error != null %}The forensic agent failed.{% elsif steps.resolve_request.output.forensic_attempted_at != blank %}A previous attempt did not finish, so this run did not start another analysis.{% else %}The analysis did not finish.{% endif %}
+          [See execution]({{ execution.url }}).
 
-  # The run had a host to analyze but still landed no findings — e.g. no
-  # OWNER access on the conversation, a deleted investigation, a rejected
-  # attachment payload, or an agent error. A retry won't fix any of those, so
+  # The run had a host to analyze but no analysis finished — the agent errored,
+  # or an earlier attempt died before recording one. A retry won't fix either, so
   # it's retired rather than left pending re-running every minute. Kept
   # distinct from `processed` so the indicator reflects that nothing landed.
   - name: mark_failed

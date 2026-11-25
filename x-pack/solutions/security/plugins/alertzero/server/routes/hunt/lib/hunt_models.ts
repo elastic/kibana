@@ -6,15 +6,18 @@
  */
 
 import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
+} from '@kbn/alertzero-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import { ALERTZERO_INFERENCE_PARENT_FEATURE_ID } from '@kbn/alertzero-common';
 import type { HuntModels, HuntModelTier } from '../../../services/watches/hunt/types';
 import {
   HUNT_MODEL_TIERS,
   HUNT_MODEL_TIER_FEATURE_IDS,
 } from '../../../services/watches/hunt/common/hunt_model_tiers';
-import { resolveScopedModel } from './scoped_model';
+import { resolveConfiguredScopedModel, resolveScopedModel } from './scoped_model';
 
 export interface HuntModelFailure {
   tier: HuntModelTier;
@@ -81,6 +84,15 @@ export const resolveHuntModels = async ({
   logger: Logger;
   tiers?: readonly HuntModelTier[];
 }): Promise<ResolveHuntModelsOutcome> => {
+  // Without this the token-usage doc carries no feature_id/parent_feature_id, so the call is
+  // invisible to per-feature cost reporting.
+  const chatModelOptions = {
+    telemetryMetadata: {
+      pluginId: telemetryPluginId,
+      aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+    },
+  };
+
   const resolved = await Promise.all(
     tiers.map(
       async (
@@ -98,14 +110,7 @@ export const resolveHuntModels = async ({
             request,
             uiSettingsClient,
             logger,
-            chatModelOptions: {
-              // Without this the token-usage doc carries no feature_id/parent_feature_id, so the
-              // call is invisible to per-feature cost reporting.
-              telemetryMetadata: {
-                pluginId: telemetryPluginId,
-                aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
-              },
-            },
+            chatModelOptions,
           });
           return outcome.ok
             ? { tier, model: outcome.model }
@@ -126,5 +131,17 @@ export const resolveHuntModels = async ({
     if (model) models[tier] = model;
     if (failure) failures.push(failure);
   }
+
+  // Empty when the row has no saved model. Callers then stay on the tier they asked for.
+  const cyber = await resolveConfiguredScopedModel({
+    inference,
+    searchInferenceEndpoints,
+    featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
+    request,
+    logger,
+    chatModelOptions,
+  });
+  if (cyber) models.cyber = cyber;
+
   return { models, failures };
 };

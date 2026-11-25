@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/core-doc-links-browser-mocks'
   - '@kbn/scout'
   - '@kbn/ui-callout'
+  - '@kbn/std'
 tags:
   - plugin
   - prod

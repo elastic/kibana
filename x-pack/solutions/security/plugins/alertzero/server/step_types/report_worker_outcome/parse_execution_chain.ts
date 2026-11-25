@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-/** One ancestor in the `executionChain` the Workflows engine stores in a child execution's context. */
-export interface ExecutionChainHop {
-  readonly executionId: string;
-  readonly invocation: 'sync' | 'async';
-  readonly workflowId: string;
-}
+import type { ExecutionChainHop } from '@kbn/workflows';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value != null && typeof value === 'object' && !Array.isArray(value);
