@@ -12,7 +12,7 @@ const MINUTE_MS = 60_000;
 const START = Date.UTC(2026, 10, 20, 10, 0);
 /** About 2 matches a minute, wobbling by one. */
 const BASELINE = { median: 2, mad: 1, mean: 2, std_dev: 0.8 };
-const THRESHOLD = getBaselineThreshold(BASELINE);
+const THRESHOLD = getBaselineThreshold({ baseline: BASELINE });
 
 /** A run whose newest minutes, from `START` plus `firstMinute`, hold these counts. */
 const createRun = ({
@@ -46,16 +46,16 @@ const findMinutes = (
 describe('getBaselineThreshold', () => {
   // A zero mean must not turn the burstiness ratio into NaN.
   it('keeps a finite threshold, three matches up, over an hour with no matches', () => {
-    expect(getBaselineThreshold({ median: 0, mad: 0, mean: 0, std_dev: 0 })).toBe(3);
+    expect(getBaselineThreshold({ baseline: { median: 0, mad: 0, mean: 0, std_dev: 0 } })).toBe(3);
   });
 
   // A bursty indicator's spread grows with its mean; a Poisson floor would flag its bursts.
   it('raises the threshold of a bursty indicator above that of a steady one at the same level', () => {
     const steady = { median: 5, mad: 1, mean: 5, std_dev: Math.sqrt(5) };
 
-    expect(getBaselineThreshold({ ...steady, std_dev: Math.sqrt(30) })).toBeGreaterThan(
-      getBaselineThreshold(steady)
-    );
+    expect(
+      getBaselineThreshold({ baseline: { ...steady, std_dev: Math.sqrt(30) } })
+    ).toBeGreaterThan(getBaselineThreshold({ baseline: steady }));
   });
 
   // Live, one reported minute of 48 against a normal of 2 raised the threshold from 7 to 21 for the
@@ -70,10 +70,10 @@ describe('getBaselineThreshold', () => {
       std_dev: Math.sqrt((59 * 4 + 48 ** 2) / 60 - mean ** 2),
     };
 
-    expect(getBaselineThreshold(withSpike)).toBeGreaterThan(11);
+    expect(getBaselineThreshold({ baseline: withSpike })).toBeGreaterThan(11);
     // Exactly the threshold of the 59 minutes of 2 alone.
-    expect(getBaselineThreshold(withSpike, [48])).toBeCloseTo(
-      getBaselineThreshold({ median: 2, mad: 0, mean: 2, std_dev: 0 })
+    expect(getBaselineThreshold({ baseline: withSpike, excluded: [48] })).toBeCloseTo(
+      getBaselineThreshold({ baseline: { median: 2, mad: 0, mean: 2, std_dev: 0 } })
     );
   });
 });
@@ -135,6 +135,19 @@ describe('findUnusualMinutes', () => {
         }
       )
     ).toEqual([[3, 12]]);
+  });
+
+  // Its documents arrived late, so the newer run counts it in full; the hour behind it is all
+  // incident, and its own threshold would let it pass.
+  it('judges a late minute before the last unusual one on the saved threshold', () => {
+    const incidentHour = { median: 25, mad: 1, mean: 25, std_dev: 5 };
+
+    expect(
+      findMinutes([createRun({ firstMinute: 0, counts: [25, 2, 30], baseline: incidentHour })], {
+        open: { threshold: THRESHOLD, last_minute: START + 2 * MINUTE_MS },
+        reported: new Set([START + 2 * MINUTE_MS]),
+      })
+    ).toEqual([[0, 25]]);
   });
 
   it('judges on the minute’s own threshold once the quiet period has passed', () => {
@@ -242,7 +255,9 @@ describe('findRise', () => {
     });
     const windowStart = START + 67 * MINUTE_MS - 360 * MINUTE_MS;
 
-    expect(findRise({ measurement: climbing, dataFrom: windowStart })).toBeDefined();
+    expect(findRise({ measurement: climbing, dataFrom: windowStart })).toEqual(
+      expect.objectContaining({ check: 'slow_rise' })
+    );
     expect(findRise({ measurement: climbing, dataFrom: windowStart + MINUTE_MS })).toBeUndefined();
   });
 });

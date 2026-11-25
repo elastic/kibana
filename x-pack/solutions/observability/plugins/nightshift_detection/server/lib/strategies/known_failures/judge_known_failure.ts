@@ -55,7 +55,14 @@ export interface KnownFailureRise {
 }
 
 /** Where the parts of a run's window start, in epoch milliseconds. */
-export function getRunWindow({ minutes }: Pick<KnownFailureMeasurement, 'minutes'>) {
+export interface RunWindow {
+  start: number;
+  baselineStart: number;
+  lastMinute: number;
+}
+
+/** Where the parts of a run's window start, in epoch milliseconds. */
+export function getRunWindow({ minutes }: Pick<KnownFailureMeasurement, 'minutes'>): RunWindow {
   const {
     window_minutes: window,
     newest_minutes: newest,
@@ -76,7 +83,13 @@ export function getRunWindow({ minutes }: Pick<KnownFailureMeasurement, 'minutes
  * `excluded` counts, the hour's minutes already reported as unusual, so one reported spike cannot
  * raise the floor for the hour after it.
  */
-export function getBaselineThreshold(baseline: KnownFailureBaseline, excluded: number[] = []) {
+export function getBaselineThreshold({
+  baseline,
+  excluded = [],
+}: {
+  baseline: KnownFailureBaseline;
+  excluded?: number[];
+}): number {
   const { median, mad } = baseline;
   const {
     mad_k: madK,
@@ -129,7 +142,8 @@ function sum(values: number[]): number {
  *    minute is reported with it. The event saves the threshold.
  * 3. While the event is open (an unusual minute within the quiet period), a minute is unusual above
  *    the saved threshold, so a long incident never becomes the hour's normal. A minute before the
- *    event's last unusual minute, read again from an overlapping run, is judged but moves nothing.
+ *    event's last unusual minute, read again from an overlapping run, is judged on the saved
+ *    threshold too, since its documents may have arrived late, but moves nothing.
  *
  * Minutes in `reported` keep the event's state moving but are left out of the result: an earlier
  * tick already reported them.
@@ -169,7 +183,7 @@ export function findUnusualMinutes({
       const excluded = [...reportedCounts]
         .filter(([minute]) => minute >= baselineStart && minute < runMinutes[0].minute)
         .map(([, count]) => count);
-      const threshold = getBaselineThreshold(baseline, excluded);
+      const threshold = getBaselineThreshold({ baseline, excluded });
       runMinutes.forEach(({ minute, count }) =>
         byMinute.set(minute, { count, baseline, threshold })
       );
@@ -192,7 +206,9 @@ export function findUnusualMinutes({
     const sinceLast = event ? minute - event.last_minute : -1;
     // 3. A minute before the last unusual one was judged before the event reached it.
     const isBeforeEvent = event !== undefined && sinceLast < 0;
-    const isOpen = event !== undefined && sinceLast >= 0 && sinceLast <= quietMinutes * MINUTE_MS;
+    // Within the quiet period on either side of the last unusual minute, so a minute read again
+    // with its late documents is judged as part of the event, not against an hour it inflated.
+    const isOpen = event !== undefined && Math.abs(sinceLast) <= quietMinutes * MINUTE_MS;
     const threshold = isOpen && event ? event.threshold : own;
     const neighbours = isOpen ? [] : getAboveNeighbours(minute);
     // 2. and 3.
