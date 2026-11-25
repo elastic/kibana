@@ -12,22 +12,18 @@ applies_to:
 The TrendAI Vision One connector connects to the TrendAI Vision One public API (v3.0) of your tenant's region. Use it to list Workbench alerts, read Observed Attack Techniques detections, find endpoints, follow response tasks, and read the result of a sandbox analysis.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Agents can only read. Actions marked _(not yet available)_ change data in TrendAI Vision One and are not exposed to agents until workflow support is added. Until then, you can run them only through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+This connector is currently available in **Agent Builder** only. Agents can only read data. Actions that change data in TrendAI Vision One are marked _(API only)_. Agents can't use them yet, but you can run them with the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
 ## Create connectors in {{kib}} [define-trend-vision-one-ui]
 
 You can create connectors in **{{stack-manage-app}}** → **{{connectors-ui}}**.
 
-### Connector networking configuration [trend-vision-one-connector-networking-configuration]
-
-Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
 ### Get API credentials [trend-vision-one-api-credentials]
 
 1. Sign in to the TrendAI Vision One console.
-2. Go to **Administration > User Roles** and create or pick a role that grants the permissions of the actions you plan to use. [Required permissions](#trend-vision-one-permissions) lists the permissions of each action.
-3. Go to **Administration > API Keys** and add an API key with that role and an expiry date.
+2. Go to **Administration** → **User Roles** and create or pick a role that grants the permissions of the actions you plan to use. [Required permissions](#trend-vision-one-permissions) lists the permissions of each action.
+3. Go to **Administration** → **API Keys** and add an API key with that role and an expiry date.
 4. Copy the API key. In the **API key** field of the connector, paste the key. In **Region API URL**, enter the API address of your tenant's region from the table in [Connector configuration](#trend-vision-one-connector-configuration).
 
 ### Connector configuration [trend-vision-one-connector-configuration]
@@ -54,6 +50,10 @@ Region API URL
 API key
 :   A TrendAI Vision One API key. The connector sends it as `Authorization: Bearer <API key>`. Refer to [Get API credentials](#trend-vision-one-api-credentials).
 
+### Connector networking configuration [trend-vision-one-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
 ### Test connectors [trend-vision-one-connector-test]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test runs the TrendAI Vision One connectivity check, which confirms the region API URL and the API key. It needs no role permission. An invalid or expired key, or a key from another region, fails the test.
@@ -68,10 +68,10 @@ The TrendAI Vision One connector exposes the following actions:
 `getAlertDetails`
 :   Returns one Workbench alert by ID, with its status, investigation result, severity, score, impact scope, indicators, matched rules, and the alert's current `etag`.
 
-`updateAlertStatus` _(not yet available)_
+`updateAlertStatus` _(API only)_
 :   Sets the `status` (Open, In Progress, Closed) and the `investigationResult` of a Workbench alert; give at least one. When you pass the `etag` from `getAlertDetails`, the update fails if the alert changed since that read; a blank `etag` is rejected. Without `etag`, the connector reads the alert first, returns `outcome: skipped` when the alert already has the requested values, and otherwise updates it with the current ETag. If TrendAI Vision One returns no ETag, the action fails without changing the alert: the connector never sends an update without `If-Match`.
 
-`addAlertNote` _(not yet available)_
+`addAlertNote` _(API only)_
 :   Adds a note (`content`, up to 500,000 characters) to a Workbench alert and returns the new `noteId`. A note cannot be deleted.
 
 `listObservedAttackTechniques`
@@ -80,49 +80,49 @@ The TrendAI Vision One connector exposes the following actions:
 `listEndpoints`
 :   Lists managed endpoints with their agent GUID, name, operating system, IP addresses, isolation status, and agent and sensor state. Narrow the list with `agentGuid`, `endpointName`, or a `filter`. Returns one page (`top` 10, 50, 100 (default), or 200) and `nextLink`. Use `select` (up to 10 fields) to return only the fields you need and `orderBy` to sort by `agentGuid` (default) or by the last connection or scan time.
 
-`isolateEndpoint` _(not yet available)_
+`isolateEndpoint` _(API only)_
 :   Isolates an endpoint from the network; it can still reach the TrendAI Vision One management server. Give exactly one of `agentGuid` or `endpointName`, and an optional `description` shown in the task list.
 
-`restoreEndpointConnection` _(not yet available)_
+`restoreEndpointConnection` _(API only)_
 :   Restores the network connection of an isolated endpoint. Give exactly one of `agentGuid` or `endpointName`.
 
-`terminateProcess` _(not yet available)_
+`terminateProcess` _(API only)_
 :   Terminates a running process on a Windows endpoint by `processId` and its `fileName` (full path of the executable) or `fileSha1`; give at least one of the two, or the action fails before anything is sent. This cannot be undone.
 
-`collectForensicFile` _(not yet available)_
+`collectForensicFile` _(API only)_
 :   Collects a file from an endpoint (`filePath`) into a password-protected archive in TrendAI Vision One.
 
 `getResponseTaskStatus`
 :   Returns a response task by the `taskId` that a response action returned: its status (`queued`, `running`, `pendingApproval`, `succeeded`, `failed`, `canceled`, or `rejected`), action, target, and error.
 
-`quarantineEmailMessage` _(not yet available)_
+`quarantineEmailMessage` _(API only)_
 :   Moves an email message to the quarantine folder of its mailbox. Give `messageId` (optionally with `mailBox`) or `uniqueId`.
 
-`deleteEmailMessage` _(not yet available)_
+`deleteEmailMessage` _(API only)_
 :   Deletes an email message. A deleted message cannot be recovered. Give `messageId` (optionally with `mailBox`) or `uniqueId`.
 
-`disableUserAccount` _(not yet available)_
+`disableUserAccount` _(API only)_
 :   Disables a user account in Active Directory or Microsoft Entra ID.
 
-`enableUserAccount` _(not yet available)_
+`enableUserAccount` _(API only)_
 :   Enables a disabled user account in Active Directory or Microsoft Entra ID.
 
-`forceUserSignOut` _(not yet available)_
+`forceUserSignOut` _(API only)_
 :   Signs a user out of all active Microsoft Entra ID sessions.
 
-`addToSuspiciousObjectList` _(not yet available)_
+`addToSuspiciousObjectList` _(API only)_
 :   Adds a URL, domain, IP address, file SHA-1, file SHA-256, or sender email address to the suspicious object list, with an optional scan action (`block` or `log`), risk level, and expiry (`daysToExpiration`, -1 for never, up to 365). Adding an object that is already on the list updates its entry. Each type holds at most 10,000 objects; when a list is full, TrendAI Vision One deletes the objects that expire first.
 
-`removeFromSuspiciousObjectList` _(not yet available)_
+`removeFromSuspiciousObjectList` _(API only)_
 :   Removes an object from the suspicious object list. Returns `outcome: notFound` when the object is not on the list.
 
-`addToExceptionList` _(not yet available)_
+`addToExceptionList` _(API only)_
 :   Adds an object to the suspicious object exception list so that it is never flagged. This weakens detection for that object.
 
-`submitFileToSandbox` _(not yet available)_
+`submitFileToSandbox` _(API only)_
 :   Submits one file, base64-encoded in `file` with its `fileName`, to the sandbox. `file` must be standard base64 with its `=` padding (a length that is a multiple of 4). Optional `documentPassword`, `archivePassword`, and `arguments` are given as plain text. Returns the submission `id`, the file `digest`, and the submission `quota`. Using Sandbox Analysis requires TrendAI Flex in your TrendAI Vision One tenant; ask your TrendAI Vision One administrator if submissions are refused.
 
-`submitUrlsToSandbox` _(not yet available)_
+`submitUrlsToSandbox` _(API only)_
 :   Submits 1 to 10 URLs to the sandbox. Returns one item per URL with its status and submission ID, and the submission `quota`. A submission costs sandbox credits and cannot be deleted. Using Sandbox Analysis requires TrendAI Flex in your TrendAI Vision One tenant; ask your TrendAI Vision One administrator if submissions are refused.
 
 `getSandboxAnalysisResult`
@@ -169,11 +169,10 @@ Each action needs the permissions in the following table on the role of the API 
 | `submitUrlsToSandbox` | Sandbox Analysis: Submit object; Sandbox Analysis: View, filter, and search |
 | `getSandboxAnalysisResult` | Sandbox Analysis: Submit object; Sandbox Analysis: View, filter, and search |
 
-## Notes from live use [trend-vision-one-live-notes]
+## Usage notes [trend-vision-one-live-notes]
 
 * The Endpoint Sensor must be enabled on an endpoint for the isolate, restore, terminate, and collect response actions. A task queued for an endpoint whose sensor is disabled ends as `failed` and the endpoint is not isolated.
 * Response tasks usually finish within seconds to minutes. A task queued for an agent that is not ready can fail after about 55 minutes. Poll `getResponseTaskStatus` with a bounded number of attempts and handle `running`, `failed`, and `succeeded`.
 * Confirm an isolation by reading `isolationStatus` with `listEndpoints`, not only the task result. The endpoint inventory can lag the task result by several minutes.
 * A sandbox analysis needs a supported file type (for example a PDF; plain text files are rejected) and, for a URL, a host that TrendAI Vision One can reach. A failed analysis shows on the sandbox task, not when you submit. The submission ID is the analysis ID.
 * Email response actions need the quarantine location of your mail provider configured in Email and Collaboration Protection; otherwise TrendAI Vision One answers with a configuration error.
-* Without a time range, `listObservedAttackTechniques` returns only the last hour (the product default). Give a detection range to read more.

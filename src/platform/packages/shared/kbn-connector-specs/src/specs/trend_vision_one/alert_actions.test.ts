@@ -247,8 +247,8 @@ describe('TrendAI Vision One updateAlertStatus', () => {
   });
 
   it('sends the lookup with the normal timeout and the PATCH with the time left of one shared deadline', async () => {
-    const now = jest.spyOn(Date, 'now');
-    now.mockReturnValueOnce(1_000_000).mockReturnValueOnce(1_000_000 + 50_000);
+    const now = jest.spyOn(performance, 'now');
+    now.mockReturnValueOnce(1_000).mockReturnValueOnce(1_000 + 50_000);
     request
       .mockResolvedValueOnce(ok(alert('WB-1'), { etag: '"e1"' }))
       .mockResolvedValueOnce(ok(undefined, {}, 204));
@@ -260,13 +260,28 @@ describe('TrendAI Vision One updateAlertStatus', () => {
   });
 
   it('gives the PATCH its full timeout when the lookup was quick, and never more than REQUEST_TIMEOUT_MS', async () => {
-    const now = jest.spyOn(Date, 'now');
-    now.mockReturnValueOnce(1_000_000).mockReturnValueOnce(1_000_000 + 200);
+    const now = jest.spyOn(performance, 'now');
+    now.mockReturnValueOnce(1_000).mockReturnValueOnce(1_000 + 200);
     request
       .mockResolvedValueOnce(ok(alert('WB-1'), { etag: '"e1"' }))
       .mockResolvedValueOnce(ok(undefined, {}, 204));
     await run('updateAlertStatus', { id: 'WB-1', status: 'Closed' });
     expect(sent(1)).toMatchObject({ method: 'PATCH', timeout: REQUEST_TIMEOUT_MS });
+    now.mockRestore();
+  });
+
+  it.each([
+    ['the read used the whole time allowed', UPDATE_ALERT_DEADLINE_MS],
+    ['the read used more time than allowed', UPDATE_ALERT_DEADLINE_MS + 5_000],
+  ])('sends no PATCH when %s', async (_label, elapsedMs) => {
+    const now = jest.spyOn(performance, 'now');
+    now.mockReturnValueOnce(1_000).mockReturnValueOnce(1_000 + elapsedMs);
+    request.mockResolvedValueOnce(ok(alert('WB-1'), { etag: '"e1"' }));
+    await expect(run('updateAlertStatus', { id: 'WB-1', status: 'Closed' })).rejects.toThrow(
+      'used all the time allowed, so the update was not sent; nothing was changed'
+    );
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(sent(0)).toMatchObject({ method: 'GET' });
     now.mockRestore();
   });
 

@@ -207,7 +207,7 @@ describe('TrendAI Vision One agent skill', () => {
     expect([...named].sort()).toEqual(tools);
   });
 
-  it('marks exactly the actions agents cannot use as not yet available on the docs page', () => {
+  it('marks exactly the actions agents cannot use as API only on the docs page', () => {
     const docs = fs.readFileSync(
       join(REPO_ROOT, 'docs/reference/connectors-kibana/trend-vision-one-action-type.md'),
       'utf8'
@@ -216,7 +216,7 @@ describe('TrendAI Vision One agent skill', () => {
     expect(docs).toContain('Agents can only read');
     expect(docs).not.toMatch(/asks you to confirm/i);
     for (const [name, action] of Object.entries(TrendVisionOne.actions)) {
-      const marked = docs.includes(`\n\`${name}\` _(not yet available)_\n`);
+      const marked = docs.includes(`\n\`${name}\` _(API only)_\n`);
       const listed = marked || docs.includes(`\n\`${name}\`\n`);
       expect({ name, listed }).toEqual({ name, listed: true });
       expect({ name, marked }).toEqual({ name, marked: action.isTool === false });

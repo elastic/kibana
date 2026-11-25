@@ -104,7 +104,7 @@ export const alertActions: ConnectorSpec['actions'] = {
       let etag = input.etag;
       let patchTimeoutMs = REQUEST_TIMEOUT_MS;
       if (etag === undefined) {
-        const startedAt = Date.now();
+        const startedAt = performance.now();
         const current = await readAlert(ctx, 'updateAlertStatus', input.id);
         const unchanged = Object.entries(changes).every(
           ([field, value]) => current.alert[field] === value
@@ -119,10 +119,14 @@ export const alertActions: ConnectorSpec['actions'] = {
           );
         }
         etag = current.etag;
-        patchTimeoutMs = Math.min(
-          REQUEST_TIMEOUT_MS,
-          UPDATE_ALERT_DEADLINE_MS - (Date.now() - startedAt)
-        );
+        // A monotonic clock, so a wall-clock change cannot give the PATCH a zero or negative timeout.
+        const timeLeftMs = Math.floor(UPDATE_ALERT_DEADLINE_MS - (performance.now() - startedAt));
+        if (timeLeftMs <= 0) {
+          throw new Error(
+            `${VENDOR} updateAlertStatus stopped: reading Workbench alert ${input.id} used all the time allowed, so the update was not sent; nothing was changed. Try again later.`
+          );
+        }
+        patchTimeoutMs = Math.min(REQUEST_TIMEOUT_MS, timeLeftMs);
       }
       await vendorRequest(ctx, {
         action: 'updateAlertStatus',
