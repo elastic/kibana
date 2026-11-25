@@ -19,7 +19,7 @@ import {
   TestProviders,
 } from '../../../../../common/mock';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../../types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -38,7 +38,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import * as notesApi from '../../../../../notes/api/api';
 import { getMockTimelineSearchSubscription } from '../../../../../common/mock/mock_timeline_search_service';
-import * as useTimelineEventsModule from '../../../../containers';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
 import { mockBrowserFields } from '../../../../../common/mock/timeline/browser_fields';
@@ -46,6 +45,9 @@ import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/us
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { UnifiedTimelineBodyProps } from '../../body/unified_timeline_body';
+import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 
 const mockPatterns = [
   'auditbeat-*',
@@ -90,10 +92,6 @@ jest.mock('react-router-dom', () => ({
 
 const { mockTimelineSearchSubscription } = getMockTimelineSearchSubscription();
 
-// These tests can take more than standard timeout of 5s
-// that is why we are increasing it.
-const SPECIAL_TEST_TIMEOUT = 50000;
-
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
   return allowedExperimentalValues[feature];
 });
@@ -104,6 +102,37 @@ jest.mock('../../../../../common/lib/kibana');
 jest.mock(`@elastic/ebt/client`);
 
 jest.mock('@kbn/expandable-flyout');
+
+jest.mock('../../body/unified_timeline_body', () => ({
+  UnifiedTimelineBody: jest.fn(
+    ({ header, events, rowAdditionalLeadingControls }: UnifiedTimelineBodyProps) => (
+      <>
+        {header}
+        {events.map((event, rowIndex) => (
+          <div key={event._id}>
+            {rowAdditionalLeadingControls?.[0].render(
+              () => (
+                <></>
+              ),
+              {
+                record: {} as DataTableRecord,
+                rowIndex,
+              }
+            )}
+          </div>
+        ))}
+      </>
+    )
+  ),
+}));
+
+const getUnifiedTimelineBodyProps = () => {
+  const props = jest.mocked(UnifiedTimelineBody).mock.lastCall?.[0];
+  if (!props) {
+    throw new Error('UnifiedTimelineBody was not rendered');
+  }
+  return props;
+};
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
@@ -186,8 +215,6 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
-const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
-
 describe('query tab with unified timeline', () => {
   const fetchNotesSpy = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
@@ -255,7 +282,6 @@ describe('query tab with unified timeline', () => {
       getUserPrivilegesMockDefaultValue({
         notesPrivileges: { crud: true, read: true },
         timelinePrivileges: { crud: true, read: true },
-        kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
         detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
       })
     );
@@ -263,70 +289,37 @@ describe('query tab with unified timeline', () => {
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
-
   describe('render', () => {
-    it(
-      'should render unifiedDataTable in timeline',
-      async () => {
-        renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
+    it('should render the timeline header', async () => {
+      renderTestComponents();
 
-    it(
-      'should render unified-field-list in timeline',
-      async () => {
-        renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-sidebar')).toBeVisible();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-    it(
-      'should show row-renderers correctly by default',
-      async () => {
-        renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
+      expect(await screen.findByTestId('timelineHeader')).toBeVisible();
+    });
 
-        expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
-      },
+    it('should hand the body the events of the timeline', async () => {
+      renderTestComponents();
 
-      SPECIAL_TEST_TIMEOUT
-    );
+      expect(await screen.findByTestId('timelineHeader')).toBeVisible();
+      await waitFor(() => {
+        expect(getUnifiedTimelineBodyProps().events).toEqual(mockTimelineData.slice(0, 1));
+      });
+      expect(getUnifiedTimelineBodyProps().itemsPerPage).toBe(1);
+    });
 
-    it(
-      'should hide row-renderers when disabled',
-      async () => {
-        const { container } = renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
+    it('should hand the body the columns of the timeline', async () => {
+      renderTestComponents();
 
-        expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
+      expect(await screen.findByTestId('timelineHeader')).toBeVisible();
+      const columnIds = getUnifiedTimelineBodyProps().columns?.map(({ id }) => id);
+      expect(columnIds).toEqual(expect.arrayContaining(customColumnOrder.map(({ id }) => id)));
+    });
 
-        fireEvent.click(screen.getByTestId('show-row-renderers-gear'));
-        expect(screen.getByTestId('row-renderers-modal')).toBeVisible();
+    it('should hand the body the row renderers', async () => {
+      renderTestComponents();
 
-        fireEvent.click(screen.getByTestId('disable-all'));
-        expect(
-          screen.getAllByTestId('renderer-checkbox')[0].querySelector('[type="checkbox"]')
-        ).not.toBeChecked();
-        fireEvent.click(
-          container.closest('body')!.querySelector('[aria-label="Closes this modal window"]')!
-        );
-
-        expect(screen.queryByTestId('row-renderers-modal')).not.toBeInTheDocument();
-
-        expect(screen.queryByTestId('timeline-row-renderer-0')).not.toBeInTheDocument();
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
+      expect(await screen.findByTestId('timelineHeader')).toBeVisible();
+      expect(getUnifiedTimelineBodyProps().rowRenderers).toBe(defaultRowRenderers);
+    });
   });
 
   describe('pagination', () => {
@@ -348,615 +341,82 @@ describe('query tab with unified timeline', () => {
         },
       },
     };
+
+    const renderWithNotes = (itemsPerPage = 1) =>
+      render(
+        <TestProviders
+          store={createMockStore({
+            ...structuredClone(mockStateWithNoteInTimeline),
+            timeline: {
+              ...structuredClone(mockStateWithNoteInTimeline.timeline),
+              timelineById: {
+                [TimelineId.test]: {
+                  ...structuredClone(
+                    mockStateWithNoteInTimeline.timeline.timelineById[TimelineId.test]
+                  ),
+                  itemsPerPage,
+                },
+              },
+            },
+          })}
+        >
+          <TestComponent />
+        </TestProviders>
+      );
+
     afterEach(() => {
       jest.clearAllMocks();
     });
 
-    it(
-      'should paginate correctly',
-      async () => {
-        render(
-          <TestProviders
-            store={createMockStore({
-              ...structuredClone(mockStateWithNoteInTimeline),
-            })}
-          >
-            <TestComponent />
-          </TestProviders>
-        );
+    it('should load notes for current page only', async () => {
+      renderWithNotes();
 
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-        expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
-
-        expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
-          'Rows per page: 1'
-        );
-
-        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
-        expect(screen.getByTestId('pagination-button-2')).toBeVisible();
-        expect(screen.queryByTestId('pagination-button-3')).toBeNull();
-
-        fireEvent.click(screen.getByTestId('pagination-button-2'));
-
-        await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should load more records according to sample size correctly',
-      async () => {
-        render(
-          <TestProviders
-            store={createMockStore({
-              ...structuredClone(mockStateWithNoteInTimeline),
-            })}
-          >
-            <TestComponent />
-          </TestProviders>
-        );
-
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
-          expect(screen.getByTestId('pagination-button-2')).toBeVisible();
-        });
-        // Go to last page
-        fireEvent.click(screen.getByTestId('pagination-button-2'));
-        await waitFor(() => {
-          expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
-        });
-        fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
-        await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
-          expect(screen.getByTestId('pagination-button-5')).toBeVisible();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should load notes for current page only',
-      async () => {
-        render(
-          <TestProviders
-            store={createMockStore({
-              ...structuredClone(mockStateWithNoteInTimeline),
-            })}
-          >
-            <TestComponent />
-          </TestProviders>
-        );
-
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
-
-        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
+      expect(await screen.findByTestId('timelineHeader')).toBeVisible();
+      await waitFor(() => {
+        expect(getUnifiedTimelineBodyProps().events).toHaveLength(3);
+      });
+      await waitFor(() => {
         expect(fetchNotesSpy).toHaveBeenCalledWith(['1']);
+      });
 
-        // Page : 2
+      // Page : 2
 
-        fetchNotesSpy.mockClear();
-        expect(screen.getByTestId('pagination-button-1')).toBeVisible();
+      fetchNotesSpy.mockClear();
+      act(() => {
+        getUnifiedTimelineBodyProps().onUpdatePageIndex?.(1);
+      });
 
-        fireEvent.click(screen.getByTestId('pagination-button-1'));
+      await waitFor(() => {
+        expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [mockTimelineData[1]._id]);
+      });
+      expect(fetchNotesSpy).toHaveBeenCalledTimes(1);
 
-        await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-1')).toHaveAttribute('aria-current', 'page');
+      // Page : 3
 
-          expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [mockTimelineData[1]._id]);
-        });
+      fetchNotesSpy.mockClear();
+      act(() => {
+        getUnifiedTimelineBodyProps().onUpdatePageIndex?.(2);
+      });
 
-        // Page : 3
-
-        fetchNotesSpy.mockClear();
-        expect(screen.getByTestId('pagination-button-2')).toBeVisible();
-        fireEvent.click(screen.getByTestId('pagination-button-2'));
-
-        await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
-
-          expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [mockTimelineData[2]._id]);
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should load notes for correct page size',
-      async () => {
-        render(
-          <TestProviders
-            store={createMockStore({
-              ...structuredClone(mockStateWithNoteInTimeline),
-            })}
-          >
-            <TestComponent />
-          </TestProviders>
-        );
-
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
-
-        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
-        expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
-          'Rows per page: 1'
-        );
-        fireEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
-
-        await waitFor(() => {
-          expect(screen.getByTestId('tablePagination-2-rows')).toBeVisible();
-        });
-
-        fetchNotesSpy.mockClear();
-        fireEvent.click(screen.getByTestId('tablePagination-2-rows'));
-
-        await waitFor(() => {
-          expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [
-            mockTimelineData[0]._id,
-            mockTimelineData[1]._id,
-          ]);
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-  });
-
-  const openDisplaySettings = async () => {
-    expect(screen.getByTestId('dataGridDisplaySelectorButton')).toBeVisible();
-
-    fireEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
-
-    await waitFor(() => {
-      expect(
-        screen
-          .getAllByTestId('unifiedDataTableSampleSizeInput')
-          .find((el) => el.getAttribute('type') === 'number')
-      ).toBeVisible();
+      await waitFor(() => {
+        expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [mockTimelineData[2]._id]);
+      });
+      expect(fetchNotesSpy).toHaveBeenCalledTimes(1);
     });
-  };
 
-  const updateSampleSize = async (sampleSize: number) => {
-    const sampleSizeInput = screen
-      .getAllByTestId('unifiedDataTableSampleSizeInput')
-      .find((el) => el.getAttribute('type') === 'number');
+    it('should load notes for correct page size', async () => {
+      renderWithNotes(2);
 
-    expect(sampleSizeInput).toBeVisible();
+      expect(await screen.findByTestId('timelineHeader')).toBeVisible();
+      expect(getUnifiedTimelineBodyProps().itemsPerPage).toBe(2);
 
-    fireEvent.change(sampleSizeInput as HTMLElement, {
-      target: { value: sampleSize },
+      await waitFor(() => {
+        expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [
+          mockTimelineData[0]._id,
+          mockTimelineData[1]._id,
+        ]);
+      });
     });
-  };
-
-  describe('controls', () => {
-    it(
-      'should reftech on sample size change',
-      async () => {
-        renderTestComponents();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-        expect(screen.queryByTestId('pagination-button-1')).not.toBeInTheDocument();
-
-        await openDisplaySettings();
-        await updateSampleSize(2);
-        await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-1')).toBeVisible();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-  });
-
-  describe('columns', () => {
-    it(
-      'should move column left/right correctly ',
-      async () => {
-        const { container } = renderTestComponents();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-
-        const messageColumnIndex =
-          customColumnOrder.findIndex((header) => header.id === 'message') +
-          //  offset for additional leading columns on left
-          3;
-
-        expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
-          'data-gridcell-column-index',
-          String(messageColumnIndex)
-        );
-
-        expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
-
-        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
-
-        await waitFor(() => {
-          expect(screen.getByTitle('Move left')).toBeEnabled();
-        });
-
-        fireEvent.click(screen.getByTitle('Move left'));
-
-        await waitFor(() => {
-          expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
-            'data-gridcell-column-index',
-            String(messageColumnIndex - 1)
-          );
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should remove column',
-      async () => {
-        const { container } = renderTestComponents();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-
-        expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
-
-        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
-
-        await waitFor(() => {
-          expect(screen.getByTitle('Remove column')).toBeVisible();
-        });
-
-        fireEvent.click(screen.getByTitle('Remove column'));
-
-        await waitFor(() => {
-          expect(
-            container.querySelector('[data-gridcell-column-id="message"]')
-          ).not.toBeInTheDocument();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should sort date column',
-      async () => {
-        const { container } = renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-
-        expect(
-          container.querySelector('[data-gridcell-column-id="@timestamp"]')
-        ).toBeInTheDocument();
-
-        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-@timestamp'));
-
-        await waitFor(() => {
-          expect(screen.getByTitle('Sort Old-New')).toBeVisible();
-        });
-        expect(screen.getByTitle('Unsort New-Old')).toBeVisible();
-
-        useTimelineEventsSpy.mockClear();
-        fireEvent.click(screen.getByTitle('Sort Old-New'));
-
-        await waitFor(() => {
-          expect(useTimelineEventsSpy).toHaveBeenNthCalledWith(
-            1,
-            expect.objectContaining({
-              sort: [
-                {
-                  direction: 'asc',
-                  esTypes: ['date'],
-                  field: '@timestamp',
-                  type: 'date',
-                },
-              ],
-            })
-          );
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should sort string column correctly',
-      async () => {
-        const { container } = renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-
-        expect(
-          container.querySelector('[data-gridcell-column-id="host.name"]')
-        ).toBeInTheDocument();
-
-        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-host.name'));
-
-        await waitFor(() => {
-          expect(screen.getByTestId('dataGridHeaderCellActionGroup-host.name')).toBeVisible();
-        });
-
-        expect(screen.getByTitle('Sort A-Z')).toBeVisible();
-        expect(screen.getByTitle('Sort Z-A')).toBeVisible();
-
-        useTimelineEventsSpy.mockClear();
-
-        fireEvent.click(screen.getByTitle('Sort A-Z'));
-
-        await waitFor(() => {
-          expect(useTimelineEventsSpy).toHaveBeenNthCalledWith(
-            1,
-            expect.objectContaining({
-              sort: [
-                {
-                  direction: 'desc',
-                  esTypes: ['date'],
-                  field: '@timestamp',
-                  type: 'date',
-                },
-                {
-                  direction: 'asc',
-                  esTypes: [],
-                  field: 'host.name',
-                  type: 'string',
-                },
-              ],
-            })
-          );
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should sort number column',
-      async () => {
-        const field = {
-          name: 'event.severity',
-          type: 'number',
-        };
-
-        const { container } = renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-
-        expect(
-          container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
-        ).toBeInTheDocument();
-
-        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
-
-        await waitFor(() => {
-          expect(screen.getByTestId(`dataGridHeaderCellActionGroup-${field.name}`)).toBeVisible();
-        });
-
-        expect(screen.getByTitle('Sort Low-High')).toBeVisible();
-        expect(screen.getByTitle('Sort High-Low')).toBeVisible();
-
-        useTimelineEventsSpy.mockClear();
-
-        fireEvent.click(screen.getByTitle('Sort Low-High'));
-
-        await waitFor(() => {
-          expect(useTimelineEventsSpy).toHaveBeenNthCalledWith(
-            1,
-            expect.objectContaining({
-              sort: [
-                {
-                  direction: 'desc',
-                  esTypes: ['date'],
-                  field: '@timestamp',
-                  type: 'date',
-                },
-                {
-                  direction: 'asc',
-                  esTypes: [],
-                  field: field.name,
-                  type: field.type,
-                },
-              ],
-            })
-          );
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-  });
-
-  describe('left controls', () => {
-    it(
-      'should clear all sorting',
-      async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
-        expect(
-          screen.getByTestId('dataGridColumnSortingButton').querySelector('[role="marquee"]')
-        ).toHaveTextContent('1');
-
-        fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
-
-        // // timestamp sorting indicators
-        expect(
-          await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
-        ).toBeInTheDocument();
-
-        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeInTheDocument();
-
-        fireEvent.click(screen.getByTestId('dataGridColumnSortingClearButton'));
-
-        await waitFor(() => {
-          expect(screen.queryByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeNull();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should be able to sort by multiple columns',
-      async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
-        expect(
-          screen.getByTestId('dataGridColumnSortingButton').querySelector('[role="marquee"]')
-        ).toHaveTextContent('1');
-
-        fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
-
-        // // timestamp sorting indicators
-        expect(
-          await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
-        ).toBeInTheDocument();
-
-        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeInTheDocument();
-
-        // add more columns to sorting
-        fireEvent.click(screen.getByText(/Pick fields to sort by/));
-
-        await waitFor(() => {
-          expect(
-            screen.getByTestId('dataGridColumnSortingPopoverColumnSelection-event.severity')
-          ).toBeInTheDocument();
-        });
-
-        fireEvent.click(
-          screen.getByTestId('dataGridColumnSortingPopoverColumnSelection-event.severity')
-        );
-
-        // check new columns for sorting validity
-        await waitFor(() => {
-          expect(
-            screen.getByTestId('dataGridHeaderCellSortingIcon-event.severity')
-          ).toBeInTheDocument();
-        });
-        expect(
-          screen.getByTestId('euiDataGridColumnSorting-sortColumn-event.severity')
-        ).toBeInTheDocument();
-
-        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeInTheDocument();
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-  });
-
-  describe('unified fields list', () => {
-    it(
-      'should remove the column when clicked on X sign',
-      async () => {
-        const field = {
-          name: 'event.severity',
-        };
-
-        renderTestComponents();
-        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
-            String(customColumnOrder.length)
-          );
-        });
-
-        // column exists in the table
-        expect(await screen.findByTestId(`dataGridHeaderCell-${field.name}`)).toBeVisible();
-
-        fireEvent.click(screen.getAllByTestId(`fieldToggle-${field.name}`)[0]);
-
-        // column not longer exists in the table
-        await waitFor(() => {
-          expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
-            String(customColumnOrder.length - 1)
-          );
-        });
-        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should add the column when clicked on ⊕ sign',
-      async () => {
-        const field = {
-          name: 'agent.id',
-        };
-
-        renderTestComponents();
-        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
-            String(customColumnOrder.length)
-          );
-        });
-
-        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
-
-        // column exists in the table
-        const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-
-        fireEvent.click(within(availableFields).getByTestId(`fieldToggle-${field.name}`));
-
-        await waitFor(() => {
-          expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
-            String(customColumnOrder.length + 1)
-          );
-          expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should should show callout when field search does not matches any field',
-      async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
-            '43'
-          );
-        });
-
-        fireEvent.change(screen.getByTestId('fieldListFiltersFieldSearch'), {
-          target: { value: 'fake_field' },
-        });
-
-        await waitFor(() => {
-          expect(
-            screen.getByTestId('fieldListGroupedAvailableFieldsNoFieldsCallout-noFieldsMatch')
-          ).toBeVisible();
-        });
-
-        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('0');
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should toggle side bar correctly',
-      async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-
-        expect(screen.getByTestId('fieldListGroupedFieldGroups')).toBeVisible();
-
-        fireEvent.click(screen.getByTitle('Hide sidebar'));
-
-        await waitFor(() => {
-          expect(screen.queryByTestId('fieldListGroupedFieldGroups')).not.toBeInTheDocument();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
   });
 
   describe('Leading actions - notes', () => {
@@ -966,27 +426,23 @@ describe('query tab with unified timeline', () => {
       );
     });
 
-    it(
-      'should open the notes flyout',
-      async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+    it('should open the notes flyout', async () => {
+      renderTestComponents();
+      expect(await screen.findByTestId('timelineHeader')).toBeVisible();
 
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+      await waitFor(() => {
+        expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+      await waitFor(() => {
+        expect(flyoutApi.openNotes).toHaveBeenCalledWith({
+          hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+          origin: FLYOUT_ORIGIN.TIMELINE,
         });
-
-        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-        await waitFor(() => {
-          expect(flyoutApi.openNotes).toHaveBeenCalledWith({
-            hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
-            origin: FLYOUT_ORIGIN.TIMELINE,
-          });
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
+      });
+    });
   });
 
   describe('Leading actions - pin', () => {
@@ -995,74 +451,64 @@ describe('query tab with unified timeline', () => {
         jest.fn((feature: keyof ExperimentalFeatures) => allowedExperimentalValues[feature])
       );
     });
-    it(
-      'should disable pinning when event has notes attached in timeline',
-      async () => {
-        const mockStateWithNoteInTimeline = {
-          ...mockState,
-          timeline: {
-            ...mockState.timeline,
-            timelineById: {
-              [TimelineId.test]: {
-                ...mockState.timeline.timelineById[TimelineId.test],
-                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
-                pinnedEventIds: { '1': true },
-              },
+
+    it('should disable pinning when event has notes attached in timeline', async () => {
+      const mockStateWithNoteInTimeline = {
+        ...mockState,
+        timeline: {
+          ...mockState.timeline,
+          timelineById: {
+            [TimelineId.test]: {
+              ...mockState.timeline.timelineById[TimelineId.test],
+              savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+              pinnedEventIds: { '1': true },
             },
           },
-        };
+        },
+      };
 
-        render(
-          <TestProviders
-            store={createMockStore({
-              ...structuredClone(mockStateWithNoteInTimeline),
-            })}
-          >
-            <TestComponent />
-          </TestProviders>
+      render(
+        <TestProviders
+          store={createMockStore({
+            ...structuredClone(mockStateWithNoteInTimeline),
+          })}
+        >
+          <TestComponent />
+        </TestProviders>
+      );
+
+      expect(await screen.findAllByTestId('timeline-pin-event-button')).toHaveLength(1);
+      // disabled because it is already pinned
+      expect(screen.getByTestId('timeline-pin-event-button')).toBeDisabled();
+
+      fireEvent.mouseOver(screen.getByTestId('timeline-pin-event-button'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
+        expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
+          'This event cannot be unpinned because it has notes in Timeline'
         );
+        /*
+         * Above event is alert and not an event but `getEventType` in
+         * x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
+         * returns it has event and not an alert even though, it has event.kind as signal.
+         * Need to see if it is okay
+         *
+         * */
+      });
+    });
 
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+    it('should allow pinning when event has notes but notes are not attached in current timeline', async () => {
+      renderTestComponents();
 
-        expect(screen.getAllByTestId('timeline-pin-event-button')).toHaveLength(1);
-        // disabled because it is already pinned
-        expect(screen.getByTestId('timeline-pin-event-button')).toBeDisabled();
+      expect(await screen.findAllByTestId('timeline-pin-event-button')).toHaveLength(1);
+      expect(screen.getByTestId('timeline-pin-event-button')).not.toBeDisabled();
 
-        fireEvent.mouseOver(screen.getByTestId('timeline-pin-event-button'));
-
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
-          expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
-            'This event cannot be unpinned because it has notes in Timeline'
-          );
-          /*
-           * Above event is alert and not an event but `getEventType` in
-           * x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
-           * returns it has event and not an alert even though, it has event.kind as signal.
-           * Need to see if it is okay
-           *
-           * */
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should allow pinning when event has notes but notes are not attached in current timeline',
-      async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        expect(screen.getAllByTestId('timeline-pin-event-button')).toHaveLength(1);
-        expect(screen.getByTestId('timeline-pin-event-button')).not.toBeDisabled();
-
-        fireEvent.mouseOver(screen.getByTestId('timeline-pin-event-button'));
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
-          expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent('Pin event');
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
+      fireEvent.mouseOver(screen.getByTestId('timeline-pin-event-button'));
+      await waitFor(() => {
+        expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
+        expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent('Pin event');
+      });
+    });
   });
 });
