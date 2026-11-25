@@ -843,8 +843,10 @@ function buildOtlpQueueAndRetry(inputs: OtlpInputs) {
     : null;
 
   return {
+    // a queue left to the spec defaults is sent as `null` to remove a stored queue, or to opt out of
+    // the defaults of the managed endpoint, which differ from it. Otherwise it is left out.
     sending_queue: isQueueUnset(inputs)
-      ? inputs.otlpQueueEnabledInput.hasStoredQueue
+      ? inputs.otlpQueueEnabledInput.hasStoredQueue || isManagedEndpoint(inputs)
         ? null
         : undefined
       : {

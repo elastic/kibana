@@ -2553,11 +2553,11 @@ describe('EditOutputFlyout', () => {
           });
           fireEvent.click(utils.getByText('Save and apply settings'));
 
-          // the queue is left out, so the stored opt-out is kept
+          // the stored opt-out is sent back
           await waitFor(() => expect(mockSendPutOutput).toHaveBeenCalled());
           expect(
             (mockSendPutOutput.mock.calls[0][1] as any).otlp_exporter.sending_queue
-          ).toBeUndefined();
+          ).toBeNull();
         });
 
         it('should apply the defaults of the managed endpoint to an output saved without a queue', async () => {
@@ -2585,6 +2585,28 @@ describe('EditOutputFlyout', () => {
               batch: expect.objectContaining({ flush_timeout: null }),
             })
           );
+        });
+
+        it('should opt out of the defaults of the managed endpoint for a queue set to the spec defaults', async () => {
+          mockStartServices(false, MANAGED_URL);
+          const { utils } = renderFlyout();
+          selectOtlpType(utils);
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+            target: { value: 'otlp' },
+          });
+          setValue(utils, 'otlpEndpointInput', 'managed.example.com:443');
+          await waitFor(() =>
+            expect(utils.getByTestId('settingsOutputsFlyout.otlpBatchEnabledInput')).toBeChecked()
+          );
+          setValue(utils, 'otlpQueueSizerInput', 'requests');
+          click(utils, 'otlpQueueBlockOnOverflowInput');
+          click(utils, 'otlpBatchEnabledInput');
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => expect(mockSendPostOutput).toHaveBeenCalled());
+          expect(
+            (mockSendPostOutput.mock.calls[0][0] as any).otlp_exporter.sending_queue
+          ).toBeNull();
         });
 
         it('should leave out the untouched queue of a new output that is not on the managed endpoint', async () => {
