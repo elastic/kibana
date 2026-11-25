@@ -1554,6 +1554,36 @@ describe('XYChart component', () => {
     });
   });
 
+  test('it shows number ranges in the tooltip and disables clicks and tooltip actions', () => {
+    const { args } = sampleArgs();
+    const numberRangeLayer: DataLayerConfig = {
+      ...(args.layers[0] as DataLayerConfig),
+      xAccessor: 'bucket',
+      accessors: ['count'],
+      splitAccessors: [],
+      table: {
+        type: 'datatable',
+        columns: [
+          { id: 'bucket', name: 'bucket', meta: { type: 'number_range' } },
+          { id: 'count', name: 'count', meta: { type: 'number' } },
+        ],
+        rows: [{ bucket: '500.0..1000.0', count: 3 }],
+      },
+    };
+
+    const component = shallow(
+      <XYChart {...defaultProps} minInterval={500} args={{ ...args, layers: [numberRangeLayer] }} />
+    );
+    const tooltip = component.find(Tooltip);
+    const headerFormatter = tooltip.prop('headerFormatter') as unknown as (value: {
+      value: number;
+    }) => JSX.Element;
+
+    expect(mount(headerFormatter({ value: 500 })).text()).toBe('500 – 1,000');
+    expect(tooltip.prop('actions')).toBeUndefined();
+    expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
+  });
+
   test('returns correct original data for ordinal x axis with special formatter', () => {
     const geometry: GeometryValue = { x: 'BAR', y: 1, accessor: 'y1', mark: null, datum: {} };
     const series = {

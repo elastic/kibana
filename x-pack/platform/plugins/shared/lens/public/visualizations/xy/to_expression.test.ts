@@ -216,6 +216,44 @@ describe('#toExpression', () => {
     ).toBeUndefined();
   });
 
+  it('should draw a number_range type in x-axis as a linear histogram', () => {
+    // ES|QL gives number range columns an ordinal scale
+    mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation((col) =>
+      col === 'a'
+        ? ({
+            label: 'bucket',
+            dataType: 'number_range',
+            isBucketed: true,
+            scale: 'ordinal',
+          } as OperationDescriptor)
+        : ({ label: `col_${col}`, dataType: 'number' } as OperationDescriptor)
+    );
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar',
+            xAccessor: 'a',
+            accessors: ['b'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    const layerChain = (expression.chain[0].arguments.layers[0] as Ast).chain;
+    const extendedDataLayer = layerChain[layerChain.length - 1];
+
+    expect(extendedDataLayer.arguments.xScaleType).toEqual(['linear']);
+    expect(extendedDataLayer.arguments.isHistogram).toEqual([true]);
+  });
+
   it('should not generate an expression when missing y', () => {
     expect(
       xyVisualization.toExpression(
