@@ -36,7 +36,7 @@ export const useInfiniteFindCaseUserActions = (
   const shouldFetchAllPages = hasNonTypeActivityFilter(params);
 
   return useInfiniteQuery<InternalFindCaseUserActions, ServerError>(
-    casesQueriesKeys.caseUserActions(caseId, params),
+    casesQueriesKeys.caseUserActionsInfinite(caseId, params),
     async ({ pageParam = 1 }) => {
       return findCaseUserActions(caseId, { ...params, page: pageParam }, abortCtrlRef.signal);
     },
