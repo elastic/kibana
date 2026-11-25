@@ -103,7 +103,7 @@ function getTabs({
           {
             key: 'agent-configuration' as const,
             label: i18n.translate('xpack.apm.settings.agentConfig', {
-              defaultMessage: 'Agent Configuration',
+              defaultMessage: 'Agent configuration',
             }),
             href: router.link('/settings/agent-configuration'),
           },
@@ -112,7 +112,7 @@ function getTabs({
     {
       key: 'agent-explorer',
       label: i18n.translate('xpack.apm.settings.agentExplorer', {
-        defaultMessage: 'Agent Explorer',
+        defaultMessage: 'Agent explorer',
       }),
       href: router.link('/settings/agent-explorer', {
         query: {
@@ -126,7 +126,7 @@ function getTabs({
     {
       key: 'agent-keys',
       label: i18n.translate('xpack.apm.settings.agentKeys', {
-        defaultMessage: 'Agent Keys',
+        defaultMessage: 'Agent keys',
       }),
       href: router.link('/settings/agent-keys'),
     },
@@ -141,7 +141,7 @@ function getTabs({
     {
       key: 'custom-links',
       label: i18n.translate('xpack.apm.settings.customizeApp', {
-        defaultMessage: 'Custom Links',
+        defaultMessage: 'Custom links',
       }),
       href: router.link('/settings/custom-links'),
     },
