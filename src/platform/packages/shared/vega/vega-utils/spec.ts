@@ -14,34 +14,34 @@ import type { VegaSpec } from '@kbn/vega-schemas';
 export const specToEditorValue = (spec: VegaSpec): string =>
   spec.format === 'json' ? JSON.stringify(spec.value, null, 2) : spec.value;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-/** The spec for the text in the editor, keeping JSON only while it parses to an object. */
+/** The spec for the text in the editor, keeping JSON only while it still parses. */
 export const specFromEditor = (text: string, format: VegaSpec['format']): VegaSpec => {
   if (format === 'json') {
     try {
-      const parsed: unknown = JSON.parse(text);
-      if (isRecord(parsed)) return { format: 'json', value: parsed };
+      return { format: 'json', value: JSON.parse(text) };
     } catch {
-      // Text that isn't JSON yet is kept as HJSON below.
+      return { format: 'hjson', value: text };
     }
   }
   return { format: 'hjson', value: text };
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /**
- * The spec as an object, or `undefined` when its HJSON doesn't parse to an object. HJSON without
- * root braces parses to a string, as it does when the Vega panel renders.
+ * The spec as an object, or `undefined` when it isn't one. HJSON without root braces parses to a
+ * string, as it does when the Vega panel renders, and JSON from the editor can be any value.
  */
 export const parseSpec = (spec: VegaSpec): Record<string, unknown> | undefined => {
-  if (spec.format === 'json') return spec.value;
+  let parsed: unknown;
   try {
-    const parsed: unknown = parse(spec.value, { legacyRoot: false, keepWsc: true });
-    return isRecord(parsed) ? parsed : undefined;
+    parsed =
+      spec.format === 'json' ? spec.value : parse(spec.value, { legacyRoot: false, keepWsc: true });
   } catch {
     return undefined;
   }
+  return isRecord(parsed) ? parsed : undefined;
 };
 
 /** ES|QL `data.url.query` strings from the top-level data sources of a parsed spec. */
