@@ -65,6 +65,21 @@ secrets redacted), `--skip-connector` (only the config, Kibana not running yet),
 `elastic:changeme`, then `elastic_serverless:changeme`), `--es-url` (default
 `http://localhost:9200`), `--kibana-config`.
 
+The script also runs the Relay dev container (`docker.elastic.co/cloud-ci/k8s-arch/relay-dev`, from
+elastic/relay-service) as `nightshift-relay-dev`, with the dev Relay cert from `@kbn/dev-utils`
+mounted, and sets `xpack.actions.relay.url: http://localhost:3000` in the block, unless
+`xpack.actions.relay` is already set elsewhere in the config. It needs Docker, and
+`docker login docker.elastic.co` for the image. A Slack stub runs on `:3100`
+(`GET :3100/_stub/messages` shows what the Relay posted). The container keeps its state in memory,
+so after restarting it, connect Slack again. When the Kibana on `--kibana-url` is a local Serverless
+project (start it first), the block also sets `xpack.actions.relay.uiam.enabled: true` with Kibana's
+observability UIAM certificate as `xpack.actions.relay.ssl`, and the container gets
+`RELAY_UIAM_URL=https://host.docker.internal:8443`; re-run after switching between stateful and
+Serverless. The block also sets `xpack.actions.relay.kibanaUrl` (a dev-only setting) to the Kibana
+URL with `host.docker.internal` as the host, which Kibana sends to the Relay at install instead of
+its public base URL: inside the container `localhost` is the container itself. Connect Slack again
+after it changes. `--skip-relay` leaves all of this out, and `--remove` stops the container.
+
 On a local Serverless observability project with UIAM, the same script works:
 
 ```bash

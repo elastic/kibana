@@ -50,5 +50,23 @@ export const ORCA_SOURCE_CODE_CONTEXT = `Source code: the system is the OpenTele
 /** Sandbox egress the source code context needs: cloning the demo from GitHub. */
 export const ORCA_SANDBOX_ALLOWED_HOSTS: readonly string[] = ['github.com'];
 
+/** The Relay dev image (elastic/relay-service): the API, the worker and a Slack stub in one container. */
+export const RELAY_DEV_IMAGE = 'docker.elastic.co/cloud-ci/k8s-arch/relay-dev:latest';
+export const RELAY_DEV_CONTAINER_NAME = 'nightshift-relay-dev';
+export const RELAY_DEV_URL = 'http://localhost:3000';
+/** The mock UIAM service of a local Serverless project, as the Relay container reaches it. */
+export const RELAY_DEV_UIAM_URL = 'https://host.docker.internal:8443';
+/** Nightshift is an observability app; the Relay's UIAM certificate must be that project type's. */
+export const RELAY_UIAM_PROJECT_TYPE = 'observability';
+/**
+ * The project the Relay's stand-in for the ingress proxy names in UIAM mode. It must be the one in
+ * the EIDENT SAN of Kibana's UIAM certificate: `MOCK_IDP_UIAM_PROJECT_ID` in `@kbn/mock-idp-utils`,
+ * which is private to the platform group.
+ */
+export const RELAY_DEV_UIAM_PROJECT_ID = 'abcdef12345678901234567890123456';
+/** How the Relay container reaches the Kibana on the host. */
+export const RELAY_DEV_HOST_NAME = 'host.docker.internal';
+export const RELAY_DEV_SLACK_STUB_URL = 'http://localhost:3100';
+
 export const MANAGED_BLOCK_START = '# >>> nightshift local-dev (managed by setup_local_dev.js) >>>';
 export const MANAGED_BLOCK_END = '# <<< nightshift local-dev (managed by setup_local_dev.js) <<<';
