@@ -34,12 +34,14 @@ import type {
 import { LATENCY_MAP_INNER_ROWS, rowToDuration } from '../query/duration_rows';
 import { getMapSource } from '../query/latency_map_query';
 import { getCellKey } from '../query/parse';
+import type { LatencyGrid } from '../query/parse';
 import { getTimeGridKey } from '../query/time_grid';
+import type { TimeGrid } from '../query/time_grid';
 import { clampRange, isSameRange } from '../geometry/cell_range';
 import type { Cell, CellRange } from '../geometry/cell_range';
 import { LAYOUT, getTimeBinsForWidth } from '../geometry/layout';
 import { createMapGeometry } from '../geometry/map_geometry';
-import type { PlotArea } from '../geometry/map_geometry';
+import type { MapGeometry, PlotArea } from '../geometry/map_geometry';
 import { formatDuration, formatTimestamp } from '../geometry/ticks';
 import { useLatencyGrid } from '../hooks/use_latency_grid';
 import { useLatencyMapColors } from '../hooks/use_latency_map_colors';
@@ -360,9 +362,13 @@ export function LatencyMap({
   // chosen an outcome with the errors filter - on its own under a host filter too, so that
   // clearing the region takes the inference away with it.
   const resolveRegion = useCallback(
-    (range: CellRange, { ofSelection = false } = {}): LatencyMapSelection => {
+    (
+      range: CellRange,
+      mapGeometry: MapGeometry,
+      { ofSelection = false } = {}
+    ): LatencyMapSelection => {
       const ownFailedOnly = ofSelection ? displaySelection?.failedOnly : undefined;
-      const next = geometry!.rangeToSelection(
+      const next = mapGeometry.rangeToSelection(
         range,
         controlled ? (hostFailedOnly ? undefined : ownFailedOnly) : failedOnly
       );
@@ -375,30 +381,23 @@ export function LatencyMap({
         ? { ...next, failedOnly: true }
         : next;
     },
-    [
-      geometry,
-      displaySelection,
-      controlled,
-      hostFailedOnly,
-      failedOnly,
-      grid,
-      timeGrid,
-      stats,
-      gridTotals,
-    ]
+    [displaySelection, controlled, hostFailedOnly, failedOnly, grid, timeGrid, stats, gridTotals]
   );
 
   // What a keyboard region would commit: its bounds, with the counts of the cells it covers,
   // over the outcome Enter would commit it with (and the host filter's, which counts failed
-  // spans alone whatever the region says).
-  const describeRange = (range: CellRange) => {
-    const rangeSelection = resolveRegion(range);
+  // spans alone whatever the region says). Of a map that has its cells: an empty range has
+  // a geometry and no grid.
+  const describeRange = (
+    range: CellRange,
+    mapGeometry: MapGeometry,
+    counted: { grid: LatencyGrid; timeGrid: TimeGrid; stats: DurationStats }
+  ) => {
+    const rangeSelection = resolveRegion(range, mapGeometry);
     // Failed spans alone: by the region's own clause, or the host's filter over it.
     const regionFailedOnly = Boolean(rangeSelection.failedOnly || (controlled && hostFailedOnly));
     const counts = getSelectionCounts({
-      grid: grid!,
-      timeGrid: timeGrid!,
-      stats: stats!,
+      ...counted,
       selection: regionFailedOnly ? { ...rangeSelection, failedOnly: true } : rangeSelection,
     });
     return {
@@ -434,7 +433,7 @@ export function LatencyMap({
     (requested: CellRange, label?: string, { ofSelection = false } = {}) => {
       if (!geometry) return;
       const range = clampRange(requested, geometry.bins, geometry.rows);
-      const next = resolveRegion(range, { ofSelection });
+      const next = resolveRegion(range, geometry, { ofSelection });
       // The same cells about the same spans: nothing to commit, and neither is a move or a
       // resize that lands where it started, whatever the cells would be read as afresh. A
       // new region over the same cells about every span where the selection was about
@@ -604,9 +603,9 @@ export function LatencyMap({
   // The keyboard's readout: the cursor's cell or, while Shift is extending a region, the whole
   // region - the bounds and counts that Enter would commit, as the summary will say them.
   const keyboardCell =
-    geometry && keyboard
+    geometry && grid && timeGrid && stats && keyboard
       ? keyboard.anchor
-        ? describeRange(getKeyboardRange(keyboard))
+        ? describeRange(getKeyboardRange(keyboard), geometry, { grid, timeGrid, stats })
         : describeCell(keyboard.cursor)
       : undefined;
   const summary = stats
