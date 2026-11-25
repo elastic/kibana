@@ -92,21 +92,6 @@ describe('selectSupportedCandidates', () => {
     );
   });
 
-  it('rejects a source whose index does not exist', async () => {
-    mockColumnsByView({
-      'view-missing': new Error(
-        'verification_exception\n\tRoot causes:\n\t\tverification_exception: Unknown index [missing]'
-      ),
-    });
-
-    const { toSchedule, unsupported } = await select(['missing'], 5);
-
-    expect(toSchedule).toEqual([]);
-    expect(unsupported).toEqual([
-      expect.objectContaining({ reason: expect.stringContaining('does not exist yet') }),
-    ]);
-  });
-
   it('rejects a source whose query Elasticsearch refuses to plan', async () => {
     mockColumnsByView({
       'view-broken': makeResponseError(

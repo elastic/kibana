@@ -15,9 +15,6 @@ import { parseError } from '../../streams/parse_error';
 import { isIndexNotFoundError } from '../latest_source_query';
 import { StatusError } from '../../errors/status_error';
 
-const getMissingIndexProblem = (index: string): string =>
-  `There are no documents to sample: an index behind [${index}] does not exist yet.`;
-
 /** Reports a failure of the column probe or the random arm, which hard-fail sampling, with its sampling context. */
 export const withSamplingErrorContext = async <T>(
   promise: Promise<T>,
@@ -28,7 +25,10 @@ export const withSamplingErrorContext = async <T>(
   } catch (err) {
     // Missing data is the caller's input, not a sampling failure.
     if (isIndexNotFoundError(err)) {
-      throw new StatusError(getMissingIndexProblem(index), 400);
+      throw new StatusError(
+        `There are no documents to sample: an index behind [${index}] does not exist yet.`,
+        400
+      );
     }
     throw new Error(`${query} failed: ${parseError(err).message}`);
   }
@@ -54,9 +54,6 @@ export const probeSampleColumns = async (
   try {
     return await probeColumns(params);
   } catch (error) {
-    if (isIndexNotFoundError(error)) {
-      return { kind: 'unsupported', problem: getMissingIndexProblem(params.index) };
-    }
     throw new Error(`Column probe failed: ${parseError(error).message}`);
   }
 };
@@ -80,9 +77,6 @@ const probeColumns = async ({
       signal,
     });
   } catch (error) {
-    if (isIndexNotFoundError(error)) {
-      throw error;
-    }
     const reason = getVerificationReason(error);
     if (reason) {
       return {
@@ -111,8 +105,9 @@ const probeColumns = async ({
   if (fullColumns.length === 0 && !(await hasAnyDocument({ esClient, index, signal }))) {
     return { kind: 'empty' };
   }
-  // The later answer wins: an index created between the two probes shows up here with a valid
-  // @timestamp and with the entity fields the first, empty answer lacked.
+  // Normally a refusal: the source has data but no usable @timestamp. It passes only when an
+  // index was created between the two probes, and then these columns carry the entity fields
+  // the first answer lacked.
   return checkTimestampColumn(index, fullColumns);
 };
 
