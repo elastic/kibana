@@ -822,7 +822,11 @@ export class SlackAppService {
       if (error instanceof SlackAppUnavailableError) return false;
       const details =
         error instanceof RelayRequestError
-          ? `status ${error.statusCode}, reason ${error.reason ?? 'unknown'}`
+          ? [
+              `status ${error.statusCode}`,
+              ...(error.reason ? [`reason ${error.reason}`] : []),
+              ...(error.relayMessage ? [`message ${error.relayMessage}`] : []),
+            ].join(', ')
           : error instanceof Error
           ? error.message
           : String(error);
