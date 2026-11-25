@@ -101,8 +101,9 @@ export interface EmbeddableConversationProps {
 
   /**
    * Optional conversation starters shown as cards under the input on the empty "new conversation"
-   * screen. When provided, they replace the default starters of the selected agent; when omitted
-   * or empty, the agent's starters are shown.
+   * screen. They show only while the default Elastic AI agent is selected, so pass the `agentId` of
+   * that agent to `openChat` if the sidebar should open with them. When provided, they replace the
+   * starters of the solution and the default list; when omitted or empty, those are shown.
    *
    * At most 3 starters are shown. A label should have up to 30 characters, is shown on the card
    * and is sent as the message when the card is clicked, with the attachments and browser API

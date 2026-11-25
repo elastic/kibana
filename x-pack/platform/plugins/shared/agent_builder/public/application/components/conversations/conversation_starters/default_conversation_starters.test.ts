@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { MAX_CONVERSATION_STARTERS } from '@kbn/agent-builder-common';
+import {
+  CONVERSATION_STARTER_LABEL_MAX_LENGTH,
+  MAX_CONVERSATION_STARTERS,
+} from '@kbn/agent-builder-common';
 import { DEFAULT_CONVERSATION_STARTERS } from './default_conversation_starters';
-
-const MAX_LABEL_LENGTH = 30;
 
 describe('DEFAULT_CONVERSATION_STARTERS', () => {
   it('has at most the number of starters that are shown', () => {
@@ -20,7 +21,7 @@ describe('DEFAULT_CONVERSATION_STARTERS', () => {
 
     labels.forEach((label) => {
       expect(label.trim()).not.toBe('');
-      expect(label.length).toBeLessThanOrEqual(MAX_LABEL_LENGTH);
+      expect(label.length).toBeLessThanOrEqual(CONVERSATION_STARTER_LABEL_MAX_LENGTH);
     });
     expect(new Set(labels).size).toBe(labels.length);
   });

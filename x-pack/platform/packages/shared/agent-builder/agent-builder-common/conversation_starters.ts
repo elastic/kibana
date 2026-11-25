@@ -19,3 +19,6 @@ export interface ConversationStarter {
 
 /** The most conversation starters shown at once. */
 export const MAX_CONVERSATION_STARTERS = 3;
+
+/** The most characters a label of a conversation starter should have. */
+export const CONVERSATION_STARTER_LABEL_MAX_LENGTH = 30;
