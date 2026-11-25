@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { RenderCellValue } from '@elastic/eui';
 import { getActionsColumn } from './actions_column';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { render, within, screen, waitFor } from '@testing-library/react';
@@ -15,13 +16,57 @@ import userEvent from '@testing-library/user-event';
 import * as actionsHeader from './actions_header';
 import { UnifiedDataTableContext } from '../../../table_context';
 import { dataTableContextComplexMock } from '../../../../__mocks__/table_context';
+import {
+  RowControlsContext,
+  createAvailableControlsGetter,
+  getAdditionalRowControlsLayout,
+} from '../additional_row_control';
+
+const getColumn = ({
+  baseColumns,
+  rowAdditionalLeadingControls = [],
+  visibleRowLeadingControls,
+}: {
+  baseColumns: RenderCellValue[];
+  rowAdditionalLeadingControls?: RowControlColumn[];
+  visibleRowLeadingControls?: number;
+}) =>
+  getActionsColumn({
+    baseColumns,
+    rowControlsLayout: getAdditionalRowControlsLayout(
+      rowAdditionalLeadingControls,
+      visibleRowLeadingControls
+    ),
+  });
+
+const renderRowCell = (
+  column: ReturnType<typeof getActionsColumn>,
+  rowAdditionalLeadingControls: RowControlColumn[] = []
+) =>
+  render(
+    <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
+      <RowControlsContext.Provider
+        value={createAvailableControlsGetter(rowAdditionalLeadingControls)}
+      >
+        {column?.rowCellRender({
+          setCellProps: jest.fn(),
+          rowIndex: 0,
+          colIndex: 0,
+          columnId: 'actions',
+          isExpandable: false,
+          isExpanded: false,
+          isDetails: false,
+        })}
+      </RowControlsContext.Provider>
+    </UnifiedDataTableContext.Provider>
+  );
 
 describe('getActionsColumn', () => {
   describe('given no columns', () => {
     it('returns null', () => {
       const result = getActionsColumn({
         baseColumns: [],
-        rowAdditionalLeadingControls: undefined,
+        rowControlsLayout: undefined,
       });
       expect(result).toBeNull();
     });
@@ -129,7 +174,7 @@ describe('getActionsColumn', () => {
     'given $description',
     ({ expectedWidth, expectedTexts, baseColumns, rowAdditionalLeadingControls }) => {
       it('returns a column with the correct width', () => {
-        const result = getActionsColumn({
+        const result = getColumn({
           baseColumns,
           rowAdditionalLeadingControls:
             rowAdditionalLeadingControls as unknown as RowControlColumn[],
@@ -146,7 +191,7 @@ describe('getActionsColumn', () => {
         const actionsHeaderSpy = jest.spyOn(actionsHeader, 'ActionsHeader');
 
         // When
-        const result = getActionsColumn({
+        const result = getColumn({
           baseColumns,
           rowAdditionalLeadingControls:
             rowAdditionalLeadingControls as unknown as RowControlColumn[],
@@ -165,26 +210,14 @@ describe('getActionsColumn', () => {
 
       it('should return the row cell render function', () => {
         // Given
-        const result = getActionsColumn({
+        const result = getColumn({
           baseColumns,
           rowAdditionalLeadingControls,
         });
         expect(result?.rowCellRender).toBeInstanceOf(Function);
 
         // When
-        render(
-          <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
-            {result?.rowCellRender({
-              setCellProps: jest.fn(),
-              rowIndex: 0,
-              colIndex: 0,
-              columnId: 'actions',
-              isExpandable: false,
-              isExpanded: false,
-              isDetails: false,
-            })}
-          </UnifiedDataTableContext.Provider>
-        );
+        renderRowCell(result, rowAdditionalLeadingControls);
 
         // Then
         expectedTexts.forEach((text) => {
@@ -217,25 +250,13 @@ describe('getActionsColumn', () => {
         },
       ];
 
-      const result = getActionsColumn({
+      const result = getColumn({
         baseColumns: [],
         rowAdditionalLeadingControls,
         visibleRowLeadingControls: 3,
       });
 
-      render(
-        <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
-          {result?.rowCellRender({
-            setCellProps: jest.fn(),
-            rowIndex: 0,
-            colIndex: 0,
-            columnId: 'actions',
-            isExpandable: false,
-            isExpanded: false,
-            isDetails: false,
-          })}
-        </UnifiedDataTableContext.Provider>
-      );
+      renderRowCell(result, rowAdditionalLeadingControls);
 
       expect(screen.getByTestId('a')).toBeVisible();
       expect(screen.getByTestId('b')).toBeVisible();
@@ -279,24 +300,12 @@ describe('getActionsColumn', () => {
       const user = userEvent.setup();
 
       // When
-      const result = getActionsColumn({
+      const result = getColumn({
         baseColumns: [],
         rowAdditionalLeadingControls,
       });
 
-      render(
-        <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
-          {result?.rowCellRender({
-            setCellProps: jest.fn(),
-            rowIndex: 0,
-            colIndex: 0,
-            columnId: 'actions',
-            isExpandable: false,
-            isExpanded: false,
-            isDetails: false,
-          })}
-        </UnifiedDataTableContext.Provider>
-      );
+      renderRowCell(result, rowAdditionalLeadingControls);
 
       // Then
 

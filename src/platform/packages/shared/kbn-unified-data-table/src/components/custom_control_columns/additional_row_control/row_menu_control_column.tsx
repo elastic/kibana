@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useContext, useMemo, useState } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -17,21 +17,21 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RowControlColumn, RowControlProps, RowControlRowProps } from '@kbn/discover-utils';
+import type { RowControlProps } from '@kbn/discover-utils';
 import { useControlColumn } from '../../../hooks/use_control_column';
+import { RowControlsContext } from './row_controls_context';
 
 /**
  * Menu button under which all other additional row controls would be placed
  */
 export const RowMenuControlCell = ({
-  getAvailableControls,
   startIndex = 0,
   ...props
 }: EuiDataGridCellValueElementProps & {
-  getAvailableControls: (rowProps: RowControlRowProps) => RowControlColumn[];
   /** Index into the available controls list from which menu items start. */
   startIndex?: number;
 }) => {
+  const getAvailableControls = useContext(RowControlsContext);
   const { record, rowIndex } = useControlColumn(props);
   const [isMoreActionsPopoverOpen, setIsMoreActionsPopoverOpen] = useState<boolean>(false);
 
@@ -105,17 +105,8 @@ export const RowMenuControlCell = ({
   );
 };
 
-export const getRowMenuControlColumn = (
-  getAvailableControls: (rowProps: RowControlRowProps) => RowControlColumn[],
-  startIndex?: number
-) => {
+export const getRowMenuControlColumn = (startIndex?: number) => {
   return (props: EuiDataGridCellValueElementProps) => {
-    return (
-      <RowMenuControlCell
-        {...props}
-        getAvailableControls={getAvailableControls}
-        startIndex={startIndex}
-      />
-    );
+    return <RowMenuControlCell {...props} startIndex={startIndex} />;
   };
 };

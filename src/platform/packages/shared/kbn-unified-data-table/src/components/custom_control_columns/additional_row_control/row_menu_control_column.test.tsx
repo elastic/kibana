@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { getRowMenuControlColumn } from './row_menu_control_column';
 import { createAvailableControlsGetter } from './row_control_column';
+import { RowControlsContext } from './row_controls_context';
 import { dataTableContextMock } from '../../../../__mocks__/table_context';
 import { mockRowAdditionalLeadingControls } from '../../../../__mocks__/external_control_columns';
 import { UnifiedDataTableContext } from '../../../table_context';
@@ -34,24 +35,26 @@ describe('getRowMenuControlColumn', () => {
         />
       )),
     };
-    const RowMenuControlColumn = getRowMenuControlColumn(
-      createAvailableControlsGetter([
-        props,
-        mockRowAdditionalLeadingControls[0],
-        mockRowAdditionalLeadingControls[1],
-      ])
-    );
+    const RowMenuControlColumn = getRowMenuControlColumn();
     render(
       <UnifiedDataTableContext.Provider value={contextMock}>
-        <RowMenuControlColumn
-          rowIndex={1}
-          setCellProps={jest.fn()}
-          columnId={props.id}
-          colIndex={0}
-          isDetails={false}
-          isExpandable={false}
-          isExpanded={false}
-        />
+        <RowControlsContext.Provider
+          value={createAvailableControlsGetter([
+            props,
+            mockRowAdditionalLeadingControls[0],
+            mockRowAdditionalLeadingControls[1],
+          ])}
+        >
+          <RowMenuControlColumn
+            rowIndex={1}
+            setCellProps={jest.fn()}
+            columnId={props.id}
+            colIndex={0}
+            isDetails={false}
+            isExpandable={false}
+            isExpanded={false}
+          />
+        </RowControlsContext.Provider>
       </UnifiedDataTableContext.Provider>
     );
     const menuButton = screen.getByTestId(

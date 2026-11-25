@@ -19,7 +19,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedDataTableProps } from './data_table';
 import React, { useCallback, useState } from 'react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
-import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
+import { buildDataTableRecord, getDocId, type RowControlColumn } from '@kbn/discover-utils';
 import { EsqlSource } from '@kbn/data-source';
 import {
   buildDataViewMock,
@@ -1062,6 +1062,48 @@ describe('UnifiedDataTable', () => {
         await waitForEuiPopoverOpen();
         expect(screen.getByTestId('exampleRowControl-heart')).toBeVisible();
         expect(screen.getByTestId('exampleRowControl-inspect')).toBeVisible();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should keep the state of leading controls when rows and controls are replaced',
+      async () => {
+        const StatefulRowControl = ({ label }: { label: string }) => {
+          const [isOpen, setIsOpen] = useState(false);
+          return (
+            <EuiButton data-test-subj="statefulRowControl" onClick={() => setIsOpen(true)}>
+              {isOpen ? `${label} open` : label}
+            </EuiButton>
+          );
+        };
+        const getControls = (label: string): RowControlColumn[] => [
+          {
+            id: 'stateful',
+            render: (_Control, { rowIndex }) => (
+              <StatefulRowControl label={`${label} ${rowIndex}`} />
+            ),
+          },
+        ];
+        const props = getProps();
+
+        const { rerender } = await renderComponent({
+          ...props,
+          rowAdditionalLeadingControls: getControls('first'),
+        });
+
+        await userEvent.click(screen.getAllByTestId('statefulRowControl')[0]);
+        expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('first 0 open');
+
+        rerender(
+          <DataTableWithI18n
+            {...props}
+            rows={esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock))}
+            rowAdditionalLeadingControls={getControls('second')}
+          />
+        );
+
+        expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('second 0 open');
       },
       EXTENDED_JEST_TIMEOUT
     );

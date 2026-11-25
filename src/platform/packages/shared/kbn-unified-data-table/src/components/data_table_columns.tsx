@@ -95,18 +95,18 @@ const getSelect = (rows: DataTableRecord[]) => ({
 
 export function getLeadControlColumns({
   rows,
-  canSetExpandedDoc,
 }: {
   rows: DataTableRecord[];
+}): EuiDataGridControlColumn[] {
+  return [getSelect(rows)];
+}
+
+export function getLeadControlColumnsExtraContent({
+  canSetExpandedDoc,
+}: {
   canSetExpandedDoc: boolean;
-}): {
-  leadColumns: EuiDataGridControlColumn[];
-  leadColumnsExtraContent: RenderCellValue[];
-} {
-  return {
-    leadColumns: [getSelect(rows)],
-    leadColumnsExtraContent: canSetExpandedDoc ? [ExpandButton] : [],
-  };
+}): RenderCellValue[] {
+  return canSetExpandedDoc ? [ExpandButton] : [];
 }
 
 function buildEuiGridColumn({

@@ -100,6 +100,7 @@ import { getRenderCellValueFn } from '../utils/get_render_cell_value';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
+  getLeadControlColumnsExtraContent,
   SELECT_ROW,
   OPEN_DETAILS,
 } from './data_table_columns';
@@ -130,6 +131,9 @@ import { useSelectedDocs } from '../hooks/use_selected_docs';
 import {
   getColorIndicatorControlColumn,
   getActionsColumn,
+  getAdditionalRowControlsLayout,
+  createAvailableControlsGetter,
+  RowControlsContext,
   type ColorIndicatorControlColumnParams,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
@@ -1341,11 +1345,45 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
-    const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-      const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
-        rows: displayedRows,
+    const getAvailableRowControls = useMemo(
+      () => createAvailableControlsGetter(rowAdditionalLeadingControls ?? []),
+      [rowAdditionalLeadingControls]
+    );
+
+    const {
+      numInlineSlots: rowControlsInlineSlots,
+      hasMenu: rowControlsHasMenu,
+      totalWidth: rowControlsWidth,
+    } = getAdditionalRowControlsLayout(
+      rowAdditionalLeadingControls ?? [],
+      visibleRowLeadingControls
+    );
+
+    // Keyed on the layout only: the cells read the current controls from RowControlsContext,
+    // so new rows or controls re-render the actions cells instead of remounting them.
+    const actionsColumn = useMemo(
+      () =>
+        isInteractive
+          ? getActionsColumn({
+              baseColumns: getLeadControlColumnsExtraContent({ canSetExpandedDoc }),
+              rowControlsLayout: {
+                numInlineSlots: rowControlsInlineSlots,
+                hasMenu: rowControlsHasMenu,
+                totalWidth: rowControlsWidth,
+              },
+            })
+          : undefined,
+      [
         canSetExpandedDoc,
-      });
+        isInteractive,
+        rowControlsHasMenu,
+        rowControlsInlineSlots,
+        rowControlsWidth,
+      ]
+    );
+
+    const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+      const leadColumns = getLeadControlColumns({ rows: displayedRows });
 
       const filteredLeadColumns = leadColumns.filter(
         (column) => isInteractive && controlColumnIds.includes(column.id)
@@ -1358,27 +1396,12 @@ const InternalUnifiedDataTable = React.forwardRef<
         filteredLeadColumns.unshift(colorIndicatorControlColumn);
       }
 
-      const actionsColumn = isInteractive
-        ? getActionsColumn({
-            baseColumns: leadColumnsExtraContent,
-            rowAdditionalLeadingControls,
-            visibleRowLeadingControls,
-          })
-        : undefined;
       if (actionsColumn) {
         filteredLeadColumns.push(actionsColumn);
       }
 
       return filteredLeadColumns;
-    }, [
-      canSetExpandedDoc,
-      controlColumnIds,
-      displayedRows,
-      getRowIndicator,
-      isInteractive,
-      rowAdditionalLeadingControls,
-      visibleRowLeadingControls,
-    ]);
+    }, [actionsColumn, controlColumnIds, displayedRows, getRowIndicator, isInteractive]);
 
     // When a custom toolbar is used, in-table search is passed via
     // gridProps.inTableSearchControl. Otherwise it goes on EUI's right controls.
@@ -1732,38 +1755,40 @@ const InternalUnifiedDataTable = React.forwardRef<
                 setIsCompareActive={setIsCompareActive}
               />
             ) : (
-              <EuiDataGridMemoized
-                // Remount on display-mode change to reset EuiDataGrid's auto-height cache; otherwise
-                // some rows stay stuck at the taller JSON height when switching back to table mode.
-                // Full screen is restored after the remount (see isFullScreenRef).
-                key={documentsDisplayMode}
-                id={dataGridId}
-                aria-describedby={randomId}
-                aria-labelledby={ariaLabelledBy}
-                columns={euiGridColumns}
-                columnVisibility={columnsVisibility}
-                data-test-subj="docTable"
-                leadingControlColumns={leadingControlColumns}
-                onColumnResize={onResize}
-                pagination={
-                  !isPrintMode && paginationMode === 'multiPage' ? paginationObj : undefined
-                }
-                renderCellValue={renderCellValueWithInTableSearchSupport}
-                ref={dataGridRef}
-                rowCount={rowCount}
-                schemaDetectors={schemaDetectors}
-                sorting={sorting as EuiDataGridSorting}
-                toolbarVisibility={toolbarVisibility}
-                rowHeightsOptions={rowHeightsOptions}
-                gridStyle={gridStyle}
-                renderCustomGridBody={renderCustomGridBody}
-                renderCustomToolbar={renderCustomToolbarFn}
-                trailingControlColumns={trailingControlColumns}
-                cellContext={cellContextWithInTableSearchSupport}
-                renderCellPopover={renderCustomPopover}
-                virtualizationOptions={virtualizationOptions}
-                onFullScreenChange={onDataGridFullScreenChange}
-              />
+              <RowControlsContext.Provider value={getAvailableRowControls}>
+                <EuiDataGridMemoized
+                  // Remount on display-mode change to reset EuiDataGrid's auto-height cache; otherwise
+                  // some rows stay stuck at the taller JSON height when switching back to table mode.
+                  // Full screen is restored after the remount (see isFullScreenRef).
+                  key={documentsDisplayMode}
+                  id={dataGridId}
+                  aria-describedby={randomId}
+                  aria-labelledby={ariaLabelledBy}
+                  columns={euiGridColumns}
+                  columnVisibility={columnsVisibility}
+                  data-test-subj="docTable"
+                  leadingControlColumns={leadingControlColumns}
+                  onColumnResize={onResize}
+                  pagination={
+                    !isPrintMode && paginationMode === 'multiPage' ? paginationObj : undefined
+                  }
+                  renderCellValue={renderCellValueWithInTableSearchSupport}
+                  ref={dataGridRef}
+                  rowCount={rowCount}
+                  schemaDetectors={schemaDetectors}
+                  sorting={sorting as EuiDataGridSorting}
+                  toolbarVisibility={toolbarVisibility}
+                  rowHeightsOptions={rowHeightsOptions}
+                  gridStyle={gridStyle}
+                  renderCustomGridBody={renderCustomGridBody}
+                  renderCustomToolbar={renderCustomToolbarFn}
+                  trailingControlColumns={trailingControlColumns}
+                  cellContext={cellContextWithInTableSearchSupport}
+                  renderCellPopover={renderCustomPopover}
+                  virtualizationOptions={virtualizationOptions}
+                  onFullScreenChange={onDataGridFullScreenChange}
+                />
+              </RowControlsContext.Provider>
             )}
           </div>
           {showFooter && (

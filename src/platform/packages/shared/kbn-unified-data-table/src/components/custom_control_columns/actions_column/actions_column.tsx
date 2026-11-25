@@ -10,35 +10,36 @@
 import type { EuiDataGridCellValueElementProps, RenderCellValue } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import type { RowControlColumn } from '@kbn/discover-utils';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
-import { getAdditionalRowControlColumns } from '../additional_row_control';
+import {
+  getAdditionalRowControlColumns,
+  type AdditionalRowControlsLayout,
+} from '../additional_row_control';
 import { ActionsHeader } from './actions_header';
 
 const COLUMN_ID = 'actions';
 
+/**
+ * Builds the actions column. Its cells depend only on `baseColumns` and the row controls
+ * layout, so callers should rebuild it only when those change: a rebuilt column remounts
+ * every actions cell and loses its state.
+ */
 export const getActionsColumn = ({
   baseColumns,
-  rowAdditionalLeadingControls,
-  visibleRowLeadingControls,
+  rowControlsLayout,
 }: {
   baseColumns: RenderCellValue[];
-  rowAdditionalLeadingControls?: RowControlColumn[];
-  visibleRowLeadingControls?: number;
+  rowControlsLayout?: AdditionalRowControlsLayout;
 }) => {
-  if (!baseColumns.length && !rowAdditionalLeadingControls?.length) {
+  if (!baseColumns.length && !rowControlsLayout?.numInlineSlots) {
     return null;
   }
 
   let columnWidth = baseColumns.length * DEFAULT_CONTROL_COLUMN_WIDTH;
   const actions = [...baseColumns];
-  if (rowAdditionalLeadingControls?.length) {
-    const { columns: additionalRowControlColumns, totalWidth } = getAdditionalRowControlColumns(
-      rowAdditionalLeadingControls,
-      visibleRowLeadingControls
-    );
-    actions.push(...additionalRowControlColumns);
-    columnWidth += totalWidth;
+  if (rowControlsLayout?.numInlineSlots) {
+    actions.push(...getAdditionalRowControlColumns(rowControlsLayout));
+    columnWidth += rowControlsLayout.totalWidth;
   }
 
   return {
