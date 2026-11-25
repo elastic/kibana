@@ -78,11 +78,14 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         );
 
         // FIND agents by policy_name
-        // The client emits the `policy_name` clause last, so the last match is the real clause.
-        const policyNameClausePattern = /\s+or\s+policy_name:([^ ]+)/g;
+        // The client emits the `policy_name` clause last, right before the closing `)`, with the
+        // search text unescaped. Its value therefore runs to that `)` and may contain spaces, and
+        // the greedy prefix picks the last clause when the search text itself contains one.
+        const policyNameClausePattern = /^(.*)\s+or\s+policy_name:(.*?)\s*\)$/;
         let kuery = query.kuery;
-        const policyNameClause = [...kuery.matchAll(policyNameClausePattern)].pop();
-        const policyName: string | undefined = policyNameClause?.[1];
+        const policyNameClause = kuery.match(policyNameClausePattern);
+        const kueryBeforePolicyName = policyNameClause?.[1];
+        const policyName: string | undefined = policyNameClause?.[2] || undefined;
 
         const foundPolicyByName = policyName
           ? agentPolicies?.filter((policy) =>
@@ -92,12 +95,9 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
 
         // `policy_name` is not an agent field, and Fleet rejects unmapped kuery fields, so the
         // clause is replaced by the policy ids it resolved to (or dropped when none match).
-        if (policyNameClause?.index !== undefined) {
+        if (kueryBeforePolicyName !== undefined) {
           const policyIdClauses = foundPolicyByName.map((p) => ` or policy_id:${p.id}`).join('');
-          kuery =
-            kuery.slice(0, policyNameClause.index) +
-            policyIdClauses +
-            kuery.slice(policyNameClause.index + policyNameClause[0].length);
+          kuery = `${kueryBeforePolicyName}${policyIdClauses} )`;
         }
 
         const agentPolicyById = mapKeys(agentPolicies, 'id');
