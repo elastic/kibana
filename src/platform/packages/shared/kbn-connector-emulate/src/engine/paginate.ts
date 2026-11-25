@@ -8,7 +8,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { cloneDeep, get, isEqual, maxBy, omit, toPath, unset } from 'lodash';
+import { cloneDeep, get, isEqual, last, maxBy, omit, toPath, unset } from 'lodash';
 import type { ContractRequest, ContractResponse, Responder } from '../contract/types';
 import { isRecord } from '../openapi/schema_walk';
 import { MOCK_PAGE_PARAM } from '../openapi/read_parameters';
@@ -66,8 +66,12 @@ export type PaginationDescriptor =
       readonly style: 'cursor';
       readonly request: CursorRequest & Located;
       readonly response: {
-        /** Where the next cursor goes; with `header`, `nextPath` is a header name. */
-        readonly in?: 'body' | 'header';
+        /**
+         * Where the next cursor goes; defaults to `body`. With `header`, `nextPath` is a header
+         * name. With `last_item`, `nextPath` is a path within the page's last item, whose value,
+         * an array's elements joined with commas, is the next cursor, as with urlscan's `sort`.
+         */
+        readonly in?: 'body' | 'header' | 'last_item';
         readonly itemsPath: string;
         readonly nextPath: string;
         /** A boolean body field that is `true` while more pages follow, e.g. Stripe's `has_more`. */
@@ -276,6 +280,24 @@ const resize = (items: readonly unknown[], size: number | undefined): unknown[] 
 
 const LINK_NEXT = /<([^>]+)>[^,]*rel="?next"?/;
 
+const getItems = (body: unknown, itemsPath: string): unknown =>
+  itemsPath === '' ? body : isRecord(body) ? get(body, itemsPath) : undefined;
+
+// The items with `cursor` written over the value at `path` in the last one, as a string where it
+// holds one and as a one-element array otherwise.
+const withLastItemCursor = (
+  items: readonly unknown[],
+  path: string,
+  cursor: string
+): readonly unknown[] => {
+  const item = cloneDeep(last(items));
+  if (!isRecord(item)) {
+    return items;
+  }
+  set(item, path, typeof get(item, path) === 'string' ? cursor : [cursor]);
+  return [...items.slice(0, -1), item];
+};
+
 // The cursor a recorded response hands to the next request, wherever the vendor puts it.
 const readRecordedNext = (
   pagination: PaginationDescriptor,
@@ -285,12 +307,16 @@ const readRecordedNext = (
     Object.entries(headers).find(([key]) => key.toLowerCase() === name.toLowerCase())?.[1];
   let url: unknown;
   if (pagination.style === 'cursor') {
-    const { in: nextIn = 'body', nextPath } = pagination.response;
-    return nextIn === 'header'
-      ? header(nextPath)
-      : isRecord(body)
-      ? get(body, nextPath)
-      : undefined;
+    const { in: nextIn = 'body', itemsPath, nextPath } = pagination.response;
+    if (nextIn === 'header') {
+      return header(nextPath);
+    }
+    if (nextIn === 'body') {
+      return isRecord(body) ? get(body, nextPath) : undefined;
+    }
+    const items = getItems(body, itemsPath);
+    const held: unknown = Array.isArray(items) ? get(last(items), nextPath) : undefined;
+    return Array.isArray(held) ? held.join(',') : held;
   } else if (pagination.style === 'link') {
     url = LINK_NEXT.exec(header('link') ?? '')?.[1];
   } else if (pagination.style === 'next_url') {
@@ -314,9 +340,6 @@ interface RecordedPage {
   readonly start?: number;
   readonly next: unknown;
 }
-
-const getItems = (body: unknown, itemsPath: string): unknown =>
-  itemsPath === '' ? body : isRecord(body) ? get(body, itemsPath) : undefined;
 
 const readRecordedPage = (
   pagination: PaginationDescriptor,
@@ -520,12 +543,18 @@ const paginate = (
   const collection = recorded
     ? resize(recorded.items, collectionSize)
     : buildCollection(template[0], collectionSize ?? DEFAULT_COLLECTION_SIZE);
-  const items = collection.slice(start, start + size);
+  const cursorAt = (position: number) => recorded?.cursors.get(position) ?? encodeCursor(position);
+  const slice = collection.slice(start, start + size);
+  // A last item's cursor points past it, on the last page too: the next page is then empty.
+  const items =
+    pagination.style === 'cursor' && pagination.response.in === 'last_item'
+      ? withLastItemCursor(slice, pagination.response.nextPath, cursorAt(start + slice.length))
+      : slice;
   const page: object =
     itemsPath === '' || !isRecord(body) ? items : set(cloneDeep(body), itemsPath, items);
   const inBody = !Array.isArray(page);
   const next = start + size < collection.length ? start + size : undefined;
-  const cursor = next === undefined ? undefined : recorded?.cursors.get(next) ?? encodeCursor(next);
+  const cursor = next === undefined ? undefined : cursorAt(next);
   const nextUrl =
     next === undefined || cursor === undefined
       ? undefined
@@ -539,7 +568,7 @@ const paginate = (
         if (inBody) {
           setNext(page, nextPath, cursor, pagination.end);
         }
-      } else {
+      } else if (nextIn === 'header') {
         const atEnd = pagination.end === 'empty_string' ? '' : undefined;
         headers = withHeader(headers, nextPath, cursor ?? atEnd);
       }

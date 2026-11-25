@@ -115,7 +115,7 @@ const paginationSchema = z.discriminatedUnion('style', [
       request: z.object({ ...cursorRequest, ...located }).strict(),
       response: z
         .object({
-          in: z.enum(['body', 'header']).optional(),
+          in: z.enum(['body', 'header', 'last_item']).optional(),
           itemsPath,
           nextPath: z.string().min(1),
           hasMorePath: z.string().optional(),
