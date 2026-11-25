@@ -22,12 +22,12 @@ export interface GetExportProvidersForAgentOptions {
   agentId: string;
 }
 
-/** The Elastic Defend package policy Fleet assigned to the agent */
-export const getEndpointPackagePolicyForAgent = async ({
+/** The export providers in the Elastic Defend policy Fleet has assigned to the agent, resolved like action dispatch does. */
+export const getExportProvidersForAgent = async ({
   endpointService,
   spaceId,
   agentId,
-}: GetExportProvidersForAgentOptions): Promise<PolicyData> => {
+}: GetExportProvidersForAgentOptions): Promise<ExportProvider[]> => {
   const [host] = await endpointService
     .getEndpointMetadataService(spaceId)
     .getMetadataForEndpoints([agentId]);
@@ -67,14 +67,5 @@ export const getEndpointPackagePolicyForAgent = async ({
     );
   }
 
-  return packagePolicy as PolicyData;
-};
-
-/** The export providers in the Elastic Defend policy Fleet has assigned to the agent, resolved like action dispatch does. */
-export const getExportProvidersForAgent = async (
-  options: GetExportProvidersForAgentOptions
-): Promise<ExportProvider[]> => {
-  const packagePolicy = await getEndpointPackagePolicyForAgent(options);
-
-  return getExportProviders(packagePolicy.inputs[0].config.policy.value);
+  return getExportProviders((packagePolicy as PolicyData).inputs[0].config.policy.value);
 };

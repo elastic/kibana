@@ -30,7 +30,7 @@ export interface CreateExportCredentialsOptions {
 
 /**
  * The only code that reads the account key. `undefined` when getAccountKey returns no key.
- * Future credential types (O19, delegated SAS) become a new branch here, not a new call site.
+ * Future credential types (e.g. a user delegation SAS) become a new branch here, not a new call site.
  */
 export const createExportCredentials = async ({
   endpointService,

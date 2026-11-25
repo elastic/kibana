@@ -76,8 +76,8 @@ describe('EndpointActionsClient', () => {
    * Configures the mocked host's Elastic Defend policy (the one the agent targeted by
    * `getCommonResponseActionOptions()` resolves to, through Fleet) to have `provider` configured,
    * and, by default, a usable stored account key for it. `fetchAgentsById()`/`packagePolicy.list()`
-   * are wired consistently so the pre-existing `fetchAgentPolicyInfo()` check (unrelated to export)
-   * keeps passing too.
+   * feed `fetchAgentPolicyInfo()`, and `packagePolicy.getByIDs()` returns the same package policy
+   * when `prepareExport()` reads it by id.
    */
   const setupExportProviderPolicy = (
     provider: ExportProvider,
@@ -107,6 +107,7 @@ describe('EndpointActionsClient', () => {
       perPage: 10_000,
       total: 1,
     });
+    (fleetServices.packagePolicy.getByIDs as jest.Mock).mockResolvedValue([packagePolicy]);
 
     const exportProviderKeyClient = exportProviderKeyMocks.createClient();
 
@@ -312,75 +313,56 @@ describe('EndpointActionsClient', () => {
         expect(exportProviderKeyClient.getAccountKey).not.toHaveBeenCalled();
       });
 
-      it('maps a `NotFoundError` from the policy lookup to a 400 with the same message', async () => {
-        const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
-        const matchingPolicy = new FleetPackagePolicyGenerator(
-          'seed'
-        ).generateEndpointPackagePolicy({ policy_ids: [EXPORT_AGENT_POLICY_ID] });
-
-        (fleetServices.fetchAgentsById as jest.Mock).mockImplementation(async (ids: string[]) =>
-          ids.map((id) =>
-            new FleetAgentGenerator('seed').generate({ id, policy_id: EXPORT_AGENT_POLICY_ID })
-          )
-        );
-        // 1st call: the pre-existing (unrelated to `export`) `fetchAgentPolicyInfo()` check -
-        // 2nd call: `prepareExport()`'s own lookup, which is the one under test here
-        (fleetServices.packagePolicy.list as jest.Mock)
-          .mockResolvedValueOnce({
-            items: [matchingPolicy],
-            page: 1,
-            perPage: 10_000,
-            total: 1,
-          })
-          .mockResolvedValueOnce({ items: [], page: 1, perPage: 10_000, total: 0 });
-
-        await expect(callWithExport()).rejects.toMatchObject({
-          statusCode: 400,
-          message: expect.stringContaining(
-            'No Elastic Defend integration policy found for agent policy'
-          ),
-        });
-      });
-
-      it('maps an `EndpointHostNotFoundError` from the policy lookup to a 400 with the same message, if practical', async () => {
-        let metadataSearchCallCount = 0;
-        const generator = new EndpointMetadataGenerator('seed');
-
-        applyEsClientSearchMock({
-          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
-          index: metadataCurrentIndexPattern,
-          response: () => {
-            metadataSearchCallCount += 1;
-
-            // 1st call: `checkAgentIds()`, which must succeed so `prepareExport()` is reached at
-            // all. 2nd call: `prepareExport()`'s own (separate) lookup of the same agent id.
-            return metadataSearchCallCount === 1
-              ? generator.toEsSearchResponse([
-                  generator.toEsSearchHit(
-                    generator.generate({
-                      elastic: { agent: { id: '1-2-3' } },
-                      Endpoint: { capabilities },
-                    })
-                  ),
-                ])
-              : BaseDataGenerator.toEsSearchResponse([]);
-          },
-        });
-
-        await expect(callWithExport()).rejects.toMatchObject({
-          statusCode: 400,
-          message: 'Endpoint with id 1-2-3 not found',
-        });
-      });
-
-      it('does not report a non-"not found" policy lookup error as a 400', async () => {
+      it("returns a 400 when the agent's Elastic Defend package policy no longer exists", async () => {
         const { packagePolicy } = setupExportProviderPolicy(PROVIDER);
         const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
 
-        // 1st call: the pre-existing `fetchAgentPolicyInfo()` check - 2nd call: the export lookup
-        (fleetServices.packagePolicy.list as jest.Mock)
-          .mockResolvedValueOnce({ items: [packagePolicy], page: 1, perPage: 10_000, total: 1 })
-          .mockRejectedValueOnce(new Error('ES is unavailable'));
+        (fleetServices.packagePolicy.getByIDs as jest.Mock).mockResolvedValue([]);
+
+        await expect(callWithExport()).rejects.toMatchObject({
+          statusCode: 400,
+          message: `No Elastic Defend integration policy found for agent policy [${EXPORT_AGENT_POLICY_ID}]`,
+        });
+        expect(fleetServices.packagePolicy.getByIDs as jest.Mock).toHaveBeenCalledWith(
+          expect.anything(),
+          [packagePolicy.id],
+          { ignoreMissing: true }
+        );
+        expect(
+          (await classConstructorOptions.endpointService.getFleetActionsClient())
+            .create as jest.Mock
+        ).not.toHaveBeenCalled();
+      });
+
+      it('returns a 400 when the Fleet agent is not assigned to an agent policy', async () => {
+        setupExportProviderPolicy(PROVIDER);
+        const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
+
+        (fleetServices.fetchAgentsById as jest.Mock).mockImplementation(async (ids: string[]) =>
+          ids.map((id) => ({
+            ...new FleetAgentGenerator('seed').generate({ id }),
+            policy_id: undefined,
+          }))
+        );
+
+        await expect(callWithExport()).rejects.toMatchObject({
+          statusCode: 400,
+          message: 'Agent [1-2-3] is not assigned to an agent policy',
+        });
+        expect(fleetServices.packagePolicy.getByIDs as jest.Mock).not.toHaveBeenCalled();
+        expect(
+          (await classConstructorOptions.endpointService.getFleetActionsClient())
+            .create as jest.Mock
+        ).not.toHaveBeenCalled();
+      });
+
+      it('does not report a non-"not found" policy lookup error as a 400', async () => {
+        setupExportProviderPolicy(PROVIDER);
+        const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
+
+        (fleetServices.packagePolicy.getByIDs as jest.Mock).mockRejectedValue(
+          new Error('ES is unavailable')
+        );
 
         const error = await callWithExport().catch((e) => e);
 
@@ -411,6 +393,7 @@ describe('EndpointActionsClient', () => {
 
         expect(fleetServices.fetchAgentsById as jest.Mock).not.toHaveBeenCalled();
         expect(fleetServices.packagePolicy.list as jest.Mock).not.toHaveBeenCalled();
+        expect(fleetServices.packagePolicy.getByIDs as jest.Mock).not.toHaveBeenCalled();
         expect(getAccountKeySpy).not.toHaveBeenCalled();
       });
 

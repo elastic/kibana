@@ -24,10 +24,8 @@ import {
   isValidExportPath,
 } from '../../../../../../common/endpoint/service/response_actions/export_providers';
 import { getExportProviders } from '../../../../../../common/endpoint/models/export_providers';
-import { getEndpointPackagePolicyForAgent } from '../../export_providers/get_export_providers_for_agent';
 import { createExportCredentials } from '../../export_providers/create_export_credentials';
-import { EndpointHostNotFoundError } from '../../../metadata';
-import { NotFoundError } from '../../../../errors';
+import { catchAndWrapError } from '../../../../utils';
 import type { HapiReadableStream } from '../../../../../types';
 import type {
   ResponseActionsApiCommandNames,
@@ -446,22 +444,31 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    let policy: PolicyData;
+    // The same (cached) agent policy info `validateRequest()` loaded and the request document records
+    const [agentPolicyInfo] = await this.fetchAgentPolicyInfo([agentId]);
 
-    try {
-      policy = await getEndpointPackagePolicyForAgent({
-        endpointService: this.options.endpointService,
-        spaceId: this.options.spaceId,
-        agentId,
-      });
-    } catch (err) {
-      if (err instanceof EndpointHostNotFoundError || err instanceof NotFoundError) {
-        return { error: err.message };
-      }
-
-      throw err;
+    if (!agentPolicyInfo) {
+      return { error: `Agent [${agentId}] is not assigned to an agent policy` };
     }
 
+    const { spaceId } = this.options;
+    const fleetServices = this.options.endpointService.getInternalFleetServices(spaceId);
+    // `getByIDs()`, not `get()`: `get()` reports every error other than not found as a bad request
+    const [packagePolicy] = await fleetServices.packagePolicy
+      .getByIDs(
+        fleetServices.savedObjects.createInternalScopedSoClient({ spaceId }),
+        [agentPolicyInfo.integrationPolicyId],
+        { ignoreMissing: true }
+      )
+      .catch(catchAndWrapError);
+
+    if (!packagePolicy) {
+      return {
+        error: `No Elastic Defend integration policy found for agent policy [${agentPolicyInfo.agentPolicyId}]`,
+      };
+    }
+
+    const policy = packagePolicy as PolicyData;
     const provider: ExportProvider | undefined = getExportProviders(
       policy.inputs[0].config.policy.value
     ).find((candidate) => candidate.id === exportProviderId);
