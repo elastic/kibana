@@ -13,42 +13,12 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { AUTH_SCHEME_REGEX } from '@kbn/connector-schemas/http';
 import { AdditionalFields } from '../components/additional_fields';
 import * as i18n from './translations';
 
 interface OAuth2FieldsProps {
   readOnly: boolean;
-  isTokenTypeEnabled?: boolean;
 }
-
-const tokenTypeValidator = ({ value }: { value: unknown }) => {
-  const tokenType = typeof value === 'string' ? value.trim() : '';
-  if (!tokenType || AUTH_SCHEME_REGEX.test(tokenType)) {
-    return undefined;
-  }
-  return { message: i18n.INVALID_TOKEN_TYPE };
-};
-
-export const TokenTypeField: React.FC<{ readOnly: boolean }> = ({ readOnly }) => (
-  <UseField
-    path="config.tokenType"
-    config={{
-      label: i18n.TOKEN_TYPE,
-      helpText: i18n.TOKEN_TYPE_HELP_TEXT,
-      labelAppend: (
-        <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
-        </EuiText>
-      ),
-      validations: [{ validator: tokenTypeValidator }],
-    }}
-    component={Field}
-    componentProps={{
-      euiFieldProps: { 'data-test-subj': 'tokenTypeOAuth2', readOnly, maxLength: 128 },
-    }}
-  />
-);
 
 export const jsonValidator = ({ value }: { value: string | null | undefined }) => {
   if (!value) {
@@ -106,10 +76,7 @@ const AdditionalFieldsWrapper: React.FC<AdditionalFieldsWrapperProps> = React.me
   }
 );
 
-export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({
-  readOnly,
-  isTokenTypeEnabled = false,
-}) => {
+export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({ readOnly }) => {
   const { emptyField, urlField } = fieldValidators;
 
   return (
@@ -189,12 +156,6 @@ export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({
           }}
         />
         <EuiSpacer size="s" />
-        {isTokenTypeEnabled && (
-          <>
-            <TokenTypeField readOnly={readOnly} />
-            <EuiSpacer size="s" />
-          </>
-        )}
         <UseField
           path="config.additionalFields"
           config={{

@@ -11,14 +11,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth/constants';
-import {
-  AuthFormTestProvider,
-  ConnectorFormTestProvider,
-} from '../../connector_types/lib/test_utils';
-import {
-  formDeserializer,
-  formSerializer,
-} from '../../connector_types/lib/http/form_serialization';
+import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 import { useSecretHeaders } from './use_secret_headers';
 
 jest.mock('./use_secret_headers');
@@ -882,96 +875,6 @@ describe('AuthConfig renders', () => {
       expect(await screen.findByTestId('ScopeOAuth2')).toBeInTheDocument();
       expect(await screen.findByTestId('additionalFields')).toBeInTheDocument();
       expect(await screen.findByTestId('additional_fieldsJsonEditor')).toBeInTheDocument();
-      expect(screen.queryByTestId('tokenTypeOAuth2')).not.toBeInTheDocument();
-    });
-
-    it.each([AuthType.OAuth2ClientCredentials, AuthType.OAuth2Password])(
-      'renders the token type field for %s when isOAuthTokenTypeEnabled is true',
-      async (authType) => {
-        render(
-          <AuthFormTestProvider
-            defaultValue={{ config: { hasAuth: true, authType } }}
-            onSubmit={onSubmit}
-          >
-            <AuthConfig readOnly={false} isOAuth2Enabled={true} isOAuthTokenTypeEnabled={true} />
-          </AuthFormTestProvider>
-        );
-
-        expect(await screen.findByTestId('tokenTypeOAuth2')).toBeInTheDocument();
-      }
-    );
-
-    describe('token type submission with the http connector serializer', () => {
-      const httpConnector = (tokenType?: string) => ({
-        id: 'test',
-        actionTypeId: '.http',
-        name: 'HTTP',
-        isDeprecated: false,
-        config: {
-          url: 'https://example.com',
-          hasAuth: true,
-          authType: AuthType.OAuth2ClientCredentials,
-          accessTokenUrl: 'https://example.com/token',
-          clientId: 'client1',
-          headers: null,
-          ...(tokenType && { tokenType }),
-        },
-        secrets: { clientSecret: 'secret1' },
-      });
-
-      const renderHttpForm = (tokenType?: string) =>
-        render(
-          <ConnectorFormTestProvider
-            connector={httpConnector(tokenType)}
-            isEdit={true}
-            onSubmit={onSubmit}
-            serializer={formSerializer}
-            deserializer={formDeserializer}
-          >
-            <AuthConfig readOnly={false} isOAuth2Enabled={true} isOAuthTokenTypeEnabled={true} />
-          </ConnectorFormTestProvider>
-        );
-
-      it('submits the token type entered in the field', async () => {
-        renderHttpForm();
-
-        await userEvent.type(await screen.findByTestId('tokenTypeOAuth2'), 'Bearer');
-        await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
-
-        await waitFor(() => expect(onSubmit).toHaveBeenCalled());
-        const [{ data, isValid }] = onSubmit.mock.calls[0];
-        expect(isValid).toBe(true);
-        expect(data.config.tokenType).toBe('Bearer');
-      });
-
-      it('does not submit a saved token type after the field is cleared', async () => {
-        renderHttpForm('Bearer');
-
-        const field = await screen.findByTestId('tokenTypeOAuth2');
-        expect(field).toHaveValue('Bearer');
-        await userEvent.clear(field);
-        await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
-
-        await waitFor(() => expect(onSubmit).toHaveBeenCalled());
-        const [{ data, isValid }] = onSubmit.mock.calls[0];
-        expect(isValid).toBe(true);
-        expect(data.config.tokenType).toBeUndefined();
-      });
-
-      it('rejects a token type that is not a single auth scheme', async () => {
-        renderHttpForm();
-
-        await userEvent.type(await screen.findByTestId('tokenTypeOAuth2'), 'Bearer token');
-        await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
-
-        expect(
-          await screen.findByText(
-            "Enter a single authorization scheme without spaces, for example 'Bearer'."
-          )
-        ).toBeInTheDocument();
-        await waitFor(() => expect(onSubmit).toHaveBeenCalled());
-        expect(onSubmit.mock.calls[0][0].isValid).toBe(false);
-      });
     });
 
     it('submits additionalFields value when authType is OAuth2', async () => {

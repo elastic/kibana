@@ -76,11 +76,6 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
   const hasProxy = formData?.__internal__?.hasProxy;
   const supportsProxy = hasProxy !== undefined;
 
-  const tokenType =
-    typeof formData.config?.tokenType === 'string'
-      ? formData.config.tokenType.trim() || undefined
-      : undefined;
-
   const queryParams = formData?.__internal__?.queryParams ?? [];
   const secretQueryParams = queryParams.reduce<Record<string, string>>((acc, { key, value }) => {
     if (key?.trim() && value?.trim()) {
@@ -94,7 +89,6 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
     config: {
       ...formData.config,
       headers: isEmpty(configHeaders) ? null : configHeaders,
-      tokenType,
       ...(supportsProxy &&
         !hasProxy && {
           proxyUrl: null,

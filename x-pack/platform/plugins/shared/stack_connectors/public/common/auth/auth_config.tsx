@@ -46,7 +46,6 @@ interface Props {
   isEdit?: boolean;
   isOAuth2Enabled?: boolean;
   isOAuth2PasswordEnabled?: boolean;
-  isOAuthTokenTypeEnabled?: boolean;
   isPfxEnabled?: boolean;
 }
 
@@ -66,7 +65,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
   isPfxEnabled = true,
   isOAuth2Enabled = false,
   isOAuth2PasswordEnabled = false,
-  isOAuthTokenTypeEnabled = false,
 }) => {
   const isModified = useFormIsModified();
   const { setFieldValue, getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
@@ -186,7 +184,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
       value: AuthType.OAuth2ClientCredentials,
       label: i18n.AUTHENTICATION_OAUTH2,
       children: authType === AuthType.OAuth2ClientCredentials && (
-        <OAuth2Fields readOnly={readOnly} isTokenTypeEnabled={isOAuthTokenTypeEnabled} />
+        <OAuth2Fields readOnly={readOnly} />
       ),
       'data-test-subj': 'authOAuth2',
     },
@@ -194,7 +192,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
       value: AuthType.OAuth2Password,
       label: i18n.AUTHENTICATION_OAUTH2_PASSWORD,
       children: authType === AuthType.OAuth2Password && (
-        <OAuth2PasswordFields readOnly={readOnly} isTokenTypeEnabled={isOAuthTokenTypeEnabled} />
+        <OAuth2PasswordFields readOnly={readOnly} />
       ),
       'data-test-subj': 'authOAuth2Password',
     },
