@@ -185,7 +185,10 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   constructor(props: FilterEditorProps) {
     super(props);
     const dataView = getIndexPatternFromFilter(props.filter, props.indexPatterns);
-    const queryDsl = this.parseFilterToQueryDsl(props.filter, props.indexPatterns);
+    // Falls back to the filter's own query when it doesn't convert for the provided data views.
+    const queryDsl =
+      this.tryParseFilterToQueryDsl(props.filter, props.indexPatterns) ??
+      JSON.stringify(props.filter.query ?? {}, null, 2);
     this.state = {
       indexPatterns: props.indexPatterns,
       selectedDataView: dataView,
@@ -267,13 +270,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     state: Partial<State>,
     queryDslOverrides: Partial<QueryDslFilter> = {}
   ) {
-    // The conversion can throw for a filter that no longer fits the data view, so keep the initial DSL.
-    let queryDsl = this.state.queryDsl;
-    try {
-      queryDsl = this.parseFilterToQueryDsl(localFilter, indexPatterns);
-    } catch {
-      // The editor still opens with the DSL generated on mount.
-    }
+    // Keeps the DSL generated on mount when the filter no longer fits the data view.
+    const queryDsl =
+      this.tryParseFilterToQueryDsl(localFilter, indexPatterns) ?? this.state.queryDsl;
     this.props.onLocalFilterCreate?.({
       filter: localFilter,
       queryDslFilter: this.getQueryDslFilter({ ...queryDslOverrides, queryDsl }),
@@ -304,7 +303,10 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     const dataView = indexPatterns.find((indexPattern) => {
       if (!indexPattern.id || isEsqlFilterableSource(indexPattern)) return false;
       const filterableFields = getFilterableFields(indexPattern);
-      return keys.every((key) => filterableFields.some(({ name }) => name === key));
+      if (!keys.every((key) => filterableFields.some(({ name }) => name === key))) return false;
+      // A same-named field of another type can make the filter unconvertible, e.g. text for a boolean.
+      const rebound = rebindFilterDataView(filter, filter.meta.index, indexPattern.id);
+      return this.tryParseFilterToQueryDsl(rebound, indexPatterns) !== undefined;
     });
     if (!dataView) {
       this.showFilterAsQueryDsl();
@@ -323,6 +325,14 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       },
       { dataViewId: dataView.id }
     );
+  }
+
+  private tryParseFilterToQueryDsl(filter: Filter, indexPatterns: FilterableSource[]) {
+    try {
+      return this.parseFilterToQueryDsl(filter, indexPatterns);
+    } catch {
+      return undefined;
+    }
   }
 
   private parseFilterToQueryDsl(filter: Filter, indexPatterns: FilterableSource[]) {

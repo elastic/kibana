@@ -19,6 +19,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createNestedDataView } from './lib/nested_data_view.mock';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { dataViewMockList } from '../../dataview_picker/mocks/dataview';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
@@ -259,6 +260,91 @@ describe('<FilterEditor />', () => {
           expect.objectContaining({ meta: expect.objectContaining({ type: 'phrase' }) })
         );
       });
+    });
+  });
+  describe('with a filter that cannot be converted to Query DSL', () => {
+    const booleanDataView = {
+      ...dataViewMockList[0],
+      id: 'boolean-data-view-id',
+      fields: [
+        {
+          name: 'flag',
+          type: 'boolean',
+          esTypes: ['boolean'],
+          aggregatable: true,
+          filterable: true,
+          searchable: true,
+        },
+      ],
+      getName: () => 'boolean',
+    } as unknown as DataView;
+    // A legacy phrase filter converts its value to the field type, which throws for text on a boolean.
+    const filter = {
+      meta: {
+        type: 'phrase',
+        index: booleanDataView.id,
+        key: 'flag',
+        params: { query: 'not-a-boolean' },
+        disabled: false,
+        negate: false,
+        alias: null,
+      },
+      query: { match: { flag: { query: 'not-a-boolean', type: 'phrase' } } },
+      $state: { store: FilterStateStore.APP_STATE },
+    };
+    const services = { data: dataMock, uiSettings: coreMock.createStart().uiSettings };
+    const renderEditor = async (props: Partial<FilterEditorProps>) => {
+      const onLocalFilterCreate = jest.fn();
+      const testBed = await registerTestBed(
+        (editorProps: ComponentProps<typeof FilterEditor>) => (
+          <KibanaContextProvider services={services}>
+            <FilterEditor {...editorProps} />
+          </KibanaContextProvider>
+        ),
+        {
+          defaultProps: {
+            theme: {
+              euiTheme: {} as unknown as EuiThemeComputed<{}>,
+              colorMode: 'DARK',
+              modifications: [],
+              highContrastMode: false,
+            } as UseEuiTheme<{}>,
+            filter,
+            indexPatterns: [dataViewMockList[0]],
+            onCancel: jest.fn(),
+            onSubmit: jest.fn(),
+            onLocalFilterCreate,
+            docLinks: coreMock.createStart().docLinks,
+            ...props,
+          } as Omit<FilterEditorProps, 'intl'>,
+        }
+      )();
+      await act(async () => {});
+      testBed.component.update();
+      return { ...testBed, onLocalFilterCreate };
+    };
+
+    it('stops loading when the data view loaded by ID cannot convert the filter', async () => {
+      dataMock.dataViews.get = jest.fn().mockResolvedValue(booleanDataView);
+      const { exists, onLocalFilterCreate } = await renderEditor({ dataViews: dataMock.dataViews });
+
+      expect(exists('filterIndexPatternsSelect')).toBe(true);
+      expect(onLocalFilterCreate).toHaveBeenLastCalledWith(expect.objectContaining({ filter }));
+    });
+
+    it('does not select a data view that cannot convert the filter', async () => {
+      dataMock.dataViews.get = jest
+        .fn()
+        .mockRejectedValue(new SavedObjectNotFound({ type: 'index-pattern', id: 'missing' }));
+      const { exists, find } = await renderEditor({
+        filter: { ...filter, meta: { ...filter.meta, index: 'missing-data-view-id' } },
+        indexPatterns: [booleanDataView],
+        dataViews: dataMock.dataViews,
+      });
+
+      // Shown as Query DSL with the original ID, instead of selecting the incompatible data view.
+      expect(exists('customEditorInput')).toBe(true);
+      expect(find('filterIndexPatternsSelect').find('input').props().value).toBe('');
     });
   });
   describe('UI renders when data view fallback promise is rejected', () => {
