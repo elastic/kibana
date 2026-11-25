@@ -18,7 +18,6 @@ import type {
   IndexEndpointHostsCyTaskOptions,
   LoadUserAndRoleCyTaskOptions,
   CreateUserAndRoleCyTaskOptions,
-  LogItTaskOptions,
   CaptureHostVmAgentDiagnosticsOptions,
 } from './types';
 import type {
@@ -191,12 +190,6 @@ declare global {
         arg: CreateUserAndRoleCyTaskOptions,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<LoadedRoleAndUser>;
-
-      task(
-        name: 'logIt',
-        arg: LogItTaskOptions,
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<null>;
 
       task(
         name: 'captureHostVmAgentDiagnostics',
