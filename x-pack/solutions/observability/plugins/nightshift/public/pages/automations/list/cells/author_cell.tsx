@@ -13,8 +13,10 @@ export const AutomationAuthorCell = ({ name }: { name: string }) => (
     <EuiFlexItem grow={false}>
       <EuiAvatar size="s" name={name} />
     </EuiFlexItem>
-    <EuiFlexItem className="eui-textTruncate" css={{ minWidth: 0 }} title={name}>
-      {name}
+    <EuiFlexItem css={{ minWidth: 0 }}>
+      <span className="eui-textTruncate" title={name}>
+        {name}
+      </span>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

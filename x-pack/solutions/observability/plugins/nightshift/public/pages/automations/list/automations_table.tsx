@@ -113,7 +113,7 @@ export const AutomationsTable = ({
     {
       field: 'name',
       name: listLabels.automationColumn,
-      width: '108px',
+      width: '106px',
       sortable: true,
       render: (_name: string, automation: Automation) => (
         <AutomationNameCell
@@ -170,7 +170,7 @@ export const AutomationsTable = ({
     },
     {
       name: listLabels.destinationColumn,
-      width: '130px',
+      width: '129px',
       render: ({ completions = [], trigger }: Automation) => {
         const destinations = completions.flatMap(({ action, targetMode, destination }) => {
           if (action !== 'post_to_slack') return [];
@@ -254,7 +254,7 @@ export const AutomationsTable = ({
     {
       field: 'isEnabled',
       name: listLabels.enabled,
-      width: '74px',
+      width: '76px',
       sortable: true,
       render: (isEnabled: boolean, automation: Automation) => (
         <EuiToolTip content={editDisabledReason}>

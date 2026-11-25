@@ -209,7 +209,7 @@ export const runCountColumns = [
     tooltip: i18n.translate('xpack.nightshift.automations.failedColumnTooltip', {
       defaultMessage: 'Failed runs in the selected time range.',
     }),
-    width: '62px',
+    width: '64px',
     getViewLabel: (count: number) =>
       i18n.translate('xpack.nightshift.automations.viewFailedRuns', {
         defaultMessage: 'View {count} failed in run history',
