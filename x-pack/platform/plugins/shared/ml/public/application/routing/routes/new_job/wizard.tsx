@@ -76,6 +76,16 @@ const getEsqlBreadcrumbs = (navigateToApp: NavigateToApp) => [
   },
 ];
 
+const getEsqlAdvancedBreadcrumbs = (navigateToApp: NavigateToApp) => [
+  ...getBaseBreadcrumbs(navigateToApp),
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.esqlAdvancedLabel', {
+      defaultMessage: 'ES|QL advanced',
+    }),
+    href: '',
+  },
+];
+
 const getPopulationBreadcrumbs = (navigateToApp: NavigateToApp) => [
   ...getBaseBreadcrumbs(navigateToApp),
   {
@@ -158,8 +168,14 @@ export const multiMetricRouteFactoryRedirect = (): MlRoute => ({
 
 export const esqlRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ESQL),
-  render: () => <EsqlPageWrapper />,
+  render: () => <EsqlPageWrapper jobType={JOB_TYPE.ESQL_BASIC} />,
   breadcrumbs: getEsqlBreadcrumbs(navigateToApp),
+});
+
+export const esqlAdvancedRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ESQL_ADVANCED),
+  render: () => <EsqlPageWrapper jobType={JOB_TYPE.ESQL_ADVANCED} />,
+  breadcrumbs: getEsqlAdvancedBreadcrumbs(navigateToApp),
 });
 
 export const populationRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
@@ -261,7 +277,9 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
   );
 };
 
-const EsqlPageWrapper: FC = () => {
+const EsqlPageWrapper: FC<{ jobType: JOB_TYPE.ESQL_BASIC | JOB_TYPE.ESQL_ADVANCED }> = ({
+  jobType,
+}) => {
   const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );
@@ -280,7 +298,7 @@ const EsqlPageWrapper: FC = () => {
   return (
     <PageLoader context={context}>
       {results ? (
-        <Page jobType={JOB_TYPE.ESQL} existingJobsAndGroups={results.existingJobsAndGroups} />
+        <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />
       ) : null}
     </PageLoader>
   );

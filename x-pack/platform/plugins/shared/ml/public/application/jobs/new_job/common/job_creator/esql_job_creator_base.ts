@@ -6,37 +6,29 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  type Field,
-  type Aggregation,
-  type SplitField,
-  type AggFieldPair,
-} from '@kbn/ml-anomaly-utils';
+import type { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import type { Job, Detector, BucketSpan } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Job, BucketSpan } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
+import type { EsqlColumn } from '../../../../services/new_job_capabilities/esql_columns_to_fields';
 import { JobCreator } from './job_creator';
-import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 
-/** Job creator for the ES|QL wizard, which starts without a data view. */
-export class EsqlJobCreator extends JobCreator {
-  protected _type: JOB_TYPE = JOB_TYPE.ESQL;
+/**
+ * Base job creator for the ES|QL wizards, which start without a data view. Its fields are the
+ * output columns of the ES|QL query.
+ */
+export abstract class EsqlJobCreatorBase extends JobCreator {
   private _indexPattern: DataView | null = null;
-  // like a multi-metric job, an optional partition field shared by all detectors
-  private _splitField: SplitField = null;
   private _isBucketSpanFromQuery = false;
+  private _hasEsqlColumns = false;
 
   constructor(mlApi: MlApi, newJobCapsService: NewJobCapsService) {
     super(mlApi, newJobCapsService);
-    this.createdBy = CREATED_BY_LABEL.ESQL;
     // ES|QL datafeeds read data with esql_query, so they have no DSL query or indices
-    delete this._datafeed_config.query;
-    delete (this._datafeed_config as Partial<Datafeed>).indices;
+    this._deleteDslDatafeedSettings();
     this.summaryCountFieldName = null;
-    this._wizardInitialized$.next(true);
   }
 
   public get esqlQuery(): string {
@@ -112,7 +104,7 @@ export class EsqlJobCreator extends JobCreator {
   public get dataView(): DataView | null {
     return this._indexPattern;
   }
-  // !!!!!!!!!!!!!!!! this needs to be more flexible, more like population job creator
+
   /** Sets the temporary data view created from the ES|QL query's source. */
   public set indexPattern(dataView: DataView) {
     this._indexPattern = dataView;
@@ -122,59 +114,40 @@ export class EsqlJobCreator extends JobCreator {
     this._indexPatternDisplayName = name === title ? name : `${name} (${title})`;
   }
 
-  public setSplitField(field: SplitField) {
-    this._splitField = field;
-
-    if (this._splitField === null) {
-      this.removeSplitField();
-    } else {
-      for (const detector of this._detectors) {
-        detector.partition_field_name = this._splitField.id;
-      }
-    }
+  /**
+   * Makes the query's output columns the fields the job can use, and rebuilds the detectors'
+   * fields and functions from them.
+   * @param columns - the query's output columns
+   * @param columnFunctions - the ML functions allowed for columns created by the query's STATS
+   */
+  public setEsqlColumns(
+    columns: readonly EsqlColumn[],
+    columnFunctions: Readonly<Record<string, readonly ML_JOB_AGGREGATION[]>>
+  ) {
+    this.newJobCapsService.initializeFromEsqlColumns(columns, columnFunctions);
+    this._hasEsqlColumns = true;
+    this._restoreDetectors();
   }
 
-  public removeSplitField() {
-    this._detectors.forEach((d) => {
-      delete d.partition_field_name;
-    });
-  }
+  /**
+   * Rebuilds the detectors' fields and functions from the job config. Detectors whose fields are
+   * not columns of the query are removed.
+   */
+  protected abstract _restoreDetectors(): void;
 
-  public get splitField(): SplitField {
-    return this._splitField;
-  }
-
-  public addDetector(agg: Aggregation, field: Field) {
-    this._addDetector(this._createDetector(agg, field), agg, field);
-  }
-
-  public editDetector(agg: Aggregation, field: Field, index: number) {
-    this._editDetector(this._createDetector(agg, field), agg, field, index);
-  }
-
-  public removeDetector(index: number) {
-    this._removeDetector(index);
-  }
-
-  public get aggFieldPairs(): AggFieldPair[] {
-    return this.detectors.map((d, i) => ({
-      field: this._fields[i],
-      agg: this._aggs[i],
-    }));
-  }
-
-  private _createDetector(agg: Aggregation, field: Field): Detector {
-    const detector: Detector = createBasicDetector(agg, field);
-    if (this._splitField !== null) {
-      detector.partition_field_name = this._splitField.id;
-    }
-    return detector;
-  }
-
-  public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
+  /** Replaces the job and datafeed configs, e.g. when cloning a job or saving edited JSON. */
+  protected _overrideEsqlConfigs(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
+    this._deleteDslDatafeedSettings();
+    // until the query step has run, the job's fields are not known, so the detectors are
+    // restored when the query's columns are set
+    if (this._hasEsqlColumns) {
+      this._restoreDetectors();
+    }
+  }
+
+  private _deleteDslDatafeedSettings() {
     delete this._datafeed_config.query;
     delete (this._datafeed_config as Partial<Datafeed>).indices;
-    this.createdBy = CREATED_BY_LABEL.ESQL;
   }
 }

@@ -18,7 +18,8 @@ import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { cloneDatafeed, getJobCreatorTitle } from '../../common/job_creator/util/general';
 import {
-  EsqlJobCreator,
+  EsqlBasicJobCreator,
+  EsqlAdvancedJobCreator,
   jobCreatorFactory,
   isAdvancedJobCreator,
   isCategorizationJobCreator,
@@ -63,14 +64,16 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const isMlCpsEnabled = getIsMlCpsEnabled();
   const chartInterval = useTimeBuckets(uiSettings);
 
-  const isEsql = jobType === JOB_TYPE.ESQL;
+  const isEsql = jobType === JOB_TYPE.ESQL_BASIC || jobType === JOB_TYPE.ESQL_ADVANCED;
   // ES|QL jobs are not based on a data view, so no data source context is provided for them.
   const selectedDataView = isEsql ? null : dataSourceContext.selectedDataView;
 
   const jobCreator = useMemo(
     () =>
-      isEsql
-        ? new EsqlJobCreator(mlApi, newJobCapsService)
+      jobType === JOB_TYPE.ESQL_BASIC
+        ? new EsqlBasicJobCreator(mlApi, newJobCapsService)
+        : jobType === JOB_TYPE.ESQL_ADVANCED
+        ? new EsqlAdvancedJobCreator(mlApi, newJobCapsService)
         : jobCreatorFactory(jobType)(
             mlApi,
             newJobCapsService,

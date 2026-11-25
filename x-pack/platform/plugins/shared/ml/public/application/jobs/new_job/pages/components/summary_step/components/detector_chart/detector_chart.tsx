@@ -23,11 +23,13 @@ export const DetectorChart: FC = () => {
   return (
     <Fragment>
       {jobCreator.type === JOB_TYPE.SINGLE_METRIC && <SingleMetricView isActive={false} />}
-      {(jobCreator.type === JOB_TYPE.MULTI_METRIC || jobCreator.type === JOB_TYPE.ESQL) && (
+      {(jobCreator.type === JOB_TYPE.MULTI_METRIC || jobCreator.type === JOB_TYPE.ESQL_BASIC) && (
         <MultiMetricView isActive={false} />
       )}
       {jobCreator.type === JOB_TYPE.POPULATION && <PopulationView isActive={false} />}
-      {jobCreator.type === JOB_TYPE.ADVANCED && <AdvancedView isActive={false} />}
+      {(jobCreator.type === JOB_TYPE.ADVANCED || jobCreator.type === JOB_TYPE.ESQL_ADVANCED) && (
+        <AdvancedView isActive={false} />
+      )}
       {jobCreator.type === JOB_TYPE.CATEGORIZATION && <CategorizationView isActive={false} />}
       {jobCreator.type === JOB_TYPE.RARE && <RareView isActive={false} />}
       {jobCreator.type === JOB_TYPE.GEO && <GeoView isActive={false} />}

@@ -11,26 +11,16 @@ import type { Field, Aggregation, SplitField } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import type { Job, Detector, CustomRule } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '../../../../services/ml_api_service';
 import { JobCreatorClassic } from './job_creator_classic';
-import { createBasicDetector } from './util/default_configs';
+import { createRichDetector, type RichDetector } from './util/rich_detector';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../../common/util/validation_utils';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 
-export interface RichDetector {
-  agg: Aggregation | null;
-  field: SplitField;
-  byField: SplitField;
-  overField: SplitField;
-  partitionField: SplitField;
-  excludeFrequent: estypes.MlExcludeFrequent | null;
-  description: string | null;
-  customRules: CustomRule[] | null;
-  useNull: boolean | null;
-}
+export type { RichDetector };
 
 export class AdvancedJobCreator extends JobCreatorClassic {
   protected _type: JOB_TYPE = JOB_TYPE.ADVANCED;
@@ -65,7 +55,7 @@ export class AdvancedJobCreator extends JobCreatorClassic {
     // addDetector doesn't support adding new custom rules.
     // this will be added in the future once it's supported in the UI
     const customRules = null;
-    const { detector, richDetector } = this._createDetector(
+    const { detector, richDetector } = createRichDetector(
       agg,
       field,
       byField,
@@ -95,7 +85,7 @@ export class AdvancedJobCreator extends JobCreatorClassic {
     const customRules =
       this._detectors[index] !== undefined ? this._detectors[index].custom_rules || null : null;
 
-    const { detector, richDetector } = this._createDetector(
+    const { detector, richDetector } = createRichDetector(
       agg,
       field,
       byField,
@@ -112,56 +102,6 @@ export class AdvancedJobCreator extends JobCreatorClassic {
     if (this._richDetectors[index] !== undefined) {
       this._richDetectors[index] = richDetector;
     }
-  }
-
-  private _createDetector(
-    agg: Aggregation,
-    field: Field,
-    byField: SplitField,
-    overField: SplitField,
-    partitionField: SplitField,
-    excludeFrequent: estypes.MlExcludeFrequent | null,
-    description: string | null,
-    customRules: CustomRule[] | null,
-    useNull: boolean | null
-  ): { detector: Detector; richDetector: RichDetector } {
-    const detector: Detector = createBasicDetector(agg, field);
-
-    if (byField !== null) {
-      detector.by_field_name = byField.id;
-    }
-    if (overField !== null) {
-      detector.over_field_name = overField.id;
-    }
-    if (partitionField !== null) {
-      detector.partition_field_name = partitionField.id;
-    }
-    if (excludeFrequent !== null) {
-      detector.exclude_frequent = excludeFrequent;
-    }
-    if (description !== null) {
-      detector.detector_description = description;
-    }
-    if (customRules !== null) {
-      detector.custom_rules = customRules;
-    }
-    if (useNull !== null) {
-      detector.use_null = useNull;
-    }
-
-    const richDetector: RichDetector = {
-      agg,
-      field,
-      byField,
-      overField,
-      partitionField,
-      excludeFrequent,
-      description,
-      customRules,
-      useNull,
-    };
-
-    return { detector, richDetector };
   }
 
   public removeDetector(index: number) {

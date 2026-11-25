@@ -98,8 +98,13 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
 
   // ES|QL fields are the query's output columns, which the source index does not have,
   // so they are all treated as having data rather than looked up in the index.
+  // Text columns are only in the categorization fields, so both lists are needed.
   const pickFieldsPopulatedFields = isEsqlJobCreator(jobCreator)
-    ? new Set(jobCreator.newJobCapsService.fields.map(({ name }) => name))
+    ? new Set(
+        [...jobCreator.newJobCapsService.fields, ...jobCreator.newJobCapsService.catFields].map(
+          ({ name }) => name
+        )
+      )
     : undefined;
 
   const pickFieldsStep = (

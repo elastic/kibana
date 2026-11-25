@@ -12,7 +12,8 @@ import type { AdvancedJobCreator } from './advanced_job_creator';
 import type { CategorizationJobCreator } from './categorization_job_creator';
 import type { RareJobCreator } from './rare_job_creator';
 import type { GeoJobCreator } from './geo_job_creator';
-import type { EsqlJobCreator } from './esql_job_creator';
+import type { EsqlBasicJobCreator } from './esql_basic_job_creator';
+import type { EsqlAdvancedJobCreator } from './esql_advanced_job_creator';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export type JobCreatorType =
@@ -23,12 +24,19 @@ export type JobCreatorType =
   | CategorizationJobCreator
   | RareJobCreator
   | GeoJobCreator
-  | EsqlJobCreator;
+  | EsqlBasicJobCreator
+  | EsqlAdvancedJobCreator;
 
-export type ClassicJobCreatorType = Exclude<JobCreatorType, EsqlJobCreator>;
+/** Job creators for the ES|QL wizards, whose datafeeds run an ES|QL query. */
+export type EsqlJobCreatorType = EsqlBasicJobCreator | EsqlAdvancedJobCreator;
+
+export type ClassicJobCreatorType = Exclude<JobCreatorType, EsqlJobCreatorType>;
 
 /** Job creators whose fields are picked with the multi-metric view. */
-export type MultiMetricLikeJobCreator = MultiMetricJobCreator | EsqlJobCreator;
+export type MultiMetricLikeJobCreator = MultiMetricJobCreator | EsqlBasicJobCreator;
+
+/** Job creators whose detectors are edited with the advanced detector list. */
+export type AdvancedLikeJobCreator = AdvancedJobCreator | EsqlAdvancedJobCreator;
 
 export function isSingleMetricJobCreator(
   jobCreator: JobCreatorType
@@ -45,7 +53,7 @@ export function isMultiMetricJobCreator(
 export function isMultiMetricLikeJobCreator( // needs a better name.!!!!!!!!!!!!!!!!!!!!!!!!!!
   jobCreator: JobCreatorType
 ): jobCreator is MultiMetricLikeJobCreator {
-  return jobCreator.type === JOB_TYPE.MULTI_METRIC || jobCreator.type === JOB_TYPE.ESQL;
+  return jobCreator.type === JOB_TYPE.MULTI_METRIC || jobCreator.type === JOB_TYPE.ESQL_BASIC;
 }
 
 export function isPopulationJobCreator(
@@ -56,6 +64,12 @@ export function isPopulationJobCreator(
 
 export function isAdvancedJobCreator(jobCreator: JobCreatorType): jobCreator is AdvancedJobCreator {
   return jobCreator.type === JOB_TYPE.ADVANCED;
+}
+
+export function isAdvancedLikeJobCreator(
+  jobCreator: JobCreatorType
+): jobCreator is AdvancedLikeJobCreator {
+  return jobCreator.type === JOB_TYPE.ADVANCED || jobCreator.type === JOB_TYPE.ESQL_ADVANCED;
 }
 
 export function isCategorizationJobCreator(
@@ -75,9 +89,22 @@ export function isGeoJobCreator(jobCreator: JobCreatorType): jobCreator is GeoJo
 export function isClassicJobCreator(
   jobCreator: JobCreatorType
 ): jobCreator is ClassicJobCreatorType {
-  return jobCreator.type !== JOB_TYPE.ESQL;
+  return isEsqlJobCreator(jobCreator) === false;
 }
 
-export function isEsqlJobCreator(jobCreator: JobCreatorType): jobCreator is EsqlJobCreator {
-  return jobCreator.type === JOB_TYPE.ESQL;
+/** Returns true for the job creators of both ES|QL wizards. */
+export function isEsqlJobCreator(jobCreator: JobCreatorType): jobCreator is EsqlJobCreatorType {
+  return jobCreator.type === JOB_TYPE.ESQL_BASIC || jobCreator.type === JOB_TYPE.ESQL_ADVANCED;
+}
+
+export function isEsqlBasicJobCreator(
+  jobCreator: JobCreatorType
+): jobCreator is EsqlBasicJobCreator {
+  return jobCreator.type === JOB_TYPE.ESQL_BASIC;
+}
+
+export function isEsqlAdvancedJobCreator(
+  jobCreator: JobCreatorType
+): jobCreator is EsqlAdvancedJobCreator {
+  return jobCreator.type === JOB_TYPE.ESQL_ADVANCED;
 }

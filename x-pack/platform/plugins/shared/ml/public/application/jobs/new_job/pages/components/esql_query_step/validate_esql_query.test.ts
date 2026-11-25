@@ -7,9 +7,17 @@
 
 import { validateEsqlQuery } from './validate_esql_query';
 
-const unnamed = (expression: string) => ({ type: 'unnamedColumn', expression });
-const unsupported = (expression: string) => ({ type: 'unsupportedStatsColumn', expression });
-const changed = (expression: string) => ({ type: 'changedAfterStats', expression });
+const unnamed = (expression: string) => ({ type: 'unnamedColumn', expression, severity: 'error' });
+const unsupported = (expression: string, severity = 'error') => ({
+  type: 'unsupportedStatsColumn',
+  expression,
+  severity,
+});
+const changed = (expression: string, severity = 'error') => ({
+  type: 'changedAfterStats',
+  expression,
+  severity,
+});
 
 describe('validateEsqlQuery', () => {
   it('accepts a query whose columns are all named', () => {
@@ -88,6 +96,19 @@ describe('validateEsqlQuery', () => {
         'FROM logs | EVAL bytes / 1024, kb = bytes / 1024 | INLINE STATS MAX(kb) BY host'
       )
     ).toEqual([unnamed('bytes / 1024'), unnamed('MAX(kb)')]);
+  });
+
+  it('only warns about columns the advanced wizard can use', () => {
+    expect(
+      validateEsqlQuery(
+        'FROM logs | STATS COUNT(*), s = VALUES(host) BY t = BUCKET(@timestamp, 1 hour) | EVAL s2 = s',
+        { isAdvanced: true }
+      )
+    ).toEqual([
+      unnamed('COUNT(*)'),
+      unsupported('s = VALUES(host)', 'warning'),
+      changed('EVAL s2 = s', 'warning'),
+    ]);
   });
 
   it('leaves queries with syntax errors to the editor', () => {

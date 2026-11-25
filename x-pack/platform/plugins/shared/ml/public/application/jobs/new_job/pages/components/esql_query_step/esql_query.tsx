@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment';
@@ -45,7 +46,13 @@ import { WizardNav } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { isEsqlJobCreator } from '../../../common/job_creator';
+import {
+  isEsqlJobCreator,
+  isEsqlAdvancedJobCreator,
+  isEsqlBasicJobCreator,
+} from '../../../common/job_creator';
+import { convertToEsqlAdvancedJob } from '../../../common/job_creator/util/general';
+import { useNavigateToManagementMlLink } from '../../../../../contexts/kibana/use_create_url';
 import type { TimeRange } from '../../../common/components';
 import { TimeRangePicker } from '../../../common/components';
 import { useEsqlTimeField } from './use_esql_time_field';
@@ -60,6 +67,16 @@ import { useToastNotificationService } from '../../../../../services/toast_notif
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
+
+const QueryProblemList: FC<{ problems: readonly EsqlQueryProblem[] }> = ({ problems }) => (
+  <ul>
+    {problems.map((problem, index) => (
+      <li key={index}>
+        <QueryProblemMessage problem={problem} />
+      </li>
+    ))}
+  </ul>
+);
 
 const QueryProblemMessage: FC<{ problem: EsqlQueryProblem }> = ({ problem }) => {
   const expression = <EuiCode>{problem.expression}</EuiCode>;
@@ -76,7 +93,13 @@ const QueryProblemMessage: FC<{ problem: EsqlQueryProblem }> = ({ problem }) => 
         />
       );
     case 'unsupportedStatsColumn':
-      return (
+      return problem.severity === 'warning' ? (
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.esqlQueryStep.unsupportedStatsColumnWarning"
+          defaultMessage="{expression} has no matching ML function, so every function its type supports is offered. Check that the function you pick suits the column."
+          values={{ expression }}
+        />
+      ) : (
         <FormattedMessage
           id="xpack.ml.newJob.wizard.esqlQueryStep.unsupportedStatsColumnProblem"
           defaultMessage="{expression} is not supported. Each column of the last {stats} command must be {count} or a single {functions}, with no filter."
@@ -89,7 +112,13 @@ const QueryProblemMessage: FC<{ problem: EsqlQueryProblem }> = ({ problem }) => 
         />
       );
     case 'changedAfterStats':
-      return (
+      return problem.severity === 'warning' ? (
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.esqlQueryStep.changedAfterStatsWarning"
+          defaultMessage="{expression} changes columns after the last {stats} command. Check that the functions you pick suit the changed columns."
+          values={{ expression, stats: <EuiCode>STATS</EuiCode> }}
+        />
+      ) : (
         <FormattedMessage
           id="xpack.ml.newJob.wizard.esqlQueryStep.changedAfterStatsProblem"
           defaultMessage="Remove {expression}, or move it before the last {stats} command. Its columns cannot be changed afterwards."
@@ -205,7 +234,24 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     };
   }, [sourceQuery, timeField, currentTimeFieldIsOption, data.dataViews, http, projectRouting]);
 
-  const queryProblems = useMemo(() => validateEsqlQuery(query.esql), [query.esql]);
+  const isAdvanced = isEsqlAdvancedJobCreator(jobCreator);
+  const queryProblems = useMemo(
+    () => validateEsqlQuery(query.esql, { isAdvanced }),
+    [query.esql, isAdvanced]
+  );
+  const queryErrors = queryProblems.filter(({ severity }) => severity === 'error');
+  const queryWarnings = queryProblems.filter(({ severity }) => severity === 'warning');
+  // the advanced wizard can use the query when its only errors are columns it allows
+  const isUsableWhenAdvanced =
+    isAdvanced === false && queryErrors.every(({ type }) => type !== 'unnamedColumn');
+
+  const navigateToMlManagement = useNavigateToManagementMlLink('anomaly_detection');
+  const convertToAdvanced = useCallback(() => {
+    if (isEsqlBasicJobCreator(jobCreator)) {
+      jobCreator.esqlQuery = query.esql;
+      convertToEsqlAdvancedJob(jobCreator, navigateToMlManagement);
+    }
+  }, [jobCreator, query.esql, navigateToMlManagement]);
 
   const execution = useEsqlQueryExecution(jobCreator);
   const { run, isLoading } = execution;
@@ -270,10 +316,7 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       });
       // a column created by an aggregation only allows the ML functions that match it,
       // e.g. mean, high_mean and low_mean for AVG
-      jobCreator.newJobCapsService.initializeFromEsqlColumns(
-        columns,
-        getEsqlColumnFunctions(query.esql)
-      );
+      jobCreator.setEsqlColumns(columns, getEsqlColumnFunctions(query.esql));
       jobCreatorUpdate();
       setCurrentStep(WIZARD_STEPS.PICK_FIELDS);
     } catch (error) {
@@ -358,6 +401,28 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             </EuiButton>
           </EuiToolTip>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              isAdvanced
+                ? undefined
+                : i18n.translate('xpack.ml.newJob.wizard.esqlQueryStep.advancedModeTooltip', {
+                    defaultMessage:
+                      'Choose any function and the by, over and partition fields of each detector. You cannot switch back.',
+                  })
+            }
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.ml.newJob.wizard.esqlQueryStep.advancedModeLabel', {
+                defaultMessage: 'Advanced',
+              })}
+              checked={isAdvanced}
+              disabled={isAdvanced}
+              onChange={convertToAdvanced}
+              data-test-subj="mlEsqlQueryAdvancedModeSwitch"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <ESQLLangEditor
@@ -370,7 +435,7 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         isLoading={isLoading}
         dataTestSubj="mlJobWizardEsqlQueryEditor"
       />
-      {queryProblems.length > 0 && (
+      {queryErrors.length > 0 && (
         <>
           <EuiSpacer size="s" />
           <KbnWarningCallout
@@ -379,14 +444,36 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
               defaultMessage: 'This query cannot be used for an anomaly detection job',
             })}
             data-test-subj="mlEsqlQueryProblemsCallout"
+            actionProps={
+              isUsableWhenAdvanced
+                ? {
+                    primary: {
+                      children: i18n.translate(
+                        'xpack.ml.newJob.wizard.esqlQueryStep.useAdvancedModeButton',
+                        { defaultMessage: 'Use advanced mode' }
+                      ),
+                      onClick: convertToAdvanced,
+                      'data-test-subj': 'mlEsqlQueryUseAdvancedModeButton',
+                    },
+                  }
+                : undefined
+            }
           >
-            <ul>
-              {queryProblems.map((problem, index) => (
-                <li key={index}>
-                  <QueryProblemMessage problem={problem} />
-                </li>
-              ))}
-            </ul>
+            <QueryProblemList problems={queryErrors} />
+          </KbnWarningCallout>
+        </>
+      )}
+      {queryWarnings.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <KbnWarningCallout
+            size="s"
+            title={i18n.translate('xpack.ml.newJob.wizard.esqlQueryStep.queryWarningsTitle', {
+              defaultMessage: 'Check these columns before creating the job',
+            })}
+            data-test-subj="mlEsqlQueryWarningsCallout"
+          >
+            <QueryProblemList problems={queryWarnings} />
           </KbnWarningCallout>
         </>
       )}
@@ -395,7 +482,7 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       <EuiSpacer />
       <WizardNav
         next={onNext}
-        nextActive={query.esql.trim() !== '' && queryProblems.length === 0 && !isCreatingDataView}
+        nextActive={query.esql.trim() !== '' && queryErrors.length === 0 && !isCreatingDataView}
       />
     </>
   );

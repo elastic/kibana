@@ -18,6 +18,16 @@ export interface EsqlQueryProblem {
   readonly type: 'unnamedColumn' | 'unsupportedStatsColumn' | 'changedAfterStats';
   /** The query text of the expression or command, e.g. `COUNT(*)`. */
   readonly expression: string;
+  /** Errors stop the query from being used. Warnings let the advanced wizard use it. */
+  readonly severity: 'error' | 'warning';
+}
+
+export interface ValidateEsqlQueryOptions {
+  /**
+   * The advanced wizard can use columns the basic wizard cannot, so their problems are warnings.
+   * Unnamed columns are always errors, as a job refers to columns by name.
+   */
+  readonly isAdvanced?: boolean;
 }
 
 // Commands whose expressions each create an output column
@@ -54,7 +64,10 @@ const getColumnExpressions = ({ args }: ESQLCommand): ESQLAstItem[] =>
  * - no EVAL or RENAME may follow the last STATS.
  * Queries with syntax errors return no problems, as the editor already reports them.
  */
-export const validateEsqlQuery = (query: string): EsqlQueryProblem[] => {
+export const validateEsqlQuery = (
+  query: string,
+  { isAdvanced = false }: ValidateEsqlQueryOptions = {}
+): EsqlQueryProblem[] => {
   try {
     const { root, errors } = Parser.parse(query);
     if (errors.length > 0) {
@@ -65,6 +78,7 @@ export const validateEsqlQuery = (query: string): EsqlQueryProblem[] => {
       ({ location }: AstNode | ESQLCommand): EsqlQueryProblem => ({
         type,
         expression: query.slice(location.min, location.max + 1),
+        severity: type === 'unnamedColumn' || isAdvanced === false ? 'error' : 'warning',
       });
 
     const unnamed = root.commands

@@ -48,6 +48,7 @@ export const ML_PAGES = {
   ANOMALY_DETECTION_CREATE_JOB_RARE: 'jobs/new_job/rare',
   ANOMALY_DETECTION_CREATE_JOB_GEO: 'jobs/new_job/geo',
   ANOMALY_DETECTION_CREATE_JOB_ESQL: 'jobs/new_job/esql',
+  ANOMALY_DETECTION_CREATE_JOB_ESQL_ADVANCED: 'jobs/new_job/esql_advanced',
   ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED: 'jobs/new_job/advanced',
   ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: 'jobs/new_job/step/job_type',
   ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: 'jobs/new_job/step/select_source',

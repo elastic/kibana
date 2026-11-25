@@ -10,7 +10,7 @@ import React, { Fragment, useContext, useState, useEffect } from 'react';
 
 import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
-import type { AdvancedJobCreator } from '../../../../../common/job_creator';
+import type { AdvancedLikeJobCreator } from '../../../../../common/job_creator';
 import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { MetricSelector } from './metric_selector';
 import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
@@ -35,7 +35,7 @@ const emptyRichDetector: RichDetector = {
 
 export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const jobCreator = jc as AdvancedJobCreator;
+  const jobCreator = jc as AdvancedLikeJobCreator;
 
   const { fields, aggs } = useNewJobCapsService();
   const [modalPayload, setModalPayload] = useState<ModalPayload | null>(null);

@@ -26,11 +26,17 @@ import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import type { JobRunner } from '../../../common/job_runner';
-import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import {
+  JsonEditorFlyout,
+  EDITOR_MODE,
+  getAdvancedDatafeedEditorMode,
+} from '../common/json_editor_flyout';
 import {
   isSingleMetricJobCreator,
   isAdvancedJobCreator,
   isClassicJobCreator,
+  isEsqlAdvancedJobCreator,
+  isEsqlBasicJobCreator,
 } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
 import { DatafeedDetails } from './components/datafeed_details';
@@ -42,6 +48,7 @@ import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiti
 import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import {
   convertToAdvancedJob,
+  convertToEsqlAdvancedJob,
   resetJob,
   advancedStartDatafeed,
 } from '../../../common/job_creator/util/general';
@@ -67,7 +74,13 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const [showJobAssignWarning, setShowJobAssignWarning] = useState(false);
 
   const isAdvanced = isAdvancedJobCreator(jobCreator);
-  const jsonEditorMode = isAdvanced ? EDITOR_MODE.EDITABLE : EDITOR_MODE.READONLY;
+  // the advanced ES|QL wizard creates and starts its job like the basic wizards, but its job
+  // JSON can be edited
+  const isEditable = isAdvanced || isEsqlAdvancedJobCreator(jobCreator);
+  const jobEditorMode = isEditable ? EDITOR_MODE.EDITABLE : EDITOR_MODE.READONLY;
+  const datafeedEditorMode = isEditable
+    ? getAdvancedDatafeedEditorMode(jobCreator)
+    : EDITOR_MODE.READONLY;
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
@@ -146,6 +159,8 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const convertToAdvanced = () => {
     if (isClassicJobCreator(jobCreator)) {
       convertToAdvancedJob(jobCreator, navigateToMlManagement);
+    } else if (isEsqlBasicJobCreator(jobCreator)) {
+      convertToEsqlAdvancedJob(jobCreator, navigateToMlManagement);
     }
   };
 
@@ -213,11 +228,12 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 <EuiFlexItem grow={false}>
                   <JsonEditorFlyout
                     isDisabled={progress > 0}
-                    jobEditorMode={jsonEditorMode}
-                    datafeedEditorMode={jsonEditorMode}
+                    jobEditorMode={jobEditorMode}
+                    datafeedEditorMode={datafeedEditorMode}
                   />
                 </EuiFlexItem>
-                {isAdvanced === false && isClassicJobCreator(jobCreator) && (
+                {((isAdvanced === false && isClassicJobCreator(jobCreator)) ||
+                  isEsqlBasicJobCreator(jobCreator)) && (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       onClick={convertToAdvanced}

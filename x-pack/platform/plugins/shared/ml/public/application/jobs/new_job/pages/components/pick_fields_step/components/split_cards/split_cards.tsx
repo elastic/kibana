@@ -107,7 +107,7 @@ export const SplitCards: FC<PropsWithChildren<Props>> = memo(
             {fieldValues.length > 0 && numberOfDetectors > 0 && splitField !== null && (
               <Fragment>
                 {(jobType === JOB_TYPE.MULTI_METRIC ||
-                  jobType === JOB_TYPE.ESQL ||
+                  jobType === JOB_TYPE.ESQL_BASIC ||
                   jobType === JOB_TYPE.GEO) && (
                   <Fragment>
                     <div

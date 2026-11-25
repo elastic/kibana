@@ -84,7 +84,7 @@ export const WizardHorizontalSteps: FC<Props> = ({
     });
   }
 
-  if (jobType === JOB_TYPE.ESQL) {
+  if (jobType === JOB_TYPE.ESQL_BASIC || jobType === JOB_TYPE.ESQL_ADVANCED) {
     stepsConfig.splice(0, 1, {
       title: i18n.translate('xpack.ml.newJob.wizard.step.esqlQueryTitle', {
         defaultMessage: 'ES|QL Query',

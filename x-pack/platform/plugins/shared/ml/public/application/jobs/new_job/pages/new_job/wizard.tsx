@@ -15,7 +15,7 @@ import type { JobCreatorContextValue } from '../components/job_creator_context';
 import { JobCreatorContext } from '../components/job_creator_context';
 import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 
-import type { JobCreatorType } from '../../common/job_creator';
+import { isEsqlJobCreator, type JobCreatorType } from '../../common/job_creator';
 import type { ChartLoader } from '../../common/chart_loader';
 import type { MapLoader } from '../../common/map_loader';
 import type { ResultsLoader } from '../../common/results_loader';
@@ -75,7 +75,7 @@ export const Wizard: FC<Props> = ({
   const firstStep =
     jobCreator.type === JOB_TYPE.ADVANCED
       ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
-      : jobCreator.type === JOB_TYPE.ESQL
+      : isEsqlJobCreator(jobCreator)
       ? WIZARD_STEPS.ESQL_QUERY
       : WIZARD_STEPS.TIME_RANGE;
 

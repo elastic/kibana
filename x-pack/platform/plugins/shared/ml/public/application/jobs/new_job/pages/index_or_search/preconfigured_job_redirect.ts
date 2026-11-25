@@ -9,8 +9,10 @@ import type { ApplicationStart } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { jobCloningService } from '../../../../services/job_cloning_service';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
+import { isEsqlDatafeed } from '../../../../../../common/util/esql_metric_query';
 
 export async function preConfiguredJobRedirect(
   dataViewsService: DataViewsContract,
@@ -20,6 +22,14 @@ export async function preConfiguredJobRedirect(
   const { createdBy, job, datafeed } = jobCloningService;
 
   if (job && datafeed) {
+    if (isEsqlDatafeed(datafeed)) {
+      // ES|QL jobs have no data view, as the wizard creates one from the query
+      await navigateToUrl(
+        `${basePath}/app/management/ml/anomaly_detection/${getEsqlWizardUrl(createdBy, job)}`
+      );
+      return Promise.reject();
+    }
+
     const dataViewId = await getDataViewIdFromDatafeed(job, datafeed, dataViewsService);
     if (dataViewId === null) {
       return Promise.resolve();
@@ -37,6 +47,26 @@ export async function preConfiguredJobRedirect(
     // don't redirect
     return Promise.resolve();
   }
+}
+
+/**
+ * Returns the ES|QL wizard for a job. Jobs from the basic wizard return to it if their detectors
+ * still share one optional partition field, and all other ES|QL jobs use the advanced wizard.
+ */
+export function getEsqlWizardUrl(createdBy: string | undefined, job: Job): string {
+  const { detectors } = job.analysis_config;
+  const [firstDetector] = detectors;
+  const isBasicShape = detectors.every(
+    (detector) =>
+      detector.by_field_name === undefined &&
+      detector.over_field_name === undefined &&
+      detector.partition_field_name === firstDetector?.partition_field_name
+  );
+  const page =
+    createdBy === CREATED_BY_LABEL.ESQL_BASIC && isBasicShape
+      ? ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ESQL
+      : ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ESQL_ADVANCED;
+  return `${page}?_g=()`;
 }
 
 async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataViewId: string) {
@@ -65,9 +95,6 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataVie
     case CREATED_BY_LABEL.GEO:
     case CREATED_BY_LABEL.GEO_FROM_LENS:
       page = JOB_TYPE.GEO;
-      break;
-    case CREATED_BY_LABEL.ESQL:
-      page = JOB_TYPE.ESQL;
       break;
     case CREATED_BY_LABEL.ADVANCED:
     default:

@@ -21,11 +21,16 @@ import { AdvancedView } from './components/advanced_view';
 import { CategorizationView } from './components/categorization_view';
 import { RareView } from './components/rare_view';
 import { GeoView } from './components/geo_view';
-import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import {
+  JsonEditorFlyout,
+  EDITOR_MODE,
+  getAdvancedDatafeedEditorMode,
+} from '../common/json_editor_flyout';
 import {
   isSingleMetricJobCreator,
   isMultiMetricLikeJobCreator,
   isEsqlJobCreator,
+  isAdvancedLikeJobCreator,
   isPopulationJobCreator,
   isCategorizationJobCreator,
   isAdvancedJobCreator,
@@ -64,7 +69,7 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           {isPopulationJobCreator(jobCreator) && (
             <PopulationView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
-          {isAdvancedJobCreator(jobCreator) && (
+          {isAdvancedLikeJobCreator(jobCreator) && (
             <AdvancedView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isCategorizationJobCreator(jobCreator) && (
@@ -89,11 +94,11 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             nextActive={nextActive}
           >
-            {isAdvancedJobCreator(jobCreator) && (
+            {isAdvancedLikeJobCreator(jobCreator) && (
               <JsonEditorFlyout
                 isDisabled={false}
                 jobEditorMode={EDITOR_MODE.EDITABLE}
-                datafeedEditorMode={EDITOR_MODE.EDITABLE}
+                datafeedEditorMode={getAdvancedDatafeedEditorMode(jobCreator)}
               />
             )}
           </WizardNav>

@@ -17,8 +17,12 @@ import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { AdvancedSection } from './components/advanced_section';
 import { AdditionalSection } from './components/additional_section';
-import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
-import { isAdvancedJobCreator } from '../../../common/job_creator';
+import {
+  JsonEditorFlyout,
+  EDITOR_MODE,
+  getAdvancedDatafeedEditorMode,
+} from '../common/json_editor_flyout';
+import { isAdvancedLikeJobCreator } from '../../../common/job_creator';
 
 interface Props extends StepProps {
   advancedExpanded: boolean;
@@ -79,11 +83,11 @@ export const JobDetailsStep: FC<Props> = ({
             next={() => setCurrentStep(WIZARD_STEPS.VALIDATION)}
             nextActive={nextActive}
           >
-            {isAdvancedJobCreator(jobCreator) && (
+            {isAdvancedLikeJobCreator(jobCreator) && (
               <JsonEditorFlyout
                 isDisabled={false}
                 jobEditorMode={EDITOR_MODE.EDITABLE}
-                datafeedEditorMode={EDITOR_MODE.EDITABLE}
+                datafeedEditorMode={getAdvancedDatafeedEditorMode(jobCreator)}
               />
             )}
           </WizardNav>

@@ -27,7 +27,7 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlLocatorParams } from '../../../../../../locator';
 import { jobCloningService } from '../../../../../services/job_cloning_service';
 import type { NewJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import type { ClassicJobCreatorType, JobCreatorType } from '..';
+import type { ClassicJobCreatorType, EsqlBasicJobCreator, JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory =
@@ -262,6 +262,19 @@ export function convertToAdvancedJob(
   });
 }
 
+/**
+ * Opens the job in the advanced ES|QL wizard, keeping its query, detectors and time range.
+ * There is no way back to the basic ES|QL wizard.
+ */
+export function convertToEsqlAdvancedJob(
+  jobCreator: EsqlBasicJobCreator,
+  navigateToPath: NavigateToMlManagementLink
+) {
+  jobCreator.createdBy = CREATED_BY_LABEL.ESQL_ADVANCED;
+  jobCloningService.stashJobForCloning(jobCreator, true, true);
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ESQL_ADVANCED);
+}
+
 export function resetAdvancedJob(
   jobCreator: JobCreatorType,
   navigateToPath: NavigateToMlManagementLink
@@ -321,9 +334,13 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.geo', {
         defaultMessage: 'Geo',
       });
-    case JOB_TYPE.ESQL:
+    case JOB_TYPE.ESQL_BASIC:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.esql', {
         defaultMessage: 'ES|QL',
+      });
+    case JOB_TYPE.ESQL_ADVANCED:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.esqlAdvanced', {
+        defaultMessage: 'ES|QL advanced',
       });
     default:
       return '';

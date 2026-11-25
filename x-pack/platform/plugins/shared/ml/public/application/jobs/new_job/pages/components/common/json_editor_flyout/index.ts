@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { JsonEditorFlyout, EDITOR_MODE } from './json_editor_flyout';
+export { JsonEditorFlyout, EDITOR_MODE, getAdvancedDatafeedEditorMode } from './json_editor_flyout';

@@ -56,13 +56,13 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
     /**
      * Fields not involved in cardinality check
      */
-    const excludedKeywords = new Set<string>(
+    const excludedKeywords = new Set<string>([
       /**
        * The keyword which is used to mean the output of categorization,
        * so it will have cardinality zero in the actual input data.
        */
-      MLCATEGORY
-    );
+      MLCATEGORY,
+    ]);
 
     const { detectors, influencers, bucket_span: bucketSpan } = analysisConfig;
 

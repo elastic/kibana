@@ -29,7 +29,7 @@ import {
 import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import type { AdvancedJobCreator } from '../../../../../common/job_creator';
+import type { AdvancedLikeJobCreator } from '../../../../../common/job_creator';
 import {
   createFieldOptions,
   createMlcategoryFieldOption,
@@ -82,7 +82,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   closeModal,
 }) => {
   const { jobCreator: jc } = useContext(JobCreatorContext);
-  const jobCreator = jc as AdvancedJobCreator;
+  const jobCreator = jc as AdvancedLikeJobCreator;
 
   const [detector, setDetector] = useState(payload.detector);
   const [aggOption, setAggOption] = useState(createAggOption(detector.agg));
