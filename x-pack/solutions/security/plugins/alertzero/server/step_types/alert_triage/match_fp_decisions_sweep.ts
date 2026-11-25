@@ -225,16 +225,18 @@ export const createDecisionSweep = ({
 
   /**
    * The decisions whose key has a true positive or inconclusive verdict. A verdict can be recorded
-   * at any time, so only a positive answer is kept for the sweep: a decision that had none is read
-   * again for each page, one search for all the decisions of the page that are not known to have
-   * one. A decision that has one stays blocked for the sweep. The search stops at the work
-   * deadline: the decisions it did not reach are deferred by the check that starts each decision.
+   * at any time, so the decision's key is read right before its close, and only a positive answer
+   * is kept: a decision that had none is read again the next time it would close. A decision that
+   * has one stays blocked for the sweep. A read that fails throws, so the caller closes nothing.
    */
   const conflicting = new Set<string>();
-  const loadConflicts = async (ids: string[]) => {
-    const unknown = ids.filter((id) => !conflicting.has(id));
-    const found = await findDecisionsWithConflictingVerdicts(contextManager, unknown, outOfTime);
-    found.forEach((id) => conflicting.add(id));
+  const hasConflictingVerdict = async (id: string): Promise<boolean> => {
+    if (!conflicting.has(id)) {
+      // No deadline here: a lookup cut short finds nothing, which would read as "no verdict".
+      const found = await findDecisionsWithConflictingVerdicts(contextManager, [id]);
+      found.forEach((foundId) => conflicting.add(foundId));
+    }
+    return conflicting.has(id);
   };
 
   /** A decision with a conflicting verdict closes nothing: its matches are tagged, as in shadow. */
@@ -412,7 +414,7 @@ export const createDecisionSweep = ({
         logger.debug(`Decision ${id} was revoked or expired during the sweep: it closes nothing`);
         return;
       }
-      if (conflicting.has(id)) return await blockByVerdict(id, alertIds);
+      if (await hasConflictingVerdict(id)) return await blockByVerdict(id, alertIds);
       const allowed = await closeAllowance(id, alertIds);
       if (allowed.length === 0) return;
       tagged = allowed;
@@ -432,25 +434,8 @@ export const createDecisionSweep = ({
     }
   };
 
-  /**
-   * Closes the alerts of each approved decision. A decision whose verdict could not be read closes
-   * nothing, and is counted as a failed close, not as deferred: it is not handed on, so the work
-   * deadline cannot count it a second time. A decision already known to have a conflicting verdict
-   * was not part of the lookup, so a failed lookup does not count it, and it is still blocked as
-   * usual.
-   */
-  const close = async (byDecision: Map<string, string[]>) => {
-    const unread = [...byDecision.keys()].filter((id) => !conflicting.has(id));
-    let toHandle = byDecision;
-    try {
-      await loadConflicts(unread);
-    } catch (error) {
-      unread.forEach(countCloseFailure);
-      warn('Could not read the verdicts of the decision keys; nothing is closed', error);
-      toHandle = new Map([...byDecision].filter(([id]) => conflicting.has(id)));
-    }
-    await eachDecision(toHandle, closeDecision);
-  };
+  /** Closes the alerts of each approved decision, as far as the work deadline allows. */
+  const close = (byDecision: Map<string, string[]>) => eachDecision(byDecision, closeDecision);
 
   // --- Dismissed decisions: keep the alerts out of analysis ---
 

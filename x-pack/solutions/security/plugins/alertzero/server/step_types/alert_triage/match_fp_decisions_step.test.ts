@@ -1860,6 +1860,40 @@ describe('triage match decisions step in on mode', () => {
     );
   });
 
+  it('blocks a decision whose key got a verdict while an earlier decision of the same page closed', async () => {
+    const { run, callKibanaApi, closes, tags } = setup({
+      mode: 'on',
+      alerts: [
+        ['a', source('C:\\x.exe')],
+        ['b', source('C:\\y.exe')],
+      ],
+      decisions: { ...approved('C:\\x.exe'), ...approved('C:\\y.exe') },
+    });
+    const inner = callKibanaApi.getMockImplementation()!;
+    let closed = false;
+    callKibanaApi.mockImplementation(
+      async (params: { path: string; body?: Record<string, any> }) => {
+        const { path, body } = params;
+        if (path.endsWith('/signals/status') && body?.status === 'closed') closed = true;
+        if (path.endsWith('/signals/search') && body?.aggs) {
+          // The batch records a true positive for y's key once x's alerts were closed.
+          const buckets = closed ? [{ key: strictKeyTag(hashOf('C:\\y.exe')) }] : [];
+          return { body: { aggregations: { keys: { buckets } } } };
+        }
+        return inner(params);
+      }
+    );
+
+    const { output } = await run();
+
+    expect(closes().flatMap(({ signal_ids: ids }) => ids)).toEqual(['a']);
+    expect(tags()).toContainEqual({
+      ids: ['b'],
+      tags: { tags_to_add: [`az:would_close:${idOf('C:\\y.exe')}`], tags_to_remove: [] },
+    });
+    expect(output).toEqual(expect.objectContaining({ closed: 1, blocked_by_verdict: 1 }));
+  });
+
   it('closes nothing, and counts a failed close, when the decision cannot be read again', async () => {
     const { run, closes } = setup({
       mode: 'on',

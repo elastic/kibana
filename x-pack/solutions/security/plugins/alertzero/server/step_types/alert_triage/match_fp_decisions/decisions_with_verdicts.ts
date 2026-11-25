@@ -22,20 +22,15 @@ const DECISIONS_PER_SEARCH = 500;
  * Which of the given approved decisions have a key that an alert already carries with a true
  * positive or inconclusive verdict. The decision was approved on evidence from before, and a later
  * verdict for the same key is evidence against it. One search covers up to 500 decisions. A read
- * that fails throws, so the caller closes nothing on a guess.
- *
- * `shouldStop` is asked before each search. Once it answers true, the decisions that are not read
- * yet are left out of the result, so the caller must not act on them. It is meant for a work
- * deadline, which stays passed once it has passed.
+ * that fails throws, so the caller closes nothing on a guess. It takes no deadline: a lookup cut
+ * short would leave decisions out, and the caller would read them as having no conflict.
  */
 export const findDecisionsWithConflictingVerdicts = async (
   api: KibanaApi,
-  decisionIds: readonly string[],
-  shouldStop: () => boolean = () => false
+  decisionIds: readonly string[]
 ): Promise<Set<string>> => {
   const found = new Set<string>();
   for (let from = 0; from < decisionIds.length; from += DECISIONS_PER_SEARCH) {
-    if (shouldStop()) break;
     const idByKeyTag = new Map(
       decisionIds.slice(from, from + DECISIONS_PER_SEARCH).map((id) => {
         const hash = hashOfDecisionId(id);
