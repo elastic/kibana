@@ -7,22 +7,19 @@
 
 import { useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
-import type {
-  RuleScope,
-  RuleSetConditions,
-} from '../../../../common/api/detection_engine/rule_sets';
-import { hasRuleSetConditions } from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
+import type { RuleSetConditions } from '../../../../common/api/detection_engine/rule_sets';
+import type { RuleQueryParams } from '../table_query';
 import { fetchSearchRules } from '../../rule_management/api/api';
 import type { FacetCountsResult } from './facet_fields';
 import { FACET_COUNT_CATEGORIES } from './facet_fields';
 
 interface UseFacetCountsParams {
+  /** The facet conditions: their tag categories get their own counts. */
   conditions: RuleSetConditions;
-  /** The rule set of the page, if any: counts are counts inside the set. */
-  scope?: RuleScope;
+  /** The rules of the table: `filter_params` and search, or the rule set with its conditions. */
+  params: RuleQueryParams;
   /** KQL of the filters that are not facets. */
   filter?: string;
-  search?: string;
   enabled?: boolean;
 }
 
@@ -34,23 +31,20 @@ type FacetCountsData = FacetCountsResult & { total: number };
  */
 export const useFacetCounts = ({
   conditions,
-  scope,
+  params,
   filter,
-  search,
   enabled = true,
 }: UseFacetCountsParams) => {
-  const scopeKey = JSON.stringify(scope ?? null);
+  const scopeKey = params.rule_scope?.rule_set_id ?? '';
   const last = useRef<{ scopeKey: string; data: FacetCountsData }>();
   return useQuery(
-    ['ruleFacetCounts', conditions, scope, filter, search],
+    ['ruleFacetCounts', params, filter],
     async ({ signal }): Promise<FacetCountsData> => {
       const response = await fetchSearchRules({
         fields: ['id'],
         pagination: { page: 1, perPage: 1 },
         ...(filter ? { filter: { term: filter, mode: 'KQL' as const } } : {}),
-        ...(search ? { search: { term: search, mode: 'legacy' as const } } : {}),
-        ...(scope ? { rule_scope: scope } : {}),
-        ...(hasRuleSetConditions(conditions) ? { filter_params: conditions } : {}),
+        ...params,
         aggregations: {
           counts: FACET_COUNT_CATEGORIES,
           exclude_own_filter: true,

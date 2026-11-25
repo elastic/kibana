@@ -7,18 +7,31 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import type { RuleScope } from '../../../../../../common/api/detection_engine/rule_sets';
+import type {
+  RuleScope,
+  RuleSetConditions,
+} from '../../../../../../common/api/detection_engine/rule_sets';
 import { buildRuleSetFilter } from '../../../rule_sets/logic/build_rule_set_filter';
 import type { RuleSetsClient } from '../../../rule_sets/logic/rule_sets_client';
 
+/** What decides the rules of a scope: conditions, picked rules and left-out rules. */
+export interface RuleScopeMembership {
+  conditions: RuleSetConditions;
+  included_rule_ids: string[];
+  excluded_rule_ids: string[];
+}
+
 /**
- * The one place that turns a rule scope into a rule filter. Every rules API that can be limited to a
- * rule set calls it, so a new storage of rules changes only this function and the set filter.
+ * The membership of a rule scope:
+ * - `rule_set_id`: the saved set;
+ * - `rule_set_id` and `conditions`: the saved set's picked and left-out rules with other
+ *   conditions, an unsaved change of the set (the rules page edits a set in place);
+ * - `conditions`, `included_rule_ids`, `excluded_rule_ids`: a definition that is not saved.
  */
-export const resolveRuleScope = async (
+export const resolveRuleScopeMembership = async (
   scope: RuleScope | undefined,
   getRuleSetsClient: () => Promise<RuleSetsClient>
-): Promise<KueryNode | undefined> => {
+): Promise<RuleScopeMembership | undefined> => {
   if (!scope) {
     return undefined;
   }
@@ -30,17 +43,34 @@ export const resolveRuleScope = async (
   } = scope;
 
   if (ruleSetId) {
-    if (conditions || includedRuleIds || excludedRuleIds) {
+    if (includedRuleIds || excludedRuleIds) {
       throw new BadRequestError(
-        'rule_scope takes either rule_set_id or a rule set definition, not both'
+        'rule_scope takes rule_set_id (optionally with conditions) or a rule set definition, not both'
       );
     }
-    return (await getRuleSetsClient()).getFilter(ruleSetId);
+    const set = await (await getRuleSetsClient()).get(ruleSetId);
+    return {
+      conditions: conditions ?? set.conditions,
+      included_rule_ids: set.included_rule_ids,
+      excluded_rule_ids: set.excluded_rule_ids,
+    };
   }
 
-  return buildRuleSetFilter({
+  return {
     conditions: conditions ?? {},
     included_rule_ids: includedRuleIds ?? [],
     excluded_rule_ids: excludedRuleIds ?? [],
-  });
+  };
+};
+
+/**
+ * The one place that turns a rule scope into a rule filter. Every rules API that can be limited to a
+ * rule set calls it, so a new storage of rules changes only this function and the set filter.
+ */
+export const resolveRuleScope = async (
+  scope: RuleScope | undefined,
+  getRuleSetsClient: () => Promise<RuleSetsClient>
+): Promise<KueryNode | undefined> => {
+  const membership = await resolveRuleScopeMembership(scope, getRuleSetsClient);
+  return membership && buildRuleSetFilter(membership);
 };

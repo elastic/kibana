@@ -568,6 +568,40 @@ export const CLEAR_CONDITIONS = i18n.translate(
   { defaultMessage: 'Clear' }
 );
 
+export const SAVE_AS_RULE_SET_TITLE = i18n.translate(
+  'xpack.securitySolution.ruleSets.saveDialog.title',
+  { defaultMessage: 'Save as rule set' }
+);
+
+export const SAVE = i18n.translate('xpack.securitySolution.ruleSets.saveDialog.save', {
+  defaultMessage: 'Save',
+});
+
+export const HINT_FILTERS = (count: number) =>
+  i18n.translate('xpack.securitySolution.ruleSets.saveDialog.hintFilters', {
+    values: { count },
+    defaultMessage:
+      '{count, plural, one {# rule} other {# rules}} now. New rules that match these filters join the set.',
+  });
+
+export const HINT_PICKED = (count: number) =>
+  i18n.translate('xpack.securitySolution.ruleSets.saveDialog.hintPicked', {
+    values: { count },
+    defaultMessage:
+      'Exactly {count, plural, one {this rule} other {these # rules}}, with no filters. New rules do not join; add more by selecting rows.',
+  });
+
+export const SETTINGS = i18n.translate('xpack.securitySolution.ruleSets.settings.title', {
+  defaultMessage: 'Name and description',
+});
+
+export const NAME_REQUIRED = i18n.translate(
+  'xpack.securitySolution.ruleSets.saveDialog.nameRequired',
+  {
+    defaultMessage: 'Enter a name',
+  }
+);
+
 export const SAVE_TO_SET = i18n.translate('xpack.securitySolution.ruleSets.filterBar.saveToSet', {
   defaultMessage: 'Save to set',
 });

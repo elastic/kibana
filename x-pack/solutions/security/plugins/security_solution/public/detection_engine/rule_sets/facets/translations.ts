@@ -106,10 +106,10 @@ export const FEWER_TAG_GROUPS = i18n.translate(
   { defaultMessage: 'Fewer tag groups' }
 );
 
-export const COUNTS_IN_SET = (name: string) =>
-  i18n.translate('xpack.securitySolution.ruleSets.facets.countsInSet', {
+export const FILTERS_OF_SET = (name: string) =>
+  i18n.translate('xpack.securitySolution.ruleSets.facets.filtersOfSet', {
     values: { name },
-    defaultMessage: 'Counts inside {name}',
+    defaultMessage: 'The filters of {name}',
   });
 
 export const COUNTS_IN_ALL = i18n.translate('xpack.securitySolution.ruleSets.facets.countsInAll', {

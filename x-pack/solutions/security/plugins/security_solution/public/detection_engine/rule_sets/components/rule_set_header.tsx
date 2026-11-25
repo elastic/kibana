@@ -25,9 +25,8 @@ import type { RuleSetSummary } from '../../../../common/api/detection_engine/rul
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRuleSetOutcomesQuery, useRuleSetsWithCountsQuery } from '../api';
-import { useRuleSetEditor } from './rule_set_editor_context';
 import { RuleSetMoreActions, RuleSetSwitcher, useSuggestRuleSets } from './rule_set_switcher';
-import { RuleSetConditionChips } from './rules_group_by_control';
+import { RuleSetDefinitionLine } from './rules_group_by_control';
 import * as i18n from './translations';
 
 /** `value` is undefined while it loads: a 0 there would read as "the group is empty". */
@@ -95,7 +94,6 @@ export const RuleSetHeader = () => {
     state: { filterOptions },
   } = useRulesTableContext();
   const { data, isLoading } = useRuleSetsWithCountsQuery();
-  const { openEditor } = useRuleSetEditor();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const suggestRuleSets = useSuggestRuleSets();
   const group: RuleSetSummary | undefined = data?.find(({ id }) => id === filterOptions.ruleSetId);
@@ -131,8 +129,8 @@ export const RuleSetHeader = () => {
             )}
             {group && (
               <>
-                <EuiSpacer size="s" />
-                <RuleSetConditionChips group={group} />
+                <EuiSpacer size="xs" />
+                <RuleSetDefinitionLine group={group} />
               </>
             )}
           </EuiFlexItem>
@@ -164,21 +162,7 @@ export const RuleSetHeader = () => {
           )}
           {group && canEditRules && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    iconType="pencil"
-                    onClick={() => openEditor({ ruleSetId: group.id })}
-                    data-test-subj="ruleSetHeaderEdit"
-                  >
-                    {i18n.EDIT_GROUP}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <RuleSetMoreActions group={group} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <RuleSetMoreActions group={group} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

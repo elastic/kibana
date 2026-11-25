@@ -24,10 +24,10 @@ import {
 import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import {
-  hasRuleSetConditions,
   liftTagCategories,
   normalizeRuleSetConditions,
 } from '../../../../../../common/detection_engine/rule_sets/rule_set_conditions';
+import { ruleQueryParams } from '../../../../rule_sets/table_query';
 import type { RuleSetLastRunOutcome } from '../../../../../../common/api/detection_engine/rule_sets';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -284,7 +284,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
   const findRulesQueryArgs = useMemo(() => {
-    const searchTerm = filterOptions.filter?.trim();
     const structuredKql = convertRulesFilterToKQL({ ...filterOptions, filter: '' });
 
     const shouldApplyGaps = Boolean(filterOptions.gapFillStatuses?.length);
@@ -295,14 +294,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       sort_field: sortingOptions.field,
       sort_order: sortingOptions.order,
       pagination,
-      ...(searchTerm !== '' ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
       ...(shouldApplyGaps ? { gap_fill_statuses: filterOptions.gapFillStatuses } : {}),
       ...(gapRange ? { gaps_range_start: gapRange.start, gaps_range_end: gapRange.end } : {}),
       ...(activeSchedulerId ? { gap_auto_fill_scheduler_id: activeSchedulerId } : {}),
-      ...(filterOptions.ruleSetId ? { rule_scope: { rule_set_id: filterOptions.ruleSetId } } : {}),
-      ...(filterOptions.conditions && hasRuleSetConditions(filterOptions.conditions)
-        ? { filter_params: filterOptions.conditions }
-        : {}),
+      ...ruleQueryParams(filterOptions),
     };
   }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
 

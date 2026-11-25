@@ -43,7 +43,7 @@ import {
   toGroupConditions,
   useIntegrationTitles,
 } from './group_by_fields';
-import { hasRuleSetConditions } from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
+import { ruleQueryParams } from '../table_query';
 import * as i18n from './translations';
 
 const SECTIONS_STEP = 20;
@@ -53,15 +53,10 @@ type Rule = RuleResponse & { gap_info?: unknown };
 
 /** Table filters of the rules page as KQL, plus the search term, for one section or all. */
 const buildSectionQuery = (filterOptions: FilterOptions, browse?: FilterOptions['browse']) => {
-  const searchTerm = filterOptions.filter?.trim();
   const structuredKql = convertRulesFilterToKQL({ ...filterOptions, filter: '', browse });
   return {
     ...(structuredKql !== '' ? { filter: { term: structuredKql, mode: 'KQL' as const } } : {}),
-    ...(searchTerm ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
-    ...(filterOptions.ruleSetId ? { rule_scope: { rule_set_id: filterOptions.ruleSetId } } : {}),
-    ...(filterOptions.conditions && hasRuleSetConditions(filterOptions.conditions)
-      ? { filter_params: filterOptions.conditions }
-      : {}),
+    ...ruleQueryParams(filterOptions),
   };
 };
 
@@ -190,7 +185,7 @@ const SectionActions = ({
     state: { filterOptions },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { openEditor } = useRuleSetEditor();
+  const { openSaveDialog } = useRuleSetEditor();
   const conditions = toGroupConditions(category, value);
   const closePopover = () => setIsOpen(false);
 
@@ -223,7 +218,13 @@ const SectionActions = ({
             toolTipProps: { position: 'right' },
             onClick: () => {
               closePopover();
-              openEditor({ initial: { name: label, conditions } });
+              if (conditions) {
+                openSaveDialog({
+                  name: label,
+                  rules: { conditions, included_rule_ids: [], excluded_rule_ids: [] },
+                  hint: i18n.HINT_FILTERS(count),
+                });
+              }
             },
           },
         ],

@@ -1241,6 +1241,8 @@ components:
           maxLength: 256
         filter_params:
           $ref: '../../rule_sets/rule_set.schema.yaml#/components/schemas/RuleSetConditions'
+        rule_scope:
+          $ref: '../../rule_sets/rule_set.schema.yaml#/components/schemas/RuleScope'
 
     BulkDeleteRules:
       allOf:

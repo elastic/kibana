@@ -30,7 +30,6 @@ import {
 import type { RuleSetSummary } from '../../../../common/api/detection_engine/rule_sets';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { useRuleManagementFilters } from '../../rule_management/logic/use_rule_management_filters';
 import { AllRulesTabs } from '../../rule_management_ui/components/rules_table/constants';
@@ -171,8 +170,6 @@ export const RuleSetSwitcher = () => {
   } = useRulesTableContext();
   const { data, isLoading, isFetching } = useRuleSetsWithCountsQuery();
   const { data: ruleManagementFilters } = useRuleManagementFilters();
-  const { openEditor } = useRuleSetEditor();
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const suggestRuleSets = useSuggestRuleSets();
   const invalidateRuleSets = useInvalidateRuleSets();
   const [isOpen, setIsOpen] = useState(false);
@@ -314,25 +311,10 @@ export const RuleSetSwitcher = () => {
             </>
           )}
         </div>
-        {(canEditRules || suggestRuleSets) && (
+        {suggestRuleSets && (
           <>
             <EuiHorizontalRule margin="s" />
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" responsive={false}>
-              {canEditRules && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    iconType="plus"
-                    onClick={() => {
-                      close();
-                      openEditor({});
-                    }}
-                    data-test-subj="ruleSetsNewGroupButton"
-                  >
-                    {i18n.NEW_GROUP}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
               {suggestRuleSets && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
@@ -363,6 +345,7 @@ export const RuleSetMoreActions = ({ group }: { group: RuleSetSummary }) => {
     actions: { setFilterOptions },
   } = useRulesTableContext();
   const { mutateAsync: deleteGroup } = useDeleteRuleSetMutation();
+  const { openSettings } = useRuleSetEditor();
   const { addSuccess, addError } = useAppToasts();
 
   return (
@@ -387,6 +370,17 @@ export const RuleSetMoreActions = ({ group }: { group: RuleSetSummary }) => {
     >
       <EuiContextMenuPanel
         items={[
+          <EuiContextMenuItem
+            key="settings"
+            icon="pencil"
+            onClick={() => {
+              setIsOpen(false);
+              openSettings(group.id);
+            }}
+            data-test-subj="ruleSetSettings"
+          >
+            {i18n.SETTINGS}
+          </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="delete"
             icon="trash"

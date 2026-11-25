@@ -14,7 +14,10 @@ import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
-import type { RuleSetConditions } from '../../../../common/api/detection_engine/rule_sets';
+import type {
+  RuleScope,
+  RuleSetConditions,
+} from '../../../../common/api/detection_engine/rule_sets';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   GetPrebuiltRuleBaseVersionRequest,
@@ -495,7 +498,8 @@ export type QueryOrIds =
       gapRange?: { start: string; end: string };
       gapFillStatuses?: GapFillStatus[];
       schedulerId?: string;
-      ruleSetId?: string;
+      /** The rule set of the table, possibly with changed conditions. */
+      ruleScope?: RuleScope;
       /** Facet selections, the same shape as rule set conditions. */
       filterParams?: RuleSetConditions;
     }
@@ -573,7 +577,7 @@ export async function performBulkAction({
     fill_gaps:
       bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
     gap_auto_fill_scheduler_id: 'schedulerId' in bulkAction ? bulkAction.schedulerId : undefined,
-    rule_set_id: 'ruleSetId' in bulkAction ? bulkAction.ruleSetId : undefined,
+    rule_scope: 'ruleScope' in bulkAction ? bulkAction.ruleScope : undefined,
     filter_params: 'filterParams' in bulkAction ? bulkAction.filterParams : undefined,
   };
 
@@ -600,7 +604,7 @@ export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExpor
     query: queryOrIds.query,
     ids: queryOrIds.ids,
     // Without them, "Select all" + Export in a set would export every rule that matches the query.
-    rule_set_id: 'ruleSetId' in queryOrIds ? queryOrIds.ruleSetId : undefined,
+    rule_scope: 'ruleScope' in queryOrIds ? queryOrIds.ruleScope : undefined,
     filter_params: 'filterParams' in queryOrIds ? queryOrIds.filterParams : undefined,
   };
 

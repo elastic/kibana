@@ -20,7 +20,7 @@ export const RuleSetsMenuButton = ({
   ruleRuleIds: string[];
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { openEditor } = useRuleSetEditor();
+  const { openSaveDialog } = useRuleSetEditor();
   return (
     <EuiPopover
       aria-label={i18n.MENU_BUTTON}
@@ -44,7 +44,13 @@ export const RuleSetsMenuButton = ({
           ruleIds={ruleIds}
           ruleRuleIds={ruleRuleIds}
           onDone={() => setIsOpen(false)}
-          onNewGroup={(picked) => openEditor({ initial: { included_rule_ids: picked } })}
+          onNewGroup={(picked) => {
+            setIsOpen(false);
+            openSaveDialog({
+              rules: { conditions: {}, included_rule_ids: picked, excluded_rule_ids: [] },
+              hint: i18n.HINT_PICKED(picked.length),
+            });
+          }}
         />
       )}
     </EuiPopover>

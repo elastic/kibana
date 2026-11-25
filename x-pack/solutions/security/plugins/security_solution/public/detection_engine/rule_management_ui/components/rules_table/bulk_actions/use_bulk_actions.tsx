@@ -11,6 +11,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useCallback, useMemo } from 'react';
+import { bulkScopeParams } from '../../../../rule_sets/table_query';
 import { BulkFillRuleGapsEventTypes } from '../../../../../common/lib/telemetry/events/bulk_fill_rule_gaps/types';
 import { ML_RULES_UNAVAILABLE } from './translations';
 import {
@@ -123,7 +124,7 @@ export const useBulkActions = ({
           gapFillStatuses: options.gapFillStatuses,
         }),
         ...(activeSchedulerId && { schedulerId: activeSchedulerId }),
-        ...(options.ruleSetId && { ruleSetId: options.ruleSetId }),
+        ...bulkScopeParams(options),
       };
     },
     [activeSchedulerId]

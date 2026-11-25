@@ -192,9 +192,10 @@ components:
       type: object
       additionalProperties: false
       description: |
-        Limits the rules to a saved rule set (`rule_set_id`), or to a rule set definition that is not
-        saved (`conditions`, `included_rule_ids`, `excluded_rule_ids`), for example while the user
-        edits a set. Give one or the other, not both.
+        Limits the rules to a saved rule set (`rule_set_id`); to a saved set with other conditions
+        (`rule_set_id` and `conditions`: its picked and left-out rules stay, an unsaved change of the
+        set); or to a rule set definition that is not saved (`conditions`, `included_rule_ids`,
+        `excluded_rule_ids`). `rule_set_id` and the rule id lists do not go together.
       properties:
         rule_set_id:
           $ref: '#/components/schemas/RuleSetId'

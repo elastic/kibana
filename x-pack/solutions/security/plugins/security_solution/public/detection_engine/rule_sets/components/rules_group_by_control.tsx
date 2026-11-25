@@ -14,20 +14,26 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { RuleSetSummary } from '../../../../common/api/detection_engine/rule_sets';
+import type {
+  RuleSetDefinition,
+  RuleSetSummary,
+} from '../../../../common/api/detection_engine/rule_sets';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useRuleManagementFilters } from '../../rule_management/logic/use_rule_management_filters';
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { fetchRuleSet, useRuleSetsWithCountsQuery, useSaveRuleSetMutation } from '../api';
-import { describeConditionParts, mergeConditions } from './condition_labels';
-import { useRuleSetEditor } from './rule_set_editor_context';
+import { describeConditionParts } from './condition_labels';
+import { RuleSetNameForm, useCreateRuleSet } from './rule_set_name_form';
+import { draftConditions, isRuleSetChanged, ruleSetFilterState } from '../table_query';
 import {
   GROUP_BY_FIELDS,
   filtersToGroupConditions,
@@ -37,41 +43,27 @@ import {
 import { ActiveFacetChips } from '../facets/active_facet_chips';
 import * as i18n from './translations';
 
-/** The visible filters that a set can store, cleared after they move into the set. */
-const CLEARED_GROUP_FILTERS = {
-  conditions: undefined,
-  filter: '',
-  tags: [],
-  showElasticRules: false,
-  showCustomRules: false,
-  includeRuleTypes: undefined,
-  browse: undefined,
-};
-
-/** What a set is: its conditions and its picked and left-out rules, as small chips. */
-export const RuleSetConditionChips = ({ group }: { group: RuleSetSummary }) => {
-  const { openEditor } = useRuleSetEditor();
+/** What a set is: its saved conditions and its picked and left-out rules, in one line. */
+export const RuleSetDefinitionLine = ({ group }: { group: RuleSetSummary }) => {
   const integrationTitles = useIntegrationTitles();
   const parts = [
     ...describeConditionParts(group.conditions, integrationTitles),
     ...(group.included_rules_count ? [i18n.PICKED(group.included_rules_count)] : []),
     ...(group.excluded_rules_count ? [i18n.LEFT_OUT(group.excluded_rules_count)] : []),
   ];
+  if (!parts.length) {
+    return null;
+  }
   return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-      {parts.map((part) => (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="filter" size="s" color="subdued" aria-hidden />
+      </EuiFlexItem>
+      {parts.map((part, index) => (
         <EuiFlexItem grow={false} key={part}>
-          <EuiToolTip content={i18n.GROUP_CONDITION_TOOLTIP(group.name)}>
-            <EuiBadge
-              color="hollow"
-              iconType="filter"
-              onClick={() => openEditor({ ruleSetId: group.id })}
-              onClickAriaLabel={i18n.EDIT_GROUP}
-              data-test-subj="ruleSetConditionChip"
-            >
-              {part}
-            </EuiBadge>
-          </EuiToolTip>
+          <EuiText size="xs" color="subdued" data-test-subj="ruleSetConditionChip">
+            {index > 0 ? `· ${part}` : part}
+          </EuiText>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
@@ -140,36 +132,96 @@ export const RulesGroupByButton = () => {
   );
 };
 
-/** Explicit save of the current filters: into the selected set, as a new set, or reset. */
+/** A button that asks for a name in a popover, then creates a set. */
+const SaveAsRuleSetButton = ({
+  label,
+  fill,
+  hint,
+  getRules,
+  dataTestSubj,
+}: {
+  label: string;
+  fill?: boolean;
+  hint: string;
+  getRules: () => Promise<RuleSetRules>;
+  dataTestSubj: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { create, isLoading } = useCreateRuleSet();
+  return (
+    <EuiPopover
+      aria-label={i18n.SAVE_AS_RULE_SET_TITLE}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="downRight"
+      panelStyle={{ width: 360 }}
+      button={
+        <EuiButton
+          size="s"
+          fill={fill}
+          iconType={fill ? 'folderOpen' : undefined}
+          onClick={() => setIsOpen(!isOpen)}
+          data-test-subj={dataTestSubj}
+        >
+          {label}
+        </EuiButton>
+      }
+    >
+      <EuiPopoverTitle paddingSize="s">{i18n.SAVE_AS_RULE_SET_TITLE}</EuiPopoverTitle>
+      {isOpen && (
+        <RuleSetNameForm
+          hint={hint}
+          isSaving={isLoading}
+          onCancel={() => setIsOpen(false)}
+          onSubmit={async (text) => {
+            if (await create(text, await getRules())) setIsOpen(false);
+          }}
+        />
+      )}
+    </EuiPopover>
+  );
+};
+
+type RuleSetRules = Pick<
+  RuleSetDefinition,
+  'conditions' | 'included_rule_ids' | 'excluded_rule_ids'
+>;
+
+/**
+ * Explicit save. All rules: a new set from the filters. A changed set: Save writes the facets and
+ * the search as its conditions (picked and left-out rules stay), Save as new set copies it with
+ * the change, Reset shows the saved set again.
+ */
 const SaveActions = ({ group }: { group?: RuleSetSummary }) => {
   const {
-    state: { filterOptions },
+    state: { filterOptions, pagination },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { openEditor } = useRuleSetEditor();
   const { mutateAsync: save, isLoading: isSaving } = useSaveRuleSetMutation();
   const { addSuccess, addError } = useAppToasts();
-  const filters = filtersToGroupConditions(filterOptions);
 
   if (!group) {
     return (
       <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
+        <SaveAsRuleSetButton
+          label={i18n.SAVE_FILTERS_AS_GROUP}
           fill
-          iconType="folderOpen"
-          onClick={() => openEditor({ initial: { conditions: filters } })}
-          data-test-subj="ruleSetsSaveFilters"
-        >
-          {i18n.SAVE_FILTERS_AS_GROUP}
-        </EuiButton>
+          hint={i18n.HINT_FILTERS(pagination.total)}
+          getRules={async () => ({
+            conditions: filtersToGroupConditions(filterOptions),
+            included_rule_ids: [],
+            excluded_rule_ids: [],
+          })}
+          dataTestSubj="ruleSetsSaveFilters"
+        />
       </EuiFlexItem>
     );
   }
 
+  const conditions = draftConditions(filterOptions);
   const saveToSet = async () => {
     try {
-      // The list has no rule id lists; read the full set, then write it back with the filters.
+      // The list has no rule id lists; read the full set, then write it back with the change.
       const { id, version, name, description, visibility, included_rule_ids, excluded_rule_ids } =
         await fetchRuleSet(group.id);
       await save({
@@ -178,29 +230,11 @@ const SaveActions = ({ group }: { group?: RuleSetSummary }) => {
         name,
         description,
         visibility,
-        conditions: mergeConditions(group.conditions, filters),
+        conditions,
         included_rule_ids,
         excluded_rule_ids,
       });
-      // The filters are part of the set now; showing them twice would hide nothing new.
-      setFilterOptions(CLEARED_GROUP_FILTERS);
-      addSuccess(i18n.FILTERS_ADDED_TOAST(group.name));
-    } catch (error) {
-      addError(error, { title: i18n.SAVE_ERROR });
-    }
-  };
-
-  const saveAsNew = async () => {
-    try {
-      const full = await fetchRuleSet(group.id);
-      openEditor({
-        initial: {
-          conditions: mergeConditions(full.conditions, filters),
-          included_rule_ids: full.included_rule_ids,
-          excluded_rule_ids: full.excluded_rule_ids,
-          visibility: full.visibility,
-        },
-      });
+      addSuccess(i18n.SAVED_TOAST(group.name));
     } catch (error) {
       addError(error, { title: i18n.SAVE_ERROR });
     }
@@ -212,16 +246,26 @@ const SaveActions = ({ group }: { group?: RuleSetSummary }) => {
         <EuiButtonEmpty
           size="s"
           iconType="refresh"
-          onClick={() => setFilterOptions(CLEARED_GROUP_FILTERS)}
+          onClick={() => setFilterOptions(ruleSetFilterState(group))}
           data-test-subj="ruleSetsResetFilters"
         >
           {i18n.RESET_FILTERS}
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton size="s" onClick={saveAsNew} data-test-subj="ruleSetsSaveAsNewGroup">
-          {i18n.SAVE_AS_NEW_SET}
-        </EuiButton>
+        <SaveAsRuleSetButton
+          label={i18n.SAVE_AS_NEW_SET}
+          hint={i18n.HINT_FILTERS(pagination.total)}
+          getRules={async () => {
+            const full = await fetchRuleSet(group.id);
+            return {
+              conditions,
+              included_rule_ids: full.included_rule_ids,
+              excluded_rule_ids: full.excluded_rule_ids,
+            };
+          }}
+          dataTestSubj="ruleSetsSaveAsNewGroup"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={i18n.SAVE_TO_SET_HELP(group.name)}>
@@ -259,7 +303,10 @@ export const RulesFilterBar = () => {
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const group = sets?.find(({ id }) => id === ruleSetId);
   const browseField = browse && GROUP_BY_FIELDS.find((field) => field.value === browse.category);
-  const hasFilters = Object.keys(filtersToGroupConditions(filterOptions)).length > 0;
+  // In a set the facets are the set's conditions: the bar shows only an unsaved change.
+  const hasFilters = ruleSetId
+    ? isRuleSetChanged(filterOptions, group)
+    : Object.keys(filtersToGroupConditions(filterOptions)).length > 0;
 
   if (!hasFilters && !browse) {
     return null;

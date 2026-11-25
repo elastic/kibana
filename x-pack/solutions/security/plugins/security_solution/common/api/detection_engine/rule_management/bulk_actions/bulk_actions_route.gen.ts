@@ -32,7 +32,7 @@ import {
   TimelineTemplateTitle,
   AlertSuppression,
 } from '../../model/rule_schema/common_attributes.gen';
-import { RuleSetConditions } from '../../rule_sets/rule_set.gen';
+import { RuleSetConditions, RuleScope } from '../../rule_sets/rule_set.gen';
 import { ThresholdAlertSuppression } from '../../model/rule_schema/specific_attributes/threshold_attributes.gen';
 
 export const BulkEditSkipReason = lazySchema(() => z.literal('RULE_NOT_MODIFIED'));
@@ -193,6 +193,7 @@ query for all rules of the set. Rule sets are managed with the rule sets API.
         'Limit the action to the rules of this rule set. Valid only with `query`; send an empty\nquery for all rules of the set. Rule sets are managed with the rule sets API.\n'
       ),
     filter_params: RuleSetConditions.optional(),
+    rule_scope: RuleScope.optional(),
   })
 );
 export type BulkActionBase = z.infer<typeof BulkActionBase>;

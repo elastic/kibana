@@ -134,6 +134,7 @@ export const RuleSetsSelectable = ({
             onDone();
             onNewGroup(ruleRuleIds);
           }}
+          data-test-subj="ruleSetsMenuNewGroup"
         >
           {i18n.MENU_NEW_GROUP(ruleIds.length)}
         </EuiButtonEmpty>

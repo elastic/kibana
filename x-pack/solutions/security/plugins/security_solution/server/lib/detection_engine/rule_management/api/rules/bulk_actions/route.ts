@@ -86,7 +86,7 @@ const resolveBulkScope = async (
   getClient: () => Promise<RuleSetsClient>
 ): Promise<KueryNode | undefined> => {
   const scope = await resolveRuleScope(
-    body.rule_set_id ? { rule_set_id: body.rule_set_id } : undefined,
+    body.rule_scope ?? (body.rule_set_id ? { rule_set_id: body.rule_set_id } : undefined),
     getClient
   );
   const params = body.filter_params ? buildConditionsFilter(body.filter_params) : undefined;
@@ -110,9 +110,13 @@ const validateBulkAction = (
     };
   }
 
-  if ((body?.rule_set_id || body?.filter_params) && body.query === undefined) {
+  if (body?.rule_set_id && body?.rule_scope) {
+    return { body: `Send rule_set_id or rule_scope, not both.`, statusCode: 400 };
+  }
+
+  if ((body?.rule_set_id || body?.filter_params || body?.rule_scope) && body.query === undefined) {
     return {
-      body: `rule_set_id and filter_params need query. Send an empty query for all matching rules.`,
+      body: `rule_set_id, rule_scope and filter_params need query. Send an empty query for all matching rules.`,
       statusCode: 400,
     };
   }

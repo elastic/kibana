@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RulesFacetPanel } from '../../../rule_sets/facets/rules_facet_panel';
+import { useRuleSetDraft } from '../../../rule_sets/components/use_rule_set_draft';
 import {
   FacetPanelVisibilityProvider,
   useFacetPanelVisibility,
@@ -62,6 +63,7 @@ const useStickyAppHeaderHeight = () => {
 const RulesWithFacets = ({ selectedTab }: { selectedTab: AllRulesTabs }) => {
   const { isOpen } = useFacetPanelVisibility();
   const headerHeight = useStickyAppHeaderHeight();
+  useRuleSetDraft();
   const offset = `(var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0px)) + ${headerHeight}px)`;
   return (
     <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>

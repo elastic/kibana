@@ -6,10 +6,7 @@
  */
 
 import type { RuleSetConditions } from '../../../../common/api/detection_engine/rule_sets';
-import {
-  DEFAULT_TAGS_MATCH,
-  normalizeRuleSetConditions,
-} from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
+import { normalizeRuleSetConditions } from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
 import { allFacetFields } from '../facets/facet_fields';
 import * as i18n from './translations';
 
@@ -37,60 +34,4 @@ export const describeConditionParts = (
       ];
     }),
   ];
-};
-
-interface Values<V> {
-  include?: V[];
-  exclude?: V[];
-}
-
-const union = <V>(a: V[] = [], b: V[] = []): V[] => [...new Set([...a, ...b])];
-
-/** The table shows set AND filters: filter values narrow the included values, excludes add up. */
-const mergeValues = <V>(set: Values<V> | undefined, filter: Values<V> | undefined) =>
-  filter
-    ? {
-        ...set,
-        ...filter,
-        include: filter.include?.length ? filter.include : set?.include,
-        exclude: union(set?.exclude, filter.exclude),
-      }
-    : set;
-
-/**
- * Adds the visible table filters to set conditions. Included tags add up (a rule must have all of
- * them); for the other fields the filter values replace the included values of the set. Excluded
- * values of both stay.
- */
-export const mergeConditions = (
-  set: RuleSetConditions,
-  filters: RuleSetConditions
-): RuleSetConditions => {
-  const categories = new Set([
-    ...Object.keys(set.tag_categories ?? {}),
-    ...Object.keys(filters.tag_categories ?? {}),
-  ]);
-  return normalizeRuleSetConditions({
-    ...set,
-    ...filters,
-    tags:
-      set.tags || filters.tags
-        ? {
-            include: union(set.tags?.include, filters.tags?.include),
-            exclude: union(set.tags?.exclude, filters.tags?.exclude),
-            match: set.tags?.match ?? DEFAULT_TAGS_MATCH,
-          }
-        : undefined,
-    related_integrations: mergeValues(set.related_integrations, filters.related_integrations),
-    mitre_tactic: mergeValues(set.mitre_tactic, filters.mitre_tactic),
-    type: mergeValues(set.type, filters.type),
-    severity: mergeValues(set.severity, filters.severity),
-    last_run_outcome: mergeValues(set.last_run_outcome, filters.last_run_outcome),
-    tag_categories: Object.fromEntries(
-      [...categories].map((category) => [
-        category,
-        mergeValues(set.tag_categories?.[category], filters.tag_categories?.[category]) ?? {},
-      ])
-    ),
-  });
 };

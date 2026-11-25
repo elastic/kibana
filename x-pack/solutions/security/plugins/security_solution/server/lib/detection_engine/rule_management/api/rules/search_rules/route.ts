@@ -7,10 +7,12 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
+import type { RuleSetConditions } from '../../../../../../../common/api/detection_engine/rule_sets';
 import { MAX_RESULTS_WINDOW } from '../../../../../../usage/constants';
 import { EXCLUDED_GAP_REASONS_KEY } from '../../../../../../../common/constants';
 import type { SearchRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -29,9 +31,12 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { resolveGapPreFilter, transformFindAlerts } from '../../../utils/utils';
 import { translateSearchFieldsToSoFields } from '../../../logic/search/search_rules_field_translation';
 import { getRuleSetsClient } from '../../../../rule_sets/api/register_routes';
-import { resolveRuleScope } from '../../../logic/search/rule_scope';
+import { resolveRuleScopeMembership } from '../../../logic/search/rule_scope';
 import { fetchDisjunctiveFacetCounts } from '../../../logic/search/facet_counts';
-import { buildConditionsFilter } from '../../../../rule_sets/logic/build_rule_set_filter';
+import {
+  buildConditionsFilter,
+  buildRuleSetFilter,
+} from '../../../../rule_sets/logic/build_rule_set_filter';
 
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
@@ -86,12 +91,31 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = await ctx.alerting.getRulesClient();
-          const scopeFilter = await resolveRuleScope(ruleScope, () => getRuleSetsClient(context));
-          const paramsFilter = filterParams ? buildConditionsFilter(filterParams) : undefined;
-          const ruleSetFilter =
-            scopeFilter && paramsFilter
-              ? nodeBuilder.and([scopeFilter, paramsFilter])
-              : scopeFilter ?? paramsFilter;
+          const membership = await resolveRuleScopeMembership(ruleScope, () =>
+            getRuleSetsClient(context)
+          );
+          const scopeFilter = membership && buildRuleSetFilter(membership);
+          const and = (nodes: Array<KueryNode | undefined>) => {
+            const present = nodes.filter((node): node is KueryNode => node != null);
+            return present.length ? nodeBuilder.and(present) : undefined;
+          };
+          const ruleSetFilter = and([
+            scopeFilter,
+            filterParams ? buildConditionsFilter(filterParams) : undefined,
+          ]);
+          // The facets are `filter_params` on top of the scope; without them, the facets are the
+          // conditions of the scope itself (the rules page edits a set in place).
+          const facets = filterParams
+            ? {
+                conditions: filterParams,
+                filterFor: (conditions: RuleSetConditions) =>
+                  and([scopeFilter, buildConditionsFilter(conditions)]),
+              }
+            : membership && {
+                conditions: membership.conditions,
+                filterFor: (conditions: RuleSetConditions) =>
+                  buildRuleSetFilter({ ...membership, conditions }),
+              };
 
           const combinedKql = buildGranularRulesKql({
             filter,
@@ -173,12 +197,11 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
             : undefined;
           const tagCategories = aggregations?.tag_categories ?? [];
           const disjunctive =
-            mainCounts && filterParams && (aggregations?.exclude_own_filter || tagCategories.length)
+            mainCounts && facets && (aggregations?.exclude_own_filter || tagCategories.length)
               ? await fetchDisjunctiveFacetCounts({
                   rulesClient,
                   filter: combinedKql,
-                  scopeFilter,
-                  filterParams,
+                  ...facets,
                   mainCounts,
                   categories: aggregations?.exclude_own_filter ? categoryCounts : [],
                   tagCategories,

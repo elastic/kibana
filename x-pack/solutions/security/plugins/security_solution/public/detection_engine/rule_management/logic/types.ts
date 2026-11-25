@@ -121,8 +121,13 @@ export interface FilterOptions {
   includeRuleTypes?: Type[];
   /** Show only the rules of this rule set. The server resolves the group. */
   ruleSetId?: string;
-  /** Facet selections: the same shape as rule set conditions, sent as `filter_params`. */
+  /**
+   * Facet selections, in the shape of rule set conditions. Without a set they are `filter_params`;
+   * with a set they are the set's conditions, changed or not (see `rule_sets/table_query.ts`).
+   */
   conditions?: RuleSetConditions;
+  /** The set whose saved conditions the facets started from; until then the set is shown as saved. */
+  draftOf?: string;
   /** One value of one facet, picked in "Browse by". */
   browse?: { category: GranularRulesFacetCategory; value: string };
   /** Split the table into sections by this field. */

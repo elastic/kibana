@@ -7,14 +7,12 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
 import type {
   FacetCounts,
   GranularRulesFacetCategory,
 } from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import type { RuleSetConditions } from '../../../../../../common/api/detection_engine/rule_sets';
 import { TAGS_FIELD } from '../../../../../../common/detection_engine/rule_management/rule_fields';
-import { buildConditionsFilter } from '../../../rule_sets/logic/build_rule_set_filter';
 import { termsBuckets } from '../../../rule_sets/logic/terms_buckets';
 import { buildAggregations, expandRawAggregationResult } from './granular_facet_aggregations';
 import { findRules } from './find_rules';
@@ -43,11 +41,12 @@ const escapeRegExp = (value: string) => value.replace(/[.?+*|{}[\]()"\\#@&<>~]/g
 
 interface FacetCountsParams {
   rulesClient: RulesClient;
-  /** KQL of the table filters that are not `filter_params` (search, enabled, last response). */
+  /** KQL of the table filters that are not facets (search, the old table filters). */
   filter: string | undefined;
-  /** The rule set scope, if any. */
-  scopeFilter: KueryNode | undefined;
-  filterParams: RuleSetConditions;
+  /** The facet conditions: `filter_params`, or the conditions of the rule scope. */
+  conditions: RuleSetConditions;
+  /** The rule filter for other facet conditions (one facet left out). */
+  filterFor: (conditions: RuleSetConditions) => KueryNode | undefined;
   /** The counts of the main search query. */
   mainCounts: FacetCounts;
   categories: GranularRulesFacetCategory[];
@@ -55,11 +54,6 @@ interface FacetCountsParams {
   /** Rule ids of the gap filter, if it is active. */
   ruleIds: string[] | undefined;
 }
-
-const and = (nodes: Array<KueryNode | undefined>): KueryNode | undefined => {
-  const present = nodes.filter((node): node is KueryNode => node != null);
-  return present.length ? nodeBuilder.and(present) : undefined;
-};
 
 /**
  * Facet counts that ignore the facet's own selection, so a facet shows the values a user can still
@@ -72,8 +66,8 @@ const and = (nodes: Array<KueryNode | undefined>): KueryNode | undefined => {
 export const fetchDisjunctiveFacetCounts = async ({
   rulesClient,
   filter,
-  scopeFilter,
-  filterParams,
+  conditions: filterParams,
+  filterFor,
   mainCounts,
   categories,
   tagCategories,
@@ -86,7 +80,7 @@ export const fetchDisjunctiveFacetCounts = async ({
     findRules({
       rulesClient,
       filter,
-      kueryFilter: and([scopeFilter, buildConditionsFilter(conditions)]),
+      kueryFilter: filterFor(conditions),
       page: 1,
       perPage: 0,
       sortField: undefined,

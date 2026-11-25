@@ -11,49 +11,132 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSkeletonText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { RuleSetDefinition } from '../../../../common/api/detection_engine/rule_sets';
-import { useRulesTableContextOptional } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
-import { RuleSetEditorFlyout } from './rule_set_editor_flyout';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useRuleSetQuery, useSaveRuleSetMutation } from '../api';
 import { RuleSetsSelectable } from './rule_sets_selectable';
+import { RuleSetNameForm, useCreateRuleSet } from './rule_set_name_form';
+import * as i18n from './translations';
 
-export interface OpenEditorParams {
-  /** Edit this set. Without it, the editor creates a new set. */
-  ruleSetId?: string;
-  /** Start values for a new set, for example rules that the user selected. */
-  initial?: Partial<RuleSetDefinition>;
+type RuleSetRules = Pick<
+  RuleSetDefinition,
+  'conditions' | 'included_rule_ids' | 'excluded_rule_ids'
+>;
+
+export interface SaveDialogParams {
+  rules: RuleSetRules;
+  name?: string;
+  /** What the set will hold, under the form. */
+  hint?: string;
 }
 
-interface RuleSetEditorContextValue {
-  openEditor: (params: OpenEditorParams) => void;
+interface RuleSetDialogsValue {
+  /** Asks for a name and saves a new set with these rules. */
+  openSaveDialog: (params: SaveDialogParams) => void;
+  /** Name, description and who can see a saved set. */
+  openSettings: (ruleSetId: string) => void;
   /** The "Rule sets" checkbox list for one rule, from the row menu of the rules table. */
   openGroupsMenu: (rule: { id: string; rule_id: string; name: string }) => void;
 }
 
-const RuleSetEditorContext = createContext<RuleSetEditorContextValue | null>(null);
+const RuleSetEditorContext = createContext<RuleSetDialogsValue | null>(null);
 
-/** Lets any part of the rules page open the one rule set editor. */
+const SaveDialog = ({ params, onClose }: { params: SaveDialogParams; onClose: () => void }) => {
+  const titleId = useGeneratedHtmlId();
+  const { create, isLoading } = useCreateRuleSet();
+  return (
+    <EuiModal aria-labelledby={titleId} onClose={onClose} css={{ width: 420 }}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle size="xs" id={titleId}>
+          {i18n.SAVE_AS_RULE_SET_TITLE}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <RuleSetNameForm
+          initial={{ name: params.name }}
+          hint={params.hint}
+          isSaving={isLoading}
+          onCancel={onClose}
+          onSubmit={async (text) => {
+            if (await create(text, params.rules)) onClose();
+          }}
+        />
+      </EuiModalBody>
+    </EuiModal>
+  );
+};
+
+const SettingsDialog = ({ ruleSetId, onClose }: { ruleSetId: string; onClose: () => void }) => {
+  const titleId = useGeneratedHtmlId();
+  const { data: set } = useRuleSetQuery(ruleSetId);
+  const { mutateAsync: save, isLoading } = useSaveRuleSetMutation();
+  const { addSuccess, addError } = useAppToasts();
+  return (
+    <EuiModal aria-labelledby={titleId} onClose={onClose} css={{ width: 460 }}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle size="xs" id={titleId}>
+          {i18n.SETTINGS}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        {!set ? (
+          <EuiSkeletonText lines={4} />
+        ) : (
+          <RuleSetNameForm
+            initial={set}
+            withDescription
+            canChangeVisibility={set.is_owner}
+            isSaving={isLoading}
+            onCancel={onClose}
+            onSubmit={async (text) => {
+              try {
+                const { id, version, conditions, included_rule_ids, excluded_rule_ids } = set;
+                await save({
+                  id,
+                  version,
+                  conditions,
+                  included_rule_ids,
+                  excluded_rule_ids,
+                  ...text,
+                });
+                addSuccess(i18n.SAVED_TOAST(text.name));
+                onClose();
+              } catch (error) {
+                addError(error, { title: i18n.SAVE_ERROR });
+              }
+            }}
+          />
+        )}
+      </EuiModalBody>
+    </EuiModal>
+  );
+};
+
+/** The small dialogs of rule sets. The rules of a set are edited on the rules page itself. */
 export const RuleSetEditorProvider = ({ children }: { children: React.ReactNode }) => {
-  const [params, setParams] = useState<OpenEditorParams | null>(null);
+  const [saveParams, setSaveParams] = useState<SaveDialogParams | null>(null);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
   const menuTitleId = useGeneratedHtmlId();
   const [menuRule, setMenuRule] = useState<{ id: string; rule_id: string; name: string } | null>(
     null
   );
-  const rulesTable = useRulesTableContextOptional();
-  const value = useMemo(() => ({ openEditor: setParams, openGroupsMenu: setMenuRule }), []);
+  const value = useMemo(
+    () => ({
+      openSaveDialog: setSaveParams,
+      openSettings: setSettingsId,
+      openGroupsMenu: setMenuRule,
+    }),
+    []
+  );
 
   return (
     <RuleSetEditorContext.Provider value={value}>
       {children}
-      {params && (
-        <RuleSetEditorFlyout
-          ruleSetId={params.ruleSetId}
-          initial={params.initial}
-          onClose={() => setParams(null)}
-          onSaved={(saved) => rulesTable?.actions.setFilterOptions({ ruleSetId: saved.id })}
-        />
-      )}
+      {saveParams && <SaveDialog params={saveParams} onClose={() => setSaveParams(null)} />}
+      {settingsId && <SettingsDialog ruleSetId={settingsId} onClose={() => setSettingsId(null)} />}
       {menuRule && (
         <EuiModal
           aria-labelledby={menuTitleId}
@@ -72,7 +155,11 @@ export const RuleSetEditorProvider = ({ children }: { children: React.ReactNode 
               onDone={() => setMenuRule(null)}
               onNewGroup={(picked) => {
                 setMenuRule(null);
-                setParams({ initial: { included_rule_ids: picked } });
+                setSaveParams({
+                  rules: { conditions: {}, included_rule_ids: picked, excluded_rule_ids: [] },
+                  name: menuRule.name,
+                  hint: i18n.HINT_PICKED(picked.length),
+                });
               }}
             />
           </EuiModalBody>
@@ -82,11 +169,10 @@ export const RuleSetEditorProvider = ({ children }: { children: React.ReactNode 
   );
 };
 
-/** For code that can also run outside the rules page (for example shared row actions). */
-export const useRuleSetEditorOptional = (): RuleSetEditorContextValue | null =>
+export const useRuleSetEditorOptional = (): RuleSetDialogsValue | null =>
   useContext(RuleSetEditorContext);
 
-export const useRuleSetEditor = (): RuleSetEditorContextValue => {
+export const useRuleSetEditor = (): RuleSetDialogsValue => {
   const value = useContext(RuleSetEditorContext);
   if (!value) {
     throw new Error('useRuleSetEditor must be used inside RuleSetEditorProvider');

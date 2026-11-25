@@ -20,6 +20,7 @@ import { hasRuleSetConditions } from '../../../../common/detection_engine/rule_s
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRuleSetsQuery } from '../api';
+import { ruleQueryParams } from '../table_query';
 import { FacetPanel } from './facet_panel';
 import { HideFacetPanelButton } from './facet_panel_visibility';
 import { useFacetCounts } from './use_facet_counts';
@@ -54,9 +55,8 @@ export const RulesFacetPanel = () => {
 
   const { data, isLoading, isFetching } = useFacetCounts({
     conditions,
-    scope: ruleSetId ? { rule_set_id: ruleSetId } : undefined,
+    params: ruleQueryParams(filterOptions),
     filter: convertRulesFilterToKQL({ ...filterOptions, filter: '' }) || undefined,
-    search: filterOptions.filter.trim() || undefined,
   });
 
   return (
@@ -87,7 +87,7 @@ export const RulesFacetPanel = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiText size="xs" color="subdued">
-        {set ? i18n.COUNTS_IN_SET(set.name) : i18n.COUNTS_IN_ALL}
+        {set ? i18n.FILTERS_OF_SET(set.name) : i18n.COUNTS_IN_ALL}
       </EuiText>
       <EuiSpacer size="s" />
       <FacetPanel
