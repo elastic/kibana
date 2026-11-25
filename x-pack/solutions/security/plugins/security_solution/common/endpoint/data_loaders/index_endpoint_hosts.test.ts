@@ -75,6 +75,17 @@ const runIndexEndpointHostDocs = (client: Client, kbnClient: KbnClient) =>
 const deletedIndices = (deleteByQuery: jest.Mock): Array<DeleteByQueryRequest['index']> =>
   deleteByQuery.mock.calls.map(([request]: [DeleteByQueryRequest]) => request.index);
 
+const expectFleetAgentsDeletedBeforePolicies = (deleteByQuery: jest.Mock): void => {
+  const fleetAgentsCall = deletedIndices(deleteByQuery).findIndex(
+    (index) => Array.isArray(index) && index.includes(fleetAgentsIndex)
+  );
+
+  expect(fleetAgentsCall).toBeGreaterThanOrEqual(0);
+  expect(deleteByQuery.mock.invocationCallOrder[fleetAgentsCall]).toBeLessThan(
+    jest.mocked(deleteIndexedFleetEndpointPolicies).mock.invocationCallOrder[0]
+  );
+};
+
 describe('indexEndpointHostDocs', () => {
   beforeEach(() => {
     jest.mocked(indexFleetEndpointPolicy).mockResolvedValue(createdPolicies);
@@ -121,6 +132,7 @@ describe('indexEndpointHostDocs', () => {
       expect.anything(),
       expect.objectContaining(createdPolicies)
     );
+    expectFleetAgentsDeletedBeforePolicies(deleteByQuery);
   });
 
   it('rolls back the host and rethrows when the bulk request rejects', async () => {
@@ -138,17 +150,20 @@ describe('indexEndpointHostDocs', () => {
       expect.arrayContaining([metadataIndex, [fleetAgentsIndex, `${fleetAgentsIndex}-*`]])
     );
     expect(deleteIndexedFleetEndpointPolicies).toHaveBeenCalled();
+    expectFleetAgentsDeletedBeforePolicies(deleteByQuery);
   });
 
   it('rethrows the original error when the rollback fails', async () => {
+    const deleteByQuery = jest.fn().mockRejectedValue(new Error('rollback failed'));
     const client = createEsClient({
-      bulk: jest.fn().mockResolvedValue({ errors: true, items: [] }),
-      deleteByQuery: jest.fn().mockRejectedValue(new Error('rollback failed')),
+      bulk: jest.fn().mockRejectedValue(new Error('bulk rejected')),
+      deleteByQuery,
     });
 
-    await expect(runIndexEndpointHostDocs(client, createKbnClient())).rejects.toBeInstanceOf(
-      EndpointError
+    await expect(runIndexEndpointHostDocs(client, createKbnClient())).rejects.toThrow(
+      'bulk rejected'
     );
+    expect(deleteByQuery).toHaveBeenCalled();
   });
 
   it('reaches the Fleet agent and policy cleanup when the metadata data streams do not exist', async () => {
@@ -184,6 +199,7 @@ describe('indexEndpointHostDocs', () => {
       expect.anything(),
       expect.objectContaining(createdPolicies)
     );
+    expectFleetAgentsDeletedBeforePolicies(deleteByQuery);
   });
 });
 

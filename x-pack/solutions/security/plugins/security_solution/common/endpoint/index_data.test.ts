@@ -9,7 +9,11 @@ import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { indexHostsAndAlerts } from './index_data';
-import { indexEndpointHostDocs } from './data_loaders/index_endpoint_hosts';
+import type { IndexedHostsResponse } from './data_loaders/index_endpoint_hosts';
+import {
+  deleteIndexedEndpointHosts,
+  indexEndpointHostDocs,
+} from './data_loaders/index_endpoint_hosts';
 import {
   startMetadataTransforms,
   stopMetadataTransforms,
@@ -97,5 +101,29 @@ describe('indexHostsAndAlerts', () => {
 
     await expect(runIndexHostsAndAlerts(true)).rejects.toBe(seedingError);
     expect(startMetadataTransforms).toHaveBeenCalledWith(client, [], packageVersion);
+  });
+
+  it('rolls back the seeded hosts before restarting the transforms when the first restart fails', async () => {
+    const restartError = new Error('start failed');
+    jest.mocked(indexEndpointHostDocs).mockResolvedValue({
+      hosts: [{ agent: { id: 'agent-1' } }],
+      agents: [{ agent: { id: 'agent-1' } }],
+    } as unknown as IndexedHostsResponse);
+    jest.mocked(startMetadataTransforms).mockRejectedValueOnce(restartError);
+
+    await expect(runIndexHostsAndAlerts(true)).rejects.toBe(restartError);
+
+    const { calls, invocationCallOrder } = jest.mocked(startMetadataTransforms).mock;
+    expect(calls).toEqual([
+      [client, ['agent-1'], packageVersion],
+      [client, [], packageVersion],
+    ]);
+    expect(deleteIndexedEndpointHosts).toHaveBeenCalledTimes(1);
+    expect(invocationCallOrder[0]).toBeLessThan(
+      jest.mocked(deleteIndexedEndpointHosts).mock.invocationCallOrder[0]
+    );
+    expect(jest.mocked(deleteIndexedEndpointHosts).mock.invocationCallOrder[0]).toBeLessThan(
+      invocationCallOrder[1]
+    );
   });
 });
