@@ -101,6 +101,12 @@ const useHeaderStyles = (
         position: sticky;
         top: 0;
         z-index: ${euiTheme.levels.mask};
+
+        // A full screen EuiDataGrid sits at a lower z-index than the mask level and would
+        // otherwise render below this header. EUI adds this class to the body while it is open.
+        .euiDataGrid__restrictBody & {
+          z-index: ${euiTheme.levels.content};
+        }
       `}
       flex-shrink: 0;
       display: flex;
