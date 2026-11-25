@@ -157,7 +157,7 @@
       ],
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-5.5-sonnet",
-        "eis/openai-gpt-5.6-sol",
+        "eis/openai-gpt-6-sol",
         "eis/openai-gpt-5.6-terra"
       ],
       "stepTimeoutInMinutes": 240,
@@ -447,7 +447,7 @@
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-5.5-sonnet",
         "eis/anthropic-claude-5.5-opus",
-        "eis/openai-gpt-5.6-sol"
+        "eis/openai-gpt-6-sol"
       ]
     },
     {
@@ -465,7 +465,7 @@
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-5.5-sonnet",
         "eis/anthropic-claude-5.5-opus",
-        "eis/openai-gpt-5.6-sol"
+        "eis/openai-gpt-6-sol"
       ]
     },
     {
