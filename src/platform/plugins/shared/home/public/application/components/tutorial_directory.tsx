@@ -186,7 +186,7 @@ class TutorialDirectoryUi extends React.Component<
 
   setBreadcrumbs = () => {
     const tab = this.getSelectedTab();
-    const { application, history } = getServices();
+    const { application, history, chrome } = getServices();
     const hash =
       history.location.hash || (typeof window !== 'undefined' ? window.location.hash : '');
     const firstCrumb = getTutorialDirectoryFirstCrumb({
@@ -203,12 +203,12 @@ class TutorialDirectoryUi extends React.Component<
       });
     }
 
-    getServices().chrome.setBreadcrumbs(breadcrumbs, {
+    chrome.setBreadcrumbs(breadcrumbs, {
       project: {
         value: breadcrumbs,
       },
     });
-    getServices().chrome.docTitle.change(tab?.name ? [tab.name, addDataTitle] : [addDataTitle]);
+    chrome.docTitle.change(tab?.name ? [tab.name, addDataTitle] : [addDataTitle]);
   };
 
   onSelectedTabChanged = (id: string) => {

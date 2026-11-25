@@ -80,8 +80,9 @@ export class Home extends Component<HomeProps, State> {
     this.fetchIsNewKibanaInstance();
 
     const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-    getServices().chrome.setBreadcrumbs([{ text: homeTitle }]);
-    getServices().chrome.docTitle.change(homeTitle);
+    const { chrome } = getServices();
+    chrome.setBreadcrumbs([{ text: homeTitle }]);
+    chrome.docTitle.change(homeTitle);
   }
 
   private async fetchIsNewKibanaInstance() {
