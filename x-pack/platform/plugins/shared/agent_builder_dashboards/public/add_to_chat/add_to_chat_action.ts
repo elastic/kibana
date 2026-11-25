@@ -45,7 +45,11 @@ import {
 } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { IdGenerator, StagedDashboards } from '../attachment_types';
-import { resolveDashboardAttachmentLink } from '../attachment_types/dashboard_integration/reconcile';
+import {
+  isAttachmentShownInDashboard,
+  resolveDashboardAttachmentLink,
+  type AreDashboardStatesEqual,
+} from '../attachment_types/dashboard_integration/reconcile';
 
 export const DASHBOARD_PANEL_ADD_TO_CHAT_PATHWAY = 'dashboard_panel';
 
@@ -59,6 +63,7 @@ export interface DashboardAddToChatActionDeps {
   >;
   dashboardAppApi$: DashboardStart['dashboardAppClientApi$'];
   analytics: AnalyticsServiceStart;
+  areEqual: AreDashboardStatesEqual;
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
   stagedDashboards: StagedDashboards;
@@ -153,7 +158,14 @@ const reportClicked = (
 export const createDashboardAddToChatAction = (
   deps: DashboardAddToChatActionDeps
 ): ActionDefinition<EmbeddableApiContext> => {
-  const { agentBuilder, analytics, canWriteDashboards, draftAttachmentId, stagedDashboards } = deps;
+  const {
+    agentBuilder,
+    analytics,
+    areEqual,
+    canWriteDashboards,
+    draftAttachmentId,
+    stagedDashboards,
+  } = deps;
 
   const getPointableDashboard = async (embeddable: unknown): Promise<DashboardApi | undefined> => {
     const dashboardApi = getPanelDashboard(embeddable, deps);
@@ -195,9 +207,8 @@ export const createDashboardAddToChatAction = (
         return;
       }
 
-      const dashboardData = dashboardStateToAttachmentData(
-        dashboardApi.getSerializedState().attributes
-      );
+      const { attributes: dashboardState } = dashboardApi.getSerializedState();
+      const dashboardData = dashboardStateToAttachmentData(dashboardState);
       const panel = findPanelById(dashboardData.panels, embeddable.uuid);
       const buildDashboardAttachment = (
         id: string,
@@ -217,7 +228,9 @@ export const createDashboardAddToChatAction = (
           dashboard_attachment_id: dashboardAttachmentId,
           panel_id: embeddable.uuid,
           label: getPointerLabel(embeddable, panel),
-          panel_type: embeddable.type,
+          // the serialized type, e.g. `vega` for a by-value ES|QL Vega panel the embeddable reports
+          // as `visualization`, is the one the agent edits by
+          panel_type: panel?.type ?? embeddable.type,
           editable: canWriteDashboards && panel ? isAgentEditablePanel(panel) : false,
           ...(canWriteDashboards ? {} : { read_only: true }),
           request_id: uuidv4(),
@@ -234,14 +247,21 @@ export const createDashboardAddToChatAction = (
         isStagedFromSavedDashboard: stagedDashboards.isStagedFromSavedDashboard,
       });
       // an unlinked dashboard, e.g. a managed one, points at the copy it already sent, because the
-      // chat skips a dashboard input whose content it already stores
-      const sentAttachment = linkedAttachment
+      // chat skips a dashboard input whose content it already stores; a copy the dashboard has
+      // since diverged from, e.g. by its filters, is staged again so the agent reads the current one
+      const sentCandidate = linkedAttachment
         ? undefined
         : conversationDashboards.findLast(
             (attachment) =>
               stagedDashboards.isStagedFrom(attachment.id, dashboardApi) &&
               hasPanel(attachment, embeddable.uuid)
           );
+      const sentData = sentCandidate && getLatestVersion(sentCandidate)?.data;
+      const sentAttachment =
+        sentData &&
+        (await isAttachmentShownInDashboard({ areEqual, dashboardState, data: sentData }))
+          ? sentCandidate
+          : undefined;
 
       let attachments: Array<PendingDashboardAttachment | PendingDashboardPanelAttachment>;
       if (sentAttachment) {
@@ -258,6 +278,7 @@ export const createDashboardAddToChatAction = (
         if (!isPanelStaged) {
           stagedDashboards.add(dashboardAttachmentId, dashboardApi);
         }
+        stagedDashboards.addPointerTarget(dashboardAttachmentId);
         attachments = [
           ...(isPanelStaged ? [] : [buildDashboardAttachment(dashboardAttachmentId, origin)]),
           buildPanelPointer(dashboardAttachmentId),

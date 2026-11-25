@@ -140,6 +140,7 @@ const createAction = ({
     agentBuilder,
     dashboardAppApi$: new BehaviorSubject<DashboardApi | undefined>(dashboardApi),
     analytics: { reportEvent } as unknown as AnalyticsServiceStart,
+    areEqual: jest.fn().mockResolvedValue(true),
     canWriteDashboards,
     draftAttachmentId,
     stagedDashboards: createStagedDashboards(),

@@ -85,6 +85,7 @@ export class AgentBuilderDashboardsPlugin
         return createDashboardAddToChatAction({
           agentBuilder: plugins.agentBuilder,
           analytics: core.analytics,
+          areEqual: plugins.dashboard.areEqual,
           dashboardAppApi$: plugins.dashboard.dashboardAppClientApi$,
           canWriteDashboards,
           draftAttachmentId,
