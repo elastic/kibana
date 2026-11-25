@@ -504,6 +504,8 @@ source name or connector name.
 | `rules_truncated` | `true` when the space has more than 10,000 eligible rules; `rules_wired_in` then covers the first 10,000 by name. |
 | `automations_total`, `automations_enabled` | Automations in the space, of any trigger kind. |
 | `automations_alert_total`, `automations_alert_enabled`, `automations_schedule_total`, `automations_schedule_enabled`, `automations_slack_total`, `automations_slack_enabled` | Automations that have a trigger of that kind. An automation counts once under each kind it has, so the kinds can sum above `automations_total`. |
+| `connectors_configured`, `connectors_by_type` | Connectors of any type in the space, and a `{ connector_type, count }` entry per connector type id, Slack included. |
+| `slack_connected`, `slack_channels_bound` | Whether the Slack app is connected, and how many channels are bound (counted over at most 20 pages). Both are per deployment, so every space reports the same values. Contributed by the Significant Events plugin; absent when its read fails. |
 | `significant_event_rules`, `significant_event_rules_active` | Distinct rules backing a Query Knowledge Indicator, and how many of those rules exist and are enabled. |
 | `significant_events_total`, `significant_events_open` | Significant Events in the space by current status: all of them, and those that are `active` or `recovering`. |
 | `external_connectors_configured`, `external_connectors_active_24h` | Connectors of a type whose inbound events are translated into alerts, and how many of them belong to an alert source that wrote an alert in the past 24 hours. Today that is Datadog only. An alert does not name the connector that delivered it, so every connector of an active source counts as active. |
