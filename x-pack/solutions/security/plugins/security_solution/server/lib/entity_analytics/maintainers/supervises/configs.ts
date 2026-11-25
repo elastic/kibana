@@ -346,6 +346,13 @@ const GOOGLE_WORKSPACE_ESQL_LIMIT = COMPOSITE_PAGE_SIZE;
  * who moved between managers on different pages can still be attributed to the old
  * manager until that snapshot leaves the lookback window.
  *
+ * The same ordering hides a removed manager: a user whose newest snapshot has no
+ * `manager_email` (manager cleared, or the user deleted from the directory) never
+ * matches the page filter, so `LAST` falls back to an older snapshot and the edge
+ * survives until that snapshot leaves the lookback window. Selecting the latest
+ * snapshot before actor paging would fix both cases, but needs an engine change
+ * shared with Workday, so it is left as a known limit.
+ *
  * `manager_email` may be an alias rather than the primary email. The resulting
  * actor EUID then has no entity and its write 404s, which is the intended drop
  * path (counted as `droppedNotInStore`).
@@ -398,6 +405,8 @@ function buildGoogleWorkspaceSupervisesConfig(): RelationshipIntegrationConfig {
     // The stream re-emits the complete directory each poll, so absence from the
     // newest snapshot means the relationship ended. The engine cannot retract, so
     // clear this source's supervises edges and repopulate from the current scan.
+    // The reset is keyed on `entity.source`, not on the writer, so an edge written
+    // to one of these entities by other means is cleared too.
     resetRelationshipsBeforeRun: { entitySource: GOOGLE_WORKSPACE_ENTITY_SOURCE },
     esqlQueryOverride: (ns, pageActorValues = []) =>
       buildGoogleWorkspaceSupervisesEsqlQuery(ns, pageActorValues),

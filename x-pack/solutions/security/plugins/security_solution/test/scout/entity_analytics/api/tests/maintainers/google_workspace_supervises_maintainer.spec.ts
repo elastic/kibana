@@ -502,30 +502,54 @@ apiTest.describe(
     );
 
     apiTest(
-      'ignores a snapshot collected outside the 30 day lookback window',
+      'keeps existing relationships when the feed stopped and only expired snapshots remain',
       async ({ apiClient, esClient }) => {
         // The engine's @timestamp lookback applies to this config, so a directory
-        // snapshot that stopped being refreshed long ago is not trusted.
+        // snapshot that stopped being refreshed long ago is not trusted. A stopped
+        // feed is not evidence that every relationship ended either: the reset must
+        // be skipped when nothing inside the lookback can repopulate it.
         const runId = randomUUID().slice(0, 8);
         const managerEmail = `stale.mgr.${runId}@example.com`;
-        const reportEmail = `stale.report.${runId}@example.com`;
+        const resolvedReportEmail = `stale.resolved.${runId}@example.com`;
+        const expiredReportEmail = `stale.expired.${runId}@example.com`;
 
-        await seedEntity(esClient, managerEmail);
-        await seedEntity(esClient, reportEmail);
+        // An edge resolved by an earlier run. Seeding `ids` (not just
+        // raw_identifiers) is what makes this test able to fail: an absent `ids`
+        // array and a cleared one both read as [].
+        await seedUserEntity(esClient, {
+          entityId: entityIdOf(managerEmail),
+          namespace: NAMESPACE,
+          email: managerEmail,
+          entitySource: ENTITY_SOURCE,
+          relationship: {
+            key: RELATIONSHIP_KEY,
+            userEmails: [resolvedReportEmail],
+            ids: [entityIdOf(resolvedReportEmail)],
+          },
+        });
+        await seedEntity(esClient, resolvedReportEmail);
+        await seedEntity(esClient, expiredReportEmail);
+
+        // Leave only an expired snapshot in the stream, so the run sees no
+        // document inside the lookback window.
+        await esClient.deleteByQuery({
+          index: LOG_INDEX,
+          query: { match_all: {} },
+          refresh: true,
+          ignore_unavailable: true,
+        });
         await seedUserRow(esClient, {
-          userEmail: reportEmail,
+          userEmail: expiredReportEmail,
           managerEmails: [managerEmail],
           collectedAgoMinutes: 45 * 24 * 60,
         });
 
         await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
 
-        await assertNoRelationshipId(
-          esClient,
-          RELATIONSHIP_KEY,
-          entityIdOf(managerEmail),
-          entityIdOf(reportEmail)
-        );
+        // The earlier edge survives, and the expired row adds nothing.
+        expect(
+          await getRelationshipIds(esClient, RELATIONSHIP_KEY, entityIdOf(managerEmail))
+        ).toStrictEqual([entityIdOf(resolvedReportEmail)]);
       }
     );
   }
