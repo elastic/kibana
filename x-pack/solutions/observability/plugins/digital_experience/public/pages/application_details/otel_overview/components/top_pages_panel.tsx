@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiLink } from '@elastic/eui';
+import { EuiBasicTable, EuiLink, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+import type { CoreWebVital } from '../../../../../common/core_web_vitals';
+import { CORE_WEB_VITAL, getVitalRating } from '../../../../../common/core_web_vitals';
 import { toPagePath } from '../../../../../common/sessions';
 import type { TopPage } from '../../../../../common/types/usage';
 import {
@@ -22,6 +24,12 @@ import { formatDurationMs } from '../../../../utils/format_duration';
 import { metricColumnPreset } from '../../../../utils/column_presets';
 import { useFormatters } from '../../../../hooks/use_formatters';
 import { DataPanel } from '../../../../components/data_panel';
+import {
+  formatVital,
+  RATING_COLORS,
+  RATING_LABELS,
+  VITAL_LABELS,
+} from '../../../../utils/web_vitals';
 import { TruncatedCode } from '../../../../components/truncated_code';
 
 const TITLE = i18n.translate('xpack.digitalExperience.overview.topPages.title', {
@@ -30,11 +38,15 @@ const TITLE = i18n.translate('xpack.digitalExperience.overview.topPages.title', 
 
 const SUBTITLE = i18n.translate('xpack.digitalExperience.overview.topPages.subtitle', {
   defaultMessage:
-    'The ten pages loaded the most, with their load time, grouped by route where the app reports one. Select a page to filter the Overview by it.',
+    'The ten pages loaded the most, with their load time, web vitals (p75) and JS errors, grouped by route where the app reports one. Select a page to filter the Overview by it.',
 });
 
 const PAGE_LABEL = i18n.translate('xpack.digitalExperience.overview.topPages.pageLabel', {
   defaultMessage: 'Page',
+});
+
+const JS_ERRORS_LABEL = i18n.translate('xpack.digitalExperience.overview.topPages.jsErrorsLabel', {
+  defaultMessage: 'JS errors',
 });
 
 const EMPTY_MESSAGE = i18n.translate('xpack.digitalExperience.overview.topPages.empty', {
@@ -62,6 +74,33 @@ export function TopPagesPanel({
   onSelectPage: (url: string) => void;
 }) {
   const { formatNumber } = useFormatters();
+
+  const vitalColumn = (
+    field: 'lcpP75Ms' | 'inpP75Ms' | 'clsP75',
+    vital: CoreWebVital
+  ): EuiBasicTableColumn<TopPage> => ({
+    field,
+    name: VITAL_LABELS[vital],
+    ...metricColumnPreset<TopPage>(),
+    render: (value: number | null) => {
+      if (value === null) {
+        return <EmptyCellValue />;
+      }
+      const rating = getVitalRating(vital, value);
+      return (
+        <EuiToolTip content={RATING_LABELS[rating]}>
+          <EuiTextColor
+            tabIndex={0}
+            color={RATING_COLORS[rating]}
+            data-test-subj={`digitalExperienceTopPageVital-${vital}`}
+            data-rating={rating}
+          >
+            {formatVital(vital, value)}
+          </EuiTextColor>
+        </EuiToolTip>
+      );
+    },
+  });
 
   const columns: Array<EuiBasicTableColumn<TopPage>> = [
     {
@@ -111,6 +150,17 @@ export function TopPagesPanel({
       ...metricColumnPreset<TopPage>(),
       render: (loadTimeP75Ms: number | null) => {
         return loadTimeP75Ms === null ? <EmptyCellValue /> : formatDurationMs(loadTimeP75Ms);
+      },
+    },
+    vitalColumn('lcpP75Ms', CORE_WEB_VITAL.lcp),
+    vitalColumn('inpP75Ms', CORE_WEB_VITAL.inp),
+    vitalColumn('clsP75', CORE_WEB_VITAL.cls),
+    {
+      field: 'jsErrors',
+      name: JS_ERRORS_LABEL,
+      ...metricColumnPreset<TopPage>(),
+      render: (jsErrors: number | null) => {
+        return jsErrors === null ? <EmptyCellValue /> : formatNumber(jsErrors);
       },
     },
   ];
