@@ -14,6 +14,8 @@ import type {
   kafkaOAuth2GrantType,
   kafkaOAuth2SignatureAlgorithm,
   kafkaSaslMechanism,
+  otlpAuthScheme,
+  otlpAuthType,
   otlpProtocol,
   otlpCompressionType,
 } from '../../constants';
@@ -195,13 +197,37 @@ export interface OtlpHttpExporterConfig extends OtlpExporterBaseConfig {
 
 export type OtlpExporterConfig = OtlpGrpcExporterConfig | OtlpHttpExporterConfig;
 
+export type OtlpAuthScheme = ValueOf<typeof otlpAuthScheme>;
+
+/** `Authorization: <scheme> <credential>` */
+export interface OtlpAuthHeader {
+  type: typeof otlpAuthType.AuthHeader;
+  scheme: OtlpAuthScheme;
+}
+
+/** `<name>: <credential>` */
+export interface OtlpCustomAuthHeader {
+  type: typeof otlpAuthType.CustomHeader;
+  name: string;
+}
+
+/**
+ * How an OTLP output authenticates with an endpoint that is not the managed OTLP endpoint. The
+ * credential is stored as a secret in `secrets.auth.credential`.
+ */
+export type OtlpOutputAuth = OtlpAuthHeader | OtlpCustomAuthHeader;
+
 export interface NewOtlpOutput extends NewBaseOutput {
   type: OutputType['Otlp'];
   otlp_exporter: OtlpExporterConfig;
+  auth?: OtlpOutputAuth | null;
   secrets?: OtlpOutputSecrets;
 }
 
 interface OtlpOutputSecrets {
+  auth?: {
+    credential?: SOSecret;
+  };
   otlp_exporter?: {
     tls?: {
       key_pem?: SOSecret;

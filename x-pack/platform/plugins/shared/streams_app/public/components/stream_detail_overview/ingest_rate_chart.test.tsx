@@ -47,7 +47,7 @@ jest.mock('../../hooks/use_streams_doc_counts_fetch', () => ({
 
 jest.mock('../../hooks/use_streams_app_fetch', () => ({
   useStreamsAppFetch: () => ({
-    value: undefined,
+    value: [{ stream: 'accounting-2026', count: 42 }],
     loading: false,
     error: undefined,
     refresh: jest.fn(),
@@ -65,8 +65,6 @@ jest.mock('@elastic/charts', () => ({
   Chart: () => <div data-test-subj="mockIngestRateChart" />,
 }));
 
-const totals = { docs: 42, storageBytes: 1024, loading: false };
-
 /** One promise per test: the component treats a new promise as a new fetch. */
 const histogramReturns = (result: Promise<unknown>) => {
   result.catch(() => {});
@@ -82,7 +80,6 @@ const renderChart = () =>
         canReadFailureStore={false}
         isQueryStream={false}
         isDraft={false}
-        totals={totals}
       />
     </I18nProvider>
   );

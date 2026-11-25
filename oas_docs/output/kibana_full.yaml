@@ -24479,7 +24479,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -24948,7 +24948,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/ai_index" \
+              -X POST "${KIBANA_URL}/api/context_engine/ai_index" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -25202,7 +25202,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/_query" \
+              -X POST "${KIBANA_URL}/api/context_engine/ai_index/_query" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -25376,7 +25376,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X DELETE "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
+              -X DELETE "${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true"
         - lang: Console
@@ -25656,7 +25656,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -26185,7 +26185,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X PUT "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+              -X PUT "${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -26425,7 +26425,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -26621,7 +26621,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_forget" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_forget" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -26846,7 +26846,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_remember" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_remember" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -27143,7 +27143,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_save_event" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_save_event" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -185467,6 +185467,17 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
+            propertyName: type
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
         id:
           type: string
         is_default:
@@ -185494,6 +185505,27 @@ components:
           additionalProperties: false
           type: object
           properties:
+            auth:
+              additionalProperties: false
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
             otlp_exporter:
               additionalProperties: false
               type: object
@@ -186446,6 +186478,41 @@ components:
         - params
       title: Custom threshold
       type: object
+    Kibana_HTTP_APIs_otlp_auth_header:
+      additionalProperties: false
+      properties:
+        scheme:
+          description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+          enum:
+            - api_key
+            - bearer_token
+          type: string
+        type:
+          enum:
+            - auth_header
+          type: string
+      required:
+        - type
+        - scheme
+      title: otlp_auth_header
+      type: object
+    Kibana_HTTP_APIs_otlp_custom_auth_header:
+      additionalProperties: false
+      properties:
+        name:
+          description: The name of the header that is sent with the credential as value.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom_header
+          type: string
+      required:
+        - type
+        - name
+      title: otlp_custom_auth_header
+      type: object
     Kibana_HTTP_APIs_otlp_grpc_exporter:
       additionalProperties: false
       properties:
@@ -186928,6 +186995,41 @@ components:
         - endpoint
         - protocol
       title: otlp_http_exporter
+      type: object
+    Kibana_HTTP_APIs_otlp_response_auth_header:
+      additionalProperties: true
+      properties:
+        scheme:
+          description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+          enum:
+            - api_key
+            - bearer_token
+          type: string
+        type:
+          enum:
+            - auth_header
+          type: string
+      required:
+        - type
+        - scheme
+      title: otlp_response_auth_header
+      type: object
+    Kibana_HTTP_APIs_otlp_response_custom_auth_header:
+      additionalProperties: true
+      properties:
+        name:
+          description: The name of the header that is sent with the credential as value.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom_header
+          type: string
+      required:
+        - type
+        - name
+      title: otlp_response_custom_auth_header
       type: object
     Kibana_HTTP_APIs_otlp_response_grpc_exporter:
       additionalProperties: true
@@ -187960,6 +188062,17 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_custom_auth_header'
+            propertyName: type
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_custom_auth_header'
         id:
           type: string
         is_default:
@@ -187987,6 +188100,27 @@ components:
           additionalProperties: true
           type: object
           properties:
+            auth:
+              additionalProperties: true
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
             otlp_exporter:
               additionalProperties: true
               type: object
@@ -195846,6 +195980,17 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
+            propertyName: type
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
         id:
           type: string
         is_default:
@@ -195871,6 +196016,28 @@ components:
           additionalProperties: false
           type: object
           properties:
+            auth:
+              additionalProperties: false
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
+                  nullable: true
             otlp_exporter:
               additionalProperties: false
               type: object

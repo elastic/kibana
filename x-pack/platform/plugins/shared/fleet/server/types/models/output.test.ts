@@ -15,6 +15,7 @@ import {
   ElasticSearchSchema,
   LogstashSchema,
   KafkaSchema,
+  OtlpSchema,
   RemoteElasticSearchSchema,
   UpdateOutputSchema,
 } from './output';
@@ -594,6 +595,40 @@ describe('Output model', () => {
           secrets: { ssl: { key: null } },
         })
       ).toThrow();
+    });
+  });
+
+  describe('OTLP authentication credential reference', () => {
+    const validateCreate = (credential: unknown) =>
+      schema.object(OtlpSchema).validate({
+        name: 'otlp',
+        type: 'otlp',
+        otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+        auth: { type: 'auth_header', scheme: 'api_key' },
+        secrets: { auth: { credential } },
+      });
+    const validateUpdate = (credential: unknown) =>
+      UpdateOutputSchema.validate({ type: 'otlp', secrets: { auth: { credential } } });
+
+    describe.each([
+      ['create', validateCreate],
+      ['update', validateUpdate],
+    ])('%s payload', (_, validate) => {
+      it('accepts a reference with an id and a hash', () => {
+        expect(() => validate({ id: 'a'.repeat(512), hash: 'b'.repeat(512) })).not.toThrow();
+      });
+
+      it('rejects an empty id', () => {
+        expect(() => validate({ id: '' })).toThrow();
+      });
+
+      it('rejects an id longer than 512 characters', () => {
+        expect(() => validate({ id: 'a'.repeat(513) })).toThrow();
+      });
+
+      it('rejects a hash longer than 512 characters', () => {
+        expect(() => validate({ id: 'credential-id', hash: 'b'.repeat(513) })).toThrow();
+      });
     });
   });
 });
