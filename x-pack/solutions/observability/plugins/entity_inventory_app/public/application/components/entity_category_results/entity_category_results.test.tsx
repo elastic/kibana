@@ -40,10 +40,7 @@ import {
   getEmptyWithFailuresTitle,
   getTypeNotAvailableTitle,
 } from '../entity_states/translations';
-import {
-  getSourceErrorText,
-  getUnsupportedMetricText,
-} from '../entity_section/translations';
+import { getSourceErrorText, getUnsupportedMetricText } from '../entity_section/translations';
 
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);
