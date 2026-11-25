@@ -43,6 +43,7 @@ const setup = async ({
       onOpenDetails={onOpenDetails}
       canDelete={canDelete}
       onDelete={onDelete}
+      ebtElement="test"
       data-test-subj="list"
     />
   );
