@@ -37,13 +37,10 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
   metadata: {
     id: '.microsoft_defender_xdr',
     displayName: 'Microsoft Defender XDR',
-    description: i18n.translate(
-      'connectorSpecs.microsoftDefenderXdr.metadata.description',
-      {
-        defaultMessage:
-          'Manage incidents and alerts, run advanced hunting KQL queries, enrich threat intelligence, and triage threats in Microsoft Defender XDR',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.microsoftDefenderXdr.metadata.description', {
+      defaultMessage:
+        'Manage incidents and alerts, run advanced hunting KQL queries, enrich threat intelligence, and triage threats in Microsoft Defender XDR',
+    }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['agentBuilder'],
   },
@@ -58,26 +55,21 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         overrides: {
           meta: {
             scope: {
-              label: i18n.translate(
-                'connectorSpecs.microsoftDefenderXdr.auth.scope.label',
-                { defaultMessage: 'OAuth scope' }
-              ),
-              helpText: i18n.translate(
-                'connectorSpecs.microsoftDefenderXdr.auth.scope.helpText',
-                {
-                  defaultMessage:
-                    'Use "https://graph.microsoft.com/.default" for Commercial, ' +
-                    '"https://graph.microsoft.us/.default" for GCC High, ' +
-                    'or "https://dod-graph.microsoft.us/.default" for DoD. ' +
-                    'Must match the cloud environment selected above.',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.microsoftDefenderXdr.auth.scope.label', {
+                defaultMessage: 'OAuth scope',
+              }),
+              helpText: i18n.translate('connectorSpecs.microsoftDefenderXdr.auth.scope.helpText', {
+                defaultMessage:
+                  'Use "https://graph.microsoft.com/.default" for Commercial, ' +
+                  '"https://graph.microsoft.us/.default" for GCC High, ' +
+                  'or "https://dod-graph.microsoft.us/.default" for DoD. ' +
+                  'Must match the cloud environment selected above.',
+              }),
             },
             tokenUrl: {
-              label: i18n.translate(
-                'connectorSpecs.microsoftDefenderXdr.auth.tokenUrl.label',
-                { defaultMessage: 'Token URL' }
-              ),
+              label: i18n.translate('connectorSpecs.microsoftDefenderXdr.auth.tokenUrl.label', {
+                defaultMessage: 'Token URL',
+              }),
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
                 'connectorSpecs.microsoftDefenderXdr.auth.tokenUrl.helpText',
@@ -101,10 +93,9 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         overrides: {
           meta: {
             scope: {
-              label: i18n.translate(
-                'connectorSpecs.microsoftDefenderXdr.auth.cert.scope.label',
-                { defaultMessage: 'OAuth scope' }
-              ),
+              label: i18n.translate('connectorSpecs.microsoftDefenderXdr.auth.cert.scope.label', {
+                defaultMessage: 'OAuth scope',
+              }),
               helpText: i18n.translate(
                 'connectorSpecs.microsoftDefenderXdr.auth.cert.scope.helpText',
                 {
