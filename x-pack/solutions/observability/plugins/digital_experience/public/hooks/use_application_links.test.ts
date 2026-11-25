@@ -93,6 +93,27 @@ describe('useApplicationLinks', () => {
 
     expect(result.current.overviewHref).not.toContain('osName=');
     expect(result.current.overviewHref).not.toContain('release=');
+  });
+
+  it("keeps a web application's Compare in every tab, so the Overview still has it on the way back", () => {
+    mockSearch('?source=otel&compare=true');
+    mockRouteQuery({ source: 'otel', compare: 'true' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
+    const { overviewHref, errorsHref, networkHref, reportsHref, sessionsHref } = result.current;
+
+    [overviewHref, errorsHref, networkHref, reportsHref, sessionsHref()].forEach((href) => {
+      expect(new URL(href, 'http://localhost').searchParams.get('compare')).toBe('true');
+    });
+  });
+
+  it('leaves Compare out of the links while it is off', () => {
+    mockSearch('?source=otel');
+    mockRouteQuery({ source: 'otel' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
+
+    expect(result.current.errorsHref).not.toContain('compare=');
     expect(result.current.overviewHref).not.toContain('compare=');
   });
 });

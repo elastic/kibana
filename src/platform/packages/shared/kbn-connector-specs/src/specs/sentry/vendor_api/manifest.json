@@ -3,14 +3,14 @@
     "assignIssue": [
       {
         "method": "put",
-        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "path": "/organizations/{organization_id_or_slug}/issues/{issue_id}/",
         "source": "v0"
       }
     ],
     "bulkUpdateIssues": [
       {
         "method": "put",
-        "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/",
+        "path": "/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/",
         "source": "v0"
       }
     ],
@@ -18,28 +18,28 @@
     "deleteIssue": [
       {
         "method": "delete",
-        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "path": "/organizations/{organization_id_or_slug}/issues/{issue_id}/",
         "source": "v0"
       }
     ],
     "getEvent": [
       {
         "method": "get",
-        "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/events/{event_id}/",
+        "path": "/projects/{organization_id_or_slug}/{project_id_or_slug}/events/{event_id}/",
         "source": "v0"
       }
     ],
     "getIssue": [
       {
         "method": "get",
-        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "path": "/organizations/{organization_id_or_slug}/issues/{issue_id}/",
         "source": "v0"
       }
     ],
     "ignoreIssue": [
       {
         "method": "put",
-        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "path": "/organizations/{organization_id_or_slug}/issues/{issue_id}/",
         "source": "v0"
       }
     ],
@@ -58,7 +58,7 @@
           },
           "style": "link"
         },
-        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/events/",
+        "path": "/organizations/{organization_id_or_slug}/issues/{issue_id}/events/",
         "source": "v0"
       }
     ],
@@ -76,7 +76,7 @@
           },
           "style": "link"
         },
-        "path": "/api/0/organizations/{organization_id_or_slug}/issues/",
+        "path": "/organizations/{organization_id_or_slug}/issues/",
         "source": "v0"
       },
       {
@@ -92,7 +92,7 @@
           },
           "style": "link"
         },
-        "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/",
+        "path": "/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/",
         "source": "v0"
       }
     ],
@@ -109,21 +109,21 @@
           },
           "style": "link"
         },
-        "path": "/api/0/organizations/{organization_id_or_slug}/projects/",
+        "path": "/organizations/{organization_id_or_slug}/projects/",
         "source": "v0"
       }
     ],
     "resolveIssue": [
       {
         "method": "put",
-        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "path": "/organizations/{organization_id_or_slug}/issues/{issue_id}/",
         "source": "v0"
       }
     ],
     "unresolveIssue": [
       {
         "method": "put",
-        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "path": "/organizations/{organization_id_or_slug}/issues/{issue_id}/",
         "source": "v0"
       }
     ],
@@ -132,7 +132,7 @@
   "sources": {
     "v0": {
       "apiVersion": "v0",
-      "fetchedAt": "2026-10-07T20:49:13.625Z",
+      "fetchedAt": "2026-11-23T23:32:21.620Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/getsentry/sentry-api-schema/main/openapi-derefed.json"
     }

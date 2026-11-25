@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { FRUSTRATION_EVENTS } from '../../../../common/otel_data';
 import { usageSearch } from './search_request';
+
+/** The runtime field of the page filter, which reads the route of a page and then its URL. */
+const PAGE_FIELD = 'digital_experience_filter_pageUrl';
 
 const PARAMS = { serviceName: 'shop', start: 1000, end: 2000 };
 
@@ -23,23 +27,34 @@ describe('usageSearch', () => {
     });
   });
 
-  it('filters the browser documents of the application, page loads and clicks only', () => {
+  it('filters the browser documents of the application, page loads, clicks and frustration only', () => {
     const { filter } = usageSearch(PARAMS).query.bool;
 
     expect(filter).toContainEqual({ term: { 'telemetry.sdk.language': 'webjs' } });
     expect(filter).toContainEqual({ term: { 'service.name': 'shop' } });
     expect(filter).toContainEqual({
-      terms: { event_name: ['browser.navigation_timing', 'browser.user_action.click'] },
+      terms: {
+        event_name: [
+          'browser.navigation_timing',
+          'browser.user_action.click',
+          'browser.frustration.rage_click',
+          'browser.frustration.dead_click',
+          'browser.frustration.error_click',
+        ],
+      },
     });
   });
 
-  it('filters the environment in one aggregation, without picker terms', () => {
+  it('lists every environment for the picker and filters the usage to the selected one', () => {
     const all = usageSearch(PARAMS).aggs;
-    const production = inEnvironment(usageSearch({ ...PARAMS, environment: 'production' }));
+    const { aggs } = usageSearch({ ...PARAMS, environment: 'production' });
 
-    expect(Object.keys(all)).toEqual(['inEnvironment']);
     expect(all.inEnvironment.filter).toEqual({ match_all: {} });
-    expect(JSON.stringify(production.filter)).toContain('production');
+    expect(aggs.environments).toBeDefined();
+    expect(aggs.environmentNames).toBeDefined();
+    expect(aggs.environmentNotDefined).toBeDefined();
+    expect(JSON.stringify(aggs.inEnvironment.filter)).toContain('production');
+    expect(JSON.stringify(aggs.environments)).not.toContain('production');
   });
 
   it('reads the top pages from navigation timings, with their load time', () => {
@@ -48,7 +63,11 @@ describe('usageSearch', () => {
     expect(pageLoads.filter.bool.filter).toEqual([
       { term: { event_name: 'browser.navigation_timing' } },
     ]);
-    expect(pageLoads.aggs.topPages.terms).toEqual({ field: 'url.full', size: 10 });
+    // The route of the page, or its URL for an app that reports none: the field the page filter reads
+    expect(pageLoads.aggs.topPages.terms).toEqual({
+      field: 'digital_experience_filter_pageUrl',
+      size: 10,
+    });
     expect(pageLoads.aggs.topPages.aggs.loadTime.percentiles).toMatchObject({
       field: 'browser.navigation_timing.load_event_end',
       percents: [75],
@@ -78,6 +97,33 @@ describe('usageSearch', () => {
     expect(selectors.terms).toEqual({ field: 'browser.css_selector', size: 10 });
     expect(selectors.aggs.tagName.terms).toEqual({ field: 'browser.tag_name', size: 1 });
   });
+
+  it('reads the frustration by type, element and page', () => {
+    const { frustration } = inEnvironment(usageSearch(PARAMS)).aggs;
+    const byType = { terms: { field: 'event_name', size: 3 } };
+    const sessions = { cardinality: { field: 'session.id' } };
+
+    expect(frustration).toEqual({
+      filter: { bool: { filter: [{ terms: { event_name: [...FRUSTRATION_EVENTS] } }] } },
+      aggs: {
+        byType,
+        sessions,
+        elements: {
+          terms: { field: 'browser.css_selector', size: 10 },
+          aggs: {
+            byType,
+            sessions,
+            tagName: { terms: { field: 'browser.tag_name', size: 1 } },
+            topPage: { terms: { field: 'url.full', size: 1 } },
+          },
+        },
+        pages: {
+          terms: { field: 'url.full', size: 30 },
+          aggs: { byType, sessions },
+        },
+      },
+    });
+  });
 });
 
 describe('usageSearch with filters', () => {
@@ -97,10 +143,11 @@ describe('usageSearch with filters', () => {
       'digital_experience_filter_device',
       'digital_experience_filter_country',
       'digital_experience_filter_appVersion',
+      'digital_experience_filter_pageUrl',
     ]);
   });
 
-  it('narrows the pages, breakdowns and clicks to the selected browser, OS, device and country', () => {
+  it('narrows the pages, breakdowns and clicks to the selected browser, country and page', () => {
     const { filter } = inEnvironment(usageSearch({ ...PARAMS, filters: FILTERS }));
 
     expect(filter).toEqual({
@@ -110,18 +157,20 @@ describe('usageSearch with filters', () => {
           { terms: { digital_experience_filter_browser: ['Chrome'] } },
           { bool: { must_not: [{ terms: { digital_experience_filter_browser: ['Safari'] } }] } },
           { terms: { digital_experience_filter_country: ['DE'] } },
+          { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
         ],
       },
     });
   });
 
-  it('narrows the page loads to the selected page, not the clicks', () => {
-    const { pageLoads, clicks } = inEnvironment(usageSearch({ ...PARAMS, filters: FILTERS })).aggs;
+  it('narrows the page loads and frustration to the URL text, not the clicks', () => {
+    const filters = { pageContains: [{ value: 'cart', exclude: false }] };
+    const { pageLoads, clicks, frustration } = inEnvironment(
+      usageSearch({ ...PARAMS, filters })
+    ).aggs;
 
-    expect(pageLoads.filter.bool.filter).toEqual([
-      { term: { event_name: 'browser.navigation_timing' } },
-      { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
-    ]);
+    expect(JSON.stringify(pageLoads.filter)).toContain('*cart*');
+    expect(JSON.stringify(frustration.filter)).toContain('*cart*');
     expect(clicks.filter).toEqual({
       bool: { filter: [{ term: { event_name: 'browser.user_action.click' } }] },
     });
