@@ -1,0 +1,19 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          featureSettings:
+            summary: Feature settings for the current space
+            value:
+              features:
+                - feature_id: agent_builder
+                  endpoints:
+                    - id: .anthropic-claude-4.6-sonnet-chat_completion
+                      parameters:
+                        reasoning:
+                          effort: low
+          emptyFeatureSettings:
+            summary: Nothing saved
+            value:
+              features: []

@@ -14,6 +14,7 @@ import { createEisConnector } from '../../__mocks__/inference_connector.mock';
 import {
   parseInferenceSettingsSO,
   validateEndpointParameters,
+  validateFeatureIds,
   validateInferenceSettings,
 } from './inference_settings';
 
@@ -253,5 +254,19 @@ describe('Inference Settings utils', () => {
         validateEndpointParameters(withEffort('openai-gpt-5.4', 'high'), getConnectorById, logger)
       ).rejects.toThrow('Elasticsearch unavailable');
     });
+  });
+});
+
+describe('validateFeatureIds', () => {
+  const isAllowed = (featureId: string) => featureId === 'agent_builder';
+
+  it('accepts an allowed feature id', () => {
+    expect(validateFeatureIds(['agent_builder'], isAllowed)).toEqual([]);
+  });
+
+  it('reports a feature id that is not allowed', () => {
+    expect(validateFeatureIds(['not_a_feature'], isAllowed)[0]).toContain(
+      'Unknown feature_id values: not_a_feature'
+    );
   });
 });

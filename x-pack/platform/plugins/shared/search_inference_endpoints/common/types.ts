@@ -24,6 +24,9 @@ export const APIRoutes = {
   GET_INFERENCE_SERVICES: 'internal/inference_endpoints/_inference/_services',
   GET_INFERENCE_SETTINGS: '/internal/search_inference_endpoints/settings',
   PUT_INFERENCE_SETTINGS: '/internal/search_inference_endpoints/settings',
+  GET_FEATURE_SETTINGS: '/api/model_management/feature_settings',
+  PUT_FEATURE_SETTINGS: '/api/model_management/feature_settings',
+  PUT_FEATURE_SETTING: '/api/model_management/feature_settings/{feature_id}',
   GET_INFERENCE_FEATURES: '/internal/search_inference_endpoints/features',
   GET_INFERENCE_CONNECTORS: INFERENCE_CONNECTORS_INTERNAL_API_PATH,
   // Single path shared by GET, PUT, and DELETE region policy operations
