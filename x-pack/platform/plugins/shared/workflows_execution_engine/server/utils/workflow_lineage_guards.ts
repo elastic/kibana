@@ -7,8 +7,6 @@
 
 import type { ExecutionChainHop } from '@kbn/workflows';
 
-export type { ExecutionChainHop };
-
 const isExecutionChainHop = (value: unknown): value is ExecutionChainHop => {
   if (typeof value !== 'object' || value === null) {
     return false;
