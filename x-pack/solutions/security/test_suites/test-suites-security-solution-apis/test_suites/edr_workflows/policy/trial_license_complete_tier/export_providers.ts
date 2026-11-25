@@ -6,8 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
-import type { UpdatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import { agentPolicyRouteService, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import type {
+  GetFullAgentPolicyResponse,
+  PackagePolicyConfigRecord,
+  UpdatePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
 import type {
   SetExportProviderKeyRequestBody,
   SetExportProviderKeyResponse,
@@ -50,10 +54,17 @@ export default function ({ getService }: FtrProviderContext) {
     const fetchStoredPolicy = async (): Promise<PolicyData> =>
       (await fetchIntegrationPolicy(kbnClient, testData.packagePolicy.id)) as PolicyData;
 
-    /** Sends the stored policy with its config changed by `update`, through the Fleet API */
-    const updatePolicyConfig = async (update: (policy: PolicyConfig) => PolicyConfig) => {
+    /**
+     * Sends the stored policy with its config changed by `update` and `otherConfig` added to the
+     * input config, through the Fleet API
+     */
+    const updatePolicyConfig = async (
+      update: (policy: PolicyConfig) => PolicyConfig,
+      otherConfig: PackagePolicyConfigRecord = {}
+    ) => {
       const body = getPolicyDataForUpdate(await fetchStoredPolicy());
       body.inputs[0].config.policy.value = update(body.inputs[0].config.policy.value);
+      Object.assign(body.inputs[0].config, otherConfig);
 
       return kbnClient.request<UpdatePackagePolicyResponse | { message: string }>({
         method: 'PUT',
@@ -66,9 +77,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     const expectRejection = async (
       update: (policy: PolicyConfig) => PolicyConfig,
-      expectedMessage: string
+      expectedMessage: string,
+      otherConfig?: PackagePolicyConfigRecord
     ) => {
-      const { status, data } = await updatePolicyConfig(update);
+      const { status, data } = await updatePolicyConfig(update, otherConfig);
 
       expect(status).to.be(400);
       expect('message' in data && data.message).to.be(expectedMessage);
@@ -142,6 +154,21 @@ export default function ({ getService }: FtrProviderContext) {
       for (const os of ['windows', 'mac', 'linux'] as const) {
         expect(value[os].response_actions).to.eql({ export_providers: [PROVIDER] });
       }
+
+      // Endpoint reads the providers from the agent policy that Fleet builds from the input config
+      const { data: fullAgentPolicy } = await kbnClient.request<GetFullAgentPolicyResponse>({
+        method: 'GET',
+        path: agentPolicyRouteService.getInfoFullPath(testData.agentPolicy.id),
+        headers: { 'elastic-api-version': '2023-10-31' },
+      });
+      const endpointInput = fullAgentPolicy.item.inputs.find(
+        (input) =>
+          input.package_policy_id === testData.packagePolicy.id && input.type === 'endpoint'
+      );
+      expect(endpointInput).to.be.ok();
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        expect(endpointInput?.policy[os].response_actions.export_providers).to.eql([PROVIDER]);
+      }
     });
 
     it('should reject a plaintext key set through a policy update', async () => {
@@ -178,6 +205,15 @@ export default function ({ getService }: FtrProviderContext) {
         (policy) =>
           setExportProviders(policy, [{ ...PROVIDER, service_url: 'https://acct.example.com' }]),
         'export_providers[0] "azure-1": service_url must be an Azure Blob Storage endpoint (*.blob.core.windows.net, *.blob.core.usgovcloudapi.net or *.blob.core.chinacloudapi.cn)'
+      );
+    });
+
+    it('should reject an input config key that sets response_actions', async () => {
+      // Fleet merges the value of every input config key into the agent policy
+      await expectRejection(
+        (policy) => policy,
+        'response_actions can\'t be set through the input config key "policy.windows.response_actions"',
+        { 'policy.windows.response_actions': { value: { export_providers: [PROVIDER] } } }
       );
     });
 
