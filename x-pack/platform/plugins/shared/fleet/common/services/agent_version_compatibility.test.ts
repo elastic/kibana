@@ -72,14 +72,20 @@ describe('getIncompatibleIntegrations with version-specific policy semantics', (
     version_condition: '~9.4.6 || ~9.5.3 || ^9.6.0',
   };
 
-  it('evaluates the agent at its major.minor, as version-specific policies do', () => {
-    // 9.4.8 satisfies the range as written, but its `9.4` policy is filtered at 9.4.0
+  it('evaluates the agent over its major.minor, as version-specific policies do', () => {
+    // The `9.4` policy keeps the inputs for every 9.4 agent, as some 9.4 versions satisfy the range
     expect(
       getIncompatibleIntegrations({ agentVersion: '9.4.8', conditions: [patchLevel] })
-    ).toEqual([patchLevel]);
+    ).toEqual([]);
+    expect(
+      getIncompatibleIntegrations({ agentVersion: '9.4.2', conditions: [patchLevel] })
+    ).toEqual([]);
     expect(
       getIncompatibleIntegrations({ agentVersion: '9.6.2', conditions: [patchLevel] })
     ).toEqual([]);
+    expect(
+      getIncompatibleIntegrations({ agentVersion: '9.3.9', conditions: [patchLevel] })
+    ).toEqual([patchLevel]);
   });
 
   it('treats a prerelease agent as its release version', () => {
@@ -93,10 +99,16 @@ describe('getIncompatibleIntegrations with version-specific policy semantics', (
 });
 
 describe('agentSatisfiesPackageVersionCondition', () => {
-  it('evaluates the agent at major.minor.0', () => {
-    expect(agentSatisfiesPackageVersionCondition('9.4.8', '>=9.4.6')).toBe(false);
+  it('evaluates the agent over its major.minor', () => {
+    expect(agentSatisfiesPackageVersionCondition('9.4.8', '>=9.4.6')).toBe(true);
+    expect(agentSatisfiesPackageVersionCondition('9.4.0', '>=9.4.6')).toBe(true);
+    expect(agentSatisfiesPackageVersionCondition('9.3.9', '>=9.4.6')).toBe(false);
     expect(agentSatisfiesPackageVersionCondition('9.5.0', '>=9.4.6')).toBe(true);
     expect(agentSatisfiesPackageVersionCondition('9.4.8', '^9.4.0')).toBe(true);
+  });
+
+  it('is false when no version of the minor satisfies the condition', () => {
+    expect(agentSatisfiesPackageVersionCondition('9.4.3', '>9.4.3 <9.4.4')).toBe(false);
   });
 
   it('returns undefined for an agent version that cannot be parsed', () => {
@@ -136,22 +148,35 @@ describe('getAgentVersionBlockers', () => {
     ).toEqual({ blockedCount: 3, blockingVersions: ['9.2.0', '9.3.2'], minVersion: '9.4.0' });
   });
 
-  it('suggests the lowest major.minor satisfying the condition, as agents are evaluated there', () => {
+  it('does not block agents in a minor where some version satisfies the condition', () => {
     expect(
       getAgentVersionBlockers({
         versionCondition: '~9.4.6 || ~9.5.3 || ^9.6.0',
         agentVersionCounts: [
           { version: '9.4.8', count: 40 },
+          { version: '9.5.0', count: 3 },
           { version: '9.6.0', count: 2 },
         ],
       })
-    ).toEqual({ blockedCount: 40, blockingVersions: ['9.4.8'], minVersion: '9.6.0' });
+    ).toEqual({ blockedCount: 0, blockingVersions: [] });
+  });
+
+  it('suggests the lowest version satisfying the condition', () => {
+    expect(
+      getAgentVersionBlockers({
+        versionCondition: '~9.4.6 || ~9.5.3 || ^9.6.0',
+        agentVersionCounts: [
+          { version: '9.3.8', count: 40 },
+          { version: '9.6.0', count: 2 },
+        ],
+      })
+    ).toEqual({ blockedCount: 40, blockingVersions: ['9.3.8'], minVersion: '9.4.6' });
     expect(
       getAgentVersionBlockers({
         versionCondition: '>=9.3.5',
-        agentVersionCounts: [{ version: '9.3.8', count: 1 }],
+        agentVersionCounts: [{ version: '9.2.8', count: 1 }],
       })
-    ).toEqual({ blockedCount: 1, blockingVersions: ['9.3.8'], minVersion: '9.4.0' });
+    ).toEqual({ blockedCount: 1, blockingVersions: ['9.2.8'], minVersion: '9.3.5' });
   });
 
   it('does not suggest a version below the blocking agents', () => {
@@ -205,8 +230,9 @@ describe('getAgentVersionBlockers', () => {
 });
 
 describe('agentLosesPackageInputs', () => {
-  it('is true for agents that do not satisfy the condition at major.minor.0', () => {
-    expect(agentLosesPackageInputs('9.4.8', '^9.4.6')).toBe(true);
+  it('is true for agents in a minor where no version satisfies the condition', () => {
+    expect(agentLosesPackageInputs('9.3.8', '^9.4.6')).toBe(true);
+    expect(agentLosesPackageInputs('9.4.0', '^9.4.6')).toBe(false);
     expect(agentLosesPackageInputs('9.5.0', '^9.4.6')).toBe(false);
   });
 

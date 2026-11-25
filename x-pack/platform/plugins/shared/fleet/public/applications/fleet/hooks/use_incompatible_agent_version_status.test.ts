@@ -198,23 +198,24 @@ describe('getIncompatibleAgentVersionStatus', () => {
     expect(result).toEqual({ status: 'NONE' });
   });
 
-  it('evaluates agents at their major.minor, as Fleet does when deploying the policy', () => {
+  it('evaluates agents over their major.minor, as Fleet does when deploying the policy', () => {
     const result = getIncompatibleAgentVersionStatus(
       createPackageInfo('~9.4.6 || ~9.5.3 || ^9.6.0'),
       [
         createAgentPolicy([
-          { version: '9.4.8', count: 40 },
+          { version: '9.3.8', count: 40 },
+          { version: '9.4.2', count: 5 },
           { version: '9.6.1', count: 2 },
         ]),
       ]
     );
-    // 9.4.8 is in `~9.4.6` but is evaluated as 9.4.0, so the agents need 9.6.0
+    // 9.4.2 is not in `~9.4.6`, but its `9.4` policy keeps the inputs for every 9.4 agent
     expect(result).toEqual({
       status: 'SOME',
       versionCondition: '~9.4.6 || ~9.5.3 || ^9.6.0',
       blockedCount: 40,
-      observedVersions: ['9.4.8'],
-      minVersion: '9.6.0',
+      observedVersions: ['9.3.8'],
+      minVersion: '9.4.6',
       agentPolicyCount: 1,
       requiresAcknowledgement: true,
     });

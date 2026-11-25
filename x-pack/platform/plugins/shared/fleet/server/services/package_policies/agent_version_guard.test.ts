@@ -259,8 +259,8 @@ describe('agent_version_guard', () => {
       expect(blocks.size).toBe(0);
     });
 
-    it('evaluates agents at their major.minor, as version-specific policies do', async () => {
-      mockAgentVersions({ 'policy-1': { '9.4.8': 40 } });
+    it('evaluates agents over their major.minor, as version-specific policies do', async () => {
+      mockAgentVersions({ 'policy-1': { '9.3.8': 40, '9.4.2': 5, '9.4.8': 3 } });
 
       const blocks = await getAgentVersionBlocks([
         {
@@ -271,9 +271,9 @@ describe('agent_version_guard', () => {
       ]);
 
       expect(blocks.get('pp-1')).toEqual(
-        expect.objectContaining({ blocked_count: 40, observed_versions: ['9.4.8'] })
+        expect.objectContaining({ blocked_count: 40, observed_versions: ['9.3.8'] })
       );
-      expect(blocks.get('pp-1')?.min_version).toBe('9.6.0');
+      expect(blocks.get('pp-1')?.min_version).toBe('9.4.6');
     });
 
     it('sums the agents across the agent policies of each item with a single query', async () => {

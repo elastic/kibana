@@ -28,6 +28,7 @@ import {
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
   agentVersionSatisfiesCondition,
+  getLowestSatisfyingVersionInMinor,
 } from './version_specific_policies_utils';
 
 describe('agentVersionSatisfiesCondition', () => {
@@ -40,6 +41,11 @@ describe('agentVersionSatisfiesCondition', () => {
     ['9.4', '>=9.5.0', false],
     ['9.4', '<9.4.0', false],
     ['9.4', '^8.19.0', false],
+    ['9.4', '>9.4.3 <9.4.4', false],
+    ['9.4', '>9.4.3 <9.4.5', true],
+    ['9.4', '>=9.0.0 <9.4.0 || >=9.5.0', false],
+    ['9.4', '<9.4.0 || ~9.4.2', true],
+    ['9.4', '>=9.4.4-rc.1', true],
   ])('treats variant %s as a range over the minor for %s -> %s', (version, condition, expected) => {
     expect(agentVersionSatisfiesCondition(version, condition)).toBe(expected);
   });
@@ -57,6 +63,21 @@ describe('agentVersionSatisfiesCondition', () => {
     expect(agentVersionSatisfiesCondition('not-a-version', '^9.4.0')).toBe(false);
     expect(agentVersionSatisfiesCondition('9.4', 'not a range')).toBe(false);
     expect(agentVersionSatisfiesCondition('9.4.0', 'not a range')).toBe(false);
+  });
+});
+
+describe('getLowestSatisfyingVersionInMinor', () => {
+  it.each([
+    [9, 4, '^9.4.4', '9.4.4'],
+    [9, 4, '~9.4.6 || ~9.5.3 || ^9.6.0', '9.4.6'],
+    [9, 4, '>=9.0.0', '9.4.0'],
+    [9, 3, '>=9.3.5', '9.3.5'],
+    [9, 4, '>9.4.3 <9.4.4', null],
+    [9, 4, '>=9.5.0', null],
+  ])('%d.%d with %s -> %s', (major, minor, condition, expected) => {
+    expect(getLowestSatisfyingVersionInMinor(major, minor, condition)?.version ?? null).toBe(
+      expected
+    );
   });
 });
 import { POLICY_ID_FIXTURES } from './version_specific_policy_id_fixtures';

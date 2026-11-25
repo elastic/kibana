@@ -287,7 +287,7 @@ export default function (providerContext: FtrProviderContext) {
           version_condition: '>=9.3.5',
           blocked_count: 1,
           observed_versions: ['9.2.0'],
-          min_version: '9.4.0',
+          min_version: '9.3.5',
         });
       });
 
@@ -401,27 +401,23 @@ export default function (providerContext: FtrProviderContext) {
         await installPackage('1.0.0');
         packagePolicyId = (
           await createPackagePolicy('1.0.0', [
-            await createAgentPolicy([{ status: 'online', version: '9.3.8' }]),
+            await createAgentPolicy([{ status: 'online', version: '9.3.2' }]),
           ])
         ).item.id;
         await installPackage('1.2.0');
       });
 
-      it('evaluates agents at their major.minor, as their version-specific policy does', async () => {
-        // 9.3.8 satisfies `>=9.3.5`, but the inputs of its `9.3` policy are filtered at 9.3.0, so
-        // the agent needs 9.4.0
-        const body = await upgradePackagePolicies([packagePolicyId], { expected: 400 });
+      it('evaluates agents over their major.minor, as their version-specific policy does', async () => {
+        // 9.3.2 doesn't satisfy `>=9.3.5`, but its `9.3` policy keeps the inputs for every 9.3 agent
+        await upgradePackagePolicies([packagePolicyId]);
 
-        expect(body.message).to.contain('9.3.8');
-        expect(body.message).to.contain(
-          'Upgrade the agents to a version that satisfies it, such as 9.4.0.'
-        );
+        expect(await getPackagePolicyVersion(packagePolicyId)).to.eql('1.2.0');
       });
     });
 
     describe('upgrading from a version with its own agent version condition', () => {
       let alreadyWithoutInputsPackagePolicyId: string;
-      let losingInputsPackagePolicyId: string;
+      let keepingInputsPackagePolicyId: string;
 
       before(async () => {
         await installPackage('1.1.0');
@@ -436,9 +432,9 @@ export default function (providerContext: FtrProviderContext) {
         alreadyWithoutInputsPackagePolicyId = await createWithAgents([
           { status: 'online', version: '9.2.0' },
         ]);
-        // 9.3.8 satisfies `^9.3.0`, but not 1.2.0's `>=9.3.5` once evaluated at 9.3.0
-        losingInputsPackagePolicyId = await createWithAgents([
-          { status: 'online', version: '9.3.8' },
+        // 9.3.2 satisfies `^9.3.0`, and its `9.3` policy keeps the inputs under 1.2.0's `>=9.3.5`
+        keepingInputsPackagePolicyId = await createWithAgents([
+          { status: 'online', version: '9.3.2' },
         ]);
         await installPackage('1.2.0');
       });
@@ -449,11 +445,10 @@ export default function (providerContext: FtrProviderContext) {
         expect(await getPackagePolicyVersion(alreadyWithoutInputsPackagePolicyId)).to.eql('1.2.0');
       });
 
-      it('rejects the upgrade when agents would lose the inputs', async () => {
-        const body = await upgradePackagePolicies([losingInputsPackagePolicyId], { expected: 400 });
+      it('upgrades when the agents keep the inputs in their minor', async () => {
+        await upgradePackagePolicies([keepingInputsPackagePolicyId]);
 
-        expect(body.message).to.contain('9.3.8');
-        expect(await getPackagePolicyVersion(losingInputsPackagePolicyId)).to.eql('1.1.0');
+        expect(await getPackagePolicyVersion(keepingInputsPackagePolicyId)).to.eql('1.2.0');
       });
     });
 

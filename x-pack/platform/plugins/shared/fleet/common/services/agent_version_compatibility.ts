@@ -7,22 +7,26 @@
 import coerce from 'semver/functions/coerce';
 import compare from 'semver/functions/compare';
 import lt from 'semver/functions/lt';
-import satisfies from 'semver/functions/satisfies';
+import SemVer from 'semver/classes/semver';
 import minVersion from 'semver/ranges/min-version';
 import validRange from 'semver/ranges/valid';
 
 import type { AgentPolicyAgentVersionCondition } from '../types';
 
+import {
+  agentVersionSatisfiesCondition,
+  getLowestSatisfyingVersionInMinor,
+} from './version_specific_policies_utils';
+
 /**
- * The version a package-level agent version condition is evaluated against for an agent on
- * `agentVersion`, or `null` when the version cannot be parsed. Fleet places agents in
- * `major.minor` version-specific policies and filters the inputs of each one against that
- * `major.minor` coerced to `major.minor.0`, so `9.4.8` is evaluated as `9.4.0`. Prerelease
- * versions such as `9.6.0-SNAPSHOT` become `9.6.0` the same way.
+ * The `major.minor` version-specific policy an agent on `agentVersion` is placed in, or `null`
+ * when the version cannot be parsed. Fleet filters the inputs of each policy for every version of
+ * that minor (see {@link agentVersionSatisfiesCondition}), so `9.4.2` keeps the inputs of
+ * `^9.4.4`. Prerelease versions such as `9.6.0-SNAPSHOT` are placed in `9.6` the same way.
  */
-const getRuntimeAgentVersion = (agentVersion: string): string | null => {
+const getAgentVariantVersion = (agentVersion: string): SemVer | null => {
   const coerced = coerce(agentVersion);
-  return coerced ? `${coerced.major}.${coerced.minor}.0` : null;
+  return coerced ? new SemVer(`${coerced.major}.${coerced.minor}.0`) : null;
 };
 
 /**
@@ -35,9 +39,12 @@ export const agentSatisfiesPackageVersionCondition = (
   agentVersion: string,
   versionCondition: string
 ): boolean | undefined => {
-  const runtimeVersion = getRuntimeAgentVersion(agentVersion);
-  if (!runtimeVersion) return undefined;
-  return satisfies(runtimeVersion, versionCondition);
+  const variantVersion = getAgentVariantVersion(agentVersion);
+  if (!variantVersion) return undefined;
+  return agentVersionSatisfiesCondition(
+    `${variantVersion.major}.${variantVersion.minor}`,
+    versionCondition
+  );
 };
 
 /**
@@ -80,8 +87,8 @@ export interface AgentVersionBlockers {
   /** The reported versions of those agents, sorted. */
   blockingVersions: string[];
   /**
-   * The lowest `major.minor.0` version satisfying the condition, only set when it is above every
-   * blocking version, so that it can be suggested as an agent upgrade target.
+   * The lowest version satisfying the condition, only set when its minor is above every blocking
+   * version, so that it can be suggested as an agent upgrade target.
    */
   minVersion?: string;
 }
@@ -97,16 +104,16 @@ const compareAgentVersions = (a: string, b: string): number => {
 const MAX_MINOR_VERSIONS_TO_TRY = 100;
 
 /**
- * The lowest version an agent can be upgraded to for `versionCondition` to keep its inputs. As
- * agents are evaluated at `major.minor.0`, this is the lowest `major.minor.0` satisfying the
- * condition, e.g. `9.4.0` for `>=9.3.5` and `9.6.0` for `~9.4.6 || ~9.5.3 || ^9.6.0`.
+ * The lowest version an agent can be upgraded to for `versionCondition` to keep its inputs, e.g.
+ * `9.3.5` for `>=9.3.5` and `9.4.6` for `~9.4.6 || ~9.5.3 || ^9.6.0`. Only versions that satisfy
+ * the condition are suggested, although earlier patches of the same minor also keep the inputs.
  */
-const getLowestSatisfyingRuntimeVersion = (versionCondition: string): string | undefined => {
+const getLowestSatisfyingVersion = (versionCondition: string): SemVer | undefined => {
   const lowest = minVersion(versionCondition);
   if (!lowest) return undefined;
   for (let minor = lowest.minor; minor <= lowest.minor + MAX_MINOR_VERSIONS_TO_TRY; minor++) {
-    const candidate = `${lowest.major}.${minor}.0`;
-    if (satisfies(candidate, versionCondition)) return candidate;
+    const candidate = getLowestSatisfyingVersionInMinor(lowest.major, minor, versionCondition);
+    if (candidate) return candidate;
   }
   return undefined;
 };
@@ -134,19 +141,20 @@ export const getAgentVersionBlockers = ({
   );
   const blockedCount = blocking.reduce((total, { count }) => total + count, 0);
 
-  const lowestSatisfying = isValidRange
-    ? getLowestSatisfyingRuntimeVersion(versionCondition)
-    : undefined;
+  const lowestSatisfying = isValidRange ? getLowestSatisfyingVersion(versionCondition) : undefined;
   const isUpgradeTarget =
     !!lowestSatisfying &&
     blockingVersions.every((version) => {
-      const runtimeVersion = getRuntimeAgentVersion(version);
-      return !!runtimeVersion && lt(runtimeVersion, lowestSatisfying);
+      const variantVersion = getAgentVariantVersion(version);
+      return (
+        !!variantVersion &&
+        lt(variantVersion, `${lowestSatisfying.major}.${lowestSatisfying.minor}.0`)
+      );
     });
 
   return {
     blockedCount,
     blockingVersions,
-    ...(isUpgradeTarget && blockedCount > 0 ? { minVersion: lowestSatisfying } : {}),
+    ...(isUpgradeTarget && blockedCount > 0 ? { minVersion: lowestSatisfying.version } : {}),
   };
 };

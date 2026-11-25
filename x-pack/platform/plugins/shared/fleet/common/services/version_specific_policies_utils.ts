@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { SemVer } from 'semver';
 import {
+  Range,
   coerce as semverCoerce,
-  intersects as semverIntersects,
+  minVersion as semverMinVersion,
   satisfies as semverSatisfies,
 } from 'semver';
 
@@ -101,10 +103,37 @@ export function removeVersionSuffixFromPolicyId(policyId: string): string {
 const MAJOR_MINOR_VERSION_REGEX = /^(\d+)\.(\d+)$/;
 
 /**
+ * The lowest version of the `major.minor` minor satisfying `versionCondition`, or `null` when no
+ * version of the minor does. Throws when `versionCondition` is not a valid range.
+ *
+ * Unlike `semver.intersects`, which compares bounds, this only finds versions that exist, so
+ * e.g. `>9.4.3 <9.4.4` has no version in `9.4`.
+ */
+export function getLowestSatisfyingVersionInMinor(
+  major: number,
+  minor: number,
+  versionCondition: string
+): SemVer | null {
+  const minorBounds = `>=${major}.${minor}.0 <${major}.${minor + 1}.0-0`;
+  let lowest: SemVer | null = null;
+  // The minor's bounds can only be ANDed with a single comparator set, so each `||` alternative
+  // is bounded separately.
+  for (const comparators of new Range(versionCondition).set) {
+    const candidate = semverMinVersion(
+      new Range([minorBounds, ...comparators.map(({ value }) => value)].join(' '))
+    );
+    if (candidate && (!lowest || candidate.compare(lowest) < 0)) {
+      lowest = candidate;
+    }
+  }
+  return lowest;
+}
+
+/**
  * Evaluates an agent version condition (e.g. `^9.4.4`) for a policy variant or an agent version.
  *
  * A `major.minor` variant label (e.g. `9.4`) serves every patch of that minor, so it is treated
- * as the range `9.4.x`: the condition is met if any patch of the minor could satisfy it. This
+ * as a range over the minor: the condition is met if any version of the minor satisfies it. This
  * avoids dropping inputs for agents that satisfy a patch-level condition (e.g. 9.4.4+ for
  * `^9.4.4`), at the cost of also matching earlier patches of the minor. A full version
  * (e.g. `9.4.4`) is checked with `satisfies`. Invalid versions or conditions are not met.
@@ -116,7 +145,13 @@ export function agentVersionSatisfiesCondition(
   try {
     const majorMinor = agentVersion.trim().match(MAJOR_MINOR_VERSION_REGEX);
     if (majorMinor) {
-      return semverIntersects(`${majorMinor[1]}.${majorMinor[2]}.x`, versionCondition);
+      return (
+        getLowestSatisfyingVersionInMinor(
+          Number(majorMinor[1]),
+          Number(majorMinor[2]),
+          versionCondition
+        ) !== null
+      );
     }
     const coercedVersion = semverCoerce(agentVersion);
     return !!coercedVersion && semverSatisfies(coercedVersion, versionCondition);
