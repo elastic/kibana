@@ -38,8 +38,8 @@ imports:
   - .github/workflows/shared/agent-router.md
 engine:
   id: claude
-  version: "2.1.111"
-  model: claude-opus-4-7
+  version: "2.1.317"
+  model: claude-opus-5-5
   max-turns: 120
   env:
     ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
@@ -47,7 +47,7 @@ engine:
     ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
     # the gateway reads only `Authorization: Bearer`
     AWF_ANTHROPIC_AUTH_HEADER: Authorization
-    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-4-7[1m]
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5-5[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]

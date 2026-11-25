@@ -96,9 +96,9 @@ imports:
 
 engine:
   id: claude
-  version: '2.1.165'
-  # an exact ID: gh-aw resolves the `opus` alias to the newest Opus, which this Claude Code version rejects
-  model: claude-opus-5
+  version: '2.1.317'
+  # an exact ID: gh-aw resolves the `opus` alias to the newest Opus the gateway lists
+  model: claude-opus-5-5
   max-turns: 120
   env:
     BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
@@ -107,7 +107,7 @@ engine:
     ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
     # the gateway reads only `Authorization: Bearer`
     AWF_ANTHROPIC_AUTH_HEADER: Authorization
-    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5-5
     ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
     CLAUDE_CODE_EFFORT_LEVEL: high
