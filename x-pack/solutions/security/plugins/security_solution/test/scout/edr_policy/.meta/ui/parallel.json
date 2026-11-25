@@ -1,5 +1,5 @@
 {
-  "sha1": "fd47c3100145644112ce0b5e4ed63d41de14ba17",
+  "sha1": "e1236cd709d2c843e1de516e60ac569f6e3759b2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_read_only.spec.ts",
-        "line": 24,
+        "line": 26,
         "column": 58
       }
     },
@@ -139,7 +139,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_read_only.spec.ts",
-        "line": 45,
+        "line": 47,
         "column": 20
       }
     }
