@@ -22,7 +22,7 @@ import {
   VIEW_CONTROLLER_SCOPE,
   resourceAttributeField,
 } from '../../../common/otel_data';
-import { SESSIONS_MAX_SESSION_HOURS } from '../../../common/sessions';
+import { MOBILE_MAX_CRASH_DELAY_HOURS, SESSIONS_MAX_SESSION_HOURS } from '../../../common/sessions';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
 import {
   NULLIFY_UNMAPPED_FIELDS,
@@ -92,22 +92,19 @@ const {
   'attribute_rank'
 );
 
-/** How late a crash may be sent after it happened, as the next launch sends it. */
-const MAX_CRASH_DELAY_HOURS = 24;
-
 /**
  * How far before its window a changed mobile session is rebuilt from: a crash sent up to
- * `MAX_CRASH_DELAY_HOURS` late still sees every other event of its session.
+ * `MOBILE_MAX_CRASH_DELAY_HOURS` late still sees every other event of its session.
  */
-export const MOBILE_REBUILD_HOURS = SESSIONS_MAX_SESSION_HOURS + MAX_CRASH_DELAY_HOURS;
+export const MOBILE_REBUILD_HOURS = SESSIONS_MAX_SESSION_HOURS + MOBILE_MAX_CRASH_DELAY_HOURS;
 
 /**
- * A crash sent later than `MAX_CRASH_DELAY_HOURS`: its session's rebuild could start after its
+ * A crash sent later than `MOBILE_MAX_CRASH_DELAY_HOURS`: its session's rebuild could start after its
  * other events, and the partial summary would replace the full one.
  */
 const LATE_CRASH = `COALESCE(${OTEL_EVENT_NAME} IN (${texts(
   CRASH_EVENTS
-)}) AND TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}) < @timestamp - ${MAX_CRASH_DELAY_HOURS} hours, false)`;
+)}) AND TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}) < @timestamp - ${MOBILE_MAX_CRASH_DELAY_HOURS} hours, false)`;
 
 const SDK_LANGUAGE = resourceAttributeField(TELEMETRY_SDK_LANGUAGE);
 

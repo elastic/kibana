@@ -145,7 +145,7 @@ export const toApplicationCounts = (aggregation?: ApplicationsAggregation) =>
 
 /** The mobile applications' documents per index, as rows of `service.name`, `_index`, `docs`. */
 export const mobileCountsQuery = (): ComposerQuery =>
-  mobileDocuments([INDEX_FIELD]).pipe`WHERE ${mobileColumn('serviceName')} IS NOT NULL`
+  mobileDocuments({ metadataFields: [INDEX_FIELD] }).pipe`WHERE ${mobileColumn('serviceName')} IS NOT NULL`
     .pipe`STATS ${resultColumn('docs')} = COUNT(*) BY ${mobileColumn('serviceName')}, ${esql.col(
     INDEX_FIELD
   )}`.pipe`LIMIT ${MAX_MOBILE_COUNT_ROWS}`;

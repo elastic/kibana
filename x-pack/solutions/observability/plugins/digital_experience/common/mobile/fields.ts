@@ -8,7 +8,9 @@
 import { Builder, esql } from '@elastic/esql';
 import type { ESQLBinaryExpression, ESQLColumn } from '@elastic/esql/types';
 import {
+  EXCEPTION_MESSAGE,
   EXCEPTION_TYPE,
+  OTEL_EVENT_NAME,
   RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -19,7 +21,9 @@ import {
 } from '@kbn/apm-types';
 import {
   APP_INSTALLATION_ID,
+  EXCEPTION_STACKTRACE,
   OS_NAME,
+  OTEL_OBSERVED_TIMESTAMP,
   TELEMETRY_DISTRO_NAME,
   attributeField,
   resourceAttributeField,
@@ -39,6 +43,13 @@ export const MOBILE_FIELDS = {
   /** One per install of the app, so it counts users. */
   installationId: resourceAttributeField(APP_INSTALLATION_ID),
   exceptionType: attributeField(EXCEPTION_TYPE),
+  exceptionMessage: attributeField(EXCEPTION_MESSAGE),
+  exceptionStacktrace: attributeField(EXCEPTION_STACKTRACE),
+  /** A crash's group, once ingest stores one; no SDK or pipeline writes it yet. */
+  exceptionFingerprint: attributeField('exception.fingerprint'),
+  eventName: OTEL_EVENT_NAME,
+  /** When the SDK observed a log record: EDOT iOS sets only this one to a crash's time. */
+  observedTimestamp: OTEL_OBSERVED_TIMESTAMP,
   environment: SERVICE_ENVIRONMENT,
   environmentName: RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
 } as const;
@@ -70,6 +81,8 @@ export const RESULT_COLUMNS = {
   osName: 'os_name',
   environments: 'environments',
   environmentNames: 'environment_names',
+  crashTime: 'crash_time',
+  fingerprint: 'fingerprint',
 } as const;
 
 /** A column the mobile queries compute, as an ES|QL column. */

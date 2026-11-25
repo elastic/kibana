@@ -50,6 +50,8 @@ export const MOBILE_SESSIONS_TASK_ID = 'digital_experience:mobile-sessions-summa
 export const MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES = 60;
 /** Events that arrive later than this after their time are not summarized. */
 export const MOBILE_SESSIONS_RECONCILE_HOURS = 24;
+/** How late a crash may be sent after it happened, as the next launch sends it. */
+export const MOBILE_MAX_CRASH_DELAY_HOURS = 24;
 
 /** How often the summaries task runs by default. */
 export const SESSIONS_DEFAULT_FREQUENCY = '1m';
