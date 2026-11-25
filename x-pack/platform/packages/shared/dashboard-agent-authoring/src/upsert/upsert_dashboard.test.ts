@@ -260,6 +260,7 @@ describe('executeDashboardUpsert', () => {
       title: 'Title',
       panels: [],
       options: { use_margins: false, sync_cursor: false },
+      esql_approximation: true,
     };
 
     it('merges options over the existing options', async () => {
@@ -298,6 +299,17 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(result.dashboardData).toEqual(dashboardData);
+    });
+
+    it.each([true, false])('sets esql_approximation to %s', async (esqlApproximation) => {
+      const result = await executeDashboardUpsert({
+        dashboardData: { ...dashboardWithSettings, esql_approximation: !esqlApproximation },
+        upsert: { esql_approximation: esqlApproximation },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.esql_approximation).toBe(esqlApproximation);
     });
 
     it('keeps the settings a call leaves out', async () => {
