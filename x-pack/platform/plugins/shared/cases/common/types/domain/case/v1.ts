@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { Settings } from '../../../bundled-types.gen';
 import {
@@ -195,9 +195,16 @@ export const SimilaritySchema = z.object({
   value: z.string(),
 });
 
-export const SimilarCaseSchema = CaseSchema.extend({
-  similarities: z.object({ observables: z.array(SimilaritySchema) }),
-});
+export const SimilarCaseSchema = lazySchema(() =>
+  CaseSchema.extend({
+    similarities: z.object({
+      /** Up to 50 observables the case shares with the source case. */
+      observables: z.array(SimilaritySchema),
+      /** How many observables the case shares with the source case, across both stores. */
+      total_observables: z.number().optional(),
+    }),
+  })
+);
 
 export type Case = z.infer<typeof CaseSchema>;
 export type Cases = z.infer<typeof CasesSchema>;

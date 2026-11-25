@@ -47,6 +47,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./user_profiles/get_current'));
     // case observables are only available with a license above basic
     loadTestFile(require.resolve('./internal/observables'));
+    // observables stored as cases-observables objects, up to 10,000 per case
+    loadTestFile(require.resolve('./internal/observables_at_scale'));
     // end-to-end observable extraction via the attachment bulkCreate side effect
     loadTestFile(require.resolve('./internal/extract_observables'));
 

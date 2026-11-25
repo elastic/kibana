@@ -40,6 +40,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
+  MAX_OBSERVABLES_PER_CASES_COUNT,
 } from '../../../common/constants';
 import {
   COMMENT_ATTACHMENT_TYPE,
@@ -65,6 +66,15 @@ import {
   transformESModelToCase,
 } from './transform';
 import type { AttachmentService } from '../attachments';
+import type { KeyCountAggs, ObservableKey } from '../observables';
+import {
+  CASE_FIELD_KEY_FIELDS,
+  CASE_FIELD_OBSERVABLES,
+  caseFieldKeysQuery,
+  chunk,
+  keyCountAggs,
+  readKeyCounts,
+} from '../observables';
 import type {
   CasesActivityV2WriterContract,
   CasesAnalyticsV2WriterContract,
@@ -214,6 +224,10 @@ const buildAttachmentSearchClauses = (
     },
   ];
 };
+
+interface FieldKeyCountsAggs {
+  observables: KeyCountAggs;
+}
 
 export class CasesService {
   private readonly log: Logger;
@@ -479,9 +493,12 @@ export class CasesService {
     extendedFieldFilters,
     fieldLabelFilters,
     statsOptions,
+    caseIdsByObservableValue = [],
   }: {
     caseOptions: SavedObjectFindOptionsKueryNode;
     namespaces: string[];
+    /** Cases whose `cases-observables` objects match the search; they join like comment matches. */
+    caseIdsByObservableValue?: string[];
     extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
     fieldLabelFilters?: ResolvedFieldLabelFilter[];
     /**
@@ -500,7 +517,7 @@ export class CasesService {
     const searchQuery = constructSearchQuery({
       search: caseOptions.search,
       searchFields: caseOptions.searchFields,
-      caseIds: caseIdsByAttachmentSearch,
+      caseIds: [...new Set([...caseIdsByAttachmentSearch, ...caseIdsByObservableValue])],
       extendedFieldFilters,
       fieldLabelFilters,
     });
@@ -916,6 +933,90 @@ export class CasesService {
       this.log.error(`Error on find cases: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Runs a raw query over cases, sorted and paged like a find, and returns the matching cases as
+   * case responses without attachment stats.
+   */
+  public async searchCasesPage({
+    namespaces,
+    query,
+    caseOptions,
+  }: {
+    namespaces: string[];
+    query: estypes.QueryDslQueryContainer;
+    caseOptions: Pick<
+      SavedObjectFindOptionsKueryNode,
+      'sortField' | 'sortOrder' | 'page' | 'perPage'
+    >;
+  }): Promise<{ cases: Case[]; total: number }> {
+    const response = await this.searchCases({
+      type: [CASE_SAVED_OBJECT],
+      namespaces,
+      query,
+      track_total_hits: true,
+      ...convertFindQueryParams(caseOptions),
+    });
+
+    const cases = (response.hits?.hits ?? []).flatMap((hit) => {
+      const caseData = (hit._source as { cases?: CasePersistedAttributes } | undefined)?.cases;
+      if (!hit._id?.startsWith(`${CASE_SAVED_OBJECT}:`) || !caseData) {
+        return [];
+      }
+      return [transformESModelToCase(hit._id.slice(CASE_SAVED_OBJECT.length + 1), caseData, hit)];
+    });
+
+    const total =
+      typeof response.hits.total === 'object'
+        ? response.hits.total.value ?? 0
+        : response.hits.total ?? 0;
+
+    return { cases, total };
+  }
+
+  /**
+   * For each key, how many cases matching the query hold it in their `observables` field, in key
+   * order. Only the cases holding one of the keys are aggregated; inside the nested field each
+   * value's bucket counts the cases it reverses to.
+   */
+  public async countCasesByObservableKeys({
+    namespaces,
+    query,
+    keys,
+  }: {
+    namespaces: string[];
+    query: estypes.QueryDslQueryContainer;
+    keys: ObservableKey[];
+  }): Promise<number[]> {
+    const counts: number[] = [];
+
+    for (const keysChunk of chunk(keys, MAX_OBSERVABLES_PER_CASES_COUNT)) {
+      const response = await this.searchCases({
+        type: [CASE_SAVED_OBJECT],
+        namespaces,
+        size: 0,
+        query: { bool: { filter: [query, caseFieldKeysQuery(keysChunk)] } },
+        aggs: {
+          observables: {
+            nested: { path: CASE_FIELD_OBSERVABLES },
+            aggs: keyCountAggs(keysChunk, CASE_FIELD_KEY_FIELDS, {
+              cases: { reverse_nested: {} },
+            }),
+          },
+        },
+      });
+
+      counts.push(
+        ...readKeyCounts(
+          keysChunk,
+          (response.aggregations as FieldKeyCountsAggs | undefined)?.observables,
+          ({ cases }) => cases?.doc_count ?? 0
+        )
+      );
+    }
+
+    return counts;
   }
 
   public async searchCases({

@@ -82,6 +82,13 @@ export interface ObservablesAggregationResult {
   };
 }
 
+/** Observables of the `cases-observables` type, overall and by owner. */
+export type ObservableObjectsAggregationResult = Pick<
+  ObservablesAggregationResult,
+  'byDescription'
+> &
+  Partial<Record<Owner, Pick<ObservablesAggregationResult, 'byDescription'>>>;
+
 export interface TotalWithMaxObservablesAggregationResult {
   buckets: Array<{
     key: number;

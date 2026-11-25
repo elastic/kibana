@@ -7,6 +7,7 @@
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import { MAX_STORED_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import {
   AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
   OBSERVABLE_TYPE_IPV4,
@@ -891,8 +892,8 @@ describe('utils', () => {
     it('returns the correct total when there are cases with max observables', () => {
       expect(
         getTotalWithMaxObservables([
-          { key: 50, doc_count: 20 },
-          { key: 49, doc_count: 15 },
+          { key: MAX_STORED_OBSERVABLES_PER_CASE, doc_count: 20 },
+          { key: MAX_STORED_OBSERVABLES_PER_CASE - 1, doc_count: 15 },
         ])
       ).toEqual(20);
     });

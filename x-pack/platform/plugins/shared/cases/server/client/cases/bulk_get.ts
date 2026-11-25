@@ -17,6 +17,7 @@ import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { SOWithErrors } from '../../common/types';
+import { getObservablesPreviews, mergeObservablesPreview } from '../../common/observables_preview';
 
 type CaseSavedObjectWithErrors = Array<SOWithErrors<CaseAttributes>>;
 
@@ -28,7 +29,7 @@ export const bulkGet = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesBulkGetResponse> => {
   const {
-    services: { caseService, attachmentService },
+    services: { caseService, attachmentService, observableService },
     logger,
     authorization,
   } = clientArgs;
@@ -49,9 +50,15 @@ export const bulkGet = async (
         operation: Operations.bulkGetCases,
       });
 
-    const commentTotals = await attachmentService.getter.getCaseAttatchmentStats({
-      caseIds: authorizedCases.map((theCase) => theCase.id),
-    });
+    const [commentTotals, observablesPreviews] = await Promise.all([
+      attachmentService.getter.getCaseAttatchmentStats({
+        caseIds: authorizedCases.map((theCase) => theCase.id),
+      }),
+      getObservablesPreviews(
+        authorizedCases.map(({ id, attributes }) => ({ id, observables: attributes.observables })),
+        observableService
+      ),
+    ]);
 
     const flattenedCases = authorizedCases.map((theCase) => {
       const { userComments, alerts, events } = commentTotals.get(theCase.id) ?? {
@@ -60,12 +67,15 @@ export const bulkGet = async (
         events: 0,
       };
 
-      return flattenCaseSavedObject({
-        savedObject: theCase,
-        totalComment: userComments,
-        totalAlerts: alerts,
-        totalEvents: events,
-      });
+      return mergeObservablesPreview(
+        flattenCaseSavedObject({
+          savedObject: theCase,
+          totalComment: userComments,
+          totalAlerts: alerts,
+          totalEvents: events,
+        }),
+        observablesPreviews.get(theCase.id)
+      );
     });
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);

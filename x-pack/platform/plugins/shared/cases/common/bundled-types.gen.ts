@@ -850,9 +850,13 @@ export const CaseResponseProperties = lazySchema(() =>
         'A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.\n'
       ),
     /**
-     * Observables attached to the case.
+     * Up to 50 observables of the case, the ones stored on the case first and then the oldest of the rest. A case holds up to 10,000 observables, so compare with total_observables to tell whether it holds more.
      */
-    observables: z.array(CaseObservable).describe('Observables attached to the case.'),
+    observables: z
+      .array(CaseObservable)
+      .describe(
+        'Up to 50 observables of the case, the ones stored on the case first and then the oldest of the rest. A case holds up to 10,000 observables, so compare with total_observables to tell whether it holds more.'
+      ),
     owner: Owner,
     settings: Settings,
     severity: CaseSeverity,
@@ -862,13 +866,15 @@ export const CaseResponseProperties = lazySchema(() =>
     totalAlerts: z.number().int(),
     totalComment: z.number().int(),
     /**
-     * The number of observables attached to the case.
+     * The number of observables of the case, including the ones not listed in observables.
      */
     total_observables: z
       .number()
       .int()
       .nullable()
-      .describe('The number of observables attached to the case.'),
+      .describe(
+        'The number of observables of the case, including the ones not listed in observables.'
+      ),
     /**
      * The number of events attached to the case.
      */
@@ -2120,9 +2126,13 @@ export const CaseResponseGetCase = lazySchema(() =>
         'A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.\n'
       ),
     /**
-     * Observables attached to the case.
+     * Up to 50 observables of the case, the ones stored on the case first and then the oldest of the rest. A case holds up to 10,000 observables, so compare with total_observables to tell whether it holds more.
      */
-    observables: z.array(CaseObservable).describe('Observables attached to the case.'),
+    observables: z
+      .array(CaseObservable)
+      .describe(
+        'Up to 50 observables of the case, the ones stored on the case first and then the oldest of the rest. A case holds up to 10,000 observables, so compare with total_observables to tell whether it holds more.'
+      ),
     owner: Owner,
     settings: Settings,
     severity: CaseSeverity,
@@ -2140,13 +2150,15 @@ export const CaseResponseGetCase = lazySchema(() =>
         'The number of user comments on the case. Use the find case comments API to retrieve comment content.'
       ),
     /**
-     * The number of observables attached to the case.
+     * The number of observables of the case, including the ones not listed in observables.
      */
     total_observables: z
       .number()
       .int()
       .nullable()
-      .describe('The number of observables attached to the case.'),
+      .describe(
+        'The number of observables of the case, including the ones not listed in observables.'
+      ),
     /**
      * The number of events attached to the case.
      */

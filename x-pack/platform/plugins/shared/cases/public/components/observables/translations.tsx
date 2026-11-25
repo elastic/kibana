@@ -219,3 +219,85 @@ export const BULK_DELETE_MESSAGE = (count: number) =>
     defaultMessage:
       'Are you sure you want to delete {count, plural, one {this observable} other {these observables}}?',
   });
+
+export const OBSERVABLES_PAGE_RANGE = (start: number, end: number, total: number) =>
+  i18n.translate('xpack.cases.caseView.observables.pageRange', {
+    values: { start, end, total },
+    defaultMessage: '{start}–{end} of {total}',
+  });
+
+export const OBSERVABLES_PREVIOUS_PAGE = i18n.translate(
+  'xpack.cases.caseView.observables.previousPage',
+  {
+    defaultMessage: 'Previous page',
+  }
+);
+
+export const OBSERVABLES_NEXT_PAGE = i18n.translate('xpack.cases.caseView.observables.nextPage', {
+  defaultMessage: 'Next page',
+});
+
+export const OBSERVABLES_ROWS_PER_PAGE = i18n.translate(
+  'xpack.cases.caseView.observables.rowsPerPage',
+  {
+    defaultMessage: 'Rows per page',
+  }
+);
+
+export const OBSERVABLES_LIMIT_USAGE = (total: number, max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.limitUsage', {
+    values: { total, max },
+    defaultMessage: '{total} of {max} observables',
+  });
+
+export const OBSERVABLES_LIMIT_USAGE_TOOLTIP = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.limitUsageTooltip', {
+    values: { max },
+    defaultMessage: 'A case holds up to {max} observables.',
+  });
+
+export const OBSERVABLES_LIMIT_REACHED_TITLE = i18n.translate(
+  'xpack.cases.caseView.observables.limitReachedTitle',
+  {
+    defaultMessage: 'This case holds the maximum number of observables',
+  }
+);
+
+export const OBSERVABLES_LIMIT_REACHED_DESCRIPTION = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.limitReachedDescription', {
+    values: { max },
+    defaultMessage:
+      'A case holds up to {max} observables. New observables, including the ones extracted from attached alerts, are not added until some are deleted.',
+  });
+
+export const OBSERVABLES_LIMIT_NEAR_TITLE = (total: number, max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.limitNearTitle', {
+    values: { total, max },
+    defaultMessage: 'This case holds {total} of {max} observables',
+  });
+
+export const OBSERVABLES_LIMIT_NEAR_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.observables.limitNearDescription',
+  {
+    defaultMessage:
+      'Observables over the limit, including the ones extracted from attached alerts, are not added.',
+  }
+);
+
+export const ADD_OBSERVABLE_LIMIT_REACHED = i18n.translate(
+  'xpack.cases.caseView.observables.addLimitReached',
+  {
+    defaultMessage: 'This case holds the maximum number of observables',
+  }
+);
+
+export const FILTER_OBSERVABLES_BY_TYPE = i18n.translate(
+  'xpack.cases.caseView.observables.filterByType',
+  {
+    defaultMessage: 'Filter by type',
+  }
+);
+
+export const OBSERVABLES_LOAD_ERROR = i18n.translate('xpack.cases.caseView.observables.loadError', {
+  defaultMessage: 'The observables could not be loaded.',
+});

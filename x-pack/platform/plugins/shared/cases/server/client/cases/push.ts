@@ -55,6 +55,7 @@ import { getAlerts } from '../alerts/get';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import { decodeOrThrowZod } from '../../common/runtime_types';
 import type { ExternalServiceResponse } from '../../../common/types/api';
+import { withCaseObservablesPreview } from '../../common/observables_preview';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
@@ -151,6 +152,7 @@ export const push = async (
       caseConfigureService,
       userActionService,
       alertsService,
+      observableService,
     },
     actionsClient,
     user,
@@ -357,7 +359,7 @@ export const push = async (
       }),
     });
 
-    return decodeOrThrowZod(CaseSchema)(res);
+    return decodeOrThrowZod(CaseSchema)(await withCaseObservablesPreview(res, observableService));
   } catch (error) {
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }

@@ -44,6 +44,10 @@ import type {
 } from '@kbn/cases-plugin/common/types/domain';
 import type {
   AddObservableRequest,
+  BulkCreateObservablesRequest,
+  BulkCreateObservablesResponse,
+  FindObservablesRequest,
+  FindObservablesResponse,
   CaseResolveResponse,
   CasesBulkGetResponse,
   CasesFindResponse,
@@ -59,6 +63,8 @@ import type {
   UserActionInternalFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
+  getCaseBulkCreateObservablesUrl,
+  getCaseFindObservablesUrl,
   getCaseBulkDeleteObservablesUrl,
   getCaseCreateObservableUrl,
   getCaseDeleteObservableUrl,
@@ -156,7 +162,47 @@ export const deleteAllCaseItems = async (es: Client) => {
     deleteMappings(es),
     deleteTemplates(es),
     deleteFieldDefinitions(es),
+    deleteCaseObservables(es),
   ]);
+};
+
+export const deleteCaseObservables = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    q: 'type:cases-observables',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+    conflicts: 'proceed',
+  });
+};
+
+/** How many `cases-observables` objects reference the case. */
+export const countCaseObservableObjects = async (es: Client, caseId: string): Promise<number> => {
+  const { count } = await es.count({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    query: {
+      bool: {
+        filter: [
+          { term: { type: 'cases-observables' } },
+          {
+            nested: {
+              path: 'references',
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'references.type': 'cases' } },
+                    { term: { 'references.id': caseId } },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+  return count;
 };
 
 export const deleteCasesUserActions = async (es: Client): Promise<void> => {
@@ -1143,6 +1189,60 @@ export const bulkDeleteObservables = async ({
     .expect(expectedHttpCode);
 
   return updatedCase;
+};
+
+export const bulkCreateObservables = async ({
+  supertest,
+  caseId,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  params: BulkCreateObservablesRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+}): Promise<BulkCreateObservablesResponse> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseBulkCreateObservablesUrl(caseId)}`
+  );
+  void setupAuth({ apiCall, headers: {}, auth });
+
+  const { body } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+export const findObservables = async ({
+  supertest,
+  caseId,
+  params = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  params?: FindObservablesRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+}): Promise<FindObservablesResponse> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseFindObservablesUrl(caseId)}`
+  );
+  void setupAuth({ apiCall, headers: {}, auth });
+
+  const { body } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return body;
 };
 
 export const similarCases = async ({

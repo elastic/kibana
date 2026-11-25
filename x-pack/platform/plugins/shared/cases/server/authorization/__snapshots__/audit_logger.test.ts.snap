@@ -1289,6 +1289,98 @@ Object {
 `;
 
 exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findObservables" with an error and entity 1`
+] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_observables_find",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases-observables",
+    },
+  },
+  "message": "Failed attempt to access cases-observables [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findObservables" with an error but no entity 1`
+] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_observables_find",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "Failed attempt to access a observables as any owners",
+}
+`;
+
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findObservables" without an error but with an entity 1`
+] = `
+Object {
+  "event": Object {
+    "action": "case_observables_find",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases-observables",
+    },
+  },
+  "message": "User has accessed cases-observables [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findObservables" without an error or entity 1`
+] = `
+Object {
+  "event": Object {
+    "action": "case_observables_find",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "User has accessed a observables as any owners",
+}
+`;
+
+exports[
   `audit_logger log function event structure creates the correct audit event for operation: "findUserActions" with an error and entity 1`
 ] = `
 Object {

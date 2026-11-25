@@ -13,6 +13,7 @@ import type { SortOrder } from '../../../common/ui/types';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
+  CASE_OBSERVABLE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   OWNERS,
@@ -26,6 +27,7 @@ import type {
   CaseAggregationResult,
   FileAttachmentAggregationResults,
   CasesWithAlertsAggs,
+  ObservableObjectsAggregationResult,
 } from '../types';
 import {
   bucketsToOwnerRecord,
@@ -38,6 +40,7 @@ import {
   getSolutionValues,
   getObservablesTotalsByType,
   getTotalWithMaxObservables,
+  sumObservablesTelemetry,
 } from './utils';
 import { buildAttachmentFramework, getAttachmentsByTypeData } from './attachments_by_type';
 import type { CasePersistedAttributes } from '../../common/types/case';
@@ -83,6 +86,7 @@ export const getCasesTelemetryData = async ({
       latestDates,
       filesRes,
       totalParticipants,
+      observablesRes,
     ] = await Promise.all([
       getCasesSavedObjectTelemetry(savedObjectsClient),
       getCasesWithAlertsByOwner(savedObjectsClient),
@@ -91,6 +95,7 @@ export const getCasesTelemetryData = async ({
       getLatestCasesDates({ savedObjectsClient, logger }),
       getFilesTelemetry(savedObjectsClient),
       getTotalParticipants(savedObjectsClient),
+      getObservablesSavedObjectTelemetry(savedObjectsClient),
     ]);
 
     const aggregationsBuckets = getAggregationsBuckets({
@@ -146,7 +151,10 @@ export const getCasesTelemetryData = async ({
           aggregationsBuckets.extractObservablesSource,
           'rule'
         ),
-        observables: getObservablesTotalsByType(casesRes.aggregations?.observables),
+        observables: sumObservablesTelemetry(
+          getObservablesTotalsByType(casesRes.aggregations?.observables),
+          getObservablesTotalsByType(observablesRes.aggregations)
+        ),
         totalWithMaxObservables: getTotalWithMaxObservables(
           casesRes.aggregations?.totalWithMaxObservables?.buckets ?? []
         ),
@@ -167,6 +175,7 @@ export const getCasesTelemetryData = async ({
       },
       sec: getSolutionValues({
         caseAggregations: casesRes.aggregations,
+        observableAggregations: observablesRes.aggregations,
         attachmentsByType,
         filesAggregations: filesRes.aggregations,
         totalWithAlertsByOwner,
@@ -174,6 +183,7 @@ export const getCasesTelemetryData = async ({
       }),
       obs: getSolutionValues({
         caseAggregations: casesRes.aggregations,
+        observableAggregations: observablesRes.aggregations,
         attachmentsByType,
         filesAggregations: filesRes.aggregations,
         totalWithAlertsByOwner,
@@ -181,6 +191,7 @@ export const getCasesTelemetryData = async ({
       }),
       main: getSolutionValues({
         caseAggregations: casesRes.aggregations,
+        observableAggregations: observablesRes.aggregations,
         attachmentsByType,
         filesAggregations: filesRes.aggregations,
         totalWithAlertsByOwner,
@@ -302,11 +313,14 @@ const getObservablesAggregations = () => ({
       byDescription: {
         terms: {
           field: `${CASE_SAVED_OBJECT}.attributes.observables.description`,
+          size: OBSERVABLES_TELEMETRY_TERMS_SIZE,
+          missing: '',
         },
         aggs: {
           byType: {
             terms: {
               field: `${CASE_SAVED_OBJECT}.attributes.observables.typeKey`,
+              size: OBSERVABLES_TELEMETRY_TERMS_SIZE,
             },
           },
         },
@@ -321,6 +335,53 @@ const getObservablesAggregations = () => ({
     },
   },
 });
+
+/** Distinct descriptions and type keys counted; a case configures at most 10 custom types. */
+const OBSERVABLES_TELEMETRY_TERMS_SIZE = 100;
+
+const getObservableObjectsByDescription = () => ({
+  byDescription: {
+    terms: {
+      field: `${CASE_OBSERVABLE_SAVED_OBJECT}.attributes.description`,
+      size: OBSERVABLES_TELEMETRY_TERMS_SIZE,
+      missing: '',
+    },
+    aggs: {
+      byType: {
+        terms: {
+          field: `${CASE_OBSERVABLE_SAVED_OBJECT}.attributes.type_key`,
+          size: OBSERVABLES_TELEMETRY_TERMS_SIZE,
+        },
+      },
+    },
+  },
+});
+
+/** Observables stored as `cases-observables` objects, by description and type, overall and by owner. */
+const getObservablesSavedObjectTelemetry = async (
+  savedObjectsClient: TelemetrySavedObjectsClient
+): Promise<SavedObjectsFindResponse<unknown, ObservableObjectsAggregationResult>> =>
+  savedObjectsClient.find<unknown, ObservableObjectsAggregationResult>({
+    page: 0,
+    perPage: 0,
+    type: CASE_OBSERVABLE_SAVED_OBJECT,
+    namespaces: ['*'],
+    aggs: {
+      ...getObservableObjectsByDescription(),
+      ...OWNERS.reduce(
+        (aggQuery, owner) => ({
+          ...aggQuery,
+          [owner]: {
+            filter: {
+              term: { [`${CASE_OBSERVABLE_SAVED_OBJECT}.attributes.owner`]: owner },
+            },
+            aggs: getObservableObjectsByDescription(),
+          },
+        }),
+        {}
+      ),
+    },
+  });
 
 const getFilesTelemetry = async (
   savedObjectsClient: TelemetrySavedObjectsClient

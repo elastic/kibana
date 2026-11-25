@@ -12,6 +12,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_OBSERVABLE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -411,6 +412,14 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+  },
+  [ReadOperations.FindObservables]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_observables_find',
+    verbs: accessVerbs,
+    docType: 'observables',
+    savedObjectType: CASE_OBSERVABLE_SAVED_OBJECT,
   },
   [ReadOperations.GetConnectors]: {
     ecsType: EVENT_TYPES.access,
