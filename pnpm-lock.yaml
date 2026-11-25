@@ -15227,9 +15227,6 @@ packages:
   '@types/yargs@17.0.33':
     resolution: {integrity: sha512-WpxBCKWPLr4xSsHgz511rFJAM+wS28w2zEO1QDNY5zM/S8ok70NNfztH0xwhqKyaK0OHCbN98LDAZuy1ctxDkA==}
 
-  '@types/yargs@17.0.35':
-    resolution: {integrity: sha512-qUHkeCyQFxMXg79wQfTtfndEC+N9ZZg76HJftDJp+qH2tV7Gj4OJi7l+PiWwJ+pWtW8GwSmqsDj/oymhrTWXjg==}
-
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
 
@@ -28246,7 +28243,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
       '@types/node': 24.10.13
-      '@types/yargs': 17.0.35
+      '@types/yargs': 17.0.33
       chalk: 4.1.2
 
   '@jest/types@30.5.1':
@@ -28256,7 +28253,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
       '@types/node': 24.10.13
-      '@types/yargs': 17.0.35
+      '@types/yargs': 17.0.33
       chalk: 4.1.2
 
   '@jridgewell/gen-mapping@0.3.13':
@@ -29588,7 +29585,7 @@ snapshots:
   '@puppeteer/browsers@3.2.3(proxy-agent@8.0.3(supports-color@10.2.2))(yauzl@3.4.0)':
     dependencies:
       modern-tar: 0.8.6
-      yargs: 18.2.0
+      yargs: 18.0.0
     optionalDependencies:
       proxy-agent: 8.0.3(supports-color@10.2.2)
       yauzl: 3.4.0
@@ -29596,7 +29593,7 @@ snapshots:
   '@puppeteer/browsers@3.2.7(proxy-agent@8.0.3(supports-color@10.2.2))(yauzl@3.4.0)':
     dependencies:
       modern-tar: 0.8.6
-      yargs: 18.2.0
+      yargs: 18.0.0
     optionalDependencies:
       proxy-agent: 8.0.3(supports-color@10.2.2)
       yauzl: 3.4.0
@@ -31281,10 +31278,6 @@ snapshots:
     dependencies:
       '@types/yargs-parser': 21.0.3
 
-  '@types/yargs@17.0.35':
-    dependencies:
-      '@types/yargs-parser': 21.0.3
-
   '@types/yauzl@2.10.3':
     dependencies:
       '@types/node': 24.10.13
@@ -32287,7 +32280,7 @@ snapshots:
       terminal-link: 5.0.0
       utility-types: 3.11.0
       winston: 3.19.0
-      yargs: 18.2.0
+      yargs: 18.0.0
       yargs-parser: 22.0.0
       zod: 4.6.5
     transitivePeerDependencies:
