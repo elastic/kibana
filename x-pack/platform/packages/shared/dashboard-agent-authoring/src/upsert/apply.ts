@@ -33,7 +33,9 @@ const applyMetadata = (
   ...(title !== undefined ? { title } : {}),
   ...(description !== undefined ? { description } : {}),
   ...(timeRange !== undefined ? { time_range: timeRange } : {}),
-  ...(options !== undefined ? { options: { ...dashboardData.options, ...options } } : {}),
+  ...(options !== undefined && Object.keys(options).length > 0
+    ? { options: { ...dashboardData.options, ...options } }
+    : {}),
 });
 
 const updateSections = (
