@@ -80,6 +80,14 @@ URL with `host.docker.internal` as the host, which Kibana sends to the Relay at 
 its public base URL: inside the container `localhost` is the container itself. Connect Slack again
 after it changes. `--skip-relay` leaves all of this out, and `--remove` stops the container.
 
+Once Kibana is up with the Relay, the script also connects the stub's Slack workspace (`T0STUB`:
+connect, approve through the stub, confirm) and binds its `#general` channel, through the same
+routes as the Nightshift settings page. Re-running changes nothing. A Relay with a real Slack app is
+left alone, and the step only warns when it fails. `#general` needs a `relay-dev` image whose stub
+ships that channel (relay-service `feat/slack-stub-ui` or later); with an older image the workspace
+connects and the script warns about the missing channel. `--remove` disconnects the workspace
+first.
+
 On a local Serverless observability project with UIAM, the same script works:
 
 ```bash

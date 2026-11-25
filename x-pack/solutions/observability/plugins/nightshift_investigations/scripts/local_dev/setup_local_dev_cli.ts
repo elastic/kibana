@@ -43,6 +43,7 @@ import {
 import { probeSandboxCredential } from './sandbox_probe';
 import { getRelayDevRunArgs, startRelayDev, stopRelayDev } from './relay_dev';
 import { createJsonClient, resolveKibanaBaseUrl } from './http_client';
+import { connectSlackStub, disconnectSlack } from './slack_stub';
 import { createServerlessAdminCookie } from './serverless_session';
 import {
   addOrcaSpaceContext,
@@ -255,6 +256,10 @@ const setUpKibana = async ({
     log.success(`Saved ${ORCA_CONNECTOR_ID} on the investigator agent`);
   }
 
+  await connectSlackStub(kibana, log).catch((error: Error) =>
+    log.warning(`Could not set up Slack: ${redactor.redact(error.message)}`)
+  );
+
   const { addedContext, addedHosts } = await addOrcaSpaceContext(kibana);
   if (addedContext) log.success('Added the ORCA source code snippet to the space custom context');
   if (addedHosts.length > 0) {
@@ -313,6 +318,10 @@ const remove = async ({
       )
     );
     if (!kibana) throw new Error('Kibana rejects the --kibana-auth credentials');
+    await disconnectSlack(kibana).then(
+      (disconnected) => disconnected && log.info('Disconnected the Slack workspace'),
+      (error: Error) => log.warning(`Could not disconnect Slack: ${error.message}`)
+    );
     await removeOrcaSpaceContext(kibana).then(
       () => log.info('Removed the ORCA source code context and its egress from the space'),
       (error: Error) => log.warning(`Could not update the space context: ${error.message}`)
@@ -401,7 +410,8 @@ run(
       writes a managed block to config/kibana.dev.yml, waits for Kibana to restart, binds the default
       space to the Nightshift service accounts and saves the ORCA connector on the investigator.
       It also runs the Relay dev container (Docker) with a Slack stub and points Kibana at it,
-      unless xpack.actions.relay is already configured.
+      unless xpack.actions.relay is already configured, then connects the stub's Slack workspace and
+      binds its #general channel.
       On a local Serverless project it binds the space as an admin of the mock IdP.
       Re-run it to pick up a rotated credential.
     `,

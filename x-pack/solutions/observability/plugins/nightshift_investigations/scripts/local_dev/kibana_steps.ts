@@ -44,7 +44,7 @@ interface KibanaStatus {
   metrics?: { process?: { uptime_in_millis?: number } };
 }
 
-const poll = async <T>(
+export const poll = async <T>(
   attempt: () => Promise<T | undefined>,
   { timeoutMs, intervalMs }: { timeoutMs: number; intervalMs: number }
 ): Promise<T | undefined> => {

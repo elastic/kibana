@@ -67,6 +67,8 @@ export const RELAY_DEV_UIAM_PROJECT_ID = 'abcdef12345678901234567890123456';
 /** How the Relay container reaches the Kibana on the host. */
 export const RELAY_DEV_HOST_NAME = 'host.docker.internal';
 export const RELAY_DEV_SLACK_STUB_URL = 'http://localhost:3100';
+/** The channel the Slack stub ships with, which the setup binds. */
+export const SLACK_STUB_CHANNEL_NAME = 'general';
 
 export const MANAGED_BLOCK_START = '# >>> nightshift local-dev (managed by setup_local_dev.js) >>>';
 export const MANAGED_BLOCK_END = '# <<< nightshift local-dev (managed by setup_local_dev.js) <<<';
