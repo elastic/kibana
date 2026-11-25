@@ -128,6 +128,7 @@ toc:
           - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/jira-cloud-action-type.md
           - file: connectors-kibana/kubernetes-action-type.md
+          - file: connectors-kibana/microsoft-sql-server-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/monday-com-action-type.md
           - file: connectors-kibana/misp-action-type.md
@@ -146,6 +147,7 @@ toc:
           - file: connectors-kibana/redis-action-type.md
           - file: connectors-kibana/rootly-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
+          - file: connectors-kibana/sentinelone-v2-action-type.md
           - file: connectors-kibana/sentry-action-type.md
           - file: connectors-kibana/servicenow-search-action-type.md
           - file: connectors-kibana/sharepoint-online-action-type.md

@@ -85,6 +85,30 @@ export function SessionSummary({
         }
       ),
     },
+    {
+      id: 'frustration',
+      title: formatNumber(session.frustration.total),
+      titleColor: session.frustration.total > 0 ? ('danger' as const) : undefined,
+      description: i18n.translate(
+        'xpack.digitalExperience.sessionDetail.summary.frustrationLabel',
+        {
+          defaultMessage: 'Frustration signals',
+        }
+      ),
+      breakdown:
+        session.frustration.total === 0
+          ? i18n.translate('xpack.digitalExperience.sessionDetail.summary.frustrationHint', {
+              defaultMessage: 'None. Reported by EDOT Browser with frustration detection.',
+            })
+          : i18n.translate('xpack.digitalExperience.sessionDetail.summary.frustrationBreakdown', {
+              defaultMessage: '{rage} rage, {dead} dead, {error} error clicks',
+              values: {
+                rage: formatNumber(session.frustration.rageClicks),
+                dead: formatNumber(session.frustration.deadClicks),
+                error: formatNumber(session.frustration.errorClicks),
+              },
+            }),
+    },
   ];
 
   // The user, start, environment and outcome are in the page header.
@@ -124,7 +148,7 @@ export function SessionSummary({
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="digitalExperienceSessionSummary">
       <EuiFlexGroup gutterSize="l" wrap responsive={false}>
-        {stats.map(({ id, title, titleColor, description }) => (
+        {stats.map(({ id, title, titleColor, description, breakdown }) => (
           <EuiFlexItem key={id} grow={false} css={{ minWidth: 120 }}>
             <EuiStat
               data-test-subj={`digitalExperienceSessionStat-${id}`}
@@ -133,6 +157,15 @@ export function SessionSummary({
               titleSize="s"
               description={description}
             />
+            {breakdown && (
+              <EuiText
+                size="xs"
+                color="subdued"
+                data-test-subj={`digitalExperienceSessionStatBreakdown-${id}`}
+              >
+                {breakdown}
+              </EuiText>
+            )}
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

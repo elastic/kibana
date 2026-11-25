@@ -1664,7 +1664,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield @elastic/kibana-discover
 /src/platform/test/functional/fixtures/es_archiver/date_n* @elastic/kibana-discover
 /src/platform/test/functional/fixtures/es_archiver/discover @elastic/kibana-discover
-/x-pack/platform/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-discover @elastic/kibana-dashboards
 /x-pack/platform/test/serverless/fixtures/es_archives/pre_calculated_histogram @elastic/kibana-discover
 /x-pack/platform/test/serverless/fixtures/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-discover
 /src/platform/test/functional/apps/discover @elastic/kibana-discover
@@ -2260,7 +2259,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/api_integration/config.ts @elastic/appex-qa
 /x-pack/platform/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/api_integration/services @elastic/appex-qa
-/x-pack/platform/test/api_integration/apis/kibana/config.ts @elastic/appex-qa
 /x-pack/platform/test/load @elastic/appex-qa
 /src/platform/test/tsconfig.json @elastic/appex-qa
 /src/platform/test/plugin_functional/services/index.ts @elastic/appex-qa
@@ -2375,7 +2373,6 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /x-pack/platform/test/functional/page_objects/banners_page.ts @elastic/kibana-core
 /x-pack/platform/test/common/lib/test_data_loader.ts @elastic/kibana-core
 /x-pack/platform/test/api_integration/services/usage_api.ts @elastic/kibana-core
-/x-pack/platform/test/api_integration/apis/kibana @elastic/kibana-core
 /src/platform/test/api_integration/fixtures/import.ndjson @elastic/kibana-core
 /x-pack/platform/test/localization/ @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
 /x-pack/platform/test/localization/tests/lens/ @elastic/kibana-dashboards
@@ -2431,7 +2428,6 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /src/platform/test/common/configure_http2.ts @elastic/kibana-core
 /src/platform/test/api_integration/apis/ui_counters @elastic/kibana-core
 /src/platform/test/api_integration/apis/telemetry @elastic/kibana-core
-/src/platform/test/api_integration/apis/stats @elastic/kibana-core # Assigned per: https://github.com/elastic/kibana/pull/20577
 /src/platform/test/api_integration/apis/saved_objects* @elastic/kibana-core
 /src/platform/test/api_integration/apis/core/*.ts @elastic/kibana-core
 /x-pack/platform/test/usage_collection @elastic/kibana-core
@@ -2439,7 +2435,6 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /x-pack/platform/test/functional_execution_context @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/telemetry @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/status @elastic/kibana-core
-/x-pack/platform/test/api_integration/apis/kibana/stats @elastic/kibana-core
 /x-pack/platform/test/serverless/functional/configs/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/node.options @elastic/kibana-core
 /config/kibana.yml @elastic/kibana-core
@@ -2706,6 +2701,7 @@ src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
 src/platform/packages/shared/kbn-connector-specs/src/lib/clients/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/generic_db_connector* @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/mssql_sql* @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/mcp/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
@@ -2755,6 +2751,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/inbound_webhook/** @e
 src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_sql_server/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/misp/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/monday_com/** @elastic/workchat-eng
@@ -2771,6 +2768,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/prometheus/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/redis/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/sentinelone/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/** @elastic/workchat-eng
@@ -4005,7 +4003,12 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/failed-test-investigator.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-test-fixer.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-verifier.* @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/flaky-fix-curator.* @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/flaky-fix-retrospective.* @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/backlog-groom.* @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/failed-backport-resolver.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/shared/flaky-fix-guidelines.md @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/shared/agent-router.md @elastic/kibana-operations @elastic/appex-qa
 /.github/scripts/ @elastic/apps-dx
 /.github/scripts/bundle_size_limits_comment* @elastic/kibana-operations
 /.github/aw/ @elastic/kibana-operations
@@ -4014,6 +4017,11 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # Scout specialist
 /.libra/specialists/scout.md @elastic/appex-qa
+
+# Task Manager task registration review
+/.agents/skills/task-manager-registration/** @elastic/response-ops
+/.libra/specialists/task-manager-registration.md @elastic/response-ops
+/.github/workflows/task-type-registration-comment.yml @elastic/kibana-operations @elastic/response-ops
 
 # Kibana Localization
 /src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
