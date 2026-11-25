@@ -5,40 +5,72 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
-import { getEntityInventoryTypes } from '../../mock_inventory_api/get_types';
-import { typesFixture } from '../__fixtures__/types';
+import { renderHook } from '@testing-library/react';
+import { HOST_TYPE_FIXTURE, K8S_DEPLOYMENT_TYPE_FIXTURE } from '../../__fixtures__/inventory_data';
+import { useEntityTypes } from '../context/entity_types_context';
 import { useEntityInventoryTypes } from './use_entity_inventory_types';
 
-jest.mock('../../mock_inventory_api/get_types');
+jest.mock('../context/entity_types_context');
 
-const mockGetTypes = getEntityInventoryTypes as jest.MockedFunction<typeof getEntityInventoryTypes>;
+const mockUseEntityTypes = useEntityTypes as jest.MockedFunction<typeof useEntityTypes>;
+
+const state = (overrides: Partial<ReturnType<typeof useEntityTypes>> = {}) => ({
+  data: [HOST_TYPE_FIXTURE, K8S_DEPLOYMENT_TYPE_FIXTURE],
+  loading: false,
+  error: undefined,
+  refresh: jest.fn(),
+  ...overrides,
+});
 
 describe('useEntityInventoryTypes', () => {
-  beforeEach(() => {
-    mockGetTypes.mockReset();
-  });
-
-  it('loads the types', async () => {
-    mockGetTypes.mockResolvedValue(typesFixture);
+  it('maps the registered types, with the category of the page they belong to', () => {
+    mockUseEntityTypes.mockReturnValue(state());
 
     const { result } = renderHook(() => useEntityInventoryTypes());
 
-    expect(result.current.isLoading).toBe(true);
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    expect(result.current.types).toEqual(typesFixture);
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeUndefined();
+    expect(result.current.types.map(({ type, category }) => ({ type, category }))).toEqual([
+      { type: 'host', category: 'hosts' },
+      { type: 'k8s.deployment', category: 'kubernetes' },
+    ]);
   });
 
-  it('returns the error when the request fails', async () => {
-    mockGetTypes.mockRejectedValue(new Error('failed'));
+  it('keeps the suggested filters and the sources of the type', () => {
+    mockUseEntityTypes.mockReturnValue(state());
 
     const { result } = renderHook(() => useEntityInventoryTypes());
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.error).toEqual(new Error('failed'));
-    expect(result.current.types).toEqual([]);
+    const [host] = result.current.types;
+    expect(host.suggestedFilters).toEqual(HOST_TYPE_FIXTURE.suggestedFilters);
+    expect(host.sources).toEqual(
+      HOST_TYPE_FIXTURE.sources.map(({ indexPattern }) => ({ indexPattern }))
+    );
+  });
+
+  it('labels an attribute from the column of the same name, only for the suggested filters', () => {
+    mockUseEntityTypes.mockReturnValue(state());
+
+    const { result } = renderHook(() => useEntityInventoryTypes());
+
+    const deployment = result.current.types.find(({ type }) => type === 'k8s.deployment');
+    expect(deployment?.attributes).toEqual(
+      expect.arrayContaining([
+        { name: 'kubernetes.namespace', label: 'Namespace' },
+        { name: 'k8s.cluster.name', label: 'Cluster' },
+      ])
+    );
+    expect(deployment?.attributes.map(({ name }) => name).sort()).toEqual(
+      [...K8S_DEPLOYMENT_TYPE_FIXTURE.suggestedFilters].sort()
+    );
+  });
+
+  it('reports the loading state and the error of the request', () => {
+    const error = new Error('failed');
+    mockUseEntityTypes.mockReturnValue(state({ data: [], loading: true, error }));
+
+    const { result } = renderHook(() => useEntityInventoryTypes());
+
+    expect(result.current).toEqual({ types: [], isLoading: true, error });
   });
 });

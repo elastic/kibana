@@ -5,36 +5,32 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
-import { getEntityInventoryTypes } from '../../mock_inventory_api/get_types';
+import { useMemo } from 'react';
+import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
+import { getCategoryOfType } from '../utils/entity_categories';
 import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
+import { useEntityTypes } from '../context/entity_types_context';
+
+const toDefinition = ({
+  type,
+  name,
+  columns,
+  sources,
+  suggestedFilters,
+}: InventoryType): EntityInventoryTypeDefinition => ({
+  type,
+  name,
+  category: getCategoryOfType(type),
+  sources: sources.map(({ indexPattern }) => ({ indexPattern })),
+  attributes: columns
+    .filter((column) => suggestedFilters.includes(column.name))
+    .map(({ name: attributeName, label }) => ({ name: attributeName, label })),
+  suggestedFilters,
+});
 
 export const useEntityInventoryTypes = () => {
-  // TODO: the implementation is temporary. Replace the mock call and the loading state with a `useQuery` that calls the real route in https://github.com/elastic/observability-dev/issues/6355
-  const [state, setState] = useState<{
-    types: EntityInventoryTypeDefinition[];
-    isLoading: boolean;
-    error?: Error;
-  }>({ types: [], isLoading: true });
+  const { data, loading, error } = useEntityTypes();
+  const types = useMemo(() => data.map(toDefinition), [data]);
 
-  useEffect(() => {
-    let isCurrent = true;
-    getEntityInventoryTypes()
-      .then((types) => {
-        if (isCurrent) {
-          setState({ types, isLoading: false });
-        }
-      })
-      .catch((error: Error) => {
-        if (isCurrent) {
-          setState({ types: [], isLoading: false, error });
-        }
-      });
-
-    return () => {
-      isCurrent = false;
-    };
-  }, []);
-
-  return state;
+  return { types, isLoading: loading, error };
 };
