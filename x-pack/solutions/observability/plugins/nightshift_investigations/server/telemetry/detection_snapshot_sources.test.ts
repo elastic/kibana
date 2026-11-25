@@ -61,18 +61,16 @@ describe('createDetectionSnapshotSources', () => {
     });
   });
 
-  it('lists one alert source per connector that imports alerts', async () => {
+  it('lists every connector with its type and inbound flag', async () => {
     const { sources, getAll } = setup();
     getAll.mockResolvedValue([
       { actionTypeId: '.datadog', isInboundEventsEnabled: true },
-      { actionTypeId: '.slack2', isInboundEventsEnabled: true },
-      { actionTypeId: '.datadog', isInboundEventsEnabled: true },
-      { actionTypeId: '.datadog', isInboundEventsEnabled: false },
+      { actionTypeId: '.slack2', isInboundEventsEnabled: false },
     ]);
 
-    await expect(sources.listExternalConnectorSources('default')).resolves.toEqual([
-      'datadog',
-      'datadog',
+    await expect(sources.listConnectors('default')).resolves.toEqual([
+      { actionTypeId: '.datadog', isInboundEventsEnabled: true },
+      { actionTypeId: '.slack2', isInboundEventsEnabled: false },
     ]);
   });
 

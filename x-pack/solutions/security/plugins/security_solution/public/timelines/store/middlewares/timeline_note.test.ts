@@ -18,6 +18,7 @@ import {
   addNote,
   addNoteToEvent,
   pinEvent,
+  setSavePromptDismissed,
 } from '../actions';
 import { updateNote } from '../../../common/store/app/actions';
 import { createNote } from '../../components/notes/helpers';
@@ -82,6 +83,31 @@ describe('Timeline note middleware', () => {
     expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
     expect(endTimelineSavingMock).toHaveBeenCalled();
     expect(selectTimelineById(store.getState(), TimelineId.test).noteIds).toContain(testNote.id);
+  });
+
+  it('should re-arm the unsaved changes prompt once a note is persisted', async () => {
+    (persistNote as jest.Mock).mockResolvedValue({
+      note: {
+        noteId: testNote.id,
+      },
+    });
+    store.dispatch(setSavePromptDismissed({ id: TimelineId.test, dismissed: true }));
+    expect(selectTimelineById(store.getState(), TimelineId.test).savePromptDismissed).toBe(true);
+
+    await store.dispatch(updateNote({ note: testNote }));
+    await store.dispatch(addNote({ id: TimelineId.test, noteId: testNote.id }));
+
+    expect(selectTimelineById(store.getState(), TimelineId.test).savePromptDismissed).toBe(false);
+  });
+
+  it('should keep the dismissal when persisting the note fails', async () => {
+    (persistNote as jest.Mock).mockRejectedValue(new Error('boom'));
+    store.dispatch(setSavePromptDismissed({ id: TimelineId.test, dismissed: true }));
+
+    await store.dispatch(updateNote({ note: testNote }));
+    await store.dispatch(addNote({ id: TimelineId.test, noteId: testNote.id }));
+
+    expect(selectTimelineById(store.getState(), TimelineId.test).savePromptDismissed).toBe(true);
   });
 
   it('should persist a note on an event of a timeline', async () => {

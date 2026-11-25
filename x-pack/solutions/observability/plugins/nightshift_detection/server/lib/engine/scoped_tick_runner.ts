@@ -10,7 +10,7 @@ import { inject, injectable } from 'inversify';
 import type { KibanaRequest } from '@kbn/core/server';
 import { AccountScope } from './account_scope';
 import { EngineRunner } from './run_engine';
-import type { TickResult } from './tick_result';
+import type { TickResult } from '../../../common/tick';
 import { RunContext } from './tokens';
 
 const MINUTE_MS = 60_000;

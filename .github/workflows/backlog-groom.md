@@ -23,24 +23,33 @@ steps:
       corepack prepare "pnpm@${PNPM_VERSION}" --activate
       pnpm --version
   - name: Bootstrap Kibana
-    run: pnpm kbn bootstrap
+    # `id-token: write` covers the whole job: keep the OIDC request variables away from install scripts
+    run: exec env -u ACTIONS_ID_TOKEN_REQUEST_TOKEN -u ACTIONS_ID_TOKEN_REQUEST_URL pnpm kbn bootstrap
 permissions:
   contents: read
   issues: read
   pull-requests: read
+  # Agent Router token for the agent (see shared/agent-router.md)
+  id-token: write
+  # threat detection runs on Copilot
+  copilot-requests: write
 imports:
   - .github/workflows/shared/app-dex-agents-otel.md
+  - .github/workflows/shared/agent-router.md
 engine:
   id: claude
-  version: "2.1.111"
-  model: opus
+  version: "2.1.317"
+  model: claude-opus-5-5
   max-turns: 120
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-    ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.7[1m]
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
+    ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
+    # `Bearer <token>`, exported by shared/agent-router.md. The fallback passes the activation job's key check.
+    ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
+    # the gateway reads only `Authorization: Bearer`
+    AWF_ANTHROPIC_AUTH_HEADER: Authorization
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5-5[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-5-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-5-5
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 tools:
   bash: true
@@ -54,10 +63,16 @@ network:
     - github
     - node
     - kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app
-    - openrouter.ai
 checkout:
   fetch-depth: 0
 safe-outputs:
+  threat-detection:
+    # The detection job can't request an OIDC token, so it runs on Copilot.
+    engine:
+      id: copilot
+      model: claude-opus-5
+    # a detection failure blocks the outputs instead of passing with a warning
+    continue-on-error: false
   report-failure-as-issue: false
   staged: true
   create-pull-request:

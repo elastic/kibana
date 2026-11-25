@@ -71,14 +71,42 @@ describe('PartialBucketsEndzones', () => {
     expect(lastShadedZones()).toEqual([]);
   });
 
-  it('shades whole edge buckets outside the domain of areas, as Lens does', () => {
-    // `isFullBin` zones lie outside the domain, so an area chart draws nothing.
+  it('shades the partial edge buckets of lines and areas inside their domain', () => {
+    // Their domain reaches the last bucket's end, from 0 to 3 hours: the zones run from its edges
+    // to the range's, over the parts of the edge buckets outside it.
     renderEndzones({ start: HOUR / 2, end: 2.5 * HOUR }, { hasBars: false });
 
     expect(lastShadedZones()).toEqual([
-      { coordinates: { x1: 0 } },
-      { coordinates: { x0: 3 * HOUR } },
+      { coordinates: { x1: HOUR / 2 } },
+      { coordinates: { x0: 2.5 * HOUR } },
     ]);
+  });
+
+  it('shades nothing on lines and areas either when the range matches the bucket edges', () => {
+    renderEndzones({ start: 0, end: 3 * HOUR }, { hasBars: false });
+
+    expect(lastShadedZones()).toEqual([]);
+  });
+
+  it('shades the rest of a last month longer than the shortest one', () => {
+    // February sets the shortest bucket; the range ends inside March, the last one
+    const months = ['2026-01-01', '2026-02-01', '2026-03-01'].map((day) => ({
+      timestamp: Date.parse(`${day}T00:00:00.000Z`),
+    }));
+    const end = Date.parse('2026-03-30T00:00:00.000Z');
+    const xDomain = getTimeChartXDomain({
+      points: months,
+      histogram: {
+        interval: { value: 1, unit: 'M' },
+        start: Date.parse('2026-01-01T00:00:00.000Z'),
+        end,
+      },
+      timeZone: 'UTC',
+      hasBars: true,
+    });
+    render(<PartialBucketsEndzones xDomain={xDomain} />, { wrapper: EuiProvider });
+
+    expect(lastShadedZones()).toEqual([{ coordinates: { x0: end } }]);
   });
 
   it('renders nothing without buckets', () => {
