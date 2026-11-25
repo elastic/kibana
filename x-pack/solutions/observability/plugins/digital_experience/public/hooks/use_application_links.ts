@@ -12,6 +12,7 @@ import qs from 'query-string';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
 import type { OverviewFilters } from '../../common/overview_filters';
 import { encodeOverviewFilters } from '../../common/overview_filters_param';
+import { APPLICATION_TYPE } from '../../common/application_source';
 import type { ApplicationSource } from '../../common/types/applications';
 import { SHARED_FILTER_NAMES } from '../utils/overview_filters_query';
 import type { SessionsListUrlQuery } from '../utils/sessions_list_query';
@@ -66,6 +67,10 @@ export const useApplicationLinks = (
   const listQuery = useListQuery();
   const sharedFilters = useSharedFilters();
   const { query: urlQuery } = useDigitalExperienceParams('/');
+  // Every page using these links is an application's, so the route has validated these already.
+  const {
+    query: { osName, release, compare },
+  } = useDigitalExperienceParams('/{serviceName}');
   const { search } = useLocation();
 
   return useMemo(() => {
@@ -79,9 +84,15 @@ export const useApplicationLinks = (
       ...listQuery,
       ...pick(urlQuery, OVERVIEW_QUERY_KEYS),
       ...(filters ? { filters } : {}),
+      // Compare, so it is still on back on the Overview after another tab.
+      compare,
+      // The mobile page's filters; the list's `applicationType` gives it the mobile page.
+      ...(listQuery.applicationType === APPLICATION_TYPE.mobile
+        ? { osName: osName || undefined, release: release || undefined }
+        : {}),
       source,
     };
-    const query = { ...listQuery, ...sharedFilters, source };
+    const query = { ...listQuery, ...sharedFilters, compare, source };
     const overviewPath = router.link('/{serviceName}', {
       path: { serviceName },
       query: tabQuery,
@@ -113,5 +124,17 @@ export const useApplicationLinks = (
           })
         ),
     };
-  }, [application, router, listQuery, sharedFilters, urlQuery, search, serviceName, source]);
+  }, [
+    application,
+    router,
+    listQuery,
+    sharedFilters,
+    urlQuery,
+    search,
+    serviceName,
+    source,
+    osName,
+    release,
+    compare,
+  ]);
 };

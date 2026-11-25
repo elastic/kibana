@@ -11,7 +11,7 @@ import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { BoostProfile, BoostRule } from '../../common/types';
 import type { BoostTarget } from './local_explain';
-import { explainTargets, getBoostTargets } from './local_explain';
+import { explainTargets, getBoostTargets, resolveIndices } from './local_explain';
 
 const PROFILES: BoostProfile[] = [
   {
@@ -47,11 +47,7 @@ const rule = (
   is_builtin: false,
 });
 
-const index = (name: string, isHidden = false): BoostTarget => ({
-  name,
-  type: 'indices',
-  isHidden,
-});
+const index = (name: string): BoostTarget => ({ name, type: 'indices' });
 
 /** The names of the rules that match each target, highest ranked first. */
 const getMatchedRuleNames = (rules: BoostRule[], targets: BoostTarget[]) =>
@@ -78,6 +74,12 @@ const dataStream = (
   rollover_on_write: false,
 });
 
+const DATA_STREAMS = [
+  dataStream('logs'),
+  dataStream('.hidden-logs', { hidden: true }),
+  dataStream('system', { hidden: true, system: true }),
+];
+
 const createClient = () => {
   const client = elasticsearchServiceMock.createScopedClusterClient();
   client.asCurrentUser.indices.resolveIndex.mockResolvedValue({
@@ -91,13 +93,6 @@ const createClient = () => {
     aliases: [],
     data_streams: [],
   });
-  client.asCurrentUser.indices.getDataStream.mockResolvedValue({
-    data_streams: [
-      dataStream('logs'),
-      dataStream('.hidden-logs', { hidden: true }),
-      dataStream('system', { hidden: true, system: true }),
-    ],
-  });
   return client;
 };
 
@@ -110,56 +105,49 @@ const forbidden = () =>
     meta: {} as DiagnosticResult['meta'],
   });
 
-describe('getBoostTargets', () => {
-  it('lists regular indices and data streams, without backing or system ones', async () => {
+describe('resolveIndices', () => {
+  it('resolves every index, hidden ones included', async () => {
     const client = createClient();
 
-    expect(await getBoostTargets(client)).toEqual([
-      { name: 'products', type: 'indices', isHidden: false },
-      { name: '.hidden-index', type: 'indices', isHidden: true },
-      { name: 'logs', type: 'data_streams', isHidden: false },
-      { name: '.hidden-logs', type: 'data_streams', isHidden: true },
-    ]);
+    expect(await resolveIndices(client)).toHaveLength(5);
     expect(client.asCurrentUser.indices.resolveIndex).toHaveBeenCalledWith({
       name: '*',
       expand_wildcards: ['open', 'hidden'],
     });
-    expect(client.asCurrentUser.indices.getDataStream).toHaveBeenCalledWith({
-      name: '*',
-      expand_wildcards: ['open', 'hidden'],
-    });
   });
 
-  it('lists nothing to a user without index privileges', async () => {
+  it('resolves none for a user without index privileges', async () => {
     const client = createClient();
     client.asCurrentUser.indices.resolveIndex.mockRejectedValue(forbidden());
-    client.asCurrentUser.indices.getDataStream.mockRejectedValue(forbidden());
 
-    expect(await getBoostTargets(client)).toEqual([]);
-  });
-
-  it('keeps the indices when only the data streams lookup is forbidden', async () => {
-    const client = createClient();
-    client.asCurrentUser.indices.getDataStream.mockRejectedValue(forbidden());
-
-    expect(await getBoostTargets(client)).toEqual([
-      { name: 'products', type: 'indices', isHidden: false },
-      { name: '.hidden-index', type: 'indices', isHidden: true },
-    ]);
+    expect(await resolveIndices(client)).toEqual([]);
   });
 
   it('fails on other errors', async () => {
     const client = createClient();
     client.asCurrentUser.indices.resolveIndex.mockRejectedValue(new Error('Unavailable'));
 
-    await expect(getBoostTargets(client)).rejects.toThrow('Unavailable');
+    await expect(resolveIndices(client)).rejects.toThrow('Unavailable');
+  });
+});
+
+describe('getBoostTargets', () => {
+  it('lists regular indices and data streams, without backing or system ones', async () => {
+    const indices = await resolveIndices(createClient());
+
+    expect(getBoostTargets(indices, DATA_STREAMS)).toEqual([
+      { name: 'products', type: 'indices' },
+      { name: '.hidden-index', type: 'indices' },
+      { name: 'logs', type: 'data_streams' },
+      { name: '.hidden-logs', type: 'data_streams' },
+    ]);
   });
 });
 
 describe('explainTargets', () => {
-  it('keeps the type and whether the target is hidden', () => {
-    expect(explainTargets([], PROFILES, [index('.hidden', true)])).toEqual([
-      { name: '.hidden', type: 'indices', isHidden: true, matchedRuleNames: [] },
+  it('keeps the type of the target', () => {
+    expect(explainTargets([], PROFILES, [index('products')])).toEqual([
+      { name: 'products', type: 'indices', matchedRuleNames: [] },
     ]);
   });
 
@@ -223,7 +211,7 @@ describe('explainTargets', () => {
     expect(
       getMatchedRuleNames(
         [rule('indices', '*'), rule('dataStreams', '*', 0, 'recent')],
-        [index('logs'), { name: 'logs', type: 'data_streams', isHidden: false }]
+        [index('logs'), { name: 'logs', type: 'data_streams' }]
       )
     ).toEqual([
       ['logs', ['indices']],

@@ -12,6 +12,7 @@
   ".inboundWebhook": "Inbound webhook receiver with `actions: {}`. It makes no outbound ctx.client requests to any vendor API.",
   ".jenkins": "Self-hosted Jenkins at a user-configured base URL. Its remote access API (/job/{name}/api/json, /build, /buildWithParameters, /queue/item/{id}/api/json, ...) is documented only in prose (jenkins.io/doc/book/using/remote-access-api). Jenkins publishes no OpenAPI, and the surface depends on installed plugins.",
   ".microsoft_defender_endpoint2": "Microsoft publishes no OpenAPI/Swagger for the Defender for Endpoint API (https://learn.microsoft.com/en-us/defender-endpoint/api/apis-intro); the HTML reference pages are the only source. The Microsoft Graph OpenAPI does not describe this API.",
+  ".microsoft_sql_server": "Talks to SQL Server through the mssql driver's TDS protocol, not an HTTP API",
   ".mongodb": "Talks to MongoDB through its driver's wire protocol, not an HTTP API",
   ".mysql": "Talks to MySQL through its driver's wire protocol, not an HTTP API",
   ".new_relic": "GraphQL-only: every action POSTs a query to NerdGraph (https://api.newrelic.com/graphql, plus the EU and JP regional hosts). The GraphQL adapter can record it, but New Relic serves its schema by introspection behind an API key, so it stays exempt until credentials exist.",

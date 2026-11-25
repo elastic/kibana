@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { CommonStepDefinition } from './step_registry/types';
+export type { CommonStepDefinition, StepExposure } from './step_registry/types';
 export type {
   CommonTriggerDefinition,
   TriggerDocumentation,

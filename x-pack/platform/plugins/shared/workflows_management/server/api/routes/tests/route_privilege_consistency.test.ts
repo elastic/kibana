@@ -701,6 +701,7 @@ describe('Route privilege/ES-operation consistency', () => {
       config: defaultConfig,
       spaces: mockSpaces,
       audit: mockAudit,
+      analytics: coreMock.createSetup().analytics,
     };
 
     registerWorkflowRoutes(deps);

@@ -512,6 +512,7 @@ export const EpisodesTable = ({
           getEpisodeDetailsHref={getEpisodeDetailsHref}
           services={{
             agentBuilder: services.agentBuilder,
+            application: services.application,
             data: services.data,
             http: services.http,
             expressions: services.expressions,

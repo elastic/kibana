@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { ContentListWrapper } from '@kbn/scout';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { UI_SLOW_RENDER_TIMEOUT_MS } from '../../../constants';
 import type { AlertingMountConfig } from './alerting_mount_config';
 
 export class RulesListPage {
   public readonly tagsFilterButton: Locator;
+  public readonly tagsFilterSearch: Locator;
   public readonly selectAllRulesButton: Locator;
   public readonly bulkActionsButton: Locator;
   public readonly bulkDisableMenuItem: Locator;
   public readonly rulesListTable: Locator;
   public readonly ruleSummaryFlyout: Locator;
+  public readonly contentList: ContentListWrapper;
   /** Header "Create rule" split button; hidden for read-only users. */
   public readonly createRuleButton: Locator;
   /** Heading tab linking to the classic (v1) Rules page; hidden without v1 read access. */
@@ -25,11 +28,13 @@ export class RulesListPage {
 
   constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.tagsFilterButton = this.page.testSubj.locator('rulesListTagsFilter');
+    this.tagsFilterSearch = this.page.testSubj.locator('rulesListTagsFilterSearch');
     this.selectAllRulesButton = this.page.testSubj.locator('selectAllRulesButton');
     this.bulkActionsButton = this.page.testSubj.locator('bulkActionsButton');
     this.bulkDisableMenuItem = this.page.testSubj.locator('bulkDisableRules');
     this.rulesListTable = this.page.testSubj.locator('rulesListTable');
     this.ruleSummaryFlyout = this.page.testSubj.locator('ruleSummaryFlyout');
+    this.contentList = new ContentListWrapper(this.page);
     this.createRuleButton = this.page.testSubj.locator('createRuleButton');
     this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');
     this.v2RulesTab = this.page.testSubj.locator('v2RulesTab');
@@ -37,6 +42,11 @@ export class RulesListPage {
 
   async goto() {
     await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.paths.rules}`);
+  }
+
+  async scrollRulesListBy(deltaY: number): Promise<void> {
+    await this.rulesListTable.hover();
+    await this.page.mouse.wheel(0, deltaY);
   }
 
   tagsFilterOption(tag: string) {
@@ -71,6 +81,7 @@ export class RulesListPage {
    */
   async filterBySingleTag(tag: string) {
     await this.tagsFilterButton.click();
+    await this.tagsFilterSearch.fill(tag);
     const option = this.tagsFilterOption(tag);
     await option.waitFor({ state: 'visible', timeout: UI_SLOW_RENDER_TIMEOUT_MS });
     await option.click();

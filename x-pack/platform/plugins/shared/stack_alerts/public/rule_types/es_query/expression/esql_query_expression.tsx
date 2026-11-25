@@ -20,13 +20,13 @@ import {
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import {
-  getESQLResults,
   getESQLTimeField,
   getEsqlSourceColumns,
   getProjectRoutingFromEsqlQuery,
   getSourceCommandQueryFromESQLQuery,
 } from '@kbn/esql-utils';
-import { type AggregateQuery } from '@kbn/es-query';
+import { type AggregateQuery, getTimeZoneFromSettings } from '@kbn/es-query';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   firstFieldOption,
@@ -37,7 +37,6 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { EsqlQuery } from '@elastic/esql';
 import useDebounce from 'react-use/lib/useDebounce';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
@@ -218,18 +217,17 @@ export const EsqlQueryExpression: React.FC<
     }
     setIsLoading(true);
     const { timeFilter, timeRange } = getTimeFilter(timeField, window);
-    const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
 
-    const table = await getESQLResults({
-      esqlQuery: esqlQuery.esql,
-      search: data.search.search,
+    const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
+    const { rawResponse } = await data.search.esql({
+      query: esqlQuery.esql,
       dropNullColumns: true,
-      timeRange,
-      timezone,
+      timeZone: timezone ? getTimeZoneFromSettings(timezone) : undefined,
       filter: timeFilter,
+      kibanaQueryContext: { timeRange },
     });
-    if (table.response) {
-      const esqlTable = transformToEsqlTable(table.response);
+    if (rawResponse) {
+      const esqlTable = transformToEsqlTable(rawResponse);
       const { results, duplicateAlertIds, longAlertIds, rows, cols } = await getEsqlQueryHits(
         esqlTable,
         esqlQuery.esql,
@@ -262,7 +260,7 @@ export const EsqlQueryExpression: React.FC<
     timeWindowUnit,
     currentRuleParams,
     esqlQuery,
-    data.search.search,
+    data.search,
     uiSettings,
     timeField,
     isServerless,
