@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
 import {
@@ -45,7 +45,7 @@ export const pinBaselineCmd: Command<void> = {
       --reason         Why this run is being pinned (recorded on the pointer)
       --pinned-by      Who/what pinned it (defaults to USER or the CI pipeline slug)
       --space-ids      Spaces the experiment was run in
-      --expect-scores  Fail unless the pinned snapshot holds exactly this many scores
+      --expect-scores  Fail the pin, before the baseline changes, unless it holds exactly this many scores
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -84,23 +84,17 @@ export const pinBaselineCmd: Command<void> = {
     });
     const evalsClient = new EvalsClient(kbnClient, log, { spaceIds });
 
+    // The expected count travels with the pin request: the route validates it before any
+    // pointer is published, so a pin issued while score export was still in flight fails
+    // without the active baseline ever changing.
     const baseline = await evalsClient.pinBaseline({
       suiteId,
       executionId,
       reason,
       pinnedBy,
+      expectedScoreCount: expectedScores,
     });
 
-    // Verify the snapshot is complete before trusting it as the baseline: a pin issued
-    // while score export was still in flight would bless a partial run. The pipeline
-    // passes the count it exported; without it, the live scores are the expectation.
-    if (expectedScores !== undefined && baseline.score_count !== expectedScores) {
-      throw createFailError(
-        `Pinned baseline ${baseline.baseline_id} holds ${baseline.score_count} score(s), but ` +
-          `${expectedScores} were expected. The run may not have finished exporting scores ` +
-          `before the pin; re-pin once the export completed.`
-      );
-    }
     if (expectedScores === undefined) {
       const liveScores = await evalsClient.getExperimentScores(executionId, {
         suiteId,

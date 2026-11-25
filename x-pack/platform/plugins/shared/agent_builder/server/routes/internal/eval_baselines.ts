@@ -26,6 +26,7 @@ import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { EVALS_API_PRIVILEGES } from '@kbn/evals-plugin/common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
+import { PinnedBaselineScoreCountMismatchError } from '../../services/eval_baselines/errors';
 
 /**
  * One execution is one baseline per space: the id is derived from the tuple rather than
@@ -89,22 +90,31 @@ export function registerEvalBaselineRoutes({
         execution_id: executionId,
         reason,
         pinned_by: pinnedBy,
+        expected_score_count: expectedScoreCount,
       } = request.body;
       const { evalBaselines } = getInternalServices();
       const spaceId = (await context.agentBuilder).spaces.getSpaceId();
       const baselineId = deterministicBaselineId(spaceId, suiteId, executionId);
 
-      // An already-pinned baseline promotes its stored snapshot without reading the live
-      // scores: rollback must not depend on data it will not use. The source scores may
-      // have aged out of retention, grown past the snapshot limit, or gained a second
-      // judge since the snapshot was taken — none of which invalidates the stored pin.
-      const repinned = await evalBaselines.repin({
-        baselineId,
-        pinnedBy: pinnedBy ?? null,
-        reason: reason ?? null,
-      });
-      if (repinned) {
-        return response.ok({ body: { baseline: repinned } });
+      try {
+        // An already-pinned baseline promotes its stored snapshot without reading the live
+        // scores: rollback must not depend on data it will not use. The source scores may
+        // have aged out of retention, grown past the snapshot limit, or gained a second
+        // judge since the snapshot was taken — none of which invalidates the stored pin.
+        const repinned = await evalBaselines.repin({
+          baselineId,
+          pinnedBy: pinnedBy ?? null,
+          reason: reason ?? null,
+          expectedScoreCount,
+        });
+        if (repinned) {
+          return response.ok({ body: { baseline: repinned } });
+        }
+      } catch (error) {
+        if (error instanceof PinnedBaselineScoreCountMismatchError) {
+          return response.badRequest({ body: { message: error.message } });
+        }
+        throw error;
       }
 
       const [, startDeps] = await coreSetup.getStartServices();
@@ -181,23 +191,31 @@ export function registerEvalBaselineRoutes({
         });
       }
 
-      const baseline = await evalBaselines.pin({
-        pointer: {
-          baseline_id: baselineId,
-          suite_id: suiteId,
-          execution_id: executionId,
-          task_model: scoreDocuments[0].task.model,
-          judge_model_id: judgeModelIds[0] ?? null,
-          git_branch: scoreDocuments[0].metadata?.git?.branch ?? null,
-          git_commit_sha: scoreDocuments[0].metadata?.git?.commit_sha ?? null,
-          pinned_by: pinnedBy ?? null,
-          reason: reason ?? null,
-        },
-        scores,
-        spaceIds: [spaceId],
-      });
+      try {
+        const baseline = await evalBaselines.pin({
+          pointer: {
+            baseline_id: baselineId,
+            suite_id: suiteId,
+            execution_id: executionId,
+            task_model: scoreDocuments[0].task.model,
+            judge_model_id: judgeModelIds[0] ?? null,
+            git_branch: scoreDocuments[0].metadata?.git?.branch ?? null,
+            git_commit_sha: scoreDocuments[0].metadata?.git?.commit_sha ?? null,
+            pinned_by: pinnedBy ?? null,
+            reason: reason ?? null,
+          },
+          scores,
+          spaceIds: [spaceId],
+          expectedScoreCount,
+        });
 
-      return response.ok({ body: { baseline } });
+        return response.ok({ body: { baseline } });
+      } catch (error) {
+        if (error instanceof PinnedBaselineScoreCountMismatchError) {
+          return response.badRequest({ body: { message: error.message } });
+        }
+        throw error;
+      }
     })
   );
 

@@ -524,6 +524,74 @@ describe('PinnedBaselineService', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
+  it('pin and repin refuse an expected score count the baseline cannot satisfy, before any write', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create, search } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    // Fresh pin: the deduped live scores are the count on offer.
+    await expect(
+      service.pin({
+        pointer: getPointer(),
+        scores: [
+          { id: 'score-doc-1', document: getScoreDocument() },
+          { id: 'score-doc-2', document: getScoreDocument() },
+        ],
+        spaceIds: ['default'],
+        expectedScoreCount: 3,
+      })
+    ).rejects.toThrow(/would hold 2 score\(s\), but 3 were expected/);
+    expect(create).not.toHaveBeenCalled();
+
+    // Promotion paths validate against the stored snapshot's immutable count (7): a
+    // mismatched re-pin must not promote the incomplete snapshot back to latest.
+    search.mockResolvedValueOnce({ hits: { hits: [getStoredPointerHit()] } });
+    await expect(
+      service.repin({
+        baselineId: 'baseline-1',
+        pinnedBy: null,
+        reason: null,
+        expectedScoreCount: 9,
+      })
+    ).rejects.toThrow(/stored snapshot is immutable/);
+    expect(create).not.toHaveBeenCalled();
+
+    search.mockResolvedValueOnce({ hits: { hits: [getStoredPointerHit()] } });
+    await expect(
+      service.pin({
+        pointer: getPointer(),
+        scores: [{ id: 'score-doc-1', document: getScoreDocument() }],
+        spaceIds: ['default'],
+        expectedScoreCount: 9,
+      })
+    ).rejects.toThrow(/would hold 7 score\(s\), but 9 were expected/);
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('pin accepts a matching expected score count, counted after dedupe', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => ({
+      errors: false,
+      items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+    }));
+
+    const baseline = await service.pin({
+      pointer: getPointer(),
+      scores: [
+        { id: 'score-doc-1', document: getScoreDocument() },
+        // A duplicate of the same source doc maps to one snapshot ID, so one is expected.
+        { id: 'score-doc-1', document: getScoreDocument() },
+      ],
+      spaceIds: ['default'],
+      expectedScoreCount: 1,
+    });
+
+    expect(baseline.score_count).toBe(1);
+  });
+
   it('pin counts and writes a score served twice by the source stream only once', async () => {
     const logger = loggingSystemMock.createLogger();
     const { coreDataStreams, create } = createDataStreamsMock();

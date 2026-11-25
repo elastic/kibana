@@ -51,7 +51,7 @@ function formatDifference(value: number): string {
   return value.toFixed(2);
 }
 
-function escapeTableCell(value: string): string {
+export function escapeTableCell(value: string): string {
   return value.replaceAll('|', '\\|');
 }
 
@@ -80,6 +80,7 @@ export function formatMarkdownCompareReport({
   baselineBranch = 'main',
   repetitionPolicy = 'mean',
   rejectedSlices = [],
+  pinnedBaseline = false,
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
@@ -94,6 +95,11 @@ export function formatMarkdownCompareReport({
   baselineBranch?: string;
   repetitionPolicy?: RepetitionPolicy;
   rejectedSlices?: string[];
+  /**
+   * A pinned baseline is a promoted reference, not the moving tip of a branch: label it as
+   * such and skip the staleness warning, which only makes sense for a branch that moves.
+   */
+  pinnedBaseline?: boolean;
 }): string {
   const sortedResults = [...results].sort(
     (a, b) =>
@@ -112,20 +118,22 @@ export function formatMarkdownCompareReport({
     (result) => result.target.stability !== null || result.baseline.stability !== null
   );
 
+  const baselineLabel = pinnedBaseline ? 'pinned' : baselineBranch;
+
   const lines: string[] = [];
 
   lines.push(
-    `**PR run**: ${targetExperimentId} | **Baseline (${baselineBranch})**: ${baselineExperimentId}`
+    `**PR run**: ${targetExperimentId} | **Baseline (${baselineLabel})**: ${baselineExperimentId}`
   );
 
   if (baselineTimestamp) {
     const diffDays = daysSince(baselineTimestamp);
     const commitLabel = baselineCommitSha ? `commit ${baselineCommitSha.slice(0, 7)}` : '';
-    const age = relativeAge(diffDays);
+    const age = pinnedBaseline ? `pinned ${relativeAge(diffDays)}` : relativeAge(diffDays);
     const parts = [commitLabel, age].filter(Boolean);
     lines.push(`Baseline: ${parts.join(', ')}`);
 
-    if (diffDays >= STALENESS_WARNING_DAYS) {
+    if (!pinnedBaseline && diffDays >= STALENESS_WARNING_DAYS) {
       lines.push(
         `> **Warning**: Baseline is ${diffDays} days old. Results may not reflect current ${baselineBranch}.`
       );
@@ -215,13 +223,13 @@ export function formatMarkdownCompareReport({
       'Evaluator',
       'N',
       'Mean (PR)',
-      `Mean (${baselineBranch})`,
+      `Mean (${baselineLabel})`,
       'Diff',
       'Test',
       'p-value',
       'Sig',
       'Outcome',
-      ...(showStability ? [`Stability (PR/${baselineBranch})`] : []),
+      ...(showStability ? [`Stability (PR/${baselineLabel})`] : []),
     ];
     tableLines.push(`| ${headers.join(' | ')} |`);
     tableLines.push(`| ${headers.map(() => '---').join(' | ')} |`);

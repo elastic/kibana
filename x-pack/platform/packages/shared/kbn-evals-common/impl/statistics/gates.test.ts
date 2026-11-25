@@ -103,6 +103,27 @@ describe('evaluateRegressionGates', () => {
     expect(zeroBaseline?.relativeChange).toBeNull();
   });
 
+  it('gates changes landing exactly on a threshold despite floating-point error', () => {
+    const report = evaluateRegressionGates([
+      // 1 - 0.92 computes as 0.07999999999999996: exactly the 8% warn boundary.
+      slice({
+        baseline: { mean: 1, used: 30, missing: 0, stability: null },
+        target: { mean: 0.92, used: 30, missing: 0, stability: null },
+        pValue: 0.2,
+      }),
+      // 1 - 0.85 at the 15% fail boundary, with significance.
+      slice({
+        evaluatorName: 'Relevance',
+        baseline: { mean: 1, used: 30, missing: 0, stability: null },
+        target: { mean: 0.85, used: 30, missing: 0, stability: null },
+        pValue: 0.01,
+      }),
+    ]);
+
+    expect(report.results.find((r) => r.evaluatorName === 'Factuality')?.verdict).toBe('warn');
+    expect(report.results.find((r) => r.evaluatorName === 'Relevance')?.verdict).toBe('fail');
+  });
+
   it('applies per-evaluator overrides on top of the defaults', () => {
     const report = evaluateRegressionGates(
       [

@@ -66,6 +66,13 @@ export interface RegressionGateReport {
 const formatPercent = (fraction: number): string =>
   `${(fraction * 100).toFixed(1).replace(/\.0$/, '')}%`;
 
+// Floating-point slack for the threshold comparisons: a drop from 1 to 0.92 computes as
+// 0.07999999999999996, which would slip under an exact 0.08 warn threshold.
+const THRESHOLD_EPSILON = 1e-9;
+
+const meetsThreshold = (relativeChange: number, threshold: number): boolean =>
+  relativeChange >= threshold - THRESHOLD_EPSILON;
+
 const gateSlice = (
   result: ComparisonResult,
   thresholds: RegressionGateThresholds
@@ -101,14 +108,14 @@ const gateSlice = (
   const relativeChange = worseChange / Math.abs(result.baseline.mean);
   const significant = result.pValue != null && result.pValue < thresholds.alpha;
 
-  if (relativeChange >= thresholds.failRelativeChange && significant) {
+  if (meetsThreshold(relativeChange, thresholds.failRelativeChange) && significant) {
     return {
       verdict: 'fail',
       relativeChange,
       reason: `worsened ${formatPercent(relativeChange)} (p=${result.pValue?.toFixed(4)})`,
     };
   }
-  if (relativeChange >= thresholds.warnRelativeChange || significant) {
+  if (meetsThreshold(relativeChange, thresholds.warnRelativeChange) || significant) {
     return {
       verdict: 'warn',
       relativeChange,

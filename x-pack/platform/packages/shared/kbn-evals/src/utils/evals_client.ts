@@ -324,11 +324,14 @@ export class EvalsClient {
     executionId,
     reason,
     pinnedBy,
+    expectedScoreCount,
   }: {
     suiteId: string;
     executionId: string;
     reason?: string;
     pinnedBy?: string;
+    /** Validated by the pin route before any pointer is published. */
+    expectedScoreCount?: number;
   }): Promise<PinnedBaseline> {
     const response = await this.kbnClient.request({
       path: this.path(EVAL_BASELINES_PIN_URL),
@@ -338,6 +341,7 @@ export class EvalsClient {
         execution_id: executionId,
         ...(reason != null && { reason }),
         ...(pinnedBy != null && { pinned_by: pinnedBy }),
+        ...(expectedScoreCount != null && { expected_score_count: expectedScoreCount }),
       },
       headers: VERSIONED_HEADERS,
     });

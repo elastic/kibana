@@ -318,6 +318,11 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const gitMetadata = getGitMetadata();
       const hostName = osHostname();
 
+      // Ingest failures only warn (an eval run is still useful with a score missing), but
+      // a baseline pin is not: the count is published to Buildkite metadata so the pin
+      // step can refuse to bless a partially exported run.
+      let scoreIngestFailures = 0;
+
       const executorClient = new KibanaEvalsClient({
         log,
         model,
@@ -358,6 +363,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             );
             for (const result of results) {
               if (result.failed.length > 0) {
+                scoreIngestFailures += result.failed.length;
                 log.warning(
                   `Score ingest partially failed for example ${event.exampleId}: ${result.failed
                     .map((f) => f.reason)
@@ -366,6 +372,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               }
             }
           } catch (error) {
+            scoreIngestFailures += 1;
             log.warning(`Score ingest failed for example ${event.exampleId}: ${error}`);
           }
         },
@@ -417,6 +424,20 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}:${connectorId}`, executionId],
               { stdio: 'ignore' }
             );
+            // Any worker reporting a failure marks the execution unpinnable: the flag's
+            // presence is the signal, so concurrent workers overwriting it is harmless.
+            if (scoreIngestFailures > 0) {
+              execFileSync(
+                'buildkite-agent',
+                [
+                  'meta-data',
+                  'set',
+                  `kbn-evals:score-ingest-failures:${suiteId}:${connectorId}`,
+                  String(scoreIngestFailures),
+                ],
+                { stdio: 'ignore' }
+              );
+            }
           }
           execFileSync(
             'buildkite-agent',

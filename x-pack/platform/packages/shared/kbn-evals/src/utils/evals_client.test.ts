@@ -851,6 +851,7 @@ describe('EvalsClient', () => {
         executionId: 'bk-1::suite-1::gpt-5',
         reason: 'monthly baseline',
         pinnedBy: 'rakesh',
+        expectedScoreCount: 42,
       });
 
       expect(kbnClient.request).toHaveBeenCalledWith(
@@ -861,6 +862,7 @@ describe('EvalsClient', () => {
             execution_id: 'bk-1::suite-1::gpt-5',
             reason: 'monthly baseline',
             pinned_by: 'rakesh',
+            expected_score_count: 42,
           },
         })
       );

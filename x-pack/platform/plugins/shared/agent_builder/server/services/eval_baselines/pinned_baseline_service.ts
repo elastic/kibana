@@ -11,6 +11,7 @@ import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { AnyIDataStreamClient } from '@kbn/data-streams';
 import type { EvaluationScoreDocument, PinnedBaseline } from '@kbn/evals-common';
 import { EvaluationIndices, MAX_PINNABLE_SCORES, buildSpaceFilter } from '@kbn/evals-common';
+import { assertExpectedScoreCount } from './errors';
 
 /** A snapshotted score document: the original score plus its baseline attribution. */
 export type PinnedBaselineScoreDocument = EvaluationScoreDocument & {
@@ -97,10 +98,12 @@ export class PinnedBaselineService {
     pointer,
     scores,
     spaceIds,
+    expectedScoreCount,
   }: {
     pointer: Omit<PinnedBaseline, 'pinned_at' | 'score_count' | 'dataset_ids'>;
     scores: Array<{ id: string; document: EvaluationScoreDocument }>;
     spaceIds: string[];
+    expectedScoreCount?: number | null;
   }): Promise<PinnedBaseline> {
     const client = await this.getClient();
 
@@ -110,6 +113,12 @@ export class PinnedBaselineService {
     // recorded count and judge metadata) ever changing.
     const existingPointer = await this.findPointerById(client, pointer.baseline_id);
     if (existingPointer) {
+      assertExpectedScoreCount({
+        baselineId: pointer.baseline_id,
+        actualCount: existingPointer.baseline.score_count,
+        expectedCount: expectedScoreCount,
+        stored: true,
+      });
       this.logger.info(
         `Baseline ${pointer.baseline_id} is already pinned; promoting its existing snapshot.`
       );
@@ -123,6 +132,13 @@ export class PinnedBaselineService {
     // across backing indices after a rollover). Both copies map to one snapshot ID, so
     // counting them separately would publish a score_count no read could ever satisfy.
     const uniqueScores = [...new Map(scores.map((score) => [score.id, score])).values()];
+
+    assertExpectedScoreCount({
+      baselineId: pointer.baseline_id,
+      actualCount: uniqueScores.length,
+      expectedCount: expectedScoreCount,
+      stored: false,
+    });
 
     const pinnedAt = new Date().toISOString();
     const datasetIds = [
@@ -199,16 +215,24 @@ export class PinnedBaselineService {
     baselineId,
     pinnedBy,
     reason,
+    expectedScoreCount,
   }: {
     baselineId: string;
     pinnedBy: string | null;
     reason: string | null;
+    expectedScoreCount?: number | null;
   }): Promise<PinnedBaseline | undefined> {
     const client = await this.getClient();
     const existingPointer = await this.findPointerById(client, baselineId);
     if (!existingPointer) {
       return undefined;
     }
+    assertExpectedScoreCount({
+      baselineId,
+      actualCount: existingPointer.baseline.score_count,
+      expectedCount: expectedScoreCount,
+      stored: true,
+    });
     return this.publishPointer(client, existingPointer, { pinnedBy, reason });
   }
 

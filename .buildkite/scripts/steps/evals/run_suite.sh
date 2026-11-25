@@ -36,6 +36,9 @@ EVAL_SUITE_INFO="$(
   node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$EVAL_SUITE_ID" || true
 )"
 EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/dev/null || true)"
+# Suites comparing against a pinned baseline don't get the fresh-baseline refresh flow:
+# unblocking it would post an ungated branch comparison over the pinned verdict.
+EVAL_SUITE_PINNED_BASELINE="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.pinnedBaseline // false' 2>/dev/null || echo false)"
 EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
 # Per-suite step timeout for suites that legitimately need longer than the 120m default.
 EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
@@ -435,7 +438,10 @@ EOF
 EOF
         # Refresh baseline block + trigger (top-level — 2-space indent).
         # The trigger fires a fresh main eval run so the PR comment is updated
-        # with a same-day baseline when the auto-discovered one is stale.
+        # with a same-day baseline when the auto-discovered one is stale. Pinned-baseline
+        # suites skip it: their reference is the pin, and the fresh-baseline run would
+        # post an ungated branch comparison over the pinned verdict.
+        if [[ "${EVAL_SUITE_PINNED_BASELINE}" != "true" ]]; then
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
   - block: "LLM Evals: Refresh ${suite_display_name}"
     key: "kbn-evals-${group_key_safe}-refresh-block"
@@ -464,6 +470,7 @@ EOF
         EVAL_SCOUT_ARCH: "${EVAL_SCOUT_ARCH:-}"
         EVAL_SCOUT_DOMAIN: "${EVAL_SCOUT_DOMAIN:-}"
 EOF
+        fi
       elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
         # Fresh-baseline mode: emit the post-comparison step inside the fanout so
         # it starts only after all model steps have written their execution IDs to
@@ -729,24 +736,38 @@ pin_baseline() {
   if [[ "${EVAL_PIN_BASELINE:-}" != "1" ]]; then
     return 0
   fi
+  # An explicitly requested pin that cannot be published must fail the step: a scheduled
+  # baseline run finishing green with the active baseline unchanged would go unnoticed.
+  if [[ -n "${EVAL_GREP:-}" || -n "${EVAL_GREP_INVERT:-}" ]]; then
+    echo "EVAL_PIN_BASELINE=1 with EVAL_GREP/EVAL_GREP_INVERT would pin a filtered run as the suite baseline; refusing."
+    return 1
+  fi
   if [[ -z "${EVAL_PROJECT:-}" ]]; then
-    echo "EVAL_PIN_BASELINE=1 requires a per-connector step (EVAL_PROJECT); skipping pin."
-    return 0
+    echo "EVAL_PIN_BASELINE=1 requires a per-connector step (EVAL_PROJECT); cannot pin."
+    return 1
   fi
   # Shards of one suite/model share a composite execution ID but run as independent
   # steps, so a per-shard pin could publish a partial execution as the baseline (and a
   # successful shard would pin even when a sibling shard failed).
   if [[ -n "${EVAL_SHARD_ID:-}" ]]; then
-    echo "Baseline pinning is not supported for sharded suites; skipping pin for shard ${EVAL_SHARD_ID}."
-    return 0
+    echo "Baseline pinning is not supported for sharded suites; cannot pin shard ${EVAL_SHARD_ID}."
+    return 1
   fi
 
   local composite=""
+  local ingest_failures=""
   if command -v buildkite-agent >/dev/null 2>&1; then
     composite="$(buildkite-agent meta-data get "kbn-evals:execution-id:${EVAL_SUITE_ID}:${EVAL_PROJECT}" 2>/dev/null || true)"
+    ingest_failures="$(buildkite-agent meta-data get "kbn-evals:score-ingest-failures:${EVAL_SUITE_ID}:${EVAL_PROJECT}" 2>/dev/null || true)"
   fi
   if [[ -z "$composite" ]]; then
     echo "No execution ID recorded for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; cannot pin baseline."
+    return 1
+  fi
+  # evaluate.ts records score-export failures here: a green run can still have holes in
+  # its exported scores, and a baseline must be a complete snapshot.
+  if [[ -n "$ingest_failures" ]]; then
+    echo "Score export reported ${ingest_failures} ingest failure(s) for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; refusing to pin an incomplete baseline."
     return 1
   fi
 

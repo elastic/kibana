@@ -78,6 +78,13 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
       | jq -r '.pinnedBaseline // false' 2>/dev/null || echo false
   )"
 
+  # A fresh-baseline run for a pinned suite would post an ungated branch comparison over
+  # the pinned verdict in the same PR comment slot; the pin is the reference, so skip it.
+  if [[ "$SUITE_PINNED_BASELINE" == "true" && -n "$FRESH_BASELINE_PR_EXPERIMENT_ID" ]]; then
+    echo "Suite ${suite_id} compares against a pinned baseline; skipping the fresh-baseline comparison."
+    continue
+  fi
+
   # Read the connector list written by run_suite.sh at fanout time.
   # Each entry is a connector ID (EVAL_PROJECT value, e.g. "eis-anthropic-claude-4-5-haiku").
   SUITE_CONNECTORS=""
@@ -129,6 +136,14 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
           HAS_RESULTS="true"
         else
           echo "Compare failed for suite ${suite_id} / connector ${connector_id}; continuing."
+          # A pinned suite's PR comment must say the verdict is missing rather than not
+          # exist: the CLI reports its own failures, so this only covers a crash before it
+          # could (reviewers otherwise read "no comment" as "no regression").
+          if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
+            printf '### ⚠️ Pinned-baseline comparison unavailable\n\nThe comparison for suite `%s` / connector `%s` failed before a verdict could be computed. See the "post comparison" step logs in this build.\n\n' \
+              "$suite_id" "$connector_id" >>"$MARKDOWN_FILE"
+            HAS_RESULTS="true"
+          fi
         fi
       fi
     done
@@ -163,6 +178,11 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
         HAS_RESULTS="true"
       else
         echo "Compare failed for suite ${suite_id}; continuing."
+        if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
+          printf '### ⚠️ Pinned-baseline comparison unavailable\n\nThe comparison for suite `%s` failed before a verdict could be computed. See the "post comparison" step logs in this build.\n\n' \
+            "$suite_id" >>"$MARKDOWN_FILE"
+          HAS_RESULTS="true"
+        fi
       fi
     fi
   fi

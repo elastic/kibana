@@ -12,14 +12,11 @@ import { KbnClient } from '@kbn/kbn-client';
 import {
   compareScores,
   pairScores,
-  resolveJudgeModelIds,
   evaluateRegressionGates,
   DEFAULT_REGRESSION_GATES,
   RepetitionPolicy,
   type RegressionGateConfig,
-  type RegressionGateReport,
 } from '@kbn/evals-common';
-import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
@@ -28,66 +25,14 @@ import { buildExecutionCompareUrl } from '../../utils/evals_ui_url';
 import { readSpaceIdsFlag } from '../run_helpers';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
+import {
+  parseGateConfig,
+  findJudgeMismatch,
+  formatGateReportMarkdown,
+  logGateReport,
+} from './regression_verdict';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
-
-const GATE_ICONS = { pass: '✅', warn: '⚠️', fail: '❌' } as const;
-
-const formatGateChange = (relativeChange: number | null): string =>
-  relativeChange == null ? '—' : `${(relativeChange * 100).toFixed(1)}% worse`;
-
-/**
- * The regression verdict for the PR comment: the headline answer ("regression or not")
- * ahead of the full comparison table, listing only the slices that tripped a gate.
- * Report-only — the verdict never fails the command.
- */
-const formatGateReportMarkdown = (report: RegressionGateReport): string => {
-  const lines: string[] = [];
-  if (report.verdict === 'fail') {
-    lines.push(`### ${GATE_ICONS.fail} Regression detected (report-only)`);
-  } else if (report.verdict === 'warn') {
-    lines.push(`### ${GATE_ICONS.warn} No regression, with warnings`);
-  } else {
-    lines.push(`### ${GATE_ICONS.pass} No regression against the pinned baseline`);
-  }
-  const flagged = [...report.regressions, ...report.warnings];
-  if (flagged.length > 0) {
-    lines.push('');
-    lines.push('| Dataset | Evaluator | Verdict | Change | p-value |');
-    lines.push('|---|---|---|---|---|');
-    for (const gate of flagged) {
-      lines.push(
-        `| ${gate.datasetName} | ${gate.evaluatorName} | ${GATE_ICONS[gate.verdict]} ${
-          gate.verdict
-        } | ${formatGateChange(gate.relativeChange)} | ${gate.pValue?.toFixed(4) ?? '—'} |`
-      );
-    }
-  }
-  return lines.join('\n');
-};
-
-const logGateReport = (log: SomeDevLog, report: RegressionGateReport): void => {
-  const summary = `Regression gates (report-only): ${report.verdict.toUpperCase()} — ${
-    report.regressions.length
-  } regression(s), ${report.warnings.length} warning(s).`;
-  if (report.verdict === 'fail') {
-    log.error(summary);
-  } else if (report.verdict === 'warn') {
-    log.warning(summary);
-  } else {
-    log.info(summary);
-  }
-  for (const gate of [...report.regressions, ...report.warnings]) {
-    const line = `  ${GATE_ICONS[gate.verdict]} ${gate.datasetName} / ${gate.evaluatorName}: ${
-      gate.reason
-    }`;
-    if (gate.verdict === 'fail') {
-      log.error(line);
-    } else {
-      log.warning(line);
-    }
-  }
-};
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -183,13 +128,7 @@ export const compareCmd: Command<void> = {
     let gateConfig: RegressionGateConfig = DEFAULT_REGRESSION_GATES;
     if (gatesPath) {
       try {
-        const parsed = JSON.parse(
-          Fs.readFileSync(gatesPath, 'utf-8')
-        ) as Partial<RegressionGateConfig>;
-        gateConfig = {
-          defaults: { ...DEFAULT_REGRESSION_GATES.defaults, ...parsed.defaults },
-          evaluators: parsed.evaluators,
-        };
+        gateConfig = parseGateConfig(Fs.readFileSync(gatesPath, 'utf-8'));
       } catch (error) {
         throw createFlagError(
           `Could not read gate thresholds from "${gatesPath}": ${
@@ -198,6 +137,22 @@ export const compareCmd: Command<void> = {
         );
       }
     }
+
+    // Skipped or invalid pinned comparisons still produce a PR-visible markdown note
+    // through the same stdout-or-file path as a completed one: the shell that builds the
+    // PR comment treats "no output" as "nothing to post", which would hide the skip.
+    const emitMarkdownNote = (heading: string, message: string): void => {
+      if (format !== 'markdown') {
+        return;
+      }
+      const content = `### ${heading}\n\n${message}\n\n`;
+      if (outputPath) {
+        Fs.appendFileSync(outputPath, content);
+        log.info(`Markdown report appended to ${outputPath}`);
+      } else {
+        process.stdout.write(content);
+      }
+    };
 
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
@@ -263,29 +218,41 @@ export const compareCmd: Command<void> = {
         }
       }
 
-      const taskModelId = targetExperimentId.includes('::')
-        ? targetExperimentId.split('::').pop()
-        : undefined;
+      // The registry pins one baseline per (suite, task model): without the model segment
+      // the lookup would return the newest pin for ANY model in the suite, and the verdict
+      // could compare different task models. Refuse instead.
+      if (!targetExperimentId.includes('::')) {
+        const message =
+          `Cannot determine the task model from execution ID \`${targetExperimentId}\`: a pinned ` +
+          `baseline is resolved per task model. Pass the full composite execution ID ` +
+          `(\`bk-BUILD::suite::model\`).`;
+        log.error(message);
+        emitMarkdownNote('⚠️ Pinned-baseline comparison skipped', message);
+        return;
+      }
+      const taskModelId = targetExperimentId.split('::').pop();
 
-      log.info(
-        `Looking up pinned baseline for suite "${suiteId}"${
-          taskModelId ? ` (model: ${taskModelId})` : ''
-        }...`
-      );
+      log.info(`Looking up pinned baseline for suite "${suiteId}" (model: ${taskModelId})...`);
 
-      const pinned = await evalsClient.findLatestPinnedBaseline({ suiteId, taskModelId });
+      let pinned;
+      try {
+        pinned = await evalsClient.findLatestPinnedBaseline({ suiteId, taskModelId });
+      } catch (error) {
+        // A broken registry must still leave a PR-visible trace: the comment step treats a
+        // clean exit with no markdown as "nothing to post", hiding that no verdict exists.
+        const message = `The pinned-baseline registry could not be reached: ${
+          error instanceof Error ? error.message : String(error)
+        }`;
+        log.error(message);
+        emitMarkdownNote('⚠️ Pinned-baseline comparison unavailable', message);
+        return;
+      }
       if (!pinned) {
         const message =
-          `No pinned baseline found for suite \`${suiteId}\`${
-            taskModelId ? ` and model \`${taskModelId}\`` : ''
-          }. ` +
+          `No pinned baseline found for suite \`${suiteId}\` and model \`${taskModelId}\`. ` +
           `Seed one from a green run on main: \`node scripts/evals ext pin-baseline --suite ${suiteId} --execution-id <id>\``;
         log.warning(message);
-        if (format === 'markdown' && outputPath) {
-          // The PR comment is built from this file; an empty file would mean no comment
-          // at all, hiding that the comparison was skipped.
-          Fs.appendFileSync(outputPath, `### ℹ️ No pinned baseline\n\n${message}\n\n`);
-        }
+        emitMarkdownNote('ℹ️ No pinned baseline', message);
         return;
       }
 
@@ -408,37 +375,40 @@ export const compareCmd: Command<void> = {
     const targetFilter = suiteId ? { suiteId, executionId: targetExperimentId } : undefined;
     const baselineFilter = suiteId ? { suiteId, executionId: baselineExperimentId } : undefined;
 
-    const [targetExperimentScores, baselineExperimentScores] = await Promise.all([
-      evalsClient.getExperimentScores(targetExperimentId, targetFilter),
-      // A pinned baseline's scores live in the pinned-baselines snapshot, which
-      // outlives the retention on the scores data stream.
-      pinnedBaselineId
-        ? evalsClient.getPinnedBaselineScores(pinnedBaselineId)
-        : evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
-    ]);
+    let targetExperimentScores;
+    let baselineExperimentScores;
+    try {
+      [targetExperimentScores, baselineExperimentScores] = await Promise.all([
+        evalsClient.getExperimentScores(targetExperimentId, targetFilter),
+        // A pinned baseline's scores live in the pinned-baselines snapshot, which
+        // outlives the retention on the scores data stream.
+        pinnedBaselineId
+          ? evalsClient.getPinnedBaselineScores(pinnedBaselineId)
+          : evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
+      ]);
+    } catch (error) {
+      if (!pinnedBaselineId) {
+        throw error;
+      }
+      const message = `The pinned baseline's scores could not be read: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
+      log.error(message);
+      emitMarkdownNote('⚠️ Pinned-baseline comparison unavailable', message);
+      return;
+    }
 
     // Scores from different judges are not comparable: refuse the comparison instead of
     // gating on garbage. The pin route rejects mixed-judge executions, so the baseline
-    // side is a single judge; the target side must be that same single judge.
-    if (pinnedJudgeModelId) {
-      const targetJudgeModelIds = resolveJudgeModelIds(targetExperimentScores);
-      const mismatch =
-        targetJudgeModelIds.length > 1 ||
-        (targetJudgeModelIds.length === 1 && targetJudgeModelIds[0] !== pinnedJudgeModelId);
+    // side is a single judge (or judge-less); the target side must match it exactly.
+    if (pinnedBaselineId) {
+      const mismatch = findJudgeMismatch({
+        baselineJudgeModelId: pinnedJudgeModelId,
+        targetScores: targetExperimentScores,
+      });
       if (mismatch) {
-        const message =
-          `Judge mismatch: the pinned baseline was scored by "${pinnedJudgeModelId}" but this run ` +
-          `was scored by "${targetJudgeModelIds.join(
-            '", "'
-          )}". The comparison is invalid — re-run ` +
-          `with the pinned judge, or pin a new baseline under the new judge.`;
-        log.error(message);
-        if (format === 'markdown' && outputPath) {
-          Fs.appendFileSync(
-            outputPath,
-            `### ⚠️ Comparison invalid: judge mismatch\n\n${message}\n\n`
-          );
-        }
+        log.error(mismatch);
+        emitMarkdownNote('⚠️ Comparison invalid: judge mismatch', mismatch);
         return;
       }
     }
@@ -467,6 +437,15 @@ export const compareCmd: Command<void> = {
     if (overlappingDatasetIds.length === 0) {
       throw new Error('No overlapping datasets found between the two experiments.');
     }
+
+    // Baseline datasets with no counterpart in this run never reach the gates: name them
+    // and qualify the verdict rather than reporting an unqualified "no regression".
+    const missingBaselineDatasets = pinnedBaselineId
+      ? [...baselineExperimentDatasets]
+          .filter(([id]) => !targetExperimentDatasets.has(id))
+          .map(([, name]) => name)
+          .sort()
+      : [];
 
     log.info(`Found ${overlappingDatasetIds.length} overlapping dataset(s).`);
 
@@ -514,7 +493,7 @@ export const compareCmd: Command<void> = {
     // verdicts never change the exit code until the suite's noise floor is known.
     const gateReport = pinnedBaselineId ? evaluateRegressionGates(results, gateConfig) : undefined;
     if (gateReport) {
-      logGateReport(log, gateReport);
+      logGateReport(log, gateReport, { missingBaselineDatasets });
     }
 
     if (format === 'markdown') {
@@ -535,7 +514,9 @@ export const compareCmd: Command<void> = {
         log.warning('Invalid Kibana URL for compare page link.');
       }
 
-      const verdictMarkdown = gateReport ? formatGateReportMarkdown(gateReport) + '\n\n' : '';
+      const verdictMarkdown = gateReport
+        ? formatGateReportMarkdown(gateReport, { missingBaselineDatasets }) + '\n\n'
+        : '';
       const markdown = formatMarkdownCompareReport({
         targetExperimentId,
         baselineExperimentId,
@@ -549,6 +530,7 @@ export const compareCmd: Command<void> = {
         baselineBranch: baselineBranch ?? undefined,
         repetitionPolicy,
         rejectedSlices: rejectedNames,
+        pinnedBaseline: Boolean(pinnedBaselineId),
       });
 
       if (outputPath) {
