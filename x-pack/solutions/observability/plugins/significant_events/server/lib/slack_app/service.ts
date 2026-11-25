@@ -820,6 +820,13 @@ export class SlackAppService {
       return await relayClient.isChannelBound(tenantKey, channelId);
     } catch (error) {
       if (error instanceof SlackAppUnavailableError) return false;
+      if (error instanceof RelayRequestError) {
+        this.logger.warn(
+          `Could not check the binding of Slack channel ${channelId}: status ${
+            error.statusCode
+          }, reason ${error.reason ?? 'unknown'}`
+        );
+      }
       throw error;
     }
   }

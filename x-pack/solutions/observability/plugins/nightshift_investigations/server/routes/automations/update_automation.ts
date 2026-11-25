@@ -18,6 +18,7 @@ import {
 } from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
 import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
+import { isElasticAppSlackChannelCompletion } from '../../lib/automations/slack_completion';
 import { validateSlackChannelsBound } from '../../lib/automations/validate_slack_channels_bound';
 import { validateThreadCompletion } from '../../lib/automations/validate_thread_completion';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
@@ -119,11 +120,14 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     };
 
     if (!pauseOnly) {
-      const completions = z.array(automationCompletionSchema).max(10).safeParse(merged.completions);
+      const isBeingEnabled = body.isEnabled === true && !existing.attributes.isEnabled;
+      const completions = z
+        .array(isBeingEnabled ? savedAutomationCompletionSchema : automationCompletionSchema)
+        .max(10)
+        .safeParse(merged.completions);
       if (!completions.success) throw badRequest(completions.error.message);
       merged.completions = completions.data;
       validateScheduledAutomation(merged);
-      const isBeingEnabled = body.isEnabled === true && !existing.attributes.isEnabled;
       if (body.completions !== undefined || body.trigger !== undefined || isBeingEnabled) {
         validateThreadCompletion(merged);
         await validateSlackChannelsBound({
@@ -132,9 +136,9 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
           checker: getSlackChannelBindingChecker(),
           logger,
           storedDestinations: new Set(
-            existing.attributes.completions.flatMap(({ destination }) =>
-              destination ? [destination.trim()] : []
-            )
+            existing.attributes.completions
+              .filter(isElasticAppSlackChannelCompletion)
+              .flatMap(({ destination }) => (destination ? [destination.trim()] : []))
           ),
         });
       }

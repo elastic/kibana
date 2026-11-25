@@ -278,19 +278,19 @@ it('returns to the Elastic Slack app when the saved connector is explicitly clea
         {
           action: 'post_to_slack',
           targetMode: 'channel',
-          destination: '#oncall',
+          destination: 'C012ABCDEF',
           connectorId: 'saved-slack',
         },
       ],
     },
   });
   await call({
-    completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' }],
+    completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: 'C012ABCDEF' }],
   });
   const workflow = parse(updateWorkflow.mock.calls[0][1].yaml);
   expect(workflow.steps[0].steps[0].with.notificationDestinations[0]).toMatchObject({
     connector_id: 'elastic-apps-slack',
-    params: { channel: '#oncall' },
+    params: { channel: 'C012ABCDEF' },
   });
 });
 
@@ -480,5 +480,43 @@ it('re-checks the saved channel when a paused automation is enabled', async () =
   await expect(call({ isEnabled: true })).rejects.toMatchObject({
     output: { statusCode: 400 },
   });
+  expect(updateWorkflow).not.toHaveBeenCalled();
   expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('rejects enabling a paused automation that posts to a Slack user for the Elastic Slack App', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      isEnabled: false,
+      completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: 'U012ABCDEF' }],
+    },
+  });
+
+  await expect(call({ isEnabled: true })).rejects.toMatchObject({
+    output: { statusCode: 400 },
+  });
+  expect(updateWorkflow).not.toHaveBeenCalled();
+});
+
+it('checks a stored channel name once a custom connector is cleared in favor of the Elastic Slack App', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      completions: [
+        {
+          action: 'post_to_slack',
+          targetMode: 'channel',
+          destination: '#oncall',
+          connectorId: 'custom-slack',
+        },
+      ],
+    },
+  });
+
+  await expect(
+    call({
+      completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' }],
+    })
+  ).rejects.toThrow('Slack destinations must be a channel ID, not a channel name.');
 });
