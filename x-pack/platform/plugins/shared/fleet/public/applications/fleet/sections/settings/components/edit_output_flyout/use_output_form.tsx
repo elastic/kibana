@@ -817,10 +817,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       managedOtlpUrl: cloud?.managedOtlp?.url,
     }
   );
+  // the client key is saved under `secrets`, which a preconfigured output allows editing separately
+  const isOtlpTlsKeyPemDisabled = isOtlpExporterDisabled || isDisabled('secrets');
   const otlpTlsInputs = useOtlpTlsInputs(
     output && isOtlpOutput(output) ? output : undefined,
     isOtlp,
-    isOtlpExporterDisabled
+    isOtlpExporterDisabled,
+    isOtlpTlsKeyPemDisabled
   );
   const isOtlpAuthEnabled = isOtlpAuthAvailable(
     getOtlpInputEndpoints(otlpInputs),
@@ -1144,10 +1147,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               output && isOtlpAuthDisabled
                 ? {}
                 : buildOtlpAuth(otlpAuthInputs, { hasStoredAuth: !!storedOtlpOutput?.auth });
-            // the TLS secrets belong to the exporter: a preconfigured output that does not allow
-            // editing it must not send them either
+            // a preconfigured output that does not allow editing the exporter and its secrets must
+            // not send the TLS secrets, or the server rejects the update
             const otlpTlsSecrets =
-              output && isOtlpExporterDisabled
+              output && isOtlpTlsKeyPemDisabled
                 ? undefined
                 : buildOtlpTlsSecrets(otlpTlsInputs, {
                     hasStoredKeyPem: !!storedOtlpTlsSecrets?.key_pem,
@@ -1166,7 +1169,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                     otlp_exporter: buildOtlpExporterConfig(
                       otlpInputs,
                       buildOtlpTls(otlpTlsInputs, {
-                        hasStoredTls: !!storedOtlpTls || !!storedOtlpTlsSecrets?.key_pem,
+                        storedTls: storedOtlpTls,
+                        hasStoredKeyPem: !!storedOtlpTlsSecrets?.key_pem,
                         // a removed secret can be kept as a `null` reference
                         hasStoredTpmSecrets: !!(
                           storedOtlpTlsSecrets?.tpm?.owner_auth || storedOtlpTlsSecrets?.tpm?.auth
@@ -1473,6 +1477,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     otlpAuthInputs,
     isOtlpAuthDisabled,
     otlpTlsInputs,
+    isOtlpTlsKeyPemDisabled,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,

@@ -27,9 +27,18 @@ import {
   SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
   OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
   DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  OTLP_MINIMUM_FLEET_SERVER_VERSION,
 } from '../../../../../../../common/constants';
 
-export type SecretType = 'output' | 'ssl' | 'download_source_auth';
+/** `otlp`: a secret of the OTLP output, which requires a Fleet Server that supports that output. */
+export type SecretType = 'output' | 'ssl' | 'download_source_auth' | 'otlp';
+
+const SECRETS_MINIMUM_FLEET_SERVER_VERSIONS: Record<SecretType, string> = {
+  output: OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  ssl: SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  download_source_auth: DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  otlp: OTLP_MINIMUM_FLEET_SERVER_VERSION,
+};
 
 export const SecretFormRow: React.FC<{
   fullWidth?: boolean;
@@ -68,12 +77,7 @@ export const SecretFormRow: React.FC<{
   onRemove,
   isRemoved = false,
 }) => {
-  const minVersion =
-    secretType === 'output'
-      ? OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION
-      : secretType === 'download_source_auth'
-      ? DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION
-      : SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION;
+  const minVersion = SECRETS_MINIMUM_FLEET_SERVER_VERSIONS[secretType];
   const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(isConvertedToSecret || !initialValue);
   const valueHiddenPanel = (

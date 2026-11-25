@@ -138,6 +138,7 @@ export const OtlpAuthentication: React.FunctionComponent<{
             })}
             {...inputs.otlpAuthCredentialInput.formRowProps}
             useSecretsStorage={true}
+            secretType="otlp"
             cancelEdit={inputs.otlpAuthCredentialInput.cancelEdit}
           >
             <EuiFieldPassword

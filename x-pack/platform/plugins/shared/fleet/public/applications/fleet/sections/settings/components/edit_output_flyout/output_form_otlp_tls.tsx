@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiAccordion, EuiTextArea } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -16,12 +16,19 @@ import type { OutputFormInputsType } from './use_output_form';
 import { isOtlpGrpc } from './use_otlp_inputs';
 import {
   getOtlpTlsPairedErrors,
+  hasOtlpTlsErrors,
   hasOtlpTlsSettings,
   isOtlpTlsKeyPemRemoved,
 } from './use_otlp_tls_inputs';
-import { OTLP_TLS_DEFAULT_MIN_VERSION } from './output_form_validators';
+import {
+  OTLP_TLS_CIPHER_SUITES,
+  OTLP_TLS_DEFAULT_MIN_VERSION,
+  OTLP_TLS_INSECURE_CIPHER_SUITES,
+  OTLP_TLS_VERSIONS,
+} from './output_form_validators';
 import { OtlpDefaultHint } from './otlp_spec';
 import {
+  getSettingErrors,
   OtlpComboBoxSetting,
   OtlpSelectSetting,
   OtlpSettingsGroup,
@@ -33,6 +40,23 @@ import {
 import { SecretFormRow } from './output_form_secret_form_row';
 
 const OTLP_TLS_CURVES: readonly OtlpTlsCurvePreference[] = ['X25519', 'P521', 'P256', 'P384'];
+const CURVE_OPTIONS = OTLP_TLS_CURVES.map((curve) => ({ label: curve }));
+
+const CIPHER_SUITE_OPTIONS = [
+  {
+    label: i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpTlsSecureCipherSuitesGroup', {
+      defaultMessage: 'Cipher suites',
+    }),
+    options: OTLP_TLS_CIPHER_SUITES.map((suite) => ({ label: suite })),
+  },
+  {
+    label: i18n.translate(
+      'xpack.fleet.settings.editOutputFlyout.otlpTlsInsecureCipherSuitesGroup',
+      { defaultMessage: 'Insecure cipher suites, which have to be allowed' }
+    ),
+    options: OTLP_TLS_INSECURE_CIPHER_SUITES.map((suite) => ({ label: suite })),
+  },
+];
 
 const TLS_VERSION_OPTIONS = [
   {
@@ -41,8 +65,14 @@ const TLS_VERSION_OPTIONS = [
       defaultMessage: 'Default',
     }),
   },
-  ...['1.0', '1.1', '1.2', '1.3'].map((version) => ({ value: version, text: version })),
+  ...OTLP_TLS_VERSIONS.map((version) => ({ value: version, text: version })),
 ];
+
+/** The version options, with a stored version that is not one of them, so that it is shown. */
+const getTlsVersionOptions = (value: string) =>
+  !value || (OTLP_TLS_VERSIONS as readonly string[]).includes(value)
+    ? TLS_VERSION_OPTIONS
+    : [...TLS_VERSION_OPTIONS, { value, text: value }];
 
 const notSetDefault = (
   <OtlpDefaultHint
@@ -67,13 +97,18 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
   inputs,
 }) => {
   const pairedErrors = getOtlpTlsPairedErrors(inputs);
-  const { otlpTlsKeyPemInput } = inputs;
+  const { otlpTlsKeyPemInput, otlpTlsMinVersionInput, otlpTlsMaxVersionInput } = inputs;
+  // the section stays open while a setting shows an error, so that the reason Save is disabled can
+  // be seen
+  const hasErrors = hasOtlpTlsErrors(inputs);
+  const [isOpen, setIsOpen] = useState(() => hasOtlpTlsSettings(inputs));
 
   return (
     <EuiAccordion
       id="otlpTlsSettings"
       data-test-subj="settingsOutputsFlyout.otlpTlsSettings"
-      initialIsOpen={hasOtlpTlsSettings(inputs)}
+      forceState={isOpen || hasErrors ? 'open' : 'closed'}
+      onToggle={(open) => setIsOpen(open || hasErrors)}
       paddingSize="m"
       buttonContent={
         <FormattedMessage
@@ -240,6 +275,7 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
           error={[...(otlpTlsKeyPemInput.errors ?? []), ...(pairedErrors.keyPem ?? [])]}
           isInvalid={otlpTlsKeyPemInput.formRowProps.isInvalid || !!pairedErrors.keyPem}
           useSecretsStorage={true}
+          secretType="otlp"
           cancelEdit={otlpTlsKeyPemInput.cancelEdit}
           onRemove={() => otlpTlsKeyPemInput.setValue(undefined)}
           isRemoved={isOtlpTlsKeyPemRemoved(inputs)}
@@ -283,9 +319,10 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
             />
           }
           helpText={<OtlpDefaultHint defaultValue={OTLP_TLS_DEFAULT_MIN_VERSION} />}
-          input={inputs.otlpTlsMinVersionInput}
+          input={otlpTlsMinVersionInput}
           testSubj="otlpTlsMinVersionInput"
-          options={TLS_VERSION_OPTIONS}
+          options={getTlsVersionOptions(otlpTlsMinVersionInput.value)}
+          error={getSettingErrors(otlpTlsMinVersionInput.errors)}
         />
         <OtlpSelectSetting
           label={
@@ -295,10 +332,10 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
             />
           }
           helpText={<OtlpDefaultHint defaultValue="1.3" />}
-          input={inputs.otlpTlsMaxVersionInput}
+          input={otlpTlsMaxVersionInput}
           testSubj="otlpTlsMaxVersionInput"
-          options={TLS_VERSION_OPTIONS}
-          error={pairedErrors.maxVersion}
+          options={getTlsVersionOptions(otlpTlsMaxVersionInput.value)}
+          error={getSettingErrors(otlpTlsMaxVersionInput.errors, pairedErrors.maxVersion)}
         />
         <OtlpComboBoxSetting
           label={
@@ -310,9 +347,8 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
           helpText={
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.otlpTlsCipherSuitesHelpText"
-              defaultMessage="Cipher suites of TLS 1.2 and lower, such as {example}. The cipher suites of TLS 1.3 cannot be configured. {defaultHint}"
+              defaultMessage="Cipher suites of TLS 1.2 and lower. The cipher suites of TLS 1.3 cannot be configured. {defaultHint}"
               values={{
-                example: 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
                 defaultHint: (
                   <OtlpDefaultHint
                     defaultText={
@@ -328,6 +364,8 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
           }
           input={inputs.otlpTlsCipherSuitesInput}
           testSubj="otlpTlsCipherSuitesInput"
+          options={CIPHER_SUITE_OPTIONS}
+          otherErrors={pairedErrors.cipherSuites}
         />
         <OtlpSwitchSetting
           label={
@@ -359,7 +397,7 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
           }
           input={inputs.otlpTlsCurvePreferencesInput}
           testSubj="otlpTlsCurvePreferencesInput"
-          options={OTLP_TLS_CURVES}
+          options={CURVE_OPTIONS}
         />
         <OtlpTextSetting
           label={

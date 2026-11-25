@@ -975,9 +975,61 @@ export const validateOtlpAuthCredentialSecret = toSecretValidator(validateOtlpAu
 // the limits of the OTLP exporter TLS settings in the API
 const OTLP_TLS_PEM_MAX_LENGTH = 65536;
 const OTLP_TLS_FILE_MAX_LENGTH = 4096;
-const OTLP_TLS_CIPHER_SUITE_MAX_LENGTH = 256;
 const OTLP_TLS_CIPHER_SUITES_MAX_SIZE = 100;
 export const OTLP_TLS_DEFAULT_MIN_VERSION = '1.2';
+
+/** The TLS versions that the collector accepts (configtls), from the lowest to the highest. */
+export const OTLP_TLS_VERSIONS = ['1.0', '1.1', '1.2', '1.3'] as const;
+
+/**
+ * The cipher suites that the collector accepts by name (configtls), as listed by the Go version
+ * that EDOT is built with (crypto/tls `CipherSuites`, without the TLS 1.3 ones, which cannot be
+ * configured).
+ */
+export const OTLP_TLS_CIPHER_SUITES = [
+  'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA',
+  'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA',
+  'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA',
+  'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA',
+  'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256',
+  'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384',
+  'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+  'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384',
+  'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256',
+  'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256',
+] as const;
+
+/** The TLS 1.3 cipher suites: the collector accepts their names, but they have no effect. */
+const OTLP_TLS13_CIPHER_SUITES = [
+  'TLS_AES_128_GCM_SHA256',
+  'TLS_AES_256_GCM_SHA384',
+  'TLS_CHACHA20_POLY1305_SHA256',
+];
+
+/**
+ * The insecure cipher suites (crypto/tls `InsecureCipherSuites`), which the collector only accepts
+ * with `include_insecure_cipher_suites`.
+ */
+export const OTLP_TLS_INSECURE_CIPHER_SUITES = [
+  'TLS_RSA_WITH_RC4_128_SHA',
+  'TLS_RSA_WITH_3DES_EDE_CBC_SHA',
+  'TLS_RSA_WITH_AES_128_CBC_SHA',
+  'TLS_RSA_WITH_AES_256_CBC_SHA',
+  'TLS_RSA_WITH_AES_128_CBC_SHA256',
+  'TLS_RSA_WITH_AES_128_GCM_SHA256',
+  'TLS_RSA_WITH_AES_256_GCM_SHA384',
+  'TLS_ECDHE_ECDSA_WITH_RC4_128_SHA',
+  'TLS_ECDHE_RSA_WITH_RC4_128_SHA',
+  'TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA',
+  'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256',
+  'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256',
+] as const;
+
+const KNOWN_OTLP_TLS_CIPHER_SUITES: readonly string[] = [
+  ...OTLP_TLS_CIPHER_SUITES,
+  ...OTLP_TLS13_CIPHER_SUITES,
+  ...OTLP_TLS_INSECURE_CIPHER_SUITES,
+];
 
 const otlpTooLongError = (max: number) => [
   i18n.translate('xpack.fleet.settings.outputForm.otlpTlsValueTooLong', {
@@ -986,10 +1038,25 @@ const otlpTooLongError = (max: number) => [
   }),
 ];
 
+// the collector parses the PEM blocks: a value without one, such as a file path, cannot be loaded
+const PEM_BLOCK_REGEX = /-----BEGIN [^-\r\n]+-----[\s\S]*-----END [^-\r\n]+-----/;
+
 /** An optional PEM-encoded certificate or key. */
 export function validateOtlpTlsPem(value: string) {
-  if ((value?.trim() ?? '').length > OTLP_TLS_PEM_MAX_LENGTH) {
+  const pem = value?.trim() ?? '';
+  if (!pem) {
+    return;
+  }
+  if (pem.length > OTLP_TLS_PEM_MAX_LENGTH) {
     return otlpTooLongError(OTLP_TLS_PEM_MAX_LENGTH);
+  }
+  if (!PEM_BLOCK_REGEX.test(pem)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsPemInvalid', {
+        defaultMessage:
+          'Paste the PEM content, from "-----BEGIN" to "-----END". Use the file setting for a path to a file.',
+      }),
+    ];
   }
 }
 
@@ -1003,7 +1070,8 @@ export function validateOtlpTlsKeyPemSecret(
   value: string | { id: string } | undefined,
   hasSavedKey: boolean
 ) {
-  if (hasSavedKey && value === '') {
+  // the key is sent trimmed: a blank replacement would leave the saved key in place
+  if (hasSavedKey && typeof value === 'string' && !value.trim()) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeyPemReplacementRequired', {
         defaultMessage: 'Enter the new client key, or cancel the change',
@@ -1020,6 +1088,19 @@ export function validateOtlpTlsFilePath(value: string) {
   }
 }
 
+/** An optional TLS version: one of the versions that the collector accepts. */
+export function validateOtlpTlsVersion(value: string) {
+  if (value && !(OTLP_TLS_VERSIONS as readonly string[]).includes(value)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsVersionInvalid', {
+        defaultMessage: '"{version}" is not a TLS version that the collector supports. Select one.',
+        values: { version: value },
+      }),
+    ];
+  }
+}
+
+/** The cipher suites: names that the collector knows. Each error names the cipher suite. */
 export function validateOtlpTlsCipherSuites(value: string[]) {
   const errors: Array<{ message: string; index?: number }> = [];
   if (value.length > OTLP_TLS_CIPHER_SUITES_MAX_SIZE) {
@@ -1031,8 +1112,15 @@ export function validateOtlpTlsCipherSuites(value: string[]) {
     });
   }
   value.forEach((suite, index) => {
-    if (suite.trim().length > OTLP_TLS_CIPHER_SUITE_MAX_LENGTH) {
-      errors.push({ message: otlpTooLongError(OTLP_TLS_CIPHER_SUITE_MAX_LENGTH)[0], index });
+    if (!KNOWN_OTLP_TLS_CIPHER_SUITES.includes(suite)) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCipherSuiteUnknown', {
+          defaultMessage: '"{suite}" is not a cipher suite that the collector supports',
+          // a long value is cut, the message only has to identify it
+          values: { suite: suite.length > 64 ? `${suite.slice(0, 64)}…` : suite },
+        }),
+        index,
+      });
     }
   });
   return errors.length ? errors : undefined;
@@ -1049,10 +1137,15 @@ export interface OtlpTlsPairedValues {
   keyFile: string;
   minVersion: string;
   maxVersion: string;
+  cipherSuites: string[];
+  includeInsecureCipherSuites: boolean;
 }
 
 export type OtlpTlsPairedErrors = Partial<
-  Record<'caFile' | 'certPem' | 'certFile' | 'keyPem' | 'keyFile' | 'maxVersion', string[]>
+  Record<
+    'caFile' | 'certPem' | 'certFile' | 'keyPem' | 'keyFile' | 'maxVersion' | 'cipherSuites',
+    string[]
+  >
 >;
 
 const pemAndFileError = (setting: string) => [
@@ -1067,8 +1160,9 @@ const isSet = (value: string) => !!value.trim();
 /**
  * Validates the TLS settings that depend on each other, as the collector does (configtls): a
  * certificate authority, a client certificate and a client key are each set either as PEM or as a
- * file, the client certificate and key are set together, and the minimum TLS version is not above
- * the maximum. Each error is set on the setting to change.
+ * file, the client certificate and key are set together, the minimum TLS version is not above the
+ * maximum, and insecure cipher suites are allowed explicitly. Each error is set on the setting to
+ * change.
  */
 export function validateOtlpTlsPairedSettings(values: OtlpTlsPairedValues): OtlpTlsPairedErrors {
   const errors: OtlpTlsPairedErrors = {};
@@ -1110,14 +1204,34 @@ export function validateOtlpTlsPairedSettings(values: OtlpTlsPairedValues): Otlp
       }),
     ];
   }
-  // the collector uses TLS 1.2 as the minimum version when it is not set
-  const minVersion = values.minVersion || OTLP_TLS_DEFAULT_MIN_VERSION;
-  if (values.maxVersion && minVersion > values.maxVersion) {
+
+  // the versions are compared by their position, and an unknown version has its own error; the
+  // collector uses TLS 1.2 as the minimum version when it is not set
+  const versionIndex = (version: string) =>
+    (OTLP_TLS_VERSIONS as readonly string[]).indexOf(version);
+  const minIndex = versionIndex(values.minVersion || OTLP_TLS_DEFAULT_MIN_VERSION);
+  const maxIndex = versionIndex(values.maxVersion);
+  if (minIndex >= 0 && maxIndex >= 0 && minIndex > maxIndex) {
     errors.maxVersion = [
       i18n.translate('xpack.fleet.settings.outputForm.otlpTlsVersionRange', {
         defaultMessage:
           'The maximum TLS version cannot be lower than the minimum TLS version ({defaultMinVersion} when not set)',
         values: { defaultMinVersion: OTLP_TLS_DEFAULT_MIN_VERSION },
+      }),
+    ];
+  }
+
+  const insecureSuites = values.includeInsecureCipherSuites
+    ? []
+    : values.cipherSuites.filter((suite) =>
+        (OTLP_TLS_INSECURE_CIPHER_SUITES as readonly string[]).includes(suite)
+      );
+  if (insecureSuites.length) {
+    errors.cipherSuites = [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsInsecureCipherSuites', {
+        defaultMessage:
+          'Turn on "Allow insecure cipher suites" to use {count, plural, one {the insecure cipher suite} other {the insecure cipher suites}} {suites}',
+        values: { count: insecureSuites.length, suites: insecureSuites.join(', ') },
       }),
     ];
   }

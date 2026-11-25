@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTextArea,
   EuiTitle,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
 import type { useComboInput, useInput, useSwitchInput } from '../../../../hooks';
@@ -29,7 +30,7 @@ import { OtlpSpecLinks } from './otlp_spec';
  * The errors of a setting: the ones of its input, and `otherErrors` that depend on other settings,
  * such as two settings that cannot be set together.
  */
-const getSettingErrors = (inputErrors: string[] | undefined, otherErrors?: string[]) => {
+export const getSettingErrors = (inputErrors: string[] | undefined, otherErrors?: string[]) => {
   const errors = [...(inputErrors ?? []), ...(otherErrors ?? [])];
   return errors.length ? errors : undefined;
 };
@@ -83,18 +84,22 @@ export const OtlpTextAreaSetting: React.FunctionComponent<{
 };
 
 /**
- * A list of values. With `options`, the values are picked from them; otherwise any value can be
- * entered.
+ * A list of values picked from `options`, which can be grouped. A stored value that is not an
+ * option stays selected, so its error can be seen and the value removed.
  */
 export const OtlpComboBoxSetting: React.FunctionComponent<{
   label: React.ReactNode;
   helpText: React.ReactNode;
   input: ReturnType<typeof useComboInput>;
   testSubj: string;
+  options: Array<EuiComboBoxOptionOption<string>>;
   placeholder?: string;
-  options?: readonly string[];
-}> = ({ label, helpText, input, testSubj, placeholder, options }) => {
-  const errors = input.props.errors?.map(({ message }) => message);
+  otherErrors?: string[];
+}> = ({ label, helpText, input, testSubj, options, placeholder, otherErrors }) => {
+  const errors = getSettingErrors(
+    input.props.errors?.map(({ message }) => message),
+    otherErrors
+  );
   return (
     <EuiFormRow fullWidth label={label} helpText={helpText} isInvalid={!!errors} error={errors}>
       <EuiComboBox
@@ -103,19 +108,10 @@ export const OtlpComboBoxSetting: React.FunctionComponent<{
         placeholder={placeholder}
         isDisabled={input.props.disabled}
         isInvalid={!!errors}
+        options={options}
         selectedOptions={input.value.map((value) => ({ label: value }))}
         onChange={(selected) => input.props.onChange(selected.map(({ label: value }) => value))}
-        {...(options
-          ? { options: options.map((value) => ({ label: value })) }
-          : {
-              noSuggestions: true,
-              onCreateOption: (value: string) => {
-                const newValue = value.trim();
-                if (newValue && !input.value.includes(newValue)) {
-                  input.props.onChange([...input.value, newValue]);
-                }
-              },
-            })}
+        onBlur={() => input.validate()}
       />
     </EuiFormRow>
   );

@@ -20,9 +20,10 @@ import {
   validateOtlpShortString,
   validateOtlpTlsCipherSuites,
   validateOtlpTlsFilePath,
-  validateOtlpTlsPairedSettings,
   validateOtlpTlsKeyPemSecret,
+  validateOtlpTlsPairedSettings,
   validateOtlpTlsPem,
+  validateOtlpTlsVersion,
 } from './output_form_validators';
 
 type OtlpTlsConfig = NonNullable<OtlpExporterConfig['tls']>;
@@ -34,14 +35,19 @@ export interface OtlpTlsSecretsPayload {
 
 const toInputValue = (value: string | null | undefined) => value ?? '';
 
-/** The inputs of the TLS settings of the OTLP exporter. */
+/**
+ * The inputs of the TLS settings of the OTLP exporter. `disabled` makes the settings read-only,
+ * and `keyPemDisabled` the client key, which is also saved under `secrets`. Read-only settings are
+ * not validated: they are not sent, and the user could not fix them.
+ */
 export function useOtlpTlsInputs(
   otlpOutput: NewOtlpOutput | undefined,
   isSelected: boolean,
-  disabled: boolean
+  disabled: boolean,
+  keyPemDisabled: boolean
 ) {
   const tls = otlpOutput?.otlp_exporter?.tls ?? undefined;
-  const validateIfSelected = <T>(validator: T) => (isSelected ? validator : undefined);
+  const validateIfSelected = <T>(validator: T) => (isSelected && !disabled ? validator : undefined);
 
   // connection security
   const otlpTlsInsecureInput = useSwitchInput(tls?.insecure ?? false, disabled);
@@ -86,10 +92,11 @@ export function useOtlpTlsInputs(
   // the saved key is removed with an explicit action, which sets the value to `undefined`
   const otlpTlsKeyPemInput = useSecretInput(
     savedKeyPem,
-    validateIfSelected((value: string | { id: string } | undefined) =>
-      validateOtlpTlsKeyPemSecret(value, !!savedKeyPem)
-    ),
-    disabled
+    isSelected && !keyPemDisabled
+      ? (value: string | { id: string } | undefined) =>
+          validateOtlpTlsKeyPemSecret(value, !!savedKeyPem)
+      : undefined,
+    keyPemDisabled
   );
   const otlpTlsKeyFileInput = useInput(
     toInputValue(tls?.key_file),
@@ -98,8 +105,16 @@ export function useOtlpTlsInputs(
   );
 
   // protocol
-  const otlpTlsMinVersionInput = useInput(toInputValue(tls?.min_version), undefined, disabled);
-  const otlpTlsMaxVersionInput = useInput(toInputValue(tls?.max_version), undefined, disabled);
+  const otlpTlsMinVersionInput = useInput(
+    toInputValue(tls?.min_version),
+    validateIfSelected(validateOtlpTlsVersion),
+    disabled
+  );
+  const otlpTlsMaxVersionInput = useInput(
+    toInputValue(tls?.max_version),
+    validateIfSelected(validateOtlpTlsVersion),
+    disabled
+  );
   const otlpTlsCipherSuitesInput = useComboInput(
     'otlpTlsCipherSuitesInput',
     tls?.cipher_suites ?? [],
@@ -207,24 +222,42 @@ export const hasOtlpTlsSettings = (inputs: OtlpTlsInputs): boolean =>
   inputs.otlpTlsCurvePreferencesInput.value.length > 0 ||
   hasOtlpTlsKeyPem(inputs);
 
+/** Whether the TLS settings are read-only, such as those of a preconfigured output. */
+const isOtlpTlsReadOnly = (inputs: OtlpTlsInputs): boolean =>
+  !!inputs.otlpTlsCaPemInput.props.disabled;
+
 /**
  * The errors of the TLS settings that depend on each other. They are derived from the current
  * values rather than stored, so that changing one setting of a pair updates the error of the other.
+ * Read-only settings have none: they are not sent, and the user could not fix them.
  */
 export const getOtlpTlsPairedErrors = (inputs: OtlpTlsInputs): OtlpTlsPairedErrors =>
-  validateOtlpTlsPairedSettings({
-    caPem: inputs.otlpTlsCaPemInput.value,
-    caFile: inputs.otlpTlsCaFileInput.value,
-    certPem: inputs.otlpTlsCertPemInput.value,
-    certFile: inputs.otlpTlsCertFileInput.value,
-    hasKeyPem: hasOtlpTlsKeyPem(inputs),
-    keyFile: inputs.otlpTlsKeyFileInput.value,
-    minVersion: inputs.otlpTlsMinVersionInput.value,
-    maxVersion: inputs.otlpTlsMaxVersionInput.value,
-  });
+  isOtlpTlsReadOnly(inputs)
+    ? {}
+    : validateOtlpTlsPairedSettings({
+        caPem: inputs.otlpTlsCaPemInput.value,
+        caFile: inputs.otlpTlsCaFileInput.value,
+        certPem: inputs.otlpTlsCertPemInput.value,
+        certFile: inputs.otlpTlsCertFileInput.value,
+        hasKeyPem: hasOtlpTlsKeyPem(inputs),
+        keyFile: inputs.otlpTlsKeyFileInput.value,
+        minVersion: inputs.otlpTlsMinVersionInput.value,
+        maxVersion: inputs.otlpTlsMaxVersionInput.value,
+        cipherSuites: inputs.otlpTlsCipherSuitesInput.value,
+        includeInsecureCipherSuites: inputs.otlpTlsIncludeInsecureCipherSuitesInput.value,
+      });
 
 export const hasOtlpTlsPairedErrors = (inputs: OtlpTlsInputs): boolean =>
   Object.keys(getOtlpTlsPairedErrors(inputs)).length > 0;
+
+/** Whether a TLS setting shows an error, which keeps the section open so the error is seen. */
+export const hasOtlpTlsErrors = (inputs: OtlpTlsInputs): boolean =>
+  hasOtlpTlsPairedErrors(inputs) ||
+  [
+    ...getOtlpTlsTextInputs(inputs),
+    inputs.otlpTlsKeyPemInput,
+    inputs.otlpTlsCipherSuitesInput,
+  ].some((input) => input.formRowProps.isInvalid);
 
 /** Validates every input, so all the errors are shown. Returns whether they are all valid. */
 export const validateOtlpTlsInputs = (inputs: OtlpTlsInputs): boolean =>
@@ -237,6 +270,8 @@ export const validateOtlpTlsInputs = (inputs: OtlpTlsInputs): boolean =>
       inputs.otlpTlsCertFileInput,
       inputs.otlpTlsKeyPemInput,
       inputs.otlpTlsKeyFileInput,
+      inputs.otlpTlsMinVersionInput,
+      inputs.otlpTlsMaxVersionInput,
       inputs.otlpTlsCipherSuitesInput,
       inputs.otlpTlsReloadIntervalInput,
       inputs.otlpTlsTpmPathInput,
@@ -245,29 +280,71 @@ export const validateOtlpTlsInputs = (inputs: OtlpTlsInputs): boolean =>
   ].every(Boolean);
 
 /**
+ * A switch is sent when it is on, or when the stored output has a value to change: a switch that
+ * is off by default and was never set stays out of the stored output.
+ */
+const flag = (value: boolean, stored: boolean | null | undefined): boolean | undefined =>
+  value || (stored !== undefined && stored !== null) ? value : undefined;
+
+const withoutUndefined = <T extends object>(object: T): T =>
+  Object.fromEntries(Object.entries(object).filter(([, value]) => value !== undefined)) as T;
+
+/**
  * Builds the `tls` of the exporter. An update is deep merged into the stored output, so a cleared
  * setting is sent as `null`, and `tls: null` removes all the stored settings with their secrets.
  * Without TLS settings, `tls` is left out unless there are stored ones to remove.
  *
  * The TPM secrets can only be set with the API. While the output has some, neither `tls` nor
- * `tpm` is sent as `null`, which would remove them: the settings are cleared one by one instead.
+ * `tpm` is sent as `null`, which would remove them: the settings are cleared one by one instead,
+ * and nothing is sent when there are no stored settings to clear.
  */
 export function buildOtlpTls(
   inputs: OtlpTlsInputs,
-  { hasStoredTls, hasStoredTpmSecrets }: { hasStoredTls: boolean; hasStoredTpmSecrets: boolean }
+  {
+    storedTls,
+    hasStoredKeyPem,
+    hasStoredTpmSecrets,
+  }: {
+    storedTls: OtlpExporterConfig['tls'] | undefined;
+    hasStoredKeyPem: boolean;
+    hasStoredTpmSecrets: boolean;
+  }
 ): OtlpTlsConfig | null | undefined {
-  if (!hasOtlpTlsSettings(inputs) && !hasStoredTpmSecrets) {
-    return hasStoredTls ? null : undefined;
+  if (!hasOtlpTlsSettings(inputs)) {
+    if (!hasStoredTpmSecrets) {
+      return storedTls || hasStoredKeyPem ? null : undefined;
+    }
+    if (!storedTls) {
+      return undefined;
+    }
   }
 
   const tpmPath = text(inputs.otlpTlsTpmPathInput);
   const tpmEnabled = inputs.otlpTlsTpmEnabledInput.value;
+  const storedTpm = storedTls?.tpm ?? undefined;
+  const getTpm = (): OtlpTlsConfig['tpm'] => {
+    if (tpmEnabled || tpmPath) {
+      return withoutUndefined({ enabled: flag(tpmEnabled, storedTpm?.enabled), path: tpmPath });
+    }
+    if (hasStoredTpmSecrets) {
+      return storedTpm
+        ? withoutUndefined({ enabled: flag(false, storedTpm.enabled), path: null })
+        : undefined;
+    }
+    return storedTpm ? null : undefined;
+  };
 
-  return {
-    insecure: inputs.otlpTlsInsecureInput.value,
-    insecure_skip_verify: inputs.otlpTlsInsecureSkipVerifyInput.value,
+  return withoutUndefined({
+    insecure: flag(inputs.otlpTlsInsecureInput.value, storedTls?.insecure),
+    insecure_skip_verify: flag(
+      inputs.otlpTlsInsecureSkipVerifyInput.value,
+      storedTls?.insecure_skip_verify
+    ),
     server_name_override: text(inputs.otlpTlsServerNameOverrideInput),
-    include_system_ca_certs_pool: inputs.otlpTlsIncludeSystemCaCertsPoolInput.value,
+    include_system_ca_certs_pool: flag(
+      inputs.otlpTlsIncludeSystemCaCertsPoolInput.value,
+      storedTls?.include_system_ca_certs_pool
+    ),
     ca_pem: text(inputs.otlpTlsCaPemInput),
     ca_file: text(inputs.otlpTlsCaFileInput),
     cert_pem: text(inputs.otlpTlsCertPemInput),
@@ -276,12 +353,14 @@ export function buildOtlpTls(
     min_version: text(inputs.otlpTlsMinVersionInput),
     max_version: text(inputs.otlpTlsMaxVersionInput),
     cipher_suites: list(inputs.otlpTlsCipherSuitesInput),
-    include_insecure_cipher_suites: inputs.otlpTlsIncludeInsecureCipherSuitesInput.value,
+    include_insecure_cipher_suites: flag(
+      inputs.otlpTlsIncludeInsecureCipherSuitesInput.value,
+      storedTls?.include_insecure_cipher_suites
+    ),
     curve_preferences: list<OtlpTlsCurvePreference>(inputs.otlpTlsCurvePreferencesInput),
     reload_interval: text(inputs.otlpTlsReloadIntervalInput),
-    tpm:
-      tpmEnabled || tpmPath || hasStoredTpmSecrets ? { enabled: tpmEnabled, path: tpmPath } : null,
-  };
+    tpm: getTpm(),
+  });
 }
 
 /**

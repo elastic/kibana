@@ -44,6 +44,7 @@ import {
   validateOtlpTlsPairedSettings,
   validateOtlpTlsPem,
   validateOtlpTlsPemSecret,
+  validateOtlpTlsVersion,
   validateSSLCertificate,
   validateSSLKey,
   validateSslPathInput,
@@ -802,25 +803,38 @@ describe('OTLP validators', () => {
   });
 
   describe('OTLP TLS', () => {
-    it('validateOtlpTlsPem should accept up to 65536 characters', () => {
+    const pem = (label: string, body = 'MIIB') =>
+      `-----BEGIN ${label}-----\n${body}\n-----END ${label}-----`;
+
+    it('validateOtlpTlsPem should accept PEM content up to 65536 characters', () => {
       expect(validateOtlpTlsPem('')).toBeUndefined();
-      expect(validateOtlpTlsPem('a'.repeat(65536))).toBeUndefined();
-      expect(validateOtlpTlsPem('a'.repeat(65537))).toEqual(['Must be at most 65536 characters']);
+      expect(validateOtlpTlsPem(pem('CERTIFICATE'))).toBeUndefined();
+      expect(validateOtlpTlsPem(`${pem('CERTIFICATE')}\n${pem('CERTIFICATE')}\n`)).toBeUndefined();
+      expect(validateOtlpTlsPem(pem('CERTIFICATE', 'a'.repeat(65537)))).toEqual([
+        'Must be at most 65536 characters',
+      ]);
+    });
+
+    it('validateOtlpTlsPem should reject a value that is not PEM, such as a file path', () => {
+      expect(validateOtlpTlsPem('/etc/ssl/ca.pem')).toEqual([
+        expect.stringContaining('Paste the PEM content'),
+      ]);
+      expect(validateOtlpTlsPem('-----BEGIN CERTIFICATE-----\nMIIB')).toHaveLength(1);
     });
 
     it('validateOtlpTlsPemSecret should accept a stored secret', () => {
       expect(validateOtlpTlsPemSecret({ id: 'secret-id' })).toBeUndefined();
-      expect(validateOtlpTlsPemSecret('a'.repeat(65537))).toHaveLength(1);
+      expect(validateOtlpTlsPemSecret('not a key')).toHaveLength(1);
     });
 
     it('validateOtlpTlsKeyPemSecret should require a replacement of a saved key', () => {
-      expect(validateOtlpTlsKeyPemSecret('', true)).toEqual([
-        'Enter the new client key, or cancel the change',
-      ]);
+      const required = ['Enter the new client key, or cancel the change'];
+      expect(validateOtlpTlsKeyPemSecret('', true)).toEqual(required);
+      expect(validateOtlpTlsKeyPemSecret('  \n', true)).toEqual(required);
       expect(validateOtlpTlsKeyPemSecret('', false)).toBeUndefined();
       expect(validateOtlpTlsKeyPemSecret(undefined, true)).toBeUndefined();
       expect(validateOtlpTlsKeyPemSecret({ id: 'secret-id' }, true)).toBeUndefined();
-      expect(validateOtlpTlsKeyPemSecret('new-key', true)).toBeUndefined();
+      expect(validateOtlpTlsKeyPemSecret(pem('PRIVATE KEY'), true)).toBeUndefined();
     });
 
     it('validateOtlpTlsFilePath should accept up to 4096 characters', () => {
@@ -830,14 +844,32 @@ describe('OTLP validators', () => {
       ]);
     });
 
-    it('validateOtlpTlsCipherSuites should reject long values and too many entries', () => {
-      expect(validateOtlpTlsCipherSuites(['TLS_AES_128_GCM_SHA256'])).toBeUndefined();
-      expect(validateOtlpTlsCipherSuites(['ok', 'a'.repeat(257)])).toEqual([
-        { message: 'Must be at most 256 characters', index: 1 },
+    it('validateOtlpTlsVersion should only accept the versions that the collector supports', () => {
+      expect(validateOtlpTlsVersion('')).toBeUndefined();
+      ['1.0', '1.1', '1.2', '1.3'].forEach((version) =>
+        expect(validateOtlpTlsVersion(version)).toBeUndefined()
+      );
+      expect(validateOtlpTlsVersion('1.2.0')).toEqual([
+        '"1.2.0" is not a TLS version that the collector supports. Select one.',
       ]);
-      expect(validateOtlpTlsCipherSuites(Array(101).fill('suite'))).toEqual([
-        { message: 'Specify at most 100 cipher suites' },
+    });
+
+    it('validateOtlpTlsCipherSuites should reject unknown cipher suites, naming them', () => {
+      expect(
+        validateOtlpTlsCipherSuites([
+          'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+          'TLS_RSA_WITH_AES_128_CBC_SHA',
+          'TLS_AES_128_GCM_SHA256',
+        ])
+      ).toBeUndefined();
+      expect(
+        validateOtlpTlsCipherSuites(['TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_TYPO'])
+      ).toEqual([
+        { message: '"TLS_TYPO" is not a cipher suite that the collector supports', index: 1 },
       ]);
+      expect(
+        validateOtlpTlsCipherSuites(Array(101).fill('TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256'))
+      ).toEqual([{ message: 'Specify at most 100 cipher suites' }]);
     });
 
     describe('validateOtlpTlsPairedSettings', () => {
@@ -850,6 +882,8 @@ describe('OTLP validators', () => {
         keyFile: '',
         minVersion: '',
         maxVersion: '',
+        cipherSuites: [],
+        includeInsecureCipherSuites: false,
       };
 
       it('should accept no settings, and a complete client certificate', () => {
@@ -907,6 +941,28 @@ describe('OTLP validators', () => {
         expect(validateOtlpTlsPairedSettings({ ...empty, maxVersion: '1.1' })).toEqual({
           maxVersion: [expect.stringContaining('1.2 when not set')],
         });
+      });
+
+      it('should not compare a version that the collector does not support', () => {
+        expect(
+          validateOtlpTlsPairedSettings({ ...empty, minVersion: '1.2.0', maxVersion: '1.10' })
+        ).toEqual({});
+      });
+
+      it('should require allowing the insecure cipher suites that are used', () => {
+        const cipherSuites = ['TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_RC4_128_SHA'];
+        expect(validateOtlpTlsPairedSettings({ ...empty, cipherSuites })).toEqual({
+          cipherSuites: [
+            'Turn on "Allow insecure cipher suites" to use the insecure cipher suite TLS_RSA_WITH_RC4_128_SHA',
+          ],
+        });
+        expect(
+          validateOtlpTlsPairedSettings({
+            ...empty,
+            cipherSuites,
+            includeInsecureCipherSuites: true,
+          })
+        ).toEqual({});
       });
     });
   });
