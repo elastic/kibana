@@ -385,7 +385,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       expected: {
         success: true,
         esql: `${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | EVAL key_machine_os_keyword = CASE(machine.os.keyword IN (${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | STATS rank_machine_os_keyword = AVG(bytes) BY machine.os.keyword | SORT rank_machine_os_keyword DESC, machine.os.keyword ASC | LIMIT 2 | KEEP machine.os.keyword), machine.os.keyword, NULL) | INLINE STATS rank_machine_os_keyword = AVG(bytes) BY key_machine_os_keyword | STATS AVG(bytes) BY rank_machine_os_keyword, key_machine_os_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_machine_os_keyword | EVAL named_machine_os_keyword = CASE(key_machine_os_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_machine_os_keyword DESC, rank_machine_os_keyword DESC, key_machine_os_keyword ASC, \`AVG(bytes)\` DESC | EVAL machine.os.keyword = COALESCE(TO_STRING(key_machine_os_keyword), "Other"::KEYWORD) | DROP named_machine_os_keyword, key_machine_os_keyword, rank_machine_os_keyword`,
-        columnNames: ['AVG(bytes)', 'machine.os.keyword', 'host.keyword'],
+        columnNames: ['AVG(bytes)', 'host.keyword', 'machine.os.keyword'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
           'machine.os.keyword': ['col1'],
@@ -422,7 +422,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       expected: {
         success: true,
         esql: `${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | EVAL key_machine_os_keyword = CASE(machine.os.keyword IN (${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | STATS rank_machine_os_keyword = AVG(bytes) BY machine.os.keyword | SORT rank_machine_os_keyword ASC, machine.os.keyword ASC | LIMIT 2 | KEEP machine.os.keyword), machine.os.keyword, NULL) | INLINE STATS rank_machine_os_keyword = AVG(bytes) BY key_machine_os_keyword | STATS AVG(bytes) BY rank_machine_os_keyword, key_machine_os_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_machine_os_keyword | EVAL named_machine_os_keyword = CASE(key_machine_os_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_machine_os_keyword DESC, rank_machine_os_keyword ASC, key_machine_os_keyword ASC, \`AVG(bytes)\` DESC | EVAL machine.os.keyword = COALESCE(TO_STRING(key_machine_os_keyword), "Other"::KEYWORD) | DROP named_machine_os_keyword, key_machine_os_keyword, rank_machine_os_keyword`,
-        columnNames: ['AVG(bytes)', 'machine.os.keyword', 'host.keyword'],
+        columnNames: ['AVG(bytes)', 'host.keyword', 'machine.os.keyword'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
           'machine.os.keyword': ['col1'],
@@ -459,7 +459,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       expected: {
         success: true,
         esql: `${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | EVAL key_machine_os_keyword = CASE(machine.os.keyword IN (${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | STATS COUNT(*) BY machine.os.keyword | SORT machine.os.keyword ASC | LIMIT 2 | KEEP machine.os.keyword), machine.os.keyword, NULL) | STATS AVG(bytes) BY key_machine_os_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_machine_os_keyword | EVAL named_machine_os_keyword = CASE(key_machine_os_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_machine_os_keyword DESC, key_machine_os_keyword ASC, \`AVG(bytes)\` DESC | EVAL machine.os.keyword = COALESCE(TO_STRING(key_machine_os_keyword), "Other"::KEYWORD) | DROP named_machine_os_keyword, key_machine_os_keyword`,
-        columnNames: ['AVG(bytes)', 'machine.os.keyword', 'host.keyword'],
+        columnNames: ['AVG(bytes)', 'host.keyword', 'machine.os.keyword'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
           'machine.os.keyword': ['col1'],
