@@ -31,6 +31,7 @@ import type {
   WaitForApprovalGraphNode,
   WaitForInputGraphNode,
   WaitGraphNode,
+  WorkflowAwaitExecutionsGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowOutputGraphNode,
@@ -89,6 +90,7 @@ import { WaitForApprovalStepImpl } from './wait_for_approval_step/wait_for_appro
 import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step';
 import { WaitStepImpl } from './wait_step/wait_step';
 import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
+import { createAwaitExecutionsStepDefinition } from './workflow_await_executions_step/workflow_await_executions_step_definition';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
 import { WorkflowOutputStepImpl } from './workflow_output_step/workflow_output_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
@@ -110,7 +112,10 @@ export class NodesFactory {
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private dependencies: ContextDependencies,
     private stepIoService: StepIoService,
-    private workflowExecutionState: Pick<WorkflowExecutionState, 'getStepExecutionsByStepId'>
+    private workflowExecutionState: Pick<
+      WorkflowExecutionState,
+      'getStepExecutionsByStepId' | 'getAllStepExecutions' | 'getStepExecution'
+    >
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
@@ -438,6 +443,33 @@ export class NodesFactory {
           workflowLogger: stepExecutionRuntime.stepLogger,
           config: this.dependencies.config,
         });
+      case 'workflow.awaitExecutions':
+        if (!this.dependencies.workflowExecutionRepository) {
+          throw new Error('WorkflowExecutionRepository is not available in dependencies');
+        }
+        if (!this.dependencies.stepExecutionRepository) {
+          throw new Error('StepExecutionRepository is not available in dependencies');
+        }
+        if (!this.dependencies.spaceId) {
+          throw new Error('spaceId is not available in dependencies');
+        }
+        return new CustomStepImpl(
+          node as WorkflowAwaitExecutionsGraphNode,
+          createAwaitExecutionsStepDefinition({
+            stepExecutionRuntime,
+            workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
+            stepExecutionRepository: this.dependencies.stepExecutionRepository,
+            workflowGraph: this.workflowGraph,
+            workflowExecutionState: this.workflowExecutionState,
+            stepIoService: this.stepIoService,
+            spaceId: this.dependencies.spaceId,
+            workflowLogger: stepLogger,
+          }),
+          stepExecutionRuntime,
+          this.connectorExecutor,
+          this.workflowRuntime,
+          stepLogger
+        );
       case 'workflow.output':
         this.workflowLogger.logDebug(`Creating workflow.output step`, {
           event: { action: 'workflow-output-step-creation', outcome: 'success' },

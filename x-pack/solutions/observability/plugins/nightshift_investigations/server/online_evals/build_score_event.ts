@@ -6,6 +6,7 @@
  */
 
 import type { EvaluateFn } from '@kbn/evals-plugin/server';
+import { MAX_TAGS_PER_SCORE, readTags } from './score_tags';
 import type {
   OnlineEvalError,
   OnlineEvalScore,
@@ -50,16 +51,20 @@ const truncate = (value: string, maxLength: number): string => {
 
 const toScores = (results: EvaluateResult[], includeExplanations: boolean): OnlineEvalScore[] =>
   results.flatMap(({ evaluator, scores = [] }) =>
-    scores.map(({ name, score, label, explanation }) => ({
-      evaluator_name: evaluator.name,
-      evaluator_version: evaluator.version,
-      name,
-      ...(typeof score === 'number' ? { value: score } : {}),
-      ...(label ? { label: truncate(label, MAX_LABEL_LENGTH) } : {}),
-      ...(includeExplanations && explanation
-        ? { explanation: truncate(explanation, MAX_EXPLANATION_LENGTH) }
-        : {}),
-    }))
+    scores.map(({ name, score, label, explanation, metadata }) => {
+      const tags = readTags(metadata).slice(0, MAX_TAGS_PER_SCORE);
+      return {
+        evaluator_name: evaluator.name,
+        evaluator_version: evaluator.version,
+        name,
+        ...(typeof score === 'number' ? { value: score } : {}),
+        ...(label ? { label: truncate(label, MAX_LABEL_LENGTH) } : {}),
+        ...(tags.length > 0 ? { tags } : {}),
+        ...(includeExplanations && explanation
+          ? { explanation: truncate(explanation, MAX_EXPLANATION_LENGTH) }
+          : {}),
+      };
+    })
   );
 
 const toErrors = (results: EvaluateResult[]): OnlineEvalError[] =>

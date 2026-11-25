@@ -7,9 +7,11 @@
 
 import { injectable } from 'inversify';
 import type { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
+import type { HttpResponsePayload } from '@kbn/core-http-server';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { EngineHttpError } from '../lib/errors/engine_http_error';
 import { getStatusCode } from '../lib/errors/get_status_code';
+import type { DetectionAccountService } from '../lib/service_account/detection_account';
 import type { EngineRouteContext } from './engine_route_context';
 
 /**
@@ -50,5 +52,45 @@ export abstract class BaseEngineRoute<TBody = unknown> implements RouteHandler {
   /** The space the request is made in. */
   protected getSpaceId(): string {
     return this.ctx.getSpaceId(this.request);
+  }
+
+  /**
+   * Runs `fn` as the space's detection service account and answers with what it returns. Another
+   * account's workflow is refused, while a user's call is swapped for the account. `abortSignal`
+   * fires when the caller goes away, so a cancelled workflow does not leave the work running.
+   */
+  protected async runAsAccount<T extends HttpResponsePayload>({
+    account,
+    fn,
+  }: {
+    account: Pick<
+      DetectionAccountService,
+      'assertServiceAccountActsForSpace' | 'asDetectionEngineAccount'
+    >;
+    fn: (params: {
+      accountRequest: KibanaRequest;
+      spaceId: string;
+      abortSignal: AbortSignal;
+    }) => Promise<T>;
+  }): Promise<IKibanaResponse> {
+    const spaceId = this.getSpaceId();
+    await account.assertServiceAccountActsForSpace({ request: this.request, spaceId });
+
+    const controller = new AbortController();
+    const subscription = this.request.events.aborted$.subscribe(() =>
+      controller.abort('the request was aborted')
+    );
+
+    try {
+      const result = await account.asDetectionEngineAccount({
+        request: this.request,
+        spaceId,
+        fn: (accountRequest) => fn({ accountRequest, spaceId, abortSignal: controller.signal }),
+      });
+
+      return this.ctx.response.ok({ body: result });
+    } finally {
+      subscription.unsubscribe();
+    }
   }
 }
