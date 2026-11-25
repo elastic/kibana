@@ -255,6 +255,50 @@ describe('executeDashboardUpsert', () => {
     expect(result.dashboardData.description).toBe('');
   });
 
+  describe('dashboard settings', () => {
+    const dashboardWithSettings: DashboardAttachmentData = {
+      title: 'Title',
+      panels: [],
+      options: { use_margins: false, sync_cursor: false },
+    };
+
+    it('merges options over the existing options', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: dashboardWithSettings,
+        upsert: { options: { hide_panel_borders: true, sync_cursor: true } },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.options).toEqual({
+        use_margins: false,
+        sync_cursor: true,
+        hide_panel_borders: true,
+      });
+    });
+
+    it('sets options on a dashboard without options', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Title', panels: [] },
+        upsert: { options: { hide_panel_titles: true } },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.options).toEqual({ hide_panel_titles: true });
+    });
+
+    it('keeps the settings a call leaves out', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: dashboardWithSettings,
+        upsert: { title: 'Renamed' },
+        logger,
+      });
+
+      expect(result.dashboardData).toEqual({ ...dashboardWithSettings, title: 'Renamed' });
+    });
+  });
+
   it('starts from an empty dashboard when no dashboard data is given', async () => {
     const result = await executeDashboardUpsert({
       upsert: {
@@ -2603,6 +2647,14 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+
+    it('keeps an unknown options key for the validator', () => {
+      const result = upsertDashboardSchema.parse({
+        options: { hide_borders: true, hide_panel_titles: true },
+      });
+
+      expect(result.options).toEqual({ hide_borders: true, hide_panel_titles: true });
     });
   });
 });
