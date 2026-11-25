@@ -6,11 +6,11 @@
  */
 
 import { connectorsSpecs } from '@kbn/connector-specs';
-import { slack2HitlAction } from '@kbn/connector-topics';
+import { getConnectorEventTopicName, slack2HitlAction } from '@kbn/connector-topics';
 
 import { registerConnectorEventTopics } from './register_connector_event_topics';
 
-const CONNECTOR_EVENT_TOPIC_NAMES = [
+const CONNECTOR_EVENT_IDS = [
   'datadog.alert',
   'github.check_run',
   'github.deployment_status',
@@ -44,7 +44,7 @@ const CONNECTOR_EVENT_TOPIC_NAMES = [
 ] as const;
 
 describe('registerConnectorEventTopics', () => {
-  it('registers each spec event id except slack2.hitl_action', () => {
+  it('registers a connectors-prefixed topic for each spec event except slack2.hitl_action', () => {
     const registerTopic = jest.fn();
     const topics = registerConnectorEventTopics(registerTopic);
     const registeredNames = registerTopic.mock.calls.map(([topic]) => topic.name);
@@ -54,15 +54,18 @@ describe('registerConnectorEventTopics', () => {
         : []
     );
 
+    const registeredEventIds = specEventIds.filter((eventId) => eventId !== slack2HitlAction.name);
+
     expect(specEventIds).toContain(slack2HitlAction.name);
-    expect(registeredNames).toEqual(
-      specEventIds.filter((eventId) => eventId !== slack2HitlAction.name)
+    expect(registeredNames).toEqual(registeredEventIds.map(getConnectorEventTopicName));
+    expect([...registeredNames].sort()).toEqual(
+      CONNECTOR_EVENT_IDS.map(getConnectorEventTopicName).sort()
     );
-    expect([...registeredNames].sort()).toEqual([...CONNECTOR_EVENT_TOPIC_NAMES]);
     expect(registeredNames).not.toContain(slack2HitlAction.name);
-    expect([...topics.keys()]).toEqual(registeredNames);
+    expect(registeredNames).not.toContain(getConnectorEventTopicName(slack2HitlAction.name));
+    expect([...topics.keys()]).toEqual(registeredEventIds);
     for (const [eventId, topic] of topics) {
-      expect(topic.name).toBe(eventId);
+      expect(topic.name).toBe(getConnectorEventTopicName(eventId));
     }
   });
 });

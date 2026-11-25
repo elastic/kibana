@@ -260,7 +260,8 @@ describe('Actions Plugin', () => {
       const registeredNames = coreSetup.pubsub.registerTopic.mock.calls.map(
         ([topic]) => topic.name
       );
-      expect(registeredNames).toEqual([...topics.keys()]);
+      expect(registeredNames).toEqual([...topics.values()].map((topic) => topic.name));
+      expect([...topics.keys()]).not.toContain(slack2HitlAction.name);
       expect(registeredNames).not.toContain(slack2HitlAction.name);
     });
 

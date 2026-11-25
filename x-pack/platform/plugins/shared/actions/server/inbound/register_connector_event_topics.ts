@@ -7,17 +7,21 @@
 
 import { connectorsSpecs } from '@kbn/connector-specs';
 import {
+  getConnectorEventTopicName,
   slack2HitlAction,
   type ConnectorEventBusData,
   type ConnectorEventTopicDefinition,
+  type ConnectorEventTopicName,
 } from '@kbn/connector-topics';
 import { defineTopic, type Topic } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 
 const defineConnectorEventTopic = <TSchema extends z.ZodObject, TName extends string>(
   definition: ConnectorEventTopicDefinition<TSchema, TName>
-): Topic<ConnectorEventBusData<TSchema>, TName> =>
-  defineTopic<Topic<ConnectorEventBusData<TSchema>, TName>>(definition.name);
+): Topic<ConnectorEventBusData<TSchema>, ConnectorEventTopicName<TName>> =>
+  defineTopic<Topic<ConnectorEventBusData<TSchema>, ConnectorEventTopicName<TName>>>(
+    getConnectorEventTopicName(definition.name)
+  );
 
 /** Registers one topic per connector event. `slack2.hitl_action` stays off the bus. */
 export const registerConnectorEventTopics = (
