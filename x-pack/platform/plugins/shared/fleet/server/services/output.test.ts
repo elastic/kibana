@@ -17,7 +17,7 @@ import {
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../common/constants';
 import type { OutputSOAttributes } from '../types';
-import type { NewElasticsearchOutput } from '../../common/types';
+import type { NewElasticsearchOutput, UpdateOutput } from '../../common/types';
 import { OUTPUT_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 
 import { outputService, outputIdToUuid } from './output';
@@ -2232,6 +2232,66 @@ describe('Output Service', () => {
               { id: 'output-test' }
             )
           ).rejects.toThrow('requires secret storage to be enabled');
+        });
+      });
+
+      describe('TLS secrets', () => {
+        const newOtlpOutput = {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'OTLP with TLS',
+          type: 'otlp' as const,
+          otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' as const },
+        };
+
+        it.each([
+          ['key_pem', { key_pem: 'my-key-pem' }],
+          ['tpm.owner_auth', { tpm: { owner_auth: 'my-owner-auth' } }],
+          ['tpm.auth', { tpm: { auth: 'my-auth' } }],
+        ])('rejects %s when secret storage is disabled', async (_name, tls) => {
+          mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+
+          await expect(
+            outputService.create(
+              getMockedSoClient(),
+              esClientMock,
+              { ...newOtlpOutput, secrets: { otlp_exporter: { tls } } },
+              { id: 'output-test' }
+            )
+          ).rejects.toThrow(
+            'secrets.otlp_exporter.tls of an OTLP output requires secret storage to be enabled'
+          );
+        });
+
+        it('accepts TLS settings without secrets when secret storage is disabled', async () => {
+          mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              ...newOtlpOutput,
+              otlp_exporter: { ...newOtlpOutput.otlp_exporter, tls: { ca_pem: 'my-ca' } },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toHaveBeenCalled();
+        });
+
+        it('accepts TLS secrets when secret storage is enabled', async () => {
+          mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            { ...newOtlpOutput, secrets: { otlp_exporter: { tls: { key_pem: 'my-key-pem' } } } },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toHaveBeenCalled();
         });
       });
 
@@ -5519,6 +5579,58 @@ describe('Output Service', () => {
           } finally {
             mockedAppContextService.getCloud.mockReturnValue({} as any);
           }
+        });
+      });
+
+      describe('TLS secrets', () => {
+        it.each([
+          ['key_pem', { key_pem: 'my-key-pem' }],
+          ['tpm.owner_auth', { tpm: { owner_auth: 'my-owner-auth' } }],
+          ['tpm.auth', { tpm: { auth: 'my-auth' } }],
+        ])('rejects %s when secret storage is disabled', async (_name, tls) => {
+          mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+
+          await expect(
+            outputService.update(getMockedSoClient({}), esClientMock, 'existing-otlp-output', {
+              secrets: { otlp_exporter: { tls } },
+            })
+          ).rejects.toThrow(
+            'secrets.otlp_exporter.tls of an OTLP output requires secret storage to be enabled'
+          );
+        });
+
+        it.each([
+          ['a null key_pem', { secrets: { otlp_exporter: { tls: { key_pem: null } } } }],
+          [
+            'null TPM secrets',
+            { secrets: { otlp_exporter: { tls: { tpm: { owner_auth: null, auth: null } } } } },
+          ],
+          [
+            'tls: null',
+            { otlp_exporter: { endpoint: 'https://otel.example.com:4317', tls: null } },
+          ],
+        ])('accepts %s when secret storage is disabled', async (_name, update) => {
+          mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-otlp-output',
+            update as UpdateOutput
+          );
+
+          expect(soClient.update).toHaveBeenCalled();
+        });
+
+        it('accepts a TLS secret when secret storage is enabled', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+            secrets: { otlp_exporter: { tls: { key_pem: 'my-key-pem' } } },
+          });
+
+          expect(soClient.update).toHaveBeenCalled();
         });
       });
 

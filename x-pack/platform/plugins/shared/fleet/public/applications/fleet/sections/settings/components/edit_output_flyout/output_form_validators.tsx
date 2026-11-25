@@ -971,3 +971,155 @@ export function validateOtlpAuthCredential(value: string) {
 }
 
 export const validateOtlpAuthCredentialSecret = toSecretValidator(validateOtlpAuthCredential);
+
+// the limits of the OTLP exporter TLS settings in the API
+const OTLP_TLS_PEM_MAX_LENGTH = 65536;
+const OTLP_TLS_FILE_MAX_LENGTH = 4096;
+const OTLP_TLS_CIPHER_SUITE_MAX_LENGTH = 256;
+const OTLP_TLS_CIPHER_SUITES_MAX_SIZE = 100;
+export const OTLP_TLS_DEFAULT_MIN_VERSION = '1.2';
+
+const otlpTooLongError = (max: number) => [
+  i18n.translate('xpack.fleet.settings.outputForm.otlpTlsValueTooLong', {
+    defaultMessage: 'Must be at most {max} characters',
+    values: { max },
+  }),
+];
+
+/** An optional PEM-encoded certificate or key. */
+export function validateOtlpTlsPem(value: string) {
+  if ((value?.trim() ?? '').length > OTLP_TLS_PEM_MAX_LENGTH) {
+    return otlpTooLongError(OTLP_TLS_PEM_MAX_LENGTH);
+  }
+}
+
+export const validateOtlpTlsPemSecret = toSecretValidator(validateOtlpTlsPem);
+
+/**
+ * The client key of the OTLP exporter. A saved key that is being replaced needs a new value: the
+ * saved key is removed with its own action, not by leaving the replacement empty.
+ */
+export function validateOtlpTlsKeyPemSecret(
+  value: string | { id: string } | undefined,
+  hasSavedKey: boolean
+) {
+  if (hasSavedKey && value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeyPemReplacementRequired', {
+        defaultMessage: 'Enter the new client key, or cancel the change',
+      }),
+    ];
+  }
+  return validateOtlpTlsPemSecret(value);
+}
+
+/** An optional path to a file on the host of the agent. */
+export function validateOtlpTlsFilePath(value: string) {
+  if ((value?.trim() ?? '').length > OTLP_TLS_FILE_MAX_LENGTH) {
+    return otlpTooLongError(OTLP_TLS_FILE_MAX_LENGTH);
+  }
+}
+
+export function validateOtlpTlsCipherSuites(value: string[]) {
+  const errors: Array<{ message: string; index?: number }> = [];
+  if (value.length > OTLP_TLS_CIPHER_SUITES_MAX_SIZE) {
+    errors.push({
+      message: i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCipherSuitesTooMany', {
+        defaultMessage: 'Specify at most {max} cipher suites',
+        values: { max: OTLP_TLS_CIPHER_SUITES_MAX_SIZE },
+      }),
+    });
+  }
+  value.forEach((suite, index) => {
+    if (suite.trim().length > OTLP_TLS_CIPHER_SUITE_MAX_LENGTH) {
+      errors.push({ message: otlpTooLongError(OTLP_TLS_CIPHER_SUITE_MAX_LENGTH)[0], index });
+    }
+  });
+  return errors.length ? errors : undefined;
+}
+
+/** The values of the OTLP exporter TLS settings that depend on each other. */
+export interface OtlpTlsPairedValues {
+  caPem: string;
+  caFile: string;
+  certPem: string;
+  certFile: string;
+  /** Whether a client key is set as a PEM key: a new value, or a stored secret. */
+  hasKeyPem: boolean;
+  keyFile: string;
+  minVersion: string;
+  maxVersion: string;
+}
+
+export type OtlpTlsPairedErrors = Partial<
+  Record<'caFile' | 'certPem' | 'certFile' | 'keyPem' | 'keyFile' | 'maxVersion', string[]>
+>;
+
+const pemAndFileError = (setting: string) => [
+  i18n.translate('xpack.fleet.settings.outputForm.otlpTlsPemAndFile', {
+    defaultMessage: 'Specify the {setting} either as PEM or as a file, not both',
+    values: { setting },
+  }),
+];
+
+const isSet = (value: string) => !!value.trim();
+
+/**
+ * Validates the TLS settings that depend on each other, as the collector does (configtls): a
+ * certificate authority, a client certificate and a client key are each set either as PEM or as a
+ * file, the client certificate and key are set together, and the minimum TLS version is not above
+ * the maximum. Each error is set on the setting to change.
+ */
+export function validateOtlpTlsPairedSettings(values: OtlpTlsPairedValues): OtlpTlsPairedErrors {
+  const errors: OtlpTlsPairedErrors = {};
+  const hasCert = isSet(values.certPem) || isSet(values.certFile);
+  const hasKey = values.hasKeyPem || isSet(values.keyFile);
+
+  if (isSet(values.caPem) && isSet(values.caFile)) {
+    errors.caFile = pemAndFileError(
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCaSetting', {
+        defaultMessage: 'certificate authority',
+      })
+    );
+  }
+  if (isSet(values.certPem) && isSet(values.certFile)) {
+    errors.certFile = pemAndFileError(
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCertSetting', {
+        defaultMessage: 'client certificate',
+      })
+    );
+  }
+  if (values.hasKeyPem && isSet(values.keyFile)) {
+    errors.keyFile = pemAndFileError(
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeySetting', {
+        defaultMessage: 'client key',
+      })
+    );
+  }
+  if (hasCert && !hasKey) {
+    errors.keyPem = [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeyRequired', {
+        defaultMessage: 'Specify the client key of the client certificate, as PEM or as a file',
+      }),
+    ];
+  }
+  if (hasKey && !hasCert) {
+    errors.certPem = [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCertRequired', {
+        defaultMessage: 'Specify the client certificate of the client key, as PEM or as a file',
+      }),
+    ];
+  }
+  // the collector uses TLS 1.2 as the minimum version when it is not set
+  const minVersion = values.minVersion || OTLP_TLS_DEFAULT_MIN_VERSION;
+  if (values.maxVersion && minVersion > values.maxVersion) {
+    errors.maxVersion = [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsVersionRange', {
+        defaultMessage:
+          'The maximum TLS version cannot be lower than the minimum TLS version ({defaultMinVersion} when not set)',
+        values: { defaultMinVersion: OTLP_TLS_DEFAULT_MIN_VERSION },
+      }),
+    ];
+  }
+  return errors;
+}

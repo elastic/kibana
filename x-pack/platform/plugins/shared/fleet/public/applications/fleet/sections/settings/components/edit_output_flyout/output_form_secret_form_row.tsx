@@ -46,6 +46,10 @@ export const SecretFormRow: React.FC<{
   label?: JSX.Element;
   disabled?: boolean;
   secretType?: SecretType;
+  /** Offers to remove the saved value, for a secret that is optional. */
+  onRemove?: () => void;
+  /** Whether the saved value is removed, which the next save applies. */
+  isRemoved?: boolean;
 }> = ({
   fullWidth,
   error,
@@ -61,6 +65,8 @@ export const SecretFormRow: React.FC<{
   label,
   disabled,
   secretType = 'output',
+  onRemove,
+  isRemoved = false,
 }) => {
   const minVersion =
     secretType === 'output'
@@ -85,35 +91,69 @@ export const SecretFormRow: React.FC<{
       ) : (
         <>
           <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.fleet.outputForm.secretValueHiddenMessage"
-              defaultMessage="The saved {varName} is hidden. You can only replace the {varName}."
-              values={{
-                varName: title,
-              }}
-            />
+            {onRemove ? (
+              <FormattedMessage
+                id="xpack.fleet.outputForm.secretValueHiddenRemovableMessage"
+                defaultMessage="The saved {varName} is hidden. You can replace or remove the {varName}."
+                values={{
+                  varName: title,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.outputForm.secretValueHiddenMessage"
+                defaultMessage="The saved {varName} is hidden. You can only replace the {varName}."
+                values={{
+                  varName: title,
+                }}
+              />
+            )}
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiButtonEmpty
-            onClick={() => {
-              setEditMode(true);
-              if (clear) {
-                clear();
-              }
-            }}
-            color="primary"
-            iconType="refresh"
-            iconSide="left"
-            size="xs"
-          >
-            <FormattedMessage
-              id="xpack.fleet.outputForm.editSecretValue"
-              defaultMessage="Replace {varName}"
-              values={{
-                varName: title,
-              }}
-            />
-          </EuiButtonEmpty>
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={() => {
+                  setEditMode(true);
+                  if (clear) {
+                    clear();
+                  }
+                }}
+                color="primary"
+                iconType="refresh"
+                iconSide="left"
+                size="xs"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.outputForm.editSecretValue"
+                  defaultMessage="Replace {varName}"
+                  values={{
+                    varName: title,
+                  }}
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            {onRemove && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={onRemove}
+                  color="danger"
+                  iconType="trash"
+                  iconSide="left"
+                  size="xs"
+                  data-test-subj="secretRemoveBtn"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.outputForm.removeSecretValue"
+                    defaultMessage="Remove {varName}"
+                    values={{
+                      varName: title,
+                    }}
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </>
       )}
     </EuiPanel>
@@ -138,6 +178,37 @@ export const SecretFormRow: React.FC<{
         }}
       />
     </EuiButtonEmpty>
+  );
+
+  const removedPanel = (
+    <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="xpack.fleet.outputForm.secretValueRemovedMessage"
+          defaultMessage="The saved {varName} is removed when you save."
+          values={{
+            varName: title,
+          }}
+        />
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiButtonEmpty
+        onClick={() => cancelEdit?.()}
+        color="primary"
+        iconType="refresh"
+        iconSide="left"
+        size="xs"
+        data-test-subj="secretCancelRemoveBtn"
+      >
+        <FormattedMessage
+          id="xpack.fleet.outputForm.cancelSecretValueRemoval"
+          defaultMessage="Cancel {varName} removal"
+          values={{
+            varName: title,
+          }}
+        />
+      </EuiButtonEmpty>
+    </EuiPanel>
   );
 
   const editValue = (
@@ -216,7 +287,11 @@ export const SecretFormRow: React.FC<{
     />
   );
 
-  const inputComponent = editMode ? editValue : valueHiddenPanel;
+  const inputComponent = editMode
+    ? editValue
+    : isRemoved && !disabled
+    ? removedPanel
+    : valueHiddenPanel;
 
   return useSecretsStorage ? (
     <EuiFormRow

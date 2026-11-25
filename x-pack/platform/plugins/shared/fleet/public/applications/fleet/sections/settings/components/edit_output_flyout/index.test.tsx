@@ -3121,6 +3121,296 @@ describe('EditOutputFlyout', () => {
       });
     });
 
+    describe('TLS', () => {
+      const otlpOutputWithTls: Output = {
+        ...otlpOutput,
+        otlp_exporter: {
+          ...otlpOutput.otlp_exporter,
+          tls: {
+            ca_pem: 'my-ca',
+            cert_pem: 'my-cert',
+            min_version: '1.2',
+            cipher_suites: ['TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256'],
+          },
+        },
+        secrets: { otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } } },
+      } as Output;
+
+      const fillNewOtlpOutput = (utils: ReturnType<typeof renderFlyout>['utils']) => {
+        selectOtlpType(utils);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'my otlp' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+      };
+
+      const change = (
+        utils: ReturnType<typeof renderFlyout>['utils'],
+        testSubj: string,
+        value: string
+      ) =>
+        fireEvent.change(utils.getByTestId(`settingsOutputsFlyout.${testSubj}`), {
+          target: { value },
+        });
+
+      const isTlsSectionOpen = (utils: ReturnType<typeof renderFlyout>['utils']) =>
+        within(utils.getByTestId('settingsOutputsFlyout.otlpTlsSettings'))
+          .getByRole('button', { name: 'TLS' })
+          .getAttribute('aria-expanded');
+
+      const createdPayload = async () => {
+        await waitFor(() => {
+          expect(mockSendPostOutput).toHaveBeenCalled();
+        });
+        return mockSendPostOutput.mock.calls[0][0] as any;
+      };
+
+      const updatedPayload = async () => {
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        return mockSendPutOutput.mock.calls[0][1] as any;
+      };
+
+      it('should be collapsed by default, and link to the versioned TLS spec', () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+
+        expect(isTlsSectionOpen(utils)).toBe('false');
+        expect(
+          utils.getByTestId('settingsOutputsFlyout.otlpSpecLink.configTls').getAttribute('href')
+        ).toBe(
+          'https://github.com/open-telemetry/opentelemetry-collector/blob/v0.155.0/config/configtls/README.md'
+        );
+      });
+
+      it('should be open when the output has TLS settings, and show them', () => {
+        const { utils } = renderFlyout(otlpOutputWithTls);
+
+        expect(isTlsSectionOpen(utils)).toBe('true');
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpTlsCaPemInput')).toHaveValue('my-ca');
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpTlsMinVersionInput')).toHaveValue(
+          '1.2'
+        );
+        expect(utils.getByText('Replace Client key, PEM')).toBeInTheDocument();
+      });
+
+      it('should leave TLS out of a new output without TLS settings', async () => {
+        const { utils } = renderFlyout();
+        fillNewOtlpOutput(utils);
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await createdPayload();
+        expect(payload.otlp_exporter.tls).toBeUndefined();
+        expect(payload.secrets).toBeUndefined();
+      });
+
+      it('should create an output with TLS settings and the client key as a secret', async () => {
+        const { utils } = renderFlyout();
+        fillNewOtlpOutput(utils);
+        change(utils, 'otlpTlsCaPemInput', 'my-ca\n');
+        change(utils, 'otlpTlsCertPemInput', 'my-cert');
+        change(utils, 'otlpTlsKeyPemInput', 'my-key');
+        change(utils, 'otlpTlsMaxVersionInput', '1.3');
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otlpTlsInsecureSkipVerifyInput'));
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await createdPayload();
+        expect(payload.otlp_exporter.tls).toEqual({
+          insecure: false,
+          insecure_skip_verify: true,
+          server_name_override: null,
+          include_system_ca_certs_pool: false,
+          ca_pem: 'my-ca',
+          ca_file: null,
+          cert_pem: 'my-cert',
+          cert_file: null,
+          key_file: null,
+          min_version: null,
+          max_version: '1.3',
+          cipher_suites: null,
+          include_insecure_cipher_suites: false,
+          curve_preferences: null,
+          reload_interval: null,
+          tpm: null,
+        });
+        expect(payload.otlp_exporter.tls).not.toHaveProperty('key_pem');
+        expect(payload.secrets).toEqual({ otlp_exporter: { tls: { key_pem: 'my-key' } } });
+      });
+
+      it('should send the authentication credential and the client key together', async () => {
+        const { utils } = renderFlyout();
+        fillNewOtlpOutput(utils);
+        change(utils, 'otlpAuthTypeInput', 'auth_header');
+        change(utils, 'otlpAuthCredentialInput', 'my-credential');
+        change(utils, 'otlpTlsCertFileInput', '/etc/cert.pem');
+        change(utils, 'otlpTlsKeyPemInput', 'my-key');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await createdPayload();
+        expect(payload.secrets).toEqual({
+          auth: { credential: 'my-credential' },
+          otlp_exporter: { tls: { key_pem: 'my-key' } },
+        });
+      });
+
+      it('should keep the stored client key, and send cleared settings as null', async () => {
+        const { utils } = renderFlyout(otlpOutputWithTls);
+        clear(utils, 'otlpTlsCaPemInput');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await updatedPayload();
+        expect(payload.otlp_exporter.tls).toEqual(
+          expect.objectContaining({
+            ca_pem: null,
+            cert_pem: 'my-cert',
+            min_version: '1.2',
+            cipher_suites: ['TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256'],
+          })
+        );
+        expect(payload.secrets).toBeUndefined();
+      });
+
+      it('should remove the stored client key with the Remove action', async () => {
+        const { utils } = renderFlyout(otlpOutputWithTls);
+        fireEvent.click(utils.getByText('Remove Client key, PEM'));
+        expect(
+          utils.getByText('The saved Client key, PEM is removed when you save.')
+        ).toBeInTheDocument();
+        change(utils, 'otlpTlsKeyFileInput', '/etc/key.pem');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await updatedPayload();
+        expect(payload.otlp_exporter.tls).toEqual(
+          expect.objectContaining({ key_file: '/etc/key.pem' })
+        );
+        expect(payload.secrets).toEqual({ otlp_exporter: { tls: { key_pem: null } } });
+      });
+
+      it('should keep the stored client key when its removal is cancelled', async () => {
+        const { utils } = renderFlyout(otlpOutputWithTls);
+        fireEvent.click(utils.getByText('Remove Client key, PEM'));
+        fireEvent.click(utils.getByText('Cancel Client key, PEM removal'));
+        expect(utils.getByText('Replace Client key, PEM')).toBeInTheDocument();
+        change(utils, 'nameInput', 'renamed otlp output');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await updatedPayload();
+        expect(payload.secrets).toBeUndefined();
+      });
+
+      it('should not save an empty replacement of the stored client key', async () => {
+        const { utils } = renderFlyout(otlpOutputWithTls);
+        fireEvent.click(utils.getByText('Replace Client key, PEM'));
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText('Enter the new client key, or cancel the change')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+
+      it('should send tls: null when all the TLS settings are cleared', async () => {
+        const { utils } = renderFlyout(otlpOutputWithTls);
+        clear(utils, 'otlpTlsCaPemInput');
+        clear(utils, 'otlpTlsCertPemInput');
+        change(utils, 'otlpTlsMinVersionInput', '');
+        fireEvent.click(
+          within(utils.getByTestId('settingsOutputsFlyout.otlpTlsCipherSuitesInput')).getByRole(
+            'button',
+            { name: /Clear input/ }
+          )
+        );
+        fireEvent.click(utils.getByText('Remove Client key, PEM'));
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await updatedPayload();
+        expect(payload.otlp_exporter.tls).toBeNull();
+        expect(payload.secrets).toEqual({ otlp_exporter: { tls: { key_pem: null } } });
+      });
+
+      it('should not remove the TPM secrets set with the API when the settings are cleared', async () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: { ...otlpOutput.otlp_exporter, tls: { ca_pem: 'my-ca' } },
+          secrets: {
+            otlp_exporter: { tls: { tpm: { owner_auth: { id: 'owner-auth-secret-id' } } } },
+          },
+        } as Output);
+        clear(utils, 'otlpTlsCaPemInput');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await updatedPayload();
+        expect(payload.otlp_exporter.tls).toEqual(
+          expect.objectContaining({ ca_pem: null, tpm: { enabled: false, path: null } })
+        );
+        expect(payload.secrets).toBeUndefined();
+      });
+
+      it('should show the errors of settings that cannot be set together, and disable saving', () => {
+        const { utils } = renderFlyout(otlpOutputWithTls);
+        const saveButton = utils.getByTestId('saveApplySettingsBtn');
+
+        change(utils, 'otlpTlsCaFileInput', '/etc/ca.pem');
+        expect(
+          utils.getByText('Specify the certificate authority either as PEM or as a file, not both')
+        ).toBeInTheDocument();
+        expect(saveButton).toBeDisabled();
+
+        clear(utils, 'otlpTlsCaPemInput');
+        expect(
+          utils.queryByText(
+            'Specify the certificate authority either as PEM or as a file, not both'
+          )
+        ).toBeNull();
+        expect(saveButton).not.toBeDisabled();
+
+        change(utils, 'otlpTlsMaxVersionInput', '1.1');
+        expect(utils.getByText(/cannot be lower than the minimum TLS version/)).toBeInTheDocument();
+        expect(saveButton).toBeDisabled();
+      });
+
+      it('should require the client key of a client certificate', async () => {
+        const { utils } = renderFlyout();
+        fillNewOtlpOutput(utils);
+        change(utils, 'otlpTlsCertPemInput', 'my-cert');
+
+        expect(
+          utils.getByText(/Specify the client key of the client certificate/)
+        ).toBeInTheDocument();
+        expect(utils.getByTestId('saveApplySettingsBtn')).toBeDisabled();
+      });
+
+      it('should keep the TLS settings when the protocol changes', async () => {
+        const { utils } = renderFlyout(otlpOutputWithTls);
+        fireEvent.click(utils.getByLabelText('HTTP/Protobuf'));
+        change(utils, 'otlpEndpointInput', 'https://collector.example.com:4318');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await updatedPayload();
+        expect(payload.otlp_exporter.protocol).toBe('http/protobuf');
+        expect(payload.otlp_exporter.tls).toEqual(expect.objectContaining({ ca_pem: 'my-ca' }));
+      });
+
+      it('should send neither TLS settings nor secrets for a preconfigured output that only allows renaming', async () => {
+        const { utils } = renderFlyout({
+          ...otlpOutputWithTls,
+          is_preconfigured: true,
+          allow_edit: ['name'],
+        });
+        change(utils, 'nameInput', 'renamed otlp output');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await updatedPayload();
+        expect(payload.otlp_exporter).toBeUndefined();
+        expect(payload.secrets).toBeUndefined();
+      });
+    });
+
     it('should not send the exporter of a preconfigured output that only allows renaming', async () => {
       const { utils } = renderFlyout({
         ...otlpOutput,

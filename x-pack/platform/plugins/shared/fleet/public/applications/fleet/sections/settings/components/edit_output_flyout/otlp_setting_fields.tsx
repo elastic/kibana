@@ -7,21 +7,32 @@
 
 import React from 'react';
 import {
+  EuiComboBox,
   EuiFieldText,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 
-import type { useInput, useSwitchInput } from '../../../../hooks';
+import type { useComboInput, useInput, useSwitchInput } from '../../../../hooks';
 
 import type { OtelSpec } from './otlp_spec';
 import { OtlpSpecLinks } from './otlp_spec';
 
 /** The fields of the OTLP output settings. */
+
+/**
+ * The errors of a setting: the ones of its input, and `otherErrors` that depend on other settings,
+ * such as two settings that cannot be set together.
+ */
+const getSettingErrors = (inputErrors: string[] | undefined, otherErrors?: string[]) => {
+  const errors = [...(inputErrors ?? []), ...(otherErrors ?? [])];
+  return errors.length ? errors : undefined;
+};
 
 export const OtlpTextSetting: React.FunctionComponent<{
   label: React.ReactNode;
@@ -29,18 +40,86 @@ export const OtlpTextSetting: React.FunctionComponent<{
   input: ReturnType<typeof useInput>;
   testSubj: string;
   placeholder?: string;
-}> = ({ label, helpText, input, testSubj, placeholder }) => (
-  <EuiFormRow fullWidth label={label} helpText={helpText} {...input.formRowProps}>
-    <EuiFieldText
-      fullWidth
-      data-test-subj={`settingsOutputsFlyout.${testSubj}`}
-      placeholder={placeholder}
-      {...input.props}
-      // validate when leaving the field, not only on save
-      onBlur={() => input.validate()}
-    />
-  </EuiFormRow>
-);
+  otherErrors?: string[];
+}> = ({ label, helpText, input, testSubj, placeholder, otherErrors }) => {
+  const errors = getSettingErrors(input.errors, otherErrors);
+  return (
+    <EuiFormRow fullWidth label={label} helpText={helpText} isInvalid={!!errors} error={errors}>
+      <EuiFieldText
+        fullWidth
+        data-test-subj={`settingsOutputsFlyout.${testSubj}`}
+        placeholder={placeholder}
+        {...input.props}
+        isInvalid={!!errors}
+        // validate when leaving the field, not only on save
+        onBlur={() => input.validate()}
+      />
+    </EuiFormRow>
+  );
+};
+
+export const OtlpTextAreaSetting: React.FunctionComponent<{
+  label: React.ReactNode;
+  helpText: React.ReactNode;
+  input: ReturnType<typeof useInput>;
+  testSubj: string;
+  placeholder?: string;
+  otherErrors?: string[];
+}> = ({ label, helpText, input, testSubj, placeholder, otherErrors }) => {
+  const errors = getSettingErrors(input.errors, otherErrors);
+  return (
+    <EuiFormRow fullWidth label={label} helpText={helpText} isInvalid={!!errors} error={errors}>
+      <EuiTextArea
+        fullWidth
+        rows={5}
+        data-test-subj={`settingsOutputsFlyout.${testSubj}`}
+        placeholder={placeholder}
+        {...input.props}
+        isInvalid={!!errors}
+        onBlur={() => input.validate()}
+      />
+    </EuiFormRow>
+  );
+};
+
+/**
+ * A list of values. With `options`, the values are picked from them; otherwise any value can be
+ * entered.
+ */
+export const OtlpComboBoxSetting: React.FunctionComponent<{
+  label: React.ReactNode;
+  helpText: React.ReactNode;
+  input: ReturnType<typeof useComboInput>;
+  testSubj: string;
+  placeholder?: string;
+  options?: readonly string[];
+}> = ({ label, helpText, input, testSubj, placeholder, options }) => {
+  const errors = input.props.errors?.map(({ message }) => message);
+  return (
+    <EuiFormRow fullWidth label={label} helpText={helpText} isInvalid={!!errors} error={errors}>
+      <EuiComboBox
+        fullWidth
+        data-test-subj={`settingsOutputsFlyout.${testSubj}`}
+        placeholder={placeholder}
+        isDisabled={input.props.disabled}
+        isInvalid={!!errors}
+        selectedOptions={input.value.map((value) => ({ label: value }))}
+        onChange={(selected) => input.props.onChange(selected.map(({ label: value }) => value))}
+        {...(options
+          ? { options: options.map((value) => ({ label: value })) }
+          : {
+              noSuggestions: true,
+              onCreateOption: (value: string) => {
+                const newValue = value.trim();
+                if (newValue && !input.value.includes(newValue)) {
+                  input.props.onChange([...input.value, newValue]);
+                }
+              },
+            })}
+      />
+    </EuiFormRow>
+  );
+};
 
 export const OtlpSwitchSetting: React.FunctionComponent<{
   label: React.ReactNode;
@@ -63,7 +142,7 @@ export const OtlpSelectSetting: React.FunctionComponent<{
   input: ReturnType<typeof useInput>;
   testSubj: string;
   options: Array<{ value: string; text: string }>;
-  error?: string;
+  error?: string | string[];
 }> = ({ label, helpText, input, testSubj, options, error }) => (
   <EuiFormRow fullWidth label={label} helpText={helpText} isInvalid={!!error} error={error}>
     <EuiSelect

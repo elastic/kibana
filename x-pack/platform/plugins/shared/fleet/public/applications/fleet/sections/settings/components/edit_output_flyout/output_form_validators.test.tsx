@@ -38,6 +38,12 @@ import {
   validateOtlpHttpUrl,
   validateOtlpProxyUrl,
   validateOtlpShortString,
+  validateOtlpTlsCipherSuites,
+  validateOtlpTlsFilePath,
+  validateOtlpTlsKeyPemSecret,
+  validateOtlpTlsPairedSettings,
+  validateOtlpTlsPem,
+  validateOtlpTlsPemSecret,
   validateSSLCertificate,
   validateSSLKey,
   validateSslPathInput,
@@ -792,6 +798,116 @@ describe('OTLP validators', () => {
       expect(validateOtlpHeaders([{ key: 'a', value: 'v'.repeat(1001) }])).toEqual([
         expect.objectContaining({ index: 0, hasKeyError: false, hasValueError: true }),
       ]);
+    });
+  });
+
+  describe('OTLP TLS', () => {
+    it('validateOtlpTlsPem should accept up to 65536 characters', () => {
+      expect(validateOtlpTlsPem('')).toBeUndefined();
+      expect(validateOtlpTlsPem('a'.repeat(65536))).toBeUndefined();
+      expect(validateOtlpTlsPem('a'.repeat(65537))).toEqual(['Must be at most 65536 characters']);
+    });
+
+    it('validateOtlpTlsPemSecret should accept a stored secret', () => {
+      expect(validateOtlpTlsPemSecret({ id: 'secret-id' })).toBeUndefined();
+      expect(validateOtlpTlsPemSecret('a'.repeat(65537))).toHaveLength(1);
+    });
+
+    it('validateOtlpTlsKeyPemSecret should require a replacement of a saved key', () => {
+      expect(validateOtlpTlsKeyPemSecret('', true)).toEqual([
+        'Enter the new client key, or cancel the change',
+      ]);
+      expect(validateOtlpTlsKeyPemSecret('', false)).toBeUndefined();
+      expect(validateOtlpTlsKeyPemSecret(undefined, true)).toBeUndefined();
+      expect(validateOtlpTlsKeyPemSecret({ id: 'secret-id' }, true)).toBeUndefined();
+      expect(validateOtlpTlsKeyPemSecret('new-key', true)).toBeUndefined();
+    });
+
+    it('validateOtlpTlsFilePath should accept up to 4096 characters', () => {
+      expect(validateOtlpTlsFilePath('/etc/ca.pem')).toBeUndefined();
+      expect(validateOtlpTlsFilePath('a'.repeat(4097))).toEqual([
+        'Must be at most 4096 characters',
+      ]);
+    });
+
+    it('validateOtlpTlsCipherSuites should reject long values and too many entries', () => {
+      expect(validateOtlpTlsCipherSuites(['TLS_AES_128_GCM_SHA256'])).toBeUndefined();
+      expect(validateOtlpTlsCipherSuites(['ok', 'a'.repeat(257)])).toEqual([
+        { message: 'Must be at most 256 characters', index: 1 },
+      ]);
+      expect(validateOtlpTlsCipherSuites(Array(101).fill('suite'))).toEqual([
+        { message: 'Specify at most 100 cipher suites' },
+      ]);
+    });
+
+    describe('validateOtlpTlsPairedSettings', () => {
+      const empty = {
+        caPem: '',
+        caFile: '',
+        certPem: '',
+        certFile: '',
+        hasKeyPem: false,
+        keyFile: '',
+        minVersion: '',
+        maxVersion: '',
+      };
+
+      it('should accept no settings, and a complete client certificate', () => {
+        expect(validateOtlpTlsPairedSettings(empty)).toEqual({});
+        expect(
+          validateOtlpTlsPairedSettings({ ...empty, certPem: 'cert', hasKeyPem: true })
+        ).toEqual({});
+        expect(
+          validateOtlpTlsPairedSettings({ ...empty, certFile: '/cert', keyFile: '/key' })
+        ).toEqual({});
+      });
+
+      it('should reject a setting set both as PEM and as a file', () => {
+        expect(
+          validateOtlpTlsPairedSettings({
+            ...empty,
+            caPem: 'ca',
+            caFile: '/ca',
+            certPem: 'cert',
+            certFile: '/cert',
+            hasKeyPem: true,
+            keyFile: '/key',
+          })
+        ).toEqual({
+          caFile: ['Specify the certificate authority either as PEM or as a file, not both'],
+          certFile: ['Specify the client certificate either as PEM or as a file, not both'],
+          keyFile: ['Specify the client key either as PEM or as a file, not both'],
+        });
+      });
+
+      it('should require the client certificate and key together', () => {
+        expect(validateOtlpTlsPairedSettings({ ...empty, certPem: 'cert' })).toEqual({
+          keyPem: [expect.stringContaining('Specify the client key')],
+        });
+        expect(validateOtlpTlsPairedSettings({ ...empty, hasKeyPem: true })).toEqual({
+          certPem: [expect.stringContaining('Specify the client certificate')],
+        });
+        expect(validateOtlpTlsPairedSettings({ ...empty, keyFile: '/key' })).toEqual({
+          certPem: [expect.stringContaining('Specify the client certificate')],
+        });
+      });
+
+      it('should ignore blank values', () => {
+        expect(validateOtlpTlsPairedSettings({ ...empty, caPem: ' ', caFile: '/ca' })).toEqual({});
+      });
+
+      it('should reject a maximum TLS version lower than the minimum', () => {
+        expect(
+          validateOtlpTlsPairedSettings({ ...empty, minVersion: '1.0', maxVersion: '1.1' })
+        ).toEqual({});
+        expect(
+          validateOtlpTlsPairedSettings({ ...empty, minVersion: '1.3', maxVersion: '1.2' })
+        ).toEqual({ maxVersion: [expect.stringContaining('cannot be lower')] });
+        // the collector uses TLS 1.2 as the minimum when it is not set
+        expect(validateOtlpTlsPairedSettings({ ...empty, maxVersion: '1.1' })).toEqual({
+          maxVersion: [expect.stringContaining('1.2 when not set')],
+        });
+      });
     });
   });
 });
