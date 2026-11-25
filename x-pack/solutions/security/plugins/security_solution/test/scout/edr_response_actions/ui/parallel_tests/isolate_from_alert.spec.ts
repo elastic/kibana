@@ -12,6 +12,7 @@ import { seedHostWithAlert, type SeededHostAlert } from '../../common/seed_endpo
 import {
   completeHostAction,
   deleteSubmittedHostActions,
+  HOST_ISOLATION_WAIT_MS,
   waitForHostIsolation,
 } from '../../common/complete_host_action';
 import { runCleanups } from '../../common/run_cleanups';
@@ -26,8 +27,8 @@ spaceTest.describe(
     tag: tags.stateful.classic,
   },
   () => {
-    // Isolate, release, and the agent-status polls do not fit in the default 60s.
-    spaceTest.setTimeout(240_000);
+    // Isolate, release, and the two agent-status polls do not fit in the default 60s.
+    spaceTest.setTimeout(HOST_ISOLATION_WAIT_MS * 2 + 120_000);
 
     let seededHost: (SeededHostAlert & { cleanup: () => Promise<void> }) | undefined;
     const submittedActionIds: string[] = [];
@@ -88,6 +89,7 @@ spaceTest.describe(
           await hostIsolation.waitUntilClosed();
           await completeHostAction({ esClient, config, action });
           await waitForHostIsolation({
+            esClient,
             kbnClient,
             spaceId: scoutSpace.id,
             agentId: host.agentId,
@@ -114,6 +116,7 @@ spaceTest.describe(
           await hostIsolation.waitUntilClosed();
           await completeHostAction({ esClient, config, action });
           await waitForHostIsolation({
+            esClient,
             kbnClient,
             spaceId: scoutSpace.id,
             agentId: host.agentId,

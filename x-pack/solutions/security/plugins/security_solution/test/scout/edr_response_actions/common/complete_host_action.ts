@@ -9,7 +9,11 @@ import type { estypes } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { EsClient, KbnClient, ScoutTestConfig } from '@kbn/scout-security';
 import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
-import type { ActionDetails } from '../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  AgentStatusApiResponse,
+  AgentStatusInfo,
+} from '../../../../common/endpoint/types';
 import {
   AGENT_STATUS_ROUTE,
   ENDPOINT_ACTION_RESPONSES_INDEX,
@@ -18,16 +22,14 @@ import {
   FILE_STORAGE_METADATA_INDEX,
 } from '../../../../common/endpoint/constants';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
+import { getEndpointPackageInfo } from '../../../../common/endpoint/utils/package';
+import { startMetadataTransforms } from '../../../../common/endpoint/utils/transforms';
 import {
   sendEndpointActionResponse,
   sendFleetActionResponse,
 } from '../../../../scripts/endpoint/common/response_actions';
 import { createSystemIndicesEsClient } from '../ui/fixtures/system_indices_es_client';
 import { runCleanups } from './run_cleanups';
-
-interface AgentStatusResponse {
-  data: Record<string, { isolated: boolean }>;
-}
 
 /**
  * Writes a successful Fleet and Endpoint response for `action`, plus the command's side
@@ -192,30 +194,42 @@ export const deleteGetFileUploads = async ({
 };
 
 /**
- * Waits until agent status reports the isolation flag written by `completeHostAction`.
- * The metadata transform has to pick up the new document before the flyout can show it.
+ * Budget for a single `waitForHostIsolation` call, matching what `waitForMetadataDocs` already
+ * allows for the same `endpoint.metadata_current-*` → `endpoint.metadata_united-*` chain.
+ */
+export const HOST_ISOLATION_WAIT_MS = 240_000;
+
+const HOST_ISOLATION_POLL_INTERVAL_MS = 5_000;
+
+/**
+ * Waits until agent status reports the isolation flag written by `completeHostAction`, keeping
+ * the shared metadata transforms that carry it to the united index running while it polls.
  */
 export const waitForHostIsolation = async ({
+  esClient,
   kbnClient,
   spaceId,
   agentId,
   isolated,
 }: {
+  esClient: EsClient;
   kbnClient: KbnClient;
   spaceId: string;
   agentId: string;
   isolated: boolean;
 }): Promise<void> => {
-  const deadline = Date.now() + 60_000;
+  const { version } = await getEndpointPackageInfo(kbnClient);
+  const deadline = Date.now() + HOST_ISOLATION_WAIT_MS;
   const pathPrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
   const path = `${pathPrefix}${AGENT_STATUS_ROUTE}?agentIds=${encodeURIComponent(
     agentId
   )}&agentType=endpoint`;
 
+  let lastStatus: AgentStatusInfo | undefined;
   let lastError: unknown;
   while (Date.now() < deadline) {
     try {
-      const response = await kbnClient.request<AgentStatusResponse>({
+      const response = await kbnClient.request<AgentStatusApiResponse>({
         method: 'GET',
         path,
         headers: {
@@ -224,18 +238,29 @@ export const waitForHostIsolation = async ({
         },
       });
 
-      if (response.data?.data?.[agentId]?.isolated === isolated) {
+      lastStatus = response.data?.data?.[agentId];
+      if (lastStatus?.isolated === isolated) {
         return;
       }
+
+      // A sibling worker's seed force-stops these cluster-wide transforms while it indexes.
+      await startMetadataTransforms(esClient, [], version);
     } catch (error) {
       lastError = error;
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1_000));
+    await new Promise((resolve) => setTimeout(resolve, HOST_ISOLATION_POLL_INTERVAL_MS));
   }
 
   const detail = lastError instanceof Error ? `: ${lastError.message}` : '';
   throw new Error(
-    `Timed out waiting for agent ${agentId} isolation to be ${isolated} in space ${spaceId}${detail}`
+    `Timed out waiting for agent ${agentId} isolation to be ${isolated} in space ${spaceId} ` +
+      `(last agent status: ${JSON.stringify(
+        lastStatus && {
+          found: lastStatus.found,
+          isolated: lastStatus.isolated,
+          status: lastStatus.status,
+        }
+      )})${detail}`
   );
 };
