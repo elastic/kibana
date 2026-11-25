@@ -107,6 +107,8 @@ describe('session events routes', () => {
       saveEvents: jest.fn(async (_scope, { events }) => ({
         results: events.map(({ id }) => ({ id, status: 'created' as const })),
       })),
+      listEvents: jest.fn(),
+      getTurn: jest.fn(),
     };
 
     const router = {

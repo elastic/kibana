@@ -59,6 +59,7 @@ describe('session memory routes', () => {
   let logger: ReturnType<typeof loggerMock.create>;
   let auditLog: jest.Mock;
   let service: jest.Mocked<SessionMemoryService>;
+  let getSpaces: jest.Mock<Promise<SpacesPluginStart>>;
   let authzResult: Record<string, boolean>;
 
   const createContext = () =>
@@ -107,8 +108,13 @@ describe('session memory routes', () => {
       remember: jest.fn(async (_scope, { id }) => ({ id: id ?? 'unused' })),
       get: jest.fn(),
       forget: jest.fn(),
+      readRevised: jest.fn(),
     };
     getSessionMemoryService = jest.fn(async () => service);
+    getSpaces = jest.fn(
+      async () =>
+        ({ spacesService: { getSpaceId: () => 'marketing' } } as unknown as SpacesPluginStart)
+    );
 
     const router = {
       versioned: {
@@ -125,8 +131,7 @@ describe('session memory routes', () => {
 
     registerSessionMemoryRoutes({
       router,
-      getSpaces: async () =>
-        ({ spacesService: { getSpaceId: () => 'marketing' } } as unknown as SpacesPluginStart),
+      getSpaces,
       getSessionMemoryService,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
       isMemoryEnabled: async () => memoryEnabled,
@@ -321,6 +326,29 @@ describe('session memory routes', () => {
         }),
       ]);
     });
+  });
+
+  it('audits a failure for every memory and rethrows when resolving the space fails', async () => {
+    const error = new Error('spaces unavailable');
+    getSpaces.mockRejectedValueOnce(error);
+
+    await expect(callRoute({ user_id: 'jdoe', ids: ['a', 'b', 'a'] })).rejects.toBe(error);
+
+    expect(service.forget).not.toHaveBeenCalled();
+    expect(auditedEvents()).toEqual([
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
+        error: { code: 'Error', message: 'spaces unavailable' },
+        user: { target: { id: 'jdoe' } },
+        kibana: { saved_object: { type: 'session_memory', id: 'a' } },
+      }),
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
+        error: { code: 'Error', message: 'spaces unavailable' },
+        user: { target: { id: 'jdoe' } },
+        kibana: { saved_object: { type: 'session_memory', id: 'b' } },
+      }),
+    ]);
   });
 
   it('audits a failure for every memory and rethrows when the service throws', async () => {

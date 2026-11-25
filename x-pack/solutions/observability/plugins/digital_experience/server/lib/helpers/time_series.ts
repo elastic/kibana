@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { TARGET_BUCKETS } from '../../../common/histogram';
 import type { HistogramInterval, TimeSeriesPoint } from '../../../common/types/applications';
