@@ -13,7 +13,6 @@ on:
   # One proposal at a time: wait until the previous curator PR is merged or closed.
   skip-if-match: 'is:pr is:open label:flaky-fix-curator'
 
-# Scheduled runs carry no `github.event.repository`, so a fork check on the event never matches.
 if: github.repository == 'elastic/kibana'
 
 permissions:
@@ -40,8 +39,8 @@ imports:
 
 engine:
   id: claude
-  version: '2.1.165'
-  model: claude-opus-5
+  version: '2.1.317'
+  model: claude-opus-5-5
   max-turns: 100
   env:
     ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
@@ -49,9 +48,9 @@ engine:
     ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
     # the gateway reads only `Authorization: Bearer`
     AWF_ANTHROPIC_AUTH_HEADER: Authorization
-    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5-5
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-5-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-5-5
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 

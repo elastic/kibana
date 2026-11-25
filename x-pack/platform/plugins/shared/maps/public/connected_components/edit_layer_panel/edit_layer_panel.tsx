@@ -25,7 +25,11 @@ import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
-import type { StyleDescriptor, VectorLayerDescriptor } from '../../../common/descriptor_types';
+import type {
+  DiscriminatedSourceDescriptor,
+  StyleDescriptor,
+  VectorLayerDescriptor,
+} from '../../../common/descriptor_types';
 import { getData, getCore } from '../../kibana_services';
 import type { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer } from '../../classes/layers/vector_layer';
@@ -121,8 +125,15 @@ export class EditLayerPanel extends Component<Props, State> {
     }
   }
 
-  _onSourceChange = (...args: OnSourceChangeArgs[]) => {
-    return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
+  _onSourceChange = (...args: Array<OnSourceChangeArgs<Record<string, unknown>>>) => {
+    return this.props.updateSourceProps(
+      this.props.selectedLayer!.getId(),
+      // Cast is required because ILayer is not generic over the source descriptor, so
+      // ILayer.renderSourceSettingsEditor can only type onChange args as Record<string, unknown>
+      // and propName is a string instead of SourcePropName.
+      // TODO remove cast by making ILayer generic over the source descriptor
+      args as Array<OnSourceChangeArgs<DiscriminatedSourceDescriptor>>
+    );
   };
 
   _renderFilterSection() {

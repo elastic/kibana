@@ -111,6 +111,9 @@ export const kafkaKerberosAuthType = {
   Password: 'password',
 } as const;
 
+// The longest Kerberos username (principal) accepted, by the API and by the form.
+export const KAFKA_KERBEROS_USERNAME_MAX_LENGTH = 256;
+
 export const kafkaPartitionType = {
   Random: 'random',
   RoundRobin: 'round_robin',
