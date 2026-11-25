@@ -600,7 +600,7 @@ const OtlpExporterSendingQueueSchema = schema.object({
   ),
   queue_size: nullable(
     schema.number(),
-    'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint.'
+    'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint when `sizer` is `bytes`.'
   ),
   sizer: schema.maybe(
     schema.oneOf([schema.literal('requests'), schema.literal('items'), schema.literal('bytes')], {

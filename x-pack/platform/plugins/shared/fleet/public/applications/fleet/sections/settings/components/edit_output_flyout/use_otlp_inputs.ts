@@ -353,7 +353,12 @@ export function useOtlpInputs(
   // a stored `null` queue opts out of the defaults of the managed endpoint: the spec ones apply,
   // so the settings that follow the endpoint start at the spec defaults to keep it unset
   const queueOptedOut = !!otlpOutput && queueInitial === null;
-  const otlpQueueEnabledInput = useSwitchInput(queueInitial?.enabled ?? true, disabled);
+  const otlpQueueEnabledInput = Object.assign(
+    useSwitchInput(queueInitial?.enabled ?? true, disabled),
+    // a queue left to the defaults is only sent as `null` to remove a stored one: an output without
+    // a queue keeps none, so the defaults of its endpoint apply if the endpoint changes
+    { hasStoredQueue: !!queueInitial }
+  );
   // the collector does not check a queue that is off: it only has to be a number
   const validateQueueCount = (value: string) =>
     otlpQueueEnabledInput.value ? validateOtlpPositiveCount(value) : validateOtlpCount(value);
@@ -385,10 +390,10 @@ export function useOtlpInputs(
   );
 
   // `batch: {}` enables batching with the defaults, so whether the output batches is its own
-  // setting. A new output batches on the managed endpoint, which has batch defaults, and follows
-  // the endpoint until the switch is switched.
+  // setting. An output without a stored queue batches on the managed endpoint, which has batch
+  // defaults, and follows the endpoint until the switch is switched.
   const otlpBatchEnabledInput = useDefaultedSwitchInput(
-    otlpOutput ? !!batchInitial : undefined,
+    queueInitial ? !!batchInitial : queueOptedOut ? false : undefined,
     queueDefaults.batchEnabled,
     disabled
   );
@@ -839,7 +844,9 @@ function buildOtlpQueueAndRetry(inputs: OtlpInputs) {
 
   return {
     sending_queue: isQueueUnset(inputs)
-      ? null
+      ? inputs.otlpQueueEnabledInput.hasStoredQueue
+        ? null
+        : undefined
       : {
           enabled: inputs.otlpQueueEnabledInput.value,
           num_consumers: integer(inputs.otlpQueueNumConsumersInput),
