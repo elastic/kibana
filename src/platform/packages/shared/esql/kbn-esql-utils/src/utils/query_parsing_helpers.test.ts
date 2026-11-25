@@ -16,6 +16,8 @@ import {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
+  getESQLRowOrigin,
+  getESQLResultPipeline,
   hasAggregatingCommand,
   parseTimeFieldFromESQLQuery,
   prettifyQuery,
@@ -81,6 +83,53 @@ describe('esql query helpers', () => {
     });
   });
 
+  describe('result pipelines', () => {
+    const forkBinding = 'LET x = (FROM logs | FORK (KEEP host) (STATS c = COUNT(*)));';
+
+    it.each`
+      query                                                                                | rowOrigin   | mayReturnSourceDocuments | hasResultAggregation | transformational
+      ${'FROM logs | DESCRIBE'}                                                            | ${'schema'} | ${false}                 | ${false}             | ${true}
+      ${'FROM logs | DESCRIBE | STATS c = COUNT(*)'}                                       | ${'schema'} | ${false}                 | ${true}              | ${true}
+      ${'FROM (FROM logs | DESCRIBE)'}                                                     | ${'schema'} | ${false}                 | ${false}             | ${true}
+      ${'FROM logs, (FROM other | DESCRIBE)'}                                              | ${'mixed'}  | ${true}                  | ${false}             | ${false}
+      ${'FROM logs | FORK (DESCRIBE) (DESCRIBE)'}                                          | ${'schema'} | ${false}                 | ${false}             | ${true}
+      ${'FROM logs | DESCRIBE | FORK (LIMIT 1) (KEEP name)'}                               | ${'schema'} | ${false}                 | ${false}             | ${true}
+      ${'FROM logs | FORK (DESCRIBE) (STATS c = COUNT(*))'}                                | ${'mixed'}  | ${false}                 | ${true}              | ${true}
+      ${'FROM logs | FORK (DESCRIBE) (KEEP host)'}                                         | ${'mixed'}  | ${true}                  | ${false}             | ${false}
+      ${'FROM logs | FORK (KEEP host) (STATS c = COUNT(*))'}                               | ${'other'}  | ${true}                  | ${true}              | ${true}
+      ${'FROM logs | FORK (WHERE x > 0) (STATS c = COUNT(*))'}                             | ${'other'}  | ${true}                  | ${true}              | ${false}
+      ${'FROM (FROM logs | FORK (KEEP host) (STATS c = COUNT(*)))'}                        | ${'other'}  | ${true}                  | ${true}              | ${true}
+      ${'LET schema = (FROM logs | DESCRIBE); FROM schema'}                                | ${'schema'} | ${false}                 | ${false}             | ${true}
+      ${'LET schema = (FROM logs | DESCRIBE); LET copy = (FROM schema); FROM copy'}        | ${'schema'} | ${false}                 | ${false}             | ${true}
+      ${'LET schema = (FROM logs | DESCRIBE); FROM logs'}                                  | ${'other'}  | ${true}                  | ${false}             | ${false}
+      ${'LET schema = (FROM logs | DESCRIBE); FROM logs | WHERE host IN (FROM schema)'}    | ${'other'}  | ${true}                  | ${false}             | ${false}
+      ${'FROM logs | WHERE host IN (FROM other | FORK (DESCRIBE) (DESCRIBE) | KEEP name)'} | ${'other'}  | ${true}                  | ${false}             | ${false}
+      ${'FROM (FROM logs | STATS c = COUNT(*))'}                                           | ${'other'}  | ${false}                 | ${true}              | ${true}
+      ${'LET x = (FROM logs | STATS c = COUNT(*)); FROM x'}                                | ${'other'}  | ${false}                 | ${true}              | ${true}
+      ${'LET x = (FROM logs | STATS c = COUNT(*)); FROM logs'}                             | ${'other'}  | ${true}                  | ${false}             | ${false}
+      ${'FROM logs | WHERE 1 IN (FROM logs | STATS c = COUNT(*))'}                         | ${'other'}  | ${true}                  | ${false}             | ${false}
+      ${'EXPLAIN (FROM logs | STATS c = COUNT(*))'}                                        | ${'other'}  | ${true}                  | ${false}             | ${false}
+      ${'FROM logs | KEEP host'}                                                           | ${'other'}  | ${true}                  | ${false}             | ${true}
+      ${'FROM (FROM logs | KEEP host)'}                                                    | ${'other'}  | ${true}                  | ${false}             | ${false}
+      ${`${forkBinding} FROM x`}                                                           | ${'other'}  | ${true}                  | ${true}              | ${true}
+      ${`${forkBinding} LET y = (FROM x); FROM y`}                                         | ${'other'}  | ${true}                  | ${true}              | ${true}
+      ${`${forkBinding} FROM (FROM x)`}                                                    | ${'other'}  | ${true}                  | ${true}              | ${true}
+      ${`${forkBinding} FROM logs`}                                                        | ${'other'}  | ${true}                  | ${false}             | ${false}
+      ${`${forkBinding} FROM logs | WHERE host IN (FROM x | KEEP host)`}                   | ${'other'}  | ${true}                  | ${false}             | ${false}
+    `(
+      'analyzes $query',
+      ({ query, rowOrigin, mayReturnSourceDocuments, hasResultAggregation, transformational }) => {
+        expect(getESQLResultPipeline(query)).toMatchObject({
+          rowOrigin,
+          mayReturnSourceDocuments,
+          hasResultAggregation,
+        });
+        expect(getESQLRowOrigin(query)).toBe(rowOrigin);
+        expect(hasTransformationalCommand(query)).toBe(transformational);
+      }
+    );
+  });
+
   describe('hasTransformationalCommand', () => {
     it('should return false for non transformational command', () => {
       expect(hasTransformationalCommand('from a | eval b = 1')).toBeFalsy();
@@ -88,10 +137,6 @@ describe('esql query helpers', () => {
 
     it('should return true for stats', () => {
       expect(hasTransformationalCommand('from a | stats count() as total by a=b')).toBeTruthy();
-    });
-
-    it('should return true for keep', () => {
-      expect(hasTransformationalCommand('from a | keep field1, field2')).toBeTruthy();
     });
 
     it('should return false for commented out transformational command', () => {
@@ -109,26 +154,20 @@ describe('esql query helpers', () => {
       expect(hasTransformationalCommand('ts a | stats var = avg(b)')).toBeTruthy();
     });
 
-    it('should return true for fork with all branches containing only transformational commands', () => {
-      expect(
-        hasTransformationalCommand('from a | fork (stats count() by field1) (keep field2, field3)')
-      ).toBeTruthy();
-    });
-
     it('should return false for fork with non-transformational commands in branches', () => {
       expect(
         hasTransformationalCommand('from a | fork (where field1 > 0) (eval field2 = field1 * 2)')
       ).toBeFalsy();
     });
-
-    it('should return false for fork with mixed transformational and non-transformational commands', () => {
-      expect(
-        hasTransformationalCommand('from a | fork (stats count() by field1) (where field2 > 0)')
-      ).toBeFalsy();
-    });
   });
 
   describe('hasAggregatingCommand', () => {
+    it('checks predicate subqueries by default', () => {
+      expect(hasAggregatingCommand('FROM logs | WHERE 1 IN (FROM logs | STATS c = COUNT(*))')).toBe(
+        true
+      );
+    });
+
     it('returns false for KEEP', () => {
       expect(hasAggregatingCommand('FROM logs | KEEP host')).toBe(false);
     });

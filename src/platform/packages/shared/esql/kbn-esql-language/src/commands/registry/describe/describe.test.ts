@@ -59,4 +59,21 @@ describe('DESCRIBE editor support', () => {
       expect.objectContaining({ code: 'unknownColumn', text: 'Unknown column "input"' }),
     ]);
   });
+
+  it.each([
+    'SET unmapped_fields="LOAD"; LET schema = (FROM logs | DESCRIBE); FROM schema',
+    'SET unmapped_fields="LOAD"; FROM (FROM logs | DESCRIBE)',
+  ])('rejects unknown schema columns after %s', async (query) => {
+    const callbacks = { getColumnsFor: () => Promise.resolve([]) };
+
+    expect((await validateQuery(`${query} | KEEP name`, callbacks)).errors).toEqual([]);
+    expect((await validateQuery(`${query} | KEEP message`, callbacks)).errors).toEqual([
+      expect.objectContaining({ code: 'unknownColumn', text: 'Unknown column "message"' }),
+    ]);
+
+    const filterQuery = `${query} | WHERE message IS NULL`;
+    const { root } = Parser.parse(filterQuery);
+    const columns = await new QueryColumns(root, filterQuery, callbacks).byType();
+    expect(columns.map(({ name }) => name)).not.toContain('message');
+  });
 });

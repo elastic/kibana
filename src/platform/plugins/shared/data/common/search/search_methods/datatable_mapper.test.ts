@@ -45,6 +45,25 @@ describe('mapEsqlResponseToDatatable', () => {
     expect(result.columns[0].name).toBe('new_name');
   });
 
+  it.each([
+    ['FROM logs | RENAME service.name AS name | DESCRIBE', 'name'],
+    [
+      'FROM logs | RENAME service.name AS name | DESCRIBE | RENAME name AS field_name',
+      'field_name',
+    ],
+    ['FROM logs | RENAME service.name AS name | FORK (DESCRIBE) (DESCRIBE)', 'name'],
+    ['FROM logs | RENAME service.name AS name | FORK (DESCRIBE) (LIMIT 1)', 'name'],
+    ['LET schema = (FROM logs | RENAME service.name AS name | DESCRIBE); FROM schema', 'name'],
+  ])('does not expose a source filter for schema columns in %s', (query, name) => {
+    const result = mapEsqlResponseToDatatable(makeResponse([{ name, type: 'keyword' }]), { query });
+
+    expect(result.columns[0].meta.sourceParams).toMatchObject({
+      sourceField: name,
+      isSourceFieldFilterable: false,
+    });
+    expect(result.columns[0].isComputedColumn).toBe(true);
+  });
+
   it('keeps meta.sourceParams.sourceField as the ES column name without RENAME', () => {
     const result = mapEsqlResponseToDatatable(makeResponse([{ name: 'host', type: 'keyword' }]), {
       query: 'FROM index',

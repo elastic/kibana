@@ -110,6 +110,7 @@ export interface ICommandMetadata {
   subquerySource?: boolean; // Optional property to indicate if the command can start a subquery expression.
   hiddenWhenQueryContainsSubqueries?: boolean; // Optional property to hide the command when the query contains subqueries.
   docPreserving?: boolean; // Optional property to indicate each output row still maps to one input document, so a full-text WHERE before it can be reused by HIGHLIGHT.
+  rowOrigin?: 'schema'; // This command replaces input rows with rows describing the input schema.
 }
 
 /**

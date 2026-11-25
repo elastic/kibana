@@ -14,9 +14,8 @@ export const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
 
 /**
  * Selects default ES|QL table columns from a query response.
- * Transformational queries (or responses with at most five columns) expose result
- * columns, capped at 50. Wider non-transformational responses keep Discover's
- * document-table / Summary default.
+ * Exposes up to 50 result columns for transformational queries and responses
+ * with at most five columns.
  */
 export const getEsqlDefaultColumns = ({
   esql,
@@ -30,8 +29,8 @@ export const getEsqlDefaultColumns = ({
   }
 
   if (
-    hasTransformationalCommand(esql) ||
-    responseColumns.length <= ESQL_TABLE_VIEW_COLUMN_THRESHOLD
+    responseColumns.length <= ESQL_TABLE_VIEW_COLUMN_THRESHOLD ||
+    hasTransformationalCommand(esql)
   ) {
     return responseColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS);
   }

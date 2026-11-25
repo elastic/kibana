@@ -25,10 +25,6 @@ const columnNames = [
   'description',
 ];
 
-// TODO: Follow schema rows through FORK and FROM subqueries, including LET bindings.
-// Editor validation can accept unmapped fields after those subqueries. Discover and
-// its embeddables can fall back to Summary, and field filters can resolve schema
-// column names against the input index.
 export const describeCommand: ICommand = {
   name: Commands.DESCRIBE,
   methods: {
@@ -43,5 +39,6 @@ export const describeCommand: ICommand = {
     declaration: 'DESCRIBE',
     examples: ['FROM logs | DESCRIBE | KEEP name, type'],
     preview: true,
+    rowOrigin: 'schema',
   },
 };

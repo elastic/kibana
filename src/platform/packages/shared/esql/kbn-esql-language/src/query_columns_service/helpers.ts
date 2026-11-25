@@ -23,6 +23,7 @@ import { getLookupJoinSource } from '../commands/definitions/utils/sources';
 import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
 import { isTimeseriesSourceCommand } from '../commands/definitions/utils/timeseries_check';
 import type { NamedSubquery } from '../commands/definitions/utils/named_subqueries';
+import { getPipelineRowOrigin } from '../commands/definitions/utils/result_pipeline';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -114,11 +115,15 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
 }
 
 /**
- * After KEEP or STATS, no new unmapped fields are added as they were erased by those destructive commands.
+ * Checks whether the pipeline can still load new unmapped fields from its source.
  */
-export function areNewUnmappedFieldsAllowed(previousCommands: ESQLAstCommand[]): boolean {
-  return !previousCommands.find((cmd) =>
-    TRANSFORMATIONAL_COMMANDS.includes(cmd.name.toLowerCase())
+export function areNewUnmappedFieldsAllowed(
+  previousCommands: readonly ESQLAstCommand[],
+  namedSubqueries?: readonly NamedSubquery[]
+): boolean {
+  return (
+    !previousCommands.some((cmd) => TRANSFORMATIONAL_COMMANDS.includes(cmd.name.toLowerCase())) &&
+    getPipelineRowOrigin(previousCommands, namedSubqueries) !== 'schema'
   );
 }
 
@@ -126,7 +131,8 @@ export function getUnmappedFields(
   command: ESQLAstCommand,
   previousCommands: ESQLAstCommand[],
   previousPipeFields: ESQLColumnData[],
-  unmappedFieldsStrategy?: UnmappedFieldsStrategy
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy,
+  namedSubqueries?: readonly NamedSubquery[]
 ): ESQLColumnData[] {
   // Not collect unmmaped fields if the strategy is DEFAULT or undefined
   if (!unmappedFieldsStrategy || unmappedFieldsStrategy === UnmappedFieldsStrategy.DEFAULT) {
@@ -134,7 +140,7 @@ export function getUnmappedFields(
   }
 
   // No unmaped fields can be collected after certain commands
-  if (!areNewUnmappedFieldsAllowed(previousCommands)) {
+  if (!areNewUnmappedFieldsAllowed(previousCommands, namedSubqueries)) {
     return [];
   }
 
@@ -208,7 +214,8 @@ export async function getCurrentQueryAvailableColumns(
     lastCommand,
     previousCommands,
     fieldsBeforeUnmapped,
-    unmappedFieldsStrategy
+    unmappedFieldsStrategy,
+    namedSubqueries
   );
 
   const fields = [...fieldsBeforeUnmapped, ...unmappedFields];

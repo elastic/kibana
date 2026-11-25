@@ -17,6 +17,13 @@ export * from './definitions/types';
 export * from './definitions/all_operators';
 export * from './definitions/utils/promql';
 export * from './definitions/utils/named_subqueries';
+export {
+  analyzeResultPipeline,
+  getPipelineRowOrigin,
+  isAggregatingCommand,
+  type EsqlResultPipeline,
+  type EsqlRowOrigin,
+} from './definitions/utils/result_pipeline';
 export { inlineCasts as inlineCastsMapping } from '@elastic/esql-definitions/inline-cast';
 
 // Utilities from definitions

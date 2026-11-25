@@ -19,8 +19,13 @@ import {
 import {
   CommandNames,
   esqlCommandRegistry,
+  analyzeResultPipeline,
+  getNamedSubqueries,
+  isAggregatingCommand,
   getPromqlBracketsToClose,
   TRANSFORMATIONAL_COMMANDS,
+  type EsqlRowOrigin,
+  type EsqlResultPipeline,
 } from '@kbn/esql-language';
 import type { PromQLLabel } from '@elastic/esql';
 import type {
@@ -32,13 +37,13 @@ import type {
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
-  ESQLAstForkCommand,
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
 import type { VariableNamePrefix } from '@kbn/esql-types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/code-editor';
+import { parseEsqlCached } from './parse_esql_cached';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -84,84 +89,48 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
   return clustersSet.size > 0 ? [...clustersSet] : undefined;
 }
 
-/**
- * Returns true when the query contains a STATS or PROMQL command, including nested
- * FORK branches. KEEP and INLINE STATS are not aggregating.
- */
+const resultPipelineCache = new WeakMap<ESQLAstQueryExpression, EsqlResultPipeline>();
+
+function getResultPipelineFromAst(root: ESQLAstQueryExpression): EsqlResultPipeline {
+  const cached = resultPipelineCache.get(root);
+  if (cached) {
+    return cached;
+  }
+
+  const result = analyzeResultPipeline(root.commands, getNamedSubqueries(root.header));
+  resultPipelineCache.set(root, result);
+  return result;
+}
+
+/** Analyzes the pipelines that supply the query results. */
+export function getESQLResultPipeline(esql: string): EsqlResultPipeline {
+  return getResultPipelineFromAst(parseEsqlCached(esql).root);
+}
+
+/** Finds STATS or PROMQL anywhere in the query. */
 export function hasAggregatingCommand(esql?: string): boolean {
   if (!esql) return false;
-  const { root } = Parser.parse(esql);
+  const { root } = parseEsqlCached(esql);
   return (
-    Walker.findAll(
-      root,
-      (node) => node.type === 'command' && (node.name === 'stats' || node.name === 'promql')
-    ).length > 0
+    Walker.find(root, (node) => node.type === 'command' && isAggregatingCommand(node)) !== undefined
   );
 }
 
-/**
- * Determines if an ES|QL query contains transformational commands.
- *
- * For ES|QL, we consider the following as transformational commands:
- * - `stats`: Performs aggregations and transformations
- * - `keep`: Filters and selects specific fields
- * - `fork` commands where ALL branches contain only transformational commands
- *
- * @param esql - The ES|QL query string to analyze
- * @returns true if the query contains transformational commands or fork commands with all transformational branches
- *
- * @example
- * hasTransformationalCommand('from index | stats count() by field') // true
- * hasTransformationalCommand('from index | keep field1, field2') // true
- * hasTransformationalCommand('from index | fork (stats count()) (keep field)') // true
- * hasTransformationalCommand('from index | fork (where x > 0) (eval y = x * 2)') // false
- * hasTransformationalCommand('from index | where field > 0') // false
- */
-export function hasTransformationalCommand(esql?: string) {
+/** Classifies the origin of the result rows in an ES|QL query. */
+export function getESQLRowOrigin(esql: string): EsqlRowOrigin {
+  return getESQLResultPipeline(esql).rowOrigin;
+}
+
+/** Detects table results and preserves the legacy KEEP and FORK classification. */
+export function hasTransformationalCommand(esql?: string): boolean {
   if (!esql) return false;
-  const { root } = Parser.parse(esql);
-
-  // Check for direct transformational commands first
-  const hasAtLeastOneTransformationalCommand = TRANSFORMATIONAL_COMMANDS.some((command) =>
-    root.commands.find(({ name }) => name === command)
-  );
-
-  // Early return if we found direct transformational commands
-  if (hasAtLeastOneTransformationalCommand) {
+  const { root } = parseEsqlCached(esql);
+  if (root.commands.some(({ name }) => TRANSFORMATIONAL_COMMANDS.includes(name))) {
     return true;
   }
 
-  // Check for fork commands with all transformational branches
-  const forkCommands = Walker.findAll(
-    root,
-    (node) => node.name === 'fork'
-  ) as Array<ESQLAstForkCommand>;
-
-  const hasForkWithAllTransformationalBranches = forkCommands.some((forkCommand) => {
-    const forkArguments = forkCommand?.args;
-
-    if (!forkArguments || forkArguments.length === 0) {
-      return false;
-    }
-
-    return forkArguments.every((parens) => {
-      const branch = parens.child;
-
-      if (branch.type !== 'query') {
-        return false;
-      }
-
-      const branchCommands = branch.commands;
-
-      // Branch must have at least one command and all commands must be transformational
-      return (
-        branchCommands.length > 0 &&
-        branchCommands.every((cmd) => TRANSFORMATIONAL_COMMANDS.includes(cmd.name))
-      );
-    });
-  });
-
-  return hasForkWithAllTransformationalBranches;
+  const result = getResultPipelineFromAst(root);
+  return !result.mayReturnSourceDocuments || result.hasLegacyTransformationalFork;
 }
 
 export function getLimitFromESQLQuery(esql: string): number {
