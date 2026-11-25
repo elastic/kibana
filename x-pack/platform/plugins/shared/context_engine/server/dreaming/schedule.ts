@@ -18,19 +18,40 @@ import type {
   ContextEngineDreamingWorkflowTemplateValues,
   ContextEngineMaintenanceWorkflowTemplateValues,
 } from '@kbn/workflows/managed';
+import type { WorkflowExecutionDto, WorkflowExecutionListDto } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  ExecutionStatusValues,
+  ExecutionType,
+  isTerminalStatus,
+} from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   DEFAULT_DREAMING_INTERVAL,
   MIN_DREAMING_INTERVAL_MINUTES,
-  dreamingBuildsAnything,
   dreamingTypesOf,
+  isDreamingOn,
   maintenanceConfigOf,
   type AiIndexDreamingConfig,
+  type RunAiIndexDreamingResponse,
 } from '../../common/dreaming';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
 import type { AiIndexService } from '../ai_indices/service';
 import type { WorkflowEnablementApi } from '../feedback_analysis/schedule';
+import { DreamingNotSetUpError } from './dreaming_not_set_up_error';
+import { DreamingRunNothingStartedError } from './dreaming_run_nothing_started_error';
+import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
+
+/** Params for listing workflow runs during a manual dreaming trigger. */
+export interface DreamingWorkflowExecutionsQuery {
+  workflowId: string;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+  omitStepRuns?: boolean;
+  size?: number;
+  request: KibanaRequest;
+}
 
 /** The workflows management API dreaming uses. */
 export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
@@ -39,14 +60,27 @@ export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<void>;
+  getWorkflowExecutions(
+    params: DreamingWorkflowExecutionsQuery,
+    spaceId: string
+  ): Promise<WorkflowExecutionListDto>;
+  getWorkflowExecution(
+    workflowExecutionId: string,
+    spaceId: string,
+    options: { includeOutput?: boolean; request: KibanaRequest }
+  ): Promise<WorkflowExecutionDto | null>;
 }
+
+const NON_TERMINAL_EXECUTION_STATUSES = ExecutionStatusValues.filter(
+  (status) => !isTerminalStatus(status)
+);
 
 const CANCELLED_RUN_RETRIES = 5;
 const CANCELLED_RUN_RETRY_MS = 1000;
 
 const isRunInProgressError = (error: unknown): boolean =>
-  error instanceof Error && error.message.includes('running executions');
-import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
+  error instanceof Error &&
+  (error.message.includes('running executions') || error.message.includes('concurrency'));
 
 export interface DreamingScheduleService {
   /**
@@ -60,6 +94,14 @@ export interface DreamingScheduleService {
   }): Promise<void>;
   /** Removes the dreaming and maintenance workflows of an AI index. */
   remove(params: { aiIndexId: string; spaceId: string; request: KibanaRequest }): Promise<void>;
+  /** Ids of attached dreaming workflows, or empty when dreaming is off. */
+  getWorkflowIds(params: { aiIndex: AiIndexItem; spaceId: string }): string[];
+  /** Runs the attached dreaming workflows now. */
+  run(params: {
+    aiIndex: AiIndexItem;
+    spaceId: string;
+    request: KibanaRequest;
+  }): Promise<RunAiIndexDreamingResponse>;
 }
 
 /** The id of the dreaming workflow of an AI index. */
@@ -87,7 +129,7 @@ export const maintenanceWorkflowIdFor = (aiIndexId: string, spaceId: string): st
 
 /** Whether an AI index has dreaming on and configured to build something. */
 export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
-  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
+  isDreamingOn(dreaming);
 
 /** Whether an AI index dreams and has memory maintenance turned on. */
 export const shouldMaintain = (aiIndex: { dreaming?: AiIndexDreamingConfig }): boolean =>
@@ -155,6 +197,7 @@ const MAINTENANCE_WORKFLOW = {
 } as const;
 
 type DreamingWorkflow = (typeof DREAMING_WORKFLOWS)[number] | typeof MAINTENANCE_WORKFLOW;
+type AttachedDreamingWorkflow = (typeof DREAMING_WORKFLOWS)[number] & { attach: true };
 
 const ALL_WORKFLOWS: readonly DreamingWorkflow[] = [...DREAMING_WORKFLOWS, MAINTENANCE_WORKFLOW];
 
@@ -212,6 +255,132 @@ export const createDreamingScheduleService = ({
 
   const automationFor = (workflow: DreamingWorkflow, aiIndexId: string, spaceId: string) =>
     ({ type: 'workflow', value: workflow.workflowIdFor(aiIndexId, spaceId) } as const);
+
+  const attachedWorkflows = DREAMING_WORKFLOWS.filter(
+    (workflow): workflow is AttachedDreamingWorkflow => workflow.attach
+  );
+
+  type StartWorkflowResult =
+    | RunAiIndexDreamingResponse['executions'][number]
+    | { failed: string }
+    | { skipped: string };
+
+  const classifyExecution = async ({
+    executionId,
+    workflowId,
+    spaceId,
+    request,
+    workflowsManagement,
+  }: {
+    executionId: string;
+    workflowId: string;
+    spaceId: string;
+    request: KibanaRequest;
+    workflowsManagement: DreamingWorkflowsApi | undefined;
+  }): Promise<StartWorkflowResult> => {
+    if (!workflowsManagement) {
+      return { workflow_id: workflowId, execution_id: executionId };
+    }
+    let execution: WorkflowExecutionDto | null;
+    try {
+      execution = await workflowsManagement.getWorkflowExecution(executionId, spaceId, {
+        request,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      log.debug(
+        () =>
+          `Could not read status for dreaming execution '${executionId}' on '${workflowId}': ${message}`
+      );
+      return { workflow_id: workflowId, execution_id: executionId };
+    }
+    if (execution === null) {
+      return { workflow_id: workflowId, execution_id: executionId };
+    }
+    if (execution.status === ExecutionStatus.SKIPPED) {
+      return { skipped: workflowId };
+    }
+    return { workflow_id: workflowId, execution_id: executionId };
+  };
+
+  const hasActiveProductionExecution = async (
+    workflowsManagement: DreamingWorkflowsApi,
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<boolean> => {
+    const active = await workflowsManagement.getWorkflowExecutions(
+      {
+        workflowId,
+        executionTypes: [ExecutionType.PRODUCTION],
+        statuses: NON_TERMINAL_EXECUTION_STATUSES,
+        omitStepRuns: true,
+        size: 1,
+        request,
+      },
+      spaceId
+    );
+    return active.results.length > 0;
+  };
+
+  const startWorkflow = async ({
+    workflow,
+    aiIndex,
+    spaceId,
+    request,
+  }: {
+    workflow: AttachedDreamingWorkflow;
+    aiIndex: AiIndexItem;
+    spaceId: string;
+    request: KibanaRequest;
+  }): Promise<StartWorkflowResult> => {
+    const workflowId = workflow.workflowIdFor(aiIndex.id, spaceId);
+    try {
+      const workflowsManagement = await getWorkflowsManagement();
+      if (workflowsManagement) {
+        try {
+          if (
+            await hasActiveProductionExecution(workflowsManagement, workflowId, spaceId, request)
+          ) {
+            return { skipped: workflowId };
+          }
+        } catch (precheckError) {
+          const message =
+            precheckError instanceof Error ? precheckError.message : String(precheckError);
+          log.debug(
+            () =>
+              `Could not check for an active dreaming run on '${workflowId}' before starting: ${message}`
+          );
+        }
+      }
+
+      const client = await getManagedWorkflowsClient();
+      const executionId = await client.execute(request, workflow.definitionId, {
+        spaceId,
+        workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndex.id, spaceId),
+      });
+      return await classifyExecution({
+        executionId,
+        workflowId,
+        spaceId,
+        request,
+        workflowsManagement,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (isRunInProgressError(error)) {
+        log.debug(
+          () =>
+            `Dreaming workflow '${workflowId}' for AI index '${aiIndex.id}' is already running: ${message}`
+        );
+      } else {
+        log.warn(
+          `Could not start dreaming workflow '${workflowId}' for AI index '${aiIndex.id}': ${message}`
+        );
+      }
+      return { failed: workflowId };
+    }
+  };
 
   const detach = async (
     workflow: DreamingWorkflow,
@@ -286,6 +455,49 @@ export const createDreamingScheduleService = ({
         await uninstall(workflow, aiIndexId, spaceId, request);
       }
       log.debug(() => `Removed dreaming for deleted AI index '${aiIndexId}' in space '${spaceId}'`);
+    },
+
+    getWorkflowIds({ aiIndex, spaceId }) {
+      if (!shouldDream(aiIndex)) {
+        return [];
+      }
+      return attachedWorkflows.map((workflow) => workflow.workflowIdFor(aiIndex.id, spaceId));
+    },
+
+    async run({ aiIndex, spaceId, request }) {
+      if (!shouldDream(aiIndex)) {
+        throw new DreamingNotSetUpError(aiIndex.id);
+      }
+
+      const results = await Promise.allSettled(
+        attachedWorkflows.map((workflow) => startWorkflow({ workflow, aiIndex, spaceId, request }))
+      );
+
+      const outcomes = results.flatMap((result) => {
+        if (result.status === 'fulfilled') {
+          return [result.value];
+        }
+        log.warn(
+          `Dreaming manual run failed for AI index '${aiIndex.id}': ${
+            result.reason instanceof Error ? result.reason.message : String(result.reason)
+          }`
+        );
+        return [];
+      });
+
+      const failed = outcomes.flatMap((outcome) => ('failed' in outcome ? [outcome.failed] : []));
+      const skipped = outcomes.flatMap((outcome) =>
+        'skipped' in outcome ? [outcome.skipped] : []
+      );
+      const executions = outcomes.flatMap((outcome) =>
+        'failed' in outcome || 'skipped' in outcome ? [] : [outcome]
+      );
+
+      if (executions.length === 0 && skipped.length === 0) {
+        throw new DreamingRunNothingStartedError(aiIndex.id);
+      }
+
+      return { executions, failed, skipped };
     },
   };
 };

@@ -146,6 +146,10 @@ interface YamlValidationResultDeprecatedStep extends YamlValidationDiagnosticBas
   owner: 'deprecated-step-validation';
 }
 
+interface YamlValidationResultStepExposure extends YamlValidationDiagnosticBase {
+  owner: 'step-exposure-validation';
+}
+
 interface YamlValidationResultEsql extends YamlValidationDiagnosticBase {
   owner: 'esql-validation';
 }
@@ -160,6 +164,10 @@ interface YamlValidationResultParallelMode extends YamlValidationDiagnosticBase 
 
 interface YamlValidationResultGraphBuild extends YamlValidationDiagnosticBase {
   owner: 'graph-build-validation';
+}
+
+interface YamlValidationResultAwaitExecutions extends YamlValidationDiagnosticBase {
+  owner: 'await-executions-validation';
 }
 
 export type StepPropertyValidationResult =
@@ -183,10 +191,12 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'workflow-output-validation',
   'if-condition-validation',
   'deprecated-step-validation',
+  'step-exposure-validation',
   'esql-validation',
   'parallel-fan-out-validation',
   'parallel-mode-validation',
   'graph-build-validation',
+  'await-executions-validation',
 ] as const;
 
 export const BATCHED_CUSTOM_MARKER_OWNER = 'custom-yaml-validation';
@@ -213,10 +223,12 @@ export type YamlValidationDiagnostic =
   | YamlValidationResultWorkflowOutput
   | YamlValidationResultIfConditionError
   | YamlValidationResultDeprecatedStep
+  | YamlValidationResultStepExposure
   | YamlValidationResultEsql
   | YamlValidationResultParallelFanOut
   | YamlValidationResultParallelMode
-  | YamlValidationResultGraphBuild;
+  | YamlValidationResultGraphBuild
+  | YamlValidationResultAwaitExecutions;
 
 export type YamlValidationDecoration =
   | YamlValidationResultVariableValid
