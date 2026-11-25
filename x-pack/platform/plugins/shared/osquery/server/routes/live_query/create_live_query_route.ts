@@ -6,14 +6,15 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { isBoom, notFound } from '@hapi/boom';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import unified from 'unified';
 import markdown from 'remark-parse-no-trim';
 import { some, filter, uniq } from 'lodash';
-import pMap from 'p-map';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createLiveQueryRequestBodySchema } from '../../../common/api';
 import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
@@ -36,10 +37,26 @@ import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
 import type { DispatchSource } from '../../handlers/action/dispatch_source';
 import { resolveWorkflowOrigin } from '../../handlers/action/action_origin';
 
-// alert_ids is not bounded by the request schema: reject oversized requests before any lookup
-// runs, and cap parallel alert lookups for the ones that are accepted.
-const MAX_DISTINCT_ALERT_IDS = 100;
-const ALERT_LOOKUP_CONCURRENCY = 10;
+// AlertsClient.get wraps every lookup failure (missing alert, alert-level authorization,
+// Elasticsearch errors) in Boom.notFound, so a missing alert cannot be told apart from one the
+// caller cannot read. Both get the same message, which also avoids revealing whether it exists.
+const alertNotAccessible = (id: string) => `Alert "${id}" was not found or is not accessible`;
+
+// Returns the ids that do not resolve to an alert the caller can read. `ids` matches `_id`
+// literally, and the client ANDs the caller's authorization and space filters into the query.
+const findUnreadableAlertIds = async (
+  client: PublicMethodsOf<AlertsClient>,
+  ids: string[]
+): Promise<string[]> => {
+  const { hits } = await client.find({
+    query: { ids: { values: ids } },
+    size: ids.length,
+    _source: false,
+  });
+  const readable = new Set(hits.hits.map((hit) => hit._id));
+
+  return ids.filter((id) => !readable.has(id));
+};
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -75,56 +92,33 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
         const logger = osqueryContext.logFactory.get('liveQuery');
 
-        const alertIds = uniq(request.body.alert_ids);
+        // alert_ids is capped at MAX_DISTINCT_ALERT_IDS distinct ids by the request schema.
+        const [primaryAlertId, ...otherAlertIds] = uniq(request.body.alert_ids);
 
-        if (alertIds.length > MAX_DISTINCT_ALERT_IDS) {
-          return response.badRequest({
-            body: `alert_ids must contain at most ${MAX_DISTINCT_ALERT_IDS} distinct ids`,
-          });
-        }
-
+        let alertsClient: PublicMethodsOf<AlertsClient> | undefined;
         let alertData: (ParsedTechnicalFields & { _index: string }) | undefined;
         let alertError: { statusCode: number; message: string } | undefined;
         try {
-          if (alertIds.length) {
-            const client = await osqueryContext.service
+          if (primaryAlertId) {
+            alertsClient = await osqueryContext.service
               .getRuleRegistryService()
               ?.getRacClientWithRequest(request);
 
-            if (!client) {
+            if (!alertsClient) {
               throw new Error('Alert client unavailable');
             }
 
-            // Every referenced alert must resolve; the first one drives the rest of the request.
-            // AlertsClient.get wraps every lookup failure (missing, unauthorized, and Elasticsearch
-            // errors alike) in a Boom 404, so all of them surface as the neutral 404 below. The
-            // controlled 500 is only for an unavailable client or an error without a status code.
-            const alerts = await pMap(
-              alertIds,
-              async (id) => {
-                const alert = await client.get({ id });
-                if (!alert) {
-                  throw notFound();
-                }
-
-                return alert as ParsedTechnicalFields & { _index: string };
-              },
-              { concurrency: ALERT_LOOKUP_CONCURRENCY }
-            );
-
-            alertData = alerts[0];
+            // Only the first alert feeds authorization; the others are checked once the caller
+            // is authorized, so a caller without osquery privileges costs a single lookup.
+            alertData = (await alertsClient.get({
+              id: primaryAlertId,
+            })) as ParsedTechnicalFields & {
+              _index: string;
+            };
           }
         } catch (error) {
-          const rawStatusCode = isBoom(error)
-            ? error.output.statusCode
-            : error?.statusCode ?? error?.meta?.statusCode;
-          const statusCode = typeof rawStatusCode === 'number' ? rawStatusCode : undefined;
-
-          if (statusCode === 404 || statusCode === 403) {
-            alertError = {
-              statusCode: 404,
-              message: 'The requested alert was not found or is not accessible',
-            };
+          if (transformError(error).statusCode === 404) {
+            alertError = { statusCode: 404, message: alertNotAccessible(primaryAlertId) };
           } else {
             logger.error(
               `Failed to retrieve alert for osquery live query request: ${
@@ -243,6 +237,41 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             statusCode: alertError.statusCode,
             body: { message: alertError.message },
           });
+        }
+
+        // The caller is authorized. Every other referenced alert must resolve too, so an action
+        // cannot be attached to an alert the caller cannot read.
+        if (alertsClient && otherAlertIds.length) {
+          try {
+            const [firstUnreadableId] = await findUnreadableAlertIds(alertsClient, otherAlertIds);
+
+            if (firstUnreadableId !== undefined) {
+              return response.customError({
+                statusCode: 404,
+                body: { message: alertNotAccessible(firstUnreadableId) },
+              });
+            }
+          } catch (error) {
+            // find() wraps lookup failures in a 404 without saying which id caused them.
+            if (transformError(error).statusCode === 404) {
+              return response.customError({
+                statusCode: 404,
+                body: { message: 'An alert was not found or is not accessible' },
+              });
+            }
+
+            logger.error(
+              `Failed to retrieve alerts for osquery live query request: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
+              { error }
+            );
+
+            return response.customError({
+              statusCode: 500,
+              body: { message: 'Error occurred while retrieving the alert' },
+            });
+          }
         }
 
         try {

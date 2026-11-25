@@ -128,6 +128,10 @@ paths:
                           timeout: 120
                           agents:
                             - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+        '404':
+          description: >-
+            An alert referenced by `alert_ids` was not found, or you do not have access to it. The
+            two cases are indistinguishable by design.
 
   /api/osquery/live_queries/{id}:
     get:

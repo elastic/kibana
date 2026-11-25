@@ -9,7 +9,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CoreStart, RequestHandler } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
-import { forbidden, notFound } from '@hapi/boom';
+import { notFound } from '@hapi/boom';
 import { EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER } from '@kbn/workflows-extensions/server';
 import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
@@ -110,12 +110,14 @@ describe('createLiveQueryRoute', () => {
   const createOsqueryContext = ({
     coreStart,
     racGet,
+    racFind,
     getActiveSpace,
     workflowsExtensionsEnabled = false,
     racClientUnavailable,
   }: {
     coreStart: CoreStart;
     racGet?: jest.Mock;
+    racFind?: jest.Mock;
     getActiveSpace?: jest.Mock;
     workflowsExtensionsEnabled?: boolean;
     racClientUnavailable?: boolean;
@@ -128,7 +130,11 @@ describe('createLiveQueryRoute', () => {
         getRuleRegistryService: jest.fn().mockReturnValue({
           getRacClientWithRequest: jest
             .fn()
-            .mockResolvedValue(racClientUnavailable ? undefined : { get: racGet ?? jest.fn() }),
+            .mockResolvedValue(
+              racClientUnavailable
+                ? undefined
+                : { get: racGet ?? jest.fn(), find: racFind ?? jest.fn() }
+            ),
         }),
       },
       logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn(), error: jest.fn() }) },
@@ -149,6 +155,7 @@ describe('createLiveQueryRoute', () => {
     {
       coreStart,
       racGet,
+      racFind,
       getActiveSpace,
       workflowsExtensionsEnabled,
       headers,
@@ -156,6 +163,7 @@ describe('createLiveQueryRoute', () => {
     }: {
       coreStart?: CoreStart;
       racGet?: jest.Mock;
+      racFind?: jest.Mock;
       getActiveSpace?: jest.Mock;
       workflowsExtensionsEnabled?: boolean;
       headers?: Record<string, string | string[]>;
@@ -169,6 +177,7 @@ describe('createLiveQueryRoute', () => {
       createOsqueryContext({
         coreStart: start,
         racGet,
+        racFind,
         getActiveSpace,
         workflowsExtensionsEnabled,
         racClientUnavailable,
@@ -341,7 +350,7 @@ describe('createLiveQueryRoute', () => {
   });
 
   describe('alert lookup failures when query access is allowed', () => {
-    const ALERT_NOT_ACCESSIBLE = 'The requested alert was not found or is not accessible';
+    const alertNotAccessible = (id: string) => `Alert "${id}" was not found or is not accessible`;
 
     // AlertsClient.get wraps every lookup failure (missing alert, alert-level authz, ES errors)
     // in Boom.notFound with the original error embedded in the message.
@@ -355,6 +364,8 @@ describe('createLiveQueryRoute', () => {
       'kibana.alert.rule.uuid': 'rule-1',
     };
 
+    const findResponse = (ids: string[]) => ({ hits: { hits: ids.map((_id) => ({ _id })) } });
+
     it.each([
       ['missing', alertsClientError('alert-1', 'Error: Not Found')],
       [
@@ -362,7 +373,6 @@ describe('createLiveQueryRoute', () => {
         alertsClientError('alert-1', 'Error: Unauthorized by "siem" to get "siem.queryRule" alert'),
       ],
       ['an ES security exception for', alertsClientError('alert-1', 'security_exception')],
-      ['a raw forbidden error for', forbidden()],
     ])('returns 404 without internal details for a %s alert', async (_description, error) => {
       const racGet = jest.fn().mockRejectedValue(error);
       const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
@@ -374,43 +384,49 @@ describe('createLiveQueryRoute', () => {
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 404,
-        body: { message: ALERT_NOT_ACCESSIBLE },
+        body: { message: alertNotAccessible('alert-1') },
       });
       expect(response.ok).not.toHaveBeenCalled();
       expect(mockedCreateActionHandler).not.toHaveBeenCalled();
     });
 
-    it('returns 404 when any of several alert_ids cannot be resolved', async () => {
-      const racGet = jest.fn(async ({ id }: { id: string }) => {
-        if (id === 'alert-2') {
-          throw alertsClientError(id, 'Error: Not Found');
-        }
-
-        return readableAlert;
-      });
+    it('returns 404 naming the first missing id when a later alert_id cannot be resolved', async () => {
+      const racGet = jest.fn().mockResolvedValue(readableAlert);
+      const racFind = jest.fn().mockResolvedValue(findResponse(['alert-2', 'alert-4']));
       const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
 
       const response = await invokeRoute(
-        { query: 'select 1;', alert_ids: ['alert-1', 'alert-2'], agent_ids: ['agent-1'] },
-        { coreStart, racGet }
+        {
+          query: 'select 1;',
+          alert_ids: ['alert-1', 'alert-2', 'alert-3', 'alert-4', 'alert-5'],
+          agent_ids: ['agent-1'],
+        },
+        { coreStart, racGet, racFind }
       );
 
+      expect(racGet).toHaveBeenCalledTimes(1);
       expect(racGet).toHaveBeenCalledWith({ id: 'alert-1' });
-      expect(racGet).toHaveBeenCalledWith({ id: 'alert-2' });
+      expect(racFind).toHaveBeenCalledTimes(1);
+      expect(racFind).toHaveBeenCalledWith({
+        query: { ids: { values: ['alert-2', 'alert-3', 'alert-4', 'alert-5'] } },
+        size: 4,
+        _source: false,
+      });
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 404,
-        body: { message: ALERT_NOT_ACCESSIBLE },
+        body: { message: alertNotAccessible('alert-3') },
       });
       expect(mockedCreateActionHandler).not.toHaveBeenCalled();
     });
 
     it('passes the first alert to the action handler when every alert resolves', async () => {
       const racGet = jest.fn(async ({ id }: { id: string }) => ({ ...readableAlert, id }));
+      const racFind = jest.fn().mockResolvedValue(findResponse(['alert-2']));
       const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
 
       const response = await invokeRoute(
         { query: 'select 1;', alert_ids: ['alert-1', 'alert-2'], agent_ids: ['agent-1'] },
-        { coreStart, racGet }
+        { coreStart, racGet, racFind }
       );
 
       expect(response.ok).toHaveBeenCalled();
@@ -419,6 +435,19 @@ describe('createLiveQueryRoute', () => {
         expect.anything(),
         expect.objectContaining({ alertData: expect.objectContaining({ id: 'alert-1' }) })
       );
+    });
+
+    it('does not run the secondary lookup for a single alert id', async () => {
+      const racGet = jest.fn().mockResolvedValue(readableAlert);
+      const racFind = jest.fn();
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
+        { coreStart, racGet, racFind }
+      );
+
+      expect(racFind).not.toHaveBeenCalled();
     });
 
     it('returns a controlled 500 when the alerts client is unavailable', async () => {
@@ -452,109 +481,81 @@ describe('createLiveQueryRoute', () => {
       expect(mockedCreateActionHandler).not.toHaveBeenCalled();
     });
 
+    it('returns a controlled 500 when the secondary lookup fails without a status code', async () => {
+      const racGet = jest.fn().mockResolvedValue(readableAlert);
+      const racFind = jest.fn().mockRejectedValue(new Error('boom'));
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1', 'alert-2'], agent_ids: ['agent-1'] },
+        { coreStart, racGet, racFind }
+      );
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Error occurred while retrieving the alert' },
+      });
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('returns 404 when the secondary lookup is rejected with a not found error', async () => {
+      const racGet = jest.fn().mockResolvedValue(readableAlert);
+      const racFind = jest.fn().mockRejectedValue(notFound('search failed'));
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1', 'alert-2'], agent_ids: ['agent-1'] },
+        { coreStart, racGet, racFind }
+      );
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 404,
+        body: { message: 'An alert was not found or is not accessible' },
+      });
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
     it('looks up each distinct alert id only once', async () => {
       const racGet = jest.fn(async ({ id }: { id: string }) => ({ ...readableAlert, id }));
+      const racFind = jest.fn().mockResolvedValue(findResponse(['alert-2']));
       const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
 
       await invokeRoute(
         {
           query: 'select 1;',
-          alert_ids: ['alert-1', 'alert-1', 'alert-2'],
+          alert_ids: ['alert-1', 'alert-1', 'alert-2', 'alert-2'],
           agent_ids: ['agent-1'],
         },
-        { coreStart, racGet }
+        { coreStart, racGet, racFind }
       );
 
-      expect(racGet).toHaveBeenCalledTimes(2);
-    });
-
-    it('keeps the first alert as the handler input when a later lookup finishes first', async () => {
-      const racGet = jest.fn(
-        ({ id }: { id: string }) =>
-          new Promise<typeof readableAlert & { id: string }>((resolve) => {
-            setTimeout(() => resolve({ ...readableAlert, id }), id === 'alert-1' ? 20 : 0);
-          })
-      );
-      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
-
-      await invokeRoute(
-        { query: 'select 1;', alert_ids: ['alert-1', 'alert-2'], agent_ids: ['agent-1'] },
-        { coreStart, racGet }
-      );
-
-      expect(mockedCreateActionHandler).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.objectContaining({ alertData: expect.objectContaining({ id: 'alert-1' }) })
-      );
-    });
-
-    it('returns 404 when the lookup resolves without an alert', async () => {
-      const racGet = jest.fn().mockResolvedValue(undefined);
-      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
-
-      const response = await invokeRoute(
-        { query: 'select 1;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
-        { coreStart, racGet }
-      );
-
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 404,
-        body: { message: ALERT_NOT_ACCESSIBLE },
-      });
-      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
-    });
-
-    it('returns 404 for an error that only carries the status in meta.statusCode', async () => {
-      const racGet = jest
-        .fn()
-        .mockRejectedValue(Object.assign(new Error('es error'), { meta: { statusCode: 404 } }));
-      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
-
-      const response = await invokeRoute(
-        { query: 'select 1;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
-        { coreStart, racGet }
-      );
-
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 404,
-        body: { message: ALERT_NOT_ACCESSIBLE },
-      });
-    });
-
-    it('returns 400 without any lookup when there are too many distinct alert ids', async () => {
-      const racGet = jest.fn(async ({ id }: { id: string }) => ({ ...readableAlert, id }));
-      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
-      const alertIds = Array.from({ length: 101 }, (_, index) => `alert-${index}`);
-
-      const response = await invokeRoute(
-        { query: 'select 1;', alert_ids: alertIds, agent_ids: ['agent-1'] },
-        { coreStart, racGet }
-      );
-
-      expect(response.badRequest).toHaveBeenCalledWith({
-        body: 'alert_ids must contain at most 100 distinct ids',
-      });
-      expect(racGet).not.toHaveBeenCalled();
-      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
-    });
-
-    it('counts distinct ids toward the limit, not duplicates', async () => {
-      const racGet = jest.fn(async ({ id }: { id: string }) => ({ ...readableAlert, id }));
-      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
-
-      const response = await invokeRoute(
-        {
-          query: 'select 1;',
-          alert_ids: Array.from({ length: 150 }, () => 'alert-1'),
-          agent_ids: ['agent-1'],
-        },
-        { coreStart, racGet }
-      );
-
-      expect(response.badRequest).not.toHaveBeenCalled();
       expect(racGet).toHaveBeenCalledTimes(1);
+      expect(racFind).toHaveBeenCalledWith(
+        expect.objectContaining({ query: { ids: { values: ['alert-2'] } }, size: 1 })
+      );
     });
+  });
+
+  it('returns 403 after a single alert lookup when the caller cannot run the query and sends several alert ids', async () => {
+    const racGet = jest.fn().mockResolvedValue({
+      _index: '.alerts-security.alerts-default',
+      'kibana.alert.rule.uuid': 'rule-1',
+    });
+    const racFind = jest.fn();
+
+    const response = await invokeRoute(
+      {
+        query: 'select 42 as custom;',
+        alert_ids: ['alert-1', 'alert-2', 'alert-3'],
+        agent_ids: ['agent-1'],
+      },
+      { racGet, racFind }
+    );
+
+    expect(response.forbidden).toHaveBeenCalledWith();
+    expect(racGet).toHaveBeenCalledTimes(1);
+    expect(racFind).not.toHaveBeenCalled();
+    expect(mockedCreateActionHandler).not.toHaveBeenCalled();
   });
 
   it('returns 403, not 500, when the alerts client is unavailable and the caller cannot run the query', async () => {

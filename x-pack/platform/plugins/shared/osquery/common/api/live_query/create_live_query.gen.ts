@@ -54,12 +54,14 @@ export const CreateLiveQueryRequestBody = lazySchema(() =>
     ecs_mapping: ECSMappingOrUndefined.optional(),
     pack_id: PackIdOrUndefined.optional(),
     /**
-     * A list of alert IDs associated with the live query.
+     * A list of alert IDs associated with the live query. At most 100 distinct IDs are accepted. Every ID must refer to an alert you can read; otherwise the request fails with a 404.
      */
     alert_ids: z
       .array(z.string())
       .optional()
-      .describe('A list of alert IDs associated with the live query.'),
+      .describe(
+        'A list of alert IDs associated with the live query. At most 100 distinct IDs are accepted. Every ID must refer to an alert you can read; otherwise the request fails with a 404.'
+      ),
     /**
      * A list of case IDs associated with the live query.
      */

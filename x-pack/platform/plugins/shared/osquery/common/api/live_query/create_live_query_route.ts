@@ -6,6 +6,8 @@
  */
 
 import * as t from 'io-ts';
+import { pipe } from 'fp-ts/function';
+import { chain } from 'fp-ts/Either';
 
 import {
   ecsMappingOrUndefined,
@@ -15,6 +17,24 @@ import {
   arrayQueries,
   timeoutOrUndefined,
 } from '@kbn/osquery-io-ts-types';
+
+export const MAX_DISTINCT_ALERT_IDS = 100;
+
+// The cap counts distinct ids: repeated ids are collapsed before any alert lookup.
+const alertIdsSchema = new t.Type<string[], string[], unknown>(
+  'AlertIds',
+  (u): u is string[] => t.array(t.string).is(u),
+  (u, c) =>
+    pipe(
+      t.array(t.string).validate(u, c),
+      chain((ids) =>
+        new Set(ids).size <= MAX_DISTINCT_ALERT_IDS
+          ? t.success(ids)
+          : t.failure(u, c, `alert_ids must contain at most ${MAX_DISTINCT_ALERT_IDS} distinct ids`)
+      )
+    ),
+  t.identity
+);
 
 export const createLiveQueryRequestBodySchema = t.partial({
   agent_ids: t.array(t.string),
@@ -27,7 +47,7 @@ export const createLiveQueryRequestBodySchema = t.partial({
   timeout: timeoutOrUndefined,
   ecs_mapping: ecsMappingOrUndefined,
   pack_id: packIdOrUndefined,
-  alert_ids: t.array(t.string),
+  alert_ids: alertIdsSchema,
   case_ids: t.array(t.string),
   event_ids: t.array(t.string),
   metadata: t.union([t.object, t.undefined]),
