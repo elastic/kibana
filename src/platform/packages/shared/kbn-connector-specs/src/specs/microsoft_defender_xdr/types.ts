@@ -85,7 +85,7 @@ export const GetDetectionRuleInputSchema = lazySchema(() =>
   z.object({
     ruleId: z
       .string()
-      .min(1)
+      .regex(/^\d+$/, 'ruleId must be a numeric string.')
       .max(MAX_ID_LENGTH)
       .describe('The numeric ID of the custom detection rule.'),
   })
@@ -191,7 +191,7 @@ export const UpdateDetectionRuleInputSchema = lazySchema(() =>
     .object({
       ruleId: z
         .string()
-        .min(1)
+        .regex(/^\d+$/, 'ruleId must be a numeric string.')
         .max(MAX_ID_LENGTH)
         .describe('The numeric ID of the custom detection rule to update.'),
       displayName: z
@@ -231,7 +231,7 @@ export const DeleteDetectionRuleInputSchema = lazySchema(() =>
   z.object({
     ruleId: z
       .string()
-      .min(1)
+      .regex(/^\d+$/, 'ruleId must be a numeric string.')
       .max(MAX_ID_LENGTH)
       .describe('The numeric ID of the custom detection rule to delete.'),
   })
@@ -327,7 +327,7 @@ export const GetIncidentInputSchema = lazySchema(() =>
   z.object({
     incidentId: z
       .string()
-      .min(1)
+      .regex(/^\d+$/, 'incidentId must be a numeric string.')
       .max(MAX_ID_LENGTH)
       .describe('Numeric incident ID, e.g. "29". Include alerts automatically.'),
   })
@@ -337,7 +337,7 @@ export type GetIncidentInput = z.infer<typeof GetIncidentInputSchema>;
 export const UpdateIncidentInputSchema = lazySchema(() =>
   z
     .object({
-      incidentId: z.string().min(1).max(MAX_ID_LENGTH).describe('Numeric incident ID to update.'),
+      incidentId: z.string().regex(/^\d+$/, 'incidentId must be a numeric string.').max(MAX_ID_LENGTH).describe('Numeric incident ID to update.'),
       status: z
         .enum(incidentStatusValues)
         .optional()
@@ -384,7 +384,7 @@ export const AddIncidentCommentInputSchema = lazySchema(() =>
   z.object({
     incidentId: z
       .string()
-      .min(1)
+      .regex(/^\d+$/, 'incidentId must be a numeric string.')
       .max(MAX_ID_LENGTH)
       .describe('Numeric incident ID to add the comment to.'),
     comment: z
@@ -427,7 +427,11 @@ export type ListAlertsInput = z.infer<typeof ListAlertsInputSchema>;
 
 export const GetAlertInputSchema = lazySchema(() =>
   z.object({
-    alertId: z.string().min(1).max(MAX_ID_LENGTH).describe('Defender alert ID.'),
+    alertId: z
+      .string()
+      .regex(/^[0-9A-Za-z_-]+$/, 'alertId must contain only alphanumeric characters, hyphens, or underscores.')
+      .max(MAX_ID_LENGTH)
+      .describe('Defender alert ID.'),
   })
 );
 export type GetAlertInput = z.infer<typeof GetAlertInputSchema>;
@@ -435,7 +439,7 @@ export type GetAlertInput = z.infer<typeof GetAlertInputSchema>;
 export const UpdateAlertInputSchema = lazySchema(() =>
   z
     .object({
-      alertId: z.string().min(1).max(MAX_ID_LENGTH).describe('Defender alert ID to update.'),
+      alertId: z.string().regex(/^[0-9A-Za-z_-]+$/, 'alertId must contain only alphanumeric characters, hyphens, or underscores.').max(MAX_ID_LENGTH).describe('Defender alert ID to update.'),
       status: z
         .enum(alertStatusValues)
         .optional()
@@ -478,7 +482,10 @@ export const RunHuntingQueryInputSchema = lazySchema(() =>
       .describe(
         'Kusto Query Language (KQL) query to run against Microsoft Defender XDR advanced hunting tables ' +
           '(e.g. DeviceEvents, EmailEvents, AlertInfo, AlertEvidence). ' +
-          'Results are limited to 100,000 rows and 30 days of data.'
+          'Results are limited to 100,000 rows and 30 days of data. ' +
+          'A valid query can exceed the Kibana response-size limit long before reaching the row cap, so ' +
+          'always project only the columns you need (e.g. | project DeviceId, Timestamp, ActionType) ' +
+          'and add a take limit (e.g. | take 100) unless you need more rows.'
       ),
     timespan: z
       .string()
@@ -498,7 +505,7 @@ export const AddAlertCommentInputSchema = lazySchema(() =>
   z.object({
     alertId: z
       .string()
-      .min(1)
+      .regex(/^[0-9A-Za-z_-]+$/, 'alertId must contain only alphanumeric characters, hyphens, or underscores.')
       .max(MAX_ID_LENGTH)
       .describe('Defender alert ID to add the comment to.'),
     comment: z
@@ -527,7 +534,7 @@ export type CorrelationReason = (typeof correlationReasonValues)[number];
 export const MergeIncidentsInputSchema = lazySchema(() =>
   z.object({
     incidentIds: z
-      .array(z.string().min(1).max(MAX_ID_LENGTH))
+      .array(z.string().regex(/^\d+$/, 'Each incident ID must be a numeric string.').max(MAX_ID_LENGTH))
       .min(2)
       .max(100)
       .describe(
