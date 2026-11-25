@@ -11,7 +11,10 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { decompressFromBase64 } from 'lz-string';
 import { InvestigationLocatorDefinition } from '../../common/locators';
-import { createRoutingTestContext } from '../lib/notifications/notification_routing.mock';
+import {
+  createRoutingTestContext,
+  getTestIsomerRuntime,
+} from '../lib/notifications/notification_routing.mock';
 import type { NotificationExecution } from '../lib/notifications/notification_delivery';
 import { handleInvestigationFailureStepDefinition } from './handle_investigation_failure';
 import { sendNotificationsStepDefinition } from './send_notifications';
@@ -49,16 +52,23 @@ const setup = (
   const urlService = new MockUrlService();
   const investigationLocator = urlService.locators.create(new InvestigationLocatorDefinition());
   const ensureForFailure = jest.fn(async () => 'conv-1');
+  const reportRunEnded = jest.fn(async () => {});
   const getLifecycleSubject = jest.fn(async () => ({
     subject: { type: 'manual', id: 'question' },
     triggerType: 'manual',
     startedAt: '2026-10-07T00:00:00Z',
   }));
+  const getLifecycleCorrelation = jest.fn(async () => ({
+    event_id: 'significant-event-1',
+    source_workflow_execution_id: 'discovery-execution-1',
+  }));
   const emitter = jest.fn();
   const getInvestigationsClient = jest.fn(() => ({
     getInvestigationExecutionContext,
     ensureForFailure,
+    reportRunEnded,
     getLifecycleSubject,
+    getLifecycleCorrelation,
     recordSlackThreadStatusMessage,
     claimSlackThread,
   })) as never;
@@ -67,12 +77,14 @@ const setup = (
     investigationLocator,
     getInvestigationsClient,
     getActions: () => ({ getActionsClientWithRequestInSpace } as never),
+    getIsomerRuntime: getTestIsomerRuntime,
     getRoutingClient,
   });
   const failureDefinition = handleInvestigationFailureStepDefinition({
     investigationLocator,
     getInvestigationsClient,
     getActions: () => ({ getActionsClientWithRequestInSpace } as never),
+    getIsomerRuntime: getTestIsomerRuntime,
     getRoutingClient,
     getTriggerEmitter: () => emitter,
   });
@@ -96,6 +108,7 @@ const setup = (
     definition,
     failureDefinition,
     ensureForFailure,
+    reportRunEnded,
     getLifecycleSubject,
     emitter,
     controller,
@@ -129,13 +142,15 @@ describe('nightshift.sendNotifications step', () => {
       expect(getInvestigationExecutionContext).toHaveBeenCalledWith('inv-1', 'exec-follow-up');
       expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, spaceId);
       expect(execute).toHaveBeenCalledWith(expect.objectContaining({ actionId: 'saved-slack' }));
-      const params = execute.mock.calls[0][0].params.subActionParams as { text: string };
+      const { blocks } = execute.mock.calls[0][0].params.subActionParams as {
+        blocks: Array<{ type: string; elements?: Array<{ url?: string }> }>;
+      };
       const prefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-      expect(params.text).toContain(`https://kibana.example${prefix}/app/r?`);
-      const locatorUrl = params.text.match(/<(https:\/\/[^|]+)\|/)?.[1];
+      const locatorUrl = blocks.find(({ type }) => type === 'actions')?.elements?.[0]?.url;
       if (!locatorUrl) {
         throw new Error('Missing locator URL');
       }
+      expect(locatorUrl).toContain(`https://kibana.example${prefix}/app/r?`);
       const redirect = new URL(locatorUrl);
       const state = JSON.parse(
         redirect.searchParams.get('p') ??
@@ -259,7 +274,12 @@ describe('nightshift.sendNotifications step', () => {
   describe('Slack thread claim for a root post', () => {
     const rootResponse = {
       status: 'ok',
-      data: { ts: '1.2', channel: 'C123', externalConversationId: 'slack:T1:C123:1.2' },
+      data: {
+        ts: '1.2',
+        channel: 'C123',
+        externalConversationId: 'slack:T1:C123:1.2',
+        workspace: 'T1',
+      },
     } as never;
 
     it('claims the thread the root post started', async () => {
@@ -274,6 +294,44 @@ describe('nightshift.sendNotifications step', () => {
         externalConversationId: 'slack:T1:C123:1.2',
         channel: 'C123',
         threadTs: '1.2',
+        workspace: 'T1',
+        summary: 'Latency',
+      });
+    });
+
+    it('claims a receipt recorded before the workspace was stored at its own timestamp', async () => {
+      const { definition, context, execute, claimSlackThread, routing } = setup(
+        'default',
+        'elastic-apps-slack'
+      );
+      execute.mockResolvedValueOnce({
+        status: 'ok',
+        data: { ts: '1.2', channel: 'C123', externalConversationId: 'slack:T1:C123:1.2' },
+      } as never);
+      claimSlackThread.mockRejectedValueOnce(new Error('boom'));
+      await definition.handler(context('started'));
+      const { id } = routing.client;
+      const stored = routing.storage.entries.get(id)?.source;
+      expect(stored?.destinations[0].thread?.thread_ts).toBe('1.2');
+      routing.storage.put(id, {
+        ...stored!,
+        attempts: stored!.attempts.map((attempt) => ({
+          ...attempt,
+          message_ts: '1.0',
+          external_conversation_id: 'slack:T1:C123:1.0',
+        })),
+      });
+
+      await definition.handler(context('started'));
+
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect(claimSlackThread).toHaveBeenLastCalledWith({
+        investigationId: 'inv-1',
+        externalConversationId: 'slack:T1:C123:1.0',
+        channel: 'C123',
+        threadTs: '1.0',
+        workspace: undefined,
+        summary: 'Latency',
       });
     });
 
@@ -369,6 +427,7 @@ describe('nightshift.handleInvestigationFailure step', () => {
       failureDefinition,
       context,
       ensureForFailure,
+      reportRunEnded,
       emitter,
       execute,
       routing,
@@ -379,18 +438,22 @@ describe('nightshift.handleInvestigationFailure step', () => {
       output: { sent: 1, failed: 0, unconfirmed: 0 },
     });
     expect(ensureForFailure).toHaveBeenCalledWith('inv-1', 'exec-follow-up', 'Model unavailable');
+    expect(reportRunEnded).toHaveBeenCalledWith('inv-1', 'exec-follow-up', 'failed');
     expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, spaceId);
     expect(emitter).toHaveBeenCalledWith(
       'nightshift-investigations.failed',
       expect.objectContaining({
         investigation_id: 'inv-1',
+        workflow_execution_id: 'exec-follow-up',
         status: 'failed',
         subject: { type: 'manual', id: 'question' },
+        event_id: 'significant-event-1',
+        source_workflow_execution_id: 'discovery-execution-1',
       })
     );
-    expect(execute.mock.calls[0][0].params.subActionParams).toMatchObject({
-      text: expect.stringContaining('Investigation failed: Model unavailable'),
-    });
+    expect(JSON.stringify(execute.mock.calls[0][0].params.subActionParams)).toContain(
+      'Model unavailable'
+    );
     expect((await routing.client.get())?.destinations[0].thread?.thread_ts).toBe('1.2');
   });
 

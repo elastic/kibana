@@ -1,5 +1,5 @@
 {
-  "sha1": "44e8877c54a92ef2f3b4738f70e4f43298feb352",
+  "sha1": "7db83ae1928921b2159a68ac61124d2a84ceb05b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -408,8 +408,8 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-6894a118a17497c",
-      "title": "Flyout System - header collapse accessibility collapsing the component header dismisses the badge overflow popover",
+      "id": "b1bb19297cb99af-8c51c14a9ba4b27",
+      "title": "Flyout System - header collapse accessibility an open badge overflow popover keeps the component header expanded",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -429,8 +429,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 134,
-        "column": 21
+        "line": 144,
+        "column": 9
       }
     },
     {
@@ -442,8 +442,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 154,
-        "column": 30
+        "line": 160,
+        "column": 9
       }
     },
     {
@@ -455,8 +455,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 178,
+        "column": 13
       }
     },
     {
@@ -525,8 +525,8 @@
       }
     },
     {
-      "id": "b1bb19297cb99af-fa243d4149f3483",
-      "title": "Flyout System - header collapse accessibility collapsing the service header dismisses the badge overflow popover",
+      "id": "b1bb19297cb99af-45884c118a39894",
+      "title": "Flyout System - header collapse accessibility an open badge overflow popover keeps the service header expanded",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -546,8 +546,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 134,
-        "column": 21
+        "line": 144,
+        "column": 9
       }
     },
     {
@@ -559,8 +559,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 154,
-        "column": 30
+        "line": 160,
+        "column": 9
       }
     },
     {
@@ -572,8 +572,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 178,
+        "column": 13
       }
     },
     {
@@ -585,8 +585,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
-        "line": 190,
-        "column": 9
+        "line": 198,
+        "column": 13
       }
     },
     {

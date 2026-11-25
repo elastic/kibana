@@ -51,6 +51,7 @@ const setup = ({
       actionTypeId: '.http',
       config: { url: 'https://api.example.com' },
       headers: { Authorization: SAVED_CONNECTOR_AUTHORIZATION },
+      hosts: ['api.example.com'],
     };
   });
   actionsClient.getAll.mockImplementation(
@@ -69,6 +70,7 @@ const setup = ({
   const wrapped = withSandboxOutputRedaction(tool, {
     getOutputRedactor: createSandboxOutputRedactorProvider({
       getDeps: () => ({ actions }),
+      logger,
     }),
     logger,
   });
@@ -128,6 +130,7 @@ describe('withSandboxOutputRedaction', () => {
     const wrapped = withSandboxOutputRedaction(tool, {
       getOutputRedactor: createSandboxOutputRedactorProvider({
         getDeps: () => ({ actions }),
+        logger,
       }),
       logger,
     });
@@ -199,21 +202,22 @@ describe('withSandboxOutputRedaction', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('does not run the tool when a sandbox capable connector cannot be resolved', async () => {
-    const { run, handler, logger } = setup({ allowedConnectorIds: ['broken-1'] });
-
-    await expect(run()).resolves.toEqual({
-      results: [
-        {
-          type: ToolResultType.error,
-          data: { message: expect.stringContaining("connector 'broken-1' assigned to this agent") },
-        },
-      ],
+  it('skips a sandbox capable connector that cannot be resolved and still runs the tool', async () => {
+    const { run, handler, logger, actionsClient } = setup({
+      allowedConnectorIds: ['broken-1', SAVED_CONNECTOR_ID],
+      handlerReturn: resultWithStdout(SAVED_CONNECTOR_TOKEN),
     });
-    expect(handler).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledTimes(1);
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Resolving connector credentials for output redaction failed')
+
+    await expect(run()).resolves.toEqual(resultWithStdout(REDACTED_PLACEHOLDER));
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: 'broken-1' });
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Connector 'broken-1' assigned to this agent cannot be resolved, so its credentials cannot be injected into sandbox commands: Unauthorized to execute connector broken-1"
+      )
     );
   });
 
@@ -273,6 +277,7 @@ describe('withSandboxOutputRedaction', () => {
       actionTypeId: '.http',
       config: { url: 'https://api.example.com' },
       headers: { Authorization: `Basic ${basicToken}` },
+      hosts: ['api.example.com'],
     });
 
     // A call that injected nothing reads the header value back from a file.

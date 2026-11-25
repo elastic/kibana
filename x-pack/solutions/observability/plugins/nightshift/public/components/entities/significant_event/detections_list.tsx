@@ -28,9 +28,9 @@ import type {
   EventLifecycleResponse,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
-import { useFetchEventLifecycle } from '../../../hooks/use_fetch_event_lifecycle';
+import { useFetchEventLifecycle } from '../../../data/significant_events/use_fetch_event_lifecycle';
 import { getImpactedServices } from '../../../common/impacted_services';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import {
   filterOccurrencesForDetection,
   getChangePointLabel,

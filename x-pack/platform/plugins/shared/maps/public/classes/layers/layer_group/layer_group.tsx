@@ -259,7 +259,7 @@ export class LayerGroup implements ILayer {
     return null;
   }
 
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs<Record<string, unknown>>) {
     return null;
   }
 

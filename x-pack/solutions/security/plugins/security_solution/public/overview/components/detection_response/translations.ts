@@ -314,3 +314,10 @@ export const OPEN_IN_ALERTS_TITLE_USERNAME = i18n.translate(
     defaultMessage: 'Username',
   }
 );
+
+export const OPEN_IN_ALERTS_TITLE_SERVICENAME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsServiceName',
+  {
+    defaultMessage: 'Service name',
+  }
+);

@@ -18,15 +18,27 @@ export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from '.
 export { getErrorMessage } from './src/utils';
 export type { DashboardFailure } from './src/utils';
 
-export type { PanelContent, PanelContentAttempt } from './src/resolve_panel';
+export type { PanelContent, PanelContentAttempt, ResolveEsqlVariables } from './src/resolve_panel';
 
 export type { DashboardValidationIssue, DashboardValidator } from './src/validate_dashboard';
 
-export { getRendererEmbeddableType } from './src/panels';
+export {
+  createPanelContentResolver,
+  getConfigPanelReferences,
+  getInlinePanelKindGuidance,
+  getPanelTypeSelection,
+  getRequestPanelEmbeddableType,
+  isRequestPanelType,
+  parseVegaSpec,
+  requiresRegisteredSchema,
+} from './src/panels';
 export type {
+  ConfigPanelReference,
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
   CustomContentPanelResolutionRequest,
+  PanelKindExecutors,
+  RequestPanelType,
   ResolvePanelContent,
   VisPanelResolutionRequest,
 } from './src/panels';
@@ -35,4 +47,5 @@ export type {
   ControlFieldCapability,
   ResolveAttachmentPanel,
   ResolveControlFieldCapabilities,
+  ResolveEsqlControlColumnType,
 } from './src/types';

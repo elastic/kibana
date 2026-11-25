@@ -26,8 +26,10 @@ import {
   type AnalysisProfileId,
 } from '../../../lib/significant_events/rules/schedule';
 import { createServerRoute } from '../../create_server_route';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { listAllSources } from '../../utils/list_all_sources';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 
 interface AnalysisProfileGroup {
   config: AnalysisProfileConfig;
@@ -185,20 +187,34 @@ const changePointScanRoute = createServerRoute({
 
     const startedAt = Date.now();
     const scanResults = await Promise.all(
-      groupQueryLinksByAnalysisProfile(queryLinks).map(({ config, queryLinks: groupedLinks }) => {
-        const isCritical = config.profile === CRITICAL_ANALYSIS_PROFILE;
-        return sigEventsContext.alertsReader.runChangePointScan(
-          esClient,
-          {
-            // Critical uses workflow inputs; default keeps its fixed profile.
-            lookback: isCritical ? criticalLookback : config.lookback,
-            bucketInterval: isCritical ? criticalBucketInterval : config.bucketInterval,
-            ruleIds: groupedLinks.map((queryLink) => queryLink.rule_id),
-            spaceId,
-          },
-          groupedLinks
-        );
-      })
+      groupQueryLinksByAnalysisProfile(queryLinks).map(
+        async ({ config, queryLinks: groupedLinks }) => {
+          const isCritical = config.profile === CRITICAL_ANALYSIS_PROFILE;
+          // Critical uses workflow inputs; default keeps its fixed profile.
+          const lookback = isCritical ? criticalLookback : config.lookback;
+          const result = await sigEventsContext.alertsReader.runChangePointScan(
+            esClient,
+            {
+              lookback,
+              bucketInterval: isCritical ? criticalBucketInterval : config.bucketInterval,
+              ruleIds: groupedLinks.map((queryLink) => queryLink.rule_id),
+              spaceId,
+            },
+            groupedLinks
+          );
+          // The Detection workflow's write gate sizes each rule's lookup by the window it was scanned over.
+          const lookbackMinutes = parseLookbackMinutes(lookback);
+          return {
+            ...result,
+            by_rule: {
+              buckets: result.by_rule.buckets.map((bucket) => ({
+                ...bucket,
+                lookback_minutes: lookbackMinutes,
+              })),
+            },
+          };
+        }
+      )
     );
     const durationMs = Date.now() - startedAt;
     const took = scanResults.reduce((sum, result) => sum + (result.took ?? 0), 0);
@@ -207,20 +223,30 @@ const changePointScanRoute = createServerRoute({
     const criticalRuleCount = countRulesForProfile(queryLinks, CRITICAL_ANALYSIS_PROFILE);
     const defaultRuleCount = countRulesForProfile(queryLinks, DEFAULT_ANALYSIS_PROFILE);
 
-    telemetry.trackSignificantEventsDetectionScan({
-      took_ms: took,
-      duration_ms: durationMs,
-      rules_requested: queryLinks.length,
-      rules_scanned: buckets.length,
-      critical_rule_count: criticalRuleCount,
-      default_rule_count: defaultRuleCount,
-      alerting_engine: 'v2',
-      alerts_source_index: sigEventsContext.alertsReader.index,
-      lookback: criticalLookback,
-      bucket_interval: criticalBucketInterval,
-      default_lookback: defaultConfig.lookback,
-      default_bucket_interval: defaultConfig.bucketInterval,
-      space_id: spaceId,
+    const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
+    trackTelemetryBestEffort({
+      logger,
+      description: 'detection scan telemetry',
+      track: () =>
+        telemetry.trackSignificantEventsDetectionScan(
+          {
+            workflow_execution_id: workflowExecutionId,
+            took_ms: took,
+            duration_ms: durationMs,
+            rules_requested: queryLinks.length,
+            rules_scanned: buckets.length,
+            critical_rule_count: criticalRuleCount,
+            default_rule_count: defaultRuleCount,
+            alerting_engine: 'v2',
+            alerts_source_index: sigEventsContext.alertsReader.index,
+            lookback: criticalLookback,
+            bucket_interval: criticalBucketInterval,
+            default_lookback: defaultConfig.lookback,
+            default_bucket_interval: defaultConfig.bucketInterval,
+            space_id: spaceId,
+          },
+          request
+        ),
     });
 
     return { alertIndex: sigEventsContext.alertsReader.index, aggregations };

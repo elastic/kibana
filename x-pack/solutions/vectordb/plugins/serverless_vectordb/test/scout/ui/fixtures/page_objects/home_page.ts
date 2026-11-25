@@ -68,6 +68,7 @@ export class VectordbHomePage {
   async goto() {
     await this.page.gotoApp(VECTORDB_APP);
     await this.header.waitFor({ state: 'visible' });
+    await this.page.getByTestId('homePageLoading').waitFor({ state: 'hidden' });
   }
 
   /** The rendered value of a stat tile, e.g. `statValue('homePageDataCard', 'documents')`. */

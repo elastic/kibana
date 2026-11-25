@@ -1,0 +1,37 @@
+name: Test release note team label comment
+
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/release_note_team_label_comment.js'
+      - '.github/scripts/release_note_team_label_comment.test.js'
+      - '.github/workflows/release-note-team-label-comment-tests.yml'
+      - '.nvmrc'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-note-team-label-comment-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test release note team label comment
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - name: Run tests
+        run: node --test .github/scripts/release_note_team_label_comment.test.js

@@ -23,7 +23,8 @@ export async function deleteConnectorById(
 
 export async function createGenAiConnectorForProxy(
   kbnClient: KbnClient,
-  proxy: LlmProxy
+  proxy: LlmProxy,
+  { defaultModel = 'gpt-4' }: { defaultModel?: string } = {}
 ): Promise<{ id: string }> {
   const res = await kbnClient.request<{ id: string }>({
     method: 'POST',
@@ -34,7 +35,7 @@ export async function createGenAiConnectorForProxy(
       config: {
         apiProvider: 'OpenAI',
         apiUrl: `http://localhost:${proxy.getPort()}`,
-        defaultModel: 'gpt-4',
+        defaultModel,
       },
       secrets: { apiKey: 'myApiKey' },
       connector_type_id: '.gen-ai',

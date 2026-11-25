@@ -29,8 +29,11 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/repo-info'
   - '@kbn/connector-emulate'
+  - '@kbn/connector-topics'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
+  - '@kbn/tooling-log'
+  - '@kbn/code-owners'
 tags:
   - shared-common
   - package

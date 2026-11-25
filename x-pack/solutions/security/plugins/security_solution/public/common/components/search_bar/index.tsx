@@ -66,6 +66,12 @@ interface SiemSearchBarProps {
    * Controls the search bar's padding and border. Use 'inPage' to align it with the page content.
    */
   displayStyle?: 'inPage' | 'detached' | 'withBorders';
+  /**
+   * Forwarded to Unified SearchBar. Renders inline after the query input and before the date
+   * picker, e.g. to offer preset ranges next to the Refresh button (pair with `hideDatePicker`).
+   * Keep the reference stable (memoize it): a new function re-renders the search bar.
+   */
+  renderQueryInputAppend?: () => React.ReactNode;
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
@@ -84,6 +90,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     id,
     isLoading = false,
     queries,
+    renderQueryInputAppend,
     savedQuery,
     setSavedQuery,
     setSearchBarFilter,
@@ -357,6 +364,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           allowSavingQueries
           dataTestSubj={dataTestSubj}
           displayStyle={displayStyle}
+          renderQueryInputAppend={renderQueryInputAppend}
         />
       </div>
     ) : null;
@@ -375,6 +383,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
     prevProps.displayStyle === nextProps.displayStyle &&
+    prevProps.renderQueryInputAppend === nextProps.renderQueryInputAppend &&
     deepEqual(prevProps.queries, nextProps.queries) &&
     deepEqual(prevProps.dataView, nextProps.dataView) &&
     deepEqual(prevProps.additionalSources, nextProps.additionalSources)

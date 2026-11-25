@@ -35,7 +35,7 @@ export const Tooltip = {
             id: 'US',
             layerId: 'e8d1d974-eed8-462f-be2c-f0004b7619b2',
             mbProperties: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+              // eslint-disable-next-line @kbn/compat/typescript-naming-convention
               __kbn__feature_id__: 'US',
               name: 'United States',
               iso2: 'US',

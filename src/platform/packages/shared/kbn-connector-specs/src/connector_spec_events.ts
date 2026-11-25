@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectorEventTopicDefinition } from '@kbn/connector-topics';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
 import type { HandleEventsResult } from './handle_events_result';
@@ -54,11 +55,24 @@ export interface EventDefinition {
   readonly eventSchema: z.ZodObject;
 }
 
+/** Maps a topic's event id and spoke schema onto a spec event. Title and description stay on the spec. */
+export const toConnectorSpecEvent = (
+  definition: ConnectorEventTopicDefinition,
+  presentation: { readonly title: string; readonly description: string }
+): EventDefinition => ({
+  eventId: definition.name,
+  title: presentation.title,
+  description: presentation.description,
+  eventSchema: definition.eventSchema,
+});
+
 /**
  * Spoke events contract.
  *
- * `handleEvents` returns emit or HTTP ack. The hub must run
- * `parseHandleEventsResult` (and `validateEmittedEvents` on emit).
+ * `handleEvents` returns an HTTP ack, or an emit. An emit may include
+ * `httpResponse` when the vendor must receive that response and the events
+ * must still be scheduled. The hub must run `parseHandleEventsResult`
+ * (and `validateEmittedEvents` on emit).
  */
 export interface ConnectorSpecEvents {
   readonly definitions: Record<string, EventDefinition>;

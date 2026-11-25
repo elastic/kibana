@@ -11,6 +11,12 @@ import type { ApplicationSummary, TimeSeriesPoint } from '../../../common/types/
 export interface SourceApplications {
   applications: ApplicationSummary[];
   environments: string[];
+}
+
+/** What a web source returns: also its page loads, and its sessions when it counts them. */
+export interface WebSourceApplications extends SourceApplications {
   /** Page loads over the time range in the selected environment. */
   pageLoadsOverTime: TimeSeriesPoint[];
+  /** Sessions that started in each bucket, `null` when the source doesn't count sessions. */
+  sessionsOverTime: TimeSeriesPoint[] | null;
 }

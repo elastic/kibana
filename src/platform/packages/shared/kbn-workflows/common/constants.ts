@@ -12,6 +12,13 @@
  */
 export const WORKFLOWS_MANAGEMENT_FEATURE_ID = 'workflowsManagement';
 
+export const WORKFLOW_RUN_NAME_MAX_LENGTH = 1024;
+
+/**
+ * Longer substring patterns can be too complex for the `wildcard` field to determinize.
+ */
+export const WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH = 128;
+
 /**
  * UI Setting ID for enabling / disabling the workflows management UI
  */
@@ -27,13 +34,6 @@ export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:show
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
 
 /**
- * When true, all `kibana.*` steps use Core `http.selfClient`.
- * When false, all `kibana.*` steps use the global `fetch` client, including YAML `fetcher`.
- */
-export const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG =
-  'workflows.kibanaRequest.coreSelfClientEnabled';
-
-/**
  * Global Advanced Setting gating the Workflow Template Library tech preview.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is
@@ -42,6 +42,19 @@ export const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG =
  * runtime dep on `workflows_management`.
  */
 export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
+
+/**
+ * How a workflow was created from a Workflow Template library template:
+ * `install` (setup form), `import` (template file upload) or `remix`
+ * (Remix with AI, saved from the editor).
+ */
+export const WORKFLOW_TEMPLATE_ORIGINS = ['install', 'import', 'remix'] as const;
+
+/** Template slug stored when the source template is not in the library catalog. */
+export const CUSTOM_WORKFLOW_TEMPLATE_SLUG = 'custom';
+
+/** Template slug stored when no catalog was available to check the source template against. */
+export const UNRESOLVED_WORKFLOW_TEMPLATE_SLUG = 'unresolved';
 
 /**
  * Global Advanced Setting gating the global Workflow Executions view

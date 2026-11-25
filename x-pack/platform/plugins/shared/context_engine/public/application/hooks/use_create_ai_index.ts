@@ -11,7 +11,7 @@ import { useCallback } from 'react';
 import { DEFAULT_AI_INDEX_TYPE } from '../../../common/constants';
 import type { AiIndexProperties } from '../../../common/http_api/ai_indices';
 import { createAiIndex as createAiIndexRequest } from '../api/ai_indices';
-import type { SelectedSource } from '../components/source_picker';
+import type { SelectedSource } from '../components/ai_index_detail/sources/types';
 import { getAiIndexDest } from '../utils/ai_index_dest';
 import { getErrorMessage } from '../utils/get_error_message';
 import { toAiIndexSources } from '../utils/sources';
@@ -25,7 +25,6 @@ interface CreatedAiIndex {
 export interface CreateAiIndexArgs {
   id: string;
   description: string;
-  memoryEnabled?: boolean;
   sources: SelectedSource[];
 }
 
@@ -36,10 +35,9 @@ export const useCreateAiIndex = () => {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading } = useMutation<CreatedAiIndex, Error, CreateAiIndexArgs>({
-    mutationFn: async ({ id, description, memoryEnabled, sources }) => {
+    mutationFn: async ({ id, description, sources }) => {
       const properties: AiIndexProperties = {
         description: description.trim() || undefined,
-        memory_enabled: memoryEnabled,
         dest: getAiIndexDest(DEFAULT_AI_INDEX_TYPE, id),
         automations: [],
         sources: toAiIndexSources(sources),

@@ -68,7 +68,7 @@ export const postFileRoute = createCasesRoute({
       }
 
       const res: caseDomainV1.Case = toLegacyCaseResponse(
-        await casesClient.attachments.addFile({
+        await casesClient.attachments.addFileAndGetCase({
           file,
           filename: filename ?? '',
           mimeType,

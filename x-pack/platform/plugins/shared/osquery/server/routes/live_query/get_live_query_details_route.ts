@@ -166,7 +166,8 @@ export const getLiveQueryDetailsRoute = (
                   'pack_id',
                   'pack_name',
                   'prebuilt_pack',
-                  'tags'
+                  'tags',
+                  'origin'
                 ),
                 queries: reduce<
                   {

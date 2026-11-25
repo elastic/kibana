@@ -16,8 +16,6 @@ import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 
 export interface ConversationsActionsGroupProps {
   investigation: Investigation;
-  onClickRecommendedAction?: ({ id }: { id: Investigation['id'] }) => void;
-
   onClickAction: BaseActionsProps['onClickAction'];
   /** Opens this investigation's chat. Supplied by the caller, which owns the route. */
   onOpenChat: () => void;
@@ -41,13 +39,12 @@ export interface ConversationsActionsGroupProps {
 
 /**
  * The card's trailing controls: opening the chat, which an analyst does constantly, and
- * the menu holding everything that changes the record — including the recommended
- * action, so the card surfaces navigation rather than a decision.
+ * the menu holding everything that changes the record. The recommended action is decided in
+ * the details flyout, so the card surfaces navigation rather than a decision.
  */
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
   ({
     investigation,
-    onClickRecommendedAction,
     onClickAction,
     onOpenChat,
     chatHref,
@@ -95,7 +92,6 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
           <BaseActions
             investigation={investigation}
             onClickAction={onClickAction}
-            onClickRecommendedAction={onClickRecommendedAction}
             canManageEscalations={canManageEscalations}
             canCloseInvestigation={canCloseInvestigation}
             onCopyLink={onCopyLink}

@@ -9,7 +9,7 @@
 #
 # Used by:
 #   .buildkite/pipelines/gen_ai_product_docs.yml
-#   .buildkite/pipelines/gen_ai_security_labs.yml
+#   .buildkite/pipelines/gen_ai_security_labs_build.yml
 #
 # Lookup is implemented in resolve_reusable_kibana_build.ts via BuildkiteClient
 # (#pipeline-utils). Escape hatches: KIBANA_REUSE_BUILD=false; or set

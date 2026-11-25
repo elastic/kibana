@@ -17,6 +17,7 @@ import type { StoredCompositeSLODefinition, StoredSLODefinition } from '../../..
 import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { SO_SLO_TYPE } from '../../../saved_objects/slo';
 import { DefaultBurnRatesClient } from '../../burn_rates_client';
+import { DefaultSLODefinitionRepository } from '../../slo_definition_repository';
 import { DefaultSummaryClient } from '../../summary_client';
 import { computeCompositeSummary } from '../../composites/compute_composite_summary';
 import { computeAndPersistCompositeSummaries } from './compute_and_persist_composite_summaries';
@@ -162,6 +163,7 @@ describe('computeAndPersistCompositeSummaries', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
+  let sloRepository: DefaultSLODefinitionRepository;
   let abortController: AbortController;
   let signal: AbortSignal;
   let mockComputeSummaries: jest.Mock;
@@ -170,6 +172,7 @@ describe('computeAndPersistCompositeSummaries', () => {
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
+    sloRepository = new DefaultSLODefinitionRepository(soClient as any, logger);
     abortController = new AbortController();
     signal = abortController.signal;
     jest.useFakeTimers().setSystemTime(TEST_DATE);
@@ -229,6 +232,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -245,6 +249,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -261,6 +266,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -281,6 +287,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -333,6 +340,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -355,6 +363,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -384,6 +393,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -394,6 +404,41 @@ describe('computeAndPersistCompositeSummaries', () => {
           namespaces: ['custom-space'],
         })
       );
+    });
+
+    it('chunks member SLO lookups by 500 ids, scoped to the composite space', async () => {
+      const membersPerComposite = 25;
+      const composites = Array.from({ length: 21 }, (_, compositeIndex) => {
+        const members = Array.from({ length: membersPerComposite }, (__, memberIndex) => ({
+          sloId: `member-slo-${String(compositeIndex * membersPerComposite + memberIndex).padStart(
+            4,
+            '0'
+          )}`,
+          weight: 1,
+        }));
+        const compositeId = `composite-slo-${String(compositeIndex).padStart(4, '0')}`;
+        const composite = buildStoredCompositeSLO({ id: compositeId, members });
+        return { ...composite, id: `so-${compositeId}`, namespaces: ['custom-space'] };
+      });
+      mockPointInTimeFinder([composites]);
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 10, page: 1 });
+
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        sloRepository,
+        logger,
+        signal,
+      });
+
+      const memberFindCalls = soClient.find.mock.calls
+        .map(([options]) => options)
+        .filter(({ type }) => type === SO_SLO_TYPE);
+      expect(memberFindCalls).toHaveLength(2);
+      expect(memberFindCalls.map(({ perPage }) => perPage).sort()).toEqual([25, 500]);
+      memberFindCalls.forEach((options) => {
+        expect(options.namespaces).toEqual(['custom-space']);
+      });
     });
 
     it('computes summary with empty active members when all member SLOs are missing', async () => {
@@ -408,6 +453,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -430,6 +476,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -446,6 +493,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -471,6 +519,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -484,6 +533,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -506,6 +556,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -531,6 +582,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -538,6 +590,36 @@ describe('computeAndPersistCompositeSummaries', () => {
       // Second SLO still processed despite first throwing
       expect(mockComputeCompositeSummary).toHaveBeenCalledTimes(2);
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the bulk operations paired when a summary document fails to encode', async () => {
+      const composite1 = buildStoredCompositeSLO({ id: 'composite-slo-id-11111111' });
+      const composite2 = buildStoredCompositeSLO({ id: 'composite-slo-id-22222222' });
+      mockPointInTimeFinder([[composite1, composite2]]);
+
+      const invalidSummary = buildCompositeSummary();
+      invalidSummary.compositeSummary.sliValue = Number.NaN;
+      mockComputeCompositeSummary
+        .mockReturnValueOnce(invalidSummary)
+        .mockReturnValueOnce(buildCompositeSummary());
+
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        sloRepository,
+        logger,
+        signal,
+      });
+
+      const { operations } = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
+      expect(operations).toHaveLength(2);
+      expect(operations[0]).toEqual({
+        index: {
+          _index: COMPOSITE_SUMMARY_INDEX_NAME,
+          _id: 'default:composite-slo-id-22222222',
+        },
+      });
+      expect(operations[1].compositeSlo.id).toBe('composite-slo-id-22222222');
     });
 
     it('logs bulk errors without throwing', async () => {
@@ -551,6 +633,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         computeAndPersistCompositeSummaries({
           esClient,
           soClient: soClient as any,
+          sloRepository,
           logger,
           signal,
         })
@@ -567,6 +650,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         computeAndPersistCompositeSummaries({
           esClient,
           soClient: soClient as any,
+          sloRepository,
           logger,
           signal,
         })
@@ -583,6 +667,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         computeAndPersistCompositeSummaries({
           esClient,
           soClient: soClient as any,
+          sloRepository,
           logger,
           signal,
         })
@@ -597,6 +682,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         computeAndPersistCompositeSummaries({
           esClient,
           soClient: soClient as any,
+          sloRepository,
           logger,
           signal,
         })
@@ -626,6 +712,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -644,6 +731,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -698,6 +786,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -725,6 +814,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
@@ -744,6 +834,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         computeAndPersistCompositeSummaries({
           esClient,
           soClient: soClient as any,
+          sloRepository,
           logger,
           signal,
         })
@@ -765,6 +856,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       await computeAndPersistCompositeSummaries({
         esClient,
         soClient: soClient as any,
+        sloRepository,
         logger,
         signal,
       });
