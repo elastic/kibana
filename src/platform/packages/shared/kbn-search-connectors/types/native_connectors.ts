@@ -3422,8 +3422,73 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
-      skip_extension_filter: {
+      drive_type: {
         default_value: null,
+        depends_on: [{ field: 'use_document_level_security', value: true }],
+        display: DROPDOWN,
+        label: translate('searchConnectors.nativeConnectors.networkDrive.driveTypeLabel', {
+          defaultMessage: 'Drive type',
+        }),
+        options: [
+          {
+            label: translate('searchConnectors.nativeConnectors.networkDrive.options.windows', {
+              defaultMessage: 'Windows',
+            }),
+            value: 'windows',
+          },
+          {
+            label: translate('searchConnectors.nativeConnectors.networkDrive.options.linux', {
+              defaultMessage: 'Linux',
+            }),
+            value: 'linux',
+          },
+        ],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 'windows',
+      },
+      identity_mappings: {
+        default_value: null,
+        depends_on: [
+          { field: 'use_document_level_security', value: true },
+          { field: 'drive_type', value: 'linux' },
+        ],
+        display: TEXTBOX,
+        label: translate('searchConnectors.nativeConnectors.networkDrive.identityMappingsLabel', {
+          defaultMessage: 'Path of CSV file containing users and groups SID (For Linux Network Drive)',
+        }),
+        options: [],
+        order: 8,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+      skip_extension_filter: {
+        default_value: false,
         depends_on: [],
         display: TOGGLE,
         label: translate('searchConnectors.nativeConnectors.networkDrive.skipExtensionFilterLabel', {
@@ -3431,7 +3496,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         }),
         options: [],
         order: 10,
-        required: false,
+        required: true,
         sensitive: false,
         tooltip: translate(
           'searchConnectors.nativeConnectors.networkDrive.skipExtensionFilterTooltip',
