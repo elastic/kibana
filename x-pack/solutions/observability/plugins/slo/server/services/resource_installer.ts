@@ -27,6 +27,7 @@ import { HEALTH_INDEX_TEMPLATE } from '../assets/index_templates/health_index_te
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
 import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
 import { allSettledOrThrow } from '../utils/all_settled_or_throw';
+import { isAbortError } from '../utils/with_deadline';
 import type { RetryOptions } from '../utils/retry';
 import { DEFAULT_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 
@@ -97,6 +98,10 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     try {
       await install();
     } catch (err) {
+      // Keep abort errors recognizable so callers can tell a cancelled install from a failed one.
+      if (isAbortError(err)) {
+        throw err;
+      }
       throw new Error(`Failed to install SLO resource [${name}]: ${err.message}`);
     }
   }

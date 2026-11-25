@@ -19,12 +19,9 @@ const setup = () => {
   const lockManager: jest.Mocked<Pick<LockManagerService, 'withLock'>> = { withLock: jest.fn() };
   lockManager.withLock.mockImplementation((_lockId, callback) => callback());
   const installerFactory = jest.fn(async () => installer);
-  const state = new ResourceInstallState({
-    installerFactory,
-    lockManager,
-    logger: loggerMock.create(),
-  });
-  return { installer, installerFactory, lockManager, state };
+  const logger = loggerMock.create();
+  const state = new ResourceInstallState({ installerFactory, lockManager, logger });
+  return { installer, installerFactory, lockManager, logger, state };
 };
 
 describe('ResourceInstallState', () => {
@@ -87,12 +84,15 @@ describe('ResourceInstallState', () => {
   });
 
   it('wraps a failure in SLOResourcesNotInstalled and retries on the next call', async () => {
-    const { installer, state } = setup();
+    const { installer, logger, state } = setup();
     installer.install.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce();
 
-    await expect(state.ensureInstalled()).rejects.toThrow(new SLOResourcesNotInstalled('boom'));
+    await expect(state.ensureInstalled()).rejects.toThrow(
+      new SLOResourcesNotInstalled('SLO resources are not installed yet, try again later')
+    );
     await expect(state.ensureInstalled()).resolves.toBeUndefined();
 
+    expect(logger.warn).toHaveBeenCalledWith('Failed to install SLO resources: boom');
     expect(installer.install).toHaveBeenCalledTimes(2);
   });
 
@@ -156,7 +156,9 @@ describe('ResourceInstallState', () => {
     installer.install.mockResolvedValueOnce().mockRejectedValueOnce(new Error('boom'));
 
     await state.ensureInstalled();
-    await expect(state.reconcile()).rejects.toThrow(new SLOResourcesNotInstalled('boom'));
+    await expect(state.reconcile()).rejects.toThrow(
+      new SLOResourcesNotInstalled('SLO resources are not installed yet, try again later')
+    );
     await state.ensureInstalled();
 
     expect(lockManager.withLock).toHaveBeenCalledTimes(3);

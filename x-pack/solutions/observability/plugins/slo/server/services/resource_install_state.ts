@@ -17,6 +17,7 @@ import type { ResourceInstaller } from './resource_installer';
 const LOCK_RETRY_INTERVAL_MS = 2_000;
 // Bounds how long a caller waits while another process installs the resources.
 const LOCK_WAIT_TIMEOUT_MS = 30_000;
+const INSTALL_FAILED_MESSAGE = 'SLO resources are not installed yet, try again later';
 const LOCK_WAIT_TIMEOUT_MESSAGE = 'SLO resources are being installed by another process';
 
 interface ResourceInstallStateDependencies {
@@ -123,7 +124,12 @@ export class ResourceInstallState {
       if (isLockAcquisitionError(err)) {
         return false;
       }
-      throw new SLOResourcesNotInstalled(err.message);
+      if (err instanceof SLOResourcesNotInstalled) {
+        throw err;
+      }
+      // The detail stays in the logs; API clients only get a generic message.
+      this.dependencies.logger.warn(`Failed to install SLO resources: ${err.message}`);
+      throw new SLOResourcesNotInstalled(INSTALL_FAILED_MESSAGE);
     }
   }
 }
