@@ -22,8 +22,9 @@ export const huntingActions: Record<string, ActionDefinition<any, any, any>> = {
       'tables (DeviceEvents, EmailEvents, AlertInfo, AlertEvidence, IdentityLogonEvents, CloudAppEvents, etc.). ' +
       'Returns schema and result rows. Results are capped at 100,000 rows; queries can access up to 30 days of data. ' +
       'Project only the columns you need (e.g. | project DeviceId, Timestamp, ActionType) to keep responses within ' +
-      "Kibana's size limit. For quick previews use | take N; for complete results aggregate in KQL or narrow the " +
-      'time window rather than relying on take.',
+      "Kibana's size limit. For quick previews use | take N; for summaries aggregate in KQL " +
+      '(e.g. | summarize count() by DeviceId); for all matching rows split the original interval into ' +
+      'smaller non-overlapping windows and query each in turn.',
     input: RunHuntingQueryInputSchema,
     handler: async (ctx, input: RunHuntingQueryInput) => {
       const body: Record<string, unknown> = { Query: input.query };
