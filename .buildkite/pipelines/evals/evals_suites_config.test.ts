@@ -210,24 +210,30 @@ describe('evals.suites.json evals decision', () => {
     expect(problems).toEqual([]);
   });
 
-  it('never hides a prompt behind a folder-specific exclude', () => {
+  it('never hides a prompt behind an exclude', () => {
     // Suites include whole plugins and exclude the folders that don't change agent behaviour, so a
-    // new folder is gated by default. An exclude naming a folder (unlike `**/*.test.ts`-style
-    // file-kind rules) is the one way a prompt can slip out, so it must not cover any prompt file.
+    // new folder is gated by default. An exclude is the one way a prompt can slip out, so none may
+    // cover a prompt file, except tests and online eval judge prompts, which aren't agent prompts.
     const isPromptFile = (file: string): boolean =>
       file.endsWith('.text') ||
       /prompt/i.test(Path.basename(file)) ||
       file.includes('/instructions/');
+    const isExemptPromptFile = (file: string): boolean =>
+      /\.test\.tsx?$/.test(file) ||
+      file.includes('/online_evals/') ||
+      Path.basename(file).includes('online_evals');
 
     const problems = decisionSuites.flatMap(({ id, requireDecisionOnPaths }) => {
       const { include = [], exclude = [] } = requireDecisionOnPaths ?? {};
-      const folderExcludes = exclude.filter((glob) => !glob.startsWith('**/'));
       return getTrackedFiles()
         .filter(
-          (file) => isPromptFile(file) && include.some((glob) => Path.matchesGlob(file, glob))
+          (file) =>
+            isPromptFile(file) &&
+            !isExemptPromptFile(file) &&
+            include.some((glob) => Path.matchesGlob(file, glob))
         )
         .flatMap((file) =>
-          folderExcludes
+          exclude
             .filter((glob) => Path.matchesGlob(file, glob))
             .map((glob) => `${id}: exclude "${glob}" hides the prompt file ${file}`)
         );

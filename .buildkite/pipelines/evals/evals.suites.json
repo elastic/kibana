@@ -197,7 +197,9 @@
           "x-pack/solutions/observability/plugins/nightshift_investigations/common/purge.ts",
           "x-pack/solutions/observability/plugins/nightshift_investigations/common/service_account.ts",
           "x-pack/platform/plugins/shared/agentic_investigations/server/impact/routes/**",
-          "x-pack/platform/plugins/shared/agentic_investigations/server/impact/services/*pills*.ts"
+          "x-pack/platform/plugins/shared/agentic_investigations/server/impact/services/*pills*.ts",
+          "x-pack/platform/plugins/shared/agentic_investigations/server/impact/services/entity_store_names.ts",
+          "x-pack/platform/plugins/shared/agentic_investigations/common/impact/impact_pills.ts"
         ]
       },
       "regressionGate": {

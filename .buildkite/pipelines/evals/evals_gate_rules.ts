@@ -91,6 +91,13 @@ export const isSuiteSkipped = (labels: readonly string[], suite: EvalsDecisionSu
   labels.includes(`${EVALS_SKIP_LABEL_PREFIX}${suite.id}`) ||
   (suite.requireDecisionOnPaths !== undefined && labels.includes(EVALS_SKIP_LABEL));
 
+/**
+ * Whether the PR asks for specific models (`models:*`, not `models:judge:*`). A reused verdict only
+ * covers a suite's default model, so reusing it must not skip a run the author asked for.
+ */
+export const hasExplicitModelRequest = (labels: readonly string[]): boolean =>
+  labels.some((label) => label.startsWith('models:') && !label.startsWith('models:judge:'));
+
 export const isSuiteRunRequested = (
   labels: readonly string[],
   suite: EvalsDecisionSuite

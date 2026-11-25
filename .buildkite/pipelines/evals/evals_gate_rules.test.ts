@@ -13,6 +13,7 @@ import {
   decideSuite,
   findReusableVerdict,
   getDecisionPathMatches,
+  hasExplicitModelRequest,
   isSuiteSkipped,
   truncateDescription,
 } from './evals_gate_rules.ts';
@@ -66,6 +67,14 @@ describe('getDecisionPathMatches', () => {
 
   it('matches nothing for a suite that has not opted in', () => {
     expect(getDecisionPathMatches(['plugins/agent/server/a.ts'], { id: 'other' })).toEqual([]);
+  });
+});
+
+describe('hasExplicitModelRequest', () => {
+  it('counts model labels but not the judge label', () => {
+    expect(hasExplicitModelRequest(['evals:gated', 'models:eis/openai-gpt-5.4'])).toBe(true);
+    expect(hasExplicitModelRequest(['evals:gated', 'models:judge:eis/openai-gpt-5.4'])).toBe(false);
+    expect(hasExplicitModelRequest(['evals:gated'])).toBe(false);
   });
 });
 

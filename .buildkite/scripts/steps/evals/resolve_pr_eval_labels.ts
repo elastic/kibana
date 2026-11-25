@@ -24,6 +24,7 @@ import type { VerdictLookup } from '../../../pipelines/evals/evals_gate_rules.ts
 import {
   EVALS_SKIP_LABEL_PREFIX,
   findReusableVerdict,
+  hasExplicitModelRequest,
   toVerdict,
 } from '../../../pipelines/evals/evals_gate_rules.ts';
 import {
@@ -54,9 +55,10 @@ const main = async (): Promise<void> => {
     .filter(Boolean);
   const headSha = process.env.BUILDKITE_COMMIT ?? '';
 
-  const gatedSuites = getRunnableEvalSuites(labels.join(',')).filter(
-    ({ regressionGate }) => regressionGate
-  );
+  // With explicit model labels, the run covers more than the reusable verdict did, so run it.
+  const gatedSuites = hasExplicitModelRequest(labels)
+    ? []
+    : getRunnableEvalSuites(labels.join(',')).filter(({ regressionGate }) => regressionGate);
   for (const suite of gatedSuites) {
     try {
       const verdict = await findReusableVerdict({ lookup: verdictLookup, headSha, suite });
