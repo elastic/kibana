@@ -404,8 +404,7 @@ NIGHTSHIFT_DATASETS=recovery-production \
 PRs that change the investigation harness get a failing `evals gate` check until they have one of
 these labels ([how the gate works](../../../../platform/packages/shared/kbn-evals/README.md#requiring-an-evals-decision-on-prs)):
 
-- `evals:nightshift-investigations` runs the suite on Sonnet 5.5. The verdict arrives about 1.5 hours
-  after the Kibana build.
+- `evals:nightshift-investigations` runs the suite on Sonnet 5.5.
 - `evals:skip` skips it.
 
 A run blocks the PR only if `goal_pass` on the golden cut drops by 0.10 or more with p < 0.05
