@@ -19,21 +19,21 @@ describe('parseCreatedAt', () => {
   it('returns undefined without logging when the value is not set', () => {
     expect(parseCreatedAt(undefined, logger)).toBeUndefined();
     expect(parseCreatedAt('', logger)).toBeUndefined();
-    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('parses an ISO-8601 timestamp into a Date', () => {
     expect(parseCreatedAt('2026-11-04T14:16:56.000Z', logger)).toEqual(
       new Date('2026-11-04T14:16:56.000Z')
     );
-    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('returns undefined and logs an error once when the value cannot be parsed', () => {
+  it('returns undefined and logs a warning once when the value cannot be parsed', () => {
     expect(parseCreatedAt('not-a-date', logger)).toBeUndefined();
-    expect(logger.error).toHaveBeenCalledTimes(1);
-    expect(logger.error).toHaveBeenCalledWith(
-      'cloud.serverless.created_at config value could not be parsed.'
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'cloud.serverless.created_at config value "not-a-date" could not be parsed as an ISO-8601 date; ignoring it.'
     );
   });
 });

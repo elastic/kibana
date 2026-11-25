@@ -19,7 +19,9 @@ export function parseCreatedAt(value: string | undefined, logger: Logger): Date 
 
   const createdAt = new Date(value);
   if (Number.isNaN(createdAt.getTime())) {
-    logger.error('cloud.serverless.created_at config value could not be parsed.');
+    logger.warn(
+      `cloud.serverless.created_at config value "${value}" could not be parsed as an ISO-8601 date; ignoring it.`
+    );
     return undefined;
   }
   return createdAt;
