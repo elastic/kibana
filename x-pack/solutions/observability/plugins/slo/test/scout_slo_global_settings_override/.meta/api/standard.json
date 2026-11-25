@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "1933d5498449cce7101dfe1f486fa95d466c3f1a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,13 +9,12 @@
       "title": "SLO global settings API with SLI retention set in kibana.yml GET returns the defaults with the override applied",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout_slo_global_settings_override/api/tests/slo_global_settings_override.spec.ts",
-        "line": 31,
-        "column": 84
+        "line": 32,
+        "column": 19
       }
     },
     {
@@ -23,13 +22,12 @@
       "title": "SLO global settings API with SLI retention set in kibana.yml PUT is rejected and saves nothing",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout_slo_global_settings_override/api/tests/slo_global_settings_override.spec.ts",
-        "line": 44,
-        "column": 14
+        "line": 45,
+        "column": 23
       }
     },
     {
@@ -37,13 +35,12 @@
       "title": "SLO global settings API with SLI retention set in kibana.yml GET returns the saved value with the override applied",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout_slo_global_settings_override/api/tests/slo_global_settings_override.spec.ts",
         "line": 58,
-        "column": 64
+        "column": 23
       }
     }
   ]

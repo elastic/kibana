@@ -10,12 +10,7 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
-/**
- * SLO global settings with SLI retention set in kibana.yml, read at startup only.
- * Used by `x-pack/solutions/observability/plugins/slo/test/scout_slo_global_settings_override`.
- *
- *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet slo_global_settings_override
- */
+/** Sets SLI retention in kibana.yml for the SLO `scout_slo_global_settings_override` suites. */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {

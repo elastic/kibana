@@ -6,11 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { SecurityException } from '../../errors';
 
 interface Params {
-  authz: SecurityPluginStart['authz'];
+  authz: SecurityPluginSetup['authz'];
   request: KibanaRequest;
 }
 

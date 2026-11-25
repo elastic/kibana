@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { GlobalSettingsStore } from '../../fixtures';
 import {
@@ -15,7 +14,7 @@ import {
   mergeSloApiHeaders,
 } from '../../fixtures';
 
-apiTest.describe('SLO global settings API (stateful)', { tag: tags.stateful.classic }, () => {
+apiTest.describe('SLO global settings API (stateful)', { tag: ['@local-stateful-classic'] }, () => {
   let store: GlobalSettingsStore;
 
   apiTest.beforeAll(async ({ esClient }) => {

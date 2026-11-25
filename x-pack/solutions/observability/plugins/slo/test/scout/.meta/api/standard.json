@@ -1,5 +1,5 @@
 {
-  "sha1": "e6a0a083eb7fd3620c33855a433cea8d0126830c",
+  "sha1": "9bf74858567776aac87c282489b85a9796c488e2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1202,6 +1202,127 @@
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
         "line": 317,
         "column": 31
+      }
+    },
+    {
+      "id": "986fa8e48204dfe-323a6cc104d29b2",
+      "title": "SLO global settings API authorization rejects a user with the SLO All privilege in a single space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/global_settings/slo_global_settings_authz.spec.ts",
+        "line": 23,
+        "column": 5
+      }
+    },
+    {
+      "id": "986fa8e48204dfe-1a965caaf717828",
+      "title": "SLO global settings API authorization allows a user with the SLO All privilege in all spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/global_settings/slo_global_settings_authz.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "9a410b9b1204da4-89803ca64fcf682",
+      "title": "SLO global settings API (stateful) GET returns the defaults when nothing was saved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/global_settings/slo_global_settings_stateful.spec.ts",
+        "line": 25,
+        "column": 11
+      }
+    },
+    {
+      "id": "15ae5fbd5966132-6b359320281d48a",
+      "title": "SLO global settings API PUT saves the SLI retention and GET returns it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/global_settings/slo_global_settings.spec.ts",
+        "line": 26,
+        "column": 61
+      }
+    },
+    {
+      "id": "15ae5fbd5966132-66dfbc7ccbf833f",
+      "title": "SLO global settings API PUT rejects a period below the minimum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/global_settings/slo_global_settings.spec.ts",
+        "line": 65,
+        "column": 19
+      }
+    },
+    {
+      "id": "15ae5fbd5966132-6ec48f373cd7c8a",
+      "title": "SLO global settings API PUT rejects a period above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/global_settings/slo_global_settings.spec.ts",
+        "line": 65,
+        "column": 19
+      }
+    },
+    {
+      "id": "15ae5fbd5966132-cd30562ea7e579c",
+      "title": "SLO global settings API PUT rejects a non-integer period",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/global_settings/slo_global_settings.spec.ts",
+        "line": 65,
+        "column": 19
+      }
+    },
+    {
+      "id": "15ae5fbd5966132-1e494ce0f22b30f",
+      "title": "SLO global settings API PUT rejects a missing enabled flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/global_settings/slo_global_settings.spec.ts",
+        "line": 65,
+        "column": 19
       }
     },
     {

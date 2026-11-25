@@ -14,7 +14,7 @@ describe('assertSloGlobalAdmin', () => {
   const request = httpServerMock.createKibanaRequest();
 
   const setup = ({ useRbac, hasAllRequested }: { useRbac: boolean; hasAllRequested: boolean }) => {
-    const { authz } = securityMock.createStart();
+    const { authz } = securityMock.createSetup();
     authz.mode.useRbacForRequest.mockReturnValue(useRbac);
     jest.mocked(authz.actions.api.get).mockImplementation((operation) => `api:${operation}`);
     const globally = jest.fn().mockResolvedValue({ hasAllRequested });

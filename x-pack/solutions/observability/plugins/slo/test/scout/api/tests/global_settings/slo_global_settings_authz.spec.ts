@@ -15,7 +15,8 @@ const sloAllRole = (spaces: string[]): KibanaRole => ({
   kibana: [{ base: [], feature: { slo: ['all'] }, spaces }],
 });
 
-const SLI_RETENTION = { enabled: false, periodDays: 365 };
+// Writing the defaults leaves the global settings as the other suites expect them.
+const DEFAULT_SLI_RETENTION = { enabled: false, periodDays: 365 };
 
 apiTest.describe('SLO global settings API authorization', { tag: tags.stateful.classic }, () => {
   apiTest(
@@ -32,7 +33,7 @@ apiTest.describe('SLO global settings API authorization', { tag: tags.stateful.c
 
       const putResponse = await apiClient.put(GLOBAL_SETTINGS_PATH, {
         headers,
-        body: { sliRetention: SLI_RETENTION },
+        body: { sliRetention: DEFAULT_SLI_RETENTION },
         responseType: 'json',
       });
       expect(putResponse).toHaveStatusCode(403);
@@ -53,7 +54,7 @@ apiTest.describe('SLO global settings API authorization', { tag: tags.stateful.c
 
       const putResponse = await apiClient.put(GLOBAL_SETTINGS_PATH, {
         headers,
-        body: { sliRetention: SLI_RETENTION },
+        body: { sliRetention: DEFAULT_SLI_RETENTION },
         responseType: 'json',
       });
       expect(putResponse).toHaveStatusCode(200);

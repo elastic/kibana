@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { GlobalSettingsStore } from '../../../scout/api/fixtures';
 import {
@@ -21,7 +20,7 @@ const SAVED_AT = '2026-11-20T10:00:00.000Z';
 
 apiTest.describe(
   'SLO global settings API with SLI retention set in kibana.yml',
-  { tag: tags.stateful.classic },
+  { tag: ['@local-stateful-classic'] },
   () => {
     let headers: Record<string, string>;
     let store: GlobalSettingsStore;
