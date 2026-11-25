@@ -36,7 +36,7 @@ import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { Action, UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_VISUALIZE_FIELD, ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { SharePluginSetup, ExportShare, SharePluginStart } from '@kbn/share-plugin/public';
@@ -138,9 +138,13 @@ import type { LensAttributes } from '../server/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
 import {
-  ACTION_OPEN_IN_LENS,
-  ACTION_SAVE_TO_DASHBOARD,
-} from './trigger_actions/built_in_actions/constants';
+  createOpenInLensAction,
+  type OpenInLensActionOptions,
+} from './trigger_actions/panel_actions/open_in_lens_action';
+import {
+  createSaveToDashboardAction,
+  type SaveToDashboardActionOptions,
+} from './trigger_actions/panel_actions/save_to_dashboard_action';
 import {
   ACTION_CREATE_ESQL_CHART,
   ACTION_EDIT_LENS_EMBEDDABLE,
@@ -269,6 +273,22 @@ export interface LensPublicStart {
       skipAppLeave?: boolean;
     }
   ) => void;
+  /**
+   * Panel actions to pass to the `extraActions` prop of the `EmbeddableComponent`.
+   * The actions are not checked for permissions by the panel, so only pass them when the user
+   * can use them: see `canUseEditor` and the `dashboard_v2.showWriteControls` capability.
+   * Create each action once (e.g. with `useMemo`), as the panel is updated when the actions change.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  actions: {
+    /** Opens the chart in the Lens editor, with its current state and time range */
+    createOpenInLensAction: (options?: OpenInLensActionOptions) => Action;
+    /** Opens the modal to add the chart to a dashboard */
+    createSaveToDashboardAction: (options?: SaveToDashboardActionOptions) => Action;
+  };
   /**
    * Method which returns true if the user has permission to use Lens as defined by application capabilities.
    */
@@ -789,31 +809,19 @@ export class LensPlugin {
       });
     };
 
-    startDependencies.uiActions.addTriggerActionAsync(
-      ON_OPEN_PANEL_MENU,
-      ACTION_OPEN_IN_LENS,
-      async () => {
-        const { createOpenInLensAction } = await import('./async_services');
-        return createOpenInLensAction({
-          application: core.application,
-          navigateToPrefilledEditor,
-        });
-      }
-    );
-
-    startDependencies.uiActions.addTriggerActionAsync(
-      ON_OPEN_PANEL_MENU,
-      ACTION_SAVE_TO_DASHBOARD,
-      async () => {
-        const { createSaveToDashboardAction } = await import('./async_services');
-        return createSaveToDashboardAction(core, startDependencies);
-      }
-    );
-
     return {
       EmbeddableComponent: LensRenderer,
       SaveModalComponent: getSaveModalComponent(core, startDependencies),
       navigateToPrefilledEditor,
+      actions: {
+        createOpenInLensAction: (options) =>
+          createOpenInLensAction(
+            { application: core.application, navigateToPrefilledEditor },
+            options
+          ),
+        createSaveToDashboardAction: (options) =>
+          createSaveToDashboardAction(core, startDependencies, options),
+      },
       canUseEditor: () => {
         return Boolean(core.application.capabilities.visualize_v2?.show);
       },

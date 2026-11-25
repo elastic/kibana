@@ -10,7 +10,6 @@ import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { LensTelemetrySource } from '@kbn/lens-common';
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =
   createGetterSetter<UsageCollectionStart>('UsageCollection', false);
@@ -40,7 +39,7 @@ export const trackSaveUiCounterEvents = (
   context?: KibanaExecutionContext
 ) => trackUiCounterEvents(events, context, SAVE_EVENT_PREFIX);
 
-export type { LensTelemetrySource } from '@kbn/lens-common';
+export type LensTelemetrySource = 'dashboards' | 'discover' | 'chat' | 'library';
 
 /** Reports a Lens chart creation, only when its source is known. @internal **/
 export const trackCreateUiCounterEvents = (

@@ -23,10 +23,6 @@ import {
 } from '@kbn/lens-common';
 import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
-import {
-  ACTION_OPEN_IN_LENS,
-  ACTION_SAVE_TO_DASHBOARD,
-} from '../../trigger_actions/built_in_actions/constants';
 import { createEmptyLensState, transformToApiConfig } from '../helper';
 import type { LensParentApi } from './types';
 
@@ -43,8 +39,6 @@ function useObservableVariable<T extends unknown>(value: T) {
 
   return observable;
 }
-
-const BUILT_IN_ACTION_IDS = [ACTION_OPEN_IN_LENS, ACTION_SAVE_TO_DASHBOARD];
 
 type PanelProps = Pick<
   PresentationPanelProps<LensApi>,
@@ -76,7 +70,6 @@ export function LensRenderer({
   filters,
   timeRange,
   disabledActions,
-  builtInActions,
   searchSessionId,
   forceDSL,
   hidePanelTitles,
@@ -96,7 +89,6 @@ export function LensRenderer({
     };
   }, []);
   const disabledActionIds$ = useObservableVariable(disabledActions);
-  const builtInActionIds$ = useObservableVariable(builtInActions);
   const viewMode$ = useObservableVariable(viewMode ?? 'view');
   const searchSessionId$ = useObservableVariable(searchSessionId);
   const hideTitle$ = useObservableVariable(hidePanelTitles);
@@ -131,9 +123,7 @@ export function LensRenderer({
 
   const searchApi = useSearchApi({ query, filters, timeRange });
 
-  const hasBuiltInActions = (builtInActions?.length || 0) > 0;
-  const showPanelChrome =
-    Boolean(withDefaultActions) || (extraActions?.length || 0) > 0 || hasBuiltInActions;
+  const showPanelChrome = Boolean(withDefaultActions) || (extraActions?.length || 0) > 0;
 
   const reload$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
   useEffect(() => {
@@ -181,20 +171,14 @@ export function LensRenderer({
       showBadges: false,
       titleHighlight,
       getActions: async (triggerId, context) => {
-        if (!withDefaultActions && !hasBuiltInActions) {
-          return extraActions ?? [];
-        }
-        const compatibleActions =
-          (await lensApi?.getTriggerCompatibleActions(triggerId, context)) ?? [];
-        // without the default actions, only the requested built-in ones are shown
         const actions = withDefaultActions
-          ? compatibleActions
-          : compatibleActions.filter(({ id: actionId }) => BUILT_IN_ACTION_IDS.includes(actionId));
+          ? await lensApi?.getTriggerCompatibleActions(triggerId, context)
+          : [];
 
-        return (extraActions ?? []).concat(actions);
+        return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [withDefaultActions, hasBuiltInActions, extraActions, lensApi, titleHighlight]);
+  }, [withDefaultActions, extraActions, lensApi, titleHighlight]);
   return (
     <EmbeddableRenderer<LensWireAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
@@ -208,7 +192,6 @@ export function LensRenderer({
           searchSessionId$,
           disabledActionIds$,
           setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
-          builtInActionIds$,
           viewMode$: apiPublishesViewMode(parentApi) ? parentApi.viewMode$ : viewMode$, // parent API takes precedence for this value
           disableTriggers$: apiHasDisableTriggers(parentApi)
             ? parentApi.disableTriggers$ // parent API takes precedence for this value

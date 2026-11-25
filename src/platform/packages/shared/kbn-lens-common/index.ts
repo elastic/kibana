@@ -293,8 +293,6 @@ export type {
   LensUnifiedSearchContext,
   LensPanelProps,
   LensSharedProps,
-  LensBuiltInActionId,
-  LensTelemetrySource,
   LensComponentProps,
   LensComponentForwardedProps,
   LensRendererProps,

@@ -9,7 +9,6 @@ import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
-import type { LensBuiltInActionId } from '@kbn/lens-plugin/public';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import { flyoutDegradedDocsTrendText } from '../../../../../common/translations';
@@ -18,7 +17,6 @@ import type { TimeRangeConfig } from '../../../../../common/types';
 import type { useQualityIssuesDocsChart } from '../../../../hooks';
 
 const CHART_HEIGHT = 180;
-const BUILT_IN_ACTIONS: LensBuiltInActionId[] = ['openInLens'];
 const DISABLED_ACTIONS = [
   'ACTION_CUSTOMIZE_PANEL',
   'ACTION_CONFIGURE_IN_LENS',
@@ -29,7 +27,7 @@ const DISABLED_ACTIONS = [
 interface TrendDocsChartProps
   extends Pick<
     ReturnType<typeof useQualityIssuesDocsChart>,
-    'attributes' | 'isChartLoading' | 'onChartLoading' | 'onBuiltInAction'
+    'attributes' | 'isChartLoading' | 'onChartLoading' | 'extraActions'
   > {
   timeRange: TimeRangeConfig;
   lastReloadTime: number;
@@ -40,7 +38,7 @@ export function TrendDocsChart({
   attributes,
   isChartLoading,
   onChartLoading,
-  onBuiltInAction,
+  extraActions,
   timeRange,
   lastReloadTime,
   onTimeRangeChange,
@@ -81,8 +79,7 @@ export function TrendDocsChart({
               timeRange={timeRange}
               attributes={attributes!}
               withDefaultActions={true}
-              builtInActions={BUILT_IN_ACTIONS}
-              onBuiltInAction={onBuiltInAction}
+              extraActions={extraActions}
               disableTriggers={false}
               lastReloadRequestTime={lastReloadTime}
               onLoad={onChartLoading}

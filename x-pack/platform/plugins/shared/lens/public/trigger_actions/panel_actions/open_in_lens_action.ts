@@ -8,40 +8,40 @@
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core/public';
 import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { LensSerializedState } from '@kbn/lens-common';
 import { isLensApi } from '../../react_embeddable/type_guards';
 import { ACTION_OPEN_IN_LENS } from './constants';
-import {
-  getEffectiveTimeRange,
-  isBuiltInActionRequested,
-  notifyBuiltInActionExecuted,
-} from './helpers';
+import { getContextEmbeddable, getEffectiveTimeRange } from './helpers';
 
 export interface OpenInLensActionServices {
   application: Pick<ApplicationStart, 'capabilities'>;
   navigateToPrefilledEditor: (input: LensSerializedState) => void;
 }
 
-export const createOpenInLensAction = ({
-  application,
-  navigateToPrefilledEditor,
-}: OpenInLensActionServices) =>
-  createAction<EmbeddableApiContext>({
+export interface OpenInLensActionOptions {
+  /** Called when the user runs the action */
+  onExecute?: () => void;
+}
+
+export const createOpenInLensAction = (
+  { application, navigateToPrefilledEditor }: OpenInLensActionServices,
+  { onExecute }: OpenInLensActionOptions = {}
+) =>
+  createAction({
     id: ACTION_OPEN_IN_LENS,
     type: ACTION_OPEN_IN_LENS,
     order: 17,
     getIconType: () => 'lensApp',
     getDisplayName: () =>
       i18n.translate('xpack.lens.action.openInLens', { defaultMessage: 'Open in Lens' }),
-    isCompatible: async ({ embeddable }) =>
-      isLensApi(embeddable) &&
-      isBuiltInActionRequested(embeddable, 'openInLens') &&
+    isCompatible: async (context) =>
+      isLensApi(getContextEmbeddable(context)) &&
       Boolean(application.capabilities.visualize_v2?.show),
-    execute: async ({ embeddable }) => {
+    execute: async (context) => {
+      const embeddable = getContextEmbeddable(context);
       if (!isLensApi(embeddable)) throw new IncompatibleActionError();
 
-      notifyBuiltInActionExecuted(embeddable, 'openInLens');
+      onExecute?.();
       navigateToPrefilledEditor({
         ...embeddable.getLegacySerializedState(),
         time_range: getEffectiveTimeRange(embeddable),

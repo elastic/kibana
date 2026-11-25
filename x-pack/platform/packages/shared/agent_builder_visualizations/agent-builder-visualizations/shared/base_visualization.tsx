@@ -6,14 +6,12 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import {
-  LENS_SAVE_TO_DASHBOARD_ACTION_ID,
-  type InlineEditLensEmbeddableContext,
-  type LensApi,
-  type TypedLensByValueInput,
+import type {
+  InlineEditLensEmbeddableContext,
+  LensApi,
+  TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { Action } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActionButtonType,
@@ -98,25 +96,20 @@ export function BaseVisualization({
     []
   );
 
+  const saveToDashboardAction = useMemo(
+    () => lens.actions.createSaveToDashboardAction({ telemetrySource: 'chat' }),
+    [lens]
+  );
   const onApiAvailable = useCallback((api: unknown) => {
     lensApiRef.current = api as LensApi;
   }, []);
-
-  const onOpenSave = useCallback(async () => {
-    const lensApi = lensApiRef.current;
-    if (!lensApi) {
-      return;
+  const onOpenSave = useCallback(() => {
+    const embeddable = lensApiRef.current;
+    if (embeddable) {
+      const context = { embeddable, trigger: { id: ON_OPEN_PANEL_MENU } };
+      saveToDashboardAction.execute(context);
     }
-
-    // the Save to dashboard action is provided by the Lens embeddable
-    const saveToDashboardAction = (await uiActions.getAction(
-      LENS_SAVE_TO_DASHBOARD_ACTION_ID
-    )) as Action<{ embeddable: LensApi }>;
-    await saveToDashboardAction.execute({
-      embeddable: lensApi,
-      trigger: { id: ON_OPEN_PANEL_MENU },
-    });
-  }, [uiActions]);
+  }, [saveToDashboardAction]);
   const saveToDashboard = useCallback(() => {
     if (canWriteDashboards) {
       onOpenSave();
@@ -189,7 +182,6 @@ export function BaseVisualization({
               style={{ height: '100%' }}
               onBrushEnd={onBrushEnd}
               onLoad={onLoad}
-              telemetrySource="chat"
               onApiAvailable={onApiAvailable}
             />
           )

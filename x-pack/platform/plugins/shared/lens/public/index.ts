@@ -19,7 +19,6 @@ export type {
   TypedLensByValueInput,
   LensEmbeddableInput,
   LensSavedObjectAttributes,
-  LensBuiltInActionId,
   LensRendererProps as EmbeddableComponentProps,
 } from '@kbn/lens-common';
 export type { LensApi, LensEmbeddableOutput } from '@kbn/lens-common-2';
@@ -124,7 +123,6 @@ export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_len
 export type { ChartInfo } from './chart_info_api';
 
 export type { LensTelemetrySource } from './lens_ui_telemetry';
-export { ACTION_SAVE_TO_DASHBOARD as LENS_SAVE_TO_DASHBOARD_ACTION_ID } from './trigger_actions/built_in_actions/constants';
 
 export { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
 

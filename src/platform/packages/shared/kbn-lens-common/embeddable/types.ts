@@ -229,16 +229,6 @@ export interface LensPanelProps {
   palette?: PaletteOutput;
 }
 
-/** Where a Lens chart is created from, reported in the Lens creation telemetry */
-export type LensTelemetrySource = 'dashboards' | 'discover' | 'chat' | 'library';
-
-/**
- * Panel actions the Lens embeddable can provide itself:
- * - `openInLens`: opens the chart in the Lens editor
- * - `saveToDashboard`: opens the modal to add the chart to a dashboard
- */
-export type LensBuiltInActionId = 'openInLens' | 'saveToDashboard';
-
 /**
  * This set of props are exposes by the Lens component too
  */
@@ -306,19 +296,6 @@ export type LensComponentProps = Simplify<
        * Allow custom actions to be rendered in the panel
        */
       extraActions?: Action[];
-      /**
-       * Built-in panel actions to add to the embeddable, regardless of `withDefaultActions`.
-       * An action is only shown when the user is allowed to run it.
-       */
-      builtInActions?: LensBuiltInActionId[];
-      /**
-       * Callback invoked when the user runs one of the built-in actions
-       */
-      onBuiltInAction?: (actionId: LensBuiltInActionId) => void;
-      /**
-       * Where the chart comes from, reported when the `saveToDashboard` action creates a chart
-       */
-      telemetrySource?: LensTelemetrySource;
       /**
        * Disable specific actions for the embeddable
        */

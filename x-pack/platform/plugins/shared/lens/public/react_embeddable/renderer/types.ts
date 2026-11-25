@@ -12,7 +12,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, ViewMode, useSearchApi } from '@kbn/presentation-publishing';
 import type { HasSerializedChildState } from '@kbn/presentation-publishing';
 
-import type { LensBuiltInActionId, LensRuntimeState } from '@kbn/lens-common';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 type SearchApi = ReturnType<typeof useSearchApi>;
@@ -21,7 +21,6 @@ interface GeneralLensApi {
   searchSessionId$: BehaviorSubject<string | undefined>;
   disabledActionIds$: BehaviorSubject<string[] | undefined>;
   setDisabledActionIds: (ids: string[] | undefined) => void;
-  builtInActionIds$: BehaviorSubject<LensBuiltInActionId[] | undefined>;
   viewMode$: PublishingSubject<ViewMode>;
   settings: {
     syncColors$: BehaviorSubject<boolean>;
