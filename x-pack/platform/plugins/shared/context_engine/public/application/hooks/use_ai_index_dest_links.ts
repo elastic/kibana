@@ -20,6 +20,12 @@ import {
 } from '../components/ki/list/list_ki_helpers';
 import { useKibana } from './use_kibana';
 
+/**
+ * All time. `@timestamp` of a KI on an index dest is the date it was added, and rewrites keep it,
+ * so a shorter window would hide old KIs that are still current.
+ */
+const DISCOVER_TIME_RANGE = { from: '1970-01-01T00:00:00.000Z', to: 'now' } as const;
+
 export const useAiIndexDestLinks = (dest: AiIndexDest | undefined) => {
   const {
     services: { share, application },
@@ -34,7 +40,7 @@ export const useAiIndexDestLinks = (dest: AiIndexDest | undefined) => {
     }
     const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
     return locator?.getRedirectUrl({
-      timeRange: { from: 'now-90d', to: 'now' },
+      timeRange: DISCOVER_TIME_RANGE,
       query: { esql: getDiscoverEsqlQuery(dest.value) },
     });
   }, [canOpenDiscover, dest, share?.url?.locators]);

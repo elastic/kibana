@@ -55,6 +55,7 @@ This stream is the durable history of rule evaluation.
 | `alert.status_count` | `long` | Consecutive count within the current alert status. |
 | `episode.id`, `episode.status`, `episode.status_count` | `alias` | Aliases of the `alert.*` fields, so queries on the pre-v8 names keep working. Aliases are not stored in `_source` and cannot be written. |
 | `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
+| `routing_tags` | `keyword` | Optional, `ignore_above: 128`. Action-policy routing tags. Top-level so events with no `rule` object can set it. Mapped in v9; no writer sets it yet. |
 | `reason` | `keyword` | Optional. The rule's `reason` template rendered against the query row. Only set on `breached` events built from a query row, at most 1,024 characters. |
 
 Writers:
@@ -147,7 +148,7 @@ That distinction is why `.alert-actions` stores both series-scoped and action-gr
 
 ## ES|QL views
 
-ES|QL views are registered as `optional: true`, which lets Kibana start even on clusters without ES|QL view support.
+The views below are defined in `esql_views/` but not registered: `getEsqlViewDefinitions()` in `esql_views/register.ts` returns an empty list, so Kibana does not create them. Once registered, a failed view does not block Kibana startup or alerting tasks: the rule executor and the dispatcher wait only for the resources they name (`ResourceManager.waitForResources()`), and neither depends on a view. This lets Kibana run on clusters without ES|QL view support.
 
 | Key | View name | Summary |
 | --- | --- | --- |

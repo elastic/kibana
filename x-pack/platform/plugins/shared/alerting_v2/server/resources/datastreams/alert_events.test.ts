@@ -26,6 +26,19 @@ describe('signal event statuses', () => {
 });
 
 describe('getAlertEventsResourceDefinition', () => {
+  it('maps routing_tags as a top-level keyword, not on rule', () => {
+    const { mappings } = getAlertEventsResourceDefinition();
+
+    expect(mappings.properties?.routing_tags).toEqual({ type: 'keyword', ignore_above: 128 });
+    expect(mappings.properties?.rule).toEqual({
+      type: 'object',
+      properties: {
+        id: { type: 'keyword' },
+        version: { type: 'long' },
+      },
+    });
+  });
+
   it('has no retention by default', () => {
     expect(getAlertEventsResourceDefinition().lifecycle).toEqual({});
   });

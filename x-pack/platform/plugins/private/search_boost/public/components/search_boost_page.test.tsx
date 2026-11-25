@@ -90,15 +90,99 @@ describe('SearchBoostPage', () => {
     expect(signals.map((signal) => signal?.aborted)).toEqual([true, true]);
   });
 
-  it('stays on the page when a rule or profile name is clicked', async () => {
+  it('opens the details page of a profile from its name', async () => {
     const { history } = renderPage(createHttp(), '/profiles');
 
     await userEvent.click(await screen.findByRole('link', { name: 'catalog-fast' }));
-    expect(history.location.pathname).toBe('/profiles');
+    expect(history.location.pathname).toBe('/profiles/catalog-fast');
+    expect(await screen.findByTestId('searchBoostProfileSettings')).toBeInTheDocument();
+  });
 
-    await userEvent.click(screen.getByTestId('searchBoostTab-rules'));
+  it('opens the details page of a rule from its name', async () => {
+    const { history } = renderPage(createHttp(), '/rules');
+
     await userEvent.click(await screen.findByRole('link', { name: 'catalog' }));
+    expect(history.location.pathname).toBe('/rules/catalog');
+    expect(await screen.findByTestId('searchBoostRuleSettings')).toBeInTheDocument();
+  });
+
+  it('shows the rule name, badges and back link on a rule details page', async () => {
+    renderPage(createHttp(), '/rules/default_indices');
+
+    expect(await screen.findByTestId('searchBoostRuleSettings')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('default_indices');
+    expect(screen.getByText('Indices')).toBeInTheDocument();
+    expect(screen.getByText('Default')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back).closest('a')).toHaveAttribute(
+      'href',
+      '/rules'
+    );
+  });
+
+  it("opens the rule's profile, and the rules list filtered by a profile", async () => {
+    const { history } = renderPage(createHttp(), '/rules/catalog');
+
+    await userEvent.click(await screen.findByRole('link', { name: 'catalog-fast' }));
+    expect(history.location.pathname).toBe('/profiles/catalog-fast');
+
+    await userEvent.click(within(screen.getByTestId('searchBoostProfileUsage')).getByRole('link'));
     expect(history.location.pathname).toBe('/rules');
+    expect(history.location.search).toBe('?profile=catalog-fast');
+  });
+
+  it('opens a rule from the rules using a profile', async () => {
+    const { history } = renderPage(createHttp(), '/profiles/logs-recent-week');
+
+    const rules = await screen.findByTestId('searchBoostProfileRulesTable');
+    await userEvent.click(within(rules).getByRole('link', { name: 'web-logs' }));
+
+    expect(history.location.pathname).toBe('/rules/web-logs');
+  });
+
+  // Elasticsearch accepts `%`, `@`, `+` and `~` in rule names.
+  it.each(['logs@custom+v1', 'logs%40custom', '100%25', 'logs~25'])(
+    'opens a rule named %s, also after a reload',
+    async (name) => {
+      const http = createHttp();
+      const rules = [{ ...mockRules[2], name }];
+      http.get.mockImplementation(async (path: unknown) =>
+        path === PROFILES_API_PATH ? { profiles: mockProfiles } : { rules }
+      );
+      const { history, unmount } = renderPage(http, '/rules');
+
+      await userEvent.click(await screen.findByRole('link', { name }));
+      expect(await screen.findByTestId('searchBoostRuleSettings')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(name);
+
+      // A reload parses the address bar, which holds the path as `history` decoded it.
+      const addressBar = history.createHref(history.location);
+      unmount();
+      contentListQueryClient.clear();
+      renderPage(http, addressBar);
+      expect(await screen.findByTestId('searchBoostRuleSettings')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(name);
+    }
+  );
+
+  it.each([
+    ['/rules/missing', 'Boost rule not found', '/rules'],
+    ['/profiles/missing', 'Boost profile not found', '/profiles'],
+  ])('shows %s as not found, with a way back', async (path, title, backPath) => {
+    const { history } = renderPage(createHttp(), path);
+
+    expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument();
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('searchBoostNotFoundBack'));
+    expect(history.location.pathname).toBe(backPath);
+  });
+
+  it('shows index and data stream names as text', async () => {
+    renderPage(createHttp(), '/rules/web-logs');
+
+    const names = await screen.findAllByTestId('searchBoostMatchName');
+    expect(names.map(({ textContent }) => textContent)).toContain('logs-nginx-default');
+    expect(screen.queryByRole('link', { name: 'logs-nginx-default' })).not.toBeInTheDocument();
   });
 
   it('switches tabs through the URL', async () => {

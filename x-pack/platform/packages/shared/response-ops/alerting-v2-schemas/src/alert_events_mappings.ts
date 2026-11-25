@@ -51,6 +51,9 @@ export const ALERT_EVENTS_MAPPINGS: MappingsDefinition = {
     },
     space_id: { type: 'keyword' },
     severity: { type: 'keyword' }, // info | low | medium | high | critical
+    // Action-policy routing. Top-level so events with no `rule` object can set it.
+    // Same limit as rule `metadata.routing_tags`.
+    routing_tags: { type: 'keyword', ignore_above: 128 },
     reason: { type: 'keyword' },
   },
 };
