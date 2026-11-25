@@ -476,6 +476,98 @@ describe('EditConnectorFlyout', () => {
       );
     });
 
+    describe('auth mode choices', () => {
+      const AuthModeProbe = ({ authMode }: { authMode?: string }) => (
+        <div data-test-subj="auth-mode-probe">{authMode ?? 'none'}</div>
+      );
+      const probeActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+        id: '.dual',
+        actionConnectorFields: lazy(() => Promise.resolve({ default: AuthModeProbe as never })),
+        validateParams: (): Promise<GenericValidationResult<unknown>> =>
+          Promise.resolve({ errors: {} }),
+      });
+
+      beforeEach(() => {
+        actionTypeRegistry.get.mockReturnValue(probeActionTypeModel);
+      });
+
+      it('does not narrow the auth choices for a connector created with outbound off', async () => {
+        const offConnector = createMockActionConnector({
+          id: 'dd-1',
+          name: 'Datadog',
+          actionTypeId: '.dual',
+          isInboundEventsEnabled: true,
+          isOutboundActionsEnabled: false,
+          authMode: 'shared',
+          config: {},
+          secrets: {},
+        });
+        renderDual(offConnector);
+        await screen.findByTestId('outbound-actions-enabled-switch');
+        await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
+
+        expect(await screen.findByTestId('auth-mode-probe')).toHaveTextContent('none');
+      });
+
+      it('keeps the shared narrowing for a connector with a saved auth type', async () => {
+        const offConnector = createMockActionConnector({
+          id: 'dd-1',
+          name: 'Datadog',
+          actionTypeId: '.dual',
+          isInboundEventsEnabled: true,
+          isOutboundActionsEnabled: false,
+          authMode: 'shared',
+          config: { authType: 'bearer' },
+          secrets: {},
+        });
+        renderDual(offConnector);
+        await screen.findByTestId('outbound-actions-enabled-switch');
+        await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
+
+        expect(await screen.findByTestId('auth-mode-probe')).toHaveTextContent('shared');
+      });
+
+      it('keeps the shared narrowing for a connector with outbound on', async () => {
+        const onConnector = createMockActionConnector({
+          id: 'dd-1',
+          name: 'Datadog',
+          actionTypeId: '.dual',
+          isInboundEventsEnabled: true,
+          isOutboundActionsEnabled: true,
+          authMode: 'shared',
+          config: {},
+          secrets: {},
+        });
+        renderDual(onConnector);
+
+        expect(await screen.findByTestId('auth-mode-probe')).toHaveTextContent('shared');
+      });
+    });
+
+    describe('cluster inbound events flag off', () => {
+      beforeEach(() => {
+        appMockRenderer.coreStart.actions.isInboundEventsEnabled = false;
+      });
+
+      it('shows a callout for a connector with outbound off', async () => {
+        renderDual(buildDualConnector(false));
+
+        expect(await screen.findByTestId('outbound-actions-off-cluster-callout')).toHaveTextContent(
+          'cannot be turned on while inbound events are disabled in the Kibana config'
+        );
+        expect(screen.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
+      });
+
+      it('shows no callout for a connector with outbound on', async () => {
+        renderDual(buildDualConnector(true));
+
+        expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
+        expect(
+          screen.queryByTestId('outbound-actions-off-cluster-callout')
+        ).not.toBeInTheDocument();
+      });
+    });
+
     it('does not send the field for a connector that is not dual', async () => {
       actionTypeRegistry.get.mockReturnValue(actionTypeModel);
       renderDual(connector);

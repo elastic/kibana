@@ -30,6 +30,7 @@ import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { connectorTypeIsDual } from '@kbn/connector-specs';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
@@ -83,13 +84,22 @@ interface EditConnectorFlyoutContentProps extends EditConnectorFlyoutProps {
   beforeCloseRef: React.MutableRefObject<() => void>;
 }
 
+/**
+ * A connector created with outbound off has no saved auth type, so its auth mode is not chosen
+ * yet and every auth choice stays open.
+ */
+const isAuthModeNotChosen = (
+  connector: UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
+): boolean =>
+  connector.isOutboundActionsEnabled === false && connector.config?.authType === undefined;
+
 const getConnectorWithoutSecrets = (
   connector: UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
 ) => ({
   ...connector,
   isMissingSecrets: connector.isMissingSecrets ?? false,
   secrets: {},
-  authMode: connector.authMode ?? 'shared',
+  authMode: isAuthModeNotChosen(connector) ? undefined : connector.authMode ?? 'shared',
 });
 
 interface ConnectorSpecLoadStateProps {
@@ -278,6 +288,13 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const isTestable =
     (actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId)) &&
     (formConnector ?? connector).isOutboundActionsEnabled !== false;
+
+  // The Run actions switch is hidden when the cluster has inbound events off, so an off connector
+  // cannot be turned on from the form.
+  const isOutboundLockedOffByCluster =
+    !isClusterInboundEventsEnabled &&
+    connectorTypeIsDual(connector.actionTypeId) &&
+    (formConnector ?? connector).isOutboundActionsEnabled === false;
 
   const onIngestTokenRotated = useCallback(
     (ingestToken: string) => {
@@ -574,6 +591,27 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
                   <EuiSpacer size="m" />
                 </>
               )}
+              {isOutboundLockedOffByCluster && (
+                <>
+                  <KbnInfoCallout
+                    announceOnMount
+                    size="s"
+                    data-test-subj="outbound-actions-off-cluster-callout"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.editConnectorForm.outboundActionsOffClusterTitle',
+                      { defaultMessage: 'Actions are off for this connector' }
+                    )}
+                    text={i18n.translate(
+                      'xpack.triggersActionsUI.sections.editConnectorForm.outboundActionsOffClusterDescription',
+                      {
+                        defaultMessage:
+                          'Rules, workflows and agents cannot run actions with this connector. Actions cannot be turned on while inbound events are disabled in the Kibana config.',
+                      }
+                    )}
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
               <ConnectorSpecLoadState
                 showLoadingSpinner={showLoadingSpinner}
                 actionTypeModelError={actionTypeModelError}
@@ -623,6 +661,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     refetchConnectorSpec,
     inboundSettingsContent,
     formRevision,
+    isOutboundLockedOffByCluster,
   ]);
 
   const renderTestTab = useCallback(() => {
