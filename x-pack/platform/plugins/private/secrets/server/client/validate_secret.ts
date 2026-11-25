@@ -13,13 +13,14 @@ import {
   SECRET_VALUE_MIN_LENGTH,
   SecretValidationError,
 } from '@kbn/secrets';
-import type { UpdateSecretParams } from '@kbn/secrets';
+import type { CreateSecretParams, UpdateSecretParams } from '@kbn/secrets';
 
-/**
- * Throws `SecretValidationError` when a secret cannot be created or updated as requested.
- * An update that keeps the current value has no value to check.
- */
-export const validateSecret = ({ name, description, value }: UpdateSecretParams): void => {
+/** Throws `SecretValidationError` when a secret breaks a rule; an omitted value is not checked. */
+export const validateSecret = ({
+  name,
+  description,
+  value,
+}: CreateSecretParams | UpdateSecretParams): void => {
   if (!isValidSecretName(name)) {
     throw new SecretValidationError(
       `A secret name has at most ${SECRET_NAME_MAX_LENGTH} characters, starts with a lowercase letter or an underscore and contains only lowercase letters, digits and underscores`

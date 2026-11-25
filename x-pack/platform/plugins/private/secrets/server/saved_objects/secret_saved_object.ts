@@ -44,8 +44,8 @@ const ATTRIBUTES_INCLUDED_IN_AAD = ['name'] as const;
 const SECRET_ID_NAMESPACE = '5f0c1c7e-8a3d-4b52-9e7a-2c6d4f1b9a30';
 
 /**
- * Encrypted saved objects accept only UUID ids, so the id is a UUIDv5 of the space and the name.
- * This makes a name unique in its space, as a storage guarantee.
+ * Encrypted saved objects accept only UUID ids, so the id is a UUIDv5 of the space and the name,
+ * which makes a name unique in its space as a storage guarantee.
  */
 export const getSecretSavedObjectId = ({
   spaceId,
@@ -66,8 +66,8 @@ export const registerSecretType = ({
   savedObjects.registerType({
     name: SECRET_SAVED_OBJECT_TYPE,
     hidden: true,
-    // Isolated per space today. `multiple-isolated` lets a later version share a secret between
-    // spaces by switching to `multiple`, without migrating data.
+    // A secret lives in one space. `multiple-isolated` ids are unique across spaces, which is why
+    // the id is derived from the space as well as the name.
     namespaceType: 'multiple-isolated',
     // Nothing searches on an attribute: a secret is read by its id, and lists read the whole space.
     mappings: {

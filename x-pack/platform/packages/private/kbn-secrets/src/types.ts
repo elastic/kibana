@@ -28,7 +28,9 @@ export interface CreateSecretParams extends Pick<SecretMetadata, 'name' | 'descr
  * An omitted value keeps the current one. An omitted description keeps the current one and
  * an empty one clears it.
  */
-export interface UpdateSecretParams extends Pick<SecretMetadata, 'name' | 'description'> {
+export interface UpdateSecretParams extends Pick<SecretMetadata, 'description'> {
+  /** The secret to update. A name cannot be changed. */
+  readonly name: string;
   readonly value?: string;
 }
 

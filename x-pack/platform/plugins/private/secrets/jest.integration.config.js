@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/jest/jest_integration_node',
+  preset: '@kbn/jest/jest_integration',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/private/secrets'],
 };

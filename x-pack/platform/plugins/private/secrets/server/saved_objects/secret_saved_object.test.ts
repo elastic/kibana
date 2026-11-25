@@ -10,8 +10,6 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { registerSecretType, SECRET_SAVED_OBJECT_TYPE } from './secret_saved_object';
 
 describe('registerSecretType', () => {
-  // The encrypted saved objects check of registered types does not see this type while the
-  // plugin is off by default, so this test is what guards its encryption.
   it('encrypts the value and binds it to the name', () => {
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 

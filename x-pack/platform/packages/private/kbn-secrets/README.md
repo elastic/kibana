@@ -4,6 +4,4 @@ Types and rules for named secrets that Kibana features can reference without exp
 
 A secret is a named entry scoped to a space. Its value is stored encrypted in Kibana.
 
-This package has no plugin dependencies: collaborators are passed in. The `secrets` plugin wires it into Kibana.
-
 It is a common package, so that the browser can share the types, limits and name rules with the server. It must not import server-only code: anything that needs the request lives in the `secrets` plugin.

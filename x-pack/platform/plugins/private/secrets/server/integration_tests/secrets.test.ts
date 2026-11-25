@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
@@ -26,7 +25,7 @@ import {
   getSecretSavedObjectId,
   SECRET_SAVED_OBJECT_TYPE,
 } from '../saved_objects/secret_saved_object';
-import { createSavedObjectsSecretsStorage } from '../storage/saved_objects_secrets_storage';
+import { createSecretsStorageFactory } from '../storage/saved_objects_secrets_storage';
 import type { SecretsPluginStart, SecretsPluginStartDependencies } from '../types';
 
 const DEFAULT_SPACE_ID = 'default';
@@ -44,25 +43,19 @@ describe('secrets on Elasticsearch', () => {
   let secrets: SecretsPluginStart;
   let pluginDependencies: SecretsPluginStartDependencies;
 
-  /** The client the plugin gives to a request of the space. */
   const getClient = (spaceId = DEFAULT_SPACE_ID): SecretsClient =>
     secrets.getClient({ request: httpServerMock.createKibanaRequest({ spaceId }) });
 
-  /** The storage of the default space, built the way the plugin builds it. */
-  const createStorage = () =>
-    createSavedObjectsSecretsStorage({
-      spaceId: DEFAULT_SPACE_ID,
-      savedObjectsClient: coreStart.savedObjects.getUnsafeInternalClient({
-        includedHiddenTypes: [SECRET_SAVED_OBJECT_TYPE],
-        excludedExtensions: [SPACES_EXTENSION_ID],
-      }),
-      encryptedClient: pluginDependencies.encryptedSavedObjects.getClient({
-        includedHiddenTypes: [SECRET_SAVED_OBJECT_TYPE],
-      }),
-    });
+  /** The storage of a space, built by the factory the plugin uses. */
+  const createStorage = (spaceId = DEFAULT_SPACE_ID) =>
+    createSecretsStorageFactory({
+      savedObjects: coreStart.savedObjects,
+      encryptedSavedObjects: pluginDependencies.encryptedSavedObjects,
+    })({ spaceId });
 
-  /** Reads a secret of the default space as stored, value included. */
-  const getStored = async (name: string) => (await createStorage().get({ name }))?.entry;
+  /** Reads a secret of a space as stored, value included. */
+  const getStored = async (name: string, spaceId = DEFAULT_SPACE_ID) =>
+    (await createStorage(spaceId).get({ name }))?.entry;
 
   /**
    * Returns a client of the default space that runs `action` after it has read a secret and
@@ -153,6 +146,25 @@ describe('secrets on Elasticsearch', () => {
     expect(await getClient(OTHER_SPACE_ID).list()).toEqual([expect.objectContaining({ name })]);
   });
 
+  it('updates and deletes a secret only in its own space', async () => {
+    const name = 'space_scoped_token';
+    await getClient().create({ name, description: DESCRIPTION, value: VALUE });
+    await getClient(OTHER_SPACE_ID).create({ name, value: 'other-space-value' });
+
+    await getClient(OTHER_SPACE_ID).update({ name, description: 'Other', value: NEW_VALUE });
+
+    expect(await getStored(name, OTHER_SPACE_ID)).toMatchObject({
+      description: 'Other',
+      value: NEW_VALUE,
+    });
+    expect(await getStored(name)).toMatchObject({ description: DESCRIPTION, value: VALUE });
+
+    await getClient(OTHER_SPACE_ID).delete({ name });
+
+    expect(await getStored(name, OTHER_SPACE_ID)).toBeUndefined();
+    expect(await getStored(name)).toMatchObject({ description: DESCRIPTION, value: VALUE });
+  });
+
   it('reports a missing secret as not found', async () => {
     const client = getClient();
 
@@ -170,7 +182,7 @@ describe('secrets on Elasticsearch', () => {
     };
 
     it.each([
-      ['an update that changes nothing', 'unchanged_token', {}],
+      ['an update with neither a value nor a description', 'unchanged_token', {}],
       ['a value that breaks a rule', 'invalid_value_token', { value: 'short' }],
     ])('refuses %s and keeps the secret as it was', async (_, name, changes) => {
       const { client } = await createSecret(name);

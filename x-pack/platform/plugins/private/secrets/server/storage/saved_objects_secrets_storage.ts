@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils, SPACES_EXTENSION_ID } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
+import type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import { SecretAlreadyExistsError, SecretConflictError, SecretNotFoundError } from '@kbn/secrets';
 import type { SecretMetadata } from '@kbn/secrets';
 import type { SecretsStorage } from '../client/storage';
@@ -134,4 +137,26 @@ export const createSavedObjectsSecretsStorage = ({
       }
     },
   };
+};
+
+export interface CreateSecretsStorageFactoryParams {
+  readonly savedObjects: Pick<SavedObjectsServiceStart, 'getUnsafeInternalClient'>;
+  readonly encryptedSavedObjects: Pick<EncryptedSavedObjectsPluginStart, 'getClient'>;
+}
+
+/** Builds the clients the storage needs once, and returns the storage of a space. */
+export const createSecretsStorageFactory = ({
+  savedObjects,
+  encryptedSavedObjects,
+}: CreateSecretsStorageFactoryParams): ((params: { spaceId: string }) => SecretsStorage) => {
+  const includedHiddenTypes = [SECRET_SAVED_OBJECT_TYPE];
+  // The storage passes the space of the request on every call. The spaces extension refuses a
+  // namespace from the caller, so it is excluded.
+  const savedObjectsClient = savedObjects.getUnsafeInternalClient({
+    includedHiddenTypes,
+    excludedExtensions: [SPACES_EXTENSION_ID],
+  });
+  const encryptedClient = encryptedSavedObjects.getClient({ includedHiddenTypes });
+  return ({ spaceId }) =>
+    createSavedObjectsSecretsStorage({ spaceId, savedObjectsClient, encryptedClient });
 };

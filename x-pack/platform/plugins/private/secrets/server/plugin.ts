@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { createSecretsClient } from './client/secrets_client';
 import { createUnavailableSecretsClient } from './client/unavailable_secrets_client';
-import { registerSecretType, SECRET_SAVED_OBJECT_TYPE } from './saved_objects/secret_saved_object';
-import { createSavedObjectsSecretsStorage } from './storage/saved_objects_secrets_storage';
+import { registerSecretType } from './saved_objects/secret_saved_object';
+import { createSecretsStorageFactory } from './storage/saved_objects_secrets_storage';
 import type {
   SecretsPluginSetup,
   SecretsPluginSetupDependencies,
@@ -21,8 +20,6 @@ import type {
 
 const NO_ENCRYPTION_KEY_REASON =
   'Secrets are unavailable: set xpack.encryptedSavedObjects.encryptionKey in kibana.yml to store them encrypted.';
-
-const includedHiddenTypes = [SECRET_SAVED_OBJECT_TYPE];
 
 export class SecretsPlugin
   implements
@@ -63,22 +60,12 @@ export class SecretsPlugin
       return { getClient: () => unavailableClient };
     }
 
-    // The storage passes the space of the request on every call. The spaces extension refuses a
-    // namespace from the caller, so it is excluded.
-    const savedObjectsClient = savedObjects.getUnsafeInternalClient({
-      includedHiddenTypes,
-      excludedExtensions: [SPACES_EXTENSION_ID],
-    });
-    const encryptedClient = encryptedSavedObjects.getClient({ includedHiddenTypes });
+    const getStorage = createSecretsStorageFactory({ savedObjects, encryptedSavedObjects });
 
     return {
       getClient: ({ request }) =>
         createSecretsClient({
-          storage: createSavedObjectsSecretsStorage({
-            spaceId: request.spaceId,
-            savedObjectsClient,
-            encryptedClient,
-          }),
+          storage: getStorage({ spaceId: request.spaceId }),
           username: security.authc.getCurrentUser(request)?.username ?? null,
         }),
     };
