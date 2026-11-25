@@ -106,10 +106,58 @@ export interface SaveEventsInput {
 
 export type SaveEventResult = SaveSessionEventResult;
 
+export interface ReadSessionTurnsInput {
+  space: string;
+  /** Only events that list this AI index in `ai_index_id`. */
+  aiIndexId: string;
+  /** ISO date: reads the events saved after it. */
+  since: string;
+  /** The last event read at `since`: continues after it. */
+  after?: { sessionId: string; eventId: string };
+  /** ISO date: leaves the events saved after it, which may belong to a turn still running. */
+  until: string;
+  /** The most events one read looks at. */
+  size: number;
+}
+
+/** One turn of a session, with every event saved for it. */
+export interface SessionTurn {
+  sessionId: string;
+  turnId: string;
+  /** The user the turn's events were saved for. */
+  userId: string;
+  /** When the last of the turn's events was saved. */
+  endedAt: string;
+  /** In the order the agent created them, without resent duplicates. */
+  events: StoredSessionEvent[];
+}
+
+/** Where an event the read looked at sits, to resume the read after it. */
+export interface SessionEventPosition {
+  savedAt: string;
+  sessionId: string;
+  eventId: string;
+  turnId: string;
+}
+
+export interface ReadSessionTurnsResult {
+  /** The events the read looked at, oldest first. */
+  positions: SessionEventPosition[];
+  /** The turns those events belong to, in order of their first event, each read whole. */
+  turns: SessionTurn[];
+  /** Whether the read looked at `size` events, so more may follow. */
+  full: boolean;
+}
+
 export interface SessionEventsService {
   /**
    * Writes one document per event. A resent event is stored again, so readers drop duplicates by
    * session and event id. Results follow the order of `input.events`.
    */
   saveEvents(scope: SessionEventsScope, input: SaveEventsInput): Promise<SaveSessionEventsResponse>;
+  /**
+   * Reads the turns that got events since a time, across all users of a space, for dreaming. A
+   * turn is read whole, so one that continues after the read is read again with its later events.
+   */
+  readTurns(input: ReadSessionTurnsInput): Promise<ReadSessionTurnsResult>;
 }

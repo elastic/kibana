@@ -61,4 +61,10 @@ describe('derivedPermissions', () => {
 
     expect(derivedPermissions([a, b], 'team-a')).toEqual(a);
   });
+
+  it('keys the audience by user as well, so the same name stays apart per user', () => {
+    expect(audienceKeyOf([undefined], 'jdoe')).toBeDefined();
+    expect(audienceKeyOf([undefined], 'jdoe')).not.toBe(audienceKeyOf([undefined], 'jroe'));
+    expect(audienceKeyOf([undefined])).toBeUndefined();
+  });
 });

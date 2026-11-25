@@ -25,6 +25,8 @@ import {
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
+import type { SessionEventsService } from '../session_events/types';
+import type { SessionMemoryService } from '../session_memory/types';
 import type { KiVerificationSummary } from '../ki_verification';
 import { WORKFLOW_VERIFIER_ID_PREFIX } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
@@ -55,6 +57,10 @@ export interface DreamingStepDependencies {
   isMemoryEnabled: () => Promise<boolean>;
   /** Whether the request has the Context Engine read API privilege in this space. */
   checkReadPrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
+  /** The session memory store, which the steps read as the internal user once they check privileges. */
+  getSessionMemoryService: () => Promise<SessionMemoryService>;
+  /** The session events store, which the steps read as the internal user once they check privileges. */
+  getSessionEventsService: () => Promise<SessionEventsService>;
 }
 
 /** Dependencies injected into the feedback analysis step definition factories. */
@@ -329,16 +335,21 @@ export const resolveOrCreateAiIndex = async (
   return { dest, managed: false };
 };
 
-/** Fails the step when a dreaming batch's memories don't all have the same permissions. */
+/** Fails the step when a dreaming batch's memories don't all have the same permissions and user. */
 export const assertSameMemoryPermissions = (
-  memories: ReadonlyArray<{ permissions?: KiPermissions }>
+  memories: ReadonlyArray<{ permissions?: KiPermissions; user_id?: string }>
 ): void => {
   const [first] = memories;
-  if (memories.some(({ permissions }) => !samePermissions(permissions, first?.permissions))) {
+  if (
+    memories.some(
+      ({ permissions, user_id: userId }) =>
+        !samePermissions(permissions, first?.permissions) || userId !== first?.user_id
+    )
+  ) {
     throw new ExecutionError({
       type: 'ValidationError',
       message:
-        "The memories don't all have the same permissions: each dreaming batch must hold one audience's memories",
+        "The memories don't all have the same permissions and user: each dreaming batch must hold one audience's memories",
     });
   }
 };

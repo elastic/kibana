@@ -9,7 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
-import { MAX_KI_CONTENT_LENGTH } from '../constants';
+import { MAX_KI_CONTENT_LENGTH, MAX_MEMORY_USER_ID_LENGTH } from '../constants';
 import {
   MAX_ACCESS_PATTERN_ESQL_LENGTH,
   MAX_ACCESS_PATTERN_LABEL_LENGTH,
@@ -108,6 +108,7 @@ export const dreamingMemoriesSchema = lazySchema(() =>
         .object({
           id: refSchema,
           updated_at: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+          user_id: z.string().max(MAX_MEMORY_USER_ID_LENGTH).optional(),
           governance: z
             .object({
               lifecycle: z.object({ status: z.string().max(64).optional() }).optional(),
@@ -144,7 +145,7 @@ export const applyDreamChangesInputSchema = lazySchema(() =>
   z.object({
     ai_index_id: aiIndexIdSchema,
     memories: dreamingMemoriesSchema.describe(
-      'The memories the model was shown, as read from the AI index: the latest revision of each. They must all have the same permissions. Every item it writes must cite some of them, or memories the item already cites, and is visible only where they all are. Deleted ones are ignored.'
+      'The memories the model was shown, as read from the AI index: the latest revision of each. They must all have the same permissions and user_id. Every item it writes must cite some of them, or memories the item already cites, and is visible only where they all are. Deleted ones are ignored.'
     ),
     changes: dreamChangeSetSchema.describe('The change set the dreaming model returned'),
     dry_run: z

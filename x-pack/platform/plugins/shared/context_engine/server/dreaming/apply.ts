@@ -90,6 +90,11 @@ export interface ApplyContext {
   /** The permissions of each memory the model was shown. */
   memoryPermissions: ReadonlyMap<string, KiPermissions | undefined>;
   /**
+   * The user the memories belong to. The KIs written are that user's own, and a KI of another
+   * user, or of none, is left alone. Unset: the KIs are not a user's, and a user's are left alone.
+   */
+  userId?: string;
+  /**
    * For writes without memories: who the KIs may be for, in place of the memories' permissions.
    * Each KI keeps its own permissions. `own` accepts any KI.
    */
@@ -184,6 +189,9 @@ const fitsAudience = (
   permissions: KiPermissions | undefined
 ): boolean => audience === 'own' || samePermissions(permissions, audience.permissions);
 
+const isOwnedBy = (ki: DreamedKi, userId: string | undefined): boolean =>
+  (typeof ki.user_id === 'string' ? ki.user_id : undefined) === userId;
+
 const SIGHTING_ATTRIBUTES = [OCCURRENCES_ATTRIBUTE, LAST_SEEN_AT_ATTRIBUTE];
 
 /** Keeps what a person-edited KI says, taking only the new sighting and references. */
@@ -218,6 +226,9 @@ const withDerivedPermissions =
       const built = build(current);
       return built && current && isPersonEdited(current) ? keepPersonEdits(current, built) : built;
     }
+    if (current && !isOwnedBy(current, context.userId)) {
+      return 'rejected';
+    }
     const cited = new Set(current ? citedMemoryIds(current) : []);
     const sources = sourceMemoryIds.filter((id) => memoryPermissions.has(id) || !cited.has(id));
     const permissions =
@@ -233,7 +244,14 @@ const withDerivedPermissions =
     const built = build(current);
     const document =
       built && current && isPersonEdited(current) ? keepPersonEdits(current, built) : built;
-    return document && permissions ? { ...document, permissions } : document;
+    if (!document) {
+      return document;
+    }
+    return {
+      ...document,
+      ...(permissions && { permissions }),
+      ...(context.userId !== undefined && { user_id: context.userId }),
+    };
   };
 
 const planDocument = async (
@@ -486,7 +504,8 @@ const deletable = async (
   const fits =
     audience !== undefined
       ? fitsAudience(audience, source.permissions)
-      : samePermissions(source.permissions, batchPermissions(context));
+      : samePermissions(source.permissions, batchPermissions(context)) &&
+        isOwnedBy(source, context.userId);
   return fits ? 'allowed' : 'rejected';
 };
 

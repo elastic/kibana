@@ -60,6 +60,7 @@ export const getApplyDreamChangesStepDefinition = ({
       }
       const changeSet = parsed.data;
       assertSameMemoryPermissions(memories);
+      const userId = memories[0]?.user_id;
 
       let aiIndex: AiIndexItem;
       try {
@@ -97,7 +98,8 @@ export const getApplyDreamChangesStepDefinition = ({
           ki &&
           !isKiDeleted(ki) &&
           kindOf(ki) !== undefined &&
-          isVisibleInSpace(ki.permissions, spaceId)
+          isVisibleInSpace(ki.permissions, spaceId) &&
+          (typeof ki.user_id === 'string' ? ki.user_id : undefined) === userId
         ) {
           existing.set(kiId, { ...ki, id: kiId });
         }
@@ -114,6 +116,7 @@ export const getApplyDreamChangesStepDefinition = ({
         ),
         existing,
         memoryPermissions,
+        userId,
       });
       const redirected = await redirectSupersededEntities(resolved.operations, {
         findKi: async (kiId) =>
@@ -150,6 +153,7 @@ export const getApplyDreamChangesStepDefinition = ({
           writer: kiWriterFromContext(stepContext),
           spaceId,
           memoryPermissions,
+          userId,
           abortSignal: context.abortSignal,
           dryRun: planned,
           written,

@@ -69,9 +69,13 @@ export const derivedPermissions = (
   return { kibana: { privileges: [{ space: spaceId, name: names, count: names.length }] } };
 };
 
-/** A short key for who can see a set of memories; undefined when none is restricted. */
+/**
+ * A short key for who can see a set of memories: their permissions, and the user they belong to.
+ * Undefined when none is restricted and there is no user.
+ */
 export const audienceKeyOf = (
-  sources: ReadonlyArray<KiPermissions | undefined>
+  sources: ReadonlyArray<KiPermissions | undefined>,
+  userId?: string
 ): string | undefined => {
   const restricted = [
     ...new Set(
@@ -81,5 +85,8 @@ export const audienceKeyOf = (
         .map(canonicalPrivileges)
     ),
   ];
+  if (userId !== undefined) {
+    return shortHash('user', userId, ...restricted.sort());
+  }
   return restricted.length > 0 ? shortHash(...restricted.sort()) : undefined;
 };

@@ -6,26 +6,25 @@
  */
 
 import { MAX_DREAMING_STEP_MEMORIES } from '../../common/dreaming';
-import type { TraceTranscriptMemory } from '../../common/step_types/read_trace_transcripts';
-import { batchByConversation, estimateTokens, splitRound } from './trace_batches';
+import type { DreamingMemory } from '../../common/step_types/dreaming_memory';
+import { batchByConversation, estimateTokens, splitRound } from './transcript_batches';
 
 const round = (
   id: string,
   conversation: string | undefined,
   tokens: number,
   space = 'default'
-): TraceTranscriptMemory => ({
+): DreamingMemory => ({
   id,
-  type: 'trace.round',
+  type: 'session.turn',
   title: '',
   content: 'x'.repeat(tokens * 4),
   updated_at: '2026-11-12T08:00:00.000Z',
-  attributes: { 'trace.id': id, ...(conversation && { 'trace.conversation_id': conversation }) },
+  attributes: { ...(conversation && { 'session.id': conversation }) },
   permissions: { kibana: { privileges: [{ space }] } },
 });
 
-const ids = (batches: TraceTranscriptMemory[][]) =>
-  batches.map((batch) => batch.map(({ id }) => id));
+const ids = (batches: DreamingMemory[][]) => batches.map((batch) => batch.map(({ id }) => id));
 
 describe('batchByConversation', () => {
   it('estimates a round at 4 characters a token', () => {
@@ -140,5 +139,13 @@ describe('batchByConversation', () => {
 
     expect(ids(batchByConversation(rounds, 1000))).toEqual([['a1', 'a2', 'x'], ['b1']]);
     expect(batchByConversation([], 1000)).toEqual([]);
+  });
+
+  it('keeps the turns of different users apart, even in one session', () => {
+    const turn = (id: string, userId: string) => ({ ...round(id, 'a', 10), user_id: userId });
+
+    expect(
+      ids(batchByConversation([turn('a1', 'u-1'), turn('a2', 'u-2'), turn('a3', 'u-1')], 1000))
+    ).toEqual([['a1', 'a3'], ['a2']]);
   });
 });
