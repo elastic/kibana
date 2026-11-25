@@ -70,8 +70,9 @@ const OUTCOMES: Record<OlsAuditAction, 'success' | 'failure' | 'unknown'> = {
 };
 
 /**
- * Creates an OLS audit event. Messages carry no titles or content, so an event about a hidden
- * object discloses nothing beyond its type and ID.
+ * Creates an OLS audit event. Messages carry no titles or content. The object's name, when given,
+ * goes only into `kibana.saved_object.name`, and callers leave it out when the audit configuration
+ * excludes saved object names, as the Saved Objects audit events do.
  *
  * @param params See {@link OlsAuditEventParams}.
  * @returns The audit event to log.

@@ -849,11 +849,13 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
 
   /**
    * Creates an audit event. The principal is set only for requests that have no authenticated
-   * user, such as background tasks.
+   * user, such as background tasks. The object's name is set only when the audit configuration
+   * includes saved object names, as for the Saved Objects audit events.
    */
-  private createAuditEvent({ principal, ...params }: OlsAuditEventParams) {
+  private createAuditEvent({ principal, name, ...params }: OlsAuditEventParams) {
     return olsAuditEvent({
       ...params,
+      name: this.auditLogger.includeSavedObjectNames ? name : undefined,
       principal: this.request.isFakeRequest ? principal : undefined,
     });
   }

@@ -272,6 +272,7 @@ describe('ScopedOlsService', () => {
     });
 
     it('records the object name in audit events', async () => {
+      Object.assign(auditLogger, { includeSavedObjectNames: true });
       await createOlsService()
         .asScoped(request)
         .authorizeObjectAccess({
@@ -289,6 +290,34 @@ describe('ScopedOlsService', () => {
           },
         })
       );
+    });
+
+    it('leaves the object name out when the audit configuration excludes it', async () => {
+      Object.assign(auditLogger, { includeSavedObjectNames: false });
+      const scoped = createOlsService().asScoped(request);
+      await scoped.authorizeObjectAccess({
+        type: TYPE,
+        spaceId: 'default',
+        operation: 'use',
+        objects: [{ id: 'widget-1', name: 'My widget', acl: PRIVATE_ACL }],
+      });
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kibana: { space_id: 'default', saved_object: { type: TYPE, id: 'widget-1' } },
+        })
+      );
+
+      // The events a change returns for the caller to log after the write follow it too.
+      const { auditEvents } = await scoped.authorizeChange({
+        type: TYPE,
+        id: 'widget-1',
+        name: 'My widget',
+        spaceId: 'default',
+        acl: PRIVATE_ACL,
+        change: { kind: 'replace', general: { access: 'edit' }, entries: [] },
+      });
+      expect(auditEvents[0].kibana?.saved_object).toEqual({ type: TYPE, id: 'widget-1' });
     });
 
     it('allows a grantee to use the object', async () => {
@@ -1023,6 +1052,7 @@ describe('ScopedOlsService', () => {
     });
 
     it('records the object name in the audit events of a change and of a denial', async () => {
+      Object.assign(auditLogger, { includeSavedObjectNames: true });
       const scoped = createOlsService().asScoped(request);
       const params = { type: TYPE, id: 'widget-1', name: 'My widget', spaceId: 'default' };
 
