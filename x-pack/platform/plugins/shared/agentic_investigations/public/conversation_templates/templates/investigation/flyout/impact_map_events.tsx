@@ -136,7 +136,8 @@ export const EVENT_GROUPS = [
   { id: 'change', icon: 'merge', color: 'danger' },
   { id: 'failure', icon: 'error', color: 'danger' },
   { id: 'condition', icon: 'warning', color: 'warning' },
-  { id: 'alert', icon: 'bell', color: 'warning' },
+  // The red triangle alerts have everywhere else, such as on the evidence charts.
+  { id: 'alert', icon: 'warning', color: 'danger' },
   { id: 'anomaly', icon: 'visLine', color: 'warning' },
   { id: 'customer_impact', icon: 'users', color: 'accent' },
   { id: 'root_cause', icon: 'crosshair', color: 'danger' },
@@ -552,6 +553,12 @@ const EntityBadge: React.FC<{
 
 type ImpactMapFlyoutMap = ImpactMapEventsFlyoutProps['impactMap'];
 
+/** Whether an event happened to something: an entity, or a relationship between two. Else it is not about anything, and nothing says it affects one. */
+export const eventAffectsAnything = (
+  event: ImpactMapEvent,
+  impactMap: ImpactMapFlyoutMap
+): boolean => getEventEntityIds(event, impactMap.relationships).length > 0;
+
 /** What an event happened to: the entities as badges, in order, or the target in words. */
 export const EventAffects: React.FC<{
   event: ImpactMapEvent;
@@ -581,7 +588,7 @@ export const EventAffects: React.FC<{
   );
 };
 
-const EventKeyFacts: React.FC<{
+export const EventKeyFacts: React.FC<{
   event: ImpactMapEvent;
   impactMap: ImpactMapFlyoutMap;
   onOpenEntity?: (entityId: string) => void;
@@ -605,7 +612,7 @@ const EventKeyFacts: React.FC<{
         },
         ...(duration ? [{ label: FACT_DURATION, value: duration }] : []),
         // An alert is about a rule, not about something it hurt.
-        ...(event.kind === 'alert'
+        ...(event.kind === 'alert' || !eventAffectsAnything(event, impactMap)
           ? []
           : [
               {
@@ -917,6 +924,23 @@ export const EventChartAndSource: React.FC<{
     )}
   </div>
 );
+
+/** Just an event's chart, placed among the other events, or nothing when it has none. */
+export const EventChart: React.FC<{
+  event: ImpactMapEvent;
+  allEvents?: readonly ImpactMapEvent[];
+}> = ({ event, allEvents }) =>
+  event.evidence?.chart ? (
+    <LazyEvidenceView
+      // The chart's own title says what it plots.
+      evidence={{
+        ...withContextAnnotations(event.evidence, event, allEvents),
+        description: undefined,
+      }}
+      referenceTime={event.at}
+      outlineChart={false}
+    />
+  ) : null;
 
 export const EventDetail: React.FC<{
   event: ImpactMapEvent;

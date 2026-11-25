@@ -13,7 +13,7 @@ import type { InvestigationEvidence } from '../../common/evidence';
 import type { HypothesesService } from '../hypotheses/services/hypotheses_service';
 import { attachImpactToInvestigation } from '../impact/attachments/attach_impact_to_investigation';
 import type { ImpactService } from '../impact/services/impact_service';
-import type { ImpactMapCatalog } from '../../common/impact_map/impact_map';
+import type { ImpactMapCatalog, ImpactMapTimeline } from '../../common/impact_map/impact_map';
 import type { ImpactMapInput, ImpactMapService } from '../impact_map/services/impact_map_service';
 import type { InvestigationsPrivilegesChecker } from '../investigations/services/check_investigations_privileges';
 import type { ResolveUser } from '../services/resolve_user';
@@ -48,6 +48,8 @@ export interface FindingsWriter {
   addImpactMapEvents: (params: {
     conversationId: string;
     events: ImpactMapEventInput[];
+    /** What the summary timeline shows; leaves the stored choice when absent. */
+    timeline?: ImpactMapTimeline;
   }) => Promise<void>;
   /** The space's catalog of entity and relationship types, so a new map reuses what is there. */
   getImpactMapCatalog: () => Promise<ImpactMapCatalog>;
@@ -135,11 +137,12 @@ export const createFindingsWriter =
           attachments,
         });
       },
-      addImpactMapEvents: async ({ conversationId, events }) => {
+      addImpactMapEvents: async ({ conversationId, events, timeline }) => {
         const { conversations, attachments, user, spaceId } = await resolveContext();
         await getImpactMapService().addEventsWithPublicClient({
           conversationId,
           events,
+          timeline,
           spaceId,
           user,
           conversations,

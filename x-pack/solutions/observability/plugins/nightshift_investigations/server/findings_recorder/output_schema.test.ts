@@ -681,6 +681,44 @@ describe('limitFindings hypothesis card fields', () => {
   });
 });
 
+describe('limitTimeline', () => {
+  it('keeps the filters, capped, and the windows', () => {
+    const parsed = findingsOutputSchema.safeParse({
+      summary: 'x',
+      hypotheses: [],
+      timeline: {
+        filters: {
+          entity_ids: [' svc ', 'svc', ...Array.from({ length: 20 }, (_, i) => `e${i}`)],
+          kinds: ['change', 'alert', 'change'],
+        },
+        windows: [
+          {
+            label: 'Data dropped 13:00 to 19:00Z',
+            start: '2026-10-30T13:00:00Z',
+            end: '2026-10-30T19:00:00Z',
+          },
+        ],
+        chart_event_id: ' root_cause:svc:1 ',
+      },
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    const { timeline } = limitFindings(parsed.data);
+    expect(timeline?.filters?.entity_ids).toHaveLength(12);
+    expect(timeline?.filters?.entity_ids?.[0]).toBe('svc');
+    expect(timeline?.filters?.kinds).toEqual(['change', 'alert']);
+    expect(timeline?.windows?.[0].label).toBe('Data dropped 13:00 to 19:00Z');
+    expect(timeline?.chart_event_id).toBe('root_cause:svc:1');
+  });
+
+  it('leaves the timeline out when the model chose nothing', () => {
+    const none = findingsOutputSchema.safeParse({ summary: 'x', hypotheses: [] });
+    expect(none.success && limitFindings(none.data).timeline).toBeUndefined();
+    const empty = findingsOutputSchema.safeParse({ summary: 'x', hypotheses: [], timeline: {} });
+    expect(empty.success && limitFindings(empty.data).timeline).toBeUndefined();
+  });
+});
+
 describe('limitBulletList', () => {
   it('turns a paragraph into short bullets', () => {
     const text = 'Alert fired. Shipping pod crashed. A deploy changed it. Fourth. Fifth. Sixth.';

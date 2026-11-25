@@ -20,7 +20,6 @@ import {
   getEntityTypeLabel,
   withContextAnnotations,
 } from './impact_map_events';
-import { takeTimelineEventFocus, takeTimelineFocus } from './timeline_focus';
 import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
 jest.mock('@kbn/agent-builder-plugin/public', () => ({
@@ -33,6 +32,12 @@ jest.mock('@kbn/agent-builder-plugin/public', () => ({
   }),
 }));
 jest.mock('./use_is_in_agent_builder');
+// The timeline flyout is its own piece; here it only has to be opened on the right focus.
+jest.mock('../../../../timeline/timeline_expanded', () => ({
+  TimelineExpandedFlyout: ({ focus }: { focus: unknown }) => (
+    <div data-test-subj="mockTimelineFlyout">{JSON.stringify(focus)}</div>
+  ),
+}));
 const mockUseIsInAgentBuilder = useIsInAgentBuilder as jest.Mock;
 const mockEuiFlyout = jest.fn();
 jest.mock('@elastic/eui', () => {
@@ -340,29 +345,19 @@ describe('ImpactMapTab', () => {
     ).toHaveTextContent('POST /_query');
   });
 
-  it('opens the Timeline tab on the event from "View in investigation timeline"', () => {
-    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
-    const openTimeline = jest.fn();
-
-    renderTab(openTimeline);
-    fireEvent.click(screen.getByTestId('fakeEntity'));
-    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[0]);
-    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapViewInTimeline'));
-
-    expect(openTimeline).toHaveBeenCalledTimes(1);
-    expect(takeTimelineEventFocus('conv-1')).toBe('e2');
-    expect(takeTimelineEventFocus('conv-1')).toBeUndefined();
-    expect(takeTimelineFocus('conv-1')).toEqual([]);
-    expect(screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeNull();
-  });
-
-  it('offers no timeline action when the flyout has no Timeline tab', () => {
+  it('opens the timeline flyout on the event from "View in investigation timeline"', () => {
     mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
 
     renderTab();
     fireEvent.click(screen.getByTestId('fakeEntity'));
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[0]);
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapViewInTimeline'));
 
-    expect(screen.queryByTestId('agenticInvestigationsImpactMapViewInTimeline')).toBeNull();
+    expect(JSON.parse(screen.getByTestId('mockTimelineFlyout').textContent ?? '{}')).toEqual({
+      entityIds: [],
+      eventId: 'e2',
+    });
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeNull();
   });
 
   describe('where the events flyout opens', () => {
@@ -411,16 +406,17 @@ describe('ImpactMapTab', () => {
     });
   });
 
-  it('opens nothing for an entity or a relationship that has no events', () => {
+  it('opens an entity with no events, but nothing for a relationship with none', () => {
     mockUseInvestigation.mockReturnValue({
       data: { in_progress: false, impact_map: { ...impactMap, events: [] } },
     });
 
     renderTab();
-    fireEvent.click(screen.getByTestId('fakeEntity'));
     fireEvent.click(screen.getByTestId('fakeRelationship'));
-
     expect(screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeInTheDocument();
   });
 
   it('lists the events of a relationship', () => {

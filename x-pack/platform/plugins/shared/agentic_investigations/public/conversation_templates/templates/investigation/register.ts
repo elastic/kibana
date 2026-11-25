@@ -14,7 +14,6 @@ import {
   type EscalationModalRenderProps,
   type OverviewSlotRenderProps,
   type ImpactMapSlotRenderProps,
-  type TimelineSlotRenderProps,
   type LiveStateSlotRenderProps,
   type SeveritySlotRenderProps,
   type TitleSlotRenderProps,
@@ -48,10 +47,6 @@ const IMPACT_MAP_LOADING_LABEL = i18n.translate(
   { defaultMessage: 'Loading impact map…' }
 );
 
-const TIMELINE_LOADING_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.detailsFlyout.timeline.loading',
-  { defaultMessage: 'Loading timeline…' }
-);
 
 /**
  * The `investigation` template: status, close, escalation, proposed actions, and the overview,
@@ -163,11 +158,6 @@ export const investigationTemplate: TemplateDefinition = {
           return Tab;
         })
       : undefined;
-
-    const LazyTimelineTab = makeLazyWithSharedClient<TimelineSlotRenderProps>(async () => {
-      const { TimelineTab } = await import('./flyout/timeline_tab');
-      return TimelineTab;
-    });
 
     const LazyInvestigationLiveState = makeLazyWithSharedClient<LiveStateSlotRenderProps>(
       async () => {
@@ -329,12 +319,6 @@ export const investigationTemplate: TemplateDefinition = {
               React.createElement(LazyImpactMapTab, props)
             )
         : undefined,
-      renderTimeline: (props) =>
-        React.createElement(
-          EscalationModalBoundary,
-          { loadingLabel: TIMELINE_LOADING_LABEL },
-          React.createElement(LazyTimelineTab, props)
-        ),
       renderLiveState: (props) =>
         React.createElement(
           React.Suspense,

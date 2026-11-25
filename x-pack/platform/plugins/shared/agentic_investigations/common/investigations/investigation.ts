@@ -18,6 +18,7 @@ import type {
   ImpactMapEntity,
   ImpactMapEntityType,
   ImpactMapEvent,
+  ImpactMapTimeline,
   ImpactMapRelationship,
   ImpactMapRelationshipType,
 } from '../impact_map/impact_map';
@@ -168,6 +169,8 @@ export interface InvestigationImpactMapResponse {
   relationship_types: ImpactMapRelationshipType[];
   /** Oldest first. Includes responder actions that belong to no entity. */
   events: ImpactMapEvent[];
+  /** What the summary timeline shows; absent when the agent chose nothing. */
+  timeline?: ImpactMapTimeline;
   created_at: string;
   updated_at?: string;
 }

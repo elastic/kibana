@@ -147,6 +147,26 @@ export {
   INVESTIGATION_IMPACT_MAP_URL,
 } from './impact_map/constants';
 
+export {
+  MAX_TIMELINE_FILTER_ENTITIES,
+  MAX_TIMELINE_KEY_EVENTS,
+  MAX_TIMELINE_WINDOWS,
+  impactMapTimelineSchema,
+} from './impact_map/impact_map';
+export {
+  buildTimeScale,
+  formatTimelineClock,
+  formatTimelineGap,
+  formatTimelineSpan,
+  isInsideWindow,
+  selectTimelineSummary,
+} from './impact_map/timeline';
+export type {
+  TimeScale,
+  TimeScaleTick,
+  TimelineSummaryData,
+} from './impact_map/timeline';
+
 export type {
   ImpactMapAnnotations,
   ImpactMapCatalog,
@@ -154,6 +174,7 @@ export type {
   ImpactMapEntityKind,
   ImpactMapEntityType,
   ImpactMapEvent,
+  ImpactMapTimeline,
   ImpactMapEventKind,
   ImpactMapHealth,
   ImpactMapIcon,

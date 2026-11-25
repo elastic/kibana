@@ -77,6 +77,8 @@ export interface ImpactMapRendererProps {
   impactMap: InvestigationImpactMapResponse;
   /** Called with the entity id when a node is clicked, to show what happened to it. */
   onEntityClick?: (entityId: string) => void;
+  /** Called with the entity under the pointer and its element, or with nothing when it leaves. */
+  onEntityHover?: (entityId: string | undefined, element?: HTMLElement) => void;
   /** Called with the relationship id when an edge is clicked. */
   onRelationshipClick?: (relationshipId: string) => void;
   /** Called by the map's full-screen control. Without it the map shows no such control. */

@@ -26,6 +26,8 @@ import {
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
+  MAX_TIMELINE_FILTER_ENTITIES,
+  MAX_TIMELINE_WINDOWS,
   MAX_HYPOTHESIS_CHECKS,
   MAX_HYPOTHESIS_UNKNOWNS,
   MAX_IMPACT_MAP_ENTITIES,
@@ -44,6 +46,7 @@ import {
   type ImpactMapMetadataField,
   type ImpactMapRelationship,
   type ImpactMapRelationshipType,
+  type ImpactMapTimeline,
   sanitizeDataSource,
   clockTimeToIso,
   buildProposalComment,
@@ -205,12 +208,35 @@ export const findingsOutputSchema = lazySchema(() => {
         ),
       })
       .optional(),
+    // What the summary timeline shows: the key events, with short labels, and windows to highlight.
+    timeline: z
+      .object({
+        filters: z
+          .object({
+            entity_ids: z.array(z.string().min(1)).optional(),
+            kinds: z.array(z.enum(IMPACT_MAP_EVENT_KINDS)).optional(),
+          })
+          .optional(),
+        windows: z
+          .array(
+            z.object({
+              label: z.string().min(1),
+              start: z.string().min(1),
+              end: z.string().min(1),
+              tone: z.enum(['danger', 'warning', 'success']).optional(),
+            })
+          )
+          .optional(),
+        chart_event_id: z.string().optional(),
+      })
+      .optional(),
     // Merged by id with the stored events, so a pass sends what is new or changed.
     events: z
       .array(
         z.object({
           kind: z.enum(IMPACT_MAP_EVENT_KINDS),
           title: z.string().min(1),
+          summary: z.string().optional(),
           description: z.string().optional(),
           at: z.string().min(1),
           ends_at: z.string().optional(),
@@ -646,6 +672,8 @@ const MAX_HYPOTHESIS_LINE = 240;
 /** What a proposal's comment may hold: the "what", the "why", and the events and names behind it. */
 const MAX_PROPOSAL_WHAT = 4000;
 const MAX_PROPOSAL_WHY = 300;
+/** The longest quick reference of an event. */
+const MAX_EVENT_SUMMARY = 160;
 const MAX_PROPOSAL_HOW = 1800;
 const MAX_PROPOSAL_EVENTS = 8;
 const MAX_PROPOSAL_HYPOTHESES = 4;
@@ -759,6 +787,9 @@ export const limitEvents = (raw: NonNullable<FindingsOutput['events']>): ImpactM
       id,
       kind: event.kind,
       title: truncate(title, MAX_MAP_LABEL_LENGTH),
+      ...(event.summary?.trim()
+        ? { summary: clipAtWord(event.summary.trim(), MAX_EVENT_SUMMARY) }
+        : {}),
       ...(event.description?.trim()
         ? {
             description: truncate(
@@ -784,6 +815,8 @@ export type FindingsRecord = Omit<
   FindingsOutput,
   'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals' | 'impact_map' | 'events'
 > & {
+  /** Absent when the model chose no key events. */
+  timeline?: ImpactMapTimeline;
   /** Absent when the pass recorded none that could be placed. */
   events?: ImpactMapEvent[];
   /** Absent when the model drew no map or none of its entities fit. */
@@ -795,6 +828,35 @@ export type FindingsRecord = Omit<
   hypotheses: Array<
     Omit<FindingsOutput['hypotheses'][number], 'evidence'> & { evidence?: InvestigationEvidence[] }
   >;
+};
+
+/** Trims what the model chose for the summary timeline to what the store accepts. */
+export const limitTimeline = (
+  raw: NonNullable<FindingsOutput['timeline']>
+): ImpactMapTimeline | undefined => {
+  const entityIds = [...new Set((raw.filters?.entity_ids ?? []).map((id) => id.trim()).filter(Boolean))]
+    .slice(0, MAX_TIMELINE_FILTER_ENTITIES);
+  const kinds = [...new Set(raw.filters?.kinds ?? [])];
+  const timeline: ImpactMapTimeline = {
+    ...(entityIds.length > 0 || kinds.length > 0
+      ? {
+          filters: {
+            ...(entityIds.length > 0 ? { entity_ids: entityIds } : {}),
+            ...(kinds.length > 0 ? { kinds } : {}),
+          },
+        }
+      : {}),
+    ...(raw.windows?.length
+      ? {
+          windows: raw.windows.slice(0, MAX_TIMELINE_WINDOWS).map((window) => ({
+            ...window,
+            label: clipAtWord(window.label.trim(), MAX_HYPOTHESIS_LINE),
+          })),
+        }
+      : {}),
+    ...(raw.chart_event_id ? { chart_event_id: raw.chart_event_id.trim() } : {}),
+  };
+  return Object.keys(timeline).length > 0 ? timeline : undefined;
 };
 
 /** Trims a parsed record to the sizes the metadata, hypotheses and impact stores accept. */
@@ -811,6 +873,7 @@ export const limitFindings = (
     hypotheses: rawHypotheses,
     impact_map: rawImpactMap,
     events: rawEvents,
+    timeline: rawTimeline,
     ...rest
   } = output;
   const events = rawEvents ? limitEvents(rawEvents) : [];
@@ -822,6 +885,7 @@ export const limitFindings = (
     ...rest,
     ...(impactMap ? { impact_map: impactMap } : {}),
     ...(events.length ? { events } : {}),
+    ...(rawTimeline && limitTimeline(rawTimeline) ? { timeline: limitTimeline(rawTimeline) } : {}),
     impact_evidence: impactEvidence,
     summary: limitDescriptionBullets(normalizeEventLinks(output.summary), MAX_SUMMARY_BULLETS),
     ...(output.verdict !== undefined
@@ -1330,6 +1394,49 @@ export const FINDINGS_JSON_SCHEMA = {
       },
       required: ['entities', 'relationships'],
     },
+    timeline: {
+      type: 'object',
+      description:
+        'What the summary timeline on the overview shows: the filters that leave the events that matter, and the spans to highlight. Only events you recorded.',
+      properties: {
+        filters: {
+          type: 'object',
+          description: `The filters the overview applies so it shows only the events that matter. Opening the whole timeline starts with the same filters, which the reader can clear. Narrow to the story: the entities it happened to and the kinds that tell it, so that about 4 to 8 events remain. At least one of the two.`,
+          properties: {
+            entity_ids: {
+              type: 'array',
+              description: `At most ${MAX_TIMELINE_FILTER_ENTITIES} ids of entities in the impact map. Only events that happened to one of them, or to a relationship that touches one, remain. Leave out to keep every entity.`,
+              items: { type: 'string' },
+            },
+            kinds: {
+              type: 'array',
+              description:
+                'Event kinds to keep, for example change, failure, root_cause, customer_impact, alert, mitigation and recovery. Leave out findings and routine events. Leave out to keep every kind.',
+              items: { type: 'string', enum: IMPACT_MAP_EVENT_KINDS },
+            },
+          },
+        },
+        windows: {
+          type: 'array',
+          description: `At most ${MAX_TIMELINE_WINDOWS}. A span during which customers were affected, shaded on the timeline and labelled as customer impact. label is a few words with the times, such as 'Checkout failing 14:56 to 15:00Z'; start and end are ISO 8601 times the findings show. Leave out when customers were not affected.`,
+          items: {
+            type: 'object',
+            properties: {
+              label: { type: 'string' },
+              start: { type: 'string' },
+              end: { type: 'string' },
+              tone: { type: 'string', enum: ['danger', 'warning', 'success'] },
+            },
+            required: ['label', 'start', 'end'],
+          },
+        },
+        chart_event_id: {
+          type: 'string',
+          description:
+            'Optional: the id of the event whose chart is drawn under the expanded timeline, on the same time axis. Pick the chart that shows the impact over time.',
+        },
+      },
+    },
     events: {
       type: 'array',
       description: `What happened, each placed against the entity or relationship of the impact map it happened to, so the map shows where and the timeline shows when. New or changed events only: they are merged with the ones already recorded. Only what the tool results or the conversation show, with the time they show. At most ${MAX_IMPACT_MAP_EVENTS}.`,
@@ -1347,6 +1454,11 @@ export const FINDINGS_JSON_SCHEMA = {
             description:
               'One line in the past tense with the measured number, for example Replicas scaled from 3 to 0 or Checkout error rate rose to 42%.',
           },
+          summary: {
+            type: 'string',
+            description:
+              'A quick reference for views with room for a few words, such as the summary timeline: one plain sentence of at most 14 words saying what happened and why it matters, in words an on-call engineer scans, for example Replica set ran for six hours or Kafka rejected a 19 MB record. No identifiers, no times (the time is shown beside it).',
+          },
           description: {
             type: 'string',
             description:
@@ -1357,7 +1469,7 @@ export const FINDINGS_JSON_SCHEMA = {
           entity: {
             type: 'string',
             description:
-              'The id of the impact map entity it happened to. Use the same id as in impact_map.',
+              'The id of the impact map entity it happened to, or that a finding is about. Use the same id as in impact_map. Every event has one (or a relationship) except a response event.',
           },
           relationship: {
             type: 'object',
@@ -1459,6 +1571,7 @@ export const LIVE_FINDINGS_JSON_SCHEMA = {
     impact_map: FINDINGS_JSON_SCHEMA.properties.impact_map,
     // Recorded as they are found, so the timeline fills while the investigation runs.
     events: FINDINGS_JSON_SCHEMA.properties.events,
+    timeline: FINDINGS_JSON_SCHEMA.properties.timeline,
   },
   required: ['summary', 'hypotheses'],
 } as const;

@@ -58,6 +58,7 @@ import { bulkGetReadableConversations } from './readable_conversation_ids';
 import type { InProgressResolver } from './in_progress';
 import {
   alertSubjectsToImpactMapEvents,
+  attachEntitiesToAlerts,
   appliedProposalsToImpactMapEvents,
   mergeImpactMapEvents,
 } from '../../../common/impact_map/events';
@@ -117,19 +118,32 @@ export class InvestigationsQueryService {
 
   async get(request: KibanaRequest, id: string): Promise<Investigation> {
     const client = await this.deps.getConversationClient(request);
-    const conversation = await retryWhileShardUnavailable(() => client.get(id));
-    if (conversation.template_id !== INVESTIGATION_TEMPLATE_ID) {
-      throw new WrongTemplateError(id, INVESTIGATION_TEMPLATE_ID);
-    }
-
     const spaceId = this.deps.getSpaceId(request);
-    const [subjects, impact, hypotheses, impactMap, inProgress, proposals] = await Promise.all([
+    // What the side indexes hold does not depend on the conversation, so it is read while the
+    // conversation is, not after it. A not-found or wrong-template answer below ends the request
+    // before these are used, so their own failures are only reported when they are.
+    const sideReads = Promise.all([
       this.deps.getSubjectsService().listByConversationIds([id], spaceId),
       this.deps.getImpactService().findByConversationId(id, spaceId),
       this.deps.getHypothesesService().findByConversationId(id, spaceId),
       this.deps.getImpactMapService().findByConversationId(id, spaceId),
-      this.deps.inProgress.isInProgress(request, spaceId, conversation),
       this.listProposals(request, id, spaceId),
+    ]);
+    sideReads.catch(() => undefined);
+
+    // The summary read leaves out the rounds, which for a long investigation are most of the
+    // conversation and take seconds to load; the template, metadata and attachment flags are all
+    // this needs. A conversation it does not return is read in full, which says why not.
+    const conversation =
+      (await retryWhileShardUnavailable(() => client.bulkGet([id]))).get(id) ??
+      (await retryWhileShardUnavailable(() => client.get(id)));
+    if (conversation.template_id !== INVESTIGATION_TEMPLATE_ID) {
+      throw new WrongTemplateError(id, INVESTIGATION_TEMPLATE_ID);
+    }
+
+    const [[subjects, impact, hypotheses, impactMap, proposals], inProgress] = await Promise.all([
+      sideReads,
+      this.deps.inProgress.isInProgress(request, spaceId, conversation),
     ]);
 
     const removed = removedAttachmentIds(conversation.attachments);
@@ -138,7 +152,10 @@ export class InvestigationsQueryService {
     // Alerts and applied to-dos are read, not stored with the map, so they appear without the
     // agent writing them; with no map yet, the timeline still shows them.
     const derivedEvents = [
-      ...alertSubjectsToImpactMapEvents(subjects.filter(({ id: docId }) => !removed.has(docId))),
+      ...attachEntitiesToAlerts(
+        alertSubjectsToImpactMapEvents(subjects.filter(({ id: docId }) => !removed.has(docId))),
+        visibleImpactMap?.entities ?? []
+      ),
       ...appliedProposalsToImpactMapEvents(proposals),
     ];
     const impactMapResponse = visibleImpactMap
@@ -788,6 +805,7 @@ const toImpactMapResponse = (
     entityTypes,
     relationshipTypes,
     events,
+    timeline,
     createdAt,
     updatedAt,
   }: InvestigationImpactMap,
@@ -803,6 +821,7 @@ const toImpactMapResponse = (
   // A type saved without an icon is given one here, so no node is drawn blank.
   entity_types: entityTypes.map(normalizeEntityType),
   relationship_types: relationshipTypes,
+  ...(timeline && { timeline }),
   // Alerts the investigation was opened on join the events the agent recorded.
   events: mergeImpactMapEvents(events ?? [], alertEvents),
   created_at: createdAt,

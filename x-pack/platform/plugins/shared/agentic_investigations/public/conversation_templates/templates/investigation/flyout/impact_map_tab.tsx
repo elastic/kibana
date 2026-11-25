@@ -22,6 +22,7 @@ import {
   EuiTimelineItem,
   EuiTitle,
   EuiToolTip,
+  EuiWrappingPopover,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -31,6 +32,8 @@ import type { ImpactMapSlotRenderProps } from '@kbn/agentic-investigations-commo
 import type { InvestigationImpactMapResponse } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import type { ImpactMapRenderer } from '../../../../types';
+import { EntityHoverCard } from '../../../../timeline/entity_hover_card';
+import { TimelineExpandedFlyout, type TimelineFocus } from '../../../../timeline/timeline_expanded';
 import {
   ImpactMapEventsFlyout,
   withRecoveredHealth,
@@ -39,7 +42,6 @@ import {
   type EventsSelection,
 } from './impact_map_events';
 import { KindAvatar, TimelineEvent } from './timeline_event';
-import { requestTimelineFocus } from './timeline_focus';
 import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
 /** Used until the map has been measured, and while loading. */
@@ -104,7 +106,6 @@ const UPDATED_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.upda
 export const ImpactMapTab: React.FC<ImpactMapSlotRenderProps & { Renderer: ImpactMapRenderer }> = ({
   conversationId,
   Renderer,
-  openTimeline,
 }) => {
   const { data, isLoading } = useInvestigation(conversationId);
 
@@ -126,12 +127,7 @@ export const ImpactMapTab: React.FC<ImpactMapSlotRenderProps & { Renderer: Impac
   }
 
   return (
-    <ImpactMapPanel
-      impactMap={impactMap}
-      Renderer={Renderer}
-      conversationId={conversationId}
-      openTimeline={openTimeline}
-    />
+    <ImpactMapPanel impactMap={impactMap} Renderer={Renderer} conversationId={conversationId} />
   );
 };
 
@@ -167,8 +163,9 @@ const ImpactMapPanel: React.FC<{
   impactMap: InvestigationImpactMapResponse;
   Renderer: ImpactMapRenderer;
   conversationId: string;
-  openTimeline?: () => void;
-}> = ({ impactMap, Renderer, conversationId, openTimeline }) => {
+}> = ({ impactMap, Renderer, conversationId }) => {
+  // "View in timeline" opens the timeline flyout over the map.
+  const [timelineFocus, setTimelineFocus] = useState<TimelineFocus | null>(null);
   const isInAgentBuilder = useIsInAgentBuilder();
   const fill = useFillHeight();
   const [isMaximized, setIsMaximized] = useState(false);
@@ -193,24 +190,21 @@ const ImpactMapPanel: React.FC<{
   const title = impactMap.title?.trim() || DEFAULT_TITLE;
   const { euiTheme } = useEuiTheme();
   const updatedAt = new Date(impactMap.updated_at ?? impactMap.created_at);
-  const viewInTimeline = openTimeline
-    ? (current: EventsSelection, eventId?: string) => {
-        const relationship =
-          current.kind === 'relationship'
-            ? impactMap.relationships.find(({ id }) => id === current.id)
-            : undefined;
-        const entityIds =
-          current.kind === 'entity'
-            ? [current.id]
-            : relationship
-            ? [relationship.source_id, relationship.target_id]
-            : [];
-        requestTimelineFocus(conversationId, eventId ? [] : entityIds, eventId);
-        setSelection(undefined);
-        setIsMaximized(false);
-        openTimeline();
-      }
-    : undefined;
+  const viewInTimeline = (current: EventsSelection, eventId?: string) => {
+    const relationship =
+      current.kind === 'relationship'
+        ? impactMap.relationships.find(({ id }) => id === current.id)
+        : undefined;
+    const entityIds =
+      current.kind === 'entity'
+        ? [current.id]
+        : relationship
+        ? [relationship.source_id, relationship.target_id]
+        : [];
+    setSelection(undefined);
+    setIsMaximized(false);
+    setTimelineFocus({ entityIds: eventId ? [] : entityIds, eventId });
+  };
   // Nothing to show for a target with no events, so a click on it does nothing.
   const open = (next: EventsSelection) => {
     const { events, metadata } = resolveEventsSelection(next, impactMap);
@@ -219,16 +213,32 @@ const ImpactMapPanel: React.FC<{
       setSelection(next);
     }
   };
-  const openEntity = (id: string) => open({ kind: 'entity', id });
+  // An entity always opens, even with no events or facts: its flyout still says what it is.
+  const openEntity = (id: string) => setSelection({ kind: 'entity', id });
   const openRelationship = (id: string) => open({ kind: 'relationship', id });
+  const [hover, setHover] = useState<{ id: string; element: HTMLElement }>();
   const map = (
     <Renderer
       impactMap={withRecoveredHealth(impactMap)}
       isFullScreen={isMaximized}
       onToggleFullScreen={() => setIsMaximized(!isMaximized)}
       onEntityClick={openEntity}
+      onEntityHover={(id, element) => setHover(id && element ? { id, element } : undefined)}
       onRelationshipClick={openRelationship}
     />
+  );
+  const hoverCard = hover && (
+    <EuiWrappingPopover
+      button={hover.element}
+      isOpen
+      closePopover={() => setHover(undefined)}
+      anchorPosition="rightCenter"
+      panelPaddingSize="m"
+      ownFocus={false}
+      panelProps={{ css: { pointerEvents: 'none', inlineSize: 340, maxInlineSize: '90vw' } }}
+    >
+      <EntityHoverCard entityId={hover.id} impactMap={impactMap} />
+    </EuiWrappingPopover>
   );
 
   const eventsFlyout = selection && (
@@ -242,10 +252,17 @@ const ImpactMapPanel: React.FC<{
       impactMap={impactMap}
       standalone={isMaximized}
       asMainFlyout={isInAgentBuilder}
-      onViewInTimeline={
-        viewInTimeline ? (eventId) => viewInTimeline(selection, eventId) : undefined
-      }
+      onViewInTimeline={(eventId) => viewInTimeline(selection, eventId)}
       onClose={() => setSelection(undefined)}
+    />
+  );
+
+  const timelineFlyout = timelineFocus && (
+    <TimelineExpandedFlyout
+      impactMap={impactMap}
+      focus={timelineFocus}
+      onOpenEntity={openEntity}
+      onClose={() => setTimelineFocus(null)}
     />
   );
 
@@ -284,6 +301,7 @@ const ImpactMapPanel: React.FC<{
       >
         {map}
       </div>
+      {hoverCard}
       {isMaximized && (
         <EuiPortal>
           <EuiFocusTrap disabled={Boolean(selection)}>
@@ -356,6 +374,7 @@ const ImpactMapPanel: React.FC<{
         </EuiPortal>
       )}
       {selection && !isMaximized && eventsFlyout}
+      {timelineFlyout}
     </EuiPanel>
   );
 };

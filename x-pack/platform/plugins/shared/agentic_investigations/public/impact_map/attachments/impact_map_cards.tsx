@@ -32,6 +32,7 @@ import type { ImpactMapRenderer } from '../../types';
 import { useIsInAgentBuilder } from '../../conversation_templates/templates/investigation/flyout/use_is_in_agent_builder';
 import {
   EventAffects,
+  eventAffectsAnything,
   EventGlance,
   getEventEntityIds,
   getEventGroup,
@@ -269,12 +270,14 @@ export const EventCard: React.FC<{
     data-test-subj="agenticInvestigationsEventCard"
   >
     <EuiSpacer size="m" />
-    {event.kind !== 'alert' && !titleNamesAffected(event, impactMap) && (
-      <>
-        <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />
-        <EuiSpacer size="s" />
-      </>
-    )}
+    {event.kind !== 'alert' &&
+      eventAffectsAnything(event, impactMap) &&
+      !titleNamesAffected(event, impactMap) && (
+        <>
+          <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />
+          <EuiSpacer size="s" />
+        </>
+      )}
     <EventGlance event={event} allEvents={impactMap.events} />
   </InvestigationCard>
 );

@@ -34,6 +34,7 @@ const MAX_ID_LENGTH = 256;
 const MAX_TYPE_ID_LENGTH = 64;
 const MAX_LABEL_LENGTH = 256;
 const MAX_DESCRIPTION_LENGTH = 1_000;
+const MAX_EVENT_SUMMARY_LENGTH = 160;
 const MAX_ICON_KEY_LENGTH = 64;
 const MAX_SVG_LENGTH = 4_000;
 const MAX_TIMESTAMP_LENGTH = 64;
@@ -236,6 +237,11 @@ export const impactMapEventSchema = lazySchema(() =>
     id: z.string().min(1).max(MAX_ID_LENGTH),
     kind: impactMapEventKindSchema,
     title: z.string().min(1).max(MAX_LABEL_LENGTH),
+    /**
+     * A quick reference: one plain sentence saying what happened, for views that have room for
+     * a few words, such as the summary timeline. Absent on events recorded before it existed.
+     */
+    summary: z.string().max(MAX_EVENT_SUMMARY_LENGTH).optional(),
     description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
     /** ISO 8601. */
     at: z.string().min(1).max(MAX_TIMESTAMP_LENGTH),
@@ -259,6 +265,50 @@ export const impactMapEventSchema = lazySchema(() =>
   })
 );
 export type ImpactMapEvent = z.infer<typeof impactMapEventSchema>;
+
+/** The most key events a summary timeline shows, and the most highlighted windows. */
+export const MAX_TIMELINE_KEY_EVENTS = 8;
+export const MAX_TIMELINE_WINDOWS = 3;
+export const MAX_TIMELINE_FILTER_ENTITIES = 12;
+
+/**
+ * What the agent chooses to show on the summary timeline: the filters that leave the events that
+ * matter, and the windows worth highlighting. Absent, the summary picks key
+ * events from their kinds.
+ */
+export const impactMapTimelineSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The filters the overview applies so it shows only the events that matter. Opening the whole
+     * timeline starts with the same filters applied, and a reader can clear them. Absent, the
+     * summary picks key events from their kinds.
+     */
+    filters: z
+      .object({
+        /** Only events that happened to one of these entities, or to a relationship that touches one. */
+        entity_ids: z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_TIMELINE_FILTER_ENTITIES).optional(),
+        /** Only events of these kinds. */
+        kinds: z.array(impactMapEventKindSchema).max(IMPACT_MAP_EVENT_KINDS.length).optional(),
+      })
+      .optional(),
+    /** Spans to highlight, such as when data was dropped. */
+    windows: z
+      .array(
+        z.object({
+          label: z.string().min(1).max(MAX_LABEL_LENGTH),
+          /** ISO 8601. */
+          start: z.string().min(1).max(MAX_TIMESTAMP_LENGTH),
+          end: z.string().min(1).max(MAX_TIMESTAMP_LENGTH),
+          tone: z.enum(['danger', 'warning', 'success']).optional(),
+        })
+      )
+      .max(MAX_TIMELINE_WINDOWS)
+      .optional(),
+    /** The event whose chart is drawn under the expanded timeline, on the same time axis. */
+    chart_event_id: z.string().min(1).max(MAX_ID_LENGTH).optional(),
+  })
+);
+export type ImpactMapTimeline = z.infer<typeof impactMapTimelineSchema>;
 
 export const impactMapEventsSchema = lazySchema(() =>
   z.array(impactMapEventSchema).max(MAX_IMPACT_MAP_EVENTS)
@@ -286,6 +336,8 @@ export const investigationImpactMapSchema = lazySchema(() =>
     relationshipTypes: impactMapRelationshipTypesSchema,
     /** Kept across map writes and merged by id: events accumulate while the graph is redrawn. */
     events: impactMapEventsSchema.optional(),
+    /** What the summary timeline shows. Kept across writes that do not send it. */
+    timeline: impactMapTimelineSchema.optional(),
     createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
     createdBy: userSchema.optional(),
     updatedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),

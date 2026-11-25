@@ -15,6 +15,7 @@ import type {
   ImpactMapEntityType,
   ImpactMapRelationship,
   ImpactMapRelationshipType,
+  ImpactMapTimeline,
   InvestigationImpactMap,
 } from '../../../common/impact_map/impact_map';
 import {
@@ -46,6 +47,8 @@ export interface ImpactMapInput {
   relationship_types?: ImpactMapRelationshipType[];
   /** Merged by id with the events already stored. An event without an id gets a stable one. */
   events?: ImpactMapEventInput[];
+  /** What the summary timeline shows. Absent, the stored choice stays. */
+  timeline?: ImpactMapTimeline;
 }
 
 /** One impact map document per space and conversation. */
@@ -59,6 +62,7 @@ const buildImpactMapDocument = ({
   title,
   graph,
   events,
+  timeline,
   user,
 }: {
   existing: ImpactMapDocument | undefined;
@@ -68,11 +72,13 @@ const buildImpactMapDocument = ({
   /** Absent when only events are written: the stored graph stays. */
   graph?: ResolvedImpactMapGraph;
   events?: ImpactMapEventInput[];
+  timeline?: ImpactMapTimeline;
   user?: User;
 }): ImpactMapDocument => {
   const now = new Date().toISOString();
   const createdBy = existing ? existing.createdBy : user;
   const mergedTitle = title ?? existing?.title;
+  const mergedTimeline = timeline ?? existing?.timeline;
   return {
     spaceId,
     conversationId,
@@ -82,6 +88,7 @@ const buildImpactMapDocument = ({
     entityTypes: graph?.entityTypes ?? existing?.entityTypes ?? [],
     relationshipTypes: graph?.relationshipTypes ?? existing?.relationshipTypes ?? [],
     events: mergeImpactMapEvents(existing?.events, events?.map(withImpactMapEventId)),
+    ...(mergedTimeline && { timeline: mergedTimeline }),
     createdAt: existing?.createdAt ?? now,
     ...(createdBy && { createdBy }),
     updatedAt: now,
@@ -181,6 +188,7 @@ export class ImpactMapService {
           title: input.title,
           graph,
           events: input.events,
+          timeline: input.timeline,
           user,
         })),
     });
@@ -223,6 +231,7 @@ export class ImpactMapService {
           title: input.title,
           graph,
           events: input.events,
+          timeline: input.timeline,
           user,
         })),
     });
@@ -236,6 +245,7 @@ export class ImpactMapService {
   async addEventsWithPublicClient({
     conversationId,
     events,
+    timeline,
     spaceId,
     user,
     conversations,
@@ -243,12 +253,13 @@ export class ImpactMapService {
   }: {
     conversationId: string;
     events: ImpactMapEventInput[];
+    timeline?: ImpactMapTimeline;
     spaceId: string;
     user?: User;
     conversations: ConversationPublicClient;
     attachments: AttachmentPublicClient;
   }): Promise<void> {
-    if (events.length === 0) {
+    if (events.length === 0 && !timeline) {
       return;
     }
     let built: ImpactMapDocument | undefined;
@@ -260,7 +271,7 @@ export class ImpactMapService {
       conversations,
       attachments,
       mutate: (existing) =>
-        (built = buildImpactMapDocument({ existing, spaceId, conversationId, events, user })),
+        (built = buildImpactMapDocument({ existing, spaceId, conversationId, events, timeline, user })),
     });
     if (built) {
       await this.writeEvents(built);

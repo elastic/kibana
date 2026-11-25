@@ -649,20 +649,24 @@ export const runFindingsPass = async (
     }
     // Omitted keeps the stored map. A live pass redraws it too, so it follows the evidence.
     // Events ride along with the map so one write updates both; on their own they leave it as is.
-    const { impact_map: impactMap, events } = record;
+    const { impact_map: impactMap, events, timeline } = record;
     if (impactMap) {
       writes.push([
         'impact map',
         () =>
           writer.setImpactMap({
             conversationId,
-            impactMap: { ...impactMap, ...(events?.length ? { events } : {}) },
+            impactMap: {
+              ...impactMap,
+              ...(events?.length ? { events } : {}),
+              ...(timeline ? { timeline } : {}),
+            },
           }),
       ]);
-    } else if (events?.length) {
+    } else if (events?.length || timeline) {
       writes.push([
         'impact map events',
-        () => writer.addImpactMapEvents({ conversationId, events }),
+        () => writer.addImpactMapEvents({ conversationId, events: events ?? [], timeline }),
       ]);
     }
     const proposals = deps.getProposals?.();

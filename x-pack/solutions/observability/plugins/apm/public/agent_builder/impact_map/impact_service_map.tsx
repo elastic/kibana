@@ -458,6 +458,7 @@ function KeepNodesInView({ nodeIds, layout }: { nodeIds: string; layout: unknown
 export function ImpactServiceMap({
   impactMap,
   onEntityClick,
+  onEntityHover,
   onRelationshipClick,
   onToggleFullScreen,
   isFullScreen,
@@ -541,6 +542,12 @@ export function ImpactServiceMap({
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
+          onNodeMouseEnter={
+            onEntityHover
+              ? (event, { id }) => onEntityHover(id, event.currentTarget as HTMLElement)
+              : undefined
+          }
+          onNodeMouseLeave={onEntityHover ? () => onEntityHover(undefined) : undefined}
           onNodeClick={onEntityClick ? (_, { id }) => onEntityClick(id) : undefined}
           onEdgeClick={onRelationshipClick ? (_, { id }) => onRelationshipClick(id) : undefined}
           nodeTypes={nodeTypes}

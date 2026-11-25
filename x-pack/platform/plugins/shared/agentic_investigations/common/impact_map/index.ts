@@ -54,6 +54,7 @@ export type {
   ImpactMapEntityKind,
   ImpactMapEntityType,
   ImpactMapEvent,
+  ImpactMapTimeline,
   ImpactMapEventKind,
   ImpactMapHealth,
   ImpactMapIcon,

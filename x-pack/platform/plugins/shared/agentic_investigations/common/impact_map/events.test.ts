@@ -6,7 +6,12 @@
  */
 
 import { MAX_IMPACT_MAP_EVENTS } from './constants';
-import { impactMapEventId, mergeImpactMapEvents, withImpactMapEventId } from './events';
+import {
+  attachEntitiesToAlerts,
+  impactMapEventId,
+  mergeImpactMapEvents,
+  withImpactMapEventId,
+} from './events';
 import type { ImpactMapEvent } from './impact_map';
 import { toEntityName } from './entity_name';
 
@@ -78,5 +83,54 @@ describe('toEntityName', () => {
     expect(toEntityName('quote-old:8080 (NXDOMAIN)')).toBe('quote-old');
     expect(toEntityName('payments-db')).toBe('payments-db');
     expect(toEntityName('(0/0)')).toBe('(0/0)');
+  });
+});
+
+describe('attachEntitiesToAlerts', () => {
+  const entities = [
+    { id: 'svc-checkout', label: 'checkout' },
+    { id: 'svc-checkout-service', label: 'checkout-service' },
+    { id: 'svc-frontend', label: 'frontend' },
+  ];
+  const alert = (overrides: Partial<ImpactMapEvent> = {}): ImpactMapEvent =>
+    event({ id: 'alert:1', kind: 'alert', entity_id: undefined, ...overrides });
+
+  it('puts an alert against the one entity its title names', () => {
+    const [result] = attachEntitiesToAlerts(
+      [alert({ title: 'Failed transaction rate threshold | frontend' })],
+      entities
+    );
+    expect(result.entity_id).toBe('svc-frontend');
+  });
+
+  it('reads the reason too, and takes the longer name when one is part of another', () => {
+    const [result] = attachEntitiesToAlerts(
+      [alert({ title: 'Rule', description: '- Latency is high for checkout-service in us-east' })],
+      entities
+    );
+    expect(result.entity_id).toBe('svc-checkout-service');
+  });
+
+  it('leaves an alert that names none, or two that are unrelated, with no entity', () => {
+    const results = attachEntitiesToAlerts(
+      [
+        alert({ id: 'a', title: 'Disk almost full' }),
+        alert({ id: 'b', title: 'Errors in frontend and checkout' }),
+      ],
+      entities
+    );
+    expect(results.map(({ entity_id: id }) => id)).toEqual([undefined, undefined]);
+  });
+
+  it('does not match part of a longer word, and leaves other events and placed alerts alone', () => {
+    const results = attachEntitiesToAlerts(
+      [
+        alert({ id: 'a', title: 'Errors in frontends' }),
+        event({ id: 'b', kind: 'failure', entity_id: undefined, title: 'frontend failed' }),
+        alert({ id: 'c', title: 'frontend slow', entity_id: 'elsewhere' }),
+      ],
+      entities
+    );
+    expect(results.map(({ entity_id: id }) => id)).toEqual([undefined, undefined, 'elsewhere']);
   });
 });

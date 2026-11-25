@@ -92,6 +92,38 @@ export const alertSubjectsToImpactMapEvents = (
       };
     });
 
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Puts the alerts an investigation was opened on against the entity they are about, when it can be
+ * told: the one entity whose name the alert's title or reason says. An alert that names none, or
+ * more than one that are not part of each other's names, is left with no entity. The alert subject
+ * carries no entity of its own, so this is read from its words.
+ */
+export const attachEntitiesToAlerts = (
+  events: readonly ImpactMapEvent[],
+  entities: ReadonlyArray<{ id: string; label?: string }>
+): ImpactMapEvent[] =>
+  events.map((event) => {
+    if (event.kind !== 'alert' || event.entity_id || event.relationship_id) {
+      return event;
+    }
+    const text = `${event.title} ${event.description ?? ''}`.toLowerCase();
+    const named = entities.filter(({ label }) => {
+      const name = label?.trim().toLowerCase();
+      return (
+        Boolean(name) &&
+        new RegExp(`(^|[^a-z0-9_.-])${escapeRegExp(name as string)}([^a-z0-9_.-]|$)`).test(text)
+      );
+    });
+    // "checkout" and "checkout-service" both named: the longer is the one meant.
+    const longest = [...named].sort((a, b) => (b.label?.length ?? 0) - (a.label?.length ?? 0))[0];
+    const clear =
+      longest &&
+      named.every(({ label }) => (longest.label ?? '').toLowerCase().includes((label ?? '').toLowerCase()));
+    return clear ? { ...event, entity_id: longest.id } : event;
+  });
+
 /**
  * The to-dos a person marked as applied, as response events: what responders did, at the time
  * they marked it. Read, not stored, so "Mark as not applied" takes the event off the timeline.

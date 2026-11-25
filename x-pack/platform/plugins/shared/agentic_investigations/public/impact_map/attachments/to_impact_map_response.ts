@@ -26,6 +26,7 @@ export const toImpactMapResponse = (
   // A type saved without an icon is given one here, so no node is drawn blank.
   entity_types: document.entityTypes.map(normalizeEntityType),
   relationship_types: document.relationshipTypes,
+  ...(document.timeline && { timeline: document.timeline }),
   events: [...(document.events ?? [])].sort((a, b) => Date.parse(a.at) - Date.parse(b.at)),
   created_at: document.createdAt,
   ...(document.updatedAt && { updated_at: document.updatedAt }),

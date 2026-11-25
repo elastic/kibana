@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+const pendingOpen = new Set<string>();
 const pending = new Map<string, string[]>();
 const pendingEvents = new Map<string, string>();
 
@@ -38,3 +39,15 @@ export const takeTimelineFocus = (conversationId: string): string[] => {
   pending.delete(conversationId);
   return entityIds;
 };
+
+/**
+ * Asks the investigation to open its timeline when it next shows: a chat card leads here before the
+ * investigation flyout is on screen.
+ */
+export const requestTimelineFlyoutOpen = (conversationId: string): void => {
+  pendingOpen.add(conversationId);
+};
+
+/** Whether the timeline was asked for, once. */
+export const takeTimelineFlyoutOpen = (conversationId: string): boolean =>
+  pendingOpen.delete(conversationId);

@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ImpactMapRenderer } from '../../types';
+import { requestTimelineFlyoutOpen } from '../../conversation_templates/templates/investigation/flyout/timeline_focus';
 import { registerInvestigationAttachmentRenderer } from '../../investigation_attachments';
 import {
   createImpactMapAttachmentRenderer,
@@ -27,8 +28,10 @@ export const registerImpactMapAttachmentTypes = (
   );
   registerInvestigationAttachmentRenderer(
     agentBuilder,
-    createTimelineAttachmentRenderer((conversationId, tab) => {
-      agentBuilder.openConversationDetails({ conversationId, initialTabId: tab });
+    createTimelineAttachmentRenderer((conversationId) => {
+      // There is no Timeline tab: the investigation opens and shows its timeline in a flyout.
+      requestTimelineFlyoutOpen(conversationId);
+      agentBuilder.openConversationDetails({ conversationId });
     })
   );
 };

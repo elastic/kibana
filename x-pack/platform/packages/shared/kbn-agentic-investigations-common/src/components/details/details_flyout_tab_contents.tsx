@@ -50,6 +50,10 @@ export interface OverviewSections {
    * host that reads fresher impact itself. Absent, the tab renders the attachment.
    */
   impact?: React.ReactNode;
+  /** The summary timeline of the key events. Shown above the impact, in its own section. */
+  timeline?: React.ReactNode;
+  /** Shown on the Timeline heading's row, such as the link to the whole timeline. */
+  timelineAction?: React.ReactNode;
   /** The conclusion, as markdown. */
   conclusion?: string;
   /** Shown under the conclusion, inside its section: the event it names as the root cause. */
@@ -74,7 +78,16 @@ export const OverviewTab = memo<OverviewTabProps>(
     sections = {},
     showLoadingSection = false,
   }) => {
-    const { subjects, impact, conclusion, conclusionEvent, reasoning, renderMarkdown } = sections;
+    const {
+      subjects,
+      impact,
+      timeline,
+      timelineAction,
+      conclusion,
+      conclusionEvent,
+      reasoning,
+      renderMarkdown,
+    } = sections;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -89,6 +102,14 @@ export const OverviewTab = memo<OverviewTabProps>(
 
         {subjects && (
           <EuiFlexItem data-test-subj="investigationOverviewSubjects">{subjects}</EuiFlexItem>
+        )}
+
+        {timeline && (
+          <EuiFlexItem data-test-subj="investigationOverviewTimeline">
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.timeline} titleAppend={timelineAction}>
+              {timeline}
+            </DetailsBlock>
+          </EuiFlexItem>
         )}
 
         {impact ? (

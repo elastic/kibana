@@ -346,6 +346,7 @@ describe('runFindingsPass', () => {
       'hypotheses',
       'impact_map',
       'events',
+      'timeline',
     ]);
     expect(Object.keys(schemaOf(final.chatComplete))).toEqual(
       expect.arrayContaining(['verdict', 'severity', 'impact_summary', 'impact_entities'])

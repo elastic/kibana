@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   EuiAccordion,
   EuiEmptyPrompt,
@@ -23,6 +23,7 @@ import {
   type OverviewSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import type { Investigation, InvestigationImpactMapResponse } from '../../../../../common';
+import { selectTimelineSummary } from '../../../../../common';
 import { HypothesisTreeCard } from '../../../../hypotheses/tree/hypothesis_tree_card';
 import {
   EventMarkdown,
@@ -33,6 +34,14 @@ import { EventCard, pickImpactEvents } from '../../../../impact_map/attachments/
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { getInvestigationDisplayTitle } from '../to_view_model';
+import {
+  TimelineSummaryCard,
+  ViewFullTimelineButton,
+} from '../../../../timeline/timeline_summary_card';
+import {
+  TimelineFlyoutHost,
+  type OpenTimeline,
+} from '../../../../timeline/use_timeline_flyout';
 
 const readMetadataString = (value: unknown): string | undefined => {
   if (typeof value !== 'string') return undefined;
@@ -42,6 +51,19 @@ const readMetadataString = (value: unknown): string | undefined => {
 };
 
 /** Sections for the data an investigation has; missing data leaves its section out. */
+/** The summary timeline, opening an event as the rest of the overview does. */
+const OverviewTimeline: React.FC<{ impactMap: InvestigationImpactMapResponse }> = ({
+  impactMap,
+}) => {
+  const links = useEventLinks();
+  return (
+    <TimelineSummaryCard
+      impactMap={impactMap}
+      onOpenEvent={(eventId) => links?.openEvent(eventId)}
+    />
+  );
+};
+
 export const toOverviewSections = (
   investigation: Investigation | undefined,
   fallbackVerdict: string | undefined
@@ -60,6 +82,16 @@ export const toOverviewSections = (
     impact: hasImpact ? (
       <CustomerImpact summary={impact?.summary} impactMap={impactMap} />
     ) : undefined,
+    timeline:
+      impactMap &&
+      selectTimelineSummary({
+        events: impactMap.events,
+        relationships: impactMap.relationships,
+        timeline: impactMap.timeline,
+      }) ? (
+        <OverviewTimeline impactMap={impactMap} />
+      ) : undefined,
+    timelineAction: impactMap ? <ViewFullTimelineButton /> : undefined,
     renderMarkdown: (text, options) => (
       <EventMarkdown text={text} color={options?.subdued ? 'subdued' : undefined} />
     ),
@@ -179,9 +211,11 @@ export const InvestigationOverview: React.FC<
   groupedAttachments,
   proposedActionsContent,
   proposedActionsCount,
-  openTimeline,
 }) => {
   const { data } = useInvestigation(conversation.id);
+  // The flyout is rendered inside the event links, which offer "View in timeline" from outside it.
+  const openTimelineRef = useRef<OpenTimeline>();
+  const openTimeline = useCallback(() => openTimelineRef.current?.(), []);
   const investigation = useMemo(() => {
     const fromConversation = conversationToInvestigation(conversation);
     const summary = readMetadataString(data?.metadata.summary);
@@ -206,17 +240,25 @@ export const InvestigationOverview: React.FC<
       conversationId={conversation.id}
       openTimeline={openTimeline}
     >
-      <OverviewTab
-        investigation={investigation}
-        attachments={conversation.attachments}
-        groupedAttachments={groupedAttachments}
-        proposedActionsContent={proposedActionsContent}
-        proposedActionsCount={proposedActionsCount}
-        sections={sections}
-        showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
-      />
-      <EuiSpacer size="m" />
-      <LearningsSection />
+      <TimelineFlyoutHost
+        conversationId={conversation.id}
+        impactMap={data?.impact_map}
+        onReady={(open) => {
+          openTimelineRef.current = open;
+        }}
+      >
+        <OverviewTab
+          investigation={investigation}
+          attachments={conversation.attachments}
+          groupedAttachments={groupedAttachments}
+          proposedActionsContent={proposedActionsContent}
+          proposedActionsCount={proposedActionsCount}
+          sections={sections}
+          showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
+        />
+        <EuiSpacer size="m" />
+        <LearningsSection />
+      </TimelineFlyoutHost>
     </EventLinksProvider>
   );
 };
