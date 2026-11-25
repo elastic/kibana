@@ -14,10 +14,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { LoadingPanel } from '../../components/ui/loading_panel';
 import { useAIFeatures } from '../../data/connectors/use_ai_features';
 import { useKibana } from '../../hooks/use_kibana';
@@ -257,6 +259,10 @@ export function SourcesView() {
                   size="s"
                   iconType="plus"
                   onClick={openCreateFlyout}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.CREATE_SOURCE,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_PAGE,
+                  })}
                 >
                   {CREATE_SOURCE_BUTTON_LABEL}
                 </EuiButton>
@@ -330,6 +336,10 @@ export function SourcesView() {
                               fill
                               iconType="plus"
                               onClick={openCreateFlyout}
+                              {...getEbtProps({
+                                action: NIGHTSHIFT_EBT_ACTIONS.CREATE_SOURCE,
+                                element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_EMPTY_PROMPT,
+                              })}
                             >
                               {CREATE_SOURCE_BUTTON_LABEL}
                             </EuiButton>

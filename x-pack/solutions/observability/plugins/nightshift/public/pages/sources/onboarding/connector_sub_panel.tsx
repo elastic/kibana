@@ -7,9 +7,12 @@
 
 import { EuiBadge, EuiSelectable, EuiSpacer } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useMemo } from 'react';
+import type { NIGHTSHIFT_EBT_DETAILS } from '../../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { ConnectorIcon } from '../../../components/ui/connector_icon';
 import {
   CONFIGURED_DEFAULT_MODEL_CALLOUT_DESCRIPTION,
@@ -17,10 +20,11 @@ import {
   DEFAULT_MODEL_BADGE_LABEL,
 } from './translations';
 
-interface ConnectorSubPanelProps {
+export interface ConnectorSubPanelProps {
   connectors: InferenceConnector[];
   resolvedConnectorId: string | undefined;
   selectedConnectorId: string | undefined;
+  detail: typeof NIGHTSHIFT_EBT_DETAILS.FEATURES | typeof NIGHTSHIFT_EBT_DETAILS.QUERIES;
   defaultConnectorOnly: boolean;
   onSelect: (connectorId: string) => void;
 }
@@ -29,6 +33,7 @@ export const ConnectorSubPanel = ({
   connectors,
   resolvedConnectorId,
   selectedConnectorId,
+  detail,
   defaultConnectorOnly,
   onSelect,
 }: ConnectorSubPanelProps) => {
@@ -39,12 +44,17 @@ export const ConnectorSubPanel = ({
         key: connector.connectorId,
         checked: connector.connectorId === selectedConnectorId ? ('on' as const) : undefined,
         prepend: <ConnectorIcon connectorName={connector.name} />,
+        ...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.SELECT_GENERATION_CONNECTOR,
+          element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_GENERATE_MENU,
+          detail,
+        }),
         append:
           connector.connectorId === resolvedConnectorId ? (
             <EuiBadge color="hollow">{DEFAULT_MODEL_BADGE_LABEL}</EuiBadge>
           ) : undefined,
       })),
-    [connectors, selectedConnectorId, resolvedConnectorId]
+    [connectors, selectedConnectorId, resolvedConnectorId, detail]
   );
 
   const handleChange = useCallback(

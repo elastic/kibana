@@ -7,10 +7,16 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { InferenceConnector } from '@kbn/inference-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY } from '@kbn/management-settings-ids';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React, { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../common/ebt_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   CONNECTOR_LOAD_ERROR,
@@ -118,6 +124,10 @@ export const GenerateSplitButton = ({
                 ? runDisabledTooltip
                 : GENERATE_FEATURES_TOOLTIP,
             toolTipProps: { position: 'right' as const },
+            ...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.GENERATE_SOURCE_FEATURES,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_GENERATE_MENU,
+            }),
           },
           buildConnectorMenuItem({
             connector: featuresConnector,
@@ -138,6 +148,10 @@ export const GenerateSplitButton = ({
                 ? runDisabledTooltip
                 : GENERATE_QUERIES_TOOLTIP,
             toolTipProps: { position: 'right' as const },
+            ...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.GENERATE_SOURCE_QUERIES,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_GENERATE_MENU,
+            }),
           },
           buildConnectorMenuItem({
             connector: queriesConnector,
@@ -151,6 +165,7 @@ export const GenerateSplitButton = ({
         connectors: allConnectors,
         resolvedConnectorId: featuresResolvedConnectorId,
         selectedConnectorId: config.connectors.features,
+        detail: NIGHTSHIFT_EBT_DETAILS.FEATURES,
         defaultConnectorOnly,
         onSelect: (connectorId) => {
           onSelectFeaturesConnector(connectorId);
@@ -161,6 +176,7 @@ export const GenerateSplitButton = ({
         connectors: allConnectors,
         resolvedConnectorId: queriesResolvedConnectorId,
         selectedConnectorId: config.connectors.queries,
+        detail: NIGHTSHIFT_EBT_DETAILS.QUERIES,
         defaultConnectorOnly,
         onSelect: (connectorId) => {
           onSelectQueriesConnector(connectorId);
@@ -198,6 +214,10 @@ export const GenerateSplitButton = ({
           isPrimaryDisabled={isCombinedRunDisabled}
           primaryDisabledTooltip={isCombinedRunDisabled ? runDisabledTooltip : undefined}
           primaryDataTestSubj="significant_events_onboard_streams_button"
+          primaryEbt={{
+            action: NIGHTSHIFT_EBT_ACTIONS.GENERATE_SOURCE_KNOWLEDGE,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_GENERATE_MENU,
+          }}
           secondaryAriaLabel={GENERATE_CONFIG_ARIA_LABEL}
           isSecondaryDisabled={isConfigDisabled}
           secondaryDataTestSubj="significant_events_onboarding_config_trigger"

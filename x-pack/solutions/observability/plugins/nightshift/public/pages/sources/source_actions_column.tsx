@@ -6,12 +6,14 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import React, { useState } from 'react';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import {
   DELETE_SOURCE_ACTION_DESCRIPTION,
   DELETE_SOURCE_ACTION_LABEL,
@@ -35,6 +37,10 @@ interface SourceActionsColumnProps {
   /** Left out for users who cannot change sources, which hides the delete button. */
   onDelete?: (source: NightshiftSource) => void;
 }
+
+const deferUntilClickIsTracked = (callback: () => void) => {
+  setTimeout(callback);
+};
 
 /**
  * Row actions as plain buttons. EUI's actions column folds more than two actions into a
@@ -99,6 +105,10 @@ export function SourceActionsColumn({
               onClick={() => {
                 void handleStopOnboarding();
               }}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.STOP_SOURCE_ONBOARDING,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_TABLE_ROW_ACTIONS,
+              })}
             />
           </EuiToolTip>
         ) : (
@@ -109,7 +119,11 @@ export function SourceActionsColumn({
               aria-label={RUN_SOURCE_ONBOARDING_BUTTON_LABEL}
               // The onboarding route rejects disabled sources.
               isDisabled={!source.enabled || blocksActivity}
-              onClick={() => onOnboard(source.id)}
+              onClick={() => deferUntilClickIsTracked(() => onOnboard(source.id))}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.RUN_SOURCE_ONBOARDING,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_TABLE_ROW_ACTIONS,
+              })}
             />
           </EuiToolTip>
         )}
@@ -123,6 +137,10 @@ export function SourceActionsColumn({
               color="danger"
               aria-label={DELETE_SOURCE_ACTION_LABEL}
               onClick={() => onDelete(source)}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.OPEN_DELETE_SOURCE_CONFIRMATION,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_TABLE_ROW_ACTIONS,
+              })}
             />
           </EuiToolTip>
         </EuiFlexItem>

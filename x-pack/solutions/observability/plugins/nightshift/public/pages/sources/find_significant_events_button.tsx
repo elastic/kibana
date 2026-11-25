@@ -7,8 +7,10 @@
 
 import React, { useCallback } from 'react';
 import type { ReactNode } from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { CANCEL_DISCOVERY_LABEL, FIND_SIGNIFICANT_EVENTS_LABEL } from './translations';
 import { ContextMenuSplitButton } from '../../components/ui/context_menu_split_button';
@@ -64,6 +66,10 @@ export const FindSignificantEventsButton = ({
               closeMenu();
             },
             'data-test-subj': 'significant_events_cancel_discovery_button',
+            ...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_SIGNIFICANT_EVENTS_DISCOVERY,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_DISCOVERY_MENU,
+            }),
           },
         ],
       },
@@ -88,6 +94,10 @@ export const FindSignificantEventsButton = ({
       primaryDisabledTooltip={isDisabled ? disabledTooltip : undefined}
       isPrimaryLoading={isRunning}
       primaryDataTestSubj={primaryDataTestSubj}
+      primaryEbt={{
+        action: NIGHTSHIFT_EBT_ACTIONS.FIND_SIGNIFICANT_EVENTS,
+        element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_DISCOVERY_MENU,
+      }}
       secondaryAriaLabel={SECONDARY_ARIA_LABEL}
       secondaryDataTestSubj="significant_events_discovery_options_trigger"
       buildPanels={buildPanels}
