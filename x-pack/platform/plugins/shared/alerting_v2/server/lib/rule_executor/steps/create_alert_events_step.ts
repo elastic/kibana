@@ -19,7 +19,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { createReasonRenderer, type ReasonRenderer } from '../reason_template';
+import { applyReasons, createReasonRenderer, type ReasonRenderer } from '../reason_template';
 import { forwardThenFinalize, guardedExpandStep } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -67,12 +67,19 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
     let builder: AlertEventsBatchBuilder | undefined;
+    let reasonRenderer: ReasonRenderer | undefined;
 
     const built = guardedExpandStep(streamState, ['rule', 'esqlRowBatch'], async function* (state) {
       const eventType = resolveAlertEventType(state.rule);
       const logger = state.logger.withLabels({ step: step.name });
 
-      if (!builder) {
+      if (!builder || !reasonRenderer) {
+        reasonRenderer = step.buildReasonRenderer({
+          rule: state.rule,
+          eventType,
+          ruleId: state.input.ruleId,
+          spaceId: state.input.spaceId,
+        });
         builder = createAlertEventsBatchBuilder({
           ruleId: state.input.ruleId,
           spaceId: state.input.spaceId,
@@ -81,12 +88,6 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           ruleVersion: state.rule.version,
           type: eventType,
           maxGroupsPerExecution: step.maxGroupsPerExecution,
-          reasonRenderer: step.buildReasonRenderer({
-            rule: state.rule,
-            eventType,
-            ruleId: state.input.ruleId,
-            spaceId: state.input.spaceId,
-          }),
           activeGroupHashes: new Set(
             (state.activeGroups ?? []).map(({ group_hash: groupHash }) => groupHash)
           ),
@@ -97,6 +98,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
       const droppedGroupsBefore = builder.droppedGroupCount;
       const alertEventsBatch = builder.buildBatch([...state.esqlRowBatch]);
+      await applyReasons(alertEventsBatch, reasonRenderer);
       // Count distinct groups newly dropped by the max this batch
       const groupsDroppedInBatch = builder.droppedGroupCount - droppedGroupsBefore;
 

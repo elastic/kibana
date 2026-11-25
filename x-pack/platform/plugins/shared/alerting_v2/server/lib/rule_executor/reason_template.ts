@@ -6,8 +6,10 @@
  */
 
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { MAX_REASON_TEMPLATE_LENGTH } from '@kbn/alerting-v2-schemas';
+import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 
 type QueryRow = Record<string, unknown>;
 type LiquidEngine = ReturnType<typeof createWorkflowLiquidEngine>;
@@ -198,4 +200,26 @@ export const createReasonRenderer = ({
       }
     },
   };
+};
+
+/**
+ * Sets the rendered reason on each event, rendering against the row stored in its `data`. Rendering
+ * is synchronous, so it yields to the event loop between rows: the time limits bound the total
+ * time spent rendering, and yielding bounds how long Kibana is blocked at once.
+ */
+export const applyReasons = async (
+  events: AlertEventDocument[],
+  renderer: ReasonRenderer
+): Promise<void> => {
+  if (renderer === NO_REASON) {
+    return;
+  }
+
+  for (const event of events) {
+    await yieldToEventLoop();
+    const reason = renderer.render(event.data);
+    if (reason !== undefined) {
+      event.reason = reason;
+    }
+  }
 };
