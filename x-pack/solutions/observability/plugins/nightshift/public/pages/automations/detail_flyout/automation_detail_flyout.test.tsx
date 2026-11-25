@@ -88,7 +88,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     mutate.mockReset();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        application: { navigateToUrl },
+        application: { navigateToUrl, getUrlForApp: () => '/app/nightshift?investigationId=inv-1' },
         http: { basePath: { prepend: (path: string) => path } },
         charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
       },
@@ -145,6 +145,37 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const startEditing = () => fireEvent.click(screen.getByTestId('automationEditButton'));
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
+
+  it('keeps a selected run open when the query returns its investigation IDs', () => {
+    const run = {
+      id: 'r1',
+      status: 'running',
+      startedAt: '2026-01-01T12:00:00.000Z',
+      triggeredBy: 'manual',
+    };
+    (useAutomationRunsInRange as jest.Mock).mockReturnValue({ runs: [run] });
+    const { rerenderAutomation } = renderFlyout();
+    fireEvent.click(screen.getByRole('tab', { name: 'Run history' }));
+    fireEvent.click(screen.getByTestId('automationRunRow'));
+    expect(screen.queryByTestId('automationRunOpenInvestigation')).not.toBeInTheDocument();
+
+    (useAutomationRunsInRange as jest.Mock).mockReturnValue({
+      runs: [
+        {
+          ...run,
+          status: 'succeeded',
+          investigationId: 'inv-1',
+          investigationExecutionId: 'exec-1',
+        },
+      ],
+    });
+    rerenderAutomation(automation);
+
+    expect(screen.getByTestId('automationRunOpenInvestigation')).toHaveAttribute(
+      'href',
+      '/app/nightshift?investigationId=inv-1'
+    );
+  });
 
   it.each(['missing', 'loading', 'error'] as const)(
     'keeps Pause and Delete available while blocking editing for a %s workflow',

@@ -146,11 +146,13 @@ const getAutomationRunsQuery = (
 });
 
 const RUNS_PAGE_SIZE = 100;
+const RUN_ACTIVITY_POLL_INTERVAL_MS = 5_000;
 
 export const useAutomationRunsInRange = (
   id: string,
   startedAfter: string,
-  startedBefore: string
+  startedBefore: string,
+  selectedRunId?: string
 ) => {
   const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage, refetch, isLoading, isError } =
@@ -171,6 +173,13 @@ export const useAutomationRunsInRange = (
       },
       getNextPageParam: (lastPage, pages) =>
         pages.length * RUNS_PAGE_SIZE < lastPage.total ? pages.length + 1 : undefined,
+      refetchInterval: (result) =>
+        selectedRunId &&
+        result?.pages.some(({ runs }) =>
+          runs.some(({ id: runId, status }) => runId === selectedRunId && status === 'running')
+        )
+          ? RUN_ACTIVITY_POLL_INTERVAL_MS
+          : false,
       retry: false,
     });
 
@@ -226,8 +235,6 @@ export const useAutomationsRunCounts = (
 
 type AutomationRunActivity =
   NightshiftInvestigationsAPIReturnType<'GET /internal/nightshift/automations/{id}/run_activity'>;
-const RUN_ACTIVITY_POLL_INTERVAL_MS = 5_000;
-
 export const useAutomationRunActivity = (
   automation: Pick<Automation, 'id' | 'isEnabled' | 'trigger' | 'runtime'>,
   { enabled = true }: { enabled?: boolean } = {}

@@ -206,7 +206,7 @@ export const AutomationDetailFlyout = ({
   const [exit, setExit] = useState<{ path?: string }>();
   const [isNameInvalid, setIsNameInvalid] = useState(false);
   const [showValidationErrors, setShowValidationErrors] = useState(false);
-  const [selectedRun, setSelectedRun] = useState<Run>();
+  const [selectedRunId, setSelectedRunId] = useState<string>();
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const activity = useAutomationRunActivity(automation, { enabled: isActionsOpen });
   const quotas = useInvestigationQuotas({ enabled: isActionsOpen, poll: isActionsOpen });
@@ -230,9 +230,11 @@ export const AutomationDetailFlyout = ({
   const runsQuery = useAutomationRunsInRange(
     automation.id,
     runRange.startedAfter,
-    runRange.startedBefore
+    runRange.startedBefore,
+    isRunsTab ? selectedRunId : undefined
   );
   const runs = runsQuery.runs as Run[];
+  const selectedRun = runs.find(({ id }) => id === selectedRunId);
   const runCounts = useAutomationsRunCounts(
     [automation.id],
     runRange.startedAfter,
@@ -428,7 +430,7 @@ export const AutomationDetailFlyout = ({
               color="text"
               data-test-subj="automationRunDetailBack"
               onClick={() => {
-                setSelectedRun(undefined);
+                setSelectedRunId(undefined);
                 navigate(`/automations/${automation.id}/runs`);
               }}
             >
@@ -585,7 +587,7 @@ export const AutomationDetailFlyout = ({
                         key={label}
                         isSelected={Boolean(index) === isRunsTab}
                         onClick={() => {
-                          setSelectedRun(undefined);
+                          setSelectedRunId(undefined);
                           navigate(`/automations/${automation.id}${index ? '/runs' : ''}`);
                         }}
                       >
@@ -629,7 +631,7 @@ export const AutomationDetailFlyout = ({
                     startedBefore={runRange.startedBefore}
                     rangeLabel={rangeLabel}
                     automationName={automation.name}
-                    onSelect={setSelectedRun}
+                    onSelect={({ id }) => setSelectedRunId(id)}
                   />
                 ) : (
                   <>

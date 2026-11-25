@@ -186,13 +186,15 @@ export class WorkflowExecutionQueryService {
 
   async getChildWorkflowExecutions(
     parentExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    options?: { omitStepExecutions?: boolean }
   ): Promise<ChildWorkflowExecutionItem[]> {
     return getChildWorkflowExecutions({
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       parentExecutionId,
       spaceId,
+      omitStepExecutions: options?.omitStepExecutions,
     });
   }
 

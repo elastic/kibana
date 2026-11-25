@@ -51,7 +51,7 @@ export const getSlackDeliveriesRoute = createNightshiftInvestigationsServerRoute
     const executionId = params.query?.executionId;
     const spaceId = getSpaceId(request);
     try {
-      await getInvestigationsClient(request).getNotifiableInvestigation(id);
+      await getInvestigationsClient(request).assertCanReadInvestigation(id);
     } catch (error) {
       rethrowInvestigationClientError(error);
     }
@@ -65,7 +65,9 @@ export const getSlackDeliveriesRoute = createNightshiftInvestigationsServerRoute
     if (!management) throw serverUnavailable('Workflows management is not available');
     const executionIds = new Set([executionId]);
     try {
-      const children = await management.getChildWorkflowExecutions(executionId, spaceId, request);
+      const children = await management.getChildWorkflowExecutions(executionId, spaceId, request, {
+        omitStepExecutions: true,
+      });
       for (const child of children) {
         if (child.workflowId === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID) {
           executionIds.add(child.executionId);

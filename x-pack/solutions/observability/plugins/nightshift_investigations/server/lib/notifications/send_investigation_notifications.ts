@@ -19,7 +19,6 @@ import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../automations/generate_workflo
 import {
   deliverInvestigationNotifications,
   getSentMessageTs,
-  getStartedMessageTs,
 } from './deliver_investigation_notifications';
 import type { DeliverInvestigationNotificationsResult } from './deliver_investigation_notifications';
 
@@ -247,7 +246,7 @@ const recordSlackThreadStatusMessages = async ({
       }
       // A later phase edits a confirmed started message, which was already handed off.
       const messageTs =
-        phase === 'started' || !getStartedMessageTs(routing, executionId, destination)
+        phase === 'started' || !getSentMessageTs(routing, executionId, destination, 'started')
           ? getSentMessageTs(routing, executionId, destination, phase)
           : undefined;
       const channel = destination.thread?.channel ?? destination.params.channel;

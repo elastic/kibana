@@ -290,11 +290,21 @@ describe('InvestigationsQueryService', () => {
       }
     });
 
-    it('rejects a conversation on another template as not an investigation', async () => {
+    it.each(['get', 'assertCanRead'] as const)('rejects another template on %s', async (read) => {
       const { service, client } = setup();
       client.get.mockResolvedValue(conversation('conv-1', { template_id: 'escalation' }));
 
-      await expect(service.get(request, 'conv-1')).rejects.toBeInstanceOf(WrongTemplateError);
+      await expect(service[read](request, 'conv-1')).rejects.toBeInstanceOf(WrongTemplateError);
+    });
+
+    it('checks readability without loading related investigation data', async () => {
+      const { service, client, subjectsService, inProgress } = setup();
+      client.get.mockResolvedValue(conversation('conv-1'));
+
+      await service.assertCanRead(request, 'conv-1');
+
+      expect(subjectsService.listByConversationIds).not.toHaveBeenCalled();
+      expect(inProgress.isInProgress).not.toHaveBeenCalled();
     });
 
     it('lists live proposals when the caller may read them', async () => {

@@ -101,20 +101,6 @@ export const getSentMessageTs = (
       attempt.status === 'sent'
   )?.message_ts;
 
-/** The execution's single message: the one its started phase posted, edited by the terminal phase. */
-export const getStartedMessageTs = (
-  routing: NotificationRouting,
-  executionId: string,
-  destination: NotificationDestination
-): string | undefined =>
-  routing.attempts.find(
-    (attempt) =>
-      attempt.execution_id === executionId &&
-      attempt.destination_id === destination.id &&
-      attempt.phase === 'started' &&
-      attempt.status === 'sent'
-  )?.message_ts;
-
 const prepareDestinationDelivery = async (
   {
     investigation,
@@ -153,7 +139,9 @@ const prepareDestinationDelivery = async (
 
   // The terminal phase edits the started message, so the thread keeps a single message.
   const messageTs =
-    phase === 'started' ? undefined : getStartedMessageTs(routing, executionId, destination);
+    phase === 'started'
+      ? undefined
+      : getSentMessageTs(routing, executionId, destination, 'started');
   let delivery: NotificationDelivery | undefined;
   try {
     delivery = prepareNotificationDelivery({

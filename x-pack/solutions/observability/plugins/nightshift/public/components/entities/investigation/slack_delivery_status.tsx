@@ -21,7 +21,11 @@ import { isHttpFetchError, type HttpStart } from '@kbn/core-http-browser';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
 import { getEbtProps } from '@kbn/ebt-click';
-import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
+import type {
+  NightshiftInvestigationsAPIReturnType,
+  NightshiftInvestigationsPublicStart,
+} from '@kbn/nightshift-investigations-plugin/public';
+import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { parseSlackChannelInput } from '../../../common/parse_slack_channel_input';
 import { slackDeliveriesQueryKey } from '../../../data/query_keys';
@@ -32,6 +36,7 @@ import {
 } from '../../../data/relay_apps/use_relay_app_bindings';
 
 const endpoint = 'GET /internal/nightshift/investigations/{id}/slack_deliveries';
+type SlackDelivery = NightshiftInvestigationsAPIReturnType<typeof endpoint>['deliveries'][number];
 const getHttpStatus = (error: unknown): number | undefined =>
   isHttpFetchError(error) ? error.response?.status : undefined;
 const isInaccessible = (error: unknown): boolean => [403, 404].includes(getHttpStatus(error) ?? 0);
@@ -133,6 +138,38 @@ const unconfirmedMessage = i18n.translate('xpack.nightshift.slackDelivery.unconf
   defaultMessage: 'Check the channel for the message. Slack delivery could not be confirmed.',
 });
 
+const getDeliveryPresentation = (
+  { channel, reason, status }: SlackDelivery,
+  binding: SlackChannelBinding | undefined,
+  availableChannelName: string | undefined,
+  settingsHref?: string
+): { label: string; message?: string; settingsHref?: string } => {
+  const label = binding
+    ? formatChannelLabel(binding)
+    : availableChannelName !== undefined
+    ? `#${availableChannelName}`
+    : channel;
+  if (status !== 'failed' && status !== 'unconfirmed') return { label };
+  if (reason === 'channel_not_connected' && binding) {
+    return { label, message: channelWasDisconnected };
+  }
+  if (reason === 'channel_not_connected' || reason === 'app_disconnected') {
+    return {
+      label,
+      message: (settingsHref ? settingsReasonLabels : viewerReasonLabels)[reason],
+      settingsHref: status === 'failed' ? settingsHref : undefined,
+    };
+  }
+  return {
+    label,
+    message: reason
+      ? otherReasonLabels[reason]
+      : status === 'failed'
+      ? failedMessage
+      : unconfirmedMessage,
+  };
+};
+
 export const SlackDeliveryStatus = ({
   http,
   investigationsClient,
@@ -187,11 +224,6 @@ export const SlackDeliveryStatus = ({
   if (inaccessible || (!data?.deliveries.length && !isError)) return null;
 
   const httpStatus = getHttpStatus(error);
-  const reasonLabels = {
-    ...(settingsHref ? settingsReasonLabels : viewerReasonLabels),
-    ...otherReasonLabels,
-  };
-
   return (
     <section data-test-subj="nightshiftSlackDeliveryStatus">
       <EuiSpacer size="m" />
@@ -210,21 +242,18 @@ export const SlackDeliveryStatus = ({
           )}
         </h3>
       </EuiTitle>
-      {data?.deliveries.map(({ id, channel, phase, status, reason, attemptedAt }) => {
+      {data?.deliveries.map((delivery) => {
+        const { id, channel, phase, status, attemptedAt } = delivery;
         const binding = bindings.find((entry) => entry.channel === channel);
         const available = canLookUpDisconnectedChannels
           ? channels.find((entry) => entry.channel === channel)
           : undefined;
-        const channelLabel = binding
-          ? formatChannelLabel(binding)
-          : available
-          ? `#${available.displayName}`
-          : channel;
-        const channelReconnected = reason === 'channel_not_connected' && binding != null;
-        const needsSettings =
-          status === 'failed' &&
-          !channelReconnected &&
-          (reason === 'channel_not_connected' || reason === 'app_disconnected');
+        const row = getDeliveryPresentation(
+          delivery,
+          binding,
+          available?.displayName,
+          settingsHref
+        );
         return (
           <EuiFlexGroup
             key={id}
@@ -236,7 +265,7 @@ export const SlackDeliveryStatus = ({
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <strong>{channelLabel}</strong>
+                    <strong>{row.label}</strong>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -256,21 +285,15 @@ export const SlackDeliveryStatus = ({
                 />
               </EuiText>
             </EuiFlexItem>
-            {(status === 'failed' || status === 'unconfirmed') && (
+            {row.message && (
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  {channelReconnected
-                    ? channelWasDisconnected
-                    : reason
-                    ? reasonLabels[reason]
-                    : status === 'failed'
-                    ? failedMessage
-                    : unconfirmedMessage}
-                  {needsSettings && settingsHref && (
+                  {row.message}
+                  {row.settingsHref && (
                     <>
                       {' '}
                       <EuiLink
-                        href={settingsHref}
+                        href={row.settingsHref}
                         data-test-subj="nightshiftSlackDeliverySettingsLink"
                         {...getEbtProps({
                           action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,

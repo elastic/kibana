@@ -547,7 +547,9 @@ describe('WorkflowsManagementApi', () => {
       manage: false,
     }));
 
-    const result = await api.getChildWorkflowExecutions('parent', 'default', mockRequest);
+    const result = await api.getChildWorkflowExecutions('parent', 'default', mockRequest, {
+      omitStepExecutions: true,
+    });
 
     expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledTimes(1);
     expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(

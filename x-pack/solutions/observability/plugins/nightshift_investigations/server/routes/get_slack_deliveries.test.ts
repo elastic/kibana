@@ -18,7 +18,7 @@ const { handler, params } =
 
 const setup = () => {
   const { client } = createRoutingTestContext();
-  const getNotifiableInvestigation = jest.fn();
+  const assertCanReadInvestigation = jest.fn();
   const getNotificationRoutingClient = jest.fn().mockResolvedValue(client);
   const getChildWorkflowExecutions = jest
     .fn()
@@ -30,14 +30,14 @@ const setup = () => {
       request: httpServerMock.createKibanaRequest(),
       params: params.parse({ path: { id: 'inv-1' }, query: executionId ? { executionId } : {} }),
       getSpaceId: () => 'default',
-      getInvestigationsClient: () => ({ getNotifiableInvestigation }),
+      getInvestigationsClient: () => ({ assertCanReadInvestigation }),
       getNotificationRoutingClient,
       getWorkflowsManagement: () => ({ management: { getChildWorkflowExecutions } }),
     } as never);
   return {
     client,
     call,
-    getNotifiableInvestigation,
+    assertCanReadInvestigation,
     getNotificationRoutingClient,
     getChildWorkflowExecutions,
   };
@@ -187,8 +187,8 @@ it('reads a retained receipt when its workflow execution is gone', async () => {
 });
 
 it('requires a scoped investigation read before loading the routing document', async () => {
-  const { call, getNotifiableInvestigation, getNotificationRoutingClient } = setup();
-  getNotifiableInvestigation.mockRejectedValue(new InvestigationNotFoundError('inv-1'));
+  const { call, assertCanReadInvestigation, getNotificationRoutingClient } = setup();
+  assertCanReadInvestigation.mockRejectedValue(new InvestigationNotFoundError('inv-1'));
 
   await expect(call()).rejects.toMatchObject({ output: { statusCode: 404 } });
   expect(getNotificationRoutingClient).not.toHaveBeenCalled();

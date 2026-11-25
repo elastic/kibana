@@ -1417,17 +1417,28 @@ export class NightshiftInvestigationsClient {
     return toNotifiableInvestigation(await this.getSharedInvestigation(investigationId), undefined);
   }
 
-  private async getSharedInvestigation(investigationId: string): Promise<SharedInvestigation> {
+  async assertCanReadInvestigation(investigationId: string): Promise<void> {
+    await this.getSharedInvestigationsClient()
+      .assertCanRead(investigationId)
+      .catch((error: unknown) => this.rethrowInvestigationReadError(investigationId, error));
+  }
+
+  private getSharedInvestigationsClient() {
     const { agenticInvestigations } = this.requireWriteDeps();
-    return agenticInvestigations
-      .getInvestigationsClient(this.request)
+    return agenticInvestigations.getInvestigationsClient(this.request);
+  }
+
+  private async getSharedInvestigation(investigationId: string): Promise<SharedInvestigation> {
+    return this.getSharedInvestigationsClient()
       .get(investigationId)
-      .catch((error: unknown) => {
-        if (isConversationNotFoundError(error)) {
-          throw new InvestigationNotFoundError(investigationId);
-        }
-        throw error;
-      });
+      .catch((error: unknown) => this.rethrowInvestigationReadError(investigationId, error));
+  }
+
+  private rethrowInvestigationReadError(investigationId: string, error: unknown): never {
+    if (isConversationNotFoundError(error)) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+    throw error;
   }
 
   /**
