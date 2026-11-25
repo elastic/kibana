@@ -536,6 +536,35 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('createWorkflowFromTemplateRemix', () => {
+    it('should call POST /internal/workflows/library/templates/{slug}/remix with the YAML and version', async () => {
+      await api.createWorkflowFromTemplateRemix({
+        yaml: 'name: Remixed',
+        template: { slug: 'ip-reputation-check', version: '1.2.0' },
+      });
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/internal/workflows/library/templates/ip-reputation-check/remix',
+        {
+          body: JSON.stringify({ yaml: 'name: Remixed', version: '1.2.0' }),
+          version: INTERNAL_VERSION,
+        }
+      );
+    });
+
+    it('should encode the slug', async () => {
+      await api.createWorkflowFromTemplateRemix({
+        yaml: 'name: Remixed',
+        template: { slug: 'slug/with/slashes', version: '1.0.0' },
+      });
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/internal/workflows/library/templates/slug%2Fwith%2Fslashes/remix',
+        expect.anything()
+      );
+    });
+  });
+
   describe('getLibraryHealth', () => {
     it('should call GET /internal/workflows/library/health', async () => {
       await api.getLibraryHealth();

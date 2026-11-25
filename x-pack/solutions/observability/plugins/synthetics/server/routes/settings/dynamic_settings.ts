@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
+import { isEqual } from 'lodash';
 import { z } from '@kbn/zod';
 import { MAX_ROUTE_STRING_LENGTH } from '../zod_query';
 import {
@@ -13,6 +14,7 @@ import {
   getSyntheticsDynamicSettings,
   setSyntheticsDynamicSettings,
 } from '../../saved_objects/synthetics_settings';
+import { DefaultRuleService } from '../default_alerts/default_alert_service';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DynamicSettings } from '../../../common/runtime_types';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
@@ -55,7 +57,13 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
     body: DynamicSettingsSchema,
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request, response, server }): Promise<DynamicSettings> => {
+  handler: async ({
+    context,
+    savedObjectsClient,
+    request,
+    response,
+    server,
+  }): Promise<DynamicSettings> => {
     const {
       privateLocationsSyncInterval: _ignoredSyncInterval,
       rebalancePrivateLocationShardsEnabled,
@@ -82,10 +90,24 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
     const { rebalancePrivateLocationShardsEnabled: _ignoredRebalance, ...prevWithoutRebalance } =
       prevSettings;
 
-    const attr = await setSyntheticsDynamicSettings(savedObjectsClient, {
+    const nextSettings = {
       ...prevWithoutRebalance,
       ...otherSettings,
-    } as DynamicSettingsAttributes);
+    } as DynamicSettingsAttributes;
+
+    // Rules are refreshed before persisting so a failure leaves the previous connectors
+    // intact in the stored settings and the save can be retried.
+    if (
+      !isEqual(prevSettings.defaultConnectors, nextSettings.defaultConnectors) ||
+      !isEqual(prevSettings.defaultEmail, nextSettings.defaultEmail)
+    ) {
+      await new DefaultRuleService(context, server, savedObjectsClient).refreshDefaultRuleActions(
+        nextSettings,
+        prevSettings.defaultConnectors
+      );
+    }
+
+    const attr = await setSyntheticsDynamicSettings(savedObjectsClient, nextSettings);
 
     let persistedRebalance = true;
     if (rebalanceChanged) {

@@ -14,41 +14,47 @@ import {
   OVERVIEW_FILTER_MAX_LENGTHS,
   OVERVIEW_FILTER_NAMES,
   OVERVIEW_FILTER_SIZE,
-  PAGE_FILTER_NAMES,
+  URL_FILTER_NAMES,
   type ListedFilterName,
   type OverviewFilterName,
   type OverviewFilterOptions,
   type OverviewFilters,
 } from '../../../common/overview_filters';
-import { EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
-import { SOURCE_URL_FIELD } from '../../sessions/source_fields';
+import { ENVIRONMENT_FIELDS, EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
+import {
+  DEVICE_DESKTOP_LABEL,
+  DEVICE_MOBILE_LABEL,
+  SOURCE_APP_VERSION_FIELDS,
+  SOURCE_MOBILE_FIELDS,
+  SOURCE_URL_FIELD,
+  SOURCE_URL_TEMPLATE_FIELD,
+} from '../../../common/otel_source_fields';
 import { environmentFilter } from '../helpers/environment';
-import { ENVIRONMENT_FIELDS, eventCount } from './queries';
-
-/**
- * Whether the browser runs on a mobile device. EDOT Browser records it even where no device model
- * or type is, so the device falls back to "Mobile" or "Desktop" rather than to nothing.
- */
-const MOBILE_FIELDS = ['resource.attributes.browser.mobile', 'attributes.browser.mobile'] as const;
+import { eventCount } from './queries';
 
 /** What a field that is not a name says, per value: the device name of `browser.mobile`. */
-const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
-  MOBILE_FIELDS.map((field) => [field, { true: 'Mobile', false: 'Desktop' }])
+export const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
+  SOURCE_MOBILE_FIELDS.map((field) => [
+    field,
+    { true: DEVICE_MOBILE_LABEL, false: DEVICE_DESKTOP_LABEL },
+  ])
 );
 
 /**
- * The fields each filter reads, in priority order. The sessions' lists come first, so a browser,
- * OS, device or country means the same in the Overview and the Sessions where they have one; the
- * device then falls back to `browser.mobile`.
+ * The fields each filter reads, in priority order. The session summaries' lists come first, so a
+ * browser, OS, device or country means the same in the Overview and the Sessions where they have
+ * one; the device then falls back to `browser.mobile`.
  */
-const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
+export const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
   browser: SESSION_ATTRIBUTE_FIELDS.browser,
   os: SESSION_ATTRIBUTE_FIELDS.os,
-  device: [...SESSION_ATTRIBUTE_FIELDS.device, ...MOBILE_FIELDS],
+  device: [...SESSION_ATTRIBUTE_FIELDS.device, ...SOURCE_MOBILE_FIELDS],
   country: SESSION_ATTRIBUTE_FIELDS.countryIso,
-  // The version the application reports, a resource attribute of OpenTelemetry.
-  appVersion: ['resource.attributes.service.version', 'attributes.service.version'],
-  pageUrl: [SOURCE_URL_FIELD],
+  appVersion: SOURCE_APP_VERSION_FIELDS,
+  // The route the app reports, like `/products/{slug}`, groups the URLs of a page; without one, as
+  // with an SDK that doesn't add routes, the page is its URL
+  pageUrl: [SOURCE_URL_TEMPLATE_FIELD, SOURCE_URL_FIELD],
+  // The text of the URL itself, which the route doesn't have
   pageContains: [SOURCE_URL_FIELD],
 };
 
@@ -60,7 +66,7 @@ export const filterFieldOf = (name: OverviewFilterName): string =>
   FILTER_SOURCE_FIELDS[name].length > 1 ? runtimeFieldOf(name) : FILTER_SOURCE_FIELDS[name][0];
 
 /**
- * Takes the first non-empty value of the fields, like the sessions do, so a
+ * Takes the first non-empty value of the fields, like the session summaries do, so a
  * document with the same value in both scopes is counted once. Unmapped fields are skipped: the
  * OTel indices map only what their data had. A field with `params.labels` says its value in other
  * words, e.g. `true` as "Mobile"; a value without a label is skipped.
@@ -139,24 +145,24 @@ const filterClause = (
 };
 
 /**
- * The selected filters that narrow every document of the Overview, except `exclude`'s own. The
- * page filters are left out: the web vitals, errors and clicks carry no page URL yet, so they
- * narrow the page loads only (`pageLoadFilters`).
+ * The selected filters that narrow every log of the Overview, except `exclude`'s own. The filters
+ * on the URL text are left out: the web vitals and JS errors carry no URL, so they narrow the page
+ * loads only (`pageLoadFilters`).
  */
 export const documentFilters = (
   filters: OverviewFilters,
   exclude?: OverviewFilterName
 ): estypes.QueryDslQueryContainer[] =>
   OVERVIEW_FILTER_NAMES.filter(
-    (name) => !PAGE_FILTER_NAMES.some((page) => page === name) && name !== exclude
+    (name) => !URL_FILTER_NAMES.some((url) => url === name) && name !== exclude
   ).flatMap((name) => filterClause(name, filters));
 
-/** The selected page filters, which narrow the page loads (except `exclude`'s own). */
+/** The selected filters on the URL text, which narrow the page loads (except `exclude`'s own). */
 export const pageLoadFilters = (
   filters: OverviewFilters,
   exclude?: OverviewFilterName
 ): estypes.QueryDslQueryContainer[] =>
-  PAGE_FILTER_NAMES.filter((name) => name !== exclude).flatMap((name) =>
+  URL_FILTER_NAMES.filter((name) => name !== exclude).flatMap((name) =>
     filterClause(name, filters)
   );
 

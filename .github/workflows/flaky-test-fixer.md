@@ -19,6 +19,10 @@ permissions:
   actions: read
   checks: read
   models: read
+  # Agent Router token for the agent (see shared/agent-router.md)
+  id-token: write
+  # threat detection runs on Copilot
+  copilot-requests: write
 
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request) }}"
 
@@ -48,25 +52,33 @@ env:
 imports:
   - .github/workflows/buildkite-cli-setup.md
   - .github/workflows/shared/app-dex-agents-otel.md
+  - .github/workflows/shared/agent-router.md
 
 engine:
   id: claude
-  version: '2.1.165'
-  model: opus
+  version: '2.1.317'
+  model: claude-opus-5-5
   max-turns: 200
   env:
     BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
-    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-    ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
+    ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
+    # `Bearer <token>`, exported by shared/agent-router.md. The fallback passes the activation job's key check.
+    ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
+    # the gateway reads only `Authorization: Bearer`
+    AWF_ANTHROPIC_AUTH_HEADER: Authorization
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5-5
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-5-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-5-5
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
 tools:
   github:
     toolsets: [default, search]
+    # the default for a public repository; issues by authors with no repository role are hidden
+    # from the agent, so the daily flaky test report's bot has to be trusted for its suite issues
+    min-integrity: approved
+    trusted-users: ['elastic-vault-github-plugin-prod[bot]']
   web-fetch:
   bash: true
 
@@ -89,7 +101,8 @@ steps:
       corepack prepare "pnpm@${PNPM_VERSION}" --activate
       pnpm --version
   - name: Bootstrap Kibana
-    run: pnpm kbn bootstrap
+    # `id-token: write` covers the whole job: keep the OIDC request variables away from install scripts
+    run: exec env -u ACTIONS_ID_TOKEN_REQUEST_TOKEN -u ACTIONS_ID_TOKEN_REQUEST_URL pnpm kbn bootstrap
   - name: Expose Kibana's Node.js path to the agent
     # the sandbox rebuilds PATH from every `bin` dir under RUNNER_TOOL_CACHE, so the agent's
     # `node` is whichever version the runner cached first, not the one setup-node just
@@ -160,7 +173,6 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - openrouter.ai
     # to properly display links to best practices docs
     - elastic.co
 sandbox:
@@ -168,11 +180,14 @@ sandbox:
 
 safe-outputs:
   threat-detection:
+    # The detection job can't request an OIDC token, so it runs on Copilot.
     engine:
-      id: claude
-      version: '2.1.165'
+      id: copilot
+      model: claude-opus-5
       env:
         BUILDKITE_API_TOKEN: ${{ '' }}
+    # a detection failure blocks the outputs instead of passing with a warning
+    continue-on-error: false
   activation-comments: true
   report-failure-as-issue: false
   messages:
@@ -261,7 +276,8 @@ safe-outputs:
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
 strict: false
-timeout-minutes: 90
+# the Agent Router token lasts about an hour and is not refreshed
+timeout-minutes: 55
 max-ai-credits: 1200
 ---
 

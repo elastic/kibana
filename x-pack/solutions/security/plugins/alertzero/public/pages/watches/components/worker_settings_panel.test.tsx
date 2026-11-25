@@ -81,6 +81,7 @@ const createWorker = (workflowId: string | null): Worker => ({
   state: 'ok',
   settingsRevision: 1,
   workflowId,
+  workflowOutdated: false,
   blockingReasons: [],
   settings: {
     workerId: WORKER_ID,
@@ -350,6 +351,7 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
       state: 'ok',
       settingsRevision: 1,
       workflowId: null,
+      workflowOutdated: false,
       blockingReasons: [],
       settings: {
         workerId: HUNT_WORKER_ID,

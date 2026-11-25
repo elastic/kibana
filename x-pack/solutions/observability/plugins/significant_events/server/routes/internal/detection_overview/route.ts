@@ -6,6 +6,10 @@
  */
 
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  significantEventStatusSchema,
+} from '@kbn/significant-events-schema';
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
@@ -29,6 +33,13 @@ const detectionOverviewRoute = createServerRoute({
       query: z.object({
         from: isoDateTime(),
         to: isoDateTime(),
+        // Narrows the significant events count so it matches the events list filter.
+        status: z
+          .union([
+            significantEventStatusSchema,
+            z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
+          ])
+          .optional(),
       }),
     })
   ),
@@ -49,6 +60,9 @@ const detectionOverviewRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
+    const { status, ...timeRange } = params.query;
+    const statuses = status === undefined ? undefined : Array.isArray(status) ? status : [status];
+
     const sources = await listAllSources(sourcesClient);
     const sourceIds = sources.map(({ id }) => id);
     const [readableSourceIds, knowledgeIndicatorClient, detectionClient, eventClient] =
@@ -65,10 +79,15 @@ const detectionOverviewRoute = createServerRoute({
         knowledgeIndicatorClient.countUnbackedQueries(readableSourceIds),
         knowledgeIndicatorClient.countRuleBackedQueries(readableSourceIds),
         detectionClient
-          .findLatestPaginated({ ...params.query, page: 1, perPage: 1 })
+          .findLatestPaginated({ ...timeRange, page: 1, perPage: 1 })
           .then(({ total }) => total),
         eventClient
-          .findLatestByCurrentStatePaginated({ ...params.query, page: 1, perPage: 1 })
+          .findLatestByCurrentStatePaginated({
+            ...timeRange,
+            ...(statuses ? { status: statuses } : {}),
+            page: 1,
+            perPage: 1,
+          })
           .then(({ total }) => total),
         // Counted on its own: the panel's entity list stops at 1,000 records.
         knowledgeIndicatorClient.countEntities(readableSourceIds),

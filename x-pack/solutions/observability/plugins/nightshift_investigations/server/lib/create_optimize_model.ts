@@ -12,17 +12,21 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { NightshiftModelBlockedError } from '@kbn/significant-events-schema';
 import {
-  NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
 } from '@kbn/nightshift-shared';
+import type { ModelUsageCollector } from './model_usage_collector';
 
-/** Attributes Wiki and Semantic Memory optimize LLM calls to Nightshift investigation memory spend. */
-export const createInvestigationMemoryTelemetry = (
+/**
+ * Attributes a background job's LLM calls (memory optimize, Wiki optimize, decision trees) to its
+ * own Nightshift use case, all within the investigation cost group.
+ */
+export const createInvestigationBackgroundTelemetry = (
+  usageId: string,
   interactionId: string
 ): ConnectorTelemetryMetadata => ({
-  pluginId: NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  pluginId: usageId,
   aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
   productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
   productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
@@ -43,6 +47,7 @@ export const createOptimizeModel = async ({
   savedObjects,
   uiSettings,
   telemetryMetadata,
+  modelUsage,
   logger,
 }: {
   request: KibanaRequest;
@@ -53,6 +58,8 @@ export const createOptimizeModel = async ({
   savedObjects: CoreStart['savedObjects'] | undefined;
   uiSettings: CoreStart['uiSettings'] | undefined;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  /** Collects the LLM usage of the returned model, for the background activity event. */
+  modelUsage?: ModelUsageCollector;
   logger: Logger;
 }): Promise<ScopedModel | undefined> => {
   if (!agentBuilder || !inference || !savedObjects || !uiSettings) {
@@ -85,6 +92,7 @@ export const createOptimizeModel = async ({
     defaultConnectorId: connectorId,
     ...(telemetryMetadata ? { telemetryMetadata } : {}),
   });
+  modelUsage?.addModelProvider(modelProvider.getUsageStats);
 
   try {
     const model = await modelProvider.getDefaultModel();

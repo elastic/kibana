@@ -10,3 +10,10 @@
  * `xpack.actions.inboundEvents.enabled` remains the hard gate; this flag can only force ingress off.
  */
 export const ACTIONS_INBOUND_EVENTS_ENABLED_FLAG = 'actions.inboundEventsEnabled';
+
+/**
+ * Experimental switch for the connector catalog. Fallback is false, so deployments without a
+ * flag provider (on-prem, air-gapped) stay off unless `feature_flags.overrides` sets the flag.
+ * `xpack.actions.catalog.enabled` remains the hard gate; this flag has no effect when it is false.
+ */
+export const ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG = 'actions.connectorCatalogEnabled';

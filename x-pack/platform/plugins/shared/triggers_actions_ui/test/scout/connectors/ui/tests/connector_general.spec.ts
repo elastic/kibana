@@ -361,7 +361,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await searchConnectors(page, connectorName);
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
 
-    await page.locator('.euiTableRowCellCheckbox .euiCheckbox__input').click();
+    await page.testSubj.locator('connectors-row').getByRole('checkbox').click();
     await page.testSubj.click('bulkDelete');
     await page.testSubj
       .locator('deleteIdsConfirmation')

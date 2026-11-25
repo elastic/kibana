@@ -24,7 +24,7 @@ jest.mock('../../../entity/use_entity_flyout_api');
 jest.mock('../../../shared/components/document_tools_flyout_header', () => ({
   DocumentToolsFlyoutHeader: () => <div data-test-subj="mock-document-tools-flyout-header" />,
 }));
-jest.mock('../../../../flyout/attack_details/left/components/attack_entity_insight_rows', () => ({
+jest.mock('./components/attack_entity_insight_rows', () => ({
   AttackUserInsightsRow: ({
     identityFields,
     buildEntityOverrides,

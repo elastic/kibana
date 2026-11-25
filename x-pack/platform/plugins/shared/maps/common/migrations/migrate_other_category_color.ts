@@ -7,24 +7,27 @@
 
 import _ from 'lodash';
 import type { Writable } from '@kbn/utility-types';
-import { LAYER_STYLE_TYPE, STYLE_TYPE, VECTOR_STYLES } from '../constants';
-import type {
-  ColorStylePropertyDescriptor,
-  LayerDescriptor,
-  VectorStyleDescriptor,
-} from '../descriptor_types';
+import { LAYER_STYLE_TYPE, STYLE_TYPE, type VECTOR_STYLES } from '../constants';
+import type { LayerDescriptor, VectorStyleDescriptor } from '../descriptor_types';
 import type { StoredMapAttributes } from '../../server';
 
 const COLOR_STYLES = [
-  VECTOR_STYLES.FILL_COLOR,
-  VECTOR_STYLES.LINE_COLOR,
-  VECTOR_STYLES.LABEL_COLOR,
-  VECTOR_STYLES.LABEL_BORDER_COLOR,
+  'fillColor', // legacy persisted key (pre snake_case rename)
+  'lineColor',
+  'labelColor',
+  'labelBorderColor',
 ];
 
-function migrateColorProperty(
-  descriptor: ColorStylePropertyDescriptor
-): ColorStylePropertyDescriptor {
+// Migrations run on persisted data, which uses the legacy camelCase keys
+interface LegacyColorDescriptor {
+  type: STYLE_TYPE;
+  options: {
+    customColorPalette?: Array<{ stop: string | null; color: string }>;
+    otherCategoryColor?: string;
+  };
+}
+
+function migrateColorProperty(descriptor: LegacyColorDescriptor): LegacyColorDescriptor {
   if (descriptor.type === STYLE_TYPE.STATIC) {
     return descriptor;
   }
@@ -83,7 +86,7 @@ export function migrateOtherCategoryColor({
         [styleName]: migrateColorProperty(
           (layerDescriptor.style as VectorStyleDescriptor)!.properties[
             styleName
-          ] as unknown as ColorStylePropertyDescriptor
+          ] as unknown as LegacyColorDescriptor
         ),
       };
     });

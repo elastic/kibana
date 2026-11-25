@@ -10,7 +10,10 @@ import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { GroupedResourcesNode } from './grouped_resources_node';
 import type { GroupedNodeData } from '../../../../common/service_map';
+import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
+
+let mockColorMode: 'LIGHT' | 'DARK' = 'LIGHT';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -18,7 +21,7 @@ jest.mock('@elastic/eui', () => {
     ...original,
     useEuiTheme: () => ({
       euiTheme: MOCK_EUI_THEME_FOR_USE_THEME,
-      colorMode: 'LIGHT',
+      colorMode: mockColorMode,
     }),
   };
 });
@@ -103,6 +106,23 @@ function renderGroupedResourcesNode(
 }
 
 describe('GroupedResourcesNode', () => {
+  beforeEach(() => {
+    mockColorMode = 'LIGHT';
+    jest.mocked(getSpanIcon).mockClear();
+  });
+
+  it('requests the light span icon in light mode', () => {
+    renderGroupedResourcesNode();
+    expect(getSpanIcon).toHaveBeenCalledWith('external', 'http', false);
+  });
+
+  it('requests the dark span icon in dark mode', () => {
+    mockColorMode = 'DARK';
+    renderGroupedResourcesNode();
+    expect(getSpanIcon).toHaveBeenCalledWith('external', 'http', true);
+    expect(getSpanIcon).not.toHaveBeenCalledWith('external', 'http', false);
+  });
+
   it('renders grouped resources label', () => {
     renderGroupedResourcesNode();
     expect(screen.getByText('5 external resources')).toBeInTheDocument();

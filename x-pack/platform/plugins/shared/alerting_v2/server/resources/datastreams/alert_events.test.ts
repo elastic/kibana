@@ -5,13 +5,36 @@
  * 2.0.
  */
 
+import { signalEventStatusSchema } from '@kbn/alerting-v2-schemas';
 import {
   alertEventSchema,
+  alertEventStatus,
   buildRuleEventDocument,
   getAlertEventsResourceDefinition,
 } from './alert_events';
 
+describe('signal event statuses', () => {
+  it('match the stored event statuses, so Create Signal can write every one of them', () => {
+    expect([...signalEventStatusSchema.options].sort()).toEqual(
+      Object.values(alertEventStatus).sort()
+    );
+  });
+});
+
 describe('getAlertEventsResourceDefinition', () => {
+  it('maps routing_tags as a top-level keyword, not on rule', () => {
+    const { mappings } = getAlertEventsResourceDefinition();
+
+    expect(mappings.properties?.routing_tags).toEqual({ type: 'keyword', ignore_above: 128 });
+    expect(mappings.properties?.rule).toEqual({
+      type: 'object',
+      properties: {
+        id: { type: 'keyword' },
+        version: { type: 'long' },
+      },
+    });
+  });
+
   it('has no retention by default', () => {
     expect(getAlertEventsResourceDefinition().lifecycle).toEqual({});
   });

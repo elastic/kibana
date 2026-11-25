@@ -187,6 +187,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
       addAttachment: mockAddAttachment,
+      removeAttachment: jest.fn(),
       updateAttachmentOrigin,
       events: {
         getChatEvents$: jest.fn((conversationId: string) =>
@@ -205,6 +206,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const dashboardPlugin: DashboardStart = {
       dashboardAppClientApi$,
       findDashboardsService,
+      areEqual: jest.fn().mockResolvedValue(false),
     } as unknown as DashboardStart;
 
     const data = dataPluginMock.createStartContract();
@@ -306,6 +308,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       agentBuilder: {
         attachments: { addAttachmentType },
         addAttachment: jest.fn(),
+        removeAttachment: jest.fn(),
         updateAttachmentOrigin: jest.fn().mockResolvedValue(undefined),
         events: {
           getChatEvents$: jest.fn(() => new Subject<ChatEvent>().asObservable()),
@@ -326,6 +329,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       dashboardPlugin: {
         dashboardAppClientApi$,
         findDashboardsService,
+        areEqual: jest.fn().mockResolvedValue(false),
       } as unknown as DashboardStart,
       data: dataPluginMock.createStartContract(),
       unifiedSearch: {

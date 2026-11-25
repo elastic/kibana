@@ -7,7 +7,7 @@
 
 import { take } from 'lodash/fp';
 import { useQuery } from '@kbn/react-query';
-import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
+import { prettifyQuery } from '@kbn/esql-utils';
 import { useMemo } from 'react';
 import { buildEntityNameFilter, EntityType } from '../../../../../../common/search_strategy';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
@@ -69,16 +69,15 @@ export const usePrivilegedUsersTableData = (
     queryKey: ['privileged-users-table', privilegedUsersTableQuery, filterQueryWithoutTimerange],
     enabled: toggleStatus,
     queryFn: async () => {
-      return getESQLResults({
-        esqlQuery: privilegedUsersTableQuery,
-        search: data.search.search,
-        filter: filterQueryWithoutTimerange,
-        executionContext: PRIVILEGED_USERS_TABLE_CONTEXT,
-      });
+      const { rawResponse } = await data.search.esql(
+        { query: privilegedUsersTableQuery, filter: filterQueryWithoutTimerange },
+        { executionContext: PRIVILEGED_USERS_TABLE_CONTEXT }
+      );
+      return rawResponse;
     },
   });
 
-  const records = useMemo(() => esqlResponseToRecords<TableItemType>(result?.response), [result]);
+  const records = useMemo(() => esqlResponseToRecords<TableItemType>(result), [result]);
 
   const nameFilterQuery = useMemo(() => {
     const userNames = records.map((user) => user['user.name']);

@@ -13,6 +13,7 @@ import type { EntityType as EntityStoreEntityType } from '@kbn/entity-store/comm
 import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import type { TimeRange } from '../queries/time_range';
 
 export const ALLOWED_ENTITY_TYPES = [
   'user',
@@ -44,7 +45,6 @@ export const SEVERITY_COUNT_FIELDS = {
   low: 'alert_low',
 } as const;
 
-export const TIME_RANGE_OPTIONS = ['24h', '7d', '30d'] as const;
 export const ROWS_MODES = ['resolved', 'individual'] as const;
 export const SORT_DIRECTIONS = ['asc', 'desc'] as const;
 
@@ -55,8 +55,9 @@ export const isOneOf = <T extends string>(options: readonly T[], value: unknown)
  * Identity and namespace source fields from entity definitions. The alert enrich rebuilds
  * each row's EUID filter from them; without the namespace sources (e.g. `event.module`)
  * the filter derives a different namespace and misses unstamped alerts. Identity fields that
- * the definition does not store (such as `user.entity.id`) are left out: the entity records
- * have no such column, so keeping them would fail the query.
+ * the definition does not store are left out: the entity records have no such column, so
+ * keeping them would fail the query. `user.entity.id` is stored, so AWS rows keep it and
+ * their alerts resolve to the ARN entity.
  */
 const IDENTITY_KEEP_FIELDS = [
   ...new Set([
@@ -92,7 +93,6 @@ export const ENTITY_FIELDS = [
   ...IDENTITY_KEEP_FIELDS,
 ] as const;
 
-export type TimeRange = (typeof TIME_RANGE_OPTIONS)[number];
 export type RowsMode = (typeof ROWS_MODES)[number];
 export type Row = Record<string, unknown>;
 export type SortDir = (typeof SORT_DIRECTIONS)[number];

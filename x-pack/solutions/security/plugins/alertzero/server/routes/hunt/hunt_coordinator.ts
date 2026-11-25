@@ -196,7 +196,11 @@ export const registerHuntCoordinatorRoute = ({
           const reportsEsClient = core.elasticsearch.client.asInternalUser;
           const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
-          const indexPatterns = await resolveHuntUniverse(context, logger);
+          const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
+            context,
+            logger,
+            isCpsEnabled()
+          );
 
           const {
             conversation_id: conversationId,
@@ -276,6 +280,7 @@ export const registerHuntCoordinatorRoute = ({
               max_tier2_sample_events,
               trigger,
               indexPatterns,
+              policySkippedPatterns: policySkipped,
               crossProjectSearch: isCpsEnabled(),
               run_id: runId,
             },

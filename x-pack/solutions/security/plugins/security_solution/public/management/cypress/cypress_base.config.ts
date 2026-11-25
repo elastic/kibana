@@ -9,7 +9,6 @@
 import registerDataSession from 'cypress-data-session/src/plugin';
 import { merge } from 'lodash';
 
-import { transparentApiProxy } from './support/transparent_api_proxy';
 import { samlAuthentication } from './support/saml_authentication';
 import { getVideosForFailedSpecs } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
@@ -89,8 +88,6 @@ export const getCypressBaseConfig = (
 
           dataLoaders(on, config);
 
-          transparentApiProxy(on, config);
-
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);
 
@@ -98,7 +95,7 @@ export const getCypressBaseConfig = (
 
           responseActionTasks(on, config);
 
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
           require('@cypress/grep/plugin').plugin(config);
 
           on('after:spec', (_, results) => {

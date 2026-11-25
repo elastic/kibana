@@ -8,10 +8,13 @@
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { dateRangeQuery } from '@kbn/es-query';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { columnPath } from './esql_categorize';
+import { esqlTimeRange } from './esql_time_range';
 
 const NO_FIELDS_SENTINEL = '<no-fields>';
+// NULLIFY's type for a requested column that no index maps; set by mappings, not values.
+const UNMAPPED_COLUMN_TYPE = 'null';
 
 const isTracedEsClient = (
   esClient: ElasticsearchClient | TracedElasticsearchClient
@@ -30,6 +33,8 @@ export interface GetEsqlColumnSchemaParams {
   index: string | string[];
   start?: number;
   end?: number;
+  /** Probes only these columns instead of the whole schema; the unmapped ones are left out. */
+  fields?: string[];
   signal?: AbortSignal;
 }
 
@@ -38,18 +43,11 @@ export async function getEsqlColumnSchema({
   index,
   start,
   end,
+  fields,
   signal,
 }: GetEsqlColumnSchemaParams): Promise<EsqlColumnSchema[]> {
   const indices = Array.isArray(index) ? index : [index];
-  const filter =
-    start !== undefined && end !== undefined
-      ? { bool: { filter: dateRangeQuery(start, end) } }
-      : undefined;
-
-  const queryParams = {
-    query: esql.from(indices).limit(0).print('basic'),
-    ...(filter ? { filter } : {}),
-  };
+  const queryParams = { query: buildSchemaQuery(indices, fields, { start, end }) };
   const response = isTracedEsClient(esClient)
     ? ((await esClient.esql(
         'get_esql_column_schema',
@@ -59,8 +57,33 @@ export async function getEsqlColumnSchema({
         signal,
       })) as unknown as ESQLSearchResponse);
 
-  return parseColumns(response);
+  const columns = parseColumns(response);
+  return fields?.length ? columns.filter(({ type }) => type !== UNMAPPED_COLUMN_TYPE) : columns;
 }
+
+// Inline time range: a request `filter` on an ES|QL view takes minutes on very wide schemas.
+const buildSchemaQuery = (
+  indices: string[],
+  fields: string[] = [],
+  { start, end }: { start?: number; end?: number }
+): string => {
+  const source =
+    start !== undefined && end !== undefined
+      ? esql.from(indices).where`${esqlTimeRange(start, end)}`
+      : esql.from(indices);
+
+  const [field, ...otherFields] = fields.map(columnPath);
+  if (field === undefined) {
+    return source.limit(0).print('basic');
+  }
+
+  // Without NULLIFY, a column that no index maps fails the whole probe.
+  return source
+    .keep(field, ...otherFields)
+    .limit(0)
+    .addSetCommand('unmapped_fields', 'NULLIFY')
+    .print('basic');
+};
 
 function parseColumns(response: ESQLSearchResponse): EsqlColumnSchema[] {
   return response.columns.flatMap((column) => {

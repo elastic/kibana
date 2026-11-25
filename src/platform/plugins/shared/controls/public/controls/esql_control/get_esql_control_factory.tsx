@@ -58,6 +58,12 @@ export const getESQLControlFactory = <
     type: ESQL_CONTROL,
     getPlacementHints,
     layoutConstraints: LAYOUT_CONSTRAINTS,
+    isDuplicate: (incomingState, existingState) =>
+      Boolean(
+        incomingState.variable_name &&
+          incomingState.variable_name === existingState.variable_name &&
+          incomingState.control_type === existingState.control_type
+      ),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 

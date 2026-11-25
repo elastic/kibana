@@ -9,7 +9,7 @@ workflows team before implementation.
 
 This PR consolidated the HITL claim + resume into a single core API,
 `WorkflowsManagementApi.resumeWorkflowExecution`
-(`src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts`).
+(`x-pack/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts`).
 All ES access on that path runs as the **internal user** (the query service is built with
 `coreStart.elasticsearch.client.asInternalUser` — see `workflows_management_service.ts`),
 with authorization enforced at the route layer and `spaceId` guards in the queries/script.

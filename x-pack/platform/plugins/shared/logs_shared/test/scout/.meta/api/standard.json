@@ -1,0 +1,102 @@
+{
+  "sha1": "725557d711508b95d4cd5d471d378f6e78014c09",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "48007daa1761965-18a14629124b009",
+      "title": "Log entries search strategy request limits returns entries for an inline log view at the column limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/logs_shared/test/scout/api/tests/log_entries_search_strategy_limits.spec.ts",
+        "line": 51,
+        "column": 22
+      }
+    },
+    {
+      "id": "48007daa1761965-8ec3595e951a60e",
+      "title": "Log entries search strategy request limits rejects a size above the limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/logs_shared/test/scout/api/tests/log_entries_search_strategy_limits.spec.ts",
+        "line": 58,
+        "column": 84
+      }
+    },
+    {
+      "id": "48007daa1761965-70779ca2c686a5d",
+      "title": "Log entries search strategy request limits rejects request columns above the limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/logs_shared/test/scout/api/tests/log_entries_search_strategy_limits.spec.ts",
+        "line": 67,
+        "column": 14
+      }
+    },
+    {
+      "id": "48007daa1761965-96a7a10f02962b0",
+      "title": "Log entries search strategy request limits rejects an inline log view with columns above the limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/logs_shared/test/scout/api/tests/log_entries_search_strategy_limits.spec.ts",
+        "line": 74,
+        "column": 15
+      }
+    },
+    {
+      "id": "48007daa1761965-ce3dd5f62a2f657",
+      "title": "Log entries search strategy request limits rejects a polling request with columns above the limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/logs_shared/test/scout/api/tests/log_entries_search_strategy_limits.spec.ts",
+        "line": 81,
+        "column": 13
+      }
+    },
+    {
+      "id": "66af56d41d0e550-23bc52d726d9e91",
+      "title": "Log entries search strategy with a persisted log view returns entries for a persisted log view with more columns than the request limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/logs_shared/test/scout/api/tests/log_entries_search_strategy_persisted_log_view.spec.ts",
+        "line": 38,
+        "column": 15
+      }
+    }
+  ]
+}
