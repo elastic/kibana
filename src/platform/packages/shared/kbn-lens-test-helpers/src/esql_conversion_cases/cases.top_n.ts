@@ -498,6 +498,33 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         reason: 'terms_other_bucket_not_supported',
       },
     },
+    // Both dimensions share one result column, so the Other key would replace the inner group
+    // that DSL expands into the remaining values.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description:
+        'nested terms on the same field with other bucket on the outer dimension is not convertible',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_same_field_not_supported',
+      },
+    },
     // The nested Other path limits by the outer key only, so a bucket between the two Top
     // values would pick the inner top N across every date bucket instead of per date bucket.
     {
@@ -1126,6 +1153,47 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           'AVG(bytes)': ['col3'],
           'geo.src': ['col1'],
           'host.keyword': ['col2'],
+        },
+      },
+    },
+    // Two Top values on the same field collapse into one result column that both Lens columns
+    // read from, so the inner `LIMIT n BY` sees one row per outer value, as DSL does.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'two terms on the same field without other bucket',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword DESC',
+          size: 2,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS AVG(bytes) BY rank_host_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY host.keyword | SORT rank_host_keyword DESC, \`AVG(bytes)\` DESC | DROP rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1', 'col2'],
+        },
+        // One row per outer host; the second of the top 2 is cdn.elastic-elastic-elastic.org:
+        // 2255 documents, 12602429 bytes.
+        expectedLastRow: {
+          'host.keyword': 'cdn.elastic-elastic-elastic.org',
+          'AVG(bytes)': 12602429 / 2255,
         },
       },
     },

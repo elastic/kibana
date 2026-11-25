@@ -480,6 +480,11 @@ export function generateEsqlQuery(
         hasUnsupportedDateHistogramNesting,
         termsBucketCount: termsBuckets.length,
         supportsOtherBucket: index === 0 && !hasBucketBetweenTermsDimensions,
+        // Duplicate bucket expressions collapse into one result column (see `bucketsResult`),
+        // which the Other remap would replace with its key, dropping the inner group.
+        hasDuplicateTermsField: termsBuckets.some(
+          (other) => other.index !== index && other.col.sourceField === col.sourceField
+        ),
       })
     )
     .find((reason): reason is EsqlConversionFailureReason => reason !== undefined);
