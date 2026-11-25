@@ -9,10 +9,14 @@ components:
     GranularRulesSearchMode:
       type: string
       description: |
-        Search mode for free-text search combined with `filter`.
+        Search mode for free-text search combined with `filter`. `legacy`: the keyword search of
+        the rules table (rule name, index patterns, MITRE ATT&CK). `semantic`: hybrid search by
+        meaning and by words over a rule search index; the result is the relevant rules in
+        relevance order, and `filter`, facets and the rule scope apply to them. Falls back to
+        `legacy` when no model is available. Without a mode, `legacy`.
       enum:
         - legacy
-      default: legacy
+        - semantic
 
     GranularRulesSearch:
       type: object

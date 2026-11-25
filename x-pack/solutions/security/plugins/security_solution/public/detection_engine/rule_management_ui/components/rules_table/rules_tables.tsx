@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RulesFilterBar } from '../../../rule_sets/components/rules_group_by_control';
+import { SearchModeLine } from '../../../rule_sets/facets/search_mode_line';
 import { GroupedRulesTable } from '../../../rule_sets/components/grouped_rules_table';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -107,6 +108,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     state: {
       rules,
       filterOptions,
+      searchMode,
       isPreflightInProgress,
       isAllSelected,
       isLoading,
@@ -435,6 +437,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           <RulesTableFilters selectedTab={selectedTab} />
           <EuiSpacer size="s" />
           <RulesFilterBar />
+          <SearchModeLine />
           <RulesTableWarnings warnings={warnings} />
           <RulesTableUtilityBar
             canBulkEdit={canReadRules}
@@ -457,13 +460,18 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               onChange={tableOnChangeCallback}
               pagination={paginationMemo}
               selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
-              sorting={{
-                sort: {
-                  // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
-                  field: sortingOptions.field as keyof Rule,
-                  direction: sortingOptions.order,
-                },
-              }}
+              // Relevant rules (semantic search) come best first; columns do not sort them.
+              sorting={
+                searchMode === 'semantic'
+                  ? undefined
+                  : {
+                      sort: {
+                        // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
+                        field: sortingOptions.field as keyof Rule,
+                        direction: sortingOptions.order,
+                      },
+                    }
+              }
               {...tableProps}
               tableLayout="auto"
               scrollableInline

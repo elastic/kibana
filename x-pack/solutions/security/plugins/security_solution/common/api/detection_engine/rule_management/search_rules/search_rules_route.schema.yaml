@@ -154,6 +154,9 @@ paths:
                     $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
                   tag_category_counts:
                     $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+                  search_mode:
+                    $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearchMode'
+                    description: The search mode that ran; `legacy` when `semantic` was asked but no model was available.
                 required:
                   - page
                   - perPage

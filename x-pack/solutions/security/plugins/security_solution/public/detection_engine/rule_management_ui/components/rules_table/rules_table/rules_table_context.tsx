@@ -157,6 +157,8 @@ export interface RulesTableState {
    * Warning, such as when the number of rules with gaps is greater than the limit.
    */
   warnings?: WarningSchema[];
+  /** The search mode that ran: `semantic` lists the relevant rules in relevance order. */
+  searchMode?: 'legacy' | 'semantic';
 }
 
 export type LoadingRuleAction =
@@ -370,7 +372,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules
   const {
-    data: { rules, total, warnings } = { rules: [], total: 0, warnings: [] },
+    data: { rules, total, warnings, searchMode } = { rules: [], total: 0, warnings: [] },
     refetch,
     dataUpdatedAt,
     isFetched,
@@ -491,6 +493,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
           total,
         }),
         warnings,
+        searchMode,
       },
       actions,
     };
@@ -519,6 +522,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     sortingOptions,
     actions,
     warnings,
+    searchMode,
   ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;

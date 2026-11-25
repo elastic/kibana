@@ -19,23 +19,20 @@ interface SavedSet {
   conditions: RuleSetConditions;
 }
 
-/** The facets and the search of the rules table as rule set conditions. */
-export const draftConditions = ({
-  conditions,
-  filter,
-}: Pick<FilterOptions, 'conditions' | 'filter'>): RuleSetConditions => {
-  const term = filter.trim();
-  return normalizeRuleSetConditions({
-    ...conditions,
-    search: term ? { term, mode: 'legacy' } : undefined,
-  });
-};
+/**
+ * The facets of the rules table as rule set conditions. The search box is not part of them: it
+ * finds rules (by meaning and by words) and is never saved into a set. A saved set can still
+ * have a keyword `search` condition from earlier; it stays in the conditions.
+ */
+export const draftConditions = ({ conditions }: Pick<FilterOptions, 'conditions'>) =>
+  normalizeRuleSetConditions({ ...conditions });
 
-/** The table state that shows a saved set: its conditions in the facets, its search in the search. */
-export const ruleSetFilterState = (set: SavedSet): Partial<FilterOptions> => {
-  const { search, ...conditions } = liftTagCategories(set.conditions);
-  return { conditions, filter: search?.term ?? '', draftOf: set.id };
-};
+/** The table state that shows a saved set: its conditions in the facets, an empty search box. */
+export const ruleSetFilterState = (set: SavedSet): Partial<FilterOptions> => ({
+  conditions: liftTagCategories(set.conditions),
+  filter: '',
+  draftOf: set.id,
+});
 
 /** The facets or the search differ from the saved conditions of the selected set. */
 export const isRuleSetChanged = (filterOptions: FilterOptions, set: SavedSet | undefined) =>
@@ -49,8 +46,17 @@ export const isRuleSetChanged = (filterOptions: FilterOptions, set: SavedSet | u
 export interface RuleQueryParams {
   rule_scope?: RuleScope;
   filter_params?: RuleSetConditions;
-  search?: { term: string; mode: 'legacy' };
+  search?: { term: string; mode: 'semantic' };
 }
+
+/**
+ * The search box asks for `semantic`; the server keeps exact text (quotes, MITRE and rule ids) on
+ * the keyword search and falls back to it without a model, and says which mode ran.
+ */
+const searchParam = (filter: string) => {
+  const term = filter.trim();
+  return term ? { search: { term, mode: 'semantic' as const } } : {};
+};
 
 /**
  * The rules that the table shows, as `_search` parameters. Without a set: the facets as
@@ -61,7 +67,10 @@ export interface RuleQueryParams {
 export const ruleQueryParams = (filterOptions: FilterOptions): RuleQueryParams => {
   const { ruleSetId, members } = filterOptions;
   if (ruleSetId && members) {
-    return { rule_scope: { rule_set_id: ruleSetId, members } };
+    return {
+      rule_scope: { rule_set_id: ruleSetId, members },
+      ...searchParam(filterOptions.filter),
+    };
   }
   if (ruleSetId) {
     return {
@@ -69,11 +78,11 @@ export const ruleQueryParams = (filterOptions: FilterOptions): RuleQueryParams =
         filterOptions.draftOf === ruleSetId
           ? { rule_set_id: ruleSetId, conditions: draftConditions(filterOptions) }
           : { rule_set_id: ruleSetId },
+      ...searchParam(filterOptions.filter),
     };
   }
-  const term = filterOptions.filter.trim();
   return {
-    ...(term ? { search: { term, mode: 'legacy' as const } } : {}),
+    ...searchParam(filterOptions.filter),
     ...(filterOptions.conditions && hasRuleSetConditions(filterOptions.conditions)
       ? { filter_params: filterOptions.conditions }
       : {}),

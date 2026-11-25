@@ -91,7 +91,7 @@ export const validateSearchRulesRequestBody = (body: SearchRulesRequestBodyInput
   errors.push(...validateSearchRulesFields(body.fields));
 
   const searchMode = body.search?.mode;
-  if (searchMode != null && searchMode !== 'legacy') {
+  if (searchMode != null && searchMode !== 'legacy' && searchMode !== 'semantic') {
     errors.push(`unsupported search.mode "${searchMode}"`);
   }
 

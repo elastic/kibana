@@ -606,6 +606,14 @@ export const HINT_FILTERS = (count: number) =>
       '{count, plural, one {# rule} other {# rules}} now. New rules that match these filters join the set.',
   });
 
+export const HINT_SEARCH_NOT_SAVED = i18n.translate(
+  'xpack.securitySolution.ruleSets.saveDialog.hintSearchNotSaved',
+  {
+    defaultMessage:
+      'The set keeps the filters, not the search text. New rules that match the filters join the set.',
+  }
+);
+
 export const HINT_PICKED = (count: number) =>
   i18n.translate('xpack.securitySolution.ruleSets.saveDialog.hintPicked', {
     values: { count },

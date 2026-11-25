@@ -234,7 +234,11 @@ const SaveActions = ({ group }: { group?: RuleSetSummary }) => {
         <SaveAsRuleSetButton
           label={i18n.SAVE_FILTERS_AS_GROUP}
           fill
-          hint={i18n.HINT_FILTERS(pagination.total)}
+          hint={
+            filterOptions.filter.trim()
+              ? i18n.HINT_SEARCH_NOT_SAVED
+              : i18n.HINT_FILTERS(pagination.total)
+          }
           getRules={async () => ({
             conditions: filtersToGroupConditions(filterOptions),
             included_rule_ids: [],

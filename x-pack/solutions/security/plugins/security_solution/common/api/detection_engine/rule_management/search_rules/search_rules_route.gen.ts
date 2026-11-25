@@ -21,6 +21,7 @@ import {
   SearchRulesAggregations,
   GranularRulesSearch,
   FacetCounts,
+  GranularRulesSearchMode,
 } from '../granular_rules/granular_rules_contract.gen';
 import { RuleScope, RuleSetConditions } from '../../rule_sets/rule_set.gen';
 import { FindRulesSortField } from '../find_rules/find_rules_route.gen';
@@ -156,6 +157,12 @@ at or past the default 10,000-result max) or the request used `search_after`.
         ),
       counts: FacetCounts.optional(),
       tag_category_counts: FacetCounts.optional(),
+      /**
+       * The search mode that ran; `legacy` when `semantic` was asked but no model was available.
+       */
+      search_mode: GranularRulesSearchMode.optional().describe(
+        'The search mode that ran; `legacy` when `semantic` was asked but no model was available.'
+      ),
     })
     .strict()
 );

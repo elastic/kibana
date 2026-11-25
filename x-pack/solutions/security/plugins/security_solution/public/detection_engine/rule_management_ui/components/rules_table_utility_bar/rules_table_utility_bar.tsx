@@ -85,7 +85,8 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
                 {i18n.SELECTED_RULES(selectedRulesCount)}
               </UtilityBarText>
 
-              {canBulkEdit && (
+              {/* Bulk actions by query use the keyword search; relevant rules are selected by row. */}
+              {canBulkEdit && rulesTableContext.state.searchMode !== 'semantic' && (
                 <UtilityBarAction
                   disabled={hasDisabledActions}
                   dataTestSubj="selectAllRules"

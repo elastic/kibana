@@ -17,11 +17,17 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
-  * Search mode for free-text search combined with `filter`.
+  * Search mode for free-text search combined with `filter`. `legacy`: the keyword search of
+the rules table (rule name, index patterns, MITRE ATT&CK). `semantic`: hybrid search by
+meaning and by words over a rule search index; the result is the relevant rules in
+relevance order, and `filter`, facets and the rule scope apply to them. Falls back to
+`legacy` when no model is available. Without a mode, `legacy`.
 
   */
-export const GranularRulesSearchMode = lazySchema(() => z.literal('legacy').default('legacy'));
+export const GranularRulesSearchMode = lazySchema(() => z.enum(['legacy', 'semantic']));
 export type GranularRulesSearchMode = z.infer<typeof GranularRulesSearchMode>;
+export type GranularRulesSearchModeEnum = typeof GranularRulesSearchMode.enum;
+export const GranularRulesSearchModeEnum = GranularRulesSearchMode.enum;
 
 /**
   * Free-text search combined with `filter`. Interpreted according to search mode.

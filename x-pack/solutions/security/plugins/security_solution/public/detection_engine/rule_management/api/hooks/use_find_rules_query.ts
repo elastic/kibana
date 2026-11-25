@@ -50,6 +50,8 @@ export interface RulesQueryResponse {
   rules: RuleResponse[];
   total: number;
   warnings?: WarningSchema[];
+  /** The search mode that ran, when the query had a search text. */
+  searchMode?: 'legacy' | 'semantic';
 }
 
 /**
@@ -79,7 +81,12 @@ export const useFindRulesQuery = (
         ...queryArgs,
       });
 
-      return { rules: response.data, total: response.total, warnings: response.warnings };
+      return {
+        rules: response.data,
+        total: response.total,
+        warnings: response.warnings,
+        searchMode: response.search_mode,
+      };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
@@ -138,6 +145,7 @@ export const useUpdateRulesCache = () => {
                 rules: updateRules(currentData.rules, newRules),
                 total: currentData.total,
                 warnings: currentData.warnings,
+                searchMode: currentData.searchMode,
               }
             : undefined
       );

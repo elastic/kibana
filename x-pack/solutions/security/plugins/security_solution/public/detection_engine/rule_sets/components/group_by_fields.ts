@@ -114,9 +114,6 @@ export const filtersToGroupConditions = (filterOptions: FilterOptions): RuleSetC
       include: [filterOptions.showElasticRules ? 'external' : 'internal'],
     };
   }
-  if (filterOptions.filter.trim()) {
-    conditions.search = { term: filterOptions.filter.trim(), mode: 'legacy' };
-  }
   if (filterOptions.browse) {
     Object.assign(
       conditions,

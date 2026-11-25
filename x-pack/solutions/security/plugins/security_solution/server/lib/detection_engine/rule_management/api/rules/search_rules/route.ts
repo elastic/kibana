@@ -33,15 +33,30 @@ import { translateSearchFieldsToSoFields } from '../../../logic/search/search_ru
 import { getRuleSetsClient } from '../../../../rule_sets/api/register_routes';
 import { resolveRuleScopeMembership } from '../../../logic/search/rule_scope';
 import { fetchDisjunctiveFacetCounts } from '../../../logic/search/facet_counts';
+import { resolveSemanticSearch } from '../../../logic/search/semantic';
 import {
   buildConditionsFilter,
   buildRuleSetFilter,
 } from '../../../../rule_sets/logic/build_rule_set_filter';
 
+/** One page of rules in relevance order (`relevantIds` is best first). */
+const orderByRelevance = <T extends { data: Array<{ id: string }> }>(
+  found: T,
+  relevantIds: string[],
+  page: number,
+  perPage: number
+): T & { page: number; perPage: number } => {
+  const rank = new Map(relevantIds.map((id, index) => [id, index]));
+  const ordered = [...found.data].sort(
+    (a, b) => (rank.get(a.id) ?? Infinity) - (rank.get(b.id) ?? Infinity)
+  );
+  return { ...found, page, perPage, data: ordered.slice((page - 1) * perPage, page * perPage) };
+};
+
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
  */
-export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: Logger) => {
+export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       access: 'internal',
@@ -117,9 +132,24 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
                   buildRuleSetFilter({ ...membership, conditions }),
               };
 
+          // Semantic search: the relevant rules (best first) come from the rule search index;
+          // facets, the rule scope and RBAC then apply to them through RulesClient below.
+          const semantic =
+            search?.mode === 'semantic' && search.term.trim()
+              ? await resolveSemanticSearch({
+                  rulesClient,
+                  esClient: ctx.core.elasticsearch.client.asInternalUser,
+                  spaceId: ctx.securitySolution.getSpaceId(),
+                  term: search.term.trim(),
+                  logger,
+                })
+              : undefined;
+          const relevantIds = semantic?.mode === 'semantic' ? semantic.ruleIds : undefined;
+          const searchMode = search ? semantic?.mode ?? 'legacy' : undefined;
+
           const combinedKql = buildGranularRulesKql({
             filter,
-            search,
+            search: search && !relevantIds ? { ...search, mode: 'legacy' } : undefined,
           });
 
           const hasGapFilters =
@@ -169,6 +199,26 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
             warnings.push(...gapPreFilter.warnings);
           }
 
+          const gapIds = hasGapFilters ? new Set(ruleIdsWithGaps) : undefined;
+          const ruleIds =
+            relevantIds && gapIds
+              ? relevantIds.filter((id) => gapIds.has(id))
+              : relevantIds ?? (hasGapFilters ? ruleIdsWithGaps : undefined);
+          if (ruleIds && ruleIds.length === 0) {
+            return response.ok({
+              body: {
+                page,
+                perPage,
+                total: 0,
+                data: [],
+                ...(searchMode ? { search_mode: searchMode } : {}),
+              },
+            });
+          }
+          // Semantic results come in relevance order: all relevant rules that pass the filters
+          // are loaded (at most a few hundred), ordered, then paged here.
+          const byRelevance = Boolean(relevantIds);
+
           const categoryCounts = aggregations?.counts ?? [];
 
           const aggs =
@@ -178,19 +228,23 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
 
           const effectiveFields = translateSearchFieldsToSoFields(fields);
 
-          const rules = await findRules({
+          const found = await findRules({
             rulesClient,
-            perPage,
-            page: shouldUseSearchAfter ? undefined : page,
-            sortField,
-            sortOrder,
+            perPage: byRelevance && ruleIds ? ruleIds.length : perPage,
+            page: byRelevance ? 1 : shouldUseSearchAfter ? undefined : page,
+            sortField: byRelevance ? undefined : sortField,
+            sortOrder: byRelevance ? undefined : sortOrder,
             filter: combinedKql,
             kueryFilter: ruleSetFilter,
             fields: effectiveFields,
-            searchAfter: shouldUseSearchAfter ? searchAfterParam : undefined,
+            searchAfter: shouldUseSearchAfter && !relevantIds ? searchAfterParam : undefined,
             aggregations: aggs,
-            ruleIds: hasGapFilters ? ruleIdsWithGaps : undefined,
+            ruleIds,
           });
+          const rules =
+            byRelevance && relevantIds
+              ? orderByRelevance(found, relevantIds, page, perPage)
+              : found;
 
           const mainCounts = rules.aggregations
             ? expandRawAggregationResult(rules.aggregations, categoryCounts)
@@ -205,7 +259,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
                   mainCounts,
                   categories: aggregations?.exclude_own_filter ? categoryCounts : [],
                   tagCategories,
-                  ruleIds: hasGapFilters ? ruleIdsWithGaps : undefined,
+                  ruleIds,
                 })
               : undefined;
           const counts = disjunctive?.counts ?? mainCounts;
@@ -221,7 +275,8 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
             ...(disjunctive && tagCategories.length
               ? { tag_category_counts: disjunctive.tagCategoryCounts }
               : {}),
-            ...(shouldUseSearchAfter ? { search_after: rules.searchAfter } : {}),
+            ...(shouldUseSearchAfter && !relevantIds ? { search_after: rules.searchAfter } : {}),
+            ...(searchMode ? { search_mode: searchMode } : {}),
           };
 
           return response.ok({ body: responseBody });
