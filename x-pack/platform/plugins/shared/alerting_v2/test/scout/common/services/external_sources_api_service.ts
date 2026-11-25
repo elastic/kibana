@@ -7,18 +7,20 @@
 
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
-import type { CreateExternalSourceData, ExternalSourceResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateExternalSourceData,
+  FindExternalSourcesResponse,
+  ExternalSourceResponse,
+} from '@kbn/alerting-v2-schemas';
 import {
   COMMON_HEADERS,
   EXTERNAL_SOURCE_API_PATH,
   EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { getExternalSourceUrl } from '../urls';
+import { getExternalSourceUrl, getListExternalSourcesUrl } from '../urls';
 
 export interface ExternalSourcesApiService {
   create: (data: CreateExternalSourceData) => Promise<ExternalSourceResponse>;
-  /** Whether an external source saved object with this id exists. */
-  exists: (id: string) => Promise<boolean>;
   /** Deletes every external source and the connector each one created. */
   cleanUp: () => Promise<void>;
 }
@@ -45,21 +47,14 @@ export const getExternalSourcesApiService = ({
       return response.data;
     }),
 
-  // A find, not a get: the KbnClient retries a get that returns 404 several times.
-  exists: (id) =>
-    measurePerformanceAsync(log, 'externalSources.exists', async () => {
-      const { saved_objects: savedObjects } = await kbnClient.savedObjects.find({
-        type: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
-      });
-      return savedObjects.some((savedObject) => savedObject.id === id);
-    }),
-
   cleanUp: () =>
     measurePerformanceAsync(log, 'externalSources.cleanUp', async () => {
-      const { saved_objects: savedObjects } = await kbnClient.savedObjects.find({
-        type: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
+      const { data } = await kbnClient.request<FindExternalSourcesResponse>({
+        method: 'GET',
+        path: getListExternalSourcesUrl({ per_page: 100 }),
+        headers: COMMON_HEADERS,
       });
-      for (const { id } of savedObjects) {
+      for (const { id } of data.items) {
         await kbnClient.request({
           method: 'DELETE',
           path: getExternalSourceUrl(id),

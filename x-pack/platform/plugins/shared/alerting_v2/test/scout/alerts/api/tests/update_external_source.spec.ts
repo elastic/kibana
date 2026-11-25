@@ -59,6 +59,11 @@ apiTest.describe('Update external source API', { tag: testData.API_ENGINE_TAG },
         version: 2,
       });
       expect(response.body.metadata.description).toBeUndefined();
+
+      const getResponse = await apiClient.get(getExternalSourceUrl('scout-import-update'), {
+        headers: writerHeaders,
+      });
+      expect(getResponse.body).toStrictEqual(response.body);
     }
   );
 
