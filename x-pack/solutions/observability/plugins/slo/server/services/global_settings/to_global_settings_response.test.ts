@@ -56,6 +56,17 @@ describe('toGlobalSettingsResponse', () => {
         effective: { enabled: true, periodDays: 200, source: 'config' },
       },
     },
+    {
+      name: 'S5: a stored value outside the current bounds',
+      stored: { sliRetention: { enabled: true, periodDays: 30, updatedAt: new Date(SAVED_AT) } },
+      override: undefined,
+      expected: {
+        enabled: true,
+        periodDays: 30,
+        updatedAt: SAVED_AT,
+        effective: { enabled: true, periodDays: 30, source: 'settings' },
+      },
+    },
   ])('returns $name', ({ stored, override, expected }) => {
     expect(toGlobalSettingsResponse({ stored, override })).toEqual({ sliRetention: expected });
   });

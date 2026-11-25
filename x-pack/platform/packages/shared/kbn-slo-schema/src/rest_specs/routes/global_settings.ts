@@ -23,7 +23,7 @@ const effectiveSliRetentionSchema = lazySchema(() =>
   z
     .object({
       enabled: z.boolean().describe('Indicates if SLI retention is applied'),
-      periodDays: z.number().int().describe('The number of days of SLI data kept'),
+      periodDays: z.number().int().min(1).describe('The number of days of SLI data kept'),
       source: z
         .enum(['default', 'settings', 'config'])
         .describe(
@@ -33,14 +33,20 @@ const effectiveSliRetentionSchema = lazySchema(() =>
     .meta({ id: 'SLOEffectiveSliRetention', additionalProperties: true })
 );
 
+// Shape only, like the stored settings: a value saved under older bounds must still be returned.
 const sloGlobalSettingsResponseSchema = lazySchema(() =>
   z
     .object({
       sliRetention: sliRetentionSchema
         .extend({
+          periodDays: z
+            .number()
+            .int()
+            .min(1)
+            .describe('The number of days of SLI data kept when SLI retention is enabled'),
           updatedAt: dateType
-            .nullable()
-            .describe('When the SLI retention was last saved, or null when it was never saved'),
+            .describe('When the SLI retention was last saved, or null when it was never saved')
+            .nullable(),
           effective: effectiveSliRetentionSchema.describe(
             'The SLI retention applied by Kibana, which can differ from the saved value'
           ),

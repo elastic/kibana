@@ -183389,7 +183389,7 @@ components:
         periodDays:
           description: The number of days of SLI data kept
           maximum: 9007199254740991
-          minimum: -9007199254740991
+          minimum: 1
           type: integer
         source:
           description: 'Where the applied value comes from: the default, the saved settings, or the `xpack.slo.sliRetention` setting in kibana.yml'
@@ -183578,11 +183578,11 @@ components:
               type: boolean
             periodDays:
               description: The number of days of SLI data kept when SLI retention is enabled
-              maximum: 3650
-              minimum: 180
+              maximum: 9007199254740991
+              minimum: 1
               type: integer
             updatedAt:
-              description: A date string, for example 2023-01-12T10:03:19.000Z
+              description: When the SLI retention was last saved, or null when it was never saved
               format: date-time
               maxLength: 128
               nullable: true
