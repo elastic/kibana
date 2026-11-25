@@ -132,7 +132,6 @@ describe('allowedExperimentalValues', () => {
     'enableSloTemplates',
     'enableVersionSpecificPolicies',
     'enableIntegrationInactivityAlerting',
-    'enableSimplifiedAgentlessUX',
     'enableOpAMP',
     'enableOTelVerifier',
     'enableResolveDependencies',

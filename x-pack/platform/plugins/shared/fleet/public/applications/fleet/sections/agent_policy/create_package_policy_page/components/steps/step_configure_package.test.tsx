@@ -13,8 +13,6 @@ import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-l
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { NewPackagePolicy, PackageInfo } from '../../../../../types';
-import { ExperimentalFeaturesService } from '../../../../../services';
-import { allowedExperimentalValues } from '../../../../../../../../common/experimental_features';
 
 import { validatePackagePolicy, isInputCompatibleWithVarGroupSelections } from '../../services';
 
@@ -714,40 +712,7 @@ describe('isSingleInputAndStreams behavior', () => {
     mockUpdatePackagePolicy.mockClear();
   });
 
-  it('should render toggle switch when feature flag is on, single policy template, single input, and single stream', async () => {
-    ExperimentalFeaturesService.init({
-      ...allowedExperimentalValues,
-      enableSimplifiedAgentlessUX: true,
-    });
-
-    const validationResults = validatePackagePolicy(
-      singleInputPackagePolicy,
-      singleInputPackageInfo,
-      deps
-    );
-    renderResult = testRenderer.render(
-      <StepConfigurePackagePolicy
-        packageInfo={singleInputPackageInfo}
-        packagePolicy={singleInputPackagePolicy}
-        updatePackagePolicy={mockUpdatePackagePolicy}
-        validationResults={validationResults}
-        submitAttempted={false}
-      />
-    );
-
-    await waitFor(() => {
-      expect(
-        renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
-      ).toBeInTheDocument();
-    });
-  });
-
-  it('should render toggle switch when feature flag is off', async () => {
-    ExperimentalFeaturesService.init({
-      ...allowedExperimentalValues,
-      enableSimplifiedAgentlessUX: false,
-    });
-
+  it('should render toggle switch for single policy template, single input, and single stream', async () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       singleInputPackageInfo,
@@ -771,11 +736,6 @@ describe('isSingleInputAndStreams behavior', () => {
   });
 
   it('should render toggle switch when there are multiple inputs', async () => {
-    ExperimentalFeaturesService.init({
-      ...allowedExperimentalValues,
-      enableSimplifiedAgentlessUX: true,
-    });
-
     const multiInputPackageInfo: PackageInfo = {
       ...singleInputPackageInfo,
       policy_templates: [
@@ -910,11 +870,6 @@ describe('isSingleInputAndStreams behavior', () => {
   });
 
   it('should render toggle switch when there are multiple policy templates', async () => {
-    ExperimentalFeaturesService.init({
-      ...allowedExperimentalValues,
-      enableSimplifiedAgentlessUX: true,
-    });
-
     const multiTemplatePackageInfo: PackageInfo = {
       ...singleInputPackageInfo,
       policy_templates: [
@@ -1033,11 +988,6 @@ describe('isSingleInputAndStreams behavior', () => {
   });
 
   it('should show deprecated policy template callout on edit page', async () => {
-    ExperimentalFeaturesService.init({
-      ...allowedExperimentalValues,
-      enableSimplifiedAgentlessUX: true,
-    });
-
     const deprecatedTemplatePackageInfo: PackageInfo = {
       ...singleInputPackageInfo,
       policy_templates: [
