@@ -182,8 +182,13 @@ export const panelNavItemStyles = ({ euiTheme }: UseEuiTheme) => {
     justify-content: flex-start;
     gap: ${euiTheme.size.s};
   `;
+  const end = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.m};
+  `;
 
-  return { root, button, label };
+  return { root, button, label, end };
 };
 
 export const panelFooterStyles = ({ euiTheme }: UseEuiTheme) => {

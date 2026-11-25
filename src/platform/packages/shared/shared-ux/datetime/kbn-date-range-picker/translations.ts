@@ -9,6 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { AutoRefreshIntervalUnit } from './types';
+
 export const timeWindowButtonsTexts = {
   legend: i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.legend', {
     defaultMessage: 'Time window actions',
@@ -363,6 +365,15 @@ export const mainPanelTexts = {
   autoRefreshPanelTitle: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.autoRefreshPanelTitle',
     { defaultMessage: 'Auto-refresh' }
+  ),
+  autoRefreshEveryLabel: (count: number, unit: AutoRefreshIntervalUnit) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.autoRefreshEveryLabel', {
+      defaultMessage: 'Every {count} {unit, select, s {sec} m {min} h {hr} other {}}',
+      values: { count, unit },
+    }),
+  autoRefreshOffLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.autoRefreshOffLabel',
+    { defaultMessage: 'Off' }
   ),
   savePresetTooltip: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.savePresetTooltip',

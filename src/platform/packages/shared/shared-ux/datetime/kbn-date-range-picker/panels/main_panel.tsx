@@ -10,6 +10,7 @@
 import React, { useCallback, useState } from 'react';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiTab,
@@ -19,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import type { TimeRangeBoundsOption } from '../types';
+import type { AutoRefreshSettings, TimeRangeBoundsOption } from '../types';
 import {
   PanelContainer,
   PanelBody,
@@ -39,6 +40,7 @@ import {
   getOptionShorthand,
   getOptionInputText,
   hasRoundedOffset,
+  msToAutoRefreshInterval,
 } from '../utils';
 import { inputControlTexts, mainPanelTexts } from '../translations';
 import { panelDividerStyles } from '../date_range_picker_panel_ui.styles';
@@ -150,9 +152,30 @@ const PresetsRecentTabs = () => {
   );
 };
 
+/** Auto-refresh status shown in the nav item, e.g. "Every 10 sec" or "Off". */
+const AutoRefreshBadge = ({ autoRefresh }: { autoRefresh: AutoRefreshSettings }) => {
+  if (!autoRefresh.isEnabled) {
+    return (
+      <EuiBadge color="default" data-test-subj="dateRangePickerAutoRefreshBadge">
+        {mainPanelTexts.autoRefreshOffLabel}
+      </EuiBadge>
+    );
+  }
+
+  const { count, unit } = msToAutoRefreshInterval(
+    autoRefresh.intervalMs,
+    autoRefresh.intervalDisplayUnit
+  );
+  return (
+    <EuiBadge color="primary" data-test-subj="dateRangePickerAutoRefreshBadge">
+      {mainPanelTexts.autoRefreshEveryLabel(count, unit)}
+    </EuiBadge>
+  );
+};
+
 const SubPanelMenu = () => {
   const { navigateTo, panelDescriptors } = useDateRangePickerPanelNavigation();
-  const { hasAutoRefresh } = useDateRangePickerContext();
+  const { hasAutoRefresh, autoRefresh } = useDateRangePickerContext();
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
 
@@ -172,10 +195,11 @@ const SubPanelMenu = () => {
       >
         {mainPanelTexts.customTimeRangePanelTitle}
       </PanelNavItem>
-      {hasAutoRefresh && (
+      {hasAutoRefresh && autoRefresh && (
         <PanelNavItem
           onClick={() => navigateTo(AutoRefreshPanel.PANEL_ID)}
           icon="refreshTime"
+          suffix={<AutoRefreshBadge autoRefresh={autoRefresh} />}
           data-test-subj="dateRangePickerAutoRefreshNavItem"
         >
           {mainPanelTexts.autoRefreshPanelTitle}
