@@ -105,6 +105,7 @@ const formatStarted = (value: string) => `${formatDate(value)} (${moment(value).
 const DETAIL_COLUMN_WIDTHS: [string, string] = ['auto', 'minmax(0, 1fr)'];
 
 const DETAIL_VALUE_PROPS = { css: { overflowWrap: 'anywhere' } } as const;
+const FIRST_RECEIPT_WINDOW_MS = 30_000;
 
 const OpenInvestigationButton = ({ investigationId }: { investigationId: string }) => {
   const { application } = useKibana().services;
@@ -121,7 +122,12 @@ const OpenInvestigationButton = ({ investigationId }: { investigationId: string 
   );
 };
 
-const RunSlackDeliveryStatus = ({ investigationId, investigationExecutionId }: Run) => {
+const RunSlackDeliveryStatus = ({
+  investigationId,
+  investigationExecutionId,
+  startedAt,
+  finishedAt,
+}: Run) => {
   const { application, http, nightshiftInvestigations } = useKibana().services;
   if (!investigationId || !investigationExecutionId || !nightshiftInvestigations) return null;
   const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
@@ -131,6 +137,7 @@ const RunSlackDeliveryStatus = ({ investigationId, investigationExecutionId }: R
       investigationsClient={nightshiftInvestigations.investigationsClient}
       investigationId={investigationId}
       executionId={investigationExecutionId}
+      firstReceiptPollUntil={Date.parse(finishedAt ?? startedAt) + FIRST_RECEIPT_WINDOW_MS}
       settingsHref={
         canManageAndConfigure
           ? application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/general' })

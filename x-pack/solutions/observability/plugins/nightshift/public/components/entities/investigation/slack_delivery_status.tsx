@@ -176,12 +176,14 @@ export const SlackDeliveryStatus = ({
   investigationId,
   executionId,
   settingsHref,
+  firstReceiptPollUntil,
 }: {
   http: HttpStart;
   investigationsClient: NightshiftInvestigationsPublicStart['investigationsClient'];
   investigationId: string;
   executionId?: string;
   settingsHref?: string;
+  firstReceiptPollUntil?: number;
 }) => {
   const { euiTheme } = useEuiTheme();
   const { data, error, isError, isFetching, refetch } = useQuery({
@@ -203,7 +205,13 @@ export const SlackDeliveryStatus = ({
     // Dispatch, investigation completion, and the failure sweep can record receipts at different times.
     refetchInterval: (result, query) => {
       if (isInaccessible(query.state.error)) return false;
-      return result?.deliveries.some(({ status }) => status === 'sending') ? 5_000 : 30_000;
+      const awaitingFirstReceipt =
+        result?.deliveries.length === 0 &&
+        firstReceiptPollUntil !== undefined &&
+        Date.now() < firstReceiptPollUntil;
+      return awaitingFirstReceipt || result?.deliveries.some(({ status }) => status === 'sending')
+        ? 5_000
+        : 30_000;
     },
   });
   const inaccessible = isInaccessible(error);

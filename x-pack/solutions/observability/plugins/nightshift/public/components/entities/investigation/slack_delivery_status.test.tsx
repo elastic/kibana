@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RELAY_APP_BINDINGS_QUERY_KEY } from '../../../data/relay_apps/use_relay_app_bindings';
@@ -24,6 +24,7 @@ it('keeps channel names across delivery states and updates the guidance after re
     const review = { ...destination, id: 'slack-review', channel: 'C08REVIEW01' };
     const fetch = jest
       .fn()
+      .mockResolvedValueOnce({ deliveries: [] })
       .mockResolvedValueOnce({
         deliveries: [
           { ...destination, status: 'sending', phase: 'started' },
@@ -65,11 +66,17 @@ it('keeps channel names across delivery states and updates the guidance after re
             investigationsClient={{ fetch } as never}
             investigationId="investigation"
             executionId="bound-execution"
+            firstReceiptPollUntil={Date.now() + 30_000}
             settingsHref="/app/nightshift/settings/general"
           />
         </QueryClientProvider>
       </I18nProvider>
     );
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+    expect(screen.queryByTestId('nightshiftSlackDeliveryStatus')).not.toBeInTheDocument();
+
+    await act(async () => jest.advanceTimersByTime(5_000));
+
     expect(await screen.findAllByText('Sending')).toHaveLength(2);
     expect(await screen.findByText('#ops')).toBeInTheDocument();
     expect(await screen.findByText('#review')).toBeInTheDocument();
