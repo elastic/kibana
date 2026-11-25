@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 
 export interface SettingsListItem {
@@ -22,7 +23,8 @@ export interface SettingsListItem {
   label: NonNullable<ReactNode>;
   value: NonNullable<ReactNode>;
   /** Shown in a tooltip on an info icon next to the label. */
-  info?: string;
+  info?: ReactNode;
+  isMuted?: boolean;
 }
 
 interface SettingsListProps {
@@ -31,33 +33,39 @@ interface SettingsListProps {
 }
 
 /** Label and value pairs, side by side on wide screens and stacked on narrow ones. */
-export const SettingsList = ({ items, 'data-test-subj': dataTestSubj }: SettingsListProps) => (
-  <EuiDescriptionList
-    type="responsiveColumn"
-    compressed
-    columnWidths={[2, 3]}
-    rowGutterSize="m"
-    data-test-subj={dataTestSubj}
-  >
-    {items.map(({ id, label, value, info }) => (
-      <Fragment key={id}>
-        <EuiDescriptionListTitle>
-          {info ? (
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip content={info} type="info" color="subdued" size="s" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
-            label
-          )}
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription data-test-subj={`searchBoostSetting-${id}`}>
-          {/* A compressed list sets its descriptions a size smaller than its titles. */}
-          <EuiText size="s">{value}</EuiText>
-        </EuiDescriptionListDescription>
-      </Fragment>
-    ))}
-  </EuiDescriptionList>
-);
+export const SettingsList = ({ items, 'data-test-subj': dataTestSubj }: SettingsListProps) => {
+  return (
+    <EuiDescriptionList
+      type="responsiveColumn"
+      compressed
+      columnWidths={[2, 3]}
+      rowGutterSize="m"
+      css={{ alignItems: 'start' }}
+      data-test-subj={dataTestSubj}
+    >
+      {items.map(({ id, label, value, info, isMuted = false }) => (
+        <Fragment key={id}>
+          <EuiDescriptionListTitle>
+            {/* The info icon takes the label's color, muted or not. */}
+            <EuiTextColor component="div" color={isMuted ? 'subdued' : 'inherit'}>
+              {info ? (
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip content={info} type="info" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                label
+              )}
+            </EuiTextColor>
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription data-test-subj={`searchBoostSetting-${id}`}>
+            {/* A compressed list sets its descriptions a size smaller than its titles. */}
+            <EuiText size="s">{value}</EuiText>
+          </EuiDescriptionListDescription>
+        </Fragment>
+      ))}
+    </EuiDescriptionList>
+  );
+};

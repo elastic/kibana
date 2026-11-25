@@ -17,13 +17,15 @@ jest.mock('../controls/data_controls/open_data_control_editor', () => ({
   openDataControlEditor: jest.fn(),
 }));
 
-const dataViewSource = (id: string): FilterableSource => ({
-  id,
-  title: id,
-  fields: [],
-  getFieldByName: () => undefined,
-  isTimeBased: () => false,
-});
+const dataViewSource = (id: string): FilterableSource =>
+  ({
+    id,
+    title: id,
+    fields: [],
+    getFieldByName: () => undefined,
+    isTimeBased: () => false,
+    isPersisted: () => true,
+  } as unknown as FilterableSource);
 
 const esqlSource = (id: string): FilterableSource => ({ ...dataViewSource(id), kind: 'esql' });
 

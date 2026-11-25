@@ -1,5 +1,5 @@
 {
-  "sha1": "52ce961bfe4cfff78c6b6fc0da49ecf7868b8396",
+  "sha1": "92a48913d0f6735182c5c06e73205873b08cca32",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -753,8 +753,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_task.spec.ts",
-        "line": 212,
-        "column": 5
+        "line": 260,
+        "column": 13
       }
     },
     {
@@ -837,7 +837,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/usage.spec.ts",
-        "line": 33,
+        "line": 36,
         "column": 2
       }
     },
@@ -851,8 +851,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/usage.spec.ts",
-        "line": 46,
-        "column": 25
+        "line": 53,
+        "column": 37
       }
     },
     {
@@ -865,8 +865,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/usage.spec.ts",
-        "line": 54,
-        "column": 14
+        "line": 69,
+        "column": 4
       }
     },
     {
@@ -879,8 +879,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/usage.spec.ts",
-        "line": 78,
-        "column": 11
+        "line": 92,
+        "column": 45
       }
     },
     {

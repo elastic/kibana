@@ -11,6 +11,7 @@ import { isWorkflowStepTriggered } from './well_known_trigger_sources';
 
 export const WORKFLOW_EXECUTE_STEP_TYPE = 'workflow.execute' as const;
 export const WORKFLOW_EXECUTE_ASYNC_STEP_TYPE = 'workflow.executeAsync' as const;
+export const WORKFLOW_AWAIT_EXECUTIONS_STEP_TYPE = 'workflow.awaitExecutions' as const;
 
 export const isExecuteSyncStepType = (stepType: string | undefined): boolean =>
   stepType === WORKFLOW_EXECUTE_STEP_TYPE;

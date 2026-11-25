@@ -8,8 +8,8 @@
  */
 
 import { apiHasEditorConfig } from '@kbn/control-group-renderer';
-import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { DataControlState } from '@kbn/controls-schemas';
+import { isEsqlFilterableSource } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanAddNewPanel,
@@ -28,6 +28,16 @@ import { dataViewsService } from '../services/kibana_services';
 
 let lastUsedDataViewId: string | undefined;
 
+/** The id of the first persisted data view published by the embeddable (skips ad hoc and ES|QL). */
+export const getFirstPersistedDataViewId = (embeddable: unknown): string | undefined =>
+  apiPublishesDataSources(embeddable)
+    ? embeddable.dataSources$.value?.find(
+        (source) =>
+          !isEsqlFilterableSource(source) &&
+          (source as { isPersisted?: () => boolean }).isPersisted?.() === true
+      )?.id
+    : undefined;
+
 export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_CONTROL,
   order: 1,
@@ -39,13 +49,10 @@ export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiCo
     const defaultDataViewId = apiHasEditorConfig(embeddable)
       ? embeddable.getEditorConfig()?.defaultDataViewId
       : undefined;
-    const publishedDataViewId = apiPublishesDataSources(embeddable)
-      ? embeddable.dataSources$.value?.find((source) => !isEsqlFilterableSource(source))?.id
-      : undefined;
     const parentDataViewId =
       defaultDataViewId ??
       lastUsedDataViewId ??
-      publishedDataViewId ??
+      getFirstPersistedDataViewId(embeddable) ??
       (await dataViewsService.getDefaultDataView())?.id;
 
     openDataControlEditor({
