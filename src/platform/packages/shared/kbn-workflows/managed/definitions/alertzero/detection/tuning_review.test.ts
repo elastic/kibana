@@ -211,6 +211,11 @@ describe('tuning_review exception name', () => {
     const armFor = (changeType: string) =>
       arms.find(({ properties }) => properties.change_type.const === changeType);
 
+    it('types change_type as a string in every arm', () => {
+      expect(arms).toHaveLength(6);
+      arms.forEach(({ properties }) => expect(properties.change_type.type).toBe('string'));
+    });
+
     it('asks the exception arm for a string exception_name', () => {
       expect(armFor('exception')?.properties.exception_name?.type).toBe('string');
       expect(armFor('exception')?.required).toContain('exception_name');

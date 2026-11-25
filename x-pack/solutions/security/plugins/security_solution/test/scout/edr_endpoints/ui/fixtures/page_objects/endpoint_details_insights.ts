@@ -13,11 +13,13 @@ import type { Locator, ScoutPage } from '@kbn/scout-security';
  * Actions and locators only; the spec asserts.
  */
 export class EndpointDetailsInsightsPage {
+  readonly detailsList: Locator;
   readonly wrapper: Locator;
   readonly connectorSelector: Locator;
   readonly scanButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
+    this.detailsList = this.page.testSubj.locator('endpointDetailsList');
     this.wrapper = this.page.testSubj.locator('endpointDetailsInsightsWrapper');
     this.connectorSelector = this.page.testSubj.locator('connector-selector');
     this.scanButton = this.page.testSubj.locator('workflowInsightsScanButton');
@@ -27,7 +29,8 @@ export class EndpointDetailsInsightsPage {
   async goto(agentId: string): Promise<void> {
     await this.page.gotoApp('security/administration/endpoints', {
       params: { selected_endpoint: agentId, show: 'details' },
-      readyWhen: this.wrapper,
+      // The flyout body, not the insights section: some product tiers do not render the section.
+      readyWhen: this.detailsList,
       // The flyout renders after the user privileges, the endpoint list init and the host
       // metadata load; on a cold first load that can take longer than the 30s default.
       readyTimeout: APP_LOAD_TIMEOUT_MS,
