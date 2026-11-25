@@ -32,6 +32,8 @@ export interface SeededRule {
   /** Saved-object id. The review reads the rule by it. */
   id: string;
   ruleId: string;
+  /** The rule's revision before the review. */
+  revision: number;
   /** The data stream that holds the rule's source events. */
   eventsIndex: string;
 }
@@ -157,5 +159,5 @@ export const seedRuleWithFalsePositives = async ({
     const failed = bulk.items.filter((item) => item.create?.error).slice(0, 3);
     throw new Error(`Seeding the false positives failed: ${JSON.stringify(failed)}`);
   }
-  return { id, ruleId, eventsIndex };
+  return { id, ruleId, revision, eventsIndex };
 };

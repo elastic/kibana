@@ -233,6 +233,9 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
       const diagnosed = autonomy === 'assisted' || decisions[0] === 'approve';
       expect(model.answeredToolCalls.includes('structured_answer')).toBe(diagnosed);
       const ruleAfter = await readRule({ ...space, id: rule.id });
+      // An approved change is saved as one new rule version. A dismissed proposal never saves.
+      const approved = decisions[decisions.length - 1] === 'approve';
+      expect(ruleAfter.revision).toBe(rule.revision + (approved ? 1 : 0));
       await check({ review, model, rule, ruleAfter, space });
     } finally {
       model?.stop();
