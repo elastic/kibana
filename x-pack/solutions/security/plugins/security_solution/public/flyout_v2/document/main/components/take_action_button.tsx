@@ -241,7 +241,7 @@ export const TakeActionButton = memo(
 
     // "Flow toast": no modal. Spin briefly, then confirm with a toast linking to the Detonate page.
     const submitDetonationWithToast = useCallback(
-      (file: Pick<DetonateFileOption, 'fileName' | 'hostName'>) => {
+      (file: Pick<DetonateFileOption, 'fileName' | 'hostName' | 'sha256'>) => {
         setIsDetonateSubmitting(true);
         detonateTimeoutRef.current = setTimeout(() => {
           setIsDetonateSubmitting(false);
@@ -322,6 +322,7 @@ export const TakeActionButton = memo(
             <DetonateSelectFilePanel
               files={detonateFiles}
               isSubmitting={isDetonateSubmitting}
+              submitLabel={flowVariant === 'toast' ? DETONATE_ACTION : undefined}
               onContinue={(file) => {
                 if (flowVariant === 'toast') {
                   submitDetonationWithToast(file);

@@ -13,6 +13,9 @@ import {
   EuiDescriptionList,
   EuiFieldText,
   EuiFilePicker,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiModal,
@@ -22,7 +25,9 @@ import {
   EuiModalHeaderTitle,
   EuiPanel,
   EuiSpacer,
-  EuiSwitch,
+  EuiSelect,
+  EuiToolTip,
+  EuiButtonIcon,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -49,6 +54,12 @@ const SOURCE_OPTIONS = [
   { id: 'url', label: i18n.SOURCE_URL },
 ];
 
+const OS_OPTIONS = [
+  { value: 'windows11', text: 'Windows 11 x64' },
+  { value: 'windows10', text: 'Windows 10 x64' },
+  { value: 'ubuntu', text: 'Ubuntu 22.04' },
+];
+
 export interface DetonateSubmitModalProps {
   /**
    * Sample details read from the alert, used to prefill the form. When omitted, the modal is
@@ -69,7 +80,7 @@ export interface DetonateSubmitModalProps {
 export const DetonateSubmitModal = memo(
   ({ sample, onClose, onSubmit, onSeeAnalysis }: DetonateSubmitModalProps) => {
     const modalTitleId = useGeneratedHtmlId({ prefix: 'detonateSubmitModalTitle' });
-    const [attachToCase, setAttachToCase] = useState(true);
+    const [os, setOs] = useState('windows11');
     const [source, setSource] = useState<SampleSource>('upload');
     const [url, setUrl] = useState('');
     const [hasFile, setHasFile] = useState(false);
@@ -116,9 +127,39 @@ export const DetonateSubmitModal = memo(
                     {
                       title: i18n.SHA_256,
                       description: (
-                        <EuiText size="s" css={{ wordBreak: 'break-all' }}>
-                          {sample.sha256}
-                        </EuiText>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                            <EuiText
+                              size="s"
+                              css={{
+                                maxWidth: 220,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}
+                              title={sample.sha256}
+                              data-test-subj="detonateSampleSha"
+                            >
+                              {sample.sha256}
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiCopy textToCopy={sample.sha256}>
+                              {(copy) => (
+                                <EuiToolTip content={i18n.COPY_SHA} disableScreenReaderOutput>
+                                  <EuiButtonIcon
+                                    iconType="copyClipboard"
+                                    aria-label={i18n.COPY_SHA}
+                                    size="xs"
+                                    color="text"
+                                    onClick={copy}
+                                    data-test-subj="detonateCopySha"
+                                  />
+                                </EuiToolTip>
+                              )}
+                            </EuiCopy>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       ),
                     },
                     { title: i18n.HOST, description: sample.hostName },
@@ -181,17 +222,16 @@ export const DetonateSubmitModal = memo(
               </>
             )}
             <EuiSpacer size="m" />
-            <EuiSwitch
-              label={i18n.ATTACH_TO_CASE}
-              checked={attachToCase}
-              onChange={(e) => setAttachToCase(e.target.checked)}
-              data-test-subj="detonateAttachToCase"
-            />
+            <EuiFormRow label={i18n.OPERATING_SYSTEM} fullWidth>
+              <EuiSelect
+                fullWidth
+                options={OS_OPTIONS}
+                value={os}
+                onChange={(e) => setOs(e.target.value)}
+                data-test-subj="detonateOperatingSystem"
+              />
+            </EuiFormRow>
           </EuiForm>
-          <EuiSpacer size="m" />
-          <EuiText size="xs" color="subdued">
-            {i18n.SUBMIT_DISCLAIMER}
-          </EuiText>
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onClose} data-test-subj="detonateCancel">
@@ -204,7 +244,7 @@ export const DetonateSubmitModal = memo(
             isDisabled={!isValid}
             data-test-subj="detonateSubmit"
           >
-            {i18n.DETONATE}
+            {i18n.SUBMIT}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>

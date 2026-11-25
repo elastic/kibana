@@ -73,6 +73,7 @@ const detonateSubLink: LinkItem = {
       defaultMessage: 'Detonate',
     }),
   ],
+  hideTimeline: true,
   id: SecurityPageName.detonate,
   path: DETONATE_PATH,
   title: DETONATE,

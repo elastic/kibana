@@ -14,10 +14,7 @@ export const PAGE_TITLE = t('title', 'Detonate');
 export const TABLE_CAPTION = t('tableCaption', 'Recent detonations');
 export const COLUMN_FILE = t('columnFile', 'File');
 export const COLUMN_VERDICT = t('columnVerdict', 'Verdict');
-export const COLUMN_SCORE = t('columnScore', 'Threat score');
-export const COLUMN_HOST = t('columnHost', 'Host');
 export const COLUMN_SUBMITTED = t('columnSubmitted', 'Submitted');
-export const COLUMN_REPORT_ID = t('columnReportId', 'Report ID');
 export const SUBMIT_FILE_URL = t('submitFileUrl', 'Submit file/URL');
 export const COLUMN_DETONATION = t('columnDetonation', 'Detonation');
 export const COLUMN_ACTIONS = t('columnActions', 'Actions');
@@ -38,5 +35,15 @@ export const ACTION_REDETONATE_DESCRIPTION = t(
   'actionRedetonateDescription',
   'Run this file again in the sandbox'
 );
-export const DETONATING = t('detonating', 'Detonating…');
-export const NO_VERDICT_YET = t('noVerdictYet', 'No verdict yet');
+export const COLUMN_HASH = t('columnHash', 'Hash');
+export const COLUMN_STATUS = t('columnStatus', 'Status');
+export const COLUMN_ENVIRONMENT = t('columnEnvironment', 'Environment');
+export const STATUS_QUEUED = t('statusQueued', 'Queued');
+export const STATUS_COMPLETE = t('statusComplete', 'Complete');
+export const STATUS_ERROR = t('statusError', 'Error');
+export const STATUS_IN_PROGRESS = t('statusInProgress', 'In progress');
+export const COPY_HASH = t('copyHash', 'Copy hash');
+export const SEARCH_PLACEHOLDER = t(
+  'searchPlaceholder',
+  'Search by file, hash, verdict, status or environment'
+);

@@ -30,6 +30,8 @@ interface DetonateSelectFilePanelProps {
   onContinue: (file: DetonateFileOption) => void;
   /** Shows a spinner on the Continue button and disables the panel while submitting. */
   isSubmitting?: boolean;
+  /** Label of the primary button. Defaults to "Continue". */
+  submitLabel?: string;
 }
 
 type FileSelectableOption = EuiSelectableOption;
@@ -57,7 +59,7 @@ const toOption = (file: DetonateFileOption): FileSelectableOption => ({
  * modal opens. Shaped like the "Select workflow" panel: search, option list, primary button.
  */
 export const DetonateSelectFilePanel = memo(
-  ({ files, onContinue, isSubmitting = false }: DetonateSelectFilePanelProps) => {
+  ({ files, onContinue, isSubmitting = false, submitLabel }: DetonateSelectFilePanelProps) => {
     const initialOptions = useMemo(() => files.map(toOption), [files]);
     const [options, setOptions] = useState<FileSelectableOption[]>(initialOptions);
 
@@ -111,7 +113,7 @@ export const DetonateSelectFilePanel = memo(
             onClick={handleContinue}
             data-test-subj="detonateSelectFileContinue"
           >
-            {i18n.CONTINUE}
+            {submitLabel ?? i18n.CONTINUE}
           </EuiButton>
         </EuiPanel>
       </div>

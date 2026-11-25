@@ -14,6 +14,7 @@ export interface PendingDetonation {
   id: string;
   fileName: string;
   hostName: string;
+  sha256: string;
   /** ISO date the detonation was submitted. */
   submittedAt: string;
 }
@@ -35,11 +36,13 @@ const subscribe = (listener: () => void) => {
 export const addPendingDetonation = ({
   fileName,
   hostName,
-}: Pick<PendingDetonation, 'fileName' | 'hostName'>): PendingDetonation => {
+  sha256,
+}: Pick<PendingDetonation, 'fileName' | 'hostName' | 'sha256'>): PendingDetonation => {
   const detonation: PendingDetonation = {
     id: `det_${Math.random().toString(16).slice(2, 14).padEnd(12, '0')}`,
     fileName,
     hostName,
+    sha256,
     submittedAt: new Date().toISOString(),
   };
   pending = [detonation, ...pending];

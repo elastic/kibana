@@ -20,13 +20,10 @@ export const MODAL_DESCRIPTION = t(
 export const FILE_NAME = t('fileName', 'File name');
 export const SHA_256 = t('sha256', 'SHA-256');
 export const HOST = t('host', 'Host');
-export const ATTACH_TO_CASE = t('attachToCase', 'Attach the report to a case');
-export const SUBMIT_DISCLAIMER = t(
-  'disclaimer',
-  'Samples run in an isolated environment. Network traffic is captured and files are deleted after 30 days.'
-);
 export const CANCEL = t('cancel', 'Cancel');
-export const DETONATE = t('detonate', 'Detonate');
+export const SUBMIT = t('submit', 'Submit');
+export const OPERATING_SYSTEM = t('operatingSystem', 'Operating System');
+export const COPY_SHA = t('copySha', 'Copy SHA-256');
 export const ALREADY_DETONATED_TITLE = t(
   'alreadyDetonatedTitle',
   'This file has already been detonated'

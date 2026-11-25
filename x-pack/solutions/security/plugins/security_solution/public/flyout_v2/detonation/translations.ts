@@ -18,9 +18,17 @@ export const DETONATE_ACTION = i18n.translate(
 export const DETONATING = i18n.translate('xpack.securitySolution.flyoutV2.detonation.detonating', {
   defaultMessage: 'Detonating',
 });
-export const DETONATING_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.flyoutV2.detonation.detonatingDescription',
-  { defaultMessage: "Detonating can take a few minutes, you'll be notified when it's done." }
+export const DETONATING_SANDBOX = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.detonatingSandbox',
+  { defaultMessage: 'Running the sample in an isolated sandbox.' }
+);
+export const DETONATING_DURATION = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.detonatingDuration',
+  { defaultMessage: 'Detonating can take 10 minutes.' }
+);
+export const DETONATING_NOTIFY = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.detonatingNotify',
+  { defaultMessage: "You'll be notified when it's done." }
 );
 export const MALICIOUS = i18n.translate('xpack.securitySolution.flyoutV2.detonation.malicious', {
   defaultMessage: 'Malicious',
@@ -176,3 +184,25 @@ export const VALUE = i18n.translate('xpack.securitySolution.flyoutV2.detonation.
 export const EDIT = i18n.translate('xpack.securitySolution.flyoutV2.detonation.edit', {
   defaultMessage: 'Edit',
 });
+
+export const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.detonation.takeAction', {
+  defaultMessage: 'Take action',
+});
+export const ISOLATE_HOST = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.isolateHost',
+  {
+    defaultMessage: 'Isolate host',
+  }
+);
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.addToNewCase',
+  { defaultMessage: 'Add to new case' }
+);
+export const OPEN_GH_ISSUE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.openGhIssue',
+  { defaultMessage: 'Open GH issue' }
+);
+export const AI_GENERATED_ACTION = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.aiAction',
+  { defaultMessage: 'AI-assisted action' }
+);

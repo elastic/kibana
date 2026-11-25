@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -69,8 +70,16 @@ export const DetonationReport: FC<DetonationReportProps> = memo(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued" textAlign="center">
-                  {i18n.DETONATING_DESCRIPTION}
+                  {i18n.DETONATING_SANDBOX}
                 </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <KbnInfoCallout
+                  size="s"
+                  title={i18n.DETONATING_DURATION}
+                  text={<p>{i18n.DETONATING_NOTIFY}</p>}
+                  data-test-subj="detonationLoadingCallout"
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>
