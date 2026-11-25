@@ -84,6 +84,10 @@ const hasSettlingProposal = (response: ListProposalsResponse | undefined): boole
 const isConflict = (error: unknown): boolean =>
   isHttpFetchError(error) && error.response?.status === 409;
 
+const isReplacedProposal = (
+  proposal: Pick<ProposalWithMetadata, 'supersededBy' | 'status'> | undefined
+): boolean => Boolean(proposal?.supersededBy) || proposal?.status === 'superseded';
+
 /**
  * A revision supersedes its predecessors without any event reaching their cards, and a pending
  * card does not poll. When a later revision shows up, refetch the earlier ones so they read as
@@ -110,7 +114,7 @@ const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined):
           const isLater = (cached?.revision ?? 1) > revision;
           const isOtherInChain =
             cached?.rootProposalId === rootProposalId && cached.id !== id && !isLater;
-          const isReplaced = Boolean(cached?.supersededBy) || cached?.status === 'superseded';
+          const isReplaced = isReplacedProposal(cached);
           // A failed refetch keeps the old data, but the card shows a load error instead of it.
           const query = queryClient.getQueryCache().find(queryKey, { exact: true });
           const isShowingError = query?.state.status === 'error';
@@ -146,6 +150,32 @@ const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined):
       return stillOpen.size > 0 ? refresh(stillOpen) : undefined;
     });
   }, [queryClient, id, rootProposalId, revision, isRevision]);
+};
+
+/**
+ * The other side of `useRefreshEarlierRevisions`: that one only finds earlier cards that already
+ * have data. A card whose first read was still loading then, and reads open when it arrives,
+ * checks once for a cached successor. It does not repeat, so the number of requests stays bounded.
+ */
+const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): void => {
+  const queryClient = useQueryClient();
+  const id = proposal?.id;
+  const isOpen = proposal !== undefined && !isReplacedProposal(proposal);
+
+  useEffect(() => {
+    if (!id || !isOpen) {
+      return;
+    }
+    const hasCachedSuccessor = queryClient
+      .getQueriesData<ProposalWithMetadata>({ queryKey: queryKeys.proposals.details })
+      .some(([, cached]) => cached?.supersedes === id);
+    if (hasCachedSuccessor) {
+      void queryClient.invalidateQueries(
+        { queryKey: queryKeys.proposals.detail(id), exact: true },
+        { cancelRefetch: false }
+      );
+    }
+  }, [queryClient, id, isOpen]);
 };
 
 /**
@@ -284,6 +314,7 @@ export const useProposal = (id: string | undefined) => {
   });
 
   useRefreshEarlierRevisions(query.data);
+  useRefreshWhenSuperseded(query.data);
 
   return query;
 };
