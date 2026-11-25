@@ -116,44 +116,107 @@ describe('WatchWorkflowsManagementClientImpl', () => {
   });
 
   describe('getStepExecution', () => {
-    const setup = (results: unknown[]) => {
-      const searchStepExecutions = jest.fn().mockResolvedValue({ results, total: results.length });
+    const setup = (
+      execution: { workflowId: string; stepExecutions: unknown[] } | null,
+      stepsById: Record<string, unknown> = {}
+    ) => {
+      const getWorkflowExecution = jest.fn().mockResolvedValue(execution);
+      const getStepExecution = jest.fn(async ({ id }: { id: string }) => stepsById[id]);
+      const searchStepExecutions = jest.fn();
       const client = new WatchWorkflowsManagementClientImpl({
+        getWorkflowExecution,
+        getStepExecution,
         searchStepExecutions,
       } as unknown as NonNullable<WorkflowsServerPluginSetup['management']>);
-      return { client, searchStepExecutions };
+      return { client, getWorkflowExecution, getStepExecution, searchStepExecutions };
     };
     const params = { workflowId: 'wf', workflowExecutionId: 'exec', stepId: 'step' };
 
-    it('searches the one step of the one execution, returning only the fields it reads', async () => {
-      const { client, searchStepExecutions } = setup([]);
-      const request = httpServerMock.createKibanaRequest();
-      await client.getStepExecution(params, 'space', request);
-      expect(searchStepExecutions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          request,
+    it('gets the execution and the documents of the one step by id, never by search', async () => {
+      const { client, getWorkflowExecution, getStepExecution, searchStepExecutions } = setup(
+        {
           workflowId: 'wf',
-          stepId: 'step',
-          workflowExecutionIds: ['exec'],
-          includeOutput: true,
-          sourceIncludes: ['stepId', 'startedAt', 'finishedAt', 'output'],
-        }),
-        'space'
+          stepExecutions: [
+            { id: 'se-other', stepId: 'other', startedAt: '2026-01-01T00:00:02.000Z' },
+            { id: 'se-step', stepId: 'step', startedAt: '2026-01-01T00:00:01.000Z' },
+          ],
+        },
+        { 'se-step': { stepId: 'step', output: { a: 1 } } }
       );
+      const request = httpServerMock.createKibanaRequest();
+      await expect(client.getStepExecution(params, 'space', request)).resolves.toEqual({
+        stepId: 'step',
+        output: { a: 1 },
+      });
+      expect(getWorkflowExecution).toHaveBeenCalledWith('exec', 'space', { request });
+      expect(getStepExecution).toHaveBeenCalledTimes(1);
+      expect(getStepExecution).toHaveBeenCalledWith(
+        { executionId: 'exec', id: 'se-step' },
+        'space',
+        request
+      );
+      expect(searchStepExecutions).not.toHaveBeenCalled();
     });
 
-    it('prefers the document that carries the output when the step id is shared', async () => {
-      const { client } = setup([{ stepId: 'step' }, { stepId: 'step', output: { a: 1 } }]);
+    it('prefers the document that carries a non-null output when the step id is shared', async () => {
+      const { client } = setup(
+        {
+          workflowId: 'wf',
+          stepExecutions: [
+            { id: 'se-result', stepId: 'step', startedAt: '2026-01-01T00:00:01.000Z' },
+            { id: 'se-wrapper', stepId: 'step', startedAt: '2026-01-01T00:00:02.000Z' },
+          ],
+        },
+        {
+          'se-result': { id: 'se-result', stepId: 'step', output: { a: 1 } },
+          'se-wrapper': { id: 'se-wrapper', stepId: 'step', output: null },
+        }
+      );
       await expect(
         client.getStepExecution(params, 'space', httpServerMock.createKibanaRequest())
-      ).resolves.toEqual({ stepId: 'step', output: { a: 1 } });
+      ).resolves.toEqual({ id: 'se-result', stepId: 'step', output: { a: 1 } });
     });
 
-    it('is undefined when the step has no document', async () => {
-      const { client } = setup([]);
+    it('returns the newest document when none carries an output', async () => {
+      const { client } = setup(
+        {
+          workflowId: 'wf',
+          stepExecutions: [
+            { id: 'se-old', stepId: 'step', startedAt: '2026-01-01T00:00:01.000Z' },
+            { id: 'se-new', stepId: 'step', startedAt: '2026-01-01T00:00:02.000Z' },
+          ],
+        },
+        { 'se-old': { id: 'se-old', stepId: 'step' }, 'se-new': { id: 'se-new', stepId: 'step' } }
+      );
+      await expect(
+        client.getStepExecution(params, 'space', httpServerMock.createKibanaRequest())
+      ).resolves.toEqual({ id: 'se-new', stepId: 'step' });
+    });
+
+    it('is undefined when the execution has no document for the step', async () => {
+      const { client, getStepExecution } = setup({
+        workflowId: 'wf',
+        stepExecutions: [{ id: 'se-other', stepId: 'other', startedAt: 's' }],
+      });
       await expect(
         client.getStepExecution(params, 'space', httpServerMock.createKibanaRequest())
       ).resolves.toBeUndefined();
+      expect(getStepExecution).not.toHaveBeenCalled();
+    });
+
+    it('is undefined when the execution is missing or belongs to another workflow', async () => {
+      const missing = setup(null);
+      await expect(
+        missing.client.getStepExecution(params, 'space', httpServerMock.createKibanaRequest())
+      ).resolves.toBeUndefined();
+      const other = setup({
+        workflowId: 'other-wf',
+        stepExecutions: [{ id: 'se-step', stepId: 'step', startedAt: 's' }],
+      });
+      await expect(
+        other.client.getStepExecution(params, 'space', httpServerMock.createKibanaRequest())
+      ).resolves.toBeUndefined();
+      expect(other.getStepExecution).not.toHaveBeenCalled();
     });
   });
 });

@@ -8,6 +8,8 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { HuntScope } from '@kbn/alertzero-common';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { WatchWorkflowsManagementClientImpl } from '../../watch_workflows_management_client';
 import {
   readLastSweepIndexScope,
   readLatestFinishedSweepIndexScope,
@@ -127,6 +129,68 @@ describe('readLastSweepIndexScope', () => {
 
     await readLastSweepIndexScope(params);
     expect(params.logger.warn).not.toHaveBeenCalled();
+  });
+
+  describe('through the Workflows management client', () => {
+    const setupWithClient = (stepsById: Record<string, unknown>) => {
+      const api = {
+        getWorkflowExecution: jest.fn().mockResolvedValue({
+          workflowId: 'wf-1',
+          stepExecutions: Object.values(stepsById),
+        }),
+        getStepExecution: jest.fn(async ({ id }: { id: string }) => stepsById[id]),
+        // The step index has not refreshed since the execution finished.
+        searchStepExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      };
+      const { params } = setup(undefined);
+      return {
+        params: {
+          ...params,
+          management: new WatchWorkflowsManagementClientImpl(
+            api as unknown as NonNullable<WorkflowsServerPluginSetup['management']>
+          ),
+        },
+      };
+    };
+
+    it('reads the gate output of a finished execution before the step index refreshes', async () => {
+      const { params } = setupWithClient({
+        'se-gate': {
+          id: 'se-gate',
+          stepId: 'check_index_scope',
+          startedAt: '2026-01-01T00:00:01.000Z',
+          finishedAt: 'f',
+          output: scope,
+        },
+      });
+      await expect(readLastSweepIndexScope(params)).resolves.toEqual({
+        checkedAt: 'f',
+        executionId: 'exec-1',
+        scope: expect.objectContaining({ resolution: 'blocked:empty_universe' }),
+      });
+    });
+
+    it('skips a newer record of the shared gate step id whose output is null', async () => {
+      const { params } = setupWithClient({
+        'se-gate': {
+          id: 'se-gate',
+          stepId: 'check_index_scope',
+          startedAt: '2026-01-01T00:00:01.000Z',
+          finishedAt: 'f',
+          output: scope,
+        },
+        'se-wrapper': {
+          id: 'se-wrapper',
+          stepId: 'check_index_scope',
+          startedAt: '2026-01-01T00:00:02.000Z',
+          output: null,
+        },
+      });
+      await expect(readLastSweepIndexScope(params)).resolves.toMatchObject({
+        scope: expect.objectContaining({ resolution: 'blocked:empty_universe' }),
+      });
+      expect(params.logger.warn).not.toHaveBeenCalled();
+    });
   });
 });
 
