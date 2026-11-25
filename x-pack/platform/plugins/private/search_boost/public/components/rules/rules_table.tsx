@@ -48,7 +48,7 @@ export const RulesTable = ({
   // Content List keeps the first render's cell renderers, so they read the latest getters.
   const latest = useLatest({ getRuleLinkProps });
   const getRule = useRuleItem();
-  const isCustomRule = (item: ContentListItem) => getRule(item)?.is_builtin === false;
+  const isCustomRule = (item: ContentListItem) => getRule(item)?.isDefault === false;
 
   return (
     <ContentListTable title={title} data-test-subj={dataTestSubj}>
@@ -59,7 +59,7 @@ export const RulesTable = ({
           <NameCell
             name={item.title}
             linkProps={latest.current.getRuleLinkProps(item.title)}
-            badge={getRule(item)?.is_builtin ? DEFAULT_RULE_BADGE_PROPS : undefined}
+            badge={getRule(item)?.isDefault ? DEFAULT_RULE_BADGE_PROPS : undefined}
             data-test-subj="searchBoostRuleLink"
           />
         )}

@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { isManagedProfile } from '../../../../common/profiles';
 import type { BoostRuleListItem } from '../../../../common/types';
 import type { BoostLists } from '../../../api';
 import { PROFILES_PATH, getRulePath, getRulesListLocation } from '../../../links';
@@ -41,7 +42,7 @@ export const ProfileDetailsRoute = ({ profileName, lists, canEdit }: ProfileDeta
       parent={PARENT}
       showsHeader={Boolean(profile) || !lists}
       type={profile?.type}
-      statusBadge={profile?.is_builtin ? MANAGED_PROFILE_BADGE : undefined}
+      statusBadge={profile && isManagedProfile(profile) ? MANAGED_PROFILE_BADGE : undefined}
     >
       <ProfileDetailsPage
         profile={profile}

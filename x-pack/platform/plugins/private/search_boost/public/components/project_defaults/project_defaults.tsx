@@ -12,18 +12,18 @@ import type { BoostProfileType } from '../../../common/types';
 import { PROJECT_DEFAULTS_TITLE } from '../../translations';
 import type { ProjectDefaultCardProps } from './project_default_card';
 import { ProjectDefaultCard } from './project_default_card';
+import { ProjectDefaultEmptyCard } from './project_default_empty_card';
 
-type ProjectDefaultCardData = Omit<
+export type ProjectDefaultCardData = Omit<
   ProjectDefaultCardProps,
-  'type' | 'canEdit' | 'onEdit' | 'onViewProfile'
+  'type' | 'canEdit' | 'onEdit' | 'getProfileLinkProps'
 >;
 
-export interface ProjectDefaultsProps {
-  canEdit: boolean;
-  indices: ProjectDefaultCardData;
-  dataStreams: ProjectDefaultCardData;
-  onEdit: (type: BoostProfileType) => void;
-  onViewProfile?: (profileName: string) => void;
+export interface ProjectDefaultsProps
+  extends Pick<ProjectDefaultCardProps, 'canEdit' | 'getProfileLinkProps'> {
+  indices?: ProjectDefaultCardData;
+  dataStreams?: ProjectDefaultCardData;
+  onEdit?: (type: BoostProfileType) => void;
 }
 
 const PROFILE_TYPES: readonly BoostProfileType[] = ['indices', 'data_streams'];
@@ -33,9 +33,9 @@ export const ProjectDefaults = ({
   indices,
   dataStreams,
   onEdit,
-  onViewProfile,
+  getProfileLinkProps,
 }: ProjectDefaultsProps) => {
-  const byType: Record<BoostProfileType, ProjectDefaultCardData> = {
+  const byType: Record<BoostProfileType, ProjectDefaultCardData | undefined> = {
     indices,
     data_streams: dataStreams,
   };
@@ -47,17 +47,24 @@ export const ProjectDefaults = ({
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="l">
-        {PROFILE_TYPES.map((type) => (
-          <EuiFlexItem key={type}>
-            <ProjectDefaultCard
-              type={type}
-              {...byType[type]}
-              canEdit={canEdit}
-              onEdit={() => onEdit(type)}
-              onViewProfile={onViewProfile}
-            />
-          </EuiFlexItem>
-        ))}
+        {PROFILE_TYPES.map((type) => {
+          const data = byType[type];
+          return (
+            <EuiFlexItem key={type}>
+              {data ? (
+                <ProjectDefaultCard
+                  type={type}
+                  {...data}
+                  canEdit={canEdit}
+                  onEdit={onEdit && (() => onEdit(type))}
+                  getProfileLinkProps={getProfileLinkProps}
+                />
+              ) : (
+                <ProjectDefaultEmptyCard type={type} />
+              )}
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     </section>
   );

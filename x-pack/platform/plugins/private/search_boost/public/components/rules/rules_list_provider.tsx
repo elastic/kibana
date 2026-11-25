@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import type { ActiveFilters, ContentListItem, FindItemsParams } from '@kbn/content-list-provider';
+import { isDefaultRule } from '../../../common/rules';
 import type { BoostRuleListItem } from '../../../common/types';
 import { InMemoryListProvider } from '../in_memory_list_provider';
 import { useItemActions } from '../item_actions';
@@ -23,7 +24,12 @@ import {
 import { RULES_LIST_LABELS } from '../../translations';
 
 type RuleItem = ContentListItem &
-  BoostRuleListItem & { source: BoostRuleListItem; appliesTo: number; storageSizeInBytes?: number };
+  BoostRuleListItem & {
+    source: BoostRuleListItem;
+    isDefault: boolean;
+    appliesTo: number;
+    storageSizeInBytes?: number;
+  };
 
 const { ItemsProvider: RuleItemsProvider, useItemLookup } = createItemLookup<RuleItem>();
 
@@ -37,6 +43,7 @@ const toItem = (rule: BoostRuleListItem): RuleItem => ({
   source: rule,
   id: rule.name,
   title: rule.name,
+  isDefault: isDefaultRule(rule),
 });
 
 const createMatchers = (searchesProfileNames: boolean) => {

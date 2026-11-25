@@ -49,30 +49,18 @@ const outrankedNameStyles = css`
   text-decoration: line-through;
 `;
 
-export const MatchesPopover = ({
-  button,
-  isOpen,
-  closePopover,
-  type,
-  matches,
-}: MatchesPopoverProps) => {
+type MatchesPopoverContentProps = Pick<MatchesPopoverProps, 'type' | 'matches'> & {
+  titleId: string;
+};
+
+const MatchesPopoverContent = ({ type, matches, titleId }: MatchesPopoverContentProps) => {
   const { euiTheme } = useEuiTheme();
-  const titleId = useGeneratedHtmlId({ prefix: 'searchBoostMatchesPopoverTitle' });
 
   const outrankedCount = matches.filter(({ outrankedByRuleName }) => outrankedByRuleName).length;
   const title = type === 'indices' ? MATCHING_INDICES_TITLE : MATCHING_DATA_STREAMS_TITLE;
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isOpen}
-      closePopover={closePopover}
-      anchorPosition="downCenter"
-      panelPaddingSize="s"
-      hasArrow={false}
-      aria-labelledby={titleId}
-      data-test-subj="searchBoostMatchesPopover"
-    >
+    <>
       <EuiPopoverTitle>
         <span id={titleId}>{title}</span>
         <EuiText size="xs" color="subdued" data-test-subj="searchBoostMatchesPopoverCount">
@@ -113,6 +101,32 @@ export const MatchesPopover = ({
           </EuiFlexGroup>
         ))}
       </div>
+    </>
+  );
+};
+
+export const MatchesPopover = ({
+  button,
+  isOpen,
+  closePopover,
+  type,
+  matches,
+}: MatchesPopoverProps) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'searchBoostMatchesPopoverTitle' });
+
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      anchorPosition="downCenter"
+      panelPaddingSize="s"
+      hasArrow={false}
+      aria-labelledby={titleId}
+      data-test-subj="searchBoostMatchesPopover"
+    >
+      {/* Its own component, so the rows are only built while the popover is open. */}
+      <MatchesPopoverContent type={type} matches={matches} titleId={titleId} />
     </EuiPopover>
   );
 };

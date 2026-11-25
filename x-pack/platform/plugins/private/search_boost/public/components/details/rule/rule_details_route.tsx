@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import { isDefaultRule } from '../../../../common/rules';
 import type { BoostLists } from '../../../api';
 import { RULES_PATH, getProfilePath, getRulePath } from '../../../links';
 import type { IndexManagementServices, LinkProps } from '../../../types';
@@ -67,7 +68,7 @@ export const RuleDetailsRoute = ({
         parent={PARENT}
         showsHeader={Boolean(rule) || !lists}
         type={rule?.type}
-        statusBadge={rule?.is_builtin ? DEFAULT_RULE_BADGE : undefined}
+        statusBadge={rule && isDefaultRule(rule) ? DEFAULT_RULE_BADGE : undefined}
       >
         <RuleDetailsPage
           rule={rule}

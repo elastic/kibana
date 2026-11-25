@@ -30,14 +30,15 @@ import {
 } from '@elastic/eui';
 
 import {
-  DEFAULT_MANAGED_PROFILE_NAMES,
-  MANAGED_PROFILE_NAMES,
-} from '../../../common/managed_profiles';
+  DEFAULT_LABELED_PROFILE_NAMES,
+  LABELED_PROFILE_NAMES,
+  isManagedProfile,
+} from '../../../common/profiles';
 import type { BoostProfile, BoostProfileType, BoostRuleMatch } from '../../../common/types';
 import {
   CANCEL_BUTTON_LABEL,
   SAVE_CHANGES_BUTTON_LABEL,
-  getManagedProfileMessage,
+  getLabeledProfileMessage,
 } from '../../translations';
 import { AppliesToFooter } from '../applies_to_footer/applies_to_footer';
 import {
@@ -77,8 +78,8 @@ interface Selection {
   customProfileName?: string;
 }
 
-const getManagedOrder = (type: BoostProfileType, profileName: string): number => {
-  const index = MANAGED_PROFILE_NAMES[type].findIndex((name) => name === profileName);
+const getLabeledOrder = (type: BoostProfileType, profileName: string): number => {
+  const index = LABELED_PROFILE_NAMES[type].findIndex((name) => name === profileName);
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 };
 
@@ -100,9 +101,9 @@ export const ProjectDefaultFlyout = ({
     const profilesOfType = profiles.filter((profile) => profile.type === type);
     return {
       managedProfiles: profilesOfType
-        .filter(({ is_builtin: isBuiltin }) => isBuiltin)
-        .sort((a, b) => getManagedOrder(type, a.name) - getManagedOrder(type, b.name)),
-      customProfiles: profilesOfType.filter(({ is_builtin: isBuiltin }) => !isBuiltin),
+        .filter(isManagedProfile)
+        .sort((a, b) => getLabeledOrder(type, a.name) - getLabeledOrder(type, b.name)),
+      customProfiles: profilesOfType.filter((profile) => !isManagedProfile(profile)),
     };
   }, [profiles, type]);
 
@@ -161,7 +162,7 @@ export const ProjectDefaultFlyout = ({
         <EuiFormFieldset legend={{ children: BOOST_PROFILE_LABEL, display: 'hidden' }}>
           <EuiFlexGroup direction="column" gutterSize="m">
             {managedProfiles.map(({ name }) => {
-              const message = getManagedProfileMessage(name);
+              const message = getLabeledProfileMessage(name);
               return (
                 <EuiFlexItem key={name} grow={false}>
                   <EuiCheckableCard
@@ -187,7 +188,7 @@ export const ProjectDefaultFlyout = ({
                           <EuiFlexItem component="span" grow={false}>
                             <strong>{message?.label ?? name}</strong>
                           </EuiFlexItem>
-                          {name === DEFAULT_MANAGED_PROFILE_NAMES[type] ? (
+                          {name === DEFAULT_LABELED_PROFILE_NAMES[type] ? (
                             <EuiFlexItem component="span" grow={false}>
                               <EuiBadge data-test-subj="searchBoostProjectDefaultBadge">
                                 {DEFAULT_PROFILE_BADGE}

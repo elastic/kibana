@@ -18,14 +18,16 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import { PROFILES_API_PATH, RULES_API_PATH } from '../../common/constants';
 import type { DatastreamFlyoutProps } from '@kbn/index-management-shared-types';
+import { isDefaultRule } from '../../common/rules';
+import type { BoostRuleListItem } from '../../common/types';
 import type { IndexManagementServices } from '../types';
 import { mockProfiles, mockRules } from './test_utils/mock_boost_data';
 import { SearchBoostPage } from './search_boost_page';
 
-const createHttp = () => {
+const createHttp = ({ rules = mockRules }: { rules?: BoostRuleListItem[] } = {}) => {
   const http = httpServiceMock.createStartContract();
   http.get.mockImplementation(async (path: unknown) =>
-    path === PROFILES_API_PATH ? { profiles: mockProfiles } : { rules: mockRules }
+    path === PROFILES_API_PATH ? { profiles: mockProfiles } : { rules }
   );
   return http;
 };
@@ -56,7 +58,19 @@ const createIndexManagement = () => {
   return { services, locator };
 };
 
-const renderPage = (http = createHttp(), initialPath = '/', canOpenIndexManagement = true) => {
+interface RenderPageOptions {
+  http?: ReturnType<typeof createHttp>;
+  initialPath?: string;
+  canEdit?: boolean;
+  canOpenIndexManagement?: boolean;
+}
+
+const renderPage = ({
+  http = createHttp(),
+  initialPath = '/',
+  canEdit = false,
+  canOpenIndexManagement = true,
+}: RenderPageOptions = {}) => {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
   const indexManagement = createIndexManagement();
   const { unmount } = render(
@@ -66,7 +80,7 @@ const renderPage = (http = createHttp(), initialPath = '/', canOpenIndexManageme
           <Router history={history}>
             <SearchBoostPage
               http={http}
-              canEdit={false}
+              canEdit={canEdit}
               indexManagement={canOpenIndexManagement ? indexManagement.services : undefined}
             />
           </Router>
@@ -111,7 +125,7 @@ describe('SearchBoostPage', () => {
       signals.push(options?.signal);
       return new Promise(() => {});
     });
-    const { unmount } = renderPage(http);
+    const { unmount } = renderPage({ http });
     await waitFor(() => expect(signals).toHaveLength(2));
 
     unmount();
@@ -119,8 +133,68 @@ describe('SearchBoostPage', () => {
     expect(signals.map((signal) => signal?.aborted)).toEqual([true, true]);
   });
 
+  it('shows the project defaults', async () => {
+    renderPage();
+
+    const section = await screen.findByTestId('searchBoostProjectDefaults');
+    expect(within(section).getByTestId('searchBoostProjectDefaultValue-indices')).toHaveTextContent(
+      'Default'
+    );
+    expect(within(section).getByTestId('searchBoostProjectDefaultCount-indices')).toHaveTextContent(
+      '4 indices'
+    );
+    expect(
+      within(section).getByTestId('searchBoostProjectDefaultValue-data_streams')
+    ).toHaveTextContent('Last 7 days');
+    expect(
+      within(section).getByTestId('searchBoostProjectDefaultCount-data_streams')
+    ).toHaveTextContent('1 data stream');
+    expect(
+      within(section).queryByTestId(/^searchBoostEditProjectDefault-/)
+    ).not.toBeInTheDocument();
+  });
+
+  // Editing the project defaults isn't connected yet.
+  it('shows no Edit button on the project defaults to editors', async () => {
+    renderPage({ canEdit: true });
+
+    const section = await screen.findByTestId('searchBoostProjectDefaults');
+    expect(
+      within(section).queryByTestId(/^searchBoostEditProjectDefault-/)
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows empty cards when Elasticsearch returns no default rules', async () => {
+    renderPage({
+      http: createHttp({ rules: mockRules.filter((rule) => !isDefaultRule(rule)) }),
+    });
+
+    const section = await screen.findByTestId('searchBoostProjectDefaults');
+    for (const type of ['indices', 'data_streams']) {
+      expect(
+        within(section).getByTestId(`searchBoostProjectDefaultEmpty-${type}`)
+      ).toHaveTextContent('No default boost profile found.');
+    }
+    expect(
+      within(section).queryByTestId(/^searchBoostProjectDefault-(indices|data_streams)$/)
+    ).not.toBeInTheDocument();
+  });
+
+  it("opens a project default's custom profile", async () => {
+    const rules = mockRules.map((rule) =>
+      rule.name === 'default_indices' ? { ...rule, boost_profile: 'catalog-fast' } : rule
+    );
+    const { history } = renderPage({ http: createHttp({ rules }) });
+
+    await userEvent.click(
+      await screen.findByTestId('searchBoostProjectDefaultProfileLink-indices')
+    );
+    expect(history.location.pathname).toBe('/profiles/catalog-fast');
+    expect(await screen.findByTestId('searchBoostProfileSettings')).toBeInTheDocument();
+  });
+
   it('opens the details page of a profile from its name', async () => {
-    const { history } = renderPage(createHttp(), '/profiles');
+    const { history } = renderPage({ initialPath: '/profiles' });
 
     await userEvent.click(await screen.findByRole('link', { name: 'catalog-fast' }));
     expect(history.location.pathname).toBe('/profiles/catalog-fast');
@@ -128,7 +202,7 @@ describe('SearchBoostPage', () => {
   });
 
   it('opens the details page of a rule from its name', async () => {
-    const { history } = renderPage(createHttp(), '/rules');
+    const { history } = renderPage({ initialPath: '/rules' });
 
     await userEvent.click(await screen.findByRole('link', { name: 'catalog' }));
     expect(history.location.pathname).toBe('/rules/catalog');
@@ -136,7 +210,7 @@ describe('SearchBoostPage', () => {
   });
 
   it('shows the rule name, badges and back link on a rule details page', async () => {
-    renderPage(createHttp(), '/rules/default_indices');
+    renderPage({ initialPath: '/rules/default_indices' });
 
     expect(await screen.findByTestId('searchBoostRuleSettings')).toBeInTheDocument();
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('default_indices');
@@ -149,7 +223,7 @@ describe('SearchBoostPage', () => {
   });
 
   it("opens the rule's profile, and the rules list filtered by a profile", async () => {
-    const { history } = renderPage(createHttp(), '/rules/catalog');
+    const { history } = renderPage({ initialPath: '/rules/catalog' });
 
     await userEvent.click(await screen.findByRole('link', { name: 'catalog-fast' }));
     expect(history.location.pathname).toBe('/profiles/catalog-fast');
@@ -160,7 +234,7 @@ describe('SearchBoostPage', () => {
   });
 
   it('opens a rule from the rules using a profile', async () => {
-    const { history } = renderPage(createHttp(), '/profiles/logs-recent-week');
+    const { history } = renderPage({ initialPath: '/profiles/logs-recent-week' });
 
     const rules = await screen.findByTestId('searchBoostProfileRulesTable');
     await userEvent.click(within(rules).getByRole('link', { name: 'web-logs' }));
@@ -172,12 +246,8 @@ describe('SearchBoostPage', () => {
   it.each(['logs@custom+v1', 'logs%40custom', '100%25', 'logs~25'])(
     'opens a rule named %s, also after a reload',
     async (name) => {
-      const http = createHttp();
-      const rules = [{ ...mockRules[2], name }];
-      http.get.mockImplementation(async (path: unknown) =>
-        path === PROFILES_API_PATH ? { profiles: mockProfiles } : { rules }
-      );
-      const { history, unmount } = renderPage(http, '/rules');
+      const http = createHttp({ rules: [{ ...mockRules[2], name }] });
+      const { history, unmount } = renderPage({ http, initialPath: '/rules' });
 
       await userEvent.click(await screen.findByRole('link', { name }));
       expect(await screen.findByTestId('searchBoostRuleSettings')).toBeInTheDocument();
@@ -187,7 +257,7 @@ describe('SearchBoostPage', () => {
       const addressBar = history.createHref(history.location);
       unmount();
       contentListQueryClient.clear();
-      renderPage(http, addressBar);
+      renderPage({ http, initialPath: addressBar });
       expect(await screen.findByTestId('searchBoostRuleSettings')).toBeInTheDocument();
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(name);
     }
@@ -197,7 +267,7 @@ describe('SearchBoostPage', () => {
     ['/rules/missing', 'Boost rule not found', '/rules'],
     ['/profiles/missing', 'Boost profile not found', '/profiles'],
   ])('shows %s as not found, with a way back', async (path, title, backPath) => {
-    const { history } = renderPage(createHttp(), path);
+    const { history } = renderPage({ initialPath: path });
 
     expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument();
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toBeInTheDocument();
@@ -207,7 +277,7 @@ describe('SearchBoostPage', () => {
   });
 
   it('opens an index in Index Management, except on a modified click', async () => {
-    const { locator } = renderPage(createHttp(), '/rules/catalog');
+    const { locator } = renderPage({ initialPath: '/rules/catalog' });
 
     const link = await screen.findByRole('link', { name: 'catalog-products' });
     expect(link).toHaveAttribute(
@@ -230,7 +300,7 @@ describe('SearchBoostPage', () => {
   });
 
   it('shows index names as text to users who cannot open Index Management', async () => {
-    renderPage(createHttp(), '/rules/catalog', false);
+    renderPage({ initialPath: '/rules/catalog', canOpenIndexManagement: false });
 
     const names = await screen.findAllByTestId('searchBoostMatchName');
     expect(names.map(({ textContent }) => textContent)).toContain('catalog-products');
@@ -238,7 +308,7 @@ describe('SearchBoostPage', () => {
   });
 
   it('shows data stream names as text to users who cannot open Index Management', async () => {
-    renderPage(createHttp(), '/rules/web-logs', false);
+    renderPage({ initialPath: '/rules/web-logs', canOpenIndexManagement: false });
 
     const names = await screen.findAllByTestId('searchBoostMatchName');
     expect(names.map(({ textContent }) => textContent)).toContain('logs-nginx-default');
@@ -248,7 +318,7 @@ describe('SearchBoostPage', () => {
 
   it('opens a data stream in the flyout and loads again once it changed', async () => {
     const http = createHttp();
-    const { history } = renderPage(http, '/rules/web-logs');
+    const { history } = renderPage({ http, initialPath: '/rules/web-logs' });
 
     const link = await screen.findByRole('link', { name: 'logs-nginx-default' });
     expect(link).toHaveAttribute(
@@ -271,7 +341,7 @@ describe('SearchBoostPage', () => {
 
   it('hides the old matches once loading again after a data stream change fails', async () => {
     const http = createHttp();
-    renderPage(http, '/rules/web-logs');
+    renderPage({ http, initialPath: '/rules/web-logs' });
     await userEvent.click(await screen.findByRole('link', { name: 'logs-nginx-default' }));
     http.get.mockRejectedValue(fetchError({ statusCode: 500, message: 'Something broke' }));
 
@@ -287,7 +357,7 @@ describe('SearchBoostPage', () => {
   });
 
   it('switches tabs through the URL', async () => {
-    const { history } = renderPage(createHttp(), '/profiles');
+    const { history } = renderPage({ initialPath: '/profiles' });
 
     expect(await screen.findByTestId('searchBoostProfilesTable')).toBeInTheDocument();
     await userEvent.click(screen.getByTestId('searchBoostTab-rules'));
@@ -297,7 +367,7 @@ describe('SearchBoostPage', () => {
   });
 
   it('keeps the profile filter when the current tab is selected again', async () => {
-    const { history } = renderPage(createHttp(), '/rules?profile=catalog-fast');
+    const { history } = renderPage({ initialPath: '/rules?profile=catalog-fast' });
 
     expect(await screen.findByTestId('searchBoostRulesCount')).toHaveTextContent(
       'Showing 1 of 1 boost rule'
@@ -311,7 +381,7 @@ describe('SearchBoostPage', () => {
   });
 
   it('opens the boost rules filtered by a profile from its rules using count', async () => {
-    const { history } = renderPage(createHttp(), '/profiles');
+    const { history } = renderPage({ initialPath: '/profiles' });
 
     const row = (await screen.findByRole('link', { name: 'catalog-fast' })).closest('tr')!;
     await userEvent.click(within(row).getByTestId('searchBoostProfileRulesLink'));
@@ -327,7 +397,7 @@ describe('SearchBoostPage', () => {
   it('shows the error in place of the page and loads again on Try again', async () => {
     const http = createHttp();
     http.get.mockRejectedValueOnce(fetchError({ statusCode: 500, message: 'Something broke' }));
-    renderPage(http);
+    renderPage({ http });
 
     const error = await screen.findByTestId('searchBoostLoadError');
     expect(error).toHaveTextContent('Unable to load boost settings');
@@ -344,7 +414,7 @@ describe('SearchBoostPage', () => {
     http.get.mockRejectedValue(
       fetchError({ statusCode: 410, message: 'boost profile API is not enabled' })
     );
-    renderPage(http);
+    renderPage({ http });
 
     const error = await screen.findByTestId('searchBoostLoadError');
     expect(error).toHaveTextContent('Unable to load boost settings');

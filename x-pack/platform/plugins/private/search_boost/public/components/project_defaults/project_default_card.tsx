@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { isManagedProfile } from '../../../common/profiles';
 import type { BoostProfileBase, BoostProfileType, BoostRuleMatch } from '../../../common/types';
 import {
   CUSTOM_PROFILE_DESCRIPTION,
@@ -30,10 +31,11 @@ import {
   getDefaultRuleTip,
   getDefaultRuleTipLabel,
   getEditProjectDefaultLabel,
-  getManagedProfileMessage,
+  getLabeledProfileMessage,
   getShowDefaultMatchesA11yLabel,
   getViewProfileLabel,
 } from '../../translations';
+import type { LinkProps } from '../../types';
 import { MatchesBadge } from '../matches_badge/matches_badge';
 import { ProjectDefaultCardIcon } from './project_default_card_icon';
 
@@ -49,8 +51,9 @@ export interface ProjectDefaultCardProps {
   profile: BoostProfileBase;
   matches: readonly BoostRuleMatch[];
   canEdit: boolean;
-  onEdit: () => void;
-  onViewProfile?: (profileName: string) => void;
+  /** Left out hides "Edit". */
+  onEdit?: () => void;
+  getProfileLinkProps?: (profileName: string) => LinkProps;
 }
 
 export const ProjectDefaultCard = ({
@@ -60,15 +63,15 @@ export const ProjectDefaultCard = ({
   matches,
   canEdit,
   onEdit,
-  onViewProfile,
+  getProfileLinkProps,
 }: ProjectDefaultCardProps) => {
   const { euiTheme } = useEuiTheme();
   const typeLabelFontSize = useEuiFontSize('s');
 
-  const isCustom = !profile.is_builtin;
-  const managedMessage = isCustom ? undefined : getManagedProfileMessage(profile.name);
-  const title = managedMessage?.label ?? profile.name;
-  const description = isCustom ? CUSTOM_PROFILE_DESCRIPTION : managedMessage?.description;
+  const isCustom = !isManagedProfile(profile);
+  const labeledMessage = isCustom ? undefined : getLabeledProfileMessage(profile.name);
+  const title = labeledMessage?.label ?? profile.name;
+  const description = isCustom ? CUSTOM_PROFILE_DESCRIPTION : labeledMessage?.description;
   const viewProfileLabel = isCustom ? getViewProfileLabel(profile.name) : undefined;
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj={`searchBoostProjectDefault-${type}`}>
@@ -102,7 +105,7 @@ export const ProjectDefaultCard = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {canEdit ? (
+            {canEdit && onEdit ? (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   size="s"
@@ -117,14 +120,14 @@ export const ProjectDefaultCard = ({
           </EuiFlexGroup>
           <EuiTitle size="m">
             <p data-test-subj={`searchBoostProjectDefaultValue-${type}`}>
-              {isCustom && onViewProfile ? (
+              {isCustom && getProfileLinkProps ? (
                 <span css={getInlineRowStyles(euiTheme.size.s)}>
                   {title}
                   <EuiToolTip content={viewProfileLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
+                      {...getProfileLinkProps(profile.name)}
                       iconType="link"
                       color="text"
-                      onClick={() => onViewProfile(profile.name)}
                       aria-label={viewProfileLabel}
                       data-test-subj={`searchBoostProjectDefaultProfileLink-${type}`}
                     />

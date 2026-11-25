@@ -15,7 +15,7 @@ import type {
   DataStreamsBoostProfile,
   IndicesBoostProfile,
 } from '../../../common/types';
-import { getManagedProfileMessage } from '../../translations';
+import { getLabeledProfileMessage } from '../../translations';
 import type { ProjectDefaultFlyoutProps } from './project_default_flyout';
 import { ProjectDefaultFlyout } from './project_default_flyout';
 
@@ -144,7 +144,7 @@ describe('ProjectDefaultFlyout', () => {
     renderFlyout(dataStreamsProps);
 
     expect(screen.getByRole('radio', { name: /Last 3 days/ })).toHaveAccessibleName(
-      `Last 3 days ${getManagedProfileMessage('data_streams_3d')?.description}`
+      `Last 3 days ${getLabeledProfileMessage('data_streams_3d')?.description}`
     );
   });
 
