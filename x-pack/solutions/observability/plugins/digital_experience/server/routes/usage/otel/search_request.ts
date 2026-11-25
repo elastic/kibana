@@ -21,7 +21,6 @@ import {
   FRUSTRATION_EVENTS,
   NAVIGATION_TIMING_LOAD_EVENT_END,
   OTEL_LOGS_INDEX,
-  WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
 } from '../../../../common/otel_data';
 import {
@@ -35,6 +34,7 @@ import {
   byEnvironment,
   eventCount,
   otelSearchDefaults,
+  webVitalNameFilter,
 } from '../../../lib/otel/queries';
 import type { ApplicationSearchParams } from '../../application_tab_route';
 
@@ -46,7 +46,7 @@ const PAGE_CANDIDATES_PER_ROW = 3;
 
 /** The 75th percentile of one web vital among the events of a page. */
 const pageVital = (vital: CoreWebVital) => ({
-  filter: { term: { [WEB_VITAL_NAME]: { value: vital, case_insensitive: true } } },
+  filter: webVitalNameFilter(vital),
   aggs: { value: p75Of(WEB_VITAL_VALUE) },
 });
 
