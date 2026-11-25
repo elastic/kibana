@@ -5,132 +5,41 @@
  * 2.0.
  */
 
-import type { DatatableUtilitiesService, ParsedInterval } from '@kbn/data-plugin/common';
-import { InvalidEsCalendarIntervalError, parseEsInterval } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DateRounding, IanaTimeZone } from '@kbn/es-date-rounding';
+import {
+  ianaTimeZoneOrUtc,
+  nextBucketKey,
+  roundToBucketKey,
+  toDateRounding,
+} from '@kbn/es-date-rounding';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment-timezone';
 import type { DateHistogramTextBasedExpressionFunction } from '../../defs/date_histogram/types';
 
-function offsetMs(timestamp: number, timeZone: string): number {
-  return moment.tz(timestamp, timeZone).utcOffset() * 60 * 1000;
-}
-
-function utcToLocal(timestamp: number, timeZone: string): number {
-  return timestamp + offsetMs(timestamp, timeZone);
-}
-
-function localToUtc(localMs: number, timeZone: string): number {
-  const wallClock = moment.utc(localMs).format('YYYY-MM-DDTHH:mm:ss.SSS');
-  return moment.tz(wallClock, timeZone).valueOf();
-}
-
-function fixedIntervalMs(interval: ParsedInterval): number {
-  return moment.duration(interval.value, interval.unit).asMilliseconds();
-}
-
-function parseEsqlHistogramInterval(intervalString: string): ParsedInterval | undefined {
-  try {
-    return parseEsInterval(intervalString);
-  } catch (error) {
-    if (error instanceof InvalidEsCalendarIntervalError) {
-      return { value: error.value, unit: error.unit, type: 'calendar' };
-    }
-    return undefined;
-  }
-}
-
-function calendarMomentUnit(unit: ParsedInterval['unit']): moment.unitOfTime.DurationConstructor {
-  return (unit === 'w' ? 'isoWeek' : unit) as moment.unitOfTime.DurationConstructor;
-}
-
-function calendarUnitIndex(value: moment.Moment, unit: ParsedInterval['unit']): number {
-  switch (unit) {
-    case 'w':
-      return value.isoWeek() - 1;
-    case 'M':
-      return value.month();
-    case 'y':
-      return value.year();
-    default:
-      return 0;
-  }
-}
-
 /**
- * Timezone offset shifts UTC onto a local timeline so `floor(t / interval)`
- * lands on local midnights/hours. The snapped local instant is then parsed
- * back as wall-clock time in the histogram timezone (the destination offset
- * can differ across DST).
- *
- * bucket_key = localToUtc(floor(utcToLocal(value) / interval) * interval)
- *
- * @see https://www.elastic.co/docs/reference/aggregations/search-aggregations-bucket-datehistogram-aggregation#time-zone
- */
-function snapToEsBucket(timestamp: number, interval: ParsedInterval, timeZone: string): number {
-  if (interval.type === 'calendar') {
-    const unit = calendarMomentUnit(interval.unit);
-    const snapped = moment.tz(timestamp, timeZone).startOf(unit);
-    if (interval.value > 1) {
-      snapped.subtract(calendarUnitIndex(snapped, interval.unit) % interval.value, unit);
-    }
-    return snapped.valueOf();
-  }
-
-  const intervalMs = fixedIntervalMs(interval);
-  const snappedLocal = Math.floor(utcToLocal(timestamp, timeZone) / intervalMs) * intervalMs;
-  return localToUtc(snappedLocal, timeZone);
-}
-
-function addInterval(timestamp: number, interval: ParsedInterval, timeZone: string): number {
-  if (interval.type === 'calendar') {
-    return moment
-      .tz(timestamp, timeZone)
-      .add(interval.value, calendarMomentUnit(interval.unit))
-      .valueOf();
-  }
-
-  const intervalMs = fixedIntervalMs(interval);
-  const nextLocal =
-    Math.floor(utcToLocal(timestamp, timeZone) / intervalMs) * intervalMs + intervalMs;
-  return localToUtc(nextLocal, timeZone);
-}
-
-const isFullyContained = (
-  bucketStart: number,
-  from: number,
-  to: number,
-  interval: ParsedInterval,
-  timeZone: string
-): boolean => bucketStart >= from && addInterval(bucketStart, interval, timeZone) <= to;
-
-/**
- * Builds the histogram domain from the applied time range and interval.
- * Bounds are snapped independently so the grid does not depend on row order or
- * break when the range crosses a DST transition.
+ * Keys of the first and last buckets of the time range, rounded like ES|QL `BUCKET`.
+ * With `dropPartials`, the buckets only partly inside the range are excluded.
  */
 const getDomainBounds = (
   from: number,
   to: number,
-  interval: ParsedInterval,
-  timeZone: string,
+  rounding: DateRounding,
+  timeZone: IanaTimeZone,
   dropPartials: boolean
 ): { min: number; max: number } | undefined => {
-  let min = snapToEsBucket(from, interval, timeZone);
-  let max = snapToEsBucket(to, interval, timeZone);
+  const firstKey = roundToBucketKey(from, rounding, timeZone);
+  const lastKey = roundToBucketKey(to, rounding, timeZone);
 
-  if (dropPartials) {
-    if (!isFullyContained(min, from, to, interval, timeZone)) {
-      min = addInterval(min, interval, timeZone);
-    }
-    if (!isFullyContained(max, from, to, interval, timeZone)) {
-      max = snapToEsBucket(max - 1, interval, timeZone);
-    }
-    if (min > max) {
-      return undefined;
-    }
+  if (!dropPartials) {
+    return { min: firstKey, max: lastKey };
   }
 
-  return { min, max };
+  // The bucket containing `to` always extends past it, so the last full bucket is the one before.
+  const min = firstKey < from ? nextBucketKey(firstKey, rounding, timeZone) : firstKey;
+  const max = roundToBucketKey(lastKey - 1, rounding, timeZone);
+
+  return min <= max ? { min, max } : undefined;
 };
 
 /**
@@ -170,21 +79,21 @@ export const dateHistogramTextBasedFn =
       return input;
     }
 
+    const rounding = toDateRounding(intervalString);
+    if (!rounding) {
+      return input;
+    }
+
     // ES|QL date histograms drop partial buckets by default: undefined is treated as true, an explicit false is respected.
     const dropPartials = meta.dropPartials ?? true;
 
     // Bucket boundaries must match the timezone ES|QL BUCKET uses so calendar intervals stay aligned.
-    const timeZone = meta.timeZone || contextTimeZone;
-
-    const interval = parseEsqlHistogramInterval(intervalString);
-    if (!interval) {
-      return input;
-    }
+    const timeZone = ianaTimeZoneOrUtc(meta.timeZone || contextTimeZone);
 
     const from = moment.tz(timeRange.from, timeZone).valueOf();
     const to = moment.tz(timeRange.to, timeZone).valueOf();
 
-    const computedDomain = getDomainBounds(from, to, interval, timeZone, dropPartials);
+    const computedDomain = getDomainBounds(from, to, rounding, timeZone, dropPartials);
 
     const columns = computedDomain
       ? input.columns.map((current) =>
@@ -209,9 +118,12 @@ export const dateHistogramTextBasedFn =
       columns,
       rows: input.rows.filter((row) => {
         const bucketStart = row[column.id];
+        if (typeof bucketStart !== 'string' && typeof bucketStart !== 'number') {
+          return true;
+        }
+        const key = moment.tz(bucketStart, timeZone).valueOf();
         return (
-          (typeof bucketStart !== 'string' && typeof bucketStart !== 'number') ||
-          isFullyContained(moment.tz(bucketStart, timeZone).valueOf(), from, to, interval, timeZone)
+          computedDomain !== undefined && key >= computedDomain.min && key <= computedDomain.max
         );
       }),
     };
