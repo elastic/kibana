@@ -31,7 +31,7 @@ import type {
 } from '../../../types';
 import { useGetCustomNotificationUnavailableComponent } from '../hooks/use_get_custom_notification_unavailable_component';
 import { NOTIFY_USER_CHECKBOX_LABEL } from '../components/shared_translations';
-import { SupportedVersionForProtectionNotice } from '../components/notify_user_option';
+import { SupportedVersionForProtectionNotice } from './supported_version_for_protection_notice';
 import { osRowPanelCss } from './os_control_layout';
 import type { PerOsPolicyAccessor } from './policy_accessor';
 

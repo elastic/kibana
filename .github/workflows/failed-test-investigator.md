@@ -97,7 +97,8 @@ imports:
 engine:
   id: claude
   version: '2.1.165'
-  model: opus
+  # an exact ID: gh-aw resolves the `opus` alias to the newest Opus, which this Claude Code version rejects
+  model: claude-opus-5
   max-turns: 120
   env:
     BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
@@ -137,15 +138,14 @@ sandbox:
 
 safe-outputs:
   threat-detection:
-    # The detection job can't request an OIDC token, so it runs on Copilot. It inherits the
-    # main engine's env: blank the secrets it must not receive.
+    # The detection job can't request an OIDC token, so it runs on Copilot.
     engine:
       id: copilot
-      model: sonnet
+      model: claude-opus-5
       env:
         BUILDKITE_API_TOKEN: ${{ '' }}
-        ANTHROPIC_API_KEY: ${{ '' }}
-        AWF_ANTHROPIC_AUTH_HEADER: ${{ '' }}
+    # a detection failure blocks the outputs instead of passing with a warning
+    continue-on-error: false
   noop:
     report-as-issue: false
   activation-comments: false

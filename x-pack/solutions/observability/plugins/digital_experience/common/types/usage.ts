@@ -9,6 +9,7 @@ import type { FrustrationCounts } from '../frustration';
 
 /** A page and the page loads of it. */
 export interface TopPage {
+  /** The route the app reports for the page, like `/products/{slug}`, or its URL without one. */
   url: string;
   pageLoads: number;
   /** 75th percentile of the load time in milliseconds, `null` without a timed page load. */
