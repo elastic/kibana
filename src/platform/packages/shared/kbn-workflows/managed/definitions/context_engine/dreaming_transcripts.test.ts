@@ -19,9 +19,14 @@ interface Step {
   condition?: string;
   foreach?: string;
   concurrency?: number;
+  'max-iterations'?: number;
+  'on-failure'?: { continue?: boolean };
   steps?: Step[];
   with?: Record<string, unknown>;
 }
+
+const pageSteps = (workflow: { steps: Step[] }): Step[] =>
+  findStep(workflow.steps, 'drain').steps ?? [];
 
 const findStep = (steps: Step[], name: string): Step => {
   const step = steps.find((candidate) => candidate.name === name);
@@ -44,16 +49,14 @@ const values: ContextEngineTranscriptDreamingWorkflowTemplateValues = {
 };
 
 const render = () => parse(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW.yamlTemplate(values));
-const batches = () => findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+const batches = () => findStep(findStep(pageSteps(render()), 'dream').steps ?? [], 'batches');
 
 describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW', () => {
   it('is its own workflow on the dreaming schedule, named and keyed apart from dreaming', () => {
     const workflow = render();
     const dreaming = parse(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values));
 
-    expect(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW.id).not.toBe(
-      CONTEXT_ENGINE_DREAMING_WORKFLOW.id
-    );
+    expect(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW.id).not.toBe(CONTEXT_ENGINE_DREAMING_WORKFLOW.id);
     expect(workflow.name).toBe('Transcript dreaming: support-cases');
     expect(workflow.settings.concurrency).toEqual(dreaming.settings.concurrency);
     expect(workflow.enabled).toBe(false);
@@ -68,6 +71,8 @@ describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW', () => {
       ai_index_id: 'support-cases',
       batch_workflow_id:
         'system-context-engine-transcript-dreaming-batch-support-cases-0123456789abcdef',
+      workflow_id: 'system-context-engine-transcript-dreaming-support-cases-0123456789abcdef',
+      drain_budget_seconds: 1440,
     });
   });
 
@@ -83,9 +88,9 @@ describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW', () => {
       'paused',
       'last_run',
       'resume',
-      'read_transcripts',
-      'active',
-      'dream',
+      'init',
+      'drain',
+      'more_rounds',
       'dry_run_result',
       'output_result',
     ]);
@@ -100,50 +105,53 @@ describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW', () => {
     ]);
   });
 
-  it('reads turns from where the last run stopped, else since the last run, unless given a time', () => {
-    const read = findStep(render().steps, 'read_transcripts');
+  it('starts from where the last run stopped, else since the last run, unless given a time', () => {
+    const init = findStep(render().steps, 'init').with as {
+      resume_from: string;
+      resume_after: string;
+    };
     const engine = createWorkflowLiquidEngine();
-    const { since, after } = read.with as { since: string; after: string };
     const lastRun = { output: { since: '2026-11-01T00:00:00.000Z' } };
     const lastOutput = {
       output: {
         context: { output: { resume_from: '2026-11-03T00:00:00Z', resume_after: 'trace-9' } },
       },
     };
+    const cursor = (scope: Record<string, unknown>) => ({
+      from: engine.parseAndRenderSync(init.resume_from, scope),
+      after: engine.parseAndRenderSync(init.resume_after, scope),
+    });
+
+    expect(cursor({ inputs: {}, steps: { last_run: lastRun } })).toEqual({
+      from: '2026-11-01T00:00:00.000Z',
+      after: '',
+    });
+    expect(cursor({ inputs: {}, steps: { last_run: lastRun, last_output: lastOutput } })).toEqual({
+      from: '2026-11-03T00:00:00Z',
+      after: 'trace-9',
+    });
+    expect(
+      cursor({
+        inputs: { since: '2026-10-01T00:00:00Z' },
+        steps: { last_run: lastRun, last_output: lastOutput },
+      })
+    ).toEqual({ from: '2026-10-01T00:00:00Z', after: '' });
+  });
+
+  it('reads each page from the cursor the previous page left', () => {
+    const read = findStep(pageSteps(render()), 'read_transcripts');
+    const { since, after } = read.with as { since: string; after: string };
+    const scope = { variables: { resume_from: '2026-11-05T00:00:00Z', resume_after: 'trace-9' } };
+    const engine = createWorkflowLiquidEngine();
 
     expect(read.type).toBe('context-engine.readSessionTranscripts');
-    expect(engine.parseAndRenderSync(since, { inputs: {}, steps: { last_run: lastRun } })).toBe(
-      '2026-11-01T00:00:00.000Z'
-    );
-    expect(
-      engine.parseAndRenderSync(since, {
-        inputs: {},
-        steps: { last_run: lastRun, last_output: lastOutput },
-      })
-    ).toBe('2026-11-03T00:00:00Z');
-    expect(
-      engine.parseAndRenderSync(after, {
-        inputs: {},
-        steps: { last_run: lastRun, last_output: lastOutput },
-      })
-    ).toBe('trace-9');
-    expect(
-      engine.parseAndRenderSync(since, {
-        inputs: { since: '2026-10-01T00:00:00Z' },
-        steps: { last_run: lastRun, last_output: lastOutput },
-      })
-    ).toBe('2026-10-01T00:00:00Z');
-    expect(
-      engine.parseAndRenderSync(after, {
-        inputs: { since: '2026-10-01T00:00:00Z' },
-        steps: { last_run: lastRun, last_output: lastOutput },
-      })
-    ).toBe('');
+    expect(engine.parseAndRenderSync(since, scope)).toBe('2026-11-05T00:00:00Z');
+    expect(engine.parseAndRenderSync(after, scope)).toBe('trace-9');
   });
 
   it('outputs where the read stopped, so the next run continues from there', () => {
     const { steps } = render();
-    const active = findStep(steps, 'active').with;
+    const active = findStep(pageSteps(render()), 'page').with;
     const engine = createWorkflowLiquidEngine();
     const scope = {
       steps: {
@@ -159,7 +167,7 @@ describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW', () => {
     expect(engine.parseAndRenderSync(String(active?.resume_after), scope)).toBe('trace-9');
     expect(findStep(steps, 'output_result').with).toEqual(
       expect.objectContaining({
-        rounds: '${{ variables.memories | size | default: 0 }}',
+        rounds: '${{ variables.rounds | default: 0 }}',
         resume_from: '{{ variables.resume_from }}',
         resume_after: '{{ variables.resume_after }}',
       })
@@ -167,12 +175,10 @@ describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW', () => {
   });
 
   it('reads up to a token budget, and runs the batches the read packed, 4 at a time', () => {
-    const { steps } = render();
-
-    expect(findStep(steps, 'read_transcripts').with).toEqual(
+    expect(findStep(pageSteps(render()), 'read_transcripts').with).toEqual(
       expect.objectContaining({ size: 1000, max_tokens: 600000, batch_tokens: 50000 })
     );
-    expect(findStep(steps, 'active').with?.batches).toBe(
+    expect(findStep(pageSteps(render()), 'page').with?.batches).toBe(
       '${{ steps.read_transcripts.output.batches }}'
     );
     expect(batches()).toEqual(
@@ -209,7 +215,7 @@ describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW', () => {
       would_write: [{ id: `ki-${created}` }],
     });
 
-    const dream = findStep(render().steps, 'dream').steps ?? [];
+    const dream = findStep(pageSteps(render()), 'dream').steps ?? [];
     const tally = findStep(dream, 'tally');
     const add = findStep(tally.steps ?? [], 'add_batch').with ?? {};
     let variables: Record<string, unknown> = {
@@ -242,5 +248,88 @@ describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW', () => {
         rejected: '${{ variables.rejected | default: 0 }}',
       })
     );
+  });
+
+  describe('draining a backlog', () => {
+    const engine = createWorkflowLiquidEngine();
+    const evaluate = (expression: unknown, scope: Record<string, unknown>) =>
+      engine.evalValueSync(String(expression).slice(3, -2).trim(), scope);
+    const drain = () => findStep(render().steps, 'drain');
+    const consts = { drain_budget_seconds: 1440 };
+
+    it('loops pages in a while step, bounded by max-iterations and 80% of the run timeout', () => {
+      const workflow = render();
+
+      expect(drain().type).toBe('while');
+      expect(drain()['max-iterations']).toBe(100);
+      expect(workflow.consts.drain_budget_seconds).toBe(0.8 * 30 * 60);
+      expect(workflow.settings.timeout).toBe('30m');
+    });
+
+    it('continues only while the last page was capped, a page fits the budget, and it is not a dry run', () => {
+      const run = (variables: Record<string, unknown>, inputs: Record<string, unknown> = {}) =>
+        evaluate(drain().condition, { variables, inputs, consts });
+      const capped = { resume_after: 'trace-9', projected_s: 600 };
+
+      expect(run(capped)).toBe(true);
+      expect(run({ ...capped, resume_after: '' })).toBe(false);
+      expect(run({ ...capped, projected_s: 1500 })).toBe(false);
+      expect(run(capped, { dry_run: true })).toBe(false);
+    });
+
+    it('projects the next page to take as long as the last one', () => {
+      const steps = drain().steps ?? [];
+      const clock = findStep(steps, 'clock').with as Record<string, string>;
+      const budget = findStep(steps, 'budget').with as Record<string, string>;
+      const startedAt = Math.floor(Date.now() / 1000) - 300;
+      const variables = { started_at: String(startedAt), elapsed_s: 100 };
+      const after = {
+        elapsed_s: Number(evaluate(clock.elapsed_s, { variables })),
+        page_s: Number(evaluate(clock.page_s, { variables })),
+      };
+
+      expect(after.elapsed_s).toBeGreaterThanOrEqual(300);
+      expect(after.page_s).toBeGreaterThanOrEqual(200);
+      expect(Number(evaluate(budget.projected_s, { variables: after }))).toBe(
+        after.elapsed_s + after.page_s
+      );
+    });
+
+    it('adds the rounds of the pages up', () => {
+      const page = findStep(pageSteps(render()), 'page').with as Record<string, string>;
+
+      expect(
+        evaluate(page.rounds, {
+          variables: { rounds: 1000 },
+          steps: { read_transcripts: { output: { memories: [1, 2, 3] } } },
+        })
+      ).toBe(1003);
+    });
+
+    it('queues the next run of the same workflow when it stopped at a cap, not on a dry run', () => {
+      const more = findStep(render().steps, 'more_rounds');
+      const [queue] = more.steps ?? [];
+
+      expect(evaluate(more.condition, { variables: { resume_after: 'trace-9' }, inputs: {} })).toBe(
+        true
+      );
+      expect(evaluate(more.condition, { variables: { resume_after: '' }, inputs: {} })).toBe(false);
+      expect(
+        evaluate(more.condition, {
+          variables: { resume_after: 'trace-9' },
+          inputs: { dry_run: true },
+        })
+      ).toBe(false);
+      expect(queue).toEqual(
+        expect.objectContaining({
+          type: 'kibana.request',
+          'on-failure': { continue: true },
+          with: expect.objectContaining({
+            method: 'POST',
+            path: '/s/{{ workflow.spaceId }}/api/workflows/workflow/{{ consts.workflow_id }}/run',
+          }),
+        })
+      );
+    });
   });
 });

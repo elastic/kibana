@@ -94,11 +94,12 @@ export const memoryConcurrencyKeyFor = (instanceKey: string): string =>
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 8,
+  version: 9,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(DREAMING_YAML, {
       __NAME__: `Dreaming: ${values.aiIndexId}`,
+      __WORKFLOW_ID__: `${CONTEXT_ENGINE_DREAMING_WORKFLOW_ID}-${values.instanceKey}`,
       __AI_INDEX_ID__: values.aiIndexId,
       __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
       __MEMORIES_INDEX__: values.memoriesIndex,
@@ -125,11 +126,12 @@ export type ContextEngineTranscriptDreamingWorkflowTemplateValues =
 export const CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 7,
+  version: 8,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(TRANSCRIPT_DREAMING_YAML, {
       __NAME__: `Transcript dreaming: ${values.aiIndexId}`,
+      __WORKFLOW_ID__: `${CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID}-${values.instanceKey}`,
       __AI_INDEX_ID__: values.aiIndexId,
       __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
       __INTERVAL_MINUTES__: values.intervalMinutes,
