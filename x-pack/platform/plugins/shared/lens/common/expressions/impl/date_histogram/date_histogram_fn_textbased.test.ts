@@ -370,6 +370,82 @@ describe('lens_date_histogram_textbased', () => {
           max: bucketStart,
         });
       });
+
+      it('keeps the 30-minute buckets of the second repeated hour after the DST fallback', async () => {
+        const firstTwo = Date.parse('2026-10-25T00:00:00.000Z');
+        const firstTwoThirty = Date.parse('2026-10-25T00:30:00.000Z');
+        const secondTwo = Date.parse('2026-10-25T01:00:00.000Z');
+        const secondTwoThirty = Date.parse('2026-10-25T01:30:00.000Z');
+        const input: Datatable = {
+          type: 'datatable',
+          columns: [
+            buildBucketColumn({
+              bucket: { interval: 30, unit: 'minute' },
+              appliedTimeRange: {
+                from: '2026-10-25T00:00:00.000Z',
+                to: '2026-10-25T01:45:00.000Z',
+              },
+            }),
+            { id: 'b', name: 'B', meta: { type: 'number' } },
+          ],
+          rows: [
+            { a: secondTwo, b: 3 },
+            { a: firstTwo, b: 1 },
+            { a: secondTwoThirty, b: 4 },
+            { a: firstTwoThirty, b: 2 },
+          ],
+        };
+
+        const result = await dateHistogramRome.fn(input, {}, createMockExecutionContext());
+
+        expect(result.rows).toStrictEqual([
+          { a: secondTwo, b: 3 },
+          { a: firstTwo, b: 1 },
+          { a: firstTwoThirty, b: 2 },
+        ]);
+        expect(result.columns[0].meta.sourceParams?.computedDomain).toEqual({
+          min: firstTwo,
+          max: secondTwo,
+        });
+      });
+
+      it('keeps local noon and midnight buckets across the DST spring forward', async () => {
+        const midnight29 = Date.parse('2026-03-29T00:00:00.000+01:00');
+        const noon29 = Date.parse('2026-03-29T12:00:00.000+02:00');
+        const midnight30 = Date.parse('2026-03-30T00:00:00.000+02:00');
+        const noon30 = Date.parse('2026-03-30T12:00:00.000+02:00');
+        const input: Datatable = {
+          type: 'datatable',
+          columns: [
+            buildBucketColumn({
+              bucket: { interval: 12, unit: 'hour' },
+              appliedTimeRange: {
+                from: '2026-03-28T23:00:00.000Z',
+                to: '2026-03-30T10:00:00.000Z',
+              },
+            }),
+            { id: 'b', name: 'B', meta: { type: 'number' } },
+          ],
+          rows: [
+            { a: midnight29, b: 1 },
+            { a: noon29, b: 2 },
+            { a: midnight30, b: 3 },
+            { a: noon30, b: 4 },
+          ],
+        };
+
+        const result = await dateHistogramRome.fn(input, {}, createMockExecutionContext());
+
+        expect(result.rows).toStrictEqual([
+          { a: midnight29, b: 1 },
+          { a: noon29, b: 2 },
+          { a: midnight30, b: 3 },
+        ]);
+        expect(result.columns[0].meta.sourceParams?.computedDomain).toEqual({
+          min: midnight29,
+          max: midnight30,
+        });
+      });
     });
   });
 
