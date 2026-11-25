@@ -202,4 +202,121 @@ describe('ServiceMapFindInPage', () => {
     expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('0/0');
     expect(screen.getByTestId('serviceMapFindNext')).toBeDisabled();
   });
+
+  describe('with an open group', () => {
+    const box: ServiceMapNode = {
+      id: 'calls:search',
+      type: 'serviceGroupBox',
+      position: { x: 100, y: 100 },
+      width: 600,
+      height: 300,
+      data: {
+        id: 'calls:search',
+        label: 'Retrieval stack',
+        isService: false,
+        isServiceGroupBox: true,
+        groupKind: 'calls',
+        memberServiceIds: ['search', 'indexer'],
+        memberCount: 2,
+      },
+    };
+    const member = (id: string, position: { x: number; y: number }): ServiceMapNode => ({
+      ...serviceNode(id, id, position),
+      parentId: box.id,
+      extent: 'parent',
+    });
+    const search = member('search', { x: 24, y: 72 });
+    const indexer = member('indexer', { x: 300, y: 72 });
+
+    it('finds a member and centers on its place on the map, not inside the box', async () => {
+      const user = userEvent.setup();
+      render(<ServiceMapFindInPage nodes={[box, search, indexer]} />);
+
+      await user.type(screen.getByTestId('serviceMapControlsSearch'), 'indexer');
+      await user.click(screen.getByTestId('serviceMapFindNext'));
+
+      expect(mockSetCenter).toHaveBeenLastCalledWith(
+        box.position.x + indexer.position.x + NODE_WIDTH / 2,
+        box.position.y + indexer.position.y + NODE_HEIGHT / 2,
+        expect.any(Object)
+      );
+      expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('1/1');
+    });
+
+    it('finds the group by its name and centers on the middle of the box', async () => {
+      const user = userEvent.setup();
+      render(<ServiceMapFindInPage nodes={[box, search, indexer]} />);
+
+      await user.type(screen.getByTestId('serviceMapControlsSearch'), 'stack');
+      await user.click(screen.getByTestId('serviceMapFindNext'));
+
+      expect(mockSetCenter).toHaveBeenLastCalledWith(
+        box.position.x + 300,
+        box.position.y + 150,
+        expect.any(Object)
+      );
+      expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('1/1');
+    });
+
+    it('does not match the box on its id or on the names of its members', async () => {
+      const user = userEvent.setup();
+      render(<ServiceMapFindInPage nodes={[box, search, indexer]} />);
+
+      await user.type(screen.getByTestId('serviceMapControlsSearch'), 'calls');
+      expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('0/0');
+
+      await user.clear(screen.getByTestId('serviceMapControlsSearch'));
+      await user.type(screen.getByTestId('serviceMapControlsSearch'), 'search');
+      // Only the `search` service: not the box, which only holds it.
+      expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('1/1');
+    });
+
+    it('finds the service once, not also its box, when the box is named after it', async () => {
+      const user = userEvent.setup();
+      // A "by calls" group is named after its busiest member.
+      const callsBox: ServiceMapNode = {
+        ...box,
+        data: { ...box.data, label: 'search' },
+      } as ServiceMapNode;
+      render(<ServiceMapFindInPage nodes={[callsBox, search, indexer]} />);
+
+      await user.type(screen.getByTestId('serviceMapControlsSearch'), 'search');
+      await user.click(screen.getByTestId('serviceMapFindNext'));
+
+      expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('1/1');
+      expect(mockSetCenter).toHaveBeenLastCalledWith(
+        box.position.x + search.position.x + NODE_WIDTH / 2,
+        box.position.y + search.position.y + NODE_HEIGHT / 2,
+        expect.any(Object)
+      );
+    });
+
+    it('finds the box by its name when a filter hides the member it is named after', async () => {
+      const user = userEvent.setup();
+      const callsBox: ServiceMapNode = {
+        ...box,
+        data: { ...box.data, label: 'search' },
+      } as ServiceMapNode;
+      render(<ServiceMapFindInPage nodes={[callsBox, { ...search, hidden: true }, indexer]} />);
+
+      await user.type(screen.getByTestId('serviceMapControlsSearch'), 'search');
+      await user.click(screen.getByTestId('serviceMapFindNext'));
+
+      expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('1/1');
+      expect(mockSetCenter).toHaveBeenLastCalledWith(
+        box.position.x + 300,
+        box.position.y + 150,
+        expect.any(Object)
+      );
+    });
+
+    it('skips members that are hidden by a filter', async () => {
+      const user = userEvent.setup();
+      render(<ServiceMapFindInPage nodes={[box, search, { ...indexer, hidden: true }]} />);
+
+      await user.type(screen.getByTestId('serviceMapControlsSearch'), 'indexer');
+
+      expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('0/0');
+    });
+  });
 });
