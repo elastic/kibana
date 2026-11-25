@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCopy, EuiFieldText, EuiFormAppend, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SourceEndpoint } from './types';
 
@@ -63,12 +63,39 @@ export const SourceEndpointField = ({
     <>
       {displayedEndpoints.map(({ id, url }, index) => {
         const label = getEndpointLabel(id);
+        const copyLabel = i18n.translate('xpack.streams.sources.copyNamedEndpointAriaLabel', {
+          defaultMessage: 'Copy {label} to clipboard',
+          values: { label },
+        });
         return (
           <React.Fragment key={id}>
             {index > 0 && <EuiSpacer size="s" />}
             <EuiFormRow
               fullWidth
               label={label}
+              labelAppend={
+                endpoint ? (
+                  <EuiCopy
+                    textToCopy={url}
+                    beforeMessage={copyLabel}
+                    tooltipProps={{ disableScreenReaderOutput: true }}
+                  >
+                    {(copy) => (
+                      <EuiButtonIcon
+                        size="xs"
+                        iconType="copy"
+                        onClick={copy}
+                        data-test-subj={
+                          id === 'default'
+                            ? 'streamsSourceEndpointCopyButton'
+                            : `streamsSourceEndpointCopyButton-${id}`
+                        }
+                        aria-label={copyLabel}
+                      />
+                    )}
+                  </EuiCopy>
+                ) : undefined
+              }
               helpText={
                 showHelpText && index === displayedEndpoints.length - 1
                   ? i18n.translate('xpack.streams.sources.endpointHelpText', {
@@ -77,9 +104,11 @@ export const SourceEndpointField = ({
                   : undefined
               }
             >
-              <EuiFieldText
+              <EuiTextArea
                 fullWidth
                 readOnly
+                rows={2}
+                resize="none"
                 value={url}
                 aria-label={label}
                 data-test-subj={
@@ -88,31 +117,6 @@ export const SourceEndpointField = ({
                     : `streamsSourceEndpointValue-${id}`
                 }
                 disabled={!endpoint}
-                append={
-                  endpoint ? (
-                    <EuiCopy textToCopy={url}>
-                      {(copy) => (
-                        <EuiFormAppend
-                          element="button"
-                          iconLeft="copy"
-                          onClick={copy}
-                          data-test-subj={
-                            id === 'default'
-                              ? 'streamsSourceEndpointCopyButton'
-                              : `streamsSourceEndpointCopyButton-${id}`
-                          }
-                          aria-label={i18n.translate(
-                            'xpack.streams.sources.copyNamedEndpointAriaLabel',
-                            {
-                              defaultMessage: 'Copy {label} to clipboard',
-                              values: { label },
-                            }
-                          )}
-                        />
-                      )}
-                    </EuiCopy>
-                  ) : undefined
-                }
               />
             </EuiFormRow>
           </React.Fragment>
