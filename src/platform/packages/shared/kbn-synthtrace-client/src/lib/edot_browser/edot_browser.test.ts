@@ -679,6 +679,7 @@ describe('edotBrowser', () => {
           slowdown: 1,
           reportExceptions: true,
           reportResourceTimings: true,
+          reportPageRoutes: true,
           impatience: 1,
           persistentHits: new Map(),
         },
@@ -754,6 +755,7 @@ describe('edotBrowser', () => {
       end,
       reportExceptions,
       reportResourceTimings,
+      reportPageRoutes,
       frustrationRandom,
     }: {
       seed?: number;
@@ -767,6 +769,7 @@ describe('edotBrowser', () => {
       end?: number;
       reportExceptions?: boolean;
       reportResourceTimings?: boolean;
+      reportPageRoutes?: boolean;
       frustrationRandom?: () => number;
     } = {}) =>
       edotBrowser
@@ -779,6 +782,7 @@ describe('edotBrowser', () => {
           dwell,
           reportExceptions,
           reportResourceTimings,
+          reportPageRoutes,
           frustrationRandom,
           random: seededRandom(seed),
         })
@@ -1801,6 +1805,78 @@ describe('edotBrowser', () => {
       clicks.forEach(({ attributes }) => {
         expect(attributes).toMatchObject({ 'browser.tag_name': 'DIV' });
         expect(attributes).not.toHaveProperty(['browser.css_selector']);
+      });
+    });
+
+    describe('page routes', () => {
+      const ROUTED_SITE: EdotBrowserSite = {
+        ...SITE,
+        pages: [
+          { path: '/' },
+          {
+            path: '/products/trail-shoes',
+            route: '/products/{slug}',
+            requests: [{ method: 'GET', url: '/api/products/trail-shoes' }],
+          },
+          { path: '/orders/48213' },
+        ],
+      };
+      const ROUTES: Record<string, string> = {
+        '/': '/',
+        '/products/trail-shoes': '/products/{slug}',
+        '/orders/48213': '/orders/{id}',
+      };
+      const routedSession = (reportPageRoutes?: boolean) =>
+        createSession({ site: ROUTED_SITE, pageViews: 12, reportPageRoutes });
+      const templateOf = (doc: ReturnType<typeof createSession>[number]) =>
+        doc.attributes?.['url.template'];
+      const isEvent = (doc: ReturnType<typeof createSession>[number], name: string) =>
+        'event_name' in doc && doc.event_name === name;
+
+      it('adds the route of the page to the logs, the one the app tells or the inferred one', () => {
+        const pageLoads = routedSession().filter((doc) =>
+          isEvent(doc, 'browser.navigation_timing')
+        );
+
+        expect(pageLoads.length).toBeGreaterThan(0);
+        pageLoads.forEach((doc) => {
+          const { pathname } = new URL(String(doc.attributes?.['url.full']));
+          expect(templateOf(doc)).toBe(ROUTES[pathname]);
+        });
+      });
+
+      it('adds it to the logs that carry no URL too, and to nothing but routes of the site', () => {
+        const logs = routedSession().filter((doc) => 'event_name' in doc && doc.event_name);
+        const webVitals = logs.filter((doc) => isEvent(doc, 'browser.web_vital'));
+
+        expect(webVitals.length).toBeGreaterThan(0);
+        logs
+          .filter((doc) => !isEvent(doc, 'browser.resource_timing'))
+          .forEach((doc) => expect(Object.values(ROUTES)).toContain(templateOf(doc)));
+      });
+
+      it('leaves resource timings and client spans without it', () => {
+        const docs = routedSession();
+        const timings = docs.filter((doc) => isEvent(doc, 'browser.resource_timing'));
+        const spans = docs.filter((doc) => 'kind' in doc && doc.kind === 'Client');
+
+        expect(timings.length).toBeGreaterThan(0);
+        expect(spans.length).toBeGreaterThan(0);
+        [...timings, ...spans].forEach((doc) => expect(templateOf(doc)).toBeUndefined());
+      });
+
+      it('writes no route when the app does not report them, and nothing else changes', () => {
+        const withRoutes = routedSession();
+        const withoutRoutes = routedSession(false);
+        const withoutTemplate = ({ attributes = {}, ...doc }: (typeof withRoutes)[number]) => ({
+          ...doc,
+          attributes: Object.fromEntries(
+            Object.entries(attributes).filter(([key]) => key !== 'url.template')
+          ),
+        });
+
+        withoutRoutes.forEach((doc) => expect(templateOf(doc)).toBeUndefined());
+        expect(withRoutes.map(withoutTemplate)).toEqual(withoutRoutes.map(withoutTemplate));
       });
     });
 
