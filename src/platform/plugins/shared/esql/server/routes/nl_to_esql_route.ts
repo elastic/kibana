@@ -121,6 +121,8 @@ export const registerNLtoESQLRoute = (
           execute: 'none',
           includeDatasets: true,
           includeViews: true,
+          currentQuery: trimmedCurrent,
+          sourceResolution: 'cascade',
         });
 
         return response.ok({

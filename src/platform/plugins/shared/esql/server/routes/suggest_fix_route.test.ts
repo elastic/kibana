@@ -145,7 +145,14 @@ describe('registerSuggestFixRoute', () => {
     await handler(requestHandlerContext, request, response);
 
     expect(generateEsql).toHaveBeenCalledWith(
-      expect.objectContaining({ execute: 'none', includeDatasets: true, includeViews: true })
+      expect.objectContaining({
+        execute: 'none',
+        includeDatasets: true,
+        includeViews: true,
+        // The failing query's sources are kept for the fix
+        currentQuery: 'FROM kibana_sample_data_flights | SORT avg DESCENGING',
+        sourceResolution: 'cascade',
+      })
     );
     expect(response.ok).toHaveBeenCalledWith({
       body: { content: 'FROM kibana_sample_data_flights | SORT avg DESC' },

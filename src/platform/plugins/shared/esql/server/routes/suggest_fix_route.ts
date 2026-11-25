@@ -85,6 +85,9 @@ export const registerSuggestFixRoute = (
           execute: 'none',
           includeDatasets: true,
           includeViews: true,
+          // The fix keeps the failing query's sources, unless they cannot be resolved.
+          currentQuery: queryString,
+          sourceResolution: 'cascade',
         });
 
         return response.ok({

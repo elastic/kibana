@@ -133,6 +133,26 @@ describe('registerNLtoESQLRoute', () => {
     });
   });
 
+  it('passes the trimmed current query and resolves the source from it first', async () => {
+    const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
+      buildMocks();
+    registerNLtoESQLRoute(router, getStartServices, context);
+
+    resolveConnectorId.mockResolvedValue('connector-1');
+    createScopedModel.mockResolvedValue({});
+    generateEsql.mockResolvedValue({ query: 'FROM web-logs | WHERE log.level == "error"' });
+
+    request.body = { nlInstruction: 'only errors', currentQuery: '  FROM web-logs | LIMIT 10\n' };
+    await handler(requestHandlerContext, request, response);
+
+    expect(generateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentQuery: 'FROM web-logs | LIMIT 10',
+        sourceResolution: 'cascade',
+      })
+    );
+  });
+
   it('does not call generateEsql for a completion request (uses generateEsqlCompletion instead)', async () => {
     const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
       buildMocks();
