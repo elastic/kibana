@@ -27,6 +27,7 @@ export const UIAM_ASSERTION_SCHEME = 'Assertion';
 const ASSERTION_TYPE = 'uiam-provenance+jwt';
 const ASSERTION_AUDIENCE = 'spiffe://uiam.elastic.co';
 const DEFAULT_LIFETIME_SECONDS = 30;
+const API_KEY_LIFETIME_SECONDS = 5 * 60;
 // An assertion is reused for this share of its lifetime, so a reused one always has at least the
 // rest of it left to reach UIAM.
 const REUSABLE_LIFETIME_SHARE = 2 / 3;
@@ -44,7 +45,8 @@ export interface UiamAssertionSigner {
   readonly subject: string;
   /**
    * Returns the `x-client-authentication` header value (`Assertion <jwt>`) bound to the given
-   * credential. The same assertion is returned for a credential until two thirds of its lifetime
+   * credential. An assertion for an API key lives five minutes, for any other credential 30
+   * seconds. The same assertion is returned for a credential until two thirds of its lifetime
    * have passed, so repeated calls do not each pay for a signature.
    */
   sign(credential: HTTPAuthorizationHeader): string;
@@ -63,13 +65,16 @@ export interface UiamAssertionSignerParams {
   certificate: string;
   /** PEM private key that matches the leaf certificate. */
   key: string;
-  /** Lifetime of every assertion, in seconds. */
-  lifetimeSeconds?: number;
   /** Clock in milliseconds since the Unix epoch. */
   now?: () => number;
 }
 
 const toBase64Url = (value: string | Buffer) => Buffer.from(value).toString('base64url');
+
+const getLifetimeSeconds = (credential: HTTPAuthorizationHeader) =>
+  credential.scheme.toLowerCase() === 'apikey'
+    ? API_KEY_LIFETIME_SECONDS
+    : DEFAULT_LIFETIME_SECONDS;
 
 const getAssertionAlgorithm = (privateKey: KeyObject): AssertionAlgorithm => {
   if (privateKey.asymmetricKeyType === 'rsa') {
@@ -132,7 +137,6 @@ const getAssertionSubject = (leaf: X509Certificate) => {
 export function createUiamAssertionSigner({
   certificate,
   key,
-  lifetimeSeconds = DEFAULT_LIFETIME_SECONDS,
   now = Date.now,
 }: UiamAssertionSignerParams): UiamAssertionSigner {
   const chain = (certificate.match(CERTIFICATE_PATTERN) ?? []).map(
@@ -159,7 +163,6 @@ export function createUiamAssertionSigner({
       x5c: chain.map((cert) => cert.raw.toString('base64')),
     })
   );
-  const reusableForMs = lifetimeSeconds * 1000 * REUSABLE_LIFETIME_SHARE;
   // Keyed by the hash of the credential, so the credential itself is never held.
   const assertions = new LRUCache<string, { value: string; issuedAtMs: number }>({
     max: ASSERTION_CACHE_MAX_SIZE,
@@ -177,7 +180,10 @@ export function createUiamAssertionSigner({
       const credentialHash = createHash('sha256')
         .update(credential.credentials)
         .digest('base64url');
-      const cached = assertions.get(credentialHash);
+      const lifetimeSeconds = getLifetimeSeconds(credential);
+      const reusableForMs = lifetimeSeconds * 1000 * REUSABLE_LIFETIME_SHARE;
+      const cacheKey = `${lifetimeSeconds}:${credentialHash}`;
+      const cached = assertions.get(cacheKey);
       // An assertion issued in the future means the clock moved back, so it is signed again.
       if (
         cached &&
@@ -204,7 +210,7 @@ export function createUiamAssertionSigner({
       });
 
       const value = `${UIAM_ASSERTION_SCHEME} ${signingInput}.${signature.toString('base64url')}`;
-      assertions.set(credentialHash, { value, issuedAtMs: issuedAt * 1000 });
+      assertions.set(cacheKey, { value, issuedAtMs: issuedAt * 1000 });
       return value;
     },
 

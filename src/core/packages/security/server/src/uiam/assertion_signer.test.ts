@@ -85,17 +85,18 @@ describe('createUiamAssertionSigner', () => {
       );
     });
 
-    it('honors a custom lifetime', () => {
-      const shortLivedSigner = createUiamAssertionSigner({
-        certificate: rsaCertificate,
-        key: rsaKey,
-        lifetimeSeconds: 5,
-        now: () => NOW,
-      });
-
-      const { payload } = decodeAssertion(shortLivedSigner.sign(bearerCredential));
-      expect(payload.exp - payload.iat).toBe(5);
-    });
+    it.each([
+      ['a bearer token', bearerCredential, 30],
+      ['an API key', apiKeyCredential, 5 * 60],
+      ['an API key in another letter case', new HTTPAuthorizationHeader('apikey', 'essu_key'), 300],
+      ['any other scheme', new HTTPAuthorizationHeader('Basic', 'essu_other'), 30],
+    ])(
+      'issues an assertion for %s that lives the expected time',
+      (_label, credential, lifetime) => {
+        const { payload } = decodeAssertion(signer.sign(credential));
+        expect(payload.exp - payload.iat).toBe(lifetime);
+      }
+    );
 
     it('produces a signature that verifies with the leaf certificate', () => {
       const { signingInput, signature } = decodeAssertion(signer.sign(bearerCredential));
@@ -120,7 +121,7 @@ describe('createUiamAssertionSigner', () => {
         now: () => Date.parse('2100-01-01T00:00:00Z'),
       });
 
-      expect(() => expiredSigner.sign(bearerCredential)).toThrowError(/the certificate expired at/);
+      expect(() => expiredSigner.sign(bearerCredential)).toThrow(/the certificate expired at/);
     });
   });
 
@@ -187,20 +188,27 @@ describe('createUiamAssertionSigner', () => {
       expect(signer.sign(bearerCredential)).toBe(renewed);
     });
 
-    it('scales the reuse window with a custom lifetime', () => {
-      const shortLivedSigner = createUiamAssertionSigner({
-        certificate: rsaCertificate,
-        key: rsaKey,
-        lifetimeSeconds: 6,
-        now: () => currentTime,
-      });
-      const assertion = shortLivedSigner.sign(bearerCredential);
+    it('reuses the assertion of an API key for two thirds of its longer lifetime', () => {
+      const assertion = signer.sign(apiKeyCredential);
 
-      currentTime = NOW + 3_999;
-      expect(shortLivedSigner.sign(bearerCredential)).toBe(assertion);
+      currentTime = NOW + 199_999;
+      expect(signer.sign(apiKeyCredential)).toBe(assertion);
 
-      currentTime = NOW + 4_000;
-      expect(shortLivedSigner.sign(bearerCredential)).not.toBe(assertion);
+      currentTime = NOW + 200_000;
+      const renewed = signer.sign(apiKeyCredential);
+      expect(renewed).not.toBe(assertion);
+      expect(decodeAssertion(renewed).payload).toEqual(
+        expect.objectContaining({ iat: NOW / 1000 + 200, exp: NOW / 1000 + 500 })
+      );
+    });
+
+    it('never reuses the assertion of the same credential under another scheme', () => {
+      const apiKeyAssertion = signer.sign(new HTTPAuthorizationHeader('ApiKey', 'essu_shared'));
+      const bearerAssertion = signer.sign(new HTTPAuthorizationHeader('Bearer', 'essu_shared'));
+
+      expect(bearerAssertion).not.toBe(apiKeyAssertion);
+      const { payload } = decodeAssertion(bearerAssertion);
+      expect(payload.exp - payload.iat).toBe(30);
     });
 
     it('never reuses the assertion of another credential', () => {
@@ -233,7 +241,7 @@ describe('createUiamAssertionSigner', () => {
 
   describe('validation', () => {
     it('rejects input without certificates', () => {
-      expect(() => createUiamAssertionSigner({ certificate: '', key: rsaKey })).toThrowError(
+      expect(() => createUiamAssertionSigner({ certificate: '', key: rsaKey })).toThrow(
         /contains no certificates/
       );
     });
@@ -244,7 +252,7 @@ describe('createUiamAssertionSigner', () => {
           certificate: rsaCertificate,
           key: readFixture('rsa_no_identity.key'),
         })
-      ).toThrowError(/does not match the certificate/);
+      ).toThrow(/does not match the certificate/);
     });
 
     it('rejects unsupported curves', () => {
@@ -253,7 +261,7 @@ describe('createUiamAssertionSigner', () => {
           certificate: readFixture('ec_p384.crt'),
           key: readFixture('ec_p384.key'),
         })
-      ).toThrowError(/unsupported key type \[ec\/secp384r1\]/);
+      ).toThrow(/unsupported key type \[ec\/secp384r1\]/);
     });
 
     it('rejects a certificate without a SPIFFE or eident identity', () => {
@@ -262,7 +270,7 @@ describe('createUiamAssertionSigner', () => {
           certificate: readFixture('rsa_no_identity.crt'),
           key: readFixture('rsa_no_identity.key'),
         })
-      ).toThrowError(/neither a SPIFFE URI SAN nor an eident DNS SAN/);
+      ).toThrow(/neither a SPIFFE URI SAN nor an eident DNS SAN/);
     });
   });
 
