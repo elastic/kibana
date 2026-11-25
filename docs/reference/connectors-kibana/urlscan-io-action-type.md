@@ -53,7 +53,7 @@ Authentication
 :   Retrieves a finished scan by UUID. Returns the verdict (malicious flag, score, categories, impersonated brands), the page identity, scan statistics, the lists of contacted domains, IPs, ASNs, and response hashes, and any files the page downloaded. Requires an API key.
 
 `scanUrl`
-:   Submits a URL for scanning and returns the scan UUID immediately. The scan itself is asynchronous and takes roughly 10 to 30 seconds, so the result is not available when this action returns. Requires an API key.
+:   Submits a URL for scanning and returns the scan UUID immediately. The scan itself is asynchronous and takes roughly 10 to 30 seconds, so the result is not available when this action returns. Accepts up to 10 tags of at most 30 characters each, as does `scanUrlAndWait`. Requires an API key.
 
 `scanUrlAndWait`
 :   Submits a URL and polls until the scan finishes, returning the completed result in one step. The action to reach for when triaging a single URL. If the scan outlives the timeout it returns the UUID with `completed: false` rather than failing, so you can collect the verdict later with `getResult`. Requires an API key.

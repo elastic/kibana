@@ -166,7 +166,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * throttle itself rather than discovering a 429 mid-batch.
  *
  * Only the rate-limited endpoints send these headers, so this returns undefined elsewhere.
- * Verified live: search, result and scan DO send them; /user/quotas/, /dom/ and /screenshots/
+ * Verified live: search, result and scan DO send them; /api/v1/quotas, /dom/ and /screenshots/
  * send none at all, which matches the vendor's "on each request to a rate-limited resource".
  * getQuota is the way to read the budget for those.
  */
@@ -474,7 +474,9 @@ const submissionBody = (input: ScanUrlInput | ScanUrlAndWaitInput) => ({
   ...(input.referer === undefined ? {} : { referer: input.referer }),
   ...(input.customagent === undefined ? {} : { customagent: input.customagent }),
   ...(input.country === undefined ? {} : { country: input.country }),
-  ...(input.overrideSafety === undefined ? {} : { overrideSafety: input.overrideSafety }),
+  // urlscan takes a string and disables its PII protection when it has any value, so a false
+  // input must leave the member out.
+  ...(input.overrideSafety === true ? { overrideSafety: 'true' } : {}),
 });
 
 const trimSubmission = (data: SubmissionResponse) => ({
@@ -512,7 +514,7 @@ export const UrlscanIo: ConnectorSpec = {
    *    authentication-only on 2026-05-04 and answer `403 {"warning":"You're not logged in!"}`
    *    without one, even for a public scan.
    *  - key always required: `POST /api/v1/scan/` has always needed one.
-   *  - anonymous still works: `GET /api/v1/search/`, `GET /user/quotas/` and
+   *  - anonymous still works: `GET /api/v1/search/`, `GET /api/v1/quotas` and
    *    `GET /screenshots/{uuid}.png`, on a reduced per-IP budget (500 searches/day).
    *
    * Both modes are offered rather than forcing a key, because an *absent* key and a *wrong*
@@ -920,8 +922,8 @@ Gotchas that matter:
       input: GetQuotaInputSchema,
       handler: async (ctx) => {
         try {
-          // Quotas live outside /api/v1, on /user/quotas/ (per the vendor's own curl example).
-          const response = await ctx.client.get(`${BASE_URL}/user/quotas/`);
+          // The path urlscan's spec and rate limit docs name for quotas.
+          const response = await ctx.client.get(`${API}/quotas`);
           const data = response.data as QuotaResponse;
           const limits = data.limits ?? {};
           const perAction: Record<string, Record<string, QuotaWindow>> = {};
@@ -973,7 +975,7 @@ Gotchas that matter:
     handler: async (ctx: ActionContext) => {
       const usesApiKey = ctx.secrets?.authType === 'api_key_header';
       try {
-        const response = await ctx.client.get(`${BASE_URL}/user/quotas/`);
+        const response = await ctx.client.get(`${API}/quotas`);
         const data = response.data as QuotaResponse;
         // The quota endpoint answers 200 for an anonymous caller too, just with the reduced
         // per-IP budget and scope "ip-address" (verified live), so a 200 alone does not prove a
@@ -997,7 +999,7 @@ Gotchas that matter:
           searchRequestsPerDay: searchPerDay,
         };
       } catch (error) {
-        throwIfCredentialProblem(error, 'GET /user/quotas/');
+        throwIfCredentialProblem(error, 'GET /api/v1/quotas');
         return throwWithApiError(error);
       }
     },

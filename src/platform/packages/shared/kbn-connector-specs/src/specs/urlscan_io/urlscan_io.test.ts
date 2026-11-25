@@ -814,7 +814,7 @@ describe('URLScan.io connector', () => {
         referer: 'https://mail.example/',
         customagent: 'Mozilla/5.0 (iPhone)',
         country: 'de',
-        overrideSafety: true,
+        overrideSafety: 'true',
       });
       // No query params at all: the vendor's submission reference documents every option as a
       // member of the POST body.
@@ -826,6 +826,17 @@ describe('URLScan.io connector', () => {
       const { ctx, client } = createContext();
       client.post.mockResolvedValue({ data: submissionResponse, headers: {} });
       await action('scanUrl').handler(ctx, { url: 'https://phish.example/login' });
+      expect(client.post.mock.calls[0][1]).toEqual({ url: 'https://phish.example/login' });
+    });
+
+    // urlscan disables its PII protection when overrideSafety has any value, false included.
+    it('leaves overrideSafety out when it is false', async () => {
+      const { ctx, client } = createContext();
+      client.post.mockResolvedValue({ data: submissionResponse, headers: {} });
+      await action('scanUrl').handler(ctx, {
+        url: 'https://phish.example/login',
+        overrideSafety: false,
+      });
       expect(client.post.mock.calls[0][1]).toEqual({ url: 'https://phish.example/login' });
     });
 
@@ -1172,7 +1183,7 @@ describe('URLScan.io connector', () => {
         maxSearchResults: unknown;
         queryableVisibility: unknown;
       };
-      expect(client.get.mock.calls[0][0]).toBe('https://urlscan.io/user/quotas/');
+      expect(client.get.mock.calls[0][0]).toBe('https://urlscan.io/api/v1/quotas');
       expect(result.scope).toBe('user');
       expect(result.limits).toEqual({
         search: { day: { limit: 500, used: 5, remaining: 495 } },
@@ -1341,6 +1352,20 @@ describe('URLScan.io connector', () => {
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 500_000 }).success).toBe(true);
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 999 }).success).toBe(false);
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 500_001 }).success).toBe(false);
+    });
+  });
+
+  describe.each(['scanUrl', 'scanUrlAndWait'] as const)('%s tag length', (actionName) => {
+    it.each([
+      [30, true],
+      [31, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      expect(
+        UrlscanIo.actions[actionName].input.safeParse({
+          url: 'https://example.com',
+          tags: ['t'.repeat(length)],
+        }).success
+      ).toBe(expected);
     });
   });
 
