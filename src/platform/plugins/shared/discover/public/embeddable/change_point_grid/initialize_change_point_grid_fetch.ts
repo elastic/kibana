@@ -64,6 +64,7 @@ export const initializeChangePointGridFetch = ({
   let esqlSourceId: string | undefined;
   let previousTimeRange: TimeRange | undefined;
   let previousEsql: string | undefined;
+  let lastReportedEsql: string | undefined;
   let requestId = 0;
 
   const subscription = combineLatest([
@@ -146,6 +147,10 @@ export const initializeChangePointGridFetch = ({
       const cards = buildChangePointCards({ table, esql: currentEsql }) ?? [];
       cards$.next(cards.slice(0, CHANGE_POINT_GRID_MAX_SERIES));
       onCardsUpdated();
+      if (lastReportedEsql !== currentEsql) {
+        lastReportedEsql = currentEsql;
+        void discoverServices.aiops?.aiopsUsage.trackRenderEsqlChangePointResults();
+      }
     };
 
     run()
