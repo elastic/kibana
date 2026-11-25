@@ -8,8 +8,8 @@
  */
 
 import BOUND_INVESTIGATION_WORKFLOW_YAML from './bound_investigation_workflow.yaml';
+import { renderRunAs } from '../../../render_bound_yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
-import { renderRunAs } from '../render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation-bound';
 
@@ -49,7 +49,8 @@ export const renderBoundInvestigationYaml = ({
 export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  // 2: the caller's timeout caps the investigation step (`timeout_seconds`, at most an hour).
+  version: 2,
   billable: false,
   yamlTemplate: renderBoundInvestigationYaml,
   management: {

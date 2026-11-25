@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 // eslint-disable-next-line no-restricted-imports
 import { Switch, MemoryRouter } from 'react-router-dom';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -33,6 +34,7 @@ describe('PrivilegedRoute', () => {
       component: () => <div data-test-subj={componentTestId} />,
       path: 'path',
       hasPrivilege: true,
+      title: 'Response actions history',
     };
 
     const renderer = createAppRootMockRenderer();
@@ -76,6 +78,9 @@ describe('PrivilegedRoute', () => {
     expect(renderResult.getByTestId(noPrivilegesPageTestId)).toBeTruthy();
     expect(renderResult.queryByTestId(noPermissionsPageTestId)).toBeNull();
     expect(renderResult.queryByTestId(componentTestId)).toBeNull();
+    expect(renderResult.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Response actions history'
+    );
   });
 
   it('renders `you need to have RBAC privileges` if no privileges', async () => {

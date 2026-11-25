@@ -32,6 +32,7 @@ import {
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
+import { resolveConnectorSpecVersion } from '../../../../lib/resolve_connector_spec_version';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
 import {
   invalidateStoredConnectorEventIdentity,
@@ -49,7 +50,11 @@ export async function create(params: ConnectorCreateParams): Promise<Connector> 
 
   try {
     const connector = await createConnector(params);
-    recordConnectorCreate({ connectorType: actionTypeId, authType });
+    recordConnectorCreate({
+      connectorType: actionTypeId,
+      authType,
+      specBased: params.context.actionTypeRegistry.isSpecActionType(actionTypeId),
+    });
     return connector;
   } catch (error) {
     // A failed request can carry values that were never validated, so unregistered ones are not used as labels.
@@ -57,6 +62,7 @@ export async function create(params: ConnectorCreateParams): Promise<Connector> 
     recordConnectorCreate({
       connectorType: toBoundedLabel(actionTypeId, actionTypeRegistry.has(actionTypeId)),
       authType: toBoundedLabel(authType, authType === 'none' || authTypeRegistry.has(authType)),
+      specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
       errorType: getConnectorCreateErrorType(error),
     });
     throw error;
@@ -70,6 +76,7 @@ async function createConnector({
     name,
     config,
     secrets,
+    specVersion,
     isInboundEventsEnabled: requestedInboundEventsEnabled,
   },
   options,
@@ -127,8 +134,13 @@ async function createConnector({
     requestedEnabled: requestedInboundEventsEnabled,
   });
 
-  const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
+  const { resolvedSpecVersion, actionTypeForValidation: actionType } = resolveConnectorSpecVersion({
+    actionType: context.actionTypeRegistry.get(actionTypeId),
+    specVersion,
+    configurationUtilities,
+  });
+
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
   });
@@ -221,6 +233,7 @@ async function createConnector({
           ...(authMode !== undefined ? { authMode } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
           hasInboundEventIdentity: Boolean(identityAttributes),
+          ...(resolvedSpecVersion !== undefined ? { specVersion: resolvedSpecVersion } : {}),
         },
         { id }
       )
@@ -308,6 +321,9 @@ async function createConnector({
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    ...(result.attributes.specVersion !== undefined
+      ? { specVersion: result.attributes.specVersion }
+      : {}),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
     ...(connectorTypeHasInboundEvents(actionTypeId) ? { isInboundEventsEnabled } : {}),
   };

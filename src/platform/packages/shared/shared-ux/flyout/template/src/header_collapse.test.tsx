@@ -176,6 +176,63 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     expect(closeButton).toHaveFocus();
   });
 
+  it('collapses while an expanded control only controls content inside the region', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Long title" description="A timestamp">
+          <FlyoutTemplate.Header.InfoBlock title="Status">
+            <button type="button" aria-expanded="true" aria-controls="inner-panel">
+              Open
+            </button>
+            <div id="inner-panel">details</div>
+          </FlyoutTemplate.Header.InfoBlock>
+        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+
+    collapseByScroll(overflowEl);
+    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
+  });
+
+  it('stays expanded while a control in the collapsible region is expanded', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Long title" description="A timestamp">
+          <FlyoutTemplate.Header.InfoBlock title="Status">
+            <button type="button" aria-expanded="true" aria-controls="outer-panel">
+              Open
+            </button>
+          </FlyoutTemplate.Header.InfoBlock>
+        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+    const panel = document.createElement('div');
+    panel.id = 'outer-panel';
+    document.body.appendChild(panel);
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+    const region = screen.getByTestId('flyoutHeaderCollapsibleRegion');
+
+    collapseByScroll(overflowEl);
+    expect(region).not.toHaveAttribute('aria-hidden');
+
+    screen.getByRole('button', { name: 'Open' }).setAttribute('aria-expanded', 'false');
+    act(() => {
+      fireEvent.scroll(overflowEl);
+    });
+    expect(region).toHaveAttribute('aria-hidden', 'true');
+    panel.remove();
+  });
+
   it('keeps the title heading visible with its id in collapsed state', () => {
     renderCollapsibleFlyout();
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
@@ -547,7 +604,7 @@ describe('FlyoutTemplate Header collapsed prop', () => {
   it('renders the title as a compact heading with its id regardless of scroll', () => {
     renderCollapsedHeader();
     const heading = screen.getByRole('heading', { name: 'Compact title' });
-    expect(heading.tagName).toBe('H3');
+    expect(heading.tagName).toBe('H2');
     expect(heading.id).toMatch(/^flyoutTemplateTitle/);
   });
 
@@ -574,7 +631,7 @@ describe('FlyoutTemplate Header collapsed prop', () => {
       </FlyoutTemplate>
     );
 
-    const heading = screen.getByRole('heading', { level: 3, name: 'Compact title' });
+    const heading = screen.getByRole('heading', { level: 2, name: 'Compact title' });
     expect(within(heading).getByRole('link', { name: 'Compact title' })).toHaveAttribute(
       'href',
       '#compact'
@@ -611,7 +668,7 @@ describe('FlyoutTemplate Header collapsed prop', () => {
     );
 
     const spinner = screen.getByTestId('flyoutHeaderTitleLoading');
-    expect(screen.getByRole('heading', { level: 3, name: 'Compact title' })).not.toContainElement(
+    expect(screen.getByRole('heading', { level: 2, name: 'Compact title' })).not.toContainElement(
       spinner
     );
   });

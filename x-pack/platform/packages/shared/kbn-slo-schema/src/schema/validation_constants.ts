@@ -6,16 +6,15 @@
  */
 
 /**
- * Validation contract shared by the io-ts schemas and their zod twins during
- * the zod migration: both flavors must accept/reject the same inputs with the
- * same messages, so the bounds and messages live here exactly once.
+ * Validation contract shared by the SLO schemas: the bounds and messages for
+ * the SLO id and projectRoutings live here exactly once.
  */
 
 export const MIN_SLO_ID_LENGTH = 8;
 export const MAX_SLO_ID_LENGTH = 48;
 export const SLO_ID_REGEX = /^[a-z0-9-_]+$/;
 export const SLO_ID_INVALID_MESSAGE =
-  'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores';
+  'Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores';
 
 // A `snapshot` project routing encodes every selected project id, so the bound scales with
 // the number of linked projects rather than with the number of exclusions.

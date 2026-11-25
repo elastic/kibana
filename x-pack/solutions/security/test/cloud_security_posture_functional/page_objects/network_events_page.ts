@@ -10,14 +10,14 @@ import { FtrService } from '@kbn/test-suites-xpack-platform/functional/ftr_provi
 import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {
-  PREVIEW_SECTION_TEST_ID,
-  PREVIEW_SECTION_HEADER_TEST_ID,
   EVENTS_TABLE_ROW_CSS_SELECTOR,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   GRAPH_PREVIEW_TEST_ID,
   GRAPH_PREVIEW_CONTENT_TEST_ID,
   GROUPED_ITEM_TEST_ID,
+  GROUPED_NODE_PREVIEW_PANEL_CONTENT_BODY_TEST_ID,
+  CHILD_DOCUMENT_FLYOUT_TEST_ID,
 } = testSubjectIds;
 
 export class NetworkEventsPageObject extends FtrService {
@@ -148,18 +148,22 @@ export class NetworkEventsPageObject extends FtrService {
       });
     },
 
-    assertPreviewPanelIsOpen: async (type: 'alert' | 'event' | 'group') => {
-      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
-      expect(await this.testSubjects.getVisibleText(PREVIEW_SECTION_HEADER_TEST_ID)).to.be(
-        type === 'alert'
-          ? 'Preview alert details'
-          : type === 'event'
-          ? 'Preview event details'
-          : 'Grouped entities panel'
+    /**
+     * Asserts the flyout opened from a graph node: a child document flyout for a single event
+     * ('event'), or the grouped node panel for grouped events/entities ('group').
+     */
+    assertPreviewPanelIsOpen: async (type: 'event' | 'group') => {
+      await this.testSubjects.existOrFail(
+        type === 'event'
+          ? CHILD_DOCUMENT_FLYOUT_TEST_ID
+          : GROUPED_NODE_PREVIEW_PANEL_CONTENT_BODY_TEST_ID,
+        { timeout: 10000 }
       );
     },
     assertPreviewPanelGroupedItemsNumber: async (expected: number) => {
-      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      await this.testSubjects.existOrFail(GROUPED_NODE_PREVIEW_PANEL_CONTENT_BODY_TEST_ID, {
+        timeout: 10000,
+      });
       const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TEST_ID);
       expect(groupedItems.length).to.be(expected);
     },

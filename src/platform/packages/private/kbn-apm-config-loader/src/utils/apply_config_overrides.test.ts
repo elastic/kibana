@@ -23,6 +23,28 @@ describe('applyConfigOverrides', () => {
     expect(config.server.uuid).toEqual('from-argv');
   });
 
+  it('overrides `server.name` when provided as a command line argument', () => {
+    const config: Record<string, any> = {
+      server: {
+        name: 'from-config',
+      },
+    };
+    const argv = ['--server.name', 'from-argv'];
+
+    applyConfigOverrides(config, argv);
+
+    expect(config.server.name).toEqual('from-argv');
+  });
+
+  it('overrides `server.name` when provided in the `--flag=value` format', () => {
+    const config: Record<string, any> = {};
+    const argv = ['--server.name=my-kibana'];
+
+    applyConfigOverrides(config, argv);
+
+    expect(config.server.name).toEqual('my-kibana');
+  });
+
   it('overrides `path.data` when provided as a command line argument', () => {
     const config: Record<string, any> = {
       path: {

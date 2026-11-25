@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
+  AWAIT_EXECUTIONS_SOURCE_MESSAGE,
   BaseConnectorStepSchema,
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
@@ -26,7 +27,6 @@ import {
   LIQUID_MEMORY_LIMIT_MAX,
   LIQUID_PARSE_LIMIT_MAX,
   LIQUID_RENDER_LIMIT_MAX,
-  MergeStepSchema,
   PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE,
   PARALLEL_MODE_REFINEMENT_MESSAGE,
   ParallelStepSchema,
@@ -36,8 +36,11 @@ import {
   WaitForInputChannelsSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
+  WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS,
+  WorkflowAwaitExecutionsStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
   WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
@@ -46,9 +49,37 @@ import {
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
-import { IF_CONDITION_MAX_LENGTH } from '../common/constants';
+import { IF_CONDITION_MAX_LENGTH, WORKFLOW_RUN_NAME_MAX_LENGTH } from '../common/constants';
 import { MAX_DURATION_LENGTH } from '../common/utils/duration/duration';
 import { getShape } from '../common/utils/zod';
+
+describe('run-name', () => {
+  const workflow = {
+    name: 'Deploy',
+    triggers: [{ type: 'manual' }],
+    steps: [{ name: 'log', type: 'console', with: { message: 'done' } }],
+  };
+
+  it.each(['Deploy staging', 'Deploy {{ inputs.target }}', '', '   '])(
+    'preserves the optional template %j',
+    (runName) => {
+      const definition = { ...workflow, 'run-name': runName };
+      expect(WorkflowSchema.parse(definition)['run-name']).toBe(runName);
+      expect(WorkflowSchemaForAutocomplete.parse(definition)['run-name']).toBe(runName);
+    }
+  );
+
+  it('allows workflows without a run name', () => {
+    expect(WorkflowSchema.parse(workflow)['run-name']).toBeUndefined();
+  });
+
+  it.each([123, {}, 'x'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH + 1)])(
+    'rejects an invalid run name',
+    (runName) => {
+      expect(WorkflowSchema.safeParse({ ...workflow, 'run-name': runName }).success).toBe(false);
+    }
+  );
+});
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {
@@ -313,6 +344,18 @@ describe('WorkflowOutputStepSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe('WorkflowFailStepSchema', () => {
+  it('keeps the error type, which a parent reads as steps.<name>.error.type', () => {
+    const step = WorkflowFailStepSchema.parse({
+      name: 'fail',
+      type: 'workflow.fail',
+      with: { message: 'The process is no longer running', type: 'NonRetryableError' },
+    });
+
+    expect(step.with?.type).toBe('NonRetryableError');
   });
 });
 
@@ -1266,16 +1309,6 @@ describe('`if` condition on step schemas', () => {
       },
     },
     {
-      name: 'merge',
-      schema: MergeStepSchema,
-      step: {
-        name: 's',
-        type: 'merge',
-        sources: ['a', 'b'],
-        steps: [{ name: 'after', type: 'console', with: { message: 'hi' } }],
-      },
-    },
-    {
       name: 'workflow.execute',
       schema: WorkflowExecuteStepSchema,
       step: { name: 's', type: 'workflow.execute', with: { 'workflow-id': 'child' } },
@@ -1388,7 +1421,7 @@ describe('HITL external channel schemas', () => {
       slack: ['connector-id', 'message'],
       slack_api: ['connector-id', 'channels', 'message'],
       email: ['connector-id', 'to', 'cc', 'bcc', 'subject', 'message'],
-      slack2: ['connector-id', 'channels', 'message'],
+      slack2: ['connector-id', 'channels', 'interactive', 'message'],
       teams: ['connector-id', 'team-id', 'channel-id', 'message'],
       servicenow: ['connector-id', 'table', 'sys-id', 'message'],
       http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
@@ -1407,7 +1440,7 @@ describe('HITL external channel schemas', () => {
       slack: ['connector-id'],
       slack_api: ['connector-id', 'channels'],
       email: ['connector-id', 'to', 'cc', 'bcc', 'subject'],
-      slack2: ['connector-id', 'channels'],
+      slack2: ['connector-id', 'channels', 'interactive'],
       teams: ['connector-id', 'team-id', 'channel-id'],
       servicenow: ['connector-id', 'table', 'sys-id'],
       http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
@@ -1657,5 +1690,58 @@ describe('workflow child identity allowlist', () => {
         schema.safeParse({ ...step, with: { ...step.with, [field]: allowedIds } }).success
       ).toBe(false);
     }
+  });
+});
+
+describe('WorkflowAwaitExecutionsStepSchema', () => {
+  const baseStep = { name: 'join', type: 'workflow.awaitExecutions' };
+
+  it.each([
+    ['a single ID', { 'execution-ids': '{{ steps.run.output.executionId }}' }],
+    ['a list of IDs', { 'execution-ids': ['a', 'b'] }],
+    ['settled mode', { 'execution-ids': 'a', mode: 'settled' }],
+    ['step references', { 'from-steps': ['fan_out', 'enrich'] }],
+  ])('accepts %s', (_label, withConfig) => {
+    expect(
+      WorkflowAwaitExecutionsStepSchema.safeParse({ ...baseStep, with: withConfig }).success
+    ).toBe(true);
+  });
+
+  it('accepts a step-level timeout', () => {
+    expect(
+      WorkflowAwaitExecutionsStepSchema.safeParse({
+        ...baseStep,
+        timeout: '10m',
+        with: { 'execution-ids': 'a' },
+      }).success
+    ).toBe(true);
+  });
+
+  it.each([
+    ['neither from-steps nor execution-ids', {}],
+    ['both from-steps and execution-ids', { 'from-steps': ['fan_out'], 'execution-ids': 'a' }],
+    ['an empty from-steps list', { 'from-steps': [] }],
+    ['a templated step name', { 'from-steps': ['{{ inputs.step }}'] }],
+    ['an empty ID', { 'execution-ids': '' }],
+    ['an empty list', { 'execution-ids': [] }],
+    [
+      'more IDs than the limit',
+      {
+        'execution-ids': Array.from(
+          { length: WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS + 1 },
+          (_, i) => `e${i}`
+        ),
+      },
+    ],
+    ['an unknown mode', { 'execution-ids': 'a', mode: 'all' }],
+  ])('rejects %s', (_label, withConfig) => {
+    expect(
+      WorkflowAwaitExecutionsStepSchema.safeParse({ ...baseStep, with: withConfig }).success
+    ).toBe(false);
+  });
+
+  it('explains the either/or rule', () => {
+    const result = WorkflowAwaitExecutionsStepSchema.safeParse({ ...baseStep, with: {} });
+    expect(result.error?.issues[0].message).toBe(AWAIT_EXECUTIONS_SOURCE_MESSAGE);
   });
 });

@@ -82,8 +82,8 @@ steps:
   - name: exit_no_active_alerts
     type: workflow.output
     if: "${{ steps.compute_idle_counts.output.alerts_count == 0 }}"
-    status: cancelled
     with:
+      skipped: true
       reason: "No recent alerts — change point scan skipped"
 
   # -----------------------------------------------------------------------

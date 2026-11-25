@@ -21,8 +21,8 @@ export interface BuildRun {
   recovered: number;
   skipped: number;
   /**
-   * Whether no further attempt can report the test: the job's last allowed attempt already did,
-   * the build has finished, or the job does not retry on failure.
+   * Whether the job's last allowed attempt reported the test. A failure no retry has reported on
+   * is pending, and a pending build does not count.
    */
   settled: boolean;
 }
@@ -32,7 +32,7 @@ export type BuildVerdict = 'passed' | 'recovered' | 'failed' | 'pending' | 'skip
 /**
  * What one build says about the test. A build in which the test has only failed so far is
  * pending until it settles: a retry may still decide whether it failed every attempt or
- * recovered.
+ * recovered, and a build that never settles is left out rather than counted either way.
  */
 export const verdictOf = (run: BuildRun): BuildVerdict => {
   if (run.passed > 0) {
@@ -74,12 +74,11 @@ export interface ConsistentFailure {
  * Finds a break in a test's runs in one setup: the latest builds all failed every attempt, and
  * the test passed in the builds before.
  *
- * Builds are sorted oldest first and each gets a verdict. Pending builds at the end are ignored,
- * a retry may still change them. The builds before those that are `failed`, back to the first
- * one that is not, form the streak; it must be at least `consecutiveBuilds` long. The
- * `cleanRunsBefore` builds before the streak, skipped builds left out, must all be `passed`;
- * fewer builds are fine, so a new test can break too. A `pending` build right before the streak
- * fails that check, so the result waits until it settles.
+ * Builds are sorted oldest first and each gets a verdict. Pending builds, a failure no retry has
+ * reported on, are left out: they neither count as failures nor break the clean history. The
+ * latest builds that are `failed`, back to the first one that is not, form the streak; it must
+ * be at least `consecutiveBuilds` long. The `cleanRunsBefore` builds before the streak, skipped
+ * builds left out, must all be `passed`; fewer builds are fine, so a new test can break too.
  *
  * The same break is found again on every later build while it lasts; callers tell a new break
  * from a known one by the issue they filed.
@@ -88,21 +87,18 @@ export const findConsistentFailure = (
   runs: readonly BuildRun[],
   rule: ConsistentFailureRule = DEFAULT_CONSISTENT_FAILURE_RULE
 ): ConsistentFailure | undefined => {
+  // a build with a failure but no final result yet counts neither way
   const verdicts = [...runs]
     .sort((a, b) => a.build - b.build)
-    .map((run) => ({ run, verdict: verdictOf(run) }));
+    .map((run) => ({ run, verdict: verdictOf(run) }))
+    .filter(({ verdict }) => verdict !== 'pending');
 
-  // skip the pending builds at the end
-  let end = verdicts.length;
-  while (end > 0 && verdicts[end - 1].verdict === 'pending') {
-    end--;
-  }
   // walk back over the failed builds: that is the streak
-  let start = end;
+  let start = verdicts.length;
   while (start > 0 && verdicts[start - 1].verdict === 'failed') {
     start--;
   }
-  const streak = verdicts.slice(start, end);
+  const streak = verdicts.slice(start);
   if (streak.length < rule.consecutiveBuilds) {
     return undefined;
   }

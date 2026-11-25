@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { Timestamp } from '@kbn/apm-ui-shared';
 import { truncate } from '@kbn/apm-common';
 import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
@@ -215,7 +215,7 @@ export function ErrorGroupList({
         render: (_, item) => {
           return (
             <MessageAndCulpritCell>
-              <EuiToolTip id="error-message-tooltip" content={item.name || NOT_AVAILABLE_LABEL}>
+              <EuiToolTip content={item.name || NOT_AVAILABLE_LABEL} disableScreenReaderOutput>
                 <MessageLink serviceName={serviceName} errorGroupId={item.groupId} query={query}>
                   {item.name || NOT_AVAILABLE_LABEL}
                 </MessageLink>
@@ -224,8 +224,8 @@ export function ErrorGroupList({
                 <>
                   <br />
                   <EuiToolTip
-                    id="error-culprit-tooltip"
                     content={item.culprit || NOT_AVAILABLE_LABEL}
+                    disableScreenReaderOutput
                   >
                     <Culprit>{item.culprit || NOT_AVAILABLE_LABEL}</Culprit>
                   </EuiToolTip>

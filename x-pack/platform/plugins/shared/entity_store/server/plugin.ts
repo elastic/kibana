@@ -7,6 +7,7 @@
 
 import { Subject } from 'rxjs';
 import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import type {
   EntityStoreCoreSetup,
@@ -17,9 +18,11 @@ import type {
   EntityStoreSetupContract,
 } from './types';
 import { createRequestHandlerContext } from './request_context_factory';
-import { PLUGIN_ID } from '../common';
+import { PLUGIN_ID, getErrorMessage } from '../common';
 import { registerTasks } from './tasks/register_tasks';
+import { getExtractEntityTaskId } from './tasks/extract_entity_task';
 import { scheduleLegacySecurityAssetsMigrationIfNeeded } from './tasks/legacy_security_assets_migration_task';
+import { scheduleLatestIndexMappingsMigration } from './tasks/latest_index_mappings_migration_task';
 import { registerTriggers } from './workflow/triggers';
 import { registerSteps } from './workflow/steps';
 import { registerUiSettings } from './infra/feature_flags/register';
@@ -56,6 +59,7 @@ import { userEntityDefinition } from '../common/domain/definitions/user';
 import { hostEntityDefinition } from '../common/domain/definitions/host';
 import { serviceEntityDefinition } from '../common/domain/definitions/service';
 import { genericEntityDefinition } from '../common/domain/definitions/generic';
+import { EXTRACTION_MODE } from '../common/domain/definitions/entity_schema';
 
 export class EntityStorePlugin
   implements
@@ -151,16 +155,6 @@ export class EntityStorePlugin
     this.entityDefinitionRegistry.closeSetupRegistration();
     this.logger.info('Initializing plugin');
 
-    plugins.taskManager.registerEncryptedSavedObjectsClient(
-      plugins.encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['task', 'api_key_to_invalidate'],
-      })
-    );
-
-    plugins.taskManager.registerApiKeyInvalidateFn(
-      plugins.security?.authc.apiKeys.invalidateAsInternalUser
-    );
-
     subscribeToLegacySecurityAssetsMigrationFlag({
       coreStart: core,
       logger: this.logger,
@@ -173,10 +167,32 @@ export class EntityStorePlugin
         }),
     });
 
+    // Not awaited: start() is synchronous and must neither block nor throw on this.
+    scheduleLatestIndexMappingsMigration({
+      coreStart: core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to schedule latest index mappings migration: ${getErrorMessage(error)}`
+      );
+    });
+
     subscribeToDualProcessFlag({
       coreStart: core,
       logger: this.logger,
       stop$: this.stop$,
+      isNonPriorityTaskScheduled: async (type, namespace) => {
+        try {
+          await plugins.taskManager.get(
+            getExtractEntityTaskId(type, namespace, EXTRACTION_MODE.nonPriority)
+          );
+          return true;
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) return false;
+          throw err;
+        }
+      },
     });
 
     const { logger, entityDefinitionRegistry } = this;

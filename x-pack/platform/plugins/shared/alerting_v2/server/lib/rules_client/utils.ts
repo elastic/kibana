@@ -6,14 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual } from 'lodash';
+import { isEqual, mapValues, pick } from 'lodash';
 import type {
   CreateRuleData,
   CreateRuleDataInput,
+  PutRuleData,
+  RuleChangeHistorySnapshot,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
-import { treeifyError } from '@kbn/zod/v4';
+import { lazySchema, treeifyError, z } from '@kbn/zod/v4';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
   createRuleDataBaseSchema,
@@ -23,10 +25,12 @@ import {
   isLifecycleConfigPresentForKind,
   isRecoveryConditionUsableWithBreach,
   isRoutingTagsAllowedForKind,
+  putRuleDataSchema,
   REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
   ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
   isRecoveryTransitionConsistentWithStrategy,
   recoveryStrategy,
+  ruleResponseSchema,
   validateComposedEsqlQuery,
   type ImmutableRuleField,
 } from '@kbn/alerting-v2-schemas';
@@ -113,7 +117,7 @@ export const ruleDisabledError = (ruleId: string, name?: string): BulkOperationE
 
 /**
  * Whether a skipped executor task is worth a retry. `bulkUpdateSchedules` only
- * touches `idle` tasks, so a skipped task is in some non-idle state — but only a
+ * touches updatable tasks, so a skipped task is in some other state — but only a
  * mid-run task (`running`/`claiming`) frees up on its own and rotates on the
  * next attempt. A `failed`/`unrecognized`/`dead_letter`/`should_delete` task
  * will not, so it must not be reported as `RULE_ALREADY_RUNNING` ("try again
@@ -498,3 +502,15 @@ export function transformRuleSoAttributesToRuleApiResponse(
     updated_at: attrs.updatedAt,
   };
 }
+
+/** Returns the configuration part of a change-history snapshot, shaped as a PUT rule body. */
+export const toRestoreRuleData = (snapshot: RuleChangeHistorySnapshot): PutRuleData =>
+  pick(snapshot, putRuleDataSchema.keyof().options);
+
+/**
+ * Rejects a change-history snapshot with a top-level field that is not a rule response field,
+ * which a restore would otherwise drop. Field values are not checked.
+ */
+export const ruleSnapshotFieldsSchema = lazySchema(() =>
+  z.strictObject(mapValues(ruleResponseSchema.shape, () => z.unknown().optional()))
+);

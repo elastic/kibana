@@ -309,4 +309,99 @@ describe('createWorkflowEvidenceEvaluator', () => {
     expect(result.metadata?.unscopedAgentAlertRetrievalRowCounts).toEqual([]);
     expect(result.metadata?.agentEsqlRowCounts).toEqual([]);
   });
+
+  describe('forbiddenWorkflowStages', () => {
+    const forbidden = ['generation', 'validation'];
+    const unscoredPassedCount = (overrides: Partial<AttackDiscoveryAgentBuilderExpected>) => {
+      const expected = baseExpected({ forbiddenWorkflowStages: forbidden, ...overrides });
+      delete expected.expectedPassedAlertCount;
+      return expected;
+    };
+    const evaluateWith = (
+      workflow: Partial<AttackDiscoveryAgentBuilderTaskOutput['workflow']>,
+      expected: AttackDiscoveryAgentBuilderExpected
+    ) =>
+      evaluator.evaluate({
+        input: {} as Params['input'],
+        output: baseOutput(workflow),
+        expected,
+        metadata: {} as Params['metadata'],
+      });
+
+    it('passes a zero-alert short-circuit run (AD tool ran, passed 0, no stages)', async () => {
+      const result = await evaluateWith(
+        { passedAlertCount: 0, stages: [] },
+        unscoredPassedCount({})
+      );
+
+      expect(result.score).toBe(1);
+      expect(result.metadata?.evidenceState).toBe('complete');
+    });
+
+    it('passes an abstention run (AD tool never ran, passed null, no stages)', async () => {
+      const result = await evaluateWith(
+        { passedAlertCount: null, stages: [] },
+        unscoredPassedCount({})
+      );
+
+      expect(result.score).toBe(1);
+    });
+
+    it('fails a run that pushed unrelated alerts through generation and validation', async () => {
+      const result = await evaluateWith(
+        { passedAlertCount: 2, stages: ['alert_retrieval', 'generation', 'validation'] },
+        unscoredPassedCount({})
+      );
+
+      expect(result.score).toBe(0);
+      expect(result.metadata?.evidenceState).toBe('complete');
+    });
+
+    it('fails when a single forbidden stage appears', async () => {
+      const result = await evaluateWith(
+        { passedAlertCount: 0, stages: ['generation'] },
+        unscoredPassedCount({})
+      );
+
+      expect(result.score).toBe(0);
+    });
+
+    it('does not fail on a stage that is not forbidden', async () => {
+      const result = await evaluateWith(
+        { passedAlertCount: 0, stages: ['alert_retrieval'] },
+        unscoredPassedCount({})
+      );
+
+      expect(result.score).toBe(1);
+    });
+
+    it('is combined with expectedWorkflowStages and the count expectations', async () => {
+      const result = await evaluateWith(
+        { retrievedAlertCount: 4, passedAlertCount: 4, stages: ['generation', 'validation'] },
+        baseExpected({
+          expectedWorkflowStages: ['generation'],
+          forbiddenWorkflowStages: ['validation'],
+          expectedPassedAlertCount: 4,
+        })
+      );
+
+      expect(result.score).toBe(0);
+    });
+
+    it('reports the forbidden stages in metadata', async () => {
+      const result = await evaluateWith({ stages: [] }, unscoredPassedCount({}));
+
+      expect(result.metadata?.forbiddenWorkflowStages).toEqual(forbidden);
+    });
+
+    it('places no restriction on stages when the expectation is absent', async () => {
+      const result = await evaluateWith(
+        { passedAlertCount: null, stages: ['generation', 'validation'] },
+        baseExpected({})
+      );
+
+      expect(result.score).toBe(1);
+      expect(result.metadata?.forbiddenWorkflowStages).toEqual([]);
+    });
+  });
 });

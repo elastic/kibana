@@ -6,13 +6,15 @@ This guide walks you through setting up an AI agent in Cursor that automatically
 
 ## How It Works
 
-1. A GitHub issue is labeled **`needs Test Plan`** — this is a team convention to identify which issues need a test plan. The agent works on any issue regardless of labels.
+1. A GitHub issue is labeled **`Needs Test Plan`** — this is a team convention to identify which issues need a test plan. The agent works on any issue regardless of labels.
 2. You open Cursor and type: `/test-plan-generator generate test plan for issue #1234`
 3. The agent reads the issue, navigates the parent epic (if any), explores all sub-issues, fetches linked Figma designs and images, and generates a structured test plan
-4. The test plan is saved locally as a draft at `.agents/tmp/test-plan-#<issue_number>.md` for you to review and edit
+4. The test plan is saved locally as a draft at `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#<issue_number>.md` for you to review and edit
 5. When you're happy with it, you run: `/test-plan-generator publish test plan for issue #1234`
 6. The agent posts the plan as a comment on the GitHub issue — using the `gh` CLI as the primary method, or the GitHub MCP as fallback if `gh` is not available
 7. If the issue changes later, run `/test-plan-generator update test plan for issue #1234` — the agent detects only what changed and updates the draft incrementally, without rewriting everything from scratch
+
+**Related:** to decide whether an issue needs a test plan and at which level of its hierarchy, use the separate `/test-plan-triage` skill. It adds the `Needs Test Plan` label, or leaves a short comment on the issue when no test plan is needed, only after you confirm.
 
 ---
 
@@ -23,13 +25,12 @@ Before starting, make sure you have:
 - [ ] [Cursor](https://cursor.com) installed and signed in with your `@elastic.co` Google account
 - [ ] Access to [github.com/elastic](https://github.com/elastic)
 - [ ] A Figma account with access to Elastic's Figma workspace
-- [ ] Node.js 18+ installed (`node --version` to check)
 
 ---
 
-## Step 1 — Generate Your GitHub Personal Access Token
+## Step 1 — Generate a GitHub Personal Access Token (optional)
 
-The agent needs a token to read and comment on GitHub issues via the `gh` CLI and, optionally, the GitHub MCP server.
+You only need this token if you enable the GitHub MCP server. The `gh` CLI gets its own token from the browser login in Step 4, so you can skip to Step 2. For the GitHub MCP's `mcp.json` entry, see [GitHub MCP shows as disconnected in Cursor](#github-mcp-shows-as-disconnected-in-cursor).
 
 1. Go to [github.com/settings/tokens](https://github.com/settings/tokens)
 2. Click **"Generate new token (classic)"**
@@ -40,9 +41,9 @@ The agent needs a token to read and comment on GitHub issues via the `gh` CLI an
 
 > ⚠️ Keep this token private. Never commit it to a repository.
 
-### Authorize the token for the Elastic organization (required)
+### Authorize the token for the Elastic organization
 
-This step is critical. Without it, all GitHub API calls to `elastic` repositories will fail with a `403 SAML enforcement` error.
+If you created a token, authorize it for the `elastic` org. Without this, every call it makes to `elastic` repositories fails with a `403 SAML enforcement` error.
 
 1. On the [tokens page](https://github.com/settings/tokens), find your newly created token
 2. Click **"Configure SSO"** next to it
@@ -118,6 +119,8 @@ brew install gh
 
 ### Authenticate with SSO
 
+If your shell profile sets `GH_TOKEN` (for example in `~/.zshrc`), `gh` uses it instead of the browser login, both in your terminal and in Cursor's agent. Remove it from your profile, then open a new terminal and restart Cursor before you log in.
+
 Elastic does not allow HTTPS authentication. When running `gh auth login`, select **Login with a web browser** (not HTTPS):
 ```bash
 gh auth login
@@ -157,7 +160,7 @@ The files live at:
 x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator/
 ├── SKILL.md                                        # Agent instructions
 ├── references/
-│   ├── common-mistakes.md                          # 8 common quality mistakes with ❌ Bad / ✅ Good examples; reviewed before every save
+│   ├── common-mistakes.md                          # Common quality mistakes with ❌ Bad / ✅ Good examples; reviewed before every save
 │   ├── critical-workflows.md                       # File-lookup convention that routes the skill to the team-owned map below when generating scenarios that touch a Security Solution area
 │   ├── critical-workflows-security-solution.md     # Security Solution team's list of critical workflows and impact-based priority rules (P0 / P1) used to raise scenario priorities beyond the default P2
 │   ├── document-structure.md                       # Test plan template, required sections, the Pending work pattern, and the Issue Clarity Assessment block
@@ -166,10 +169,10 @@ x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-gen
 │   ├── example-test-plan-backend.md                # Sibling example for a backend / parser feature without UI and without a linked PR (synthetic issue numbers)
 │   ├── gathering-context.md                        # Step 1 in detail: gh CLI commands, URL handling, images, Figma (metadata-first flow + session budget), sub-issues, PRs, test catalog, AC origin tagging, orphan-PR handling
 │   ├── issue-clarity-assessment.md                 # Rubric, 5 dimensions, grading anchors, per-issue + combined readability scoring, Coverage Ratio (with the no-PR boundary case), stop-and-ask gate, two worked examples
-│   ├── mode-generate.md                            # Generate / regenerate flow (run end-to-end or fill gaps when a draft exists)
+│   ├── mode-generate.md                            # What `generate` does when the issue already has a published plan: check and update, generate from scratch, or cancel
 │   ├── mode-update.md                              # Incremental update flow with PR re-read, Issue Clarity Assessment re-evaluation, and full-document coherence review
 │   ├── optional-scenarios.md                       # Optional sections (RBAC, upgrade, CCS, multi-space, multi-tenant), Gherkin rules, priorities, critical-workflows pointer
-│   ├── output-formats.md                           # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout, per-scenario Execution status block, token usage marker
+│   ├── output-formats.md                           # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout, per-scenario Execution status block, token usage and cost markers
 │   └── security-test-directories.md                # Map of existing test locations in the repo
 └── scripts/
     ├── publish_test_plan.sh                        # Deterministic publish step (invoked in Step 4)
@@ -205,7 +208,7 @@ Since the skill uses `disable-model-invocation: true`, it is **not** applied aut
 ```
    Replace `1234` with a real issue number that has a description, acceptance criteria, and ideally some sub-issues.
 5. Watch the agent work through the steps — it will show what it reads from GitHub (via `gh` CLI), Figma, and any linked content
-6. When finished, open `.agents/tmp/test-plan-#1234.md` in the editor to review the draft
+6. When finished, open `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#1234.md` in the editor to review the draft
 7. When happy with it, run: `/test-plan-generator publish test plan for issue #1234`
 8. Check the GitHub issue — the test plan should appear as a new comment posted with your account
 
@@ -225,14 +228,14 @@ Or with a full URL:
 
 ### Choosing a verbosity level (optional)
 
-Every command accepts an optional verbosity keyword — `lean`, `standard`, or `detailed` — that controls **prose density and per-scenario metadata only**. It never changes which scenarios are written, their priorities, or which `⚠️` entries appear in *Known Limitations*.
+The `generate` and `update` commands accept an optional verbosity keyword — `lean`, `standard`, or `detailed` — that controls **prose density and per-scenario metadata only**. It never changes which scenarios are written, their priorities, or which `⚠️` entries appear in *Known Limitations*.
 
 ```
 /test-plan-generator generate a lean test plan for issue #1234
 /test-plan-generator generate a detailed test plan for issue #1234
 ```
 
-If you omit the keyword, the agent uses `standard` (the current default). The chosen level is persisted as a hidden `<!-- verbosity: … -->` marker in the published comment, so `update` runs preserve it automatically. To flip the level later, just include the keyword in the update invocation — the agent re-renders `Overview`, `Feature Background`, `Assumptions`, and the per-scenario metadata lines at the new level (scenario titles and Gherkin stay as they are) and announces the change in its post-save message. Moving from `lean` to a higher level, or to `detailed` from any level, re-reads every linked PR (a `lean` plan does not keep test names, and only a `detailed` plan keeps the PR details), so that update takes longer. If the issue has no linked PR, moving up from `lean` searches the code for existing tests instead. Plans published before this marker existed are treated as `standard`: the first `update` only adds the marker, unless you pass a different level keyword.
+If you omit the keyword, the agent uses `standard` (the current default). The chosen level is persisted as a hidden `<!-- verbosity: … -->` marker in the published comment, so `update` runs preserve it automatically. To flip the level later, just include the keyword in the update invocation — the agent re-renders `Overview`, `Feature Background`, `Assumptions`, and the per-scenario metadata lines at the new level (scenario titles and Gherkin stay as they are) and announces the change in its post-save message. Moving from `lean` to a higher level, or to `detailed` from any level, re-reads every linked PR (a `lean` plan does not keep test names, and only a `detailed` plan keeps the PR details), so that update takes longer. If the issue has no linked PR, moving up from `lean` searches the code for existing tests instead, and moving to `detailed` re-reads the source files the plan cites. Plans published before this marker existed are treated as `standard`: the first `update` only adds the marker, unless you pass a different level keyword.
 
 **When to reach for `lean`** — small, well-understood changes; issues where the reviewer already knows the domain; drafts you plan to skim.
 
@@ -319,13 +322,29 @@ If you want to force a full re-read of all linked PRs regardless of activity:
 
 The agent uses the `gh` CLI as the primary method, invoking `scripts/publish_test_plan.sh` for a deterministic publish — it writes the hidden markers at the top in a fixed order, detects any existing test plan comment, decides between PATCH and POST, posts the content, and deletes the local draft. If `gh` is not available, the agent falls back to the GitHub MCP: it runs the script with `--dry-run` (which does not need `gh`) to get the comment body, then posts it through the MCP. Either way, the comment is posted (or updated) on the issue and the local draft is deleted.
 
+### Recording execution results
+
+Every scenario ends with three checkboxes: `✅ Pass`, `❌ Fail` and `🚫 Blocked`. Once the plan is published, anyone with write access to the repository can tick one while running the plan. Tick only one per scenario. If you tick Fail or Blocked, reply to the comment with the details (environment, build, steps to reproduce), as the plan asks. GitHub keeps who ticked each box and when in the comment's edit history, so the plan doubles as the execution record.
+
+`update`, and the *Check and update if needed* option that `generate` offers when a plan already exists, match scenarios by their exact title within the same feature area. A scenario whose title and steps did not change keeps its ticks. In the steps, whitespace, capitalization and punctuation edits do not count as changes. If the steps change, or the scenario moves to another feature area, its boxes are cleared and it gets a `_Scenario updated on YYYY-MM-DD, please re-execute_` line above them. Any title edit, even punctuation only, makes it a new scenario: its boxes start empty, with no note.
+
+The update flow copies the ticks from the comment as it was when the draft was created, and `publish` replaces the whole comment. If someone ticks a box after the draft is created and before you publish, the published plan drops that tick, but you can still find it in the comment's edit history. Before publishing, check the published comment for newer ticks and copy them into the draft. Choosing *Generate from scratch* on an issue that already has a plan clears all the ticks when you publish; only the update flow keeps them.
+
+### Scenario priorities and your team's critical workflows
+
+When the owning team has a critical-workflows map, the agent uses it to set each scenario's default priority (P0, P1 or P2). A narrow scenario inside a P0 workflow can end up as P1 or P2, but the general impact rules alone cannot lower a workflow the map marks as P0; if the agent does lower it, it explains why in a `⚠️` note in *Known Limitations*. A workflow the map does not list starts at P2, and the general impact rules can raise it to P1 or P0 when it risks data loss or a security issue, or blocks core functionality. Today only Security Solution has a map ([`critical-workflows-security-solution.md`](../../../.agents/skills/test-plan-generator/references/critical-workflows-security-solution.md)). For other teams, priorities come from the general impact rules alone, and *Known Limitations* says so with this note: `⚠️ No team critical-workflows map was applied — priority was derived from abstract impact rules only.` To add a map for your team, follow *Adding a new team* in [`critical-workflows.md`](../../../.agents/skills/test-plan-generator/references/critical-workflows.md#adding-a-new-team).
+
+### Token usage and cost
+
+**The token usage and estimated cost lines only work in Claude Code for now.** In Cursor both show *not available for this session*, and the plan is generated as usual. See the FAQ entry [*What do the Token usage and Estimated cost lines mean?*](#faq) for how they are measured.
+
 ---
 
 ## Troubleshooting
 
 ### "403 SAML enforcement" error when reading issues
 
-Your GitHub token is not authorized for the Elastic organization. Go to [github.com/settings/tokens](https://github.com/settings/tokens), find your token, click **"Configure SSO"**, and authorize it for the `elastic` org. See Step 1 for the full procedure.
+Your GitHub token is not authorized for the Elastic organization. If you logged in to `gh` through the browser, sign in to Elastic's SSO at [github.com/orgs/elastic/sso](https://github.com/orgs/elastic/sso), then run `gh auth login` again and authorize the `elastic` org when prompted (Step 4). If you use a personal access token for the GitHub MCP, go to [github.com/settings/tokens](https://github.com/settings/tokens), find your token, click **"Configure SSO"**, and authorize it for the `elastic` org (Step 1). If `gh` picks up a token from `GH_TOKEN`, remove it as described in Step 4 and log in through the browser.
 
 ### GitHub MCP shows as disconnected in Cursor
 
@@ -358,12 +377,11 @@ Make sure you select **Login with a web browser** when prompted, not the HTTPS o
 
 ### `gh` CLI posts the comment but the update flow is broken on the next run
 
-The agent looks for a comment whose first two lines are exactly:
+The agent finds the published plan by its first line:
 ```
 <!-- test-plan-generated -->
-<!-- generated-by: [model] -->
 ```
-to detect existing test plans and avoid duplicates. If those markers are missing or not at the very top of the comment, the agent will create a new comment instead of updating the existing one. Open the published comment on GitHub, make sure both lines are present and are the very first lines, save, and the update flow will work correctly from then on.
+If that line is missing or is not the very first line of the comment, `update` treats the issue as having no plan and generates a new one, and `publish` posts a new comment instead of editing the existing one. Open the published comment on GitHub, put that line back as the very first line, save, and the update flow will work correctly from then on.
 
 ### `publish_test_plan.sh` exits with an error code
 
@@ -371,16 +389,16 @@ When publishing, the agent runs `scripts/publish_test_plan.sh`. If the script fa
 
 | Exit code | Meaning | Fix |
 |---|---|---|
-| 65 | The draft's top markers are wrong: no model identifier (no `--model` and no `generated-by:` line), or a duplicated or invalid `verbosity:` / `tokens:` marker | The script writes the top markers itself, so this usually means the draft was edited externally, or an `update` draft kept the old markers from the published comment. Open `.agents/tmp/test-plan-#<issue>.md`, fix or remove the marker lines at the top, and publish again. |
+| 65 | The draft's top markers are wrong: no model identifier (no `--model` and no `generated-by:` line), a duplicated or invalid `verbosity:` / `tokens:` / `cost:` marker, or a `cost:` marker without a `tokens:` marker | The script writes the top markers itself, so this usually means the draft was edited externally, or an `update` draft kept the old markers from the published comment. Open `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#<issue>.md`, fix or remove the marker lines at the top, and publish again. |
 | 66 | Draft file does not exist | Run `generate test plan for issue #<n>` first to create the draft. |
 | 69 | `gh` CLI is not installed | Run `brew install gh` (Step 4). |
 | 70 | Unexpected response from GitHub API (could not resolve comment id, or API returned no URL) | Usually a transient API issue. Re-run the publish command. If it persists, check `gh api /repos/<owner>/<repo>/issues/<n>/comments` manually to confirm the comment is reachable. |
 | 77 | `gh` CLI is not authenticated | Run `gh auth login` (Step 4). |
-| 64 | Argument or usage error | Re-run the publish command. If it persists, open an issue. |
+| 64 | Argument or usage error, or the repository could not be detected from the current folder | Open the Kibana repository root in Cursor, or name the issue by its full URL so the agent passes `--repo`, then re-run the publish command. If it persists, open an issue. |
 
 ### Cursor hangs or stops responding during generation
 
-This is most commonly caused by the GitHub MCP being enabled at the same time the agent is doing complex multi-step work. The MCP can interfere with parallel tool calls and cause the session to freeze. **The recommended fix is to disable the GitHub MCP in `mcp.json` and use `gh` CLI exclusively** — this has proven to resolve hanging issues completely. See Step 3 for instructions on how to configure `mcp.json` without the GitHub MCP entry.
+This is most commonly caused by the GitHub MCP being enabled at the same time the agent is doing complex multi-step work. The MCP can interfere with parallel tool calls and cause the session to freeze. **The recommended fix is to disable the GitHub MCP in `mcp.json` and use `gh` CLI exclusively** — this has proven to resolve hanging issues completely.
 
 If the GitHub MCP is already disabled and you still see hangs, it is likely due to the issue having many sub-issues and PRs with large diffs. In that case, split the work:
 
@@ -402,7 +420,7 @@ Use [jsonlint.com](https://jsonlint.com) to validate the file. A missing closing
 Yes, as long as your GitHub token has access to that repository and has been SSO-authorized for the `elastic` org. The target issue (the one named in your command, where the test plan comment will be posted) can live in a different repo than the one you currently have open in Cursor — for example, you can run the skill from your local `elastic/kibana` checkout but publish to an issue in `elastic/security-team`. The skill passes the right `--repo <owner>/<repo>` flag to the publish script automatically based on the issue URL or context.
 
 **What if the issue has no Figma or Google Docs links?**
-The agent skips those steps and works only with the issue text and sub-issues. The quality of the test plan depends on the quality of the issue description.
+The agent skips those steps and works only with the issue text, sub-issues and linked PRs. The quality of the test plan depends on the quality of the issue description.
 
 **Can the agent read screenshots and images in issues?**
 Yes, as long as you are using a vision-capable model in Cursor. Use the **`auto`** model setting — it selects the best available model for each step and avoids rate-limiting issues. The agent fetches and analyzes image URLs found in the issue body and comments — typically screenshots at `user-images.githubusercontent.com`. If an image requires authentication, the agent will note it could not be read.
@@ -414,10 +432,10 @@ The agent automatically reads the parent issue one level up — including its bo
 The agent reads it and uses it to understand what is already covered. It will not duplicate those scenarios in the current issue's test plan. If everything is already covered by sub-issue test plans, the agent will stop and ask how you want to proceed — offering a summary plan with links, a full self-contained plan, or cancellation.
 
 **What if the issue is an epic and some sub-issues are not yet implemented?**
-The agent applies the *Pending work pattern* defined in `references/document-structure.md`: unimplemented sub-issue acceptance criteria are written as forward-looking scenarios under a collapsible "Pending work — forward-looking gaps from open sub-issues" section, each marked with `(Pending #N)` against its source sub-issue. The Test Coverage Summary then includes a dedicated "Pending work" row that counts those scenarios as `Manual only` (they cannot be exercised today). Implemented-but-unreleased sub-issues are treated as in scope and get regular scenarios instead. The pattern is applied only to true epics with open sub-issues — for standalone issues it is skipped.
+The agent applies the *Pending work pattern* defined in `references/document-structure.md`: unimplemented sub-issue acceptance criteria are written as forward-looking scenarios under a collapsible "Pending work — forward-looking gaps from open sub-issues" section. Each of those acceptance criteria starts with `(Pending #N)` and each scenario title ends with `— pending #N`, where `#N` is the source sub-issue. The Test Coverage Summary then includes a dedicated "Pending work" row that counts those scenarios as `Manual only` (they cannot be exercised today). Implemented-but-unreleased sub-issues are treated as in scope and get regular scenarios instead. The pattern is applied only to true epics with open sub-issues — for standalone issues it is skipped.
 
 **What if the issue itself already has a published test plan and I run `generate`?**
-The agent will detect the existing test plan and ask whether you want to check if it is still up to date, generate from scratch, or cancel. If you choose to check, it will re-read all sources and add only what is missing — it will not rewrite what is already correct.
+The agent will detect the existing test plan and ask whether you want to check if it is still up to date, generate from scratch, or cancel. If you choose to check, it will re-read all sources and add only what is missing or outdated — it will not rewrite what is already correct. If nothing changed, it says the plan is up to date and saves no draft.
 
 **Do I need both the GitHub MCP and `gh` CLI?**
 No — `gh` CLI is the primary and recommended method. The GitHub MCP is optional and in practice causes hanging issues when enabled during complex agent sessions. Install and authenticate `gh` CLI (Step 4) and you will have everything you need. The GitHub MCP can be left disabled.
@@ -428,7 +446,7 @@ The skill files live in the repository under `x-pack/solutions/security/plugins/
 **How does the agent self-review the draft before saving?**
 Three layers, all run during Step 3 just before the draft is written, in this order:
 1. The *Red flags — STOP and ask* table at the top of `SKILL.md` (right below the Core rule). It maps the most common "I'll just rationalise this" thoughts (e.g. *"the image fetch failed, I'll describe it from alt text"*, *"the total scenarios count looks close enough — I'll round"*, *"the issue is thin but the PR fills the gaps"*, *"I found a PR that obviously implements this scope, but no issue cross-references it — I'll add it to the corpus"*) to the correct alternative behaviour. If the agent catches itself in any of those, it stops and asks instead of inventing.
-2. The expanded `references/common-mistakes.md` file. 8 frequent quality issues (hallucinated scenarios, duplicated sub-issue coverage, speculative optional sections, UI-step Gherkin, overlooked sub-issue ACs, overlooked PR artifacts, inconsistent Known Limitations, ignoring the Core rule) — each entry has a one-paragraph description, a concrete ❌ Bad example (most sourced from observed agent runs), and a ✅ Good alternative. On top of that, the Gherkin self-review in `references/output-formats.md` includes three mechanical sum-checks on the Test Coverage Summary table to catch undercounts and a structural check on the Issue Clarity Assessment block.
+2. The expanded `references/common-mistakes.md` file. 11 frequent quality issues (hallucinated scenarios, duplicated sub-issue coverage, speculative optional sections, scoping out coverage by feature-flag state, silent CRUD gaps, ignoring dependency data lifecycle, UI-step Gherkin, overlooked sub-issue ACs, overlooked PR artifacts, inconsistent Known Limitations, ignoring the Core rule) — each entry has a one-paragraph description, a concrete ❌ Bad example (most sourced from observed agent runs), and a ✅ Good alternative. On top of that, the Gherkin self-review in `references/output-formats.md` includes three mechanical sum-checks on the Test Coverage Summary table to catch undercounts and a structural check on the Issue Clarity Assessment block.
 3. The *draft coherence review* in `references/draft-coherence-review.md` — a holistic end-to-end re-read of the assembled draft against the gathered context corpus. The previous two layers are itemised (per-scenario rules, per-category mistakes, sum-checks); this layer compares sections of the draft against each other and against the issue / PR / Figma sources gathered in Step 1. It is split into two short tables: *Document-as-whole coherence* (D1–D9: e.g. *Overview* matches what scenarios actually test, *Scope* bullets map to scenarios bidirectionally, *Known Limitations* claims match the document, voice and detail level consistent across scenarios) and *Source fidelity* (S1–S8: e.g. ACs verbatim from the issue, *Feature Background* motivation traceable to source, UI element names / error strings / feature-flag names matching their origin tag). Each row is graded Consistent / Drift / Incoherent — Drift and Incoherent findings are fixed on the draft before saving, or recorded as a `⚠️` entry in *Known Limitations* if unresolvable. This layer is not published — its only externally visible effects are draft edits and new `⚠️` entries.
 
 If something still looks off in the published comment, edit the source file in `references/` and open a PR — the skill improves the same way any other code does.
@@ -447,16 +465,19 @@ PR descriptions, PR review comments, PR diffs, and code do **not** count toward 
 Because the audience for the feedback is the PMs and writers who own the issue, not just the engineer running the skill. Putting the assessment inside the published test plan means anyone reading the GitHub comment sees the score; tracking it across runs gives the team a quality KPI for issue authoring without any separate dashboard. The section is wrapped in `<details>` and collapsed by default so it never crowds the actual scenarios.
 
 **Is there a worked example for backend / parser features (no UI, no PR linked)?**
-Yes — `references/example-test-plan-backend.md`. It uses synthetic issue numbers (`#90100` parent, `#90201` target) and a fictional FooBar parser to demonstrate the patterns that the UI example does not cover: two dimensions marked **N/A** in the Issue Clarity Assessment (UX/UI and Data & Roles), the *no-PR linked* boundary case for the Coverage Ratio, the `TARGET_VERSION` user-unavailable fallback, and optional sections (RBAC / Multi-space / Multi-tenant / Upgrade / CCS) explicitly omitted with justification. Pick the example that matches the shape of your feature, not its domain — `example-test-plan.md` for a UI feature with a linked PR, `example-test-plan-backend.md` otherwise.
+Yes — `references/example-test-plan-backend.md`. It uses synthetic issue numbers (`#90100` parent, `#90201` target) and a fictional FooBar parser to demonstrate the patterns that the UI example does not cover: two dimensions marked **N/A** in the Issue Clarity Assessment (UX/UI and Data & Roles), the *no-PR linked* boundary case for the Coverage Ratio, the `TARGET_VERSION` user-unavailable fallback, optional sections (RBAC / Multi-space / Multi-tenant / CCS) explicitly omitted with justification, and upgrade recorded under *Out of scope* because a pure parser has no upgrade surface. Pick the example that matches the shape of your feature, not its domain — `example-test-plan.md` for a UI feature with a linked PR, `example-test-plan-backend.md` otherwise.
 
 **The agent asked me whether to include a PR I didn't expect. What happened?**
 The agent detected an **orphan PR** — a PR whose title or scope clearly relates to the target issue (or one of its sub-issues) but no formal cross-reference exists in either direction (no `Closes #N`, no mention in any issue body, no reference in the timeline). Orphan PRs are the single most common source of silent scope creep, so the skill never absorbs them quietly. You will see a short table from the agent listing the PR number, title, best-guess relation to the target, and a default action if you do not respond. Decide based on whether the PR really implements scope of your target issue — if yes, tell the agent to include it; if no or unsure, decline and the agent will record it under *Known Limitations* with a `⚠️`. The full handling is defined in `references/gathering-context.md` under *Orphan PRs*.
 
 **The agent flagged `TARGET_VERSION` as not specified. What does that mean and what should I do?**
-`TARGET_VERSION` is the Kibana release this work targets. The agent looks for it in (in priority order) the issue's milestone, project fields (`Target`, `Fix version`, etc.), version-pattern labels (`v9.5`, `release:9.5`), or explicit mentions in the issue body / comments. When none of those resolve and you are present, the agent will ask you directly. When you are not available — async runs, dry-runs, batch generation — the agent applies the *user-unavailable fallback* defined in `SKILL.md` Step 2: it marks `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in the *Assumptions* section, and omits the optional Upgrade scenarios entirely rather than guess. If the feature is a pure parser or pure compute with no upgrade surface, the omission is the correct outcome. Otherwise, set the milestone / label and re-run the skill in `update` mode to add the Upgrade section before publishing.
+`TARGET_VERSION` is the Kibana release this work targets. The agent looks for it in (in priority order) the issue's milestone, project fields (`Target`, `Fix version`, etc.), version-pattern labels (`v9.5`, `release:9.5`), or explicit mentions in the issue body / comments. When none of those resolve and you are present, the agent will ask you directly. When you are not available — async runs, dry-runs, batch generation — the agent applies the *user-unavailable fallback* defined in `SKILL.md` Step 2. If the feature ships changes to Elasticsearch mappings, saved-object types or migrations, Kibana config keys, or navigation, it keeps the Upgrade scenarios with a `TARGET_VERSION` placeholder, marks `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in the *Assumptions* section, and records the `⚠️` in *Known Limitations*. If the feature is a pure parser or pure compute with no upgrade surface, upgrade goes under *Out of scope* with a one-clause reason and the version does not matter. To fill in the version, set the milestone or a version label and re-run the skill in `update` mode before publishing.
 
 **The draft has a new ⚠️ entry in *Known Limitations* I don't recognise. Is that a bug?**
 Probably not — it is the *draft coherence review* (the third self-review layer) doing its job. It re-reads the assembled draft end-to-end and compares sections of the document against each other (D1–D9) and against the gathered context (S1–S8). When it finds a contradiction the agent cannot resolve from the sources alone, it records it as a `⚠️` entry instead of guessing. Read the `⚠️` line, decide which side is correct based on your knowledge of the feature, edit the draft to resolve it, and publish. If the same kind of `⚠️` appears repeatedly across runs, the underlying issue or PR likely has a real inconsistency worth fixing at the source.
+
+**What do the *Token usage* and *Estimated cost* lines mean?**
+After saving a draft, the agent prints the tokens used and an estimated cost in US dollars, and stores both as hidden `<!-- tokens: … -->` and `<!-- cost: … -->` markers in the published comment. They are read from the Claude Code session transcript, so other agents show *not available for this session*. They cover the **whole chat session** until the draft was saved, so start a new chat to measure a single run; the closing messages after the save are not included, usually about a tenth of the total. The cost uses the API list prices in [gh-aw's model price list](https://github.com/github/gh-aw/blob/main/actions/setup/js/models.json), downloaded on every run, so price changes there apply right away. Without network access the script uses the copy in `.agents/scripts/model_prices.json` instead; the date next to the amount tells which prices were used. It is an estimate, not what your subscription is billed. The cost shows as not available when a model is not in the price list, when it rounds to zero, or when part of the session's usage has no model id and could be worth more than 1% of the cost.
 
 **Can I run this without being inside the repository folder in Cursor?**
 No — the skill only loads when you have the repository open in Cursor. The MCP servers work globally, but the skill is repo-specific.

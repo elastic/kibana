@@ -15,3 +15,12 @@ export type ChangeHistoryChangesSummaryRenderFn = (props: {
   changes: ChangeHistoryListItemChanges;
   summary: unknown;
 }) => ReactNode;
+
+/** Renders the "N changes" content of a timeline row. */
+export type ChangeHistoryChangesRenderFn = (props: {
+  item: ChangeHistoryListItem;
+  changes: ChangeHistoryListItemChanges;
+  summary: unknown;
+  nChanges: string; // localized "N changes" label for this row
+  requestCompareToPrevious?: () => void; // selects this row and compares it to the previous change
+}) => ReactNode;

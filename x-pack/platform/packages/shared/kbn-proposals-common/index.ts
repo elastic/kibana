@@ -34,6 +34,16 @@ export {
 export { ACTION_WORKFLOW_TAG, actionMetadataSchema } from '@kbn/workflows';
 export type { ActionMetadata } from '@kbn/workflows';
 
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionCatalogEntry,
+  ActionImpact,
+  ActionSubjectKind,
+  JsonSchema,
+  ListActionsResponse,
+} from './src/action_catalog';
+
 export {
   approveProposalRequestSchema,
   boundedActionInput,
@@ -41,9 +51,11 @@ export {
   dismissProposalRequestSchema,
   dismissReasonSchema,
   isAwaitingDecision,
+  isGatelessProposal,
   isTodoProposal,
   isExpired,
   isProposalSettling,
+  isAwaitingRetry,
   isTerminal,
   OPEN_PROPOSAL_STATUSES,
   SETTLED_PROPOSAL_STATUSES,
@@ -57,6 +69,7 @@ export {
   proposalCategorySchema,
   proposalConfidenceSchema,
   proposalDecisionSchema,
+  proposalGateSchema,
   proposalImpactSchema,
   proposalOriginSchema,
   proposalSchema,
@@ -76,7 +89,9 @@ export type {
   ProposalCategory,
   ProposalConfidence,
   ProposalDecision,
+  ProposalDecisionMode,
   ProposalFilters,
+  ProposalGate,
   ProposalImpact,
   ProposalOrigin,
   ProposalChartsSummaryBucket,

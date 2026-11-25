@@ -27,7 +27,7 @@ export const CopyBinScripts: Task = {
         linux: platform.isLinux(),
         serverless: platform.isServerless(),
         pointerCompression: platform.isServerless() || platform.isCloud(),
-        forcePointerCompression: Boolean(process.env.CI_FORCE_NODE_POINTER_COMPRESSION), // for .buildkite/pipeline-resource-definitions/kibana-pointer-compression.yml
+        forcePointerCompression: platform.isLinux() && config.shouldForceNodePointerCompression(),
       };
 
       if (platform.isWindows()) {

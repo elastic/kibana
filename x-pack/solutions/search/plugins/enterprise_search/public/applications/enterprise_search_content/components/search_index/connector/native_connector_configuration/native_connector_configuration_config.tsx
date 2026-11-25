@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Connector, ConnectorDefinition, ConnectorStatus } from '@kbn/search-connectors';
-import { ConnectorConfigurationComponent } from '@kbn/search-connectors';
+import { ConnectorConfigurationComponent } from '@kbn/search-connectors/components';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { Status } from '../../../../../../../common/types/api';

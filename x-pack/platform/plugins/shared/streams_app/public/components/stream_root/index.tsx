@@ -9,13 +9,20 @@ import React from 'react';
 import { StreamDetailContextProvider } from '../../hooks/use_stream_detail';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { RedirectTo } from '../redirect_to';
 
 export function StreamDetailRoot({ children }: { children: React.ReactNode }) {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
+  const { access } = useStreamsPrivileges();
 
   const {
     path: { key },
   } = useStreamsAppParams('/{key}', true);
+
+  if (!access.legacy) {
+    return <RedirectTo path="/" />;
+  }
 
   return (
     <StreamDetailContextProvider name={key} streamsRepositoryClient={streamsRepositoryClient}>

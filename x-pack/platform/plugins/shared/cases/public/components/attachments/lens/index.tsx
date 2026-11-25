@@ -17,7 +17,7 @@ import {
   type LensSavedObjectAttachmentData,
   type LensSavedObjectAttachmentMetadata,
   type LensAttachmentData,
-} from '../../../../common/types/domain_zod/attachment/lens/v2';
+} from '../../../../common/types/domain/attachment/lens/v2';
 import { LENS_SO_TYPE } from '../../../../common/constants/attachments';
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from './translations';

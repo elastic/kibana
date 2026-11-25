@@ -27,7 +27,7 @@ type GetImpactClient = AgenticInvestigationsPluginStart['getImpactClient'];
 /** Conversation-derived fields merged onto a proposal on read. Absent when unreadable. */
 type ConversationDecoration = Pick<
   ProposalItem,
-  'conversationTitle' | 'conversationAgentId' | 'conversationAssignees'
+  'conversationTitle' | 'conversationAgentId' | 'conversationStatus' | 'conversationAssignees'
 >;
 
 /**
@@ -39,6 +39,9 @@ const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
   if (Array.isArray(value)) return value;
   return typeof value === 'string' ? [value] : [];
 };
+
+const readStatus = (value: MetadataFieldValue | undefined): 'open' | 'closed' | undefined =>
+  value === 'open' || value === 'closed' ? value : undefined;
 
 /**
  * Breaks every tie the timestamps leave, so a row cannot move between two offset
@@ -161,6 +164,9 @@ export class ConversationProposalsService {
           {
             ...(title ? { conversationTitle: title } : {}),
             ...(agentId ? { conversationAgentId: agentId } : {}),
+            ...(readStatus(metadata?.status)
+              ? { conversationStatus: readStatus(metadata?.status) }
+              : {}),
             conversationAssignees: readAssignees(metadata?.assignees),
           },
         ])

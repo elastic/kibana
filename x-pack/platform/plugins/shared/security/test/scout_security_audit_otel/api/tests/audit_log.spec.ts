@@ -266,6 +266,35 @@ apiTest.describe(
     );
 
     apiTest(
+      'http_request: logged for a route with minimal authentication, without user.domain',
+      async ({ apiClient, samlAuth }) => {
+        const snap = receiver.snapshot();
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+
+        // The search route uses minimal authentication, so the user comes from the session and
+        // carries no authentication realm.
+        await apiClient.post('internal/search/es', {
+          headers: { ...cookieHeader, ...KBN_XSRF, 'elastic-api-version': '1' },
+          body: { params: { index: '.kibana', body: { size: 0 } } },
+          responseType: 'json',
+        });
+
+        const e = await snap.waitForLogRecord(
+          (attrs) =>
+            attrs['event.action'] === 'http_request' &&
+            typeof attrs['url.original'] === 'string' &&
+            (attrs['url.original'] as string).includes('/internal/search/es')
+        );
+
+        expectOtelEnvelope(e);
+        expect(e['user.name']).toBeDefined();
+        expect(e['user.id']).toBe(e['user.name']);
+        expect(e['user.domain']).toBeUndefined();
+        expect(e['kibana.session.id']).toBeDefined();
+      }
+    );
+
+    apiTest(
       'saved_object_find: kibana.space.id present (not kibana.space_id)',
       async ({ apiClient, samlAuth }) => {
         const snap = receiver.snapshot();

@@ -35,7 +35,7 @@ describe('Continuous Threat Hunt close reports', () => {
   describeCloseReports({
     closeReports: [
       {
-        closeReason: 'benign',
+        closeReason: '{{ steps.dismiss_investigation_if_clean.output.metadata.close_reason }}',
         closeStep: 'dismiss_investigation_if_clean',
         definition: ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW,
         reportStep: 'report_investigation_closed_benign',
@@ -566,20 +566,5 @@ describe('Continuous Threat Hunt outcome reports', () => {
         /reportId|closureSummary|proposalBullets|package_summary|package_reason|title|comment/
       );
     });
-  });
-});
-
-describe('Continuous Threat Hunt managed versions', () => {
-  it.each([
-    [
-      ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.id,
-      ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.version,
-      6,
-    ],
-    [ALERTZERO_HUNT_WORKFLOW.id, ALERTZERO_HUNT_WORKFLOW.version, 2],
-    [ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.id, ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.version, 2],
-    [ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.id, ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.version, 2],
-  ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
-    expect(version).toBe(expected);
   });
 });

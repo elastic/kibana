@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlyoutHeader, EuiBadge } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 export const TabHeaderContainer = styled.div`
   width: 100%;
@@ -23,7 +23,7 @@ export const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   overflow: scroll;
 
   &.euiFlyoutHeader {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
+    ${({ theme }) => `padding: ${theme.euiTheme.size.s} 0 0 0;`}
   }
 `;
 
@@ -36,11 +36,11 @@ export const FullWidthFlexGroup = styled(EuiFlexGroup)`
 export const VerticalRule = styled.div`
   width: 2px;
   height: 100%;
-  background: ${({ theme }) => theme.eui.euiColorLightShade};
+  background: ${({ theme }) => theme.euiTheme.colors.lightShade};
 `;
 
 VerticalRule.displayName = 'VerticalRule';
 
 export const EventsCountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+  margin-left: ${({ theme }) => theme.euiTheme.size.s};
 `;

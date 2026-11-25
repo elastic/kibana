@@ -18,6 +18,7 @@ import {
   executeTaskCommonDefinition,
   evaluateTraceCommonDefinition,
   ingestScoresCommonDefinition,
+  persistOnlineScoresCommonDefinition,
   evaluateExampleCommonDefinition,
   evaluateDatasetCommonDefinition,
   startExperimentCommonDefinition,
@@ -36,6 +37,7 @@ import {
   evaluateWorkBatch,
   flattenDatasetWork,
   ingestScores,
+  persistOnlineScores,
   resolveDatasets,
   resolveEvaluatorModel,
   resolveTaskModel,
@@ -144,11 +146,22 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     ...evaluateTraceCommonDefinition,
     handler: async (context) => {
       const { trace_id, reference_data, evaluators } = context.input;
-      const { results, errors } = await evaluateTrace(makeRuntime(context), {
+      const { results, errors, hasRetriableErrors } = await evaluateTrace(makeRuntime(context), {
         traceId: trace_id,
         referenceData: reference_data,
         evaluators,
       });
+
+      // A trace with no scores is a failed step, so `on-failure.retry` can try it again, unless
+      // every failure was unmet evidence, which a retry can't fix. Partial failures still return
+      // the successful results for persistence.
+      if (results.length === 0 && hasRetriableErrors) {
+        throw new Error(
+          `ai.evals.evaluateTrace: every evaluator failed for trace "${trace_id}": ${errors.join(
+            '; '
+          )}`
+        );
+      }
 
       if (errors.length > 0) {
         context.logger.warn(
@@ -195,6 +208,21 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
           failed: response.failed.length,
         },
       };
+    },
+  });
+
+  const persistOnlineScoresStep = createServerStepDefinition({
+    ...persistOnlineScoresCommonDefinition,
+    handler: async (context) => {
+      const { monitor, trace_id, connector_id, results, errors } = context.input;
+      const response = await persistOnlineScores(makeRuntime(context), {
+        monitor,
+        traceId: trace_id,
+        connectorId: connector_id,
+        results,
+        errors,
+      });
+      return { output: response };
     },
   });
 
@@ -422,6 +450,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     executeTaskStep,
     evaluateTraceStep,
     ingestScoresStep,
+    persistOnlineScoresStep,
     evaluateExampleStep,
     evaluateDatasetStep,
     startExperimentStep,

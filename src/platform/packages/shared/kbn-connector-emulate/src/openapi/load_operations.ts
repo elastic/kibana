@@ -14,6 +14,7 @@ import type {
   ContractOperation,
   ContractSpec,
   Credential,
+  FixedQueryParameter,
   MediaTypeContent,
   OpenApiDocument,
   OperationParameter,
@@ -94,6 +95,9 @@ const toServers = (servers: unknown): OperationServer[] | undefined => {
           {
             default: String(fallback),
             enum: Array.isArray(values) ? values.map(String) : undefined,
+            ...(isRecord(variable) && variable['x-path-parameter'] === true
+              ? { pathParameter: true as const }
+              : {}),
           },
         ];
       })
@@ -115,6 +119,30 @@ const toCredential = (scheme: Record<string, unknown>): Credential | undefined =
     return { in: 'authorization', scheme: 'bearer' };
   }
   return undefined;
+};
+
+// The `name=value` pairs of an `x-ms-paths` key, decoded as `URL.searchParams` decodes a
+// request's. Bare tokens such as `flat` in `/{containerName}?restype=container&comp=list&flat`
+// only tell keys apart for AutoRest: clients never send them. Pairs named in `optional` may be
+// left out of a request.
+const toFixedQuery = (
+  path: string,
+  optional: readonly unknown[] = []
+): FixedQueryParameter[] | undefined => {
+  const start = path.indexOf('?');
+  if (start === -1) {
+    return undefined;
+  }
+  const pairs = path
+    .slice(start + 1)
+    .split('&')
+    .filter((pair) => pair.includes('='));
+  const fixed = [...new URLSearchParams(pairs.join('&'))].map(([name, value]) => ({
+    name,
+    value,
+    ...(optional.includes(name) ? { optional: true as const } : {}),
+  }));
+  return fixed.length > 0 ? fixed : undefined;
 };
 
 const getDialect = ({ openapi }: OpenApiDocument): ContractSpec['dialect'] => {
@@ -212,8 +240,19 @@ export const loadOperations = (input: OpenApiDocument, source?: string): Contrac
         : { value: referenced.value[field], pointer: appendPointer(referenced.pointer, field) };
   };
 
-  return extensibleEntriesOf(document.paths).flatMap(([path, node]) => {
-    const field = toPathItemFields(node, appendPointer('/paths', path));
+  // AutoRest specs such as Azure Blob Storage's put operations that only differ in fixed query
+  // parameters, e.g. `/?comp=list`, under `x-ms-paths`.
+  const pathItems = [
+    ...extensibleEntriesOf(document.paths).map(([path, node]) => ({ path, node, in: '/paths' })),
+    ...extensibleEntriesOf(document['x-ms-paths']).map(([path, node]) => ({
+      path,
+      node,
+      in: '/x-ms-paths',
+    })),
+  ];
+
+  return pathItems.flatMap(({ path, node, in: container }) => {
+    const field = toPathItemFields(node, appendPointer(container, path));
     const itemParameters = field('parameters');
     const inheritedParameters = toParameters(itemParameters.value, itemParameters.pointer);
     const itemServers = toServers(field('servers').value);
@@ -227,6 +266,12 @@ export const loadOperations = (input: OpenApiDocument, source?: string): Contrac
         pointer: appendPointer(additional.pointer, method),
       })),
     ];
+
+    const fixedQueryOf = (operation: Record<string, unknown>) => {
+      const optional = operation['x-optional-fixed-query'];
+      const fixedQuery = toFixedQuery(path, Array.isArray(optional) ? optional : []);
+      return fixedQuery ? { fixedQuery } : {};
+    };
 
     return operations.flatMap(({ method, value: operation, pointer }): ContractOperation[] => {
       if (!isRecord(operation)) {
@@ -253,6 +298,7 @@ export const loadOperations = (input: OpenApiDocument, source?: string): Contrac
               : `${method.toUpperCase()} ${path}`,
           method,
           path,
+          ...fixedQueryOf(operation),
           servers: toServers(operation.servers) ?? itemServers ?? rootServers,
           parameters: [...inherited, ...ownParameters],
           requestBody: body && {

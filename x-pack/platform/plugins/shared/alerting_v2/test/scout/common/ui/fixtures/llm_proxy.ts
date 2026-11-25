@@ -13,6 +13,8 @@ export interface LlmProxyWorkerFixtures {
   llmProxy: LlmProxy;
 }
 
+export const LLM_PROXY_CONNECTOR_NAME = 'alerting-v2-llm-proxy';
+
 /**
  * Starts an LLM proxy and a `.gen-ai` connector pointing at it for Agent Builder chats. The
  * connector is global to the cluster, so only the connector created here is deleted.
@@ -25,7 +27,7 @@ export const provideLlmProxy = async (
   let connectorId: string | undefined;
   try {
     ({ id: connectorId } = await apiServices.alerting.connectors.create({
-      name: 'alerting-v2-llm-proxy',
+      name: LLM_PROXY_CONNECTOR_NAME,
       connectorTypeId: '.gen-ai',
       config: {
         apiProvider: 'OpenAI',

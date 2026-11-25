@@ -9,7 +9,7 @@
 
 /** @typedef {import('webpack').Compiler} WebpackCompiler */
 
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @kbn/compat/import-no-extraneous-dependencies */
 const nodeStdlibBrowser = require('node-stdlib-browser');
 
 /**

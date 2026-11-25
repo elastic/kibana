@@ -101,7 +101,6 @@ export const FLEET_ROUTING_PATHS = {
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
-export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
 export const INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM = 'showDeprecated';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
@@ -139,13 +138,11 @@ export const pagePathGetters: {
     searchTerm,
     category,
     subCategory,
-    onlyAgentless,
     showDeprecated,
   }: {
     searchTerm?: string;
     category?: string;
     subCategory?: string;
-    onlyAgentless?: boolean;
     showDeprecated?: boolean;
   }) => {
     const categoryPath =
@@ -158,18 +155,28 @@ export const pagePathGetters: {
     if (searchTerm) {
       queryParams.set(INTEGRATIONS_SEARCH_QUERYPARAM, searchTerm);
     }
-    if (onlyAgentless) {
-      queryParams.set(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM, 'true');
-    }
     if (showDeprecated === true) {
       queryParams.set(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM, 'true');
     }
     const search = queryParams.toString();
     return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${search ? `?${search}` : ''}`];
   },
-  integrations_installed: ({ query, category }: { query?: string; category?: string }) => {
+  integrations_installed: ({
+    query,
+    category,
+    viewInstances,
+  }: {
+    query?: string;
+    category?: string;
+    /** Package name whose onboarding instances panel to open. */
+    viewInstances?: string;
+  }) => {
     const categoryPath = category ? `/${category}` : ``;
-    const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
+    const params = [
+      ...(query ? [`${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}`] : []),
+      ...(viewInstances ? [`viewInstances=${encodeURIComponent(viewInstances)}`] : []),
+    ];
+    const queryParams = params.length ? `?${params.join('&')}` : ``;
     return [INTEGRATIONS_BASE_PATH, `/installed${categoryPath}${queryParams}`];
   },
   integrations_installed_updates_available: ({

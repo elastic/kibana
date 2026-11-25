@@ -36,12 +36,14 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/share-plugin'
   - '@kbn/utility-types'
+  - '@kbn/search-types'
 tags:
   - plugin
   - prod
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

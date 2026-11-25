@@ -40,7 +40,7 @@ const zeroKiStats = { active: zeroStats, expired: zeroStats, deleted: zeroStats 
 const countsResponse = (counts: Record<string, number>) => ({
   columns: [
     { name: 'count', type: 'long' },
-    { name: 'lifecycle', type: 'keyword' },
+    { name: 'ki_status', type: 'keyword' },
   ],
   values: Object.entries(counts).map(([lifecycle, count]) => [count, lifecycle]),
 });
@@ -100,7 +100,9 @@ describe('context_engine usage collector', () => {
     ]);
     esqlResponses.set('ai-index-idx-a', { counts: { active: 3, deleted: 1 } });
     esqlResponses.set('ai-index-ds-b', { counts: { active: 2, expired: 4 } });
-    esqlResponses.set('ai-index-idx-c', { counts: { active: 4, expired: 2, deleted: 2 } });
+    esqlResponses.set('ai-index-idx-c', {
+      counts: { active: 4, expired: 2, deleted: 2, verification_failed: 5 },
+    });
 
     const usage = await fetch();
 

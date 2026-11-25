@@ -93,8 +93,24 @@ test.describe(
       await expect(pageObjects.integrationManagement.getCreateDataStreamFlyout()).toBeHidden();
     });
 
-    test('Analyze Logs button is disabled when the form is empty', async ({ pageObjects }) => {
-      await expect(pageObjects.integrationManagement.getAnalyzeLogsButton()).toBeDisabled();
+    test('Analyze Logs shows inline errors and keeps the flyout open when the form is empty', async ({
+      pageObjects,
+    }) => {
+      const flyout = pageObjects.integrationManagement.getCreateDataStreamFlyout();
+      const analyzeButton = pageObjects.integrationManagement.getAnalyzeLogsButton();
+
+      await expect(analyzeButton).toBeEnabled();
+      await analyzeButton.click();
+
+      await expect(flyout.getByText('Data stream title is required')).toBeVisible();
+      await expect(flyout.getByText('Data stream description is required')).toBeVisible();
+      await expect(flyout.getByText('Please select a data collection method')).toBeVisible();
+      await expect(flyout.getByText('A log sample is required for analysis')).toBeVisible();
+      await expect(pageObjects.integrationManagement.getDataStreamTitleInput()).toHaveAttribute(
+        'aria-invalid',
+        'true'
+      );
+      await expect(flyout).toBeVisible();
     });
 
     test('shows the file upload card as the default log source', async ({ pageObjects }) => {
@@ -128,10 +144,11 @@ test.describe(
       ).toBeDisabled();
     });
 
-    test('Analyze Logs button is enabled when all required fields are filled', async ({
-      pageObjects,
-    }) => {
+    test('inline errors clear once all required fields are filled', async ({ pageObjects }) => {
       const flyout = pageObjects.integrationManagement.getCreateDataStreamFlyout();
+
+      await pageObjects.integrationManagement.getAnalyzeLogsButton().click();
+      await expect(flyout.getByText('Data stream title is required')).toBeVisible();
 
       await pageObjects.integrationManagement
         .getDataStreamTitleInput()
@@ -154,10 +171,13 @@ test.describe(
         buffer: Buffer.from('2024-01-01T00:00:00Z level=info msg="sample log line"\n'),
       });
 
-      await expect(pageObjects.integrationManagement.getAnalyzeLogsButton()).toBeEnabled();
+      await expect(flyout.getByText('Data stream title is required')).toBeHidden();
+      await expect(flyout.getByText('Data stream description is required')).toBeHidden();
+      await expect(flyout.getByText('Please select a data collection method')).toBeHidden();
+      await expect(flyout.getByText('A log sample is required for analysis')).toBeHidden();
     });
 
-    test('Analyze Logs button stays disabled when integration title has only one character', async ({
+    test('Analyze Logs shows the integration details callout when integration title has only one character', async ({
       pageObjects,
     }) => {
       await pageObjects.integrationManagement.getIntegrationTitleInput().clear();
@@ -186,10 +206,15 @@ test.describe(
         buffer: Buffer.from('2024-01-01T00:00:00Z level=info msg="sample log line"\n'),
       });
 
-      await expect(pageObjects.integrationManagement.getAnalyzeLogsButton()).toBeDisabled();
+      await pageObjects.integrationManagement.getAnalyzeLogsButton().click();
+
+      await expect(
+        pageObjects.integrationManagement.getIntegrationDetailsInvalidCallout()
+      ).toContainText('Name must be at least 2 characters long');
+      await expect(flyout).toBeVisible();
     });
 
-    test('Analyze Logs button stays disabled when data stream title is empty', async ({
+    test('Analyze Logs shows an inline error when data stream title is empty', async ({
       pageObjects,
     }) => {
       const flyout = pageObjects.integrationManagement.getCreateDataStreamFlyout();
@@ -208,10 +233,13 @@ test.describe(
         buffer: Buffer.from('2024-01-01T00:00:00Z level=info msg="sample log line"\n'),
       });
 
-      await expect(pageObjects.integrationManagement.getAnalyzeLogsButton()).toBeDisabled();
+      await pageObjects.integrationManagement.getAnalyzeLogsButton().click();
+
+      await expect(flyout.getByText('Data stream title is required')).toBeVisible();
+      await expect(flyout).toBeVisible();
     });
 
-    test('Analyze Logs button stays disabled when data stream title has only one character', async ({
+    test('Analyze Logs shows an inline error when data stream title has only one character', async ({
       pageObjects,
     }) => {
       const flyout = pageObjects.integrationManagement.getCreateDataStreamFlyout();
@@ -235,7 +263,10 @@ test.describe(
         buffer: Buffer.from('2024-01-01T00:00:00Z level=info msg="sample log line"\n'),
       });
 
-      await expect(pageObjects.integrationManagement.getAnalyzeLogsButton()).toBeDisabled();
+      await pageObjects.integrationManagement.getAnalyzeLogsButton().click();
+
+      await expect(flyout.getByText('Name must be at least 2 characters long')).toBeVisible();
+      await expect(flyout).toBeVisible();
     });
 
     test('Analyze Logs calls the upload and create APIs then navigates to the edit page', async ({

@@ -18,7 +18,6 @@ import { getRandomAnsweringMessage } from './i18n';
 import { tags } from './constants';
 import { toCurrentRun, type StateType, type StateUpdate } from './state';
 import { processStructuredAnswerResponse } from './response_processing';
-import { countNonTodosSteps } from './step_state';
 
 const structuredOutputZodSchema = z.object({
   response: z.string().describe("The response to the user's query"),
@@ -61,9 +60,7 @@ export const createAnswerAgentStructured = ({
     const retryUpdate = (error: AgentBuilderAgentExecutionError): StateUpdate => ({
       answerOutcome: { type: 'retry_error', error },
       errorCount: state.errorCount + 1,
-      retryNotices: [
-        { phase: 'answer', afterNonTodosStepCount: countNonTodosSteps(state.steps), error },
-      ],
+      retryNotices: [{ phase: 'answer', afterStepCount: state.steps.length, error }],
     });
 
     try {

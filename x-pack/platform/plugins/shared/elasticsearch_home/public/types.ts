@@ -6,14 +6,16 @@
  */
 
 import type { FC } from 'react';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { Observable } from 'rxjs';
+import type { IconType } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
 export interface ElasticsearchHomeStartDependencies {
-  agentBuilder: AgentBuilderPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
   share: SharePluginStart;
   cloud?: CloudStart;
 }
@@ -22,7 +24,7 @@ export type ElasticsearchHomeServices = CoreStart & ElasticsearchHomeStartDepend
 
 export interface HomeAddDataLink {
   key: string;
-  iconType: EuiIconType;
+  iconType: IconType;
   label: string;
   onClick: () => void;
   testSubj?: string;
@@ -66,15 +68,29 @@ export interface ElasticsearchHomePageProps {
    * dismissal state, e.g. `vectordb.home`.
    */
   storageKeyPrefix: string;
-  /** Defaults to the Elasticsearch getting-started docs. */
+  /** Defaults to the Elasticsearch search docs. */
   docsLink?: HomeDocsLink;
   /** Defaults to a product-neutral Elasticsearch prompt. */
   ideSetup?: HomeIdeSetup;
   banner?: HomeBannerConfig;
-  /** Prepended to the generic "Add data" entries. */
-  primaryAddDataLink?: HomeAddDataLink;
+  /**
+   * Shown in an info icon next to the Data card's title, e.g. to explain that the stats include
+   * data streams. Omit it to show no icon.
+   */
+  dataCardTooltip?: string;
+  /** The "Add data" entries, in display order. */
+  addDataLinks: HomeAddDataLink[];
+  /** The host's classic-navigation side nav, for hosts rendered under the classic chrome style. */
+  solutionNav?: KibanaPageTemplateProps['solutionNav'];
 }
 
 export interface ElasticsearchHomePublicStart {
   HomePage: FC<ElasticsearchHomePageProps>;
+  /**
+   * Emits whether integrated onboarding is enabled, following flag changes. For code outside React,
+   * such as an `AppUpdater`.
+   */
+  getIntegratedOnboardingEnabled$: () => Observable<boolean>;
+  /** React hook returning whether integrated onboarding is enabled. */
+  useIntegratedOnboardingEnabled: () => boolean;
 }

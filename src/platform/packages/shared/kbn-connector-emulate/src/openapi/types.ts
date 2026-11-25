@@ -90,6 +90,12 @@ export interface OperationResponse {
 export interface ServerVariable {
   readonly default: string;
   readonly enum?: readonly string[];
+  /**
+   * Set by `x-path-parameter`: the variable is also the operation's leading path parameter of
+   * the same name, which requests to this server leave out of the path, as with S3's
+   * virtual-hosted buckets (`{Bucket}.s3.{region}.amazonaws.com`).
+   */
+  readonly pathParameter?: true;
 }
 
 export interface OperationServer {
@@ -114,12 +120,28 @@ export interface SecurityScheme {
 /** Schemes that must all be satisfied; an empty list allows anonymous requests. */
 export type SecurityRequirement = readonly SecurityScheme[];
 
+export interface FixedQueryParameter {
+  readonly name: string;
+  readonly value: string;
+  /**
+   * Listed in the operation's `x-optional-fixed-query`: requests may leave it out, as S3's
+   * `x-id`, which only SDKs send.
+   */
+  readonly optional?: true;
+}
+
 export interface ContractOperation {
   /** The `operationId`, or `METHOD /path` when the spec declares none. */
   readonly id: string;
   /** Lowercase HTTP method. */
   readonly method: string;
+  /** The key in `paths`, or in `x-ms-paths` including its query part, such as `/?comp=list`. */
   readonly path: string;
+  /**
+   * The query parameters an `x-ms-paths` key fixes (its `name=value` pairs), which tell
+   * operations on the same path apart.
+   */
+  readonly fixedQuery?: readonly FixedQueryParameter[];
   readonly servers: readonly OperationServer[];
   readonly parameters: readonly OperationParameter[];
   readonly requestBody?: OperationRequestBody;

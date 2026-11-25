@@ -7,34 +7,44 @@
 
 import { notFound } from '@hapi/boom';
 import { isNotFoundError } from '@kbn/es-errors';
+import { bytePartition } from '@kbn/std';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import {
   isEnabledFailureStore,
   streamsUnitIdentifierSchema,
   type ClassicIngestStreamEffectiveLifecycle,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_RESOLVE_INDEX_PATTERN_LENGTH,
   MAX_RESOLVE_INDEX_PATTERNS,
   collectResolvedDataStreamNames,
   collectResolvedIndexNames,
-  getUnitDestinationWritePatterns,
-  matchesIndexPattern,
   type ResolvedDestinationIndex,
+  type ResolvedDestinationIndexHealth,
   type ResolveUnitIndicesResponse,
 } from '../../../../common';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_V2_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
 import { getDataStreamLifecycle, getFailureStore } from '../../../lib/streams/stream_crud';
 import { processAsyncInChunks } from '../../../utils/process_async_in_chunks';
 import { createServerRoute } from '../../create_server_route';
 
-const unitPathSchema = z.object({
-  path: z.object({
-    id: streamsUnitIdentifierSchema.describe('The unit id.'),
-  }),
-});
+const resolveUnitIndicesParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: streamsUnitIdentifierSchema.describe('The unit id.'),
+    }),
+    query: z
+      .object({
+        start: z.iso.datetime().describe('Start of the time range, ISO 8601.'),
+        end: z.iso.datetime().describe('End of the time range, ISO 8601.'),
+      })
+      .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
+        message: 'start must be before end',
+      }),
+  })
+);
 
 const assertStreamsCanvasEnabled = async (uiSettingsClient: {
   get: (key: string) => Promise<unknown>;
@@ -46,15 +56,22 @@ const assertStreamsCanvasEnabled = async (uiSettingsClient: {
   }
 };
 
-const uniquePatterns = (patterns: string[]): string[] => [...new Set(patterns)];
-
-const chunkPatterns = (patterns: string[]): string[][] => {
-  const chunks: string[][] = [];
-  for (let index = 0; index < patterns.length; index += MAX_RESOLVE_INDEX_PATTERNS) {
-    chunks.push(patterns.slice(index, index + MAX_RESOLVE_INDEX_PATTERNS));
-  }
-  return chunks;
+const toResolvedIndexHealth = (
+  status: string | undefined
+): ResolvedDestinationIndexHealth | undefined => {
+  const health = status?.toLowerCase();
+  return health === 'green' || health === 'yellow' || health === 'red' ? health : undefined;
 };
+
+// The names go in the request line, so a chunk is bounded by its length as well as its count.
+const chunkNames = (names: string[]): string[][] =>
+  bytePartition(names).flatMap((byteChunk) => {
+    const chunks: string[][] = [];
+    for (let index = 0; index < byteChunk.length; index += MAX_RESOLVE_INDEX_PATTERNS) {
+      chunks.push(byteChunk.slice(index, index + MAX_RESOLVE_INDEX_PATTERNS));
+    }
+    return chunks;
+  });
 
 export const resolveUnitIndicesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/unit/{id}/_resolve_indices',
@@ -62,21 +79,21 @@ export const resolveUnitIndicesRoute = createServerRoute({
     access: 'internal',
     summary: 'Resolve unit destination indices',
     description:
-      'Fetches a Streams unit and returns the Elasticsearch indices each destination can write to.',
+      'Fetches a Streams unit and returns the Elasticsearch indices each destination wrote documents to in the time range, as its metrics report them.',
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.read],
     },
   },
-  params: unitPathSchema,
+  params: resolveUnitIndicesParamsSchema,
   handler: async ({
     params,
     request,
     getScopedClients,
     logger,
   }): Promise<ResolveUnitIndicesResponse> => {
-    const { soClient, uiSettingsClient, scopedClusterClient, streamsClient } =
+    const { unitSoClient, uiSettingsClient, scopedClusterClient, streamsClient, unitStatsClient } =
       await getScopedClients({
         request,
       });
@@ -84,7 +101,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
     const streamsUnitService = new StreamsUnitService({
-      soClient,
+      soClient: unitSoClient,
       logger,
     });
 
@@ -92,31 +109,39 @@ export const resolveUnitIndicesRoute = createServerRoute({
       unit: { destinations },
     } = await streamsUnitService.getUnitOrEmpty(params.path.id);
 
-    const patternsByDestination = Object.fromEntries(
-      destinations.map((destination) => [
-        destination.id,
-        getUnitDestinationWritePatterns(destination).filter(
-          (pattern) => pattern.length <= MAX_RESOLVE_INDEX_PATTERN_LENGTH
-        ),
-      ])
-    );
+    // Only a local Elasticsearch destination writes to indices of this cluster.
+    const collectionsByDestination = await unitStatsClient.getDestinationCollections({
+      unitId: params.path.id,
+      destinationIds: destinations.flatMap(({ id, type }) =>
+        type === 'elasticsearch' ? [id] : []
+      ),
+      window: params.query,
+    });
 
     const emptyResponse = (): ResolveUnitIndicesResponse => ({
       destinations: Object.fromEntries(
-        Object.keys(patternsByDestination).map((destinationId) => [destinationId, { indices: [] }])
+        destinations.map(({ id: destinationId }) => [destinationId, { indices: [] }])
       ),
     });
 
-    const allPatterns = uniquePatterns(Object.values(patternsByDestination).flat());
-    if (allPatterns.length === 0) {
+    const allNames = [
+      ...new Set(
+        Object.values(collectionsByDestination)
+          .flat()
+          .map(({ name }) => name)
+          .filter((name) => name.length <= MAX_RESOLVE_INDEX_PATTERN_LENGTH)
+      ),
+    ];
+    if (allNames.length === 0) {
       return emptyResponse();
     }
 
+    // Leaves out a written-to index that was deleted since, or that the user cannot see.
     const resolvedNames = new Set<string>();
     const dataStreamNames = new Set<string>();
-    for (const patterns of chunkPatterns(allPatterns)) {
+    for (const names of chunkNames(allNames)) {
       const resolved = await scopedClusterClient.asCurrentUser.indices.resolveIndex({
-        name: patterns.join(','),
+        name: names.join(','),
         expand_wildcards: 'open',
         ignore_unavailable: true,
         allow_no_indices: true,
@@ -129,9 +154,9 @@ export const resolveUnitIndicesRoute = createServerRoute({
       }
     }
 
-    const names = [...resolvedNames];
     const lifecycleByName = new Map<string, ClassicIngestStreamEffectiveLifecycle>();
     const failureStoreEnabledByName = new Map<string, boolean>();
+    const healthByName = new Map<string, ResolvedDestinationIndexHealth>();
     const privilegesByName: Record<string, { read_failure_store: boolean }> =
       dataStreamNames.size > 0
         ? await streamsClient.getPrivilegesPerStream([...dataStreamNames])
@@ -162,32 +187,44 @@ export const resolveUnitIndicesRoute = createServerRoute({
           dataStream.name,
           isEnabledFailureStore(getFailureStore({ dataStream }))
         );
+        const health = toResolvedIndexHealth(dataStream.status);
+        if (health) {
+          healthByName.set(dataStream.name, health);
+        }
       }
     }
 
+    const windowSeconds = (Date.parse(params.query.end) - Date.parse(params.query.start)) / 1000;
+
     return {
       destinations: Object.fromEntries(
-        Object.entries(patternsByDestination).map(([destinationId, patterns]) => [
+        destinations.map(({ id: destinationId }) => [
           destinationId,
           {
-            indices: names
-              .filter((name) => patterns.some((pattern) => matchesIndexPattern(name, pattern)))
-              .map(
-                (name): ResolvedDestinationIndex =>
-                  dataStreamNames.has(name)
-                    ? {
-                        name,
-                        is_data_stream: true,
-                        lifecycle: lifecycleByName.get(name) ?? {
-                          error: { message: 'Data stream not found' },
-                        },
-                        failure_store_enabled: failureStoreEnabledByName.get(name) ?? true,
-                        privileges: {
-                          read_failure_store: privilegesByName[name]?.read_failure_store ?? false,
-                        },
-                      }
-                    : { name, is_data_stream: false }
-              ),
+            indices: (collectionsByDestination[destinationId] ?? [])
+              .filter(({ name }) => resolvedNames.has(name))
+              .sort((left, right) => left.name.localeCompare(right.name))
+              .map(({ name, documents }): ResolvedDestinationIndex => {
+                const writes = {
+                  name,
+                  documents,
+                  ingestion_rate: documents / windowSeconds,
+                };
+                return dataStreamNames.has(name)
+                  ? {
+                      ...writes,
+                      is_data_stream: true,
+                      lifecycle: lifecycleByName.get(name) ?? {
+                        error: { message: 'Data stream not found' },
+                      },
+                      failure_store_enabled: failureStoreEnabledByName.get(name) ?? true,
+                      health: healthByName.get(name),
+                      privileges: {
+                        read_failure_store: privilegesByName[name]?.read_failure_store ?? false,
+                      },
+                    }
+                  : { ...writes, is_data_stream: false };
+              }),
           },
         ])
       ),

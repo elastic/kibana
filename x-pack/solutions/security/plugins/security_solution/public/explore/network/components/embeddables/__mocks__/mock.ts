@@ -48,21 +48,21 @@ export const mockSourceLayer = {
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: {
+      fill_color: {
         type: 'STATIC',
         options: { color: 'euiColorVis4' },
       },
-      lineColor: {
+      line_color: {
         type: 'STATIC',
         options: { color: 'euiColorVisBase0' },
       },
-      lineWidth: { type: 'STATIC', options: { size: 2 } },
-      iconSize: { type: 'STATIC', options: { size: 8 } },
-      iconOrientation: {
+      line_width: { type: 'STATIC', options: { size: 2 } },
+      icon_size: { type: 'STATIC', options: { size: 8 } },
+      icon_orientation: {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbolizeAs: {
+      symbolize_as: {
         options: { value: 'icon' },
       },
       icon: {
@@ -106,21 +106,21 @@ export const mockDestinationLayer = {
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: {
+      fill_color: {
         type: 'STATIC',
         options: { color: 'euiColorVis2' },
       },
-      lineColor: {
+      line_color: {
         type: 'STATIC',
         options: { color: 'euiColorVisBase0' },
       },
-      lineWidth: { type: 'STATIC', options: { size: 2 } },
-      iconSize: { type: 'STATIC', options: { size: 8 } },
-      iconOrientation: {
+      line_width: { type: 'STATIC', options: { size: 2 } },
+      icon_size: { type: 'STATIC', options: { size: 8 } },
+      icon_orientation: {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbolizeAs: {
+      symbolize_as: {
         options: { value: 'icon' },
       },
       icon: {
@@ -162,21 +162,21 @@ export const mockClientLayer = {
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: {
+      fill_color: {
         type: 'STATIC',
         options: { color: 'euiColorVis4' },
       },
-      lineColor: {
+      line_color: {
         type: 'STATIC',
         options: { color: 'euiColorVisBase0' },
       },
-      lineWidth: { type: 'STATIC', options: { size: 2 } },
-      iconSize: { type: 'STATIC', options: { size: 8 } },
-      iconOrientation: {
+      line_width: { type: 'STATIC', options: { size: 2 } },
+      icon_size: { type: 'STATIC', options: { size: 8 } },
+      icon_orientation: {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbolizeAs: {
+      symbolize_as: {
         options: { value: 'icon' },
       },
       icon: {
@@ -225,21 +225,21 @@ export const mockServerLayer = {
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: {
+      fill_color: {
         type: 'STATIC',
         options: { color: 'euiColorVis2' },
       },
-      lineColor: {
+      line_color: {
         type: 'STATIC',
         options: { color: 'euiColorVisBase0' },
       },
-      lineWidth: { type: 'STATIC', options: { size: 2 } },
-      iconSize: { type: 'STATIC', options: { size: 8 } },
-      iconOrientation: {
+      line_width: { type: 'STATIC', options: { size: 2 } },
+      icon_size: { type: 'STATIC', options: { size: 8 } },
+      icon_orientation: {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbolizeAs: {
+      symbolize_as: {
         options: { value: 'icon' },
       },
       icon: {
@@ -280,15 +280,15 @@ export const mockLineLayer = {
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: {
+      fill_color: {
         type: 'STATIC',
         options: { color: '#A6EDEA' },
       },
-      lineColor: {
+      line_color: {
         type: 'STATIC',
         options: { color: '#A6EDEA' },
       },
-      lineWidth: {
+      line_width: {
         type: 'DYNAMIC',
         options: {
           field: {
@@ -296,20 +296,20 @@ export const mockLineLayer = {
             name: 'doc_count',
             origin: 'source',
           },
-          minSize: 1,
-          maxSize: 8,
-          fieldMetaOptions: {
-            isEnabled: true,
+          min_size: 1,
+          max_size: 8,
+          field_meta_options: {
+            is_enabled: true,
             sigma: 3,
           },
         },
       },
-      iconSize: { type: 'STATIC', options: { size: 10 } },
-      iconOrientation: {
+      icon_size: { type: 'STATIC', options: { size: 10 } },
+      icon_orientation: {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbolizeAs: {
+      symbolize_as: {
         options: { value: 'icon' },
       },
       icon: {
@@ -345,15 +345,15 @@ export const mockClientServerLineLayer = {
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: {
+      fill_color: {
         type: 'STATIC',
         options: { color: '#A6EDEA' },
       },
-      lineColor: {
+      line_color: {
         type: 'STATIC',
         options: { color: '#A6EDEA' },
       },
-      lineWidth: {
+      line_width: {
         type: 'DYNAMIC',
         options: {
           field: {
@@ -361,20 +361,20 @@ export const mockClientServerLineLayer = {
             name: 'doc_count',
             origin: 'source',
           },
-          minSize: 1,
-          maxSize: 8,
-          fieldMetaOptions: {
-            isEnabled: true,
+          min_size: 1,
+          max_size: 8,
+          field_meta_options: {
+            is_enabled: true,
             sigma: 3,
           },
         },
       },
-      iconSize: { type: 'STATIC', options: { size: 10 } },
-      iconOrientation: {
+      icon_size: { type: 'STATIC', options: { size: 10 } },
+      icon_orientation: {
         type: 'STATIC',
         options: { orientation: 0 },
       },
-      symbolizeAs: {
+      symbolize_as: {
         options: { value: 'icon' },
       },
       icon: {
