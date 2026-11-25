@@ -6,7 +6,12 @@
  */
 
 import { getToolCallSteps, type TaskOutput } from '@kbn/evals';
-import { attachmentTools, internalTools, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  attachmentTools,
+  internalTools,
+  platformCoreTools,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
@@ -68,6 +73,7 @@ export const createToolUsageEvaluators = (log: ToolingLog) => [
     'security.security_labs_search'
   ),
   createToolCallCountEvaluator('security.get_entity calls', 'security.get_entity'),
+  createToolCallCountEvaluator('platform.core.execute_esql calls', platformCoreTools.executeEsql),
   {
     name: 'Tool sequence (steps)',
     kind: 'CODE' as const,
@@ -112,6 +118,31 @@ export const createSkillLoadedEvaluator = (skillName: string) => ({
         })
     );
     return { score: loaded ? 1 : 0 };
+  },
+});
+
+const MAX_EVIDENCE_ESQL_CALLS = 3;
+
+/**
+ * CODE evaluator: 1 when the agent ran at least one ES|QL query that returned a result, and ran at most
+ * three ES|QL queries. Checks the evidence step from the tool steps, not from the answer.
+ */
+export const createEvidenceLookupEvaluator = (log: ToolingLog) => ({
+  name: 'ES|QL evidence lookup (one success, at most three calls)',
+  kind: 'CODE' as const,
+  direction: 'maximize' as const,
+  evaluate: async ({ output }: { output: unknown }) => {
+    const esqlCalls = getRawToolSteps(output).filter(
+      ({ tool_id: toolId }) => toolId === platformCoreTools.executeEsql
+    );
+    const succeeded = esqlCalls.filter(({ results = [] }) =>
+      results.some(({ type }) => type === ToolResultType.esqlResults)
+    ).length;
+    log.info(`ES|QL evidence calls: ${esqlCalls.length}, with results: ${succeeded}`);
+    return {
+      score: succeeded > 0 && esqlCalls.length <= MAX_EVIDENCE_ESQL_CALLS ? 1 : 0,
+      metadata: { calls: esqlCalls.length, succeeded },
+    };
   },
 });
 

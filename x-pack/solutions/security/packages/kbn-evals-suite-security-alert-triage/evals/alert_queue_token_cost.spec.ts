@@ -25,6 +25,7 @@ import { createEvaluateConverse } from '../src/evaluate_converse';
 import {
   createAlertDetailEvaluator,
   createAlertRowsEvaluator,
+  createEvidenceLookupEvaluator,
   createSkillLoadedEvaluator,
   createToolUsageEvaluators,
 } from '../src/evaluators';
@@ -189,7 +190,11 @@ const TEMPTING_PROMPTS: Array<{ id: string; question: string; expected: string }
 type EvaluateAlertQueue = ReturnType<typeof createEvaluateConverse>;
 
 const evaluate = base.extend<
-  { evaluateAlertQueue: EvaluateAlertQueue; evaluateAlertQueueNoSkill: EvaluateAlertQueue },
+  {
+    evaluateAlertQueue: EvaluateAlertQueue;
+    evaluateAlertQueueNoSkill: EvaluateAlertQueue;
+    evaluateAlertEvidence: EvaluateAlertQueue;
+  },
   {}
 >({
   evaluateAlertQueue: [
@@ -205,6 +210,26 @@ const evaluate = base.extend<
             ...createToolUsageEvaluators(log),
             createAlertRowsEvaluator(log),
             createAlertDetailEvaluator(log),
+            createSkillLoadedEvaluator('alert-analysis'),
+          ],
+        })
+      );
+    },
+    { scope: 'test' },
+  ],
+  // The evidence case also checks the ES|QL lookup from the tool steps.
+  evaluateAlertEvidence: [
+    ({ fetch, connector, evaluators, executorClient, log }, use) => {
+      use(
+        createEvaluateConverse({
+          fetch,
+          connector,
+          evaluators,
+          executorClient,
+          log,
+          extraEvaluators: [
+            ...createToolUsageEvaluators(log),
+            createEvidenceLookupEvaluator(log),
             createSkillLoadedEvaluator('alert-analysis'),
           ],
         })
@@ -452,8 +477,8 @@ evaluate.describe(
     });
 
     // Both alerts are medium severity with no host or IP. Only the 10-day-old events tell them apart.
-    evaluate('Alert queue — evidence step, skill bound', async ({ evaluateAlertQueue }) => {
-      await evaluateAlertQueue({
+    evaluate('Alert queue — evidence step, skill bound', async ({ evaluateAlertEvidence }) => {
+      await evaluateAlertEvidence({
         dataset: {
           name: 'agent builder: security-alert-queue-evidence-skill',
           description:
