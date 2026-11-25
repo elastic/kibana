@@ -1922,6 +1922,69 @@ describe('update()', () => {
           );
           expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
         });
+
+        test('turning outbound off on an old shared connector saves authMode shared', async () => {
+          arrangeExisting(buildNotChosen({ outboundEnabled: true }) as never);
+
+          const result = await update({
+            context: dualContext,
+            id: 'connector-id',
+            action: { name: 'renamed', config: {}, secrets: {}, isOutboundActionsEnabled: false },
+          });
+
+          expect(result.authMode).toBe('shared');
+          expect(savedAction()).toEqual(expect.objectContaining({ authMode: 'shared' }));
+        });
+
+        test('an old shared connector turned off cannot then be turned on with a per-user auth type', async () => {
+          const existing = buildNotChosen({ outboundEnabled: true });
+          arrangeExisting(existing as never);
+
+          await update({
+            context: dualContext,
+            id: 'connector-id',
+            action: { name: 'renamed', config: {}, secrets: {}, isOutboundActionsEnabled: false },
+          });
+
+          const savedOff = savedAction() as unknown as Record<string, unknown>;
+          unsecuredSavedObjectsClient.create.mockClear();
+          arrangeExisting({
+            ...existing,
+            attributes: { ...existing.attributes, ...savedOff },
+          } as never);
+
+          await expect(
+            update({
+              context: dualContext,
+              id: 'connector-id',
+              action: {
+                name: 'renamed',
+                config: { instanceUrl: 'https://saved.example.com', authType: PER_USER },
+                secrets: { authType: PER_USER },
+                isOutboundActionsEnabled: true,
+              },
+            })
+          ).rejects.toThrow(
+            'Authentication type cannot be changed to a per-user type for shared connectors.'
+          );
+          expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+        });
+
+        test('saves no authMode when outbound stays on', async () => {
+          arrangeExisting(buildNotChosen({ outboundEnabled: true }) as never);
+
+          await update({
+            context: dualContext,
+            id: 'connector-id',
+            action: {
+              name: 'renamed',
+              config: { instanceUrl: 'https://saved.example.com' },
+              secrets: { authType: 'bearer' },
+            },
+          });
+
+          expect(savedAction()).not.toHaveProperty('authMode');
+        });
       });
     });
 

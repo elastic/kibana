@@ -160,15 +160,23 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   // Outbound off with no secrets sent: the saved auth type is kept, so it is not checked.
   const isOutboundOffWithoutSecrets = !isOutboundActionsEnabled && areSecretsOmitted(secrets);
 
-  // A connector created with outbound off has not chosen an auth mode yet. Old shared
-  // connectors with no `config.authType` have outbound on, so they stay locked.
+  const wasOutboundDisabled = isOutboundActionsDisabledInConfig({
+    actionTypeId,
+    config: attributes.config as Record<string, unknown> | undefined,
+  });
+
+  // A connector created with outbound off has not chosen an auth mode yet. An old shared
+  // connector with no stored `authMode` is pinned to shared when outbound is turned off
+  // (see `shouldPinSharedAuthMode`), so it can never reach this state.
   const isAuthModeNotChosen =
+    authMode === undefined && wasOutboundDisabled && currentAuthTypeId === undefined;
+
+  // Turning outbound off on a connector with no stored auth mode saves the resolved mode.
+  const shouldPinSharedAuthMode =
     authMode === undefined &&
-    isOutboundActionsDisabledInConfig({
-      actionTypeId,
-      config: attributes.config as Record<string, unknown> | undefined,
-    }) &&
-    currentAuthTypeId === undefined;
+    connectorTypeIsDual(actionTypeId) &&
+    !wasOutboundDisabled &&
+    !isOutboundActionsEnabled;
 
   const requestedAuthMode = isOutboundOffWithoutSecrets
     ? undefined
@@ -325,6 +333,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           ...(isAuthModeNotChosen && requestedAuthMode !== undefined
             ? { authMode: requestedAuthMode }
             : {}),
+          ...(shouldPinSharedAuthMode ? { authMode: currentAuthMode } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
           hasInboundEventIdentity: Boolean(identityAttributes),
         },
