@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { SOURCES_TYPES } from '@kbn/esql-types';
 import { FunctionDefinitionTypes } from '../../../commands/definitions/types';
 import { Location } from '../../../commands/registry/types';
 import { setTestFunctions } from '../../../commands/definitions/utils/test_functions';
@@ -67,5 +68,35 @@ describe('time series source context', () => {
     );
 
     expect(suggestions).not.toContain('AVG_OVER_TIME');
+  });
+});
+
+describe('time series sources in subqueries', () => {
+  const suggestTsdbIndex = async (query: string) => {
+    const { suggest, callbacks } = await setup();
+    const suggestions = await suggest(query, {
+      callbacks: {
+        ...callbacks,
+        getSources: jest.fn(async () => [
+          { name: 'index', hidden: false, type: SOURCES_TYPES.INDEX },
+          { name: 'tsdb_index', hidden: false, type: SOURCES_TYPES.TIMESERIES },
+        ]),
+      },
+    });
+
+    return suggestions.find(({ label }) => label === 'tsdb_index');
+  };
+
+  it('suggests a time series index and rewrites the subquery FROM to TS', async () => {
+    const suggestion = await suggestTsdbIndex('FROM index, (FROM tsdb_i/)');
+
+    expect(JSON.stringify(suggestion?.command)).toContain('TS tsdb_index');
+  });
+
+  it('keeps FROM when the subquery has another source', async () => {
+    const suggestion = await suggestTsdbIndex('FROM index, (FROM (ROW x = 1), tsdb_i/)');
+
+    expect(suggestion).toBeDefined();
+    expect(JSON.stringify(suggestion?.command)).not.toContain('TS tsdb_index');
   });
 });
