@@ -100,6 +100,7 @@ export const OtlpAuthentication: React.FunctionComponent<{
       {!isSecretStorageAvailable && (
         <>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="warning"
             iconType="lock"
