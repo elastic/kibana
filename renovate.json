@@ -517,7 +517,7 @@
     },
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
-      "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "@xterm/xterm"],
+      "matchDepNames": ["@msw/serve", "@types/byte-size", "byte-size", "msw", "@xterm/xterm"],
       "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
