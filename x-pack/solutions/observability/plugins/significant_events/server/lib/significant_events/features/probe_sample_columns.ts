@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { errors } from '@elastic/elasticsearch';
 import { esql } from '@elastic/esql';
 import { getEsqlColumnSchema, type EsqlColumnSchema } from '@kbn/ai-tools';
 import { SOURCE_TIMESTAMP_FIELD, getTimestampColumnProblem } from '@kbn/nightshift-shared';
@@ -77,16 +76,16 @@ const probeColumns = async ({
       signal,
     });
   } catch (error) {
-    const reason = getVerificationReason(error);
-    if (reason) {
+    const { type, message } = parseError(error);
+    if (type === 'verification_exception') {
       return {
         kind: 'unsupported',
-        problem: `Elasticsearch rejects the query behind [${index}]: ${reason}`,
+        problem: `Elasticsearch rejects the query behind [${index}]: ${message}`,
       };
     }
     // A probe that cannot answer must not take sampling down with it: the arms run as they did
     // before the probe existed, the entity arm without its filters.
-    logger.warn(`Column probe failed, sampling without it: ${parseError(error).message}`);
+    logger.warn(`Column probe failed, sampling without it: ${message}`);
     return { kind: 'supported', columns: undefined };
   }
 
@@ -116,17 +115,6 @@ const checkTimestampColumn = (index: string, columns: EsqlColumnSchema[]): Sampl
   return problem
     ? { kind: 'unsupported', problem: `Cannot sample [${index}]: ${problem}` }
     : { kind: 'supported', columns };
-};
-
-const getVerificationReason = (error: unknown): string | undefined => {
-  if (
-    !(error instanceof errors.ResponseError) ||
-    error.body?.error?.type !== 'verification_exception'
-  ) {
-    return undefined;
-  }
-  const reason: unknown = error.body.error.reason;
-  return typeof reason === 'string' ? reason : error.message;
 };
 
 /** One cheap `LIMIT 1` count: tells a view with no data yet apart from one that has documents. */

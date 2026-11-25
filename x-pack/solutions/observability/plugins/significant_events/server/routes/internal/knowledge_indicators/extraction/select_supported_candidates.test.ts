@@ -37,7 +37,7 @@ const makeResponseError = (statusCode: number, type: string, reason: string) =>
     headers: {},
     warnings: [],
     meta: {} as unknown as TransportResult['meta'],
-    body: { error: { type, reason } },
+    body: { error: { type, reason, root_cause: [{ type, reason }] } },
   } as TransportResult);
 
 const ids = (candidates: SourceCandidate[]) => candidates.map(({ sourceId }) => sourceId);
@@ -106,7 +106,8 @@ describe('selectSupportedCandidates', () => {
     expect(toSchedule).toEqual([]);
     expect(unsupported).toEqual([
       expect.objectContaining({
-        reason: 'Elasticsearch rejects the query behind [view-broken]: Unknown column [gone_field]',
+        reason:
+          'Elasticsearch rejects the query behind [view-broken]: verification_exception\n\tRoot causes:\n\t\tverification_exception: Unknown column [gone_field]',
       }),
     ]);
   });
