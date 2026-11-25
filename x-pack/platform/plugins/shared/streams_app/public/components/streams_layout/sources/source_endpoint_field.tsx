@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiCopy, EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiButtonIcon,
+  EuiCopy,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTextArea,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SourceEndpoint } from './types';
 
@@ -48,6 +56,14 @@ export const SourceEndpointField = ({
   endpoints?: SourceEndpoint[];
   showHelpText?: boolean;
 }) => {
+  const { euiTheme } = useEuiTheme();
+  // `rows` stops setting the height under `field-sizing: content`, so keep two rows as the minimum.
+  const endpointValueStyles = css`
+    @supports (field-sizing: content) {
+      field-sizing: content;
+      min-block-size: calc(2lh + 2 * ${euiTheme.size.m});
+    }
+  `;
   const endpointUnavailableLabel = i18n.translate(
     'xpack.streams.sources.endpointUnavailableLabel',
     {
@@ -109,6 +125,7 @@ export const SourceEndpointField = ({
                 readOnly
                 rows={2}
                 resize="none"
+                css={endpointValueStyles}
                 value={url}
                 aria-label={label}
                 data-test-subj={
