@@ -57,6 +57,9 @@ describe('timeZoneShape', () => {
       'America/New_York'
     );
     expect(timeZoneQuery().safeParse({}).data?.timeZone).toBe('UTC');
+    // Names moment-timezone knows but Elasticsearch rejects, as the zone they link to
+    expect(timeZoneQuery().safeParse({ timeZone: 'ROC' }).data?.timeZone).toBe('Asia/Taipei');
+    expect(timeZoneQuery().safeParse({ timeZone: 'EST' }).data?.timeZone).toBe('America/Panama');
   });
 
   it('accepts a UTC offset, which the browser sends when it cannot name its time zone', () => {
