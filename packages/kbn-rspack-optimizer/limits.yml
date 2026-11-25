@@ -62,7 +62,7 @@ pageLoadAssetSize:
   elasticAssistant: 136070
   elasticAssistantSharedState: 3369
   elasticConsole: 1119
-  elasticsearchHome: 2777
+  elasticsearchHome: 3251
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
@@ -190,7 +190,7 @@ pageLoadAssetSize:
   serverless: 1571
   serverlessObservability: 14136
   serverlessSearch: 18103
-  serverlessVectordb: 8809
+  serverlessVectordb: 10433
   sessionView: 647
   share: 379
   shared-core: 343009
