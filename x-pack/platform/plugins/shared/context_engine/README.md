@@ -728,3 +728,32 @@ A bad proposal is skipped, not fatal. Every rejection comes back as a `skipped`
 entry with a reason: `invalid`, `action_not_allowed`, `duplicate`, `conflict`,
 or `limit_exceeded`.
 
+
+## Dreaming windows
+
+The dreaming workflows (`dreaming`, `dreaming_traces`, `relationships` and
+`maintenance`) read what changed since the last successful run, and resume from
+where that run stopped when it hit its read limit.
+
+With no successful run, a workflow starts 7 days back (`default_hours: 168`). The
+window it derives on its own is clamped to 30 days (`max_hours: 720`), so a
+backlog older than that is not read automatically. A schedule that was paused or
+failing for longer than 30 days resumes from 30 days back.
+
+To read an older backlog once, run the workflow manually with the optional `since`
+input, an ISO 8601 time:
+
+```json
+{ "since": "2026-01-01T00:00:00.000Z" }
+```
+
+`since` replaces the derived window and is not clamped. It ignores the previous
+run's resume point, so the run reads from `since` onward, up to the workflow's
+read limit. A run that reads as many items as it can reports where to resume, and
+the next scheduled run continues from there, which drains a large backlog over
+several runs. Use `dry_run` (where supported) with `since` first to see what a
+catch-up would write. Setting `since` to `1970-01-01T00:00:00.000Z` reads the
+whole history.
+
+The 7 and 30 day defaults are part of the managed workflow definitions and are not
+configured per AI index; `since` is the supported way to move the window.
