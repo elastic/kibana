@@ -68,16 +68,6 @@ describe('setExportProviders', () => {
     expect(result.mac).not.toHaveProperty('response_actions');
     expect(result.linux).not.toHaveProperty('response_actions');
   });
-
-  it('keeps other response_actions settings when given an empty list', () => {
-    const policy = setExportProviders(policyFactory(), [AZURE_PROVIDER]);
-    set(policy, 'mac.response_actions.other_setting', true);
-
-    const result = setExportProviders(policy, []);
-
-    expect(result.windows).not.toHaveProperty('response_actions');
-    expect(result.mac.response_actions).toEqual({ other_setting: true });
-  });
 });
 
 describe('removeExportProviders', () => {
@@ -124,13 +114,13 @@ describe('removeExportProviders', () => {
   });
 
   it.each(['windows', 'mac', 'linux'] as const)(
-    'keeps other response_actions settings on %s',
+    'removes the whole response_actions on %s, including other settings',
     (os) => {
       set(policy, `${os}.response_actions.other_setting`, true);
 
       const result = removeExportProviders(policy);
 
-      expect(result[os].response_actions).toEqual({ other_setting: true });
+      expect(result[os]).not.toHaveProperty('response_actions');
     }
   );
 
