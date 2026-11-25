@@ -182,6 +182,7 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
               maxDuration={rowToDuration(datum.y + 1, stats)}
               spans={datum.spans}
               failed={datum.failed}
+              failedOnly={failedOnly}
               unit={unit}
               sampled={sampled}
               hint={getInteractionHint(unit, canClick)}
@@ -190,7 +191,7 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
           </EuiPanel>
         );
       },
-    [dataByCell, timeGrid, stats, unit, sampled, canClick, timeZone]
+    [dataByCell, timeGrid, stats, unit, sampled, failedOnly, canClick, timeZone]
   );
 
   const handleBrush: BrushEndListener = (event) => {

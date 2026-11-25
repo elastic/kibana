@@ -399,6 +399,7 @@ export function LatencyMap({
         // With "failed only" the map shows the failed spans alone, and so does the cell.
         spans: failedOnly ? failed : counts?.spans ?? 0,
         failed,
+        failedOnly,
       };
     },
     [grid, timeGrid, stats, failedOnly]
@@ -445,12 +446,13 @@ export function LatencyMap({
   // spans alone whatever the region says).
   const describeRange = (range: CellRange) => {
     const rangeSelection = resolveRegion(range);
+    // Failed spans alone: by the region's own clause, or the host's filter over it.
+    const regionFailedOnly = Boolean(rangeSelection.failedOnly || (controlled && hostFailedOnly));
     const counts = getSelectionCounts({
       grid: grid!,
       timeGrid: timeGrid!,
       stats: stats!,
-      selection:
-        controlled && hostFailedOnly ? { ...rangeSelection, failedOnly: true } : rangeSelection,
+      selection: regionFailedOnly ? { ...rangeSelection, failedOnly: true } : rangeSelection,
     });
     return {
       fromMs: Date.parse(rangeSelection.from),
@@ -459,6 +461,7 @@ export function LatencyMap({
       maxDuration: rangeSelection.maxDuration,
       spans: counts.spans,
       failed: counts.failed,
+      failedOnly: regionFailedOnly,
     };
   };
 
@@ -484,8 +487,17 @@ export function LatencyMap({
     (requested: CellRange, label?: string, { ofSelection = false } = {}) => {
       if (!geometry) return;
       const range = clampRange(requested, geometry.bins, geometry.rows);
-      if (displaySelection && committedRange && isSameRange(range, committedRange)) return;
       const next = resolveRegion(range, { ofSelection });
+      // The same cells about the same spans: nothing to commit. The same cells about every
+      // span where the selection was about failures (or the reverse) is a change.
+      if (
+        displaySelection &&
+        committedRange &&
+        isSameRange(range, committedRange) &&
+        Boolean(next.failedOnly) === Boolean(displaySelection.failedOnly)
+      ) {
+        return;
+      }
       commit(label ? { ...next, label } : next);
     },
     [geometry, displaySelection, committedRange, commit, resolveRegion]
@@ -924,13 +936,15 @@ export function LatencyMap({
               ? // One message, so translations can reorder it; 'to', not a dash, which a
                 // screen reader would skip.
                 i18n.translate('traceLatencyMap.cellAnnouncement', {
-                  defaultMessage: '{fromTime} to {toTime}, {minDuration} to {maxDuration}, {count}',
+                  defaultMessage:
+                    '{fromTime} to {toTime}, {minDuration} to {maxDuration}, {count}{failedOnly, select, true {, failed only} other {}}',
                   values: {
                     fromTime: formatTimestamp(keyboardCell.fromMs, timeZone),
                     toTime: formatTimestamp(keyboardCell.toMs, timeZone),
                     minDuration: formatDuration(keyboardCell.minDuration),
                     maxDuration: formatDuration(keyboardCell.maxDuration),
                     count: getCountText(unit, keyboardCell.spans, sampled),
+                    failedOnly: String(keyboardCell.failedOnly),
                   },
                 })
               : ''}

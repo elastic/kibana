@@ -1347,6 +1347,44 @@ describe('LatencyMap', () => {
       expect(condition).not.toContain('event.outcome');
     });
 
+    it('commits the same cells about every span when the selection was about failures', async () => {
+      // A one-cell errors-only selection, host filter off: extended and brought back, the
+      // draft covers the same cell, but about every span - which Enter must commit.
+      const { onSelectionCommit } = renderMap({
+        selection: {
+          ...geometry.rangeToSelection({ x0: 3, x1: 4, y0: 5, y1: 6 }),
+          failedOnly: true,
+        },
+        failedOnly: false,
+        onFailedOnlyChange: jest.fn(),
+      });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight', true);
+      press(layer, 'ArrowLeft', true);
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent('40 spans');
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).not.toHaveTextContent('failed only');
+      press(layer, 'Enter');
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 3, x1: 4, y0: 5, y1: 6 })
+      );
+    });
+
+    it('says when a region is read as failed only, in the readout and its announcement', async () => {
+      // The far cell is all failures: a region over it is inferred to be about them.
+      renderMap();
+      const layer = await getLayer();
+      act(() => layer.focus());
+      // The cursor starts mid-map; walk it to column 30, row 20, then anchor a region there.
+      for (let i = 0; i < 10; i += 1) press(layer, 'ArrowRight');
+      for (let i = 0; i < 9; i += 1) press(layer, 'ArrowUp');
+      press(layer, 'ArrowRight', true);
+      const details = screen.getByTestId('traceLatencyMapCellDetails');
+      expect(details).toHaveTextContent('3 spans');
+      expect(details).toHaveTextContent('failed only');
+      expect(screen.getByTestId('traceLatencyMapAnnouncement')).toHaveTextContent(/failed only/);
+    });
+
     it('opens the cell under the cursor with Enter, as the pointer click does', async () => {
       const onCellClick = jest.fn();
       renderMap({

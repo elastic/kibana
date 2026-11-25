@@ -357,12 +357,13 @@ describe('useLatencyGrid', () => {
       try {
         const started = 1_000_000;
         now.mockReturnValue(started);
-        let p90 = 5_000_000;
+        // The p99 tops the rows: another p99 bins every histogram differently.
+        let p99 = 10_000_000;
         const runEsql = jest.fn(async (query: string): Promise<ESQLSearchResponse> => {
           if (query.includes('PERCENTILE')) {
             return {
               ...statsTable(100),
-              values: [[100_000, p90, 8_000_000, 10_000_000, 2_000_000_000, 100]],
+              values: [[100_000, 5_000_000, 8_000_000, p99, 2_000_000_000, 100]],
             };
           }
           if (isOperationsQuery(query)) {
@@ -379,9 +380,9 @@ describe('useLatencyGrid', () => {
         await waitFor(() => expect(first.result.current.operations).toHaveLength(1));
         first.unmount();
         // The statistics are past their age, the histograms are not - but the range's
-        // percentiles moved, so the rows they were binned by are not these.
+        // p99 moved, so the rows they were binned by are not these.
         now.mockReturnValue(started + LATENCY_GRID_CACHE_MAX_AGE_MS + 1000);
-        p90 = 6_000_000;
+        p99 = 12_000_000;
         const again = renderHook(() =>
           useLatencyGrid({ source, runEsql, targetBins: 60, loadOperations: true })
         );
