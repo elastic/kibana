@@ -13,6 +13,7 @@ import {
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import {
+  SECRET_VALUE_MAX_LENGTH,
   SecretAlreadyExistsError,
   SecretConflictError,
   SecretNotFoundError,
@@ -125,6 +126,15 @@ describe('secrets on Elasticsearch', () => {
     expect(document?.[SECRET_SAVED_OBJECT_TYPE].value).toEqual(expect.any(String));
     expect(document?.[SECRET_SAVED_OBJECT_TYPE].value).not.toContain(VALUE);
     expect(await getStored(name)).toMatchObject({ value: VALUE });
+  });
+
+  it('stores a value of the maximum length made of characters that JSON escapes', async () => {
+    const name = 'escaped_value_token';
+    const value = '\u0001'.repeat(SECRET_VALUE_MAX_LENGTH);
+
+    await getClient().create({ name, value });
+
+    expect((await getStored(name))?.value).toEqual(value);
   });
 
   it('refuses a secret that breaks a rule and stores nothing', async () => {
@@ -243,13 +253,19 @@ describe('secrets on Elasticsearch', () => {
       expect(await getStored(name)).toMatchObject({ value: NEW_VALUE, description: DESCRIPTION });
     });
 
-    it('keeps who created the secret and when', async () => {
-      const { client, created } = await createSecret('kept_creation_token');
-      const { createdBy, createdAt } = created;
+    it('keeps who created the secret and records who updated it', async () => {
+      const name = 'attributed_token';
+      const storage = createStorage();
+      await createSecretsClient({ storage, username: 'alice' }).create({ name, value: VALUE });
+      const created = await getStored(name);
 
-      const updated = await client.update({ name: 'kept_creation_token', value: NEW_VALUE });
+      await createSecretsClient({ storage, username: 'bob' }).update({ name, value: NEW_VALUE });
 
-      expect(updated).toMatchObject({ createdBy, createdAt });
+      expect(await getStored(name)).toMatchObject({
+        createdBy: 'alice',
+        createdAt: created?.createdAt,
+        updatedBy: 'bob',
+      });
     });
 
     it('reports a secret deleted during the update as not found', async () => {

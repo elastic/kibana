@@ -10,15 +10,19 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SECRET_DESCRIPTION_MAX_LENGTH, SECRET_NAME_MAX_LENGTH } from '@kbn/secrets';
+import {
+  SECRET_DESCRIPTION_MAX_LENGTH,
+  SECRET_NAME_MAX_LENGTH,
+  SECRET_VALUE_MAX_LENGTH,
+} from '@kbn/secrets';
 
 export const SECRET_SAVED_OBJECT_TYPE = 'secret';
 
 const USERNAME_MAX_LENGTH = 1024;
 const TIMESTAMP_MAX_LENGTH = 64;
-// The schema sees the stored value: the ciphertext of a value of at most SECRET_VALUE_MAX_LENGTH
-// characters.
-const ENCRYPTED_VALUE_MAX_LENGTH = 131072;
+// The schema sees the stored value: the base64 ciphertext of the value as JSON. JSON takes at most
+// six bytes per character, which base64 turns into eight, and encryption adds a short header.
+const ENCRYPTED_VALUE_MAX_LENGTH = 8 * SECRET_VALUE_MAX_LENGTH + 1024;
 
 const secretSchemaV1 = schema.object({
   name: schema.string({ minLength: 1, maxLength: SECRET_NAME_MAX_LENGTH }),
