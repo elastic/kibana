@@ -39,10 +39,16 @@ export class ResourcesReconcileTask {
         description: 'Reinstalls missing or outdated SLO shared resources',
         timeout: '5m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          signal,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          signal: AbortSignal;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance);
+              return this.runTask(taskInstance, signal);
             },
           };
         },
@@ -85,7 +91,7 @@ export class ResourcesReconcileTask {
     }
   }
 
-  public async runTask(taskInstance: ConcreteTaskInstance) {
+  public async runTask(taskInstance: ConcreteTaskInstance, signal?: AbortSignal) {
     if (!this.wasStarted) {
       this.logger.debug('runTask Aborted. Task not started yet');
       return;
@@ -99,7 +105,7 @@ export class ResourcesReconcileTask {
     }
 
     try {
-      if (!(await this.resourceInstallState.reconcile())) {
+      if (!(await this.resourceInstallState.reconcile(undefined, signal))) {
         this.logger.debug('SLO resources are being installed by another process');
       }
     } catch (err) {

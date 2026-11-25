@@ -31,7 +31,7 @@ import type { RetryOptions } from '../utils/retry';
 import { DEFAULT_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 
 export interface ResourceInstaller {
-  install(): Promise<void>;
+  install(signal?: AbortSignal): Promise<void>;
 }
 
 const COMPONENT_TEMPLATES: readonly ClusterPutComponentTemplateRequest[] = [
@@ -57,6 +57,9 @@ const BASE_INDICES: readonly string[] = [
 ];
 
 export class DefaultResourceInstaller implements ResourceInstaller {
+  // Set per install() run; every ES call then stops retrying once aborted.
+  private signal?: AbortSignal;
+
   constructor(
     private esClient: ElasticsearchClient,
     private logger: Logger,
@@ -64,7 +67,8 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   ) {}
 
   // Every Elasticsearch call retries transient errors; the install stops at the first resource that still fails.
-  public async install(): Promise<void> {
+  public async install(signal?: AbortSignal): Promise<void> {
+    this.signal = signal;
     this.logger.debug('Installing SLO shared resources');
 
     // Wait for every component template to settle so no ES call outlives the install lock.
@@ -153,6 +157,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     return await retryTransientEsErrors(esCall, {
       logger: this.logger,
       retryOptions: this.retryOptions,
+      signal: this.signal,
     });
   }
 

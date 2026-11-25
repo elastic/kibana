@@ -150,4 +150,49 @@ describe('ResourceInstallState', () => {
     expect(lockManager.withLock).toHaveBeenCalledTimes(16);
     expect(installer.install).not.toHaveBeenCalled();
   });
+
+  it('reconcile failure invalidates a previously cached success', async () => {
+    const { installer, lockManager, state } = setup();
+    installer.install.mockResolvedValueOnce().mockRejectedValueOnce(new Error('boom'));
+
+    await state.ensureInstalled();
+    await expect(state.reconcile()).rejects.toThrow(new SLOResourcesNotInstalled('boom'));
+    await state.ensureInstalled();
+
+    expect(lockManager.withLock).toHaveBeenCalledTimes(3);
+  });
+
+  it('reconcile keeps a cached success when another process holds the lock', async () => {
+    const { installer, lockManager, state } = setup();
+    installer.install.mockResolvedValue();
+
+    await state.ensureInstalled();
+    lockManager.withLock.mockRejectedValueOnce(new LockAcquisitionError('lock held'));
+    await expect(state.reconcile()).resolves.toBe(false);
+    await state.ensureInstalled();
+
+    expect(lockManager.withLock).toHaveBeenCalledTimes(2);
+  });
+
+  it('passes the abort signal to the installer on reconcile', async () => {
+    const { installer, state } = setup();
+    installer.install.mockResolvedValue();
+    const { signal } = new AbortController();
+
+    await state.reconcile(DEFAULT_RETRY_OPTIONS, signal);
+
+    expect(installer.install).toHaveBeenCalledWith(signal);
+  });
+
+  it('times out when a single lock attempt outlasts the wait budget', async () => {
+    jest.useFakeTimers();
+    const { lockManager, state } = setup();
+    lockManager.withLock.mockReturnValue(new Promise(() => {}));
+
+    const assertion = expect(state.ensureInstalled()).rejects.toThrow(
+      new SLOResourcesNotInstalled('SLO resources are being installed by another process')
+    );
+    await jest.advanceTimersByTimeAsync(30_000);
+    await assertion;
+  });
 });
