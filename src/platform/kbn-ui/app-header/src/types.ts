@@ -125,6 +125,9 @@ export interface AppHeaderTab {
   href?: string;
   badge?: AppHeaderTabBadge;
   'data-test-subj'?: string;
+  'data-ebt-action'?: string;
+  'data-ebt-element'?: string;
+  'data-ebt-detail'?: string;
   disabled?: boolean;
   toolTipContent?: string;
   /**

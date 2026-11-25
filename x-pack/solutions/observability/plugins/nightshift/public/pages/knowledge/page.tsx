@@ -8,8 +8,10 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { Redirect, useHistory, useParams } from 'react-router-dom';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { NightshiftAppHeader } from '../../components/app_header';
 import { usePageSectionPaddingSize } from '../../hooks/use_is_mobile';
 import { useKibana } from '../../hooks/use_kibana';
@@ -95,6 +97,11 @@ export function KnowledgePage({
       history.push(`/knowledge/${id}`);
     },
     'data-test-subj': `nightshiftKnowledgeTab-${id}`,
+    ...getEbtProps({
+      action: NIGHTSHIFT_EBT_ACTIONS.VIEW_KNOWLEDGE_TAB,
+      element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_TABS,
+      detail: id,
+    }),
   }));
 
   return (
