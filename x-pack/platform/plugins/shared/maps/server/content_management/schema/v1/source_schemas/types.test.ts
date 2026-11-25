@@ -39,7 +39,7 @@ describe('DiscriminatedSourceDescriptor', () => {
 
   test('should expose property names from any member', () => {
     const esqlProp: KeysOfUnion<DiscriminatedSourceDescriptor> = 'esql';
-    const esSearchProp: KeysOfUnion<DiscriminatedSourceDescriptor> = 'tooltipProperties';
-    expect([esqlProp, esSearchProp]).toEqual(['esql', 'tooltipProperties']);
+    const esSearchProp: KeysOfUnion<DiscriminatedSourceDescriptor> = 'tooltip_properties';
+    expect([esqlProp, esSearchProp]).toEqual(['esql', 'tooltip_properties']);
   });
 });

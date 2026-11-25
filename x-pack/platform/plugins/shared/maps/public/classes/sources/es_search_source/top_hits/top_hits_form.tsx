@@ -23,7 +23,11 @@ import type { ESSearchSourceDescriptor } from '../../../../../common/descriptor_
 type TopHitsSourceChangeArgs = OnSourceChangeArgs<
   Pick<
     ESSearchSourceDescriptor,
-    'topHitsGroupByTimeseries' | 'topHitsSplitField' | 'topHitsSize' | 'sortField' | 'sortOrder'
+    | 'top_hits_group_by_timeseries'
+    | 'top_hits_split_field'
+    | 'top_hits_size'
+    | 'sort_field'
+    | 'sort_order'
   >
 >;
 

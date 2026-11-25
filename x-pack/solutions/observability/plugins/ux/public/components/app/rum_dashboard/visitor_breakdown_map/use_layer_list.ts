@@ -72,7 +72,7 @@ export function useLayerList() {
       index_pattern_id: getStaticDataViewId(spaceId),
       apply_global_query: true,
       apply_global_time: true,
-      applyForceRefresh: true,
+      apply_force_refresh: true,
     };
 
     const _esTermSourceRegion: Writable<ESTermSourceDescriptor> = {
@@ -86,8 +86,8 @@ export function useLayerList() {
       },
       index_pattern_id: getStaticDataViewId(spaceId),
       apply_global_query: true,
-      applyGlobalTime: true,
-      applyForceRefresh: true,
+      apply_global_time: true,
+      apply_force_refresh: true,
     };
     return {
       esTermSourceCountry: _esTermSourceCountry,

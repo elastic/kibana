@@ -34,6 +34,7 @@ export type { FieldFormatter } from './constants';
 export type {
   DataFilters,
   EMSFileSourceDescriptor,
+  ESQLSourceDescriptor,
   ESTermSourceDescriptor,
   LayerDescriptor,
   RuntimeLayerState,
