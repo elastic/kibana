@@ -25,8 +25,9 @@ Cloud environment
     - **US Government GCC High** — Microsoft 365 Government GCC High cloud
     - **US Government DoD** — Microsoft 365 Government DoD cloud
 
-Authentication: Client secret (OAuth 2.0 Client Credentials)
-:   Configure the following fields:
+### Authentication: Client secret (OAuth 2.0 Client Credentials) [microsoft-defender-xdr-client-secret-auth]
+
+Configure the following fields:
 
 Token URL
 :   The Microsoft Entra ID token endpoint for your tenant. Use the format `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`, replacing `{tenant-id}` with your directory (tenant) ID (GUID). For GCC High and DoD use `https://login.microsoftonline.us/{tenant-id}/oauth2/v2.0/token`.
@@ -37,8 +38,9 @@ Client ID
 Client Secret
 :   A client secret created for the app registration under **Certificates & Secrets**.
 
-Authentication: Certificate (OAuth 2.0 Private Key JWT)
-:   As an alternative to a client secret, authenticate with an X.509 certificate. Upload the PEM-encoded public certificate and private key. The certificate must first be uploaded to your app registration under **Certificates & secrets > Certificates**.
+### Authentication: Certificate (OAuth 2.0 Private Key JWT) [microsoft-defender-xdr-certificate-auth]
+
+As an alternative to a client secret, authenticate with an X.509 certificate. Upload the PEM-encoded public certificate and private key. The certificate must first be uploaded to your app registration under **Certificates & secrets > Certificates**.
 
 ## Available actions [microsoft-defender-xdr-available-actions]
 
@@ -52,7 +54,7 @@ The following actions are available for the Microsoft Defender XDR connector.
 | `getIncident` | Incident management | `incidentId` | — | `SecurityIncident.ReadWrite.All` |
 | `updateIncident` | Incident management | `incidentId` + at least one field | `status`, `assignedTo`, `classification`, `determination`, `severity`, `customTags` | `SecurityIncident.ReadWrite.All` |
 | `addIncidentComment` | Incident management | `incidentId`, `comment` | — | `SecurityIncident.ReadWrite.All` |
-| `mergeIncidents` _(not yet available as an agent tool)_ | Incident management | `incidentIds` (≥ 2 IDs) | `comment` | `SecurityIncident.ReadWrite.All` |
+| `mergeIncidents` _(API only)_ | Incident management | `incidentIds` (≥ 2 IDs) | `comment` | `SecurityIncident.ReadWrite.All` |
 | `listAlerts` | Alert management | — | `filter`, `top`, `skip` | `SecurityAlert.ReadWrite.All` |
 | `getAlert` | Alert management | `alertId` | — | `SecurityAlert.ReadWrite.All` |
 | `updateAlert` | Alert management | `alertId` + at least one field | `status`, `assignedTo`, `classification`, `determination` | `SecurityAlert.ReadWrite.All` |
@@ -60,9 +62,9 @@ The following actions are available for the Microsoft Defender XDR connector.
 | `runHuntingQuery` | Advanced hunting | `query` | `timespan` | `ThreatHunting.Read.All` |
 | `listDetectionRules` | Custom detection rules | — | `top`, `skip` | `CustomDetection.Read.All` |
 | `getDetectionRule` | Custom detection rules | `ruleId` | — | `CustomDetection.Read.All` |
-| `createDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `displayName`, `queryText`, `period`, `alertTemplate` | `status` | `CustomDetection.ReadWrite.All` |
-| `updateDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `ruleId` + at least one field | `displayName`, `status`, `queryText`, `period`, `alertTemplate` | `CustomDetection.ReadWrite.All` |
-| `deleteDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `ruleId` | — | `CustomDetection.ReadWrite.All` |
+| `createDetectionRule` _(API only)_ | Custom detection rules | `displayName`, `queryText`, `period`, `alertTemplate` | `status` | `CustomDetection.ReadWrite.All` |
+| `updateDetectionRule` _(API only)_ | Custom detection rules | `ruleId` + at least one field | `displayName`, `status`, `queryText`, `period`, `alertTemplate` | `CustomDetection.ReadWrite.All` |
+| `deleteDetectionRule` _(API only)_ | Custom detection rules | `ruleId` | — | `CustomDetection.ReadWrite.All` |
 | `getThreatIntelHost` | Threat intelligence | `host` | — | `ThreatIntelligence.Read.All` |
 | `getThreatIntelHostReputation` | Threat intelligence | `host` | — | `ThreatIntelligence.Read.All` |
 | `getPassiveDnsRecords` | Threat intelligence | `host` | — | `ThreatIntelligence.Read.All` |
