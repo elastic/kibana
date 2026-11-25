@@ -35,6 +35,7 @@ import {
 import { getTriageMatchFpDecisionsStepDefinition } from './alert_triage/match_fp_decisions_step';
 import { getTriageRevokeFpDecisionStepDefinition } from './alert_triage/revoke_fp_decision_step';
 import { getTriageStoreFpDecisionsStepDefinition } from './alert_triage/store_fp_decisions_step';
+import { getBuildRuleTuningWikiEntryStepDefinition } from './build_rule_tuning_wiki_entry';
 import type { ReportWorkerOutcomeStepDeps } from './report_worker_outcome/report_worker_outcome_step';
 import { getReportWorkerOutcomeStepDefinition } from './report_worker_outcome/report_worker_outcome_step';
 
@@ -121,6 +122,7 @@ export const registerStepDefinitions = ({
     })
   );
   workflowsExtensions.registerStepDefinition(getTriageRevokeFpDecisionStepDefinition());
+  workflowsExtensions.registerStepDefinition(getBuildRuleTuningWikiEntryStepDefinition());
 };
 
 export { getPackageReportStepDefinition } from './package_report';

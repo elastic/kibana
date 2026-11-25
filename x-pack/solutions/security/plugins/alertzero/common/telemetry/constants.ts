@@ -157,6 +157,23 @@ export const RULE_TUNING_CHANGE_TYPES = [
 export type RuleTuningChangeType = (typeof RULE_TUNING_CHANGE_TYPES)[number];
 
 /**
+ * How a Rule Tuning review read the rule's decision history before diagnosis: `found` a page,
+ * `empty` when the rule has none yet, `failed` when the read failed, and `none` when no diagnosis
+ * ran.
+ */
+export const RULE_TUNING_DECISION_HISTORY_READS = ['found', 'empty', 'failed', 'none'] as const;
+
+export type RuleTuningDecisionHistoryRead = (typeof RULE_TUNING_DECISION_HISTORY_READS)[number];
+
+/**
+ * Whether a Rule Tuning review added the analyst's decision to the rule's decision history:
+ * `saved` (also when a replay found it already there), `failed`, or `none` when nobody decided.
+ */
+export const RULE_TUNING_DECISION_HISTORY_SAVES = ['saved', 'failed', 'none'] as const;
+
+export type RuleTuningDecisionHistorySave = (typeof RULE_TUNING_DECISION_HISTORY_SAVES)[number];
+
+/**
  * The manual-autonomy entry gate of a Rule Tuning or Rule Coverage review: `skipped` when no
  * entry gate ran, else how an analyst answered it, or `undecided` when nobody did.
  */
