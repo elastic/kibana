@@ -158,10 +158,14 @@ resolve_service_account() {
 
   case "$bucket" in
     "kibana-ci-es-snapshots-daily")
-      echo "kibana-ci-access-es-daily@$GCLOUD_EMAIL_POSTFIX"
+      if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-elasticsearch-snapshot-promote" ]]; then
+        echo "kibana-ci-es-snapshot-promote@$GCLOUD_EMAIL_POSTFIX"
+      else
+        echo "kibana-ci-es-snapshot-build@$GCLOUD_EMAIL_POSTFIX"
+      fi
       ;;
     "kibana-ci-es-snapshots-permanent")
-      echo "kibana-ci-access-es-permanent@$GCLOUD_EMAIL_POSTFIX"
+      echo "kibana-ci-es-snapshot-promote@$GCLOUD_EMAIL_POSTFIX"
       ;;
     "kibana-so-types-snapshots")
       echo "kibana-ci-access-so-snapshots@$GCLOUD_EMAIL_POSTFIX"

@@ -24,6 +24,10 @@ const PUBLISHED_PR_EMAIL =
   'kibana-ci-access-published-pr@elastic-kibana-ci.iam.gserviceaccount.com';
 const TYPESCRIPT_EMAIL = 'kibana-ci-access-ts-archives@elastic-kibana-ci.iam.gserviceaccount.com';
 const TYPESCRIPT_PR_EMAIL = 'kibana-ci-ts-archives-pr@elastic-kibana-ci.iam.gserviceaccount.com';
+const ES_SNAPSHOT_BUILD_EMAIL =
+  'kibana-ci-es-snapshot-build@elastic-kibana-ci.iam.gserviceaccount.com';
+const ES_SNAPSHOT_PROMOTE_EMAIL =
+  'kibana-ci-es-snapshot-promote@elastic-kibana-ci.iam.gserviceaccount.com';
 const BUCKET = 'kibana-ci-artifacts-us-central1';
 const TOKEN_RESPONSE = 'mock-token-response';
 const QUOTA_ERROR = 'Error code quota_exceeded: [Security Token Service] throttled';
@@ -200,6 +204,21 @@ describe('GCS service account activation', () => {
     ['ci-artifacts.kibana.dev', 'kibana-storybooks-from-pr', PUBLISHED_PR_EMAIL],
     ['ci-typescript-archives', 'kibana-pull-request', TYPESCRIPT_PR_EMAIL],
     ['ci-typescript-archives', 'kibana-on-merge', TYPESCRIPT_EMAIL],
+    [
+      'kibana-ci-es-snapshots-daily',
+      'kibana-elasticsearch-snapshot-build',
+      ES_SNAPSHOT_BUILD_EMAIL,
+    ],
+    [
+      'kibana-ci-es-snapshots-daily',
+      'kibana-elasticsearch-snapshot-promote',
+      ES_SNAPSHOT_PROMOTE_EMAIL,
+    ],
+    [
+      'kibana-ci-es-snapshots-permanent',
+      'kibana-elasticsearch-snapshot-promote',
+      ES_SNAPSHOT_PROMOTE_EMAIL,
+    ],
   ])('selects scoped access to %s for %s', (bucket, pipelineSlug, expectedEmail) => {
     const result = sandbox.run([bucket], { BUILDKITE_PIPELINE_SLUG: pipelineSlug });
 
