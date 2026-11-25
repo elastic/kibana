@@ -41,6 +41,7 @@ import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
+  removeDottedResponseActionsKeys,
   validateExportProviders,
   validateNoDottedResponseActionsKeys,
 } from './handlers/validate_export_providers';
@@ -142,6 +143,13 @@ const shouldUpdateMetaValues = (
   );
 };
 
+const isExportProvidersEnabled = (
+  productFeatures: ProductFeaturesService,
+  experimentalFeatures: ExperimentalFeatures
+): boolean =>
+  productFeatures.isEnabled(ProductFeatureSecurityKey.endpointResponseActions) &&
+  experimentalFeatures.responseActionsEndpointFileExport;
+
 /**
  * Callback to handle creation of PackagePolicies in Fleet
  */
@@ -164,21 +172,31 @@ export const getPackagePolicyCreateCallback = (
     request
   ): Promise<NewPackagePolicy> => {
     // Checked first, even without a request: the early return below keeps the incoming policy as it
-    // is, overrides and dotted keys bypass every other check, and the plaintext key must never
-    // reach the policy.
+    // is, overrides bypass every other check, and the plaintext key must never reach the policy.
     if (isEndpointPackagePolicy(newPackagePolicy)) {
       rejectResponseActionsInOverrides(newPackagePolicy);
-
-      const incomingPolicyValue = newPackagePolicy.inputs?.[0]?.config?.policy?.value;
-      if (incomingPolicyValue) {
-        validateNoDottedResponseActionsKeys(incomingPolicyValue as PolicyConfig);
-      }
-      rejectExportProviderCredentialsOnCreate(incomingPolicyValue);
+      rejectExportProviderCredentialsOnCreate(newPackagePolicy.inputs?.[0]?.config?.policy?.value);
     }
 
     // callback is called outside request context
     if (!context || !request) {
       logger.debug('PackagePolicyCreateCallback called outside request context. Skipping...');
+
+      const endpointPolicyData = newPackagePolicy as NewPolicyData;
+      const incomingPolicyValue = endpointPolicyData.inputs?.[0]?.config?.policy?.value;
+
+      // The incoming policy is kept here (with a request it's replaced by the defaults below),
+      // so it gets the export provider gating of an update
+      if (isEndpointPackagePolicy(newPackagePolicy) && incomingPolicyValue) {
+        if (isExportProvidersEnabled(productFeatures, experimentalFeatures)) {
+          validateNoDottedResponseActionsKeys(incomingPolicyValue);
+        } else {
+          endpointPolicyData.inputs[0].config.policy.value = removeExportProviders(
+            removeDottedResponseActionsKeys(incomingPolicyValue)
+          );
+        }
+      }
+
       return newPackagePolicy;
     }
 
@@ -381,12 +399,13 @@ export const getPackagePolicyUpdateCallback = (
 
       // Stripped before license validation for the same reason as custom YARA signatures above.
       if (
-        (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointResponseActions) ||
-          !experimentalFeatures.responseActionsEndpointFileExport) &&
+        !isExportProvidersEnabled(productFeatures, experimentalFeatures) &&
         endpointIntegrationData.inputs?.[0]?.config?.policy?.value
       ) {
         endpointIntegrationData.inputs[0].config.policy.value = removeExportProviders(
-          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+          removeDottedResponseActionsKeys(
+            endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+          )
         );
       }
 
@@ -409,7 +428,6 @@ export const getPackagePolicyUpdateCallback = (
         const packagePolicyId = endpointIntegrationData.id as string;
         const exportProvidersPolicyValue = policyConfig.value as PolicyConfig;
 
-        // Runs whatever the feature flag: `removeExportProviders()` doesn't remove dotted keys
         validateNoDottedResponseActionsKeys(exportProvidersPolicyValue);
 
         // Reject a plaintext key or a malformed reference before deciding which references to keep

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import {
+  removeDottedResponseActionsKeys,
   validateExportProviders,
   validateNoDottedResponseActionsKeys,
 } from './validate_export_providers';
@@ -394,5 +396,36 @@ describe('validateNoDottedResponseActionsKeys()', () => {
     expect(error).toBeInstanceOf(EndpointIntegrationFleetError);
     expect(error.statusCode).toBe(400);
     expect(error.apiPassThrough).toBe(true);
+  });
+});
+
+describe('removeDottedResponseActionsKeys()', () => {
+  // `set()` with an array path writes a literal (dotted) key instead of expanding it
+  it.each([
+    ['the root key windows.response_actions', ['windows.response_actions']],
+    [
+      'the root key linux.response_actions.export_providers.0.service_url',
+      ['linux.response_actions.export_providers.0.service_url'],
+    ],
+    ['a response_actions.* key in mac', ['mac', 'response_actions.export_providers']],
+    [
+      'a dotted key inside response_actions',
+      ['windows', 'response_actions', 'export_providers.0.service_url'],
+    ],
+  ])('should remove %s and keep the rest of the policy', (_, path) => {
+    const policy = set(buildPolicy([buildProvider()]), path, 'https://example.com');
+
+    expect(removeDottedResponseActionsKeys(policy)).toEqual(buildPolicy([buildProvider()]));
+  });
+
+  it('should keep unrelated dotted keys', () => {
+    const expected = set(
+      set(policyFactory(), ['windows.malware'], {}),
+      ['linux', 'malware.mode'],
+      'off'
+    );
+    const policy = set(cloneDeep(expected), ['windows.response_actions'], {});
+
+    expect(removeDottedResponseActionsKeys(policy)).toEqual(expected);
   });
 });
