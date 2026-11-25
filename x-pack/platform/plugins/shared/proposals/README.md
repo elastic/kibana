@@ -233,8 +233,9 @@ free would create a duplicate.
 ### Caller-supplied ids
 
 `create()` takes an optional `id`: any id the routes can reach (1 to 256 characters,
-and not `.` or `..`, which a browser resolves away as path segments). The
-`proposals.createProposal` step's `proposalId` takes only a UUID. Without one it mints a
+not blank, and not `.` or `..`, which a browser resolves away as path segments). The
+`proposals.createProposal` step's `proposalId` takes only a UUID, so the start contract's
+`createProposal` refuses any other id for a gated proposal up front. Without one it mints a
 random id, exactly as before. An id is unique across spaces, not within one, so a caller
 that derives it should derive it from the space too. With one, the proposal is created under that id with
 `op_type: 'create'`, so two callers that derive the same id from the same thing meet

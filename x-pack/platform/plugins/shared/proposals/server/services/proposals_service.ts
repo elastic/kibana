@@ -315,12 +315,13 @@ export class ProposalsService {
     params: CreateProposalParams,
     { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
   ): Promise<ProposalWithMetadata> {
+    // A blank id could be stored, but `load` refuses it, so nothing could read the proposal.
     if (
       params.id !== undefined &&
-      (params.id.length === 0 || params.id.length > MAX_PROPOSAL_ID_LENGTH)
+      (blankToUndefined(params.id) === undefined || params.id.length > MAX_PROPOSAL_ID_LENGTH)
     ) {
       throw new ProposalInvalidIdError(
-        `A proposal id must be 1 to ${MAX_PROPOSAL_ID_LENGTH} characters long`
+        `A proposal id must be 1 to ${MAX_PROPOSAL_ID_LENGTH} characters long and not blank`
       );
     }
     // A browser resolves these as path segments even when encoded, so the
@@ -892,7 +893,10 @@ export class ProposalsService {
         const recorded: StoredProposalRecord = { ...proposal, resolveExecutionId };
         const { id: _id, ...document } = recorded;
         conflicted = version;
-        await this.writeDocument(id, document, version);
+        // Refreshed now rather than at the next refresh: a run write that loses to this one
+        // waits for it to be searchable (see `loadNewerThan`), and a refresh interval can
+        // outlast that wait.
+        await this.writeDocument(id, document, version, { refresh: true });
         return recorded;
       } catch (error) {
         if (!(error instanceof ProposalWriteConflictError)) {
@@ -2007,7 +2011,8 @@ export class ProposalsService {
   private async writeDocument(
     id: string,
     document: ProposalDocument,
-    { seqNo, primaryTerm }: WriteVersion
+    { seqNo, primaryTerm }: WriteVersion,
+    { refresh }: { refresh?: true } = {}
   ): Promise<WriteVersion> {
     try {
       const { _seq_no: writtenSeqNo, _primary_term: writtenPrimaryTerm } =
@@ -2017,6 +2022,7 @@ export class ProposalsService {
           ...(seqNo !== undefined && primaryTerm !== undefined
             ? { if_seq_no: seqNo, if_primary_term: primaryTerm }
             : {}),
+          ...(refresh && { refresh }),
         });
       return { seqNo: writtenSeqNo, primaryTerm: writtenPrimaryTerm };
     } catch (error) {

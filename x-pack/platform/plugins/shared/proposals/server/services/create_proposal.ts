@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { CREATE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
@@ -22,7 +23,7 @@ import type {
 } from '@kbn/proposals-common';
 import type { ProposalPrivilegesChecker } from './check_proposal_privileges';
 import type { ProposalsService } from './proposals_service';
-import { ProposalInvalidActionInputError } from './errors';
+import { ProposalInvalidActionInputError, ProposalInvalidIdError } from './errors';
 
 /** `triggeredBy` of every gate run this plugin starts on a caller's behalf. */
 export const PROPOSALS_TRIGGER_SOURCE = 'proposals';
@@ -62,8 +63,8 @@ export interface NewProposal {
   /**
    * The id to create the proposal under, for a caller that derives it from what it proposes. An
    * id that already exists is refused with `ProposalAlreadyExistsError` on the gateless path, and
-   * fails the gate's create step on the gated one. Unique across spaces, not within one, so
-   * derive it from the space too.
+   * fails the gate's create step on the gated one, which also requires a UUID. Unique across
+   * spaces, not within one, so derive it from the space too.
    */
   id?: string;
 }
@@ -198,6 +199,11 @@ export const createProposalCreator = ({
       return { proposal: created };
     }
 
+    // The gate's create step only takes a UUID, and a run it fails would only show here as a
+    // proposal that never appears.
+    if (id !== undefined && !z.uuid().safeParse(id).success) {
+      throw new ProposalInvalidIdError(`A gated proposal's id must be a UUID, got [${id}]`);
+    }
     await assertAvailable(request);
     if (actionWorkflowId !== undefined) {
       await getProposalsService().assertActionProposable(

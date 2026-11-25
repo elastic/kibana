@@ -1043,6 +1043,7 @@ describe('ProposalsService', () => {
 
     it.each([
       ['an empty', ''],
+      ['a blank, which no read could find,', '   '],
       ['a longer than routable', 'x'.repeat(257)],
       ['a "." path segment as an', '.'],
       ['a ".." path segment as an', '..'],
@@ -4659,6 +4660,38 @@ describe('ProposalsService — gateless proposals', () => {
       });
       expect(released.decision).toBeUndefined();
       expect(current()).toMatchObject({ resolveExecutionId: RESOLVE_EXECUTION_ID });
+      // Searchable at once, so a run write it beat finds it without waiting on a refresh.
+      const [, [recordWrite]] = storage.index.mock.calls;
+      expect(recordWrite.document).toMatchObject({ resolveExecutionId: RESOLVE_EXECUTION_ID });
+      expect(recordWrite.refresh).toBe(true);
+      expect(markWrite.refresh).toBeUndefined();
+    });
+
+    it('starts one resolve run when two approvals loaded the same version', async () => {
+      const { storage, write } = createLiveStorage(withAction());
+      // Both approvals load before either writes, and only a write at the stored version lands.
+      let storedSeqNo = 7;
+      storage.index.mockImplementation(
+        async ({ document, if_seq_no }: { document: ProposalDocument; if_seq_no?: number }) => {
+          await new Promise((resolve) => setImmediate(resolve));
+          if (if_seq_no !== undefined && if_seq_no !== storedSeqNo) {
+            throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+          }
+          storedSeqNo += 1;
+          return write({ document });
+        }
+      );
+      const { service, workflowsApi } = createService(storage);
+
+      const results = await Promise.allSettled([
+        service.releaseGate('proposal-1', releaseParams()),
+        service.releaseGate('proposal-1', releaseParams()),
+      ]);
+
+      expect(results.map(({ status }) => status).sort()).toEqual(['fulfilled', 'rejected']);
+      const refused = results.find(({ status }) => status === 'rejected') as PromiseRejectedResult;
+      expect(refused.reason).toBeInstanceOf(ProposalConflictError);
+      expect(workflowsApi.executeWorkflow).toHaveBeenCalledTimes(1);
     });
 
     it('refuses a superseded revision, starting nothing', async () => {

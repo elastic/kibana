@@ -195,6 +195,14 @@ describe('isInFlux', () => {
     expect(isInFlux({ id: 'fail-a', decision: 'approved', status: 'failed' })).toBe(false);
   });
 
+  it('is false for a failed gateless action, which is never retried', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(3_000_000);
+
+    expect(
+      isInFlux({ id: 'fail-gateless', decision: 'approved', status: 'failed', gate: 'none' })
+    ).toBe(false);
+  });
+
   it('is false once the new action (retry) has replaced the failed action', () => {
     expect(
       isInFlux({ id: 'fail-2', decision: 'approved', status: 'failed', supersededBy: 'retry' })
@@ -1305,7 +1313,7 @@ describe('useApproveProposal', () => {
     expect(isInFlux({ id: 'lag-1', decision: 'approved', status: 'succeeded' })).toBe(false);
   });
 
-  it('stops waiting for a gateless approval the server lifts, and leaves nothing unseen', async () => {
+  it('rejects a gateless approval the server lifts once the proposals are refetched, and leaves nothing unseen', async () => {
     const http = makeHttp();
     http.post.mockResolvedValue({
       id: 'g-1',
@@ -1324,12 +1332,16 @@ describe('useApproveProposal', () => {
       typeof useKibana
     >);
 
-    const { Wrapper } = createWrapper();
+    const { Wrapper, queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
 
-    await result.current.mutateAsync({ id: 'g-1', body: {} });
+    await expect(result.current.mutateAsync({ id: 'g-1', body: {} })).rejects.toThrow(
+      'The approval did not go through'
+    );
 
     expect(http.get).toHaveBeenCalledTimes(2);
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
     expect(inFlightDecisions.hasUnseen('g-1')).toBe(false);
   });
 
@@ -1432,6 +1444,50 @@ describe('useApproveProposal', () => {
       });
       expect(invalidateSpy).toHaveBeenCalledTimes(1);
 
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(10_000);
+      });
+
+      expect(http.get).toHaveBeenCalledTimes(2);
+      expect(invalidateSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('keeps polling a gated proposal whose mark shows before its decision', async () => {
+    jest.useFakeTimers();
+    try {
+      const http = makeHttp();
+      http.post.mockRejectedValue(makeHttpFetchError(409));
+      // The gate stamps its mark first; its post-gate step writes the decision afterwards.
+      http.get
+        .mockResolvedValueOnce({
+          id: 'p-1',
+          status: 'pending',
+          gate: 'workflow',
+          gateReleasedAt: '2026-01-01T00:00:00.000Z',
+        })
+        .mockResolvedValue({
+          id: 'p-1',
+          status: 'pending',
+          gate: 'workflow',
+          gateReleasedAt: '2026-01-01T00:00:00.000Z',
+          decision: 'approved',
+        });
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+
+      const { Wrapper, queryClient } = createWrapper();
+      const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+      await act(async () => {
+        await expect(result.current.mutateAsync({ id: 'p-1', body: {} })).rejects.toThrow(
+          'HTTP 409'
+        );
+      });
       await act(async () => {
         await jest.advanceTimersByTimeAsync(10_000);
       });
