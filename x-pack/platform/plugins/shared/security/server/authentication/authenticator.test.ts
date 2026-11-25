@@ -2529,8 +2529,9 @@ describe('Authenticator', () => {
       const newState = { authorization: 'Basic yyy' };
       const userProfile = { ...userProfileMock.createWithSecurity(), uid: 'new-profile-uid' };
 
-      // Starts one request per given session, all before any of them completes.
-      const authenticateWithSessions = async (...sessionValues: SessionValue[]) => {
+      // Starts one request per given session, all before any of them completes. `null` stands for
+      // a request that has no session yet.
+      const authenticateWithSessions = async (...sessionValues: Array<SessionValue | null>) => {
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
           AuthenticationResult.succeeded(mockAuthenticatedUser(), {
             userProfileGrant,
@@ -2538,7 +2539,11 @@ describe('Authenticator', () => {
           })
         );
         for (const sessionValue of sessionValues) {
-          mockOptions.session.get.mockResolvedValueOnce({ error: null, value: sessionValue });
+          mockOptions.session.get.mockResolvedValueOnce(
+            sessionValue
+              ? { error: null, value: sessionValue }
+              : { error: new SessionMissingError(), value: null }
+          );
         }
 
         return Promise.allSettled(
@@ -2575,6 +2580,30 @@ describe('Authenticator', () => {
           { ...mockSessVal, userProfileId: 'new-profile-uid', state: newState },
           { extend: true }
         );
+      });
+
+      it('records the activation duration once for requests with the same session', async () => {
+        mockOptions.userProfileService.activate.mockResolvedValue(userProfile);
+
+        await authenticateWithSessions(mockSessVal, mockSessVal, mockSessVal);
+
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
+        expect(securityTelemetry.recordUserProfileActivationDuration).toHaveBeenCalledTimes(1);
+        expect(securityTelemetry.recordUserProfileActivationDuration).toHaveBeenCalledWith(
+          expect.any(Number),
+          { providerType: 'basic', outcome: 'success' }
+        );
+      });
+
+      it('activates the user profile separately for requests that have no session yet', async () => {
+        mockOptions.userProfileService.activate.mockResolvedValue(userProfile);
+
+        await authenticateWithSessions(null, null);
+
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(2);
+        expect(securityTelemetry.recordUserProfileActivationDuration).toHaveBeenCalledTimes(2);
+        expect(mockOptions.session.create).toHaveBeenCalledTimes(2);
+        expect(mockOptions.session.update).not.toHaveBeenCalled();
       });
 
       it('activates the user profile separately for requests with different sessions', async () => {
