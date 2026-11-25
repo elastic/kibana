@@ -14,6 +14,15 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { findProductionDependencies, readPnpmLock } from '@kbn/yarn-lock-validator';
 import { loadPackageJson } from './helpers';
 
+// Production dependencies that ship native binaries but never load them, with the reason. The build removes the
+// binaries from the distributable (see CleanExtraFilesFromModules), so none ships.
+const ALLOWED_PROD_NATIVE_MODULES = new Map([
+  [
+    'oracledb',
+    'Ships prebuilt Thick-mode binaries; the Oracle connector uses Thin mode (pure JS), which loads none of them',
+  ],
+]);
+
 // Checks if a given path contains a native module or not recursively
 async function isNativeModule(modulePath: string, log: ToolingLog): Promise<boolean> {
   const stack: string[] = [modulePath];
@@ -75,7 +84,10 @@ async function checkDependencies(
           const packageJson = loadPackageJson(packageJsonPath);
           const dependencyKey = `${packageJson.name}@${packageJson.version}`;
 
-          if (productionDependencies.has(dependencyKey)) {
+          if (
+            productionDependencies.has(dependencyKey) &&
+            !ALLOWED_PROD_NATIVE_MODULES.has(packageJson.name)
+          ) {
             const isNative = await isNativeModule(entryPath, log);
             if (isNative) {
               prodNativeModulesFound.push({

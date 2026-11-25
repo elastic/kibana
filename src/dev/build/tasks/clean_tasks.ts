@@ -99,6 +99,9 @@ export const CleanExtraFilesFromModules: Task = {
           '**/.bin',
           '**/bin',
 
+          // prebuilt Thick-mode binaries; the Oracle connector uses Thin mode, which loads none of them
+          '**/oracledb/build',
+
           // linters
           '**/.eslintrc',
           '**/.eslintrc.js',
