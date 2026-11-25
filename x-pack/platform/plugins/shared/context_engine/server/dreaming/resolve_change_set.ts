@@ -9,6 +9,7 @@ import {
   DREAMING_TYPE_PATTERN,
   ENTITY_TYPE_PREFIX,
   FACT_TYPE_PREFIX,
+  MAX_DREAMING_CHANGE_SET_ITEMS,
   dreamingTypesOf,
   type AiIndexDreamingConfig,
 } from '../../common/dreaming';
@@ -156,8 +157,11 @@ export const resolveChangeSet = (
     return ki;
   };
 
-  for (const entity of changeSet.entities) {
+  for (const [index, entity] of changeSet.entities.entries()) {
     attempt(`entity ${entity.ref}`, () => {
+      if (index >= MAX_DREAMING_CHANGE_SET_ITEMS) {
+        reject(`over the limit of ${MAX_DREAMING_CHANGE_SET_ITEMS} entities a change set`);
+      }
       if (vocabulary.entityTypes.size === 0) {
         reject('this AI index does not build entities');
       }
@@ -212,8 +216,11 @@ export const resolveChangeSet = (
     });
   }
 
-  for (const fact of changeSet.facts) {
+  for (const [index, fact] of changeSet.facts.entries()) {
     attempt(`fact ${fact.ref}`, () => {
+      if (index >= MAX_DREAMING_CHANGE_SET_ITEMS) {
+        reject(`over the limit of ${MAX_DREAMING_CHANGE_SET_ITEMS} facts a change set`);
+      }
       if (vocabulary.factTypes.size === 0) {
         reject('this AI index does not build facts');
       }

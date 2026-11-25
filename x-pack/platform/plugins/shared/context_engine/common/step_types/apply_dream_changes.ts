@@ -15,6 +15,7 @@ import {
   MAX_ACCESS_PATTERN_LABEL_LENGTH,
   MAX_ACCESS_PATTERN_RETURNS_LENGTH,
   MAX_DREAMING_ACCESS_PATTERNS,
+  MAX_DREAMING_CHANGE_SET_INPUT_ITEMS,
   MAX_DREAMING_CHANGE_SET_ITEMS,
   MAX_DREAMING_STEP_MEMORIES,
   MAX_DREAMING_TYPE_LENGTH,
@@ -80,7 +81,7 @@ export const dreamChangeSetSchema = lazySchema(() =>
           source_memory_ids: sourceMemoryIdsSchema.optional(),
         })
       )
-      .max(MAX_DREAMING_CHANGE_SET_ITEMS)
+      .max(MAX_DREAMING_CHANGE_SET_INPUT_ITEMS)
       .default([]),
     facts: z
       .array(
@@ -94,7 +95,7 @@ export const dreamChangeSetSchema = lazySchema(() =>
           source_memory_ids: sourceMemoryIdsSchema.optional(),
         })
       )
-      .max(MAX_DREAMING_CHANGE_SET_ITEMS)
+      .max(MAX_DREAMING_CHANGE_SET_INPUT_ITEMS)
       .default([]),
   })
 );

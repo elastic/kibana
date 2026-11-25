@@ -270,7 +270,7 @@ steps:
 
                 Keep lists whole. When a memory lists options, steps, fields, values or names, record every one, in the order given, rather than a few examples ("such as", "including", "and others").
 
-                Record every piece of knowledge in the MEMORIES that a configured type covers, the small ones too, not only the main point of a memory: a later question can be about any of them. Write up to 200 facts and 200 entities for the whole batch. When there are more, keep the ones a later question is most likely to need.
+                Record every piece of knowledge in the MEMORIES that a configured type covers, the small ones too, not only the main point of a memory: a later question can be about any of them.
 
                 Return only changes. Update an existing item by repeating its id as ref with the new values; create one with a new key like "new:1"; delete one with delete: true.
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_DREAMING_CHANGE_SET_ITEMS } from '../../common/dreaming';
 import {
   dreamChangeSetSchema,
   type DreamChangeSet,
@@ -415,5 +416,36 @@ describe('resolveChangeSet', () => {
       { item: 'entity new:1', reason: 'this AI index does not build entities' },
     ]);
     expect(operations).toHaveLength(1);
+  });
+
+  it('applies the first 200 facts and entities of a change set and rejects the rest', () => {
+    const fact = (index: number) => ({
+      ref: `new:f${index}`,
+      type: 'preference',
+      title: `Bob likes drink ${index}`,
+      content: `Bob likes drink ${index}.`,
+      source_memory_ids: ['m-1'],
+    });
+    const entity = (index: number) => ({
+      ref: `new:e${index}`,
+      type: 'team',
+      title: `Team ${index}`,
+      source_memory_ids: ['m-1'],
+    });
+    const count = MAX_DREAMING_CHANGE_SET_ITEMS + 1;
+
+    const { operations, rejected } = resolveChangeSet(
+      changeSet({
+        entities: Array.from({ length: count }, (_, index) => entity(index + 1)),
+        facts: Array.from({ length: count }, (_, index) => fact(index + 1)),
+      }),
+      context()
+    );
+
+    expect(rejected).toEqual([
+      { item: `entity new:e${count}`, reason: 'over the limit of 200 entities a change set' },
+      { item: `fact new:f${count}`, reason: 'over the limit of 200 facts a change set' },
+    ]);
+    expect(operations).toHaveLength(MAX_DREAMING_CHANGE_SET_ITEMS * 2);
   });
 });
