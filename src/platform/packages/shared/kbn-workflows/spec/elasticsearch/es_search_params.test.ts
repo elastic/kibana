@@ -34,6 +34,13 @@ const ACCEPTED_BODIES: Record<string, Record<string, unknown>> = {
     script_fields: { kb: { script: "doc['bytes'].value / 1024.0" } },
   },
   'fields shortcut': { fields: ['host.name', 'status_code'] },
+  '_source string': { _source: 'host.*' },
+  '_source array': { _source: ['host.name', 'message'] },
+  '_source object': { _source: { includes: ['host.*', 'message'], excludes: ['host.ip'] } },
+  '_source object with include alias': { _source: { include: ['host.*'] } },
+  'docvalue_fields with format': {
+    docvalue_fields: ['host.name', { field: '@timestamp', format: 'epoch_millis' }],
+  },
   'runtime_mappings script, full form': {
     runtime_mappings: {
       kb: {
