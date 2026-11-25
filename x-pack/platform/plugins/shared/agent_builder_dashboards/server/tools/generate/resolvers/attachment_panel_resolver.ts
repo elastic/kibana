@@ -86,7 +86,7 @@ export const createAttachmentPanelResolver = ({
       const { panel, pointerData } = resolution;
       if (pointerData.read_only) {
         return fail(
-          `Panel pointer "${attachmentId}" is read only: the user cannot change dashboards, so its panel cannot be copied.`
+          `Panel pointer "${attachmentId}" was added when the user could not change dashboards, so its panel cannot be copied. If they have since been given access, ask them to add the panel to the chat again.`
         );
       }
       return { type: 'success', panelContent: { type: panel.type, config: panel.config } };
