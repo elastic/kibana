@@ -18,9 +18,9 @@ import type {
   ConversationPublicClient,
   ConversationTemplatesStart,
 } from '@kbn/agent-builder-server';
-import type { Conversation, ConversationSearchSort } from '@kbn/agent-builder-common';
+import type { ConversationSearchSort } from '@kbn/agent-builder-common';
+import pMap from 'p-map';
 import type { AssignmentsService } from '../../assignments/assignments_service';
-import { toStringArray } from '../../assignments/assignments_service';
 import type { EscalationLinkActor } from '../../../common/escalations/can_link_escalation';
 import { canLinkEscalation } from '../../../common/escalations/can_link_escalation';
 import type {
@@ -78,6 +78,9 @@ import {
 
 /** Agent Builder rejects `addEvents` calls with more events than this. */
 const MAX_EVENTS_PER_REQUEST = 10;
+
+/** Each assignment waits for a refresh, and a link can carry up to 100 investigations. */
+const MAX_CONCURRENT_ASSIGNMENTS = 10;
 
 const toEventData = ({
   id,
@@ -268,7 +271,9 @@ export class EscalationsService {
       },
     ]);
 
-    await this.assignToInvestigations(request, escalation.user?.id, [investigation]);
+    await this.assignToInvestigations(request, escalation.user?.id, [investigation.id], {
+      onlyIfUnassigned: false,
+    });
 
     return escalation;
   }
@@ -344,7 +349,8 @@ export class EscalationsService {
     await this.assignToInvestigations(
       request,
       actor.profileUid,
-      newlyLinked.filter(({ metadata }) => toStringArray(metadata?.assignees).length === 0)
+      newlyLinked.map(({ id }) => id),
+      { onlyIfUnassigned: true }
     );
 
     return conversation;
@@ -358,21 +364,17 @@ export class EscalationsService {
   private async assignToInvestigations(
     request: KibanaRequest,
     assignee: string | undefined,
-    investigations: Array<Pick<Conversation, 'id' | 'metadata'>>
+    investigationIds: string[],
+    { onlyIfUnassigned }: { onlyIfUnassigned: boolean }
   ): Promise<void> {
-    if (!isUserProfileId(assignee)) return;
-
-    const targets = investigations
-      .map(({ id, metadata }) => ({ id, assignees: toStringArray(metadata?.assignees) }))
-      .filter(({ assignees }) => !assignees.includes(assignee));
-    if (targets.length === 0) return;
+    if (!isUserProfileId(assignee) || investigationIds.length === 0) return;
 
     try {
       await this.investigationsPrivileges.assertCanManage(request);
     } catch (error) {
       if (error instanceof InvestigationsForbiddenError) {
         this.logger.debug(
-          `Not assigning the caller to investigations ${targets.map(({ id }) => id).join(', ')}: ${
+          `Not assigning the caller to investigations ${investigationIds.join(', ')}: ${
             error.message
           }`
         );
@@ -387,22 +389,30 @@ export class EscalationsService {
     }
 
     const assignmentsService = this.getAssignmentsService();
-    for (const { id, assignees } of targets) {
-      try {
-        await assignmentsService.assign({
-          request,
-          conversationId: id,
-          assignees: [...assignees, assignee],
-          expectedTemplate: INVESTIGATION_TEMPLATE_ID,
-        });
-      } catch (error) {
-        this.logger.warn(
-          `Failed to assign the caller to investigation ${id}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
-    }
+    await pMap(
+      investigationIds,
+      async (id) => {
+        try {
+          const result = await assignmentsService.addAssignee({
+            request,
+            conversationId: id,
+            assignee,
+            expectedTemplate: INVESTIGATION_TEMPLATE_ID,
+            onlyIfUnassigned,
+          });
+          if (result !== 'assigned') {
+            this.logger.debug(`Not assigning the caller to investigation ${id}: ${result}`);
+          }
+        } catch (error) {
+          this.logger.warn(
+            `Failed to assign the caller to investigation ${id}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      },
+      { concurrency: MAX_CONCURRENT_ASSIGNMENTS }
+    );
   }
 
   /**

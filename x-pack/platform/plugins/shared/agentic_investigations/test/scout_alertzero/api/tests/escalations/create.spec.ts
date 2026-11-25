@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
@@ -21,20 +22,60 @@ import {
 
 const ESCALATION_TEMPLATE_ID = 'escalation';
 
+/** Manages escalations but not investigations: base Read without the investigations sub-feature. */
+const ESCALATIONS_ONLY_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        agenticInvestigations: ['minimal_read', 'escalations_all'],
+        agentBuilder: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
 apiTest.describe(
   'POST /internal/investigations/escalations — create escalation',
   { tag: [...tags.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     let viewerCookieHeader: Record<string, string>;
+    let escalationsOnlyCookieHeader: Record<string, string>;
     let investigationId: string;
     let adminProfileUid: string;
+    let viewerProfileUid: string;
+    let viewerProbeId: string;
     // Tracks all conversations created during the suite so afterAll can clean them up.
     const createdIds: string[] = [];
+    // Conversations owned by the escalations-only user; only their owner can delete them.
+    const escalationsOnlyCreatedIds: string[] = [];
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
       ({ cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer'));
+      ({ cookieHeader: escalationsOnlyCookieHeader } = await samlAuth.asInteractiveUser(
+        ESCALATIONS_ONLY_ROLE
+      ));
+
+      // The viewer's profile uid comes from a probe conversation they own.
+      const viewerProbe = await apiClient.post(AB_CONVERSATIONS_PATH, {
+        headers: { ...PUBLIC_HEADERS, ...viewerCookieHeader },
+        body: {
+          title: '__create-spec-probe__',
+          template_id: 'investigation',
+          access_control: { access_mode: 'public' },
+          metadata: { status: 'open' },
+        },
+        responseType: 'json',
+      });
+      viewerProbeId = expectCreated(viewerProbe, 'viewer probe');
+      viewerProfileUid = viewerProbe.body.user?.id as string;
+      if (!viewerProfileUid) {
+        throw new Error('viewer profile uid not found in probe creation response');
+      }
 
       // Create a real investigation conversation through the Agent Builder API so the
       // .chat-conversations index is managed by Kibana (direct esClient writes are
@@ -65,6 +106,8 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ apiClient }) => {
       await deleteConversations(apiClient, [investigationId, ...createdIds], cookieHeader);
+      await deleteConversations(apiClient, [viewerProbeId], viewerCookieHeader);
+      await deleteConversations(apiClient, escalationsOnlyCreatedIds, escalationsOnlyCookieHeader);
     });
 
     apiTest('creates a public escalation and returns 200', async ({ apiClient }) => {
@@ -188,8 +231,38 @@ apiTest.describe(
       });
       createdIds.push(unassignedId);
 
+      // The escalation goes to the viewer, so only the creator (admin) may end up on the
+      // investigation.
       const response = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+        body: {
+          linked_investigation_id: unassignedId,
+          visibility: 'public',
+          assignees: [viewerProfileUid],
+        },
+        responseType: 'json',
+      });
+      createdIds.push(expectCreated(response, 'escalation'));
+      expect(response.body.metadata?.assignees).toStrictEqual([viewerProfileUid]);
+
+      const investigations = await apiClient.get(
+        `${INVESTIGATIONS_PATH}?id=${encodeURIComponent(unassignedId)}`,
+        { headers: { ...INTERNAL_HEADERS, ...cookieHeader }, responseType: 'json' }
+      );
+      expect(investigations).toHaveStatusCode(200);
+      const { assignees } = investigations.body.results[0].metadata;
+      expect(assignees).toStrictEqual([adminProfileUid]);
+      expect(assignees).not.toContain(viewerProfileUid);
+    });
+
+    apiTest('does not assign a creator who cannot manage investigations', async ({ apiClient }) => {
+      const unassignedId = await seedInvestigation(apiClient, cookieHeader, {
+        title: 'Scout investigation escalated without manage_investigations',
+      });
+      createdIds.push(unassignedId);
+
+      const response = await apiClient.post(CREATE_ESCALATION_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...escalationsOnlyCookieHeader },
         body: {
           linked_investigation_id: unassignedId,
           visibility: 'public',
@@ -197,14 +270,14 @@ apiTest.describe(
         },
         responseType: 'json',
       });
-      createdIds.push(expectCreated(response, 'escalation'));
+      escalationsOnlyCreatedIds.push(expectCreated(response, 'escalation'));
 
       const investigations = await apiClient.get(
         `${INVESTIGATIONS_PATH}?id=${encodeURIComponent(unassignedId)}`,
         { headers: { ...INTERNAL_HEADERS, ...cookieHeader }, responseType: 'json' }
       );
       expect(investigations).toHaveStatusCode(200);
-      expect(investigations.body.results[0].metadata.assignees).toStrictEqual([adminProfileUid]);
+      expect(investigations.body.results[0].metadata.assignees ?? []).toStrictEqual([]);
     });
 
     apiTest('returns 400 when assignees is empty', async ({ apiClient }) => {

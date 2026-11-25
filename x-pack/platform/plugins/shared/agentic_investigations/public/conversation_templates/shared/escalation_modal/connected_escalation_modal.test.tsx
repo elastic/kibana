@@ -367,14 +367,17 @@ describe('ConnectedEscalationModal', () => {
   });
 
   it('success toast for create links to the newly created escalation in Agent Builder', () => {
-    renderModal({ mode: 'create' });
+    const refetchConversation = jest.fn().mockResolvedValue(undefined);
+    renderModal({ mode: 'create', refetchConversation });
     fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
 
     const [, callbacks] = createMutate.mock.calls[0];
     const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
+    expect(refetchConversation).not.toHaveBeenCalled();
     // onSuccess receives the created Conversation; id and agent_id are used to deep-link.
     callbacks.onSuccess({ id: 'new-esc-1', agent_id: 'new-agent-1' });
 
+    expect(refetchConversation).toHaveBeenCalledTimes(1);
     expect(getChatHref).toHaveBeenCalledWith('new-esc-1', 'new-agent-1');
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -407,15 +410,18 @@ describe('ConnectedEscalationModal', () => {
       refetch: jest.fn(),
     } as unknown as ReturnType<typeof useListEscalations>);
 
-    renderModal({ mode: 'addToExisting' });
+    const refetchConversation = jest.fn().mockResolvedValue(undefined);
+    renderModal({ mode: 'addToExisting', refetchConversation });
     fireEvent.click(screen.getByTestId('escalationModalEscalation-esc-3'));
     fireEvent.click(screen.getByTestId('escalationModalattachToEscalation'));
 
     const [, callbacks] = addMutate.mock.calls[0];
     const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
+    expect(refetchConversation).not.toHaveBeenCalled();
     // onSuccess receives the updated Conversation; id and agent_id are used to deep-link.
     callbacks.onSuccess({ id: 'esc-3', agent_id: 'agent-3' });
 
+    expect(refetchConversation).toHaveBeenCalledTimes(1);
     expect(getChatHref).toHaveBeenCalledWith('esc-3', 'agent-3');
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({

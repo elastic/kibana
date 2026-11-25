@@ -7,6 +7,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -34,6 +35,7 @@ import type {
 } from '../../../common';
 import { retryOnTransientError } from '../../retry_on_transient_error';
 import { investigationQueryKeys } from '../../investigations/query_keys';
+import { statusSignal } from '../../conversation_templates/shared/connected_status/status_signal';
 import { escalationQueryKeys } from '../query_keys';
 
 /**
@@ -44,10 +46,16 @@ const invalidateEscalations = (queryClient: ReturnType<typeof useQueryClient>) =
   void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
 };
 
-/** Creating or linking an escalation can assign the caller to the investigation. */
+/**
+ * Creating or linking an escalation can assign the caller to the investigation, which queue cards
+ * read through the proposals queries. The status signal reaches queue pages whose QueryClient is
+ * not this one, e.g. when the modal runs in the flyout's isolated QueryClient.
+ */
 const invalidateEscalationsAndInvestigations = (queryClient: ReturnType<typeof useQueryClient>) => {
   invalidateEscalations(queryClient);
   void queryClient.invalidateQueries({ queryKey: investigationQueryKeys.all });
+  void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
+  statusSignal.bump();
 };
 
 /** Lists escalations, optionally filtered by status/page/perPage and with debounced search. */

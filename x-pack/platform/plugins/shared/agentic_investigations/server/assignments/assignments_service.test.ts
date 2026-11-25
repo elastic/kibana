@@ -11,6 +11,7 @@ import {
   ConversationAccessControlRole,
   createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
+import { MAX_ESCALATION_ASSIGNEES } from '../../common/escalations/constants';
 import { AssignmentsService, WrongTemplateError } from './assignments_service';
 
 const MOCK_CONVERSATION_PUBLIC = {
@@ -365,5 +366,121 @@ describe('AssignmentsService.assign', () => {
     });
 
     expect(result).toBe(updatedConv);
+  });
+});
+
+describe('AssignmentsService.addAssignee', () => {
+  const params = {
+    request,
+    conversationId: 'conv-1',
+    assignee: 'user-new',
+    expectedTemplate: 'escalation',
+  };
+
+  it('appends to the assignees read right before the write', async () => {
+    const client = makeClient({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a']))
+        .mockResolvedValueOnce(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a', 'user-b'])),
+    });
+    const service = makeService(client);
+
+    await service.addAssignee(params);
+    await expect(service.addAssignee({ ...params, assignee: 'user-c' })).resolves.toBe('assigned');
+
+    expect(client.get).toHaveBeenCalledTimes(2);
+    expect(client.patchMetadata).toHaveBeenLastCalledWith(
+      'conv-1',
+      { assignees: ['user-a', 'user-b', 'user-c'] },
+      { access: 'converse', refresh: 'wait_for' }
+    );
+  });
+
+  it('private: adds only the new assignee to the ACL and removes no one', async () => {
+    const callOrder: string[] = [];
+    const client = makeClient({
+      get: jest.fn().mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a'])),
+      addAccessControlEntries: jest.fn().mockImplementation(() => {
+        callOrder.push('addAccessControlEntries');
+        return Promise.resolve({});
+      }),
+      patchMetadata: jest.fn().mockImplementation(() => {
+        callOrder.push('patchMetadata');
+        return Promise.resolve({ conversation: MOCK_CONVERSATION_PRIVATE });
+      }),
+    });
+    const service = makeService(client);
+
+    await expect(service.addAssignee(params)).resolves.toBe('assigned');
+
+    expect(client.addAccessControlEntries).toHaveBeenCalledWith(
+      'conv-1',
+      [{ type: 'user', id: 'user-new', role: ConversationAccessControlRole.Member }],
+      { access: 'converse' }
+    );
+    expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
+    expect(callOrder).toEqual(['addAccessControlEntries', 'patchMetadata']);
+  });
+
+  it('public: writes the list without ACL calls', async () => {
+    const client = makeClient({
+      get: jest.fn().mockResolvedValue(withAssignees(MOCK_CONVERSATION_PUBLIC, ['user-a'])),
+    });
+    const service = makeService(client);
+
+    await expect(service.addAssignee(params)).resolves.toBe('assigned');
+
+    expect(client.addAccessControlEntries).not.toHaveBeenCalled();
+    expect(client.patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { assignees: ['user-a', 'user-new'] },
+      { access: 'converse', refresh: 'wait_for' }
+    );
+  });
+
+  it.each([
+    ['already_assigned', ['user-a', 'user-new'], {}],
+    ['has_assignees', ['user-a'], { onlyIfUnassigned: true }],
+    ['limit_reached', Array.from({ length: MAX_ESCALATION_ASSIGNEES }, (_, i) => `user-${i}`), {}],
+  ])('returns %s without writing', async (expected, assignees, extra) => {
+    const client = makeClient({
+      get: jest.fn().mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, assignees)),
+    });
+    const service = makeService(client);
+
+    await expect(service.addAssignee({ ...params, ...extra })).resolves.toBe(expected);
+
+    expect(client.addAccessControlEntries).not.toHaveBeenCalled();
+    expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('assigns an unassigned conversation when onlyIfUnassigned is set', async () => {
+    const client = makeClient();
+    const service = makeService(client);
+
+    await expect(service.addAssignee({ ...params, onlyIfUnassigned: true })).resolves.toBe(
+      'assigned'
+    );
+
+    expect(client.patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { assignees: ['user-new'] },
+      { access: 'converse', refresh: 'wait_for' }
+    );
+  });
+
+  it('throws WrongTemplateError without writing', async () => {
+    const client = makeClient({
+      get: jest
+        .fn()
+        .mockResolvedValue({ ...MOCK_CONVERSATION_PUBLIC, template_id: 'investigation' }),
+    });
+    const service = makeService(client);
+
+    await expect(service.addAssignee(params)).rejects.toBeInstanceOf(WrongTemplateError);
+
+    expect(client.patchMetadata).not.toHaveBeenCalled();
   });
 });

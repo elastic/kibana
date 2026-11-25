@@ -63,7 +63,8 @@ const renderBlocks = ({ header }: ConversationTemplateDetailsFlyoutDescriptor) =
  */
 const renderModule = (
   options: Partial<InvestigationDetailsFlyoutOptions>,
-  initialConversation: Conversation = conversation()
+  initialConversation: Conversation = conversation(),
+  refetchConversation?: () => Promise<void>
 ) => {
   const { Provider, useDetailsFlyout } = createInvestigationDetailsFlyoutModule({
     ...baseOptions,
@@ -73,7 +74,11 @@ const renderModule = (
   const Flyout = () => {
     const [shown, setShownState] = React.useState(initialConversation);
     setShown = setShownState;
-    const { footer } = useDetailsFlyout({ conversation: shown, isOpenedFromChat: false });
+    const { footer } = useDetailsFlyout({
+      conversation: shown,
+      isOpenedFromChat: false,
+      refetchConversation,
+    });
     return (
       <>
         {footer?.primary && (
@@ -184,6 +189,18 @@ describe('useInvestigationDetailsFlyout', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close modal' }));
 
     expect(screen.queryByText('Escalation modal create')).not.toBeInTheDocument();
+  });
+
+  it("hands the flyout's refetchConversation to the escalation modal", () => {
+    const refetchConversation = jest.fn().mockResolvedValue(undefined);
+    const renderEscalationModal = jest.fn(() => <div>Escalation modal</div>);
+    renderModule({ renderEscalationModal }, conversation(), refetchConversation);
+
+    fireEvent.click(screen.getByRole('button', { name: OPEN_ESCALATION }));
+
+    expect(renderEscalationModal).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: 'create', refetchConversation })
+    );
   });
 
   it('keeps an open escalation modal on the investigation the flyout shows now', () => {

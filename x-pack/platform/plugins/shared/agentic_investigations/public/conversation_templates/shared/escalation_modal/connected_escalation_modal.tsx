@@ -54,7 +54,7 @@ const apiErrorText = (error: unknown): string | undefined => {
 };
 
 export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
-  ({ mode: initialMode, investigation, onClose }) => {
+  ({ mode: initialMode, investigation, onClose, refetchConversation }) => {
     const conversationId = investigation.conversationId;
     const { euiTheme } = useEuiTheme();
     const [mode, setMode] = useState(initialMode);
@@ -276,6 +276,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                     },
                     {
                       onSuccess: (escalation) => {
+                        void refetchConversation?.();
                         notifications?.toasts.addSuccess({
                           title: ESCALATION_SUCCESS.createTitle,
                           actionProps: {
@@ -312,6 +313,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                 { escalationId, linkedInvestigationId: conversationId },
                 {
                   onSuccess: (escalation) => {
+                    void refetchConversation?.();
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.addToTitle,
                       actionProps: {
