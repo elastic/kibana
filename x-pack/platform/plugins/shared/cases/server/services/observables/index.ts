@@ -288,17 +288,18 @@ export class ObservableService {
     });
   }
 
-  /** Updates an observable by id. Pass an id resolved with `getForCase`; the case is not checked. */
+  /**
+   * Updates an observable `getForCase` returned, which checked it belongs to the case. Its version
+   * makes a concurrent edit fail with a 409.
+   */
   public async update({
-    id,
+    observable: { id, version },
     attributes,
-    version,
   }: {
-    id: string;
+    observable: SavedObject<ObservablePersistedAttributes>;
     attributes: Partial<
       Pick<ObservablePersistedAttributes, 'value' | 'description' | 'updated_at' | 'updated_by'>
     >;
-    version?: string;
   }): Promise<void> {
     await this.logged(`update observable ${id}`, () =>
       this.context.unsecuredSavedObjectsClient.update<ObservablePersistedAttributes>(
@@ -311,17 +312,19 @@ export class ObservableService {
   }
 
   /**
-   * Deletes observables by id. Ids that are already gone are not an error. Pass ids resolved with
-   * `getForCase`; the case is not checked.
+   * Deletes observables `getForCase` returned, which checked they belong to the case. Ones that are
+   * already gone are not an error.
    */
-  public async bulkDelete(ids: string[]): Promise<void> {
-    if (ids.length === 0) {
+  public async bulkDelete(
+    observables: Array<SavedObject<ObservablePersistedAttributes>>
+  ): Promise<void> {
+    if (observables.length === 0) {
       return;
     }
 
-    await this.logged(`delete ${ids.length} observables`, async () => {
+    await this.logged(`delete ${observables.length} observables`, async () => {
       const { statuses } = await this.context.unsecuredSavedObjectsClient.bulkDelete(
-        ids.map((id) => ({ type: CASE_OBSERVABLE_SAVED_OBJECT, id })),
+        observables.map(({ id }) => ({ type: CASE_OBSERVABLE_SAVED_OBJECT, id })),
         { refresh: 'wait_for' }
       );
 

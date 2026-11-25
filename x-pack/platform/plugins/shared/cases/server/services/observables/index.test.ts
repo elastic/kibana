@@ -323,11 +323,10 @@ describe('ObservableService', () => {
   });
 
   describe('update', () => {
-    it('updates the object with the version and waits for the refresh', async () => {
+    it('updates the object with its version and waits for the refresh', async () => {
       await service.update({
-        id: 'observable-1',
+        observable: { ...savedObject('observable-1'), version: 'WzEsMV0=' },
         attributes: { value: '10.0.0.9', updated_at: '2026-11-07T09:30:00.000Z' },
-        version: 'WzEsMV0=',
       });
 
       expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -350,7 +349,10 @@ describe('ObservableService', () => {
       unsecuredSavedObjectsClient.update.mockRejectedValueOnce(conflict);
 
       await expect(
-        service.update({ id: 'observable-1', attributes: { value: 'x' }, version: 'v1' })
+        service.update({
+          observable: { ...savedObject('observable-1'), version: 'v1' },
+          attributes: { value: 'x' },
+        })
       ).rejects.toBe(conflict);
       expect(log.error).toHaveBeenCalledWith(
         'Failed to update observable observable-1: Error: conflict',
@@ -368,7 +370,7 @@ describe('ObservableService', () => {
         ],
       });
 
-      await service.bulkDelete(['observable-1', 'observable-2']);
+      await service.bulkDelete([savedObject('observable-1'), savedObject('observable-2')]);
 
       expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith(
         [
@@ -391,7 +393,7 @@ describe('ObservableService', () => {
         statuses: [{ ...errorResult('observable-1', 500, 'es down'), success: false }],
       });
 
-      await expect(service.bulkDelete(['observable-1'])).rejects.toThrow(
+      await expect(service.bulkDelete([savedObject('observable-1')])).rejects.toThrow(
         'Failed to delete 1 observables: observable-1: es down'
       );
     });
