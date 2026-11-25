@@ -73,7 +73,6 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     isUniversalAlertingAvailable,
     getSlackChannelBindingChecker,
     getInvestigatorServiceAccountService,
-    logger,
     context,
   }) => {
     const workflowsManagement = getWorkflowsManagement();
@@ -113,7 +112,6 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       automation: attributes,
       request,
       checker: getSlackChannelBindingChecker(),
-      logger,
     });
 
     const created = await soClient.create<NightshiftAutomationAttributes>(

@@ -7,7 +7,6 @@
 
 import { badRequest, serverUnavailable } from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/core/server';
 import { isSlackChannelId } from '../../../common';
 import type { SlackChannelBindingChecker } from '../../types';
 import { isElasticAppSlackChannelCompletion } from './slack_completion';
@@ -17,13 +16,11 @@ export const validateSlackChannelsBound = async ({
   automation,
   request,
   checker,
-  logger,
   storedDestinations = new Set<string>(),
 }: {
   automation: Pick<NightshiftAutomationAttributes, 'completions'>;
   request: KibanaRequest;
   checker: SlackChannelBindingChecker | undefined;
-  logger: Logger;
   storedDestinations?: ReadonlySet<string>;
 }): Promise<void> => {
   const channels = new Set<string>();
@@ -43,8 +40,7 @@ export const validateSlackChannelsBound = async ({
     throw badRequest('The Elastic Slack App is not available on this deployment.');
   }
   for (const channel of channels) {
-    const isBound = await checker(request, channel).catch((error: Error) => {
-      logger.warn(`Could not check the binding of Slack channel ${channel}: ${error.message}`);
+    const isBound = await checker(request, channel).catch(() => {
       throw serverUnavailable(`Could not check that Slack channel ${channel} is connected.`);
     });
     if (!isBound) {

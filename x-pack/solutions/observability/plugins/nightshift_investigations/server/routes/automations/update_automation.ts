@@ -82,7 +82,6 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     isUniversalAlertingAvailable,
     getSlackChannelBindingChecker,
     getInvestigatorServiceAccountService,
-    logger,
     context,
   }) => {
     const workflowsManagement = getWorkflowsManagement();
@@ -134,7 +133,6 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
           automation: merged,
           request,
           checker: getSlackChannelBindingChecker(),
-          logger,
           storedDestinations: new Set(
             existing.attributes.completions
               .filter(isElasticAppSlackChannelCompletion)

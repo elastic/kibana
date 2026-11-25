@@ -1647,14 +1647,16 @@ describe('SlackAppService', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('relay_busy'));
     });
 
-    it('rethrows a Relay failure', async () => {
-      const { server } = createConnectedHarness();
+    it('rethrows a Relay failure and logs it once', async () => {
+      const { server, logger } = createConnectedHarness();
       const relayError = new Error('relay down');
       isChannelBound.mockRejectedValue(relayError);
 
       await expect(new SlackAppService(server).isChannelBound(request, 'C1')).rejects.toBe(
         relayError
       );
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('relay down'));
     });
   });
 
