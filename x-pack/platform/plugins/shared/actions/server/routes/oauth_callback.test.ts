@@ -71,6 +71,10 @@ const mockEncryptedSavedObjectsClient = {
   }),
 };
 
+const mockSavedObjectsClient = {
+  get: jest.fn(),
+};
+
 const mockSpacesService = {
   getSpaceId: jest.fn().mockReturnValue('default'),
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
@@ -111,7 +115,7 @@ const createMockContext = (
       },
     },
     savedObjects: {
-      getClient: jest.fn().mockReturnValue({}),
+      getClient: jest.fn().mockReturnValue(mockSavedObjectsClient),
     },
   }),
   actions: Promise.resolve({
@@ -139,6 +143,9 @@ describe('oauthCallbackRoute', () => {
       getDecryptedAsInternalUser: jest.fn(),
     });
     mockActionsClient.evictClientPool.mockReset();
+    mockSavedObjectsClient.get.mockResolvedValue({
+      attributes: { actionTypeId: '.google_drive', config: {} },
+    });
 
     MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as never);
     MockUserConnectorTokenClient.mockImplementation(
@@ -694,6 +701,7 @@ describe('oauthCallbackRoute', () => {
       }),
     };
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue(connectorEncryptedClient);
+    mockSavedObjectsClient.get.mockResolvedValue({ attributes: { config: {} } });
 
     mockRequestOAuthAuthorizationCodeToken.mockRejectedValue(new Error('Token exchange failed'));
 
@@ -784,19 +792,11 @@ describe('oauthCallbackRoute', () => {
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
     });
-    mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
-        attributes: {
-          actionTypeId: '.dual',
-          config: { outboundEnabled: false },
-          secrets: {
-            clientId: 'client-id',
-            clientSecret: 'client-secret',
-            tokenUrl: 'https://provider.example.com/token',
-          },
-        },
-      }),
+    mockSavedObjectsClient.get.mockResolvedValue({
+      attributes: { actionTypeId: '.dual', config: { outboundEnabled: false } },
     });
+    const getDecryptedAsInternalUser = jest.fn();
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue({ getDecryptedAsInternalUser });
 
     const [, handler] = registerRoute();
     const req = httpServerMock.createKibanaRequest({
@@ -806,6 +806,7 @@ describe('oauthCallbackRoute', () => {
 
     await handler(createMockContext(), req, res);
 
+    expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
     expect(mockRequestOAuthAuthorizationCodeToken).not.toHaveBeenCalled();
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).not.toHaveBeenCalled();
     expect(res.redirected).toHaveBeenCalledWith({

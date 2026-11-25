@@ -619,6 +619,26 @@ export const oauthCallbackRoute = (
             spaces && oauthState.spaceId
               ? spaces.spacesService.spaceIdToNamespace(oauthState.spaceId)
               : undefined;
+          // The outbound check reads the config without decrypting. Secrets are not read
+          // for a connector with outbound off.
+          const savedConnector = await core.savedObjects
+            .getClient({ includedHiddenTypes: ['action'] })
+            .get<{ actionTypeId: string; config?: Record<string, unknown> }>(
+              'action',
+              stateConnectorId,
+              { namespace }
+            );
+          connectorTypeId = savedConnector.attributes.actionTypeId;
+          // A connector with outbound off sends no stored credentials to the provider.
+          if (
+            isOutboundActionsDisabledInConfig({
+              actionTypeId: savedConnector.attributes.actionTypeId,
+              config: savedConnector.attributes.config,
+            })
+          ) {
+            throw Boom.badRequest(OUTBOUND_ACTIONS_DISABLED_MESSAGE);
+          }
+
           const rawAction = await connectorEncryptedClient.getDecryptedAsInternalUser<{
             actionTypeId: string;
             name: string;
@@ -629,16 +649,6 @@ export const oauthCallbackRoute = (
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType || config?.authType;
-          connectorTypeId = rawAction.attributes.actionTypeId;
-          // A connector with outbound off sends no stored credentials to the provider.
-          if (
-            isOutboundActionsDisabledInConfig({
-              actionTypeId: rawAction.attributes.actionTypeId,
-              config: config as Record<string, unknown> | undefined,
-            })
-          ) {
-            throw Boom.badRequest(OUTBOUND_ACTIONS_DISABLED_MESSAGE);
-          }
           connectorAuthType = getConnectorAuthType({ config, secrets });
           const provider = secrets.provider;
 
