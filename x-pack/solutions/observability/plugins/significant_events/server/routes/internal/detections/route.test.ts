@@ -359,11 +359,11 @@ describe('detection marker routes', () => {
         }),
         maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
         params: {
-          body: {
+          body: markScannedRoute.params.shape.body.parse({
             rule_uuids: ['rule-1'],
             scanned_by: 'exec-1',
             observed_change_point_type: observed,
-          },
+          }),
         },
       } as unknown as Parameters<typeof markScannedRoute.handler>[0]);
 
