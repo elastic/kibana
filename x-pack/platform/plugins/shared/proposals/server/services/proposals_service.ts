@@ -1312,12 +1312,24 @@ export class ProposalsService {
     return new Map(buckets.map(({ key, doc_count: count }) => [String(key), count]));
   }
 
-  /** Deletes every proposal of a conversation that no longer exists, whatever its status. */
-  async deleteByConversation(conversationId: string, spaceId: string): Promise<void> {
+  /**
+   * Deletes the undecided proposals (pending, expired, superseded) of a conversation that no
+   * longer exists. The gate executions still parked on a pending proposal are cancelled first,
+   * so they do not idle until their deadline.
+   */
+  async deleteByConversation(
+    conversationId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    await this.cancelParkedGates(conversationId, spaceId, request);
     const { failures } = await this.deps.esClient.deleteByQuery({
       index: PROPOSALS_INDEX_NAME,
       query: {
-        bool: { filter: [{ term: { spaceId } }, { term: { conversationId } }] },
+        bool: {
+          filter: [{ term: { spaceId } }, { term: { conversationId } }],
+          must_not: [{ exists: { field: 'decision' } }],
+        },
       },
       conflicts: 'proceed',
       ignore_unavailable: true,
@@ -1328,6 +1340,56 @@ export class ProposalsService {
         `Could not delete ${failures.length} proposal(s) of deleted conversation [${conversationId}]`
       );
     }
+  }
+
+  /** Best-effort: cancels the gate execution of each pending proposal of the conversation. */
+  private async cancelParkedGates(
+    conversationId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    const executionIds = new Set<string>();
+    try {
+      // The helper streams every matching proposal, so no limit applies to how many are read.
+      const proposals = this.deps.esClient.helpers.scrollDocuments<
+        Pick<ProposalDocument, 'workflowExecutionId'>
+      >({
+        index: PROPOSALS_INDEX_NAME,
+        ignore_unavailable: true,
+        _source: ['workflowExecutionId'],
+        query: {
+          bool: {
+            filter: [
+              { term: { spaceId } },
+              { term: { conversationId } },
+              { term: { status: 'pending' } },
+              { exists: { field: 'workflowExecutionId' } },
+            ],
+          },
+        },
+      });
+      for await (const { workflowExecutionId } of proposals) {
+        const executionId = blankToUndefined(workflowExecutionId);
+        if (executionId !== undefined) {
+          executionIds.add(executionId);
+        }
+      }
+    } catch (error) {
+      this.deps.logger.warn(
+        `Could not look up the gate executions of deleted conversation [${conversationId}]: ${error}`
+      );
+      return;
+    }
+
+    await asyncMapWithLimit([...executionIds], 10, async (executionId) => {
+      try {
+        await this.deps.getWorkflowsApi().cancelWorkflowExecution(executionId, spaceId, request);
+      } catch (error) {
+        this.deps.logger.warn(
+          `Could not cancel gate execution [${executionId}] of deleted conversation [${conversationId}]: ${error}`
+        );
+      }
+    });
   }
 
   /** Resolves any proposal in a revision chain to its live revision using the root ID. */

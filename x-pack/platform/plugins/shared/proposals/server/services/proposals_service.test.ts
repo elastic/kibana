@@ -98,6 +98,7 @@ const createStorage = (document?: ProposalDocument) => {
 };
 
 const createWorkflowsApi = () => ({
+  cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
   getWorkflow: jest.fn().mockResolvedValue({
     definition: {
       consts: {
@@ -2853,10 +2854,22 @@ describe('ProposalsService', () => {
   });
 
   describe('deleteByConversation', () => {
-    it('deletes every proposal of the conversation in the space, whatever its status', async () => {
-      const { service, esClient } = createService(createStorage());
+    const mockScroll = (
+      esClient: ReturnType<typeof createService>['esClient'],
+      ...ids: Array<string | undefined>
+    ) => {
+      esClient.helpers.scrollDocuments.mockImplementation(async function* () {
+        for (const workflowExecutionId of ids) {
+          yield { workflowExecutionId };
+        }
+      } as never);
+    };
 
-      await service.deleteByConversation('conversation-1', SPACE_ID);
+    it('deletes only the undecided proposals of the conversation in the space', async () => {
+      const { service, esClient } = createService(createStorage());
+      mockScroll(esClient);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
 
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2867,18 +2880,84 @@ describe('ProposalsService', () => {
                 { term: { spaceId: SPACE_ID } },
                 { term: { conversationId: 'conversation-1' } },
               ],
+              must_not: [{ exists: { field: 'decision' } }],
             },
           },
-          conflicts: 'proceed',
         })
       );
+    });
+
+    it('looks up the gate executions of the pending proposals of the conversation only', async () => {
+      const { service, esClient } = createService(createStorage());
+      mockScroll(esClient);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(esClient.helpers.scrollDocuments).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: PROPOSALS_INDEX_NAME,
+          query: {
+            bool: {
+              filter: [
+                { term: { spaceId: SPACE_ID } },
+                { term: { conversationId: 'conversation-1' } },
+                { term: { status: 'pending' } },
+                { exists: { field: 'workflowExecutionId' } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('cancels each distinct gate execution of the pending proposals before deleting', async () => {
+      const { service, esClient, workflowsApi } = createService(createStorage());
+      mockScroll(esClient, 'exec-1', 'exec-2', 'exec-1', undefined);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'exec-1',
+        SPACE_ID,
+        request
+      );
+      expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'exec-2',
+        SPACE_ID,
+        request
+      );
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('still deletes the proposals when a gate execution cannot be cancelled', async () => {
+      const { service, esClient, workflowsApi, logger } = createService(createStorage());
+      mockScroll(esClient, 'exec-1');
+      workflowsApi.cancelWorkflowExecution.mockRejectedValue(new Error('boom'));
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('exec-1'));
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('still deletes the proposals when the gate executions cannot be looked up', async () => {
+      const { service, esClient, workflowsApi } = createService(createStorage());
+      esClient.helpers.scrollDocuments.mockImplementation(async function* () {
+        throw new Error('boom');
+      } as never);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(workflowsApi.cancelWorkflowExecution).not.toHaveBeenCalled();
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
     });
 
     it('warns when some proposals could not be deleted', async () => {
       const { service, esClient, logger } = createService(createStorage());
       esClient.deleteByQuery.mockResolvedValue({ failures: [{}, {}] } as never);
 
-      await service.deleteByConversation('conversation-1', SPACE_ID);
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2 proposal(s)'));
     });

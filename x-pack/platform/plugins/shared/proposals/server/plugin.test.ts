@@ -39,13 +39,13 @@ jest.mock('./routes/register_routes', () => ({
   registerRoutes: jest.fn(),
 }));
 
-const createContext = () =>
+const createContext = (logger = loggerMock.create()) =>
   ({
-    logger: { get: () => loggerMock.create() },
+    logger: { get: () => logger },
   } as unknown as ConstructorParameters<typeof ProposalsPlugin>[0]);
 
-const setupPlugin = () => {
-  const plugin = new ProposalsPlugin(createContext());
+const setupPlugin = (logger = loggerMock.create()) => {
+  const plugin = new ProposalsPlugin(createContext(logger));
   const coreSetup = coreMock.createSetup();
   const features = { registerKibanaFeature: jest.fn() };
   const workflowsExtensions = {
@@ -211,41 +211,35 @@ describe('ProposalsPlugin', () => {
       expect(initializeManagedWorkflows).toHaveBeenCalledTimes(1);
     });
 
-    it('deletes the same-space proposals of a deleted conversation through the registered listener', async () => {
+    it('deletes the proposals of a deleted conversation through the registered listener, passing the request', async () => {
       const { plugin, agentBuilder } = setupPlugin();
-      const { coreStart } = startPlugin(plugin);
+      const { contract } = startPlugin(plugin);
+      const deleteByConversation = jest
+        .spyOn(contract.getProposalsService(), 'deleteByConversation')
+        .mockResolvedValue(undefined);
       const [[listener]] = agentBuilder.conversations.onConversationDeleted.mock.calls;
-      const { deleteByQuery } = coreStart.elasticsearch.client.asInternalUser;
-      (deleteByQuery as jest.Mock).mockResolvedValue({ deleted: 2 });
+      const request = { id: 'request' };
 
-      await listener({}, { conversationId: 'conversation-1', spaceId: 'space-a' });
+      await listener(request, { conversationId: 'conversation-1', spaceId: 'space-a' });
 
-      expect(deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(deleteByQuery).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: [
-                { term: { spaceId: 'space-a' } },
-                { term: { conversationId: 'conversation-1' } },
-              ],
-            },
-          },
-        })
-      );
+      expect(deleteByConversation).toHaveBeenCalledTimes(1);
+      expect(deleteByConversation).toHaveBeenCalledWith('conversation-1', 'space-a', request);
     });
 
     it('swallows a proposal cleanup failure so the conversation delete is unaffected', async () => {
-      const { plugin, agentBuilder } = setupPlugin();
-      const { coreStart } = startPlugin(plugin);
+      const logger = loggerMock.create();
+      const { plugin, agentBuilder } = setupPlugin(logger);
+      const { contract } = startPlugin(plugin);
+      jest
+        .spyOn(contract.getProposalsService(), 'deleteByConversation')
+        .mockRejectedValue(new Error('boom'));
       const [[listener]] = agentBuilder.conversations.onConversationDeleted.mock.calls;
-      (coreStart.elasticsearch.client.asInternalUser.deleteByQuery as jest.Mock).mockRejectedValue(
-        new Error('boom')
-      );
 
       await expect(
         listener({}, { conversationId: 'conversation-2', spaceId: 'default' })
       ).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('conversation-2'));
     });
 
     it('exposes the proposals service for in-process callers', () => {

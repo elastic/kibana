@@ -75,7 +75,7 @@ export interface ScopedConversationEventEmitter {
   emitMetadataPatched(payload: ConversationMetadataPatchedPayload): void;
   emitAttachmentEvents(payload: ConversationAttachmentEventsPayload): void;
   emitConversationUpdated(payload: ConversationUpdatedTriggerEvent): void;
-  emitConversationDeleted?(payload: ConversationDeletedPayload): Promise<void>;
+  emitConversationDeleted(payload: ConversationDeletedPayload): Promise<void>;
 }
 
 export const createScopedConversationEventEmitter = (

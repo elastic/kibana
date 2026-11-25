@@ -48,6 +48,8 @@ export const getSettleIncompleteProposalStepDefinition = ({
         const proposal = await service.get(latest.proposalId, spaceId, request);
 
         const status = input.status ?? (proposal.decision !== undefined ? 'failed' : 'expired');
+        // Kept so that a proposal deleted before the write still reports this status.
+        settling = { proposalId: input.proposalId, status };
 
         const updated = await service.update(
           {

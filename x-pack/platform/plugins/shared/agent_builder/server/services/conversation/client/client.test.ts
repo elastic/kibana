@@ -2183,6 +2183,90 @@ describe('ConversationClient', () => {
 
       await expect(client.delete('conversation-1')).rejects.toBe(serverError);
     });
+
+    describe('emitConversationDeleted via event emitter', () => {
+      const buildEventEmitter = () => ({
+        emitMetadataPatched: jest.fn(),
+        emitAttachmentEvents: jest.fn(),
+        emitConversationUpdated: jest.fn(),
+        emitConversationDeleted: jest.fn(),
+      });
+
+      const createClientWithEmitter = (eventEmitter: ReturnType<typeof buildEventEmitter>) =>
+        createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          executionClient: mockExecutionClient as unknown as AgentExecutionClient,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          eventEmitter,
+        });
+
+      beforeEach(() => {
+        mockGetDocumentResponse(createConversationDocument());
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+      });
+
+      it('emits { conversationId, spaceId } when the storage result is "deleted"', async () => {
+        const eventEmitter = buildEventEmitter();
+        mockEsClient.delete.mockResolvedValue({ result: 'deleted' });
+
+        await expect(createClientWithEmitter(eventEmitter).delete('conversation-1')).resolves.toBe(
+          true
+        );
+
+        expect(eventEmitter.emitConversationDeleted).toHaveBeenCalledTimes(1);
+        expect(eventEmitter.emitConversationDeleted).toHaveBeenCalledWith({
+          conversationId: 'conversation-1',
+          spaceId: testSpace,
+        });
+      });
+
+      it('does not emit when the storage result is not "deleted"', async () => {
+        const eventEmitter = buildEventEmitter();
+        mockEsClient.delete.mockResolvedValue({ result: 'not_found' });
+
+        await expect(createClientWithEmitter(eventEmitter).delete('conversation-1')).resolves.toBe(
+          false
+        );
+
+        expect(eventEmitter.emitConversationDeleted).not.toHaveBeenCalled();
+      });
+
+      it('does not emit when the delete call returns a 404', async () => {
+        const eventEmitter = buildEventEmitter();
+        mockEsClient.delete.mockRejectedValue(
+          Object.assign(new Error('not found'), { statusCode: 404 })
+        );
+
+        await expect(createClientWithEmitter(eventEmitter).delete('conversation-1')).resolves.toBe(
+          true
+        );
+
+        expect(eventEmitter.emitConversationDeleted).not.toHaveBeenCalled();
+      });
+
+      it('emits once per cascaded child conversation', async () => {
+        const eventEmitter = buildEventEmitter();
+        mockEsClient.search
+          .mockResolvedValueOnce({ hits: { hits: [{ _id: 'child-1' }, { _id: 'child-2' }] } })
+          .mockResolvedValue({ hits: { hits: [] } });
+        mockEsClient.delete.mockResolvedValue({ result: 'deleted' });
+
+        await createClientWithEmitter(eventEmitter).delete('conversation-1');
+
+        expect(eventEmitter.emitConversationDeleted).toHaveBeenCalledTimes(3);
+        const emittedIds = eventEmitter.emitConversationDeleted.mock.calls
+          .map(([payload]) => payload.conversationId)
+          .sort();
+        expect(emittedIds).toEqual(['child-1', 'child-2', 'conversation-1']);
+        eventEmitter.emitConversationDeleted.mock.calls.forEach(([payload]) =>
+          expect(payload.spaceId).toBe(testSpace)
+        );
+      });
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -2740,6 +2824,7 @@ describe('ConversationClient', () => {
         emitMetadataPatched: jest.fn(),
         emitAttachmentEvents: jest.fn(),
         emitConversationUpdated: jest.fn(),
+        emitConversationDeleted: jest.fn(),
       });
 
       it('emits emitMetadataPatched with changed fields after a successful write', async () => {
@@ -4150,6 +4235,7 @@ describe('ConversationClient', () => {
           emitMetadataPatched: jest.fn(),
           emitAttachmentEvents,
           emitConversationUpdated: jest.fn(),
+          emitConversationDeleted: jest.fn(),
         },
       });
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
@@ -4342,6 +4428,7 @@ describe('ConversationClient', () => {
           emitMetadataPatched: jest.fn(),
           emitAttachmentEvents: jest.fn(),
           emitConversationUpdated,
+          emitConversationDeleted: jest.fn(),
         },
       });
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
@@ -5138,6 +5225,7 @@ describe('ConversationClient', () => {
             emitMetadataPatched: jest.fn(),
             emitAttachmentEvents: onAttachmentEvents,
             emitConversationUpdated: jest.fn(),
+            emitConversationDeleted: jest.fn(),
           },
         });
         mockGetDocumentResponse(

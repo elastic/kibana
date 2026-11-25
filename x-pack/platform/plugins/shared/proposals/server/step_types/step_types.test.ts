@@ -1009,19 +1009,33 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(result.output).toEqual({ proposalId: 'proposal-1', status: 'expired' });
   });
 
-  it('should settle nothing, and not fail, when the proposal is deleted before the write', async () => {
-    const service = {
-      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
-      get: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' }),
-      update: jest.fn().mockRejectedValue(new ProposalNotFoundError('proposal-1')),
-    };
+  it.each([
+    {
+      case: 'keeps the given status',
+      stored: { id: 'proposal-1', status: 'pending' },
+      input: { proposalId: 'proposal-1', status: 'expired' },
+      expected: 'expired',
+    },
+    {
+      case: 'keeps the computed failed status of a decided proposal',
+      stored: { id: 'proposal-1', status: 'executing', decision: 'approved' },
+      input: { proposalId: 'proposal-1' },
+      expected: 'failed',
+    },
+  ])(
+    'should settle nothing, and not fail, when the proposal is deleted before the write and $case',
+    async ({ stored, input, expected }) => {
+      const service = {
+        getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+        get: jest.fn().mockResolvedValue(stored),
+        update: jest.fn().mockRejectedValue(new ProposalNotFoundError('proposal-1')),
+      };
 
-    const result = await settleDefinition(service).handler(
-      createContext({ proposalId: 'proposal-1', status: 'expired' })
-    );
+      const result = await settleDefinition(service).handler(createContext(input));
 
-    expect(result.output).toEqual({ proposalId: 'proposal-1', status: 'expired' });
-  });
+      expect(result.output).toEqual({ proposalId: 'proposal-1', status: expected });
+    }
+  );
 
   it('should adopt the live head before writing', async () => {
     const service = {

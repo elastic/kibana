@@ -96,9 +96,13 @@ export class ProposalsPlugin
     });
 
     agentBuilder.conversations.onConversationDeleted(
-      async (_request, { conversationId, spaceId }) => {
+      async (request, { conversationId, spaceId }) => {
         try {
-          await this.requireProposalsService().deleteByConversation(conversationId, spaceId);
+          await this.requireProposalsService().deleteByConversation(
+            conversationId,
+            spaceId,
+            request
+          );
         } catch (error) {
           this.logger.warn(
             `Could not delete the proposals of deleted conversation [${conversationId}]: ${error}`
