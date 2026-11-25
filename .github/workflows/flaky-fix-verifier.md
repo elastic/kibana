@@ -117,6 +117,10 @@ network:
     - '*.buildkite.com'
     - buildkiteartifacts.com
     - ci-stats.kibana.dev
+    # github.com / api.github.com can't be dropped to force MCP-only GitHub reads: the GitHub MCP
+    # server shares this egress allowlist (the firewall attaches the MCP gateway to the same
+    # network topology), so blocking the host would break the MCP reads too. The MCP-only rule
+    # stays prompt-enforced; see the agent instructions.
     - github.com
     - api.github.com
     - openrouter.ai
@@ -678,7 +682,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
 
 When you iterate, you are editing a PR you did not open. This is allowed because the fixer creates in-repo (non-fork) branches. To push:
 
-- Check out the PR head branch (e.g. `gh pr checkout ${{ env.PR_NUMBER }}`), make the minimal edit, and commit it.
+- The PR head is already checked out in the workspace (the current working directory); make the minimal edit there and commit it. Don't run `gh pr checkout` or any other `gh`/`git` command that fetches from GitHub — the agent has no git credentials.
 - Emit a single `push-to-pull-request-branch` safe output targeting PR #${{ env.PR_NUMBER }}.
 - Keep the change minimal and focused on the root cause. Re-running `/flaky` after the push validates the new commit, since the runner builds from the updated PR head.
 - Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any.

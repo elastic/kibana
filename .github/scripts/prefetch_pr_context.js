@@ -156,6 +156,12 @@ const metadataQuery = `
         closingIssuesReferences(first: 10) {
           nodes {
             number
+            repository {
+              owner {
+                login
+              }
+              name
+            }
           }
         }
         timelineItems(first: 100, itemTypes: [CROSS_REFERENCED_EVENT]) {
@@ -307,7 +313,11 @@ const getPrMetadata = async ({ github, owner, repo, pullNumber }) => {
     state: pullRequest.state,
     title: pullRequest.title,
     url: pullRequest.url,
-    closingIssues: pullRequest.closingIssuesReferences.nodes.map(({ number }) => number),
+    // GitHub can close issues in other repositories; keep only same-repo issues so the
+    // number-only REST lookup below can't pull an unrelated issue's comments.
+    closingIssues: pullRequest.closingIssuesReferences.nodes
+      .filter((node) => node.repository?.owner?.login === owner && node.repository?.name === repo)
+      .map(({ number }) => number),
     crossReferencedPulls,
   };
 };
@@ -440,6 +450,28 @@ const getReviewComments = async ({ github, owner, repo, repoFullName, pullNumber
   }
 };
 
+// Verifier-only extra; the shared artifact (and its other consumers, e.g. the Failed Backport
+// Resolver) must still be written even if a linked issue's comments can't be fetched, so each
+// issue's failure is isolated and never rejects the prefetch.
+const getLinkedIssueComments = async ({ github, core, owner, repo, issueNumbers }) =>
+  Promise.all(
+    issueNumbers.map(async (issueNumber) => {
+      try {
+        const comments = await github.paginate(github.rest.issues.listComments, {
+          owner,
+          repo,
+          issue_number: issueNumber,
+          per_page: 100,
+        });
+
+        return { number: issueNumber, comments: filterTrustedComments({ comments }) };
+      } catch (error) {
+        core.warning(`Could not fetch comments for linked issue #${issueNumber}: ${error.message}`);
+        return { number: issueNumber, comments: [] };
+      }
+    })
+  );
+
 const prefetchPrContext = async ({
   github,
   core,
@@ -484,19 +516,7 @@ const prefetchPrContext = async ({
 
   const [reviewComments, linkedIssueComments] = await Promise.all([
     getReviewComments({ github, owner, repo, repoFullName, pullNumber }),
-    Promise.all(
-      metadata.closingIssues.map(async (issueNumber) => ({
-        number: issueNumber,
-        comments: filterTrustedComments({
-          comments: await github.paginate(github.rest.issues.listComments, {
-            owner,
-            repo,
-            issue_number: issueNumber,
-            per_page: 100,
-          }),
-        }),
-      }))
-    ),
+    getLinkedIssueComments({ github, core, owner, repo, issueNumbers: metadata.closingIssues }),
   ]);
 
   const prAuthorLogin = metadata.author?.is_bot
@@ -532,6 +552,7 @@ const prefetchPrContext = async ({
 module.exports = {
   buildPrDiffFromFiles,
   filterTrustedComments,
+  getLinkedIssueComments,
   getPrMetadata,
   getReviewComments,
   graphqlWithRetry,
