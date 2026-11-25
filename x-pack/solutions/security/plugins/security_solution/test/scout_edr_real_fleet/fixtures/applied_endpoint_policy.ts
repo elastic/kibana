@@ -46,7 +46,9 @@ export const waitForAppliedEndpointPolicy = async (
   }: WaitForAppliedEndpointPolicyOptions
 ): Promise<number> => {
   const startedAt = Date.now();
-  const expectedPolicy = packagePolicyId ?? 'any package policy';
+  const expectedPolicy = packagePolicyId
+    ? `package policy ${packagePolicyId}`
+    : 'any package policy';
   let isFirstRead = true;
   let appliedRevision = 0;
 
