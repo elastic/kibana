@@ -66,6 +66,9 @@ export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
     planningPhases: readPlanningPhases(esqlProfile),
     driverCount: drivers.length,
     operators,
+    plans: (esqlProfile?.plans ?? []).filter(
+      (plan) => typeof plan.plan === 'string' && plan.plan.length > 0
+    ),
     planNodeSources: readPlanNodeSources(esqlProfile?.plans ?? []),
     hasTimeline: timeline.drivers.length > 0,
     timeline,

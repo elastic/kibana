@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EsqlProfilePlan } from '@kbn/es-types';
 import type { esqlProfileResponseSchema } from '@elastic/esql-definitions/profile-schema';
 
 type SchemaProperties = typeof esqlProfileResponseSchema.properties;
@@ -115,6 +116,17 @@ export interface QueryProfileTimeline {
   drivers: TimelineDriver[];
 }
 
+/** What is kept of a result set so two runs can be compared without holding every row. */
+export interface QueryResultsSummary {
+  /** The name and type of every column, since the same values in another type are another result. */
+  columns: Array<{ name: string; type: string }>;
+  rowCount: number;
+  /** Fingerprint of the rows, ignoring their order. */
+  rowsFingerprint: string;
+  /** Fingerprint of the rows in the order they came back. */
+  orderedFingerprint: string;
+}
+
 export interface QueryProfileView {
   queryTookMillis?: number;
   planningTookMillis?: number;
@@ -122,9 +134,13 @@ export interface QueryProfileView {
   planningPhases: PlanningPhase[];
   driverCount: number;
   operators: AggregatedOperator[];
+  /** The plans Elasticsearch reports, as text, for the AI to read. */
+  plans: EsqlProfilePlan[];
   /** The source of each plan node that has one, by `planNodeKey` of its node and id. */
   planNodeSources: Record<string, PlanNodeSource>;
   /** True when at least one driver has a usable start and stop. */
   hasTimeline: boolean;
   timeline: QueryProfileTimeline;
+  /** What the profiled run returned. Set by the loader, since the profile does not hold rows. */
+  results?: QueryResultsSummary;
 }

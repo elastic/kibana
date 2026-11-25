@@ -100,7 +100,12 @@ export class DataPublicPlugin
     );
 
     inspector.registerView(
-      getEsqlQueryProfileViewDescription(() => ({ search: startServices().self.search }))
+      getEsqlQueryProfileViewDescription(() => ({
+        search: startServices().self.search,
+        http: startServices().core.http,
+        licensing: startServices().plugins.licensing,
+        application: startServices().core.application,
+      }))
     );
 
     fieldFormats.register(

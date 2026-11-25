@@ -132,3 +132,11 @@ export {
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';
+
+export {
+  AiRequestFailure,
+  getConnectorsUrl,
+  isNoAiConnectorError,
+  readRequestErrorMessage,
+  toAiRequestFailure,
+} from './src/utils/ai_connector';

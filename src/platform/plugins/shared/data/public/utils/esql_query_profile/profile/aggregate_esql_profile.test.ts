@@ -45,6 +45,11 @@ describe('aggregateEsqlProfile', () => {
           ],
         },
       ],
+      // A plan with no text has nothing for the AI to read.
+      plans: [
+        { node_name: 'node-a', plan: 'Limit\n_LimitExec' },
+        { node_name: 'node-b', plan: '' },
+      ],
     });
 
     expect(view.queryTookMillis).toBe(2_000);
@@ -52,6 +57,7 @@ describe('aggregateEsqlProfile', () => {
     expect(view.executionTookMillis).toBe(1_500);
     expect(view.planningPhases).toEqual([{ id: 'parsing', tookMillis: 40 }]);
     expect(view.driverCount).toBe(2);
+    expect(view.plans).toEqual([{ node_name: 'node-a', plan: 'Limit\n_LimitExec' }]);
 
     expect(view.operators).toHaveLength(1);
     const [reader] = view.operators;
@@ -120,6 +126,7 @@ describe('aggregateEsqlProfile', () => {
       planningPhases: [],
       driverCount: 0,
       operators: [],
+      plans: [],
       planNodeSources: {},
       hasTimeline: false,
       timeline: { drivers: [] },

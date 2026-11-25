@@ -14,6 +14,10 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { RequestStatistics } from '@kbn/inspector-plugin/common';
+import type { ApplicationStart, HttpStart } from '@kbn/core/public';
+import { NO_AI_CONNECTOR_ERROR_CODE } from '@kbn/esql-types';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { of } from 'rxjs';
 import type { ISearchStart } from '../../search';
 import { getEsqlQueryProfileViewDescription } from '.';
 import { QueryProfileView } from './query_profile_view';
@@ -127,6 +131,8 @@ const renderProfileOf = (query: string, search: Pick<ISearchStart, 'esql'>) => {
 describe('getEsqlQueryProfileViewDescription', () => {
   const view = getEsqlQueryProfileViewDescription(() => ({
     search: {} as ISearchStart,
+    http: {} as HttpStart,
+    application: {} as ApplicationStart,
   }));
 
   it('shows for an ES|QL request and stays hidden for DSL and SQL', () => {
@@ -597,5 +603,195 @@ describe('QueryProfileView', () => {
       await screen.findByTestId('esqlQueryProfileDuration');
       expect(screen.queryByTestId('esqlQueryProfileByCommandTab')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('QueryProfileView faster query suggestion', () => {
+  const slowProfile = {
+    query: { took_millis: 1_000 },
+    planning: { took_millis: 10 },
+    drivers: [
+      {
+        description: 'data',
+        operators: [
+          {
+            operator: 'ValuesSourceReaderOperator[fields = [body]]',
+            status: { process_nanos: 900_000_000, rows_received: 10, rows_emitted: 10 },
+          },
+        ],
+      },
+    ],
+  };
+  const fastProfile = {
+    query: { took_millis: 200 },
+    planning: { took_millis: 10 },
+    drivers: [
+      {
+        description: 'data',
+        operators: [
+          {
+            operator: 'ValuesSourceReaderOperator[fields = [x]]',
+            status: { process_nanos: 100_000_000, rows_received: 10, rows_emitted: 10 },
+          },
+        ],
+      },
+    ],
+  };
+  const columns = [{ name: 'x' }];
+  const values = [[1], [2]];
+  const ORIGINAL = 'FROM logs | WHERE x > 0';
+  const SUGGESTED = 'FROM logs | KEEP x | WHERE x > 0';
+
+  const licensingWith = (hasEnterprise: boolean) =>
+    ({
+      license$: of({ isActive: true, hasAtLeast: () => hasEnterprise }),
+    } as unknown as LicensingPluginStart);
+
+  const setup = (
+    suggestedResponse: { columns: object[]; values: unknown[][] },
+    { hasEnterprise = true, hasHttp = true }: { hasEnterprise?: boolean; hasHttp?: boolean } = {}
+  ) => {
+    const application = {
+      capabilities: {
+        management: { insightsAndAlerting: { triggersActionsConnectors: true } },
+      },
+      getUrlForApp: () =>
+        '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors',
+    } as unknown as ApplicationStart;
+    const esql = jest.fn(async ({ query }: { query: string }) => ({
+      rawResponse:
+        query === SUGGESTED
+          ? { profile: fastProfile, ...suggestedResponse }
+          : { profile: slowProfile, columns, values },
+    }));
+    const post = jest.fn();
+    const requests = new RequestAdapter();
+    logRequest(requests, 'Documents', {
+      query: ORIGINAL,
+      time_zone: 'UTC',
+      include_execution_metadata: true,
+    });
+    renderView(
+      <QueryProfileView
+        adapters={{ requests }}
+        search={{ esql } as unknown as Pick<ISearchStart, 'esql'>}
+        http={hasHttp ? ({ post } as never) : undefined}
+        licensing={licensingWith(hasEnterprise)}
+        application={application}
+      />
+    );
+    return { esql, post };
+  };
+
+  it('suggests a query without running it, then profiles it on request and compares', async () => {
+    const { esql, post } = setup({ columns, values: [[2], [1]] });
+    post.mockResolvedValue({ query: SUGGESTED, reason: 'Only x is needed.' });
+
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileSuggest'));
+
+    expect(await screen.findByText(SUGGESTED)).toBeInTheDocument();
+    expect(screen.getByTestId('esqlQueryProfileSuggestionReason')).toHaveTextContent(
+      'Only x is needed.'
+    );
+    expect(screen.getByText(/has not been run/)).toBeInTheDocument();
+    expect(esql).toHaveBeenCalledTimes(1);
+
+    const [route, { body }] = post.mock.calls[0];
+    expect(route).toBe('/internal/esql/optimize_query');
+    expect(JSON.parse(body)).toMatchObject({ queryString: ORIGINAL });
+    expect(JSON.parse(body).profileContext).toContain('ValuesSourceReader');
+
+    await userEvent.click(screen.getByTestId('esqlQueryProfileProfileSuggestion'));
+
+    expect(await screen.findByTestId('esqlQueryProfileTimeComparison')).toHaveTextContent(
+      'Original 1 s, suggestion 200 ms (−80%)'
+    );
+    expect(esql).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: SUGGESTED, timeZone: 'UTC', profile: true }),
+      expect.anything()
+    );
+    expect(screen.getByTestId('esqlQueryProfileResultsCheck')).toHaveTextContent(
+      'Same results: 2 rows, in a different order.'
+    );
+  });
+
+  it.each([
+    ['an enterprise license', { hasEnterprise: false }],
+    ['an http service', { hasHttp: false }],
+  ])('does not offer the suggestion without %s', async (_, options) => {
+    setup({ columns, values }, options);
+
+    await screen.findByTestId('esqlQueryProfileDuration');
+    expect(screen.queryByTestId('esqlQueryProfileSuggest')).not.toBeInTheDocument();
+  });
+
+  it('keeps the suggestion and says what failed when running it fails', async () => {
+    const { esql, post } = setup({ columns, values });
+    post.mockResolvedValue({ query: SUGGESTED, reason: 'Only x is needed.' });
+
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileSuggest'));
+    await screen.findByTestId('esqlQueryProfileProfileSuggestion');
+    esql.mockRejectedValueOnce(new Error('Unknown column [y]'));
+    await userEvent.click(screen.getByTestId('esqlQueryProfileProfileSuggestion'));
+
+    expect(await screen.findByText('Unable to run the suggested query')).toBeInTheDocument();
+    expect(screen.getByText('Unknown column [y]')).toBeInTheDocument();
+    expect(screen.getByText(SUGGESTED)).toBeInTheDocument();
+    expect(screen.getByTestId('esqlQueryProfileSuggestionReason')).toHaveTextContent(
+      'Only x is needed.'
+    );
+    expect(screen.getByTestId('esqlQueryProfileProfileSuggestion')).toBeInTheDocument();
+  });
+
+  it('warns when the suggested query does not return the same results', async () => {
+    const { post } = setup({ columns, values: [[1]] });
+    post.mockResolvedValue({ query: SUGGESTED, reason: 'Faster.' });
+
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileSuggest'));
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileProfileSuggestion'));
+
+    expect(await screen.findByTestId('esqlQueryProfileResultsCheck')).toHaveTextContent(
+      'It returns 1 row and the original returned 2. This is not an equivalent query.'
+    );
+  });
+
+  it('says so when the AI finds no safe improvement', async () => {
+    const { post, esql } = setup({ columns, values });
+    post.mockResolvedValue({ query: null, reason: 'It is already efficient.' });
+
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileSuggest'));
+
+    expect(await screen.findByTestId('esqlQueryProfileNoSuggestion')).toHaveTextContent(
+      'No safe improvement found. It is already efficient.'
+    );
+    expect(esql).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the reason when the suggestion fails', async () => {
+    const { post } = setup({ columns, values });
+    post.mockRejectedValue({ body: { message: 'No AI connector available.' } });
+
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileSuggest'));
+
+    expect(await screen.findByText('No AI connector available.')).toBeInTheDocument();
+    expect(screen.getByText('Unable to suggest a faster query')).toBeInTheDocument();
+  });
+
+  it('says no connector is set up and links to where to set one up', async () => {
+    const { post } = setup({ columns, values });
+    post.mockRejectedValue({
+      body: {
+        message: 'No AI connector available.',
+        attributes: { code: NO_AI_CONNECTOR_ERROR_CODE },
+      },
+    });
+
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileSuggest'));
+
+    expect(await screen.findByText('No AI connector is set up.')).toBeInTheDocument();
+    expect(screen.getByTestId('esqlQueryProfileSetUpConnector')).toHaveAttribute(
+      'href',
+      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
+    );
   });
 });

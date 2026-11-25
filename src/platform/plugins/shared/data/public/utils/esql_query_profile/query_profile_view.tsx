@@ -20,6 +20,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { ApplicationStart, HttpStart } from '@kbn/core/public';
+import { getConnectorsUrl } from '@kbn/esql-utils';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +35,8 @@ import { listEsqlInspectorRequests } from './esql_inspector_requests';
 import { loadEsqlQueryProfile } from './profile/load_esql_query_profile';
 import { ProfileSummary } from './profile_summary';
 import { readRequestQuery } from './shared/json_helpers';
+import { FasterQuerySuggestion } from './suggestion/faster_query_suggestion';
+import { useHasEnterpriseLicense } from './suggestion/use_has_enterprise_license';
 import { TimelineTab } from './timeline/timeline_tab';
 
 type TabId = 'timeline' | 'byCommand';
@@ -276,10 +281,20 @@ const ProfileDetails = ({
 export const QueryProfileView = ({
   adapters,
   search,
+  http,
+  licensing,
+  application,
 }: {
   adapters: Adapters;
   search: Pick<ISearchStart, 'esql'>;
+  /** Needed for the AI suggestion. Without it the suggestion is not offered. */
+  http?: Pick<HttpStart, 'post'>;
+  /** Needed to know whether the license allows the AI suggestion. */
+  licensing?: LicensingPluginStart;
+  /** Needed to link to the place where an AI connector is set up. */
+  application?: Pick<ApplicationStart, 'capabilities' | 'getUrlForApp'>;
 }) => {
+  const hasEnterpriseLicense = useHasEnterpriseLicense(licensing);
   const requests = useEsqlRequests(adapters);
   // A refetch logs the requests again with new ids but the same names, so the pick is kept by both.
   const [picked, setPicked] = useState<{ id: string; name: string } | undefined>();
@@ -390,6 +405,19 @@ export const QueryProfileView = ({
       ) : view ? (
         <>
           <ProfileSummary view={view} />
+          {http && hasEnterpriseLicense && profiledRequest?.json && query ? (
+            <>
+              <EuiSpacer size="m" />
+              <FasterQuerySuggestion
+                http={http}
+                search={search}
+                requestJson={profiledRequest.json}
+                originalQuery={query}
+                originalView={view}
+                connectorsUrl={application ? getConnectorsUrl(application) : undefined}
+              />
+            </>
+          ) : null}
           <ProfileDetails
             view={view}
             heat={heat}

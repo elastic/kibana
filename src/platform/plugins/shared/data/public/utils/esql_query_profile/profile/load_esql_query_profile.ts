@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { IEsqlSearchParams } from '@kbn/search-types';
 import type { ISearchStart } from '../../../search';
+import { summarizeResults } from './result_summary';
 import { aggregateEsqlProfile } from './aggregate_esql_profile';
 import type { QueryProfileView } from './types';
 import { isRecord } from '../shared/json_helpers';
@@ -70,5 +71,5 @@ export async function loadEsqlQueryProfile({
     );
   }
 
-  return aggregateEsqlProfile(profile);
+  return { ...aggregateEsqlProfile(profile), results: summarizeResults(rawResponse) };
 }
