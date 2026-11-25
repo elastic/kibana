@@ -305,6 +305,105 @@ function buildWorkdaySupervisesConfig(
   };
 }
 
+const GOOGLE_WORKSPACE_MANAGER_EMAIL_FIELD = 'google_workspace.users.manager_email';
+/** `entity.namespace` the entity store derives from `event.module` for these users. */
+const GOOGLE_WORKSPACE_NAMESPACE = 'google_workspace';
+const GOOGLE_WORKSPACE_ENTITY_SOURCE = 'google_workspace';
+/**
+ * Step 2 row cap for the Google Workspace config. `manager_email` is the only
+ * actor field, so a page yields at most one row per page bucket value and this
+ * never truncates (composite paging is one-way, so a truncated row would be a
+ * manager whose reports are never written). Keep it ≤ 10,000: ES|QL silently
+ * caps a higher LIMIT at `esql.query.result_truncation_max_size`.
+ */
+const GOOGLE_WORKSPACE_ESQL_LIMIT = COMPOSITE_PAGE_SIZE;
+
+/**
+ * Step 2 ES|QL for Google Workspace `supervises`.
+ *
+ * Same inversion as Workday: a user document names only that user's manager, so
+ * the row's own user is the TARGET and the manager is the ACTOR. The manager is
+ * identified by email (`manager_email`, from the directory's `manager` relation),
+ * which is also what the actor entity's EUID is keyed on.
+ *
+ * The users stream re-reads the whole directory every poll and its `@timestamp`
+ * is the collection time, so the engine's default 30d `@timestamp` lookback is
+ * kept: it bounds the scan and is also what the pre-run reset probe checks, so a
+ * stream that stopped polling never triggers a reset. Within that window the
+ * index holds one snapshot per user per poll, so each user is first collapsed to
+ * the manager of their newest snapshot (`LAST`); grouping the snapshots directly
+ * would add a user under every manager they ever had, and the reset below only
+ * repairs that once per run.
+ *
+ * `manager_email` can hold several values, so it is expanded after the collapse.
+ * A multi-valued actor mis-groups under the standard builder, hence
+ * `kind: 'override'`. An expanded value can belong to another page, so rows are
+ * scoped to the page's own values (`scopeToPageActorValues`); each value's full
+ * set of reports is built on its own page.
+ *
+ * As with Workday, the collapse is per page, not global: the engine's page filter
+ * (`manager_email IN (…)`) applies at the source, before the `STATS`, so a user
+ * who moved between managers on different pages can still be attributed to the old
+ * manager until that snapshot leaves the lookback window.
+ *
+ * `manager_email` may be an alias rather than the primary email. The resulting
+ * actor EUID then has no entity and its write 404s, which is the intended drop
+ * path (counted as `droppedNotInStore`).
+ */
+function buildGoogleWorkspaceSupervisesEsqlQuery(
+  namespace: string,
+  pageActorValues: readonly string[]
+): string {
+  const logIndex = `logs-google_workspace.users-${namespace}`;
+  // The row's own user is the target, so the canonical helper applies directly.
+  const targetEuidEval = euid.esql.getEuidEvaluation(
+    getBuiltInEntityDefinition('user'),
+    'targetEntityId',
+    { withTypeId: true }
+  );
+  const pageActorParams = pageActorValues.map(() => '?').join(', ');
+
+  return `FROM ${logIndex}
+| WHERE ${GOOGLE_WORKSPACE_MANAGER_EMAIL_FIELD} IS NOT NULL
+| EVAL ${targetEuidEval}
+| WHERE COALESCE(targetEntityId, "") != ""
+| STATS managerKey = LAST(${GOOGLE_WORKSPACE_MANAGER_EMAIL_FIELD}, @timestamp) BY targetEntityId
+| MV_EXPAND managerKey
+| WHERE managerKey != ""
+| EVAL ${ENGINE_COLUMNS.actor} = CONCAT("user:", managerKey, "@${GOOGLE_WORKSPACE_NAMESPACE}")
+| WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
+    AND ${ENGINE_COLUMNS.actor} != "user:@${GOOGLE_WORKSPACE_NAMESPACE}"
+    AND ${ENGINE_COLUMNS.actor} RLIKE ".+:.+@.+"
+| STATS ${RELATIONSHIP_KEY} = VALUES(targetEntityId) BY ${ENGINE_COLUMNS.actor}, managerKey
+| WHERE managerKey IN (${pageActorParams})
+| DROP managerKey
+| LIMIT ${GOOGLE_WORKSPACE_ESQL_LIMIT}`;
+}
+
+function buildGoogleWorkspaceSupervisesConfig(): RelationshipIntegrationConfig {
+  return {
+    kind: 'override',
+    id: 'google_workspace',
+    name: 'Google Workspace',
+    indexPattern: (namespace) => `logs-google_workspace.users-${namespace}`,
+    targetEntityType: 'user',
+    relationshipKey: RELATIONSHIP_KEY,
+    // Managers, not reports: step 1 must bucket the actor.
+    customActor: {
+      fields: [GOOGLE_WORKSPACE_MANAGER_EMAIL_FIELD],
+    },
+    // Required for the Step 2 row bound; see `GOOGLE_WORKSPACE_ESQL_LIMIT`.
+    scopeToPageActorValues: true,
+    validateTargetIds: true,
+    // The stream re-emits the complete directory each poll, so absence from the
+    // newest snapshot means the relationship ended. The engine cannot retract, so
+    // clear this source's supervises edges and repopulate from the current scan.
+    resetRelationshipsBeforeRun: { entitySource: GOOGLE_WORKSPACE_ENTITY_SOURCE },
+    esqlQueryOverride: (ns, pageActorValues = []) =>
+      buildGoogleWorkspaceSupervisesEsqlQuery(ns, pageActorValues),
+  };
+}
+
 function buildSupervisesConfig(
   source: SupervisesSource,
   lastProcessedTimestamp?: string
@@ -344,6 +443,7 @@ export function buildSupervisesConfigs(
   return [
     ...SUPERVISES_SOURCES.map((source) => buildSupervisesConfig(source, lastProcessedTimestamp)),
     buildWorkdaySupervisesConfig(lastProcessedTimestamp),
+    buildGoogleWorkspaceSupervisesConfig(),
   ];
 }
 
