@@ -185,7 +185,7 @@ export const global_search_types_suggester = z.object({
     text: z.optional(z.string().register(z.globalRegistry, {
         description: 'Global suggest text, to avoid repetition when the same text is used in several suggesters'
     }))
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_sliced_scroll = z.object({
     field: z.optional(types_field),
@@ -354,7 +354,7 @@ export const types_query_dsl_shape_query = types_query_dsl_query_base.and(z.obje
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When set to `true` the query ignores an unmapped field and will not match any documents.'
     }))
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 export const types_query_dsl_semantic_query = types_query_dsl_query_base.and(z.object({
     field: z.string().register(z.globalRegistry, {
@@ -1217,7 +1217,7 @@ export const types_query_dsl_geo_shape_query = types_query_dsl_query_base.and(z.
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to ignore an unmapped field and not match any documents for this query.\nSet to `false` to throw an exception if the field is not mapped.'
     }))
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 export const types_query_dsl_geo_validation_method = z.enum([
     'coerce',
@@ -1228,7 +1228,7 @@ export const types_query_dsl_geo_validation_method = z.enum([
 export const types_query_dsl_geo_polygon_query = types_query_dsl_query_base.and(z.object({
     validation_method: z.optional(types_query_dsl_geo_validation_method),
     ignore_unmapped: z.optional(z.boolean())
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 /**
  * A map hex cell (H3) reference
@@ -1261,7 +1261,7 @@ export const types_query_dsl_geo_distance_query = types_query_dsl_query_base.and
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to ignore an unmapped field and not match any documents for this query.\nSet to `false` to throw an exception if the field is not mapped.'
     }))
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 export const types_query_dsl_geo_execution = z.enum(['memory', 'indexed']);
 
@@ -1271,7 +1271,7 @@ export const types_query_dsl_geo_bounding_box_query = types_query_dsl_query_base
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to ignore an unmapped field and not match any documents for this query.\nSet to `false` to throw an exception if the field is not mapped.'
     }))
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 export const types_query_dsl_fuzzy_query = z.union([
     types_query_dsl_query_base.and(z.object({
@@ -1367,7 +1367,7 @@ export const types_query_dsl_date_decay_function = types_query_dsl_decay_functio
 
 export const types_query_dsl_decay_function_base = z.object({
     multi_value_mode: z.optional(types_query_dsl_multi_value_mode)
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_query_dsl_untyped_decay_function = types_query_dsl_decay_function_base.and(z.record(z.string(), z.unknown()));
 
@@ -2276,10 +2276,6 @@ export const types_result = z.enum([
     'noop'
 ]);
 
-/**
- * Cause and details about a request failure. This class defines the properties common to all error types.
- * Additional details are also provided, that depend on the error type.
- */
 export const types_error_cause = z.object({
     type: z.string().register(z.globalRegistry, {
         description: 'The type of error'
@@ -2302,7 +2298,7 @@ export const types_error_cause = z.object({
     }
 }).register(z.globalRegistry, {
     description: 'Cause and details about a request failure. This class defines the properties common to all error types.\nAdditional details are also provided, that depend on the error type.'
-});
+}).and(z.record(z.string(), z.unknown()));
 
 /**
  * Time unit for nanoseconds
@@ -2322,7 +2318,7 @@ export const types_inline_get = z.object({
     _primary_term: z.optional(z.number()),
     _routing: z.optional(types_routing),
     _source: z.optional(z.record(z.string(), z.unknown()))
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const global_bulk_failure_store_status = z.enum([
     'not_applicable_or_unknown',
@@ -2620,14 +2616,11 @@ export const types_mapping_all_field = z.object({
     store_term_vectors: z.boolean()
 });
 
-/**
- * Base type for multi-bucket aggregation results that can hold sub-aggregations results.
- */
 export const types_aggregations_multi_bucket_base = z.object({
     doc_count: z.number()
 }).register(z.globalRegistry, {
     description: 'Base type for multi-bucket aggregation results that can hold sub-aggregations results.'
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_aggregations_composite_bucket = types_aggregations_multi_bucket_base.and(z.object({
     key: types_aggregations_composite_aggregate_key
@@ -2709,7 +2702,7 @@ export const types_aggregations_filters_aggregate = types_aggregations_multi_buc
  */
 export const types_aggregations_single_bucket_aggregate_base = types_aggregations_aggregate_base.and(z.object({
     doc_count: z.number()
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 export const types_aggregations_filter_aggregate = types_aggregations_single_bucket_aggregate_base.and(z.record(z.string(), z.unknown()));
 
@@ -5303,7 +5296,7 @@ export const types_aggregations_inference_aggregate = types_aggregations_aggrega
     feature_importance: z.optional(z.array(types_aggregations_inference_feature_importance)),
     top_classes: z.optional(z.array(types_aggregations_inference_top_class_entry)),
     warning: z.optional(z.string())
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 export const global_search_types_nested_identity = z.object({
     field: types_field,
@@ -6787,14 +6780,14 @@ export const types_geo_distance_sort = z.object({
     order: z.optional(types_sort_order),
     unit: z.optional(types_distance_unit),
     nested: z.optional(types_nested_sort_value)
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_sort_options = z.object({
     _score: z.optional(types_score_sort),
     _doc: z.optional(types_score_sort),
     _geo_distance: z.optional(types_geo_distance_sort),
     _script: z.optional(types_script_sort)
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_sort_combinations = z.union([
     types_field,
@@ -8945,7 +8938,7 @@ export const indices_types_index_settings = z.object({
     'indexing.slowlog': z.optional(indices_types_indexing_slowlog_settings),
     indexing_pressure: z.optional(indices_types_indexing_pressure),
     store: z.optional(indices_types_storage)
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_aggregations_top_hits_aggregate = types_aggregations_aggregate_base.and(z.lazy(() => z.object({
     get hits() {

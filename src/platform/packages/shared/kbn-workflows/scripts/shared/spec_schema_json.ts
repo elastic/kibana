@@ -20,10 +20,15 @@ export interface SpecTypeName {
   namespace: string;
 }
 
+export interface SpecBehavior {
+  type: SpecTypeName;
+}
+
 export interface SpecType {
   kind: string;
   name: SpecTypeName;
   shortcutProperty?: string;
+  behaviors?: SpecBehavior[];
   properties?: SpecProperty[];
   body?: { kind: string; properties?: SpecProperty[] };
 }

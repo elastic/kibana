@@ -49,6 +49,47 @@ const ACCEPTED_BODIES: Record<string, Record<string, unknown>> = {
       },
     },
   },
+  'field sort inside collapse.inner_hits': {
+    collapse: {
+      field: 'id',
+      inner_hits: { name: 'latest', size: 1, sort: [{ updated_at: 'desc' }] },
+    },
+  },
+  'field sort inside top_hits': {
+    size: 0,
+    aggregations: {
+      latest: { top_hits: { size: 1, sort: [{ '@timestamp': { order: 'desc' } }] } },
+    },
+  },
+  'geo_distance query': {
+    query: { geo_distance: { distance: '10km', 'source.geo.location': { lat: 52.5, lon: 13.4 } } },
+  },
+  'geo_bounding_box query': {
+    query: {
+      geo_bounding_box: {
+        'source.geo.location': { top_left: [13.0, 53.0], bottom_right: [14.0, 52.0] },
+      },
+    },
+  },
+  'geo_shape query': {
+    query: {
+      geo_shape: {
+        area: {
+          shape: {
+            type: 'envelope',
+            coordinates: [
+              [13.0, 53.0],
+              [14.0, 52.0],
+            ],
+          },
+          relation: 'within',
+        },
+      },
+    },
+  },
+  'suggest with a named suggester': {
+    suggest: { text: 'conection', fix_typo: { term: { field: 'message' } } },
+  },
   'aggs alias': { size: 0, aggs: { by_host: { terms: { field: 'host.name' } } } },
   'aggs alias in sub-aggregations': {
     size: 0,
