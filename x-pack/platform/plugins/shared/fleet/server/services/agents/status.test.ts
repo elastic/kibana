@@ -12,6 +12,7 @@ import { AGENTS_INDEX } from '../../../common';
 
 import { createAppContextStartContractMock } from '../../mocks';
 
+import { AgentRequestInvalidError } from '../../errors';
 import { appContextService } from '../app_context';
 
 import {
@@ -292,6 +293,40 @@ describe('getAgentStatusForAgentPolicy', () => {
     expect(serializedQuery).toContain(
       '{"query_string":{"fields":["local_metadata.host.hostname"],"query":"host*"}}'
     );
+  });
+
+  it('rejects a filter kuery that references a field outside the agent queryable mappings', async () => {
+    const esClient = { search: jest.fn() };
+    const soClient = {
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+    };
+
+    await expect(
+      getAgentStatusForAgentPolicy(esClient as any, soClient as any, undefined, 'not_a_field:foo')
+    ).rejects.toThrow(AgentRequestInvalidError);
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it('accepts a filter kuery on agent queryable fields, including the SO attribute prefix', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: { status: { buckets: [] } },
+      }),
+    };
+    const soClient = {
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+    };
+
+    await getAgentStatusForAgentPolicy(
+      esClient as any,
+      soClient as any,
+      undefined,
+      'fleet-agents.agent.version:8.15.0 and policy_id:"policy-1"'
+    );
+
+    const serializedQuery = JSON.stringify(esClient.search.mock.calls[0][0].query);
+    expect(serializedQuery).toContain('"agent.version":"8.15.0"');
+    expect(serializedQuery).toContain('"policy_id":"policy-1"');
   });
 });
 
