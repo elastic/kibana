@@ -189,8 +189,15 @@ const executeDestinationDelivery = async (
   { delivery, diagnostic }: PreparedDestinationDelivery,
   execute?: ExecuteConnector
 ): Promise<NotificationOutcome> => {
+  const stopped: NotificationOutcome = {
+    status: 'failed',
+    error: 'Notification delivery stopped before posting',
+  };
+  if (signal.aborted) {
+    return stopped;
+  }
   if (!(await routingClient.isActive()) || signal.aborted) {
-    return { status: 'failed', error: 'Notification delivery stopped before posting' };
+    return stopped;
   }
   if (diagnostic || !execute || !delivery) {
     return { status: 'failed', error: diagnostic || 'Notification delivery is unavailable' };

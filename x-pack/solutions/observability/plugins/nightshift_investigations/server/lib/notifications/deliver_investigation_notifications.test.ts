@@ -402,13 +402,17 @@ describe('investigation notification lifecycle', () => {
         if (abortPoint === 'claim') controller.abort();
         return attempt;
       });
-      jest.spyOn(client, 'isActive').mockImplementation(async () => {
+      const isActiveSpy = jest.spyOn(client, 'isActive').mockImplementation(async () => {
+        if (controller.signal.aborted) {
+          throw new Error('Attachment read failed');
+        }
         const active = await isActive();
         if (abortPoint === 'isActive' && claimed) controller.abort();
         return active;
       });
       expect(await send('started')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
       expect(execute).not.toHaveBeenCalled();
+      isActiveSpy.mockRestore();
 
       expect(await send('failed', 'exec-1', [destination], new AbortController().signal)).toEqual({
         sent: 1,
