@@ -9,6 +9,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
+import { resolveTokenUrlAgainstServers } from '@kbn/connector-emulate';
 import { vendorApiExemptionsSchema } from '../exemptions';
 import { listConnectors } from '../find_connector';
 import { parseManifest } from '../manifest';
@@ -27,30 +28,8 @@ interface SnapshotDocument {
   components?: { securitySchemes?: Record<string, OpenApiSecurityScheme> };
 }
 
-/**
- * A spec may declare `tokenUrl` relative to its servers, as Okta's and Datadog's do. Taking it
- * verbatim would compare `/oauth2/v1/token` with a connector's absolute token URL and never
- * match, so the connector would be reported as not served when the emulator does serve it.
- */
-const resolveAgainstServers = (
-  tokenUrl: string,
-  servers: SnapshotDocument['servers']
-): string[] => {
-  if (/^https?:\/\//i.test(tokenUrl)) return [tokenUrl];
-  const resolved = (servers ?? [])
-    .map(({ url }) => url)
-    .filter((url): url is string => typeof url === 'string' && /^https?:\/\//i.test(url))
-    .map((url) => {
-      try {
-        return new URL(tokenUrl, url.endsWith('/') ? url : `${url}/`).toString();
-      } catch {
-        return undefined;
-      }
-    })
-    .filter((url): url is string => url !== undefined);
-  // With no server to resolve against the raw value is still the best description of it.
-  return resolved.length > 0 ? resolved : [tokenUrl];
-};
+const serverUrlsOf = ({ servers }: SnapshotDocument): string[] =>
+  (servers ?? []).map(({ url }) => url).filter((url): url is string => typeof url === 'string');
 
 const exists = (file: string): Promise<boolean> =>
   fs.access(file).then(
@@ -76,8 +55,13 @@ const readServedTokenUrls = async (directory: string): Promise<string[]> => {
       .catch(() => ({}));
     for (const scheme of Object.values(snapshot.components?.securitySchemes ?? {})) {
       for (const { tokenUrl } of Object.values(scheme.flows ?? {})) {
+        // A spec may declare `tokenUrl` relative to its servers, as Okta's and Datadog's do.
+        // Taken verbatim it would never match a connector's absolute token URL, so the
+        // connector would be reported as not served when the emulator does serve it.
         if (tokenUrl) {
-          for (const url of resolveAgainstServers(tokenUrl, snapshot.servers)) urls.add(url);
+          for (const url of resolveTokenUrlAgainstServers(tokenUrl, serverUrlsOf(snapshot))) {
+            urls.add(url);
+          }
         }
       }
     }

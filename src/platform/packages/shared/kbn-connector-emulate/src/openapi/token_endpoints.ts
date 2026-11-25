@@ -135,6 +135,29 @@ const resolveTokenUrl = (
   return { url: `${origin}${removeDotSegments(withoutQuery(path))}`, variables };
 };
 
+/**
+ * Resolves a spec's `tokenUrl` against its server URLs, for a reader that has the committed
+ * document but has not loaded it, such as the connector coverage report. Template variables
+ * survive: `URL` lowercases `{yourOktaDomain}` and rejects `{protocol}://{name}` outright, so
+ * resolving with it would silently produce a URL that matches nothing. A server the token URL
+ * cannot be resolved against is left out, and the raw value stands when none resolves.
+ */
+export const resolveTokenUrlAgainstServers = (
+  tokenUrl: string,
+  serverUrls: readonly string[]
+): string[] => {
+  const servers: OperationServer[] =
+    serverUrls.length > 0 ? serverUrls.map((url) => ({ url, variables: {} })) : [DEFAULT_SERVER];
+  const resolved = servers.flatMap((server) => {
+    try {
+      return [resolveTokenUrl(tokenUrl, server).url];
+    } catch {
+      return [];
+    }
+  });
+  return resolved.length > 0 ? [...new Set(resolved)] : [tokenUrl];
+};
+
 const uniqueServers = (operations: readonly ContractOperation[]): OperationServer[] => {
   const servers = operations.flatMap(({ servers: declared }) =>
     declared.length > 0 ? declared : [DEFAULT_SERVER]

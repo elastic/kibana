@@ -12,7 +12,47 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
-import { grantedScopes } from './token_endpoints';
+import { grantedScopes, resolveTokenUrlAgainstServers } from './token_endpoints';
+
+describe('resolveTokenUrlAgainstServers', () => {
+  it('keeps an absolute token URL', () => {
+    expect(
+      resolveTokenUrlAgainstServers('https://id.example.com/token', ['https://api.example.com/v1'])
+    ).toEqual(['https://id.example.com/token']);
+  });
+
+  it('resolves a relative token URL against each server', () => {
+    expect(
+      resolveTokenUrlAgainstServers('/oauth2/v1/token', [
+        'https://api.example.com/v1',
+        'https://eu.example.com/v1',
+      ])
+    ).toEqual([
+      'https://api.example.com/oauth2/v1/token',
+      'https://eu.example.com/oauth2/v1/token',
+    ]);
+  });
+
+  // `new URL` lowercases `{yourOktaDomain}` and rejects `{protocol}://{name}`, which would leave
+  // a token URL that matches nothing. Okta and Datadog declare both shapes.
+  it('resolves against templated servers without touching the variables', () => {
+    expect(resolveTokenUrlAgainstServers('/oauth2/v1/token', ['https://{yourOktaDomain}'])).toEqual(
+      ['https://{yourOktaDomain}/oauth2/v1/token']
+    );
+    // A server whose scheme is itself a variable has no parseable origin, so its token URL
+    // matches on the path alone, as it does for a relative server such as `/v1`.
+    expect(
+      resolveTokenUrlAgainstServers('/oauth2/v1/token', [
+        'https://{subdomain}.{site}',
+        '{protocol}://{name}',
+      ])
+    ).toEqual(['https://{subdomain}.{site}/oauth2/v1/token', '/oauth2/v1/token']);
+  });
+
+  it('falls back to the server OpenAPI assumes when a spec declares none', () => {
+    expect(resolveTokenUrlAgainstServers('/oauth2/v1/token', [])).toEqual(['/oauth2/v1/token']);
+  });
+});
 
 const spec = {
   openapi: '3.0.3',
