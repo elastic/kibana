@@ -8,7 +8,7 @@
 export interface ESProcessorConfig {
   on_failure?: Processor[];
   ignore_failure?: boolean;
-  if?: string;
+  if?: string | Record<string, unknown>;
   tag?: string;
   [key: string]: any;
 }
