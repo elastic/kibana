@@ -204,6 +204,10 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
     const { server: eventsServer } = this;
+    plugins.nightshiftInvestigations?.registerSlackChannelBindingChecker((request, channelId) =>
+      new SlackAppService(eventsServer).isChannelBound(request, channelId)
+    );
+
     const slackCountsByRun = new WeakMap<
       AbortSignal,
       Promise<Partial<Awaited<ReturnType<typeof getSlackSnapshotCounts>>>>
