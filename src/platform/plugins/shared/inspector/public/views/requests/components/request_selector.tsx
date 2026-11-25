@@ -117,11 +117,19 @@ export class RequestSelector extends Component<RequestSelectorProps> {
                 color={selectedRequest.status === RequestStatus.OK ? 'success' : 'danger'}
                 iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
               >
-                <FormattedMessage
-                  id="inspector.requests.requestTimeLabel"
-                  defaultMessage="{requestTime}ms"
-                  values={{ requestTime: selectedRequest.time }}
-                />
+                {selectedRequest.response?.isCached ? (
+                  <FormattedMessage
+                    id="inspector.requests.cachedRequestTimeLabel"
+                    defaultMessage="{requestTime}ms (cached)"
+                    values={{ requestTime: selectedRequest.time }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="inspector.requests.requestTimeLabel"
+                    defaultMessage="{requestTime}ms"
+                    values={{ requestTime: selectedRequest.time }}
+                  />
+                )}
               </EuiBadge>
             </EuiToolTip>
           )}

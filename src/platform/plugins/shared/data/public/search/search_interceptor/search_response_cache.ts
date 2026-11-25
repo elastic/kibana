@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
+import { map, Subscription } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchAbortController } from './search_abort_controller';
 
@@ -145,7 +145,9 @@ export class SearchResponseCache {
       this.touchGroup(item.groupId);
       return {
         groupId: item.groupId,
-        response$: item.response$,
+        response$: item.hasCompletedResponse
+          ? item.response$.pipe(map((response) => ({ ...response, isCached: true })))
+          : item.response$,
         searchAbortController: item.searchAbortController,
       };
     }

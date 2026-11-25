@@ -560,7 +560,7 @@ describe('SearchMethodsService', () => {
 
       it('calls requestResponder.ok with response data on success', async () => {
         const mockResponse = { columns: [], values: [] };
-        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        mockSearch.mockReturnValue(of({ rawResponse: mockResponse, isCached: true }));
         const requestResponder = createMockRequestResponder();
         const inspector = createMockInspector(requestResponder);
 
@@ -568,6 +568,7 @@ describe('SearchMethodsService', () => {
 
         expect(requestResponder.ok).toHaveBeenCalledWith({
           json: { rawResponse: mockResponse },
+          isCached: true,
           requestParams: undefined,
         });
       });

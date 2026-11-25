@@ -155,6 +155,7 @@ export class SearchMethodsService implements ISearchMethods {
       requestResponder?.stats(getEsqlInspectorStats(rawResponse));
       requestResponder?.ok({
         json: { rawResponse: response.rawResponse },
+        isCached: response.isCached,
         requestParams: response.requestParams,
       });
 
@@ -263,6 +264,7 @@ export class SearchMethodsService implements ISearchMethods {
 
       requestResponder?.ok({
         json: { rawResponse: response.rawResponse },
+        isCached: response.isCached,
         requestParams: response.requestParams,
       });
 
@@ -299,6 +301,7 @@ export class SearchMethodsService implements ISearchMethods {
       requestResponder?.stats(getSqlInspectorStats(response.rawResponse, response.took));
       requestResponder?.ok({
         json: { rawResponse: response.rawResponse },
+        isCached: response.isCached,
         requestParams: response.requestParams,
       });
 
@@ -363,6 +366,7 @@ export class SearchMethodsService implements ISearchMethods {
       requestResponder?.stats(getDslResponseInspectorStats(response.rawResponse));
       requestResponder?.ok({
         json: { rawResponse: response.rawResponse },
+        isCached: response.isCached,
         requestParams: response.requestParams,
       });
 
