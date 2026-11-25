@@ -42,7 +42,10 @@
             "interfaces": {
               "terms": {
                 "field": "system.network.name",
-                "size": 100
+                "size": 20,
+                "order": {
+                  "_key": "asc"
+                }
               },
               "aggregations": {
                 "bytes_in_max": {
