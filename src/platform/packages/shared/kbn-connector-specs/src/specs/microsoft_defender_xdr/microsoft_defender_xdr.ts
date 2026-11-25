@@ -38,7 +38,7 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
     id: '.microsoft_defender_xdr',
     displayName: 'Microsoft Defender XDR',
     description: i18n.translate(
-      'core.kibanaConnectorSpecs.microsoftDefenderXdr.metadata.description',
+      'connectorSpecs.microsoftDefenderXdr.metadata.description',
       {
         defaultMessage:
           'Manage incidents and alerts, run advanced hunting KQL queries, enrich threat intelligence, and triage threats in Microsoft Defender XDR',
@@ -59,11 +59,11 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
           meta: {
             scope: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.scope.label',
+                'connectorSpecs.microsoftDefenderXdr.auth.scope.label',
                 { defaultMessage: 'OAuth scope' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.scope.helpText',
+                'connectorSpecs.microsoftDefenderXdr.auth.scope.helpText',
                 {
                   defaultMessage:
                     'Use "https://graph.microsoft.com/.default" for Commercial, ' +
@@ -75,12 +75,12 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
             },
             tokenUrl: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.tokenUrl.label',
+                'connectorSpecs.microsoftDefenderXdr.auth.tokenUrl.label',
                 { defaultMessage: 'Token URL' }
               ),
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.tokenUrl.helpText',
+                'connectorSpecs.microsoftDefenderXdr.auth.tokenUrl.helpText',
                 {
                   defaultMessage:
                     "Replace '{tenant-id}' with your Microsoft Entra tenant ID (GUID). " +
@@ -102,11 +102,11 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
           meta: {
             scope: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.cert.scope.label',
+                'connectorSpecs.microsoftDefenderXdr.auth.cert.scope.label',
                 { defaultMessage: 'OAuth scope' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.cert.scope.helpText',
+                'connectorSpecs.microsoftDefenderXdr.auth.cert.scope.helpText',
                 {
                   defaultMessage:
                     'Use "https://graph.microsoft.com/.default" for Commercial, ' +
@@ -122,7 +122,7 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
             tokenUrl: {
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.cert.tokenUrl.helpText',
+                'connectorSpecs.microsoftDefenderXdr.auth.cert.tokenUrl.helpText',
                 {
                   defaultMessage:
                     "Replace '{tenant-id}' with your Microsoft Entra tenant ID. " +
@@ -134,7 +134,7 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
             },
             clientId: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.cert.clientId.helpText',
+                'connectorSpecs.microsoftDefenderXdr.auth.cert.clientId.helpText',
                 {
                   defaultMessage:
                     'The Application (client) ID of the Entra app registration (Azure Portal > Entra ID > App registrations > your app > Overview).',
@@ -143,7 +143,7 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
             },
             certificate: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.cert.certificate.helpText',
+                'connectorSpecs.microsoftDefenderXdr.auth.cert.certificate.helpText',
                 {
                   defaultMessage:
                     'Upload the PEM-encoded public certificate you uploaded to the Entra app registration. Must begin with -----BEGIN CERTIFICATE-----.',
@@ -152,7 +152,7 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
             },
             privateKey: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.cert.privateKey.helpText',
+                'connectorSpecs.microsoftDefenderXdr.auth.cert.privateKey.helpText',
                 {
                   defaultMessage:
                     'Upload the PEM-encoded private key that matches the uploaded certificate. Must begin with -----BEGIN PRIVATE KEY-----, -----BEGIN RSA PRIVATE KEY-----, or -----BEGIN ENCRYPTED PRIVATE KEY-----.',
@@ -179,7 +179,7 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.microsoftDefenderXdr.test.description', {
+    description: i18n.translate('connectorSpecs.microsoftDefenderXdr.test.description', {
       defaultMessage:
         'Verifies connectivity to Microsoft Defender XDR by fetching the most recent incident.',
     }),

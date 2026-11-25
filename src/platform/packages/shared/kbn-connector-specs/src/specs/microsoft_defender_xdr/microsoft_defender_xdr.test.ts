@@ -945,9 +945,7 @@ describe('addAlertComment handler', () => {
 describe('mergeIncidents handler', () => {
   it('calls POST /security/incidents/mergeIncidents with incidentIds and incidentComment', async () => {
     const client = makeClient();
-    client.post = jest
-      .fn()
-      .mockResolvedValue({ data: { targetIncidentId: '1' } });
+    client.post = jest.fn().mockResolvedValue({ data: { targetIncidentId: '1' } });
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.mergeIncidents;
     const result = await action?.handler(ctx as never, {

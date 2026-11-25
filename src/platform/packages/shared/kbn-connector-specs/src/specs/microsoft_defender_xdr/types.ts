@@ -165,8 +165,8 @@ export const CreateDetectionRuleInputSchema = lazySchema(() =>
       .enum(['enabled', 'disabled'])
       .default('enabled')
       .describe(
-          "Whether the rule runs on its schedule: 'enabled' or 'disabled'. Defaults to 'enabled' when omitted, so pass 'disabled' explicitly to stage an inactive rule."
-        ),
+        "Whether the rule runs on its schedule: 'enabled' or 'disabled'. Defaults to 'enabled' when omitted, so pass 'disabled' explicitly to stage an inactive rule."
+      ),
     queryText: z
       .string()
       .min(1)
@@ -337,7 +337,11 @@ export type GetIncidentInput = z.infer<typeof GetIncidentInputSchema>;
 export const UpdateIncidentInputSchema = lazySchema(() =>
   z
     .object({
-      incidentId: z.string().regex(/^\d+$/, 'incidentId must be a numeric string.').max(MAX_ID_LENGTH).describe('Numeric incident ID to update.'),
+      incidentId: z
+        .string()
+        .regex(/^\d+$/, 'incidentId must be a numeric string.')
+        .max(MAX_ID_LENGTH)
+        .describe('Numeric incident ID to update.'),
       status: z
         .enum(incidentStatusValues)
         .optional()
@@ -429,7 +433,10 @@ export const GetAlertInputSchema = lazySchema(() =>
   z.object({
     alertId: z
       .string()
-      .regex(/^[0-9A-Za-z_-]+$/, 'alertId must contain only alphanumeric characters, hyphens, or underscores.')
+      .regex(
+        /^[0-9A-Za-z_-]+$/,
+        'alertId must contain only alphanumeric characters, hyphens, or underscores.'
+      )
       .max(MAX_ID_LENGTH)
       .describe('Defender alert ID.'),
   })
@@ -439,7 +446,14 @@ export type GetAlertInput = z.infer<typeof GetAlertInputSchema>;
 export const UpdateAlertInputSchema = lazySchema(() =>
   z
     .object({
-      alertId: z.string().regex(/^[0-9A-Za-z_-]+$/, 'alertId must contain only alphanumeric characters, hyphens, or underscores.').max(MAX_ID_LENGTH).describe('Defender alert ID to update.'),
+      alertId: z
+        .string()
+        .regex(
+          /^[0-9A-Za-z_-]+$/,
+          'alertId must contain only alphanumeric characters, hyphens, or underscores.'
+        )
+        .max(MAX_ID_LENGTH)
+        .describe('Defender alert ID to update.'),
       status: z
         .enum(alertStatusValues)
         .optional()
@@ -509,7 +523,10 @@ export const AddAlertCommentInputSchema = lazySchema(() =>
   z.object({
     alertId: z
       .string()
-      .regex(/^[0-9A-Za-z_-]+$/, 'alertId must contain only alphanumeric characters, hyphens, or underscores.')
+      .regex(
+        /^[0-9A-Za-z_-]+$/,
+        'alertId must contain only alphanumeric characters, hyphens, or underscores.'
+      )
       .max(MAX_ID_LENGTH)
       .describe('Defender alert ID to add the comment to.'),
     comment: z
@@ -538,7 +555,9 @@ export type CorrelationReason = (typeof correlationReasonValues)[number];
 export const MergeIncidentsInputSchema = lazySchema(() =>
   z.object({
     incidentIds: z
-      .array(z.string().regex(/^\d+$/, 'Each incident ID must be a numeric string.').max(MAX_ID_LENGTH))
+      .array(
+        z.string().regex(/^\d+$/, 'Each incident ID must be a numeric string.').max(MAX_ID_LENGTH)
+      )
       .min(2)
       .max(100)
       .describe(

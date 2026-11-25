@@ -36,7 +36,7 @@ export const threatIntelActions: Record<string, ActionDefinition<any, any, any>>
     scope: 'read',
     description:
       'Get the Microsoft Defender Threat Intelligence reputation score and classification for a hostname or IP address. ' +
-      'Returns a score (0–100, higher = more malicious), a classification (malicious/suspicious/neutral/benign), ' +
+      'Returns a score (0–100, higher = more malicious), a classification (unknown/neutral/suspicious/malicious), ' +
       'and the rules that influenced the score. ' +
       'Requires the ThreatIntelligence.Read.All Graph permission.',
     input: GetThreatIntelHostInputSchema,
