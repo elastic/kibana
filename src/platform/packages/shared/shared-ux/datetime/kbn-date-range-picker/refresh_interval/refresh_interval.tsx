@@ -109,7 +109,7 @@ export function RefreshInterval({
 
       const intervalMs = autoRefreshIntervalToMs(parsed, derived.unit);
       if (intervalMs >= minIntervalMs) {
-        onChange({ ...value, intervalMs });
+        onChange({ ...value, intervalMs, intervalDisplayUnit: derived.unit });
       }
     },
     [onChange, value, derived.unit, minIntervalMs]
@@ -125,7 +125,11 @@ export function RefreshInterval({
       if (autoRefreshIntervalToMs(countInput, derived.unit) >= minIntervalMs) return;
 
       setCountInput(minCount);
-      onChange({ ...value, intervalMs: autoRefreshIntervalToMs(minCount, derived.unit) });
+      onChange({
+        ...value,
+        intervalMs: autoRefreshIntervalToMs(minCount, derived.unit),
+        intervalDisplayUnit: derived.unit,
+      });
     },
     [countInput, derived.count, derived.unit, minIntervalMs, minCount, onChange, value]
   );

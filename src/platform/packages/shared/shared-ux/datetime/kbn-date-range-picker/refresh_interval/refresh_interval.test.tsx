@@ -151,6 +151,31 @@ describe('RefreshInterval', () => {
     expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit')).toBeDisabled();
   });
 
+  it('keeps the shown unit when the count changes', () => {
+    const Harness = () => {
+      const [value, setValue] = useState<AutoRefreshSettings>({
+        isEnabled: true,
+        isPaused: false,
+        intervalMs: 59_000,
+        intervalDisplayUnit: 'm',
+      });
+
+      return <RefreshInterval value={value} onChange={setValue} />;
+    };
+
+    renderWithEuiTheme(<Harness />);
+
+    const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+    const unit = screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit');
+    expect(count).toHaveValue(59);
+    expect(unit).toHaveValue('s');
+
+    fireEvent.change(count, { target: { value: '60' } });
+
+    expect(count).toHaveValue(60);
+    expect(unit).toHaveValue('s');
+  });
+
   describe('with `minIntervalMs`', () => {
     it('does not apply a count below the minimum while typing and raises it on blur', () => {
       const onChange = jest.fn();
