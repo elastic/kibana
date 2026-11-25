@@ -3001,7 +3001,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.allowed_actions',
       {
         defaultMessage:
-          'A signed value that limits which response actions Endpoint runs and, when runscript is allowed, which scripts it can run. Generate it with the Elastic Endpoint allowed actions tool: https://github.com/elastic/endpoint/tree/main/tools/ElasticEndpointAllowedActions. Once set, a new value must be signed with the same key and generated later. Removing the value fails the policy and keeps the previous restrictions. Releasing an isolated host is always allowed. Empty allows all response actions. Default: empty.',
+          'A signed value that limits which response actions Endpoint runs and, when runscript is allowed, which scripts it can run. Generate it with the Elastic Endpoint allowed actions tool: https://github.com/elastic/endpoint/tree/main/tools/ElasticEndpointAllowedActions. Once set, a new value must be signed with the same key and generated later. Removing the value fails the policy and keeps the previous restrictions. Releasing an isolated host is always allowed. Empty, when never set, allows all response actions. Default: empty.',
       }
     ),
   },
@@ -3012,7 +3012,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.allowed_actions',
       {
         defaultMessage:
-          'A signed value that limits which response actions Endpoint runs and, when runscript is allowed, which scripts it can run. Generate it with the Elastic Endpoint allowed actions tool: https://github.com/elastic/endpoint/tree/main/tools/ElasticEndpointAllowedActions. Once set, a new value must be signed with the same key and generated later. Removing the value fails the policy and keeps the previous restrictions. Releasing an isolated host is always allowed. Empty allows all response actions. Default: empty.',
+          'A signed value that limits which response actions Endpoint runs and, when runscript is allowed, which scripts it can run. Generate it with the Elastic Endpoint allowed actions tool: https://github.com/elastic/endpoint/tree/main/tools/ElasticEndpointAllowedActions. Once set, a new value must be signed with the same key and generated later. Removing the value fails the policy and keeps the previous restrictions. Releasing an isolated host is always allowed. Empty, when never set, allows all response actions. Default: empty.',
       }
     ),
   },
@@ -3023,7 +3023,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.allowed_actions',
       {
         defaultMessage:
-          'A signed value that limits which response actions Endpoint runs and, when runscript is allowed, which scripts it can run. Generate it with the Elastic Endpoint allowed actions tool: https://github.com/elastic/endpoint/tree/main/tools/ElasticEndpointAllowedActions. Once set, a new value must be signed with the same key and generated later. Removing the value fails the policy and keeps the previous restrictions. Releasing an isolated host is always allowed. Empty allows all response actions. Default: empty.',
+          'A signed value that limits which response actions Endpoint runs and, when runscript is allowed, which scripts it can run. Generate it with the Elastic Endpoint allowed actions tool: https://github.com/elastic/endpoint/tree/main/tools/ElasticEndpointAllowedActions. Once set, a new value must be signed with the same key and generated later. Removing the value fails the policy and keeps the previous restrictions. Releasing an isolated host is always allowed. Empty, when never set, allows all response actions. Default: empty.',
       }
     ),
   },
