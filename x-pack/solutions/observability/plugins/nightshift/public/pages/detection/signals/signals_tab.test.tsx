@@ -121,6 +121,17 @@ describe('SignalsTab', () => {
     });
   });
 
+  it('lets the rule link click reach window so click telemetry fires', () => {
+    const windowClick = jest.fn();
+    window.addEventListener('click', windowClick);
+    renderTab();
+
+    fireEvent.click(screen.getByTestId(`nightshiftSignalRule-${signal.detection_id}`));
+    window.removeEventListener('click', windowClick);
+
+    expect(windowClick).toHaveBeenCalledTimes(1);
+  });
+
   it('opens a deep-linked signal outside the current page from the by-id query', () => {
     const deepLinkedSignal = {
       ...signal,

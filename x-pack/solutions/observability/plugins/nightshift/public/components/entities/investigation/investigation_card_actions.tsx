@@ -10,11 +10,17 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   copyToClipboard,
   EuiButtonIcon,
-  EuiConfirmModal,
+  EuiButton,
+  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPopover,
   EuiText,
   EuiToolTip,
@@ -84,8 +90,6 @@ export const InvestigationCardActions = ({
   const chatHref = getChatHref(investigation.id, investigation.agent_id);
   const handleOpenChat = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
-      // The card behind this control is itself clickable.
-      event.stopPropagation();
       // Let modified / middle clicks fall through so the href can open in a new tab.
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
         return;
@@ -138,8 +142,7 @@ export const InvestigationCardActions = ({
         key="copyLink"
         icon="link"
         aria-label={getFlyoutShareUrlAriaLabel()}
-        onClick={(event) => {
-          event.stopPropagation();
+        onClick={() => {
           setIsMenuOpen(false);
           handleCopyLink();
         }}
@@ -153,8 +156,7 @@ export const InvestigationCardActions = ({
               key="delete"
               icon="trash"
               color="danger"
-              onClick={(event) => {
-                event.stopPropagation();
+              onClick={() => {
                 setIsMenuOpen(false);
                 setIsDeleteConfirmOpen(true);
               }}
@@ -229,10 +231,7 @@ export const InvestigationCardActions = ({
                 color="text"
                 iconType="ellipsis"
                 aria-label={openMenuLabel}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                  event.stopPropagation();
-                  setIsMenuOpen((open) => !open);
-                }}
+                onClick={() => setIsMenuOpen((open) => !open)}
                 data-test-subj="nightshiftInvestigationCardActions"
               />
             </EuiToolTip>
@@ -241,24 +240,20 @@ export const InvestigationCardActions = ({
           <EuiContextMenuPanel items={menuItems} />
         </EuiPopover>
         {isDeleteConfirmOpen && (
-          // React events bubble through the modal's portal to the clickable card behind it.
-          <div onClick={(event) => event.stopPropagation()} role="presentation">
-            <EuiConfirmModal
-              aria-labelledby={deleteConfirmTitleId}
-              titleProps={{ id: deleteConfirmTitleId }}
-              title={i18n.translate('xpack.nightshift.investigations.cardDeleteConfirmTitle', {
-                defaultMessage: 'Delete investigation?',
-              })}
-              onCancel={() => setIsDeleteConfirmOpen(false)}
-              onConfirm={handleDelete}
-              cancelButtonText={i18n.translate('xpack.nightshift.investigations.cardDeleteCancel', {
-                defaultMessage: 'Cancel',
-              })}
-              confirmButtonText={deleteLabel}
-              buttonColor="danger"
-              defaultFocusedButton="cancel"
-              data-test-subj="nightshiftInvestigationCardDeleteConfirm"
-            >
+          <EuiModal
+            role="alertdialog"
+            aria-labelledby={deleteConfirmTitleId}
+            onClose={() => setIsDeleteConfirmOpen(false)}
+            data-test-subj="nightshiftInvestigationCardDeleteConfirm"
+          >
+            <EuiModalHeader>
+              <EuiModalHeaderTitle id={deleteConfirmTitleId}>
+                {i18n.translate('xpack.nightshift.investigations.cardDeleteConfirmTitle', {
+                  defaultMessage: 'Delete investigation?',
+                })}
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
+            <EuiModalBody>
               <EuiText size="s">
                 <p>
                   {i18n.translate('xpack.nightshift.investigations.cardDeleteConfirmBody', {
@@ -268,8 +263,31 @@ export const InvestigationCardActions = ({
                   })}
                 </p>
               </EuiText>
-            </EuiConfirmModal>
-          </div>
+            </EuiModalBody>
+            <EuiModalFooter>
+              <EuiButtonEmpty
+                autoFocus
+                onClick={() => setIsDeleteConfirmOpen(false)}
+                data-test-subj="confirmModalCancelButton"
+              >
+                {i18n.translate('xpack.nightshift.investigations.cardDeleteCancel', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+              <EuiButton
+                fill
+                color="danger"
+                onClick={handleDelete}
+                data-test-subj="confirmModalConfirmButton"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DELETE_INVESTIGATION,
+                  element: ebtElement,
+                })}
+              >
+                {deleteLabel}
+              </EuiButton>
+            </EuiModalFooter>
+          </EuiModal>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

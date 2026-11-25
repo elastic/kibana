@@ -87,6 +87,23 @@ describe('InvestigationCardActions', () => {
     expect(openChat).toHaveBeenCalledWith('investigation-1', 'nightshift.investigation');
   });
 
+  it('lets clicks on open in chat and delete confirm reach window so click telemetry fires', async () => {
+    const windowClick = jest.fn();
+    window.addEventListener('click', windowClick);
+    renderActions();
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardOpenInChat'));
+    expect(windowClick).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardDelete'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    window.removeEventListener('click', windowClick);
+
+    expect(windowClick).toHaveBeenCalledTimes(4);
+    await waitFor(() => expect(httpDelete).toHaveBeenCalled());
+  });
+
   it('shows the assignees before the other actions', () => {
     renderActions(<span data-test-subj="assigneesControl" />);
 

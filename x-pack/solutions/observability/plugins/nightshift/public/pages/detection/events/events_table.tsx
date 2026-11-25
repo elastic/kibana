@@ -249,10 +249,8 @@ export const EventsTable = ({
                 buttonRef={(element: HTMLButtonElement | null) =>
                   onOpenButtonMount(event.event_id, element)
                 }
-                onClick={(clickEvent: React.MouseEvent<HTMLButtonElement>) => {
-                  clickEvent.stopPropagation();
-                  onEventClick(event);
-                }}
+                onClick={() => onEventClick(event)}
+                data-prevent-row-click
                 data-test-subj={`nightshiftOpenEvent-${event.event_id}`}
                 {...getEbtProps({
                   action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SIGNIFICANT_EVENT,
@@ -308,7 +306,12 @@ export const EventsTable = ({
       rowProps={(event) => ({
         isSelected: event.event_id === selectedEventId,
         'data-test-subj': `nightshiftDetectionEventRow-${event.event_id}`,
-        onClick: () => onEventClick(event),
+        onClick: (clickEvent: React.MouseEvent) => {
+          if ((clickEvent.target as HTMLElement).closest('[data-prevent-row-click]')) {
+            return;
+          }
+          onEventClick(event);
+        },
       })}
       noItemsMessage={isLoading ? LOADING_EVENTS_MESSAGE : ''}
     />

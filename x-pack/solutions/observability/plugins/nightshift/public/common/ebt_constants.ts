@@ -22,6 +22,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   COLLAPSE_DETECTIONS: 'collapseDetections',
   CLONE_AUTOMATION: 'cloneAutomation',
   CONFIGURE_DETECTION: 'configureDetection',
+  CONFIRM_DELETE_INVESTIGATION: 'confirmDeleteInvestigation',
   CREATE_AUTOMATION: 'createAutomation',
   OPEN_NIGHTSHIFT_IN_DEFAULT_SPACE: 'openNightshiftInDefaultSpace',
   CREATE_DRAFT_SOURCE: 'createDraftSource',
