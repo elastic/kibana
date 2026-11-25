@@ -21,7 +21,6 @@ import {
   esqlCommandRegistry,
   analyzeResultPipeline,
   getNamedSubqueries,
-  isAggregatingCommand,
   getPromqlBracketsToClose,
   TRANSFORMATIONAL_COMMANDS,
   type EsqlRowOrigin,
@@ -37,6 +36,7 @@ import type {
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
+  ESQLAstForkCommand,
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
 import type { VariableNamePrefix } from '@kbn/esql-types';
@@ -107,12 +107,18 @@ export function getESQLResultPipeline(esql: string): EsqlResultPipeline {
   return getResultPipelineFromAst(parseEsqlCached(esql).root);
 }
 
-/** Finds STATS or PROMQL anywhere in the query. */
+/**
+ * Returns true when the query contains a STATS or PROMQL command, including nested
+ * FORK branches. KEEP and INLINE STATS are not aggregating.
+ */
 export function hasAggregatingCommand(esql?: string): boolean {
   if (!esql) return false;
   const { root } = parseEsqlCached(esql);
   return (
-    Walker.find(root, (node) => node.type === 'command' && isAggregatingCommand(node)) !== undefined
+    Walker.findAll(
+      root,
+      (node) => node.type === 'command' && (node.name === 'stats' || node.name === 'promql')
+    ).length > 0
   );
 }
 
@@ -121,7 +127,7 @@ export function getESQLRowOrigin(esql: string): EsqlRowOrigin {
   return getESQLResultPipeline(esql).rowOrigin;
 }
 
-/** Detects table results and preserves the legacy KEEP and FORK classification. */
+/** Detects schema table results and preserves the legacy transformational classification. */
 export function hasTransformationalCommand(esql?: string): boolean {
   if (!esql) return false;
   const { root } = parseEsqlCached(esql);
@@ -129,8 +135,25 @@ export function hasTransformationalCommand(esql?: string): boolean {
     return true;
   }
 
-  const result = getResultPipelineFromAst(root);
-  return !result.mayReturnSourceDocuments || result.hasLegacyTransformationalFork;
+  const { rowOrigin, mayReturnSourceDocuments } = getResultPipelineFromAst(root);
+  if (rowOrigin !== 'other' && !mayReturnSourceDocuments) {
+    return true;
+  }
+
+  const forks = Walker.findAll(
+    root,
+    (node) => node.type === 'command' && node.name === 'fork'
+  ) as ESQLAstForkCommand[];
+  return forks.some(
+    ({ args }) =>
+      args.length > 0 &&
+      args.every(
+        ({ child }) =>
+          child.type === 'query' &&
+          child.commands.length > 0 &&
+          child.commands.every(({ name }) => TRANSFORMATIONAL_COMMANDS.includes(name))
+      )
+  );
 }
 
 export function getLimitFromESQLQuery(esql: string): number {

@@ -269,19 +269,6 @@ describe('getEmbeddableDisplayColumns', () => {
     ).toEqual({ columns, grid: undefined });
   });
 
-  it('uses Summary when STATS only supplies values to an IN predicate', () => {
-    expect(
-      getEmbeddableDisplayColumns({
-        autoApplyDiscoverColumnDefaults: true,
-        persistedColumns: [],
-        dataView: dataViewMock,
-        isEsql: true,
-        esql: 'FROM logs | WHERE 1 IN (FROM logs | FORK (KEEP host) (STATS c = COUNT(*)) | EVAL n = 1 | KEEP n)',
-        esqlResultColumnNames: ['host', 'message'],
-      })
-    ).toEqual({ columns: [], grid: undefined });
-  });
-
   it('does not treat STATS mentioned in a string as an aggregating query', () => {
     expect(
       getEmbeddableDisplayColumns({

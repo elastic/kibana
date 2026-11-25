@@ -9,7 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { getESQLResultPipeline } from '@kbn/esql-utils';
+import { getESQLResultPipeline, hasAggregatingCommand } from '@kbn/esql-utils';
 import type { DefaultAppStateColumn } from '../../context_awareness';
 import { getResolvedProfileColumns } from '../../context_awareness/utils/get_resolved_profile_columns';
 import { getEsqlDefaultColumns } from '../../utils/get_esql_default_columns';
@@ -76,9 +76,9 @@ export const getEmbeddableDisplayColumns = ({
   }
 
   if (isEsql && esql) {
-    const result = getESQLResultPipeline(esql);
-    // Commands such as KEEP still return documents and should use Summary.
-    if (result.mayReturnSourceDocuments && !result.hasResultAggregation) {
+    const { rowOrigin, mayReturnSourceDocuments } = getESQLResultPipeline(esql);
+    const hasSchemaTable = rowOrigin !== 'other' && !mayReturnSourceDocuments;
+    if (!hasSchemaTable && !hasAggregatingCommand(esql)) {
       return EMPTY_DISPLAY_COLUMNS;
     }
 

@@ -9,7 +9,6 @@
 
 import { isSource, isSubQuery } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLAstForkCommand, ESQLAstItem } from '@elastic/esql/types';
-import { TRANSFORMATIONAL_COMMANDS } from '../../../constants';
 import { esqlCommandRegistry } from '../../registry';
 import {
   findNamedSubqueryForSource,
@@ -22,18 +21,14 @@ export type EsqlRowOrigin = 'schema' | 'other' | 'mixed';
 export interface EsqlResultPipeline {
   readonly rowOrigin: EsqlRowOrigin;
   readonly mayReturnSourceDocuments: boolean;
-  readonly hasResultAggregation: boolean;
-  readonly hasLegacyTransformationalFork: boolean;
 }
 
 const DEFAULT_RESULT: EsqlResultPipeline = {
   rowOrigin: 'other',
   mayReturnSourceDocuments: true,
-  hasResultAggregation: false,
-  hasLegacyTransformationalFork: false,
 };
 
-export const isAggregatingCommand = ({ name }: ESQLAstCommand): boolean =>
+const isAggregatingCommand = ({ name }: ESQLAstCommand): boolean =>
   name === 'stats' || name === 'promql';
 
 function combineResults(results: readonly EsqlResultPipeline[]): EsqlResultPipeline {
@@ -48,10 +43,6 @@ function combineResults(results: readonly EsqlResultPipeline[]): EsqlResultPipel
       : 'mixed',
     mayReturnSourceDocuments: results.some(
       ({ mayReturnSourceDocuments }) => mayReturnSourceDocuments
-    ),
-    hasResultAggregation: results.some(({ hasResultAggregation }) => hasResultAggregation),
-    hasLegacyTransformationalFork: results.some(
-      ({ hasLegacyTransformationalFork }) => hasLegacyTransformationalFork
     ),
   };
 }
@@ -105,29 +96,18 @@ export function analyzeResultPipeline(
       } else if (command.name === 'fork') {
         const { args } = command as ESQLAstForkCommand;
         if (args.length > 0) {
-          const branches = combineResults(
+          result = combineResults(
             args.map(({ child }) =>
               child.type === 'query' ? analyze(child.commands, bindings, result) : result
             )
           );
-          result = {
-            ...branches,
-            hasLegacyTransformationalFork:
-              branches.hasLegacyTransformationalFork ||
-              args.every(
-                ({ child }) =>
-                  child.type === 'query' &&
-                  child.commands.length > 0 &&
-                  child.commands.every(({ name }) => TRANSFORMATIONAL_COMMANDS.includes(name))
-              ),
-          };
         }
       } else if (
         esqlCommandRegistry.getCommandByName(command.name)?.metadata.rowOrigin === 'schema'
       ) {
         result = { ...result, rowOrigin: 'schema', mayReturnSourceDocuments: false };
       } else if (isAggregatingCommand(command)) {
-        result = { ...result, mayReturnSourceDocuments: false, hasResultAggregation: true };
+        result = { ...result, mayReturnSourceDocuments: false };
       }
     }
     return result;

@@ -20,7 +20,6 @@ export * from './definitions/utils/named_subqueries';
 export {
   analyzeResultPipeline,
   getPipelineRowOrigin,
-  isAggregatingCommand,
   type EsqlResultPipeline,
   type EsqlRowOrigin,
 } from './definitions/utils/result_pipeline';
