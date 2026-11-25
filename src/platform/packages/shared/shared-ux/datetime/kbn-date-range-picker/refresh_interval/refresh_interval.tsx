@@ -45,7 +45,8 @@ export interface RefreshIntervalProps {
   /**
    * Lowest interval the user can set, in milliseconds. A lower count is not applied while
    * typing and is raised to the lowest whole count of the selected unit once focus leaves the
-   * form, so picking a unit right after typing a count still uses the typed count.
+   * form, so picking a unit right after typing a count still uses the typed count. An interval
+   * below the minimum that the user didn't edit is left as is.
    * @default 0
    */
   minIntervalMs?: number;
@@ -118,6 +119,7 @@ export function RefreshInterval({
   const handleBlur = useCallback(
     (e: FocusEvent<HTMLDivElement>) => {
       if (e.currentTarget.contains(e.relatedTarget)) return;
+      if (countInput === derived.count) return;
       if (!isApplicableCount(countInput)) {
         setCountInput(derived.count);
         return;

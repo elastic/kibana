@@ -223,6 +223,38 @@ describe('RefreshInterval', () => {
       );
     });
 
+    it.each<[string, boolean]>([
+      ['off', false],
+      ['on', true],
+    ])(
+      'leaves an unedited interval below the minimum as is when auto-refresh is %s',
+      (_, isEnabled) => {
+        const onChange = jest.fn();
+        renderWithEuiTheme(
+          <>
+            <RefreshInterval
+              value={{
+                isEnabled,
+                isPaused: !isEnabled,
+                intervalMs: 2000,
+                intervalDisplayUnit: 's',
+              }}
+              onChange={onChange}
+              minIntervalMs={5000}
+            />
+            <button type="button" data-test-subj="outside" />
+          </>
+        );
+
+        fireEvent.blur(screen.getByTestId('dateRangePickerAutoRefreshToggle'), {
+          relatedTarget: screen.getByTestId('outside'),
+        });
+
+        expect(onChange).not.toHaveBeenCalled();
+        expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(2);
+      }
+    );
+
     it('raises the count to the minimum when switching to a smaller unit', () => {
       const onChange = jest.fn();
       renderWithEuiTheme(
