@@ -353,6 +353,52 @@ describe('URLScan.io connector', () => {
     });
   });
 
+  // Axios only drops the standard credential headers on a cross-host redirect.
+  describe('redirects', () => {
+    const keyDroppedOnRedirect = expect.objectContaining({ sensitiveHeaders: ['api-key'] });
+    const url = 'https://phish.example/login';
+
+    it.each([
+      ['searchScans', { q: 'x' }],
+      ['getResult', { uuid: UUID }],
+      ['getScreenshot', { uuid: UUID }],
+      ['getDom', { uuid: UUID }],
+      ['getQuota', {}],
+    ])('%s drops the api-key header on a cross-host redirect', async (name, input) => {
+      const { ctx, client } = createContext();
+      client.get.mockResolvedValue({ data: '', headers: {} });
+      await action(name).handler(ctx, input);
+      expect(client.get.mock.calls[0][1]).toEqual(keyDroppedOnRedirect);
+    });
+
+    it('scanUrl drops the api-key header on a cross-host redirect', async () => {
+      const { ctx, client } = createContext();
+      client.post.mockResolvedValue({ data: submissionResponse, headers: {} });
+      await action('scanUrl').handler(ctx, { url });
+      expect(client.post.mock.calls[0][2]).toEqual(keyDroppedOnRedirect);
+    });
+
+    it('scanUrlAndWait drops it on the submission and on the polls', async () => {
+      jest.useFakeTimers();
+      const { ctx, client } = createContext();
+      client.post.mockResolvedValue({ data: submissionResponse, headers: {} });
+      client.get.mockResolvedValue({ data: resultResponse, headers: {} });
+      const pending = action('scanUrlAndWait').handler(ctx, { url });
+      await jest.runAllTimersAsync();
+      await pending;
+      jest.useRealTimers();
+      expect(client.post.mock.calls[0][2]).toEqual(keyDroppedOnRedirect);
+      expect(client.get.mock.calls[0][1]).toEqual(keyDroppedOnRedirect);
+    });
+
+    it('the connectivity test drops it too', async () => {
+      const { ctx, client } = createContext();
+      client.get.mockResolvedValue({ data: { scope: 'user' }, headers: {} });
+      await UrlscanIo.test.handler(ctx);
+      expect(client.get.mock.calls[0][1]).toEqual(keyDroppedOnRedirect);
+    });
+  });
+
   describe('searchScans', () => {
     it('GETs the search endpoint with the query', async () => {
       const { ctx, client } = createContext();

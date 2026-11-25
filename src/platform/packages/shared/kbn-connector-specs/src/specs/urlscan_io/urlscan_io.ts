@@ -50,6 +50,12 @@ const POLL_INTERVAL_MS = 3_000;
 const DEFAULT_DOM_MAX_LENGTH = 50_000;
 
 /**
+ * Settings for every urlscan request. On a cross-host redirect Axios drops only the standard
+ * credential headers, so the api-key header has to be named to be dropped with them.
+ */
+const REDIRECT_SAFE = { sensitiveHeaders: ['api-key'] };
+
+/**
  * Surface urlscan's own error text. Its errors carry `message` plus a `description` (for
  * example "The domain .google.com could not be resolved to a valid IPv4/IPv6 address"), which
  * is the part that tells a caller why a submission was refused. An unwrapped axios message
@@ -596,6 +602,7 @@ Gotchas that matter:
       handler: async (ctx, input: SearchScansInput) => {
         try {
           const response = await ctx.client.get(`${API}/search/`, {
+            ...REDIRECT_SAFE,
             params: {
               q: input.q,
               ...(input.size === undefined ? {} : { size: input.size }),
@@ -637,7 +644,10 @@ Gotchas that matter:
       handler: async (ctx, input: GetResultInput) => {
         requireApiKey(ctx, 'GET /api/v1/result/{uuid}/');
         try {
-          const response = await ctx.client.get(`${API}/result/${encodeURIComponent(input.uuid)}/`);
+          const response = await ctx.client.get(
+            `${API}/result/${encodeURIComponent(input.uuid)}/`,
+            REDIRECT_SAFE
+          );
           return {
             found: true as const,
             ...trimResult(response.data as ScanResultResponse, input.includeRequests),
@@ -687,6 +697,7 @@ Gotchas that matter:
         requireApiKey(ctx, 'POST /api/v1/scan/');
         try {
           const response = await ctx.client.post(`${API}/scan/`, submissionBody(input), {
+            ...REDIRECT_SAFE,
             headers: { 'Content-Type': 'application/json' },
           });
           return {
@@ -715,6 +726,7 @@ Gotchas that matter:
         let submission: SubmissionResponse;
         try {
           const response = await ctx.client.post(`${API}/scan/`, submissionBody(input), {
+            ...REDIRECT_SAFE,
             headers: { 'Content-Type': 'application/json' },
           });
           submission = response.data as SubmissionResponse;
@@ -752,7 +764,10 @@ Gotchas that matter:
         do {
           attempts += 1;
           try {
-            const response = await ctx.client.get(`${API}/result/${encodeURIComponent(uuid)}/`);
+            const response = await ctx.client.get(
+              `${API}/result/${encodeURIComponent(uuid)}/`,
+              REDIRECT_SAFE
+            );
             return {
               found: true as const,
               submission: trimmedSubmission,
@@ -836,6 +851,7 @@ Gotchas that matter:
         const screenshotUrl = `${BASE_URL}/screenshots/${uuid}.png`;
         try {
           const response = await ctx.client.get(screenshotUrl, {
+            ...REDIRECT_SAFE,
             responseType: 'arraybuffer',
           });
           const buffer = Buffer.from(response.data as ArrayBuffer);
@@ -885,7 +901,7 @@ Gotchas that matter:
         const domUrl = `${BASE_URL}/dom/${uuid}/`;
         const maxLength = input.maxLength ?? DEFAULT_DOM_MAX_LENGTH;
         try {
-          const response = await ctx.client.get(domUrl, { responseType: 'text' });
+          const response = await ctx.client.get(domUrl, { ...REDIRECT_SAFE, responseType: 'text' });
           const dom = typeof response.data === 'string' ? response.data : String(response.data);
           const truncated = dom.length > maxLength;
           return {
@@ -923,7 +939,7 @@ Gotchas that matter:
       handler: async (ctx) => {
         try {
           // The path urlscan's spec and rate limit docs name for quotas.
-          const response = await ctx.client.get(`${API}/quotas`);
+          const response = await ctx.client.get(`${API}/quotas`, REDIRECT_SAFE);
           const data = response.data as QuotaResponse;
           const limits = data.limits ?? {};
           const perAction: Record<string, Record<string, QuotaWindow>> = {};
@@ -975,7 +991,7 @@ Gotchas that matter:
     handler: async (ctx: ActionContext) => {
       const usesApiKey = ctx.secrets?.authType === 'api_key_header';
       try {
-        const response = await ctx.client.get(`${API}/quotas`);
+        const response = await ctx.client.get(`${API}/quotas`, REDIRECT_SAFE);
         const data = response.data as QuotaResponse;
         // The quota endpoint answers 200 for an anonymous caller too, just with the reduced
         // per-IP budget and scope "ip-address" (verified live), so a 200 alone does not prove a
