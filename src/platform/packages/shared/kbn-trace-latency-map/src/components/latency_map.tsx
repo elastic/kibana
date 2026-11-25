@@ -34,15 +34,16 @@ import type {
 import { LATENCY_MAP_INNER_ROWS, durationToRow, rowToDuration } from '../query/duration_rows';
 import { getMapSource } from '../query/latency_map_query';
 import { getCellKey } from '../query/parse';
+import { getTimeGridKey } from '../query/time_grid';
 import { clampRange, isSameRange } from '../geometry/cell_range';
 import type { Cell, CellRange } from '../geometry/cell_range';
 import { LAYOUT, getTimeBinsForWidth } from '../geometry/layout';
 import { createMapGeometry } from '../geometry/map_geometry';
 import type { PlotArea, Point } from '../geometry/map_geometry';
-import { isSamePlot } from '../geometry/plot_calibration';
 import { formatDuration, formatTimestamp } from '../geometry/ticks';
 import { useLatencyGrid } from '../hooks/use_latency_grid';
 import { useLatencyMapColors } from '../hooks/use_latency_map_colors';
+import { usePlotCalibration } from '../hooks/use_plot_calibration';
 import { useSettledWidth } from '../hooks/use_settled_width';
 import { endGesture, moveGesture, startGesture } from '../selection/gesture';
 import type { Gesture } from '../selection/gesture';
@@ -240,40 +241,15 @@ export function LatencyMap({
     if (loadedSource) callbacks.current.onLoad?.(loadedSource);
   }, [loadedSource]);
 
-  // Where the chart put its cells. Known from the first cell it tells of, and only for as long as
-  // the chart keeps its height and its columns.
-  const plotKey = `${height}:${timeGrid?.fromMs}:${timeGrid?.binMs}:${timeGrid?.bins}`;
-  const [calibrated, setCalibrated] = useState<{
-    key: string;
-    plot: PlotArea;
-    rightMargin: number;
-    width: number;
-  }>();
-  const plot = useMemo(() => {
-    if (!calibrated || calibrated.key !== plotKey) return undefined;
-    const widthDelta = width - calibrated.width;
-    const marginDelta = rightMargin - calibrated.rightMargin;
-    if ((widthDelta === 0 && marginDelta === 0) || !timeGrid) return calibrated.plot;
-    // A resize within a tier (a flyout opening beside the map, say) and the band gutter only
-    // change how wide the columns are, so the calibration follows them exactly: same corner
-    // and rows, each column's share of the change. The chart's next event confirms it.
-    return {
-      ...calibrated.plot,
-      colWidth: calibrated.plot.colWidth + (widthDelta - marginDelta) / timeGrid.bins,
-    };
-  }, [calibrated, plotKey, rightMargin, width, timeGrid]);
-  const handlePlot = useCallback(
-    (next: PlotArea) =>
-      setCalibrated((previous) =>
-        previous?.key === plotKey &&
-        previous.rightMargin === rightMargin &&
-        previous.width === width &&
-        isSamePlot(previous.plot, next)
-          ? previous
-          : { key: plotKey, plot: next, rightMargin, width }
-      ),
-    [plotKey, rightMargin, width]
-  );
+  // A new grid (the map resized into another tier, or its range changed) puts cells elsewhere.
+  const gridKey = getTimeGridKey(timeGrid);
+  // Where the chart put its cells, for as long as it keeps its height and its columns.
+  const { plot, handlePlot } = usePlotCalibration({
+    plotKey: `${height}:${gridKey}`,
+    width,
+    rightMargin,
+    timeGrid,
+  });
 
   const geometry = useMemo(
     () =>
@@ -345,9 +321,8 @@ export function LatencyMap({
   const [isDrawing, setIsDrawing] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
 
-  // A new grid (the map resized, or its range changed) puts cells elsewhere: a cursor, an anchor or
-  // a move in progress would point at cells that are no longer there, or past the new edge.
-  const gridKey = timeGrid ? `${timeGrid.fromMs}:${timeGrid.binMs}:${timeGrid.bins}` : undefined;
+  // A new grid puts cells elsewhere: a cursor, an anchor or a move in progress would point at
+  // cells that are no longer there, or past the new edge.
   useEffect(() => {
     setKeyboard(undefined);
     setDraft(undefined);
