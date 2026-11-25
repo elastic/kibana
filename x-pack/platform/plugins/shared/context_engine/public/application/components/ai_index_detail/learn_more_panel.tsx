@@ -30,7 +30,6 @@ interface LearnMoreCard {
   href: string;
 }
 
-/** Links to the Context Engine docs. */
 export const LearnMorePanel = () => {
   const {
     services: { docLinks },

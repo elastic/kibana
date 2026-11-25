@@ -24,11 +24,7 @@ export interface FailedAutomationRun {
   execution: WorkflowExecutionListItemDto;
 }
 
-/**
- * The automations whose latest run failed or timed out, in the order of `workflowIds`.
- * Shares the query cache with `useLatestWorkflowExecution`, so the automation rows and
- * this list always show the same run.
- */
+/** The automations whose latest run failed or timed out, in the order of `workflowIds`. */
 export const useFailedAutomationRuns = (
   workflowIds: readonly string[],
   { enabled = true }: { enabled?: boolean } = {}
@@ -47,7 +43,7 @@ export const useFailedAutomationRuns = (
 
   return uniqueWorkflowIds.flatMap((workflowId, index) => {
     const result = results[index];
-    // A failed refresh keeps the old data. Like the automation row, don't show it as current.
+    // A failed refresh keeps the old data, so don't show it as current.
     if (result?.isError) {
       return [];
     }

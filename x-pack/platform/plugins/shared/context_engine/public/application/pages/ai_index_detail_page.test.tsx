@@ -31,14 +31,17 @@ import {
   CONTEXT_ENGINE_PATHS,
   getAiIndexDetailPath,
   getAiIndexKnowledgeDocumentsPath,
+  getAiIndexAutomationsPath,
   getAiIndexSettingsPath,
   getAiIndexSourcesPath,
 } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
 import { SETUP_WIZARD_STORAGE_KEY } from '../utils/setup_wizard';
+import { RECENT_KNOWLEDGE_DOCUMENTS_QUERY } from '../components/ai_index_detail';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
+import type { LatestWorkflowExecution } from '../hooks/use_latest_workflow_execution';
 
 const AI_INDEX_DETAIL_ROUTE_PATHS = [
   CONTEXT_ENGINE_PATHS.detail,
@@ -74,13 +77,14 @@ jest.mock('../hooks/use_data_connectors', () => ({
 }));
 
 const mockMgetWorkflows = jest.fn();
+const mockCreateWorkflow = jest.fn();
 const mockGetWorkflowExecutions = jest.fn();
 
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsApi: () => ({
     mgetWorkflows: mockMgetWorkflows,
     getWorkflowExecutions: mockGetWorkflowExecutions,
-    createWorkflow: jest.fn(),
+    createWorkflow: mockCreateWorkflow,
   }),
   useWorkflowsCapabilities: () => ({
     canExecuteWorkflow: true,
@@ -128,6 +132,20 @@ jest.mock('../hooks/use_ai_index_dreaming', () => ({
   useAiIndexDreaming: jest.fn(),
 }));
 
+const mockDefaultLatestWorkflowExecution = (): LatestWorkflowExecution => ({
+  executions: undefined,
+  unavailableWorkflowIds: [],
+  isRunning: false,
+  activeExecutionId: undefined,
+  isError: false,
+  isLoading: false,
+});
+
+jest.mock('../hooks/use_latest_workflow_execution', () => ({
+  ...jest.requireActual('../hooks/use_latest_workflow_execution'),
+  useLatestWorkflowExecution: jest.fn(() => mockDefaultLatestWorkflowExecution()),
+}));
+
 jest.mock('../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => ({
     agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
@@ -139,6 +157,10 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
 const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 const mockUseAiIndexDreaming = jest.mocked(useAiIndexDreaming);
 const preferenceDreaming = { enabled: true, facts: [{ type: 'preference' }] };
+
+jest.mock('../hooks/use_ai_index_spend', () => ({
+  useAiIndexSpend: () => ({ spend: undefined, isLoading: true, error: undefined }),
+}));
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -225,10 +247,10 @@ const renderWithProviders = (
   );
 };
 
-const closeSetupWizard = () => {
+const closeSetupWizard = (aiIndexId = 'my-ai-index') => {
   window.localStorage.setItem(
     SETUP_WIZARD_STORAGE_KEY,
-    JSON.stringify({ '/my-ai-index': 'closed' })
+    JSON.stringify({ [`/${aiIndexId}`]: 'closed' })
   );
 };
 
@@ -263,12 +285,21 @@ const removeAutomationFromRow = async (rowIndex: number) => {
 };
 
 describe('AiIndexDetailPage', () => {
+  // jsdom has no scrollIntoView. Links to `#automations` scroll to the Automations panel.
+  const scrollIntoView = jest.fn();
+
   beforeEach(() => {
+    Element.prototype.scrollIntoView = scrollIntoView;
     mockMgetWorkflows.mockResolvedValue([]);
+    mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
     mockGetWorkflowExecutions.mockResolvedValue({ results: [] });
     mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
-    mockUseAiIndexDreaming.mockReturnValue({ dreaming: undefined, isLoading: false });
+    mockUseAiIndexDreaming.mockReturnValue({
+      dreaming: undefined,
+      workflowIds: [],
+      isLoading: false,
+    });
     // Most tests are about the normal Overview, so the setup wizard starts closed.
     closeSetupWizard();
   });
@@ -531,7 +562,11 @@ describe('AiIndexDetailPage', () => {
   });
 
   it('opens the dreaming settings from the Settings tab when memory is globally enabled', async () => {
-    mockUseAiIndexDreaming.mockReturnValue({ dreaming: preferenceDreaming, isLoading: false });
+    mockUseAiIndexDreaming.mockReturnValue({
+      dreaming: preferenceDreaming,
+      workflowIds: [],
+      isLoading: false,
+    });
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 
@@ -676,7 +711,7 @@ describe('AiIndexDetailPage', () => {
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith(
       CONTEXT_ENGINE_APP_ID,
-      expect.objectContaining({ path: getAiIndexSettingsPath(aiIndex.id) })
+      expect.objectContaining({ path: getAiIndexAutomationsPath(aiIndex.id) })
     );
   });
 
@@ -811,6 +846,8 @@ describe('AiIndexDetailPage', () => {
     expect(await within(settingsTab).findByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
       'My workflow'
     );
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+    expect(within(settingsTab).getByRole('heading', { name: 'Automations' })).toHaveFocus();
   });
 
   it('does not count dreaming automations while memory is off', async () => {
@@ -831,7 +868,26 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextOverviewStatCardValue-automations')).toHaveTextContent('1');
   });
 
-  it('gives the empty recent documents panel the full row when there are no documents', async () => {
+  it('asks for the counts with the same request as Recent documents, so it is sent once', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    // The setup wizard counts memories per type with its own requests, so those are left out.
+    const requests = mockUseListKi.mock.calls
+      .filter(([{ type }]) => type === undefined)
+      .map(([args]) => ({
+        ...args,
+        notifyOnError: undefined,
+      }));
+    expect(requests).toContainEqual({ aiIndexId: aiIndex.id, ...RECENT_KNOWLEDGE_DOCUMENTS_QUERY });
+    expect(new Set(requests.map((request) => JSON.stringify(request))).size).toBe(1);
+  });
+
+  it('keeps the chart next to the empty recent documents panel when there are no documents', async () => {
     mockUseListKi.mockImplementation(() => ({
       ...defaultListKiMock,
       total: 0,
@@ -845,7 +901,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextOverviewRecentDocumentsEmpty')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextOverviewDocumentsChart')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextOverviewDocumentsChart')).toBeInTheDocument();
   });
 
   it('shows no knowledge documents count when the summary request fails', async () => {
@@ -865,6 +921,81 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextOverviewStatCardValue-knowledgeDocuments')).toHaveTextContent(
       '-'
     );
+  });
+
+  it('does not show the onboarding panel when the summary request fails', async () => {
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+      error: new Error('Request timed out'),
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextOnboardingConnectAgentPanel')).not.toBeInTheDocument();
+  });
+
+  it('does not show the previous AI index summary while the new one loads', async () => {
+    const otherAiIndex: GetAiIndexResponse = { ...aiIndex, id: 'other-ai-index' };
+    closeSetupWizard(otherAiIndex.id);
+    // `useListKi` keeps the previous AI index's response (25 documents) while this one loads.
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
+      isPreviousData: true,
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(otherAiIndex);
+
+    renderWithProviders(services, undefined, getAiIndexDetailPath(otherAiIndex.id));
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextOverviewStatCard-knowledgeDocuments')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextOverviewStatCardValue-knowledgeDocuments')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextOverviewDocumentsChart')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextOnboardingConnectAgentPanel')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the Overview sections with skeletons before the AI index has loaded', async () => {
+    const services = createServices();
+    let resolveAiIndexGet: (value: GetAiIndexResponse) => void = () => {};
+    services.http.get.mockImplementation(
+      () =>
+        new Promise<GetAiIndexResponse>((resolve) => {
+          resolveAiIndexGet = resolve;
+        })
+    );
+
+    renderWithProviders(services);
+
+    expect(await screen.findByTestId('contextOverviewStatCards')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextOverviewStatCardValue-sources')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextOverviewStatCardValue-automations')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextOverviewRecentDocuments')).toBeInTheDocument();
+    expect(screen.getByTestId('contextOverviewDocumentsChart')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-sources')).toHaveTextContent(/^Sources$/);
+    expect(mockUseListKi).toHaveBeenCalledWith(
+      expect.objectContaining({ aiIndexId: aiIndex.id, notifyOnError: false })
+    );
+
+    resolveAiIndexGet(aiIndex);
+
+    expect(await screen.findByTestId('contextOverviewStatCardValue-sources')).toHaveTextContent(
+      '1'
+    );
+    expect(screen.getByTestId('contextAiIndexDetailTab-sources')).toHaveTextContent('Sources1');
   });
 
   it('shows the Manage in Settings link only once the AI index is known to be editable', async () => {
@@ -1034,6 +1165,43 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(await screen.findByTestId('contextAddAutomationButton')).toBeEnabled();
+  });
+
+  it('creates a workflow from the Settings tab, attaches it, and opens the editor', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services, undefined, getAiIndexSettingsPath(aiIndex.id));
+
+    await waitForAiIndexDetailLoaded();
+
+    fireEvent.click(await screen.findByTestId('contextAddAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
+
+    await waitFor(() => {
+      expect(mockCreateWorkflow).toHaveBeenCalledWith({
+        yaml: expect.stringContaining('my-ai-index automation'),
+      });
+    });
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [{ type: 'workflow', value: 'wf-created' }],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
+          }),
+        })
+      );
+    });
+
+    expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index%2Fsettings',
+    });
   });
 
   it('keeps the rows rendered while the summaries for an edited list resolve', async () => {

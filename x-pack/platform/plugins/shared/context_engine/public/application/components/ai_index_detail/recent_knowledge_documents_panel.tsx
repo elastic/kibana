@@ -8,20 +8,21 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
+  EuiText,
+  EuiTextTruncate,
   EuiTitle,
-  useEuiFontSize,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { KI_NOT_DELETED_STATUSES } from '../../../../common/ki_lifecycle_status';
 import type { KiListItem } from '../../../../common/http_api/knowledge_indicators';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
@@ -31,51 +32,35 @@ import { getAiIndexKnowledgeDocumentsPath, getKnowledgeDocumentLocation } from '
 import { getKiDisplayTitle } from '../ki/list/list_ki_helpers';
 import { KiFormattedDate } from '../ki/shared/ki_formatted_date';
 import { KiTypeDisplay } from '../ki/shared/ki_type_display';
-import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
+import { OverviewPanelEmptyState } from './overview_panel_empty_state';
+
+// A column, so the empty state can sit at the bottom of the panel, level with the chart's.
+const panelStyle = css({ display: 'flex', flexDirection: 'column' });
+// Flex groups grow by default, which would push the title down in the column panel.
+const headerStyle = css({ flexGrow: 0 });
 
 export const RECENT_KNOWLEDGE_DOCUMENTS_SIZE = 5;
 
-const useRowStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const { fontSize: smallFontSize } = useEuiFontSize('xs');
-  return useMemo(
-    () => ({
-      row: css({
-        display: 'flex',
-        alignItems: 'center',
-        gap: euiTheme.size.m,
-        padding: `${euiTheme.size.s} ${euiTheme.size.xs}`,
-        borderTop: euiTheme.border.thin,
-        color: euiTheme.colors.textParagraph,
-        textDecoration: 'none',
-        '&:first-of-type': {
-          borderTop: 'none',
-        },
-        '&:hover, &:focus-visible': {
-          backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-          textDecoration: 'none',
-        },
-      }),
-      title: css({
-        flex: 1,
-        minWidth: 0,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        fontWeight: euiTheme.font.weight.medium,
-      }),
-      updated: css({
-        flexShrink: 0,
-        color: euiTheme.colors.textSubdued,
-        fontSize: smallFontSize,
-      }),
-    }),
-    [euiTheme, smallFontSize]
-  );
-};
+/** Also used by the Overview page for its counts, so both share one request. */
+export const RECENT_KNOWLEDGE_DOCUMENTS_QUERY = {
+  size: RECENT_KNOWLEDGE_DOCUMENTS_SIZE,
+  status: KI_NOT_DELETED_STATUSES,
+  sort: 'updated',
+} as const;
 
-const RecentKnowledgeDocumentRow = ({ aiIndexId, ki }: { aiIndexId: string; ki: KiListItem }) => {
-  const styles = useRowStyles();
+const badgeItemCss = css({ minWidth: 0, maxWidth: '40%' });
+
+interface RecentKnowledgeDocumentRowProps {
+  aiIndexId: string;
+  ki: KiListItem;
+  hasDivider: boolean;
+}
+
+const RecentKnowledgeDocumentRow = ({
+  aiIndexId,
+  ki,
+  hasDivider,
+}: RecentKnowledgeDocumentRowProps) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { path, params } = getKnowledgeDocumentLocation(aiIndexId, ki);
   const { href, onClick } = getRouterLinkProps({
@@ -85,27 +70,38 @@ const RecentKnowledgeDocumentRow = ({ aiIndexId, ki }: { aiIndexId: string; ki: 
   const { title, type, updated_at: updatedAt } = ki;
 
   return (
-    <a
-      href={href}
-      onClick={onClick}
-      css={styles.row}
-      data-test-subj="contextOverviewRecentDocumentRow"
-      {...getEbtProps({
-        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
-        action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_RECENT_DOCUMENT,
-      })}
-    >
-      <EuiIcon type="document" color="subdued" aria-hidden={true} />
-      <span css={styles.title} data-test-subj="contextOverviewRecentDocumentTitle">
-        {getKiDisplayTitle(title)}
-      </span>
-      <KiTypeDisplay as="badge" type={type} />
-      {updatedAt ? (
-        <span css={styles.updated}>
-          <KiFormattedDate value={updatedAt} />
-        </span>
-      ) : null}
-    </a>
+    <li data-test-subj="contextOverviewRecentDocumentRow">
+      {hasDivider ? <EuiHorizontalRule margin="s" aria-hidden={true} /> : null}
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="document" color="subdued" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem className="eui-textTruncate">
+          <EuiLink
+            href={href}
+            onClick={onClick}
+            className="eui-textTruncate"
+            data-test-subj="contextOverviewRecentDocumentTitle"
+            {...getEbtProps({
+              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
+              action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_RECENT_DOCUMENT,
+            })}
+          >
+            <EuiTextTruncate text={getKiDisplayTitle(title)} />
+          </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={badgeItemCss}>
+          <KiTypeDisplay as="badge" type={type} />
+        </EuiFlexItem>
+        {updatedAt ? (
+          <EuiFlexItem grow={false} className="eui-textNoWrap">
+            <EuiText size="xs" color="subdued">
+              <KiFormattedDate value={updatedAt} />
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    </li>
   );
 };
 
@@ -143,19 +139,13 @@ interface RecentKnowledgeDocumentsPanelProps {
   isMemoryEnabled: boolean;
 }
 
-/** The most recently updated Knowledge documents of the AI index. */
 export const RecentKnowledgeDocumentsPanel = ({
   aiIndexId,
   isManaged,
   isMemoryEnabled,
 }: RecentKnowledgeDocumentsPanelProps) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
-  const { kis, isLoading, error } = useListKi({
-    aiIndexId,
-    size: RECENT_KNOWLEDGE_DOCUMENTS_SIZE,
-    status: KI_NOT_DELETED_STATUSES,
-    sort: 'updated',
-  });
+  const { kis, isLoading, error } = useListKi({ aiIndexId, ...RECENT_KNOWLEDGE_DOCUMENTS_QUERY });
   const knowledgeDocumentsPath = getAiIndexKnowledgeDocumentsPath(aiIndexId);
   const viewAllLinkProps = getRouterLinkProps({
     href: createContextEngineUrl(knowledgeDocumentsPath),
@@ -163,9 +153,69 @@ export const RecentKnowledgeDocumentsPanel = ({
   });
   const hasDocuments = kis.length > 0;
 
+  const renderBody = () => {
+    if (isLoading) {
+      return (
+        <>
+          <EuiSpacer size="m" />
+          <EuiSkeletonText lines={3} data-test-subj="contextOverviewRecentDocumentsLoading" />
+        </>
+      );
+    }
+    if (error && !hasDocuments) {
+      return (
+        <OverviewPanelEmptyState
+          iconType="warning"
+          dataTestSubj="contextOverviewRecentDocumentsError"
+          message={i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.loadError',
+            { defaultMessage: 'Unable to load recent knowledge documents.' }
+          )}
+        />
+      );
+    }
+    if (!hasDocuments) {
+      return (
+        <OverviewPanelEmptyState
+          iconType="document"
+          dataTestSubj="contextOverviewRecentDocumentsEmpty"
+          message={getEmptyText({ isManaged, isMemoryEnabled })}
+        />
+      );
+    }
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup
+          component="ul"
+          direction="column"
+          gutterSize="none"
+          aria-label={i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.listAriaLabel',
+            { defaultMessage: 'Recent knowledge documents' }
+          )}
+        >
+          {kis.map((ki, index) => (
+            <RecentKnowledgeDocumentRow
+              key={`${ki.index}/${ki.id}`}
+              aiIndexId={aiIndexId}
+              ki={ki}
+              hasDivider={index > 0}
+            />
+          ))}
+        </EuiFlexGroup>
+      </>
+    );
+  };
+
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextOverviewRecentDocuments">
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+    <EuiPanel
+      hasBorder
+      paddingSize="l"
+      css={panelStyle}
+      data-test-subj="contextOverviewRecentDocuments"
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} css={headerStyle}>
         <EuiFlexItem>
           <EuiTitle size="s">
             <h2>
@@ -193,40 +243,7 @@ export const RecentKnowledgeDocumentsPanel = ({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-      {isLoading ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiSkeletonText lines={3} data-test-subj="contextOverviewRecentDocumentsLoading" />
-        </>
-      ) : error && !hasDocuments ? (
-        <AiIndexDetailPanelDescription data-test-subj="contextOverviewRecentDocumentsError">
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.overview.recentDocuments.loadError', {
-            defaultMessage: 'Unable to load recent knowledge documents.',
-          })}
-        </AiIndexDetailPanelDescription>
-      ) : hasDocuments ? (
-        <>
-          <EuiSpacer size="s" />
-          <nav
-            aria-label={i18n.translate(
-              'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.listAriaLabel',
-              { defaultMessage: 'Recent knowledge documents' }
-            )}
-          >
-            {kis.map((ki) => (
-              <RecentKnowledgeDocumentRow
-                key={`${ki.index}/${ki.id}`}
-                aiIndexId={aiIndexId}
-                ki={ki}
-              />
-            ))}
-          </nav>
-        </>
-      ) : (
-        <AiIndexDetailPanelDescription data-test-subj="contextOverviewRecentDocumentsEmpty">
-          {getEmptyText({ isManaged, isMemoryEnabled })}
-        </AiIndexDetailPanelDescription>
-      )}
+      {renderBody()}
     </EuiPanel>
   );
 };

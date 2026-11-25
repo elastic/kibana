@@ -82,7 +82,6 @@ describe('KnowledgeDocumentsChartPanel', () => {
     );
     expect(screen.queryByTestId('contextOverviewDocumentsChartEmpty')).not.toBeInTheDocument();
     const countAxis = mockAxisProps.mock.calls.find(([props]) => props.id === 'count')?.[0];
-    expect(countAxis.domain).toBeUndefined();
     expect(countAxis.maximumFractionDigits).toBe(0);
   });
 
@@ -95,17 +94,14 @@ describe('KnowledgeDocumentsChartPanel', () => {
     expect(tooltip.headerFormatter({ value: '2026-11-01' })).toBe('Nov 1');
   });
 
-  it('shows empty bars and a short text when no documents were added in 30 days', () => {
+  it('shows an empty state instead of the chart when no documents were added in 30 days', () => {
     mockUseKiHistogram.mockReturnValue(
       histogramResult({ buckets: [{ date: '2026-11-20', count: 0 }] })
     );
 
     renderPanel();
 
-    expect(screen.getByTestId('mockChart')).toBeInTheDocument();
-    const countAxis = mockAxisProps.mock.calls.find(([props]) => props.id === 'count')?.[0];
-    expect(countAxis.domain).toEqual({ min: 0, max: 1 });
-    expect(countAxis.ticks).toBe(1);
+    expect(screen.queryByTestId('mockChart')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextOverviewDocumentsChartEmpty')).toHaveTextContent(
       'No new knowledge documents in the last 30 days.'
     );
@@ -129,5 +125,14 @@ describe('KnowledgeDocumentsChartPanel', () => {
       'Unable to load the knowledge documents chart.'
     );
     expect(screen.queryByTestId('mockChart')).not.toBeInTheDocument();
+  });
+
+  it('keeps the loaded chart when a refetch fails', () => {
+    mockUseKiHistogram.mockReturnValue(histogramResult({ error: new Error('boom') }));
+
+    renderPanel();
+
+    expect(screen.getByTestId('mockChart')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextOverviewDocumentsChartError')).not.toBeInTheDocument();
   });
 });

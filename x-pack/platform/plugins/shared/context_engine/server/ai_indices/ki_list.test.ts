@@ -6,7 +6,9 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   getKiGroups,
   getKiHistogram,
@@ -20,9 +22,17 @@ const BACKING_INDEX = 'ai-index-idx-sample';
 const INDEX_DEST = { type: 'index' as const, value: BACKING_INDEX };
 const DATA_STREAM_DEST = { type: 'data_stream' as const, value: 'ai-index-ds-sample' };
 
-const probeResponse = (fields: string[]) => ({
-  columns: fields.map((name) => ({ name })),
+// The probe reads only column names, so every column gets the same type.
+const probeResponse = (fields: string[]): EsqlEsqlResult => ({
+  columns: fields.map((name) => ({ name, type: 'keyword' })),
   values: [],
+});
+const histogramResponse = (rows: Array<[number, string]>): EsqlEsqlResult => ({
+  columns: [
+    { name: 'count', type: 'long' },
+    { name: 'day', type: 'date' },
+  ],
+  values: rows,
 });
 const ALL_FIELDS = [
   'id',
@@ -1269,13 +1279,9 @@ describe('latestRevisionPipeline', () => {
 });
 
 describe('getKiHistogram', () => {
-  const query = jest.fn();
-  const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const { query } = esClient.esql;
   const NOW = new Date('2026-11-20T10:00:00.000Z');
-  const histogramResponse = (rows: Array<[number, string]>) => ({
-    columns: [{ name: 'count' }, { name: 'day' }],
-    values: rows,
-  });
 
   beforeEach(() => {
     query.mockReset();
@@ -1304,7 +1310,6 @@ describe('getKiHistogram', () => {
     expect(allowPartialResults).toBe(false);
     expect(text).toContain('first_seen = MIN(@timestamp)');
     expect(text).toContain('| WHERE ki_status IN ("active", "expired")\n');
-    // A KI without any revision timestamp still counts by its updated_at.
     expect(text).toContain('| EVAL added_at = COALESCE(first_seen, TO_DATETIME(updated_at))\n');
     expect(text).toContain(
       '| WHERE added_at >= TO_DATETIME(?from) AND added_at < TO_DATETIME(?to)\n'
@@ -1351,13 +1356,13 @@ describe('getKiHistogram', () => {
 });
 
 describe('getKiHistogram without updated_at', () => {
-  const query = jest.fn();
-  const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const { query } = esClient.esql;
 
   it('uses the first revision timestamp alone', async () => {
     query
       .mockResolvedValueOnce(probeResponse(['id', '@timestamp']))
-      .mockResolvedValueOnce({ columns: [{ name: 'count' }, { name: 'day' }], values: [] });
+      .mockResolvedValueOnce(histogramResponse([]));
 
     await getKiHistogram(esClient, { dest: INDEX_DEST, now: new Date('2026-11-20T10:00:00Z') });
 

@@ -22,7 +22,6 @@ interface UseKiHistogramResult {
 
 const EMPTY_BUCKETS: KiHistogramBucket[] = [];
 
-/** Knowledge documents added per UTC day over the last 30 days, oldest first. */
 export const useKiHistogram = (aiIndexId: string): UseKiHistogramResult => {
   const {
     services: { http },
@@ -31,6 +30,7 @@ export const useKiHistogram = (aiIndexId: string): UseKiHistogramResult => {
   const { data, isLoading, error } = useQuery<KiHistogramResponse, Error>({
     queryKey: contextEngineQueryKeys.aiIndex.kiHistogram(aiIndexId),
     queryFn: ({ signal }) => getKiHistogram(http, { aiIndexId, signal }),
+    refetchOnWindowFocus: false,
   });
 
   return {

@@ -17,21 +17,27 @@ export const AI_INDEX_QUERY_PATH = `${AI_INDEX_PATH}/_query`;
 export const AI_INDEX_DESCRIBE_PATH = `${AI_INDEX_BY_ID_PATH}/_describe`;
 export const AI_INDEX_DREAMING_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/dreaming`;
 export const DREAMING_TEMPLATES_PATH = `${INTERNAL_API_PATH}/dreaming_templates`;
+export const AI_INDEX_DREAMING_RUN_PATH = `${AI_INDEX_DREAMING_PATH}/run`;
 export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/ki_summary`;
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
+export const AI_INDEX_SUGGEST_AUTOMATION_CONTEXT_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/_suggest_automation_context`;
+
+/** Version of the internal suggest-automation-context API, shared between route registration and the browser client. */
+export const SUGGEST_AUTOMATION_CONTEXT_INTERNAL_API_VERSION = '1';
+
 export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
+export const AI_INDEX_SPEND_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/spend`;
+export const SPACE_SPEND_PATH = `${INTERNAL_API_PATH}/spend`;
 /**
  * A static segment wins over `{kiId}`, so `GET` can't read a KI whose id is exactly `_groups`.
  * `PATCH`, `DELETE` and `_restore` still reach it.
  */
 export const AI_INDEX_KI_GROUPS_PATH = `${AI_INDEX_KI_LIST_PATH}/_groups`;
-/** Same routing note as `_groups`: `GET` can't read a KI whose id is exactly `_histogram`. */
+/** A static segment wins over `{kiId}`, so `GET` can't read a KI whose id is exactly `_histogram`. */
 export const AI_INDEX_KI_HISTOGRAM_PATH = `${AI_INDEX_KI_LIST_PATH}/_histogram`;
-/** Number of UTC days in the KI histogram, today included. */
 export const KI_HISTOGRAM_DAYS = 30;
-
 export const SESSION_EVENTS_SAVE_PATH = `${PUBLIC_API_PATH}/memory/_save_event`;
 export const SESSION_MEMORY_FORGET_PATH = `${PUBLIC_API_PATH}/memory/_forget`;
 export const SESSION_MEMORY_REMEMBER_PATH = `${PUBLIC_API_PATH}/memory/_remember`;

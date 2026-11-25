@@ -13,11 +13,14 @@ import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { FailedAutomationRun } from '../../hooks/use_failed_automation_runs';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
-import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
+import { AUTOMATIONS_HEADING_ID, AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 import { FailedAutomationRunsCallout } from './failed_automation_runs_callout';
 
 jest.mock('../../hooks/use_failed_automation_runs');
-jest.mock('../../hooks/use_workflow_summaries');
+jest.mock('../../hooks/use_workflow_summaries', () => ({
+  ...jest.requireActual('../../hooks/use_workflow_summaries'),
+  useWorkflowSummaries: jest.fn(),
+}));
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
@@ -66,7 +69,6 @@ describe('FailedAutomationRunsCallout', () => {
       summaries: summaries([
         { id: 'wf-1', name: 'Sync runbooks', definition },
         { id: 'wf-2', definition },
-        // No definition: the workflow is missing or cannot be read.
         { id: 'wf-3', name: 'Deleted workflow', definition: null },
       ]),
       isLoading: false,
@@ -107,7 +109,7 @@ describe('FailedAutomationRunsCallout', () => {
     );
   });
 
-  it('counts every failed run and describes the first one', () => {
+  it('counts every failed run and shows no single error when several runs failed', () => {
     mockUseFailedAutomationRuns.mockReturnValue([
       failedRun('wf-2', 'Timed out'),
       failedRun('wf-1', 'connect ECONNREFUSED'),
@@ -116,12 +118,21 @@ describe('FailedAutomationRunsCallout', () => {
     renderCallout();
 
     expect(screen.getByTestId('contextOverviewFailedRunsCallout')).toHaveTextContent(
-      '2 automation runs failed.'
+      /^2 automation runs failed\.View automations$/
     );
-    // wf-2 has no resolved name, so the workflow id stands in.
-    expect(screen.getByTestId('contextOverviewFailedRunsMessage')).toHaveTextContent(
-      'wf-2: Timed out'
-    );
+    expect(screen.queryByTestId('contextOverviewFailedRunsMessage')).not.toBeInTheDocument();
+  });
+
+  it('cuts a long error and keeps the full text on hover', () => {
+    const longError = 'x'.repeat(500);
+    mockUseFailedAutomationRuns.mockReturnValue([failedRun('wf-1', longError)]);
+
+    renderCallout();
+
+    const message = screen.getByTestId('contextOverviewFailedRunsMessage');
+    expect(message).toHaveAttribute('title', `Sync runbooks: ${longError}`);
+    expect(message.textContent).toMatch(/^Sync runbooks: x+… View run$/);
+    expect(message.textContent?.length).toBeLessThan(250);
   });
 
   it('links to the automations list instead of one run when several runs failed', () => {
@@ -132,6 +143,10 @@ describe('FailedAutomationRunsCallout', () => {
     const automationsPanel = document.createElement('div');
     automationsPanel.id = AUTOMATIONS_PANEL_ID;
     automationsPanel.scrollIntoView = jest.fn();
+    const automationsHeading = document.createElement('h2');
+    automationsHeading.id = AUTOMATIONS_HEADING_ID;
+    automationsHeading.tabIndex = -1;
+    automationsPanel.appendChild(automationsHeading);
     document.body.appendChild(automationsPanel);
 
     renderCallout();
@@ -142,6 +157,7 @@ describe('FailedAutomationRunsCallout', () => {
       behavior: 'smooth',
       block: 'start',
     });
+    expect(automationsHeading).toHaveFocus();
 
     automationsPanel.remove();
   });

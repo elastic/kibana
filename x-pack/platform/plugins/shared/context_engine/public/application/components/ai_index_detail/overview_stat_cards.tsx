@@ -23,7 +23,7 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useNavigation } from '../../hooks/use_navigation';
 import {
   getAiIndexKnowledgeDocumentsPath,
-  getAiIndexSettingsPath,
+  getAiIndexAutomationsPath,
   getAiIndexSourcesPath,
 } from '../../paths';
 
@@ -96,9 +96,10 @@ interface OverviewStatCardsProps {
   isManaged: boolean;
   isMemoryEnabled: boolean;
   isLoading: boolean;
+  /** Sources and Automations come from the AI index, so they wait for it. */
+  isAiIndexLoading: boolean;
 }
 
-/** Counts of the AI index's knowledge documents, sources and automations. Each card opens its tab. */
 export const OverviewStatCards = ({
   aiIndexId,
   knowledgeDocumentsCount,
@@ -107,6 +108,7 @@ export const OverviewStatCards = ({
   isManaged,
   isMemoryEnabled,
   isLoading,
+  isAiIndexLoading,
 }: OverviewStatCardsProps) => (
   <EuiFlexGroup gutterSize="m" responsive={true} data-test-subj="contextOverviewStatCards">
     <EuiFlexItem>
@@ -151,7 +153,7 @@ export const OverviewStatCards = ({
               )
         }
         path={getAiIndexSourcesPath(aiIndexId)}
-        isLoading={false}
+        isLoading={isAiIndexLoading}
       />
     </EuiFlexItem>
     <EuiFlexItem>
@@ -166,8 +168,8 @@ export const OverviewStatCards = ({
           'xpack.contextEngine.aiIndexDetail.overview.statCards.automationsCaption',
           { defaultMessage: 'keep documents up to date' }
         )}
-        path={getAiIndexSettingsPath(aiIndexId)}
-        isLoading={false}
+        path={getAiIndexAutomationsPath(aiIndexId)}
+        isLoading={isAiIndexLoading}
       />
     </EuiFlexItem>
   </EuiFlexGroup>

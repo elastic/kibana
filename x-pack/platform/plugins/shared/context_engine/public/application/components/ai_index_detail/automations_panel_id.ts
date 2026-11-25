@@ -5,5 +5,13 @@
  * 2.0.
  */
 
-/** DOM id of the Automations panel, so the failed-run warning can scroll to it. */
 export const AUTOMATIONS_PANEL_ID = 'contextAiIndexAutomationsPanel';
+export const AUTOMATIONS_HEADING_ID = 'contextAiIndexAutomationsHeading';
+
+/** Scrolls to the Automations panel and focuses its heading, so a screen reader announces it. */
+export const goToAutomations = (): void => {
+  document
+    .getElementById(AUTOMATIONS_PANEL_ID)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById(AUTOMATIONS_HEADING_ID)?.focus({ preventScroll: true });
+};

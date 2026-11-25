@@ -17,7 +17,11 @@ export { LearnMorePanel } from './learn_more_panel';
 export { LockedSectionPanel } from './locked_section_panel';
 export { ManageAutomationsLink } from './manage_automations_link';
 export { OverviewStatCards } from './overview_stat_cards';
-export { RecentKnowledgeDocumentsPanel } from './recent_knowledge_documents_panel';
+export {
+  RECENT_KNOWLEDGE_DOCUMENTS_QUERY,
+  RecentKnowledgeDocumentsPanel,
+} from './recent_knowledge_documents_panel';
 export { SignalsPanel } from './signals_panel';
 export { SourcesPanel } from './sources/sources_panel';
+export { SpendPanel } from './spend_panel';
 export { TracesPanel } from './traces_panel';

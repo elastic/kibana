@@ -13,9 +13,7 @@ import React, { useMemo } from 'react';
 import { KI_HISTOGRAM_DAYS } from '../../../../common/constants';
 import { useKiHistogram } from '../../hooks/use_ki_histogram';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
-
-export const KNOWLEDGE_DOCUMENTS_CHART_HEIGHT = 200;
-const EMPTY_COUNT_DOMAIN = { min: 0, max: 1 };
+import { OVERVIEW_PANEL_BODY_HEIGHT, OverviewPanelEmptyState } from './overview_panel_empty_state';
 
 const titleLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.overview.documentsChart.title',
@@ -58,7 +56,6 @@ interface KnowledgeDocumentsChartPanelProps {
   aiIndexId: string;
 }
 
-/** Bar chart of the Knowledge documents added each day in the last 30 days. */
 export const KnowledgeDocumentsChartPanel = ({ aiIndexId }: KnowledgeDocumentsChartPanelProps) => {
   const { buckets, isLoading, error } = useKiHistogram(aiIndexId);
   const baseTheme = useElasticChartsTheme();
@@ -70,59 +67,65 @@ export const KnowledgeDocumentsChartPanel = ({ aiIndexId }: KnowledgeDocumentsCh
       return (
         <EuiSkeletonRectangle
           width="100%"
-          height={KNOWLEDGE_DOCUMENTS_CHART_HEIGHT}
+          height={OVERVIEW_PANEL_BODY_HEIGHT}
           data-test-subj="contextOverviewDocumentsChartLoading"
         />
       );
     }
-    if (error) {
+    if (error && buckets.length === 0) {
       return (
-        <AiIndexDetailPanelDescription data-test-subj="contextOverviewDocumentsChartError">
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.overview.documentsChart.loadError', {
-            defaultMessage: 'Unable to load the knowledge documents chart.',
-          })}
-        </AiIndexDetailPanelDescription>
+        <OverviewPanelEmptyState
+          iconType="warning"
+          dataTestSubj="contextOverviewDocumentsChartError"
+          message={i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.overview.documentsChart.loadError',
+            { defaultMessage: 'Unable to load the knowledge documents chart.' }
+          )}
+        />
+      );
+    }
+    if (!hasAddedDocuments) {
+      return (
+        <OverviewPanelEmptyState
+          iconType="chartBarVertical"
+          dataTestSubj="contextOverviewDocumentsChartEmpty"
+          message={i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.overview.documentsChart.empty',
+            {
+              defaultMessage: 'No new knowledge documents in the last {days} days.',
+              values: { days: KI_HISTOGRAM_DAYS },
+            }
+          )}
+        />
       );
     }
     return (
-      <>
-        <Chart size={{ height: KNOWLEDGE_DOCUMENTS_CHART_HEIGHT }}>
-          <Settings
-            baseTheme={baseTheme}
-            showLegend={false}
-            locale={i18n.getLocale()}
-            ariaLabel={titleLabel}
-          />
-          <Tooltip headerFormatter={({ value }) => formatDay(String(value))} />
-          <Axis id="date" position={Position.Bottom} tickFormat={(day) => formatDay(String(day))} />
-          <Axis
-            id="count"
-            position={Position.Left}
-            // Counts are whole documents. `integersOnly` is deprecated and ignored for tick labels.
-            maximumFractionDigits={0}
-            // All zero: keep the zero line at the bottom with only 0 and 1 as labels.
-            ticks={hasAddedDocuments ? 4 : 1}
-            domain={hasAddedDocuments ? undefined : EMPTY_COUNT_DOMAIN}
-          />
-          <BarSeries
-            id="knowledgeDocumentsAdded"
-            name={seriesLabel}
-            xScaleType={ScaleType.Ordinal}
-            yScaleType={ScaleType.Linear}
-            xAccessor="date"
-            yAccessors={['count']}
-            data={buckets}
-          />
-        </Chart>
-        {hasAddedDocuments ? null : (
-          <AiIndexDetailPanelDescription data-test-subj="contextOverviewDocumentsChartEmpty">
-            {i18n.translate('xpack.contextEngine.aiIndexDetail.overview.documentsChart.empty', {
-              defaultMessage: 'No new knowledge documents in the last {days} days.',
-              values: { days: KI_HISTOGRAM_DAYS },
-            })}
-          </AiIndexDetailPanelDescription>
-        )}
-      </>
+      <Chart size={{ height: OVERVIEW_PANEL_BODY_HEIGHT }}>
+        <Settings
+          baseTheme={baseTheme}
+          showLegend={false}
+          locale={i18n.getLocale()}
+          ariaLabel={titleLabel}
+        />
+        <Tooltip headerFormatter={({ value }) => formatDay(String(value))} />
+        <Axis id="date" position={Position.Bottom} tickFormat={(day) => formatDay(String(day))} />
+        <Axis
+          id="count"
+          position={Position.Left}
+          // Counts are whole documents. `integersOnly` is deprecated and ignored for tick labels.
+          maximumFractionDigits={0}
+          ticks={4}
+        />
+        <BarSeries
+          id="knowledgeDocumentsAdded"
+          name={seriesLabel}
+          xScaleType={ScaleType.Ordinal}
+          yScaleType={ScaleType.Linear}
+          xAccessor="date"
+          yAccessors={['count']}
+          data={buckets}
+        />
+      </Chart>
     );
   };
 

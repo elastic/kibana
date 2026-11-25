@@ -532,7 +532,6 @@ export const getKiGroups = async (
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** The `YYYY-MM-DD` keys of the histogram window: the last `KI_HISTOGRAM_DAYS` UTC days, oldest first. */
 export const kiHistogramDays = (now: Date): string[] => {
   const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
   return Array.from({ length: KI_HISTOGRAM_DAYS }, (_, i) =>

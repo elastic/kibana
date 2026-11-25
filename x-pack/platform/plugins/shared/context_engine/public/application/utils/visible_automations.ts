@@ -17,7 +17,6 @@ export const getVisibleAutomations = (
     ? [...automations]
     : automations.filter((automation) => !isDreamingAutomation(automation));
 
-/** Workflow ids of the visible automations. */
 export const getVisibleWorkflowIds = (
   automations: readonly AiIndexAutomation[],
   isMemoryEnabled: boolean

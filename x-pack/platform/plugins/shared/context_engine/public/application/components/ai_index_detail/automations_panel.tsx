@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiPanel,
   EuiPopover,
-  EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
   useEuiTheme,
@@ -26,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import React, { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
@@ -36,21 +36,23 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
-import { getAiIndexDetailPath } from '../../paths';
 import { getVisibleAutomations, getVisibleWorkflowIds } from '../../utils/visible_automations';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
-import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
+import {
+  AiIndexDetailPanelEmptyState,
+  AiIndexDetailPanelEmptyStateSkeleton,
+} from './ai_index_detail_panel_empty_prompt';
 import { AutomationRow } from './automation_row';
-import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
+import { AUTOMATIONS_HEADING_ID, AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 
 /**
  * Builds the query string that tells the Workflows app to send its back button
- * here (to this AI index detail page) instead of the Workflows list.
+ * to `returnPath` (the AI index tab the user came from) instead of the Workflows list.
  */
-const getWorkflowReturnSearch = (aiIndexId: string): string =>
+const getWorkflowReturnSearch = (returnPath: string): string =>
   new URLSearchParams({
     returnApp: CONTEXT_ENGINE_APP_ID,
-    returnPath: getAiIndexDetailPath(aiIndexId),
+    returnPath,
   }).toString();
 
 interface AutomationsPanelProps {
@@ -91,14 +93,19 @@ export const AutomationsPanel = ({
     isLoading: isLoadingSummaries,
     missingReadPrivilege,
   } = useWorkflowSummaries(visibleWorkflowIds);
-  const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
+  const { canSuggest, isSuggesting, suggestAutomation } = useSuggestAutomation({
+    aiIndex,
+    isManaged,
+    onSaved,
+  });
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
 
   const canCreateWorkflow = application.capabilities.workflowsManagement?.createWorkflow === true;
 
-  const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(aiIndex.id)}` : '';
+  const { pathname } = useLocation();
+  const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(pathname)}` : '';
 
   const handleCreate = async () => {
     setIsAddMenuOpen(false);
@@ -198,7 +205,8 @@ export const AutomationsPanel = ({
           fill={fill}
           iconType="chevronSingleDown"
           iconSide="right"
-          isDisabled={isBusy || aiIndex === undefined}
+          isLoading={isSuggesting}
+          isDisabled={isBusy || isSuggesting || aiIndex === undefined}
           data-test-subj="contextAddAutomationButton"
           onClick={() => setIsAddMenuOpen((open) => !open)}
           {...getEbtProps({
@@ -217,7 +225,7 @@ export const AutomationsPanel = ({
   const panelDescription = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.description',
     {
-      defaultMessage: 'Automations keep Knowledge Indicators current as your sources change.',
+      defaultMessage: 'Automations keep knowledge documents current as your sources change.',
     }
   );
 
@@ -225,8 +233,8 @@ export const AutomationsPanel = ({
     <EuiPanel hasBorder paddingSize="l" id={AUTOMATIONS_PANEL_ID}>
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>
+          <EuiTitle size="xs">
+            <h2 id={AUTOMATIONS_HEADING_ID} tabIndex={-1}>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {
                 defaultMessage: 'Automations',
               })}
@@ -234,14 +242,9 @@ export const AutomationsPanel = ({
           </EuiTitle>
           <AiIndexDetailPanelDescription>{panelDescription}</AiIndexDetailPanelDescription>
         </EuiFlexItem>
-        {headerAction !== undefined ? (
-          <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>
-        ) : (
-          showAddAutomation &&
-          !isLoading &&
-          hasAutomations && (
-            <EuiFlexItem grow={false}>{renderAddAutomationButton({ fill: false })}</EuiFlexItem>
-          )
+        {headerAction !== undefined && <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>}
+        {showAddAutomation && !isLoading && hasAutomations && (
+          <EuiFlexItem grow={false}>{renderAddAutomationButton({ fill: false })}</EuiFlexItem>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -264,7 +267,10 @@ export const AutomationsPanel = ({
         </>
       )}
       {isLoading || isLoadingSummaries ? (
-        <EuiSkeletonText lines={2} data-test-subj="contextAiIndexAutomationsLoading" />
+        <>
+          <EuiSpacer size="m" />
+          <AiIndexDetailPanelEmptyStateSkeleton dataTestSubj="contextAiIndexAutomationsLoading" />
+        </>
       ) : (
         <>
           {!hasAutomations ? (
