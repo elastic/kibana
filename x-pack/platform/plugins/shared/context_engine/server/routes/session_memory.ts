@@ -31,7 +31,7 @@ import type {
 } from '../../common/http_api/session_memory';
 import { validateAiIndexId, validateNonBlank } from '../../common/validation';
 import { assertAiIndicesWritable } from '../ai_indices/assert_ai_indices_writable';
-import { AiIndexNotFoundError, AiIndexNotWritableError } from '../ai_indices/errors';
+import { AiIndexNotFoundError, AiIndexWriteForbiddenError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import {
   sessionMemoryForgetAuditEvent,
@@ -326,7 +326,7 @@ export const registerSessionMemoryRoutes = ({
           if (error instanceof AiIndexNotFoundError) {
             return reject(error, 'notFound');
           }
-          if (error instanceof AiIndexNotWritableError) {
+          if (error instanceof AiIndexWriteForbiddenError) {
             return reject(error, 'forbidden');
           }
           audit({ memoryId: id, error: toError(error) });
@@ -436,13 +436,12 @@ export const registerSessionMemoryRoutes = ({
           return response.forbidden({ body: { message: resolvedUser.error.message } });
         }
 
-        const scope = {
-          space: resolveSpaceId(await getSpaces(), request),
-          userId: resolvedUser.userId,
-        };
-
         let body: ForgetSessionMemoriesResponse;
         try {
+          const scope = {
+            space: resolveSpaceId(await getSpaces(), request),
+            userId: resolvedUser.userId,
+          };
           const results = await (await getSessionMemoryService()).forget(scope, uniqueIds);
           body = { results };
         } catch (error) {

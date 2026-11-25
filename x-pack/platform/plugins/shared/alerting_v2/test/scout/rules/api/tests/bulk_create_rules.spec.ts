@@ -122,6 +122,36 @@ apiTest.describe('Bulk create rules API', { tag: testData.API_ENGINE_TAG }, () =
     }
   );
 
+  apiTest(
+    'create: should report BUILDER_TYPE_UNKNOWN per item under 200 and still create the rest',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(BULK_CREATE_URL, {
+        headers: writerHeaders,
+        body: {
+          items: [
+            {
+              ...buildCreateRuleData({
+                metadata: { name: 'unknown-builder', builder: { type: 'not-a-builder' } },
+              }),
+              id: 'bulk-unknown-builder',
+            },
+            buildCreateRuleData({
+              metadata: { name: 'known-builder', builder: { type: 'threshold' } },
+            }),
+          ],
+        },
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].metadata.name).toBe('known-builder');
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0]).toMatchObject({
+        id: 'bulk-unknown-builder',
+        error: { code: 'BUILDER_TYPE_UNKNOWN' },
+      });
+    }
+  );
+
   apiTest('validation: should reject an empty items array', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_CREATE_URL, {
       headers: writerHeaders,

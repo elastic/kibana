@@ -6,7 +6,7 @@
  */
 
 import type { ApiClientFixture, KibanaRole } from '@kbn/scout-security';
-import { getPlaywrightTagsFor, PUBLIC_API_HEADERS } from '@kbn/scout-security';
+import { getPlaywrightTagsFor } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ACTION_DETAILS_ROUTE, SCAN_ROUTE } from '../../../../../common/endpoint/constants';
 import type {
@@ -17,6 +17,7 @@ import type {
 } from '../../../../../common/endpoint/types';
 import { getEndpointOperationsAnalyst } from '../../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
 import { getHostVmClient } from '../../../../../scripts/endpoint/common/vm_services';
+import { buildRequestHeaders } from '../../../fixtures/request_headers';
 import { apiTest } from '../fixtures';
 
 const ACTION_TIMEOUT_MS = 180_000;
@@ -134,12 +135,7 @@ apiTest.describe('Real agent scan response action', { tag: SCAN_ACTION_TAGS }, (
     const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
       endpointOperationsAnalystRole()
     );
-    requestHeaders = {
-      ...apiKeyHeader,
-      ...PUBLIC_API_HEADERS,
-      'kbn-xsrf': 'scout-edr-real-fleet',
-      'Content-Type': 'application/json',
-    };
+    requestHeaders = buildRequestHeaders(apiKeyHeader);
   });
 
   apiTest(

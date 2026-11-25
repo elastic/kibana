@@ -13,6 +13,7 @@ import {
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
   SESSIONS_MANAGED_BY,
+  SESSIONS_MAX_KEYWORD_LENGTH,
   SESSIONS_VERSION,
 } from '../../../common/sessions';
 
@@ -34,7 +35,8 @@ export interface WebVitalSamples {
 /** One session's summary, as the summaries task writes it. */
 export interface SessionDocument {
   session: { id: string };
-  service: { name: string };
+  /** The application, and the version its latest event reports. */
+  service: { name: string; version?: string | null };
   start_time: string;
   end_time: string;
   duration_ms: number;
@@ -46,6 +48,11 @@ export interface SessionDocument {
   click_count: number;
   /** `exception` events, as the applications list counts JS errors. */
   js_error_count: number;
+  /**
+   * The p75 of the page loads' load event end in milliseconds, and how many page loads reported
+   * one, as the Overview's load time reads them.
+   */
+  load_time: { p75: number | null; count: number };
   /** HTTP requests the browser made with a known outcome, and the failed ones. */
   http_request_count: number;
   http_failed_request_count: number;
@@ -57,6 +64,24 @@ export interface SessionDocument {
    * nothing sets it yet, so it is absent rather than `false`. Readers expose it as `hasReplay`.
    */
   has_replay?: boolean;
+  /**
+   * EDOT Browser frustration signals. Mapped without a `SESSIONS_VERSION` bump: summaries written
+   * before them have none, which readers take as 0. An index created before them doesn't map them
+   * (`dynamic: false`): rebuilt summaries still carry the counts in `_source`, so the table and
+   * detail show them, but the filter, sort, KPI and drill-down find nothing until the index is
+   * deleted for the task to rebuild it (only pre-release setups have one).
+   */
+  rage_click_count?: number;
+  dead_click_count?: number;
+  error_click_count?: number;
+  frustration_count?: number;
+  /**
+   * CSS selectors of the elements that were frustrated, the `SESSIONS_FRUSTRATION_VALUES` with the
+   * most signals.
+   */
+  frustration_targets?: string[];
+  /** Paths of the pages where the session was frustrated, capped the same way. */
+  frustration_pages?: string[];
   entry_page: string | null;
   exit_page: string | null;
   journey: string[];
@@ -82,16 +107,23 @@ export interface SessionDocument {
  * whole bulk request. A longer value stays in `_source` but is not indexed, so it drops out of
  * search and the facets instead of stalling every summary behind it.
  */
-const MAX_KEYWORD_LENGTH = 1024;
-
-export const keyword = { type: 'keyword', ignore_above: MAX_KEYWORD_LENGTH } as const;
+export const keyword = { type: 'keyword', ignore_above: SESSIONS_MAX_KEYWORD_LENGTH } as const;
 export const count = { type: 'long' } as const;
+
+const frustrationMappings = {
+  rage_click_count: count,
+  dead_click_count: count,
+  error_click_count: count,
+  frustration_count: count,
+  frustration_targets: keyword,
+  frustration_pages: keyword,
+} as const;
 
 export const sessionsIndexMappings = {
   dynamic: false,
   properties: {
     session: { properties: { id: keyword } },
-    service: { properties: { name: keyword } },
+    service: { properties: { name: keyword, version: keyword } },
     start_time: { type: 'date' },
     end_time: { type: 'date' },
     duration_ms: count,
@@ -100,10 +132,12 @@ export const sessionsIndexMappings = {
     page_load_count: count,
     click_count: count,
     js_error_count: count,
+    load_time: { properties: { p75: { type: 'double' }, count } },
     http_request_count: count,
     http_failed_request_count: count,
     bounced: { type: 'boolean' },
     has_replay: { type: 'boolean' },
+    ...frustrationMappings,
     entry_page: keyword,
     exit_page: keyword,
     journey: keyword,
