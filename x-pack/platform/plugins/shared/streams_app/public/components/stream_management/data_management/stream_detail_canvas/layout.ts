@@ -12,20 +12,25 @@ import {
   NODE_HEIGHT_BY_TYPE,
   NODE_HEIGHT_ESTIMATE,
   NODE_WIDTH_ESTIMATE,
+  ROUTING_RULE_ROW_HEIGHT,
   ROW_GAP,
 } from './canvas_constants';
-import { DESTINATION_NODE_TYPE } from './types';
+import { DESTINATION_NODE_TYPE, ROUTING_NODE_TYPE } from './types';
 
 interface LayoutNode {
   id: string;
   type?: string;
   /** React Flow's measured DOM size, present once the node has been rendered. */
   measured?: { height?: number };
+  /** A routing node lists its rules in `rules`, one row each. */
+  data?: Record<string, unknown>;
 }
 
 interface LayoutEdge {
   source: string;
   target: string;
+  /** Which of the source's handles the edge leaves from, such as a routing rule. */
+  sourceHandle?: string | null;
 }
 
 // Dagre spaces nodes edge-to-edge, so translate the design's center-to-center
@@ -34,8 +39,42 @@ interface LayoutEdge {
 const RANK_SEPARATION = Math.max(COLUMN_GAP - NODE_WIDTH_ESTIMATE, 0);
 const NODE_SEPARATION = Math.max(ROW_GAP - NODE_HEIGHT_ESTIMATE, 0);
 
-const getNodeHeight = ({ type, measured }: LayoutNode): number =>
-  measured?.height ?? (type ? NODE_HEIGHT_BY_TYPE[type] : undefined) ?? NODE_HEIGHT_ESTIMATE;
+const getNodeHeight = ({ type, measured, data }: LayoutNode): number => {
+  if (measured?.height !== undefined) {
+    return measured.height;
+  }
+  const height = (type ? NODE_HEIGHT_BY_TYPE[type] : undefined) ?? NODE_HEIGHT_ESTIMATE;
+  const rules = type === ROUTING_NODE_TYPE ? data?.rules : undefined;
+  const ruleCount = Array.isArray(rules) ? rules.length : 0;
+  return height + Math.max(ruleCount - 1, 0) * ROUTING_RULE_ROW_HEIGHT;
+};
+
+// Dagre keeps the uniform grid for every card, and only reserves more room for a
+// card taller than that, such as a routing node with several rules.
+const getLayoutHeight = (node: LayoutNode): number =>
+  Math.max(getNodeHeight(node), NODE_HEIGHT_ESTIMATE);
+
+const getHandleIndex = (handle: string | null | undefined): number => {
+  const index = /\d+$/.exec(handle ?? '')?.[0];
+  return index === undefined ? 0 : Number(index);
+};
+
+/**
+ * Dagre knows nothing about handles, and it stacks the targets of a node in the
+ * reverse of the order it sees the edges in. Handing it each source's edges last
+ * rule first puts the first rule's target on top, in the same order as the rules,
+ * so the lines out of a routing node do not cross. Sources keep the order they
+ * first appear in.
+ */
+const orderEdgesForLayout = (edges: LayoutEdge[]): LayoutEdge[] => {
+  const bySource = new Map<string, LayoutEdge[]>();
+  edges.forEach((edge) => {
+    bySource.set(edge.source, [...(bySource.get(edge.source) ?? []), edge]);
+  });
+  return [...bySource.values()].flatMap((group) =>
+    group.sort((a, b) => getHandleIndex(a.sourceHandle) - getHandleIndex(b.sourceHandle)).reverse()
+  );
+};
 
 // Center-to-center distances between successive dagre ranks and rows.
 const COLUMN_PITCH = NODE_WIDTH_ESTIMATE + RANK_SEPARATION;
@@ -83,9 +122,9 @@ export const layoutGraph = (nodes: LayoutNode[], edges: LayoutEdge[]): Map<strin
     .setDefaultEdgeLabel(() => ({}));
 
   flowNodes.forEach((node) => {
-    graph.setNode(node.id, { width: NODE_WIDTH_ESTIMATE, height: NODE_HEIGHT_ESTIMATE });
+    graph.setNode(node.id, { width: NODE_WIDTH_ESTIMATE, height: getLayoutHeight(node) });
   });
-  layoutEdges.forEach(({ source, target }) => {
+  orderEdgesForLayout(layoutEdges).forEach(({ source, target }) => {
     graph.setEdge(source, target);
   });
 
