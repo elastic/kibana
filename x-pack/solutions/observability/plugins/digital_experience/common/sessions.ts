@@ -288,19 +288,27 @@ export interface SessionListResponse {
   kpis: SessionListKpis;
 }
 
-/** The events the journey lists; the API leaves out all others, which Discover shows. */
+/** The kinds of events a mobile session's timeline lists. */
+export type MobileSessionEventKind = 'screen' | 'tap' | 'request' | 'error' | 'log';
+
+/**
+ * The events the journey lists; the API leaves out all others, which Discover shows. Mobile
+ * sessions list screens, taps, requests and logs too.
+ */
 export type SessionTimelineEventKind =
   | 'page_view'
   | 'click'
   | 'error'
   | 'web_vital'
-  | 'frustration';
+  | 'frustration'
+  | MobileSessionEventKind;
 
 export interface SessionTimelineEvent {
   kind: SessionTimelineEventKind;
   name: string;
   timestamp: string;
   offsetMs: number;
+  /** The page, or a mobile app's screen, the event happened on. */
   page: string | null;
   detail: string | null;
   /** The clicks a rage click summarizes; `null` for every other event. */
@@ -311,6 +319,10 @@ export interface SessionTimelineEvent {
   spanId: string | null;
   /** The uncaught exception behind an error click; unset for every other event. */
   exception?: SessionTimelineException;
+  /** A mobile request's response status; the browser's requests are listed apart. */
+  statusCode?: number | null;
+  /** A mobile request's duration. */
+  durationMs?: number | null;
 }
 
 /** The uncaught exception a frustration signal names, as an error click does. */

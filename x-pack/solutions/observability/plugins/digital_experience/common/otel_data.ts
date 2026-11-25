@@ -53,6 +53,18 @@ export type MobilePlatform = keyof typeof MOBILE_OS_NAMES;
 export const CRASH_EVENTS = ['app.crash', 'crash'] as const;
 /** Taps, as EDOT React Native records them. */
 export const EVENT_WIDGET_CLICK = 'app.widget.click';
+/** Taps outside any widget, as EDOT Android records them. */
+export const EVENT_SCREEN_CLICK = 'app.screen.click';
+/** EDOT Android's span of a screen shown. */
+export const SCREEN_LOAD_SPAN = 'elastic.app.screen.load';
+export const APP_SCREEN_NAME = 'app.screen.name';
+export const APP_WIDGET_NAME = 'app.widget.name';
+export const APP_WIDGET_ID = 'app.widget.id';
+/** A log record's text and level, in the OTel logs indices. */
+export const OTEL_LOG_BODY = 'body.text';
+export const OTEL_SEVERITY_TEXT = 'severity_text';
+/** A span's duration in nanoseconds, in the OTel traces indices. */
+export const OTEL_SPAN_DURATION = 'duration';
 /** The instrumentation scope of EDOT iOS view controller spans: one per screen shown. */
 export const VIEW_CONTROLLER_SCOPE = 'UIViewController';
 export const OTEL_SCOPE_NAME = 'scope.name';

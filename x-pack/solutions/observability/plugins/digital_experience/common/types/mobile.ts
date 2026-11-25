@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FacetBucket } from '../sessions';
+import type { FacetBucket, SessionTimelineEvent } from '../sessions';
 import type { ComparedValue, HistogramBuckets, MobilePlatform } from './applications';
 
 /** A release's totals over the time range; `OTHER_RELEASE_KEY` for "Other". */
@@ -98,5 +98,32 @@ export interface MobileCrashGroupsResponse {
   /** Most affected users first. */
   crashGroups: MobileCrashGroup[];
   /** Whether the user can't read every OTel logs index, so the values may be missing some data. */
+  isPartial: boolean;
+}
+
+/** The most frequent values, and how many crashes had any other or none. */
+export interface CrashBreakdown {
+  top: FacetBucket[];
+  other: number;
+}
+
+export interface MobileCrash {
+  /** ISO 8601, when it happened rather than when the next launch sent it. */
+  time: string;
+  type: string | null;
+  message: string | null;
+  stacktrace: string | null;
+  release: string | null;
+  sessionId: string | null;
+}
+
+export interface MobileCrashGroupDetailResponse {
+  /** `null` when the group has no crash in the range and filters. */
+  latestCrash: MobileCrash | null;
+  releases: CrashBreakdown;
+  osVersions: CrashBreakdown;
+  deviceModels: CrashBreakdown;
+  /** The latest crash's session up to the crash, oldest first; empty without a session. */
+  beforeCrash: SessionTimelineEvent[];
   isPartial: boolean;
 }

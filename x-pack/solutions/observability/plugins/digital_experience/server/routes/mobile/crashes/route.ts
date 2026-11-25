@@ -8,22 +8,50 @@
 import { lazySchema } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { OTEL_LOGS_INDEX } from '../../../../common/otel_data';
-import type { MobileCrashGroupsResponse } from '../../../../common/types/mobile';
+import type {
+  MobileCrashGroupDetailResponse,
+  MobileCrashGroupsResponse,
+} from '../../../../common/types/mobile';
 import {
   APPLICATION_TAB_ROUTE_OPTIONS,
   APPLICATION_TAB_ROUTE_SECURITY,
   toApplicationSearch,
 } from '../../application_tab_route';
 import { hasPartialReadAccess } from '../../applications/get_partial_access';
-import { createDigitalExperienceServerRoute } from '../../create_digital_experience_server_route';
-import { mobileFiltersParams } from '../mobile_params';
+import {
+  createDigitalExperienceServerRoute,
+  type DigitalExperienceRouteHandlerResources,
+} from '../../create_digital_experience_server_route';
+import { mobileCrashGroupParams, mobileFiltersParams } from '../mobile_params';
+import { getCrashGroup } from './get_crash_group';
 import { getCrashGroups } from './get_crash_groups';
 
 export const MOBILE_CRASH_GROUPS_ENDPOINT =
   'GET /internal/digital_experience/mobile_applications/{serviceName}/crash_groups';
+export const MOBILE_CRASH_GROUP_ENDPOINT =
+  'GET /internal/digital_experience/mobile_applications/{serviceName}/crash_groups/{fingerprint}';
 
-/** The Crashes tab of the mobile application page. */
-export const mobileCrashesRouteRepository = createDigitalExperienceServerRoute({
+/** Whether the user can't read every OTel logs index, which crashes are in. */
+const isPartialRead = async ({
+  context,
+  request,
+  logger,
+}: Pick<
+  DigitalExperienceRouteHandlerResources,
+  'context' | 'request' | 'logger'
+>): Promise<boolean> => {
+  const { elasticsearch } = await context.core;
+  // Elasticsearch skips the indices the user can't read, so the counts would look complete.
+  return hasPartialReadAccess({
+    esClient: elasticsearch.client.asCurrentUser,
+    internalEsClient: elasticsearch.client.asInternalUser,
+    getIndices: async () => [OTEL_LOGS_INDEX],
+    signal: getRequestAbortedSignal(request.events.aborted$),
+    logger,
+  });
+};
+
+const listRoute = createDigitalExperienceServerRoute({
   endpoint: MOBILE_CRASH_GROUPS_ENDPOINT,
   options: APPLICATION_TAB_ROUTE_OPTIONS,
   security: APPLICATION_TAB_ROUTE_SECURITY,
@@ -36,8 +64,6 @@ export const mobileCrashesRouteRepository = createDigitalExperienceServerRoute({
       request,
       logger,
     });
-    const { elasticsearch } = await context.core;
-    // Elasticsearch skips the indices the user can't read, so the counts would look complete.
     const [crashGroups, isPartial] = await Promise.all([
       getCrashGroups({
         esClient,
@@ -46,14 +72,44 @@ export const mobileCrashesRouteRepository = createDigitalExperienceServerRoute({
         end,
         environment,
       }),
-      hasPartialReadAccess({
-        esClient: elasticsearch.client.asCurrentUser,
-        internalEsClient: elasticsearch.client.asInternalUser,
-        getIndices: async () => [OTEL_LOGS_INDEX],
-        signal: getRequestAbortedSignal(request.events.aborted$),
-        logger,
-      }),
+      isPartialRead({ context, request, logger }),
     ]);
     return { crashGroups, isPartial };
   },
 });
+
+const detailRoute = createDigitalExperienceServerRoute({
+  endpoint: MOBILE_CRASH_GROUP_ENDPOINT,
+  options: APPLICATION_TAB_ROUTE_OPTIONS,
+  security: APPLICATION_TAB_ROUTE_SECURITY,
+  params: lazySchema(mobileCrashGroupParams),
+  handler: async ({
+    params,
+    context,
+    request,
+    logger,
+  }): Promise<MobileCrashGroupDetailResponse> => {
+    const { osName, release } = params.query;
+    const { esClient, serviceName, start, end, environment } = await toApplicationSearch({
+      params,
+      context,
+      request,
+      logger,
+    });
+    const [detail, isPartial] = await Promise.all([
+      getCrashGroup({
+        esClient,
+        filters: { serviceName, osName, release },
+        fingerprint: params.path.fingerprint,
+        start,
+        end,
+        environment,
+      }),
+      isPartialRead({ context, request, logger }),
+    ]);
+    return { ...detail, isPartial };
+  },
+});
+
+/** The Crashes tab of the mobile application page: its groups, and a group's detail. */
+export const mobileCrashesRouteRepository = { ...listRoute, ...detailRoute };

@@ -1,0 +1,153 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { sumBy } from 'lodash';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import {
+  CRASH_DELAY_MS,
+  crashEvents,
+  withCrashBreakdown,
+  withCrashFingerprint,
+  withCrashGroup,
+  withLatestCrash,
+  type CrashBreakdownName,
+  type CrashBreakdownRow,
+  type LatestCrashRow,
+} from '../../../../common/mobile/crash_groups';
+import { RESULT_COLUMNS } from '../../../../common/mobile/fields';
+import type { MobilePanelFilters } from '../../../../common/mobile/filters';
+import {
+  SESSION_EVENTS_BEFORE_CRASH,
+  sessionEventsBefore,
+  type SessionEventRow,
+} from '../../../../common/mobile/session_events';
+import { SESSIONS_MAX_SESSION_HOURS, type SessionTimelineEvent } from '../../../../common/sessions';
+import type {
+  CrashBreakdown,
+  MobileCrash,
+  MobileCrashGroupDetailResponse,
+} from '../../../../common/types/mobile';
+import { runEsql, timeFilter } from '../../../lib/esql';
+
+/** Values a breakdown shows before "Other". */
+export const CRASH_BREAKDOWN_TOP = 5;
+
+const MAX_SESSION_MS = SESSIONS_MAX_SESSION_HOURS * 60 * 60 * 1000;
+
+export interface GetCrashGroupParams {
+  esClient: TracedElasticsearchClient;
+  filters: MobilePanelFilters;
+  fingerprint: string;
+  start: number;
+  end: number;
+  environment?: string;
+}
+
+const toBreakdown = (rows: CrashBreakdownRow[]): CrashBreakdown => {
+  const withValue = rows.filter((row) => row[RESULT_COLUMNS.value] != null);
+  const top = withValue.slice(0, CRASH_BREAKDOWN_TOP).map((row) => ({
+    key: String(row[RESULT_COLUMNS.value]),
+    count: row[RESULT_COLUMNS.count],
+  }));
+  return {
+    top,
+    other: sumBy(rows, (row) => row[RESULT_COLUMNS.count]) - sumBy(top, ({ count }) => count),
+  };
+};
+
+const toCrash = (row: LatestCrashRow): MobileCrash => ({
+  time: row[RESULT_COLUMNS.crashTime],
+  type: row[RESULT_COLUMNS.exceptionType] ?? null,
+  message: row[RESULT_COLUMNS.message] ?? null,
+  stacktrace: row[RESULT_COLUMNS.stacktrace] ?? null,
+  release: row[RESULT_COLUMNS.release] ?? null,
+  sessionId: row[RESULT_COLUMNS.sessionId] ?? null,
+});
+
+/** A session event as the browser's timeline has it, offset from the first one listed. */
+const toTimelineEvent = (row: SessionEventRow, firstMs: number): SessionTimelineEvent => ({
+  kind: row[RESULT_COLUMNS.eventKind],
+  name: row[RESULT_COLUMNS.name],
+  timestamp: row['@timestamp'],
+  offsetMs: Math.max(0, Date.parse(row['@timestamp']) - firstMs),
+  page: row[RESULT_COLUMNS.page] ?? null,
+  detail: row[RESULT_COLUMNS.detail] ?? null,
+  stacktrace: row[RESULT_COLUMNS.stacktrace] ?? null,
+  traceId: row[RESULT_COLUMNS.traceId] ?? null,
+  spanId: row[RESULT_COLUMNS.spanId] ?? null,
+  statusCode: row[RESULT_COLUMNS.statusCode] ?? null,
+  durationMs: row[RESULT_COLUMNS.durationMs] ?? null,
+});
+
+/** The session events before a crash, oldest first. */
+const getEventsBefore = async (
+  esClient: TracedElasticsearchClient,
+  serviceName: string,
+  { sessionId, time }: MobileCrash
+): Promise<SessionTimelineEvent[]> => {
+  if (!sessionId) {
+    return [];
+  }
+  const crashMs = Date.parse(time);
+  const rows = await runEsql<SessionEventRow>(
+    esClient,
+    'get_mobile_crash_session_events',
+    sessionEventsBefore({
+      serviceName,
+      sessionId,
+      before: time,
+      limit: SESSION_EVENTS_BEFORE_CRASH,
+    }),
+    timeFilter(crashMs - MAX_SESSION_MS, crashMs, undefined)
+  );
+  const oldestFirst = [...rows].reverse();
+  const firstMs = oldestFirst.length > 0 ? Date.parse(oldestFirst[0]['@timestamp']) : 0;
+  return oldestFirst.map((row) => toTimelineEvent(row, firstMs));
+};
+
+/**
+ * A crash group's detail in the range and filters: its latest crash, its crashes by release, OS
+ * version and device model, and what the latest crash's session did before it.
+ */
+export const getCrashGroup = async ({
+  esClient,
+  filters,
+  fingerprint,
+  start,
+  end,
+  environment,
+}: GetCrashGroupParams): Promise<Omit<MobileCrashGroupDetailResponse, 'isPartial'>> => {
+  // `pipe` appends to the query it's called on, so each query starts from its own.
+  const groupCrashes = () =>
+    withCrashGroup(withCrashFingerprint(crashEvents({ ...filters, start, end })), fingerprint);
+  const filter = timeFilter(start, end + CRASH_DELAY_MS, environment);
+  const breakdown = (name: CrashBreakdownName) =>
+    runEsql<CrashBreakdownRow>(
+      esClient,
+      `get_mobile_crash_group_${name}`,
+      withCrashBreakdown(groupCrashes(), name),
+      filter
+    ).then(toBreakdown);
+
+  const [[latestRow], releases, osVersions, deviceModels] = await Promise.all([
+    runEsql<LatestCrashRow>(
+      esClient,
+      'get_mobile_crash_group_latest',
+      withLatestCrash(groupCrashes()),
+      filter
+    ),
+    breakdown('releases'),
+    breakdown('osVersions'),
+    breakdown('deviceModels'),
+  ]);
+  const latestCrash = latestRow ? toCrash(latestRow) : null;
+  const beforeCrash = latestCrash
+    ? await getEventsBefore(esClient, filters.serviceName, latestCrash)
+    : [];
+
+  return { latestCrash, releases, osVersions, deviceModels, beforeCrash };
+};

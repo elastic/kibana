@@ -8,9 +8,12 @@
 import {
   CRASH_DELAY_MS,
   crashEvents,
+  withCrashBreakdown,
   withCrashFingerprint,
+  withCrashGroup,
   withCrashGroupReleases,
   withCrashGroupStats,
+  withLatestCrash,
 } from './crash_groups';
 
 const START = Date.parse('2021-01-18T12:00:00.000Z');
@@ -94,6 +97,41 @@ describe('withCrashGroupReleases', () => {
     ).print('basic');
 
     expect(query).toContain('| WHERE fingerprint IN ("abc", "d\\"e")');
-    expect(query).toContain('| STATS releases = VALUES(`service.version`) BY fingerprint | LIMIT 2');
+    expect(query).toContain(
+      '| STATS releases = VALUES(`service.version`) BY fingerprint | LIMIT 2'
+    );
+  });
+});
+
+describe('crash group detail', () => {
+  const groupCrashes = () =>
+    withCrashGroup(
+      withCrashFingerprint(crashEvents({ serviceName: 'ride-ios', start: START, end: END })),
+      'abc'
+    );
+
+  it("keeps the group's crashes, the fingerprint as a param", () => {
+    const { query, params } = groupCrashes().toRequest();
+
+    expect(query).toContain('| WHERE fingerprint == ?fingerprint');
+    expect(params).toEqual(expect.arrayContaining([{ fingerprint: 'abc' }]));
+  });
+
+  it('reads the latest crash with its stack trace and session', () => {
+    expect(withLatestCrash(groupCrashes()).print('basic')).toContain(
+      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = `service.version`, session_id = `attributes.session.id` | KEEP crash_time, exception_type, message, stacktrace, release, session_id'
+    );
+  });
+
+  it('counts the crashes per release, OS version and device model', () => {
+    expect(withCrashBreakdown(groupCrashes(), 'releases').print('basic')).toContain(
+      '| STATS count = COUNT(*) BY value = `service.version` | SORT count DESC, value | LIMIT 1000'
+    );
+    expect(withCrashBreakdown(groupCrashes(), 'osVersions').print('basic')).toContain(
+      'BY value = `resource.attributes.os.version`'
+    );
+    expect(withCrashBreakdown(groupCrashes(), 'deviceModels').print('basic')).toContain(
+      'BY value = COALESCE(`resource.attributes.device.model.name`, `resource.attributes.device.model.identifier`)'
+    );
   });
 });

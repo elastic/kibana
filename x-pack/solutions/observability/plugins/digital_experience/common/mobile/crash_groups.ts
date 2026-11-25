@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Builder, type ComposerQuery } from '@elastic/esql';
+import { Builder, esql, type ComposerQuery } from '@elastic/esql';
 import { CRASH_EVENTS, OTEL_LOGS_INDEX } from '../otel_data';
 import { MOBILE_MAX_CRASH_DELAY_HOURS } from '../sessions';
 import { ERROR_GROUPS_ROWS } from '../top_rows';
@@ -107,4 +107,63 @@ export interface CrashGroupRow {
 export interface CrashGroupReleasesRow {
   [RESULT_COLUMNS.fingerprint]: string;
   [RESULT_COLUMNS.releases]?: string | string[] | null;
+}
+
+/** The crashes of one group. */
+export const withCrashGroup = (query: ComposerQuery, fingerprint: string): ComposerQuery =>
+  query.pipe`WHERE ${resultColumn('fingerprint')} == ${{ fingerprint }}`;
+
+/** A group's latest crash, with its stack trace and session. */
+export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
+  query.pipe`SORT ${resultColumn('crashTime')} DESC`.pipe`LIMIT 1`.pipe`EVAL
+      ${resultColumn('exceptionType')} = ${mobileColumn('exceptionType')},
+      ${resultColumn('message')} = ${mobileColumn('exceptionMessage')},
+      ${resultColumn('stacktrace')} = ${mobileColumn('exceptionStacktrace')},
+      ${resultColumn('release')} = ${mobileColumn('serviceVersion')},
+      ${resultColumn('sessionId')} = ${mobileColumn('sessionId')}`.pipe`KEEP ${[
+    resultColumn('crashTime'),
+    resultColumn('exceptionType'),
+    resultColumn('message'),
+    resultColumn('stacktrace'),
+    resultColumn('release'),
+    resultColumn('sessionId'),
+  ]}`;
+
+/** What a crash group is broken down by in its detail. */
+export const CRASH_BREAKDOWNS = {
+  releases: () => mobileColumn('serviceVersion'),
+  osVersions: () => mobileColumn('osVersion'),
+  deviceModels: () =>
+    esql.exp`COALESCE(${mobileColumn('deviceModelName')}, ${mobileColumn(
+      'deviceModelIdentifier'
+    )})`,
+} as const;
+
+export type CrashBreakdownName = keyof typeof CRASH_BREAKDOWNS;
+
+/** Values a breakdown counts before the rest is "Other". */
+const MAX_BREAKDOWN_ROWS = 1000;
+
+/** The crashes per value of a breakdown, most first; crashes without one have a `null` value. */
+export const withCrashBreakdown = (query: ComposerQuery, name: CrashBreakdownName): ComposerQuery =>
+  query.pipe`STATS ${resultColumn('count')} = COUNT(*) BY ${resultColumn(
+    'value'
+  )} = ${CRASH_BREAKDOWNS[name]()}`.pipe`SORT ${resultColumn('count')} DESC, ${resultColumn(
+    'value'
+  )}`.pipe`LIMIT ${MAX_BREAKDOWN_ROWS}`;
+
+/** The row of `withLatestCrash`. */
+export interface LatestCrashRow {
+  [RESULT_COLUMNS.crashTime]: string;
+  [RESULT_COLUMNS.exceptionType]?: string | null;
+  [RESULT_COLUMNS.message]?: string | null;
+  [RESULT_COLUMNS.stacktrace]?: string | null;
+  [RESULT_COLUMNS.release]?: string | null;
+  [RESULT_COLUMNS.sessionId]?: string | null;
+}
+
+/** The row of `withCrashBreakdown`. */
+export interface CrashBreakdownRow {
+  [RESULT_COLUMNS.count]: number;
+  [RESULT_COLUMNS.value]?: string | null;
 }
