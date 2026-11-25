@@ -616,8 +616,37 @@ describe('dynamic definition rules', () => {
       );
     });
 
-    it('accepts sum_rate and last on the same metric name (cumulative_count)', () => {
+    it('accepts sum_increase and sum_delta on the same metric name (change_over_range)', () => {
       expectAccepted(
+        withMetrics([
+          {
+            indexPattern: 'metrics-kubernetes.state_container-*',
+            metrics: [
+              {
+                name: 'k8s.container.restarts',
+                field: 'kubernetes.container.status.restarts',
+                agg: 'sum_increase',
+                unit: 'count',
+              },
+            ],
+          },
+          {
+            indexPattern: 'metrics-k8sclusterreceiver.otel-*',
+            metrics: [
+              {
+                name: 'k8s.container.restarts',
+                field: 'k8s.container.restarts',
+                agg: 'sum_delta',
+                unit: 'count',
+              },
+            ],
+          },
+        ])
+      );
+    });
+
+    it('rejects sum_rate vs last on the same metric name', () => {
+      expectRejected(
         withMetrics([
           {
             indexPattern: 'metrics-kubernetes.state_container-*',
@@ -641,7 +670,9 @@ describe('dynamic definition rules', () => {
               },
             ],
           },
-        ])
+        ]),
+        ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
+        METRIC_CONSISTENCY_RULE
       );
     });
 

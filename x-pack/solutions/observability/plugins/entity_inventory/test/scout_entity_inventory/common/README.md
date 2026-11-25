@@ -24,16 +24,17 @@ No index maps `k8s.deployment.uid`, although every OpenTelemetry document carrie
 - `metrics-kubernetes.state_deployment-default` (data stream): Elastic Agent names
   (`orchestrator.cluster.name`, `kubernetes.namespace`, `kubernetes.deployment.*`,
   `kubernetes.labels.app`) and `metricset.name: state_deployment`. Supplies
-  `k8s.deployment.available` via `last` of `kubernetes.deployment.replicas.available`.
+  `k8s.deployment.available` via `max` of `kubernetes.deployment.replicas.available`.
 - `metrics-kubernetes.state_container-default` (data stream): Elastic Agent container state
   (`kubernetes.namespace`, `kubernetes.deployment.name`,
   `kubernetes.container.status.restarts`) and `metricset.name: state_container`. The definition
-  declares restarts as `sum_rate` here; under `FROM` that rate is omitted and listed in
-  `unsupportedMetrics[]` (no TSDS in this archive).
+  has a single source for the Elastic Agent integration, with index pattern `metrics-kubernetes.*`.
+  It matches this stream and `state_deployment`, and its filter keeps only documents whose
+  `metricset.name` is `state_deployment` or `state_container`. It declares restarts as `max`, which
+  `FROM` can compute, so `unsupportedMetrics[]` stays empty.
 - `metrics-k8sclusterreceiver.otel-default` (data stream): OpenTelemetry names (`k8s.cluster.name`,
   `k8s.namespace.name`, `k8s.deployment.name`, `k8s.deployment.available`,
-  `k8s.deployment.desired`, `k8s.container.restarts`). Restarts use `last` and fill the column when
-  the Agent rate plan cannot.
+  `k8s.deployment.desired`, `k8s.container.restarts`). Restarts use `max`, like the Agent source.
 - `metrics-k8sclusterreceiver.otel-tsds`: a plain time-series index (`index.mode: time_series`), not a
   data stream, with the same OpenTelemetry names. A time-series data stream sets its time bounds
   around the current time when it is created and rejects fixed archive timestamps; a plain index
@@ -47,7 +48,7 @@ No index maps `k8s.deployment.uid`, although every OpenTelemetry document carrie
 
 ## Metric samples
 
-| Window | Entity | available | restarts (OTel `last`) |
+| Window | Entity | available | restarts (`max`) |
 | --- | --- | --- | --- |
 | 2026-11-01 10:01 | checkout/cart-api | 3 | 5 |
 | 2026-11-01 10:01 | checkout/payments | 2 | 1 |

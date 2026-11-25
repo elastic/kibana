@@ -318,6 +318,81 @@ describe('buildListQuery', () => {
       expect(Parser.parse(esql).errors).toEqual([]);
     });
   });
+
+  /**
+   * `INCREASE` and `DELTA` are TS-only like `RATE`: TS computes the change over the range, FROM
+   * omits the column from STATS and KEEP.
+   */
+  describe('change-over-range metrics under TS vs FROM', () => {
+    const changeOverRangeDefinition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: 'metrics-kubernetes.state_container-*',
+            metrics: [
+              { name: 'cpu', field: 'system.cpu.total.norm.pct', agg: 'last' },
+              {
+                name: 'restarts',
+                field: 'kubernetes.container.status.restarts',
+                agg: 'sum_increase',
+                unit: 'count',
+              },
+            ],
+          },
+          {
+            indexPattern: 'metrics-k8sclusterreceiver.otel-*',
+            metrics: [
+              { name: 'cpu', field: 'k8s.node.cpu.usage', agg: 'last' },
+              {
+                name: 'restarts',
+                field: 'k8s.container.restarts',
+                agg: 'sum_delta',
+                unit: 'count',
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const queriesFor = (engine: 'TS' | 'FROM') => {
+      const plans = plansOf(changeOverRangeDefinition, engine === 'TS');
+      const identity = resolveIdentityPlan(changeOverRangeDefinition);
+      const columns = buildColumns(changeOverRangeDefinition, plans, identity);
+      return plans
+        .filter((plan) => plan.engine === engine)
+        .map((plan) => buildListQuery({ plan, identity, columns, window, limit: LIMIT }).esql);
+    };
+
+    it('TS computes SUM(INCREASE) on the counter source and SUM(DELTA) on the gauge source', () => {
+      const [ecsQuery, otelQuery] = queriesFor('TS');
+
+      expect(ecsQuery).toContain(
+        '`restarts` = SUM(INCREASE(`kubernetes.container.status.restarts`))'
+      );
+      expect(otelQuery).toContain('`restarts` = SUM(DELTA(`k8s.container.restarts`))');
+      [ecsQuery, otelQuery].forEach((esql) => {
+        const keepLine = esql.split('\n').find((line) => line.startsWith('| KEEP '));
+        expect(keepLine).toContain('`restarts`');
+        expect(Parser.parse(esql).errors).toEqual([]);
+      });
+    });
+
+    it('FROM omits the change-over-range column from STATS and KEEP', () => {
+      const queries = queriesFor('FROM');
+
+      expect(queries).toHaveLength(2);
+      queries.forEach((esql) => {
+        const keepLine = esql.split('\n').find((line) => line.startsWith('| KEEP '));
+        expect(esql).not.toContain('INCREASE(');
+        expect(esql).not.toContain('DELTA(');
+        expect(keepLine).not.toContain('`restarts`');
+        expect(keepLine).toContain('`cpu`');
+        expect(Parser.parse(esql).errors).toEqual([]);
+      });
+    });
+  });
 });
 
 describe('generateListQueries', () => {

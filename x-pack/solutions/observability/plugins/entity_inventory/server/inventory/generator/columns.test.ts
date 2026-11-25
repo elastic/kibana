@@ -289,7 +289,7 @@ describe('buildColumns with metrics', () => {
     );
   });
 
-  it('keeps the first plan agg when sum_rate and last share cumulative_count', () => {
+  it('keeps the first plan agg when sum_increase and sum_delta share change_over_range', () => {
     const definition: EntityDefinitionWithoutId = {
       ...k8sNodeFixture,
       dynamic: {
@@ -300,7 +300,7 @@ describe('buildColumns with metrics', () => {
               {
                 name: 'restarts',
                 field: 'kubernetes.container.status.restarts',
-                agg: 'sum_rate',
+                agg: 'sum_increase',
                 unit: 'count',
               },
             ],
@@ -308,7 +308,12 @@ describe('buildColumns with metrics', () => {
           {
             indexPattern: 'metrics-b-*',
             metrics: [
-              { name: 'restarts', field: 'k8s.container.restarts', agg: 'last', unit: 'count' },
+              {
+                name: 'restarts',
+                field: 'k8s.container.restarts',
+                agg: 'sum_delta',
+                unit: 'count',
+              },
             ],
           },
         ],
@@ -317,7 +322,7 @@ describe('buildColumns with metrics', () => {
     const columns = columnsOf(definition);
     expect(columns.find((column) => column.name === 'restarts')).toMatchObject({
       kind: 'metric',
-      agg: 'sum_rate',
+      agg: 'sum_increase',
       unit: 'count',
       fieldByPlan: { 0: 'kubernetes.container.status.restarts', 1: 'k8s.container.restarts' },
     });

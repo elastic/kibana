@@ -514,9 +514,12 @@ describe('dynamicSourceSchema', () => {
 });
 
 describe('dynamicMetricSchema', () => {
-  it.each(['last', 'avg', 'sum_rate', 'count_distinct'] as const)('accepts agg %s', (agg) => {
-    expect(dynamicMetricSchema.safeParse(metric({ agg })).success).toBe(true);
-  });
+  it.each(['last', 'avg', 'sum_rate', 'count_distinct', 'sum_increase', 'sum_delta'] as const)(
+    'accepts agg %s',
+    (agg) => {
+      expect(dynamicMetricSchema.safeParse(metric({ agg })).success).toBe(true);
+    }
+  );
 
   it('rejects an unknown agg', () => {
     expect(dynamicMetricSchema.safeParse(metric({ agg: 'percentile' as 'last' })).success).toBe(
@@ -540,6 +543,14 @@ describe('dynamicMetricSchema', () => {
       false
     );
   });
+
+  it.each(['sum_increase', 'sum_delta'] as const)(
+    'rejects offset on %s but allows scale',
+    (agg) => {
+      expect(dynamicMetricSchema.safeParse(metric({ agg, scale: 2 })).success).toBe(true);
+      expect(dynamicMetricSchema.safeParse(metric({ agg, offset: 1 })).success).toBe(false);
+    }
+  );
 
   it('rejects non-finite scale', () => {
     expect(dynamicMetricSchema.safeParse(metric({ scale: Number.NaN })).success).toBe(false);

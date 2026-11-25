@@ -27,7 +27,7 @@ const TS_ONLY = {
 const CLUSTER = 'k8s.cluster.name';
 const NAMESPACE = 'kubernetes.namespace';
 
-const STATE_PATTERN = 'metrics-kubernetes.state_deployment-*';
+const STATE_PATTERN = 'metrics-kubernetes.*';
 const OTEL_PATTERN = 'metrics-k8sclusterreceiver.otel-*';
 
 interface AttributeValuesResponse {

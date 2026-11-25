@@ -32,7 +32,8 @@ export const METRIC_NAME_RULE = 'metric names';
 /**
  * Name of the rule that the same metric name keeps one measurement and unit across sources.
  * Aggregations may differ only when they share a declared measurement class (see
- * `areMetricAggsEquivalent`); e.g. `avg` vs `max` is rejected, `sum_rate` vs `last` is allowed.
+ * `areMetricAggsEquivalent`); e.g. `avg` vs `max` and `sum_rate` vs `last` are rejected,
+ * `sum_increase` vs `sum_delta` is allowed.
  */
 export const METRIC_CONSISTENCY_RULE = 'metric consistency across sources';
 /** Name of the rule that a display label is for an attribute of a source or an identity field. */

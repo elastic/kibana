@@ -9,16 +9,6 @@ import { getPresenceFilter } from '@kbn/entity-store/common';
 import type { RegistrableEntityDefinition } from '@kbn/entity-store/server';
 import { MANAGED_BY } from '../constants';
 
-/**
- * A Kubernetes deployment, identified by `<namespace>/<name>` read from the ECS names. The
- * ECS<->OTel alias layer resolves those names on the OpenTelemetry stream, so one composition
- * serves both sources. The same namespace and name in two clusters land on one id; the cluster is
- * an attribute.
- *
- * Metrics: available, desired, and restarts all use `max` from `state_deployment` /
- * `state_container` (ECS) and OTel. No deployment uptime duration field exists in that
- * integration, so uptime is not declared.
- */
 export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
   type: 'k8s.deployment',
   name: 'K8s Deployment',
@@ -71,7 +61,7 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
           {
             name: 'k8s.container.restarts',
             field: 'kubernetes.container.status.restarts',
-            agg: 'max_rate',
+            agg: 'max',
             unit: 'count',
           },
         ],
@@ -98,7 +88,7 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
           {
             name: 'k8s.container.restarts',
             field: 'k8s.container.restarts',
-            agg: 'max_rate',
+            agg: 'max',
             unit: 'count',
           },
         ],

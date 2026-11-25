@@ -21,8 +21,8 @@ const DEPLOYMENT_IDS = [
   'k8s.deployment:platform/ingress',
 ];
 
-const STATE_PATTERN = 'metrics-kubernetes.state_deployment-*';
-const STATE_CONTAINER_PATTERN = 'metrics-kubernetes.state_container-*';
+// One Agent source reads both the state_deployment and state_container data streams.
+const STATE_PATTERN = 'metrics-kubernetes.*';
 const OTEL_PATTERN = 'metrics-k8sclusterreceiver.otel-*';
 
 // No index maps `k8s.deployment.uid`, so each of the OpenTelemetry source's two plans (`TS` and
@@ -137,7 +137,6 @@ apiTest.describe(
           body.queries.map(({ indexPattern, engine }) => ({ indexPattern, engine }))
         ).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM' },
-          { indexPattern: STATE_CONTAINER_PATTERN, engine: 'FROM' },
           { indexPattern: OTEL_PATTERN, engine: 'TS' },
           { indexPattern: OTEL_PATTERN, engine: 'FROM' },
         ]);
@@ -147,7 +146,7 @@ apiTest.describe(
           expect(typeof query.took).toBe('number');
         });
         // The OpenTelemetry time-series index holds no 2026-11-01 documents, so its `TS` plan reads none.
-        expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 3, 0, 3]);
+        expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 0, 3]);
       }
     );
 
@@ -217,7 +216,7 @@ apiTest.describe(
           },
           { name: 'last_seen', kind: 'last_seen' },
         ]);
-        expect(columns).toStrictEqual(
+        expect(columns.map(({ name, kind }) => ({ name, kind }))).toStrictEqual(
           types
             .find(({ type }) => type === 'k8s.deployment')
             ?.columns.map(({ name, kind }) => ({ name, kind }))
@@ -281,7 +280,7 @@ apiTest.describe(
     apiTest(
       'gives a source with no time-series index a FROM plan only and lists its rows',
       async ({ apiClient }) => {
-        // The Agent state_deployment pattern holds only a data stream (no time-series index).
+        // The Agent `metrics-kubernetes.*` pattern holds only data streams (no time-series index).
         const response = await postList(
           apiClient,
           { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' },
@@ -326,7 +325,6 @@ apiTest.describe(
         expect(errors).toStrictEqual([]);
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
-          { indexPattern: STATE_CONTAINER_PATTERN, engine: 'FROM', rowCount: 0 },
           { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 1 },
           { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 0 },
         ]);
@@ -363,7 +361,6 @@ apiTest.describe(
         // a third row) and `TS` reads only it (it would return standard-only).
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
-          { indexPattern: STATE_CONTAINER_PATTERN, engine: 'FROM', rowCount: 0 },
           { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 2 },
           { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 2 },
         ]);
@@ -392,7 +389,6 @@ apiTest.describe(
         expect(errors).toStrictEqual([]);
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
-          { indexPattern: STATE_CONTAINER_PATTERN, engine: 'FROM', rowCount: 0 },
           { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 1 },
           { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 1 },
         ]);
@@ -676,7 +672,7 @@ apiTest.describe(
         // each is reported in `errors`, and that is not truncation.
         expect(rows).toStrictEqual([]);
         expect(errors).toStrictEqual(
-          [STATE_PATTERN, STATE_CONTAINER_PATTERN, OTEL_PATTERN].map((indexPattern) => ({
+          [STATE_PATTERN, OTEL_PATTERN].map((indexPattern) => ({
             indexPattern,
             status: null,
             reason: `no readable index behind "${indexPattern}" maps @timestamp`,

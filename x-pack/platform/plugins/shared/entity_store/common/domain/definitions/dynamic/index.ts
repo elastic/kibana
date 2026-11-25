@@ -54,8 +54,8 @@ export {
   SERVABLE_IDENTITY_RULE,
 } from './dynamic_definition_rules';
 export {
-  CUMULATIVE_COUNT_AGGS,
-  CUMULATIVE_COUNT_MEASUREMENT,
+  CHANGE_OVER_RANGE_AGGS,
+  CHANGE_OVER_RANGE_MEASUREMENT,
   areMetricAggsEquivalent,
   getMetricMeasurementClass,
 } from './metric_measurement';

@@ -50,17 +50,22 @@ export const METRIC_AGGS = [
   'max_rate',
   'avg_rate',
   'min_rate',
+  'sum_increase',
+  'sum_delta',
 ] as const;
 
 /** Closed set of units the inventory client can format. */
 export const METRIC_UNITS = ['percent', 'ratio', 'bytes', 'ms', 's', 'count'] as const;
 
 const COUNT_AGGS: ReadonlySet<(typeof METRIC_AGGS)[number]> = new Set(['count', 'count_distinct']);
-const RATE_AGGS: ReadonlySet<(typeof METRIC_AGGS)[number]> = new Set([
+/** Aggregates with a true zero (rates and changes over the range), so an offset is meaningless. */
+const TRUE_ZERO_AGGS: ReadonlySet<(typeof METRIC_AGGS)[number]> = new Set([
   'sum_rate',
   'max_rate',
   'avg_rate',
   'min_rate',
+  'sum_increase',
+  'sum_delta',
 ]);
 
 /** A mapped field path: dot-separated segments, no wildcards, expressions, quoting or whitespace. */
@@ -170,7 +175,8 @@ export const dynamicMetricSchema = lazySchema(() =>
       filter: filterSchema.optional(),
       // Applied after STATS as `m = m * scale [+ offset]`. Forbidden on count aggregates.
       scale: z.number().finite().optional(),
-      // Applied after STATS (and after scale when both are set). Forbidden on count and rate aggs.
+      // Applied after STATS (and after scale when both are set). Forbidden on count, rate and
+      // change-over-range (`sum_increase`, `sum_delta`) aggs.
       offset: z.number().finite().optional(),
       // How the inventory client formats the value; closed set so list cells can render units.
       unit: z.enum(METRIC_UNITS).optional(),
@@ -190,11 +196,11 @@ export const dynamicMetricSchema = lazySchema(() =>
           message: `offset is not allowed on agg "${agg}"`,
         });
       }
-      if (RATE_AGGS.has(agg) && offset !== undefined) {
+      if (TRUE_ZERO_AGGS.has(agg) && offset !== undefined) {
         ctx.addIssue({
           code: 'custom',
           path: ['offset'],
-          message: `offset is not allowed on rate agg "${agg}" (rate has a true zero)`,
+          message: `offset is not allowed on agg "${agg}" (it has a true zero)`,
         });
       }
     })

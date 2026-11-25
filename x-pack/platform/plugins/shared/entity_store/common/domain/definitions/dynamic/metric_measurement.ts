@@ -8,25 +8,28 @@
 import type { DynamicMetricAgg } from './dynamic_block_schema';
 
 /**
- * Measurement id for a cumulative count that may be a counter rate on one source and a gauge
- * level on another (Kubernetes container restarts: ECS `sum_rate`, OTel `last`). Closed set —
- * do not widen without product agreement; `avg`/`max` and the other rate outers stay singletons.
+ * Measurement id for the absolute change of a field over the queried time range, whether the
+ * field is a counter on one source and a gauge on another (Kubernetes container restarts: ECS
+ * counter via `sum_increase`, OTel gauge via `sum_delta`). Closed set: do not widen without
+ * product agreement; every other aggregation stays a singleton.
  */
-export const CUMULATIVE_COUNT_MEASUREMENT = 'cumulative_count';
+export const CHANGE_OVER_RANGE_MEASUREMENT = 'change_over_range';
 
 /**
- * Aggregations that share {@link CUMULATIVE_COUNT_MEASUREMENT}. `sum_rate` for counters;
- * `last` for gauges that already store the cumulative level. Future `increase` / `delta` belong
- * here once the schema accepts them.
+ * Aggregations that share {@link CHANGE_OVER_RANGE_MEASUREMENT}: `sum_increase` for counters
+ * (ES|QL `INCREASE` accepts counters only) and `sum_delta` for gauges (`DELTA` rejects counters).
  */
-export const CUMULATIVE_COUNT_AGGS: ReadonlySet<DynamicMetricAgg> = new Set(['sum_rate', 'last']);
+export const CHANGE_OVER_RANGE_AGGS: ReadonlySet<DynamicMetricAgg> = new Set([
+  'sum_increase',
+  'sum_delta',
+]);
 
 /**
  * The measurement class of an aggregation: a closed equivalence set, or the agg itself when it
  * stands alone. Same metric `name` across sources must share this class (and the same unit).
  */
 export const getMetricMeasurementClass = (agg: DynamicMetricAgg): string =>
-  CUMULATIVE_COUNT_AGGS.has(agg) ? CUMULATIVE_COUNT_MEASUREMENT : agg;
+  CHANGE_OVER_RANGE_AGGS.has(agg) ? CHANGE_OVER_RANGE_MEASUREMENT : agg;
 
 /** Whether two aggregations produce the same measurement for metric-name consistency. */
 export const areMetricAggsEquivalent = (left: DynamicMetricAgg, right: DynamicMetricAgg): boolean =>
