@@ -23,7 +23,7 @@ export interface InspectorAdapters extends Adapters {
 
 export const getProfilesInspectorView = (): InspectorViewDescription => ({
   title: i18n.translate('discover.inspector.profilesInspectorViewTitle', {
-    defaultMessage: 'Profiles',
+    defaultMessage: 'Discover profiles',
   }),
   order: 20,
   help: i18n.translate('discover.inspector.profilesInspectorViewHelpText', {
