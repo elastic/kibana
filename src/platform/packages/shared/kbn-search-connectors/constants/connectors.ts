@@ -670,7 +670,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     isTechPreview: true,
-    keywords: ['cloud', 'box'],
+    keywords: ['cloud', 'box', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.box.name', {
       defaultMessage: 'Box',
     }),

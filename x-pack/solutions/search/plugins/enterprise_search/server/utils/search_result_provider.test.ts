@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NEVER, of } from 'rxjs';
+import { firstValueFrom, NEVER, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
 import type { GlobalSearchProviderContext } from '@kbn/global-search-plugin/server';
@@ -233,28 +233,24 @@ describe('Search search provider', () => {
       });
     });
 
-    it('matches built-in sources when searching content crawlers', () => {
+    it('matches built-in sources when searching content crawlers', async () => {
       const searchProvider = getSearchResultProvider(
         { hasConnectors: true } as any,
         CONNECTOR_DEFINITIONS
       );
-      getTestScheduler().run(({ expectObservable }) => {
-        expectObservable(
-          searchProvider.find(
-            { term: 'content crawlers' },
-            { aborted$: NEVER, maxResults: 100, preference: '' },
-            mockSearchProviderContext
-          )
-        ).toBe('(a|)', {
-          a: expect.arrayContaining([
-            expect.objectContaining({
-              id: 'azure_blob_storage',
-              score: 50,
-              title: 'Azure Blob Storage',
-            }),
-          ]),
-        });
-      });
+      const results = await firstValueFrom(
+        searchProvider.find(
+          { term: 'content crawlers' },
+          { aborted$: NEVER, maxResults: 100, preference: '' },
+          mockSearchProviderContext
+        )
+      );
+
+      expect(results).toHaveLength(CONNECTOR_DEFINITIONS.length);
+      expect(results.map((result) => result.id).sort()).toEqual(
+        CONNECTOR_DEFINITIONS.map((definition) => definition.serviceType).sort()
+      );
+      expect(results.every((result) => result.score === 50)).toBe(true);
     });
 
     it('returns appropriate native flags when on cloud', () => {
