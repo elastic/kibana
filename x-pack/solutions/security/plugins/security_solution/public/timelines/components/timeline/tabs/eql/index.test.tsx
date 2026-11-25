@@ -402,10 +402,11 @@ describe('EQL Tab', () => {
       beforeEach(() => {
         // pagination tests need more than 1 record so here
         // we return 5 records instead of just 1.
+        const events = structuredClone(mockTimelineData.slice(0, 5));
         useTimelineEventsMock = jest.fn(() => [
           false,
           {
-            events: structuredClone(mockTimelineData.slice(0, 5)),
+            events,
             rawEvents: [],
             pageInfo: {
               activePage: 0,
@@ -533,6 +534,7 @@ describe('EQL Tab', () => {
             expect(fetchNotesMock).toHaveBeenCalledWith([mockTimelineData[0]._id]);
           });
           expect(getUnifiedTimelineBodyProps().itemsPerPage).toBe(1);
+          expect(getUnifiedTimelineBodyProps().itemsPerPageOptions).toEqual([1, 2, 3, 4, 5]);
 
           fetchNotesMock.mockClear();
           act(() => {
