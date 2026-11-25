@@ -15,7 +15,7 @@ const NOTE = 'test note';
 const NO_OWN_TIMEOUT_MS = 0;
 // Starts only once the tab is ready, so it never spends the cold navigation's budget; the lookup
 // is sent while the tab loads, so its answer is normally already there by then.
-const NOTE_LOOKUP_DEADLINE_MS = 30_000;
+const NOTE_LOOKUP_DEADLINE_MS = 10_000;
 
 spaceTest.describe(
   'Policy details - protection updates (read only)',
