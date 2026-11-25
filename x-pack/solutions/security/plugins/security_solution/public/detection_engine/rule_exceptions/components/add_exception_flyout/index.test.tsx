@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { EntriesArray, EntryMatch } from '@kbn/securitysolution-io-ts-list-types';
@@ -1196,6 +1196,123 @@ describe('When the add exception modal is opened', () => {
       fireEvent.click(await screen.findByRole('option', { name: 'Duplicate' }));
 
       expect(screen.getByTestId('exceptionFlyoutCloseReasonSelect')).toHaveTextContent('Duplicate');
+    });
+  });
+
+  describe('confirm button while the conditions change', () => {
+    const validItem = getExceptionListItemSchemaMock();
+
+    const reportFromBuilder = (change: {
+      errorExists: boolean;
+      exceptionItems: Array<ReturnType<typeof getExceptionListItemSchemaMock>>;
+    }) => {
+      const { calls } = mockGetExceptionBuilderComponentLazy.mock;
+      const { onChange } = calls[calls.length - 1][0];
+      act(() => {
+        onChange({ ...change, exceptionsToDelete: [], warningExists: false });
+      });
+    };
+
+    beforeEach(() => {
+      mockFetchIndexPatterns.mockImplementation(() => ({
+        isLoading: false,
+        indexPatterns: stubIndexPattern,
+        getExtendedFields: () => Promise.resolve([]),
+      }));
+      render(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[{ ...getRulesSchemaMock(), index: ['filebeat-*'] } as Rule]}
+            isBulkAction={false}
+            alertData={undefined}
+            isAlertDataLoading={false}
+            alertStatus={undefined}
+            isEndpointItem={false}
+            showAlertCloseOptions={false}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+    });
+
+    it('stays disabled until the item has a name', () => {
+      reportFromBuilder({ errorExists: false, exceptionItems: [validItem] });
+
+      expect(screen.getByTestId('addExceptionConfirmButton')).toBeDisabled();
+
+      fireEvent.change(screen.getByTestId('exceptionFlyoutNameInput'), {
+        target: { value: 'My item name' },
+      });
+
+      expect(screen.getByTestId('addExceptionConfirmButton')).toBeEnabled();
+    });
+
+    it('is enabled only while every condition has a value', () => {
+      fireEvent.change(screen.getByTestId('exceptionFlyoutNameInput'), {
+        target: { value: 'My item name' },
+      });
+
+      // A field and a value
+      reportFromBuilder({ errorExists: false, exceptionItems: [validItem] });
+      expect(screen.getByTestId('addExceptionConfirmButton')).toBeEnabled();
+
+      // The value is removed: the builder reports an error for the empty input and no item
+      reportFromBuilder({ errorExists: true, exceptionItems: [] });
+      expect(screen.getByTestId('addExceptionConfirmButton')).toBeDisabled();
+
+      // Synthetic: a validation error alone disables the button, even with a valid item reported
+      reportFromBuilder({ errorExists: true, exceptionItems: [validItem] });
+      expect(screen.getByTestId('addExceptionConfirmButton')).toBeDisabled();
+
+      // The operator is switched: the error is cleared, but there is still no valid item
+      reportFromBuilder({ errorExists: false, exceptionItems: [] });
+      expect(screen.getByTestId('addExceptionConfirmButton')).toBeDisabled();
+
+      // A value for the new operator
+      reportFromBuilder({ errorExists: false, exceptionItems: [validItem] });
+      expect(screen.getByTestId('addExceptionConfirmButton')).toBeEnabled();
+    });
+  });
+
+  describe('custom fields in the condition builder', () => {
+    const renderFlyout = (isEndpointItem: boolean): void => {
+      mockFetchIndexPatterns.mockImplementation(() => ({
+        isLoading: false,
+        indexPatterns: stubIndexPattern,
+        getExtendedFields: () => Promise.resolve([]),
+      }));
+      render(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[{ ...getRulesSchemaMock(), index: ['filebeat-*'] } as Rule]}
+            isBulkAction={false}
+            alertData={undefined}
+            isAlertDataLoading={false}
+            alertStatus={undefined}
+            isEndpointItem={isEndpointItem}
+            showAlertCloseOptions={false}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+    };
+
+    it('allows fields that are not in the index for a rule exception', () => {
+      renderFlyout(false);
+
+      expect(mockGetExceptionBuilderComponentLazy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ allowCustomFieldOptions: true })
+      );
+    });
+
+    it('does not allow fields that are not in the index for an endpoint exception', () => {
+      renderFlyout(true);
+
+      expect(mockGetExceptionBuilderComponentLazy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ allowCustomFieldOptions: false })
+      );
     });
   });
 });

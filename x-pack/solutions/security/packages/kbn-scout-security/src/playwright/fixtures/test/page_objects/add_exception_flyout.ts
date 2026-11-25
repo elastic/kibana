@@ -26,10 +26,12 @@ export class AddExceptionFlyoutPage {
   public readonly submitButton: Locator;
   public readonly flyoutTitle: Locator;
 
+  private readonly entryContainers: Locator;
   private readonly addExceptionButtons: Record<AddExceptionButtonType, Locator>;
 
   constructor(private readonly page: ScoutPage) {
     this.flyoutTitle = this.page.testSubj.locator('exceptionFlyoutTitle');
+    this.entryContainers = this.page.testSubj.locator('exceptionItemEntryContainer');
     this.itemNameInput = this.page.testSubj.locator('exceptionFlyoutNameInput');
     this.bulkCloseCheckbox = this.page.testSubj.locator('bulkCloseAlertOnAddExceptionCheckbox');
     this.submitButton = this.page.testSubj.locator('addExceptionConfirmButton');
@@ -60,9 +62,7 @@ export class AddExceptionFlyoutPage {
     operator: string;
     value: string;
   }) {
-    const entryScope = this.page.locator(
-      `${subj('exceptionItemEntryContainer')} >> nth=${entryIndex}`
-    );
+    const entryScope = await this.entryAt(entryIndex);
 
     // Scope each combo to this entry (there can be several) via the helper's scope arg.
     const fieldCombo = this.page.components.comboBox('fieldAutocompleteComboBox', entryScope);
@@ -93,133 +93,46 @@ export class AddExceptionFlyoutPage {
   }
 
   /**
-   * Locator of one exception item (an "or" group) in the builder. Items are addressed by
-   * position on purpose: the builder tests assert that positions keep their values when
-   * neighbouring rows are added or removed.
+   * Picks one condition of the builder by position and waits until it is visible. A position that
+   * does not exist fails here with a clear timeout.
    */
-  private itemLocator(itemIndex: number): Locator {
-    return this.page.locator(`${subj('exceptionEntriesContainer')} >> nth=${itemIndex}`);
-  }
-
-  /** Locator of one entry row (a nested parent and each nested child are separate rows). */
-  private entryLocator(itemIndex: number, entryIndex: number): Locator {
-    return this.itemLocator(itemIndex).locator(
-      `${subj('exceptionItemEntryContainer')} >> nth=${entryIndex}`
-    );
-  }
-
-  private fieldCombo(itemIndex: number, entryIndex: number) {
-    return this.page.components.comboBox(
-      'fieldAutocompleteComboBox',
-      this.entryLocator(itemIndex, entryIndex)
-    );
-  }
-
-  /** Picks a field that exists in the rule's index patterns (or a child of a nested parent). */
-  async selectField(itemIndex: number, entryIndex: number, field: string) {
-    await this.fieldCombo(itemIndex, entryIndex).setSelectedOptions([field]);
-  }
-
-  /** Types a field that is not in the index patterns and commits it as a custom option. */
-  async createCustomField(itemIndex: number, entryIndex: number, field: string) {
-    await this.fieldCombo(itemIndex, entryIndex).setCustomSelectedOptions([field]);
+  private async entryAt(index: number): Promise<Locator> {
+    // eslint-disable-next-line playwright/no-nth-methods -- condition rows have no identity of their own; callers name the position
+    const entry = this.entryContainers.nth(index);
+    await entry.waitFor({ state: 'visible' });
+    return entry;
   }
 
   /**
-   * Picks a leaf field of a nested path in the empty parent row of a new nested condition.
-   * The row then shows the nested path itself (for `process.elf.sections.name` it shows
-   * `process.elf.sections`) and the leaf becomes the first child row. The combo helper
-   * `setSelectedOptions` cannot be used here, because it waits for the picked label to be
-   * the row's selection.
+   * Combo box of the only condition of the builder, which is where a new flyout starts. With
+   * several conditions the locator matches more than one element and Playwright reports it.
    */
-  async selectNestedParent(itemIndex: number, entryIndex: number, leafField: string) {
-    await this.entryLocator(itemIndex, entryIndex)
-      .locator(subj('fieldAutocompleteComboBox'))
-      .locator(subj('comboBoxSearchInput'))
-      .fill(leafField);
-    await this.page.getByRole('option', { name: leafField, exact: true }).click();
+  private onlyEntryCombo(comboBoxTestSubj: string) {
+    return this.page.components.comboBox(comboBoxTestSubj, this.entryContainers);
+  }
+
+  /** Picks a field that exists in the rule's index patterns in the only condition. */
+  async selectField(field: string) {
+    await this.onlyEntryCombo('fieldAutocompleteComboBox').setSelectedOptions([field]);
   }
 
   /** Types into the field search box without selecting, then returns the visible options. */
-  async searchFieldOptions(itemIndex: number, entryIndex: number, text: string) {
-    const entryScope = this.entryLocator(itemIndex, entryIndex);
-    await entryScope
+  async searchFieldOptions(text: string) {
+    await this.entryContainers
       .locator(subj('fieldAutocompleteComboBox'))
       .locator(subj('comboBoxSearchInput'))
       .fill(text);
-    return this.fieldCombo(itemIndex, entryIndex).getAllVisibleOptions();
+    return this.onlyEntryCombo('fieldAutocompleteComboBox').getAllVisibleOptions();
   }
 
-  /** Selected field label of every row in an item ('' for a row without a field yet). */
-  async getFieldLabels(itemIndex: number): Promise<string[]> {
-    const rowCount = await this.itemLocator(itemIndex)
-      .locator(subj('exceptionItemEntryContainer'))
-      .count();
-    const labels: string[] = [];
-    for (let entryIndex = 0; entryIndex < rowCount; entryIndex++) {
-      const [label] = await this.fieldCombo(itemIndex, entryIndex).getSelectedOptions();
-      labels.push(label ?? '');
-    }
-    return labels;
+  /** Opens the value dropdown of the `match` ("is") condition and returns the visible suggestions. */
+  async getMatchValueSuggestions() {
+    return this.onlyEntryCombo('valuesAutocompleteMatch').getAllVisibleOptions();
   }
 
-  async getItemCount(): Promise<number> {
-    return this.page.locator(subj('exceptionEntriesContainer')).count();
-  }
-
-  async setOperator(itemIndex: number, entryIndex: number, operator: string) {
-    await this.selectOperator(this.entryLocator(itemIndex, entryIndex), operator);
-  }
-
-  /** Commits a free-text value on a `match` ("is") entry. */
-  async setMatchValue(itemIndex: number, entryIndex: number, value: string) {
-    await this.page.components
-      .comboBox('valuesAutocompleteMatch', this.entryLocator(itemIndex, entryIndex))
-      .setCustomSelectedOptions([value]);
-  }
-
-  /** Opens the value dropdown of a `match` entry and returns the suggestions that are visible. */
-  async getMatchValueSuggestions(itemIndex: number, entryIndex: number) {
-    return this.page.components
-      .comboBox('valuesAutocompleteMatch', this.entryLocator(itemIndex, entryIndex))
-      .getAllVisibleOptions();
-  }
-
-  /** Picks one of the suggested values of a `match` entry. */
-  async selectMatchValueSuggestion(itemIndex: number, entryIndex: number, value: string) {
-    await this.page.components
-      .comboBox('valuesAutocompleteMatch', this.entryLocator(itemIndex, entryIndex))
-      .setSelectedOptions([value]);
-  }
-
-  /**
-   * Removes the value of a `match` entry the way a user does: one Backspace in the value input
-   * drops the selection and leaves its text in the search box, the text is deleted too, and a
-   * click elsewhere blurs the input so that the builder reports the empty value as an error.
-   * Leftover search text would be committed again as a new value on Enter or on blur, because
-   * the combo accepts custom options.
-   */
-  async removeMatchValue(itemIndex: number, entryIndex: number) {
-    const valueInput = this.entryLocator(itemIndex, entryIndex)
-      .locator(subj('valuesAutocompleteMatch'))
-      .locator(subj('comboBoxSearchInput'));
-    await valueInput.press('Backspace');
-    await valueInput.fill('');
-    await this.flyoutTitle.click();
-  }
-
-  /** Commits free-text values on a `match_any` ("is one of") entry. */
-  async setMatchAnyValues(itemIndex: number, entryIndex: number, values: string[]) {
-    await this.page.components
-      .comboBox('valuesAutocompleteMatchAny', this.entryLocator(itemIndex, entryIndex))
-      .setCustomSelectedOptions(values);
-  }
-
-  /** Clicks the delete button of one row; rows of all nested children count separately. */
-  async deleteEntry(itemIndex: number, entryIndex: number) {
-    await this.itemLocator(itemIndex)
-      .locator(`${subj('builderItemEntryDeleteButton')} >> nth=${entryIndex}`)
-      .click();
+  /** Picks one of the suggested values of the `match` ("is") condition. */
+  async selectMatchValueSuggestion(value: string) {
+    await this.onlyEntryCombo('valuesAutocompleteMatch').setSelectedOptions([value]);
   }
 
   async setExceptionName(name: string) {
