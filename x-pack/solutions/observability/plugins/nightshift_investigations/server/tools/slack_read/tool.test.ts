@@ -9,8 +9,19 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { createSlackReadTool, SLACK_READ_TOOL_ID } from './tool';
 
-const appConnector = { id: 'elastic-apps-slack', actionTypeId: '.slack2', config: {} };
-const otherConnectors = [
+interface FakeConnector {
+  id: string;
+  actionTypeId: string;
+  config: Record<string, unknown>;
+  isOutboundActionsEnabled?: boolean;
+}
+
+const appConnector: FakeConnector = {
+  id: 'elastic-apps-slack',
+  actionTypeId: '.slack2',
+  config: {},
+};
+const otherConnectors: FakeConnector[] = [
   { id: 'team-slack', actionTypeId: '.slack2', config: {} },
   { id: 'unassigned-slack', actionTypeId: '.slack2', config: {} },
   { id: 'telemetry', actionTypeId: '.elasticsearch', config: {} },
@@ -27,7 +38,7 @@ const setup = (
 ) => {
   const connectors = appConnected ? [appConnector, ...otherConnectors] : otherConnectors;
   const execute = jest.fn().mockResolvedValue({ status: 'ok', data: { ok: true, channels: [] } });
-  const get = jest.fn(async ({ id }: { id: string }) => {
+  const get = jest.fn(async ({ id }: { id: string }): Promise<FakeConnector> => {
     const connector = connectors.find((candidate) => candidate.id === id);
     if (!connector) throw SavedObjectsErrorHelpers.createGenericNotFoundError('action', id);
     return connector;
