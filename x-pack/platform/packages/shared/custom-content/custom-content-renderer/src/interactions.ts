@@ -27,6 +27,12 @@ export type CustomContentInteraction = FilterInteraction;
 export type CustomContentInteractionAction = CustomContentInteraction['action'];
 
 const ATTRIBUTE_PREFIX = 'data-cc-';
+// What the reader reads, and so all there is to scope.
+const ATTRIBUTE_NAMES = ['action', 'field', 'value', 'op'] as const;
+const SCOPED_ATTRIBUTE = new RegExp(
+  `${ATTRIBUTE_PREFIX}(?=(?:${ATTRIBUTE_NAMES.join('|')})\\b)`,
+  'g'
+);
 const NONCE_PATTERN = /^[0-9a-f]{8,}$/;
 
 /**
@@ -40,13 +46,15 @@ export const createInteractionNonce = (): string =>
   ).join('');
 
 /**
- * Renames `data-cc-` to `data-cc-<nonce>-` in the author's template, before any data is filled in.
- * Authors keep writing `data-cc-action`; `readInteraction` reads only the renamed attributes. Without
+ * Renames `data-cc-action`, `-field`, `-value` and `-op` to `data-cc-<nonce>-action` and so on in the
+ * author's template, before any data is filled in. Nothing else that starts with `data-cc-` is
+ * touched, such as a column that is called that. Authors keep writing `data-cc-action`;
+ * `readInteraction` reads only the renamed attributes. Without
  * this, a value that reached the page as markup (any output path that skips escaping) could carry a
  * working `data-cc-action` of its own, however it got there.
  */
 export const scopeInteractionAttributes = (template: string, nonce: string): string =>
-  template.replaceAll(ATTRIBUTE_PREFIX, `${ATTRIBUTE_PREFIX}${nonce}-`);
+  template.replace(SCOPED_ATTRIBUTE, `${ATTRIBUTE_PREFIX}${nonce}-`);
 
 // The frame's document is untrusted input, so nothing is read through the node's own properties:
 // a form holding `<input name="getAttribute">` would replace that method with an element. The
@@ -56,7 +64,7 @@ const getAttribute = (element: Element, name: string): string | null =>
   Element.prototype.getAttribute.call(element, name);
 
 /** Reads an attribute of the clicked element by the name the author wrote, without the prefix. */
-type ReadAttribute = (name: 'action' | 'field' | 'value' | 'op') => string | null;
+type ReadAttribute = (name: (typeof ATTRIBUTE_NAMES)[number]) => string | null;
 
 const parseFilter = (
   read: ReadAttribute,

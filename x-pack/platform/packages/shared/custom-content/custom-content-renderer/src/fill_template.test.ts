@@ -87,17 +87,20 @@ describe('fillTemplateDatasets with one query', () => {
   });
 
   it.each([
-    ['echo', '{% echo rows[0]["label"].value %}'],
-    ['echo inside a liquid block', '{% liquid\n echo rows[0]["label"].value\n%}'],
-    ['cycle', '{% cycle rows[0]["label"].value, "b" %}'],
-  ])('writes nothing for %s, which would not escape the value', async (_, tag) => {
-    const result = await fillTemplateDatasets(`<p>${tag}</p>`, [
-      {
-        columns: [{ name: 'label', type: 'keyword' }],
-        rows: [['<b data-cc-action="filter">x</b>']],
-      },
-    ]);
-    expect(result).toBe('<p></p>');
+    ['echo', 'echo', '{% echo rows[0]["label"].value %}'],
+    ['echo inside a liquid block', 'echo', '{% liquid\n echo rows[0]["label"].value\n%}'],
+    ['cycle', 'cycle', '{% cycle rows[0]["label"].value, "b" %}'],
+  ])('fails with a message that says what to write instead of %s', async (_, name, tag) => {
+    // These write a value as markup, so they are not left to do it, and not left as a silent gap
+    // in the panel either.
+    await expect(
+      fillTemplateDatasets(`<p>${tag}</p>`, [
+        {
+          columns: [{ name: 'label', type: 'keyword' }],
+          rows: [['<b data-cc-action="filter">x</b>']],
+        },
+      ])
+    ).rejects.toThrow(`The "${name}" tag is not supported in a custom content template`);
   });
 
   it('rejects when a template exceeds the render limit (DoS guard)', async () => {

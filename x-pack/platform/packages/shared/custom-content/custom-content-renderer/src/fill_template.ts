@@ -24,9 +24,16 @@ const getEngine = async () => {
   // escaping: a forbidden filter becomes the identity, and the output is escaped as for any value.
   CUSTOM_CONTENT_FORBIDDEN_FILTERS.forEach((name) => liquid.registerFilter(name, (value) => value));
   // Only `{{ }}` escapes. `echo` (also inside `liquid`) and `cycle` write a value as markup, so they
-  // become tags that write nothing.
+  // fail with a message that says what to write instead, and not by leaving a gap in the panel.
   CUSTOM_CONTENT_FORBIDDEN_TAGS.forEach((name) =>
-    liquid.registerTag(name, { parse() {}, render() {} })
+    liquid.registerTag(name, {
+      parse() {},
+      render() {
+        throw new Error(
+          `The "${name}" tag is not supported in a custom content template. Write values with {{ }}, and use CSS for alternating rows.`
+        );
+      },
+    })
   );
   return liquid;
 };

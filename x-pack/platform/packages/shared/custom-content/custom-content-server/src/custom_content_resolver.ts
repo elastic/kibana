@@ -269,13 +269,16 @@ function describeData({ columns, values }: SampledData): string {
   return `Data schema:\n${schemaLines}${sampleSection}`;
 }
 
+/** The text of a query, as long as the model is shown it. */
+const truncateQuery = (query: string): string =>
+  query.length > MAX_QUERY_TEXT_LENGTH
+    ? `${query.slice(0, MAX_QUERY_TEXT_LENGTH)}… (truncated)`
+    : query;
+
 /** A query after the first: its text always, and its data when it is new or changing. */
 function describeOtherQuery(query: string, position: number, data: SampledData | undefined) {
   const name = queryName(position);
-  const text =
-    query.length > MAX_QUERY_TEXT_LENGTH
-      ? `${query.slice(0, MAX_QUERY_TEXT_LENGTH)}… (truncated)`
-      : query;
+  const text = truncateQuery(query);
   const header = `${name} — the template reads this query's rows as ${name}.rows${
     data ? '' : ' (not changing)'
   }:\n\`\`\`esql\n${text}\n\`\`\``;
@@ -343,7 +346,11 @@ export const createCustomContentTemplateResolver = ({
       const { columns } = sampledFirst;
       let schemaSection: string;
       if (columns.length > 0) {
-        schemaSection = `${describeData(
+        // The text comes with the schema: a column that is a field of the index and one that is
+        // computed can look the same in a schema, and only the query tells them apart.
+        schemaSection = `ES|QL query:\n\`\`\`esql\n${truncateQuery(
+          esqlQuery
+        )}\n\`\`\`\n\n${describeData(
           sampledFirst
         )}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${sanitizeCellValue(
           columns[0].name

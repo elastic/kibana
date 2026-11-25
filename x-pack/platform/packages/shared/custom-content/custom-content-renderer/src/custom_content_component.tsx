@@ -142,6 +142,7 @@ export const CustomContentComponent = ({
   useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
 
   const hasInteractions = isInteractive && onInteraction !== undefined;
+  const sandbox = getSandbox(isInteractive, hasInteractions);
   // The listener outlives renders, so it reads what is current instead of closing over it.
   const latest = useLatest({ columns, interactionNonce, onInteraction, interactionActions });
 
@@ -212,9 +213,13 @@ export const CustomContentComponent = ({
         html && (
           <div css={containerCss}>
             <iframe
+              // A browser applies a changed `sandbox` only on the next navigation, so a frame that
+              // stays loaded keeps the flags (and the listener) of the mode it was loaded in. A new
+              // key loads a new frame that has the ones of the mode it is in now.
+              key={sandbox}
               css={iframeCss}
               srcDoc={html}
-              sandbox={getSandbox(isInteractive, hasInteractions)}
+              sandbox={sandbox}
               onLoad={attachListener}
               title={IFRAME_TITLE}
             />

@@ -219,6 +219,34 @@ describe('CustomContentComponent', () => {
       expect(onInteraction).not.toHaveBeenCalled();
     });
 
+    // A browser applies a changed `sandbox` only when the frame navigates, so the frame has to be a
+    // new one: the old one would keep the flags, and the listener, of the mode it was loaded in.
+    it('loads a new frame, without the listener, when the view becomes non-interactive', () => {
+      const { iframe, container, rerender } = mountWithColumns(jest.fn());
+      expect(hasClickListener(iframe)).toBe(true);
+
+      rerender(
+        <CustomContentComponent {...defaultProps} onInteraction={jest.fn()} isInteractive={false} />
+      );
+
+      const next = container.querySelector('iframe')!;
+      expect(iframe.isConnected).toBe(false);
+      expect(next.getAttribute('sandbox')).toBe('');
+      expect(hasClickListener(next)).toBe(false);
+    });
+
+    it('loads a new frame, with the listener, when the view becomes interactive', () => {
+      const { iframe, container, rerender } = mountWithColumns(jest.fn(), { isInteractive: false });
+      expect(hasClickListener(iframe)).toBe(false);
+
+      rerender(<CustomContentComponent {...defaultProps} onInteraction={jest.fn()} />);
+
+      const next = container.querySelector('iframe')!;
+      expect(iframe.isConnected).toBe(false);
+      expect(next.getAttribute('sandbox')).toContain('allow-same-origin');
+      expect(hasClickListener(next)).toBe(true);
+    });
+
     it('never offers interactions in a non-interactive view, even when the host asks', () => {
       const { iframe } = mountWithColumns(jest.fn(), { isInteractive: false });
       expect(iframe.getAttribute('sandbox')).toBe('');

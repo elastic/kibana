@@ -53,11 +53,13 @@ const HOST_TEMPLATE = `
   </div>
 {% endfor %}`;
 
-// One button asks for a column the query does not return, the other for a real one.
+// One button asks for `region`, a field of the index that the query leaves out of its result, the
+// other for `host`, which it returns. `region` is in the data view and filterable, so only the check
+// of the columns of the query can refuse it: a field that does not exist would be refused anyway.
 const MIXED_TEMPLATE = `
 {% for row in rows %}
   <div>
-    <button data-cc-action="filter" data-cc-field="not_a_column" data-cc-value="{{ row.host.value }}">
+    <button data-cc-action="filter" data-cc-field="region" data-cc-value="east">
       Unknown {{ row.host.value }}
     </button>
     <button data-cc-action="filter" data-cc-field="host" data-cc-value="{{ row.host.value }}">
@@ -77,11 +79,14 @@ spaceTest.describe(
       await esClient.indices.delete({ index, ignore_unavailable: true });
       await esClient.indices.create({
         index,
-        mappings: { properties: { host: { type: 'keyword' } } },
+        mappings: { properties: { host: { type: 'keyword' }, region: { type: 'keyword' } } },
       });
       await esClient.bulk({
         refresh: true,
-        operations: HOSTS.flatMap((host) => [{ index: { _index: index } }, { host }]),
+        operations: HOSTS.flatMap((host) => [
+          { index: { _index: index } },
+          { host, region: 'east' },
+        ]),
       });
     });
 
@@ -91,11 +96,16 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ scoutSpace, esClient }) => {
-      await scoutSpace.savedObjects.cleanStandardList();
-      await esClient.indices.delete({
-        index: getHostsIndex(scoutSpace.id),
-        ignore_unavailable: true,
-      });
+      // The index is on the cluster, which the teardown of the worker does not clean, so it goes even
+      // when the cleanup of the saved objects fails.
+      try {
+        await scoutSpace.savedObjects.cleanStandardList();
+      } finally {
+        await esClient.indices.delete({
+          index: getHostsIndex(scoutSpace.id),
+          ignore_unavailable: true,
+        });
+      }
     });
 
     const addHostsPanel = async (

@@ -385,6 +385,34 @@ describe('createCustomContentTemplateResolver — several queries', () => {
     mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
   });
 
+  // A column that is a field of the index and one that is computed can look the same in a schema;
+  // only the text of the query tells them apart.
+  it('gives the model the text of a first query that is new or changing, before its schema', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('host'));
+
+    await resolve({
+      prompt: 'A list of hosts',
+      esqlQueries: ['FROM logs | EVAL host = UPPER(host)'],
+      changedQueries: [true],
+    });
+
+    const content = contentOf();
+    expect(content).toContain('FROM logs | EVAL host = UPPER(host)');
+    expect(content.indexOf('FROM logs')).toBeLessThan(content.indexOf('Data schema:'));
+  });
+
+  it('cuts the text of a first query that is very long', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('host'));
+
+    await resolve({
+      prompt: 'A list of hosts',
+      esqlQueries: [`FROM logs | WHERE host == "${'x'.repeat(5000)}"`],
+      changedQueries: [true],
+    });
+
+    expect(contentOf()).toContain('(truncated)');
+  });
+
   it('runs none of the queries when refining a template whose queries are not changing', async () => {
     await resolve({
       prompt: 'Restyle',

@@ -144,6 +144,14 @@ describe('readInteraction', () => {
     });
   });
 
+  it('leaves other names that start with data-cc- alone, such as a column called that', () => {
+    const template =
+      '{{ row["data-cc-count"].value }} data-cc-actions data-cc-op="is_not" data-cc-value="v"';
+    expect(scopeInteractionAttributes(template, NONCE)).toBe(
+      `{{ row["data-cc-count"].value }} data-cc-actions data-cc-${NONCE}-op="is_not" data-cc-${NONCE}-value="v"`
+    );
+  });
+
   it('ignores a click outside any action, and non-element targets', () => {
     expect(read(render({}))).toBeUndefined();
     expect(read(null)).toBeUndefined();
