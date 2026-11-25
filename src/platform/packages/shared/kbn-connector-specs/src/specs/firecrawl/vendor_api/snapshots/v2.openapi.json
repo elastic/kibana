@@ -2672,6 +2672,29 @@
               }
             }
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
           "402": {
             "content": {
               "application/json": {
@@ -2707,6 +2730,12 @@
                   "properties": {
                     "error": {
                       "type": "string"
+                    },
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
                     }
                   },
                   "type": "object"
@@ -2896,6 +2925,29 @@
               }
             }
           },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
           "429": {
             "content": {
               "application/json": {
@@ -2915,8 +2967,17 @@
               "application/json": {
                 "schema": {
                   "properties": {
+                    "code": {
+                      "type": "string"
+                    },
                     "error": {
                       "type": "string"
+                    },
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
                     }
                   },
                   "type": "object"
@@ -3033,6 +3094,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "jobId": {
+                      "type": "string"
+                    },
                     "success": {
                       "type": "boolean"
                     }
@@ -3056,6 +3120,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "jobId": {
+                      "type": "string"
+                    },
                     "success": {
                       "type": "boolean"
                     }
@@ -3077,6 +3144,9 @@
                       "type": "string"
                     },
                     "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
                       "type": "string"
                     },
                     "requiresAction": {
@@ -3129,6 +3199,32 @@
                     "error": {
                       "type": "string"
                     },
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
+                      "type": "string"
+                    },
                     "success": {
                       "type": "boolean"
                     }
@@ -3150,6 +3246,9 @@
                       "type": "string"
                     },
                     "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
                       "type": "string"
                     },
                     "success": {
@@ -3186,6 +3285,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "jobId": {
+                      "type": "string"
+                    },
                     "success": {
                       "type": "boolean"
                     }
@@ -3207,6 +3309,9 @@
                       "type": "string"
                     },
                     "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
                       "type": "string"
                     },
                     "success": {
@@ -3723,6 +3828,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "jobId": {
+                      "type": "string"
+                    },
                     "success": {
                       "type": "boolean"
                     }
@@ -3741,6 +3849,9 @@
                       "type": "string"
                     },
                     "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
                       "type": "string"
                     },
                     "success": {
