@@ -270,7 +270,7 @@ steps:
 
                 Keep lists whole. When a memory lists options, steps, fields, values or names, record every one, in the order given, rather than a few examples ("such as", "including", "and others").
 
-                Record every piece of knowledge in the MEMORIES that a configured type covers, the small ones too, not only the main point of a memory: a later question can be about any of them.
+                Record every piece of knowledge in the MEMORIES that a configured type covers, the small ones too, not only the main point of a memory: a later question can be about any of them. Write up to 200 facts and 200 entities for the whole batch. When there are more, keep the ones a later question is most likely to need.
 
                 Return only changes. Update an existing item by repeating its id as ref with the new values; create one with a new key like "new:1"; delete one with delete: true.
 
@@ -287,7 +287,7 @@ steps:
                 {%- endif %}
                 {%- if consts.entity_types.size > 0 %}
 
-                Give every entity a content summary of what is known about it: its attribute values and the main facts about it. Name each entity by its canonical name, the same way every time: an entity is kept by its type and name, so one named the same as an EXISTING entity or in other MEMORIES is the same entity. Something the MEMORIES do not name, such as the user's sister, is still an entity: name it the way they refer to it, such as "Sister".
+                Give every entity a content summary of what is known about it: its attribute values and the main facts about it. Name each entity by its canonical name, the same way every time: an entity is kept by its type and name, so one named the same as an EXISTING entity or in other MEMORIES is the same entity. Something the MEMORIES do not name, such as the user's sister, is still an entity: name it the way they refer to it, with what tells it apart when they say, such as "Sister" or "Older sister".
                 {%- endif %}
 
                 Give an entity or fact access_patterns when the MEMORIES show how to query the raw data about it: up to 5 distinct questions a later agent could answer from that data. Build them only from indices, fields, values and queries that appear in the MEMORIES; return none rather than invent an index or field. Each has:

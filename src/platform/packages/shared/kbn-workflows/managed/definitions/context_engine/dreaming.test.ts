@@ -307,6 +307,7 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       expect(rendered).toContain('counts as much as its main point');
       expect(rendered).toContain('Keep lists whole.');
       expect(rendered).toContain('the small ones too');
+      expect(rendered).toContain('Write up to 200 facts and 200 entities for the whole batch.');
       expect(rendered).toContain(
         'write the latest value and keep the earlier ones with when they held'
       );
@@ -324,6 +325,9 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       );
       expect(rendered).toContain(
         "Something the MEMORIES do not name, such as the user's sister, is still an entity"
+      );
+      expect(rendered).toContain(
+        'with what tells it apart when they say, such as "Sister" or "Older sister"'
       );
     });
 
