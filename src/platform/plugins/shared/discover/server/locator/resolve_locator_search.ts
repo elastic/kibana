@@ -8,6 +8,7 @@
  */
 
 import Boom from '@hapi/boom';
+import dateMath from '@kbn/datemath';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
@@ -26,6 +27,10 @@ export interface ResolvedLocatorSearch {
 
 const isString = (value: unknown): value is string => typeof value === 'string';
 
+// An absolute date or date math (like `now-15m`). `roundUp` is how the end of a range is resolved.
+const isDateOrDateMath = (value: unknown, roundUp = false): boolean =>
+  isString(value) && dateMath.parse(value, { roundUp })?.isValid() === true;
+
 const isSortOrderPair = (item: unknown): boolean =>
   Array.isArray(item) &&
   item.length === 2 &&
@@ -42,9 +47,14 @@ const validateParams = ({ columns, sort, timeRange }: DiscoverAppLocatorParams):
     throw new Error('Invalid DiscoverAppLocatorParams: "columns" must be an array of strings');
   }
 
-  if (timeRange !== undefined && !(isString(timeRange?.from) && isString(timeRange?.to))) {
+  // `timeRange` can be `null` here, because the params are not validated: `null?.from` is `undefined`,
+  // which is not a valid date, so it fails with the same error.
+  if (
+    timeRange !== undefined &&
+    !(isDateOrDateMath(timeRange?.from) && isDateOrDateMath(timeRange?.to, true))
+  ) {
     throw new Error(
-      'Invalid DiscoverAppLocatorParams: "timeRange" must have a "from" and a "to" string'
+      'Invalid DiscoverAppLocatorParams: "timeRange" must have a valid "from" and "to", as a date or date math'
     );
   }
 
@@ -100,8 +110,8 @@ export const resolveLocatorSearch = async (
 
     return { savedSearch, dataView, searchSource };
   } catch (error) {
-    // Boom errors (for example a saved object that is not found, or is forbidden) are rethrown as they
-    // are, to keep their status code. Their message already names the object.
+    // Boom errors raised while the search is loaded (for example a saved object that is not found, or is
+    // forbidden) are rethrown as they are, to keep their status code. Their message already names the object.
     if (Boom.isBoom(error)) {
       throw error;
     }

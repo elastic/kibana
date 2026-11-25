@@ -19,6 +19,7 @@ const LOGSTASH_DATA_ARCHIVE =
 const LOGSTASH_SAVED_OBJECTS =
   'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/logs';
 const ECOM_SAVED_SEARCH_ID = '6091ead0-1c6d-11ea-a100-8589bb9d7c6b';
+const ECOM_DATA_VIEW_ID = '5193f870-d861-11e9-a311-0fa548c5f953';
 const TIMELESS_SAVED_OBJECTS =
   'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/timeless';
 const TIMELESS_SAVED_SEARCH_WITH_QUERY = 'fc3e8ff0-9844-11ed-8e25-6b737289a7c8';
@@ -241,6 +242,103 @@ export default ({ getService }: FtrProviderContext) => {
 
           it('csv file matches', () => {
             expectSnapshot(csvFile).toMatch();
+          });
+        });
+      });
+
+      describe('locator params without a saved search, or on top of one', () => {
+        const timeRange = { from: '2019-07-11T00:00:00.000Z', to: '2019-07-12T00:00:00.000Z' };
+
+        before(async () => {
+          await reportingAPI.initEcommerce();
+        });
+
+        after(async () => {
+          await reportingAPI.teardownEcommerce();
+        });
+
+        const generateCsv = async (
+          params: JobParamsCsvFromSavedObject['locatorParams'][number]['params']
+        ) => {
+          const { text, status } = await requestCsvFromSavedSearch({
+            locatorParams: [{ id: DISCOVER_APP_LOCATOR, version: 'reporting', params }],
+          });
+          expect(status).to.eql(200);
+          const { job, path }: { job: ReportApiJSON; path: string } = JSON.parse(text);
+          await reportingAPI.waitForJobToFinish(path);
+          const response = await supertest.get(path);
+          return { job, path, response, csvFile: response.text };
+        };
+
+        describe('data view id only (unsaved search)', () => {
+          let result: Awaited<ReturnType<typeof generateCsv>>;
+
+          before(async () => {
+            result = await generateCsv({
+              dataViewId: ECOM_DATA_VIEW_ID,
+              columns: ['category', 'currency', 'order_id'],
+              sort: [
+                ['order_date', 'asc'],
+                ['order_id', 'asc'],
+              ],
+              query: { language: 'kuery', query: 'currency:EUR' },
+              timeRange,
+            });
+          });
+
+          it('job response data is correct, with the data view name as title', () => {
+            expect(result.job.attempts).equal(0);
+            expectSnapshot({
+              contentType: result.response.header['content-type'],
+              contentDisposition: result.response.header['content-disposition'],
+              title: result.job.payload.title,
+            }).toMatch();
+          });
+
+          it('has the time field before the columns, and the rows sorted', () => {
+            const [header, ...rows] = result.csvFile.trim().split('\n');
+            expect(header).to.eql('order_date,category,currency,order_id');
+            expect(rows.length).to.be.greaterThan(1);
+
+            const dates = rows.map((row) => row.split(',')[0]);
+            expect(dates).to.eql([...dates].sort());
+          });
+
+          it('only has the rows that match the query', () => {
+            const [, ...rows] = result.csvFile.trim().split('\n');
+            expect(rows.every((row) => row.includes(',EUR,'))).to.be(true);
+          });
+
+          it('csv file matches', () => {
+            expectSnapshot(result.csvFile).toMatch();
+          });
+        });
+
+        describe('columns and sort of the locator params, over the ones of the saved search', () => {
+          let result: Awaited<ReturnType<typeof generateCsv>>;
+
+          before(async () => {
+            result = await generateCsv({
+              savedSearchId: ECOM_SAVED_SEARCH_ID,
+              columns: ['category', 'order_id'],
+              sort: [['order_id', 'asc']],
+              timeRange,
+            });
+          });
+
+          it('uses the columns of the locator params, with the time field first', () => {
+            const [header] = result.csvFile.trim().split('\n');
+            expect(header).to.eql('order_date,category,order_id');
+          });
+
+          it('uses the sort of the locator params', () => {
+            const [, ...rows] = result.csvFile.trim().split('\n');
+            const orderIds = rows.map((row) => Number(row.split(',').pop()));
+            expect(orderIds).to.eql([...orderIds].sort((a, b) => a - b));
+          });
+
+          it('csv file matches', () => {
+            expectSnapshot(result.csvFile).toMatch();
           });
         });
       });

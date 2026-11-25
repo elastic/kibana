@@ -215,6 +215,12 @@ test('columns of the locator params take precedence over the saved search column
   expect(columns).toEqual(['timestamp', 'url']);
 });
 
+test('columns that are cleared in the locator params take precedence over the saved search columns', async () => {
+  const provider = columnsFromLocatorFactory(mockServices);
+  const columns = await provider({ savedSearchId: mockSavedSearchId, columns: [] });
+  expect(columns).toBeUndefined();
+});
+
 test('throws without a saved search or data view reference', async () => {
   const provider = columnsFromLocatorFactory(mockServices);
   await expect(provider({ columns: ['url'] })).rejects.toThrow(

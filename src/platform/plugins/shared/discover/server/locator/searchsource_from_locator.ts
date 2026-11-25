@@ -124,8 +124,10 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
       searchSource,
     } = await resolveLocatorSearch(services, params);
 
-    // columns in the locator params (current state) take precedence over the saved search
-    const columnsSource = params.columns?.length ? params.columns : savedSearch?.columns;
+    // Columns in the locator params (current state) take precedence over the ones of the saved search.
+    // Like the sort, an explicit empty array is kept on purpose: it means the columns were cleared, so all
+    // the fields are exported instead of the columns of the saved search (same as the Discover UI).
+    const columnsSource = params.columns ?? savedSearch?.columns;
     const { columns, timeFieldName } = await getColumns(services, index, {
       columns: columnsSource,
     });

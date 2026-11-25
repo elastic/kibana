@@ -451,6 +451,23 @@ describe('locator params validation', () => {
   });
 });
 
+// the time range of a saved search is stored in its tab
+const setSavedSearchTimeRange = (timeRange: { from: string; to: string }) => {
+  const [tab] = defaultSavedSearch.attributes.tabs;
+  mockSavedSearch = {
+    ...defaultSavedSearch,
+    attributes: {
+      ...defaultSavedSearch.attributes,
+      tabs: [
+        {
+          ...tab,
+          attributes: { ...tab.attributes, timeRestore: true, timeRange },
+        },
+      ],
+    },
+  };
+};
+
 describe('filters', () => {
   test('ignores empty filters and does not mutate the filters of the locator params', async () => {
     const testFilter = {
@@ -471,6 +488,9 @@ describe('filters', () => {
   test.each([
     ['without "to"', { from: 'now-15m' }],
     ['without "from"', { to: 'now' }],
+    ['with empty dates', { from: '', to: '' }],
+    ['with an invalid date', { from: 'garbage', to: 'now' }],
+    ['with an invalid date math', { from: 'now-15m', to: 'now-' }],
     ['that is not an object', 'now-15m'],
     ['that is null', null],
   ])(
@@ -479,12 +499,83 @@ describe('filters', () => {
       const provider = searchSourceFromLocatorFactory(mockServices);
       await expect(
         provider({ savedSearchId: mockSavedSearchId, timeRange: range as unknown as TimeRange })
-      ).rejects.toThrow('"timeRange" must have a "from" and a "to" string');
+      ).rejects.toThrow('"timeRange" must have a valid "from" and "to"');
     }
   );
+
+  test.each([
+    ['dates', { from: '2026-11-05T00:00:00.000Z', to: '2026-11-19T00:00:00.000Z' }],
+    ['date math', { from: 'now-15m', to: 'now' }],
+    ['rounded date math', { from: 'now/d', to: 'now/d' }],
+  ])('accepts a time range with %s', async (_d, timeRange) => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId, timeRange });
+
+    expect(searchSource.getSerializedFields().filter).toEqual([
+      expect.objectContaining({
+        query: {
+          range: {
+            timestamp: {
+              format: 'strict_date_optional_time',
+              gte: timeRange.from,
+              lte: timeRange.to,
+            },
+          },
+        },
+      }),
+    ]);
+  });
+
+  test('uses the time range of the saved search if the locator params do not have one', async () => {
+    setSavedSearchTimeRange({ from: 'now-7d', to: 'now' });
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId });
+
+    expect(searchSource.getSerializedFields().filter).toEqual([
+      expect.objectContaining({
+        query: {
+          range: {
+            timestamp: { format: 'strict_date_optional_time', gte: 'now-7d', lte: 'now' },
+          },
+        },
+      }),
+    ]);
+  });
+
+  test('the time range of the locator params takes precedence over the one of the saved search', async () => {
+    setSavedSearchTimeRange({ from: 'now-7d', to: 'now' });
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({
+      savedSearchId: mockSavedSearchId,
+      timeRange: { from: 'now-15m', to: 'now' },
+    });
+
+    expect(searchSource.getSerializedFields().filter).toEqual([
+      expect.objectContaining({
+        query: {
+          range: {
+            timestamp: { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' },
+          },
+        },
+      }),
+    ]);
+  });
 });
 
 describe('errors', () => {
+  test('rethrows the Boom error of a saved search that is not found, as it is', async () => {
+    const boomError = Boom.notFound('Saved object [search/missing-search] not found');
+    (soClient.get as jest.Mock).mockRejectedValueOnce(boomError);
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const error = await provider({ savedSearchId: 'missing-search' }).catch((e) => e);
+
+    expect(error).toBe(boomError);
+    expect(error.output.statusCode).toBe(404);
+  });
+
   test('rethrows Boom errors as they are', async () => {
     const boomError = Boom.notFound('Saved object [index-pattern/missing-data-view] not found');
     dataViewsService.get.mockRejectedValueOnce(boomError);
@@ -540,14 +631,25 @@ describe('time field', () => {
   });
 });
 
-test('uses the columns of the saved search as fields, with the time field first', async () => {
-  const provider = searchSourceFromLocatorFactory(mockServices);
-  const searchSource = await provider({ savedSearchId: mockSavedSearchId });
+describe('fields', () => {
+  test('uses the columns of the saved search as fields, with the time field first', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId });
 
-  expect(searchSource.getSerializedFields().fields).toEqual(
-    ['timestamp', 'response', 'url', 'clientip', 'machine.os', 'tags'].map((field) => ({
-      field,
-      include_unmapped: true,
-    }))
-  );
+    expect(searchSource.getSerializedFields().fields).toEqual(
+      ['timestamp', 'response', 'url', 'clientip', 'machine.os', 'tags'].map((field) => ({
+        field,
+        include_unmapped: true,
+      }))
+    );
+  });
+
+  test('uses all the fields if the columns of the locator params are cleared, instead of the saved search columns', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId, columns: [] });
+
+    expect(searchSource.getSerializedFields().fields).toEqual([
+      { field: '*', include_unmapped: true },
+    ]);
+  });
 });
