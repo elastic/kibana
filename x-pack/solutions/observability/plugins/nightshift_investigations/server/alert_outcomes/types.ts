@@ -93,6 +93,16 @@ export interface AlertRef {
 
 export type ResolveResult = { ref: AlertRef } | { untrackable: UntrackableReason; detail?: string };
 
+export type CheckResult =
+  | {
+      status: Exclude<CheckStatus, 'error'>;
+      /** Set when the source says the alert will never be checkable again. */
+      stop?: StopReason;
+      recovered_at?: string;
+      updated_at?: string;
+    }
+  | { status: 'error'; message: string };
+
 /** One tracking record per investigation; its document id is the investigation id. */
 export interface TrackingRecord {
   investigation_id: string;

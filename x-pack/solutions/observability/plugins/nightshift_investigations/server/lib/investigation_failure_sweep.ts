@@ -47,6 +47,17 @@ export const investigationFailureSweepOutputSchema = lazySchema(() =>
     checked: z.number(),
     errors: z.number(),
     checkpoint: checkpointSchema,
+    /** Alert outcome checks the sweep step runs after reconciliation; not part of the checkpoint. */
+    alert_outcomes: z
+      .object({
+        checked: z.number(),
+        recovered: z.number(),
+        stopped: z.number(),
+        errors: z.number(),
+        timed_out: z.boolean(),
+        skipped: z.literal('disabled').optional(),
+      })
+      .optional(),
   })
 );
 

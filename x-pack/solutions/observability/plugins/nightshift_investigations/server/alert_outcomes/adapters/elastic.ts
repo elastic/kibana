@@ -10,7 +10,13 @@ import {
   isSelectedActionEnabled,
   type SelectedActions,
 } from '@kbn/connector-specs';
-import type { AlertRef, IdentityProposal, ResolveResult, UntrackableReason } from '../types';
+import type {
+  AlertRef,
+  CheckResult,
+  IdentityProposal,
+  ResolveResult,
+  UntrackableReason,
+} from '../types';
 import { LOCAL_CONNECTOR_ID } from '../types';
 import type { AdapterContext, ProviderAdapter } from './types';
 
@@ -19,9 +25,12 @@ export const ELASTICSEARCH_CONNECTOR_TYPE_ID = connectorsSpecs.Elasticsearch.met
 /** Matches the dot-prefixed, hidden alert aliases without `expand_wildcards`. */
 const ALERTS_INDEX = '.alerts-*';
 const SEARCH_SUB_ACTION = 'search';
+/** Active alerts are rewritten on every rule run; one untouched for a day is an orphan. */
+export const STALE_AFTER_MS = 24 * 60 * 60_000;
 /** Slack posts and alert writes come from different clocks and queues. */
 const POST_TIME_TOLERANCE_MS = 2 * 60_000;
 const MAX_RESOLVE_CANDIDATES = 20;
+const CHECK_CHUNK_SIZE = 100;
 
 const FIELDS = {
   uuid: 'kibana.alert.uuid',
@@ -161,6 +170,27 @@ const untrackable = (reason: UntrackableReason, detail?: string): ResolveResult 
   ...(detail ? { detail: detail.slice(0, 500) } : {}),
 });
 
+/** Maps one alert document to a check result. */
+export const toCheckResult = (doc: AlertDoc | undefined, now: number): CheckResult => {
+  if (!doc) return { status: 'unknown' };
+  const updatedAt = doc.timestamp;
+  if (doc.status === 'recovered') {
+    return {
+      status: 'recovered',
+      ...(doc.end ? { recovered_at: doc.end } : {}),
+      ...(updatedAt ? { updated_at: updatedAt } : {}),
+    };
+  }
+  if (doc.status === 'untracked') {
+    return { status: 'unknown', stop: 'untracked_by_source' };
+  }
+  const updated = updatedAt ? Date.parse(updatedAt) : NaN;
+  if (!Number.isNaN(updated) && now - updated > STALE_AFTER_MS) {
+    return { status: 'stale', updated_at: updatedAt };
+  }
+  return { status: 'firing', ...(updatedAt ? { updated_at: updatedAt } : {}) };
+};
+
 /**
  * Kibana alerts on a remote cluster, read through an External Elasticsearch (`.elasticsearch`)
  * connector. Local alerts are out of scope until the Nightshift service accounts can read
@@ -208,5 +238,37 @@ export const elasticAlertsAdapter: ProviderAdapter = {
       ...(doc.start ? { alert_start: doc.start } : {}),
     };
     return { ref };
+  },
+
+  async check(refs, context, now) {
+    const results = new Map<string, CheckResult>();
+    const byConnector = new Map<string, AlertRef[]>();
+    for (const ref of refs) {
+      byConnector.set(ref.connector_id, [...(byConnector.get(ref.connector_id) ?? []), ref]);
+    }
+    for (const [connectorId, connectorRefs] of byConnector) {
+      for (let i = 0; i < connectorRefs.length; i += CHECK_CHUNK_SIZE) {
+        const chunk = connectorRefs.slice(i, i + CHECK_CHUNK_SIZE);
+        const uuids = chunk.map(({ alert_uuid: uuid }) => uuid);
+        try {
+          const docs = await searchAlerts(
+            context,
+            connectorId,
+            { bool: { filter: [{ terms: { [FIELDS.uuid]: uuids } }] } },
+            uuids.length * 2
+          );
+          // Sorted newest first, so the first document of a uuid is its latest state.
+          const latest = new Map<string, AlertDoc>();
+          for (const doc of docs) {
+            if (doc.uuid && !latest.has(doc.uuid)) latest.set(doc.uuid, doc);
+          }
+          for (const uuid of uuids) results.set(uuid, toCheckResult(latest.get(uuid), now));
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          for (const uuid of uuids) results.set(uuid, { status: 'error', message });
+        }
+      }
+    }
+    return results;
   },
 };

@@ -663,6 +663,7 @@ export class NightshiftInvestigationsPlugin
             getRoutingClient: this.getNotificationRoutingClient,
             getTriggerEmitter,
             getWorkflowsManagement: () => this.workflowsManagement,
+            getAlertOutcomePollDeps: alertOutcomeServices.getPollDeps,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(

@@ -57,6 +57,24 @@ describe('AlertOutcomeTrackingStore', () => {
     expect(client.index).toHaveBeenCalledWith({ id: 'inv-1', document: record, op_type: 'create' });
   });
 
+  it('updates only the version it read', async () => {
+    client.index
+      .mockResolvedValueOnce({ _seq_no: 8, _primary_term: 1 })
+      .mockRejectedValueOnce(conflict());
+    const store = createStore();
+    const stored = { record, seqNo: 7, primaryTerm: 1 };
+
+    await expect(store.update(stored, { state: 'recovering' })).resolves.toEqual({
+      record: { ...record, state: 'recovering' },
+      seqNo: 8,
+      primaryTerm: 1,
+    });
+    expect(client.index).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'inv-1', if_seq_no: 7, if_primary_term: 1 })
+    );
+    await expect(store.update(stored, { state: 'recovering' })).resolves.toBeUndefined();
+  });
+
   it('rethrows other errors', async () => {
     client.index.mockRejectedValue(new Error('cluster down'));
     await expect(createStore().create(record)).rejects.toThrow('cluster down');
@@ -84,5 +102,29 @@ describe('AlertOutcomeTrackingStore', () => {
   it('skips hits without a version', async () => {
     client.search.mockResolvedValue({ hits: { hits: [{ _source: record }] } });
     await expect(createStore().get('default', 'inv-1')).resolves.toBeUndefined();
+  });
+
+  it('finds due records of one space, oldest first, with their versions', async () => {
+    client.search.mockResolvedValue({
+      hits: { hits: [{ _source: record, _seq_no: 3, _primary_term: 2 }, { _source: record }] },
+    });
+    await expect(
+      createStore().findDue({ spaceId: 'default', now: '2026-11-24T10:05:00.000Z', size: 50 })
+    ).resolves.toEqual([{ record, seqNo: 3, primaryTerm: 2 }]);
+    expect(client.search).toHaveBeenCalledWith({
+      track_total_hits: false,
+      size: 50,
+      seq_no_primary_term: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { space_id: 'default' } },
+            { term: { state: 'tracking' } },
+            { range: { next_check_at: { lte: '2026-11-24T10:05:00.000Z' } } },
+          ],
+        },
+      },
+      sort: [{ next_check_at: { order: 'asc' } }],
+    });
   });
 });

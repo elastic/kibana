@@ -6,10 +6,17 @@
  */
 
 import type { IdentityProposal } from '../types';
-import { ELASTICSEARCH_CONNECTOR_TYPE_ID, elasticAlertsAdapter, wasActiveAt } from './elastic';
+import {
+  ELASTICSEARCH_CONNECTOR_TYPE_ID,
+  STALE_AFTER_MS,
+  elasticAlertsAdapter,
+  toCheckResult,
+  wasActiveAt,
+} from './elastic';
 import type { AdapterContext } from './types';
 
 const POST = '2026-11-24T10:00:00.000Z';
+const NOW = Date.parse('2026-11-24T10:30:00.000Z');
 
 const alertDoc = (overrides: Record<string, unknown> = {}) => ({
   _source: {
@@ -228,6 +235,107 @@ describe('elastic alerts adapter', () => {
       ['without a start', {}, false],
     ])('an alert that %s', (_, doc, expected) => {
       expect(wasActiveAt(doc, POST)).toBe(expected);
+    });
+  });
+
+  describe('toCheckResult', () => {
+    it('reports a recovery with the time the source recorded', () => {
+      expect(
+        toCheckResult(
+          {
+            status: 'recovered',
+            end: '2026-11-24T10:20:00.000Z',
+            timestamp: '2026-11-24T10:21:00.000Z',
+          },
+          NOW
+        )
+      ).toEqual({
+        status: 'recovered',
+        recovered_at: '2026-11-24T10:20:00.000Z',
+        updated_at: '2026-11-24T10:21:00.000Z',
+      });
+    });
+
+    it('stops tracking an alert the source stopped tracking', () => {
+      expect(toCheckResult({ status: 'untracked' }, NOW)).toEqual({
+        status: 'unknown',
+        stop: 'untracked_by_source',
+      });
+    });
+
+    it('reports an active alert nobody updated for a day as stale', () => {
+      const timestamp = new Date(NOW - STALE_AFTER_MS - 1).toISOString();
+      expect(toCheckResult({ status: 'active', timestamp }, NOW)).toEqual({
+        status: 'stale',
+        updated_at: timestamp,
+      });
+    });
+
+    it('reports an active alert as firing, and a missing one as unknown', () => {
+      expect(
+        toCheckResult({ status: 'active', timestamp: '2026-11-24T10:25:00.000Z' }, NOW)
+      ).toEqual({ status: 'firing', updated_at: '2026-11-24T10:25:00.000Z' });
+      expect(toCheckResult(undefined, NOW)).toEqual({ status: 'unknown' });
+    });
+  });
+
+  describe('check', () => {
+    const ref = (uuid: string, connectorId = 'remote-es') => ({
+      source: 'elastic' as const,
+      connector_id: connectorId,
+      alert_uuid: uuid,
+    });
+
+    it('checks the alerts of a connector in one search and uses the latest document of each', async () => {
+      const { context, actionsClient } = createContext({
+        hits: [
+          alertDoc({
+            'kibana.alert.status': 'recovered',
+            'kibana.alert.end': '2026-11-24T10:20:00.000Z',
+          }),
+          alertDoc(),
+          alertDoc({ 'kibana.alert.uuid': 'alert-2' }),
+        ],
+      });
+      const results = await elasticAlertsAdapter.check(
+        [ref('alert-1'), ref('alert-2'), ref('alert-3')],
+        context,
+        NOW
+      );
+      expect(actionsClient.execute).toHaveBeenCalledTimes(1);
+      expect(actionsClient.execute.mock.calls[0][0].params.subActionParams.query).toEqual({
+        bool: { filter: [{ terms: { 'kibana.alert.uuid': ['alert-1', 'alert-2', 'alert-3'] } }] },
+      });
+      expect(results.get('alert-1')).toMatchObject({ status: 'recovered' });
+      expect(results.get('alert-2')).toMatchObject({ status: 'firing' });
+      expect(results.get('alert-3')).toEqual({ status: 'unknown' });
+    });
+
+    it('searches each connector separately and isolates their errors', async () => {
+      const execute = jest.fn(async ({ actionId }: { actionId: string }) =>
+        actionId === 'broken'
+          ? { status: 'error', message: 'access denied' }
+          : { status: 'ok', data: { hits: { hits: [alertDoc()] } } }
+      );
+      const { context } = createContext({ execute });
+      const results = await elasticAlertsAdapter.check(
+        [ref('alert-1'), ref('alert-9', 'broken')],
+        context,
+        NOW
+      );
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(results.get('alert-1')).toMatchObject({ status: 'firing' });
+      expect(results.get('alert-9')).toEqual({ status: 'error', message: 'access denied' });
+    });
+
+    it('chunks large batches', async () => {
+      const { context, actionsClient } = createContext({ hits: [] });
+      await elasticAlertsAdapter.check(
+        Array.from({ length: 250 }, (_, i) => ref(`alert-${i}`)),
+        context,
+        NOW
+      );
+      expect(actionsClient.execute).toHaveBeenCalledTimes(3);
     });
   });
 });
