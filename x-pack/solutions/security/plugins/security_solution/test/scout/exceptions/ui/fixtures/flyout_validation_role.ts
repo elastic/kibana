@@ -11,22 +11,14 @@ import type { KibanaRole } from '@kbn/scout-security';
 export const FLYOUT_VALIDATION_INDEX_PREFIX = 'scout-exceptions-flyout';
 
 /**
- * Custom role for `flyout_validation.spec.ts`.
+ * Custom role for `flyout_validation.spec.ts`, limited to the worker's space.
  *
- * The exception flyout builds its field list and value suggestions with requests that run as
- * the logged-in user against the rule's source index. The user needs `read` and
- * `view_index_metadata` on the index the spec creates.
- *
- * A predefined role cannot read an index of this spec's own. It reads only patterns that other
- * Scout suites also write to and query with enabled rules, such as `auditbeat-*`, and the alerts
- * those rules produce would then depend on this spec's documents. The dedicated prefix keeps the
- * index out of reach of every shared pattern.
- *
- * The user also needs `write` on the alerts index. The exceptions viewer disables its "Add rule
- * exception" button unless the user can write to the alerts index (`hasIndexWrite`), although
- * the spec never saves an exception or touches an alert.
+ * - The flyout reads the fields of the spec's own index as the logged-in user. The index has a
+ *   dedicated prefix because predefined roles only read patterns that other suites write to.
+ * - The exceptions viewer disables "Add rule exception" without write access to the alerts index
+ *   (`hasIndexWrite`), which `create_doc` satisfies.
  */
-export const FLYOUT_VALIDATION_ROLE: KibanaRole = {
+export const getFlyoutValidationRole = (spaceId: string): KibanaRole => ({
   elasticsearch: {
     cluster: [],
     indices: [
@@ -35,11 +27,11 @@ export const FLYOUT_VALIDATION_ROLE: KibanaRole = {
         privileges: ['read', 'view_index_metadata'],
       },
       {
-        names: ['.alerts-security*'],
-        privileges: ['read', 'view_index_metadata', 'write'],
+        names: [`.alerts-security.alerts-${spaceId}`],
+        privileges: ['read', 'view_index_metadata', 'create_doc'],
       },
       {
-        names: ['.siem-signals-*'],
+        names: [`.siem-signals-${spaceId}*`],
         privileges: ['read', 'view_index_metadata'],
       },
     ],
@@ -52,7 +44,7 @@ export const FLYOUT_VALIDATION_ROLE: KibanaRole = {
         securitySolutionAlertsV1: ['read'],
         siemV5: ['read'],
       },
-      spaces: ['*'],
+      spaces: [spaceId],
     },
   ],
-};
+});

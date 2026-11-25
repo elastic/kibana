@@ -9,7 +9,7 @@ import { AddExceptionButtonType, spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import {
   FLYOUT_VALIDATION_INDEX_PREFIX,
-  FLYOUT_VALIDATION_ROLE,
+  getFlyoutValidationRole,
 } from '../fixtures/flyout_validation_role';
 
 spaceTest.describe(
@@ -78,7 +78,7 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, kbnUrl, scoutSpace }) => {
       const { ruleDetailsPage, addExceptionFlyoutPage } = pageObjects;
 
-      await browserAuth.loginWithCustomRole(FLYOUT_VALIDATION_ROLE);
+      await browserAuth.loginWithCustomRole(getFlyoutValidationRole(scoutSpace.id));
       await ruleDetailsPage.goto({
         kbnUrl,
         spaceId: scoutSpace.id,
