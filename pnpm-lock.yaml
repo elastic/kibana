@@ -4851,7 +4851,7 @@ importers:
         version: 1.63.0
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.6.3
-        version: 0.6.3(@types/webpack@5.28.5(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.26.1)(webpack-dev-server@5.2.7)(webpack-hot-middleware@2.25.1)(webpack@5.96.1)
+        version: 0.6.3(@types/webpack@5.28.5(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.19.0)(type-fest@4.26.1)(webpack-dev-server@5.2.7)(webpack-hot-middleware@2.25.1)(webpack@5.96.1)
       '@redocly/cli':
         specifier: 2.64.1
         version: 2.64.1
@@ -5693,8 +5693,8 @@ importers:
         specifier: 6.17.0
         version: 6.17.0
       react-refresh:
-        specifier: 0.18.0
-        version: 0.18.0
+        specifier: 0.19.0
+        version: 0.19.0
       react-test-renderer:
         specifier: 17.0.2
         version: 17.0.2(react@17.0.2)
@@ -20451,8 +20451,8 @@ packages:
       redux:
         optional: true
 
-  react-refresh@0.18.0:
-    resolution: {integrity: sha512-QgT5//D3jfjJb6Gsjxv0Slpj23ip+HtOpnNgnb2S5zU3CB26G/IDPGoy4RJB42wzFE46DRsstbW6tKHoKbhAxw==}
+  react-refresh@0.19.0:
+    resolution: {integrity: sha512-5HdstYgoJBbBofjapO5qCPcovECJCBfvjLb+iTcsmqDFVMRdqy0qs7iiInBJTUXmIFc2bjoc5b2HVLp2zRtYhQ==}
     engines: {node: '>=0.10.0'}
 
   react-remove-scroll-bar@2.3.4:
@@ -27975,13 +27975,13 @@ snapshots:
     dependencies:
       playwright: 1.63.0
 
-  '@pmmmwh/react-refresh-webpack-plugin@0.6.3(@types/webpack@5.28.5(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.26.1)(webpack-dev-server@5.2.7)(webpack-hot-middleware@2.25.1)(webpack@5.96.1)':
+  '@pmmmwh/react-refresh-webpack-plugin@0.6.3(@types/webpack@5.28.5(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.19.0)(type-fest@4.26.1)(webpack-dev-server@5.2.7)(webpack-hot-middleware@2.25.1)(webpack@5.96.1)':
     dependencies:
       anser: 2.3.2
       core-js-pure: 3.26.0
       error-stack-parser: 2.0.6
       html-entities: 2.5.2
-      react-refresh: 0.18.0
+      react-refresh: 0.19.0
       schema-utils: 4.3.2
       source-map: 0.7.6
       webpack: 5.96.1(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -38195,7 +38195,7 @@ snapshots:
       react-dom: 17.0.2(react@17.0.2)
       redux: 4.2.1
 
-  react-refresh@0.18.0: {}
+  react-refresh@0.19.0: {}
 
   react-remove-scroll-bar@2.3.4(@types/react@18.2.79)(react@17.0.2):
     dependencies:
