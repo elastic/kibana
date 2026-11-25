@@ -62,6 +62,13 @@ describe('useFormatters', () => {
     expect(formatKpiPercent(0.5)).toBe('50%');
   });
 
+  it("shows an error rate with two decimals, in the user's number locale", () => {
+    expect(renderFormatters().formatErrorRate(0.1)).toBe('0.10');
+    expect(renderFormatters({ 'format:number:defaultLocale': 'de' }).formatErrorRate(0.1)).toBe(
+      '0,10'
+    );
+  });
+
   it('formats dates with the date format in the configured time zone', () => {
     const { formatDate, timeZone } = renderFormatters({ 'dateFormat:tz': 'America/New_York' });
 

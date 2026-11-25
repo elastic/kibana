@@ -124,6 +124,14 @@ export const useSessionsStatusState = ({
   }, [autoEnable, enable]);
 
   const rebuilding = status?.rebuilding === true;
+  // Back on a page that shows the rebuild, which may have finished while no page did
+  const wasWatched = useRef(isWatched);
+  useEffect(() => {
+    if (isWatched && !wasWatched.current && rebuilding) {
+      refresh();
+    }
+    wasWatched.current = isWatched;
+  }, [isWatched, rebuilding, refresh]);
   useEffect(() => {
     if (!rebuilding || !isWatched) {
       return;

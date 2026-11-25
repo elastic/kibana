@@ -75,6 +75,26 @@ apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERI
   });
 
   apiTest(
+    'gives no marker to a release with documents before the range',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+      const response = await apiClient.get(mobileReleasesPath(MOBILE_APPS.boundaryAndroid), {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      // 1.0.0 has a session at the range's start and two in the hour before it
+      const { releases, markers } = response.body as MobileReleasesResponse;
+      expect(releases.map(({ release, sessions }) => ({ release, sessions }))).toStrictEqual([
+        { release: '1.0.0', sessions: 1 },
+      ]);
+      expect(markers).toStrictEqual([]);
+    }
+  );
+
+  apiTest(
     'names the top 5 releases by sessions and groups the rest as one Other row, each session once',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
@@ -116,7 +136,8 @@ apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERI
         false,
         true,
       ]);
-      // The tail's session in each bucket it has a document in: 2.10.0 at one time, 2.010.0 later
+      // The tail's session in each bucket it has a document in: 2.10.0 at one time, then both,
+      // still one session
       const otherSeries = series[5];
       expect(otherSeries.points.filter(({ sessions }) => sessions > 0)).toStrictEqual([
         { timestamp: Date.parse(TIMESTAMP), sessions: 1, errorRate: null },

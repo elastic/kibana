@@ -17,12 +17,15 @@ import { useKibanaServices } from './use_kibana_services';
 
 const COMPACT_NUMBER_PATTERN = '0,0.[0]';
 const COMPACT_PERCENT_PATTERN = '0,0.[0]%';
+const ERROR_RATE_PATTERN = '0,0.00';
 
 export interface Formatters {
   /** A count or other number, with the `format:number:defaultPattern` advanced setting. */
   formatNumber: (value: number) => string;
   /** A share between 0 and 1, with the `format:percent:defaultPattern` advanced setting. */
   formatPercent: (share: number) => string;
+  /** An error rate, always with two decimals in the user's number locale, e.g. "0.10". */
+  formatErrorRate: (rate: number) => string;
   /** A share on a KPI tile, to one decimal at most, e.g. "42.4%": more reads as noise there. */
   formatKpiPercent: (share: number) => string;
   /** A change, to one decimal at most, with a sign unless it rounds to 0, e.g. "+1.5" or "0". */
@@ -47,6 +50,7 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
   // Changes and KPI shares to one decimal at most, whatever the default patterns: "-4.949%" reads
   // as noise on a tile.
   const kpiPercent = new PercentFormat({ pattern: COMPACT_PERCENT_PATTERN }, getConfig);
+  const errorRate = new NumberFormat({ pattern: ERROR_RATE_PATTERN }, getConfig);
   const signedNumber = new NumberFormat(
     { alwaysShowSign: true, pattern: COMPACT_NUMBER_PATTERN },
     getConfig
@@ -63,6 +67,7 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
   return {
     formatNumber: (value) => number.convertToText(value),
     formatPercent: (share) => percent.convertToText(share),
+    formatErrorRate: (rate) => errorRate.convertToText(rate),
     formatKpiPercent: (share) => kpiPercent.convertToText(share),
     formatSignedNumber: (value) => signedNumber.convertToText(value),
     formatSignedPercent: (share) => signedPercent.convertToText(share),

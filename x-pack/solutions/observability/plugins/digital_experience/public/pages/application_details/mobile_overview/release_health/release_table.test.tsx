@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MAX_RELEASE_LENGTH } from '../../../../../common/filter_lengths';
 import { OTHER_RELEASE_KEY } from '../../../../../common/mobile/releases';
 import type { MobileReleaseRow } from '../../../../../common/types/mobile';
 import { createFormatters, useFormatters } from '../../../../hooks/use_formatters';
@@ -148,6 +149,30 @@ describe('ReleaseTable', () => {
 
     expect(within(row('')).queryByRole('button')).toBeNull();
     expect(screen.getAllByTestId('digitalExperienceMobileReleaseFilterLink')).toHaveLength(3);
+  });
+
+  it('has no filter on a release longer than the URL accepts, as the release picker', () => {
+    const longRelease = 'v'.repeat(MAX_RELEASE_LENGTH + 1);
+    render(
+      <SortedTable
+        releases={[
+          { release: longRelease, isOther: false, sessions: 1, users: 1, errorRate: null },
+        ]}
+        colors={new Map()}
+        selectedRelease={undefined}
+        onSelectRelease={onSelectRelease}
+      />,
+      {
+        wrapper: ({ children }) => (
+          <I18nProvider>
+            <EuiProvider>{children}</EuiProvider>
+          </I18nProvider>
+        ),
+      }
+    );
+
+    expect(within(row(longRelease)).getByText(longRelease)).toBeInTheDocument();
+    expect(within(row(longRelease)).queryByRole('button')).toBeNull();
   });
 
   it('sorts by a column, with "Other" still last', () => {

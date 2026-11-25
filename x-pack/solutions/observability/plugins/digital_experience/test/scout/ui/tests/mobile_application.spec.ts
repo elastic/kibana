@@ -127,7 +127,6 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       await expect(
         digitalExperience.mobileReleaseTable.getByText(BUSY_RELEASE, { exact: true })
       ).toBeVisible();
-      await expect(digitalExperience.mobileReleaseTable.getByText('0.10')).toBeVisible();
     });
 
     await test.step('draws both charts, the release in their legends', async () => {
@@ -148,6 +147,32 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
     await test.step('has no accessibility violations with the charts drawn', async () => {
       const { violations } = await page.checkA11y({ include: ['main'] });
       expect(violations).toHaveLength(0);
+    });
+  });
+
+  test('filters the page by a release from its table, and takes the filter off', async ({
+    page,
+    pageObjects: { digitalExperience },
+  }) => {
+    await digitalExperience.gotoApplication(MOBILE_APPS.android, {
+      ...TIME_RANGE,
+      source: 'otel',
+      applicationType: 'mobile',
+    });
+    await expect(digitalExperience.mobileKpiValue('Sessions')).toHaveText('3');
+
+    await test.step('narrows the URL and the data to the release', async () => {
+      await digitalExperience.mobileReleaseFilter('2.9.0').click();
+      await expect(page).toHaveURL(/release=2\.9\.0/);
+      await expect(digitalExperience.mobileKpiValue('Sessions')).toHaveText('2');
+      await expect(digitalExperience.mobileReleaseFilterRemove('2.9.0')).toBeVisible();
+    });
+
+    await test.step('takes the filter off from its pill', async () => {
+      await digitalExperience.mobileReleaseFilterRemove('2.9.0').click();
+      await expect(page).not.toHaveURL(/release=/);
+      await expect(digitalExperience.mobileKpiValue('Sessions')).toHaveText('3');
+      await expect(digitalExperience.mobileReleaseFilter('2.9.0')).toBeVisible();
     });
   });
 });

@@ -11,6 +11,7 @@ import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiBasicTable, EuiHealth, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { MAX_RELEASE_LENGTH } from '../../../../../common/filter_lengths';
 import { MIN_RELEASE_SESSIONS } from '../../../../../common/mobile/releases';
 import type { MobileReleaseRow } from '../../../../../common/types/mobile';
 import {
@@ -27,7 +28,6 @@ import {
   valueWithShareLabel,
 } from '../../../../labels';
 import { metricColumnPreset } from '../../../../utils/column_presets';
-import { formatErrorRate } from '../../../../utils/format_error_rate';
 
 const TABLE_CAPTION = i18n.translate('xpack.digitalExperience.mobile.releases.table.caption', {
   defaultMessage: 'Release health by app version',
@@ -124,6 +124,10 @@ const releaseColumns = ({
       if (isOther) {
         return <EuiHealth color={colors.get(release)}>{OTHER_RELEASE_LABEL}</EuiHealth>;
       }
+      // Longer than the URL and the routes accept, as the release picker leaves it out
+      if (release.length > MAX_RELEASE_LENGTH) {
+        return <EuiHealth color={colors.get(release)}>{release}</EuiHealth>;
+      }
       // A removable pill, so it's clear a click takes the filter off
       if (release === selectedRelease) {
         return (
@@ -192,7 +196,7 @@ const releaseColumns = ({
           <span tabIndex={0}>{NOT_ENOUGH_DATA_LABEL}</span>
         </EuiToolTip>
       ) : (
-        formatErrorRate(errorRate)
+        formatters.formatErrorRate(errorRate)
       ),
   },
 ];

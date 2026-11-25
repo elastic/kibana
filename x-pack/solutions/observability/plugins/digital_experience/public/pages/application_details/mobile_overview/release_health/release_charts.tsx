@@ -48,7 +48,6 @@ import { useFormatters } from '../../../../hooks/use_formatters';
 import { MOBILE_ERROR_RATE_DESCRIPTION, OTHER_RELEASE_LABEL } from '../../../../labels';
 import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../../utils/brush_time_range';
-import { formatErrorRate } from '../../../../utils/format_error_rate';
 import { getTimeChartXDomain } from '../../../../utils/histogram_interval';
 
 const CHART_HEIGHT = 240;
@@ -311,6 +310,7 @@ export function ReleaseErrorRateChart({
   series: allSeries,
   ...props
 }: ReleaseChartProps) {
+  const { formatErrorRate } = useFormatters();
   const series = useMemo(() => {
     const withRate = new Set(
       releases.filter(({ errorRate }) => errorRate !== null).map(({ release }) => release)

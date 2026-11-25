@@ -54,15 +54,20 @@ export const getTimeChartXDomain = ({
   });
   const nominalInterval = moment.duration(value, unit).asMilliseconds();
   const maxKey = Math.max(end - nominalInterval, keys[keys.length - 1]);
+  // Calendar buckets vary in length, e.g. March; the points are the full grid, as in Lens
+  const lastBucketEnd =
+    unit === 's'
+      ? maxKey + nominalInterval
+      : moment
+          .tz(keys[keys.length - 1], timeZone)
+          .add(value, unit)
+          .valueOf();
   return {
     min: Math.min(keys[0], start),
-    max: hasBars ? maxKey : maxKey + nominalInterval,
+    max: hasBars ? maxKey : lastBucketEnd,
     minInterval: unit === 's' ? nominalInterval : getAdjustedInterval(keys, value, unit, timeZone),
     range: { start, end },
     hasBars,
-    lastBucketEnd:
-      unit === 's'
-        ? maxKey + nominalInterval
-        : moment.tz(maxKey, timeZone).add(value, unit).valueOf(),
+    lastBucketEnd,
   };
 };

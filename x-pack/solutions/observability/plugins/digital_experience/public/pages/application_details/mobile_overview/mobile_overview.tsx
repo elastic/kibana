@@ -29,10 +29,9 @@ import { MobileOnboardingPrompt } from '../../../components/mobile_onboarding_pr
 import { MobileUnreadableDataPrompt } from '../../../components/mobile_unreadable_data_prompt';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import { useEnvironment } from '../../../hooks/use_environment';
-import { useFormatters } from '../../../hooks/use_formatters';
+import { useFormatters, type Formatters } from '../../../hooks/use_formatters';
 import { useQueryParam } from '../../../hooks/use_query_param';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
-import { formatErrorRate } from '../../../utils/format_error_rate';
 import {
   COMPARE_LABEL,
   MOBILE_ERROR_RATE_DESCRIPTION,
@@ -65,7 +64,7 @@ const MOBILE_KPIS: ReadonlyArray<
   > & {
     kpi: MobileKpi;
     /** The user's number format unless set. */
-    formatValue?: (value: number) => string;
+    formatValue?: (formatters: Formatters) => (value: number) => string;
   }
 > = [
   {
@@ -97,7 +96,7 @@ const MOBILE_KPIS: ReadonlyArray<
     tooltip: MOBILE_ERROR_RATE_DESCRIPTION,
     changeUnit: 'relative',
     higherIsBetter: false,
-    formatValue: formatErrorRate,
+    formatValue: ({ formatErrorRate }) => formatErrorRate,
   },
 ];
 
@@ -314,12 +313,12 @@ export function MobileOverview({
               </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
-                {MOBILE_KPIS.map(({ kpi, formatValue = formatNumber, ...panel }) => (
+                {MOBILE_KPIS.map(({ kpi, formatValue, ...panel }) => (
                   <ComparedKpiPanel
                     key={kpi}
                     {...panel}
                     value={currentKpis?.[kpi]}
-                    formatValue={formatValue}
+                    formatValue={formatValue?.(formatters) ?? formatNumber}
                     isComparing={isComparing}
                     isLoading={isLoading}
                   />

@@ -122,11 +122,13 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
   },
   // Most sessions still on 2.9.0, the newest release 2.10.0, which only a version sort puts last.
   // Later in the same session, versions that aren't releases: the `version` type would sort each
-  // after 2.10.0, and each showed up after it.
+  // after 2.10.0, and each showed up after it. 2.10.0 shows up again then, in the same bucket as
+  // 2.010.0, both left for "Other".
   ...[
     { version: '2.9.0', sessionId: 'android-1' },
     { version: '2.9.0', sessionId: 'android-2' },
     { version: '2.10.0', sessionId: 'android-3' },
+    { version: '2.10.0', sessionId: 'android-3', timestamp: LATER_TIMESTAMP },
     ...['debug', '', 'v3.0.0', '3.0.0-beta', '3.0.0+45', '2.010.0'].map((version) => ({
       version,
       sessionId: 'android-3',

@@ -116,10 +116,10 @@ on serverless and stateful.
   **Health summary**: its title, a **Compare to the previous period** toggle (`compare=true` in the
   URL, so a reload or Share keeps it) and the KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
   (health summary, release health, stability, users, performance, views) join the page as those
-  issues fill them, rather than showing placeholders. Every KPI uses `MobilePanel`: the current
+  issues fill them, rather than showing placeholders. Every KPI uses `ComparedKpiPanel`: the current
   value and a tooltip with the calculation and, with Compare on, its change against the previous
-  period of equal length and the previous value. The error rate shows with two decimals, as in the
-  release table, its chart and the applications list. A relative change shows one decimal at most
+  period of equal length and the previous value. The error rate shows with two decimals in the user's
+  number locale (`formatErrorRate`), as in the release table and its chart. A relative change shows one decimal at most
   (`+3.9%`), whatever the percent pattern. A change's sign and color follow the rounded value
   shown, so one that rounds to 0 reads `0%` with a neutral badge. A warning shows when the user
   can't read every OTel index, as the counts may then miss data. Without mobile data it links to
@@ -165,7 +165,8 @@ on serverless and stateful.
   The table, in a bordered panel like the KPIs and charts, shows each release's share of the
   sessions (none while filtered by a release, where it would read 100%), sorts by sessions, users
   or error rate ("Other" stays last) and shows the error rate with two decimals; a release filters
-  the page by it (the `release` filter), and the selected one shows as a pill whose cross takes
+  the page by it (the `release` filter; not one longer than `MAX_RELEASE_LENGTH`, which the URL and
+  the routes reject, as the release picker leaves it out), and the selected one shows as a pill whose cross takes
   the filter off. Each chart has a one-line header (an `h3` and an info tip with the
   calculation), so both plots line up, and a legend below it (hover a release to spotlight it,
   click to hide it); dragging over one narrows the time range. Session shares show one decimal at
@@ -891,7 +892,8 @@ session detail timeline). Without it they answer 403 naming those privileges; ot
 logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status` (fetched by `SessionsStatusProvider` only once
-  a web page asks for it, and checked back only while one is open, so mobile pages and the list's
+  a web page asks for it, and checked back only while one is open, at once when one opens again
+  during a rebuild, so mobile pages and the list's
   Mobile tab the URL picks request none; on that tab, with the status unknown, the list keeps its
   Web tab, where sessions may still need setting up. The Mobile tab the list opens by itself, with
   only mobile rows, requests it and checks back while sessions rebuild, so the list fetches again,

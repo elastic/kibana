@@ -321,6 +321,25 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(useSessionsStatus).toHaveBeenLastCalledWith({ enabled: true });
   });
 
+  it('shows the Web applications by itself once the sessions it opened the Mobile tab without are built', async () => {
+    mockSessionsStatus({ status: { ...HEALTHY_SESSIONS, rebuilding: true } });
+    respondWith([mobileApp()]);
+    const { rerender } = renderPage();
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+
+    // The rebuild finishes, and its sessions bring a Web application
+    respondWith([mobileApp(), webApp()]);
+    mockSessionsStatus();
+    rerender(<ApplicationsListPage />);
+
+    expect(
+      await within(await screen.findByTestId('digitalExperienceApplicationsTable')).findByText(
+        'web-app'
+      )
+    ).toBeVisible();
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
   it('shows no empty Web tab on the Mobile tab the URL picks once sessions are known to be ready', async () => {
     mockApplicationType('mobile');
     respondWith([mobileApp()]);

@@ -216,6 +216,22 @@ export class DigitalExperiencePage {
     return chart.locator(`[data-ech-series-name="${release}"]`);
   }
 
+  /** The control in the Release health table that filters the page by `release`. */
+  mobileReleaseFilter(release: string): Locator {
+    return this.mobileReleaseTable.getByRole('button', {
+      name: `Filter by release ${release}`,
+      exact: true,
+    });
+  }
+
+  /** The selected release's pill in the Release health table, which takes the filter off. */
+  mobileReleaseFilterRemove(release: string): Locator {
+    return this.mobileReleaseTable.getByRole('button', {
+      name: `Stop filtering by release ${release}`,
+      exact: true,
+    });
+  }
+
   /** The value of a KPI of the mobile page, e.g. `Sessions`. */
   mobileKpiValue(kpi: MobileKpi): Locator {
     return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Value`);
