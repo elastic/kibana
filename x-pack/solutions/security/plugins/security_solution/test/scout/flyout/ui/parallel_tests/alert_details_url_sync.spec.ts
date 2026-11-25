@@ -34,9 +34,12 @@ spaceTest.describe(
     });
 
     spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
-      await apiServices.detectionRule.deleteAll();
-      await apiServices.detectionAlerts.deleteAll();
-      await apiServices.host.cleanupHostFixture(scoutSpace.id);
+      try {
+        await apiServices.detectionRule.deleteAll();
+        await apiServices.detectionAlerts.deleteAll();
+      } finally {
+        await apiServices.host.cleanupHostFixture(scoutSpace.id);
+      }
     });
 
     spaceTest('should test flyout url sync', async ({ pageObjects, page }) => {
@@ -60,6 +63,7 @@ spaceTest.describe(
 
       const urlAfterReload = page.url();
       expect(urlAfterReload).toContain(FLYOUT_URL_PARAM);
+      await expect(headerTitle).toHaveText(ruleName);
 
       await pageObjects.alertDetailsRightPanelPage.closeFlyout();
 
