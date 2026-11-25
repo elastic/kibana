@@ -662,6 +662,50 @@ describe('InventoryService.list', () => {
     });
   });
 
+  it('lists only the computed metric in unavailableColumns when a rate omitted under FROM shares its unmapped field', async () => {
+    const withRateOnSharedField = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: OTEL_PATTERN,
+            metrics: [
+              { name: 'network_bytes', field: 'host.network.bytes', agg: 'last' as const },
+              { name: 'network_rate', field: 'host.network.bytes', agg: 'sum_rate' as const },
+            ],
+          },
+        ],
+      },
+    };
+    const { service, esClient } = createService([withRateOnSharedField]);
+    answerByPattern(esClient, {
+      [OTEL_PATTERN]: esqlResponse(
+        ['entity.id', 'kubernetes.node.name', 'network_bytes', 'last_seen'],
+        [],
+        { nullTyped: ['network_bytes'] }
+      ),
+    });
+
+    const response = await service.list({
+      type: withRateOnSharedField.type,
+      window: WINDOW,
+      limit: 10,
+    });
+
+    expect(response.unsupportedMetrics).toEqual([
+      {
+        indexPattern: OTEL_PATTERN,
+        engine: 'FROM',
+        column: 'network_rate',
+        field: 'host.network.bytes',
+        agg: 'sum_rate',
+      },
+    ]);
+    expect(response.unavailableColumns).toEqual([
+      { column: 'network_bytes', indexPattern: OTEL_PATTERN, field: 'host.network.bytes' },
+    ]);
+  });
+
   it('lists rates omitted under FROM in unsupportedMetrics on list and plan', async () => {
     const withRate = {
       ...k8sNodeFixture,

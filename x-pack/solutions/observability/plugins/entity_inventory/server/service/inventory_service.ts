@@ -69,18 +69,6 @@ interface ListPlan {
   probesMs: number;
 }
 
-const toUnavailableColumns = (
-  { index, indexPattern }: QueryPlan,
-  unavailableFields: string[],
-  columns: OutputColumn[]
-): UnavailableColumn[] =>
-  columns.flatMap(({ name, fieldByPlan }) => {
-    const field = fieldByPlan?.[index];
-    return field !== undefined && unavailableFields.includes(field)
-      ? [{ column: name, indexPattern, field }]
-      : [];
-  });
-
 type ExecutionStats = Omit<QueryExecutionStats, 'isPartial'>;
 
 const NO_EXECUTION_STATS: ExecutionStats = {
@@ -249,7 +237,11 @@ export class InventoryService {
           reason: partialRowsReason(),
         });
       }
-      const { usable, reason, unavailableFields } = interpretPlanResult(result, identity, columns);
+      const {
+        usable,
+        reason,
+        unavailableColumns: planUnavailableColumns,
+      } = interpretPlanResult(result, identity, columns);
       if (!usable) {
         errors.push({
           indexPattern: plan.indexPattern,
@@ -258,7 +250,7 @@ export class InventoryService {
         });
         return [];
       }
-      unavailableColumns.push(...toUnavailableColumns(plan, unavailableFields, columns));
+      unavailableColumns.push(...planUnavailableColumns);
       return [{ ...result, rows: applyValueLabels(rows, plan) }];
     });
 
