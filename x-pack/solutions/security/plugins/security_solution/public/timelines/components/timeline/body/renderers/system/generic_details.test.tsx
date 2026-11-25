@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { SystemGenericDetails, SystemGenericLine } from './generic_details';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -25,23 +24,9 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../../../../../common/components/link_to');
 
 describe('SystemGenericDetails', () => {
-  const mount = useMountAppended();
-
   describe('rendering', () => {
-    test('it renders the default SystemGenericDetails', () => {
-      const wrapper = shallow(
-        <SystemGenericDetails
-          contextId="[contextid-123]"
-          text="[generic-text-123]"
-          data={mockTimelineData[28].ecs}
-          timelineId="test"
-        />
-      );
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('it returns system rendering if the data does contain system data', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <SystemGenericDetails
             contextId="[contextid-123]"
@@ -51,7 +36,7 @@ describe('SystemGenericDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         'Braden@zeek-london[generic-text-123](6278)with resultfailureSource128.199.212.120'
       );
     });
@@ -59,7 +44,7 @@ describe('SystemGenericDetails', () => {
 
   describe('#SystemGenericLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -85,13 +70,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][generic-text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it returns nothing if data is all null', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -117,11 +102,11 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toBe('');
     });
 
     test('it can return only the host name', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -147,11 +132,11 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[hostname-123]');
+      expect(container.textContent).toBe('[hostname-123]');
     });
 
     test('it can return the host, message', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -177,11 +162,11 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[hostname-123][message-123]');
+      expect(container.textContent).toBe('[hostname-123][message-123]');
     });
 
     test('it can return the host, message, outcome', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -207,11 +192,11 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[hostname-123]with result[outcome-123][message-123]');
+      expect(container.textContent).toBe('[hostname-123]with result[outcome-123][message-123]');
     });
 
     test('it can return the host, message, outcome, packageName', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -237,13 +222,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[hostname-123]with result[outcome-123][packageName-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -269,13 +254,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[hostname-123]with result[outcome-123][packageName-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -301,13 +286,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[hostname-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -333,13 +318,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[hostname-123][processExecutable-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -365,13 +350,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[hostname-123][processExecutable-123](123)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -397,13 +382,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[hostname-123][processName-123](123)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -429,13 +414,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[hostname-123][processName-123](123)with result[outcome-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -461,13 +446,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[hostname-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature, text', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -493,13 +478,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[hostname-123][text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature, text, userDomain, username', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -525,13 +510,13 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[username-123]\\[userDomain-123]@[hostname-123][text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -557,7 +542,7 @@ describe('SystemGenericDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toBe(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });

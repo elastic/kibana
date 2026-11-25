@@ -19,7 +19,10 @@ jest.mock('../ai_indices/ki_revision', () => ({
   findKiRevision: jest.fn(),
   putKiRevision: jest.fn(),
 }));
-jest.mock('../ai_indices/ki_write', () => ({ softDeleteKi: jest.fn() }));
+jest.mock('../ai_indices/ki_write', () => ({
+  ...jest.requireActual('../ai_indices/ki_write'),
+  softDeleteKi: jest.fn(),
+}));
 jest.mock('../ai_indices/ki_relationships', () => ({
   findLinkingRelationshipIds: jest.fn(async () => []),
 }));
@@ -61,10 +64,10 @@ describe('applyOperations', () => {
     jest.mocked(putKiRevision).mockResolvedValue(undefined);
   });
 
-  it('cites rounds read from traces as trace://, keeping the permissions of their space', async () => {
+  it('cites turns read from session events as session://, keeping the permissions of their space', async () => {
     const roundPermissions = { kibana: { privileges: [{ space: 'team-a' }] } };
     const counts = await applyOperations(
-      context(undefined, new Map([['trace:51fff8a2', roundPermissions]])),
+      context(undefined, new Map([['session:s-1/turn-1', roundPermissions]])),
       [
         {
           op: 'upsert_fact',
@@ -72,7 +75,7 @@ describe('applyOperations', () => {
           type: 'preference',
           title: 'Tom Becker eats vegetarian',
           content: 'Tom Becker always wants vegetarian meals.',
-          sourceMemoryIds: ['trace:51fff8a2'],
+          sourceMemoryIds: ['session:s-1/turn-1'],
           lastSeenAt: '2026-11-11T13:12:03.357Z',
         },
       ]
@@ -81,7 +84,7 @@ describe('applyOperations', () => {
     expect(counts).toEqual(expect.objectContaining({ created: 1, rejected: [] }));
     expect(written()[0]).toEqual(
       expect.objectContaining({
-        references: [{ uri: 'trace://51fff8a2', relation: 'derived_from' }],
+        references: [{ uri: 'session://s-1/turn-1', relation: 'derived_from' }],
         attributes: {
           'memory.number_of_occurrences': 1,
           'memory.last_seen_at': '2026-11-11T13:12:03.357Z',
@@ -253,6 +256,31 @@ describe('applyOperations', () => {
     expect(putKiRevision).toHaveBeenCalledWith(expect.objectContaining({ existing: undefined }));
   });
 
+  it('keeps the first @timestamp when it rewrites a KI on an index dest, but not on a data stream', async () => {
+    const bob: DreamedKi = {
+      id: 'entity-person-bob',
+      type: 'entity.person',
+      title: 'Bob',
+      '@timestamp': '2026-10-01T08:00:00.000Z',
+    };
+    const upsertBob: DreamingOperation = {
+      op: 'upsert_entity',
+      id: 'entity-person-bob',
+      type: 'person',
+      title: 'Bob',
+      attributes: {},
+      sourceMemoryIds: ['m-1'],
+    };
+    stored.set(bob.id, bob);
+
+    await applyOperations(context(), [upsertBob]);
+    await applyOperations(context({ type: 'data_stream', value: 'ai-index-ds-a' }), [upsertBob]);
+
+    const [onIndex, onDataStream] = written();
+    expect(onIndex['@timestamp']).toBe('2026-10-01T08:00:00.000Z');
+    expect(onDataStream['@timestamp']).not.toBe('2026-10-01T08:00:00.000Z');
+  });
+
   it('retries a write that lost to a concurrent one', async () => {
     jest
       .mocked(putKiRevision)
@@ -294,6 +322,116 @@ describe('applyOperations', () => {
       expect.anything(),
       expect.objectContaining({ kiId: 'fact-1', writer, refresh: true })
     );
+  });
+
+  describe('a KI a person edited', () => {
+    const person = { uri: 'api://context_engine.ki.update', metadata: { space_id: 'team-a' } };
+
+    beforeEach(() => {
+      stored.set('entity-person-bob', {
+        id: 'entity-person-bob',
+        type: 'entity.person',
+        title: 'Robert',
+        content: 'Robert, the on-call SRE.',
+        attributes: {
+          role: 'SRE',
+          'memory.number_of_occurrences': 1,
+          'memory.edited_by': person.uri,
+          'memory.edited_at': '2026-11-01T00:00:00.000Z',
+        },
+        references: [{ uri: 'ki://m-1', relation: 'derived_from' }],
+        governance: { provenance: { updated_by: writer } },
+      });
+    });
+
+    it('keeps what it says, recording only the sighting and the new memory', async () => {
+      const counts = await applyOperations(context(), [
+        {
+          op: 'upsert_entity',
+          id: 'entity-person-bob',
+          type: 'contractor',
+          title: 'Bob',
+          content: 'Bob.',
+          attributes: { role: 'DBA', team: 'Data' },
+          sourceMemoryIds: ['m-2'],
+          lastSeenAt: '2026-11-03T00:00:00.000Z',
+        },
+      ]);
+
+      expect(counts).toEqual({ created: 0, updated: 1, deleted: 0, rejected: [] });
+      expect(written()[0]).toEqual(
+        expect.objectContaining({
+          type: 'entity.person',
+          title: 'Robert',
+          content: 'Robert, the on-call SRE.',
+          attributes: {
+            role: 'SRE',
+            'memory.number_of_occurrences': 2,
+            'memory.last_seen_at': '2026-11-03T00:00:00.000Z',
+            'memory.edited_by': person.uri,
+            'memory.edited_at': '2026-11-01T00:00:00.000Z',
+          },
+          references: [
+            { uri: 'ki://m-1', relation: 'derived_from' },
+            { uri: 'ki://m-2', relation: 'derived_from' },
+          ],
+        })
+      );
+    });
+
+    it('updates a KI the update API wrote without marking it edited, such as a tag change', async () => {
+      stored.set('entity-person-bob', {
+        id: 'entity-person-bob',
+        type: 'entity.person',
+        title: 'Robert',
+        updated_at: '2026-10-01T00:00:00.000Z',
+        attributes: { 'memory.number_of_occurrences': 1 },
+        references: [{ uri: 'ki://m-1', relation: 'derived_from' }],
+        governance: { provenance: { updated_by: person } },
+      });
+
+      await applyOperations(context(), [
+        {
+          op: 'upsert_entity',
+          id: 'entity-person-bob',
+          type: 'person',
+          title: 'Bob',
+          attributes: {},
+          sourceMemoryIds: ['m-2'],
+        },
+      ]);
+
+      expect(written()[0]).toEqual(expect.objectContaining({ title: 'Bob' }));
+      expect(written()[0].attributes).not.toHaveProperty('memory.edited_by');
+    });
+
+    it('writes nothing when the memory is already cited', async () => {
+      const counts = await applyOperations(context(), [
+        {
+          op: 'upsert_entity',
+          id: 'entity-person-bob',
+          type: 'person',
+          title: 'Bob',
+          attributes: {},
+          sourceMemoryIds: ['m-1'],
+        },
+      ]);
+
+      expect(counts).toEqual({ created: 0, updated: 0, deleted: 0, rejected: [] });
+      expect(putKiRevision).not.toHaveBeenCalled();
+    });
+
+    it('refuses to delete it', async () => {
+      const counts = await applyOperations(context(), [{ op: 'delete', id: 'entity-person-bob' }]);
+
+      expect(counts).toEqual({
+        created: 0,
+        updated: 0,
+        deleted: 0,
+        rejected: [{ item: 'delete entity-person-bob', reason: 'a person edited it' }],
+      });
+      expect(softDeleteKi).not.toHaveBeenCalled();
+    });
   });
 
   it('makes a KI built from restricted memories visible only in this space, to whoever can see them all', async () => {

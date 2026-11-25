@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { ActionOrigin } from '../../../../server/handlers/action/action_origin';
 import {
   answerQuery,
   apiTest,
@@ -21,9 +22,13 @@ import {
   deleteLeftoverWorkflows,
   deleteSavedQuery,
   deleteSystemIndicesUser,
+  findActionIdsSince,
+  historyClient,
   indexFakeAgents,
+  OSQUERY_ACTIONS_INDEX,
   stepOf,
   takeDispatchedActionIds,
+  trackDispatchedActionIds,
   workflowsClient,
   type FakeAgent,
 } from '../fixtures';
@@ -60,6 +65,11 @@ const runQueryStep = (target: string, extra = '') => `  - name: q
       ${target}
 ${extra}`;
 
+const actionIdsOf = (action: { action_id: string; queries: Array<{ action_id: string }> }) => [
+  action.action_id,
+  ...action.queries.map(({ action_id: queryActionId }) => queryActionId),
+];
+
 const osqueryRole = (osquery: string[]): KibanaRole => ({
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { osquery, workflowsManagement: ['all'] }, spaces: ['*'] }],
@@ -69,9 +79,11 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
   let systemEs: Client;
   let policyId: string;
   let adminHeaders: Record<string, string>;
+  let specStart: string;
   const savedQueryIds: Array<{ id: string; space?: string }> = [];
 
   apiTest.beforeAll(async ({ esClient, kbnClient, config, requestAuth }) => {
+    specStart = new Date().toISOString();
     systemEs = await createSystemIndicesClient(esClient, config);
     policyId = await createOsqueryAgentPolicy(kbnClient, 'osq-wf-run-query');
     await indexFakeAgents(systemEs, policyId, [AGENT_A, AGENT_B]);
@@ -105,7 +117,12 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
 
   apiTest.afterAll(async ({ esClient, kbnClient }) => {
     await deleteAnsweredQueries(esClient);
-    await deleteDispatchedActions(systemEs, takeDispatchedActionIds());
+    // Also this run's actions for the spec's agents, in case a test failed before it could
+    // register the ids it dispatched.
+    await deleteDispatchedActions(systemEs, [
+      ...takeDispatchedActionIds(),
+      ...(await findActionIdsSince(systemEs, [AGENT_A.id, AGENT_B.id], specStart)),
+    ]);
     for (const { id, space } of savedQueryIds) {
       await deleteSavedQuery(kbnClient, id, space);
     }
@@ -159,6 +176,143 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
       });
       expect(Object.keys(output?.rows[0].ecs)).toStrictEqual(['process.name']);
       await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
+    'history: a workflow dispatch is listed with source Workflow and under the workflow filter',
+    async ({ apiClient, esClient }) => {
+      const workflows = workflowsClient(apiClient, adminHeaders);
+      const history = historyClient(apiClient, adminHeaders, new Date().toISOString());
+      const workflowId = await workflows.create(
+        'osq-wf-history-source',
+        runQueryStep(`agent_ids: ["${AGENT_A.id}"]`)
+      );
+      const executionId = await workflows.run(workflowId);
+      const state = await workflows.waitForDispatch(executionId, 'q');
+      await answerQuery(esClient, {
+        queryActionId: state.queries[0].action_id,
+        agent: AGENT_A,
+        rows: [{ pid: '1', name: 'systemd' }],
+      });
+      await workflows.waitForEnd(executionId);
+
+      const stored = await systemEs.search<{ origin?: ActionOrigin }>({
+        index: OSQUERY_ACTIONS_INDEX,
+        query: { term: { action_id: state.action_id } },
+      });
+      expect(stored.hits.hits).toHaveLength(1);
+      expect(stored.hits.hits[0]._source?.origin).toStrictEqual({
+        type: 'workflow',
+        run_id: executionId,
+        verified: false,
+      });
+
+      const fieldMappings = await systemEs.indices.getFieldMapping({
+        index: OSQUERY_ACTIONS_INDEX,
+        fields: ['origin.type', 'origin.run_id', 'origin.verified'],
+      });
+      expect(Object.keys(fieldMappings)).not.toHaveLength(0);
+      for (const { mappings } of Object.values(fieldMappings)) {
+        expect(mappings['origin.type']?.mapping?.type).toMatchObject({ type: 'keyword' });
+        expect(mappings['origin.run_id']?.mapping?.run_id).toMatchObject({ type: 'keyword' });
+        expect(mappings['origin.verified']?.mapping?.verified).toMatchObject({
+          type: 'boolean',
+        });
+      }
+
+      const actionId = state.action_id;
+      expect(await history(actionId)).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history(actionId, 'workflow')).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history(actionId, 'live')).toHaveLength(0);
+      expect(await history(actionId, 'rule')).toHaveLength(0);
+      expect(await history(actionId, 'workflow,rule')).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history(actionId, 'live,rule')).toHaveLength(0);
+      await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
+    'history: a generic kibana.request call to the live query API is listed with source Workflow',
+    async ({ apiClient }) => {
+      const workflows = workflowsClient(apiClient, adminHeaders);
+      const history = historyClient(apiClient, adminHeaders, new Date().toISOString());
+      // No osquery step and no osquery headers: the engine's own call headers identify the run.
+      const workflowId = await workflows.create(
+        'osq-wf-kibana-request-source',
+        `  - name: dispatch
+    type: kibana.request
+    with:
+      method: POST
+      path: /api/osquery/live_queries
+      headers:
+        elastic-api-version: "2023-10-31"
+      body:
+        query: "SELECT 1"
+        agent_ids: ["${AGENT_A.id}"]
+`
+      );
+      const executionId = await workflows.run(workflowId);
+      const execution = await workflows.waitForEnd(executionId);
+      expect(execution.status).toBe('completed');
+
+      // `kibana.request` returns the response body as the step output.
+      const { data: action } = stepOf(execution, 'dispatch').output as {
+        data: { action_id: string; queries: Array<{ action_id: string }> };
+      };
+      trackDispatchedActionIds(actionIdsOf(action));
+      const stored = await systemEs.search<{ origin?: ActionOrigin }>({
+        index: OSQUERY_ACTIONS_INDEX,
+        query: { term: { action_id: action.action_id } },
+      });
+      expect(stored.hits.hits).toHaveLength(1);
+      expect(stored.hits.hits[0]._source?.origin).toStrictEqual({
+        type: 'workflow',
+        run_id: executionId,
+        verified: false,
+      });
+      expect(await history(action.action_id)).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history(action.action_id, 'workflow')).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history(action.action_id, 'live')).toHaveLength(0);
+      expect(await history(action.action_id, 'rule')).toHaveLength(0);
+
+      await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
+    'history: a public API call cannot claim a workflow origin with the execution header',
+    async ({ apiClient }) => {
+      const history = historyClient(apiClient, adminHeaders, new Date().toISOString());
+      // `apiClient` sends no `x-elastic-internal-origin`, unlike `kbnClient`, so this is what an
+      // external caller can do.
+      const response = await apiClient.post('api/osquery/live_queries', {
+        headers: {
+          ...adminHeaders,
+          'kbn-xsrf': 'true',
+          'elastic-api-version': '2023-10-31',
+          'x-kibana-workflow-execution-id': 'forged-execution',
+          'x-osquery-dispatch-source': 'workflow',
+          'x-osquery-dispatch-workflow-id': 'wf-forged',
+        },
+        body: { query: 'SELECT 1', agent_ids: [AGENT_A.id] },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      const action = response.body.data as {
+        action_id: string;
+        queries: Array<{ action_id: string }>;
+      };
+      trackDispatchedActionIds(actionIdsOf(action));
+      const stored = await systemEs.search<{ origin?: ActionOrigin }>({
+        index: OSQUERY_ACTIONS_INDEX,
+        query: { term: { action_id: action.action_id } },
+      });
+      expect(stored.hits.hits).toHaveLength(1);
+      expect(stored.hits.hits[0]._source).toBeDefined();
+      expect(Object.keys(stored.hits.hits[0]._source ?? {})).not.toContain('origin');
+      expect(await history(action.action_id)).toMatchObject([{ source: 'Live' }]);
+      expect(await history(action.action_id, 'workflow')).toHaveLength(0);
     }
   );
 

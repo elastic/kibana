@@ -24,6 +24,8 @@ import {
   EVENT_EXCEPTION,
   EVENT_WEB_VITAL,
   EXCEPTION_STACKTRACE,
+  FRUSTRATION_CLICK_COUNT,
+  FRUSTRATION_EVENTS,
   OTEL_SPAN_NAME,
   PAGE_VIEW_EVENTS,
   WEB_VITAL_NAME,
@@ -42,8 +44,12 @@ import {
   type SessionSummary,
   type SessionTimelineEvent,
   type SessionTimelineEventKind,
+  type SessionTimelineException,
 } from '../../../common/sessions';
-import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from '../../lib/otel/source_fields';
+import {
+  SOURCE_SERVICE_NAME_FIELD,
+  SOURCE_SESSION_ID_FIELD,
+} from '../../../common/otel_source_fields';
 import { totalHitsOf } from '../../lib/helpers/values';
 import {
   attributeNumber,
@@ -96,6 +102,7 @@ const TIMELINE_ATTRIBUTES = [
   EXCEPTION_STACKTRACE,
   BROWSER_CSS_SELECTOR,
   TARGET_XPATH,
+  FRUSTRATION_CLICK_COUNT,
 ] as const;
 
 /**
@@ -142,6 +149,9 @@ const classify = (event: OtelEventFields): SessionTimelineEventKind | null => {
   if (name === EVENT_EXCEPTION) {
     return 'error';
   }
+  if (isOneOf(name, FRUSTRATION_EVENTS)) {
+    return 'frustration';
+  }
   if (isOneOf(name, CLICK_EVENTS)) {
     return 'click';
   }
@@ -156,6 +166,7 @@ const detailOf = (kind: SessionTimelineEventKind, event: OtelEventFields): strin
     case 'error':
       return attributeString(event, EXCEPTION_MESSAGE) ?? attributeString(event, ERROR_TYPE);
     case 'click':
+    case 'frustration':
       return attributeString(event, BROWSER_CSS_SELECTOR) ?? attributeString(event, TARGET_XPATH);
     case 'web_vital':
       return attributeString(event, WEB_VITAL_VALUE);
@@ -174,6 +185,16 @@ const displayNameOf = (kind: SessionTimelineEventKind, event: OtelEventFields): 
   return eventNameOf(event) || kind;
 };
 
+/** The uncaught exception a frustration signal names, as an error click does, if any. */
+const exceptionOf = (event: OtelEventFields): SessionTimelineException | null => {
+  const type = attributeString(event, EXCEPTION_TYPE);
+  const message = attributeString(event, EXCEPTION_MESSAGE);
+  if (type === null && message === null) {
+    return null;
+  }
+  return { type, message, stacktrace: attributeString(event, EXCEPTION_STACKTRACE) };
+};
+
 const toTimelineEvent = (
   event: OtelEventFields,
   sessionStartMs: number
@@ -187,6 +208,7 @@ const toTimelineEvent = (
   if (kind === null) {
     return null;
   }
+  const exception = kind === 'frustration' ? exceptionOf(event) : null;
   return {
     kind,
     name: displayNameOf(kind, event),
@@ -194,9 +216,11 @@ const toTimelineEvent = (
     offsetMs: Math.max(0, ms - sessionStartMs),
     page: pageOf(event),
     detail: detailOf(kind, event),
+    clickCount: kind === 'frustration' ? attributeNumber(event, FRUSTRATION_CLICK_COUNT) : null,
     stacktrace: kind === 'error' ? attributeString(event, EXCEPTION_STACKTRACE) : null,
     traceId: fieldString(event, 'trace_id'),
     spanId: fieldString(event, 'span_id'),
+    ...(exception ? { exception } : {}),
   };
 };
 
@@ -262,6 +286,7 @@ export const buildPageVisits = (
         durationMs: 0,
         clickCount: 0,
         errorCount: 0,
+        frustrationCount: 0,
         webVitals: emptyWebVitals(),
         load: null,
       };
@@ -274,6 +299,9 @@ export const buildPageVisits = (
     }
     if (kind === 'error') {
       current.errorCount += 1;
+    }
+    if (kind === 'frustration') {
+      current.frustrationCount += 1;
     }
     const vital = webVitalOf(event);
     if (vital) {
@@ -311,6 +339,7 @@ const JOURNEY_EVENT_NAMES = [
   ...CLICK_EVENTS,
   EVENT_EXCEPTION,
   EVENT_WEB_VITAL,
+  ...FRUSTRATION_EVENTS,
 ];
 
 /**

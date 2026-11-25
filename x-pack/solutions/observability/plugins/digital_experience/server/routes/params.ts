@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { isoDateTime, z } from '@kbn/zod/v4';
 import {
   OVERVIEW_KUERY_MAX_LENGTH,
-  PAGE_FILTER_NAMES,
+  URL_FILTER_NAMES,
   type OverviewFilterName,
 } from '../../common/overview_filters';
 import {
@@ -17,9 +17,13 @@ import {
   overviewFiltersParamIssue,
   readOverviewFilters,
 } from '../../common/overview_filters_param';
-import { MAX_ENVIRONMENT_LENGTH } from '../lib/constants';
+import { toElasticsearchTimeZone } from '../../common/time_zone';
+import { MAX_ENVIRONMENT_LENGTH, MAX_SERVICE_NAME_LENGTH } from '../lib/constants';
 
 const MAX_TIME_ZONE_LENGTH = 64;
+
+/** An application's `service.name` in a route's path, as long as APM indexes it. */
+export const serviceNameParam = () => z.string().min(1).max(MAX_SERVICE_NAME_LENGTH);
 
 /** The params of a route over a time range and an optional environment. */
 export const timeRangeShape = () => ({
@@ -50,7 +54,8 @@ export const timeZoneShape = () => ({
     .refine((value) => UTC_OFFSET.test(value) || moment.tz.zone(value) !== null, {
       message: 'Unknown time zone',
     })
-    .default('UTC'),
+    .default('UTC')
+    .transform(toElasticsearchTimeZone),
 });
 
 /** The query of a route over a time range and an optional environment; `start` precedes `end`. */
@@ -97,10 +102,10 @@ export const filteredTimeRangeQuery = () =>
   z.object(filteredTimeRangeShape()).refine(isStartBeforeEnd, START_AFTER_END_ISSUE);
 
 /**
- * The query of a route whose documents carry no page URL (e.g. the errors): the filters of
- * `filteredTimeRangeQuery` but the page, which is rejected, not applied.
+ * The query of a route whose documents carry no URL (e.g. the errors): the filters of
+ * `filteredTimeRangeQuery` but the URL text, which is rejected, not applied.
  */
 export const documentFilteredTimeRangeQuery = () =>
   z
-    .object(filteredTimeRangeShape(PAGE_FILTER_NAMES))
+    .object(filteredTimeRangeShape(URL_FILTER_NAMES))
     .refine(isStartBeforeEnd, START_AFTER_END_ISSUE);
