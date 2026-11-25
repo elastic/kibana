@@ -142,6 +142,12 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
   if [[ "${EVAL_INCLUDE_EIS_MODELS:-}" =~ ^(1|true)$ ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
+  # A suite pinning eis/* requiredModelGroups needs those connectors provisioned even when the
+  # request named none (the on-demand pipeline forwards only the operator's EVAL_MODEL_GROUPS).
+  if printf '%s' "${EVAL_SUITE_INFO:-}" \
+    | jq -e '[.requiredModelGroups[]? | select(startswith("eis/"))] | length > 0' >/dev/null 2>&1; then
+    NEED_EIS_CONNECTORS="true"
+  fi
   # Fanout child steps only need EIS connectors when running an EIS project.
   if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
     NEED_EIS_CONNECTORS="true"

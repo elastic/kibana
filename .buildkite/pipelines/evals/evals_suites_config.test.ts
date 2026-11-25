@@ -20,6 +20,129 @@ const suites = (
   }
 ).suites;
 
+const TIER_FEATURE_IDS = ['alertzero_efficient', 'alertzero_balanced'];
+
+/** Every list of steps nested under a step, per the kbn-workflows step schema. */
+const nestedStepLists = (step: Record<string, any>): Array<Array<Record<string, any>>> => {
+  const lists: unknown[] = [
+    step.steps,
+    step.else,
+    step.default,
+    step['on-failure']?.fallback,
+    step['iteration-on-failure']?.fallback,
+    ...(Array.isArray(step.cases) ? step.cases.map((branch: any) => branch?.steps) : []),
+    ...(Array.isArray(step.branches) ? step.branches.map((branch: any) => branch?.steps) : []),
+  ];
+  return lists.filter((list): list is Array<Record<string, any>> => Array.isArray(list));
+};
+
+const asList = (value: unknown): string[] =>
+  Array.isArray(value)
+    ? value.filter((id): id is string => typeof id === 'string')
+    : typeof value === 'string'
+    ? [value]
+    : [];
+
+/** Feature ids a step resolves its model from, in order: `with.feature_id`, then `connector-id-by-feature`; each is a string or a list. */
+const stepFeatureIds = (step: Record<string, any>): string[] => [
+  ...asList(step.with?.feature_id),
+  ...asList(step['connector-id-by-feature']),
+];
+
+/** The first step named `name`, descending into every nested step container. */
+const findStepByName = (
+  steps: Array<Record<string, any>>,
+  name: string
+): Record<string, any> | undefined => {
+  for (const step of steps) {
+    if (step.name === name) return step;
+    const nested = nestedStepLists(step)
+      .map((list) => findStepByName(list, name))
+      .find((found) => found !== undefined);
+    if (nested) return nested;
+  }
+  return undefined;
+};
+
+/** Tier feature ids used by a step list, descending into every nested step container. */
+const findTierFeatureUses = (
+  steps: Array<Record<string, any>>
+): Array<{ stepName: string; featureId: string }> =>
+  steps.flatMap((step) => [
+    ...stepFeatureIds(step)
+      .filter((featureId) => TIER_FEATURE_IDS.includes(featureId))
+      .map((featureId) => ({ stepName: String(step.name ?? '?'), featureId })),
+    ...nestedStepLists(step).flatMap(findTierFeatureUses),
+  ]);
+
+describe('findTierFeatureUses', () => {
+  const tier = (name: string) => ({
+    name,
+    type: 'ai.agent',
+    'connector-id-by-feature': ['alertzero_balanced'],
+  });
+
+  it.each([
+    ['steps', (inner: Record<string, any>) => ({ name: 'outer', steps: [inner] })],
+    ['else', (inner: Record<string, any>) => ({ name: 'outer', else: [inner] })],
+    ['default', (inner: Record<string, any>) => ({ name: 'outer', default: [inner] })],
+    [
+      'on-failure.fallback',
+      (inner: Record<string, any>) => ({ name: 'outer', 'on-failure': { fallback: [inner] } }),
+    ],
+    [
+      'iteration-on-failure.fallback',
+      (inner: Record<string, any>) => ({
+        name: 'outer',
+        'iteration-on-failure': { fallback: [inner] },
+      }),
+    ],
+    [
+      'cases[].steps',
+      (inner: Record<string, any>) => ({ name: 'outer', cases: [{ match: 1, steps: [inner] }] }),
+    ],
+    [
+      'branches[].steps',
+      (inner: Record<string, any>) => ({
+        name: 'outer',
+        branches: [{ name: 'a', steps: [inner] }],
+      }),
+    ],
+  ])('finds a tier feature nested under %s', (_container, wrap) => {
+    expect(findTierFeatureUses([wrap(tier('inner'))])).toEqual([
+      { stepName: 'inner', featureId: 'alertzero_balanced' },
+    ]);
+  });
+
+  it('finds a tier feature written as a single string', () => {
+    expect(
+      findTierFeatureUses([
+        { name: 'one-line', type: 'ai.agent', 'connector-id-by-feature': 'alertzero_balanced' },
+      ])
+    ).toEqual([{ stepName: 'one-line', featureId: 'alertzero_balanced' }]);
+  });
+
+  it('reads feature_id and connector-id-by-feature on the same step', () => {
+    expect(
+      findTierFeatureUses([
+        {
+          name: 'both',
+          with: { feature_id: ['alertzero_frontier'] },
+          'connector-id-by-feature': ['alertzero_efficient'],
+        },
+      ])
+    ).toEqual([{ stepName: 'both', featureId: 'alertzero_efficient' }]);
+  });
+
+  it('ignores the frontier feature', () => {
+    expect(
+      findTierFeatureUses([
+        { name: 'ok', 'connector-id-by-feature': ['alertzero_frontier'], steps: [] },
+      ])
+    ).toEqual([]);
+  });
+});
+
 const shardedSuites = suites.filter((suite) => (suite.shards?.length ?? 0) > 0);
 
 // `run_suite.sh` lowercases the id and rewrites every other character to `-` to build the step key,
@@ -164,6 +287,133 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
       });
 
     expect(problems).toEqual([]);
+  });
+});
+
+describe('evals.suites.json requiredModelGroups (AZ tier coverage)', () => {
+  // The Attack Discovery Worker suite must always run the AZ tier models the worker itself uses:
+  // its `requiredModelGroups` is unioned into every request (PR labels and on-demand fanout), so
+  // worker eval scores always cover the current tier model set. The worker resolves
+  // `alertzero_template_models` then `alertzero_frontier` for generation and review, so the
+  // Frontier tier is the set to cover (an unset cyber-domain row falls through to it).
+  const WORKER_SUITE_ID = 'security-attack-discovery-worker';
+  const workerSuite = suites.find(({ id }) => id === WORKER_SUITE_ID);
+  if (!workerSuite) throw new Error(`${WORKER_SUITE_ID} is missing from evals.suites.json`);
+
+  // `.openai-gpt-6-sol-chat_completion` -> `eis/openai-gpt-6-sol` (generate_eis_connectors.js keys
+  // connectors by slugified model id; `connectorMatchesModelGroup` matches the `eis/<modelId>` form).
+  const endpointToModelGroup = (endpoint: string): string | null => {
+    const match = /^\.[a-z0-9.-]+-chat_completion$/.exec(endpoint);
+    if (!match) return null;
+    return `eis/${endpoint.slice(1, -'_chat_completion'.length)}`;
+  };
+
+  it('pins a non-empty requiredModelGroups list', () => {
+    expect(workerSuite.requiredModelGroups?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  it('covers every FRONTIER_RECOMMENDED_ENDPOINTS model the worker generation/review resolve to', () => {
+    // The tier lists in inference_features.ts are not exported, so parse the source. Any edit to
+    // the Frontier tier (a model added, swapped or dropped) must update the pin in the same PR.
+    const source = Fs.readFileSync(
+      Path.join(
+        __dirname,
+        '../../../x-pack/solutions/security/plugins/alertzero/server/inference_features.ts'
+      ),
+      'utf-8'
+    );
+    const frontierMatch = /const FRONTIER_RECOMMENDED_ENDPOINTS = \[([\s\S]*?)\];/.exec(source);
+    if (!frontierMatch) {
+      throw new Error('FRONTIER_RECOMMENDED_ENDPOINTS not found in inference_features.ts');
+    }
+    const frontierEndpoints = [...frontierMatch[1].matchAll(/'(\.[^']+)'/g)].map((m) => m[1]);
+    if (frontierEndpoints.length === 0) {
+      throw new Error('FRONTIER_RECOMMENDED_ENDPOINTS parsed as empty');
+    }
+
+    const pinned = new Set(workerSuite.requiredModelGroups ?? []);
+    const frontierGroups = new Set<string>();
+    const problems = frontierEndpoints.flatMap((endpoint) => {
+      const group = endpointToModelGroup(endpoint);
+      if (!group) {
+        return [`could not map Frontier endpoint "${endpoint}" to an eis/ model group`];
+      }
+      frontierGroups.add(group);
+      return pinned.has(group)
+        ? []
+        : [`"${group}" is Frontier but not pinned in requiredModelGroups`];
+    });
+
+    // Reverse direction: a model dropped from Frontier must leave the pin too, or it keeps running
+    // in every request and fails the per-group connector assertion once EIS stops provisioning it.
+    for (const group of pinned) {
+      if (!frontierGroups.has(group)) {
+        problems.push(`"${group}" is pinned in requiredModelGroups but not a Frontier endpoint`);
+      }
+    }
+
+    expect(problems).toEqual([]);
+  });
+
+  it('stays aligned when the worker workflows change tier feature ids', () => {
+    // The pin tracks what the worker actually calls. If a workflow switches tier (e.g. the FP/TP
+    // review moves to balanced) or adds another tier feature, the required list must be re-reviewed.
+    const DEFINITIONS = Path.join(
+      __dirname,
+      '../../../src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero'
+    );
+    const WORKER_YAMLS = [
+      'attack_discovery_batched_generation.yaml',
+      'attack_discovery_fp_tp_analysis.yaml',
+    ];
+    const problems: string[] = [];
+    for (const file of WORKER_YAMLS) {
+      const parsed = parseYaml(Fs.readFileSync(Path.join(DEFINITIONS, file), 'utf-8')) as {
+        steps?: Array<Record<string, any>>;
+        'on-failure'?: { fallback?: Array<Record<string, any>> };
+      };
+      const onFailureFallback = parsed['on-failure']?.fallback;
+      problems.push(
+        ...findTierFeatureUses([
+          ...(parsed.steps ?? []),
+          ...(Array.isArray(onFailureFallback) ? onFailureFallback : []),
+        ]).map(
+          ({ stepName, featureId }) =>
+            `${file}: step "${stepName}" uses tier feature "${featureId}", which the ` +
+            `requiredModelGroups pin (Frontier) does not cover. Update the pin in the same PR.`
+        )
+      );
+    }
+
+    expect(problems).toEqual([]);
+  });
+});
+
+describe('worker model-calling steps feature chain', () => {
+  const DEFINITIONS = Path.join(
+    __dirname,
+    '../../../src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero'
+  );
+  const stepsOf = (file: string): Array<Record<string, any>> =>
+    (
+      parseYaml(Fs.readFileSync(Path.join(DEFINITIONS, file), 'utf-8')) as {
+        steps: Array<Record<string, any>>;
+      }
+    ).steps;
+
+  it.each([
+    ['attack_discovery_batched_generation.yaml', 'run_batch'],
+    ['attack_discovery_fp_tp_analysis.yaml', 'analyze'],
+  ])('%s step %s resolves template models, then Frontier', (file, stepName) => {
+    const step = findStepByName(stepsOf(file), stepName);
+    if (!step) throw new Error(`${file} has no step "${stepName}"`);
+    expect(stepFeatureIds(step)).toEqual(['alertzero_template_models', 'alertzero_frontier']);
+  });
+
+  it('attack_discovery_batched_generation.yaml step run_batch lets an explicit connector_id input win over the feature ids', () => {
+    const step = findStepByName(stepsOf('attack_discovery_batched_generation.yaml'), 'run_batch');
+    if (!step) throw new Error('attack_discovery_batched_generation.yaml has no step "run_batch"');
+    expect(step.with?.connector_id).toBe('{{ inputs.connector_id }}');
   });
 });
 
