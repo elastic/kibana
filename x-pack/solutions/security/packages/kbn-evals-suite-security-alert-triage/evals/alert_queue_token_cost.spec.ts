@@ -402,6 +402,8 @@ evaluate.describe(
     evaluate.beforeAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
       log.info(`Indexing evidence events into ${EVIDENCE_EVENTS_INDEX} and 2 alerts`);
 
+      // A crashed earlier run can leave the index behind, and create would then fail.
+      await esClient.indices.delete({ index: EVIDENCE_EVENTS_INDEX, ignore_unavailable: true });
       await esClient.indices.create({
         index: EVIDENCE_EVENTS_INDEX,
         mappings: {
