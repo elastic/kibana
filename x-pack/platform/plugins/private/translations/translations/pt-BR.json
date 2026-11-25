@@ -62216,7 +62216,6 @@
     "xpack.securitySolution.siemMigrations.baseService.noConnector.text": "Nenhum conector de IA configurado. Selecione um conector de IA para iniciar as traduções.",
     "xpack.securitySolution.siemMigrations.baseService.noConnector.title": "Nenhum conector configurado.",
     "xpack.securitySolution.siemMigrations.common.addAnotherMigration.title": "Adicionar outra migração",
-    "xpack.securitySolution.siemMigrations.common.addIntegrations.title": "Adicionar integrações",
     "xpack.securitySolution.siemMigrations.common.baseService.pollingError": "Erro ao buscar estatísticas de migrações",
     "xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.canNotParse": "Não é possível analisar o arquivo como um arquivo JSON ou NDJSON",
     "xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.canNotRead": "Falha ao ler o arquivo",

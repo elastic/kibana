@@ -62210,7 +62210,6 @@
     "xpack.securitySolution.siemMigrations.baseService.noConnector.text": "AIコネクターが構成されていません。変換を開始するには、AIコネクターを選択してください。",
     "xpack.securitySolution.siemMigrations.baseService.noConnector.title": "コネクターが構成されていません。",
     "xpack.securitySolution.siemMigrations.common.addAnotherMigration.title": "別の移行を追加",
-    "xpack.securitySolution.siemMigrations.common.addIntegrations.title": "統合を追加",
     "xpack.securitySolution.siemMigrations.common.baseService.pollingError": "移行統計の取得エラー",
     "xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.canNotParse": "ファイルをJSONファイルまたはNDJSONファイルとして解析できません",
     "xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.canNotRead": "ファイルの読み取りに失敗しました",

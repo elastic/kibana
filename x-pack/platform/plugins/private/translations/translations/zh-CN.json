@@ -62194,7 +62194,6 @@
     "xpack.securitySolution.siemMigrations.baseService.noConnector.text": "未配置 AI 连接器。选择 AI 连接器以开始迁移。",
     "xpack.securitySolution.siemMigrations.baseService.noConnector.title": "未配置连接器。",
     "xpack.securitySolution.siemMigrations.common.addAnotherMigration.title": "添加另一个迁移",
-    "xpack.securitySolution.siemMigrations.common.addIntegrations.title": "添加集成",
     "xpack.securitySolution.siemMigrations.common.baseService.pollingError": "获取迁移统计信息时出错",
     "xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.canNotParse": "无法将文件解析为 JSON 或 NDJSON 文件",
     "xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.canNotRead": "无法读取文件",

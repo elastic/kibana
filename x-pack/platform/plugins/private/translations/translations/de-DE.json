@@ -62042,7 +62042,6 @@
     "xpack.securitySolution.siemMigrations.baseService.noConnector.text": "Kein KI-Connector konfiguriert. Wählen Sie einen KI-Connector, um Übersetzungen zu starten.",
     "xpack.securitySolution.siemMigrations.baseService.noConnector.title": "Kein Konnektor konfiguriert.",
     "xpack.securitySolution.siemMigrations.common.addAnotherMigration.title": "Eine weitere Migration hinzufügen",
-    "xpack.securitySolution.siemMigrations.common.addIntegrations.title": "Integrationen hinzufügen",
     "xpack.securitySolution.siemMigrations.common.baseService.pollingError": "Fehler beim Abrufen der Migrationsstatistiken",
     "xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.canNotParse": "Die Datei kann weder als JSON-Datei noch als NDJSON-Datei geparst werden",
     "xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.canNotRead": "Datei konnte nicht gelesen werden",
