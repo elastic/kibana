@@ -38,11 +38,12 @@ To use this connector, register an application in Microsoft Entra ID and grant i
    | `SecurityAlert.ReadWrite.All` | Read, update, and comment on alerts |
    | `ThreatHunting.Read.All` | Run advanced hunting queries |
    | `CustomDetection.Read.All` | List and read custom detection rules |
-   | `CustomDetection.ReadWrite.All` | Create, update, and delete custom detection rules (required for the API-only actions) |
    | `ThreatIntelligence.Read.All` | Threat intelligence enrichment (host details, reputation, passive DNS, WHOIS) |
    | `SecurityEvents.Read.All` | Read Microsoft Secure Score |
 
 3. Select **Add permissions**, then **Grant admin consent** for your organization.
+
+If you plan to use the API-only rule-management actions (`createDetectionRule`, `updateDetectionRule`, `deleteDetectionRule`), also add `CustomDetection.ReadWrite.All`.
 
 #### Authenticate with a client secret
 

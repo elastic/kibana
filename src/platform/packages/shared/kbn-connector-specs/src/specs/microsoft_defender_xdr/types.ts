@@ -484,8 +484,9 @@ export const RunHuntingQueryInputSchema = lazySchema(() =>
           '(e.g. DeviceEvents, EmailEvents, AlertInfo, AlertEvidence). ' +
           'Results are limited to 100,000 rows and 30 days of data. ' +
           'A valid query can exceed the Kibana response-size limit long before reaching the row cap, so ' +
-          'always project only the columns you need (e.g. | project DeviceId, Timestamp, ActionType) ' +
-          'and add a take limit (e.g. | take 100) unless you need more rows.'
+          'project only the columns you need (e.g. | project DeviceId, Timestamp, ActionType). ' +
+          'Use | take N for quick previews; for complete results aggregate in KQL or narrow the time window ' +
+          'rather than relying on take (omitted rows are not indicated in the response).'
       ),
     timespan: z
       .string()

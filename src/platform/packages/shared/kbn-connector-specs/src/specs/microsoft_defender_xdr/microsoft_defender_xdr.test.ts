@@ -9,7 +9,14 @@
 
 import { MicrosoftDefenderXdr } from './microsoft_defender_xdr';
 import {
+  AddAlertCommentInputSchema,
+  AddIncidentCommentInputSchema,
   CreateDetectionRuleInputSchema,
+  DeleteDetectionRuleInputSchema,
+  GetAlertInputSchema,
+  GetDetectionRuleInputSchema,
+  GetIncidentInputSchema,
+  MergeIncidentsInputSchema,
   UpdateAlertInputSchema,
   UpdateDetectionRuleInputSchema,
   UpdateIncidentInputSchema,
@@ -136,6 +143,84 @@ describe('MicrosoftDefenderXdr schema', () => {
     const result = MicrosoftDefenderXdr.schema?.safeParse({});
     expect(result?.success).toBe(true);
     expect((result as { success: true; data: { cloud: string } }).data?.cloud).toBe('commercial');
+  });
+});
+
+// ---- ID field validation ----
+
+describe('ID field validation', () => {
+  // Incident IDs are numeric strings (e.g. "29")
+  it('GetIncidentInputSchema accepts a numeric incident ID', () => {
+    expect(GetIncidentInputSchema.safeParse({ incidentId: '29' }).success).toBe(true);
+  });
+  it('GetIncidentInputSchema rejects a non-numeric incident ID', () => {
+    expect(GetIncidentInputSchema.safeParse({ incidentId: 'abc' }).success).toBe(false);
+  });
+  it('GetIncidentInputSchema rejects a path-traversal incident ID', () => {
+    expect(GetIncidentInputSchema.safeParse({ incidentId: '../2' }).success).toBe(false);
+  });
+
+  it('AddIncidentCommentInputSchema accepts a numeric incident ID', () => {
+    expect(
+      AddIncidentCommentInputSchema.safeParse({ incidentId: '100', comment: 'note' }).success
+    ).toBe(true);
+  });
+  it('AddIncidentCommentInputSchema rejects a non-numeric incident ID', () => {
+    expect(
+      AddIncidentCommentInputSchema.safeParse({ incidentId: '1a', comment: 'note' }).success
+    ).toBe(false);
+  });
+
+  // Alert IDs contain digits, underscores, and hyphens (e.g. "da637493038654691815_-1452872782")
+  it('GetAlertInputSchema accepts a Graph alert ID with underscores and hyphens', () => {
+    expect(
+      GetAlertInputSchema.safeParse({ alertId: 'da637493038654691815_-1452872782' }).success
+    ).toBe(true);
+  });
+  it('GetAlertInputSchema rejects an alert ID containing a path separator', () => {
+    expect(GetAlertInputSchema.safeParse({ alertId: '../other' }).success).toBe(false);
+  });
+
+  it('AddAlertCommentInputSchema accepts a Graph alert ID with underscores and hyphens', () => {
+    expect(
+      AddAlertCommentInputSchema.safeParse({
+        alertId: 'da637493038654691815_-1452872782',
+        comment: 'note',
+      }).success
+    ).toBe(true);
+  });
+
+  // Merge incidents — each member of incidentIds must be numeric
+  it('MergeIncidentsInputSchema accepts an array of numeric incident IDs', () => {
+    expect(
+      MergeIncidentsInputSchema.safeParse({
+        incidentIds: ['1', '2', '3'],
+        comment: 'Same campaign',
+      }).success
+    ).toBe(true);
+  });
+  it('MergeIncidentsInputSchema rejects a non-numeric member of incidentIds', () => {
+    expect(
+      MergeIncidentsInputSchema.safeParse({
+        incidentIds: ['1', '../2'],
+        comment: 'Same campaign',
+      }).success
+    ).toBe(false);
+  });
+
+  // Detection rule IDs are numeric strings
+  it('GetDetectionRuleInputSchema accepts a numeric rule ID', () => {
+    expect(GetDetectionRuleInputSchema.safeParse({ ruleId: '12345' }).success).toBe(true);
+  });
+  it('GetDetectionRuleInputSchema rejects a non-numeric rule ID', () => {
+    expect(GetDetectionRuleInputSchema.safeParse({ ruleId: 'rule-abc' }).success).toBe(false);
+  });
+
+  it('DeleteDetectionRuleInputSchema accepts a numeric rule ID', () => {
+    expect(DeleteDetectionRuleInputSchema.safeParse({ ruleId: '99' }).success).toBe(true);
+  });
+  it('DeleteDetectionRuleInputSchema rejects a non-numeric rule ID', () => {
+    expect(DeleteDetectionRuleInputSchema.safeParse({ ruleId: '../99' }).success).toBe(false);
   });
 });
 
