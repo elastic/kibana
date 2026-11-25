@@ -25,6 +25,7 @@ import type { TutorialType } from '../../services/tutorials/types';
 import {
   getTutorialDirectoryAppHeaderBack,
   getTutorialDirectoryFirstCrumb,
+  getHashQuery,
 } from './tutorial_directory_return_crumb';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -171,7 +172,11 @@ class TutorialDirectoryUi extends React.Component<
       const tabExists = this.tabs.some((tab) => tab.id === newTab);
       if (!tabExists) {
         // If the tab does not exist, redirect to the default tab
-        getServices().history.push(`#/tutorial_directory/${SAMPLE_DATA_TAB_ID}`);
+        getServices().history.push(
+          `#/tutorial_directory/${SAMPLE_DATA_TAB_ID}${getHashQuery(
+            getServices().history.location.hash
+          )}`
+        );
       } else if (newTab !== this.state.selectedTabId) {
         this.setState({
           selectedTabId: newTab,
@@ -215,7 +220,10 @@ class TutorialDirectoryUi extends React.Component<
       selectedTabId: id,
     });
     // Update URL to reflect the selected tab
-    getServices().history.push(`#/tutorial_directory/${id}`);
+    // Keep the query so the return params survive tab changes.
+    getServices().history.push(
+      `#/tutorial_directory/${id}${getHashQuery(getServices().history.location.hash)}`
+    );
   };
 
   getTabs = (): AppHeaderTab[] => {

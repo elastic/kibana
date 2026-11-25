@@ -17,6 +17,10 @@ const addDataLinkText = i18n.translate('home.breadcrumbs.addDataLinkText', {
   defaultMessage: 'Add data',
 });
 
+const homeLinkText = i18n.translate('home.breadcrumbs.homeLinkText', {
+  defaultMessage: 'Home',
+});
+
 const previousPageLinkText = i18n.translate('home.breadcrumbs.previousPageLinkText', {
   defaultMessage: 'Previous page',
 });
@@ -28,9 +32,16 @@ const backToSelectionLinkText = i18n.translate(
   }
 );
 
+const backToHomeLinkText = i18n.translate('home.tutorial.introduction.backToHomeLinkText', {
+  defaultMessage: 'Back to Home',
+});
+
 const selectionLinkText = i18n.translate('home.tutorial.directory.selectionLinkText', {
   defaultMessage: 'Selection',
 });
+
+export const HOME_RETURN_APP_ID = 'home';
+export const HOME_RETURN_PATH = '#/';
 
 export function readReturnParamsFromHash(
   hash: string
@@ -66,6 +77,31 @@ function getReturnHref({
   };
 }
 
+function getReturnAppLinkText(returnAppId: string): string {
+  if (returnAppId === 'observabilityOnboarding') return addDataLinkText;
+  if (returnAppId === HOME_RETURN_APP_ID) return homeLinkText;
+  return previousPageLinkText;
+}
+
+/** Appends the return params that make the Add data back links point to `returnAppId`. */
+export function appendReturnParamsToHash(
+  hash: string,
+  { returnAppId, returnPath }: { returnAppId: string; returnPath: string }
+): string {
+  const queryStart = hash.indexOf('?');
+  const base = queryStart === -1 ? hash : hash.slice(0, queryStart);
+  const params = new URLSearchParams(queryStart === -1 ? '' : hash.slice(queryStart + 1));
+  params.set('returnAppId', returnAppId);
+  params.set('returnPath', returnPath);
+  return `${base}?${params.toString()}`;
+}
+
+/** Returns the query string (with leading `?`) of a hash route, or an empty string. */
+export function getHashQuery(hash: string): string {
+  const queryStart = hash.indexOf('?');
+  return queryStart === -1 ? '' : hash.slice(queryStart);
+}
+
 export function getTutorialDirectoryFirstCrumb({
   hash,
   addBasePath,
@@ -83,8 +119,7 @@ export function getTutorialDirectoryFirstCrumb({
     };
   }
   return {
-    text:
-      returned.returnAppId === 'observabilityOnboarding' ? addDataLinkText : previousPageLinkText,
+    text: getReturnAppLinkText(returned.returnAppId),
     href: returned.href,
   };
 }
@@ -116,13 +151,13 @@ export function getTutorialIntroductionBackLink({
   getUrlForApp: (appId: string, options: { path: string }) => string;
 }): { href: string; text?: string } {
   const returned = getReturnHref({ hash, getUrlForApp });
-  if (!returned || returned.returnAppId !== 'observabilityOnboarding') {
-    return {
-      href: addBasePath('/app/integrations'),
-    };
+  if (returned?.returnAppId === 'observabilityOnboarding') {
+    return { text: backToSelectionLinkText, href: returned.href };
+  }
+  if (returned?.returnAppId === HOME_RETURN_APP_ID) {
+    return { text: backToHomeLinkText, href: returned.href };
   }
   return {
-    text: backToSelectionLinkText,
-    href: returned.href,
+    href: addBasePath('/app/integrations'),
   };
 }

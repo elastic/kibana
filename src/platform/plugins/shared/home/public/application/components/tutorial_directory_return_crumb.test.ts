@@ -8,8 +8,11 @@
  */
 
 import {
+  appendReturnParamsToHash,
+  getHashQuery,
   getTutorialDirectoryAppHeaderBack,
   getTutorialDirectoryFirstCrumb,
+  getTutorialIntroductionBackLink,
 } from './tutorial_directory_return_crumb';
 
 const addBasePath = (path: string) => path;
@@ -94,5 +97,39 @@ describe('getTutorialDirectoryAppHeaderBack', () => {
       label: 'Previous page',
       href: '/app/otherApp/foo',
     });
+  });
+});
+
+describe('Home return params', () => {
+  const homeHash = '#/tutorial_directory/sampleData?returnAppId=home&returnPath=%23%2F';
+
+  it('names Home in the first crumb', () => {
+    expect(getTutorialDirectoryFirstCrumb({ hash: homeHash, addBasePath, getUrlForApp })).toEqual({
+      text: 'Home',
+      href: '/app/home#/',
+    });
+  });
+
+  it('names Home as the app header back destination', () => {
+    expect(
+      getTutorialDirectoryAppHeaderBack({ hash: homeHash, addBasePath, getUrlForApp })
+    ).toEqual({ label: 'Home', href: '/app/home#/' });
+  });
+
+  it('names Back to Home in the tutorial introduction back link', () => {
+    expect(getTutorialIntroductionBackLink({ hash: homeHash, addBasePath, getUrlForApp })).toEqual({
+      text: 'Back to Home',
+      href: '/app/home#/',
+    });
+  });
+
+  it('appends return params and keeps them readable via getHashQuery', () => {
+    const hash = appendReturnParamsToHash('#/tutorial_directory/sampleData', {
+      returnAppId: 'home',
+      returnPath: '#/',
+    });
+    expect(hash).toBe(homeHash);
+    expect(getHashQuery(hash)).toBe('?returnAppId=home&returnPath=%23%2F');
+    expect(getHashQuery('#/tutorial_directory/sampleData')).toBe('');
   });
 });
