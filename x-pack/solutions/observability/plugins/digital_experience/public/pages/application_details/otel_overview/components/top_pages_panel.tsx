@@ -181,6 +181,8 @@ export function TopPagesPanel({
         columns={columns}
         rowHeader="url"
         tableLayout="auto"
+        // Its metric columns don't shrink: a narrow panel scrolls them instead of cutting them off.
+        scrollableInline
       />
     </DataPanel>
   );
