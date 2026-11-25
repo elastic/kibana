@@ -14,7 +14,7 @@ import type {
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '@kbn/maps-plugin/common';
-import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
+import { INITIAL_LOCATION, SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
@@ -85,7 +85,7 @@ export const GeoPointContentWithMap: FC<{
             narrow_by_global_time: true,
             narrow_by_map_bounds: true,
             id: (searchLayerDescriptor.sourceDescriptor as { id: string }).id,
-            type: 'ESQL',
+            type: SOURCE_TYPES.ESQL,
             apply_force_refresh: true,
           };
 
