@@ -77,6 +77,20 @@ describe('registerSavedObjects', () => {
     );
   });
 
+  it('titles an external source by its name', () => {
+    const { logger, savedObjects, encryptedSavedObjects } = createDeps();
+
+    registerSavedObjects({ savedObjects, encryptedSavedObjects, logger });
+
+    const externalSourceType = (savedObjects.registerType as jest.Mock).mock.calls
+      .map(([type]) => type)
+      .find(({ name }) => name === EXTERNAL_SOURCE_SAVED_OBJECT_TYPE);
+
+    expect(
+      externalSourceType.management.getTitle({ attributes: { metadata: { name: 'Prod' } } })
+    ).toBe('External source: [Prod]');
+  });
+
   it('logs SAVED_OBJECTS_TYPE_REGISTRATION_FAILED and rethrows when a type fails to register', () => {
     const { logger, mockLogger, savedObjects, encryptedSavedObjects } = createDeps();
     const failure = new Error('boom');

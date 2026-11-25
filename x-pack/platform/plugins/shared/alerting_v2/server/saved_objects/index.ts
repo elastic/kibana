@@ -144,7 +144,7 @@ export function registerSavedObjects({
         management: {
           importableAndExportable: false,
           getTitle(so: SavedObject<ExternalSourceSavedObjectAttributes>) {
-            return `Import: [${so.attributes.metadata.name}]`;
+            return `External source: [${so.attributes.metadata.name}]`;
           },
         },
         modelVersions: externalSourceModelVersions,
