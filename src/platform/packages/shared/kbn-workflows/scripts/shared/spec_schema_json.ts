@@ -45,20 +45,20 @@ export interface SpecSchemaJson {
 
 type SchemaOrRef = OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
 
-/** Returns every `properties` object of a schema, including the ones inside `allOf` parts. */
-export const getPropertyMaps = (schema: SchemaOrRef): Array<Record<string, SchemaOrRef>> => {
+/** Returns the schema and every `allOf` part of it that has `properties`. */
+export const getObjectSchemas = (schema: SchemaOrRef): OpenAPIV3.SchemaObject[] => {
   if ('$ref' in schema) {
     return [];
   }
-  const maps: Array<Record<string, SchemaOrRef>> = schema.properties ? [schema.properties] : [];
-  for (const part of schema.allOf ?? []) {
-    maps.push(...getPropertyMaps(part));
-  }
-  return maps;
+  return [
+    ...(schema.properties ? [schema] : []),
+    ...(schema.allOf ?? []).flatMap(getObjectSchemas),
+  ];
 };
 
 export const findPropertySchema = (
   schema: SchemaOrRef,
   propertyName: string
 ): SchemaOrRef | undefined =>
-  getPropertyMaps(schema).find((properties) => propertyName in properties)?.[propertyName];
+  getObjectSchemas(schema).find(({ properties }) => properties && propertyName in properties)
+    ?.properties?.[propertyName];

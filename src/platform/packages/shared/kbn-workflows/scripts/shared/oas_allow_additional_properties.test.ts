@@ -10,17 +10,38 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import {
   allowSpecAdditionalProperties,
+  getSchemaNamesReachedFrom,
   getTypesWithAdditionalProperties,
 } from './oas_allow_additional_properties';
 import type { SpecSchemaJson } from './spec_schema_json';
 
+// Every schema in `schemas` is reachable from a request body unless listed in `responseOnly`.
 const makeDocument = (
-  schemas: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>
+  schemas: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>,
+  responseOnly: string[] = []
 ): OpenAPIV3.Document => ({
   openapi: '3.0.0',
   info: { title: 'Test', version: '1.0.0' },
   paths: {},
-  components: { schemas },
+  components: {
+    schemas,
+    requestBodies: {
+      search: {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: Object.fromEntries(
+                Object.keys(schemas)
+                  .filter((name) => !responseOnly.includes(name))
+                  .map((name) => [name, { $ref: `#/components/schemas/${name}` }])
+              ),
+            },
+          },
+        },
+      },
+    },
+  },
 });
 
 describe('getTypesWithAdditionalProperties', () => {
@@ -94,5 +115,33 @@ describe('allowSpecAdditionalProperties', () => {
     allowSpecAdditionalProperties(document, new Set(['_types.TermsQuery', '_types.Missing']));
 
     expect(document.components?.schemas).toEqual({ '_types.TermsQuery': termsQuery });
+  });
+
+  it('leaves schemas that no request body reaches unchanged', () => {
+    const multiBucketBase: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: { buckets: { type: 'array', items: {} } },
+    };
+    const document = makeDocument({ '_types.MultiBucketBase': multiBucketBase }, [
+      '_types.MultiBucketBase',
+    ]);
+
+    allowSpecAdditionalProperties(document, new Set(['_types.MultiBucketBase']));
+
+    expect(document.components?.schemas?.['_types.MultiBucketBase']).toBe(multiBucketBase);
+  });
+});
+
+describe('getSchemaNamesReachedFrom', () => {
+  it('follows refs through other schemas and stops at cycles', () => {
+    const schemas = {
+      A: { type: 'object', properties: { b: { $ref: '#/components/schemas/B' } } },
+      B: { type: 'array', items: { $ref: '#/components/schemas/A' } },
+      C: { type: 'object' },
+    };
+
+    expect(getSchemaNamesReachedFrom({ $ref: '#/components/schemas/A' }, schemas)).toEqual(
+      new Set(['A', 'B'])
+    );
   });
 });

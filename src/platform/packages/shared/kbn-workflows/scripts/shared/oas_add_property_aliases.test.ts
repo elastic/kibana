@@ -119,4 +119,29 @@ describe('addPropertyAliases', () => {
       ).properties?.aggs
     ).toBe(existing);
   });
+
+  it('makes a required property optional when it has an alias', () => {
+    const document: OpenAPIV3.Document = {
+      openapi: '3.0.0',
+      info: { title: 'Test', version: '1.0.0' },
+      paths: {},
+      components: {
+        schemas: {
+          '_types.aggregations.AggregationContainer': {
+            type: 'object',
+            properties: { aggregations },
+            required: ['aggregations'],
+          },
+        },
+      },
+    };
+
+    addPropertyAliases(document, getPropertyAliases(spec));
+
+    expect(document.components?.schemas?.['_types.aggregations.AggregationContainer']).toEqual({
+      type: 'object',
+      properties: { aggregations, aggs: aggregations },
+      required: [],
+    });
+  });
 });

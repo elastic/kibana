@@ -32,6 +32,32 @@ const isOpenObject = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
   !schema.properties &&
   schema.additionalProperties !== false;
 
+const SCHEMA_REF_PREFIX = '#/components/schemas/';
+
+/** Returns the names of every component schema that `root` references, directly or through other schemas. */
+export const getSchemaNamesReachedFrom = (
+  root: unknown,
+  schemas: Record<string, unknown>
+): Set<string> => {
+  const reached = new Set<string>();
+  const pending: unknown[] = [root];
+  while (pending.length > 0) {
+    const node = pending.pop();
+    if (node && typeof node === 'object') {
+      const { $ref } = node as { $ref?: unknown };
+      if (typeof $ref === 'string' && $ref.startsWith(SCHEMA_REF_PREFIX)) {
+        const name = $ref.slice(SCHEMA_REF_PREFIX.length);
+        if (!reached.has(name)) {
+          reached.add(name);
+          pending.push(schemas[name]);
+        }
+      }
+      pending.push(...Object.values(node));
+    }
+  }
+  return reached;
+};
+
 /**
  * The OpenAPI spec drops `AdditionalProperty` behaviors, so field-keyed entries are unknown keys.
  * Zod strips them: `sort: [{ '@timestamp': 'desc' }]` inside `inner_hits` becomes `[{}]`, and
@@ -41,14 +67,18 @@ const isOpenObject = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
  * `additionalProperties` does not work here: the openapi-ts zod plugin ignores it when the schema
  * has `properties`. The record does not use the value type, because the spec does not emit some
  * of them (`FieldSort`).
+ *
+ * Only request schemas change: response schemas feed the Liquid output lookup, where an open record
+ * would hide typed fields (for example a composite bucket's `key`).
  */
 export const allowSpecAdditionalProperties = (
   document: OpenAPIV3.Document,
   typeNames: Set<string>
 ): OpenAPIV3.Document => {
   const schemas = document.components?.schemas ?? {};
+  const requestSchemaNames = getSchemaNamesReachedFrom(document.components?.requestBodies, schemas);
   for (const typeName of typeNames) {
-    const schema = schemas[typeName];
+    const schema = requestSchemaNames.has(typeName) ? schemas[typeName] : undefined;
     const isOpen = schema && !('$ref' in schema) && schema.allOf?.some(isOpenObject);
     if (schema && !('$ref' in schema) && !isOpen) {
       schemas[typeName] = schema.allOf

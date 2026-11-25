@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import type { OpenAPIV3 } from 'openapi-types';
-import { getPropertyMaps, type SpecProperty, type SpecSchemaJson } from './spec_schema_json';
+import { getObjectSchemas, type SpecProperty, type SpecSchemaJson } from './spec_schema_json';
 
 type PropertyAliases = Map<string, string[]>;
 
@@ -59,13 +59,16 @@ const addAliases = (
   schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
   aliases: PropertyAliases
 ) => {
-  for (const properties of getPropertyMaps(schema)) {
+  for (const objectSchema of getObjectSchemas(schema)) {
+    const { properties = {} } = objectSchema;
     for (const [name, names] of aliases) {
       const propertySchema = properties[name];
       if (propertySchema) {
         for (const alias of names) {
           properties[alias] ??= propertySchema;
         }
+        // Either the property or one of its aliases is enough, so the property is no longer required.
+        objectSchema.required = objectSchema.required?.filter((required) => required !== name);
       }
     }
   }

@@ -8,7 +8,11 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { allowShortcutProperties, getShortcutProperties } from './oas_allow_shortcut_properties';
+import {
+  allowAnyScriptParams,
+  allowShortcutProperties,
+  getShortcutProperties,
+} from './oas_allow_shortcut_properties';
 import type { SpecSchemaJson } from './spec_schema_json';
 
 const makeDocument = (
@@ -63,9 +67,23 @@ describe('allowShortcutProperties', () => {
   });
 
   it('uses top-level properties', () => {
+    const fieldAndFormat: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: { field: { type: 'string' } },
+    };
+    const document = makeDocument({ '_types.query_dsl.FieldAndFormat': fieldAndFormat });
+
+    allowShortcutProperties(document, new Map([['_types.query_dsl.FieldAndFormat', 'field']]));
+
+    expect(document.components?.schemas?.['_types.query_dsl.FieldAndFormat']).toEqual({
+      anyOf: [fieldAndFormat, { type: 'string' }],
+    });
+  });
+
+  it('allows only a string as the Script shortcut, not the all-optional ScriptSource object', () => {
     const script: OpenAPIV3.SchemaObject = {
       type: 'object',
-      properties: { source: { type: 'string' } },
+      properties: { source: { $ref: '#/components/schemas/_types.ScriptSource' } },
     };
     const document = makeDocument({ '_types.Script': script });
 
@@ -89,5 +107,23 @@ describe('allowShortcutProperties', () => {
     );
 
     expect(document.components?.schemas).toEqual({ '_types.Other': other });
+  });
+});
+
+describe('allowAnyScriptParams', () => {
+  it('allows any value in Script params', () => {
+    const document = makeDocument({
+      '_types.Script': {
+        type: 'object',
+        properties: { params: { type: 'object', additionalProperties: { type: 'object' } } },
+      },
+    });
+
+    allowAnyScriptParams(document);
+
+    expect(document.components?.schemas?.['_types.Script']).toEqual({
+      type: 'object',
+      properties: { params: { type: 'object', additionalProperties: {} } },
+    });
   });
 });

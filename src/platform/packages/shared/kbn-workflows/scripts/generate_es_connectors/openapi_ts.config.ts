@@ -13,7 +13,10 @@ import {
 import { createAddPropertyAliases } from '../shared/oas_add_property_aliases';
 import { alignDefaultWithEnum } from '../shared/oas_align_default_with_enum';
 import { createAllowSpecAdditionalProperties } from '../shared/oas_allow_additional_properties';
-import { createAllowShortcutProperties } from '../shared/oas_allow_shortcut_properties';
+import {
+  allowAnyScriptParams,
+  createAllowShortcutProperties,
+} from '../shared/oas_allow_shortcut_properties';
 import { removeDiscriminatorsWithoutMapping } from '../shared/oas_remove_discriminators_without_mapping';
 import { createRemoveServerDefaults } from '../shared/oas_remove_server_defaults';
 
@@ -27,6 +30,7 @@ const preprocessedOpenApiSpec = [
   // which hides their properties from the other patches.
   createAddPropertyAliases(ES_SPEC_SCHEMA_PATH),
   createAllowSpecAdditionalProperties(ES_SPEC_SCHEMA_PATH),
+  allowAnyScriptParams,
   createAllowShortcutProperties(ES_SPEC_SCHEMA_PATH),
   alignDefaultWithEnum,
   // Remove server-side defaults from OpenAPI spec to prevent Zod from applying them client-side

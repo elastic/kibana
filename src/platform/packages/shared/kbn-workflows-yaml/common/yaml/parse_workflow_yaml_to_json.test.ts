@@ -141,6 +141,37 @@ describe('parseWorkflowYamlToJSON', () => {
       expect(result.success).toBe(true);
     });
 
+    describe('inside a union', () => {
+      // Same shape as the generated ES shortcut types: `anyOf: [full object, shortcut]`.
+      const schema = z.object({
+        prefix: z.union([
+          z.object({ value: z.string(), case_insensitive: z.optional(z.boolean()) }),
+          z.string(),
+        ]),
+      });
+
+      it('should suppress the union error when one branch fails only at template values', () => {
+        const yaml = `prefix:
+          value: web
+          case_insensitive: "{{ inputs.ci }}"
+        `;
+        const result = parseWorkflowYamlToJSON(yaml, schema);
+        expect(result).toMatchObject({
+          success: true,
+          data: { prefix: { value: 'web', case_insensitive: '{{ inputs.ci }}' } },
+        });
+      });
+
+      it('should keep the union error when a branch also fails at a non-template value', () => {
+        const yaml = `prefix:
+          value: 42
+          case_insensitive: "{{ inputs.ci }}"
+        `;
+        const result = parseWorkflowYamlToJSON(yaml, schema);
+        expect(result.success).toBe(false);
+      });
+    });
+
     it('should still show validation errors for non-dynamic invalid values', () => {
       const schema = z.object({
         steps: z.array(

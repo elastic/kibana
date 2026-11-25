@@ -90,6 +90,17 @@ const ACCEPTED_BODIES: Record<string, Record<string, unknown>> = {
   'suggest with a named suggester': {
     suggest: { text: 'conection', fix_typo: { term: { field: 'message' } } },
   },
+  'script with scalar params': {
+    script_fields: {
+      kb: { script: { source: "doc['bytes'].value / params.d", params: { d: 1024, on: true } } },
+    },
+  },
+  'script with templated params': {
+    script_fields: {
+      kb: { script: { source: "doc['bytes'].value / params.d", params: { d: '{{ inputs.d }}' } } },
+    },
+  },
+  'span_term with the term alias': { query: { span_term: { message: { term: 'connection' } } } },
   'aggs alias': { size: 0, aggs: { by_host: { terms: { field: 'host.name' } } } },
   'aggs alias in sub-aggregations': {
     size: 0,
