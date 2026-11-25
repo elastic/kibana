@@ -100,6 +100,26 @@ describe('Enterprise Search - connectors search provider', () => {
       expect(results).toEqual([{ ...getConnectorSearchData('postgres'), score: 100 }]);
     });
 
+    it('returns results when the content crawler type is specified', async () => {
+      const results = await lastValueFrom(
+        connectorsSearchResultProvider.find(
+          { term: 'companyName-postgres-connector-all', types: ['content crawler'] },
+          {
+            aborted$: NEVER,
+            maxResults: 100,
+            client,
+            preference: '',
+          },
+          mockSearchProviderContext
+        )
+      );
+      expect(results).toEqual([{ ...getConnectorSearchData('postgres'), score: 100 }]);
+    });
+
+    it('advertises the content crawler searchable type', () => {
+      expect(connectorsSearchResultProvider.getSearchableTypes()).toEqual(['content crawler']);
+    });
+
     it('returns all matched results', async () => {
       const results = await lastValueFrom(
         connectorsSearchResultProvider.find(
