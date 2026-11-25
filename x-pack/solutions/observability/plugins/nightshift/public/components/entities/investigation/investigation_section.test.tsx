@@ -20,14 +20,20 @@ jest.mock('../../../hooks/use_kibana', () => ({
           investigation: item,
           onClick,
           actions,
-          ...ebtProps
+          ...rest
         }: {
           investigation: InvestigationSummary;
           onClick?: (investigation: InvestigationSummary) => void;
           actions?: React.ReactNode;
         }) => (
           <div data-test-subj="investigationCard">
-            <button type="button" onClick={() => onClick?.(item)} {...ebtProps}>
+            <button
+              type="button"
+              onClick={() => onClick?.(item)}
+              {...Object.fromEntries(
+                Object.entries(rest).filter(([key]) => key.startsWith('data-ebt-'))
+              )}
+            >
               {item.title}
             </button>
             {actions}
