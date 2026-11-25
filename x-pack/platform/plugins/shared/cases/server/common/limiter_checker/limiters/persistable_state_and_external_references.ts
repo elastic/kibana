@@ -9,9 +9,24 @@ import type { AttachmentRequestV2 } from '../../../../common/types/api';
 import { AttachmentType } from '../../../../common/types/domain';
 import type { AttachmentService } from '../../../services';
 import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../common/constants';
-import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
+import {
+  FILE_ATTACHMENT_TYPE,
+  PERSISTABLE_ATTACHMENT_TYPES,
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
+} from '../../../../common/constants/attachments';
+import {
+  isLegacyAttachmentRequest,
+  isUnifiedAttachmentRequest,
+} from '../../../../common/utils/attachments';
 import { isFileAttachmentRequest, isPersistableStateOrExternalReference } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
+
+const UNIFIED_TYPES_TO_COUNT = new Set<string>([
+  ...PERSISTABLE_ATTACHMENT_TYPES,
+  ...Object.keys(UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP).filter(
+    (type) => type !== FILE_ATTACHMENT_TYPE
+  ),
+]);
 
 export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
   constructor(private readonly attachmentService: AttachmentService) {
@@ -30,10 +45,14 @@ export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
 
   public countOfItemsInRequest(requests: AttachmentRequestV2[]): number {
     const legacyRequests = requests.filter(isLegacyAttachmentRequest);
-    const totalReferences = legacyRequests
+    const totalLegacyReferences = legacyRequests
       .filter(isPersistableStateOrExternalReference)
       .filter((request) => !isFileAttachmentRequest(request));
 
-    return totalReferences.length;
+    const totalUnifiedReferences = requests
+      .filter(isUnifiedAttachmentRequest)
+      .filter((request) => UNIFIED_TYPES_TO_COUNT.has(request.type));
+
+    return totalLegacyReferences.length + totalUnifiedReferences.length;
   }
 }
