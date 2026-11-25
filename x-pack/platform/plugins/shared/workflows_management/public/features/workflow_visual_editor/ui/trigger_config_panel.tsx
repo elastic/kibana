@@ -6,15 +6,12 @@
  */
 
 import {
-  EuiAccordion,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
   EuiEmptyPrompt,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiIcon,
   EuiTab,
   EuiTabs,
@@ -37,6 +34,7 @@ import {
 import { detectIndent } from '@kbn/workflows-yaml';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
 import { KqlConditionInput } from './kql_condition_input';
+import { ScheduledTriggerFields } from './scheduled_trigger_fields';
 import { StepValidatedFormRow } from './step_validated_form_row';
 import { TriggerConnectorIdField } from './trigger_connector_id_field';
 import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
@@ -107,16 +105,15 @@ const writeManualInputs = (
   return doc.toString({ indent, lineWidth: 0 });
 };
 
-const writeScheduledEvery = (fragment: string, every: string, indent: number): string => {
+const writeScheduledWith = (
+  fragment: string,
+  withValue: Record<string, unknown>,
+  indent: number
+): string => {
   const doc = parseDocument(fragment);
   if (!isMap(doc.contents)) return fragment;
-  doc.set('with', doc.createNode({ every }));
+  doc.set('with', doc.createNode(withValue));
   return doc.toString({ indent, lineWidth: 0 });
-};
-
-const readScheduledEvery = (fragment: string): string => {
-  const every = parseDocument(fragment).getIn(['with', 'every']);
-  return typeof every === 'string' && every.trim() ? every : '5m';
 };
 
 /**
@@ -142,7 +139,6 @@ export function TriggerConfigPanel({
   const [fragment, setFragment] = useState(initialFragment);
   const indent = useMemo(() => detectIndent(initialFragment), [initialFragment]);
   const titleId = useGeneratedHtmlId({ prefix: 'workflowTriggerConfigTitle' });
-  const settingsAccordionId = useGeneratedHtmlId({ prefix: 'workflowTriggerConfigSettings' });
 
   const chip = resolveNodeChipStyle(euiTheme, triggerType, true, {
     isSuccess: false,
@@ -151,7 +147,6 @@ export function TriggerConfigPanel({
 
   const [manualFields, setManualFields] = useState<SchemaPropertyField[]>([]);
   const [inputsJsonDraft, setInputsJsonDraft] = useState('');
-  const [everyDraft, setEveryDraft] = useState(() => readScheduledEvery(initialFragment));
 
   useEffect(() => {
     setFragment(initialFragment);
@@ -190,10 +185,6 @@ export function TriggerConfigPanel({
     if (triggerType !== 'manual' || !parsed.js) return false;
     return parseInputsToSchemaProperties(parsed.js.inputs) === 'unsupported';
   }, [triggerType, parsed.js]);
-
-  useEffect(() => {
-    if (triggerType === 'scheduled') setEveryDraft(readScheduledEvery(fragment));
-  }, [triggerType, fragment]);
 
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
@@ -238,11 +229,9 @@ export function TriggerConfigPanel({
     [fragment, indent]
   );
 
-  const handleEveryChange = useCallback(
-    (value: string) => {
-      setEveryDraft(value);
-      setFragment((current) => writeScheduledEvery(current, value.trim() || '5m', indent));
-    },
+  const handleScheduleChange = useCallback(
+    (withValue: Record<string, unknown>) =>
+      setFragment((current) => writeScheduledWith(current, withValue, indent)),
     [indent]
   );
 
@@ -564,42 +553,11 @@ export function TriggerConfigPanel({
                       )}
                     </div>
                   ) : showScheduledSettings ? (
-                    <EuiAccordion
-                      id={settingsAccordionId}
-                      initialIsOpen
-                      paddingSize="none"
-                      buttonContent={
-                        <EuiTitle size="xxs">
-                          <h4>
-                            {i18n.translate('workflows.triggerConfigPanel.settingsAccordion', {
-                              defaultMessage: 'Settings',
-                            })}
-                          </h4>
-                        </EuiTitle>
-                      }
-                      data-test-subj="workflowTriggerConfigPanelAccordion-settings"
-                    >
-                      <div css={{ paddingTop: euiTheme.size.m }}>
-                        <EuiFormRow
-                          label={i18n.translate('workflows.triggerConfigPanel.everyLabel', {
-                            defaultMessage: 'Run every',
-                          })}
-                          helpText={i18n.translate('workflows.triggerConfigPanel.everyHelp', {
-                            defaultMessage: 'Minimum 1 minute. Examples: 1m, 90s, 2h, 1d.',
-                          })}
-                          fullWidth
-                        >
-                          <EuiFieldText
-                            compressed
-                            fullWidth
-                            value={everyDraft}
-                            disabled={readOnly}
-                            onChange={(e) => handleEveryChange(e.target.value)}
-                            data-test-subj="workflowTriggerConfigPanelEvery"
-                          />
-                        </EuiFormRow>
-                      </div>
-                    </EuiAccordion>
+                    <ScheduledTriggerFields
+                      value={parsed.js?.with}
+                      readOnly={readOnly}
+                      onChange={handleScheduleChange}
+                    />
                   ) : showEventSettings ? (
                     <div
                       data-test-subj="workflowTriggerConfigPanelEventSettings"

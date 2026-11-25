@@ -45,6 +45,21 @@ export const GRAPH_REBUILD_FIXTURES = defineFixtures({
     timeoutMs: FIVE_MINUTES,
     knownGaps: [],
   },
+  scheduled_triggers: {
+    file: 'scheduled_triggers.yaml',
+    timeoutMs: FIVE_MINUTES,
+    knownGaps: [
+      {
+        key: 'trigger 6 (scheduled) | schedule {"rrule":{"freq":"DAILY","interval":1,"tzid":"Etc/GMT+2","dtstart":"2025-01-01T09:00:00.000Z"}} is edited in YAML (the form cannot hold it without changing it) | unsupported',
+        reason:
+          'A schedule with a `dtstart` would lose it when written back from the form, so the panel leaves it to the YAML tab.',
+      },
+      {
+        key: 'trigger 6 (scheduled) | with | different',
+        reason: 'The same schedule: it has no control, so the trigger keeps the default interval.',
+      },
+    ],
+  },
   flow_control: {
     file: 'flow_control.yaml',
     timeoutMs: FIVE_MINUTES,

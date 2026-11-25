@@ -157,10 +157,12 @@ const STRING_CODE_LANGUAGE_BY_STEP: Readonly<
 
 /**
  * Transport-only params that would only add noise to the form. They are query parameters of the
- * Elasticsearch / Kibana APIs, so they only apply under `with`: a step's own root config may
- * legitimately use the same name (`data.parseJson`'s `source`).
+ * Elasticsearch / Kibana APIs, so they only apply under `with` of those steps: a step's own root
+ * config may legitimately use the same name (`data.parseJson`'s `source`), and so may the input of
+ * another step (`data.stringifyJson`'s `pretty`).
  */
 const HIDDEN_KEYS = new Set(['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+const HIDES_TRANSPORT_KEYS = /^(elasticsearch|kibana)\./;
 
 const isRequired = (schema: z.ZodType): boolean => !schema.safeParse(undefined).success;
 
@@ -615,6 +617,25 @@ const buildVariants = (
  */
 const VALUE_FORM_CONDITION_STEP_TYPES: ReadonlySet<string> = new Set(['if', 'while']);
 
+/** The fields of several object schemas as one form: a key is required only when every member requires it. */
+const mergeObjectMembers = (
+  stepType: string,
+  members: readonly z.ZodObject[],
+  basePath: readonly string[]
+): StepFormField[] => {
+  const merged = new Map<string, StepFormField>();
+  members.forEach((member) =>
+    fieldsFromObject(stepType, member, basePath, false).forEach((field) => {
+      const existing = merged.get(field.key);
+      merged.set(field.key, existing ? mergeFields(existing, field) : field);
+    })
+  );
+  return Array.from(merged.values()).map((field) => ({
+    ...field,
+    required: members.every((member) => requiredKeysOf(member).includes(field.key)),
+  }));
+};
+
 const fieldsFromObject = (
   stepType: string,
   schema: z.ZodType | undefined,
@@ -647,6 +668,12 @@ const fieldsFromObject = (
       };
       return [withField];
     }
+    // Members that need the same keys are not a choice of how to write the value (`status` is
+    // `closed` in one and `open | acknowledged` in the other): one form with their fields combined.
+    const members = collectVariantMembers(schema);
+    if (members && members.length > 1 && members.every((m) => m instanceof z.ZodObject)) {
+      return mergeObjectMembers(stepType, members as z.ZodObject[], basePath);
+    }
   }
   // A step whose whole `with` is a map of names to values (`data.set`): one field for the map.
   if (inner instanceof z.ZodRecord && basePath.length === 1 && basePath[0] === 'with') {
@@ -673,7 +700,7 @@ const fieldsFromObject = (
   return Object.entries(inner.shape as Record<string, z.ZodType>)
     .filter(
       ([key, fieldSchema]) =>
-        !(isWithLevel && HIDDEN_KEYS.has(key)) &&
+        !(isWithLevel && HIDES_TRANSPORT_KEYS.test(stepType) && HIDDEN_KEYS.has(key)) &&
         !(isRootLevel && isNestedStepsSchema(fieldSchema)) &&
         !isNeverSchema(fieldSchema)
     )

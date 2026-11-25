@@ -442,6 +442,63 @@ describe('step_form_schema', () => {
       ]);
     });
 
+    describe('a `with` that is a union of objects needing the same keys (security.setAlertStatus)', () => {
+      const idsOrIdList = z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]);
+      const contract = {
+        type: 'security.setAlertStatus',
+        paramsSchema: z.discriminatedUnion('status', [
+          z.object({
+            alert_ids: idsOrIdList,
+            status: z.literal('closed'),
+            close_reason: z.enum(['duplicate', 'benign_positive']).optional(),
+          }),
+          z.object({ alert_ids: idsOrIdList, status: z.enum(['open', 'acknowledged']) }),
+        ]),
+        outputSchema: z.unknown(),
+        summary: null,
+        description: null,
+      } as unknown as ConnectorContractUnion;
+      const fields = () => getStepFormSchema('security.setAlertStatus', [contract])?.fields ?? [];
+
+      it('is one form, not an empty one', () => {
+        expect(fields().map((f) => f.path.join('.'))).toEqual([
+          'with.alert_ids',
+          'with.status',
+          'with.close_reason',
+        ]);
+        expect(fields().some((f) => f.kind === 'variants')).toBe(false);
+      });
+
+      it('offers every status of every member, and requires what every member requires', () => {
+        const byKey = (key: string) => fields().find((f) => f.key === key);
+        expect(byKey('status')).toMatchObject({
+          kind: 'select',
+          required: true,
+          options: ['closed', 'open', 'acknowledged'],
+        });
+        expect(byKey('alert_ids')).toMatchObject({ required: true });
+        // Only one member has it, so it is optional.
+        expect(byKey('close_reason')).toMatchObject({ kind: 'select', required: false });
+      });
+    });
+
+    it('offers `pretty` of a step that is not an Elasticsearch / Kibana API call', () => {
+      const contract = {
+        type: 'data.stringifyJson',
+        paramsSchema: z.object({ pretty: z.boolean().optional() }),
+        outputSchema: z.unknown(),
+        summary: null,
+        description: null,
+      } as unknown as ConnectorContractUnion;
+
+      const fields = getStepFormSchema('data.stringifyJson', [contract])?.fields ?? [];
+
+      expect(fields.find((f) => f.key === 'pretty')).toMatchObject({
+        path: ['with', 'pretty'],
+        kind: 'boolean',
+      });
+    });
+
     it('names the variants of a union keyed on a literal `type` by that `type`', () => {
       const targetConnector = {
         type: 'target',

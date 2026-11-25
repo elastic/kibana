@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { normalizeSchedule } from './schedule_form_shape';
+
 export type YamlValue =
   | string
   | number
@@ -155,7 +157,7 @@ const inputsAsSchema = (inputs: YamlValue): YamlValue => {
 
 const triggerShape = (trigger: YamlObject): YamlObject => ({
   type: trigger.type,
-  ...(trigger.with ? { with: trigger.with } : {}),
+  ...(trigger.with ? { with: normalizeSchedule(trigger.with) } : {}),
   ...(trigger.inputs ? { inputs: inputsAsSchema(trigger.inputs) } : {}),
 });
 

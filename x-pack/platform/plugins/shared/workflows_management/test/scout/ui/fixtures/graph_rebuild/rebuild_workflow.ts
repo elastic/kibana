@@ -16,6 +16,7 @@ import type {
   YamlValue,
 } from './compare_rebuilt_workflow';
 import { asObjects, asSteps, compareWorkflows, isObject } from './compare_rebuilt_workflow';
+import { scheduleFormShape } from './schedule_form_shape';
 import type { WorkflowsApiServicesFixture } from '..';
 import type { WorkflowsPageObjects } from '../page_objects';
 import type {
@@ -184,23 +185,37 @@ class GraphRebuild {
           await this.authoring.addTriggerInput(toTriggerInput(input));
         }
       }
-      if (type === 'scheduled') {
-        const { with: schedule } = trigger;
-        if (isObject(schedule) && typeof schedule.every === 'string') {
-          await this.authoring.setTriggerEvery(schedule.every);
-        } else {
-          this.note(
-            this.unsupported,
-            where,
-            `schedule ${JSON.stringify(schedule)} has no control (only "every")`
-          );
-        }
-      }
+      if (type === 'scheduled') await this.buildSchedule(trigger.with, where);
     } catch (error) {
       this.note(this.issues, where, firstLine(error as Error));
       await this.attachScreenshot(`fail-trigger-${index}`);
     }
     await this.authoring.closeTriggerPanel();
+  }
+
+  /**
+   * `every` goes in the Interval field; an rrule the form can hold goes through the Date & time controls; one it
+   * cannot (a `dtstart`, several hours) is left to the YAML tab, which this builder never types into.
+   */
+  private async buildSchedule(schedule: YamlValue | undefined, where: string): Promise<void> {
+    if (isObject(schedule) && Object.keys(schedule).length === 1) {
+      if (typeof schedule.every === 'string') {
+        await this.authoring.setTriggerEvery(schedule.every);
+        return;
+      }
+      const shape = scheduleFormShape(schedule.rrule);
+      if (shape) {
+        await this.authoring.setTriggerCalendarSchedule(shape);
+        return;
+      }
+    }
+    this.note(
+      this.unsupported,
+      where,
+      `schedule ${JSON.stringify(
+        schedule
+      )} is edited in YAML (the form cannot hold it without changing it)`
+    );
   }
 
   private async fillSettings(): Promise<void> {

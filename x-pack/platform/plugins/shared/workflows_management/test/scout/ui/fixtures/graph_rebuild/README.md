@@ -30,6 +30,7 @@ These are the causes found when the whole example library was rebuilt, one fixtu
 | Fixture | Covers |
 | --- | --- |
 | `settings_triggers` | Description, tags, constants of every type, manual inputs (required, default, enum, array), scheduled, alert |
+| `scheduled_triggers` | Scheduled triggers: an interval, and Date & time patterns that repeat daily (every day, weekdays, every 2 days), weekly and monthly, with a time zone; a schedule with a `dtstart` the form leaves to the YAML tab |
 | `flow_control` | if/else, foreach with a nested if, while, switch (cases and default), step-level `if` and `timeout` |
 | `error_handling` | `on-failure`: continue, retry, fallback steps, a fallback inside a loop |
 | `data_transforms` | `data.map` (item, index, nested `$map`), `data.set`, `data.parseJson`, filter, find, aggregate |

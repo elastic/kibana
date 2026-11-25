@@ -10,6 +10,8 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { YamlObject, YamlValue } from '../graph_rebuild/compare_rebuilt_workflow';
 import { isObject } from '../graph_rebuild/compare_rebuilt_workflow';
+import type { ScheduleFormShape } from '../graph_rebuild/schedule_form_shape';
+import { WEEKDAYS } from '../graph_rebuild/schedule_form_shape';
 
 /**
  * Matches a graph "+" wire-insertion control by its `data-insert-context`
@@ -869,8 +871,54 @@ export class WorkflowGraphAuthoringPage {
     return true;
   }
 
+  /** Adds a scheduled trigger to an empty canvas and leaves its panel open. */
+  async addScheduledTrigger(): Promise<void> {
+    await this.openAddTriggerFromEmptyCanvas();
+    await this.pickTrigger('Scheduled');
+  }
+
   async setTriggerEvery(every: string): Promise<void> {
+    await this.setTriggerScheduleMode('interval');
     await this.fillInput(this.page.testSubj.locator('workflowTriggerConfigPanelEvery'), every);
+  }
+
+  /** The Interval or the Date & time form of a scheduled trigger. The radio is covered by its label: the click goes to it. */
+  async setTriggerScheduleMode(mode: 'interval' | 'calendar'): Promise<void> {
+    await this.page.testSubj
+      .locator(`workflowTriggerConfigScheduleMode-${mode}`)
+      .dispatchEvent('click');
+  }
+
+  /** Presses a day chip only when it is not in the state wanted. */
+  private async setScheduleChip(testSubj: string, wanted: boolean): Promise<void> {
+    const chip = this.page.testSubj.locator(testSubj);
+    const pressed = (await chip.getAttribute('aria-pressed')) === 'true';
+    if (pressed !== wanted) await chip.click();
+  }
+
+  /** A Date & time schedule: Repeat, Every, On (days, or days of the month), At and Time zone. */
+  async setTriggerCalendarSchedule(schedule: ScheduleFormShape): Promise<void> {
+    const control = (part: string) =>
+      this.page.testSubj.locator(`workflowTriggerConfigSchedule${part}`);
+    await this.setTriggerScheduleMode('calendar');
+    await control(`Repeat-${schedule.repeat}`).dispatchEvent('click');
+    await this.fillInput(control('Count'), String(schedule.count));
+    if (schedule.repeat === 'monthly') {
+      const wanted = schedule.monthDays ?? [];
+      for (let day = 1; day <= 31; day += 1) {
+        await this.setScheduleChip(
+          `workflowTriggerConfigScheduleMonthDay-${day}`,
+          wanted.includes(day)
+        );
+      }
+    } else {
+      const wanted = schedule.days ?? [];
+      for (const day of WEEKDAYS) {
+        await this.setScheduleChip(`workflowTriggerConfigScheduleDay-${day}`, wanted.includes(day));
+      }
+    }
+    await control('Time').fill(schedule.time);
+    await control('Timezone').selectOption(schedule.tzid);
   }
 
   /** One input of the manual trigger: name, type, description, allowed values, and required or default. */
