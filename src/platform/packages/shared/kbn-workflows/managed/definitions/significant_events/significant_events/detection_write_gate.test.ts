@@ -113,7 +113,9 @@ const matchesFilter = (
   }
   if (filter.range) {
     const gte = String(render(filter.range['@timestamp'].gte, context));
-    return atMinute - record.atMinute <= Number(gte.replace(/^now-|m$/g, ''));
+    const match = /^now-(\d+)m$/.exec(gte);
+    if (!match) throw new Error(`Lookup range ${gte} is not ES date math of the form now-<N>m`);
+    return atMinute - record.atMinute <= Number(match[1]);
   }
   return true;
 };

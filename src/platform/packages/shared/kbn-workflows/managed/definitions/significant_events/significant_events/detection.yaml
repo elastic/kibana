@@ -279,8 +279,9 @@ steps:
           # write, so require error == null.
           # `stationary` (flat alert rate) is overwhelmingly ambient noise and is never written;
           # post-escalation recovery is handled by the judge's re-evaluation queries instead.
-          # A rule flipping between a type and `stationary` writes a detection on every flip back;
-          # discovery's flaky-rule hold-back is what absorbs that.
+          # A rule flipping between a type and `stationary` writes a detection on every flip back.
+          # Discovery's flaky-rule hold-back limits how many of those reach review, except for rules
+          # at or above its exempt severity score; it does not limit the writes here.
           is_transition: >-
             ${{ steps.compute_rule_context.output.has_rule_uuid
             and steps.check_last_scan.error == null
