@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  PROPOSALS_INTERNAL_URL,
+  type ApproveProposalRequest,
+  type DismissProposalRequest,
+} from '@kbn/proposals-common';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { pollFor, spaceUrl } from '../helpers';
@@ -116,7 +121,7 @@ export const decidePendingProposal = async ({
       async () => {
         const listed = await apiClient.get<{ proposals: Array<{ id: string }> }>(
           spaceUrl(
-            `internal/proposals?conversationId=${encodeURIComponent(
+            `${PROPOSALS_INTERNAL_URL}?conversationId=${encodeURIComponent(
               conversationId
             )}&status=pending`,
             spaceId
@@ -133,13 +138,14 @@ export const decidePendingProposal = async ({
         if (!proposal) {
           return undefined;
         }
+        const body: ApproveProposalRequest | DismissProposalRequest =
+          decision === 'approve' ? {} : { dismissReason: 'no_reason' };
         const decided = await apiClient.post(
-          spaceUrl(`internal/proposals/${encodeURIComponent(proposal.id)}/${decision}`, spaceId),
-          {
-            headers: { ...headers, ...INTERNAL_V1_HEADERS },
-            responseType: 'json',
-            body: decision === 'approve' ? {} : { dismissReason: 'no_reason' },
-          }
+          spaceUrl(
+            `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(proposal.id)}/${decision}`,
+            spaceId
+          ),
+          { headers: { ...headers, ...INTERNAL_V1_HEADERS }, responseType: 'json', body }
         );
         // A proposal can list before the review has parked at its gate, and the route answers
         // 409 until it has.

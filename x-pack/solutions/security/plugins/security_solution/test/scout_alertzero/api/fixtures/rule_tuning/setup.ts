@@ -16,6 +16,8 @@ import {
   SECURITY_SERVICE_ACCOUNT_URL,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   WORKER_SERVICE_ACCOUNT_NAMES,
+  type ListWorkersResponse,
+  type UpdateWorkerRequestBody,
 } from '@kbn/alertzero-common';
 import { spaceUrl } from '../helpers';
 import { expectStatus, INTERNAL_V1_HEADERS, type RuleTuningSpaceArgs } from './common';
@@ -24,10 +26,6 @@ const SEARCH_INFERENCE_SETTINGS_PATH = 'internal/search_inference_endpoints/sett
 
 interface InferenceSettings {
   data?: { features?: Array<{ feature_id: string }> };
-}
-
-interface WorkerList {
-  workers: Array<{ id: string; settingsRevision: number | null }>;
 }
 
 /** Points the space's AlertZero models at the LLM proxy and returns the connector id. */
@@ -133,24 +131,28 @@ export const setRuleTuningWorker = async ({
   enabled: boolean;
   settings?: { serviceAccountId: string; autonomy: 'manual' | 'assisted' };
 }): Promise<void> => {
-  const listed = await apiClient.get<WorkerList>(spaceUrl(ALERTZERO_WORKERS_URL, spaceId), {
-    headers: { ...headers, ...INTERNAL_V1_HEADERS },
-    responseType: 'json',
-  });
+  const listed = await apiClient.get<ListWorkersResponse>(
+    spaceUrl(ALERTZERO_WORKERS_URL, spaceId),
+    {
+      headers: { ...headers, ...INTERNAL_V1_HEADERS },
+      responseType: 'json',
+    }
+  );
   expectStatus('List the workers', listed);
   const worker = listed.body.workers.find(
     ({ id }) => id === SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
   );
+  const body: UpdateWorkerRequestBody = {
+    enabled,
+    ...(settings ? { settings, settingsRevision: worker?.settingsRevision ?? null } : {}),
+  };
   // Enabling schedules the worker, and its first run starts at once.
   const patched = await apiClient.patch(
     spaceUrl(buildWorkerUrl(SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID), spaceId),
     {
       headers: { ...headers, ...INTERNAL_V1_HEADERS },
       responseType: 'json',
-      body: {
-        enabled,
-        ...(settings ? { settings, settingsRevision: worker?.settingsRevision ?? null } : {}),
-      },
+      body,
     }
   );
   expectStatus(`${enabled ? 'Enable' : 'Disable'} the rule tuning worker`, patched);
