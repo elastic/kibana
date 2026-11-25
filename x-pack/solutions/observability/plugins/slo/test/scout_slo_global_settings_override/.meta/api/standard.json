@@ -1,5 +1,5 @@
 {
-  "sha1": "1933d5498449cce7101dfe1f486fa95d466c3f1a",
+  "sha1": "38bd5477e18617a26c8f237b385eb9ceabe67a60",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout_slo_global_settings_override/api/tests/slo_global_settings_override.spec.ts",
-        "line": 32,
-        "column": 19
+        "line": 31,
+        "column": 21
       }
     },
     {
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout_slo_global_settings_override/api/tests/slo_global_settings_override.spec.ts",
-        "line": 45,
+        "line": 44,
         "column": 23
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout_slo_global_settings_override/api/tests/slo_global_settings_override.spec.ts",
-        "line": 58,
+        "line": 57,
         "column": 23
       }
     }

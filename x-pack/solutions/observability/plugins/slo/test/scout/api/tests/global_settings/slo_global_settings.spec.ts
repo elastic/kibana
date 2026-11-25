@@ -14,16 +14,21 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let headers: Record<string, string>;
+    let original: { enabled: boolean; periodDays: number };
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
+    apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+      const response = await apiClient.get(GLOBAL_SETTINGS_PATH, { headers, responseType: 'json' });
+      const { enabled, periodDays } = response.body.sliRetention;
+      original = { enabled, periodDays };
     });
 
+    // The API cannot delete the settings: restore the values found, saved if they were defaults.
     apiTest.afterAll(async ({ apiClient }) => {
       await apiClient.put(GLOBAL_SETTINGS_PATH, {
         headers,
-        body: { sliRetention: { enabled: false, periodDays: 365 } },
+        body: { sliRetention: original },
         responseType: 'json',
       });
     });

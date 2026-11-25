@@ -20,9 +20,17 @@ interface StoredSliRetention {
   updatedAt: string;
 }
 
+interface StoredGlobalSettingsDocument {
+  type: 'slo-global-settings';
+  'slo-global-settings': { sliRetention?: StoredSliRetention };
+  typeMigrationVersion: string;
+  updated_at: string;
+}
+
 export interface GlobalSettingsStore {
   deleteStoredGlobalSettings: () => Promise<void>;
   storeSliRetention: (sliRetention: StoredSliRetention) => Promise<void>;
+  /** Restores the document found on creation, then deletes the temporary user and role. */
   cleanup: () => Promise<void>;
 }
 
@@ -42,40 +50,66 @@ export const createGlobalSettingsStore = async (esClient: Client): Promise<Globa
       },
     ],
   });
-  await esClient.security.putUser({
-    username: SYSTEM_INDICES_USER,
-    password,
-    roles: [SYSTEM_INDICES_USER],
-  });
+
+  const deleteCredentials = async () => {
+    await esClient.security.deleteUser({ username: SYSTEM_INDICES_USER }, { ignore: [404] });
+    await esClient.security.deleteRole({ name: SYSTEM_INDICES_USER }, { ignore: [404] });
+  };
+
   const credentials = Buffer.from(`${SYSTEM_INDICES_USER}:${password}`).toString('base64');
   const headers = { authorization: `Basic ${credentials}` };
 
+  let original: StoredGlobalSettingsDocument | undefined;
+  try {
+    await esClient.security.putUser({
+      username: SYSTEM_INDICES_USER,
+      password,
+      roles: [SYSTEM_INDICES_USER],
+    });
+    const { _source } = await esClient.get<StoredGlobalSettingsDocument>(
+      { index: SAVED_OBJECT_INDEX, id: SAVED_OBJECT_DOC_ID },
+      { headers, ignore: [404] }
+    );
+    original = _source;
+  } catch (error) {
+    await deleteCredentials();
+    throw error;
+  }
+
+  const deleteStoredGlobalSettings = async () => {
+    await esClient.delete(
+      { index: SAVED_OBJECT_INDEX, id: SAVED_OBJECT_DOC_ID, refresh: 'wait_for' },
+      { headers, ignore: [404] }
+    );
+  };
+
+  const indexDocument = async (document: StoredGlobalSettingsDocument) => {
+    await esClient.index(
+      { index: SAVED_OBJECT_INDEX, id: SAVED_OBJECT_DOC_ID, refresh: 'wait_for', document },
+      { headers }
+    );
+  };
+
   return {
-    deleteStoredGlobalSettings: async () => {
-      await esClient.delete(
-        { index: SAVED_OBJECT_INDEX, id: SAVED_OBJECT_DOC_ID, refresh: 'wait_for' },
-        { headers, ignore: [404] }
-      );
-    },
+    deleteStoredGlobalSettings,
     storeSliRetention: async (sliRetention) => {
-      await esClient.index(
-        {
-          index: SAVED_OBJECT_INDEX,
-          id: SAVED_OBJECT_DOC_ID,
-          refresh: 'wait_for',
-          document: {
-            type: 'slo-global-settings',
-            'slo-global-settings': { sliRetention },
-            typeMigrationVersion: '10.1.0',
-            updated_at: sliRetention.updatedAt,
-          },
-        },
-        { headers }
-      );
+      await indexDocument({
+        type: 'slo-global-settings',
+        'slo-global-settings': { sliRetention },
+        typeMigrationVersion: '10.1.0',
+        updated_at: sliRetention.updatedAt,
+      });
     },
     cleanup: async () => {
-      await esClient.security.deleteUser({ username: SYSTEM_INDICES_USER }, { ignore: [404] });
-      await esClient.security.deleteRole({ name: SYSTEM_INDICES_USER }, { ignore: [404] });
+      try {
+        if (original) {
+          await indexDocument(original);
+        } else {
+          await deleteStoredGlobalSettings();
+        }
+      } finally {
+        await deleteCredentials();
+      }
     },
   };
 };

@@ -15,8 +15,10 @@ const sloAllRole = (spaces: string[]): KibanaRole => ({
   kibana: [{ base: [], feature: { slo: ['all'] }, spaces }],
 });
 
-// Writing the defaults leaves the global settings as the other suites expect them.
-const DEFAULT_SLI_RETENTION = { enabled: false, periodDays: 365 };
+const SLI_RETENTION = { enabled: false, periodDays: 365 };
+
+// Sent by the global check only: a 403 from the route-level privilege check has another message.
+const ALL_SPACES_MESSAGE = 'Global SLO settings require the SLO "All" privilege in all spaces';
 
 apiTest.describe('SLO global settings API authorization', { tag: tags.stateful.classic }, () => {
   apiTest(
@@ -30,13 +32,15 @@ apiTest.describe('SLO global settings API authorization', { tag: tags.stateful.c
         responseType: 'json',
       });
       expect(getResponse).toHaveStatusCode(403);
+      expect(getResponse.body.message).toContain(ALL_SPACES_MESSAGE);
 
       const putResponse = await apiClient.put(GLOBAL_SETTINGS_PATH, {
         headers,
-        body: { sliRetention: DEFAULT_SLI_RETENTION },
+        body: { sliRetention: SLI_RETENTION },
         responseType: 'json',
       });
       expect(putResponse).toHaveStatusCode(403);
+      expect(putResponse.body.message).toContain(ALL_SPACES_MESSAGE);
     }
   );
 
@@ -52,9 +56,11 @@ apiTest.describe('SLO global settings API authorization', { tag: tags.stateful.c
       });
       expect(getResponse).toHaveStatusCode(200);
 
+      // Saving the values just read leaves the deployment-wide settings unchanged.
+      const { enabled, periodDays } = getResponse.body.sliRetention;
       const putResponse = await apiClient.put(GLOBAL_SETTINGS_PATH, {
         headers,
-        body: { sliRetention: DEFAULT_SLI_RETENTION },
+        body: { sliRetention: { enabled, periodDays } },
         responseType: 'json',
       });
       expect(putResponse).toHaveStatusCode(200);

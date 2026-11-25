@@ -33,7 +33,6 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async () => {
-      await store.deleteStoredGlobalSettings();
       await store.cleanup();
     });
 

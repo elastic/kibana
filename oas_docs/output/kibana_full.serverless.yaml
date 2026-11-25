@@ -72084,7 +72084,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Global SLO settings apply to all spaces. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges in all spaces. The response holds the saved settings and the settings applied by Kibana, which a kibana.yml setting can override.<br/><br/>[Required authorization] Route required privileges: slo_write.
+        Global SLO settings apply to all spaces. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges in all spaces. The response holds the saved settings and the resolved settings, which a kibana.yml setting can override.<br/><br/>[Required authorization] Route required privileges: slo_write.
       operationId: getSloGlobalSettingsOp
       parameters: []
       requestBody:
@@ -185811,15 +185811,15 @@ components:
       type: object
       properties:
         enabled:
-          description: Indicates if SLI retention is applied
+          description: Indicates if SLI retention is enabled
           type: boolean
         periodDays:
-          description: The number of days of SLI data kept
+          description: The number of days of SLI data to keep
           maximum: 9007199254740991
           minimum: 1
           type: integer
         source:
-          description: 'Where the applied value comes from: the default, the saved settings, or the `xpack.slo.sliRetention` setting in kibana.yml'
+          description: 'Where the resolved value comes from: the default, the saved settings, or the `xpack.slo.sliRetention` setting in kibana.yml'
           enum:
             - default
             - settings
@@ -185990,7 +185990,7 @@ components:
         - results
     Kibana_HTTP_APIs_SLOGlobalSettingsResponse:
       additionalProperties: true
-      description: The saved global SLO settings, the date they were last saved, and the settings applied by Kibana
+      description: The saved global SLO settings, the date they were last saved, and the resolved settings
       type: object
       properties:
         sliRetention:
@@ -185999,7 +185999,7 @@ components:
           properties:
             effective:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOEffectiveSliRetention'
-              description: The SLI retention applied by Kibana, which can differ from the saved value
+              description: The SLI retention policy resolved from the saved value and kibana.yml, which can differ from the saved value
             enabled:
               description: Indicates if dated SLI indices older than the retention period are deleted
               type: boolean

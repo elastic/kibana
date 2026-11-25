@@ -26,7 +26,7 @@ export const getSLOGlobalSettingsRoute = createSloServerRoute({
   options: {
     access: 'public',
     summary: 'Get the global SLO settings',
-    description: `${GLOBAL_ADMIN_DESCRIPTION} The response holds the saved settings and the settings applied by Kibana, which a kibana.yml setting can override.`,
+    description: `${GLOBAL_ADMIN_DESCRIPTION} The response holds the saved settings and the resolved settings, which a kibana.yml setting can override.`,
     operationId: 'getSloGlobalSettingsOp',
     availability: AVAILABILITY,
     oasOperationObject: () => path.join(__dirname, 'examples/get_global_settings.yaml'),
