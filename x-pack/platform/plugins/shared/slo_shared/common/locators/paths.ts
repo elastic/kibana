@@ -15,6 +15,7 @@ export const SLO_DETAIL_PATH = '/:sloId/:tabId?' as const;
 export const SLO_CREATE_PATH = '/create' as const;
 export const SLO_EDIT_PATH = '/edit/:sloId' as const;
 export const SLO_SETTINGS_PATH = '/settings' as const;
+export const SLO_GLOBAL_SETTINGS_PATH = '/settings/global' as const;
 export const SLOS_MANAGEMENT_PATH = '/management' as const;
 export const SLO_COMPOSITE_CREATE_PATH = '/composite/create' as const;
 export const SLO_COMPOSITE_EDIT_PATH = '/composite/edit/:compositeSloId' as const;
@@ -24,6 +25,7 @@ export const paths = {
   slos: `${SLOS_BASE_PATH}${SLOS_PATH}`,
   slosComposite: `${SLOS_BASE_PATH}${SLOS_COMPOSITE_PATH}`,
   slosSettings: `${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`,
+  slosGlobalSettings: `${SLOS_BASE_PATH}${SLO_GLOBAL_SETTINGS_PATH}`,
   slosWelcome: `${SLOS_BASE_PATH}${SLOS_WELCOME_PATH}`,
   slosManagement: `${SLOS_BASE_PATH}${SLOS_MANAGEMENT_PATH}`,
   slosManagementTemplates: `${SLOS_BASE_PATH}${SLOS_MANAGEMENT_TEMPLATES_PATH}`,

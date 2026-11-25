@@ -7,11 +7,16 @@
 import { EuiPageSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
+import { paths, SLO_SETTINGS_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React from 'react';
+import { Redirect } from 'react-router-dom';
+import { LoadingState } from '../../components/loading_state';
 import { SloAppHeader } from '../../components/slo_app_header/slo_app_header';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { GlobalSettingsForm } from './components/global_settings_form';
+import { useActiveSettingsTab, useSloSettingsHeaderTabs } from './components/use_slo_settings_tabs';
+import { useGetGlobalSettings } from './hooks/use_get_global_settings';
 import { SettingsForm } from './settings_form';
 
 const pageTitle = i18n.translate('xpack.slo.pageHeader.title.', {
@@ -28,6 +33,9 @@ export function SloSettingsPage() {
     serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
+  const { data: globalSettings, isLoading, isError } = useGetGlobalSettings();
+  const activeTab = useActiveSettingsTab();
+  const tabs = useSloSettingsHeaderTabs({ showGlobalTab: globalSettings !== undefined });
 
   useBreadcrumbs(
     [
@@ -57,9 +65,17 @@ export function SloSettingsPage() {
         title={pageTitle}
         hiddenItemIds={['settings']}
         back={{ href: basePath.prepend(paths.slos), label: slosBackLabel }}
+        tabs={tabs}
       />
       <EuiPageSection paddingSize="l" restrictWidth={false}>
-        <SettingsForm />
+        {activeTab === 'space' && <SettingsForm />}
+        {activeTab === 'global' && isLoading && (
+          <LoadingState dataTestSubj="sloGlobalSettingsLoading" />
+        )}
+        {activeTab === 'global' && isError && <Redirect to={SLO_SETTINGS_PATH} />}
+        {activeTab === 'global' && globalSettings && (
+          <GlobalSettingsForm settings={globalSettings} />
+        )}
       </EuiPageSection>
     </ObservabilityPageTemplate>
   );
