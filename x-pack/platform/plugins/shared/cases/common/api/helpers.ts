@@ -28,6 +28,7 @@ import {
   INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL,
   INTERNAL_CASE_OBSERVABLES_BULK_CREATE_URL,
   INTERNAL_CASE_OBSERVABLES_FIND_URL,
+  INTERNAL_CASE_OBSERVABLE_METADATA_URL,
   INTERNAL_CASE_WORKFLOW_RUN_URL,
 } from '../constants';
 
@@ -122,6 +123,10 @@ export const getCaseFindObservablesUrl = (id: string): string => {
 
 export const getCaseBulkCreateObservablesUrl = (id: string): string => {
   return INTERNAL_CASE_OBSERVABLES_BULK_CREATE_URL.replace('{case_id}', id);
+};
+
+export const getCaseObservableMetadataUrl = (id: string): string => {
+  return INTERNAL_CASE_OBSERVABLE_METADATA_URL.replace('{case_id}', id);
 };
 
 export const getCaseSimilarCasesUrl = (caseId: string) => {

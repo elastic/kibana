@@ -22,13 +22,6 @@ export const NO_OBSERVABLES = i18n.translate(
   }
 );
 
-export const SHOWING_OBSERVABLES = (totalObservables: number) =>
-  i18n.translate('xpack.cases.caseView.observables.showingObservablesTitle', {
-    values: { totalObservables },
-    defaultMessage:
-      'Showing {totalObservables} {totalObservables, plural, =1 {observable} other {observables}}',
-  });
-
 export const OBSERVABLES_TABLE = i18n.translate(
   'xpack.cases.caseView.observables.observablesTable',
   {
@@ -65,6 +58,31 @@ export const OBSERVABLE_DESCRIPTION = i18n.translate(
 export const OBSERVABLE_ACTIONS = i18n.translate('xpack.cases.caseView.observables.actions', {
   defaultMessage: 'Actions',
 });
+
+export const RELATED_CASES = i18n.translate('xpack.cases.caseView.observables.relatedCases', {
+  defaultMessage: 'Related cases',
+});
+
+export const SHOW_RELATED_CASES = i18n.translate(
+  'xpack.cases.caseView.observables.showRelatedCases',
+  { defaultMessage: 'Show the other cases with this observable' }
+);
+
+export const CASES_COUNT_ABOVE_MAX = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.casesCountAboveMax', {
+    values: { max },
+    defaultMessage: '{max, number}+',
+  });
+
+export const LOADING_RELATED_CASES = i18n.translate(
+  'xpack.cases.caseView.observables.loadingRelatedCases',
+  { defaultMessage: 'Counting the other cases with this observable' }
+);
+
+export const VIEW_OBSERVABLE_DETAILS = i18n.translate(
+  'xpack.cases.caseView.observables.viewDetails',
+  { defaultMessage: 'View details' }
+);
 
 export const DELETE_OBSERVABLE = i18n.translate('xpack.cases.caseView.observables.delete', {
   defaultMessage: 'Delete observable',
@@ -244,18 +262,6 @@ export const OBSERVABLES_ROWS_PER_PAGE = i18n.translate(
   }
 );
 
-export const OBSERVABLES_LIMIT_USAGE = (total: number, max: number) =>
-  i18n.translate('xpack.cases.caseView.observables.limitUsage', {
-    values: { total, max },
-    defaultMessage: '{total} of {max} observables',
-  });
-
-export const OBSERVABLES_LIMIT_USAGE_TOOLTIP = (max: number) =>
-  i18n.translate('xpack.cases.caseView.observables.limitUsageTooltip', {
-    values: { max },
-    defaultMessage: 'A case holds up to {max} observables.',
-  });
-
 export const OBSERVABLES_LIMIT_REACHED_TITLE = i18n.translate(
   'xpack.cases.caseView.observables.limitReachedTitle',
   {
@@ -301,3 +307,93 @@ export const FILTER_OBSERVABLES_BY_TYPE = i18n.translate(
 export const OBSERVABLES_LOAD_ERROR = i18n.translate('xpack.cases.caseView.observables.loadError', {
   defaultMessage: 'The observables could not be loaded.',
 });
+
+export const OBSERVABLE_METADATA = i18n.translate('xpack.cases.caseView.observables.metadata', {
+  defaultMessage: 'Metadata',
+});
+
+export const METADATA_HELP_TEXT = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.metadataHelpText', {
+    values: { max },
+    defaultMessage:
+      'Metadata is shared by every case in this space that holds this value. Add up to {max} key and value pairs.',
+  });
+
+export const METADATA_LOADING = i18n.translate('xpack.cases.caseView.observables.metadataLoading', {
+  defaultMessage: 'Loading the metadata of this value',
+});
+
+export const ADD_METADATA = i18n.translate('xpack.cases.caseView.observables.addMetadata', {
+  defaultMessage: 'Add metadata',
+});
+
+export const REMOVE_METADATA = i18n.translate('xpack.cases.caseView.observables.removeMetadata', {
+  defaultMessage: 'Remove metadata',
+});
+
+export const METADATA_KEY_LABEL = i18n.translate(
+  'xpack.cases.caseView.observables.metadataKeyLabel',
+  {
+    defaultMessage: 'Key',
+  }
+);
+
+export const METADATA_VALUE_LABEL = i18n.translate(
+  'xpack.cases.caseView.observables.metadataValueLabel',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const METADATA_KEY_REQUIRED = i18n.translate(
+  'xpack.cases.caseView.observables.metadataKeyRequired',
+  {
+    defaultMessage: 'A key is required.',
+  }
+);
+
+export const METADATA_VALUE_REQUIRED = i18n.translate(
+  'xpack.cases.caseView.observables.metadataValueRequired',
+  {
+    defaultMessage: 'A value is required.',
+  }
+);
+
+export const METADATA_KEY_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.metadataKeyTooLong', {
+    values: { max },
+    defaultMessage: 'The key must be {max} characters or fewer.',
+  });
+
+export const METADATA_VALUE_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.metadataValueTooLong', {
+    values: { max },
+    defaultMessage: 'The value must be {max} characters or fewer.',
+  });
+
+export const METADATA_KEY_INVALID = i18n.translate(
+  'xpack.cases.caseView.observables.metadataKeyInvalid',
+  {
+    defaultMessage: 'A key cannot contain *.',
+  }
+);
+
+export const METADATA_KEY_DUPLICATE = i18n.translate(
+  'xpack.cases.caseView.observables.metadataKeyDuplicate',
+  {
+    defaultMessage: 'Each key can be used once.',
+  }
+);
+
+export const METADATA_LIMIT_REACHED = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.metadataLimitReached', {
+    values: { max },
+    defaultMessage: 'A value holds up to {max} metadata pairs.',
+  });
+
+export const FILTER_OBSERVABLES_BY_METADATA = i18n.translate(
+  'xpack.cases.caseView.observables.filterByMetadata',
+  {
+    defaultMessage: 'Filter by metadata: key, key:value or key:value*',
+  }
+);

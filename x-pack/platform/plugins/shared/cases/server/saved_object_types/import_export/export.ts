@@ -21,15 +21,18 @@ import type { FieldDefinition } from '../../../common/types/domain/field_definit
 import { createCaseError } from '../../common/error';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type { ObservablePersistedAttributes } from '../../common/types/observable';
+import type { ObservableSharedPersistedAttributes } from '../../common/types/observable_shared';
 import type { ConfigType } from '../../config';
 import {
   getAttachmentsAndUserActionsForCases,
   getTemplatesAndFieldDefinitionsForCases,
+  getSharedObservablesForCases,
 } from './utils';
 import { getSavedObjectsTypes } from '../../../common';
 import {
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
+  CASE_OBSERVABLE_SAVED_OBJECT,
 } from '../../../common/constants';
 
 export async function handleExport({
@@ -52,6 +55,7 @@ export async function handleExport({
       | AttachmentAttributesV2
       | CaseUserActionWithoutReferenceIds
       | ObservablePersistedAttributes
+      | ObservableSharedPersistedAttributes
       | Template
       | FieldDefinition
     >
@@ -91,10 +95,21 @@ export async function handleExport({
       getTemplatesAndFieldDefinitionsForCases(savedObjectsClient, cleanedObjects, logger),
     ]);
 
+    const sharedObservables = await getSharedObservablesForCases({
+      savedObjectsClient,
+      savedObjectsSerializer: savedObjects.createSerializer(),
+      cases: cleanedObjects,
+      observableObjects: attachmentsAndUserActionsForCases.filter(
+        (savedObject): savedObject is SavedObject<ObservablePersistedAttributes> =>
+          savedObject.type === CASE_OBSERVABLE_SAVED_OBJECT
+      ),
+    });
+
     return [
       ...cleanedObjects,
       ...attachmentsAndUserActionsForCases,
       ...templatesAndFieldDefinitions,
+      ...sharedObservables,
     ];
   } catch (error) {
     throw createCaseError({

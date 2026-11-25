@@ -19,6 +19,7 @@ import { createCaseAttachmentSavedObjectType } from './attachments';
 import { caseTemplateSavedObjectType } from './templates';
 import { caseFieldDefinitionSavedObjectType } from './field_definitions';
 import { createCaseObservableSavedObjectType } from './observables';
+import { createCaseObservableSharedSavedObjectType } from './observable_shared';
 import type { ConfigType } from '../config';
 
 interface RegisterSavedObjectsArgs {
@@ -61,4 +62,5 @@ export const registerSavedObjects = ({
   core.savedObjects.registerType(caseFieldDefinitionSavedObjectType);
   core.savedObjects.registerType(createCaseAttachmentSavedObjectType());
   core.savedObjects.registerType(createCaseObservableSavedObjectType());
+  core.savedObjects.registerType(createCaseObservableSharedSavedObjectType());
 };

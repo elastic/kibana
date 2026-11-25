@@ -18,7 +18,6 @@ import {
   EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
-import type { Observable } from '../../../common/types/domain/observable/v1';
 import * as i18n from './translations';
 import * as workflowI18n from '../workflows/translations';
 
@@ -33,13 +32,14 @@ import { useCasesWorkflowExecutor } from '../workflows/use_cases_workflow_execut
 import { useCaseWorkflowRunTelemetry } from '../../analytics/use_case_workflow_run_telemetry';
 import { useCaseWorkflowFilters } from '../workflows/use_run_case_workflow';
 import { OBSERVABLE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
+import type { ObservableWithMetadata } from '../../../common/types/api';
 
 /** The Cases API derives the workflow event from the origin, so no client inputs are sent. */
 const WORKFLOW_INPUTS: Record<string, unknown> = {};
 
 export interface ObservableActionsPopoverButtonProps {
   caseData: CaseUI;
-  observable: Observable;
+  observable: ObservableWithMetadata;
   /** Whether the current user may run a workflow from this observable. */
   canRunWorkflow: boolean;
 }

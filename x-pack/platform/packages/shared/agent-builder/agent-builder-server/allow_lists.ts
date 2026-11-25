@@ -398,6 +398,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Platform – Cases
   'case',
   'cases',
+  'case_observable',
 
   // Platform – Alerting v2
   'platform.alerting.alert',

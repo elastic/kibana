@@ -1658,3 +1658,140 @@ describe('observables stored as cases-observables objects', () => {
     expect(mockObservableService.bulkDelete).not.toHaveBeenCalled();
   });
 });
+
+describe('observable metadata', () => {
+  const mockObservableSharedService = mockClientArgs.services.observableSharedService;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockClientArgs.authorization.ensureAuthorized.mockResolvedValue(undefined);
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+    mockCaseService.patchCase.mockResolvedValue(caseSOWithObservables);
+    mockObservableService.countForCase.mockResolvedValue(0);
+    mockObservableService.findExisting.mockResolvedValue([]);
+  });
+
+  it('merges the metadata of an added observable into its value, in the case owner', async () => {
+    await addObservable(
+      caseSO.id,
+      {
+        observable: { ...mockObservablePost, value: '10.0.0.9', metadata: { triage: 'confirmed' } },
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockObservableSharedService.writeMetadata).toHaveBeenCalledWith({
+      owner: caseSO.attributes.owner,
+      typeKey: mockObservablePost.typeKey,
+      value: '10.0.0.9',
+      metadata: { triage: 'confirmed' },
+      mode: 'merge',
+      user: mockClientArgs.user,
+    });
+    // Metadata is never stored on the observable itself.
+    expect(createdObservables()[0]).not.toHaveProperty('metadata');
+  });
+
+  it('writes metadata only for the observables a bulk create added', async () => {
+    await bulkCreateObservables(
+      caseSO.id,
+      {
+        observables: [
+          { ...mockObservablePost, metadata: { triage: 'repeat' } }, // already in the field
+          { ...mockObservablePost, value: '10.0.0.9', metadata: { triage: 'new' } },
+          { ...mockObservablePost, value: '10.0.0.10' },
+        ],
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockObservableSharedService.writeMetadata).toHaveBeenCalledTimes(1);
+    expect(mockObservableSharedService.writeMetadata).toHaveBeenCalledWith(
+      expect.objectContaining({ value: '10.0.0.9', metadata: { triage: 'new' } })
+    );
+  });
+
+  it('replaces the metadata of an edited observable, without storing it in the case field', async () => {
+    await updateObservable(
+      caseSO.id,
+      mockObservable.id,
+      {
+        observable: {
+          value: mockObservable.value,
+          description: null,
+          metadata: { triage: 'benign' },
+        },
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockObservableSharedService.writeMetadata).toHaveBeenCalledWith(
+      expect.objectContaining({
+        typeKey: mockObservable.typeKey,
+        value: mockObservable.value,
+        metadata: { triage: 'benign' },
+        mode: 'replace',
+      })
+    );
+    const [[{ updatedAttributes }]] = mockCaseService.patchCase.mock.calls;
+    expect(updatedAttributes.observables?.[0]).not.toHaveProperty('metadata');
+  });
+
+  it('clears the metadata when the edit sends null', async () => {
+    await updateObservable(
+      caseSO.id,
+      mockObservable.id,
+      { observable: { value: mockObservable.value, description: null, metadata: null } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockObservableSharedService.writeMetadata).toHaveBeenCalledWith(
+      expect.objectContaining({ metadata: null, mode: 'replace' })
+    );
+  });
+
+  it('keeps the metadata when the edit leaves it out', async () => {
+    await updateObservable(
+      caseSO.id,
+      mockObservable.id,
+      { observable: { value: mockObservable.value, description: 'edited' } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockObservableSharedService.writeMetadata).not.toHaveBeenCalled();
+  });
+
+  it('writes the metadata of a value edit to the new value', async () => {
+    await updateObservable(
+      caseSO.id,
+      mockObservable.id,
+      { observable: { value: '10.20.30.40', description: null, metadata: { triage: 'new' } } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockObservableSharedService.writeMetadata).toHaveBeenCalledWith(
+      expect.objectContaining({ value: '10.20.30.40', metadata: { triage: 'new' } })
+    );
+  });
+
+  it('rejects more than 20 metadata pairs', async () => {
+    const metadata = Object.fromEntries(Array.from({ length: 21 }, (_, i) => [`key-${i}`, 'x']));
+
+    await expect(
+      addObservable(
+        caseSO.id,
+        { observable: { ...mockObservablePost, value: '10.0.0.9', metadata } },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow();
+    expect(mockObservableSharedService.writeMetadata).not.toHaveBeenCalled();
+  });
+});

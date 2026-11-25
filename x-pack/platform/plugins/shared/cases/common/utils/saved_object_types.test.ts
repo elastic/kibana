@@ -15,6 +15,7 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_OBSERVABLE_SAVED_OBJECT,
+  CASE_OBSERVABLE_SHARED_SAVED_OBJECT,
 } from '../constants';
 import { getSavedObjectsTypes } from './saved_object_types';
 
@@ -28,6 +29,7 @@ describe('getSavedObjectsTypes', () => {
     CASE_ATTACHMENT_SAVED_OBJECT,
     CASE_FIELD_DEFINITION_SAVED_OBJECT,
     CASE_OBSERVABLE_SAVED_OBJECT,
+    CASE_OBSERVABLE_SHARED_SAVED_OBJECT,
   ];
 
   it('returns only the base types when called with no config', () => {

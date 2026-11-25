@@ -94,7 +94,12 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
 
     async deleteComments(): Promise<void> {
       await kbnServer.savedObjects.clean({
-        types: ['cases-comments', 'cases-attachments', 'cases-observables'],
+        types: [
+          'cases-comments',
+          'cases-attachments',
+          'cases-observables',
+          'cases-observable-shared',
+        ],
       });
     },
 

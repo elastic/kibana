@@ -48,6 +48,7 @@ export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const
 export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
 export const CASE_FIELD_DEFINITION_SAVED_OBJECT = 'cases-field-definition' as const;
 export const CASE_OBSERVABLE_SAVED_OBJECT = 'cases-observables' as const;
+export const CASE_OBSERVABLE_SHARED_SAVED_OBJECT = 'cases-observable-shared' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -134,6 +135,12 @@ export const INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL =
 export const INTERNAL_CASE_OBSERVABLES_FIND_URL = `${INTERNAL_CASE_OBSERVABLES_URL}/_find` as const;
 export const INTERNAL_CASE_OBSERVABLES_BULK_CREATE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/_bulk_create` as const;
+export const INTERNAL_CASE_OBSERVABLE_METADATA_URL =
+  `${INTERNAL_CASE_OBSERVABLES_URL}/_metadata` as const;
+export const INTERNAL_FIND_CASES_BY_OBSERVABLE_URL =
+  `${CASES_INTERNAL_URL}/observables/_find_cases` as const;
+export const INTERNAL_COUNT_CASES_BY_OBSERVABLES_URL =
+  `${CASES_INTERNAL_URL}/observables/_count_cases` as const;
 export const INTERNAL_CASE_WORKFLOW_RUN_URL =
   `${CASES_INTERNAL_URL}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
@@ -450,6 +457,16 @@ export const MAX_OBSERVABLES_PER_PAGE = 100;
 export const DEFAULT_OBSERVABLES_PER_PAGE = 20;
 /** Longest cursor the observables list route accepts. */
 export const MAX_OBSERVABLES_CURSOR_LENGTH = 4096;
+/** Most metadata pairs one observable value holds. */
+export const MAX_OBSERVABLE_METADATA_PAIRS = 20;
+/** Longest metadata key. */
+export const MAX_OBSERVABLE_METADATA_KEY_LENGTH = 256;
+/** Longest metadata value; it matches the indexed length so every value can be filtered. */
+export const MAX_OBSERVABLE_METADATA_VALUE_LENGTH = 1024;
+/** Most metadata filters one observables list request combines. */
+export const MAX_OBSERVABLE_METADATA_FILTERS = 5;
+/** Most observable values one metadata filter matches before it stops. */
+export const MAX_METADATA_FILTER_VALUES = 10_000;
 
 /**
  * Delays

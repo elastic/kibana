@@ -57,6 +57,7 @@ import {
   createTemplatesServiceMock,
   createFieldDefinitionsServiceMock,
   createObservableServiceMock,
+  createObservableSharedServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
 import {
@@ -111,7 +112,10 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     bulkAddObservables: jest.fn(),
     bulkCreateObservables: jest.fn(),
     findObservables: jest.fn(),
+    findByObservable: jest.fn(),
+    countByObservables: jest.fn(),
     getObservablesByIds: jest.fn().mockResolvedValue([]),
+    getObservableMetadata: jest.fn(),
     bulkDeleteObservables: jest.fn(),
     getApplicableFields: jest.fn(),
   });
@@ -285,6 +289,7 @@ export const createCasesClientMockArgs = () => {
       templatesService: createTemplatesServiceMock(),
       fieldDefinitionsService: createFieldDefinitionsServiceMock(),
       observableService: createObservableServiceMock(),
+      observableSharedService: createObservableSharedServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),

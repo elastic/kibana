@@ -131,6 +131,8 @@
     "@kbn/core-http-common",
     "@kbn/workflows-ui",
     "@kbn/ui-callout",
+    "@kbn/flyout-template",
+    "@kbn/flyout-info-blocks",
   ],
   "exclude": ["target/**/*"]
 }
