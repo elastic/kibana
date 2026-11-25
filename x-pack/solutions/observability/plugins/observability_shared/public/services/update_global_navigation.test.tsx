@@ -131,6 +131,17 @@ describe('classic rules and alerts read', () => {
     );
   });
 
+  it('treats machine learning alert read plus security rules read as alert read', () => {
+    const mlAndSecurityRules = capabilities({
+      navLinks: { ml: true },
+      ml: { canUseMlAlerts: true },
+      securitySolutionRulesV4: { read_rules: true },
+    });
+
+    expect(hasClassicRulesReadCapability(mlAndSecurityRules)).toBe(true);
+    expect(hasClassicAlertsReadCapability(mlAndSecurityRules)).toBe(true);
+  });
+
   it('returns false for Actions and Connectors, Classic Rules Settings, and Security rules', () => {
     const actionsAndConnectors = capabilities({
       actions: { show: true },

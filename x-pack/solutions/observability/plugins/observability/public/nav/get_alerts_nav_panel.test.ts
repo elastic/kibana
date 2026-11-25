@@ -379,6 +379,18 @@ describe('getAlertsNavPanel', () => {
       expect(children?.[0]).not.toHaveProperty('getIsActive');
     });
 
+    it('shows Alerts when machine learning alert read is combined with security rules read', () => {
+      setCapabilities(core, {
+        navLinks: { ml: true },
+        ml: { canUseMlAlerts: true },
+        securitySolutionRulesV4: { read_rules: true },
+      });
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
+      ]);
+    });
+
     it('hides Alerts and Rules from a security rules user', () => {
       setCapabilities(core, {
         securitySolutionRulesV4: { read_rules: true },

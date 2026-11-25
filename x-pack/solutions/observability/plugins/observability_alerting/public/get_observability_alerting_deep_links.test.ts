@@ -187,6 +187,19 @@ describe('getObservabilityAlertingDeepLinks', () => {
       expect(visibleIn[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual(SEARCHABLE);
     });
 
+    it('offers Alerts when machine learning alert read is combined with security rules read', () => {
+      const visibleIn = visibleInById(
+        capabilities({
+          navLinks: { ml: true },
+          ml: { canUseMlAlerts: true },
+          securitySolutionRulesV4: { read_rules: true },
+        })
+      );
+
+      expect(visibleIn[OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]).toEqual(SEARCHABLE);
+      expect(visibleIn[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual(SEARCHABLE);
+    });
+
     it('offers Alerts and Rules V1 to a v1 apm navLink user', () => {
       expect(visibleInById(capabilities({ navLinks: { apm: true } }))).toEqual({
         [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ALERTS,

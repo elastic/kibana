@@ -33,10 +33,41 @@ export const hasPlatformRuleReadCapabilities = (capabilities: Capabilities): boo
   capabilities.navLinks?.[ML_APP_ID] === true ||
   capabilities[DATA_QUALITY_FEATURE_ID]?.show === true;
 
+// ML Read sets this UI capability. It grants anomaly-detection alert read and not `rac`.
+const ML_ANOMALY_ALERT_READ_CAPABILITY = 'canUseMlAlerts';
+
 /**
- * Platform features whose privileges grant classic alert read.
- * Machine Learning and Data Set Quality can read rules but do not grant the `rac` API the Alerts table needs.
+ * UI capabilities whose privileges include the `rac` API.
+ * Literals match the Security Solution feature ids so this platform package does not depend on it.
+ * Observability features that grant `rac` are checked in `@kbn/observability-shared-plugin`.
+ */
+const RAC_UI_CAPABILITIES = [
+  ['siem', 'show'],
+  ['siemV2', 'show'],
+  ['siemV3', 'show'],
+  ['siemV4', 'show'],
+  ['siemV5', 'show'],
+  ['securitySolutionRulesV1', 'read_rules'],
+  ['securitySolutionRulesV2', 'read_rules'],
+  ['securitySolutionRulesV3', 'read_rules'],
+  ['securitySolutionRulesV4', 'read_rules'],
+  ['securitySolutionAlertsV1', 'read_alerts'],
+] as const;
+
+const hasMlAnomalyAlertRead = (capabilities: Capabilities): boolean =>
+  capabilities.ml?.[ML_ANOMALY_ALERT_READ_CAPABILITY] === true;
+
+const hasRacFromAnotherFeature = (capabilities: Capabilities): boolean =>
+  RAC_UI_CAPABILITIES.some(
+    ([featureId, capabilityId]) => capabilities[featureId]?.[capabilityId] === true
+  );
+
+/**
+ * True when the user can read classic alerts and call `rac`.
+ * Stack Alerts grants both. Machine Learning grants alert read only, so it counts when another
+ * feature in the same space grants `rac`, such as Security Rules and Exceptions Read.
  */
 export const hasPlatformAlertReadCapabilities = (capabilities: Capabilities): boolean =>
   capabilities[STACK_ALERTS_FEATURE_ID]?.[STACK_ALERTS_SHOW_UI_CAPABILITY] === true ||
-  capabilities[STACK_ALERTS_ONLY_FEATURE_ID]?.show === true;
+  capabilities[STACK_ALERTS_ONLY_FEATURE_ID]?.show === true ||
+  (hasMlAnomalyAlertRead(capabilities) && hasRacFromAnotherFeature(capabilities));

@@ -136,9 +136,36 @@ describe('hasPlatformAlertReadCapabilities', () => {
   it.each([
     ['the machine learning app privilege', { navLinks: { ml: true } }],
     ['data set quality show', { dataQuality: { show: true } }],
-  ])('returns false for %s, which can read rules but does not grant rac', (_label, features) => {
-    expect(hasPlatformRuleReadCapabilities(capabilities(features))).toBe(true);
+    ['machine learning alert read without rac', { ml: { canUseMlAlerts: true } }],
+    ['security rules read without alert read', { securitySolutionRulesV4: { read_rules: true } }],
+  ])('returns false for %s', (_label, features) => {
     expect(hasPlatformAlertReadCapabilities(capabilities(features))).toBe(false);
+  });
+
+  it.each([
+    ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
+    ['security read', { siemV5: { show: true } }],
+    ['security alerts read', { securitySolutionAlertsV1: { read_alerts: true } }],
+  ])('returns true when machine learning alert read is combined with %s', (_label, features) => {
+    expect(
+      hasPlatformAlertReadCapabilities(
+        capabilities({
+          ml: { canUseMlAlerts: true },
+          ...features,
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('returns false when data set quality is combined with rac but has no alert read', () => {
+    expect(
+      hasPlatformAlertReadCapabilities(
+        capabilities({
+          dataQuality: { show: true },
+          securitySolutionRulesV4: { read_rules: true },
+        })
+      )
+    ).toBe(false);
   });
 
   it('returns false without any platform alerts capability', () => {

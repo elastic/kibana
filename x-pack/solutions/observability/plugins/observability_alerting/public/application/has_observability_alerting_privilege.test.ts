@@ -94,6 +94,19 @@ describe('hasObservabilityAlertingCapabilities', () => {
       });
     });
 
+    it('returns alerts v1 when machine learning alert read is combined with security rules read', () => {
+      const mlAndSecurityRules = capabilities({
+        navLinks: { ml: true },
+        ml: { canUseMlAlerts: true },
+        securitySolutionRulesV4: { read_rules: true },
+      });
+
+      expect(hasObservabilityAlertingCapabilities(mlAndSecurityRules, 'alerts')).toEqual({
+        v1: true,
+        v2: false,
+      });
+    });
+
     it('returns v1: true for stack alerts only, which does not grant rules', () => {
       const stackAlertsOnly = capabilities({ stackAlertsOnly: { show: true } });
 
