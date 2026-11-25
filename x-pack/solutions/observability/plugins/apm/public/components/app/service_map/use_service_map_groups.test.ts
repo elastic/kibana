@@ -19,7 +19,7 @@ import {
 } from '../../../../common/service_map';
 import { DEFAULT_EDGE_STYLE } from '../../../../common/service_map/constants';
 import { useServiceMapGroupingEnabled } from '../../../hooks/use_service_map_grouping_enabled';
-import { useServiceMapClosedGroups } from './use_service_map_closed_groups';
+import { useServiceMapGroups } from './use_service_map_groups';
 
 jest.mock('../../../hooks/use_service_map_grouping_enabled', () => ({
   useServiceMapGroupingEnabled: jest.fn(),
@@ -48,7 +48,7 @@ function edge(source: string, target: string): ServiceMapEdge {
   };
 }
 
-describe('useServiceMapClosedGroups', () => {
+describe('useServiceMapGroups', () => {
   const nodes = [serviceNode('a'), serviceNode('b')];
   const edges = [edge('a', 'b')];
 
@@ -76,7 +76,7 @@ describe('useServiceMapClosedGroups', () => {
     mockedUseServiceMapGroupingEnabled.mockReturnValue(false);
 
     const { result } = renderHook(() =>
-      useServiceMapClosedGroups({
+      useServiceMapGroups({
         nodes,
         edges,
         serviceGrouping: collapsibleGrouping,
@@ -92,7 +92,7 @@ describe('useServiceMapClosedGroups', () => {
     mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
 
     const { result } = renderHook(() =>
-      useServiceMapClosedGroups({ nodes, edges, serviceGrouping: undefined })
+      useServiceMapGroups({ nodes, edges, serviceGrouping: undefined })
     );
 
     expect(result.current.nodes).toBe(nodes);
@@ -120,7 +120,7 @@ describe('useServiceMapClosedGroups', () => {
     };
 
     const { result } = renderHook(() =>
-      useServiceMapClosedGroups({ nodes, edges, serviceGrouping: grouping })
+      useServiceMapGroups({ nodes, edges, serviceGrouping: grouping })
     );
 
     expect(result.current.nodes).toHaveLength(2);
@@ -131,7 +131,7 @@ describe('useServiceMapClosedGroups', () => {
     mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
 
     const { result } = renderHook(() =>
-      useServiceMapClosedGroups({
+      useServiceMapGroups({
         nodes,
         edges,
         serviceGrouping: collapsibleGrouping,
@@ -147,7 +147,7 @@ describe('useServiceMapClosedGroups', () => {
     it('opens a group as a box around its members, and closes it again', () => {
       mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
       const { result } = renderHook(() =>
-        useServiceMapClosedGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
       );
       expect(result.current.nodes.map(({ id }) => id)).toEqual([groupId]);
 
@@ -166,7 +166,7 @@ describe('useServiceMapClosedGroups', () => {
     it('still counts an open group in the count line', () => {
       mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
       const { result } = renderHook(() =>
-        useServiceMapClosedGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
       );
 
       act(() => result.current.openGroup(groupId));
@@ -177,7 +177,7 @@ describe('useServiceMapClosedGroups', () => {
     it('keeps the same callbacks across renders', () => {
       mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
       const { result, rerender } = renderHook(() =>
-        useServiceMapClosedGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
       );
       const { openGroup, closeGroup } = result.current;
 
@@ -191,7 +191,7 @@ describe('useServiceMapClosedGroups', () => {
     it('ignores opening a group while the grouping flag is off', () => {
       mockedUseServiceMapGroupingEnabled.mockReturnValue(false);
       const { result } = renderHook(() =>
-        useServiceMapClosedGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
       );
 
       act(() => result.current.openGroup(groupId));

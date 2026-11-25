@@ -94,6 +94,13 @@ export const GROUP_BOX_PADDING = 24;
 export const GROUP_BOX_HEADER_HEIGHT = 48;
 
 /**
+ * From this many members, an open group whose own layout is much longer than it is wide (see
+ * `FOLD_ASPECT_RATIO_THRESHOLD`) packs its members into a grid. Members with few or no calls
+ * between them would otherwise line up in one long row or column.
+ */
+export const GROUP_BOX_GRID_MIN_MEMBER_COUNT = 6;
+
+/**
  * Below this node count the service map is never folded into serpentine bands: small maps already
  * fit the viewport, and folding them just adds visual noise.
  */

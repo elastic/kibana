@@ -17,7 +17,7 @@ import {
 import { useServiceMapGroupingEnabled } from '../../../hooks/use_service_map_grouping_enabled';
 import { formatServiceGroupingCountLine } from './format_service_grouping_count_line';
 
-export interface UseServiceMapClosedGroupsResult {
+export interface UseServiceMapGroupsResult {
   nodes: ServiceMapNode[];
   edges: ServiceMapEdge[];
   countLine?: string;
@@ -29,7 +29,7 @@ export interface UseServiceMapClosedGroupsResult {
  * After badge merge: collapse groups of 2+ using API `serviceGrouping`, except the ones the user
  * has opened, which are drawn as a box around their members.
  */
-export function useServiceMapClosedGroups({
+export function useServiceMapGroups({
   nodes,
   edges,
   serviceGrouping,
@@ -37,7 +37,7 @@ export function useServiceMapClosedGroups({
   nodes: ServiceMapNode[];
   edges: ServiceMapEdge[];
   serviceGrouping?: ServiceMapGrouping;
-}): UseServiceMapClosedGroupsResult {
+}): UseServiceMapGroupsResult {
   const isGroupingEnabled = useServiceMapGroupingEnabled();
   const [openGroupIds, setOpenGroupIds] = useState<ReadonlySet<string>>(() => new Set());
 

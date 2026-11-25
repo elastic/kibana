@@ -455,6 +455,10 @@ describe('groupServiceNodes', () => {
       expect(members.every((n) => n.extent === 'parent')).toBe(true);
       expect(members.every((n) => nextNodes.indexOf(n) > boxIndex)).toBe(true);
 
+      // dragging the box would take over panning, but its members can be dragged inside it
+      expect(box?.draggable).toBe(false);
+      expect(members.every((n) => n.draggable !== false)).toBe(true);
+
       // the other groups stay closed, so each service is on the map exactly once
       expect(
         nextNodes

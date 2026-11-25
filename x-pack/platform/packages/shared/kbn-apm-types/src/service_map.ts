@@ -381,7 +381,7 @@ export interface EdgeMarker extends ReactFlowEdgeMarker {
 export interface ServiceMapEdgeData extends Record<string, unknown> {
   isBidirectional: boolean;
   isGrouped?: boolean;
-  /** Both ends are services of the same open group. Drawn faint until one end is hovered. */
+  /** Both ends are services of the same open group, so the call stays inside its box. */
   isIntraGroup?: boolean;
   sourceData?: ConnectionNode;
   targetData?: ConnectionNode;

@@ -16,7 +16,7 @@ const ServiceMapGroupActionsContext = createContext<ServiceMapGroupActionsContex
 
 /**
  * Lets the box of an open service group close itself. The state of which groups are open lives above
- * the graph (see `useServiceMapClosedGroups`), so the node asks for it through context instead of
+ * the graph (see `useServiceMapGroups`), so the node asks for it through context instead of
  * carrying a callback in its data.
  */
 export function ServiceMapGroupActionsProvider({

@@ -220,7 +220,7 @@ export const ServiceGroupNode = memo(
                     count={data.alertsCount ?? 0}
                     serviceName={data.label}
                     data-test-subj="serviceMapNodeServiceGroupAlertsBadge"
-                    // Display-only until open-group / group alerts navigation exists
+                    // Display-only: there is no navigation to the alerts of a group yet
                   />
                 )}
                 {showSloBadge && data.sloStatus && (

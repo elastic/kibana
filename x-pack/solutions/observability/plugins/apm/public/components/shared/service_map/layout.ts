@@ -19,6 +19,7 @@ import {
   FOLD_MIN_LOCAL_EDGE_FRACTION,
   GROUP_BOX_PADDING,
   GROUP_BOX_HEADER_HEIGHT,
+  GROUP_BOX_GRID_MIN_MEMBER_COUNT,
 } from '../../../../common/service_map/constants';
 
 export interface LayoutOptions {
@@ -464,6 +465,43 @@ function layoutFlat<T extends Node>(
 }
 
 /**
+ * Members of a group laid out on their own are one long row or column when they have few or no
+ * calls between them, which makes a box thousands of pixels long. From
+ * `GROUP_BOX_GRID_MIN_MEMBER_COUNT` members, a layout longer than `FOLD_ASPECT_RATIO_THRESHOLD`
+ * times its short side is packed into a grid instead, filled in the order of the layout so
+ * neighbours stay together.
+ */
+function packElongatedMembersInGrid<T extends Node>(
+  laidOutMembers: T[],
+  opts: Required<LayoutOptions>
+): T[] {
+  if (laidOutMembers.length < GROUP_BOX_GRID_MIN_MEMBER_COUNT) {
+    return laidOutMembers;
+  }
+
+  const width =
+    Math.max(...laidOutMembers.map(({ position }) => position.x + opts.nodeWidth)) -
+    Math.min(...laidOutMembers.map(({ position }) => position.x));
+  const height =
+    Math.max(...laidOutMembers.map(({ position }) => position.y + opts.nodeHeight)) -
+    Math.min(...laidOutMembers.map(({ position }) => position.y));
+  if (Math.max(width, height) / Math.min(width, height) <= FOLD_ASPECT_RATIO_THRESHOLD) {
+    return laidOutMembers;
+  }
+
+  const isVertical = opts.rankdir === 'TB';
+  const [primary, cross] = isVertical ? (['y', 'x'] as const) : (['x', 'y'] as const);
+  const inLayoutOrder = [...laidOutMembers].sort(
+    (a, b) => a.position[primary] - b.position[primary] || a.position[cross] - b.position[cross]
+  );
+  const gridById = new Map(
+    applyGridFallbackLayout(inLayoutOrder, opts).map((member) => [member.id, member] as const)
+  );
+  // Same order as the input
+  return laidOutMembers.map((member) => gridById.get(member.id) ?? member);
+}
+
+/**
  * Lays out a map that has open groups: nodes with a `parentId` that is also in `nodes`.
  *
  * Each open group's members are laid out on their own, using only the edges between them, and the
@@ -498,7 +536,10 @@ function layoutWithOpenGroups<T extends Node>(
     const memberEdges = edges.filter(
       ({ source, target }) => memberIds.has(source) && memberIds.has(target)
     );
-    const laidOutMembers = layoutFlat(members, memberEdges, options, onDagreLayoutFailure);
+    const laidOutMembers = packElongatedMembersInGrid(
+      layoutFlat(members, memberEdges, options, onDagreLayoutFailure),
+      opts
+    );
 
     const minX = Math.min(...laidOutMembers.map(({ position }) => position.x));
     const minY = Math.min(...laidOutMembers.map(({ position }) => position.y));

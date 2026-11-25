@@ -143,6 +143,9 @@ function createServiceGroupBoxNode(
     id: group.id,
     type: 'serviceGroupBox',
     position: { x: 0, y: 0 },
+    // The box covers a large area: dragging on it should pan the map, not move the group. Its
+    // members can still be dragged, inside it.
+    draggable: false,
     data: {
       id: group.id,
       label: formatServiceGroupName(group),

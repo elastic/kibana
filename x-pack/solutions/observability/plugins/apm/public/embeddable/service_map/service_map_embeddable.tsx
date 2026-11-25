@@ -30,7 +30,7 @@ import { DisabledPrompt } from '../../components/app/service_map/disabled_prompt
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
-import { useServiceMapClosedGroups } from '../../components/app/service_map/use_service_map_closed_groups';
+import { useServiceMapGroups } from '../../components/app/service_map/use_service_map_groups';
 import { ServiceMapGraph } from '../../components/app/service_map/graph';
 import { ContextualServiceMapGraph } from '../../components/app/service_map/contextual_map/contextual_service_map_graph';
 import {
@@ -336,7 +336,7 @@ export function ServiceMapEmbeddable({
     countLine: groupingCountLine,
     openGroup,
     closeGroup,
-  } = useServiceMapClosedGroups({
+  } = useServiceMapGroups({
     nodes: nodesWithBadges,
     edges: data.edges,
     serviceGrouping: useContextualMap ? undefined : data.serviceGrouping,

@@ -778,4 +778,106 @@ describe('applyServiceMapLayout with open groups', () => {
       });
     });
   });
+
+  describe('with many members', () => {
+    const memberIds = (count: number) => Array.from({ length: count }, (_, i) => `m${i}`);
+    const openGroup = (count: number, groupEdges: Edge[], rankdir: 'LR' | 'TB' = 'LR') => {
+      const result = applyServiceMapLayout(
+        [box('box'), ...memberIds(count).map((id) => member(id, 'box'))],
+        groupEdges,
+        { rankdir }
+      );
+      const boxNode = result.find(({ id }) => id === 'box') as Node;
+      const members = result.filter(({ parentId }) => parentId);
+      return { boxNode, members, width: boxNode.width ?? 0, height: boxNode.height ?? 0 };
+    };
+    const longToShort = (width: number, height: number) =>
+      Math.max(width, height) / Math.min(width, height);
+    const FOLD_RATIO = 2.5;
+
+    it.each([6, 30, 150])('packs %i members with no calls between them into a grid', (count) => {
+      const { width, height, members } = openGroup(count, []);
+
+      expect(longToShort(width, height)).toBeLessThanOrEqual(FOLD_RATIO);
+      expect(distinctValues(members.map(({ position }) => position.x))).toBeGreaterThan(1);
+      expect(distinctValues(members.map(({ position }) => position.y))).toBeGreaterThan(1);
+    });
+
+    it.each(['LR', 'TB'] as const)(
+      'packs 30 members that all call one service into a grid (%s)',
+      (rankdir) => {
+        const star = memberIds(30)
+          .slice(1)
+          .map((id) => createEdge('m0', id));
+
+        const { width, height } = openGroup(30, star, rankdir);
+
+        expect(longToShort(width, height)).toBeLessThanOrEqual(FOLD_RATIO);
+      }
+    );
+
+    it('packs a long chain of members into a grid', () => {
+      const chain = memberIds(10)
+        .slice(1)
+        .map((id, i) => createEdge(`m${i}`, id));
+
+      const { width, height } = openGroup(10, chain);
+
+      expect(longToShort(width, height)).toBeLessThanOrEqual(FOLD_RATIO);
+    });
+
+    it('keeps members in the order of the calls between them in the grid', () => {
+      const chain = memberIds(10)
+        .slice(1)
+        .map((id, i) => createEdge(`m${i}`, id));
+
+      const { members } = openGroup(10, chain);
+      const readingOrder = [...members].sort(
+        (a, b) => a.position.y - b.position.y || a.position.x - b.position.x
+      );
+
+      expect(readingOrder.map(({ id }) => id)).toEqual(memberIds(10));
+    });
+
+    it('keeps every member inside the box and apart from the others', () => {
+      const { members, width, height } = openGroup(30, []);
+      const rects = members.map(({ position }) => ({
+        ...position,
+        width: NODE_WIDTH,
+        height: NODE_HEIGHT,
+      }));
+
+      rects.forEach((a, i) => {
+        expect(a.x).toBeGreaterThanOrEqual(GROUP_BOX_PADDING);
+        expect(a.y).toBeGreaterThanOrEqual(GROUP_BOX_PADDING + GROUP_BOX_HEADER_HEIGHT);
+        expect(a.x + NODE_WIDTH).toBeLessThanOrEqual(width - GROUP_BOX_PADDING);
+        expect(a.y + NODE_HEIGHT).toBeLessThanOrEqual(height - GROUP_BOX_PADDING);
+        rects.slice(i + 1).forEach((b) => expect(overlaps(a, b)).toBe(false));
+      });
+    });
+
+    it('keeps a small group in the layout of its calls, in one row', () => {
+      const chain = [createEdge('m0', 'm1'), createEdge('m1', 'm2'), createEdge('m2', 'm3')];
+
+      const { members } = openGroup(4, chain);
+
+      expect(distinctValues(members.map(({ position }) => position.y))).toBe(1);
+    });
+
+    it('leaves a group that is already close to square as it is laid out', () => {
+      // Six members in three ranks of two: about as tall as it is wide.
+      const edgesBetweenRanks = [
+        createEdge('m0', 'm2'),
+        createEdge('m0', 'm3'),
+        createEdge('m1', 'm2'),
+        createEdge('m1', 'm3'),
+        createEdge('m2', 'm4'),
+        createEdge('m3', 'm5'),
+      ];
+
+      const { members } = openGroup(6, edgesBetweenRanks);
+
+      expect(distinctValues(members.map(({ position }) => position.x))).toBe(3);
+    });
+  });
 });
