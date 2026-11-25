@@ -140,6 +140,10 @@ export function KnowledgeIndicatorFeatureDetailsContent({
                 iconType="discoverApp"
                 iconSide="left"
                 onClick={onOpenInDiscover}
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_DISCOVER,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATOR_FLYOUT,
+                })}
               >
                 {OPEN_IN_DISCOVER_LABEL}
               </EuiButtonEmpty>

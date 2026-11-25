@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
@@ -32,6 +33,10 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import React, { useCallback, useMemo, useState } from 'react';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../../../common/ebt_constants';
 import { useIsMobile } from '../../../../../hooks/use_is_mobile';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
@@ -168,6 +173,10 @@ export function KnowledgeIndicatorDetailsFlyout({
     return [
       <EuiContextMenuItem
         key="open-in-discover"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_DISCOVER,
+          element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATOR_FLYOUT,
+        })}
         icon="discoverApp"
         onClick={() => {
           setIsActionsMenuOpen(false);
@@ -192,6 +201,10 @@ export function KnowledgeIndicatorDetailsFlyout({
         items.push(
           <EuiContextMenuItem
             key="feature-restore"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.RESTORE_KNOWLEDGE_INDICATOR,
+              element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATOR_FLYOUT,
+            })}
             icon="eye"
             disabled={isMutating}
             onClick={() => {
@@ -206,6 +219,10 @@ export function KnowledgeIndicatorDetailsFlyout({
         items.push(
           <EuiContextMenuItem
             key="feature-exclude"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.EXCLUDE_KNOWLEDGE_INDICATOR,
+              element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATOR_FLYOUT,
+            })}
             icon="eyeSlash"
             disabled={isMutating}
             onClick={() => {
@@ -233,6 +250,10 @@ export function KnowledgeIndicatorDetailsFlyout({
     items.push(
       <EuiContextMenuItem
         key="feature-delete"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.DELETE_KNOWLEDGE_INDICATOR,
+          element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATOR_FLYOUT,
+        })}
         icon="trash"
         color="danger"
         disabled={isMutating}
@@ -262,6 +283,10 @@ export function KnowledgeIndicatorDetailsFlyout({
         ? [
             <EuiContextMenuItem
               key="query-promote"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.PROMOTE_KNOWLEDGE_INDICATOR,
+                element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATOR_FLYOUT,
+              })}
               icon="plusCircle"
               disabled={isPromoteDisabled}
               toolTipContent={promoteTooltip}
@@ -284,6 +309,10 @@ export function KnowledgeIndicatorDetailsFlyout({
       }),
       <EuiContextMenuItem
         key="query-delete"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.DELETE_KNOWLEDGE_INDICATOR,
+          element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATOR_FLYOUT,
+        })}
         icon="trash"
         color="danger"
         disabled={isMutating}

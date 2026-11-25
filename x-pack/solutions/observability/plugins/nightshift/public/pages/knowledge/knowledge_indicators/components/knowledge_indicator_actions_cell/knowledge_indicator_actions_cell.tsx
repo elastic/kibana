@@ -12,6 +12,7 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
@@ -27,6 +28,10 @@ import {
 import { durabilityMenuItem } from '../durability_menu_item';
 import { useBlocksNewActivity } from '../../../../../data/maintenance/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../translations';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../../../common/ebt_constants';
 
 interface Props {
   knowledgeIndicator: KnowledgeIndicator;
@@ -52,6 +57,10 @@ export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequ
         items.push(
           <EuiContextMenuItem
             key="feature-restore"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.RESTORE_KNOWLEDGE_INDICATOR,
+              element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATORS_TABLE,
+            })}
             icon="eye"
             disabled={isMutating}
             onClick={() => {
@@ -66,6 +75,10 @@ export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequ
         items.push(
           <EuiContextMenuItem
             key="feature-exclude"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.EXCLUDE_KNOWLEDGE_INDICATOR,
+              element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATORS_TABLE,
+            })}
             icon="eyeSlash"
             disabled={isMutating}
             onClick={() => {
@@ -93,6 +106,10 @@ export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequ
     items.push(
       <EuiContextMenuItem
         key="feature-delete"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.DELETE_KNOWLEDGE_INDICATOR,
+          element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATORS_TABLE,
+        })}
         icon="trash"
         color="danger"
         disabled={isMutating}
@@ -127,6 +144,10 @@ export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequ
     return [
       <EuiContextMenuItem
         key="query-promote"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.PROMOTE_KNOWLEDGE_INDICATOR,
+          element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATORS_TABLE,
+        })}
         icon="plusCircle"
         disabled={isPromoteDisabled}
         toolTipContent={promoteTooltip}
@@ -147,6 +168,10 @@ export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequ
       }),
       <EuiContextMenuItem
         key="query-delete"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.DELETE_KNOWLEDGE_INDICATOR,
+          element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATORS_TABLE,
+        })}
         icon="trash"
         disabled={isMutating}
         onClick={() => {

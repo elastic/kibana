@@ -21,10 +21,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React, { useMemo } from 'react';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../../../common/ebt_constants';
 import { SeverityBadge } from '../../../../../components/ui/severity_badge';
 import { getKnowledgeIndicatorTitle } from '../../utils/get_knowledge_indicator_title';
 import { getFeatureTypeLabel } from '../../utils/get_feature_type_label';
@@ -98,6 +103,10 @@ export function DeleteTableItemsModal({
           data-test-subj="significantEventsAppDeleteTableItemsModalDeleteButton"
           color="danger"
           onClick={onConfirm}
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DELETE_KNOWLEDGE_INDICATORS,
+            element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATOR_DELETE_MODAL,
+          })}
           isLoading={isLoading}
           fill
         >

@@ -79,6 +79,23 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
   VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
   VIEW_SOURCES: 'viewSources',
+  ARCHIVE_MEMORY_PAGE: 'archiveMemoryPage',
+  ARCHIVE_WIKI_PAGE: 'archiveWikiPage',
+  BULK_DELETE_KNOWLEDGE_INDICATORS: 'bulkDeleteKnowledgeIndicators',
+  BULK_EXCLUDE_KNOWLEDGE_INDICATORS: 'bulkExcludeKnowledgeIndicators',
+  BULK_PROMOTE_KNOWLEDGE_INDICATORS: 'bulkPromoteKnowledgeIndicators',
+  BULK_RESTORE_KNOWLEDGE_INDICATORS: 'bulkRestoreKnowledgeIndicators',
+  CONFIRM_ARCHIVE_WIKI_PAGE: 'confirmArchiveWikiPage',
+  CONFIRM_DELETE_KNOWLEDGE_INDICATORS: 'confirmDeleteKnowledgeIndicators',
+  CONFIRM_DELETE_MEMORY_PAGE: 'confirmDeleteMemoryPage',
+  DELETE_KNOWLEDGE_INDICATOR: 'deleteKnowledgeIndicator',
+  DELETE_MEMORY_PAGE: 'deleteMemoryPage',
+  EXCLUDE_KNOWLEDGE_INDICATOR: 'excludeKnowledgeIndicator',
+  OPEN_IN_DISCOVER: 'openInDiscover',
+  PROMOTE_KNOWLEDGE_INDICATOR: 'promoteKnowledgeIndicator',
+  RESTORE_KNOWLEDGE_INDICATOR: 'restoreKnowledgeIndicator',
+  RESTORE_MEMORY_PAGE: 'restoreMemoryPage',
+  RESTORE_WIKI_PAGE: 'restoreWikiPage',
 } as const;
 
 export const NIGHTSHIFT_EBT_ELEMENTS = {
@@ -113,6 +130,11 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
   START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',
   TOPOLOGY: 'nightshiftTopology',
+  KNOWLEDGE_INDICATORS_TOOLBAR: 'nightshiftKnowledgeIndicatorsToolbar',
+  KNOWLEDGE_INDICATORS_TABLE: 'nightshiftKnowledgeIndicatorsTable',
+  KNOWLEDGE_INDICATOR_DELETE_MODAL: 'nightshiftKnowledgeIndicatorDeleteModal',
+  MEMORY_PAGE: 'nightshiftMemoryPage',
+  WIKI_PAGE: 'nightshiftWikiPage',
 } as const;
 
 export const NIGHTSHIFT_EBT_DETAILS = {

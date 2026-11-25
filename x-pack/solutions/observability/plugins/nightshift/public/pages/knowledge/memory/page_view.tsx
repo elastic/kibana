@@ -10,7 +10,12 @@ import {
   EuiBadge,
   EuiBadgeGroup,
   EuiButton,
-  EuiConfirmModal,
+  EuiButtonEmpty,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -30,9 +35,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage, FormattedNumber, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getMemoryArchiveReasonLabel } from './labels';
 import { MemoryMergedFromRow } from './lineage';
@@ -159,6 +166,12 @@ export function MemoryPageView({
                 isLoading={isArchiving}
                 onClick={() => setArchived({ id: page.id, archived: !page.archived })}
                 data-test-subj="nightshiftMemoryArchiveToggle"
+                {...getEbtProps({
+                  action: page.archived
+                    ? NIGHTSHIFT_EBT_ACTIONS.RESTORE_MEMORY_PAGE
+                    : NIGHTSHIFT_EBT_ACTIONS.ARCHIVE_MEMORY_PAGE,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.MEMORY_PAGE,
+                })}
               >
                 {page.archived ? (
                   <FormattedMessage
@@ -184,6 +197,10 @@ export function MemoryPageView({
               isDisabled={isDeleting}
               onClick={() => setDeleteTarget({ id: page.id, version: data.version })}
               data-test-subj="nightshiftMemoryDeleteButton"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.DELETE_MEMORY_PAGE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.MEMORY_PAGE,
+              })}
             >
               <FormattedMessage
                 id="xpack.nightshift.knowledge.memory.deleteButton"
@@ -311,6 +328,10 @@ export function MemoryPageView({
                             getSourceTaskPath(conversationId, page.agent_id)
                           )}
                           data-test-subj="nightshiftMemorySourceTaskLink"
+                          {...getEbtProps({
+                            action: NIGHTSHIFT_EBT_ACTIONS.VIEW_KNOWLEDGE_INDICATOR_SOURCE,
+                            element: NIGHTSHIFT_EBT_ELEMENTS.MEMORY_PAGE,
+                          })}
                         >
                           {sourceTask}
                         </EuiLink>
@@ -360,47 +381,60 @@ export function MemoryPageView({
       </EuiPanel>
 
       {deleteTarget && (
-        <EuiConfirmModal
-          titleProps={{ id: modalTitleId }}
+        <EuiModal
           aria-labelledby={modalTitleId}
-          title={
-            <FormattedMessage
-              id="xpack.nightshift.knowledge.memory.deleteConfirmTitle"
-              defaultMessage="Delete this memory permanently?"
-            />
-          }
-          onCancel={() => {
-            setDeleteTarget(undefined);
-          }}
-          cancelButtonText={i18n.translate(
-            'xpack.nightshift.knowledge.memory.deleteConfirmCancel',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.nightshift.knowledge.memory.deleteConfirmButton"
-              defaultMessage="Delete permanently"
-            />
-          }
-          buttonColor="danger"
+          role="alertdialog"
+          onClose={() => setDeleteTarget(undefined)}
           data-test-subj="nightshiftMemoryDeleteConfirm"
-          onConfirm={() => {
-            setDeleteTarget(undefined);
-            deletePage(
-              { id: deleteTarget.id, version: deleteTarget.version },
-              { onSuccess: onDeleted }
-            );
-          }}
         >
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.nightshift.knowledge.memory.deleteConfirmBody"
-              defaultMessage="This memory will be removed from Semantic Memory. This cannot be undone — archiving keeps the record and is reversible."
-            />
-          </EuiText>
-        </EuiConfirmModal>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle id={modalTitleId}>
+              <FormattedMessage
+                id="xpack.nightshift.knowledge.memory.deleteConfirmTitle"
+                defaultMessage="Delete this memory permanently?"
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.nightshift.knowledge.memory.deleteConfirmBody"
+                defaultMessage="This memory will be removed from Semantic Memory. This cannot be undone — archiving keeps the record and is reversible."
+              />
+            </EuiText>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty
+              data-test-subj="nightshiftMemoryPageViewCancelButton"
+              onClick={() => setDeleteTarget(undefined)}
+            >
+              {i18n.translate('xpack.nightshift.knowledge.memory.deleteConfirmCancel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+            <EuiButton
+              data-test-subj="nightshiftMemoryPageViewDeletePermanentlyButton"
+              fill
+              color="danger"
+              onClick={() => {
+                setDeleteTarget(undefined);
+                deletePage(
+                  { id: deleteTarget.id, version: deleteTarget.version },
+                  { onSuccess: onDeleted }
+                );
+              }}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DELETE_MEMORY_PAGE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.MEMORY_PAGE,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.nightshift.knowledge.memory.deleteConfirmButton"
+                defaultMessage="Delete permanently"
+              />
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
       )}
     </div>
   );
