@@ -23,7 +23,10 @@ import { getLookupJoinSource } from '../commands/definitions/utils/sources';
 import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
 import { isTimeseriesSourceCommand } from '../commands/definitions/utils/timeseries_check';
 import type { NamedSubquery } from '../commands/definitions/utils/named_subqueries';
-import { getPipelineRowOrigin } from '../commands/definitions/utils/result_pipeline';
+import {
+  analyzeResultRows,
+  isSchemaDerivedRow,
+} from '../commands/definitions/utils/result_pipeline';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -123,7 +126,7 @@ export function areNewUnmappedFieldsAllowed(
 ): boolean {
   return (
     !previousCommands.some((cmd) => TRANSFORMATIONAL_COMMANDS.includes(cmd.name.toLowerCase())) &&
-    getPipelineRowOrigin(previousCommands, namedSubqueries) !== 'schema'
+    !Array.from(analyzeResultRows(previousCommands, namedSubqueries)).every(isSchemaDerivedRow)
   );
 }
 

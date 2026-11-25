@@ -18,7 +18,7 @@ import {
   mapVariableToColumn,
   isComputedColumn,
   getQuerySummary,
-  getESQLRowOrigin,
+  hasESQLSchemaDerivedRows,
   buildRenameSourceFieldMap,
 } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -59,7 +59,7 @@ export const mapEsqlResponseToDatatable = (
     : body.values;
 
   // Source filters are ambiguous when a query combines schema and document rows.
-  const hasSchemaRows = getESQLRowOrigin(query) !== 'other';
+  const hasSchemaRows = hasESQLSchemaDerivedRows(query);
   const querySummary = getQuerySummary(query);
   const renameSourceFieldMap =
     !hasSchemaRows && querySummary.renamedColumnsPairs?.size

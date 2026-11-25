@@ -8,118 +8,102 @@
  */
 
 import { isSource, isSubQuery } from '@elastic/esql';
-import type { ESQLAstCommand, ESQLAstForkCommand, ESQLAstItem } from '@elastic/esql/types';
-import { esqlCommandRegistry } from '../../registry';
+import type { ESQLAstCommand, ESQLAstForkCommand, ESQLSource } from '@elastic/esql/types';
 import {
   findNamedSubqueryForSource,
   getNamedSubqueriesAvailableTo,
   type NamedSubquery,
 } from './named_subqueries';
 
-export type EsqlRowOrigin = 'schema' | 'other' | 'mixed';
+export type EsqlResultRowKind =
+  | 'document'
+  | 'schema'
+  | 'aggregate'
+  | 'schema-aggregate'
+  | 'unknown';
+export type EsqlResultRows = ReadonlySet<EsqlResultRowKind>;
 
-export interface EsqlResultPipeline {
-  readonly rowOrigin: EsqlRowOrigin;
-  readonly mayReturnSourceDocuments: boolean;
+const UNKNOWN_ROWS: EsqlResultRows = new Set(['unknown']);
+const DOCUMENT_ROWS: EsqlResultRows = new Set(['document']);
+const SCHEMA_ROWS: EsqlResultRows = new Set(['schema']);
+const AGGREGATE_ROWS: EsqlResultRows = new Set(['aggregate']);
+
+/** Identifies rows whose lineage starts at a schema-producing command. */
+export const isSchemaDerivedRow = (kind: EsqlResultRowKind): boolean =>
+  kind === 'schema' || kind === 'schema-aggregate';
+
+/** Checks whether any possible output row is schema-derived. */
+export const hasSchemaDerivedRows = (rows: EsqlResultRows): boolean =>
+  [...rows].some(isSchemaDerivedRow);
+
+function unionRows(results: readonly EsqlResultRows[]): EsqlResultRows {
+  return results.length ? new Set(results.flatMap((rows) => [...rows])) : UNKNOWN_ROWS;
 }
 
-const DEFAULT_RESULT: EsqlResultPipeline = {
-  rowOrigin: 'other',
-  mayReturnSourceDocuments: true,
-};
-
-const isAggregatingCommand = ({ name }: ESQLAstCommand): boolean =>
-  name === 'stats' || name === 'promql';
-
-function combineResults(results: readonly EsqlResultPipeline[]): EsqlResultPipeline {
-  const [first] = results;
-  if (!first) {
-    return DEFAULT_RESULT;
-  }
-
-  return {
-    rowOrigin: results.every(({ rowOrigin }) => rowOrigin === first.rowOrigin)
-      ? first.rowOrigin
-      : 'mixed',
-    mayReturnSourceDocuments: results.some(
-      ({ mayReturnSourceDocuments }) => mayReturnSourceDocuments
-    ),
-  };
-}
-
-/** Analyzes the commands and subqueries that supply the result rows. */
-export function analyzeResultPipeline(
+/** Identifies the row kinds emitted by a pipeline, following its result-producing sources. */
+export function analyzeResultRows(
   commands: readonly ESQLAstCommand[],
   namedSubqueries: readonly NamedSubquery[] = []
-): EsqlResultPipeline {
-  const bindingResults = new Map<NamedSubquery, EsqlResultPipeline>();
+): EsqlResultRows {
+  const bindingResults = new Map<NamedSubquery, EsqlResultRows>();
 
-  function getSourceResult(
-    source: ESQLAstItem,
-    bindings: readonly NamedSubquery[]
-  ): EsqlResultPipeline {
-    if (isSubQuery(source)) {
-      return analyze(source.child.commands, bindings);
-    }
-
-    const binding = isSource(source) && findNamedSubqueryForSource(source, bindings);
+  function getSourceRows(source: ESQLSource, bindings: readonly NamedSubquery[]): EsqlResultRows {
+    const binding = findNamedSubqueryForSource(source, bindings);
     if (!binding) {
-      return DEFAULT_RESULT;
+      return DOCUMENT_ROWS;
     }
 
     const cached = bindingResults.get(binding);
-    if (cached !== undefined) {
+    if (cached) {
       return cached;
     }
 
-    const result = analyze(
-      binding.query.commands,
-      getNamedSubqueriesAvailableTo(bindings, binding)
-    );
-    bindingResults.set(binding, result);
-    return result;
+    const rows = analyze(binding.query.commands, getNamedSubqueriesAvailableTo(bindings, binding));
+    bindingResults.set(binding, rows);
+    return rows;
   }
 
   function analyze(
     pipeline: readonly ESQLAstCommand[],
     bindings: readonly NamedSubquery[],
-    input = DEFAULT_RESULT
-  ): EsqlResultPipeline {
-    let result = input;
-    for (const command of pipeline) {
-      if (command.name === 'from') {
-        result = combineResults(
-          command.args
-            .filter((arg) => isSource(arg) || isSubQuery(arg))
-            .map((arg) => getSourceResult(arg, bindings))
-        );
-      } else if (command.name === 'fork') {
-        const { args } = command as ESQLAstForkCommand;
-        if (args.length > 0) {
-          result = combineResults(
-            args.map(({ child }) =>
-              child.type === 'query' ? analyze(child.commands, bindings, result) : result
+    input = UNKNOWN_ROWS
+  ): EsqlResultRows {
+    return pipeline.reduce<EsqlResultRows>((rows, command) => {
+      switch (command.name) {
+        case 'from':
+          return unionRows(
+            command.args.flatMap((arg) => {
+              if (isSubQuery(arg)) {
+                return [analyze(arg.child.commands, bindings)];
+              }
+              return isSource(arg) ? [getSourceRows(arg, bindings)] : [];
+            })
+          );
+        case 'fork': {
+          const { args } = command as ESQLAstForkCommand;
+          return args.length
+            ? unionRows(
+                args.map(({ child }) =>
+                  child.type === 'query' ? analyze(child.commands, bindings, rows) : rows
+                )
+              )
+            : rows;
+        }
+        case 'describe':
+          return SCHEMA_ROWS;
+        case 'stats':
+          return new Set(
+            Array.from(rows, (kind) =>
+              isSchemaDerivedRow(kind) ? 'schema-aggregate' : 'aggregate'
             )
           );
-        }
-      } else if (
-        esqlCommandRegistry.getCommandByName(command.name)?.metadata.rowOrigin === 'schema'
-      ) {
-        result = { ...result, rowOrigin: 'schema', mayReturnSourceDocuments: false };
-      } else if (isAggregatingCommand(command)) {
-        result = { ...result, mayReturnSourceDocuments: false };
+        case 'promql':
+          return AGGREGATE_ROWS;
+        default:
+          return rows;
       }
-    }
-    return result;
+    }, input);
   }
 
   return analyze(commands, namedSubqueries);
-}
-
-/** Returns the origin of the rows supplied by the pipeline. */
-export function getPipelineRowOrigin(
-  commands: readonly ESQLAstCommand[],
-  namedSubqueries?: readonly NamedSubquery[]
-): EsqlRowOrigin {
-  return analyzeResultPipeline(commands, namedSubqueries).rowOrigin;
 }

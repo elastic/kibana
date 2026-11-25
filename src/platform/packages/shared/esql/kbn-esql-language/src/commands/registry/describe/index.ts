@@ -39,6 +39,5 @@ export const describeCommand: ICommand = {
     declaration: 'DESCRIBE',
     examples: ['FROM logs | DESCRIBE | KEEP name, type'],
     preview: true,
-    rowOrigin: 'schema',
   },
 };

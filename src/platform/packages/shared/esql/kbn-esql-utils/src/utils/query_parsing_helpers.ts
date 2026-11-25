@@ -19,12 +19,12 @@ import {
 import {
   CommandNames,
   esqlCommandRegistry,
-  analyzeResultPipeline,
+  analyzeResultRows,
+  hasSchemaDerivedRows,
   getNamedSubqueries,
   getPromqlBracketsToClose,
   TRANSFORMATIONAL_COMMANDS,
-  type EsqlRowOrigin,
-  type EsqlResultPipeline,
+  type EsqlResultRows,
 } from '@kbn/esql-language';
 import type { PromQLLabel } from '@elastic/esql';
 import type {
@@ -89,22 +89,22 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
   return clustersSet.size > 0 ? [...clustersSet] : undefined;
 }
 
-const resultPipelineCache = new WeakMap<ESQLAstQueryExpression, EsqlResultPipeline>();
+const resultRowsCache = new WeakMap<ESQLAstQueryExpression, EsqlResultRows>();
 
-function getResultPipelineFromAst(root: ESQLAstQueryExpression): EsqlResultPipeline {
-  const cached = resultPipelineCache.get(root);
+function getResultRowsFromAst(root: ESQLAstQueryExpression): EsqlResultRows {
+  const cached = resultRowsCache.get(root);
   if (cached) {
     return cached;
   }
 
-  const result = analyzeResultPipeline(root.commands, getNamedSubqueries(root.header));
-  resultPipelineCache.set(root, result);
+  const result = analyzeResultRows(root.commands, getNamedSubqueries(root.header));
+  resultRowsCache.set(root, result);
   return result;
 }
 
 /** Analyzes the pipelines that supply the query results. */
-export function getESQLResultPipeline(esql: string): EsqlResultPipeline {
-  return getResultPipelineFromAst(parseEsqlCached(esql).root);
+export function getESQLResultRows(esql: string): EsqlResultRows {
+  return getResultRowsFromAst(parseEsqlCached(esql).root);
 }
 
 /**
@@ -122,9 +122,18 @@ export function hasAggregatingCommand(esql?: string): boolean {
   );
 }
 
-/** Classifies the origin of the result rows in an ES|QL query. */
-export function getESQLRowOrigin(esql: string): EsqlRowOrigin {
-  return getESQLResultPipeline(esql).rowOrigin;
+/** Checks whether the query can emit schema-derived rows. */
+export function hasESQLSchemaDerivedRows(esql: string): boolean {
+  return hasSchemaDerivedRows(getESQLResultRows(esql));
+}
+
+function isSchemaTableResult(rows: EsqlResultRows): boolean {
+  return hasSchemaDerivedRows(rows) && !rows.has('document') && !rows.has('unknown');
+}
+
+/** Checks whether schema-derived rows contribute to a table-only result. */
+export function hasESQLSchemaTableResult(esql: string): boolean {
+  return isSchemaTableResult(getESQLResultRows(esql));
 }
 
 /** Detects schema table results and preserves the legacy transformational classification. */
@@ -135,8 +144,7 @@ export function hasTransformationalCommand(esql?: string): boolean {
     return true;
   }
 
-  const { rowOrigin, mayReturnSourceDocuments } = getResultPipelineFromAst(root);
-  if (rowOrigin !== 'other' && !mayReturnSourceDocuments) {
+  if (isSchemaTableResult(getResultRowsFromAst(root))) {
     return true;
   }
 

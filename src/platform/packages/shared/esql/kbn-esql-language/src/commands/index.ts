@@ -18,10 +18,9 @@ export * from './definitions/all_operators';
 export * from './definitions/utils/promql';
 export * from './definitions/utils/named_subqueries';
 export {
-  analyzeResultPipeline,
-  getPipelineRowOrigin,
-  type EsqlResultPipeline,
-  type EsqlRowOrigin,
+  analyzeResultRows,
+  hasSchemaDerivedRows,
+  type EsqlResultRows,
 } from './definitions/utils/result_pipeline';
 export { inlineCasts as inlineCastsMapping } from '@elastic/esql-definitions/inline-cast';
 

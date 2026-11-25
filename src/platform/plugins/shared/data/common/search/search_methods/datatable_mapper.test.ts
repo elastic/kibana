@@ -47,6 +47,7 @@ describe('mapEsqlResponseToDatatable', () => {
 
   it.each([
     ['FROM logs | RENAME service.name AS name | DESCRIBE', 'name'],
+    ['FROM logs | RENAME service.name AS name | DESCRIBE | STATS name = COUNT(*)', 'name'],
     [
       'FROM logs | RENAME service.name AS name | DESCRIBE | RENAME name AS field_name',
       'field_name',

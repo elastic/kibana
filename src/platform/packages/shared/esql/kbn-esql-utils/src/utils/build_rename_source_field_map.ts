@@ -9,7 +9,7 @@
 
 import { isColumn } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
-import { getPipelineRowOrigin } from '@kbn/esql-language';
+import { analyzeResultRows, hasSchemaDerivedRows } from '@kbn/esql-language';
 import type { ESQLCommandSummary, ESQLCommandSummaryContext } from '@kbn/esql-language';
 import {
   createQuerySummaryContext,
@@ -173,7 +173,7 @@ function resolvePipelineRenames(
   query: string,
   summaryContext: ESQLCommandSummaryContext
 ): Map<string, string> {
-  if (getPipelineRowOrigin(commands, summaryContext.namedSubqueries) !== 'other') {
+  if (hasSchemaDerivedRows(analyzeResultRows(commands, summaryContext.namedSubqueries))) {
     return new Map();
   }
 
