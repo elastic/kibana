@@ -72,10 +72,7 @@ export const setupRum = (
       createTaskRunner: ({ signal }: RunContext) => ({
         async run() {
           const policy = await service;
-          if (!policy || signal.aborted) {
-            return;
-          }
-          if (!(await policy.publishLatest(signal)) && !signal.aborted) {
+          if (policy && !(await policy.publishLatest(signal)) && !signal.aborted) {
             throw new Error('Could not republish the RUM policy');
           }
         },

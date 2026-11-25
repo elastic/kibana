@@ -15,6 +15,7 @@ export const RUM_POLICY_TYPE = 'apm-rum-policy';
 const RUM_POLICY_ID = 'default';
 const MAX_TOKENS = 10;
 const MAX_ORIGINS = 100;
+const MAX_PUBLISH_ATTEMPTS = 3;
 
 export const rumSettingsSchema = schema.object({
   enabled: schema.boolean(),
@@ -23,19 +24,27 @@ export const rumSettingsSchema = schema.object({
   }),
 });
 
-const rumPolicySchemaV1 = schema.object({
-  revision: schema.number({ min: 1, max: Number.MAX_SAFE_INTEGER }),
-  deleted: schema.boolean(),
-  ...rumSettingsSchema.getPropSchemas(),
-  client_tokens: schema.arrayOf(
-    schema.object({
-      id: schema.string({ maxLength: 128 }),
-      sha256: schema.string({ maxLength: 64 }),
-      created_at: schema.string({ maxLength: 64 }),
-    }),
-    { maxSize: MAX_TOKENS }
-  ),
-});
+// Forward compatibility ignores unknown fields at every level, so a rollback can read newer policies.
+const createRumPolicySchemaV1 = (unknowns: 'forbid' | 'ignore') =>
+  schema.object(
+    {
+      revision: schema.number({ min: 1, max: Number.MAX_SAFE_INTEGER }),
+      deleted: schema.boolean(),
+      ...rumSettingsSchema.getPropSchemas(),
+      client_tokens: schema.arrayOf(
+        schema.object(
+          {
+            id: schema.string({ maxLength: 128 }),
+            sha256: schema.string({ maxLength: 64 }),
+            created_at: schema.string({ maxLength: 64 }),
+          },
+          { unknowns }
+        ),
+        { maxSize: MAX_TOKENS }
+      ),
+    },
+    { unknowns }
+  );
 
 export const rumPolicySavedObject: SavedObjectsType = {
   name: RUM_POLICY_TYPE,
@@ -46,8 +55,8 @@ export const rumPolicySavedObject: SavedObjectsType = {
     1: {
       changes: [],
       schemas: {
-        forwardCompatibility: rumPolicySchemaV1.extends({}, { unknowns: 'ignore' }),
-        create: rumPolicySchemaV1,
+        forwardCompatibility: createRumPolicySchemaV1('ignore'),
+        create: createRumPolicySchemaV1('forbid'),
       },
     },
   },
@@ -62,27 +71,6 @@ const emptyPolicy: AgentlessRumPolicy = {
   allowed_origins: [],
   client_tokens: [],
 };
-
-// Publish only known fields, even if a newer Kibana version stored more.
-const toPublishedPolicy = ({
-  revision,
-  enabled,
-  deleted,
-  allowed_origins: allowedOrigins,
-  client_tokens: tokens,
-}: AgentlessRumPolicy): AgentlessRumPolicy => ({
-  revision,
-  enabled,
-  deleted,
-  allowed_origins: allowedOrigins,
-  client_tokens: tokens.map(({ id, sha256, created_at: createdAt }) => ({
-    id,
-    sha256,
-    created_at: createdAt,
-  })),
-});
-
-const MAX_PUBLISH_ATTEMPTS = 3;
 
 export class RumPolicyService {
   constructor(
@@ -200,20 +188,19 @@ export class RumPolicyService {
   public async publishLatest(signal?: AbortSignal): Promise<boolean> {
     try {
       let saved = await this.read();
-      for (let attempt = 0; attempt < MAX_PUBLISH_ATTEMPTS && saved; attempt++) {
-        if (signal?.aborted) {
-          return false;
+      for (let attempt = 0; attempt < MAX_PUBLISH_ATTEMPTS; attempt++) {
+        if (!saved) {
+          return true;
         }
-        const { revision } = saved.attributes;
-        await this.agentless.publish(toPublishedPolicy(saved.attributes), { signal });
+        signal?.throwIfAborted();
+        await this.agentless.publish(saved.attributes, { signal });
+        signal?.throwIfAborted();
         const latest = await this.read();
-        if (!latest || latest.attributes.revision <= revision) {
+        signal?.throwIfAborted();
+        if (!latest || latest.attributes.revision <= saved.attributes.revision) {
           return true;
         }
         saved = latest;
-      }
-      if (!saved) {
-        return true;
       }
       this.logger.warn('The RUM policy kept changing while it was being published.');
       return false;

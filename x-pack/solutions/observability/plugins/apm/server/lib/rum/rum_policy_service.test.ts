@@ -33,12 +33,13 @@ const storedPolicy = (attributes: AgentlessRumPolicy, version: string) => ({
 });
 
 describe('RumPolicyService', () => {
-  const logger = loggingSystemMock.createLogger();
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let savedObjects: ReturnType<typeof savedObjectsClientMock.create>;
   let agentless: jest.Mocked<AgentlessRumClient>;
   let service: RumPolicyService;
 
   beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
     savedObjects = savedObjectsClientMock.create();
     agentless = { mintToken: jest.fn(), publish: jest.fn() };
     service = new RumPolicyService(savedObjects, agentless, logger);
@@ -200,18 +201,6 @@ describe('RumPolicyService', () => {
     expect(agentless.publish).toHaveBeenCalledTimes(3);
   });
 
-  it('publishes only known policy fields', async () => {
-    const newerPolicy = {
-      ...initialPolicy,
-      future: true,
-      client_tokens: [{ ...tokenRecord, label: 'x' }],
-    };
-    savedObjects.get.mockResolvedValue(storedPolicy(newerPolicy, 'version-1'));
-
-    await expect(service.publishLatest()).resolves.toBe(true);
-    expect(agentless.publish).toHaveBeenCalledWith(initialPolicy, { signal: undefined });
-  });
-
   it('does not publish once the signal is aborted', async () => {
     const controller = new AbortController();
     savedObjects.get.mockImplementation(async () => {
@@ -235,14 +224,30 @@ describe('RumPolicyService', () => {
     );
   });
 
-  it('reads newer policies by ignoring unknown fields', () => {
+  it('does not wait for another read once the task is cancelled after publishing', async () => {
+    const controller = new AbortController();
+    savedObjects.get.mockResolvedValue(storedPolicy(initialPolicy, 'version-1'));
+    agentless.publish.mockImplementation(async () => controller.abort());
+
+    await expect(service.publishLatest(controller.signal)).resolves.toBe(false);
+    expect(savedObjects.get).toHaveBeenCalledTimes(1);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('reads newer policies by ignoring unknown fields at every level', () => {
     const { modelVersions } = rumPolicySavedObject;
     const versions = typeof modelVersions === 'function' ? modelVersions() : modelVersions;
-    const { forwardCompatibility } = versions?.[1]?.schemas ?? {};
+    const { create, forwardCompatibility } = versions?.[1]?.schemas ?? {};
+    const newerPolicy = {
+      ...initialPolicy,
+      future: true,
+      client_tokens: [{ ...tokenRecord, label: 'x' }],
+    };
+
     expect(
-      typeof forwardCompatibility === 'object' &&
-        forwardCompatibility.validate({ ...initialPolicy, future: true })
+      typeof forwardCompatibility === 'object' && forwardCompatibility.validate(newerPolicy)
     ).toEqual(initialPolicy);
+    expect(() => typeof create === 'object' && create.validate(newerPolicy)).toThrow();
   });
 
   it.each([['*'], ['http://[::1]:8080'], ['https://example.org:8443']])(
