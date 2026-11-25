@@ -62,8 +62,9 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.status).toBe('completed');
-      // Known failures is the only strategy; whether it is due depends on the minute. When it runs,
-      // it reads the account's rules, the knowledge indicators and `.rule-events` for real.
+      // Known failures is the only strategy; whether it is due depends on the minute. This proves the
+      // tick runs with it bound and without errors. The space holds no knowledge indicator, so a due
+      // run stops before `.rule-events`; the generator's unit tests cover the join and the row read.
       const unexpected = response.body.strategies.filter(
         ({ id, error }) => id !== 'known_failures' || error !== undefined
       );

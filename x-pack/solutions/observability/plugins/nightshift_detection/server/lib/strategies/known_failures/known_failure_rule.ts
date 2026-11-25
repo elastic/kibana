@@ -6,34 +6,45 @@
  */
 
 import { MAX_ESQL_QUERY_LENGTH } from '@kbn/alerting-v2-schemas';
+import { HIGH_SEVERITY_THRESHOLD } from '@kbn/significant-events-schema';
 import type { QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { computeRuleId } from '../../rules/rule_identity';
 import type { AlertingRuleResource } from '../types';
-import {
-  canCompileKnownFailureQuery,
-  compileKnownFailureQuery,
-} from './compile_known_failure_query';
+import { compileKnownFailureQuery, getUncountableReason } from './compile_known_failure_query';
 import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants';
 
 /**
  * Why a knowledge indicator gets no Known failures rule, or `undefined` when it gets one. Only match
  * queries made of `FROM` and `WHERE`, with at most `KEEP`, `DROP` or `SORT` beside them, can be
- * counted per minute, and only while the rule query stays within the rules API's length limit.
+ * counted per minute, and only while the rule query stays within the rules API's length limit. And
+ * only from the severity score significant events needs to back a query with a rule: each rule
+ * scans six hours every five minutes, too much for an indicator nobody would be paged for.
  */
 export function getUnwatchableReason(
-  query: Pick<StreamQuery, 'id' | 'type' | 'esql'>
+  query: Pick<StreamQuery, 'id' | 'type' | 'esql' | 'severity_score'>
 ): string | undefined {
+  // Unscored counts as 0, as it does for significant events.
+  if (query.severity_score === undefined) {
+    return `knowledge indicator [${query.id}] has no severity score, and Known failures watches only from ${HIGH_SEVERITY_THRESHOLD}`;
+  }
+  if (query.severity_score < HIGH_SEVERITY_THRESHOLD) {
+    return `knowledge indicator [${query.id}] has a severity score of ${query.severity_score}, below ${HIGH_SEVERITY_THRESHOLD}, the score significant events needs to back a query with a rule`;
+  }
   if (query.type !== 'match') {
     return `knowledge indicator [${query.id}] is a STATS query, which Known failures does not count yet`;
   }
-  if (!canCompileKnownFailureQuery(query.esql.query)) {
-    return `knowledge indicator [${query.id}] is not a FROM … | WHERE … query (KEEP, DROP and SORT aside)`;
+  const uncountable = getUncountableReason(query.esql.query);
+  if (uncountable) {
+    return `knowledge indicator [${query.id}] ${uncountable}`;
   }
   // The rules API rejects a longer query. The cross-project form is the longest, so a query that
   // fits it fits either way, and the rule id does not flip with the setting.
   if (
-    compileKnownFailureQuery({ esql: query.esql.query, cpsEnabled: true }).length >
-    MAX_ESQL_QUERY_LENGTH
+    compileKnownFailureQuery({
+      knowledgeIndicatorId: query.id,
+      esql: query.esql.query,
+      cpsEnabled: true,
+    }).length > MAX_ESQL_QUERY_LENGTH
   ) {
     return `knowledge indicator [${query.id}] is too long to watch`;
   }
@@ -69,6 +80,7 @@ export function buildKnownFailureRule({
     // No grouping: the query returns one row per run, all of one series.
     query: {
       base: compileKnownFailureQuery({
+        knowledgeIndicatorId: query.id,
         esql: query.esql.query,
         cpsEnabled,
       }),

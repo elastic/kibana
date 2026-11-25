@@ -23,7 +23,7 @@ import type { GenerateResult } from '../strategies/types';
 import { planWindows } from './plan_windows';
 import type { PlannedWindow } from './plan_windows';
 import { SpaceRunLock } from './space_run_lock';
-import type { StrategyRunResult, TickResult } from './tick_result';
+import type { StrategyRunResult, TickResult } from '../../../common/tick';
 import { DetectionEngineDataClient, KnowledgeIndicators, RunContext, Sources } from './tokens';
 
 /**

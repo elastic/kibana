@@ -24,6 +24,7 @@ const createQuery = (id: string, esql: string): QueryLink => ({
     esql: { query: esql },
     type: 'match',
     features: [{ id: 'checkout' }],
+    severity_score: 70,
   },
   source_id: 'source-1',
   rule_backed: false,

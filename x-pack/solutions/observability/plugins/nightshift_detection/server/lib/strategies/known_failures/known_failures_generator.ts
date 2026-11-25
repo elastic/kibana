@@ -192,8 +192,7 @@ async function readWatchedKnowledgeIndicators({
     managedRules.filter(({ enabled }) => !enabled).map(({ id }) => id)
   );
 
-  // Two indicators with the same query share a rule id; sorted by id, the same one always wins.
-  const countable = sortBy(queries, ({ query }) => query.id)
+  const countable = queries
     .filter(({ query }) => getUnwatchableReason(query) === undefined)
     .map((query) => ({ query, ruleId: getKnownFailureRuleId({ spaceId, query, cpsEnabled }) }));
   return {

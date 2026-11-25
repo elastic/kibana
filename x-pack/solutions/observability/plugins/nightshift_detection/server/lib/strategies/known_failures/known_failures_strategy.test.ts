@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
 import type { QueryLink, QueryType } from '@kbn/significant-events-schema';
 import { computeRuleId } from '../../rules/rule_identity';
@@ -18,14 +19,24 @@ const createQuery = ({
   title = 'Checkout timeouts',
   esql = 'FROM logs-* | WHERE service.name == "checkout" AND message : "timeout"',
   type = 'match',
+  // The lowest score significant events backs with a rule, so the default fixture sits on the edge.
+  severityScore = 60,
 }: {
   id?: string;
   sourceId?: string;
   title?: string;
   esql?: string;
   type?: QueryType;
+  severityScore?: number;
 } = {}): QueryLink => ({
-  query: { id, title, description: 'Checkout calls time out', esql: { query: esql }, type },
+  query: {
+    id,
+    title,
+    description: 'Checkout calls time out',
+    esql: { query: esql },
+    type,
+    severity_score: severityScore,
+  },
   source_id: sourceId,
   rule_backed: false,
   rule_id: `rule-${id}`,
@@ -75,11 +86,12 @@ describe('KnownFailuresStrategy', () => {
     });
 
     // Dropped, not refused: they leave the matched lines unchanged, and KEEP could drop @timestamp.
+    // An @timestamp in them is no time bound of the indicator's own, since the rule drops them.
     it('counts a knowledge indicator with KEEP, DROP or SORT on its filters alone', async () => {
       const { resources } = await new KnownFailuresStrategy().resources(
         createContext([
           createQuery({
-            esql: 'FROM logs-* | KEEP message | WHERE message : "timeout" | DROP a | SORT message',
+            esql: 'FROM logs-* | KEEP @timestamp, message | WHERE message : "timeout" | DROP a | SORT @timestamp DESC',
           }),
         ])
       );
@@ -103,11 +115,28 @@ describe('KnownFailuresStrategy', () => {
       );
     });
 
+    // A knowledge indicator id is any string; unquoted, a line break in it would end the comment
+    // naming it and run the rest as ES|QL.
+    it('keeps a line break in the knowledge indicator id out of the rule query', async () => {
+      const { resources } = await new KnownFailuresStrategy().resources(
+        createContext([createQuery({ id: 'ki-1\n| LIMIT 0' })])
+      );
+
+      expect(resources[0].data.query.base).not.toMatch(/^\| LIMIT 0/m);
+    });
+
     // Noted, not skipped: a skipped source keeps all its rules, so the old rule of an edited
-    // indicator beside a STATS one would never be deleted.
-    it('notes STATS, non-filter, SET, subquery, self-timed, parameterized and overlong knowledge indicators without skipping their source', async () => {
+    // indicator beside a STATS one would never be deleted. The note is the only place an author
+    // learns why, so it names the actual reason.
+    it('notes STATS, non-filter, SET, subquery, self-timed, parameterized, overlong and low-severity knowledge indicators without skipping their source', async () => {
       const { resources, skipped, notes } = await new KnownFailuresStrategy().resources(
         createContext([
+          // Below the score significant events needs to back a query with a rule.
+          createQuery({ id: 'medium', severityScore: 59 }),
+          {
+            ...createQuery({ id: 'unscored' }),
+            query: omit(createQuery({ id: 'unscored' }).query, 'severity_score'),
+          },
           createQuery({ id: 'stats', type: 'stats' }),
           createQuery({ id: 'limited', esql: 'FROM logs-* | WHERE a == 1 | LIMIT 10' }),
           createQuery({ id: 'unfiltered', esql: 'FROM logs-* | SORT message' }),
@@ -132,13 +161,15 @@ describe('KnownFailuresStrategy', () => {
       expect(resources).toEqual([]);
       expect(skipped).toEqual([]);
       expect(notes).toEqual([
-        expect.stringMatching(/^source-1: .*\[stats\]/),
-        expect.stringMatching(/^source-1: .*\[limited\]/),
-        expect.stringMatching(/^source-1: .*\[unfiltered\]/),
-        expect.stringMatching(/^source-1: .*\[set\]/),
-        expect.stringMatching(/^source-1: .*\[subquery\]/),
-        expect.stringMatching(/^source-1: .*\[now\]/),
-        expect.stringMatching(/^source-1: .*\[param\]/),
+        expect.stringMatching(/^source-1: .*\[medium\] has a severity score of 59, below 60/),
+        expect.stringMatching(/^source-1: .*\[unscored\] has no severity score/),
+        expect.stringMatching(/^source-1: .*\[stats\] is a STATS query/),
+        expect.stringMatching(/^source-1: .*\[limited\] uses LIMIT/),
+        expect.stringMatching(/^source-1: .*\[unfiltered\] has no WHERE/),
+        expect.stringMatching(/^source-1: .*\[set\] starts with a SET header/),
+        expect.stringMatching(/^source-1: .*\[subquery\] reads from a subquery/),
+        expect.stringMatching(/^source-1: .*\[now\] bounds its own time/),
+        expect.stringMatching(/^source-1: .*\[param\] uses \? parameters/),
         expect.stringMatching(/^source-1: .*\[long\] is too long/),
       ]);
     });
@@ -185,9 +216,11 @@ describe('getKnownFailureRuleId', () => {
     ).toBe(getId({}));
   });
 
-  it('changes with the query, the source and the routing', () => {
+  // Two indicators sharing one rule would leave one of them unwatched, its rows read as the other's.
+  it('changes with the knowledge indicator, the query, the source and the routing', () => {
     const id = getId({});
 
+    expect(getId({ id: 'ki-2' })).not.toBe(id);
     expect(getId({ esql: 'FROM logs-* | WHERE message : "refused"' })).not.toBe(id);
     expect(getId({ sourceId: 'source-2' })).not.toBe(id);
     expect(getId({}, true)).not.toBe(id);
