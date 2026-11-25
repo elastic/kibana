@@ -7,7 +7,7 @@
 
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 import { computeServiceMapFilterOptionCounts } from './service_map_filter_option_counts';
-import { mkEdge } from './test_helpers';
+import { mkEdge, mkIntraGroupEdge } from './test_helpers';
 
 function mkService(id: string, sloStatus?: 'healthy' | 'violated' | 'noSLOs'): ServiceMapNode {
   return {
@@ -131,6 +131,27 @@ describe('computeServiceMapFilterOptionCounts', () => {
       expect(slo.violated).toBe(1);
       expect(slo.noData).toBe(1);
       expect(connection).toEqual({ connected: 2, orphaned: 0 });
+    });
+
+    it('does not count a call between two members of the group as a connection', () => {
+      const nodes = [box, member('opbeans-java'), member('opbeans-node')];
+      const edges = [mkIntraGroupEdge('e1', 'opbeans-java', 'opbeans-node')];
+
+      const { connection } = computeServiceMapFilterOptionCounts(nodes, edges);
+
+      expect(connection).toEqual({ connected: 0, orphaned: 2 });
+    });
+
+    it('counts a member with a call out of the group as connected', () => {
+      const nodes = [box, member('opbeans-java'), member('opbeans-node'), mkService('frontend')];
+      const edges = [
+        mkIntraGroupEdge('e1', 'opbeans-java', 'opbeans-node'),
+        mkEdge('e2', 'frontend', 'opbeans-java'),
+      ];
+
+      const { connection } = computeServiceMapFilterOptionCounts(nodes, edges);
+
+      expect(connection).toEqual({ connected: 2, orphaned: 1 });
     });
 
     it('does not count the box as an orphaned node', () => {

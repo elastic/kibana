@@ -26,6 +26,7 @@ import {
  * Connection-based filter values.
  * - `orphaned`: show only nodes with 0 edges (no connections at all).
  * - `connected`: show only nodes with ≥1 edge.
+ * Calls between the members of the same open group do not count as edges.
  */
 export type ConnectionFilter = 'orphaned' | 'connected';
 
@@ -55,10 +56,18 @@ type ServiceMapFilterNodeData = Pick<
   'alertsCount' | 'alertsByStatus' | 'sloStatus' | 'serviceAnomalyStats'
 >;
 
-/** Builds a Set of node IDs that appear on at least one edge (as source or target). */
+/**
+ * Builds a Set of node IDs that appear on at least one edge (as source or target). Calls between
+ * the members of an open group are left out, as they are not on the map while the group is closed:
+ * a node is connected or orphaned the same way whether its group is open or closed, so opening a
+ * group never hides it from a connection filter that showed it closed.
+ */
 export function buildConnectedNodeIdSet(edges: ServiceMapEdgeType[]): Set<string> {
   const connected = new Set<string>();
   for (const edge of edges) {
+    if (edge.data?.isIntraGroup) {
+      continue;
+    }
     connected.add(edge.source);
     connected.add(edge.target);
   }

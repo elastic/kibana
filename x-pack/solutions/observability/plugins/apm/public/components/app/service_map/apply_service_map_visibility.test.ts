@@ -8,11 +8,12 @@
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
+import type { ConnectionFilter } from './apply_service_map_visibility';
 import {
   applyServiceMapVisibility,
   DEFAULT_SERVICE_MAP_VIEW_FILTERS,
 } from './apply_service_map_visibility';
-import { mkEdge } from './test_helpers';
+import { mkEdge, mkIntraGroupEdge } from './test_helpers';
 
 const mkService = (
   id: string,
@@ -188,6 +189,60 @@ describe('applyServiceMapVisibility', () => {
       expect(byId[box.id]).toBe(false);
       expect(byId['opbeans-go']).toBe(false);
       expect(byId['opbeans-node']).toBe(true);
+    });
+
+    describe('with connection filters', () => {
+      const filterBy = (connectionFilter: ConnectionFilter[]) => ({
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        connectionFilter,
+      });
+      const hiddenById = (outNodes: ServiceMapNode[]) =>
+        Object.fromEntries(outNodes.map((n) => [n.id, n.hidden]));
+
+      it('keeps a group with calls only between its members under the Orphaned filter', () => {
+        // Closed, it has no edge and is orphaned: opening it must not make it vanish.
+        const nodes = [box, member('opbeans-go'), member('opbeans-node')];
+
+        const { nodes: outNodes } = applyServiceMapVisibility(
+          nodes,
+          [mkIntraGroupEdge('e1', 'opbeans-go', 'opbeans-node')],
+          filterBy(['orphaned'])
+        );
+
+        expect(outNodes.map((n) => n.hidden)).toEqual([false, false, false]);
+      });
+
+      it('hides a group with calls only between its members under the Connected filter', () => {
+        const nodes = [box, member('opbeans-go'), member('opbeans-node')];
+
+        const { nodes: outNodes } = applyServiceMapVisibility(
+          nodes,
+          [mkIntraGroupEdge('e1', 'opbeans-go', 'opbeans-node')],
+          filterBy(['connected'])
+        );
+
+        expect(outNodes.every((n) => n.hidden)).toBe(true);
+      });
+
+      it('keeps the box and the member with a call out of the group under the Connected filter', () => {
+        const nodes = [box, member('opbeans-go'), member('opbeans-node'), mkService('frontend')];
+
+        const { nodes: outNodes } = applyServiceMapVisibility(
+          nodes,
+          [
+            mkIntraGroupEdge('e1', 'opbeans-go', 'opbeans-node'),
+            mkEdge('e2', 'frontend', 'opbeans-go'),
+          ],
+          filterBy(['connected'])
+        );
+
+        expect(hiddenById(outNodes)).toEqual({
+          [box.id]: false,
+          'opbeans-go': false,
+          'opbeans-node': true,
+          frontend: false,
+        });
+      });
     });
 
     it('hides the box when none of its members match the filters', () => {
