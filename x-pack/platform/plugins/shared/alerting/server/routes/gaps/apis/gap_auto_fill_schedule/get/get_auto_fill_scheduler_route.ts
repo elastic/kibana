@@ -105,7 +105,7 @@ export const getAutoFillSchedulerPublicRoute = (
       access: 'public',
       summary: 'Get a gap auto fill scheduler by ID',
       description:
-        'Get the configuration of a gap auto fill scheduler, including whether automatic gap filling is enabled. Schedulers are scoped to the Kibana space of the request. The Elastic Security detection rules settings use the scheduler with the ID `security-solution-gap-auto-fill-scheduler-<space-id>`.',
+        'Get the configuration of a gap auto fill scheduler, including whether automatic gap filling is enabled. Schedulers are scoped to the Kibana space of the request. The Elastic Security detection rules settings use the scheduler with the ID `security-solution-gap-auto-fill-scheduler-<space-id>`. This API requires an Enterprise license.',
       tags: ['oas-tag:alerting'],
       oasOperationObject: getGapAutoFillSchedulerExamplesV1,
     },

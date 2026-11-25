@@ -91,7 +91,7 @@ export const deleteAutoFillSchedulerPublicRoute = (
       access: 'public',
       summary: 'Delete a gap auto fill scheduler by ID',
       description:
-        'Delete a gap auto fill scheduler and stop its scheduled task. Automatic gap filling stops for the rule types the scheduler covered.',
+        'Delete a gap auto fill scheduler and stop its scheduled task. Automatic gap filling stops for the rule types the scheduler covered. This API requires an Enterprise license.',
       tags: ['oas-tag:alerting'],
     },
   });

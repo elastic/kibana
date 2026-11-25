@@ -101,7 +101,7 @@ export const createAutoFillSchedulerPublicRoute = (
       access: 'public',
       summary: 'Create a gap auto fill scheduler',
       description:
-        'Create a gap auto fill scheduler that periodically fills detected gaps for the given rule types in the Kibana space of the request. Only one scheduler can exist per rule type and consumer pair. To manage the automatic gap filling setting shown in the Elastic Security detection rules settings, use the ID `security-solution-gap-auto-fill-scheduler-<space-id>`.',
+        'Create a gap auto fill scheduler that periodically fills detected gaps for the given rule types in the Kibana space of the request. Only one scheduler can exist per rule type and consumer pair. To manage the automatic gap filling setting shown in the Elastic Security detection rules settings, use the ID `security-solution-gap-auto-fill-scheduler-<space-id>`. This API requires an Enterprise license.',
       tags: ['oas-tag:alerting'],
       oasOperationObject: createGapAutoFillSchedulerExamplesV1,
     },

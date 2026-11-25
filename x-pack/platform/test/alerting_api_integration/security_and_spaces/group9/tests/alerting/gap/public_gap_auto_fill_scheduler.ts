@@ -147,11 +147,48 @@ export default function publicGapAutoFillSchedulerTests({ getService }: FtrProvi
           .send(getSchedulerBody({ id }))
           .expect(200);
 
+        // A different rule type pair isolates the id conflict from the one-scheduler-per-pair check
         const duplicateResp = await supertest
           .post(`${urlPrefix}${PUBLIC_PATH}`)
           .set('kbn-xsrf', 'foo')
-          .send(getSchedulerBody({ id }));
+          .send(
+            getSchedulerBody({ id, rule_types: [{ type: 'test.noop', consumer: 'alertsFixture' }] })
+          );
         expect(duplicateResp.statusCode).to.eql(409);
+      });
+
+      it('returns 409 when a scheduler with the same rule type pair already exists', async () => {
+        await supertest
+          .post(`${urlPrefix}${PUBLIC_PATH}`)
+          .set('kbn-xsrf', 'foo')
+          .send(getSchedulerBody({ id: `public-scheduler-pair-a-${Date.now()}` }))
+          .expect(200);
+
+        const duplicatePairResp = await supertest
+          .post(`${urlPrefix}${PUBLIC_PATH}`)
+          .set('kbn-xsrf', 'foo')
+          .send(getSchedulerBody({ id: `public-scheduler-pair-b-${Date.now()}` }));
+        expect(duplicatePairResp.statusCode).to.eql(409);
+      });
+
+      it('returns 409 when the id is used by an enabled scheduler in another space', async () => {
+        const id = `public-scheduler-cross-space-${Date.now()}`;
+        await supertest
+          .post(`${urlPrefix}${PUBLIC_PATH}`)
+          .set('kbn-xsrf', 'foo')
+          .send(getSchedulerBody({ id }))
+          .expect(200);
+
+        const otherSpaceResp = await supertest
+          .post(`${getUrlPrefix('default')}${PUBLIC_PATH}`)
+          .set('kbn-xsrf', 'foo')
+          .send(getSchedulerBody({ id }));
+        expect(otherSpaceResp.statusCode).to.eql(409);
+
+        // The scheduler in the first space is untouched
+        const getResp = await supertest.get(`${urlPrefix}${PUBLIC_PATH}/${id}`);
+        expect(getResp.statusCode).to.eql(200);
+        expect(getResp.body.enabled).to.eql(true);
       });
 
       it('returns 404 for get, update and delete of an unknown id', async () => {

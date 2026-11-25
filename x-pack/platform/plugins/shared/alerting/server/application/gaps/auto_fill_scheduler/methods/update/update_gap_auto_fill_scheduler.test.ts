@@ -19,6 +19,9 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { SavedObject, Logger, KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { nodeBuilder } from '@kbn/es-query';
+import { TaskStatus, type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import type { AlertingAuthorization } from '../../../../../authorization';
@@ -123,6 +126,32 @@ function setupSchedulerSo(attrs?: Partial<GapAutoFillSchedulerSO>) {
   return so;
 }
 
+const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'scheduler-1');
+
+function mockSchedulerTask({
+  spaceId = 'default',
+  interval = '1h',
+  scope = ['scope-a'],
+}: { spaceId?: string; interval?: string; scope?: string[] } = {}): ConcreteTaskInstance {
+  const task = {
+    id: 'scheduler-1',
+    taskType: 'gap-auto-fill-scheduler-task',
+    schedule: { interval },
+    scope,
+    params: { configId: 'scheduler-1', spaceId },
+    state: {},
+    attempts: 0,
+    status: TaskStatus.Idle,
+    runAt: new Date(),
+    scheduledAt: new Date(),
+    startedAt: null,
+    retryAt: null,
+    ownerId: null,
+  } as ConcreteTaskInstance;
+  taskManager.get.mockResolvedValue(task);
+  return task;
+}
+
 describe('updateGapAutoFillScheduler()', () => {
   let rulesClient: RulesClient;
 
@@ -135,6 +164,7 @@ describe('updateGapAutoFillScheduler()', () => {
       per_page: 1,
       page: 1,
     });
+    taskManager.get.mockRejectedValue(notFoundError);
 
     rulesClient = new RulesClient(rulesClientParamsBase);
     rulesClientParamsBase.getActionsClient.mockResolvedValue(actionsClient);
@@ -160,6 +190,7 @@ describe('updateGapAutoFillScheduler()', () => {
     unsecuredSavedObjectsClient.update.mockResolvedValue(updatedSo);
     // Mock get to return updatedSo on the second call (after update)
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(updatedSo);
+    mockSchedulerTask({ interval: '1h' });
 
     const params = getParams();
     await rulesClient.updateGapAutoFillScheduler(params);
@@ -189,6 +220,7 @@ describe('updateGapAutoFillScheduler()', () => {
   test('disables scheduler, removes task, and deletes backfills when enabled is set to false', async () => {
     const existingSo = setupSchedulerSo();
     unsecuredSavedObjectsClient.update.mockResolvedValue(existingSo);
+    mockSchedulerTask();
 
     const params = getParams({ enabled: false });
     await rulesClient.updateGapAutoFillScheduler(params);
@@ -234,15 +266,14 @@ describe('updateGapAutoFillScheduler()', () => {
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
       type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       perPage: 2,
-      filter:
-        '(' +
-        updatedRuleTypePairs
-          .map(
-            (pair) =>
-              `${GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE}.attributes.ruleTypeConsumerPairs: "${pair}"`
+      filter: nodeBuilder.or(
+        updatedRuleTypePairs.map((pair) =>
+          nodeBuilder.is(
+            `${GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE}.attributes.ruleTypeConsumerPairs`,
+            pair
           )
-          .join(' or ') +
-        ')',
+        )
+      ),
     });
 
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -262,6 +293,91 @@ describe('updateGapAutoFillScheduler()', () => {
       operation: expect.any(String),
       entity: expect.any(String),
     });
+  });
+
+  test('schedules a task when enabling a scheduler that has none', async () => {
+    const existingSo = setupSchedulerSo({ enabled: false });
+    unsecuredSavedObjectsClient.update.mockResolvedValue(existingSo);
+
+    const params = getParams();
+    await rulesClient.updateGapAutoFillScheduler(params);
+
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: existingSo.id, schedule: { interval: '2h' } }),
+      { request: params.request }
+    );
+  });
+
+  test('keeps the existing task when the schedule and scope are unchanged', async () => {
+    const existingSo = setupSchedulerSo({ schedule: { interval: '2h' }, scope: ['scope-a'] });
+    unsecuredSavedObjectsClient.update.mockResolvedValue(existingSo);
+    mockSchedulerTask({ interval: '2h', scope: ['scope-a'] });
+
+    const params = getParams({ schedule: { interval: '2h' }, scope: ['scope-a'] });
+    await rulesClient.updateGapAutoFillScheduler(params);
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      params.id,
+      expect.objectContaining({ name: 'updated name', maxBackfills: 200 })
+    );
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+    expect(backfillClient.deleteBackfillsByInitiatorId).not.toHaveBeenCalled();
+  });
+
+  test('replaces the task when the scope changes', async () => {
+    const existingSo = setupSchedulerSo({ schedule: { interval: '2h' } });
+    unsecuredSavedObjectsClient.update.mockResolvedValue(existingSo);
+    mockSchedulerTask({ interval: '2h', scope: ['scope-a'] });
+
+    const params = getParams({ schedule: { interval: '2h' }, scope: ['scope-b'] });
+    await rulesClient.updateGapAutoFillScheduler(params);
+
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(existingSo.id);
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: ['scope-b'] }),
+      { request: params.request }
+    );
+  });
+
+  test('throws a conflict when enabling and the task belongs to a scheduler in another space', async () => {
+    setupSchedulerSo({ enabled: false });
+    mockSchedulerTask({ spaceId: 'other-space' });
+
+    await expect(rulesClient.updateGapAutoFillScheduler(getParams())).rejects.toThrow(
+      'already exists for a gap auto fill scheduler in another space'
+    );
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+  });
+
+  test('does not remove a task that belongs to a scheduler in another space when disabling', async () => {
+    const existingSo = setupSchedulerSo({ enabled: false });
+    unsecuredSavedObjectsClient.update.mockResolvedValue(existingSo);
+    mockSchedulerTask({ spaceId: 'other-space' });
+
+    await rulesClient.updateGapAutoFillScheduler(getParams({ enabled: false }));
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    expect(backfillClient.deleteBackfillsByInitiatorId).toHaveBeenCalled();
+  });
+
+  test('keeps the stored excludedReasons when the update omits them', async () => {
+    const existingSo = setupSchedulerSo({ excludedReasons: [] });
+    unsecuredSavedObjectsClient.update.mockResolvedValue(existingSo);
+
+    await rulesClient.updateGapAutoFillScheduler(getParams({ excludedReasons: undefined }));
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      'scheduler-1',
+      expect.objectContaining({ excludedReasons: [] })
+    );
   });
 
   test('validates params and throws on invalid payload', async () => {

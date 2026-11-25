@@ -106,7 +106,7 @@ export const updateAutoFillSchedulerPublicRoute = (
       access: 'public',
       summary: 'Update a gap auto fill scheduler by ID',
       description:
-        'Replace the configuration of a gap auto fill scheduler. The request body must contain the full configuration. Set `enabled` to `true` to turn automatic gap filling on and to `false` to turn it off. The call is idempotent: repeating it with the same body leaves the scheduler in the same state.',
+        'Replace the configuration of a gap auto fill scheduler. The request body must contain the full configuration; if `excluded_reasons` is omitted, the current value is kept. Set `enabled` to `true` to turn automatic gap filling on and to `false` to turn it off. The call is idempotent: repeating it with the same body leaves the scheduler in the same state and does not reset the next scheduled run. This API requires an Enterprise license.',
       tags: ['oas-tag:alerting'],
       oasOperationObject: updateGapAutoFillSchedulerExamplesV1,
     },

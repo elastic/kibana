@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { nodeBuilder } from '@kbn/es-query';
 import { adHocRunStatus, backfillInitiator } from '../../common/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type {
@@ -3082,7 +3083,10 @@ describe('BackfillClient', () => {
       expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
         perPage: 100,
-        filter: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiatorId: "init-1"`,
+        filter: nodeBuilder.and([
+          nodeBuilder.is(`${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiator`, 'system'),
+          nodeBuilder.is(`${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiatorId`, 'init-1'),
+        ]),
       });
       expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
         { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },

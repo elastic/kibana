@@ -35,7 +35,8 @@ const schedulerFieldDescriptions = {
   name: 'A name for the gap auto fill scheduler.',
   enabled:
     'Indicates whether the scheduler is enabled. When `true`, the scheduler periodically fills detected gaps for the matching rules; when `false`, no automatic gap filling occurs.',
-  maxBackfills: 'The maximum number of backfills the scheduler creates per run.',
+  maxBackfills:
+    'The maximum number of backfills that can exist for the scheduler at the same time. Backfills that are still running count toward this limit, so a run schedules fewer backfills, or none, until existing backfills finish. Reaching the limit is not a scheduler failure.',
   numRetries: 'The number of times the scheduler retries filling a gap that failed.',
   gapFillRange:
     'How far back in time the scheduler looks for gaps, as a date math expression relative to now, for example `now-90d`.',
@@ -234,7 +235,7 @@ export const gapAutoFillSchedulerResponseSchema = schema.object(
           meta: { description: schedulerFieldDescriptions.ruleConsumer },
         }),
       }),
-      { meta: { description: schedulerFieldDescriptions.ruleTypes } }
+      { maxSize: MAX_ARRAY_FIELDS, meta: { description: schedulerFieldDescriptions.ruleTypes } }
     ),
     gap_fill_range: schema.string({
       meta: { description: schedulerFieldDescriptions.gapFillRange },
@@ -244,10 +245,12 @@ export const gapAutoFillSchedulerResponseSchema = schema.object(
     }),
     num_retries: schema.number({ meta: { description: schedulerFieldDescriptions.numRetries } }),
     scope: schema.arrayOf(schema.string(), {
+      maxSize: MAX_ARRAY_FIELDS,
       meta: { description: schedulerFieldDescriptions.scope },
     }),
     excluded_reasons: schema.maybe(
       schema.arrayOf(schema.string(), {
+        maxSize: Object.values(gapReasonType).length,
         meta: { description: schedulerFieldDescriptions.excludedReasons },
       })
     ),

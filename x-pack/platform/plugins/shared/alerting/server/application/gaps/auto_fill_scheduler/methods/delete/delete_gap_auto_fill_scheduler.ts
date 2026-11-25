@@ -15,7 +15,7 @@ import {
 } from '../../../../../rules_client/common/audit_events';
 import { getGapAutoFillSchedulerSchema } from '../schemas';
 import type { GetGapAutoFillSchedulerParams } from '../types';
-import { getGapAutoFillSchedulerSO } from '../utils';
+import { getGapAutoFillSchedulerSO, getGapAutoFillSchedulerTask } from '../utils';
 
 export async function deleteGapAutoFillScheduler(
   context: RulesClientContext,
@@ -47,7 +47,14 @@ export async function deleteGapAutoFillScheduler(
     const scheduledTaskId = schedulerSo.id;
 
     try {
-      await taskManager.removeIfExists(scheduledTaskId);
+      // Task ids are global, so leave a task that belongs to a scheduler in another space alone
+      const { task, isOwnedByCurrentSpace } = await getGapAutoFillSchedulerTask({
+        context,
+        id: scheduledTaskId,
+      });
+      if (task && isOwnedByCurrentSpace) {
+        await taskManager.removeIfExists(scheduledTaskId);
+      }
     } catch (err) {
       const errorMessage = `Unable to remove gap auto fill scheduler task for id: ${params.id}. Backfills and saved object will not be deleted.`;
       context.logger.error(`${errorMessage} - ${err}`);

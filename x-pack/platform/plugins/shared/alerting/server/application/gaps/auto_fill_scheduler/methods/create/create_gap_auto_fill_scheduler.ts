@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { SavedObjectsCreateOptions } from '@kbn/core/server';
+import { nodeBuilder } from '@kbn/es-query';
 import type { RulesClientContext } from '../../../../../rules_client/types';
 import type { CreateGapAutoFillSchedulerParams } from './types';
 import type { GapAutoFillSchedulerResponse } from '../../result/types';
@@ -21,6 +22,7 @@ import {
   GapAutoFillSchedulerAuditAction,
 } from '../../../../../rules_client/common/audit_events';
 import { GAP_AUTO_FILL_SCHEDULER_TASK_TYPE } from '../../../types/scheduler';
+import { gapAutoFillSchedulerTaskConflictError, getGapAutoFillSchedulerTask } from '../utils';
 
 export async function createGapAutoFillScheduler(
   context: RulesClientContext,
@@ -72,12 +74,15 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
     // Throw error if a gap auto fill scheduler already exists for the same (rule type, consumer) pair
     const pairs = Array.from(new Set(params.ruleTypes.map((rt) => `${rt.type}:${rt.consumer}`)));
     if (pairs.length > 0) {
-      const filter = `(${pairs
-        .map(
-          (p) =>
-            `${GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE}.attributes.ruleTypeConsumerPairs: "${p}"`
+      // Build the filter as nodes so caller-provided consumers are matched literally
+      const filter = nodeBuilder.or(
+        pairs.map((p) =>
+          nodeBuilder.is(
+            `${GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE}.attributes.ruleTypeConsumerPairs`,
+            p
+          )
         )
-        .join(' or ')})`;
+      );
       const { saved_objects: candidates } = await soClient.find<GapAutoFillSchedulerSO>({
         type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
         perPage: 1,
@@ -88,6 +93,17 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
         throw Boom.conflict(
           `A gap auto fill scheduler already exists for at least one of the specified (rule type, consumer) pairs`
         );
+      }
+    }
+
+    // Task ids are global, so refuse an id whose task belongs to a scheduler in another space
+    if (params.id) {
+      const { task, isOwnedByCurrentSpace } = await getGapAutoFillSchedulerTask({
+        context,
+        id: params.id,
+      });
+      if (task && !isOwnedByCurrentSpace) {
+        throw gapAutoFillSchedulerTaskConflictError(params.id);
       }
     }
 
