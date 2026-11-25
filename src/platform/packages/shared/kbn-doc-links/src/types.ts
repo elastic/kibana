@@ -424,6 +424,7 @@ export interface DocLinks {
   readonly query: {
     readonly eql: string;
     readonly kueryQuerySyntax: string;
+    readonly kueryQueryNestedFields: string;
     readonly luceneQuery: string;
     readonly luceneQuerySyntax: string;
     readonly percolate: string;
@@ -810,6 +811,8 @@ export interface DocLinks {
   readonly contextEngine: {
     readonly overview: string;
     readonly aiIndices: string;
+    readonly sources: string;
+    readonly memory: string;
   };
   readonly agentBuilder: {
     readonly agentBuilder: string;
@@ -829,6 +832,7 @@ export interface DocLinks {
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
     readonly aiAssistant: string;
+    readonly replaceKnowledgeBaseContent: string;
   };
   readonly applicationConnections: {
     readonly oauthClients: string;

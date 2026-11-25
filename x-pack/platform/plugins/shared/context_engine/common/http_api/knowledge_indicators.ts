@@ -32,6 +32,33 @@ export interface ListKisResponse {
   summary: KiListSummary;
 }
 
+/** One KI type with its count and its first KIs in the requested sort. */
+export interface KiGroup {
+  type: string;
+  count: number;
+  kis: KiListItem[];
+}
+
+export interface ListKiGroupsResponse {
+  /** KIs that match the filters. */
+  total: number;
+  /** KIs that match the filters but are in none of the returned groups. */
+  total_other: number;
+  /** The biggest types, `count` descending, then `type` ascending. */
+  groups: KiGroup[];
+}
+
+export interface KiHistogramBucket {
+  /** UTC day, `YYYY-MM-DD`. */
+  date: string;
+  count: number;
+}
+
+export interface KiHistogramResponse {
+  /** One bucket per day, oldest first, days without KIs included. */
+  buckets: KiHistogramBucket[];
+}
+
 export type KiJsonPrimitive = string | number | boolean | null;
 export type KiJsonValue = KiJsonPrimitive | KiJsonValue[] | { [key: string]: KiJsonValue };
 

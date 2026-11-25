@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -64,7 +64,6 @@ import {
   mockEndpointSecurityLogOnFailureEvent,
   mockEndpointSecurityLogOnSuccessEvent,
 } from '../../../../../../common/mock/mock_endgame_ecs_data';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import type { EndpointAlertCriteria } from './generic_row_renderer';
 import {
   createDnsRowRenderer,
@@ -105,8 +104,6 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../../../../../common/components/link_to');
 jest.mock('../../../../../../overview/components/events_by_dataset');
 describe('GenericRowRenderer', () => {
-  const mount = useMountAppended();
-
   describe('#createGenericSystemRowRenderer', () => {
     let nonSystem: Ecs;
     let system: Ecs;
@@ -119,15 +116,19 @@ describe('GenericRowRenderer', () => {
         text: 'some text',
       });
     });
-    test('renders correctly against snapshot', () => {
+    test('renders the row details', () => {
       const children = connectedToRenderer.renderRow({
         data: system,
 
         scopeId: TimelineId.test,
       });
 
-      const wrapper = shallow(<span>{children}</span>);
-      expect(wrapper).toMatchSnapshot();
+      const { container } = render(
+        <TestProviders>
+          <span>{children}</span>
+        </TestProviders>
+      );
+      expect(container.textContent).toContain('Evan@zeek-london');
     });
 
     test('should return false if not a system datum', () => {
@@ -154,12 +155,12 @@ describe('GenericRowRenderer', () => {
 
         scopeId: TimelineId.test,
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{children}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toContain(
+      expect(container.textContent).toContain(
         'Evan@zeek-londonsome text(6278)with resultfailureSource128.199.212.120'
       );
     });
@@ -179,15 +180,19 @@ describe('GenericRowRenderer', () => {
       });
     });
 
-    test('renders correctly against snapshot', () => {
+    test('renders the row details', () => {
       const children = fileToRenderer.renderRow({
         data: systemFile,
 
         scopeId: TimelineId.test,
       });
 
-      const wrapper = shallow(<span>{children}</span>);
-      expect(wrapper).toMatchSnapshot();
+      const { container } = render(
+        <TestProviders>
+          <span>{children}</span>
+        </TestProviders>
+      );
+      expect(container.textContent).toContain('Braden@zeek-london');
     });
 
     test('should return false if not a auditd datum', () => {
@@ -213,12 +218,12 @@ describe('GenericRowRenderer', () => {
 
         scopeId: TimelineId.test,
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{children}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toContain(
+      expect(container.textContent).toContain(
         'Braden@zeek-londonsome text(6278)with resultfailureSource128.199.212.120'
       );
     });
@@ -236,7 +241,7 @@ describe('GenericRowRenderer', () => {
 
       const endpointAlertsRowRenderer = createEndpointAlertsRowRenderer(endpointAlertCriteria);
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(mockEndpointFileCreationMalwarePreventionAlert) &&
             endpointAlertsRowRenderer.renderRow({
@@ -246,7 +251,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'win2019-endpoint-1was prevented from creating a malicious file6a5eabd6-1c79-4962-b411-a5e7d9e967d4.tmpinC:\\Users\\sean\\Downloads\\6a5eabd6-1c79-4962-b411-a5e7d9e967d4.tmpviachrome.exe(8944)C:\\Program Files\\Google\\Chrome\\Application\\chrome.exevia parent processexplorer.exe(1008)with resultsuccess7cc42618e580f233fee47e82312cc5c3476cb5de9219ba3f9eb7f99ac0659c30'
       );
     });
@@ -262,7 +267,7 @@ describe('GenericRowRenderer', () => {
 
       const endpointAlertsRowRenderer = createEndpointAlertsRowRenderer(endpointAlertCriteria);
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(mockEndpointFileCreationMalwareDetectionAlert) &&
             endpointAlertsRowRenderer.renderRow({
@@ -272,7 +277,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'DESKTOP-1was detected creating a malicious filemimikatz_write.exeinC:\\temp\\mimikatz_write.exeviapython.exe(4400)C:\\Python27\\python.exemain.py-a,execute-pc:\\tempvia parent processpythonservice.exe(2936)with resultsuccess263f09eeee80e03aa27a2d19530e2451978e18bf733c5f1c64ff2389c5dc17b0'
       );
     });
@@ -288,7 +293,7 @@ describe('GenericRowRenderer', () => {
 
       const endpointAlertsRowRenderer = createEndpointAlertsRowRenderer(endpointAlertCriteria);
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(
             mockEndpointFilesEncryptedRansomwarePreventionAlert
@@ -300,7 +305,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'DESKTOP-1ransomware was prevented from encrypting filesviapowershell.exe(6056)powershell.exe-filemock_ransomware_v3.ps1via parent processcmd.exe(10680)with resultsuccesse9fa973eb5ad446e0be31c7b8ae02d48281319e7f492e1ddaadddfbdd5b480c7'
       );
     });
@@ -316,7 +321,7 @@ describe('GenericRowRenderer', () => {
 
       const endpointAlertsRowRenderer = createEndpointAlertsRowRenderer(endpointAlertCriteria);
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(
             mockEndpointFilesEncryptedRansomwareDetectionAlert
@@ -328,7 +333,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'DESKTOP-1ransomware was detected encrypting filesviapowershell.exe(4684)powershell.exe-filemock_ransomware_v3.ps1via parent processcmd.exe(8616)e9fa973eb5ad446e0be31c7b8ae02d48281319e7f492e1ddaadddfbdd5b480c7'
       );
     });
@@ -344,7 +349,7 @@ describe('GenericRowRenderer', () => {
 
       const endpointAlertsRowRenderer = createEndpointAlertsRowRenderer(endpointAlertCriteria);
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(
             mockEndpointFileModificationMalwarePreventionAlert
@@ -356,7 +361,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'win2019-endpoint-1was prevented from modifying a malicious filemimikatz - Copy.exeinC:\\Users\\sean\\Downloads\\mimikatz_trunk (1)\\x64\\mimikatz - Copy.exeviaexplorer.exe(1008)C:\\Windows\\Explorer.EXEvia parent processC:\\Windows\\System32\\userinit.exe(356)with resultsuccess31eb1de7e840a342fd468e558e5ab627bcb4c542a8fe01aec4d5ba01d539a0fc'
       );
     });
@@ -372,7 +377,7 @@ describe('GenericRowRenderer', () => {
 
       const endpointAlertsRowRenderer = createEndpointAlertsRowRenderer(endpointAlertCriteria);
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(
             mockEndpointFileModificationMalwareDetectionAlert
@@ -384,7 +389,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'mac-1.localwas detected modifying a malicious fileaircrackin/private/var/root/write_malware/modules/write_malware/aircrackviaPython(5995)/usr/local/Cellar/python/2.7.14/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Pythonmain.py-amodifyvia parent processPython(97)with resultsuccessf0954d9673878b2223b00b7ec770c7b438d876a9bb44ec78457e5c618f31f52b'
       );
     });
@@ -400,7 +405,7 @@ describe('GenericRowRenderer', () => {
 
       const endpointAlertsRowRenderer = createEndpointAlertsRowRenderer(endpointAlertCriteria);
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(mockEndpointFileRenameMalwarePreventionAlert) &&
             endpointAlertsRowRenderer.renderRow({
@@ -410,7 +415,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'win2019-endpoint-1was prevented from renaming a malicious file23361f8f413dd9258545030e42056a352fe35f66bac376d49954551c9b4bcf97.exeinC:\\Users\\sean\\Downloads\\23361f8f413dd9258545030e42056a352fe35f66bac376d49954551c9b4bcf97.exeviaexplorer.exe(1008)C:\\Windows\\Explorer.EXEvia parent processC:\\Windows\\System32\\userinit.exe(356)with resultsuccess23361f8f413dd9258545030e42056a352fe35f66bac376d49954551c9b4bcf97'
       );
     });
@@ -426,7 +431,7 @@ describe('GenericRowRenderer', () => {
 
       const endpointAlertsRowRenderer = createEndpointAlertsRowRenderer(endpointAlertCriteria);
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(mockEndpointFileRenameMalwareDetectionAlert) &&
             endpointAlertsRowRenderer.renderRow({
@@ -436,7 +441,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'win2019-endpoint-1was detected renaming a malicious file23361f8f413dd9258545030e42056a352fe35f66bac376d49954551c9b4bcf97.exeinC:\\Users\\sean\\Downloads\\23361f8f413dd9258545030e42056a352fe35f66bac376d49954551c9b4bcf97.exeviaexplorer.exe(1008)C:\\Windows\\Explorer.EXEvia parent processC:\\Windows\\System32\\userinit.exe(356)with resultsuccess23361f8f413dd9258545030e42056a352fe35f66bac376d49954551c9b4bcf97'
       );
     });
@@ -452,7 +457,7 @@ describe('GenericRowRenderer', () => {
 
       const endpointAlertsRowRenderer = createEndpointAlertsRowRenderer(endpointAlertCriteria);
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(
             mockEndpointProcessExecutionMalwarePreventionAlert
@@ -464,7 +469,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'win2019-endpoint-1was prevented from executing a malicious processC:\\Users\\sean\\Downloads\\3be13acde2f4dcded4fd8d518a513bfc9882407a6e384ffb17d12710db7d76fb.exe(6920)C:\\Users\\sean\\Downloads\\3be13acde2f4dcded4fd8d518a513bfc9882407a6e384ffb17d12710db7d76fb.exewith resultsuccess3be13acde2f4dcded4fd8d518a513bfc9882407a6e384ffb17d12710db7d76fb'
       );
     });
@@ -480,7 +485,7 @@ describe('GenericRowRenderer', () => {
 
       const endpointAlertsRowRenderer = createEndpointAlertsRowRenderer(endpointAlertCriteria);
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(
             mockEndpointProcessExecutionMalwareDetectionAlert
@@ -492,7 +497,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'DESKTOP-1was detected executing a malicious processmimikatz_write.exe(8668)c:\\temp\\mimikatz_write.exevia parent processpython.exewith resultsuccess263f09eeee80e03aa27a2d19530e2451978e18bf733c5f1c64ff2389c5dc17b0'
       );
     });
@@ -508,7 +513,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointProcessStartRowRenderer.isInstance(mockEndpointProcessExecEvent) &&
             endpointProcessStartRowRenderer.renderRow({
@@ -518,7 +523,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'admin@test-mac.localexecuted processmdworker_shared(4454)/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared-smdworker-cMDSImporterWorker-mcom.apple.mdworker.sharedvia parent processlaunchd(1)4bc018ac461706496302d1faab0a8bb39aad974eb432758665103165f3a2dd2b'
       );
     });
@@ -532,7 +537,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointProcessStartRowRenderer.isInstance(mockEndpointProcessForkEvent) &&
             endpointProcessStartRowRenderer.renderRow({
@@ -542,7 +547,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'admin@test-mac.localforked processzoom.us(4042)/Applications/zoom.us.app/Contents/MacOS/zoom.usvia parent processzoom.us(3961)cbf3d059cc9f9c0adff5ef15bf331b95ab381837fa0adecd965a41b5846f4bd4'
       );
     });
@@ -556,7 +561,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointProcessStartRowRenderer.isInstance(mockEndpointProcessStartEvent) &&
             endpointProcessStartRowRenderer.renderRow({
@@ -566,7 +571,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@win2019-endpoint-1started processconhost.exe(3636)C:\\Windows\\system32\\conhost.exe,0xffffffff,-ForceV1697334c236cce7d4c9e223146ee683a1219adced9729d4ae771fd6a1502a6b63'
       );
     });
@@ -583,7 +588,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameProcessCreationEventRowRenderer.isInstance(endgameCreationEvent) &&
             endgameProcessCreationEventRowRenderer.renderRow({
@@ -593,7 +598,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Arun\\Anvi-Acer@HD-obe-8bf77f54started processMicrosoft.Photos.exe(441684)C:\\Program Files\\WindowsApps\\Microsoft.Windows.Photos_2018.18091.17210.0_x64__8wekyb3d8bbwe\\Microsoft.Photos.exe-ServerName:App.AppXzst44mncqdg84v7sv6p7yznqwssy6f7f.mcavia parent processsvchost.exe(8)d4c97ed46046893141652e2ec0056a698f6445109949d7fcabbce331146889ee'
       );
     });
@@ -607,7 +612,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointProcessEndRowRenderer.isInstance(mockEndpointProcessEndEvent) &&
             endpointProcessEndRowRenderer.renderRow({
@@ -617,7 +622,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@win2019-endpointterminated processsvchost.exe(10392)C:\\Windows\\System32\\svchost.exe,-k,netsvcs,-p,-s,NetSetupSvcwith exit code-1via parent processservices.exe7fd065bac18c5278777ae44908101cdfed72d26fa741367f0ad4d02020787ab6'
       );
     });
@@ -634,7 +639,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameProcessTerminationEventRowRenderer.isInstance(endgameTerminationEvent) &&
             endgameProcessTerminationEventRowRenderer.renderRow({
@@ -644,7 +649,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Arun\\Anvi-Acer@HD-obe-8bf77f54terminated processRuntimeBroker.exe(442384)with exit code087976f3430cc99bc939e0694247c0759961a49832b87218f4313d6fc0bc3a776'
       );
     });
@@ -661,7 +666,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameProcessCreationEventRowRenderer.isInstance(endgameCreationEvent) &&
             endgameProcessCreationEventRowRenderer.renderRow({
@@ -671,7 +676,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
 
     test('it does NOT render the event when the event category is NOT process', () => {
@@ -690,7 +695,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameProcessCreationEventRowRenderer.isInstance(endgameCreationEvent) &&
             endgameProcessCreationEventRowRenderer.renderRow({
@@ -700,7 +705,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
 
     test('it does NOT render the event when both the action name and event category do NOT match', () => {
@@ -719,7 +724,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameProcessCreationEventRowRenderer.isInstance(endgameCreationEvent) &&
             endgameProcessCreationEventRowRenderer.renderRow({
@@ -729,7 +734,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
   });
 
@@ -743,7 +748,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointFileCreationRowRenderer.isInstance(mockEndpointFileCreationEvent) &&
             endpointFileCreationRowRenderer.renderRow({
@@ -753,7 +758,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@win2019-endpointcreated a fileWimProvider.dllinC:\\Windows\\TEMP\\E38FD162-B6E6-4799-B52D-F590BACBAE94\\WimProvider.dllviaMsMpEng.exe(2424)'
       );
     });
@@ -770,7 +775,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameFileCreateEventRowRenderer.isInstance(endgameFileCreateEvent) &&
             endgameFileCreateEventRowRenderer.renderRow({
@@ -780,7 +785,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Arun\\Anvi-Acer@HD-obe-8bf77f54created a fileinC:\\Users\\Arun\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\63d78c21-e593-4484-b7a9-db33cd522ddc.tmpviachrome.exe(11620)'
       );
     });
@@ -794,7 +799,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointFileDeletionRowRenderer.isInstance(mockEndpointFileDeletionEvent) &&
             endpointFileDeletionRowRenderer.renderRow({
@@ -804,7 +809,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@windows-endpoint-1deleted a fileAM_Delta_Patch_1.329.2793.0.exeinC:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.329.2793.0.exeviasvchost.exe(1728)'
       );
     });
@@ -818,7 +823,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointFileModificationRowRenderer.isInstance(mockEndpointFileModificationEvent) &&
             endpointFileModificationRowRenderer.renderRow({
@@ -828,7 +833,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'admin@test-Mac.localmodified a file.dat.nosync01a5.6hoWv1in/Users/admin/Library/Application Support/CrashReporter/.dat.nosync01a5.6hoWv1viadiagnostics_agent(421)'
       );
     });
@@ -842,7 +847,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointFileOverwriteRowRenderer.isInstance(mockEndpointFileOverwriteEvent) &&
             endpointFileOverwriteRowRenderer.renderRow({
@@ -852,7 +857,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'LOCAL SERVICE\\NT AUTHORITY@windows-endpoint-1overwrote a filelastalive0.datinC:\\Windows\\ServiceState\\EventLog\\Data\\lastalive0.datviasvchost.exe(1228)'
       );
     });
@@ -866,7 +871,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointFileRenameRowRenderer.isInstance(mockEndpointFileRenameEvent) &&
             endpointFileRenameRowRenderer.renderRow({
@@ -876,7 +881,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'LOCAL SERVICE\\NT AUTHORITY@windows-endpoint-1renamed a fileSRU.loginC:\\Windows\\System32\\sru\\SRU.logfrom its original pathC:\\Windows\\System32\\sru\\SRUtmp.logviasvchost.exe(1204)'
       );
     });
@@ -893,7 +898,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameFileDeleteEventRowRenderer.isInstance(endgameFileDeleteEvent) &&
             endgameFileDeleteEventRowRenderer.renderRow({
@@ -903,7 +908,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@HD-v1s-d2118419deleted a filetmp000002f6inC:\\Windows\\TEMP\\tmp00000404\\tmp000002f6viaAmSvc.exe(1084)'
       );
     });
@@ -920,7 +925,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {fileCreatedEventRowRenderer.isInstance(fimFileCreatedEvent) &&
             fileCreatedEventRowRenderer.renderRow({
@@ -930,7 +935,9 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('foohostcreated a filein/etc/subgidviaan unknown process');
+      expect(container.textContent).toEqual(
+        'foohostcreated a filein/etc/subgidviaan unknown process'
+      );
     });
 
     test('it renders a FIM (non-endgame) file deleted event', () => {
@@ -945,7 +952,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {fileDeletedEventRowRenderer.isInstance(fimFileDeletedEvent) &&
             fileDeletedEventRowRenderer.renderRow({
@@ -955,7 +962,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'foohostdeleted a filein/etc/gshadow.lockviaan unknown process'
       );
     });
@@ -972,7 +979,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameFileCreateEventRowRenderer.isInstance(endgameFileCreateEvent) &&
             endgameFileCreateEventRowRenderer.renderRow({
@@ -982,7 +989,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
 
     test('it does NOT render an Endgame file_create_event when category is NOT file', () => {
@@ -1001,7 +1008,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameFileCreateEventRowRenderer.isInstance(endgameFileCreateEvent) &&
             endgameFileCreateEventRowRenderer.renderRow({
@@ -1011,7 +1018,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
 
     test('it does NOT render a FIM (non-Endgame) file created event when the event dataset is NOT file', () => {
@@ -1030,7 +1037,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {fileCreatedEventRowRenderer.isInstance(fimFileCreatedEvent) &&
             fileCreatedEventRowRenderer.renderRow({
@@ -1040,7 +1047,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
   });
 
@@ -1054,7 +1061,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointConnectionAcceptedRowRenderer.isInstance(
             mockEndpointNetworkConnectionAcceptedEvent
@@ -1066,7 +1073,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
+      expect(extractEuiIconText(removeExternalLinkText(container.textContent))).toBe(
         'NETWORK SERVICE\\NT AUTHORITY@windows-endpoint-1accepted a connection viasvchost.exe(328)with resultsuccessEndpoint network eventincomingtcpSource10.1.2.3:64557North AmericaUnited States🇺🇸USNorth CarolinaConcordDestination10.50.60.70:3389'
       );
     });
@@ -1081,7 +1088,7 @@ describe('GenericRowRenderer', () => {
           text,
         });
 
-        const wrapper = mount(
+        const { container } = render(
           <TestProviders>
             {endpointRegistryModificationRowRenderer.isInstance(
               mockEndpointRegistryModificationEvent
@@ -1093,7 +1100,7 @@ describe('GenericRowRenderer', () => {
           </TestProviders>
         );
 
-        expect(wrapper.text()).toEqual(
+        expect(container.textContent).toEqual(
           'SYSTEM\\NT AUTHORITY@win2019-endpoint-1modified registry keySOFTWARE\\WOW6432Node\\Google\\Update\\ClientState\\{430FD4D0-B729-4F61-AA34-91526481799D}\\CurrentStatewith new valueHKLM\\SOFTWARE\\WOW6432Node\\Google\\Update\\ClientState\\{430FD4D0-B729-4F61-AA34-91526481799D}\\CurrentState\\StateValueviaGoogleUpdate.exe(7408)'
         );
       });
@@ -1109,7 +1116,7 @@ describe('GenericRowRenderer', () => {
           text,
         });
 
-        const wrapper = mount(
+        const { container } = render(
           <TestProviders>
             {endpointLibraryLoadRowRenderer.isInstance(mockEndpointLibraryLoadEvent) &&
               endpointLibraryLoadRowRenderer.renderRow({
@@ -1119,7 +1126,7 @@ describe('GenericRowRenderer', () => {
           </TestProviders>
         );
 
-        expect(wrapper.text()).toEqual(
+        expect(container.textContent).toEqual(
           'SYSTEM\\NT AUTHORITY@win2019-endpoint-1loaded librarybcrypt.dllinC:\\Windows\\System32\\bcrypt.dllviasshd.exe(9644)e70f5d8f87aab14e3160227d38387889befbe37fa4f8f5adc59eff52804b35fd'
         );
       });
@@ -1134,7 +1141,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointHttpRequestEventRowRenderer.isInstance(mockEndpointNetworkHttpRequestEvent) &&
             endpointHttpRequestEventRowRenderer.renderRow({
@@ -1144,7 +1151,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
+      expect(extractEuiIconText(removeExternalLinkText(container.textContent))).toBe(
         'NETWORK SERVICE\\NT AUTHORITY@win2019-endpoint-1made a http request viasvchost.exe(2232)Endpoint network eventoutgoinghttptcpSource10.1.2.3:51570Destination10.11.12.13:80North AmericaUnited States🇺🇸USArizonaPhoenix'
       );
     });
@@ -1161,7 +1168,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameIpv4ConnectionAcceptEventRowRenderer.isInstance(ipv4ConnectionAcceptEvent) &&
             endgameIpv4ConnectionAcceptEventRowRenderer.renderRow({
@@ -1171,7 +1178,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
+      expect(extractEuiIconText(removeExternalLinkText(container.textContent))).toBe(
         'SYSTEM\\NT AUTHORITY@HD-gqf-0af7b4feaccepted a connection viaAmSvc.exe(1084)tcp1:network-community_idSource127.0.0.1:49306Destination127.0.0.1:49305'
       );
     });
@@ -1188,7 +1195,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameIpv6ConnectionAcceptEventRowRenderer.isInstance(ipv6ConnectionAcceptEvent) &&
             endgameIpv6ConnectionAcceptEventRowRenderer.renderRow({
@@ -1198,7 +1205,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
+      expect(extractEuiIconText(removeExternalLinkText(container.textContent))).toBe(
         'SYSTEM\\NT AUTHORITY@HD-55b-3ec87f66accepted a connection via(4)tcp1:network-community_idSource::1:51324Destination::1:5357'
       );
     });
@@ -1212,7 +1219,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endpointDisconnectReceivedRowRenderer.isInstance(mockEndpointDisconnectReceivedEvent) &&
             endpointDisconnectReceivedRowRenderer.renderRow({
@@ -1222,7 +1229,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
+      expect(extractEuiIconText(removeExternalLinkText(container.textContent))).toBe(
         'NETWORK SERVICE\\NT AUTHORITY@windows-endpoint-1disconnected viasvchost.exe(328)Endpoint network eventincomingtcpSource10.20.30.40:64557North AmericaUnited States🇺🇸USNorth CarolinaConcord(42.47%)1.2KB(57.53%)1.6KBDestination10.11.12.13:3389'
       );
     });
@@ -1239,7 +1246,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameIpv4DisconnectReceivedEventRowRenderer.isInstance(ipv4DisconnectReceivedEvent) &&
             endgameIpv4DisconnectReceivedEventRowRenderer.renderRow({
@@ -1249,7 +1256,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
+      expect(extractEuiIconText(removeExternalLinkText(container.textContent))).toBe(
         'Arun\\Anvi-Acer@HD-obe-8bf77f54disconnected viachrome.exe(11620)8.1KBtcp1:LxYHJJv98b2O0fNccXu6HheXmwk=Source192.168.0.6:59356(25.78%)2.1KB(74.22%)6KBDestination10.156.162.53:443'
       );
     });
@@ -1266,7 +1273,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameIpv6DisconnectReceivedEventRowRenderer.isInstance(ipv6DisconnectReceivedEvent) &&
             endgameIpv6DisconnectReceivedEventRowRenderer.renderRow({
@@ -1276,7 +1283,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
+      expect(extractEuiIconText(removeExternalLinkText(container.textContent))).toBe(
         'SYSTEM\\NT AUTHORITY@HD-55b-3ec87f66disconnected via(4)7.9KBtcp1:ZylzQhsB1dcptA2t4DY8S6l9o8E=Source::1:51338(96.92%)7.7KB(3.08%)249BDestination::1:2869'
       );
     });
@@ -1293,7 +1300,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {socketOpenedEventRowRenderer.isInstance(socketOpenedEvent) &&
             socketOpenedEventRowRenderer.renderRow({
@@ -1303,7 +1310,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
+      expect(extractEuiIconText(removeExternalLinkText(container.textContent))).toBe(
         'root@foohostopened a socket withgoogle_accounts(2166)Outbound socket (10.4.20.1:59554 -> 10.1.2.3:80) Ooutboundtcp1:network-community_idSource10.4.20.1:59554Destination10.1.2.3:80'
       );
     });
@@ -1320,7 +1327,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {socketClosedEventRowRenderer.isInstance(socketClosedEvent) &&
             socketClosedEventRowRenderer.renderRow({
@@ -1330,7 +1337,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
+      expect(extractEuiIconText(removeExternalLinkText(container.textContent))).toBe(
         'root@foohostclosed a socket withgoogle_accounts(2166)Outbound socket (10.4.20.1:59508 -> 10.1.2.3:80) Coutboundtcp1:network-community_idSource10.4.20.1:59508Destination10.1.2.3:80'
       );
     });
@@ -1347,7 +1354,7 @@ describe('GenericRowRenderer', () => {
         text,
       });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {endgameIpv4ConnectionAcceptEventRowRenderer.isInstance(ipv4ConnectionAcceptEvent) &&
             endgameIpv4ConnectionAcceptEventRowRenderer.renderRow({
@@ -1357,7 +1364,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
   });
 
@@ -1367,7 +1374,7 @@ describe('GenericRowRenderer', () => {
 
       const securityLogOnRowRenderer = createSecurityEventRowRenderer({ actionName });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {securityLogOnRowRenderer.isInstance(mockEndpointSecurityLogOnSuccessEvent) &&
             securityLogOnRowRenderer.renderRow({
@@ -1377,7 +1384,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@win2019-endpointsuccessfully logged inviaC:\\Program Files\\OpenSSH-Win64\\sshd.exe(90210)'
       );
     });
@@ -1387,7 +1394,7 @@ describe('GenericRowRenderer', () => {
 
       const securityLogOnRowRenderer = createSecurityEventRowRenderer({ actionName });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {securityLogOnRowRenderer.isInstance(mockEndpointSecurityLogOnFailureEvent) &&
             securityLogOnRowRenderer.renderRow({
@@ -1397,7 +1404,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'win2019-endpointfailed to log inviaC:\\Program Files\\OpenSSH-Win64\\sshd.exe(90210)'
       );
     });
@@ -1410,7 +1417,7 @@ describe('GenericRowRenderer', () => {
 
       const userLogonEventRowRenderer = createSecurityEventRowRenderer({ actionName });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {userLogonEventRowRenderer.isInstance(userLogonEvent) &&
             userLogonEventRowRenderer.renderRow({
@@ -1420,7 +1427,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@HD-v1s-d2118419successfully logged inusing logon type5 - Service(target logon ID0x3e7)viaC:\\Windows\\System32\\services.exe(432)as requested by subjectWIN-Q3DOP1UKA81$(subject logon ID0x3e7)4624'
       );
     });
@@ -1433,7 +1440,7 @@ describe('GenericRowRenderer', () => {
 
       const adminLogonEventRowRenderer = createSecurityEventRowRenderer({ actionName });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {adminLogonEventRowRenderer.isInstance(adminLogonEvent) &&
             adminLogonEventRowRenderer.renderRow({
@@ -1443,7 +1450,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'With special privileges,SYSTEM\\NT AUTHORITY@HD-obe-8bf77f54successfully logged inviaC:\\Windows\\System32\\lsass.exe(964)as requested by subjectSYSTEM\\NT AUTHORITY4672'
       );
     });
@@ -1456,7 +1463,7 @@ describe('GenericRowRenderer', () => {
 
       const explicitUserLogonEventRowRenderer = createSecurityEventRowRenderer({ actionName });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {explicitUserLogonEventRowRenderer.isInstance(explicitUserLogonEvent) &&
             explicitUserLogonEventRowRenderer.renderRow({
@@ -1466,7 +1473,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'A login was attempted using explicit credentialsArun\\Anvi-AcertoHD-55b-3ec87f66viaC:\\Windows\\System32\\svchost.exe(1736)as requested by subjectANVI-ACER$\\WORKGROUP(subject logon ID0x3e7)4648'
       );
     });
@@ -1476,7 +1483,7 @@ describe('GenericRowRenderer', () => {
 
       const securityLogOffRowRenderer = createSecurityEventRowRenderer({ actionName });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {securityLogOffRowRenderer.isInstance(mockEndpointSecurityLogOffEvent) &&
             securityLogOffRowRenderer.renderRow({
@@ -1486,7 +1493,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@win2019-endpointlogged offviaC:\\Windows\\System32\\lsass.exe(90210)'
       );
     });
@@ -1499,7 +1506,7 @@ describe('GenericRowRenderer', () => {
 
       const userLogoffEventRowRenderer = createSecurityEventRowRenderer({ actionName });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {userLogoffEventRowRenderer.isInstance(userLogoffEvent) &&
             userLogoffEventRowRenderer.renderRow({
@@ -1509,7 +1516,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Arun\\Anvi-Acer@HD-55b-3ec87f66logged offusing logon type2 - Interactive(target logon ID0x16db41e)viaC:\\Windows\\System32\\lsass.exe(964)4634'
       );
     });
@@ -1522,7 +1529,7 @@ describe('GenericRowRenderer', () => {
 
       const userLogonEventRowRenderer = createSecurityEventRowRenderer({ actionName });
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {userLogonEventRowRenderer.isInstance(userLogonEvent) &&
             userLogonEventRowRenderer.renderRow({
@@ -1532,7 +1539,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
   });
 
@@ -1540,7 +1547,7 @@ describe('GenericRowRenderer', () => {
     test('it renders an endpoint network lookup_requested event', () => {
       const dnsRowRenderer = createDnsRowRenderer();
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {dnsRowRenderer.isInstance(mockEndpointNetworkLookupRequestedEvent) &&
             dnsRowRenderer.renderRow({
@@ -1550,7 +1557,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@win2019-endpointasked forlogging.googleapis.comwith question typeAviagoogle_osconfig_agent.exe(3272)dns'
       );
     });
@@ -1558,7 +1565,7 @@ describe('GenericRowRenderer', () => {
     test('it renders an endpoint network lookup_result event', () => {
       const dnsRowRenderer = createDnsRowRenderer();
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {dnsRowRenderer.isInstance(mockEndpointNetworkLookupResultEvent) &&
             dnsRowRenderer.renderRow({
@@ -1568,7 +1575,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@win2019-endpointasked forlogging.googleapis.comwith question typeAAAAviagoogle_osconfig_agent.exe(3272)dns'
       );
     });
@@ -1580,7 +1587,7 @@ describe('GenericRowRenderer', () => {
 
       const dnsRowRenderer = createDnsRowRenderer();
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {dnsRowRenderer.isInstance(requestEvent) &&
             dnsRowRenderer.renderRow({
@@ -1590,7 +1597,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'SYSTEM\\NT AUTHORITY@HD-obe-8bf77f54asked forupdate.googleapis.comwith question typeA, which resolved to10.100.197.67viaGoogleUpdate.exe(443192)3008dns'
       );
     });
@@ -1602,7 +1609,7 @@ describe('GenericRowRenderer', () => {
 
       const dnsRowRenderer = createDnsRowRenderer();
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {dnsRowRenderer.isInstance(dnsEvent) &&
             dnsRowRenderer.renderRow({
@@ -1612,7 +1619,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
+      expect(extractEuiIconText(removeExternalLinkText(container.textContent))).toBe(
         'iot.example.comasked forlookup.example.comwith question typeA, which resolved to10.1.2.3(response code:NOERROR)viaan unknown process6.937500msOct 8, 2019 @ 10:05:23.241Oct 8, 2019 @ 10:05:23.248outbounddns177Budp1:network-community_idSource10.9.9.9:58732(22.60%)40B(77.40%)137BDestination10.1.1.1:53OceaniaAustralia🇦🇺AU'
       );
     });
@@ -1630,7 +1637,7 @@ describe('GenericRowRenderer', () => {
 
       const dnsRowRenderer = createDnsRowRenderer();
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {dnsRowRenderer.isInstance(requestEvent) &&
             dnsRowRenderer.renderRow({
@@ -1640,7 +1647,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
 
     test('it does NOT render an event if dns.question.name is not provided', () => {
@@ -1656,7 +1663,7 @@ describe('GenericRowRenderer', () => {
 
       const dnsRowRenderer = createDnsRowRenderer();
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           {dnsRowRenderer.isInstance(requestEvent) &&
             dnsRowRenderer.renderRow({
@@ -1666,7 +1673,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('');
+      expect(container.textContent).toEqual('');
     });
   });
 });

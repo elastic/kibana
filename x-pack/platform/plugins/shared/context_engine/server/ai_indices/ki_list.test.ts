@@ -6,16 +6,33 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getKis, probeColumns } from './ki_list';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  getKiGroups,
+  getKiHistogram,
+  getKis,
+  kiHistogramDays,
+  latestRevisionPipeline,
+  probeColumns,
+} from './ki_list';
 
 const BACKING_INDEX = 'ai-index-idx-sample';
 const INDEX_DEST = { type: 'index' as const, value: BACKING_INDEX };
 const DATA_STREAM_DEST = { type: 'data_stream' as const, value: 'ai-index-ds-sample' };
 
-const probeResponse = (fields: string[]) => ({
-  columns: fields.map((name) => ({ name })),
+// The probe reads only column names, so every column gets the same type.
+const probeResponse = (fields: string[]): EsqlEsqlResult => ({
+  columns: fields.map((name) => ({ name, type: 'keyword' })),
   values: [],
+});
+const histogramResponse = (rows: Array<[number, string]>): EsqlEsqlResult => ({
+  columns: [
+    { name: 'count', type: 'long' },
+    { name: 'day', type: 'date' },
+  ],
+  values: rows,
 });
 const ALL_FIELDS = [
   'id',
@@ -149,16 +166,127 @@ describe('ki_list', () => {
         'EVAL lifecycle_status = COALESCE(governance.lifecycle.status, "active")',
         'EVAL ki_status = CASE(lifecycle_status == "active" AND COALESCE(false, false), "expired", lifecycle_status)',
         'WHERE lifecycle_status != "deleted"',
+        'EVAL type = MV_MIN(type)',
+        'EVAL type = CASE(type == "", NULL, type)',
         'EVAL expires_at = TO_STRING(NULL)',
-        'SORT revision_time DESC, id ASC',
+        'EVAL updated_sort = COALESCE(TO_DATETIME(updated_at), revision_time)',
+        'SORT updated_sort DESC, id ASC',
         'KEEP _index, id, type, title, updated_at, expires_at, ki_status',
         'LIMIT 25',
       ].join('\n| ')
     );
     expect(queryText(1)).toContain('| STATS total = COUNT(*)');
     expect(queryText(2)).toContain(
-      '| WHERE type IS NOT NULL\n| STATS count = COUNT(*) BY type\n| SORT count DESC, type ASC\n| LIMIT 5'
+      '| WHERE type IS NOT NULL AND BYTE_LENGTH(type) <= 256\n| STATS count = COUNT(*) BY type\n| SORT count DESC, type ASC\n| LIMIT 5'
     );
+  });
+
+  it('sets type to null when the index has no type column', async () => {
+    query.mockReset();
+    query
+      .mockResolvedValueOnce(probeResponse(['id', '@timestamp', 'title']))
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+
+    expect(queryText(0)).toContain('| EVAL type = TO_STRING(NULL)\n');
+    expect(queryText(0)).not.toContain('MV_MIN');
+  });
+
+  it('returns no type for a row whose type is an empty string', async () => {
+    query
+      .mockResolvedValueOnce(
+        rowsResponse([[BACKING_INDEX, 'ki-1', '', 'Empty type', null, 'active']])
+      )
+      .mockResolvedValueOnce(totalsResponse(1))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    const { kis } = await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+
+    expect(kis).toEqual([
+      { id: 'ki-1', index: BACKING_INDEX, title: 'Empty type', status: 'active' },
+    ]);
+  });
+
+  // The AI briefing reads `summary.counts_by_type`, so this also keeps `""` out of the briefing.
+  it('builds type counts only from groupable types', async () => {
+    query
+      .mockResolvedValueOnce(totalsResponse(3))
+      .mockResolvedValueOnce(bucketsResponse([[1, 'faq']]));
+
+    await getKis(esClient, { dest: INDEX_DEST, size: 0 });
+
+    const bucketsQuery = queryText(1);
+    expect(bucketsQuery).toContain('| EVAL type = CASE(type == "", NULL, type)\n');
+    expect(bucketsQuery).toContain('| WHERE type IS NOT NULL AND BYTE_LENGTH(type) <= 256\n');
+  });
+
+  describe('excludeTypes', () => {
+    const OTHER = '(type IS NULL OR type NOT IN (?excludeType0, ?excludeType1))';
+
+    it('filters rows and the total to other types, keeps KIs without a type, and leaves the summary alone', async () => {
+      query
+        .mockResolvedValueOnce(
+          rowsResponse([[BACKING_INDEX, 'ki-1', null, 'No type', null, 'active']])
+        )
+        .mockResolvedValueOnce(totalsResponse(9, 2))
+        .mockResolvedValueOnce(bucketsResponse([[7, 'faq']]));
+
+      await expect(
+        getKis(esClient, { dest: INDEX_DEST, size: 25, excludeTypes: ['faq', 'policy'] })
+      ).resolves.toEqual(
+        expect.objectContaining({
+          total: 2,
+          summary: { total: 9, counts_by_type: [{ type: 'faq', count: 7 }] },
+        })
+      );
+
+      const params = [{ excludeType0: 'faq' }, { excludeType1: 'policy' }];
+      expect(query.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining(`| WHERE ${OTHER}\n`),
+        params,
+      });
+      expect(query.mock.calls[2][0]).toEqual({
+        query: expect.stringContaining(
+          `| STATS total = COUNT(*), filtered = COUNT(*) WHERE ${OTHER}`
+        ),
+        params,
+      });
+      expect(query.mock.calls[3][0]).not.toHaveProperty('params');
+    });
+
+    it('applies type and excludeTypes together', async () => {
+      query
+        .mockResolvedValueOnce(rowsResponse([]))
+        .mockResolvedValueOnce(totalsResponse(9, 0))
+        .mockResolvedValueOnce(bucketsResponse([]));
+
+      await getKis(esClient, {
+        dest: INDEX_DEST,
+        size: 25,
+        type: 'faq',
+        excludeTypes: ['faq', 'policy'],
+      });
+
+      expect(query.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining(`| WHERE type == ?type AND ${OTHER}\n`),
+        params: [{ type: 'faq' }, { excludeType0: 'faq' }, { excludeType1: 'policy' }],
+      });
+    });
+
+    it('adds no filter for an empty list', async () => {
+      query
+        .mockResolvedValueOnce(rowsResponse([]))
+        .mockResolvedValueOnce(totalsResponse(0))
+        .mockResolvedValueOnce(bucketsResponse([]));
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, excludeTypes: [] });
+
+      expect(queryText(0)).not.toContain('NOT IN');
+      expect(queryText(1)).not.toContain('filtered');
+    });
   });
 
   it('returns expired KIs without filtering on expires_at', async () => {
@@ -497,6 +625,8 @@ describe('ki_list', () => {
         'EVAL lifecycle_status = "active"',
         'EVAL ki_status = CASE(lifecycle_status == "active" AND COALESCE(false, false), "expired", lifecycle_status)',
         'WHERE lifecycle_status != "deleted"',
+        'EVAL type = MV_MIN(type)',
+        'EVAL type = CASE(type == "", NULL, type)',
         'EVAL updated_at = TO_STRING(NULL)',
         'EVAL expires_at = TO_STRING(NULL)',
         'SORT id ASC',
@@ -674,7 +804,7 @@ describe('ki_list', () => {
           'LIMIT 25',
         ].join('\n| ')
       );
-      expect(queryText(0)).not.toContain('revision_time DESC');
+      expect(queryText(0)).not.toContain('updated_sort');
       expect(queryText(1)).not.toContain('title_sort');
       expect(queryText(2)).not.toContain('title_sort');
     });
@@ -697,13 +827,45 @@ describe('ki_list', () => {
       );
     });
 
-    it('sorts newest first when sort is updated', async () => {
+    it('sorts by updated_at newest first, falling back to the revision timestamp', async () => {
       emptyResponses();
 
       await getKis(esClient, { dest: INDEX_DEST, size: 25, sort: 'updated' });
 
-      expect(queryText(0)).toContain('| SORT revision_time DESC, id ASC\n| KEEP');
+      expect(queryText(0)).toContain(
+        [
+          'EVAL updated_sort = COALESCE(TO_DATETIME(updated_at), revision_time)',
+          'SORT updated_sort DESC, id ASC',
+          'KEEP',
+        ].join('\n| ')
+      );
       expect(queryText(0)).not.toContain('title_sort');
+    });
+
+    it('sorts by updated_at with missing dates last when the index has no timestamp column', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(['id', 'updated_at', 'type']));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+
+      expect(queryText(0)).toContain(
+        [
+          'EVAL updated_sort = TO_DATETIME(updated_at)',
+          'SORT updated_sort DESC NULLS LAST, id ASC',
+        ].join('\n| ')
+      );
+    });
+
+    it('sorts by the revision timestamp when the index has no updated_at column', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(['id', '@timestamp', 'type']));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+
+      expect(queryText(0)).toContain('| SORT revision_time DESC, id ASC\n| KEEP');
+      expect(queryText(0)).not.toContain('updated_sort');
     });
 
     it('sorts by id when the index has no timestamp column', async () => {
@@ -723,7 +885,7 @@ describe('ki_list', () => {
 
       await getKis(esClient, { dest: INDEX_DEST, size: 25, query: 'refund' });
 
-      expect(queryText(0)).toContain('| SORT _score DESC, revision_time DESC, id ASC\n| KEEP');
+      expect(queryText(0)).toContain('| SORT _score DESC, updated_sort DESC, id ASC\n| KEEP');
     });
   });
 
@@ -772,7 +934,7 @@ describe('ki_list', () => {
       params: [{ searchQuery: 'refund' }],
     });
     expect(queryText(0)).toContain('METADATA _id, _index, _score\n');
-    expect(queryText(0)).toContain('SORT _score DESC, revision_time DESC, id ASC');
+    expect(queryText(0)).toContain('SORT _score DESC, updated_sort DESC, id ASC');
     expect(queryText(1)).toContain(
       'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
     );
@@ -848,5 +1010,362 @@ describe('ki_list', () => {
 
     expect(queryText(0)).toContain('WHERE FALSE');
     expect(queryText(0)).not.toContain('MATCH(');
+  });
+});
+
+describe('getKiGroups', () => {
+  const query = jest.fn();
+  const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+  const queryText = (call: number) => query.mock.calls[call + 1][0].query as string;
+  const OPTIONS = { dest: INDEX_DEST, maxGroups: 5, previewSize: 3 };
+
+  const groupBucketsResponse = (rows: Array<[number, string | null, number, boolean]>) => ({
+    columns: [{ name: 'count' }, { name: 'group_type' }, { name: 'total' }, { name: 'is_other' }],
+    values: rows,
+  });
+
+  beforeEach(() => {
+    query.mockReset();
+    query.mockResolvedValueOnce(probeResponse(ALL_FIELDS));
+  });
+
+  it('returns the biggest types with their first KIs and counts the rest as other', async () => {
+    query
+      .mockResolvedValueOnce(
+        groupBucketsResponse([
+          [4, 'faq', 7, false],
+          [2, 'policy', 7, false],
+        ])
+      )
+      .mockResolvedValueOnce(
+        rowsResponse([[BACKING_INDEX, 'ki-1', 'faq', 'Refunds', null, 'active']])
+      )
+      .mockResolvedValueOnce(
+        rowsResponse([[BACKING_INDEX, 'ki-2', 'policy', 'Returns', null, 'active']])
+      );
+
+    await expect(getKiGroups(esClient, OPTIONS)).resolves.toEqual({
+      total: 7,
+      total_other: 1,
+      groups: [
+        {
+          type: 'faq',
+          count: 4,
+          kis: [
+            { id: 'ki-1', index: BACKING_INDEX, type: 'faq', title: 'Refunds', status: 'active' },
+          ],
+        },
+        {
+          type: 'policy',
+          count: 2,
+          kis: [
+            {
+              id: 'ki-2',
+              index: BACKING_INDEX,
+              type: 'policy',
+              title: 'Returns',
+              status: 'active',
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(queryText(0)).toContain(
+      [
+        'EVAL type = MV_MIN(type)',
+        'EVAL type = CASE(type == "", NULL, type)',
+        'EVAL expires_at = TO_STRING(NULL)',
+        'EVAL group_type = CASE(type IS NOT NULL AND BYTE_LENGTH(type) <= 256, type, NULL)',
+        'STATS count = COUNT(*) BY group_type',
+        'INLINE STATS total = SUM(count)',
+        'EVAL is_other = group_type IS NULL',
+        'SORT is_other ASC, count DESC, group_type ASC',
+        'LIMIT 5',
+      ].join('\n| ')
+    );
+    // total_other = total - sum(counts), from the same query: no extra count query.
+    expect(query).toHaveBeenCalledTimes(4);
+    expect(query.mock.calls[2][0]).toEqual({
+      query: expect.stringContaining(
+        '| WHERE type == ?type\n| EVAL updated_sort = COALESCE(TO_DATETIME(updated_at), revision_time)\n| SORT updated_sort DESC, id ASC\n| KEEP _index, id, type, title, updated_at, expires_at, ki_status\n| LIMIT 3'
+      ),
+      params: [{ type: 'faq' }],
+    });
+    expect(query.mock.calls[3][0].params).toEqual([{ type: 'policy' }]);
+  });
+
+  it('drops the bucket of KIs that cannot be a group', async () => {
+    query
+      .mockResolvedValueOnce(
+        groupBucketsResponse([
+          [4, 'faq', 9, false],
+          [5, null, 9, true],
+        ])
+      )
+      .mockResolvedValueOnce(rowsResponse([]));
+
+    const { total, total_other: totalOther, groups } = await getKiGroups(esClient, OPTIONS);
+
+    expect({ total, totalOther }).toEqual({ total: 9, totalOther: 5 });
+    expect(groups.map(({ type }) => type)).toEqual(['faq']);
+    expect(query).toHaveBeenCalledTimes(3);
+  });
+
+  it('counts every KI as other when no KI has a groupable type', async () => {
+    query.mockResolvedValueOnce(groupBucketsResponse([[3, null, 3, true]]));
+
+    await expect(getKiGroups(esClient, OPTIONS)).resolves.toEqual({
+      total: 3,
+      total_other: 3,
+      groups: [],
+    });
+    expect(query).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns zeros for an AI index without KIs', async () => {
+    query.mockResolvedValueOnce(groupBucketsResponse([]));
+
+    await expect(getKiGroups(esClient, OPTIONS)).resolves.toEqual({
+      total: 0,
+      total_other: 0,
+      groups: [],
+    });
+  });
+
+  it('returns zeros when the backing store does not exist', async () => {
+    query.mockReset();
+    query.mockRejectedValueOnce(unknownIndexError());
+
+    await expect(getKiGroups(esClient, OPTIONS)).resolves.toEqual({
+      total: 0,
+      total_other: 0,
+      groups: [],
+    });
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+
+  it('counts the types past maxGroups as other', async () => {
+    query
+      .mockResolvedValueOnce(
+        groupBucketsResponse([
+          [4, 'faq', 10, false],
+          [3, 'policy', 10, false],
+        ])
+      )
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(rowsResponse([]));
+
+    const { total, total_other: totalOther } = await getKiGroups(esClient, {
+      ...OPTIONS,
+      maxGroups: 2,
+    });
+
+    expect({ total, totalOther }).toEqual({ total: 10, totalOther: 3 });
+  });
+
+  it('uses exactly the given types as groups, as params, and counts all other KIs as other', async () => {
+    query
+      .mockResolvedValueOnce(
+        groupBucketsResponse([
+          [3, 'policy', 9, false],
+          [6, null, 9, true],
+        ])
+      )
+      .mockResolvedValueOnce(rowsResponse([]));
+
+    const result = await getKiGroups(esClient, {
+      ...OPTIONS,
+      types: ['faq', 'policy'],
+      query: 'refund',
+    });
+
+    // "faq" has no match for the search: it is left out, the client shows it as 0.
+    expect(result).toEqual({
+      total: 9,
+      total_other: 6,
+      groups: [{ type: 'policy', count: 3, kis: [] }],
+    });
+    expect(queryText(0)).toContain(
+      'EVAL group_type = CASE(type IS NOT NULL AND BYTE_LENGTH(type) <= 256 AND type IN (?groupType0, ?groupType1), type, NULL)'
+    );
+    // maxGroups (5) is ignored: one bucket per given type.
+    expect(queryText(0)).toContain('| LIMIT 2');
+    expect(query.mock.calls[1][0].params).toEqual([
+      { searchQuery: 'refund' },
+      { groupType0: 'faq' },
+      { groupType1: 'policy' },
+    ]);
+  });
+
+  it('leaves out the excluded types before grouping, as params', async () => {
+    query
+      .mockResolvedValueOnce(
+        groupBucketsResponse([
+          [3, 'policy', 5, false],
+          [2, null, 5, true],
+        ])
+      )
+      .mockResolvedValueOnce(rowsResponse([]));
+
+    const result = await getKiGroups(esClient, { ...OPTIONS, excludeTypes: ['faq', 'runbook'] });
+
+    // total and total_other cover only the KIs outside the excluded types.
+    expect(result).toEqual({
+      total: 5,
+      total_other: 2,
+      groups: [{ type: 'policy', count: 3, kis: [] }],
+    });
+    expect(queryText(0)).toContain(
+      [
+        '| WHERE (type IS NULL OR type NOT IN (?excludeType0, ?excludeType1))',
+        'EVAL group_type = CASE(type IS NOT NULL AND BYTE_LENGTH(type) <= 256, type, NULL)',
+      ].join('\n| ')
+    );
+    expect(query.mock.calls[1][0].params).toEqual([
+      { excludeType0: 'faq' },
+      { excludeType1: 'runbook' },
+    ]);
+    // An excluded type can't be a group, so the group rows need no exclude filter.
+    expect(query.mock.calls[2][0].params).toEqual([{ type: 'policy' }]);
+  });
+
+  it('applies status, search and sort to buckets and rows', async () => {
+    query
+      .mockResolvedValueOnce(groupBucketsResponse([[1, 'faq', 2, false]]))
+      .mockResolvedValueOnce(rowsResponse([]));
+
+    await getKiGroups(esClient, {
+      ...OPTIONS,
+      maxGroups: 2,
+      previewSize: 1,
+      statuses: ['expired'],
+      query: 'refund',
+      sort: 'title',
+    });
+
+    expect(query.mock.calls[1][0].params).toEqual([{ searchQuery: 'refund' }]);
+    expect(query.mock.calls[2][0].params).toEqual([{ type: 'faq' }, { searchQuery: 'refund' }]);
+    for (const call of [0, 1]) {
+      expect(queryText(call)).toContain('| WHERE ki_status IN ("expired")\n');
+      expect(queryText(call)).toContain('MATCH(title, ?searchQuery');
+    }
+    expect(queryText(0)).toContain('| LIMIT 2');
+    expect(queryText(1)).toContain('| SORT _score DESC, title_sort ASC NULLS LAST, id ASC');
+    expect(queryText(1)).toContain('| LIMIT 1');
+  });
+});
+
+describe('kiHistogramDays', () => {
+  it('returns the last 30 UTC days, oldest first, today included', () => {
+    const days = kiHistogramDays(new Date('2026-03-01T23:30:00.000-05:00'));
+
+    expect(days).toHaveLength(30);
+    // 23:30 in New York is already March 2 in UTC.
+    expect(days[29]).toBe('2026-03-02');
+    expect(days[0]).toBe('2026-02-01');
+  });
+});
+
+describe('latestRevisionPipeline', () => {
+  const has = () => true;
+
+  it('adds first_seen only when asked, so other callers keep their query', () => {
+    expect(latestRevisionPipeline(INDEX_DEST, has).join('\n')).not.toContain('first_seen');
+    expect(latestRevisionPipeline(DATA_STREAM_DEST, has, { firstSeen: true })).toContain(
+      'INLINE STATS latest = MAX(revision_time), first_seen = MIN(@timestamp) BY id'
+    );
+  });
+});
+
+describe('getKiHistogram', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const { query } = esClient.esql;
+  const NOW = new Date('2026-11-20T10:00:00.000Z');
+
+  beforeEach(() => {
+    query.mockReset();
+  });
+
+  it('counts non-deleted KIs per day by first revision and fills empty days with zero', async () => {
+    query.mockResolvedValueOnce(probeResponse(ALL_FIELDS)).mockResolvedValueOnce(
+      histogramResponse([
+        [3, '2026-11-20T00:00:00.000Z'],
+        [2, '2026-10-22T00:00:00.000Z'],
+      ])
+    );
+
+    const { buckets } = await getKiHistogram(esClient, { dest: INDEX_DEST, now: NOW });
+
+    expect(buckets).toHaveLength(30);
+    expect(buckets[0]).toEqual({ date: '2026-10-22', count: 2 });
+    expect(buckets[1]).toEqual({ date: '2026-10-23', count: 0 });
+    expect(buckets[29]).toEqual({ date: '2026-11-20', count: 3 });
+
+    const {
+      query: text,
+      params,
+      allow_partial_results: allowPartialResults,
+    } = query.mock.calls[1][0];
+    expect(allowPartialResults).toBe(false);
+    expect(text).toContain('first_seen = MIN(@timestamp)');
+    expect(text).toContain('| WHERE ki_status IN ("active", "expired")\n');
+    expect(text).toContain('| EVAL added_at = COALESCE(first_seen, TO_DATETIME(updated_at))\n');
+    expect(text).toContain(
+      '| WHERE added_at >= TO_DATETIME(?from) AND added_at < TO_DATETIME(?to)\n'
+    );
+    expect(text).toContain('| EVAL day = DATE_TRUNC(1 day, added_at)\n');
+    expect(text).toContain('| STATS count = COUNT(*) BY day');
+    expect(params).toEqual([
+      { from: '2026-10-22T00:00:00.000Z' },
+      { to: '2026-11-21T00:00:00.000Z' },
+    ]);
+  });
+
+  it('falls back to updated_at when the dest has no @timestamp', async () => {
+    query
+      .mockResolvedValueOnce(probeResponse(['id', 'updated_at']))
+      .mockResolvedValueOnce(histogramResponse([[1, '2026-11-19T00:00:00.000Z']]));
+
+    const { buckets } = await getKiHistogram(esClient, { dest: INDEX_DEST, now: NOW });
+
+    expect(buckets[28]).toEqual({ date: '2026-11-19', count: 1 });
+    expect(query.mock.calls[1][0].query).toContain('| EVAL added_at = TO_DATETIME(updated_at)\n');
+    expect(query.mock.calls[1][0].query).not.toContain('first_seen');
+  });
+
+  it('returns 30 empty days without a query when the dest has no date column', async () => {
+    query.mockResolvedValueOnce(probeResponse(['id', 'title']));
+
+    const { buckets } = await getKiHistogram(esClient, { dest: INDEX_DEST, now: NOW });
+
+    expect(buckets).toHaveLength(30);
+    expect(buckets.every(({ count }) => count === 0)).toBe(true);
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 30 empty days when the dest index does not exist', async () => {
+    query.mockRejectedValueOnce(unknownIndexError());
+
+    const { buckets } = await getKiHistogram(esClient, { dest: INDEX_DEST, now: NOW });
+
+    expect(buckets).toHaveLength(30);
+    expect(buckets.every(({ count }) => count === 0)).toBe(true);
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('getKiHistogram without updated_at', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const { query } = esClient.esql;
+
+  it('uses the first revision timestamp alone', async () => {
+    query
+      .mockResolvedValueOnce(probeResponse(['id', '@timestamp']))
+      .mockResolvedValueOnce(histogramResponse([]));
+
+    await getKiHistogram(esClient, { dest: INDEX_DEST, now: new Date('2026-11-20T10:00:00Z') });
+
+    expect(query.mock.calls[1][0].query).toContain('| EVAL added_at = first_seen\n');
   });
 });

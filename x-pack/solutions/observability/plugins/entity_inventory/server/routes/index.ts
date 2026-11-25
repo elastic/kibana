@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { filterValuesRoute } from './filter_values/route';
 import { listRoute } from './list/route';
+import { planRoute } from './plan/route';
 import { typesRoute } from './types/route';
 
 export const entityInventoryRouteRepository = {
   ...typesRoute,
   ...listRoute,
+  ...filterValuesRoute,
+  ...planRoute,
 };
 
 export type EntityInventoryRouteRepository = typeof entityInventoryRouteRepository;

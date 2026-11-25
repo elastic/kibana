@@ -27,6 +27,7 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridControlColumn,
   EuiDataGridColumn,
+  EuiDataGridProps,
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
@@ -48,6 +49,8 @@ import {
   LENS_ROW_HEIGHT_MODE as RowHeightMode,
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  LENS_DATATABLE_DEFAULT_PAGE_SIZE,
+  LENS_DATATABLE_PAGE_SIZE_OPTIONS,
 } from '@kbn/lens-common';
 import type {
   LensTableRowContextMenuEvent,
@@ -93,8 +96,12 @@ const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
   footer: 'shade',
 };
 
-export const DEFAULT_PAGE_SIZE = 10;
-const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
+// Keep the vertical scrollbar so the grid's clientWidth, which EUI sizes columns from,
+// does not change when rows start or stop overflowing
+// (https://github.com/elastic/kibana/issues/208426).
+const DATA_GRID_VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
+  style: { overflow: 'auto scroll' },
+};
 
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -128,7 +135,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       props.args.pageSize
         ? {
             pageIndex: 0,
-            pageSize: props.args.pageSize ?? DEFAULT_PAGE_SIZE,
+            pageSize: props.args.pageSize ?? LENS_DATATABLE_DEFAULT_PAGE_SIZE,
           }
         : undefined
     );
@@ -691,13 +698,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           pagination={
             pagination && {
               ...pagination,
-              pageSizeOptions: PAGE_SIZE_OPTIONS,
+              pageSizeOptions: [...LENS_DATATABLE_PAGE_SIZE_OPTIONS],
               onChangeItemsPerPage,
               onChangePage,
             }
           }
           onColumnResize={onColumnResize}
           toolbarVisibility={false}
+          virtualizationOptions={DATA_GRID_VIRTUALIZATION_OPTIONS}
           renderFooterCellValue={renderSummaryRow}
           ref={dataGridRef}
         />
@@ -708,7 +716,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
 const datatableContainerStyles = css`
   height: 100%;
-  overflow: auto hidden;
+  width: 100%;
+  // DataGrid owns scrolling. Its width must not propagate to the Lens wrappers, or their
+  // scrollbars steal width and feed EUI's column-width ResizeObserver loop
+  // (https://github.com/elastic/kibana/issues/208426).
+  contain: inline-size;
+  overflow: hidden;
   user-select: text;
 
   .lnsTableCell--multiline {

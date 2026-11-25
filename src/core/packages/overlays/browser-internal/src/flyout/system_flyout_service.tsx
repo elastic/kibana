@@ -281,7 +281,7 @@ export class SystemFlyoutService {
           onResize,
           ...options
         }: OverlaySystemFlyoutOpenOptions = {}
-      ): OverlayRef => {
+      ): SystemFlyoutRef => {
         const { flyoutMenuProps } = options;
         const { flyoutContainer, flyoutRef, flyoutElementId, onCloseFlyout } =
           this.createManagedFlyout({
@@ -290,11 +290,32 @@ export class SystemFlyoutService {
             onClose: options.onClose,
           });
 
-        // title and other flyoutMenuProps: flyoutMenuProps.title takes precedence over top-level title
-        let mergedFlyoutMenuProps: EuiFlyoutMenuProps | undefined;
-        if (title || flyoutMenuProps) {
-          mergedFlyoutMenuProps = { title, ...flyoutMenuProps };
-        }
+        // Mutable title so `flyoutRef.setTitle` can retitle the open flyout.
+        let currentTitle = title;
+        const titleListeners = new Set<() => void>();
+        const subscribeTitle = (listener: () => void) => {
+          titleListeners.add(listener);
+          return () => {
+            titleListeners.delete(listener);
+          };
+        };
+        const getTitle = () => currentTitle;
+        flyoutRef.titleSetter = (next) => {
+          if (next === currentTitle) return;
+          currentTitle = next;
+          titleListeners.forEach((listener) => listener());
+        };
+        const TitleBound = ({
+          children,
+        }: {
+          children: (menuProps: EuiFlyoutMenuProps | undefined) => React.ReactElement;
+        }) => {
+          const liveTitle = React.useSyncExternalStore(subscribeTitle, getTitle);
+          // flyoutMenuProps.title takes precedence over top-level title
+          return children(
+            liveTitle || flyoutMenuProps ? { title: liveTitle, ...flyoutMenuProps } : undefined
+          );
+        };
 
         // Render the flyout content using EuiFlyout with session management
         // This ensures full EUI Flyout System integration
@@ -315,20 +336,24 @@ export class SystemFlyoutService {
               onResize={onResize}
             >
               {({ type, size, onResize: handleResize }) => (
-                <EuiFlyout
-                  {...options}
-                  id={flyoutElementId}
-                  type={type}
-                  size={size}
-                  onResize={handleResize}
-                  flyoutMenuProps={mergedFlyoutMenuProps}
-                  session={session}
-                  onClose={onCloseFlyout}
-                  aria-label={options['aria-label']}
-                  aria-labelledby={options['aria-labelledby']}
-                >
-                  {content}
-                </EuiFlyout>
+                <TitleBound>
+                  {(mergedFlyoutMenuProps) => (
+                    <EuiFlyout
+                      {...options}
+                      id={flyoutElementId}
+                      type={type}
+                      size={size}
+                      onResize={handleResize}
+                      flyoutMenuProps={mergedFlyoutMenuProps}
+                      session={session}
+                      onClose={onCloseFlyout}
+                      aria-label={options['aria-label']}
+                      aria-labelledby={options['aria-labelledby']}
+                    >
+                      {content}
+                    </EuiFlyout>
+                  )}
+                </TitleBound>
               )}
             </SystemFlyoutController>
           </KibanaRenderContextProvider>,

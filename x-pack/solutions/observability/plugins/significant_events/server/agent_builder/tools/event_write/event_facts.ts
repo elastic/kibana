@@ -13,6 +13,8 @@ import {
   type SignificantEvent,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { getSignalCollectedAt } from '../../../lib/significant_events/events/signal_collected_at';
+import { createBulkWriteValidationError } from '../bulk_write';
 import {
   addsNewDetectionRules,
   extractRuleUuids,
@@ -76,6 +78,7 @@ export const shouldSkipAsNoOp = ({
   return (
     latest.status === candidate.status &&
     latest.severity === severity &&
+    latest.summary === candidate.input.summary &&
     !addsRule &&
     !changesMemberVerdict(history, candidate.input.signals)
   );
@@ -152,7 +155,9 @@ const decideSeverity = ({
     return 'low';
   }
   if (proposed === undefined) {
-    throw new Error('events_write: an event with signals needs a proposed severity.');
+    throw createBulkWriteValidationError(
+      'events_write: an event with signals needs a proposed severity.'
+    );
   }
   return proposed;
 };
@@ -183,9 +188,12 @@ export const loadHistory = async ({
 export const computeEventFacts = ({
   candidate,
   timestamp,
+  resolvedSeverity,
 }: {
   candidate: ResolvedWriteCandidate;
   timestamp: string;
+  /** The severity the event should have, which wins over the agent's and the status. */
+  resolvedSeverity?: Severity;
 }): EventFacts => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const { latest, priorDocs } = candidate;
@@ -194,10 +202,14 @@ export const computeEventFacts = ({
 
   // A closed series that reopens starts a new episode: its stored signals belong to the closed one.
   const reopens = isContinuation && !isLiveStatus(latest?.status) && isLiveStatus(candidate.status);
-  const signals =
+  const signals = (
     isContinuation && !reopens
       ? mergeSignalsLatestPerRule(currentEpisode, candidate.input.signals ?? [], timestamp)
-      : candidate.input.signals ?? [];
+      : candidate.input.signals ?? []
+  ).map((signal) => {
+    const collectedAt = getSignalCollectedAt(signal);
+    return collectedAt === signal.collected_at ? signal : { ...signal, collected_at: collectedAt };
+  });
 
   const episodeContext =
     isContinuation && !reopens
@@ -210,12 +222,14 @@ export const computeEventFacts = ({
 
   const { status } = candidate;
 
-  const severity = decideSeverity({
-    proposed: candidate.input.severity,
-    storedSeverity: latest?.severity,
-    status,
-    signals,
-  });
+  const severity =
+    resolvedSeverity ??
+    decideSeverity({
+      proposed: candidate.input.severity,
+      storedSeverity: latest?.severity,
+      status,
+      signals,
+    });
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
   // A rule that now confirms what the event stored as unconfirmed changes what the event is about:

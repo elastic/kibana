@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
 import type { EntityInventoryEntityCategory } from '../../types';
-import { createPublicConfigMock } from '../../mocks';
-import { EntityInventorySearchProvider, useEntityInventorySearch } from '../context/search_context';
+import { createPublicConfigMock, MockEntityInventoryProvider } from '../../mocks';
+import { useEntityInventorySearch } from '../context/search_context';
 import { useEntityInventoryDataView } from './use_entity_inventory_data_view';
 
 const definition = (
@@ -27,6 +27,7 @@ const definition = (
   category,
   sources: indexPatterns.map((indexPattern) => ({ indexPattern })),
   attributes: [],
+  suggestedFilters: [],
 });
 
 const TYPES = [
@@ -37,7 +38,7 @@ const TYPES = [
 
 let mockTypes: EntityInventoryTypeDefinition[] = TYPES;
 
-jest.mock('../filters/use_entity_inventory_types', () => ({
+jest.mock('./use_entity_inventory_types', () => ({
   useEntityInventoryTypes: () => ({ types: mockTypes, isLoading: false }),
 }));
 
@@ -52,15 +53,16 @@ const renderDataViewHook = (entityCategory: EntityInventoryEntityCategory) => {
   const dataViews = dataViewPluginMocks.createStartContract();
   const dataView = { title: 'created', fields: [] } as unknown as DataView;
   (dataViews.create as jest.Mock).mockResolvedValue(dataView);
+  const history = createMemoryHistory();
 
   const wrapper = ({ children }: { children?: React.ReactNode }) => (
-    <KibanaContextProvider
+    <MockEntityInventoryProvider
+      entityCategory={entityCategory}
       services={{ ...coreMock.createStart(), dataViews, config: createPublicConfigMock() }}
+      history={history}
     >
-      <EntityInventorySearchProvider entityCategory={entityCategory}>
-        {children}
-      </EntityInventorySearchProvider>
-    </KibanaContextProvider>
+      {children}
+    </MockEntityInventoryProvider>
   );
 
   return {
@@ -106,11 +108,11 @@ describe('useEntityInventoryDataView', () => {
   it('creates a data view for the new scope when the selection changes', async () => {
     const { dataViews, result } = renderDataViewHook('all');
 
-    act(() => result.current.search.setFilterSelection({ category: 'kubernetes', attributes: {} }));
+    act(() => result.current.search.setFilterControls({ category: 'kubernetes', attributes: {} }));
     await waitFor(() => expect(dataViews.create).toHaveBeenCalledWith(dataViewOf('logs-c-*')));
 
     act(() =>
-      result.current.search.setFilterSelection({ category: 'hosts', type: 'two', attributes: {} })
+      result.current.search.setFilterControls({ category: 'hosts', type: 'two', attributes: {} })
     );
     await waitFor(() => expect(dataViews.create).toHaveBeenCalledWith(dataViewOf('logs-a-*')));
   });

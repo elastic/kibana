@@ -92,13 +92,6 @@ const imageSets = {
       defaultMessage: 'Suggest AI partitioning image for the streams app',
     }),
   },
-  queryStreamsEmptyState: {
-    light: () => import('./query_streams_empty_state_light.svg'),
-    dark: () => import('./query_streams_empty_state_dark.svg'),
-    alt: i18n.translate('xpack.streams.queryStreams.emptyStateImage', {
-      defaultMessage: 'Empty state illustration for query streams',
-    }),
-  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {

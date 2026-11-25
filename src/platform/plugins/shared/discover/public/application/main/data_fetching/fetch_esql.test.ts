@@ -32,6 +32,7 @@ describe('fetchEsql', () => {
     esqlSource: mockEsqlSource,
     inspectorAdapters: { requests: new RequestAdapter() },
     data: discoverServiceMock.data,
+    uiSettings: discoverServiceMock.uiSettings,
     scopedProfilesManager,
     esqlApproximation: false,
   };
@@ -184,17 +185,6 @@ describe('fetchEsql', () => {
     );
   });
 
-  it('passes the Kibana locale to the search method', async () => {
-    mockEsqlResult([], []);
-
-    await fetchEsql(fetchEsqlMockProps);
-
-    expect(discoverServiceMock.data.search.esql).toHaveBeenCalledWith(
-      expect.objectContaining({ locale: i18n.getLocale() }),
-      expect.anything()
-    );
-  });
-
   it('passes esqlApproximation to the search method', async () => {
     mockEsqlResult([], []);
 
@@ -202,6 +192,20 @@ describe('fetchEsql', () => {
 
     expect(discoverServiceMock.data.search.esql).toHaveBeenCalledWith(
       expect.objectContaining({ approximation: true }),
+      expect.anything()
+    );
+  });
+
+  it('sends the dateFormat:tz time zone and the Kibana locale', async () => {
+    mockEsqlResult([], []);
+    const uiSettings = {
+      get: jest.fn((key: string) => (key === 'dateFormat:tz' ? 'Europe/Paris' : undefined)),
+    } as unknown as typeof discoverServiceMock.uiSettings;
+
+    await fetchEsql({ ...fetchEsqlMockProps, uiSettings });
+
+    expect(discoverServiceMock.data.search.esql).toHaveBeenCalledWith(
+      expect.objectContaining({ timeZone: 'Europe/Paris', locale: i18n.getLocale() }),
       expect.anything()
     );
   });
