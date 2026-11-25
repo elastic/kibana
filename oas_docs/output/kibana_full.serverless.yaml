@@ -23781,7 +23781,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -24250,7 +24250,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/ai_index" \
+              -X POST "${KIBANA_URL}/api/context_engine/ai_index" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -24504,7 +24504,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/_query" \
+              -X POST "${KIBANA_URL}/api/context_engine/ai_index/_query" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -24678,7 +24678,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X DELETE "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
+              -X DELETE "${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true"
         - lang: Console
@@ -24958,7 +24958,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -25487,7 +25487,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X PUT "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+              -X PUT "${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -25727,7 +25727,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -25923,7 +25923,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_forget" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_forget" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -26148,7 +26148,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_remember" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_remember" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -26445,7 +26445,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_save_event" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_save_event" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
