@@ -141,6 +141,14 @@ describe('parseWorkflowYamlToJSON', () => {
       expect(result.success).toBe(true);
     });
 
+    it.each(['"{{ inputs.x }}"', '"${{ inputs.x }}"', '"{% if x %}y{% endif %}"'])(
+      'should reject a document that is only the template value %s',
+      (yaml) => {
+        const result = parseWorkflowYamlToJSON(yaml, z.object({ name: z.string() }));
+        expect(result.success).toBe(false);
+      }
+    );
+
     describe('inside a union', () => {
       // Same shape as the generated ES shortcut types: `anyOf: [full object, shortcut]`.
       const schema = z.object({

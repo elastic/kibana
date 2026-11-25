@@ -87,8 +87,9 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
   const result = schema.safeParse(parseResult.json);
   if (!result.success) {
     // Filter out validation errors for dynamic values (${{ }}), variable values ({{ }}), and Liquid tags ({% ... %})
+    // An empty path here is the whole document, which a template value must not replace.
     const filteredIssues = result.error.issues.filter(
-      (issue) => !isTemplateValueIssue(issue, parseResult.json)
+      (issue) => issue.path.length === 0 || !isTemplateValueIssue(issue, parseResult.json)
     );
 
     if (filteredIssues.length === 0) {
