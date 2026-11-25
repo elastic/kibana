@@ -208,6 +208,7 @@ class TutorialDirectoryUi extends React.Component<
         value: breadcrumbs,
       },
     });
+    getServices().chrome.docTitle.change(tab?.name ? [tab.name, addDataTitle] : [addDataTitle]);
   };
 
   onSelectedTabChanged = (id: string) => {
