@@ -11,6 +11,7 @@ import {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
+  ConversationOriginType,
   type Conversation,
   type ConversationWithoutRounds,
   type VersionedAttachment,
@@ -19,6 +20,8 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ChatResponse } from '../../../../../common/http_api/chat';
+import type { ChatCallbackAcceptedResponse } from '../../../../../common/http_api/chat_callback';
+import { CallbackTestServer } from '../../../../scout_agent_builder_shared/lib/callback_test_server';
 import type {
   GetConversationResponse,
   ListConversationsResponse,
@@ -1419,6 +1422,74 @@ apiTest.describe(
           expect(ownerView).toHaveStatusCode(200);
           expect((ownerView.body as Conversation).title).not.toBe('Renamed by admin');
         });
+      }
+    );
+
+    // ── callback origin ─────────────────────────────────────────────────────
+
+    apiTest(
+      "callback origin lookup never resolves to another user's public conversation",
+      async ({ apiClient }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-origin-agent-${testRunId.slice(0, 8)}`;
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Shared));
+
+        const callbackServer = new CallbackTestServer();
+        const callbackServerUrl = await callbackServer.start();
+
+        const origin = {
+          type: ConversationOriginType.Slack,
+          external_conversation_id: `slack:T1:C1:${testRunId}`,
+        };
+
+        const converseCallbackAs = async (
+          user: { username: string; password: string },
+          input: string
+        ): Promise<string> => {
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            title: input,
+            response: `Response to: ${input}`,
+          });
+
+          const response = await apiClient.post(`${accessControlInternalBase}/converse/callback`, {
+            headers: { ...headersFor(user), 'elastic-api-version': '1' },
+            body: {
+              input,
+              agent_id: agentId,
+              connector_id: connectorId,
+              execution_idempotency_key: `Ev-origin-${user.username}-${testRunId}`,
+              origin,
+              access_control: { access_mode: ConversationAccessControlMode.Public },
+              callback: { url: `${callbackServerUrl}/callback` },
+            },
+            responseType: 'json',
+          });
+
+          expect(response).toHaveStatusCode(202);
+
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          return (response.body as ChatCallbackAcceptedResponse).conversation_id;
+        };
+
+        try {
+          const aliceConversationId = await converseCallbackAs(alice, 'Alice claims the thread');
+          const bobConversationId = await converseCallbackAs(bob, 'Bob writes in the thread');
+
+          expect(bobConversationId).not.toBe(aliceConversationId);
+
+          const aliceView = await getConversationAs(apiClient, alice, aliceConversationId);
+
+          expect(aliceView).toHaveStatusCode(200);
+
+          const { rounds } = aliceView.body as Conversation;
+
+          expect(rounds.map((round) => round.input.message)).toStrictEqual([
+            'Alice claims the thread',
+          ]);
+        } finally {
+          await callbackServer.stop();
+        }
       }
     );
 

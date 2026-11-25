@@ -76,6 +76,7 @@ import type {
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
+  buildOwnedConversationFilter,
   buildPinnedFilter,
   buildReadAccessFilter,
   hasConversationConverseAccess,
@@ -189,6 +190,7 @@ export interface ConversationClient {
     options: ConversationWriteOptions
   ): Promise<AppendSteerResult>;
   exists(conversationId: string): Promise<boolean>;
+  /** The current user's own conversation for an external origin, if any. */
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(
     conversation: ConversationCreateRequest,
@@ -1021,6 +1023,7 @@ class ConversationClientImpl implements ConversationClient {
           filter: [
             createSpaceDslFilter(this.space),
             { term: { 'origin.external_conversation_id': origin.external_conversation_id } },
+            buildOwnedConversationFilter({ user: this.getUser() }),
           ],
         },
       },
@@ -1039,7 +1042,7 @@ class ConversationClientImpl implements ConversationClient {
     try {
       const document = await this.getDocumentWithAccess({
         conversationId: hit._id,
-        access: 'converse',
+        access: 'owner',
       });
 
       return toConversationResponseFromDocument({

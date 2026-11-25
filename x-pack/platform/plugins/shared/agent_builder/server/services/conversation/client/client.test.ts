@@ -1480,6 +1480,26 @@ describe('ConversationClient', () => {
   });
 
   describe('getByOrigin', () => {
+    it('does not return a public conversation owned by another user', async () => {
+      const document = createConversationDocument({
+        userId: 'other-user-id',
+        username: 'other-user',
+        accessMode: ConversationAccessControlMode.Public,
+      });
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [document],
+        },
+      });
+      mockGetDocumentResponseOnce(document);
+
+      const result = await client.getByOrigin({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+
+      expect(result).toBeUndefined();
+    });
+
     it('finds a conversation by first-class origin in the current space', async () => {
       const document = createConversationDocument();
       mockEsClient.search.mockResolvedValueOnce({
@@ -1507,6 +1527,20 @@ describe('ConversationClient', () => {
                   term: {
                     'origin.external_conversation_id':
                       'team:T123/channel:C123/thread:1712345678.000100',
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      { term: { user_id: 'user-1' } },
+                      {
+                        bool: {
+                          must_not: { exists: { field: 'user_id' } },
+                          filter: { term: { user_name: 'test-user' } },
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
                   },
                 },
               ],
