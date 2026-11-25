@@ -55,7 +55,11 @@ export {
   type EvalRunContext,
   type ResolveEvalRunContextOptions,
   type BuildEvalRunArgsOptions,
+  readSpaceIdsFlag,
 } from './src/cli/run_helpers';
+// Building blocks for extension CLI commands that talk to the evaluations cluster.
+export { getEvaluationsKbnClient } from './src/utils/evaluations_kbn_client';
+export { getSpaceIdsFromEnv } from './src/utils/space_ids';
 
 export {
   resolveEvalSuites,

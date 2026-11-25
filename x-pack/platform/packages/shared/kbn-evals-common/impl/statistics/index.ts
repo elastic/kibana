@@ -13,3 +13,11 @@ export type { PairedTestOutcome } from './run_test';
 export { selectTest, PARAMETRIC_UPGRADE_MIN_PAIRS, NORMALITY_ALPHA } from './select_test';
 export { inferMetricType } from './metric_type';
 export type { MetricType } from './metric_type';
+export { evaluateRegressionGates, DEFAULT_REGRESSION_GATES } from './gates';
+export type {
+  GateVerdict,
+  GateResult,
+  RegressionGateConfig,
+  RegressionGateThresholds,
+  RegressionGateReport,
+} from './gates';

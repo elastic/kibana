@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ComparisonResult } from '../schemas/experiments/compare_experiments_route.gen';
+import { evaluateRegressionGates, DEFAULT_REGRESSION_GATES } from './gates';
+
+const slice = (overrides: Partial<ComparisonResult>): ComparisonResult =>
+  ({
+    datasetId: 'dataset-1',
+    datasetName: 'Dataset 1',
+    evaluatorName: 'Factuality',
+    sampleSize: 30,
+    baseline: { mean: 0.8, used: 30, missing: 0, stability: null },
+    target: { mean: 0.8, used: 30, missing: 0, stability: null },
+    repetitionWarning: false,
+    pValue: 0.5,
+    direction: 'maximize',
+    metricType: 'continuous',
+    hypothesisTest: { name: 'paired-t', statistic: 0 },
+    ...overrides,
+  } as ComparisonResult);
+
+describe('evaluateRegressionGates', () => {
+  it('fails only when the worse-direction change passes the threshold with significance', () => {
+    const report = evaluateRegressionGates([
+      // 25% significant drop on a maximize metric: regression.
+      slice({ target: { mean: 0.6, used: 30, missing: 0, stability: null }, pValue: 0.01 }),
+      // Same drop without significance: warn, not fail.
+      slice({
+        evaluatorName: 'Relevance',
+        target: { mean: 0.6, used: 30, missing: 0, stability: null },
+        pValue: 0.2,
+      }),
+    ]);
+
+    expect(report.verdict).toBe('fail');
+    expect(report.regressions.map(({ evaluatorName }) => evaluatorName)).toEqual(['Factuality']);
+    expect(report.warnings.map(({ evaluatorName }) => evaluatorName)).toEqual(['Relevance']);
+    expect(report.regressions[0].relativeChange).toBeCloseTo(0.25);
+  });
+
+  it('never gates improvements, whatever their size and significance', () => {
+    const report = evaluateRegressionGates([
+      slice({ target: { mean: 0.99, used: 30, missing: 0, stability: null }, pValue: 0.0001 }),
+      // On a minimize metric (e.g. tokens), a drop is the improvement.
+      slice({
+        evaluatorName: 'Input Tokens',
+        direction: 'minimize',
+        baseline: { mean: 1000, used: 30, missing: 0, stability: null },
+        target: { mean: 500, used: 30, missing: 0, stability: null },
+        pValue: 0.0001,
+      }),
+    ]);
+
+    expect(report.verdict).toBe('pass');
+    expect(report.results.every(({ verdict }) => verdict === 'pass')).toBe(true);
+  });
+
+  it('gates minimize metrics on increases and warns on significant sub-threshold changes', () => {
+    const report = evaluateRegressionGates([
+      // 20% significant token increase: regression.
+      slice({
+        evaluatorName: 'Input Tokens',
+        direction: 'minimize',
+        baseline: { mean: 1000, used: 30, missing: 0, stability: null },
+        target: { mean: 1200, used: 30, missing: 0, stability: null },
+        pValue: 0.001,
+      }),
+      // 2% significant increase: under both thresholds, but significance still warns.
+      slice({
+        evaluatorName: 'Output Tokens',
+        direction: 'minimize',
+        baseline: { mean: 1000, used: 30, missing: 0, stability: null },
+        target: { mean: 1020, used: 30, missing: 0, stability: null },
+        pValue: 0.001,
+      }),
+    ]);
+
+    expect(report.regressions.map(({ evaluatorName }) => evaluatorName)).toEqual(['Input Tokens']);
+    expect(report.warnings.map(({ evaluatorName }) => evaluatorName)).toEqual(['Output Tokens']);
+  });
+
+  it('skips neutral slices and refuses to fail on a zero baseline mean', () => {
+    const report = evaluateRegressionGates([
+      slice({ evaluatorName: 'Analysis', direction: 'neutral', pValue: null }),
+      slice({
+        evaluatorName: 'Errors',
+        direction: 'minimize',
+        baseline: { mean: 0, used: 30, missing: 0, stability: null },
+        target: { mean: 3, used: 30, missing: 0, stability: null },
+        pValue: 0.001,
+      }),
+    ]);
+
+    expect(report.verdict).toBe('warn');
+    expect(report.results.find((r) => r.evaluatorName === 'Analysis')?.verdict).toBe('pass');
+    const zeroBaseline = report.results.find((r) => r.evaluatorName === 'Errors');
+    expect(zeroBaseline?.verdict).toBe('warn');
+    expect(zeroBaseline?.relativeChange).toBeNull();
+  });
+
+  it('applies per-evaluator overrides on top of the defaults', () => {
+    const report = evaluateRegressionGates(
+      [
+        // 10% significant drop: passes the 15% default but fails a stricter override.
+        slice({ target: { mean: 0.72, used: 30, missing: 0, stability: null }, pValue: 0.01 }),
+      ],
+      {
+        ...DEFAULT_REGRESSION_GATES,
+        evaluators: { Factuality: { failRelativeChange: 0.05 } },
+      }
+    );
+
+    expect(report.verdict).toBe('fail');
+  });
+});

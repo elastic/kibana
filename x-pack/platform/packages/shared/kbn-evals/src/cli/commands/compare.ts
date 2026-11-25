@@ -9,7 +9,17 @@ import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
-import { compareScores, pairScores, RepetitionPolicy } from '@kbn/evals-common';
+import {
+  compareScores,
+  pairScores,
+  resolveJudgeModelIds,
+  evaluateRegressionGates,
+  DEFAULT_REGRESSION_GATES,
+  RepetitionPolicy,
+  type RegressionGateConfig,
+  type RegressionGateReport,
+} from '@kbn/evals-common';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
@@ -20,6 +30,64 @@ import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
+
+const GATE_ICONS = { pass: '✅', warn: '⚠️', fail: '❌' } as const;
+
+const formatGateChange = (relativeChange: number | null): string =>
+  relativeChange == null ? '—' : `${(relativeChange * 100).toFixed(1)}% worse`;
+
+/**
+ * The regression verdict for the PR comment: the headline answer ("regression or not")
+ * ahead of the full comparison table, listing only the slices that tripped a gate.
+ * Report-only — the verdict never fails the command.
+ */
+const formatGateReportMarkdown = (report: RegressionGateReport): string => {
+  const lines: string[] = [];
+  if (report.verdict === 'fail') {
+    lines.push(`### ${GATE_ICONS.fail} Regression detected (report-only)`);
+  } else if (report.verdict === 'warn') {
+    lines.push(`### ${GATE_ICONS.warn} No regression, with warnings`);
+  } else {
+    lines.push(`### ${GATE_ICONS.pass} No regression against the pinned baseline`);
+  }
+  const flagged = [...report.regressions, ...report.warnings];
+  if (flagged.length > 0) {
+    lines.push('');
+    lines.push('| Dataset | Evaluator | Verdict | Change | p-value |');
+    lines.push('|---|---|---|---|---|');
+    for (const gate of flagged) {
+      lines.push(
+        `| ${gate.datasetName} | ${gate.evaluatorName} | ${GATE_ICONS[gate.verdict]} ${
+          gate.verdict
+        } | ${formatGateChange(gate.relativeChange)} | ${gate.pValue?.toFixed(4) ?? '—'} |`
+      );
+    }
+  }
+  return lines.join('\n');
+};
+
+const logGateReport = (log: SomeDevLog, report: RegressionGateReport): void => {
+  const summary = `Regression gates (report-only): ${report.verdict.toUpperCase()} — ${
+    report.regressions.length
+  } regression(s), ${report.warnings.length} warning(s).`;
+  if (report.verdict === 'fail') {
+    log.error(summary);
+  } else if (report.verdict === 'warn') {
+    log.warning(summary);
+  } else {
+    log.info(summary);
+  }
+  for (const gate of [...report.regressions, ...report.warnings]) {
+    const line = `  ${GATE_ICONS[gate.verdict]} ${gate.datasetName} / ${gate.evaluatorName}: ${
+      gate.reason
+    }`;
+    if (gate.verdict === 'fail') {
+      log.error(line);
+    } else {
+      log.warning(line);
+    }
+  }
+};
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -33,8 +101,13 @@ export const compareCmd: Command<void> = {
     2. Auto-resolve baseline from a branch (for CI):
        node scripts/evals compare <experiment-id> --baseline-branch main --suite <suite-id>
 
+    3. Compare against the pinned baseline with a regression verdict (regression suites):
+       node scripts/evals compare <experiment-id> --baseline-pinned --suite <suite-id>
+
   Options:
     --baseline-branch  Branch to find the latest baseline experiment on (e.g. "main")
+    --baseline-pinned  Compare against the suite's pinned baseline (see "evals ext pin-baseline")
+    --gates            Path to a JSON file overriding the default regression gate thresholds
     --suite            Suite ID filter for baseline lookup and score filtering
     --format           Output format: "terminal" (default) or "markdown"
     --kibana-url       Kibana URL for generating compare page links in markdown
@@ -51,6 +124,7 @@ export const compareCmd: Command<void> = {
   flags: {
     string: [
       'baseline-branch',
+      'gates',
       'suite',
       'format',
       'kibana-url',
@@ -59,8 +133,11 @@ export const compareCmd: Command<void> = {
       'space-ids',
       'repetition-policy',
     ],
+    boolean: ['baseline-pinned'],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
+      --baseline-pinned  Compare against the suite's pinned baseline instead of a branch run
+      --gates            Path to a JSON file overriding the default regression gate thresholds
       --suite            Suite ID filter for baseline lookup and score filtering
       --format           Output format: "terminal" (default) or "markdown"
       --kibana-url       Kibana URL for generating compare page links in markdown
@@ -73,6 +150,8 @@ export const compareCmd: Command<void> = {
   run: async ({ log, flagsReader }) => {
     const positionals = flagsReader.getPositionals();
     const baselineBranch = flagsReader.string('baseline-branch');
+    const baselinePinned = flagsReader.boolean('baseline-pinned');
+    const gatesPath = flagsReader.string('gates');
     const suiteId = flagsReader.string('suite');
     const format = flagsReader.string('format') ?? 'terminal';
     const kibanaUrl = flagsReader.string('kibana-url');
@@ -93,6 +172,32 @@ export const compareCmd: Command<void> = {
       throw createFlagError('--repetition-policy must be "mean" or "median".');
     }
     const repetitionPolicy = parsedPolicy.data;
+
+    if (baselinePinned && baselineBranch) {
+      throw createFlagError('--baseline-pinned and --baseline-branch are mutually exclusive.');
+    }
+    if (gatesPath && !baselinePinned) {
+      throw createFlagError('--gates only applies with --baseline-pinned.');
+    }
+
+    let gateConfig: RegressionGateConfig = DEFAULT_REGRESSION_GATES;
+    if (gatesPath) {
+      try {
+        const parsed = JSON.parse(
+          Fs.readFileSync(gatesPath, 'utf-8')
+        ) as Partial<RegressionGateConfig>;
+        gateConfig = {
+          defaults: { ...DEFAULT_REGRESSION_GATES.defaults, ...parsed.defaults },
+          evaluators: parsed.evaluators,
+        };
+      } catch (error) {
+        throw createFlagError(
+          `Could not read gate thresholds from "${gatesPath}": ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
 
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
@@ -129,8 +234,74 @@ export const compareCmd: Command<void> = {
     let targetExperimentId: string;
     let baselineExperimentId: string;
     let baselineMetadata: BaselineExperiment | undefined;
+    let pinnedBaselineId: string | undefined;
+    let pinnedJudgeModelId: string | null | undefined;
 
-    if (baselineBranch) {
+    if (baselinePinned) {
+      if (!suiteId) {
+        throw createFlagError('--suite is required when using --baseline-pinned.');
+      }
+
+      targetExperimentId = positionals[0];
+      if (!targetExperimentId) {
+        throw createFlagError(
+          'One experiment ID is required with --baseline-pinned. Example: node scripts/evals compare <experiment-id> --baseline-pinned --suite <suite-id>'
+        );
+      }
+
+      // Same base-build-ID resolution as the branch mode (see below).
+      if (!targetExperimentId.includes('::')) {
+        const resolved = await evalsClient.findLatestExperimentForBuild({
+          suiteId,
+          baseExecutionId: targetExperimentId,
+        });
+        if (resolved) {
+          log.info(`Resolved PR experiment: ${targetExperimentId} → ${resolved.executionId}`);
+          targetExperimentId = resolved.executionId;
+        } else {
+          log.warning(`Could not resolve base ID "${targetExperimentId}"; using raw ID.`);
+        }
+      }
+
+      const taskModelId = targetExperimentId.includes('::')
+        ? targetExperimentId.split('::').pop()
+        : undefined;
+
+      log.info(
+        `Looking up pinned baseline for suite "${suiteId}"${
+          taskModelId ? ` (model: ${taskModelId})` : ''
+        }...`
+      );
+
+      const pinned = await evalsClient.findLatestPinnedBaseline({ suiteId, taskModelId });
+      if (!pinned) {
+        const message =
+          `No pinned baseline found for suite \`${suiteId}\`${
+            taskModelId ? ` and model \`${taskModelId}\`` : ''
+          }. ` +
+          `Seed one from a green run on main: \`node scripts/evals ext pin-baseline --suite ${suiteId} --execution-id <id>\``;
+        log.warning(message);
+        if (format === 'markdown' && outputPath) {
+          // The PR comment is built from this file; an empty file would mean no comment
+          // at all, hiding that the comparison was skipped.
+          Fs.appendFileSync(outputPath, `### ℹ️ No pinned baseline\n\n${message}\n\n`);
+        }
+        return;
+      }
+
+      pinnedBaselineId = pinned.baseline_id;
+      pinnedJudgeModelId = pinned.judge_model_id;
+      baselineExperimentId = pinned.execution_id;
+      baselineMetadata = {
+        executionId: pinned.execution_id,
+        timestamp: pinned.pinned_at,
+        gitCommitSha: pinned.git_commit_sha ?? null,
+        gitBranch: pinned.git_branch ?? null,
+      };
+      log.info(
+        `Found pinned baseline ${pinned.baseline_id} (execution ${pinned.execution_id}, pinned at ${pinned.pinned_at})`
+      );
+    } else if (baselineBranch) {
       if (!suiteId) {
         throw createFlagError('--suite is required when using --baseline-branch.');
       }
@@ -239,8 +410,38 @@ export const compareCmd: Command<void> = {
 
     const [targetExperimentScores, baselineExperimentScores] = await Promise.all([
       evalsClient.getExperimentScores(targetExperimentId, targetFilter),
-      evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
+      // A pinned baseline's scores live in the pinned-baselines snapshot, which
+      // outlives the retention on the scores data stream.
+      pinnedBaselineId
+        ? evalsClient.getPinnedBaselineScores(pinnedBaselineId)
+        : evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
     ]);
+
+    // Scores from different judges are not comparable: refuse the comparison instead of
+    // gating on garbage. The pin route rejects mixed-judge executions, so the baseline
+    // side is a single judge; the target side must be that same single judge.
+    if (pinnedJudgeModelId) {
+      const targetJudgeModelIds = resolveJudgeModelIds(targetExperimentScores);
+      const mismatch =
+        targetJudgeModelIds.length > 1 ||
+        (targetJudgeModelIds.length === 1 && targetJudgeModelIds[0] !== pinnedJudgeModelId);
+      if (mismatch) {
+        const message =
+          `Judge mismatch: the pinned baseline was scored by "${pinnedJudgeModelId}" but this run ` +
+          `was scored by "${targetJudgeModelIds.join(
+            '", "'
+          )}". The comparison is invalid — re-run ` +
+          `with the pinned judge, or pin a new baseline under the new judge.`;
+        log.error(message);
+        if (format === 'markdown' && outputPath) {
+          Fs.appendFileSync(
+            outputPath,
+            `### ⚠️ Comparison invalid: judge mismatch\n\n${message}\n\n`
+          );
+        }
+        return;
+      }
+    }
 
     if (targetExperimentScores.length === 0) {
       throw new Error(`No scores found for experiment ID: ${targetExperimentId}`);
@@ -308,21 +509,33 @@ export const compareCmd: Command<void> = {
       return;
     }
 
+    // The regression decision, only against a pinned baseline: a branch-mode baseline is
+    // whatever happened to run last, not a reference anyone promoted. Report-only —
+    // verdicts never change the exit code until the suite's noise floor is known.
+    const gateReport = pinnedBaselineId ? evaluateRegressionGates(results, gateConfig) : undefined;
+    if (gateReport) {
+      logGateReport(log, gateReport);
+    }
+
     if (format === 'markdown') {
       const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
-      const comparePageUrl = effectiveKibanaUrl
-        ? buildExecutionCompareUrl({
-            kibanaUrl: effectiveKibanaUrl,
-            spaceId: spaceIds?.[0],
-            baselineExecutionId: baselineExperimentId,
-            targetExecutionId: targetExperimentId,
-            repetitionPolicy,
-          })
-        : undefined;
-      if (effectiveKibanaUrl && !comparePageUrl) {
+      // The UI comparison page reads live scores only: a pinned baseline's execution may
+      // have aged out of the scores retention, so the link would 404. Omit it.
+      const comparePageUrl =
+        effectiveKibanaUrl && !pinnedBaselineId
+          ? buildExecutionCompareUrl({
+              kibanaUrl: effectiveKibanaUrl,
+              spaceId: spaceIds?.[0],
+              baselineExecutionId: baselineExperimentId,
+              targetExecutionId: targetExperimentId,
+              repetitionPolicy,
+            })
+          : undefined;
+      if (effectiveKibanaUrl && !pinnedBaselineId && !comparePageUrl) {
         log.warning('Invalid Kibana URL for compare page link.');
       }
 
+      const verdictMarkdown = gateReport ? formatGateReportMarkdown(gateReport) + '\n\n' : '';
       const markdown = formatMarkdownCompareReport({
         targetExperimentId,
         baselineExperimentId,
@@ -339,10 +552,10 @@ export const compareCmd: Command<void> = {
       });
 
       if (outputPath) {
-        Fs.appendFileSync(outputPath, markdown + '\n\n');
+        Fs.appendFileSync(outputPath, verdictMarkdown + markdown + '\n\n');
         log.info(`Markdown report appended to ${outputPath}`);
       } else {
-        process.stdout.write(markdown + '\n');
+        process.stdout.write(verdictMarkdown + markdown + '\n');
       }
     } else {
       const report = formatCompareReport({

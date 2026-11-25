@@ -830,6 +830,88 @@ describe('EvalsClient', () => {
     });
   });
 
+  describe('pinned baselines', () => {
+    const pinnedBaseline = {
+      baseline_id: 'baseline-1',
+      suite_id: 'suite-1',
+      execution_id: 'bk-1::suite-1::gpt-5',
+      judge_model_id: 'glm-5.2',
+      pinned_at: '2026-11-01T00:00:00.000Z',
+      score_count: 2,
+    };
+
+    it('pinBaseline posts the pin request and returns the created baseline', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ baseline: pinnedBaseline }));
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.pinBaseline({
+        suiteId: 'suite-1',
+        executionId: 'bk-1::suite-1::gpt-5',
+        reason: 'monthly baseline',
+        pinnedBy: 'rakesh',
+      });
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'POST',
+          body: {
+            suite_id: 'suite-1',
+            execution_id: 'bk-1::suite-1::gpt-5',
+            reason: 'monthly baseline',
+            pinned_by: 'rakesh',
+          },
+        })
+      );
+      expect(result).toMatchObject({ baseline_id: 'baseline-1', judge_model_id: 'glm-5.2' });
+    });
+
+    it('findLatestPinnedBaseline returns undefined only on a genuine null baseline', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ baseline: null }));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(
+        client.findLatestPinnedBaseline({ suiteId: 'suite-1', taskModelId: 'gpt-5' })
+      ).resolves.toBeUndefined();
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          query: { suite_id: 'suite-1', model_id: 'gpt-5' },
+        })
+      );
+    });
+
+    it('findLatestPinnedBaseline propagates lookup failures instead of masking them as "no pin"', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockRejectedValue(new Error('404 Not Found'));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(client.findLatestPinnedBaseline({ suiteId: 'suite-1' })).rejects.toThrow(
+        '404 Not Found'
+      );
+    });
+
+    it('getPinnedBaselineScores returns the snapshot scores and propagates failures', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      const score = createScoreDocument('example-1');
+      kbnClient.request.mockResolvedValueOnce(asKbnResponse({ scores: [score], total: 1 }));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(client.getPinnedBaselineScores('baseline-1')).resolves.toHaveLength(1);
+
+      kbnClient.request.mockRejectedValueOnce(new Error('401 Unauthorized'));
+      await expect(client.getPinnedBaselineScores('baseline-1')).rejects.toThrow(
+        '401 Unauthorized'
+      );
+    });
+  });
+
   describe('getExperimentDatasetExamples', () => {
     it.each([
       { spaceIds: undefined, prefix: '' },

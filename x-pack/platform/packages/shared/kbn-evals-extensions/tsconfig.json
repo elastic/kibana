@@ -11,6 +11,7 @@
     "@kbn/evals-common",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
+    "@kbn/kbn-client",
     "@kbn/tooling-log"
   ]
 }
