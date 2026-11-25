@@ -19,7 +19,7 @@ This connector is currently available in **Agent Builder** only. Workflow suppor
 
 ## Create connectors in {{kib}} [define-sentinelone-v2-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
+You can create connectors in **{{stack-manage-app}}** → **{{connectors-ui}}**.
 
 ### Connector networking configuration [sentinelone-v2-connector-networking-configuration]
 
