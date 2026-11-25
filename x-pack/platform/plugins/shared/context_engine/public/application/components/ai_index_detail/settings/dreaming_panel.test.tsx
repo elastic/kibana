@@ -108,6 +108,7 @@ const renderPanel = (
     dreaming,
     workflowIds: dreaming?.enabled ? ['wf-dreaming'] : [],
     isLoading,
+    isError: false,
   });
   return render(
     <I18nProvider>

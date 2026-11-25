@@ -89,7 +89,7 @@ describe('SettingsTab', () => {
     jest.clearAllMocks();
     jest
       .mocked(useAiIndexDreaming)
-      .mockReturnValue({ dreaming: undefined, isLoading: false, workflowIds: [] });
+      .mockReturnValue({ dreaming: undefined, isLoading: false, isError: false, workflowIds: [] });
   });
 
   it('always renders the General section', () => {
@@ -153,7 +153,7 @@ describe('SettingsTab', () => {
     it('does not scroll while Dreaming is still loading', () => {
       jest
         .mocked(useAiIndexDreaming)
-        .mockReturnValue({ dreaming: undefined, isLoading: true, workflowIds: [] });
+        .mockReturnValue({ dreaming: undefined, isLoading: true, isError: false, workflowIds: [] });
 
       renderTab({ aiIndex }, true, automationsPath);
 
@@ -163,13 +163,16 @@ describe('SettingsTab', () => {
     it('scrolls to Automations when Dreaming finishes loading on the mounted page', () => {
       jest
         .mocked(useAiIndexDreaming)
-        .mockReturnValue({ dreaming: undefined, isLoading: true, workflowIds: [] });
+        .mockReturnValue({ dreaming: undefined, isLoading: true, isError: false, workflowIds: [] });
       const { rerenderTab } = renderTab({ aiIndex }, true, automationsPath);
       expect(scrollIntoView).not.toHaveBeenCalled();
 
-      jest
-        .mocked(useAiIndexDreaming)
-        .mockReturnValue({ dreaming: undefined, isLoading: false, workflowIds: [] });
+      jest.mocked(useAiIndexDreaming).mockReturnValue({
+        dreaming: undefined,
+        isLoading: false,
+        isError: false,
+        workflowIds: [],
+      });
       rerenderTab();
 
       expect(scrollIntoView).toHaveBeenCalledTimes(1);

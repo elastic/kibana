@@ -23,6 +23,11 @@ import {
 import { useKibana } from './use_kibana';
 
 interface UseSetupWizardParams {
+  /**
+   * The AI index id from the URL. It is known before `aiIndex` loads, so a closed wizard is
+   * recognized right away.
+   */
+  aiIndexId?: string;
   aiIndex: GetAiIndexResponse | undefined;
   /** The AI index's dreaming config. */
   dreaming: AiIndexDreamingConfig | undefined;
@@ -31,6 +36,8 @@ interface UseSetupWizardParams {
   isMemoryEnabled: boolean;
   /** False while the memory count or the dreaming config is still loading. */
   isProgressReady: boolean;
+  /** True when the memory count or the dreaming config failed to load, so the progress is unknown. */
+  isProgressError: boolean;
   /** Whether the Overview tab is open. Each visit to it makes a fresh decision. */
   isActive: boolean;
 }
@@ -58,18 +65,20 @@ const noop = () => () => {};
  * Overview, so finishing a step mid-flow doesn't make the wizard disappear under the user.
  */
 export const useSetupWizard = ({
+  aiIndexId: urlAiIndexId,
   aiIndex,
   dreaming,
   memoryCount,
   isMemoryEnabled,
   isProgressReady,
+  isProgressError,
   isActive,
 }: UseSetupWizardParams): UseSetupWizardResult => {
   const {
     services: { http },
   } = useKibana();
   const basePath = http.basePath.get();
-  const aiIndexId = aiIndex?.id;
+  const aiIndexId = aiIndex?.id ?? urlAiIndexId;
 
   const stored = useSyncExternalStore<SetupWizardStoredValue | undefined>(
     aiIndexId ? subscribeSetupWizardStorage : noop,
@@ -89,8 +98,11 @@ export const useSetupWizard = ({
   if (!isActive && visit !== undefined) {
     setVisit(undefined);
   } else if (isActive && aiIndex && done && visit?.aiIndexId !== aiIndex.id) {
-    // A managed or closed AI index never shows the wizard, so it needn't wait for its progress data.
-    if (aiIndex.managed || stored === 'closed' || isProgressReady) {
+    if (isProgressError) {
+      // Unknown progress is not "not done": show the normal Overview instead of guessing.
+      setVisit({ aiIndexId: aiIndex.id, view: { show: false } });
+    } else if (aiIndex.managed || stored === 'closed' || isProgressReady) {
+      // A managed or closed AI index never shows the wizard, so it needn't wait for its progress data.
       setVisit({
         aiIndexId: aiIndex.id,
         view: getSetupWizardView({ isManaged: aiIndex.managed, isMemoryEnabled, done, stored }),
@@ -112,6 +124,11 @@ export const useSetupWizard = ({
       writeSetupWizardStoredValue({ basePath, aiIndexId }, 'closed');
     }
   }, [aiIndexId, basePath]);
+
+  if (!aiIndex) {
+    // A closed wizard never shows, so the page needn't wait for the AI index to know that.
+    return stored === 'closed' ? { status: 'hidden' } : { status: 'loading' };
+  }
 
   const view = visit?.aiIndexId === aiIndexId ? visit?.view : undefined;
   if (view === undefined || !done) {

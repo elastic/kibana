@@ -15,6 +15,8 @@ interface UseMemoryCountResult {
   memoryCount: number;
   /** True until both counts belong to this AI index. */
   isLoading: boolean;
+  /** True when a count request failed. The count is then unknown, not 0. */
+  isError: boolean;
 }
 
 /**
@@ -41,7 +43,7 @@ export const useMemoryCount = (
   });
 
   if (!enabled) {
-    return { memoryCount: 0, isLoading: false };
+    return { memoryCount: 0, isLoading: false, isError: false };
   }
 
   return {
@@ -51,5 +53,6 @@ export const useMemoryCount = (
       sessionFacts.isLoading ||
       sessions.isPreviousData ||
       sessionFacts.isPreviousData,
+    isError: sessions.error !== undefined || sessionFacts.error !== undefined,
   };
 };

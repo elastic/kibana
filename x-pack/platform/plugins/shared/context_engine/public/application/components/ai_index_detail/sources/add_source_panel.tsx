@@ -46,6 +46,8 @@ export const AddSourcePanel = ({
       justifyContent="spaceBetween"
       gutterSize="s"
       responsive={false}
+      // On a narrow screen the action drops below the title instead of squeezing it.
+      wrap
     >
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">

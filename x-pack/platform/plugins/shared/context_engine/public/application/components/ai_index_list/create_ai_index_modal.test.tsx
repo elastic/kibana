@@ -16,15 +16,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../../ai_index_created_location_state';
-import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
 import { readSetupWizardStoredValue, writeSetupWizardStoredValue } from '../../utils/setup_wizard';
 import { CreateAiIndexModal } from './create_ai_index_modal';
-
-jest.mock('../../hooks/use_memory_enabled', () => ({
-  useMemoryEnabled: jest.fn(),
-}));
-
-const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 
 const renderWithProviders = (core: CoreStart, onClose: () => void = jest.fn()) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -54,10 +47,6 @@ const typeId = (id: string) => {
 const VALID_ID = 'support-ticket-triage';
 
 describe('CreateAiIndexModal', () => {
-  beforeEach(() => {
-    mockUseMemoryEnabled.mockReturnValue(false);
-  });
-
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -134,23 +123,6 @@ describe('CreateAiIndexModal', () => {
     expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
       path: '/ai_index/support-ticket-triage',
       state: AI_INDEX_CREATED_LOCATION_STATE,
-    });
-  });
-
-  it('opens the detail page (setup wizard) also while memory is on', async () => {
-    mockUseMemoryEnabled.mockReturnValue(true);
-    const services = coreMock.createStart();
-    services.http.post.mockResolvedValue({});
-
-    renderWithProviders(services);
-    typeId(VALID_ID);
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexModalConfirmButton'));
-
-    await waitFor(() => {
-      expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
-        path: '/ai_index/support-ticket-triage',
-        state: AI_INDEX_CREATED_LOCATION_STATE,
-      });
     });
   });
 

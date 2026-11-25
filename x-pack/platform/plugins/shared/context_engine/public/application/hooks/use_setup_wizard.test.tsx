@@ -38,6 +38,7 @@ const defaultParams: Params = {
   memoryCount: 0,
   isMemoryEnabled: true,
   isProgressReady: true,
+  isProgressError: false,
   isActive: true,
 };
 
@@ -63,6 +64,24 @@ describe('useSetupWizard', () => {
     expect(result.current.status).toBe('loading');
 
     rerender({ ...defaultParams, isProgressReady: true });
+
+    expect(result.current).toMatchObject({ status: 'shown', currentStep: 'dreaming' });
+  });
+
+  it('shows the normal Overview when the progress failed to load, even with steps not done', () => {
+    const { result } = renderSetupWizard({ isProgressError: true });
+
+    expect(result.current.status).toBe('hidden');
+  });
+
+  it('does not wait for the rest of the progress data when a request already failed', () => {
+    const { result } = renderSetupWizard({ isProgressReady: false, isProgressError: true });
+
+    expect(result.current.status).toBe('hidden');
+  });
+
+  it('shows the wizard when the progress loaded without an error', () => {
+    const { result } = renderSetupWizard({ isProgressReady: true, isProgressError: false });
 
     expect(result.current).toMatchObject({ status: 'shown', currentStep: 'dreaming' });
   });

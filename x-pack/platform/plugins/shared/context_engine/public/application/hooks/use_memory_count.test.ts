@@ -36,7 +36,7 @@ describe('useMemoryCount', () => {
 
     const { result } = renderHook(() => useMemoryCount('my-ai-index', { enabled: true }));
 
-    expect(result.current).toEqual({ memoryCount: 5, isLoading: false });
+    expect(result.current).toEqual({ memoryCount: 5, isLoading: false, isError: false });
     expect(useListKi).toHaveBeenCalledWith(
       expect.objectContaining({ aiIndexId: 'my-ai-index', size: 0, type: 'memory.session' })
     );
@@ -58,6 +58,26 @@ describe('useMemoryCount', () => {
 
     const { result } = renderHook(() => useMemoryCount('my-ai-index', { enabled: false }));
 
-    expect(result.current).toEqual({ memoryCount: 0, isLoading: false });
+    expect(result.current).toEqual({ memoryCount: 0, isLoading: false, isError: false });
+  });
+
+  it('is an error when one of the counts failed', () => {
+    useListKi.mockImplementation(({ type }: { type: string }) =>
+      type === 'memory.session_fact'
+        ? listResult({ error: new Error('Request timed out') })
+        : listResult({ total: 2 })
+    );
+
+    const { result } = renderHook(() => useMemoryCount('my-ai-index', { enabled: true }));
+
+    expect(result.current.isError).toBe(true);
+  });
+
+  it('is not an error when disabled, even if a stale error is left', () => {
+    useListKi.mockReturnValue(listResult({ error: new Error('Request timed out') }));
+
+    const { result } = renderHook(() => useMemoryCount('my-ai-index', { enabled: false }));
+
+    expect(result.current.isError).toBe(false);
   });
 });

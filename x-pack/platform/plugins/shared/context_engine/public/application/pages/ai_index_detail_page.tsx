@@ -155,7 +155,11 @@ export const AiIndexDetailPage = () => {
   // `useListKi` keeps the previous AI index's response while this one loads.
   const isKiSummaryPending = isKiSummaryLoading || (isKiSummaryPreviousData && !kiSummaryError);
   const hasLoadedKiSummary = aiIndex !== undefined && !isKiSummaryPending;
-  const { memoryCount, isLoading: isMemoryCountLoading } = useMemoryCount(aiIndex?.id, {
+  const {
+    memoryCount,
+    isLoading: isMemoryCountLoading,
+    isError: isMemoryCountError,
+  } = useMemoryCount(aiIndex?.id, {
     enabled: aiIndex !== undefined && isMemoryEnabled,
   });
   const hasKnowledgeIndicators = hasLoadedKiSummary && !kiSummaryError && summary.total > 0;
@@ -183,15 +187,21 @@ export const AiIndexDetailPage = () => {
   );
   const isManaged = aiIndex?.managed === true;
   // Only the setup wizard reads it here, and the wizard has no dreaming step without memory.
-  const { dreaming, isLoading: isDreamingLoading } = useAiIndexDreaming(aiIndex?.id ?? '', {
+  const {
+    dreaming,
+    isLoading: isDreamingLoading,
+    isError: isDreamingError,
+  } = useAiIndexDreaming(aiIndex?.id ?? '', {
     enabled: aiIndex !== undefined && !isManaged && isMemoryEnabled,
   });
   const setupWizard = useSetupWizard({
+    aiIndexId: id,
     aiIndex,
     dreaming,
     memoryCount,
     isMemoryEnabled,
     isProgressReady: !isMemoryCountLoading && !isDreamingLoading,
+    isProgressError: isMemoryCountError || isDreamingError,
     isActive: !isSourcesTab && !isKnowledgeIndicatorsTab && !isSettingsTab,
   });
   // The setup wizard replaces the "AI index created" callout.
@@ -391,8 +401,9 @@ export const AiIndexDetailPage = () => {
   );
 
   const overviewRouteContent = (() => {
-    if (aiIndex && setupWizard.status === 'loading') {
-      // Wait for the wizard decision, so the normal Overview doesn't flash first.
+    if (setupWizard.status === 'loading') {
+      // Wait for the wizard decision, so the normal Overview doesn't flash first. A closed wizard
+      // is known from the URL id, so it skips this and shows the Overview skeleton right away.
       return (
         <EuiFlexGroup justifyContent="center" data-test-subj="contextAiIndexOverviewLoading">
           <EuiFlexItem grow={false}>

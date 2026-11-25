@@ -54,6 +54,10 @@ const closedToast = i18n.translate('xpack.contextEngine.setupWizard.closedToast'
   defaultMessage: 'Setup closed. Everything is in Settings when you need it.',
 });
 
+const blankDescriptionError = i18n.translate('xpack.contextEngine.setupWizard.descriptionBlank', {
+  defaultMessage: 'Enter a description.',
+});
+
 const placeholderText = i18n.translate('xpack.contextEngine.setupWizard.placeholder', {
   defaultMessage: 'This step is not ready yet. Skip it for now.',
 });
@@ -153,6 +157,9 @@ export const SetupWizard = ({
     value: trimmedDescription,
     maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
   });
+  // Only spaces: Finish setup stays off, so say why. An untouched (empty) field shows nothing.
+  const isDescriptionBlank = description.length > 0 && trimmedDescription.length === 0;
+  const descriptionError = isDescriptionBlank ? blankDescriptionError : descriptionValidation.error;
   const isBusy = isSaving || isFinishing || isSavingSources;
 
   const getCanContinue = (): boolean => {
@@ -201,7 +208,7 @@ export const SetupWizard = ({
     onClick: () => onStepChange(stepId),
     disabled: isBusy,
     'data-test-subj': `contextSetupWizardStep-${stepId}`,
-    ...getEbtProps({ element: ebtElement, action: ebtAction.GO_TO_STEP }),
+    ...getEbtProps({ element: ebtElement, action: ebtAction.GO_TO_STEP, detail: stepId }),
   }));
 
   return (
@@ -224,7 +231,16 @@ export const SetupWizard = ({
           <EuiText size="s" color="subdued">
             <p>
               {texts.description}{' '}
-              <EuiLink href={docsLinks[currentStep]} target="_blank" external>
+              <EuiLink
+                href={docsLinks[currentStep]}
+                target="_blank"
+                external
+                {...getEbtProps({
+                  element: ebtElement,
+                  action: CONTEXT_ENGINE_UI_EBT.action.navigation.LEARN_MORE_DOCS,
+                  detail: currentStep,
+                })}
+              >
                 {texts.docsLinkLabel}
               </EuiLink>
             </p>
@@ -234,7 +250,7 @@ export const SetupWizard = ({
             <AiIndexDescriptionField
               value={description}
               onChange={setDescription}
-              error={descriptionValidation.error}
+              error={descriptionError}
               warning={descriptionValidation.warning}
               data-test-subj="contextSetupWizardDescription"
             />
@@ -263,7 +279,11 @@ export const SetupWizard = ({
                 onClick={() => close(closedToast)}
                 isDisabled={isBusy}
                 data-test-subj="contextSetupWizardExit"
-                {...getEbtProps({ element: ebtElement, action: ebtAction.EXIT })}
+                {...getEbtProps({
+                  element: ebtElement,
+                  action: ebtAction.EXIT,
+                  detail: currentStep,
+                })}
               >
                 {i18n.translate('xpack.contextEngine.setupWizard.exit', {
                   defaultMessage: 'Exit setup',
@@ -276,7 +296,11 @@ export const SetupWizard = ({
                 onClick={goToNextOpenStep}
                 isDisabled={isBusy}
                 data-test-subj="contextSetupWizardSkip"
-                {...getEbtProps({ element: ebtElement, action: ebtAction.SKIP })}
+                {...getEbtProps({
+                  element: ebtElement,
+                  action: ebtAction.SKIP,
+                  detail: currentStep,
+                })}
               >
                 {isLastStep
                   ? i18n.translate('xpack.contextEngine.setupWizard.skipAndFinish', {
@@ -297,6 +321,7 @@ export const SetupWizard = ({
                 {...getEbtProps({
                   element: ebtElement,
                   action: isLastStep ? ebtAction.FINISH : ebtAction.CONTINUE,
+                  detail: currentStep,
                 })}
               >
                 {isLastStep

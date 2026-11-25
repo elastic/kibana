@@ -191,6 +191,25 @@ describe('SetupWizard', () => {
     expect(onStepChange).toHaveBeenCalledWith('describe');
   });
 
+  it('tells which step each click came from', () => {
+    renderWizard({ initialStep: 'sources', done: { ...noneDone, sources: true } });
+
+    expect(screen.getByTestId('contextSetupWizardStep-describe')).toHaveAttribute(
+      'data-ebt-detail',
+      'describe'
+    );
+    ['Exit', 'Skip', 'Continue'].forEach((name) => {
+      expect(screen.getByTestId(`contextSetupWizard${name}`)).toHaveAttribute(
+        'data-ebt-detail',
+        'sources'
+      );
+    });
+    expect(screen.getByRole('link', { name: /Sources and automations/ })).toHaveAttribute(
+      'data-ebt-detail',
+      'sources'
+    );
+  });
+
   it('Skip opens the next step and saves nothing', () => {
     const { onStepChange, onClose } = renderWizard();
 
@@ -286,10 +305,29 @@ describe('SetupWizard', () => {
       expect(screen.getByTestId('contextSetupWizardContinue')).toHaveTextContent('Finish setup');
     });
 
-    it('disables Finish setup while the description is empty', () => {
+    it('disables Finish setup while the description is empty, with no message', () => {
       renderWizard({ initialStep: 'describe' });
 
       expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
+      expect(screen.queryByText('Enter a description.')).not.toBeInTheDocument();
+    });
+
+    it('explains why Finish setup is off when the description is only spaces', () => {
+      renderWizard({ initialStep: 'describe' });
+
+      fireEvent.change(screen.getByTestId('contextSetupWizardDescription'), {
+        target: { value: '   ' },
+      });
+
+      expect(screen.getByText('Enter a description.')).toBeInTheDocument();
+      expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
+
+      fireEvent.change(screen.getByTestId('contextSetupWizardDescription'), {
+        target: { value: 'Checkout failures.' },
+      });
+
+      expect(screen.queryByText('Enter a description.')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled();
     });
 
     it('Finish setup saves the description and closes the wizard', async () => {
