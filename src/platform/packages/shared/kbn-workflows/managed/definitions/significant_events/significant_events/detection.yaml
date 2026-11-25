@@ -193,21 +193,11 @@ steps:
 
   - name: compute_scan_gap
     # Longest expected gap between two scans of one rule: a full coverage cycle plus one dropped
-    # run (concurrency strategy is drop) plus the run that finally picks the rule.
+    # run (concurrency strategy is drop) plus the run that finally picks the rule. Rounded up
+    # because the settings accept fractional minutes and ES date math does not.
     type: data.set
     with:
-      scan_gap_minutes: "${{ inputs.detectionIntervalMinutes | times: 2 | plus: inputs.targetCoverageMinutes }}"
-
-  - name: compute_gate_window
-    # How far back check_last_scan looks. At least the critical scan lookback, so a critical rule
-    # that went quiet for longer than the window it is scanned over is not compared with a record
-    # that window cannot contain; and at least the scan gap, so a continuing incident still finds
-    # the previous scan's marker. Default-profile rules are scanned over a fixed, longer window, so
-    # for them only the scan gap holds; a shorter gate window can only cost an extra detection.
-    # The scan route has already validated lookback as `now-<N>m`, case-insensitively and trimmed.
-    type: data.set
-    with:
-      gate_window_minutes: "${{ inputs.lookback | strip | downcase | remove: 'now-' | remove: 'm' | plus: 0 | at_least: variables.scan_gap_minutes }}"
+      scan_gap_minutes: "${{ inputs.detectionIntervalMinutes | times: 2 | plus: inputs.targetCoverageMinutes | ceil }}"
 
   # -----------------------------------------------------------------------
   # Step 3: Foreach rule bucket — observe the change_point type and write a DETECTION on transition.
@@ -229,14 +219,21 @@ steps:
         with:
           change_point_type: "${{ foreach.item.change_points.type | entries | map: 'key' | first | default: '' }}"
           has_rule_uuid: "${{ foreach.item.key != null and foreach.item.key != '' and variables.batch_rule_uuids contains foreach.item.key }}"
+          # How far back check_last_scan looks. At least the window this rule was scanned over
+          # (lookback_minutes, set per analysis profile by the scan route), so a rule that went quiet
+          # for longer than that is not compared with a record its scan cannot contain; and at least
+          # the scan gap, so a continuing incident still finds the previous scan's record.
+          gate_window_minutes: "${{ foreach.item.lookback_minutes | at_least: variables.scan_gap_minutes }}"
 
       - name: check_last_scan
-        # Most recent scan record for this rule: a detection (change_point_type) or a scan marker
-        # (observed_change_point_type). Processed and skip markers carry no rule_uuid, so the term
-        # filter excludes them. Comparing against the last scan rather than the last detection is
-        # what lets a `stationary` scan reset the gate, since `stationary` is never written as a
-        # detection. Bounded by gate_window_minutes: a rule that went quiet has no scans to reset
-        # it, so its old record must age out of the window.
+        # Most recent scan record for this rule that observed a type: a detection (change_point_type)
+        # or a scan marker (observed_change_point_type). Processed and skip markers carry no
+        # rule_uuid, so the term filter excludes them. Markers with no observed type (an
+        # inconclusive scan, or one written before markers recorded it) are skipped, so they neither
+        # reset the gate nor hide the record before them. Comparing against the last scan rather
+        # than the last detection is what lets a `stationary` scan reset the gate, since `stationary`
+        # is never written as a detection. Bounded by gate_window_minutes: a rule that went quiet
+        # has no scans to reset it, so its old record must age out of the window.
         if: "${{ steps.compute_rule_context.output.has_rule_uuid }}"
         type: elasticsearch.request
         with:
@@ -254,16 +251,23 @@ steps:
                       kibana.space_ids: "{{ variables.spaceId }}"
                   - term:
                       rule_uuid: "{{ foreach.item.key }}"
+                  - bool:
+                      should:
+                        - exists:
+                            field: change_point_type
+                        - exists:
+                            field: observed_change_point_type
+                      minimum_should_match: 1
                   - range:
                       "@timestamp":
-                        gte: 'now-{{ variables.gate_window_minutes }}m'
+                        gte: 'now-{{ steps.compute_rule_context.output.gate_window_minutes }}m'
         on-failure:
           continue: true
       - name: compute_transition
         type: data.set
         with:
-          # "" when the rule has no scan record in the window, or only a marker written before markers
-          # recorded the observed type; any observed type then reads as a transition.
+          # "" when the rule has no typed scan record in the window; any observed type then reads as
+          # a transition.
           last_change_point_type: "{% if steps.check_last_scan.output.hits.total.value > 0 %}{{ steps.check_last_scan.output.hits.hits[0]._source.change_point_type | default: steps.check_last_scan.output.hits.hits[0]._source.observed_change_point_type | default: '' }}{% else %}{% endif %}"
           detection_p_value: "${{ foreach.item.change_points.type[steps.compute_rule_context.output.change_point_type].p_value | default: 0 }}"
 

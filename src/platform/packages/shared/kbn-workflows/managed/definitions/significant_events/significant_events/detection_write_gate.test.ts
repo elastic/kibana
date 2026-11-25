@@ -26,7 +26,7 @@ interface StoredRecord {
 }
 
 interface Scan {
-  /** The change point type Elasticsearch reports for the rule in this scan. */
+  /** The change point type Elasticsearch reports for the rule in this scan; '' when inconclusive. */
   type: string;
   /** When the scan runs, in minutes since the first scan. */
   atMinute: number;
@@ -36,18 +36,17 @@ interface Scan {
 
 interface LookupFilter {
   exists?: { field: string };
+  bool?: { should: LookupFilter[] };
   range?: { '@timestamp': { gte: string } };
 }
 
 const RULE_UUID = 'rule-1';
 const LOOKUP_STEP = 'check_last_scan';
 const SCAN_INTERVAL_MINUTES = 10;
-// The default schedule: a 50 minute gate window.
-const INPUTS = {
-  lookback: 'now-40m',
-  targetCoverageMinutes: 30,
-  detectionIntervalMinutes: SCAN_INTERVAL_MINUTES,
-};
+// The default schedule: a 50 minute scan gap.
+const INPUTS = { targetCoverageMinutes: 30, detectionIntervalMinutes: SCAN_INTERVAL_MINUTES };
+// The critical profile's default lookback, which the scan route reports per rule.
+const LOOKBACK_MINUTES = 40;
 
 const engine = createWorkflowLiquidEngine();
 
@@ -77,31 +76,59 @@ const renderWith = (step: WorkflowStep, context: object): Record<string, unknown
     Object.entries(step.with ?? {}).map(([key, value]) => [key, render(value, context)])
   );
 
-/** Runs the top-level steps that size check_last_scan's window, in workflow order. */
-const getGateWindowMinutes = (inputs: Record<string, unknown>): unknown => {
-  const scanGap = renderWith(findStep(topSteps, 'compute_scan_gap'), { inputs });
-  return renderWith(findStep(topSteps, 'compute_gate_window'), { inputs, variables: scanGap })
-    .gate_window_minutes;
+const getScanGapVariables = (inputs: Record<string, unknown>): Record<string, unknown> =>
+  renderWith(findStep(topSteps, 'compute_scan_gap'), { inputs });
+
+const createContext = ({
+  type,
+  lookbackMinutes,
+  inputs = INPUTS,
+}: {
+  type: string;
+  lookbackMinutes: number;
+  inputs?: Record<string, unknown>;
+}) => ({
+  foreach: {
+    item: {
+      key: RULE_UUID,
+      lookback_minutes: lookbackMinutes,
+      change_points: { type: type ? { [type]: { p_value: 1e-6 } } : {} },
+    },
+  },
+  variables: { batch_rule_uuids: [RULE_UUID], ...getScanGapVariables(inputs) },
+  steps: {} as Record<string, { output?: unknown; error?: unknown }>,
+});
+
+/** Whether a record matches one of the lookup query's filters; the rule_uuid term always does. */
+const matchesFilter = (
+  filter: LookupFilter,
+  record: StoredRecord,
+  { atMinute, context }: { atMinute: number; context: object }
+): boolean => {
+  if (filter.exists) return filter.exists.field in record;
+  if (filter.bool) {
+    return filter.bool.should.some((clause) =>
+      matchesFilter(clause, record, { atMinute, context })
+    );
+  }
+  if (filter.range) {
+    const gte = String(render(filter.range['@timestamp'].gte, context));
+    return atMinute - record.atMinute <= Number(gte.replace(/^now-|m$/g, ''));
+  }
+  return true;
 };
 
-/** The newest record the lookup step's query can match, honouring its `exists` and range filters. */
+/** The newest record the lookup step's query can match. */
 const findPrevious = (
   store: StoredRecord[],
-  { atMinute, context }: { atMinute: number; context: object }
+  options: { atMinute: number; context: object }
 ): StoredRecord | undefined => {
   const { body } = getRuleStep(LOOKUP_STEP).with as {
     body: { query: { bool: { filter: LookupFilter[] } } };
   };
-  const { filter } = body.query.bool;
-  const requiredFields = filter.flatMap(({ exists }) => (exists ? [exists.field] : []));
-  const windowsMinutes = filter.flatMap(({ range }) =>
-    range ? [Number(String(render(range['@timestamp'].gte, context)).replace(/^now-|m$/g, ''))] : []
-  );
   return store
-    .filter(
-      (record) =>
-        requiredFields.every((field) => field in record) &&
-        windowsMinutes.every((windowMinutes) => atMinute - record.atMinute <= windowMinutes)
+    .filter((record) =>
+      body.query.bool.filter.every((filter) => matchesFilter(filter, record, options))
     )
     .at(-1);
 };
@@ -111,15 +138,11 @@ const runScan = (
   store: StoredRecord[],
   { type, atMinute, isLookupFailing = false }: Scan
 ): void => {
-  const steps: Record<string, { output?: unknown; error?: unknown }> = {};
-  const context = {
-    foreach: { item: { key: RULE_UUID, change_points: { type: { [type]: { p_value: 1e-6 } } } } },
-    variables: { batch_rule_uuids: [RULE_UUID], gate_window_minutes: getGateWindowMinutes(INPUTS) },
-    steps,
-  };
-  const previous = findPrevious(store, { atMinute, context });
+  const context = createContext({ type, lookbackMinutes: LOOKBACK_MINUTES });
+  const { steps } = context;
 
   steps.compute_rule_context = { output: renderWith(getRuleStep('compute_rule_context'), context) };
+  const previous = findPrevious(store, { atMinute, context });
   steps[LOOKUP_STEP] = isLookupFailing
     ? { error: new Error('search failed') }
     : {
@@ -172,9 +195,19 @@ describe('detection write gate', () => {
     expect(countDetections([{ type: 'spike' }, { type: 'spike' }, { type: 'spike' }])).toBe(1);
   });
 
-  it('writes a new detection when the rule comes back after its last record left the window', () => {
-    expect(countDetections([{ type: 'spike' }, { type: 'spike', atMinute: 60 }])).toBe(2);
+  it('writes one detection when an inconclusive scan interrupts the incident', () => {
+    expect(countDetections([{ type: 'spike' }, { type: '' }, { type: 'spike' }])).toBe(1);
   });
+
+  it.each([
+    [50, 1],
+    [51, 2],
+  ])(
+    'with the next spike %d minutes later, past a 50 minute window, writes %d detections',
+    (atMinute, expected) => {
+      expect(countDetections([{ type: 'spike' }, { type: 'spike', atMinute }])).toBe(expected);
+    }
+  );
 
   it('writes neither a detection nor a marker when the lookup fails', () => {
     const store = runScans([
@@ -189,26 +222,38 @@ describe('detection write gate', () => {
     ]);
   });
 
-  it('reads a marker written before markers recorded the observed type as no previous type', () => {
-    const store = runScans([{ type: 'spike' }], [{ rule_uuid: RULE_UUID, atMinute: -10 }]);
+  it('looks past a marker written before markers recorded the observed type', () => {
+    const store = runScans(
+      [{ type: 'spike' }],
+      [
+        { rule_uuid: RULE_UUID, change_point_type: 'spike', atMinute: -20 },
+        { rule_uuid: RULE_UUID, atMinute: -10 },
+      ]
+    );
 
-    expect(store.at(-1)).toEqual({ rule_uuid: RULE_UUID, change_point_type: 'spike', atMinute: 0 });
+    expect(store.filter((record) => 'change_point_type' in record)).toHaveLength(1);
   });
 
   describe('lookup window', () => {
     it.each([
       // A one-run drop on the default schedule leaves 50 minutes between scans of a rule.
-      ['now-40m', 30, 10, 50],
+      [40, 30, 10, 50],
       // A scan window longer than the gap, as on c0: a quiet rule ages out with the window.
-      ['now-180m', 30, 10, 180],
-      // The scan route accepts the unit in upper case.
-      ['now-180M', 30, 10, 180],
+      [180, 30, 10, 180],
+      // Fractional settings round up, since ES date math takes whole minutes.
+      [40, 30.5, 10, 51],
     ])(
-      'with lookback %s, %d minutes coverage and a %d minute interval, is %d minutes',
-      (lookback, targetCoverageMinutes, detectionIntervalMinutes, expected) => {
-        expect(
-          getGateWindowMinutes({ lookback, targetCoverageMinutes, detectionIntervalMinutes })
-        ).toBe(expected);
+      'with a %d minute scan, %d minutes coverage and a %d minute interval, is %d minutes',
+      (lookbackMinutes, targetCoverageMinutes, detectionIntervalMinutes, expected) => {
+        const context = createContext({
+          type: 'spike',
+          lookbackMinutes,
+          inputs: { targetCoverageMinutes, detectionIntervalMinutes },
+        });
+
+        expect(renderWith(getRuleStep('compute_rule_context'), context).gate_window_minutes).toBe(
+          expected
+        );
       }
     );
   });
