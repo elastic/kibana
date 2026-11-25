@@ -85,11 +85,15 @@ describe('OverviewStatCards', () => {
     ).toHaveTextContent('from your sources and memories');
   });
 
-  it('shows no sources count for a managed AI index', () => {
+  it('shows no sources or automations count for a managed AI index', () => {
     renderCards({ isManaged: true });
 
     expect(screen.getByTestId('contextOverviewStatCardValue-sources')).toHaveTextContent('-');
     expect(screen.getByTestId('contextOverviewStatCardCaption-sources')).toHaveTextContent(
+      'managed by Elastic'
+    );
+    expect(screen.getByTestId('contextOverviewStatCardValue-automations')).toHaveTextContent('-');
+    expect(screen.getByTestId('contextOverviewStatCardCaption-automations')).toHaveTextContent(
       'managed by Elastic'
     );
   });

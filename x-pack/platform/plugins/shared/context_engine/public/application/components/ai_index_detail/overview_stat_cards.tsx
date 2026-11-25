@@ -29,6 +29,11 @@ import {
 
 const NO_VALUE = '-';
 
+const managedCaption = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.overview.statCards.managedCaption',
+  { defaultMessage: 'managed by Elastic' }
+);
+
 interface OverviewStatCardProps {
   id: string;
   label: string;
@@ -143,10 +148,7 @@ export const OverviewStatCards = ({
         value={isManaged ? NO_VALUE : sourcesCount}
         caption={
           isManaged
-            ? i18n.translate(
-                'xpack.contextEngine.aiIndexDetail.overview.statCards.sourcesManagedCaption',
-                { defaultMessage: 'managed by Elastic' }
-              )
+            ? managedCaption
             : i18n.translate(
                 'xpack.contextEngine.aiIndexDetail.overview.statCards.sourcesCaption',
                 { defaultMessage: 'read by your automations' }
@@ -163,11 +165,15 @@ export const OverviewStatCards = ({
           'xpack.contextEngine.aiIndexDetail.overview.statCards.automationsLabel',
           { defaultMessage: 'Automations' }
         )}
-        value={automationsCount}
-        caption={i18n.translate(
-          'xpack.contextEngine.aiIndexDetail.overview.statCards.automationsCaption',
-          { defaultMessage: 'keep documents up to date' }
-        )}
+        value={isManaged ? NO_VALUE : automationsCount}
+        caption={
+          isManaged
+            ? managedCaption
+            : i18n.translate(
+                'xpack.contextEngine.aiIndexDetail.overview.statCards.automationsCaption',
+                { defaultMessage: 'keep documents up to date' }
+              )
+        }
         path={getAiIndexAutomationsPath(aiIndexId)}
         isLoading={isAiIndexLoading}
       />
