@@ -12,9 +12,14 @@ import { act, renderHook } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { EntityInventoryEntityCategory } from '../../types';
 import { DEFAULT_TIME_RANGE } from '../constants';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_NOT_ALLOWED_TOAST_TITLE } from '../translations';
 import { createPublicConfigMock } from '../../mocks';
+import {
+  EntityInventoryDateRangeProvider,
+  useEntityInventoryDateRange,
+} from './date_range_context';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from './search_context';
 
 const renderSearchHook = (
@@ -24,17 +29,32 @@ const renderSearchHook = (
   const core = coreMock.createStart();
   const config = createPublicConfigMock({ timeRangeLimitDisabled });
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
+  let entityCategory: EntityInventoryEntityCategory = 'kubernetes';
+  let dateRangeContext: ReturnType<typeof useEntityInventoryDateRange>;
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <KibanaContextProvider services={{ ...core, config }}>
       <Router history={history}>
-        <EntityInventorySearchProvider entityCategory="kubernetes">
-          {children}
-        </EntityInventorySearchProvider>
+        <EntityInventoryDateRangeProvider>
+          <EntityInventorySearchProvider entityCategory={entityCategory}>
+            {children}
+          </EntityInventorySearchProvider>
+        </EntityInventoryDateRangeProvider>
       </Router>
     </KibanaContextProvider>
   );
+  const hook = renderHook(
+    () => {
+      dateRangeContext = useEntityInventoryDateRange();
+      return useEntityInventorySearch();
+    },
+    { wrapper }
+  );
+  const changeCategory = (next: EntityInventoryEntityCategory) => {
+    entityCategory = next;
+    hook.rerender();
+  };
 
-  return { core, history, ...renderHook(() => useEntityInventorySearch(), { wrapper }) };
+  return { core, history, getDateRangeContext: () => dateRangeContext, changeCategory, ...hook };
 };
 
 const kuery = (query: string) => ({ language: 'kuery', query });
@@ -253,6 +273,84 @@ describe('EntityInventorySearchProvider', () => {
     expect(() => renderHook(() => useEntityInventorySearch())).toThrow(
       'useEntityInventorySearch must be used within an EntityInventorySearchProvider'
     );
+  });
+
+  it('throws a descriptive error when the date range provider is missing', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    const history = createMemoryHistory();
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <KibanaContextProvider
+        services={{ ...coreMock.createStart(), config: createPublicConfigMock() }}
+      >
+        <Router history={history}>
+          <EntityInventorySearchProvider entityCategory="kubernetes">
+            {children}
+          </EntityInventorySearchProvider>
+        </Router>
+      </KibanaContextProvider>
+    );
+
+    expect(() => renderHook(() => useEntityInventorySearch(), { wrapper })).toThrow(
+      'useEntityInventoryDateRange must be used within an EntityInventoryDateRangeProvider'
+    );
+  });
+
+  describe('across pages', () => {
+    it('hands the committed range to the date range provider', () => {
+      const { result, getDateRangeContext } = renderSearchHook();
+
+      act(() => {
+        result.current.submit({ dateRange: { from: 'now-1h', to: 'now' } });
+      });
+
+      expect(getDateRangeContext().dateRange).toEqual({ from: 'now-1h', to: 'now' });
+    });
+
+    it('starts a page without state from the range of the date range provider', () => {
+      const { result, history } = renderSearchHook();
+      act(() => {
+        result.current.submit({ dateRange: { from: 'now-1h', to: 'now' } });
+      });
+
+      act(() => {
+        history.push('/hosts');
+      });
+
+      expect(result.current.dateRange).toEqual({ from: 'now-1h', to: 'now' });
+      expect(history.location.search).toContain('now-1h');
+    });
+
+    it('keeps the range of a URL that has a state', () => {
+      const { result, history } = renderSearchHook();
+      act(() => {
+        result.current.submit({ dateRange: { from: 'now-1h', to: 'now' } });
+      });
+
+      act(() => {
+        history.push('/hosts?_a=(dateRange:(from:now-2h,to:now))');
+      });
+
+      expect(result.current.dateRange).toEqual({ from: 'now-2h', to: 'now' });
+    });
+
+    it('asks for a refresh when the entity category changes', () => {
+      const { result, changeCategory } = renderSearchHook();
+      const tokenBefore = result.current.refreshToken;
+
+      changeCategory('hosts');
+
+      expect(result.current.entityCategory).toBe('hosts');
+      expect(result.current.refreshToken).toBe(tokenBefore + 1);
+    });
+
+    it('does not ask for a refresh when it renders again with the same category', () => {
+      const { result, rerender } = renderSearchHook();
+      const tokenBefore = result.current.refreshToken;
+
+      rerender();
+
+      expect(result.current.refreshToken).toBe(tokenBefore);
+    });
   });
 
   describe('URL state', () => {
