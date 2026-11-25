@@ -21,7 +21,7 @@ const editScenario = (gold: Parameters<typeof layoutEditExample>[0]): DashboardD
  * Edits of the seeded sectioned logs dashboard beyond moving ES|QL panels:
  * the non-ES|QL panel kinds, controls, data the cluster does not have,
  * visualizations from earlier in the conversation, section renames, and
- * dashboard options (tagged `settings_edit`). Each example combines several
+ * dashboard settings (tagged `settings_edit`). Each example combines several
  * asks, so one run covers more than one gap. The section rename must also
  * leave every dashboard setting alone.
  */
@@ -154,12 +154,14 @@ export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
     structure: { sectionCount: 3 },
   }),
   editScenario({
-    question: 'hide the panel titles and borders and stop syncing the cursor across panels',
+    question:
+      'hide the panel titles and borders, stop syncing the cursor across panels, and make the dashboard faster with approximate results',
     // A setting the prompt does not name, which must stay off.
     dashboard: { ...SECTIONED_LOGS_DASHBOARD, options: { use_margins: false } },
     layoutEdit: { changes: [] },
     settings: {
       options: { hide_panel_titles: true, hide_panel_borders: true, sync_cursor: false },
+      esqlApproximation: true,
     },
     behaviour: 'settings_edit',
   }),

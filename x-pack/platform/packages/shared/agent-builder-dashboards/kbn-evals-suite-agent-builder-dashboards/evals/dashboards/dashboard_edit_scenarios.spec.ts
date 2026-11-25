@@ -24,7 +24,7 @@ evaluate.describe(
           dataset: {
             name: 'agent builder dashboards: edit scenarios',
             description:
-              'Edits a seeded sectioned logs dashboard: Vega and ML panel config, data-view and Query DSL Vega panels it must not edit silently, controls, an index the cluster does not have, charts from earlier in the conversation, a section rename, and dashboard options. Scores each ask and the layout the edit must keep.',
+              'Edits a seeded sectioned logs dashboard: Vega and ML panel config, data-view and Query DSL Vega panels it must not edit silently, controls, an index the cluster does not have, charts from earlier in the conversation, a section rename, and dashboard options and fast mode. Scores each ask and the layout the edit must keep.',
             examples: DASHBOARD_EDIT_SCENARIO_EXAMPLES,
           },
         });
