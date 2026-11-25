@@ -14,7 +14,9 @@ import { getEsqlQueriesFromSpec, parseSpec } from '@kbn/vega-utils';
  * stored spec is the source of truth across save/import round-trips.
  *
  * Accepts a serialized spec (JSON or Kibana's HJSON) or a parsed object; returns undefined when no ES|QL
- * data binding is present or the input cannot be parsed.
+ * data binding is present or the input cannot be parsed. Only a single top-level `data` source is
+ * recovered: the Vega author writes one data source, so a query from a `data` array may not be the
+ * chart's.
  */
 export const extractEsqlFromSpec = (
   spec: string | Record<string, unknown> | null | undefined
@@ -24,5 +26,8 @@ export const extractEsqlFromSpec = (
   }
 
   const parsed = typeof spec === 'string' ? parseSpec({ format: 'hjson', value: spec }) : spec;
-  return parsed ? getEsqlQueriesFromSpec(parsed).find((query) => query.trim()) : undefined;
+  if (!parsed || Array.isArray(parsed.data)) {
+    return undefined;
+  }
+  return getEsqlQueriesFromSpec(parsed).find((query) => query.trim());
 };

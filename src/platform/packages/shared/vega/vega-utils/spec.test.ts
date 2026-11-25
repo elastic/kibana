@@ -40,6 +40,11 @@ describe('editor spec', () => {
     it('falls back to an HJSON spec while the JSON text does not parse', () => {
       expect(specFromEditor('{"mark":', 'json')).toEqual({ format: 'hjson', value: '{"mark":' });
     });
+
+    it('falls back to an HJSON spec when the JSON text is not an object', () => {
+      expect(specFromEditor('null', 'json')).toEqual({ format: 'hjson', value: 'null' });
+      expect(specFromEditor('[1]', 'json')).toEqual({ format: 'hjson', value: '[1]' });
+    });
   });
 
   describe('parseSpec', () => {

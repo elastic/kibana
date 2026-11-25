@@ -47,6 +47,14 @@ describe('extractEsqlFromSpec', () => {
     expect(extractEsqlFromSpec({ data: { values: [{ a: 1 }] } })).toBeUndefined();
   });
 
+  it('returns undefined when the spec has a data array', () => {
+    expect(
+      extractEsqlFromSpec({
+        data: [{ values: [{ a: 1 }] }, { url: { '%type%': 'esql', query: ESQL } }],
+      })
+    ).toBeUndefined();
+  });
+
   it('returns undefined for empty, malformed, or blank-query input', () => {
     expect(extractEsqlFromSpec(undefined)).toBeUndefined();
     expect(extractEsqlFromSpec(null)).toBeUndefined();

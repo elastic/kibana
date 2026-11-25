@@ -14,20 +14,21 @@ import type { VegaSpec } from '@kbn/vega-schemas';
 export const specToEditorValue = (spec: VegaSpec): string =>
   spec.format === 'json' ? JSON.stringify(spec.value, null, 2) : spec.value;
 
-/** The spec for the text in the editor, keeping JSON only while it still parses. */
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** The spec for the text in the editor, keeping JSON only while it parses to an object. */
 export const specFromEditor = (text: string, format: VegaSpec['format']): VegaSpec => {
   if (format === 'json') {
     try {
-      return { format: 'json', value: JSON.parse(text) };
+      const parsed: unknown = JSON.parse(text);
+      if (isRecord(parsed)) return { format: 'json', value: parsed };
     } catch {
-      return { format: 'hjson', value: text };
+      // Text that isn't JSON yet is kept as HJSON below.
     }
   }
   return { format: 'hjson', value: text };
 };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * The spec as an object, or `undefined` when its HJSON doesn't parse to an object. HJSON without
