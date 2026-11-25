@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+const CHANNEL_ID_SHAPE = /^[CG][A-Z0-9]+$/;
 const CHANNEL_ID = /^[CG][A-Z0-9]{8,}$/;
 const CHANNEL_PATH_SEGMENTS = [/^archives$/, /^client$/];
+
+export const isSlackChannelId = (value: string): boolean => CHANNEL_ID_SHAPE.test(value);
 
 /** Extracts a Slack channel id from an id or a channel link. */
 export const parseSlackChannelInput = (input: string): string | undefined => {

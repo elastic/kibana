@@ -174,7 +174,10 @@ function UsageAndErrorsPanels({
   /** Includes the value in a filter, or takes it off when it is included already. */
   onSelectFilter: (name: OverviewFilterName, value: string) => void;
 }) {
-  const { errorsHref, sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
+  const { errorsHref, frustrationHref, sessionsHref } = useApplicationLinks(
+    serviceName,
+    APPLICATION_SOURCE.otel
+  );
   const {
     topPages,
     breakdowns,
@@ -255,6 +258,7 @@ function UsageAndErrorsPanels({
                 frustratedPages={frustratedPages}
                 isLoading={isLoading}
                 sessionsHref={sessionsHref}
+                dashboardHref={frustrationHref}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
