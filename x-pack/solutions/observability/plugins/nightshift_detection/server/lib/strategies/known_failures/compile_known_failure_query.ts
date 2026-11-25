@@ -15,7 +15,12 @@ import { KNOWN_FAILURES_SETTINGS } from './constants';
 const FILTER_COMMANDS = new Set(['from', 'where']);
 /** Commands that only shape the output, so dropping them leaves the matched lines unchanged. */
 const OUTPUT_ONLY_COMMANDS = new Set(['keep', 'drop', 'sort']);
-/** The `CHANGE_POINT` types that move the level for longer than a minute. */
+/**
+ * The `CHANGE_POINT` types that move the level for longer than a minute. A `spike` or `dip` lasts
+ * one minute, which the baseline check covers, and as the latest change it would hide an earlier
+ * step from every later run. The other types (`distribution_change`, `non_stationary`, `stationary`,
+ * `indeterminable`) say nothing about a rise.
+ */
 const IS_LEVEL_CHANGE = 'change_point_type IN ("step_change", "trend_change")';
 /** Puts each column of a long `EVAL` or `STATS` on its own line. */
 const COLUMN_BREAK = '\n    ';
@@ -87,24 +92,17 @@ function getFilterCommands(esql: string): { commands: string[] } | { reason: str
  * bounds nothing.
  */
 function getOwnTimeOrParamsReason(kept: ESQLCommand[]): string | undefined {
-  let hasParam = false;
-  let hasOwnTime = false;
-  kept.forEach((command) =>
-    Walker.walk(command, {
-      visitLiteral: (node) => {
-        hasParam ||= node.literalType === 'param';
-      },
-      visitFunction: (node) => {
-        hasOwnTime ||= node.name.toLowerCase() === 'now';
-      },
-      visitColumn: (node) => {
-        hasOwnTime ||= node.parts.join('.') === '@timestamp';
-      },
-    })
-  );
-  if (hasParam) {
+  if (kept.some((command) => Walker.params(command).length > 0)) {
     return 'uses ? parameters, which the rule cannot bind';
   }
+  const hasOwnTime = kept.some(
+    (command) =>
+      Walker.hasFunction(command, 'now') ||
+      Walker.find(
+        command,
+        (node) => node.type === 'column' && node.parts.join('.') === '@timestamp'
+      ) !== undefined
+  );
   if (hasOwnTime) {
     return 'bounds its own time with NOW() or @timestamp, so the minutes outside it would count as zero matches';
   }
