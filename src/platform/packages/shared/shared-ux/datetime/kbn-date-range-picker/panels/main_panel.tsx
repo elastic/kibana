@@ -32,6 +32,7 @@ import {
 import { DocumentationPanel } from './documentation_panel';
 import { SettingsPanel } from './settings_panel';
 import { AutoRefreshPanel } from './auto_refresh_panel';
+import { EmptyDotIcon } from './empty_dot_icon';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { mainPanelStyles } from './main_panel.styles';
@@ -156,7 +157,11 @@ const PresetsRecentTabs = () => {
 const AutoRefreshBadge = ({ autoRefresh }: { autoRefresh: AutoRefreshSettings }) => {
   if (!autoRefresh.isEnabled) {
     return (
-      <EuiBadge color="default" data-test-subj="dateRangePickerAutoRefreshBadge">
+      <EuiBadge
+        color="default"
+        iconType={EmptyDotIcon}
+        data-test-subj="dateRangePickerAutoRefreshBadge"
+      >
         {mainPanelTexts.autoRefreshOffLabel}
       </EuiBadge>
     );
@@ -167,7 +172,7 @@ const AutoRefreshBadge = ({ autoRefresh }: { autoRefresh: AutoRefreshSettings })
     autoRefresh.intervalDisplayUnit
   );
   return (
-    <EuiBadge color="primary" data-test-subj="dateRangePickerAutoRefreshBadge">
+    <EuiBadge color="primary" iconType="dot" data-test-subj="dateRangePickerAutoRefreshBadge">
       {mainPanelTexts.autoRefreshEveryLabel(count, unit)}
     </EuiBadge>
   );
