@@ -26,6 +26,44 @@ export const defaultSourceStatus: MetricsSourceStatus = {
  */
 const toSingleLine = (value: string): string => value.replace(/[\r\n]+/g, ' ');
 
+/**
+ * Wraps a probe failure in an `Error` whose message is prefixed with the source and pattern
+ * context, so the log names which source is misconfigured rather than relying on the original
+ * error's context-free message.
+ */
+const withSourceContext = (original: Error, context: string): Error => {
+  const message = `${context}: ${original.message}`;
+  const error = new Error(message);
+  error.name = original.name;
+  // Kibana's `%message` pattern conversion renders `error.stack` in place of `error.message`
+  // when a stack is present, so copying the original stack verbatim would hide the source and
+  // pattern from the default console and OTel log body. Rewrite the stack's header (the
+  // leading `name: message`) to carry the enriched message while keeping the original frames,
+  // so the context survives in the rendered output and the stacktrace stays faithful.
+  //
+  // The header must be replaced as a whole: an Elasticsearch `ResponseError` message spans
+  // several lines (`Caused by` / `Root causes`), so splitting on the first line break alone
+  // would leave those lines in the frames and print the diagnostic detail twice.
+  //
+  // Only rewrite a string stack: Kibana's logging supports Elasticsearch client errors whose
+  // `stack` is not a string, and manipulating a non-string stack here would throw and turn the
+  // probe failure into a 500 instead of the `unknown` status.
+  if (typeof original.stack === 'string') {
+    const originalHeader = `${original.name}: ${original.message}`;
+    error.stack = original.stack.startsWith(originalHeader)
+      ? `${error.name}: ${message}${original.stack.slice(originalHeader.length)}`
+      : `${error.name}: ${message}\n${original.stack}`;
+  } else {
+    // The original stack is not a string we can splice the enriched header into, and the
+    // wrapper's own stack points at this helper rather than where the probe failed. Reporting
+    // those frames would replace the original diagnostic with a misleading location, so drop
+    // the stack entirely: `%message` then renders `error.message`, which already carries the
+    // source, pattern and original message.
+    error.stack = undefined;
+  }
+  return error;
+};
+
 interface ComposeSourceStatusParams {
   logger: Logger;
   sourceStatus: Pick<InfraSourceStatus, 'hasMetricIndices'>;
@@ -59,8 +97,15 @@ export const composeSourceStatus = async ({
       metricIndicesStatus: hasMetricIndices ? 'available' : 'missing',
     };
   } catch (err) {
+    const context = `Metric index status check failed for source "${toSingleLine(
+      sourceId
+    )}" (pattern: ${toSingleLine(metricAlias)})`;
+
     if (err instanceof NoSuchRemoteClusterError) {
-      logger.error(err);
+      // Keep the missing remote cluster at error level, but name the source and pattern so the
+      // operator can tell which configuration is misconfigured rather than seeing only the
+      // error's own context-free default message.
+      logger.error(withSourceContext(err, context));
       return defaultSourceStatus;
     }
 
@@ -87,38 +132,7 @@ export const composeSourceStatus = async ({
       // `LogRecord.error`, which is only populated from the first argument when it is an Error, so
       // passing it as `{ error }` meta would drop those attributes.
       const original = err instanceof Error ? err : new Error(String(err));
-      const message = `Metric index status check failed for source "${toSingleLine(
-        sourceId
-      )}" (pattern: ${toSingleLine(metricAlias)}): ${original.message}`;
-      const error = new Error(message);
-      error.name = original.name;
-      // Kibana's `%message` pattern conversion renders `error.stack` in place of `error.message`
-      // when a stack is present, so copying the original stack verbatim would hide the source and
-      // pattern from the default console and OTel log body. Rewrite the stack's header (the
-      // leading `name: message`) to carry the enriched message while keeping the original frames,
-      // so the context survives in the rendered output and the stacktrace stays faithful.
-      //
-      // The header must be replaced as a whole: an Elasticsearch `ResponseError` message spans
-      // several lines (`Caused by` / `Root causes`), so splitting on the first line break alone
-      // would leave those lines in the frames and print the diagnostic detail twice.
-      //
-      // Only rewrite a string stack: Kibana's logging supports Elasticsearch client errors whose
-      // `stack` is not a string, and manipulating a non-string stack here would throw and turn the
-      // probe failure into a 500 instead of the `unknown` status.
-      if (typeof original.stack === 'string') {
-        const originalHeader = `${original.name}: ${original.message}`;
-        error.stack = original.stack.startsWith(originalHeader)
-          ? `${error.name}: ${message}${original.stack.slice(originalHeader.length)}`
-          : `${error.name}: ${message}\n${original.stack}`;
-      } else {
-        // The original stack is not a string we can splice the enriched header into, and the
-        // wrapper's own stack points at this helper rather than where the probe failed. Reporting
-        // those frames would replace the original diagnostic with a misleading location, so drop
-        // the stack entirely: `%message` then renders `error.message`, which already carries the
-        // source, pattern and original message.
-        error.stack = undefined;
-      }
-      logger.error(error);
+      logger.error(withSourceContext(original, context));
     }
 
     return {

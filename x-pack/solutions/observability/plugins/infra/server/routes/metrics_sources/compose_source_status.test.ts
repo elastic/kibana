@@ -249,8 +249,11 @@ describe('composeSourceStatus', () => {
     expect(message).toContain('metrics-* error forged line');
   });
 
-  it('keeps the error log and reports missing remote clusters when the remote cluster does not exist', async () => {
-    const error = new NoSuchRemoteClusterError('no such remote cluster');
+  it('keeps the error log and reports missing remote clusters, naming the source in the message', async () => {
+    // The default NoSuchRemoteClusterError message is context-free ("The configured remote
+    // cluster is missing or not reachable."), so the operator can't tell which source is
+    // misconfigured. The log must name the source and pattern while staying at error level.
+    const error = new NoSuchRemoteClusterError();
     const hasMetricIndices = jest.fn().mockRejectedValue(error);
 
     await expect(compose(hasMetricIndices)).resolves.toEqual({
@@ -258,7 +261,13 @@ describe('composeSourceStatus', () => {
       remoteClustersExist: false,
       metricIndicesStatus: 'unknown',
     });
-    expect(logger.error).toHaveBeenCalledWith(error);
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggedError = logger.error.mock.calls[0][0] as Error;
+    expect(loggedError).toBeInstanceOf(Error);
+    expect(loggedError.name).toBe('NoSuchRemoteClusterError');
+    expect(loggedError.message).toBe(
+      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): The configured remote cluster is missing or not reachable.'
+    );
     expect(logger.warn).not.toHaveBeenCalled();
   });
 });
