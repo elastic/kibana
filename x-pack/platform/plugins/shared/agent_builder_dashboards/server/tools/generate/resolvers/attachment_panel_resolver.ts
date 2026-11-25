@@ -83,7 +83,12 @@ export const createAttachmentPanelResolver = ({
       if ('error' in resolution) {
         return fail(resolution.error);
       }
-      const { panel } = resolution;
+      const { panel, pointerData } = resolution;
+      if (pointerData.read_only) {
+        return fail(
+          `Panel pointer "${attachmentId}" is read only: the user cannot change dashboards, so its panel cannot be copied.`
+        );
+      }
       return { type: 'success', panelContent: { type: panel.type, config: panel.config } };
     }
 
