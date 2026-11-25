@@ -169,6 +169,16 @@ describe('secrets on Elasticsearch', () => {
       return { client, created };
     };
 
+    it.each([
+      ['an update that changes nothing', 'unchanged_token', {}],
+      ['a value that breaks a rule', 'invalid_value_token', { value: 'short' }],
+    ])('refuses %s and keeps the secret as it was', async (_, name, changes) => {
+      const { client } = await createSecret(name);
+
+      await expect(client.update({ name, ...changes })).rejects.toThrow(SecretValidationError);
+      expect(await getStored(name)).toMatchObject({ value: VALUE, description: DESCRIPTION });
+    });
+
     it('replaces the value and keeps the description', async () => {
       const { client } = await createSecret('new_value_token');
 
