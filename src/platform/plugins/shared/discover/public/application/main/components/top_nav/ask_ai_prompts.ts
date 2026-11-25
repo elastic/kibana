@@ -9,17 +9,32 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ASK_AI_SUGGESTED_PROMPTS: readonly string[] = [
-  i18n.translate('discover.topNav.askAi.promptCpuUsageByHost', {
-    defaultMessage: 'Track CPU usage by host',
+/**
+ * Returns the "Ask AI" suggested prompts, which showcase ES|QL grouping, extraction, joining and
+ * filtering. The joining prompt needs a lookup index, so it is only included when one is given.
+ */
+export const getAskAiSuggestedPrompts = (lookupIndexName?: string): string[] => [
+  i18n.translate('discover.topNav.askAi.promptGroupPatterns', {
+    defaultMessage: 'Group similar messages into patterns and count each one',
   }),
-  i18n.translate('discover.topNav.askAi.promptAnomaliesInTraces', {
-    defaultMessage: 'Detect spikes, dips, or anomalies in my traces',
+  i18n.translate('discover.topNav.askAi.promptVolumeChange', {
+    defaultMessage: 'Find where document volume suddenly changed',
   }),
-  i18n.translate('discover.topNav.askAi.promptErrorsLastHour', {
-    defaultMessage: 'Find errors in the last hour',
+  i18n.translate('discover.topNav.askAi.promptExtractFields', {
+    defaultMessage: 'Extract the IP address and status code from <field1>',
+    ignoreTag: true,
   }),
-  i18n.translate('discover.topNav.askAi.promptServicesByLatency', {
-    defaultMessage: 'Rank services by p95 latency',
+  ...(lookupIndexName
+    ? [
+        i18n.translate('discover.topNav.askAi.promptLookupJoin', {
+          defaultMessage: 'Add details from {lookupIndexName} matched on <field1>',
+          values: { lookupIndexName },
+          ignoreTag: true,
+        }),
+      ]
+    : []),
+  i18n.translate('discover.topNav.askAi.promptRelevantDocuments', {
+    defaultMessage: 'Find the documents most relevant to <search terms>',
+    ignoreTag: true,
   }),
 ];

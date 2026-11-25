@@ -8,7 +8,7 @@
  */
 
 import type { KeyboardEvent, Ref } from 'react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -30,11 +30,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { AiButtonEmpty } from '@kbn/ui-ai-components';
+import { NL_TO_ESQL_MAX_INSTRUCTION_LENGTH } from '@kbn/esql-types';
 
 const MAX_SUGGESTED_PROMPTS = 5;
 
 const sendLabel = i18n.translate('unifiedSearch.query.askAi.sendLabel', {
   defaultMessage: 'Send',
+});
+
+const promptTooLongLabel = i18n.translate('unifiedSearch.query.askAi.promptTooLongLabel', {
+  defaultMessage: 'Shorten the prompt to {maxLength} characters or fewer',
+  values: { maxLength: NL_TO_ESQL_MAX_INSTRUCTION_LENGTH },
 });
 
 const closeLabel = i18n.translate('unifiedSearch.query.askAi.closeLabel', {
@@ -43,7 +49,8 @@ const closeLabel = i18n.translate('unifiedSearch.query.askAi.closeLabel', {
 
 export interface AskAiConfig {
   suggestedPrompts: readonly string[];
-  onSubmit: (prompt: string) => void;
+  // The input waits for the returned promise; the signal aborts when the input closes first
+  onSubmit: (prompt: string, signal: AbortSignal) => Promise<void>;
 }
 
 export interface AskAiButtonProps {
@@ -77,18 +84,34 @@ export const AskAiInput = ({ suggestedPrompts, onSubmit, onClose }: AskAiInputPr
   const [actionsWidth, setActionsWidth] = useState<number>();
   const isPopoverShown = isPopoverOpen && !prompt;
   const trimmedPrompt = prompt.trim();
+  const isPromptTooLong = trimmedPrompt.length > NL_TO_ESQL_MAX_INSTRUCTION_LENGTH;
   const visiblePrompts = suggestedPrompts.slice(0, MAX_SUGGESTED_PROMPTS);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const abortControllerRef = useRef<AbortController>();
+  const canSubmit = Boolean(trimmedPrompt) && !isPromptTooLong && !isGenerating;
 
-  const submit = () => {
-    if (trimmedPrompt) {
-      onSubmit(trimmedPrompt);
+  // Closing the input cancels the generation
+  useEffect(() => () => abortControllerRef.current?.abort(), []);
+
+  const submit = async () => {
+    if (!canSubmit) return;
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    setIsGenerating(true);
+    try {
+      await onSubmit(trimmedPrompt, abortController.signal);
+    } finally {
+      if (!abortController.signal.aborted) {
+        setIsGenerating(false);
+      }
     }
   };
 
   const onInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === keys.ENTER) {
+    // Enter also confirms an input method editor (IME) candidate, which must not send the prompt
+    if (event.key === keys.ENTER && !event.nativeEvent.isComposing) {
       event.preventDefault();
-      submit();
+      void submit();
     }
     if (event.key === keys.ARROW_DOWN && isPopoverShown) {
       event.preventDefault();
@@ -135,6 +158,8 @@ export const AskAiInput = ({ suggestedPrompts, onSubmit, onClose }: AskAiInputPr
             icon="sparkles"
             inputRef={inputRef}
             value={prompt}
+            readOnly={isGenerating}
+            isInvalid={isPromptTooLong}
             onChange={(event) => setPrompt(event.target.value)}
             onFocus={() => setIsPopoverOpen(true)}
             onKeyDown={onInputKeyDown}
@@ -150,14 +175,20 @@ export const AskAiInput = ({ suggestedPrompts, onSubmit, onClose }: AskAiInputPr
           <EuiResizeObserver onResize={({ width }) => setActionsWidth(width)}>
             {(resizeRef) => (
               <div ref={resizeRef} css={styles.actions}>
-                <EuiToolTip content={sendLabel} disableScreenReaderOutput>
+                <EuiToolTip
+                  content={isPromptTooLong ? promptTooLongLabel : sendLabel}
+                  disableScreenReaderOutput={!isPromptTooLong}
+                >
                   <EuiButtonIcon
                     iconType="return"
                     display="fill"
                     color="primary"
                     size="xs"
-                    isDisabled={!trimmedPrompt}
-                    onClick={submit}
+                    isDisabled={!canSubmit}
+                    // Keeps the tooltip explaining the length limit reachable
+                    hasAriaDisabled={isPromptTooLong}
+                    isLoading={isGenerating}
+                    onClick={() => void submit()}
                     aria-label={sendLabel}
                     data-test-subj="unifiedSearchAskAiSend"
                   />

@@ -10,7 +10,7 @@
 import type { ComponentProps } from 'react';
 import React, { useContext, useEffect } from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
 import { DataSourceType } from '../../../../../common/data_sources';
@@ -41,8 +41,6 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
     onQuerySubmit,
     disableSubmitAction,
     showDatePicker,
-    autoSubmitVisor,
-    onAutoSubmitVisor,
   } = props;
 
   return (
@@ -51,7 +49,6 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
       data-has-data-view-picker-component-props={String(Boolean(dataViewPickerComponentProps))}
       data-has-data-view-picker-override={String(Boolean(dataViewPickerOverride))}
       data-disable-submit-action={String(Boolean(disableSubmitAction))}
-      data-auto-submit-visor={String(Boolean(autoSubmitVisor))}
       data-date-picker-disabled={
         typeof showDatePicker === 'object' ? String(showDatePicker.disabled) : 'false'
       }
@@ -70,9 +67,6 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
         }
       >
         Submit
-      </button>
-      <button data-test-subj="mock-auto-submit-visor" onClick={onAutoSubmitVisor}>
-        Auto submit visor
       </button>
     </div>
   );
@@ -297,38 +291,6 @@ describe('Discover topnav component', () => {
         'false'
       );
     });
-  });
-
-  test('keeps asking to send the prompt the tab was opened with until the visor sends it', async () => {
-    const { toolkit, props } = await setup();
-    const tabId = toolkit.getCurrentTab().id;
-    toolkit.internalState.dispatch(
-      internalStateActions.setAutoSubmitVisor({ tabId, autoSubmitVisor: true })
-    );
-
-    const { unmount } = renderTestComponent({ toolkit, props });
-
-    expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
-      'data-auto-submit-visor',
-      'true'
-    );
-
-    // Leaving before the visor could send it, e.g. while it still loads, keeps the prompt pending
-    unmount();
-    renderTestComponent({ toolkit, props });
-
-    expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
-      'data-auto-submit-visor',
-      'true'
-    );
-
-    fireEvent.click(screen.getByTestId('mock-auto-submit-visor'));
-
-    await waitFor(() => expect(toolkit.getCurrentTab().autoSubmitVisor).toBe(false));
-    expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
-      'data-auto-submit-visor',
-      'false'
-    );
   });
 
   describe('date picker', () => {

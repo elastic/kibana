@@ -12,14 +12,18 @@ import type { ILicense } from '@kbn/licensing-types';
 
 const INFERENCE_CONNECTORS_ROUTE = '/internal/inference/connectors';
 
+/** How long a connectors lookup that found one is reused before the connectors are looked up again. */
+export const INFERENCE_CONNECTORS_CACHE_MS = 60 * 1000;
+
 export interface NlToEsqlAvailability {
   hasEnterpriseLicense: () => Promise<boolean>;
   hasInferenceConnector: () => Promise<boolean>;
 }
 
 /**
- * Creates the checks that gate natural language to ES|QL. Results are cached for the session,
- * but a failed lookup is not, so a transient error does not hide the feature until a reload.
+ * Creates the checks that gate natural language to ES|QL. The license is cached for the session,
+ * unless its lookup fails. Connectors can be added at any time, so a connectors lookup is shared
+ * while it runs and reused afterwards only when it found one, for a minute.
  */
 export const createNlToEsqlAvailability = (
   getLicense: () => Promise<ILicense | undefined>,
@@ -27,6 +31,7 @@ export const createNlToEsqlAvailability = (
 ): NlToEsqlAvailability => {
   let enterpriseLicenseRequest: Promise<boolean> | undefined;
   let inferenceConnectorRequest: Promise<boolean> | undefined;
+  let inferenceConnectorExpiresAt = 0;
 
   return {
     hasEnterpriseLicense: () =>
@@ -38,13 +43,22 @@ export const createNlToEsqlAvailability = (
           enterpriseLicenseRequest = undefined;
           return false;
         })),
-    hasInferenceConnector: () =>
-      (inferenceConnectorRequest ??= http
-        .get<{ connectors: unknown[] }>(INFERENCE_CONNECTORS_ROUTE)
-        .then((res) => res.connectors.length > 0)
-        .catch(() => {
-          inferenceConnectorRequest = undefined;
-          return false;
-        })),
+    hasInferenceConnector: () => {
+      if (!inferenceConnectorRequest || Date.now() >= inferenceConnectorExpiresAt) {
+        inferenceConnectorExpiresAt = Infinity;
+        inferenceConnectorRequest = http
+          .get<{ connectors: unknown[] }>(INFERENCE_CONNECTORS_ROUTE)
+          .then((res) => res.connectors.length > 0)
+          // A failed request or an unexpected response both count as no connector
+          .catch(() => false)
+          .then((hasConnector) => {
+            inferenceConnectorExpiresAt = hasConnector
+              ? Date.now() + INFERENCE_CONNECTORS_CACHE_MS
+              : 0;
+            return hasConnector;
+          });
+      }
+      return inferenceConnectorRequest;
+    },
   };
 };

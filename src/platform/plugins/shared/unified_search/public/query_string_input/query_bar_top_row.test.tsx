@@ -717,8 +717,14 @@ describe('QueryBarTopRowTopRow', () => {
       },
     });
 
-    it('should submit a suggested prompt and return focus to the Ask AI button', async () => {
-      const onSubmit = jest.fn();
+    it('should submit a suggested prompt and wait for it to be handled', async () => {
+      let resolveSubmit: () => void = () => {};
+      const onSubmit = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSubmit = resolve;
+          })
+      );
       render(wrapQueryBarTopRowInContext({ ...getTestProps(onSubmit), query: kqlQuery }));
 
       await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
@@ -732,23 +738,60 @@ describe('QueryBarTopRowTopRow', () => {
       expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveValue('prompt 2');
 
       await userEvent.click(screen.getByTestId('unifiedSearchAskAiSend'));
-      expect(onSubmit).toHaveBeenCalledWith('prompt 2');
-      expect(screen.queryByTestId('unifiedSearchAskAiInput')).not.toBeInTheDocument();
-      expect(screen.getByTestId('unifiedSearchAskAiButton')).toHaveFocus();
+      expect(onSubmit).toHaveBeenCalledWith('prompt 2', expect.any(AbortSignal));
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveAttribute('readonly');
+      expect(screen.getByTestId('unifiedSearchAskAiSend')).toBeDisabled();
+
+      await act(async () => resolveSubmit());
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).not.toHaveAttribute('readonly');
+      expect(screen.getByTestId('unifiedSearchAskAiSend')).toBeEnabled();
     });
 
-    it('should submit on Enter and return focus to the Ask AI button on close', async () => {
-      const onSubmit = jest.fn();
+    it('should submit on Enter and cancel the submission on close', async () => {
+      const onSubmit = jest.fn(
+        (_prompt: string, _signal: AbortSignal) => new Promise<void>(() => {})
+      );
       render(wrapQueryBarTopRowInContext({ ...getTestProps(onSubmit), query: kqlQuery }));
 
       await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
       await userEvent.type(screen.getByTestId('unifiedSearchAskAiInput'), '  my prompt {enter}');
-      expect(onSubmit).toHaveBeenCalledWith('my prompt');
+      expect(onSubmit).toHaveBeenCalledWith('my prompt', expect.any(AbortSignal));
 
-      await userEvent.click(screen.getByTestId('unifiedSearchAskAiButton'));
       await userEvent.click(screen.getByTestId('unifiedSearchAskAiClose'));
+      expect(onSubmit.mock.calls[0][1].aborted).toBe(true);
       expect(screen.queryByTestId('unifiedSearchAskAiInput')).not.toBeInTheDocument();
       expect(screen.getByTestId('unifiedSearchAskAiButton')).toHaveFocus();
+    });
+
+    it('should not submit a prompt longer than the generation accepts', async () => {
+      const onSubmit = jest.fn();
+      render(wrapQueryBarTopRowInContext({ ...getTestProps(onSubmit), query: kqlQuery }));
+
+      await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
+      fireEvent.change(screen.getByTestId('unifiedSearchAskAiInput'), {
+        target: { value: 'a'.repeat(2001) },
+      });
+      fireEvent.keyDown(screen.getByTestId('unifiedSearchAskAiInput'), { key: 'Enter' });
+
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toBeInvalid();
+      expect(screen.getByTestId('unifiedSearchAskAiSend')).toHaveAttribute('aria-disabled', 'true');
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('should not submit on the Enter that confirms an input method editor candidate', async () => {
+      const onSubmit = jest.fn();
+      render(wrapQueryBarTopRowInContext({ ...getTestProps(onSubmit), query: kqlQuery }));
+
+      await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
+      fireEvent.change(screen.getByTestId('unifiedSearchAskAiInput'), {
+        target: { value: 'ログを表示' },
+      });
+      fireEvent.keyDown(screen.getByTestId('unifiedSearchAskAiInput'), {
+        key: 'Enter',
+        isComposing: true,
+      });
+
+      expect(onSubmit).not.toHaveBeenCalled();
     });
 
     it('should close on Escape once the suggested prompts are hidden', async () => {

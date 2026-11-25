@@ -9,7 +9,7 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import type { IDslPagination } from '@kbn/search-types';
 import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
@@ -225,6 +225,37 @@ describe('test getDataStateContainer', () => {
     expect(mockFetchEsql).not.toHaveBeenCalled();
     expect(mockFetchDocuments).not.toHaveBeenCalled();
   });
+
+  test.each([
+    ['fetches', true, 1],
+    ['does not fetch', false, 0],
+  ])(
+    'a new tab %s on init with search on page load disabled when forceInitialFetch is %s',
+    async (_, forceInitialFetch, fetchCount) => {
+      const services = createDiscoverServicesMock();
+      const getUiSetting = (services.uiSettings.get as jest.Mock).getMockImplementation();
+      (services.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+        key === SEARCH_ON_PAGE_LOAD_SETTING ? false : getUiSetting?.(key)
+      );
+      const toolkit = getDiscoverInternalStateMock({ services });
+      await toolkit.initializeTabs();
+      await toolkit.internalState.dispatch(
+        internalStateActions.openInNewTab({
+          appState: { query: { esql: 'FROM logs' } },
+          forceInitialFetch,
+        })
+      );
+
+      await toolkit.initializeSingleTab({
+        tabId: toolkit.getCurrentTab().id,
+        skipWaitForDataFetching: true,
+      });
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      expect(mockFetchEsql).toHaveBeenCalledTimes(fetchCount);
+      expect(toolkit.getCurrentTab().forceInitialFetch).toBeFalsy();
+    }
+  );
 
   test('timefilter-triggered refetch does not search an empty ES|QL query', async () => {
     const toolkit = getDiscoverInternalStateMock();

@@ -23,7 +23,7 @@ import {
 } from '../hooks/use_effective_project_routing';
 import { SubmitButton } from './submit_button';
 import { VisorMode } from './visor_mode';
-import { useNlGeneration, type NlSubmitOptions } from './use_nl_generation';
+import { useNlGeneration } from './use_nl_generation';
 import {
   searchPlaceholder,
   nlPlaceholder,
@@ -177,14 +177,12 @@ function NlVisorActions({
   value,
   onSubmit,
   onStop,
-  autoFocusStop,
   styles,
 }: {
   isLoading: boolean;
   value: string;
   onSubmit: () => void;
   onStop: () => void;
-  autoFocusStop: boolean;
   styles: VisorStyles;
 }) {
   if (isLoading) {
@@ -199,7 +197,6 @@ function NlVisorActions({
           iconType="stop"
           iconSide="left"
           onClick={onStop}
-          autoFocus={autoFocusStop}
           data-test-subj="esqlVisorStopGeneration"
         >
           {stopLabel}
@@ -224,9 +221,6 @@ function NlVisorActions({
 export interface QuickSearchVisorRestorableState {
   // Unset until the user picks a mode
   visorMode?: VisorMode;
-  // The natural language prompt. Reported through onInitialStateChange on every keystroke,
-  // so hosts that store it should debounce
-  nlValue?: string;
 }
 
 const { withRestorableState, useRestorableState } =
@@ -254,14 +248,6 @@ interface QuickSearchVisorPropsInternal {
   onKqlSubmitted?: () => void;
   // Insets the visor from an outlined editor so its controls do not sit on the border
   hasOutline?: boolean;
-  // Focuses the natural language input on mount; the host must disable the editor autofocus.
-  // With autoSubmit, also keeps the focus in the visor while the prompt is generated
-  autoFocus?: boolean;
-  // Sends the restored natural language prompt once on mount and applies the generated query
-  // without review, for a prompt the user already submitted elsewhere
-  autoSubmit?: boolean;
-  // Called once the restored prompt is sent, so the host can drop its request
-  onAutoSubmit?: () => void;
 }
 
 // React.memo is applied inside the withRestorableState HOC (called below)
@@ -275,9 +261,6 @@ function QuickSearchVisorInternal({
   disableSubmitAction = false,
   onKqlSubmitted,
   hasOutline = false,
-  autoFocus = false,
-  autoSubmit = false,
-  onAutoSubmit,
 }: QuickSearchVisorPropsInternal) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, data, core } = kibana.services;
@@ -296,20 +279,19 @@ function QuickSearchVisorInternal({
     [core.analytics]
   );
 
-  const [nlValue = '', setNlValue] = useRestorableState('nlValue', '');
   const onNlQueryApplied = useCallback(
     (generatedQuery: string) => onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH_NL),
     [onUpdateAndSubmitQuery]
   );
   const {
+    nlValue,
+    setNlValue,
     isNlLoading,
     hasConnector,
     onNlSubmit: submitNl,
     onStopGeneration,
   } = useNlGeneration({
     query,
-    nlValue,
-    setNlValue,
     onNlResult,
     onNlReject: focusNlInput,
     onUpdateAndSubmitQuery: onNlQueryApplied,
@@ -339,20 +321,12 @@ function QuickSearchVisorInternal({
     [isDisabled, disableSubmitAction, query, onUpdateAndSubmitQuery, onKqlSubmitted]
   );
 
-  // Returns whether the prompt was sent
-  const submitPrompt = useCallback(
-    (options?: NlSubmitOptions) => {
-      if (isDisabled || !nlValue.trim()) return false;
-      // NL does not need an existing query, unlike KQL, so an empty editor can still submit it.
-      if (disableSubmitAction && query.trim()) return false;
-      submitNl(options);
-      return true;
-    },
-    [isDisabled, disableSubmitAction, query, nlValue, submitNl]
-  );
   const onNlSubmit = useCallback(() => {
-    submitPrompt();
-  }, [submitPrompt]);
+    if (isDisabled) return;
+    // NL does not need an existing query, unlike KQL, so an empty editor can still submit it.
+    if (disableSubmitAction && query.trim()) return;
+    submitNl();
+  }, [isDisabled, disableSubmitAction, query, submitNl]);
 
   const onVisorModeChange = useCallback(
     (id: VisorMode) => {
@@ -417,31 +391,6 @@ function QuickSearchVisorInternal({
   const isKqlMode =
     (!showAskAiButton || (visorMode ?? VisorMode.NaturalLanguage) === VisorMode.KQL) &&
     !(hasNoSource && showAskAiButton);
-
-  // Waits for the natural language input to show, since AI availability resolves after the first
-  // render. The review is skipped: the user has no query of their own in this editor yet
-  const isAutoSubmitPendingRef = useRef(autoSubmit);
-  const [isAutoGenerating, setIsAutoGenerating] = useState(false);
-  useEffect(() => {
-    if (!isAutoSubmitPendingRef.current || isKqlMode) return;
-    isAutoSubmitPendingRef.current = false;
-    if (submitPrompt({ skipReview: true })) {
-      onAutoSubmit?.();
-      setIsAutoGenerating(true);
-    }
-  }, [isKqlMode, submitPrompt, onAutoSubmit]);
-
-  // Generating disables the prompt, which drops the focus it took on mount. Stop holds the focus
-  // meanwhile (see NlVisorActions) and the prompt takes it back once the request settles, for a
-  // follow-up or a retry, unless the user has moved on
-  useEffect(() => {
-    if (!isAutoGenerating || isNlLoading) return;
-    setIsAutoGenerating(false);
-    if (autoFocus && document.activeElement === document.body) {
-      focusNlInput();
-    }
-  }, [isAutoGenerating, isNlLoading, autoFocus, focusNlInput]);
-
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible, hasOutline);
 
   if (!KQLComponent) {
@@ -506,7 +455,6 @@ function QuickSearchVisorInternal({
           onChange={setNlValue}
           onSubmit={onNlSubmit}
           inputStyles={styles.nlInput}
-          autoFocus={autoFocus}
         />
       </div>
       <NlVisorActions
@@ -514,7 +462,6 @@ function QuickSearchVisorInternal({
         value={nlValue}
         onSubmit={onNlSubmit}
         onStop={onStopGeneration}
-        autoFocusStop={isAutoGenerating && autoFocus}
         styles={styles}
       />
     </VisorLayout>

@@ -232,9 +232,9 @@ const internalStateSliceDef = createSlice({
         tab.skipInitialFetch = action.payload.skipInitialFetch;
       }),
 
-    setAutoSubmitVisor: (state, action: TabAction<Pick<TabState, 'autoSubmitVisor'>>) =>
+    setForceInitialFetch: (state, action: TabAction<Pick<TabState, 'forceInitialFetch'>>) =>
       withTab(state, action.payload, (tab) => {
-        tab.autoSubmitVisor = action.payload.autoSubmitVisor;
+        tab.forceInitialFetch = action.payload.forceInitialFetch;
       }),
 
     setIsDataViewLoading: (state, action: TabAction<Pick<TabState, 'isDataViewLoading'>>) =>

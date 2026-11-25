@@ -10,10 +10,19 @@
 import { useEffect, useState } from 'react';
 import { useKibanaServices } from '../kibana_services';
 
+// The checks are requests; this mirror lets the next mount start with the last known result
+// instead of adding the AI controls once the requests settle, which would shift the query bar
+let lastKnownAvailability = false;
+
+/** Forgets the last known result so tests can change it. */
+export const clearNlToEsqlAvailabilityCache = (): void => {
+  lastKnownAvailability = false;
+};
+
 /** Whether natural language to ES|QL is available (inference plugin, Enterprise license and an AI connector). */
 export const useIsNlToEsqlAvailable = (): boolean => {
   const deps = useKibanaServices();
-  const [isAvailable, setIsAvailable] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(lastKnownAvailability);
 
   useEffect(() => {
     if (!deps?.esql.isInferenceAvailable) {
@@ -25,6 +34,7 @@ export const useIsNlToEsqlAvailable = (): boolean => {
     const checkAvailability = async () =>
       (await esql.hasEnterpriseLicense()) && (await esql.hasInferenceConnector());
     checkAvailability().then((available) => {
+      lastKnownAvailability = available;
       if (!cancelled) {
         setIsAvailable(available);
       }

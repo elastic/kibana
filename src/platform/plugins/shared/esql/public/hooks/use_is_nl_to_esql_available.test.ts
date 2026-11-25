@@ -9,7 +9,10 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useKibanaServices } from '../kibana_services';
-import { useIsNlToEsqlAvailable } from './use_is_nl_to_esql_available';
+import {
+  clearNlToEsqlAvailabilityCache,
+  useIsNlToEsqlAvailable,
+} from './use_is_nl_to_esql_available';
 
 jest.mock('../kibana_services', () => ({
   useKibanaServices: jest.fn(),
@@ -24,6 +27,7 @@ describe('useIsNlToEsqlAvailable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clearNlToEsqlAvailabilityCache();
     (useKibanaServices as jest.Mock).mockReturnValue({ esql });
   });
 
@@ -46,6 +50,17 @@ describe('useIsNlToEsqlAvailable', () => {
     const { result } = renderHook(() => useIsNlToEsqlAvailable());
 
     await waitFor(() => expect(result.current).toBe(true));
+  });
+
+  it('starts the next mount with the last known result', async () => {
+    esql.hasEnterpriseLicense.mockResolvedValue(true);
+    esql.hasInferenceConnector.mockResolvedValue(true);
+    const first = renderHook(() => useIsNlToEsqlAvailable());
+    await waitFor(() => expect(first.result.current).toBe(true));
+
+    const second = renderHook(() => useIsNlToEsqlAvailable());
+
+    expect(second.result.current).toBe(true);
   });
 
   it('is false without an Enterprise license', async () => {

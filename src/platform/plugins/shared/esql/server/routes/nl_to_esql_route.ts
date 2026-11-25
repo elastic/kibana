@@ -8,12 +8,10 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
+import { NL_TO_ESQL_MAX_INSTRUCTION_LENGTH, NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { EsqlServerPluginStart } from '../types';
 import { createScopedModel, resolveConnectorId } from './helpers';
-
-const MAX_NL_INSTRUCTION_LENGTH = 2000;
 
 /**
  * Builds additional context for {@link generateEsql} when the request is not a completion.
@@ -55,7 +53,7 @@ export const registerNLtoESQLRoute = (
       path: NL_TO_ESQL_ROUTE,
       validate: {
         body: schema.object({
-          nlInstruction: schema.string({ maxLength: MAX_NL_INSTRUCTION_LENGTH }),
+          nlInstruction: schema.string({ maxLength: NL_TO_ESQL_MAX_INSTRUCTION_LENGTH }),
           currentQuery: schema.maybe(schema.string({ maxLength: 50000 })),
           isCompletion: schema.maybe(schema.boolean()),
         }),

@@ -296,20 +296,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   visorInitialState?: QuickSearchVisorProps['initialState'];
   onVisorInitialStateChange?: QuickSearchVisorProps['onInitialStateChange'];
   /**
-   * Focuses the ES|QL quick search visor's natural language input on mount instead of the editor.
-   */
-  autoFocusVisor?: boolean;
-  /**
-   * Sends the ES|QL quick search visor's restored natural language prompt on mount and runs the
-   * generated query without the review step.
-   */
-  autoSubmitVisor?: boolean;
-  /**
-   * Called when the visor sends the restored prompt, so the host can drop its `autoSubmitVisor` request.
-   */
-  onAutoSubmitVisor?: () => void;
-
-  /**
    * Optional configuration for ES|QL variables.
    *
    * This prop allows you to define and manage variables used within ES|QL queries,
@@ -495,14 +481,6 @@ export const QueryBarTopRow = React.memo(
     const askAiButtonRef = useRef<HTMLButtonElement>(null);
     const wasAskAiModeRef = useRef(false);
     const { askAi } = props;
-
-    const onAskAiSubmit = useCallback(
-      (prompt: string) => {
-        askAi?.onSubmit(prompt);
-        setIsAskAiMode(false);
-      },
-      [askAi]
-    );
 
     // Leaving Ask AI mode removes the focused input, so hand focus back to the button that opened it
     useEffect(() => {
@@ -1509,7 +1487,7 @@ export const QueryBarTopRow = React.memo(
           {askAi && isAskAiMode ? (
             <AskAiInput
               suggestedPrompts={askAi.suggestedPrompts}
-              onSubmit={onAskAiSubmit}
+              onSubmit={askAi.onSubmit}
               onClose={() => setIsAskAiMode(false)}
             />
           ) : (
@@ -1614,7 +1592,6 @@ export const QueryBarTopRow = React.memo(
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
             hasExternalVisor
-            disableAutoFocus={props.autoFocusVisor}
           />
         )
       );
@@ -1667,9 +1644,6 @@ export const QueryBarTopRow = React.memo(
                     onKqlSubmitted={focusEsqlEditor}
                     initialState={props.visorInitialState}
                     onInitialStateChange={props.onVisorInitialStateChange}
-                    autoFocus={props.autoFocusVisor}
-                    autoSubmit={props.autoSubmitVisor}
-                    onAutoSubmit={props.onAutoSubmitVisor}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}

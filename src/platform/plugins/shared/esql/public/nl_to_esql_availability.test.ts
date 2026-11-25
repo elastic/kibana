@@ -8,7 +8,10 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { createNlToEsqlAvailability } from './nl_to_esql_availability';
+import {
+  createNlToEsqlAvailability,
+  INFERENCE_CONNECTORS_CACHE_MS,
+} from './nl_to_esql_availability';
 
 describe('createNlToEsqlAvailability', () => {
   const setup = () => {
@@ -16,6 +19,10 @@ describe('createNlToEsqlAvailability', () => {
     const getLicense = jest.fn();
     return { http, getLicense, ...createNlToEsqlAvailability(getLicense, http) };
   };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
   it.each([
     ['an active Enterprise license', { status: 'active', hasAtLeast: () => true }, true],
@@ -32,6 +39,7 @@ describe('createNlToEsqlAvailability', () => {
     ['some connectors exist', () => Promise.resolve({ connectors: [{ id: 'c1' }] }), true],
     ['no connectors exist', () => Promise.resolve({ connectors: [] }), false],
     ['the request fails', () => Promise.reject(new Error('network error')), false],
+    ['the response is unexpected', () => Promise.resolve({}), false],
   ])('resolves hasInferenceConnector when %s', async (_, response, expected) => {
     const { http, hasInferenceConnector } = setup();
     (http.get as jest.Mock).mockImplementation(response);
@@ -50,15 +58,56 @@ describe('createNlToEsqlAvailability', () => {
     expect(http.get).toHaveBeenCalledTimes(2);
   });
 
-  it('requests the license and the connectors only once', async () => {
-    const { http, getLicense, hasEnterpriseLicense, hasInferenceConnector } = setup();
+  it('requests the license only once', async () => {
+    const { getLicense, hasEnterpriseLicense } = setup();
     getLicense.mockResolvedValue({ status: 'active', hasAtLeast: () => true });
-    (http.get as jest.Mock).mockResolvedValue({ connectors: [{ id: 'c1' }] });
 
     await Promise.all([hasEnterpriseLicense(), hasEnterpriseLicense()]);
-    await Promise.all([hasInferenceConnector(), hasInferenceConnector()]);
+    await hasEnterpriseLicense();
 
     expect(getLicense).toHaveBeenCalledTimes(1);
+  });
+
+  it('shares a pending lookup even when it outlives the cache lifetime', async () => {
+    const { http, hasInferenceConnector } = setup();
+    const now = jest.spyOn(Date, 'now').mockReturnValue(0);
+    const response = Promise.withResolvers<{ connectors: unknown[] }>();
+    (http.get as jest.Mock).mockReturnValue(response.promise);
+
+    const first = hasInferenceConnector();
+    now.mockReturnValue(INFERENCE_CONNECTORS_CACHE_MS + 1);
+    const second = hasInferenceConnector();
+    response.resolve({ connectors: [{ id: 'c1' }] });
+
+    expect(await Promise.all([first, second])).toEqual([true, true]);
     expect(http.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('looks the connectors up again when none were found', async () => {
+    const { http, hasInferenceConnector } = setup();
+    (http.get as jest.Mock)
+      .mockResolvedValueOnce({ connectors: [] })
+      .mockResolvedValueOnce({ connectors: [{ id: 'c1' }] });
+
+    expect(await hasInferenceConnector()).toBe(false);
+    expect(await hasInferenceConnector()).toBe(true);
+    expect(http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('reuses a lookup that found connectors for a minute', async () => {
+    const { http, hasInferenceConnector } = setup();
+    const now = jest.spyOn(Date, 'now').mockReturnValue(0);
+    (http.get as jest.Mock)
+      .mockResolvedValueOnce({ connectors: [{ id: 'c1' }] })
+      .mockResolvedValueOnce({ connectors: [] });
+
+    expect(await hasInferenceConnector()).toBe(true);
+    now.mockReturnValue(INFERENCE_CONNECTORS_CACHE_MS - 1);
+    expect(await hasInferenceConnector()).toBe(true);
+    expect(http.get).toHaveBeenCalledTimes(1);
+
+    now.mockReturnValue(INFERENCE_CONNECTORS_CACHE_MS);
+    expect(await hasInferenceConnector()).toBe(false);
+    expect(http.get).toHaveBeenCalledTimes(2);
   });
 });

@@ -21,11 +21,10 @@ interface NLInputProps {
   onChange: (value: string) => void;
   onSubmit: () => void;
   inputStyles: SerializedStyles;
-  autoFocus?: boolean;
 }
 
 export const NLInput = forwardRef<NLInputApi, NLInputProps>(function NLInput(
-  { value, placeholder, disabled, onChange, onSubmit, inputStyles, autoFocus },
+  { value, placeholder, disabled, onChange, onSubmit, inputStyles },
   ref
 ) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -48,13 +47,6 @@ export const NLInput = forwardRef<NLInputApi, NLInputProps>(function NLInput(
   }, []);
 
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (autoFocus && textarea) {
-      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-    }
-  }, [autoFocus]);
-
-  useEffect(() => {
     if (document.activeElement === textareaRef.current) {
       updateHeight();
     }
@@ -72,7 +64,6 @@ export const NLInput = forwardRef<NLInputApi, NLInputProps>(function NLInput(
         placeholder={placeholder}
         value={value}
         disabled={disabled}
-        autoFocus={autoFocus}
         onChange={(e) => {
           onChange(e.target.value);
           updateHeight();
