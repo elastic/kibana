@@ -14,7 +14,7 @@ import { useKibana } from '../../common/lib/kibana';
 
 type CreateConnectorSchema = Pick<
   UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>,
-  'actionTypeId' | 'name' | 'config' | 'secrets' | 'id' | 'isInboundEventsEnabled'
+  'actionTypeId' | 'name' | 'config' | 'secrets' | 'id' | 'isInboundEventsEnabled' | 'specVersion'
 >;
 
 export interface CreateConnectorError {

@@ -66,6 +66,9 @@ export const useConnectorCreateForm = ({
     createConnectorError,
   } = useCreateConnector({ hideSuccessToast });
 
+  const isCatalogEnabled =
+    connectorContext?.services.isCatalogEnabled ?? services.actions?.isCatalogEnabled;
+
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
@@ -85,7 +88,17 @@ export const useConnectorCreateForm = ({
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
     refetch: refetchConnectorSpec,
-  } = useActionTypeModel({ actionTypeRegistry, actionTypeId, http, docLinks, uiSettings });
+  } = useActionTypeModel({
+    actionTypeRegistry,
+    actionTypeId,
+    http,
+    docLinks,
+    uiSettings,
+    // TODO this should be user input, out of scope for now
+    specVersion: isCatalogEnabled ? '1' : undefined,
+  });
+
+  const specVersion = isCatalogEnabled ? actionTypeModel?.specVersion : undefined;
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
@@ -138,6 +151,7 @@ export const useConnectorCreateForm = ({
         config: config ?? {},
         secrets: secrets ?? {},
         id: id ?? '',
+        ...(specVersion !== undefined ? { specVersion } : {}),
         ...isInboundEventsEnabledPayload(
           typeId,
           isInboundEventsEnabled,
@@ -148,7 +162,7 @@ export const useConnectorCreateForm = ({
 
     setShowFormErrors(true);
     return undefined;
-  }, [submit, preSubmitValidator, createConnector, isClusterInboundEventsEnabled]);
+  }, [submit, preSubmitValidator, createConnector, isClusterInboundEventsEnabled, specVersion]);
 
   useEffect(() => {
     isMounted.current = true;
