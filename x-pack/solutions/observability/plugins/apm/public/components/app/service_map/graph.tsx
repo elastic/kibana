@@ -51,6 +51,8 @@ import {
 } from './constants';
 import { findElementByDataId } from './find_element_by_data_id';
 import { getServiceMapViewTarget } from './get_service_map_view_target';
+import type { SwitchedGroup } from './get_switched_group';
+import { getSwitchedGroup } from './get_switched_group';
 import { ServiceNode } from '../../shared/service_map/service_node';
 import { ServiceGroupNode } from '../../shared/service_map/service_group_node';
 import { ServiceGroupBoxNode } from '../../shared/service_map/service_group_box_node';
@@ -372,6 +374,8 @@ function GraphInner({
   const hasPerformedInitialFitRef = useRef(false);
   // Whether each group was closed or open at the last fit, to tell when one was opened or closed.
   const fitGroupTypesRef = useRef(new Map<string, string>());
+  // The group that was opened or closed and that the view has not moved to yet.
+  const pendingGroupFitRef = useRef<SwitchedGroup | undefined>(undefined);
 
   // EBT + console fire once per failed layout computation (each useMemo re-run that throws),
   // not strictly once per page visit—intentional for measuring failure frequency.
@@ -463,26 +467,27 @@ function GraphInner({
 
     // Opening or closing a group re-lays out the whole map. Fitting all of it would shrink the group
     // that was just opened to a few pixels on a big map, so the view follows that group instead.
-    const previousGroupTypes = fitGroupTypesRef.current;
-    const currentGroupTypes = new Map<string, string>();
-    let switchedGroup: { id: string; isOpened: boolean } | undefined;
-    for (const { id, type } of nodesWithContextHighlight) {
-      if (type !== 'serviceGroup' && type !== 'serviceGroupBox') {
-        continue;
-      }
-      currentGroupTypes.set(id, type);
-      const previousType = previousGroupTypes.get(id);
-      if (previousType && previousType !== type) {
-        switchedGroup = { id, isOpened: type === 'serviceGroupBox' };
-      }
+    const { currentTypes, switchedGroup: newlySwitchedGroup } = getSwitchedGroup(
+      fitGroupTypesRef.current,
+      nodesWithContextHighlight
+    );
+    fitGroupTypesRef.current = currentTypes;
+    // Kept until the view has moved: if this effect runs again before the timer below does, that
+    // run's timer takes over, and it has to frame the group too, not fit the whole map.
+    if (newlySwitchedGroup) {
+      pendingGroupFitRef.current = newlySwitchedGroup;
     }
-    fitGroupTypesRef.current = currentGroupTypes;
 
     if (nodesAfterFilters.length > 0) {
       const isInitialFit = !hasPerformedInitialFitRef.current;
       hasPerformedInitialFitRef.current = true;
       const timer = setTimeout(() => {
-        if (!switchedGroup) {
+        const switchedGroup = pendingGroupFitRef.current;
+        pendingGroupFitRef.current = undefined;
+        if (
+          !switchedGroup ||
+          !nodesWithContextHighlight.some(({ id }) => id === switchedGroup.id)
+        ) {
           handleFitView(!isInitialFit);
           return;
         }
@@ -749,30 +754,17 @@ function GraphInner({
   // lost with it. So when a group switches between closed and open, the focus moves to its element.
   // It is announced here, from the state that was committed, so it is also for a group opened with
   // the pointer or closed with the button of its box, and not only for the keys.
-  const groupNodeTypesRef = useRef(new Map<string, string>());
+  const announcedGroupTypesRef = useRef(new Map<string, string>());
   useEffect(() => {
-    const previousTypes = groupNodeTypesRef.current;
-    const currentTypes = new Map<string, string>();
-    let switchedGroup: ServiceMapNode | undefined;
-    for (const node of nodes) {
-      if (!isServiceGroupNode(node) && !isServiceGroupBoxNode(node)) {
-        continue;
-      }
-      const type = node.type ?? '';
-      currentTypes.set(node.id, type);
-      const previousType = previousTypes.get(node.id);
-      if (previousType && previousType !== type) {
-        switchedGroup = node;
-      }
-    }
-    groupNodeTypesRef.current = currentTypes;
+    const { currentTypes, switchedGroup } = getSwitchedGroup(announcedGroupTypesRef.current, nodes);
+    announcedGroupTypesRef.current = currentTypes;
 
     if (!switchedGroup) {
       return;
     }
-    const groupLabel = switchedGroup.data.label || switchedGroup.id;
+    const { id, label: groupLabel, isOpened } = switchedGroup;
     announce(
-      isServiceGroupBoxNode(switchedGroup)
+      isOpened
         ? i18n.translate('xpack.apm.serviceMap.groupOpened', {
             defaultMessage: 'Opened group {groupLabel}. Press Enter or Escape on it to close.',
             values: { groupLabel },
@@ -782,7 +774,7 @@ function GraphInner({
             values: { groupLabel },
           })
     );
-    findElementByDataId(mapRegionRef.current, switchedGroup.id)?.focus();
+    findElementByDataId(mapRegionRef.current, id)?.focus();
   }, [nodes, announce]);
 
   useEffect(() => {
@@ -896,10 +888,18 @@ function GraphInner({
       'Use Tab to navigate between service nodes. Use Arrow keys to move between adjacent nodes. ' +
       'Press Enter or Space to select a node and view its details including connections. ' +
       'Press Escape to close the details panel. ' +
-      'Press Enter or Space on a group to open it, and Enter or Escape on an open group to close it. ' +
       'When focus is in the map region or on the page background (no text field focused), press Command K or Control K to open find in page and focus the search field. ' +
       'The options panel and zoom controls in the top left allow you to filter, change layout, zoom in, zoom out, and fit the view.',
   });
+  // Its own message, added only to a map that has groups, so the one above keeps its translations.
+  const hasGroups = nodes.some((node) => isServiceGroupNode(node) || isServiceGroupBoxNode(node));
+  const groupScreenReaderInstructions = i18n.translate(
+    'xpack.apm.serviceMap.screenReaderInstructions.groups',
+    {
+      defaultMessage:
+        'Press Enter or Space on a group to open it, and Enter or Escape on an open group to close it.',
+    }
+  );
 
   return (
     <ServiceMapInteractivityProvider isInteractive={isInteractive}>
@@ -918,7 +918,11 @@ function GraphInner({
             aria-describedby={serviceMapId}
           >
             <EuiScreenReaderOnly>
-              <div id={serviceMapId}>{screenReaderInstructions}</div>
+              <div id={serviceMapId}>
+                {hasGroups
+                  ? `${screenReaderInstructions} ${groupScreenReaderInstructions}`
+                  : screenReaderInstructions}
+              </div>
             </EuiScreenReaderOnly>
             <EuiScreenReaderLive>{screenReaderAnnouncement}</EuiScreenReaderLive>
             <ReactFlow

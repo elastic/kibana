@@ -425,6 +425,23 @@ describe('groupServiceNodes', () => {
       );
     });
 
+    it('names the closed groups and the box of an open group for the element that takes the focus', () => {
+      const { nodes: nextNodes } = groupServiceNodes(
+        openNodes(),
+        [],
+        ILLUSTRATION_GROUPING,
+        undefined,
+        open(SHOP)
+      );
+
+      expect(nextNodes.find((n) => n.id === SHOP)?.ariaLabel).toBe(
+        'Open service group: shop, 3 services. Press Enter or Escape to close the group.'
+      );
+      expect(nextNodes.find((n) => n.id === FINANCE)?.ariaLabel).toBe(
+        'Service group: finance, 2 services'
+      );
+    });
+
     it('draws an open group as a box followed by its members, and leaves the others closed', () => {
       const { nodes: nextNodes } = groupServiceNodes(
         openNodes(),

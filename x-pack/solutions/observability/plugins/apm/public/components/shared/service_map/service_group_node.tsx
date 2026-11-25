@@ -13,6 +13,10 @@ import { i18n } from '@kbn/i18n';
 import { getSeverity, getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceGroupNodeData } from '../../../../common/service_map';
 import {
+  getServiceGroupAriaLabel,
+  getServiceGroupMemberCountLabel,
+} from '../../../../common/service_map';
+import {
   NODE_BORDER_WIDTH_DEFAULT,
   NODE_BORDER_WIDTH_SELECTED,
   NODE_LABEL_MAX_WIDTH,
@@ -52,11 +56,7 @@ export const ServiceGroupNode = memo(
 
     const ariaLabel = useMemo(() => {
       const parts = [
-        i18n.translate('xpack.apm.serviceMap.serviceGroupNode.ariaLabel', {
-          defaultMessage:
-            'Service group: {groupName}, {count} {count, plural, one {service} other {services}}',
-          values: { groupName: data.label, count: data.memberCount },
-        }),
+        getServiceGroupAriaLabel({ groupName: data.label, memberCount: data.memberCount }),
       ];
 
       if (data.serviceAnomalyStats?.anomalyScore !== undefined) {
@@ -162,13 +162,7 @@ export const ServiceGroupNode = memo(
     const showSloBadge =
       canReadSlos && (data.sloStatus === 'violated' || data.sloStatus === 'degrading');
 
-    const memberCountLabel = i18n.translate(
-      'xpack.apm.serviceMap.serviceGroupNode.memberCountLabel',
-      {
-        defaultMessage: '{count} {count, plural, one {service} other {services}}',
-        values: { count: data.memberCount },
-      }
-    );
+    const memberCountLabel = getServiceGroupMemberCountLabel(data.memberCount);
 
     return (
       <HighlightWrapper nodeId={data.id} contextHighlight={Boolean(data.contextHighlight)}>

@@ -526,7 +526,12 @@ function layoutWithOpenGroups<T extends Node>(
       continue;
     }
     boxIdByMemberId.set(node.id, node.parentId);
-    membersByBoxId.set(node.parentId, [...(membersByBoxId.get(node.parentId) ?? []), node]);
+    const members = membersByBoxId.get(node.parentId);
+    if (members) {
+      members.push(node);
+    } else {
+      membersByBoxId.set(node.parentId, [node]);
+    }
   }
 
   const boxSizes = new Map<string, NodeSize>();

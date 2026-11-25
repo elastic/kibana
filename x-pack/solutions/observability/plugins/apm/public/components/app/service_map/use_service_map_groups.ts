@@ -41,12 +41,18 @@ export function useServiceMapGroups({
   const isGroupingEnabled = useServiceMapGroupingEnabled();
   const [openGroupIds, setOpenGroupIds] = useState<ReadonlySet<string>>(() => new Set());
 
+  // The same set when nothing changes, so the map is not grouped and laid out again for nothing.
   const openGroup = useCallback((groupId: string) => {
-    setOpenGroupIds((previous) => new Set(previous).add(groupId));
+    setOpenGroupIds((previous) =>
+      previous.has(groupId) ? previous : new Set(previous).add(groupId)
+    );
   }, []);
 
   const closeGroup = useCallback((groupId: string) => {
     setOpenGroupIds((previous) => {
+      if (!previous.has(groupId)) {
+        return previous;
+      }
       const next = new Set(previous);
       next.delete(groupId);
       return next;

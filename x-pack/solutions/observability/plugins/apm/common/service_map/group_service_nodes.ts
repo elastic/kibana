@@ -19,6 +19,7 @@ import type {
 } from './types';
 import { isServiceNodeData } from './types';
 import { formatServiceGroupName } from './format_service_group_name';
+import { getServiceGroupAriaLabel, getServiceGroupBoxAriaLabel } from './service_group_labels';
 import { createEdgeMarker, getEdgeId } from './utils';
 import { DEFAULT_EDGE_STYLE } from './constants';
 
@@ -139,6 +140,7 @@ function createServiceGroupBoxNode(
   group: ServiceMapGroup,
   memberNodes: ServiceMapNode[]
 ): ServiceMapNode {
+  const label = formatServiceGroupName(group);
   return {
     id: group.id,
     type: 'serviceGroupBox',
@@ -146,9 +148,11 @@ function createServiceGroupBoxNode(
     // The box covers a large area: dragging on it should pan the map, not move the group. Its
     // members can still be dragged, inside it.
     draggable: false,
+    // The name of the element that takes the focus, as React Flow only sets it from here.
+    ariaLabel: getServiceGroupBoxAriaLabel({ groupName: label, memberCount: memberNodes.length }),
     data: {
       id: group.id,
-      label: formatServiceGroupName(group),
+      label,
       isService: false,
       isServiceGroupBox: true,
       groupKind: group.kind,
@@ -163,14 +167,17 @@ function createServiceGroupNode(
   memberNodes: ServiceMapNode[]
 ): ServiceMapNode {
   const members = memberNodes.map((node) => node.data as ServiceNodeData);
+  const label = formatServiceGroupName(group);
 
   return {
     id: group.id,
     type: 'serviceGroup',
     position: { x: 0, y: 0 },
+    // The name of the element that takes the focus, as React Flow only sets it from here.
+    ariaLabel: getServiceGroupAriaLabel({ groupName: label, memberCount: members.length }),
     data: {
       id: group.id,
-      label: formatServiceGroupName(group),
+      label,
       isService: false,
       isServiceGroup: true,
       groupKind: group.kind,

@@ -11,6 +11,10 @@ import { EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ServiceGroupBoxNodeData } from '../../../../common/service_map';
+import {
+  getServiceGroupBoxAriaLabel,
+  getServiceGroupMemberCountLabel,
+} from '../../../../common/service_map';
 import { GROUP_BOX_HEADER_HEIGHT } from '../../../../common/service_map/constants';
 import { useServiceMapInteractivity } from './service_map_interactivity_context';
 import { useServiceMapCloseGroup } from './service_map_group_actions_context';
@@ -31,18 +35,8 @@ export const ServiceGroupBoxNode = memo(({ data }: NodeProps<ServiceGroupBoxNode
 
   const handleClose = useCallback(() => closeGroup?.(id), [closeGroup, id]);
 
-  const memberCountLabel = i18n.translate(
-    'xpack.apm.serviceMap.serviceGroupBoxNode.memberCountLabel',
-    {
-      defaultMessage: '{count} {count, plural, one {service} other {services}}',
-      values: { count: memberCount },
-    }
-  );
-  const ariaLabel = i18n.translate('xpack.apm.serviceMap.serviceGroupBoxNode.ariaLabel', {
-    defaultMessage:
-      'Open service group: {groupName}, {count} {count, plural, one {service} other {services}}. Press Enter or Escape to close the group.',
-    values: { groupName: label, count: memberCount },
-  });
+  const memberCountLabel = getServiceGroupMemberCountLabel(memberCount);
+  const ariaLabel = getServiceGroupBoxAriaLabel({ groupName: label, memberCount });
   const closeLabel = i18n.translate('xpack.apm.serviceMap.serviceGroupBoxNode.closeButtonLabel', {
     defaultMessage: 'Close group {groupName}',
     values: { groupName: label },

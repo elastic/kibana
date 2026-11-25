@@ -188,6 +188,32 @@ describe('useServiceMapGroups', () => {
       expect(result.current.closeGroup).toBe(closeGroup);
     });
 
+    it('does not group the map again when a group is opened that is already open', () => {
+      mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+      const { result } = renderHook(() =>
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+      );
+      act(() => result.current.openGroup(groupId));
+      const openNodes = result.current.nodes;
+
+      act(() => result.current.openGroup(groupId));
+
+      expect(result.current.nodes).toBe(openNodes);
+    });
+
+    it('does not group the map again when a group is closed that is not open', () => {
+      mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+      const { result } = renderHook(() =>
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+      );
+      const closedNodes = result.current.nodes;
+
+      act(() => result.current.closeGroup(groupId));
+      act(() => result.current.closeGroup('namePrefix:other'));
+
+      expect(result.current.nodes).toBe(closedNodes);
+    });
+
     it('ignores opening a group while the grouping flag is off', () => {
       mockedUseServiceMapGroupingEnabled.mockReturnValue(false);
       const { result } = renderHook(() =>
