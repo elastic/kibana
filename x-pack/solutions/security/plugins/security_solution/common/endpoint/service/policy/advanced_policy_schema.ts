@@ -2843,7 +2843,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.events.system_dll_enrichment',
-    first_supported_version: '9.6',
+    first_supported_version: '9.7',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.system_dll_enrichment',
       {
