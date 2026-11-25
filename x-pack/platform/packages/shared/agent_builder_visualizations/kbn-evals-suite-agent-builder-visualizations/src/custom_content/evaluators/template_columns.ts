@@ -13,6 +13,20 @@ import { readColumnReferencesByQuery } from './template_column_references';
 
 export const CUSTOM_CONTENT_TEMPLATE_COLUMNS_EVALUATOR_NAME = 'Custom Content Template Columns';
 
+const describeProblems = (missing: string[], unknownQueries: number[]): string =>
+  [
+    missing.length > 0
+      ? `The template reads columns the query does not return: ${missing.join(', ')}.`
+      : undefined,
+    unknownQueries.length > 0
+      ? `The template reads queries the panel does not have: ${unknownQueries
+          .map((position) => (position === 0 ? 'rows' : `queries[${position}]`))
+          .join(', ')}.`
+      : undefined,
+  ]
+    .filter((problem) => problem !== undefined)
+    .join(' ');
+
 /** Every column the template reads is a column of the query it reads it from, and every query it reads exists. */
 export const createTemplateColumnsEvaluator = ({
   runQuery,
@@ -30,21 +44,21 @@ export const createTemplateColumnsEvaluator = ({
     }
 
     const references = readColumnReferencesByQuery(template);
-    const read = [...references].filter(([, columns]) => columns.length > 0);
     const unknownQueries = [...references.keys()].filter((position) => position >= queries.length);
-    if (read.length === 0 && unknownQueries.length === 0) {
+    const reads = [...references].filter(
+      ([position, columns]) => position < queries.length && columns.length > 0
+    );
+    if (reads.length === 0 && unknownQueries.length === 0) {
       return skippedResult('The template reads no columns.');
     }
 
     const columnsByQuery = new Map<number, string[]>();
-    for (const [position] of read) {
-      if (position >= queries.length) {
-        continue;
-      }
+    for (const [position] of reads) {
       try {
+        const { columns = [] } = await runQuery(queries[position]);
         columnsByQuery.set(
           position,
-          ((await runQuery(queries[position])).columns ?? []).map(({ name }) => name)
+          columns.map(({ name }) => name)
         );
       } catch (error) {
         return {
@@ -57,30 +71,14 @@ export const createTemplateColumnsEvaluator = ({
       }
     }
 
-    const missing = read.flatMap(([position, columns]) =>
-      position >= queries.length
-        ? []
-        : columns
-            .filter((column) => !columnsByQuery.get(position)?.includes(column))
-            .map((column) => (queries.length > 1 ? `${column} (query ${position})` : column))
+    const missing = reads.flatMap(([position, columns]) =>
+      columns
+        .filter((column) => !columnsByQuery.get(position)?.includes(column))
+        .map((column) => (queries.length > 1 ? `${column} (query ${position})` : column))
     );
-    const total =
-      read
-        .filter(([position]) => position < queries.length)
-        .reduce((sum, [, columns]) => sum + columns.length, 0) + unknownQueries.length;
+    const checked = reads.reduce((sum, [, columns]) => sum + columns.length, 0);
+    const total = checked + unknownQueries.length;
     const failed = missing.length + unknownQueries.length;
-    const problems = [
-      ...(missing.length > 0
-        ? [`The template reads columns the query does not return: ${missing.join(', ')}.`]
-        : []),
-      ...(unknownQueries.length > 0
-        ? [
-            `The template reads queries the panel does not have: ${unknownQueries
-              .map((position) => (position === 0 ? 'rows' : `queries[${position}]`))
-              .join(', ')}.`,
-          ]
-        : []),
-    ];
 
     return {
       score: (total - failed) / total,
@@ -88,7 +86,7 @@ export const createTemplateColumnsEvaluator = ({
       explanation:
         failed === 0
           ? 'Every column the template reads is returned by the query it reads it from.'
-          : problems.join(' '),
+          : describeProblems(missing, unknownQueries),
       metadata: {
         references: Object.fromEntries(references),
         columns: Object.fromEntries(columnsByQuery),

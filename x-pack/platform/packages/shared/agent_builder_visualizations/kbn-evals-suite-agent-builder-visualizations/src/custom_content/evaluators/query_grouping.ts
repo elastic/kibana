@@ -15,9 +15,13 @@ export const CUSTOM_CONTENT_QUERY_GROUPING_EVALUATOR_NAME = 'Custom Content Quer
 
 const STATS_COMMANDS = new Set(['stats', 'inline stats', 'inlinestats']);
 
-/** The expressions a query groups by, so an alias (`status = response.keyword`) is read as written. */
-export const readGroupings = (query: string): string[] =>
-  Parser.parse(query).root.commands.flatMap(({ name, args }) =>
+/** The expressions a query groups by, as written; a query that does not parse cleanly groups by nothing. */
+export const readGroupings = (query: string): string[] => {
+  const { root, errors } = Parser.parse(query);
+  if (errors.length > 0) {
+    return [];
+  }
+  return root.commands.flatMap(({ name, args }) =>
     STATS_COMMANDS.has(name)
       ? args.flatMap((arg) =>
           !Array.isArray(arg) && arg.type === 'option' && arg.name === 'by'
@@ -26,8 +30,9 @@ export const readGroupings = (query: string): string[] =>
         )
       : []
   );
+};
 
-/** Each expected field is grouped by in one of the panel's queries, however the grouping is aliased. */
+/** Each expected field has a query that groups by it alone among the expected fields, however the grouping is aliased. */
 export const createQueryGroupingEvaluator = (): CustomContentEvaluator => ({
   name: CUSTOM_CONTENT_QUERY_GROUPING_EVALUATOR_NAME,
   kind: 'CODE',
@@ -38,25 +43,32 @@ export const createQueryGroupingEvaluator = (): CustomContentEvaluator => ({
       return skippedResult('No expected grouping declared for this example.');
     }
 
-    const groupings = getQueries(output.after).flatMap((query) => {
+    const groupings = getQueries(output.after).map((query) => {
       try {
         return readGroupings(query).map(normalizeQuery);
       } catch {
         return [];
       }
     });
-    const missing = fields.filter(
-      (field) => !groupings.some((grouping) => grouping.includes(normalizeQuery(field)))
+    const fieldsByQuery = groupings.map((expressions) =>
+      fields.filter((field) =>
+        expressions.some((expression) => expression.includes(normalizeQuery(field)))
+      )
+    );
+    const covered = fields.filter((field) =>
+      fieldsByQuery.some((grouped) => grouped.length === 1 && grouped[0] === field)
     );
 
     return {
-      score: (fields.length - missing.length) / fields.length,
-      label: missing.length === 0 ? 'grouped-by-all' : 'missing-grouping',
+      score: covered.length / fields.length,
+      label: covered.length === fields.length ? 'grouped-by-all' : 'missing-grouping',
       explanation:
-        missing.length === 0
-          ? 'Every expected field is grouped by in a query.'
-          : `No query groups by: ${missing.join(', ')}.`,
-      metadata: { groupings, missing },
+        covered.length === fields.length
+          ? 'Each expected field has a query that groups by it alone.'
+          : `No query groups by only: ${fields
+              .filter((field) => !covered.includes(field))
+              .join(', ')}.`,
+      metadata: { groupings },
     };
   },
 });

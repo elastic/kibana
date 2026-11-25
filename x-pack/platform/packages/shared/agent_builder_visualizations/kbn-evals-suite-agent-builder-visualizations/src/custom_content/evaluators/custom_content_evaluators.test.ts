@@ -755,6 +755,46 @@ describe('Custom Content Query Grouping', () => {
     expect((await run(evaluator, outputWith({ esqls: [hosts, hosts] }), expected)).score).toBe(0.5);
   });
 
+  it('gives no credit to a query that groups by two of the fields', async () => {
+    const result = await run(
+      evaluator,
+      outputWith({
+        esqls: [
+          'FROM l | STATS c = COUNT(*) BY host.keyword, response.keyword | LIMIT 5',
+          'FROM l | STATS c = COUNT(*) BY host | LIMIT 5',
+        ],
+      }),
+      expected
+    );
+    expect(result).toMatchObject({ score: 0.5, label: 'missing-grouping' });
+  });
+
+  it('accepts the queries in any order', async () => {
+    const result = await run(
+      evaluator,
+      outputWith({
+        esqls: ['FROM l | STATS c = COUNT(*) BY response', 'FROM l | STATS c = COUNT(*) BY host'],
+      }),
+      expected
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('does not take a query with parse errors for a grouping', async () => {
+    expect(readGroupings('FROM l | STATS c = COUNT(*) BY host | WHERE')).toEqual([]);
+    const result = await run(
+      evaluator,
+      outputWith({
+        esqls: [
+          'FROM l | STATS c = COUNT(*) BY host | WHERE',
+          'FROM l | STATS c = COUNT(*) BY response',
+        ],
+      }),
+      expected
+    );
+    expect(result.score).toBe(0.5);
+  });
+
   it('ignores a query that does not parse', async () => {
     const result = await run(
       evaluator,
