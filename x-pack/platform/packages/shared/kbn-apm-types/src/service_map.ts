@@ -350,11 +350,25 @@ export interface ServiceGroupNodeData extends BaseNodeData {
   stats?: ServiceMapServiceStats;
 }
 
+/**
+ * An open service group: the box drawn around its member services. The members are ordinary
+ * service nodes whose `parentId` is this node's id. Distinct from the closed `ServiceGroupNodeData`
+ * so filters and badges never read the box as a service.
+ */
+export interface ServiceGroupBoxNodeData extends BaseNodeData {
+  isService: false;
+  isServiceGroupBox: true;
+  groupKind: ServiceMapGroup['kind'];
+  memberServiceIds: string[];
+  memberCount: number;
+}
+
 export type ServiceMapNodeData =
   | ServiceNodeData
   | DependencyNodeData
   | GroupedNodeData
-  | ServiceGroupNodeData;
+  | ServiceGroupNodeData
+  | ServiceGroupBoxNodeData;
 
 export type ServiceMapNode = Node<ServiceMapNodeData>;
 
@@ -367,6 +381,8 @@ export interface EdgeMarker extends ReactFlowEdgeMarker {
 export interface ServiceMapEdgeData extends Record<string, unknown> {
   isBidirectional: boolean;
   isGrouped?: boolean;
+  /** Both ends are services of the same open group. Drawn faint until one end is hovered. */
+  isIntraGroup?: boolean;
   sourceData?: ConnectionNode;
   targetData?: ConnectionNode;
   sourceLabel?: string;

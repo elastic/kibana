@@ -145,8 +145,41 @@ describe('tab_state actions', () => {
 
       const tab = selectTab(internalState.getState(), tabId);
 
-      expect(tab.expandedDoc).toBe(expandedDoc);
+      expect(tab.expandedDoc?.raw).toBe(expandedDoc.raw);
       expect(tab.appState.expandedDoc).toEqual({ id: '1', index: 'i' });
+    });
+
+    it('should resolve the document profile for records passed in unresolved', async () => {
+      const { internalState, runtimeStateManager, tabId } = await setup();
+      const scopedProfilesManager = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).scopedProfilesManager$.getValue();
+      const resolveSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
+
+      // A raw record (a chart section's, for example) gains the lazy document context,
+      // so the flyout can pick its document profile.
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      const stored = selectTab(internalState.getState(), tabId).expandedDoc;
+      expect(resolveSpy).toHaveBeenCalledWith({ record: expandedDoc });
+      expect(stored && 'context' in stored).toBe(true);
+
+      // An already-resolved record passes through untouched.
+      resolveSpy.mockClear();
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: stored }));
+      expect(resolveSpy).not.toHaveBeenCalled();
+      expect(selectTab(internalState.getState(), tabId).expandedDoc).toBe(stored);
+    });
+
+    it('should resolve a raw record once, so a redispatch converges on the same instance', async () => {
+      const { internalState, tabId } = await setup();
+
+      // The expanded-doc sync redispatches its record until the store holds it: a fresh
+      // proxy per dispatch would never match and loop forever.
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      const first = selectTab(internalState.getState(), tabId).expandedDoc;
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      expect(selectTab(internalState.getState(), tabId).expandedDoc).toBe(first);
     });
 
     it('should clear the expanded doc reference when the flyout is closed', async () => {
@@ -235,7 +268,7 @@ describe('tab_state actions', () => {
 
       const tab = selectTab(internalState.getState(), tabId);
 
-      expect(tab.expandedDoc).toBe(expandedDoc);
+      expect(tab.expandedDoc?.raw).toBe(expandedDoc.raw);
       expect(tab.expandedDocOwner).toBe('cascade_node_1');
       expect(tab.appState.expandedDoc).toBeUndefined();
     });
@@ -256,7 +289,7 @@ describe('tab_state actions', () => {
 
       const tab = selectTab(internalState.getState(), tabId);
 
-      expect(tab.expandedDoc).toBe(cascadeExpandedDoc);
+      expect(tab.expandedDoc?.raw).toBe(cascadeExpandedDoc.raw);
       expect(tab.expandedDocOwner).toBe('cascade_node_1');
       expect(tab.appState.expandedDoc).toBeUndefined();
     });
@@ -275,7 +308,7 @@ describe('tab_state actions', () => {
 
       const tab = selectTab(internalState.getState(), tabId);
 
-      expect(tab.expandedDoc).toBe(esqlRecord);
+      expect(tab.expandedDoc?.raw).toBe(esqlRecord.raw);
       expect(tab.appState.expandedDoc).toBeUndefined();
     });
 
@@ -994,6 +1027,13 @@ describe('tab_state actions', () => {
         rowHeight: undefined,
       });
 
+      // A reference is only written when the query can refetch it: give it the metadata.
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { query: { esql: 'FROM test-index METADATA _id, _index' } },
+        })
+      );
       const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
       internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
       expect(getCurrentTab().appState.expandedDoc).toEqual({

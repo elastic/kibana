@@ -97,4 +97,47 @@ describe('computeServiceMapFilterOptionCounts', () => {
     expect(slo.violated).toBe(1);
     expect(totalServiceNodes).toBe(2);
   });
+
+  describe('with an open group', () => {
+    const box: ServiceMapNode = {
+      id: 'namePrefix:opbeans',
+      type: 'serviceGroupBox',
+      position: { x: 0, y: 0 },
+      data: {
+        id: 'namePrefix:opbeans',
+        label: 'opbeans',
+        isService: false,
+        isServiceGroupBox: true,
+        groupKind: 'attribute',
+        memberServiceIds: ['opbeans-java', 'opbeans-node'],
+        memberCount: 2,
+      },
+    };
+    const member = (id: string, sloStatus?: 'violated'): ServiceMapNode => ({
+      ...mkService(id, sloStatus),
+      parentId: box.id,
+      extent: 'parent',
+    });
+
+    it('counts the members, not the box', () => {
+      const nodes = [box, member('opbeans-java', 'violated'), member('opbeans-node')];
+      const edges: ServiceMapEdge[] = [mkEdge('e1', 'opbeans-java', 'opbeans-node')];
+
+      const { slo, totalServiceNodes, connection } = computeServiceMapFilterOptionCounts(
+        nodes,
+        edges
+      );
+      expect(totalServiceNodes).toBe(2);
+      expect(slo.violated).toBe(1);
+      expect(slo.noData).toBe(1);
+      expect(connection).toEqual({ connected: 2, orphaned: 0 });
+    });
+
+    it('does not count the box as an orphaned node', () => {
+      const nodes = [box, member('opbeans-java'), member('opbeans-node')];
+
+      const { connection } = computeServiceMapFilterOptionCounts(nodes, []);
+      expect(connection).toEqual({ connected: 0, orphaned: 2 });
+    });
+  });
 });

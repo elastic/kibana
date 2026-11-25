@@ -154,7 +154,8 @@ function serviceMatchesFilters(
 /**
  * Applies client-side visibility for service map nodes and edges. Service and closed service-group
  * nodes must match all active filters. Dependency and resource-group nodes are shown when connected
- * to any visible node; non-matching services/groups are never pulled in through dependencies.
+ * to any visible node; non-matching services/groups are never pulled in through dependencies. The
+ * box of an open group is shown when any of its members is.
  */
 export function applyServiceMapVisibility(
   nodes: ServiceMapNode[],
@@ -202,6 +203,13 @@ export function applyServiceMapVisibility(
       }
       visibleIds.add(neighborId);
       queue.push(neighborId);
+    }
+  }
+
+  // The box of an open group has no edges of its own: it stays while any of its members does.
+  for (const node of nodes) {
+    if (node.parentId && visibleIds.has(node.id)) {
+      visibleIds.add(node.parentId);
     }
   }
 

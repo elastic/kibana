@@ -9,6 +9,7 @@
 
 import { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { BasicPrettyPrinter, EsqlQuery, mutate } from '@elastic/esql';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import {
@@ -48,13 +49,23 @@ export const useCopyExpandedDocLink = ({
     }
 
     try {
-      return constructCascadeQuery({
+      const cascadeQuery = constructCascadeQuery({
         query: currentTab.appState.query,
         dataView,
         esqlVariables: currentTab.esqlVariables,
         nodeType: 'leaf',
         ...currentTab.expandedDocCascadePath,
       });
+      if (!cascadeQuery) {
+        return undefined;
+      }
+      // The link carries a document reference, and restoring one refetches the document
+      // through this query by `_id`/`_index` (`fetch_expanded_doc.ts`): without asking for
+      // them, the copied link could never bring the document back.
+      const parsed = EsqlQuery.fromSrc(cascadeQuery.esql);
+      mutate.commands.from.metadata.upsert(parsed.ast, '_id');
+      mutate.commands.from.metadata.upsert(parsed.ast, '_index');
+      return { ...cascadeQuery, esql: BasicPrettyPrinter.print(parsed.ast) };
     } catch {
       return undefined;
     }

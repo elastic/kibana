@@ -13,28 +13,34 @@ import { parseDurationStats } from '../query/duration_rows';
 import {
   buildDurationStatsQuery,
   buildLatencyGridQuery,
+  buildOperationHistogramQuery,
   getMapQueryParts,
   getMapSampling,
 } from '../query/latency_map_query';
+import type { MapSampling } from '../query/latency_map_query';
 import { addTableToGrid, createEmptyGrid } from '../query/parse';
 import type { LatencyGrid } from '../query/parse';
 import { getTimeGrid } from '../query/time_grid';
 import type { TimeGrid } from '../query/time_grid';
+import { parseOperationHistograms } from '../operations/operation_bands';
+import type { OperationHistogram } from '../operations/operation_bands';
 
 export interface LatencyGridState {
   isLoading: boolean;
   stats?: DurationStats;
   timeGrid?: TimeGrid;
   grid?: LatencyGrid;
-  /** The dense part of the range was sampled; counts there are estimates. */
-  sampled: boolean;
+  /** How the dense part of the range was sampled; undefined when every span was read. */
+  sampling?: MapSampling;
+  /** Per-operation duration histograms, once loaded; [] when their query failed. */
+  operations?: OperationHistogram[];
   isEmpty: boolean;
   error?: Error;
   /** The source of the map shown, once it finished loading. */
   loadedSource?: TraceSource;
 }
 
-const LOADING: LatencyGridState = { isLoading: true, sampled: false, isEmpty: false };
+const LOADING: LatencyGridState = { isLoading: true, isEmpty: false };
 
 const isAbort = (error: unknown) => error instanceof Error && error.name === 'AbortError';
 
@@ -48,12 +54,15 @@ export function useLatencyGrid({
   runEsql,
   targetBins,
   enabled = true,
+  loadOperations = false,
 }: {
   source: TraceSource;
   runEsql: RunEsql;
   targetBins: number;
   /** Loads nothing until true: a map that has not been measured has no columns to ask for. */
   enabled?: boolean;
+  /** Also loads the per-operation duration histograms, for the duration bands. */
+  loadOperations?: boolean;
 }): LatencyGridState {
   // Keyed by content, so a host passing an equal source in a new object does not reload.
   const sourceKey = JSON.stringify(source);
@@ -63,6 +72,8 @@ export function useLatencyGrid({
   // The statistics of a source do not depend on the columns: a resize into another tier
   // reloads the grid with the stats it already has, not the percentiles again.
   const statsCache = useRef<{ key: string; stats: DurationStats }>();
+  // Neither do the operation histograms, which have no time axis.
+  const operationsCache = useRef<{ key: string; operations: OperationHistogram[] }>();
   const [state, setState] = useState<LatencyGridState>(LOADING);
 
   useEffect(() => {
@@ -86,7 +97,6 @@ export function useLatencyGrid({
       if (!stats.spans) {
         return {
           isLoading: false,
-          sampled: false,
           isEmpty: true,
           stats,
           timeGrid,
@@ -94,6 +104,23 @@ export function useLatencyGrid({
         };
       }
       const sampling = getMapSampling(stats);
+      // Started beside the grid queries - the histograms need only the statistics. On a
+      // failure the map just loses its bands, and nothing is cached, so the next load
+      // retries after a transient error; an aborted run is discarded with the rest.
+      const operationsPromise =
+        loadOperations && operationsCache.current?.key !== sourceKey
+          ? run(buildOperationHistogramQuery(stableSource, stats, sampling)).then(
+              (table) => {
+                const operations = parseOperationHistograms(
+                  table,
+                  sampling ? 1 / sampling.probability : 1
+                );
+                operationsCache.current = { key: sourceKey, operations };
+                return operations;
+              },
+              () => undefined
+            )
+          : undefined;
       let grid = createEmptyGrid(timeGrid.bins);
       if (sampling) {
         const [exact, sampled] = getMapQueryParts(sampling);
@@ -110,15 +137,22 @@ export function useLatencyGrid({
           await run(buildLatencyGridQuery(stableSource, stats, timeGrid))
         );
       }
-      return {
+      const gridState: LatencyGridState = {
         isLoading: false,
-        sampled: Boolean(sampling),
+        sampling,
         isEmpty: grid.cells.size === 0,
         stats,
         timeGrid,
         grid,
         loadedSource: stableSource,
       };
+      if (!loadOperations) return gridState;
+      if (!operationsPromise) {
+        return { ...gridState, operations: operationsCache.current?.operations ?? [] };
+      }
+      // The map shows while the histograms finish; the bands join it when they arrive.
+      if (!controller.signal.aborted) setState(gridState);
+      return { ...gridState, operations: (await operationsPromise) ?? [] };
     })().then(
       (next) => {
         if (!controller.signal.aborted) setState(next);
@@ -127,7 +161,6 @@ export function useLatencyGrid({
         if (controller.signal.aborted || isAbort(error)) return;
         setState({
           isLoading: false,
-          sampled: false,
           isEmpty: false,
           error: error instanceof Error ? error : new Error(String(error)),
         });
@@ -135,7 +168,7 @@ export function useLatencyGrid({
     );
 
     return () => controller.abort();
-  }, [sourceKey, stableSource, targetBins, enabled]);
+  }, [sourceKey, stableSource, targetBins, enabled, loadOperations]);
 
   return state;
 }

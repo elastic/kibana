@@ -140,6 +140,72 @@ describe('applyServiceMapVisibility', () => {
     expect(byId.postgresql).toBe(false);
   });
 
+  describe('open groups', () => {
+    const box: ServiceMapNode = {
+      id: 'namePrefix:opbeans',
+      type: 'serviceGroupBox',
+      position: { x: 0, y: 0 },
+      data: {
+        id: 'namePrefix:opbeans',
+        label: 'opbeans',
+        isService: false,
+        isServiceGroupBox: true,
+        groupKind: 'attribute',
+        memberServiceIds: ['opbeans-go', 'opbeans-node'],
+        memberCount: 2,
+      },
+    };
+    const member = (id: string, overrides: Parameters<typeof mkService>[1] = {}) => ({
+      ...mkService(id, overrides),
+      parentId: box.id,
+    });
+
+    it('shows the box and its members with default filters, with no edge on the box', () => {
+      const nodes = [box, member('opbeans-go'), member('opbeans-node')];
+
+      const { nodes: outNodes } = applyServiceMapVisibility(
+        nodes,
+        [mkEdge('e1', 'opbeans-go', 'opbeans-node')],
+        DEFAULT_SERVICE_MAP_VIEW_FILTERS
+      );
+
+      expect(outNodes.map((n) => n.hidden)).toEqual([false, false, false]);
+    });
+
+    it('keeps the box while one member matches the filters, and hides the others', () => {
+      const nodes = [
+        box,
+        member('opbeans-go', { alertsCount: 1 }),
+        member('opbeans-node', { alertsCount: 0 }),
+      ];
+
+      const { nodes: outNodes } = applyServiceMapVisibility(nodes, [], {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        alertStatusFilter: [ALERT_STATUS_ACTIVE],
+      });
+
+      const byId = Object.fromEntries(outNodes.map((n) => [n.id, n.hidden]));
+      expect(byId[box.id]).toBe(false);
+      expect(byId['opbeans-go']).toBe(false);
+      expect(byId['opbeans-node']).toBe(true);
+    });
+
+    it('hides the box when none of its members match the filters', () => {
+      const nodes = [
+        box,
+        member('opbeans-go', { alertsCount: 0 }),
+        member('opbeans-node', { alertsCount: 0 }),
+      ];
+
+      const { nodes: outNodes } = applyServiceMapVisibility(nodes, [], {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        alertStatusFilter: [ALERT_STATUS_ACTIVE],
+      });
+
+      expect(outNodes.every((n) => n.hidden)).toBe(true);
+    });
+  });
+
   it('treats sloStatus noSLOs like noData for SLO filter', () => {
     const nodes: ServiceMapNode[] = [
       mkService('a', { sloStatus: 'noSLOs' }),
