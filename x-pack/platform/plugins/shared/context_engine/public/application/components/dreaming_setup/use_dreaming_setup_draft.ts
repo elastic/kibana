@@ -6,9 +6,11 @@
  */
 
 import { useMemo, useState } from 'react';
-import { buildDreamingTemplateConfig } from '../../../../common/dreaming_templates';
-import type { LoadedDreamingTemplate } from '../../../../common/dreaming_templates';
-import type { DreamingTemplateConfig } from '../../../../common/dreaming_templates';
+import {
+  buildDreamingTemplateConfig,
+  type DreamingTemplateConfig,
+  type LoadedDreamingTemplate,
+} from '../../../../common/dreaming_templates';
 import {
   draftBuildsAnything,
   draftOf,
@@ -22,7 +24,7 @@ export const CUSTOM_TEMPLATE_ID = 'custom';
 
 const EMPTY_DRAFT: DreamingConfigDraft = draftOf({});
 
-export const useDreamingSetupDraft = (): {
+export interface DreamingSetupDraft {
   templates: LoadedDreamingTemplate[];
   isLoading: boolean;
   error: Error | undefined;
@@ -36,10 +38,12 @@ export const useDreamingSetupDraft = (): {
   setDraft: (next: DreamingConfigDraft) => void;
   canApply: boolean;
   buildConfig: () => DreamingTemplateConfig | undefined;
-} => {
+}
+
+export const useDreamingSetupDraft = (): DreamingSetupDraft => {
   const { templates, isLoading, error } = useDreamingTemplates();
   const [pickedId, setPickedId] = useState<string>();
-  const [editedSummary, setEditedSummary] = useState<string>();
+  const [editedSummary, setSummary] = useState<string>();
   const [edited, setEdited] = useState<{ id: string; draft: DreamingConfigDraft }>();
   const selectedId = pickedId ?? templates[0]?.id;
   const isCustom = selectedId === CUSTOM_TEMPLATE_ID;
@@ -60,12 +64,8 @@ export const useDreamingSetupDraft = (): {
   const select = (id: string) => {
     if (id !== selectedId) {
       setPickedId(id);
-      setEditedSummary(undefined);
+      setSummary(undefined);
     }
-  };
-
-  const setSummary = (next: string) => {
-    setEditedSummary(next);
   };
 
   const setDraft = (next: DreamingConfigDraft) => {

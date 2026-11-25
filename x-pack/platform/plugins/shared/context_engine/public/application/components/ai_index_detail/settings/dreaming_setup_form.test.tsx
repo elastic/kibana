@@ -37,7 +37,7 @@ const LEGAL = {
 };
 
 const applyTemplate = jest.fn();
-const onCancel = jest.fn();
+const onDiscard = jest.fn();
 
 const renderForm = ({ loadError }: { loadError?: Error } = {}) => {
   jest.mocked(useDreamingTemplates).mockReturnValue({
@@ -49,7 +49,7 @@ const renderForm = ({ loadError }: { loadError?: Error } = {}) => {
   return render(
     <I18nProvider>
       <EuiProvider>
-        <DreamingSetupForm aiIndexId="tickets" onCancel={onCancel} />
+        <DreamingSetupForm aiIndexId="tickets" onDiscard={onDiscard} />
       </EuiProvider>
     </I18nProvider>
   );
@@ -72,7 +72,7 @@ describe('DreamingSetupForm', () => {
       expect(screen.getByTestId('contextDreamingConfigFact-solution')).toBeInTheDocument()
     );
     expect(screen.getByTestId('contextAiIndexDreamingSetupSummary')).toHaveValue('Support.');
-    expect(screen.getByTestId('contextAiIndexDreamingSetupApply')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingSetupSave')).toBeInTheDocument();
   });
 
   it('switches templates and updates summary', async () => {
@@ -100,7 +100,7 @@ describe('DreamingSetupForm', () => {
     fireEvent.change(screen.getByTestId('contextAiIndexDreamingSetupSummary'), {
       target: { value: 'Acme support.' },
     });
-    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupApply'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupSave'));
 
     await waitFor(() =>
       expect(applyTemplate).toHaveBeenCalledWith({
@@ -118,17 +118,17 @@ describe('DreamingSetupForm', () => {
     renderForm({ loadError: new Error('Boom') });
 
     expect(screen.getByTestId('contextDreamingTemplatesError')).toHaveTextContent('Boom');
-    expect(screen.queryByTestId('contextAiIndexDreamingSetupApply')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexDreamingSetupSave')).not.toBeInTheDocument();
   });
 
-  it('calls onCancel when Cancel is clicked', async () => {
+  it('calls onDiscard when Discard changes is clicked', async () => {
     renderForm();
     await waitFor(() =>
-      expect(screen.getByTestId('contextAiIndexDreamingSetupApply')).toBeInTheDocument()
+      expect(screen.getByTestId('contextAiIndexDreamingSetupSave')).toBeInTheDocument()
     );
 
-    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupCancel'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupDiscard'));
 
-    expect(onCancel).toHaveBeenCalled();
+    expect(onDiscard).toHaveBeenCalled();
   });
 });

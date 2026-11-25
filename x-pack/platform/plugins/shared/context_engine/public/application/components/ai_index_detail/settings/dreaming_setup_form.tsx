@@ -11,36 +11,40 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiSkeletonText,
   EuiSpacer,
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React from 'react';
-import { DreamingConfigEditor } from '../../dreaming_config/dreaming_config_editor';
 import { DreamingTemplatePicker } from '../../dreaming_setup/dreaming_template_picker';
 import {
-  applyButtonLabel,
   applyDisabledTitle,
   customHelpText,
-  learnsDescription,
-  learnsTitle,
+  discardChangesLabel,
   loadErrorTitle,
-  startFromLabel,
+  saveChangesLabel,
   summaryHelpText,
   summaryLabel,
 } from '../../dreaming_setup/translations';
 import { useDreamingSetupDraft } from '../../dreaming_setup/use_dreaming_setup_draft';
 import { useApplyDreamingTemplate } from '../../../hooks/use_apply_dreaming_template';
+import { DreamingLearnsRows } from './dreaming_learns_rows';
 import { SettingsRow } from './settings_row';
+
+const startFromLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.setup.startFrom',
+  {
+    defaultMessage: 'Start from',
+  }
+);
 
 interface DreamingSetupFormProps {
   aiIndexId: string;
-  onCancel: () => void;
+  onDiscard: () => void;
 }
 
-export const DreamingSetupForm = ({ aiIndexId, onCancel }: DreamingSetupFormProps) => {
+export const DreamingSetupForm = ({ aiIndexId, onDiscard }: DreamingSetupFormProps) => {
   const {
     templates,
     isLoading,
@@ -99,18 +103,12 @@ export const DreamingSetupForm = ({ aiIndexId, onCancel }: DreamingSetupFormProp
         />
       </SettingsRow>
       <EuiHorizontalRule margin="m" />
-      <SettingsRow title={learnsTitle} description={learnsDescription}>
-        {draft ? (
-          <DreamingConfigEditor draft={draft} onChange={setDraft} />
-        ) : (
-          <EuiSkeletonText lines={8} />
-        )}
-      </SettingsRow>
+      <DreamingLearnsRows draft={draft} onChange={setDraft} />
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} data-test-subj="contextAiIndexDreamingSetupCancel">
-            {cancelLabel}
+          <EuiButtonEmpty onClick={onDiscard} data-test-subj="contextAiIndexDreamingSetupDiscard">
+            {discardChangesLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -120,16 +118,12 @@ export const DreamingSetupForm = ({ aiIndexId, onCancel }: DreamingSetupFormProp
             isLoading={isSaving}
             isDisabled={!canApply}
             title={canApply ? undefined : applyDisabledTitle}
-            data-test-subj="contextAiIndexDreamingSetupApply"
+            data-test-subj="contextAiIndexDreamingSetupSave"
           >
-            {applyButtonLabel}
+            {saveChangesLabel}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
 };
-
-const cancelLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.setup.cancel', {
-  defaultMessage: 'Cancel',
-});

@@ -30,10 +30,8 @@ import { DreamingConfigEditor } from '../components/dreaming_config/dreaming_con
 import { DreamingTemplatePicker } from '../components/dreaming_setup/dreaming_template_picker';
 import { useDreamingSetupDraft } from '../components/dreaming_setup/use_dreaming_setup_draft';
 import {
-  applyButtonLabel,
   applyDisabledTitle,
   customHelpText,
-  examplesLabel,
   loadErrorTitle,
   summaryHelpText,
   summaryLabel,
@@ -54,6 +52,14 @@ import { getAiIndexDetailPath } from '../paths';
 
 const pageTitle = i18n.translate('xpack.contextEngine.dreamingTemplate.title', {
   defaultMessage: 'Set up dreaming',
+});
+
+const applyButtonLabel = i18n.translate('xpack.contextEngine.dreamingTemplate.applyButton', {
+  defaultMessage: 'Turn on dreaming',
+});
+
+const examplesLabel = i18n.translate('xpack.contextEngine.dreamingTemplate.examplesLabel', {
+  defaultMessage: 'What are you building?',
 });
 
 const Highlight = ({ children }: { children: React.ReactNode }) => {

@@ -7,10 +7,14 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DreamingTemplateSummary } from '../../../../common/dreaming_templates';
 import { CUSTOM_TEMPLATE_ID } from './use_dreaming_setup_draft';
-import { customLabel } from './translations';
+
+const customLabel = i18n.translate('xpack.contextEngine.dreamingTemplate.custom', {
+  defaultMessage: 'Custom',
+});
 
 interface PillProps {
   label: string;

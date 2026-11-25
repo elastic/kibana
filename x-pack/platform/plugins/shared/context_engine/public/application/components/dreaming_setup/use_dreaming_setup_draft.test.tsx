@@ -104,4 +104,84 @@ describe('useDreamingSetupDraft', () => {
       relationships: [],
     });
   });
+
+  it('setDraft updates draft and canApply', () => {
+    const { result } = renderHook(() => useDreamingSetupDraft());
+    const nextDraft = draftOf({ facts: [{ type: 'policy', description: 'A policy.' }] });
+
+    act(() => {
+      result.current.setDraft(nextDraft);
+    });
+
+    expect(result.current.draft).toEqual(nextDraft);
+    expect(result.current.canApply).toBe(true);
+    expect(result.current.buildConfig()?.facts).toEqual([
+      { type: 'policy', description: 'A policy.' },
+    ]);
+  });
+
+  it('canApply reflects whether the draft builds anything', () => {
+    const { result } = renderHook(() => useDreamingSetupDraft());
+
+    act(() => {
+      result.current.setDraft(draftOf({}));
+    });
+    expect(result.current.canApply).toBe(false);
+
+    act(() => {
+      result.current.setDraft(draftOf(SUPPORT.dreaming, { entitiesEnabled: false }));
+    });
+    expect(result.current.canApply).toBe(true);
+  });
+
+  it('builds custom config from draft and summary only', () => {
+    const { result } = renderHook(() => useDreamingSetupDraft());
+
+    act(() => {
+      result.current.select(CUSTOM_TEMPLATE_ID);
+    });
+    act(() => {
+      result.current.setDraft(draftOf({ facts: [{ type: 'x' }] }));
+    });
+    act(() => {
+      result.current.setSummary('My summary');
+    });
+
+    const config = result.current.buildConfig();
+    expect(config?.instructions).toBe('My summary');
+    expect(config?.facts).toEqual([{ type: 'x' }]);
+    expect(config?.entities).toBeNull();
+    expect(config?.relationships).toEqual([]);
+  });
+
+  it('does not keep an edited draft when switching templates', () => {
+    const { result } = renderHook(() => useDreamingSetupDraft());
+    const edited = draftOf({ facts: [{ type: 'only_on_support' }] });
+
+    act(() => {
+      result.current.setDraft(edited);
+    });
+    expect(result.current.draft).toEqual(edited);
+
+    act(() => {
+      result.current.select('legal_assistant');
+    });
+
+    expect(result.current.draft).toEqual(draftOf(LEGAL.dreaming, { entitiesEnabled: false }));
+  });
+
+  it('returns undefined config while templates are loading', () => {
+    jest.mocked(useDreamingTemplates).mockReturnValue({
+      templates: [],
+      isLoading: true,
+      error: undefined,
+    });
+
+    const { result } = renderHook(() => useDreamingSetupDraft());
+
+    expect(result.current.selectedId).toBeUndefined();
+    expect(result.current.draft).toBeUndefined();
+    expect(result.current.canApply).toBe(false);
+    expect(result.current.buildConfig()).toBeUndefined();
+  });
 });

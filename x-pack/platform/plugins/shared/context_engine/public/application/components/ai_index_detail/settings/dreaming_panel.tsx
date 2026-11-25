@@ -51,19 +51,14 @@ import {
 import { useDreamingTemplates } from '../../../hooks/use_dreaming_templates';
 import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
 import {
-  DreamingConfigEditor,
   draftBuildsAnything,
   draftOf,
   typesOfDraft,
   type DreamingConfigDraft,
 } from '../../dreaming_config/dreaming_config_editor';
-import {
-  enableDreamingLabel,
-  learnsDescription,
-  learnsTitle,
-  notSetUpDescription,
-} from '../../dreaming_setup/translations';
+import { discardChangesLabel, saveChangesLabel } from '../../dreaming_setup/translations';
 import { DreamingLastRunStatus } from './dreaming_last_run_status';
+import { DreamingLearnsRows } from './dreaming_learns_rows';
 import { DreamingSetupForm } from './dreaming_setup_form';
 import { DreamingRunsSection } from './dreaming_runs_section';
 import { MaintenanceSettings, maintenanceErrorsOf } from './maintenance_settings';
@@ -76,6 +71,17 @@ export const DREAMING_JSON_MAX_HEIGHT = 480;
 const enabledLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.enabledLabel', {
   defaultMessage: 'Dream on a schedule',
 });
+const turnOnDreamingLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.setup.turnOnLabel',
+  { defaultMessage: 'Turn on dreaming' }
+);
+const notSetUpDescription = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.notSetUpDescription',
+  {
+    defaultMessage:
+      'Dreaming is not set up. Turn it on to choose what this AI index learns from its memories. Nothing is saved until you save your changes.',
+  }
+);
 const scheduleDescription = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.dreaming.scheduleDescription',
   { defaultMessage: 'How often dreaming runs.' }
@@ -324,13 +330,11 @@ const DreamingEditor = ({
         />
       </SettingsRow>
       <EuiHorizontalRule margin="m" />
-      <SettingsRow title={learnsTitle} description={learnsDescription}>
-        <DreamingConfigEditor
-          draft={draft}
-          onChange={setEdited}
-          {...(suggestedEntities && { suggestedEntities })}
-        />
-      </SettingsRow>
+      <DreamingLearnsRows
+        draft={draft}
+        onChange={setEdited}
+        {...(suggestedEntities && { suggestedEntities })}
+      />
       <EuiHorizontalRule margin="m" />
       <SettingsRow
         title={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.maintenance.title', {
@@ -353,9 +357,7 @@ const DreamingEditor = ({
                 isDisabled={isSaving}
                 data-test-subj="contextAiIndexDreamingDiscard"
               >
-                {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.discard', {
-                  defaultMessage: 'Discard changes',
-                })}
+                {discardChangesLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -368,9 +370,7 @@ const DreamingEditor = ({
                 }
                 data-test-subj="contextAiIndexDreamingSave"
               >
-                {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.save', {
-                  defaultMessage: 'Save changes',
-                })}
+                {saveChangesLabel}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -386,7 +386,7 @@ interface DreamingPanelProps {
 
 /**
  * Shows and edits what an AI index's dreaming learns and how often it runs.
- * When dreaming is not set up we display a toggle to turns it on.
+ * When dreaming is not set up, a switch reveals the setup form.
  */
 export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
   const [isJsonOpen, setIsJsonOpen] = useState(false);
@@ -428,10 +428,10 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
     }
     return (
       <>
-        <SettingsRow title={enableDreamingLabel} description={notSetUpDescription}>
+        <SettingsRow title={turnOnDreamingLabel} description={notSetUpDescription}>
           <EuiSwitch
             showLabel={false}
-            label={enableDreamingLabel}
+            label={turnOnDreamingLabel}
             checked={isCreating}
             onChange={(event) => setIsCreating(event.target.checked)}
             data-test-subj="contextAiIndexDreamingSetUpToggle"
@@ -440,7 +440,7 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
         {isCreating ? (
           <>
             <EuiHorizontalRule margin="m" />
-            <DreamingSetupForm aiIndexId={aiIndex.id} onCancel={() => setIsCreating(false)} />
+            <DreamingSetupForm aiIndexId={aiIndex.id} onDiscard={() => setIsCreating(false)} />
           </>
         ) : null}
       </>

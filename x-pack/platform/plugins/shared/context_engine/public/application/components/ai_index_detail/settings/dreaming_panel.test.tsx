@@ -149,21 +149,21 @@ describe('DreamingPanel', () => {
     expect(screen.queryByTestId('contextAiIndexDreamingSetUpToggle')).not.toBeInTheDocument();
   });
 
-  it('shows the setup form when Enable dreaming is on and hides it when off', async () => {
+  it('shows the setup form when Turn on dreaming is on and hides it when off', async () => {
     renderPanel(aiIndexWith(undefined));
 
-    expect(screen.queryByTestId('contextAiIndexDreamingSetupApply')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexDreamingSetupSave')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
 
     await waitFor(() =>
-      expect(screen.getByTestId('contextAiIndexDreamingSetupApply')).toBeInTheDocument()
+      expect(screen.getByTestId('contextAiIndexDreamingSetupSave')).toBeInTheDocument()
     );
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
 
-    expect(screen.queryByTestId('contextAiIndexDreamingSetupApply')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexDreamingSetupSave')).not.toBeInTheDocument();
   });
 
-  it('discards setup edits when Cancel is clicked and toggling on again starts pristine', async () => {
+  it('discards setup edits when Discard changes is clicked and toggling on again starts pristine', async () => {
     renderPanel(aiIndexWith(undefined));
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
     await waitFor(() =>
@@ -173,7 +173,7 @@ describe('DreamingPanel', () => {
     fireEvent.change(screen.getByTestId('contextAiIndexDreamingSetupSummary'), {
       target: { value: 'Edited.' },
     });
-    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupCancel'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupDiscard'));
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
 
     await waitFor(() =>
@@ -195,10 +195,10 @@ describe('DreamingPanel', () => {
     const view = renderPanel(props);
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
     await waitFor(() =>
-      expect(screen.getByTestId('contextAiIndexDreamingSetupApply')).toBeInTheDocument()
+      expect(screen.getByTestId('contextAiIndexDreamingSetupSave')).toBeInTheDocument()
     );
 
-    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupApply'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupSave'));
 
     await waitFor(() =>
       expect(applyTemplate).toHaveBeenCalledWith({
@@ -224,7 +224,7 @@ describe('DreamingPanel', () => {
 
     fireEvent.click(screen.getByTestId('contextDreamingTemplateOption-custom'));
 
-    expect(screen.getByTestId('contextAiIndexDreamingSetupApply')).toBeDisabled();
+    expect(screen.getByTestId('contextAiIndexDreamingSetupSave')).toBeDisabled();
   });
 
   it('shows the config as JSON in a modal', () => {

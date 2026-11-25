@@ -7,20 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const examplesLabel = i18n.translate('xpack.contextEngine.dreamingTemplate.examplesLabel', {
-  defaultMessage: 'What are you building?',
-});
-
 export const customHelpText = i18n.translate(
   'xpack.contextEngine.dreamingTemplate.customHelpText',
   {
     defaultMessage: 'Start empty and add your own fact types.',
   }
 );
-
-export const customLabel = i18n.translate('xpack.contextEngine.dreamingTemplate.custom', {
-  defaultMessage: 'Custom',
-});
 
 export const summaryLabel = i18n.translate('xpack.contextEngine.dreamingTemplate.summaryLabel', {
   defaultMessage: 'Describe your company, your agent and the knowledge it needs',
@@ -40,48 +32,20 @@ export const applyDisabledTitle = i18n.translate(
   }
 );
 
-export const applyButtonLabel = i18n.translate('xpack.contextEngine.dreamingTemplate.applyButton', {
-  defaultMessage: 'Turn on dreaming',
+export const saveChangesLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.save', {
+  defaultMessage: 'Save changes',
 });
+
+export const discardChangesLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.discard',
+  {
+    defaultMessage: 'Discard changes',
+  }
+);
 
 export const loadErrorTitle = i18n.translate(
   'xpack.contextEngine.dreamingTemplate.loadErrorTitle',
   {
     defaultMessage: 'Unable to load the examples',
-  }
-);
-
-export const startFromLabel = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.dreaming.setup.startFrom',
-  {
-    defaultMessage: 'Start from',
-  }
-);
-
-export const enableDreamingLabel = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.dreaming.setup.enableLabel',
-  {
-    defaultMessage: 'Enable dreaming',
-  }
-);
-
-export const notSetUpDescription = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.dreaming.notSetUpTitle',
-  {
-    defaultMessage: 'Dreaming is not set up. Choose what this AI index learns from its memories.',
-  }
-);
-
-export const learnsTitle = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.dreaming.learnsTitle',
-  {
-    defaultMessage: 'What dreaming learns',
-  }
-);
-
-export const learnsDescription = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.dreaming.learnsDescription',
-  {
-    defaultMessage: 'Fact types always. Entity and relationship types when entities are on.',
   }
 );
