@@ -6,20 +6,17 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import moment from 'moment';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { EntityInventoryEntityCategory } from '../../../types';
 import { ENTITY_INVENTORY_APP_NAME, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../../constants';
-import { createPublicConfigMock } from '../../../mocks';
-import { EntityInventorySearchProvider } from '../../context/search_context';
+import { createPublicConfigMock, MockEntityInventoryProvider } from '../../../mocks';
 import { QUICK_RANGES } from './quick_ranges';
 import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../../translations';
 import { EntityInventorySearchBar } from './search_bar';
@@ -60,13 +57,13 @@ const renderSearchBar = (
   const config = createPublicConfigMock({ timeRangeLimitDisabled });
 
   return render(
-    <KibanaContextProvider services={{ ...coreMock.createStart(), unifiedSearch, config }}>
-      <Router history={createMemoryHistory()}>
-        <EntityInventorySearchProvider entityCategory={entityCategory}>
-          <EntityInventorySearchBar />
-        </EntityInventorySearchProvider>
-      </Router>
-    </KibanaContextProvider>
+    <MockEntityInventoryProvider
+      entityCategory={entityCategory}
+      services={{ ...coreMock.createStart(), unifiedSearch, config }}
+      history={createMemoryHistory()}
+    >
+      <EntityInventorySearchBar />
+    </MockEntityInventoryProvider>
   );
 };
 
