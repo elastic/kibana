@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { vegaSpecSchema, vegaQuerySchema, vegaFiltersSchema } from './schema';
-export type { VegaSpec } from './schema';
-export { vegaLibraryItemSchema } from './library_item_schema';
-export type { VegaLibraryItemState } from './library_item_schema';
+export {
+  vegaSpecSchema,
+  vegaQuerySchema,
+  vegaFiltersSchema,
+  vegaLibraryItemSchema,
+} from './schema';
+export type { VegaSpec, VegaLibraryItemState } from './schema';
