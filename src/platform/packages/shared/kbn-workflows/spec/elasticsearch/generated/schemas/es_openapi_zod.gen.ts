@@ -252,16 +252,10 @@ export const types_query_dsl_sparse_vector_query = types_query_dsl_query_base.an
 })));
 
 export const types_query_dsl_span_term_query = z.union([
-    z.union([
-        types_query_dsl_query_base.and(z.object({
-            value: types_field_value,
-            term: z.optional(types_field_value)
-        })),
-        types_query_dsl_query_base.and(z.object({
-            value: z.optional(types_field_value),
-            term: types_field_value
-        }))
-    ]),
+    types_query_dsl_query_base.and(z.object({
+        value: types_field_value,
+        term: z.optional(types_field_value)
+    })),
     types_field_value
 ]);
 
@@ -3862,71 +3856,27 @@ export const types_analysis_hyphenation_decompounder_token_filter = types_analys
     }))
 }));
 
-export const types_analysis_hunspell_token_filter = z.union([
-    types_analysis_token_filter_base.and(z.object({
-        type: z.enum(['hunspell']),
-        dedup: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, duplicate tokens are removed from the filter’s output. Defaults to `true`.'
-        })),
-        dictionary: z.optional(z.string().register(z.globalRegistry, {
-            description: 'One or more `.dic` files (e.g, `en_US.dic`, my_custom.dic) to use for the Hunspell dictionary.\nBy default, the `hunspell` filter uses all `.dic` files in the `<$ES_PATH_CONF>/hunspell/<locale>` directory specified using the `lang`, `language`, or `locale` parameter.'
-        })),
-        locale: z.string().register(z.globalRegistry, {
-            description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
-        }),
-        longest_only: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, only the longest stemmed version of each token is included in the output. If `false`, all stemmed versions of the token are included. Defaults to `false`.'
-        })),
-        lang: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
-        })),
-        language: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
-        }))
+export const types_analysis_hunspell_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['hunspell']),
+    dedup: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, duplicate tokens are removed from the filter’s output. Defaults to `true`.'
     })),
-    types_analysis_token_filter_base.and(z.object({
-        type: z.enum(['hunspell']),
-        dedup: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, duplicate tokens are removed from the filter’s output. Defaults to `true`.'
-        })),
-        dictionary: z.optional(z.string().register(z.globalRegistry, {
-            description: 'One or more `.dic` files (e.g, `en_US.dic`, my_custom.dic) to use for the Hunspell dictionary.\nBy default, the `hunspell` filter uses all `.dic` files in the `<$ES_PATH_CONF>/hunspell/<locale>` directory specified using the `lang`, `language`, or `locale` parameter.'
-        })),
-        locale: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
-        })),
-        longest_only: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, only the longest stemmed version of each token is included in the output. If `false`, all stemmed versions of the token are included. Defaults to `false`.'
-        })),
-        lang: z.string().register(z.globalRegistry, {
-            description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
-        }),
-        language: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
-        }))
+    dictionary: z.optional(z.string().register(z.globalRegistry, {
+        description: 'One or more `.dic` files (e.g, `en_US.dic`, my_custom.dic) to use for the Hunspell dictionary.\nBy default, the `hunspell` filter uses all `.dic` files in the `<$ES_PATH_CONF>/hunspell/<locale>` directory specified using the `lang`, `language`, or `locale` parameter.'
     })),
-    types_analysis_token_filter_base.and(z.object({
-        type: z.enum(['hunspell']),
-        dedup: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, duplicate tokens are removed from the filter’s output. Defaults to `true`.'
-        })),
-        dictionary: z.optional(z.string().register(z.globalRegistry, {
-            description: 'One or more `.dic` files (e.g, `en_US.dic`, my_custom.dic) to use for the Hunspell dictionary.\nBy default, the `hunspell` filter uses all `.dic` files in the `<$ES_PATH_CONF>/hunspell/<locale>` directory specified using the `lang`, `language`, or `locale` parameter.'
-        })),
-        locale: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
-        })),
-        longest_only: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, only the longest stemmed version of each token is included in the output. If `false`, all stemmed versions of the token are included. Defaults to `false`.'
-        })),
-        lang: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
-        })),
-        language: z.string().register(z.globalRegistry, {
-            description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
-        })
+    locale: z.string().register(z.globalRegistry, {
+        description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
+    }),
+    longest_only: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, only the longest stemmed version of each token is included in the output. If `false`, all stemmed versions of the token are included. Defaults to `false`.'
+    })),
+    lang: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
+    })),
+    language: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
     }))
-]);
+}));
 
 export const types_analysis_hindi_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
     type: z.enum(['hindi_normalization'])

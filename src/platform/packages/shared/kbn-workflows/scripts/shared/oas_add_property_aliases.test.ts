@@ -120,45 +120,28 @@ describe('addPropertyAliases', () => {
     ).toBe(existing);
   });
 
-  it('accepts either spelling of a required property with anyOf variants that keep refs', () => {
-    const value: OpenAPIV3.ReferenceObject = { $ref: '#/components/schemas/_types.FieldValue' };
-    const spanTermQuery: OpenAPIV3.SchemaObject = {
-      allOf: [
-        { $ref: '#/components/schemas/_types.query_dsl.QueryBase' },
-        { type: 'object', properties: { value }, required: ['value'] },
-      ],
-    };
+  it('keeps a required property required when it has an alias', () => {
     const document: OpenAPIV3.Document = {
       openapi: '3.0.0',
       info: { title: 'Test', version: '1.0.0' },
       paths: {},
-      components: { schemas: { '_types.query_dsl.SpanTermQuery': spanTermQuery } },
+      components: {
+        schemas: {
+          '_types.aggregations.AggregationContainer': {
+            type: 'object',
+            properties: { aggregations },
+            required: ['aggregations'],
+          },
+        },
+      },
     };
 
-    addPropertyAliases(document, {
-      schemas: new Map([['_types.query_dsl.SpanTermQuery', new Map([['value', ['term']]])]]),
-      requestBodies: new Map(),
-    });
+    addPropertyAliases(document, getPropertyAliases(spec));
 
-    const withAliasProperty = {
+    expect(document.components?.schemas?.['_types.aggregations.AggregationContainer']).toEqual({
       type: 'object',
-      properties: { value, term: value },
-    };
-    expect(document.components?.schemas?.['_types.query_dsl.SpanTermQuery']).toEqual({
-      anyOf: [
-        {
-          allOf: [
-            { $ref: '#/components/schemas/_types.query_dsl.QueryBase' },
-            { ...withAliasProperty, required: ['value'] },
-          ],
-        },
-        {
-          allOf: [
-            { $ref: '#/components/schemas/_types.query_dsl.QueryBase' },
-            { ...withAliasProperty, required: ['term'] },
-          ],
-        },
-      ],
+      properties: { aggregations, aggs: aggregations },
+      required: ['aggregations'],
     });
   });
 });

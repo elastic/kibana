@@ -45,7 +45,7 @@ export interface SpecSchemaJson {
 
 type SchemaOrRef = OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
 
-/** Returns the schema and every `allOf` or `anyOf` part of it that has `properties`. */
+/** Returns the schema and every `allOf` part of it that has `properties`. */
 export const getObjectSchemas = (schema: SchemaOrRef): OpenAPIV3.SchemaObject[] => {
   if ('$ref' in schema) {
     return [];
@@ -53,8 +53,6 @@ export const getObjectSchemas = (schema: SchemaOrRef): OpenAPIV3.SchemaObject[] 
   return [
     ...(schema.properties ? [schema] : []),
     ...(schema.allOf ?? []).flatMap(getObjectSchemas),
-    // Alias variants wrap a schema in `anyOf`; later patches still need its properties.
-    ...(schema.anyOf ?? []).flatMap(getObjectSchemas),
   ];
 };
 
