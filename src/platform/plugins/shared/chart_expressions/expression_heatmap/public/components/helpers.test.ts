@@ -341,6 +341,26 @@ describe('fillMissingHeatmapYBuckets', () => {
     expect(filled.map((entry) => entry.y)).toEqual([null, 0, 1, 2, 3, 0]);
   });
 
+  it('inserts a descending gap between the surrounding buckets', () => {
+    const rows = [
+      { x: 'a', y: 2, value: 1 },
+      { x: 'b', y: 0, value: 2 },
+    ];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(filled.map((entry) => entry.y)).toEqual([2, 1, 0]);
+    expect(firstAppearance(filled, 'x')).toEqual(['a', 'b']);
+    expect(filled.find((entry) => entry.y === 1)).toMatchObject({ x: 'a', value: null });
+  });
+
+  it('fills a wider descending gap in the direction of the rows', () => {
+    const rows = [row(3, 1), row(0, 2, 'b')];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(filled.map((entry) => entry.y)).toEqual([3, 2, 1, 0]);
+    expect(firstAppearance(filled, 'x')).toEqual(['a', 'b']);
+  });
+
   it('leaves a NaN Y key in place and still fills a real gap', () => {
     const rows = [
       { x: 'a', y: NaN, value: 9 },

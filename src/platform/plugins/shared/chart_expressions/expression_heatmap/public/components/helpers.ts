@@ -166,32 +166,35 @@ export const fillMissingHeatmapYBuckets = (
     return rows;
   }
 
-  const nextPresentIndex = new Map<number, number>();
-  for (let i = 0; i < presentIndexes.length - 1; i++) {
-    nextPresentIndex.set(presentIndexes[i], presentIndexes[i + 1]);
-  }
-
+  const presentIndexSet = new Set(presentIndexes);
   const yIsRange = typeof template[yAccessor] === 'string';
-  const seen = new Set<number>();
+  const inserted = new Set<number>();
   const filled: Datatable['rows'] = [];
+  let previousIndex: number | undefined;
   for (let position = 0; position < rows.length; position++) {
     const row = rows[position];
-    filled.push(row);
     const index = rowIndexes[position];
-    if (index == null || seen.has(index)) {
-      continue;
+    // Place each missing step between the buckets that surround it, following the
+    // direction of the rows. The first histogram row is already written by then, so
+    // the copied X value is on the axis and X order stays unchanged.
+    if (index != null && previousIndex != null && index !== previousIndex) {
+      const step = index > previousIndex ? 1 : -1;
+      for (let bucketIndex = previousIndex + step; bucketIndex !== index; bucketIndex += step) {
+        if (presentIndexSet.has(bucketIndex) || inserted.has(bucketIndex)) {
+          continue;
+        }
+        inserted.add(bucketIndex);
+        const lower = bucketIndex * interval;
+        filled.push({
+          ...template,
+          [yAccessor]: yIsRange ? `${lower}..${(bucketIndex + 1) * interval}` : lower,
+          [valueAccessor]: null,
+        });
+      }
     }
-    seen.add(index);
-    // Blank rows go right after the first row of the bucket below them. That is never before
-    // the template row, so the template's X value is already placed and no X order changes.
-    const next = nextPresentIndex.get(index) ?? index + 1;
-    for (let bucketIndex = index + 1; bucketIndex < next; bucketIndex++) {
-      const lower = bucketIndex * interval;
-      filled.push({
-        ...template,
-        [yAccessor]: yIsRange ? `${lower}..${(bucketIndex + 1) * interval}` : lower,
-        [valueAccessor]: null,
-      });
+    filled.push(row);
+    if (index != null) {
+      previousIndex = index;
     }
   }
   return filled;
