@@ -332,7 +332,9 @@ export const AwsIamRoleAuth: AuthTypeSpec<AuthSchemaType> = {
     // configured defaults (timeouts, base headers, etc.) but without our signing
     // interceptor — which would otherwise create a circular dependency since STS
     // is also an *.amazonaws.com host.
-    const stsClient = axios.create(axiosInstance.defaults);
+    // The per-execution abort signal is dropped: concurrent executions share one AssumeRole call, so
+    // one caller disconnecting must not cancel it for the others. The inherited timeout still bounds it.
+    const stsClient = axios.create({ ...axiosInstance.defaults, signal: undefined });
 
     axiosInstance.interceptors.request.use(
       createAwsSigV4Interceptor(({ region }) =>

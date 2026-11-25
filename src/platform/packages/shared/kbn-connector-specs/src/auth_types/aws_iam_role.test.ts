@@ -56,10 +56,13 @@ describe('AwsIamRoleAuth', () => {
     ...overrides,
   });
 
-  const getInterceptor = async (secret: ReturnType<typeof makeSecret>) => {
+  const getInterceptor = async (
+    secret: ReturnType<typeof makeSecret>,
+    defaults: Record<string, unknown> = {}
+  ) => {
     let interceptor: RequestInterceptor | undefined;
     const axiosInstance = {
-      defaults: {},
+      defaults,
       interceptors: {
         request: {
           use: (fn: RequestInterceptor) => {
@@ -218,6 +221,16 @@ describe('AwsIamRoleAuth', () => {
       await interceptor(makeRequest('https://dynamodb.eu-west-1.amazonaws.com/'));
 
       expect(mockStsPost).toHaveBeenCalledTimes(2);
+    });
+
+    it("does not tie the shared AssumeRole call to one caller's abort signal", async () => {
+      const controller = new AbortController();
+
+      await getInterceptor(makeSecret(), { timeout: 30_000, signal: controller.signal });
+
+      const [stsConfig] = (axios.create as jest.Mock).mock.calls[0];
+      expect(stsConfig.signal).toBeUndefined();
+      expect(stsConfig.timeout).toBe(30_000);
     });
 
     it('lets the next request retry after a concurrent AssumeRole failed', async () => {

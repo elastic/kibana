@@ -130,7 +130,7 @@ Session name
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-These settings apply to the requests to DynamoDB. They do not apply to the AWS STS `AssumeRole` request that the **AWS IAM Role** authentication type makes. That request goes directly to the regional STS endpoint, `sts.<region>.amazonaws.com`, so {{kib}} must be able to reach it without a proxy. If your deployment requires a proxy or custom certificates to reach AWS, use **AWS Credentials** instead.
+These settings apply to the requests to DynamoDB. They do not apply to the AWS STS `AssumeRole` request that the **AWS IAM Role** authentication type makes to the regional STS endpoint, `sts.<region>.amazonaws.com`. That request ignores the proxy, certificate, TLS, and allowed hosts settings above. It uses the proxy environment variables of the {{kib}} process (`HTTPS_PROXY` and `NO_PROXY`) if they are set, and otherwise connects directly. If your deployment needs the {{kib}} proxy or custom certificate settings to reach AWS, use **AWS Credentials** instead.
 
 ### Test connectors [amazon-dynamodb-action-configuration]
 
