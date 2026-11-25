@@ -471,7 +471,7 @@ export const ConnectorIconsMap: Map<
       () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')
     ),
   ],
-  
+
   [
     '.trend_vision_one',
     lazy(
