@@ -8,11 +8,13 @@
  */
 
 import DREAMING_YAML from './dreaming.yaml';
+import DREAMING_BATCH_YAML from './dreaming_batch.yaml';
 import TRACE_DREAMING_YAML from './dreaming_traces.yaml';
 import TRACE_DREAMING_BATCH_YAML from './dreaming_traces_batch.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
 import MAINTENANCE_YAML from './maintenance.yaml';
 import RELATIONSHIPS_YAML from './relationships.yaml';
+import RELATIONSHIPS_BATCH_YAML from './relationships_batch.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
 export const CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID =
@@ -94,7 +96,7 @@ export const memoryConcurrencyKeyFor = (instanceKey: string): string =>
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 7,
+  version: 8,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(DREAMING_YAML, {
@@ -103,13 +105,38 @@ export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
       __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
       __MEMORIES_INDEX__: values.memoriesIndex,
       __INTERVAL_MINUTES__: values.intervalMinutes,
+      __BATCH_WORKFLOW_ID__: `${CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID}-${values.instanceKey}`,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineDreamingWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID = 'system-context-engine-batch-dreaming';
+
+/** The same config as dreaming: a batch is consolidated with its types and instructions. */
+export type ContextEngineDreamingBatchWorkflowTemplateValues =
+  ContextEngineDreamingWorkflowTemplateValues;
+
+/**
+ * Consolidates one batch of memories into long-term facts and entities, against the existing ones
+ * most like the batch.
+ */
+export const CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW = {
+  id: CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(DREAMING_BATCH_YAML, {
+      __NAME__: `Dreaming batch: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __MEMORIES_INDEX__: values.memoriesIndex,
       __CONNECTOR_ID__: values.connectorId,
       __INSTRUCTIONS__: values.instructions,
       __FACT_TYPES__: values.factTypes,
       __ENTITY_TYPES__: values.entityTypes,
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition<ContextEngineDreamingWorkflowTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition<ContextEngineDreamingBatchWorkflowTemplateValues>;
 
 export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID = 'system-context-engine-trace-dreaming';
 
@@ -178,7 +205,7 @@ export type ContextEngineRelationshipsWorkflowTemplateValues =
 export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
   id: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 4,
+  version: 5,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(RELATIONSHIPS_YAML, {
@@ -187,12 +214,38 @@ export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
       __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
       __MEMORIES_INDEX__: values.memoriesIndex,
       __INTERVAL_MINUTES__: values.intervalMinutes,
+      __BATCH_WORKFLOW_ID__: `${CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID}-${values.instanceKey}`,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineRelationshipsWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID =
+  'system-context-engine-batch-relationships';
+
+/** The same config as dreaming: a batch is linked with its relationship types and instructions. */
+export type ContextEngineRelationshipsBatchWorkflowTemplateValues =
+  ContextEngineDreamingWorkflowTemplateValues;
+
+/**
+ * Links one batch of facts and entities with relationships, against the existing entities, facts
+ * and relationships most like the batch.
+ */
+export const CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW = {
+  id: CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(RELATIONSHIPS_BATCH_YAML, {
+      __NAME__: `Relationships batch: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __MEMORIES_INDEX__: values.memoriesIndex,
       __CONNECTOR_ID__: values.connectorId,
       __INSTRUCTIONS__: values.instructions,
       __RELATIONSHIP_TYPES__: values.relationshipTypes,
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition<ContextEngineRelationshipsWorkflowTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition<ContextEngineRelationshipsBatchWorkflowTemplateValues>;
 
 export const CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID = 'system-context-engine-maintenance';
 

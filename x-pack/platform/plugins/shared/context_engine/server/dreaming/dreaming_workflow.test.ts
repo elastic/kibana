@@ -7,9 +7,12 @@
 
 import { parse } from 'yaml';
 import {
+  CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW,
   CONTEXT_ENGINE_DREAMING_WORKFLOW,
+  CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW,
 } from '@kbn/workflows/managed';
+import { MAX_DREAMING_STEP_MEMORIES } from '../../common/dreaming';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 
 interface Step {
@@ -41,14 +44,20 @@ const findStep = (candidates: Step[], name: string): Step | undefined =>
     .find(Boolean);
 
 describe.each([
+  ['dreaming', stepsOf(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values)), ['read_memories']],
   [
-    'dreaming',
-    stepsOf(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values)),
-    ['read_memories', 'read_existing'],
+    'dreaming batch',
+    stepsOf(CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW.yamlTemplate(values)),
+    ['read_batch', 'read_existing'],
   ],
   [
     'relationships',
     stepsOf(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW.yamlTemplate(values)),
+    ['read_items'],
+  ],
+  [
+    'relationships batch',
+    stepsOf(CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW.yamlTemplate(values)),
     ['read_items', 'read_entities', 'read_relationships', 'match_facts', 'read_facts'],
   ],
 ])('the %s workflow', (_, steps, reads) => {
@@ -60,4 +69,22 @@ describe.each([
       );
     }
   );
+});
+
+describe('the batch size of dreaming', () => {
+  const chunkSizeOf = (yaml: string): number => Number(/\| chunk: (\d+)/.exec(yaml)?.[1]);
+
+  it('is 100 memories, within what one apply step takes', () => {
+    const size = chunkSizeOf(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values));
+
+    expect(size).toBe(100);
+    expect(size).toBeLessThanOrEqual(MAX_DREAMING_STEP_MEMORIES);
+  });
+
+  it('is 25 facts and entities for relationships, fewer than the batch of dreaming', () => {
+    const size = chunkSizeOf(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW.yamlTemplate(values));
+
+    expect(size).toBe(25);
+    expect(size).toBeLessThanOrEqual(MAX_DREAMING_STEP_MEMORIES);
+  });
 });

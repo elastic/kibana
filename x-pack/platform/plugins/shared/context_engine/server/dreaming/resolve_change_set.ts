@@ -15,7 +15,7 @@ import {
 import type { AccessPattern, DreamChangeSet } from '../../common/step_types/apply_dream_changes';
 import { baseContent } from './access_patterns';
 import { citedMemoryIds, kindOf, type DreamedKi, type DreamedKiKind } from './dreamed_ki';
-import { batchKeyOf, entityId, factId, TRACE_ROUND_ID_PREFIX } from './ids';
+import { batchKeyOf, entityId, factId, runFactId, TRACE_ROUND_ID_PREFIX } from './ids';
 import { audienceKeyOf, type KiPermissions } from './permissions';
 
 const NEW_REF_PREFIX = 'new:';
@@ -114,6 +114,7 @@ export const resolveChangeSet = (
   const operations: DreamingOperation[] = [];
   const rejected: ResolvedChangeSet['rejected'] = [];
   const batchKey = batchKeyOf(memories.keys());
+  const newFactIds = new Set<string>();
 
   const attempt = (item: string, run: () => void) => {
     try {
@@ -154,6 +155,21 @@ export const resolveChangeSet = (
       reject(`'${ref}' is not an existing ${kind}`);
     }
     return ki;
+  };
+
+  const newFactIdOf = (
+    ref: string,
+    type: string,
+    title: string,
+    sourceMemoryIds: readonly string[]
+  ): string => {
+    const audience = audienceKeyOf(sourceMemoryIds.map((id) => memoryPermissions.get(id)));
+    const id = runFactId(executionId, type, title, audience);
+    if (newFactIds.has(id)) {
+      return factId(executionId, batchKey, ref);
+    }
+    newFactIds.add(id);
+    return id;
   };
 
   for (const entity of changeSet.entities) {
@@ -241,7 +257,7 @@ export const resolveChangeSet = (
       const sourceMemoryIds = resolveSources(fact.source_memory_ids, current);
       operations.push({
         op: 'upsert_fact',
-        id: current?.id ?? factId(executionId, batchKey, fact.ref),
+        id: current?.id ?? newFactIdOf(fact.ref, type, title, sourceMemoryIds),
         type,
         title,
         content,
