@@ -168,6 +168,7 @@ export function ApmMainTemplate({
     // the primary slot (e.g. Edit service group) and demotes the global primary.
     const resolvedHeader: ApmMainTemplateHeaderProps = {
       ...header,
+      docLink: header.docLink ?? docLinks!.links.apm.overview,
       menu: mergeAppMenuConfigs(registeredAppMenu, header.menu),
     };
 
