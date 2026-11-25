@@ -6,6 +6,9 @@
  */
 
 import type { ApiClientFixture } from '@kbn/scout-security';
+import type { JsonObject } from '@kbn/utility-types';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { findStepOutput } from '../workflow_runs';
 
 // Inlined: Playwright's esbuild cannot load the managed YAML behind @kbn/workflows/managed.
 export const RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-review';
@@ -18,14 +21,30 @@ export const INTERNAL_V1_HEADERS = {
   'elastic-api-version': '1',
 };
 
-export const expectStatus = (
+/** Throws with `what`, the status and the body unless the response status is accepted. */
+export const expectStatus = <TBody>(
   what: string,
-  { statusCode, body }: { statusCode: number; body: unknown },
+  { statusCode, body }: { statusCode: number; body: TBody },
   accepted: number[] = [200]
 ): void => {
   if (!accepted.includes(statusCode)) {
     throw new Error(`${what}: status ${statusCode} ${JSON.stringify(body)}`);
   }
+};
+
+/** True for statuses a poll waits out: a route or object that is not there yet, or a server error. */
+export const isTransientStatus = (statusCode: number): boolean =>
+  statusCode === 404 || statusCode >= 500;
+
+/** The output of a step of the execution, when it is a JSON object. */
+export const findStepOutputObject = (
+  execution: WorkflowExecutionDto,
+  stepId: string
+): JsonObject | undefined => {
+  const output = findStepOutput(execution, stepId);
+  return typeof output === 'object' && output !== null && !Array.isArray(output)
+    ? output
+    : undefined;
 };
 
 export interface RuleTuningSpaceArgs {

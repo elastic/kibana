@@ -22,35 +22,44 @@ import { expectStatus, INTERNAL_V1_HEADERS, type RuleTuningSpaceArgs } from './c
 
 const SEARCH_INFERENCE_SETTINGS_PATH = 'internal/search_inference_endpoints/settings';
 
-/**
- * Creates a `.gen-ai` connector to the LLM proxy in the space and pins the AlertZero features
- * to it, so the review's `diagnose_rule` step runs on the scripted model.
- */
+interface InferenceSettings {
+  data?: { features?: Array<{ feature_id: string }> };
+}
+
+interface WorkerList {
+  workers: Array<{ id: string; settingsRevision: number | null }>;
+}
+
+/** Points the space's AlertZero models at the LLM proxy and returns the connector id. */
 export const pinModelToProxy = async ({
   apiClient,
   headers,
   spaceId,
   proxyPort,
 }: RuleTuningSpaceArgs & { proxyPort: number }): Promise<string> => {
-  const connector = await apiClient.post(spaceUrl('api/actions/connector', spaceId), {
-    headers,
-    responseType: 'json',
-    body: {
-      name: `scout-rule-tuning-proxy-${spaceId}`,
-      connector_type_id: '.gen-ai',
-      config: {
-        apiProvider: 'OpenAI',
-        apiUrl: `http://localhost:${proxyPort}`,
-        defaultModel: 'gpt-4',
+  const connector = await apiClient.post<{ id: string }>(
+    spaceUrl('api/actions/connector', spaceId),
+    {
+      headers,
+      responseType: 'json',
+      body: {
+        name: `scout-rule-tuning-proxy-${spaceId}`,
+        connector_type_id: '.gen-ai',
+        config: {
+          apiProvider: 'OpenAI',
+          apiUrl: `http://localhost:${proxyPort}`,
+          defaultModel: 'gpt-4',
+        },
+        secrets: { apiKey: 'scout-test-key' },
       },
-      secrets: { apiKey: 'scout-test-key' },
-    },
-  });
+    }
+  );
   expectStatus('Create the proxy connector', connector);
-  const { id: connectorId } = connector.body as { id: string };
+  const { id: connectorId } = connector.body;
 
+  // The review's diagnosis runs on the balanced feature, and the worker checks the parent one.
   const settingsUrl = spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId);
-  const current = await apiClient.get(settingsUrl, {
+  const current = await apiClient.get<InferenceSettings>(settingsUrl, {
     headers: { ...headers, ...INTERNAL_V1_HEADERS },
     responseType: 'json',
   });
@@ -59,9 +68,9 @@ export const pinModelToProxy = async ({
     ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
     ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
   ]);
-  const features = (
-    (current.body as { data?: { features?: Array<{ feature_id: string }> } }).data?.features ?? []
-  ).filter(({ feature_id: featureId }) => !pinned.has(featureId));
+  const features = (current.body.data?.features ?? []).filter(
+    ({ feature_id: featureId }) => !pinned.has(featureId)
+  );
   const put = await apiClient.put(settingsUrl, {
     headers: { ...headers, ...INTERNAL_V1_HEADERS },
     responseType: 'json',
@@ -79,14 +88,14 @@ export const pinModelToProxy = async ({
   return connectorId;
 };
 
-/** Creates a service account with the rule tuning worker's built-in role. */
+/** Creates a service account with the rule tuning worker's built-in role and returns its id. */
 export const createWorkerServiceAccount = async ({
   apiClient,
   headers,
   spaceId,
 }: RuleTuningSpaceArgs): Promise<string> => {
   const accountName = WORKER_SERVICE_ACCOUNT_NAMES[SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID];
-  const created = await apiClient.post(SECURITY_SERVICE_ACCOUNT_URL, {
+  const created = await apiClient.post<{ id: string }>(SECURITY_SERVICE_ACCOUNT_URL, {
     headers: { ...headers, 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' },
     responseType: 'json',
     body: {
@@ -97,9 +106,10 @@ export const createWorkerServiceAccount = async ({
     },
   });
   expectStatus('Create the worker service account', created);
-  return (created.body as { id: string }).id;
+  return created.body.id;
 };
 
+/** Deletes a service account, and succeeds when it is already gone. */
 export const deleteServiceAccount = async ({
   apiClient,
   headers,
@@ -112,10 +122,7 @@ export const deleteServiceAccount = async ({
   expectStatus('Delete the worker service account', deleted, [200, 204, 404]);
 };
 
-/**
- * Enables the rule tuning worker in the space, running as the service account. Enabling
- * schedules the worker, and its first run starts at once.
- */
+/** Turns the space's rule tuning worker on or off, optionally with new settings. */
 export const setRuleTuningWorker = async ({
   apiClient,
   headers,
@@ -126,14 +133,15 @@ export const setRuleTuningWorker = async ({
   enabled: boolean;
   settings?: { serviceAccountId: string; autonomy: 'manual' | 'assisted' };
 }): Promise<void> => {
-  const listed = await apiClient.get(spaceUrl(ALERTZERO_WORKERS_URL, spaceId), {
+  const listed = await apiClient.get<WorkerList>(spaceUrl(ALERTZERO_WORKERS_URL, spaceId), {
     headers: { ...headers, ...INTERNAL_V1_HEADERS },
     responseType: 'json',
   });
   expectStatus('List the workers', listed);
-  const worker = (
-    listed.body as { workers: Array<{ id: string; settingsRevision: number | null }> }
-  ).workers.find(({ id }) => id === SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID);
+  const worker = listed.body.workers.find(
+    ({ id }) => id === SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
+  );
+  // Enabling schedules the worker, and its first run starts at once.
   const patched = await apiClient.patch(
     spaceUrl(buildWorkerUrl(SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID), spaceId),
     {

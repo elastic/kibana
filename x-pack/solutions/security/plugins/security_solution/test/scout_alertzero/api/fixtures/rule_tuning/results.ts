@@ -6,13 +6,14 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
+import type { FindExceptionListItemsResponse } from '@kbn/securitysolution-exceptions-common/api';
 import {
   createDetectionsApi,
   createExceptionsApi,
+  type DetectionsApi,
 } from '@kbn/security-solution-test-api-clients/scout';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { findStepOutput } from '../workflow_runs';
-import { expectStatus, type RuleTuningSpaceArgs } from './common';
+import { expectStatus, findStepOutputObject, type RuleTuningSpaceArgs } from './common';
 import { FP_ALERT_COUNT } from './seed';
 
 /** What the review's backtest counted, from its `record_preview_outcome` step. */
@@ -23,21 +24,40 @@ export interface BacktestOutcome {
   proposed_alert_count: number;
 }
 
-/** The backtest result of the review, or undefined when the review never ran one. */
-export const readBacktest = (review: WorkflowExecutionDto): BacktestOutcome | undefined =>
-  findStepOutput(review, 'record_preview_outcome') as BacktestOutcome | undefined;
+/** The rule as the detection engine returns it. The tests only seed query rules. */
+export type RuleState = Extract<
+  Awaited<ReturnType<DetectionsApi['readRule']>>['body'],
+  { type: 'query' }
+>;
 
-export interface RuleState {
-  query: string;
-  risk_score: number;
-  severity: string;
-  exceptions_list: Array<{
-    list_id: string;
-    namespace_type: 'single' | 'agnostic';
-    type: string;
-  }>;
-}
+/** The backtest counts of the review, or undefined when its output has another shape. */
+export const readBacktest = (review: WorkflowExecutionDto): BacktestOutcome | undefined => {
+  // The step runs on every review. Without a backtest it reports both runs as not succeeded.
+  const output = findStepOutputObject(review, 'record_preview_outcome');
+  if (!output) {
+    return undefined;
+  }
+  const currentSucceeded = output.current_succeeded;
+  const currentAlertCount = output.current_alert_count;
+  const proposedSucceeded = output.proposed_succeeded;
+  const proposedAlertCount = output.proposed_alert_count;
+  if (
+    typeof currentSucceeded !== 'boolean' ||
+    typeof currentAlertCount !== 'number' ||
+    typeof proposedSucceeded !== 'boolean' ||
+    typeof proposedAlertCount !== 'number'
+  ) {
+    return undefined;
+  }
+  return {
+    current_succeeded: currentSucceeded,
+    current_alert_count: currentAlertCount,
+    proposed_succeeded: proposedSucceeded,
+    proposed_alert_count: proposedAlertCount,
+  };
+};
 
+/** Reads the rule by its saved-object id. */
 export const readRule = async ({
   apiClient,
   headers,
@@ -49,21 +69,22 @@ export const readRule = async ({
     { headers, kibanaSpace: spaceId }
   );
   expectStatus(`Read rule ${id}`, response);
-  return response.body as RuleState;
+  const { body } = response;
+  if (body.type !== 'query') {
+    throw new Error(`Rule ${id} is a ${body.type} rule, the tests seed query rules`);
+  }
+  return body;
 };
 
-export interface ExceptionItem {
-  name: string;
-  entries: Array<{ field: string; operator: string; type: string; value?: string }>;
-}
-
-/** The items of the rule's own exception list. A rule with no such list has none. */
+/** The items of the rule's own exception list, or none when it has no such list. */
 export const readRuleExceptionItems = async ({
   apiClient,
   headers,
   spaceId,
   rule,
-}: RuleTuningSpaceArgs & { rule: RuleState }): Promise<ExceptionItem[]> => {
+}: RuleTuningSpaceArgs & {
+  rule: RuleState;
+}): Promise<FindExceptionListItemsResponse['data']> => {
   const list = rule.exceptions_list.find(({ type }) => type === 'rule_default');
   if (!list) {
     return [];
@@ -78,7 +99,7 @@ export const readRuleExceptionItems = async ({
     { headers, kibanaSpace: spaceId }
   );
   expectStatus(`Read the exception items of list ${list.list_id}`, response);
-  return response.body.data as ExceptionItem[];
+  return response.body.data;
 };
 
 /** Workflow tags of the rule's alerts, one array per alert. */

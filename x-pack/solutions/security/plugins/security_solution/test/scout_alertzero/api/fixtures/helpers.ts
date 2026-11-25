@@ -60,10 +60,7 @@ export const runCleanupSteps = async (
   }
 };
 
-/**
- * Polls `read` until it returns a value, or throws with `what` after `timeoutMs`. Unlike
- * `expect.poll`, it hands back the value it found.
- */
+/** Polls `read` until it returns a value and returns it, or throws with `what` after `timeoutMs`. */
 export const pollFor = async <T>(
   what: string,
   read: () => Promise<T | undefined>,
@@ -82,11 +79,12 @@ export const pollFor = async <T>(
   }
 };
 
-/**
- * Deletes the alerts index of a space. Deleting the space leaves it behind. Resolved by name,
- * because wildcard deletes are refused by default.
- */
-export const deleteSpaceAlertsIndex = async (esClient: EsClient, spaceId: string) => {
+/** Deletes the alerts index that a deleted space leaves behind. */
+export const deleteSpaceAlertsIndex = async (
+  esClient: EsClient,
+  spaceId: string
+): Promise<void> => {
+  // Resolved by name, because wildcard deletes are refused by default.
   const backing = Object.keys(
     await esClient.indices.get({
       index: `.alerts-security.alerts-${spaceId}`,

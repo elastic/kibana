@@ -21,8 +21,10 @@ export const TP_EVENT_COUNT = 2;
 export const SEEDED_EVENT_COUNT = FP_ALERT_COUNT + TP_EVENT_COUNT;
 /**
  * How long before the test the seeded history happened. The rule looks back 6 minutes, so its
- * own runs never alert on these events, while the backtest, which ends at the newest false
- * positive, replays them.
+ * own runs never alert on these events. The backtest still replays them, because
+ * `rule_tuning_review.yaml` ends it at the newest false positive (`run_previews`,
+ * `timeframeEnd: inputs.last_fp_at`). If the review ends the backtest anywhere else, the
+ * backtest counts in the tests drop to 0.
  */
 const HISTORY_AGE_MS = 2 * 60 * 60_000;
 const HISTORY_SPACING_MS = 20_000;
@@ -35,16 +37,7 @@ export interface SeededRule {
   eventsIndex: string;
 }
 
-/**
- * Creates an enabled query rule and the history the worker looks for: `FP_ALERT_COUNT` source
- * events of `FP_PROCESS_NAME`, each with an alert that analysts closed as a false positive, and
- * `TP_EVENT_COUNT` events of `TP_PROCESS_NAME` that a good tuning change must keep alerting on.
- * The true positives have no alerts, so the worker sees a 100% false positive rate.
- *
- * The alerts are written only after the rule's first run has installed the space's alerts alias.
- * A write to that name before the install makes ES create a plain, dynamically mapped index, and
- * the sweep's query then fails on fields that index never mapped.
- */
+/** Creates a query rule with closed false positives and the source events behind them. */
 export const seedRuleWithFalsePositives = async ({
   apiClient,
   headers,
@@ -81,6 +74,9 @@ export const seedRuleWithFalsePositives = async ({
     { headers, kibanaSpace: spaceId }
   );
   expectStatus(`Create rule ${name}`, created);
+  // The alerts are written only after the rule's first run has installed the space's alerts
+  // alias. A write to that name before the install makes ES create a plain, dynamically mapped
+  // index, and the sweep's query then fails on fields that index never mapped.
   await pollFor(
     `the alerts alias of space ${spaceId}`,
     async () =>
@@ -89,9 +85,11 @@ export const seedRuleWithFalsePositives = async ({
         : undefined,
     { timeoutMs: 120_000, intervalMs: 1_000 }
   );
-  const { id, revision } = created.body as { id: string; revision: number };
+  const { id, revision } = created.body;
 
-  // Every event sits a few seconds before its alert, and all of them inside one rule interval
+  // FP_ALERT_COUNT events of FP_PROCESS_NAME, each with a closed false positive alert below, and
+  // TP_EVENT_COUNT events of TP_PROCESS_NAME with no alerts, which a good change keeps alerting
+  // on. Every event sits a few seconds before its alert, and all of them inside one rule interval
   // before the newest false positive, so the backtest's last run covers each event once.
   const newestAlertAt = Date.now() - HISTORY_AGE_MS;
   const eventAt = (i: number): string =>

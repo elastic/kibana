@@ -32,6 +32,7 @@
     "@kbn/securitysolution-list-constants",
     "@kbn/test-es-server",
     "@kbn/tooling-log",
+    "@kbn/utility-types",
     "@kbn/workflows",
     "@kbn/agent-builder-common",
     "@kbn/core",

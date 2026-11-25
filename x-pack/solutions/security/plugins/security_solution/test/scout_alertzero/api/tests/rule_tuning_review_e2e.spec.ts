@@ -44,9 +44,13 @@ import {
   type SeededRule,
 } from '../fixtures';
 
-const SETUP_TIMEOUT_MS = 180_000;
-const TEST_TIMEOUT_MS = 600_000;
+/** Budget of each wait for the review: its start, its investigation, each decision and its end. */
 const STEP_TIMEOUT_MS = 180_000;
+/**
+ * Covers every wait at its full budget, so a slow run fails in a wait and still cleans up: the
+ * alerts alias (2 minutes), five review steps, the alert tags (1 minute) and the cleanup.
+ */
+const TEST_TIMEOUT_MS = 120_000 + 5 * STEP_TIMEOUT_MS + 60_000 + 180_000;
 
 const RUN = Date.now();
 
@@ -90,6 +94,11 @@ const RISK_SCORE_PROPOSAL = {
   proposed_risk_score: 21,
   proposed_severity: 'low',
 };
+
+type TuningProposal =
+  | typeof QUERY_PROPOSAL
+  | typeof EXCEPTION_PROPOSAL
+  | typeof RISK_SCORE_PROPOSAL;
 
 interface CaseFixtures {
   apiClient: ApiClientFixture;
@@ -147,7 +156,7 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
     }: {
       name: string;
       autonomy: 'manual' | 'assisted';
-      proposal: Record<string, unknown>;
+      proposal: TuningProposal;
       decisions: Array<'approve' | 'dismiss'>;
     },
     check: (result: CaseResult) => Promise<void>
@@ -207,15 +216,23 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
         spaceId
       );
 
+      // Checked before the review status: a model call the scripted model could not answer
+      // fails the review, and these messages say what to change.
+      expect(
+        model.unansweredToolCalls,
+        'The review forced tool calls the scripted model has no reply for. Add a reply to FIXED_TOOL_ARGS in fixtures/scripted_model.ts.'
+      ).toStrictEqual([]);
+      expect(
+        model.unmatchedRequestCount(),
+        'Model calls arrived while every scripted model interceptor was busy. Raise CONCURRENT_REQUESTS in fixtures/scripted_model.ts.'
+      ).toBe(0);
       expect(review.status, JSON.stringify(review.error)).toBe(ExecutionStatus.COMPLETED);
       // A dismissed entry gate ends the review before the agent is asked for a proposal.
       const diagnosed = autonomy === 'assisted' || decisions[0] === 'approve';
       expect(model.answeredToolCalls.includes('structured_answer')).toBe(diagnosed);
-      expect(model.unansweredToolCalls).toStrictEqual([]);
       const ruleAfter = await readRule({ ...space, id: rule.id });
       await check({ review, model, rule, ruleAfter, space });
     } finally {
-      apiTest.setTimeout(TEST_TIMEOUT_MS + SETUP_TIMEOUT_MS);
       model?.stop();
       await runCleanupSteps([
         {
@@ -344,8 +361,12 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
           decisions: ['approve'],
         },
         async ({ review, rule, ruleAfter, space }) => {
-          // A risk score change alerts on the same events, so the review does not backtest it.
-          expect(readBacktest(review)?.proposed_succeeded).not.toBe(true);
+          // A risk score change alerts on the same events, so the review does not backtest it,
+          // and the outcome step reports neither run.
+          expect(readBacktest(review)).toMatchObject({
+            current_succeeded: false,
+            proposed_succeeded: false,
+          });
           expect(ruleAfter.risk_score).toBe(RISK_SCORE_PROPOSAL.proposed_risk_score);
           expect(ruleAfter.severity).toBe(RISK_SCORE_PROPOSAL.proposed_severity);
           expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
