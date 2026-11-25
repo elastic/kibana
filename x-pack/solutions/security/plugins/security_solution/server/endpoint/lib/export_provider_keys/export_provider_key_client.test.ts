@@ -22,6 +22,10 @@ import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  EncryptionError,
+  EncryptionErrorOperation,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import { nodeBuilder } from '@kbn/es-query';
 import type { AzureBlobExportProvider } from '../../../../common/endpoint/types';
 import { createSavedObjectsClientFactoryMock } from '../../services/saved_objects/saved_objects_client_factory.mocks';
@@ -194,13 +198,28 @@ describe('ExportProviderKeyClient', () => {
 
     it('returns undefined when the object can not be decrypted', async () => {
       esoClient.getDecryptedAsInternalUser.mockRejectedValue(
-        new Error('Unable to decrypt attribute "account_key"')
+        new EncryptionError(
+          'Unable to decrypt attribute "account_key"',
+          'account_key',
+          EncryptionErrorOperation.Decryption
+        )
       );
 
       await expect(
         createClient().getAccountKey(PACKAGE_POLICY_ID, createProvider())
       ).resolves.toBeUndefined();
       expect(logger.debug).toHaveBeenCalled();
+    });
+
+    it('throws other read errors', async () => {
+      const error = SavedObjectsErrorHelpers.decorateEsUnavailableError(
+        new Error('ES is unavailable')
+      );
+      esoClient.getDecryptedAsInternalUser.mockRejectedValue(error);
+
+      await expect(createClient().getAccountKey(PACKAGE_POLICY_ID, createProvider())).rejects.toBe(
+        error
+      );
     });
 
     it('returns undefined when the object belongs to another package policy', async () => {

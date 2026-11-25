@@ -17,6 +17,7 @@ import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import { EncryptionError } from '@kbn/encrypted-saved-objects-plugin/server';
 import { nodeBuilder } from '@kbn/es-query';
 import type { ExportProvider } from '../../../../common/endpoint/types';
 import { EndpointError } from '../../../../common/endpoint/errors';
@@ -155,7 +156,11 @@ export class ExportProviderKeyClient implements ExportProviderKeyClientInterface
         );
       attributes = keyObject.attributes;
     } catch (error) {
-      return logNoKey(`key [id=${keyId}] could not be read: ${error.message}`);
+      if (SavedObjectsErrorHelpers.isNotFoundError(error) || error instanceof EncryptionError) {
+        return logNoKey(`key [id=${keyId}] could not be read: ${error.message}`);
+      }
+
+      throw error;
     }
 
     if (attributes.package_policy_id !== packagePolicyId) {

@@ -35,8 +35,9 @@ export interface ExportProviderKeyMetadata {
 export interface ExportProviderKeyService {
   /**
    * The decrypted key for `provider`, or `undefined` when the provider has no reference, the object is
-   * missing, it belongs to another package policy, its `account_name` differs from the provider's,
-   * or encryption is unavailable. Never throws for those cases; logs at debug.
+   * missing or can't be decrypted, it belongs to another package policy, its `account_name` differs from
+   * the provider's, or encryption is unavailable. Logs those cases at debug. Any other read error
+   * (e.g. Elasticsearch unavailable) is thrown.
    */
   getAccountKey(packagePolicyId: string, provider: ExportProvider): Promise<string | undefined>;
 }
