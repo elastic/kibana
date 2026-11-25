@@ -660,22 +660,34 @@ describe('createDetectionRule handler', () => {
     client.post = jest.fn().mockResolvedValue({ data: { id: '100', displayName: 'Tactic Rule' } });
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.createDetectionRule;
-    const tactics = [
-      {
-        tactic: 'Execution',
-        techniques: [{ technique: 'T1059', subTechniques: ['T1059.001'] }],
-      },
-    ];
     await action?.handler(ctx as never, {
       displayName: 'Tactic Rule',
       queryText: 'DeviceEvents | limit 1',
       period: 'PT1H',
-      alertTemplate: { title: 'Tactic Alert', severity: 'high', tactics },
+      alertTemplate: {
+        title: 'Tactic Alert',
+        severity: 'high',
+        tactics: [
+          {
+            tactic: 'Execution',
+            techniques: [{ technique: 'T1059', subTechniques: ['T1059.001'] }],
+          },
+        ],
+      },
     });
     const body = client.post.mock.calls[0][1] as Record<string, unknown>;
     expect(
       (body.detectionAction as Record<string, unknown>)?.alertTemplate as Record<string, unknown>
-    ).toMatchObject({ tactics });
+    ).toEqual({
+      title: 'Tactic Alert',
+      severity: 'high',
+      tactics: [
+        {
+          tactic: 'Execution',
+          techniques: [{ technique: 'T1059', subTechniques: ['T1059.001'] }],
+        },
+      ],
+    });
   });
 });
 
@@ -734,20 +746,32 @@ describe('updateDetectionRule handler', () => {
     client.patch = jest.fn().mockResolvedValue({ data: { id: '42' } });
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.updateDetectionRule;
-    const tactics = [
-      {
-        tactic: 'Persistence',
-        techniques: [{ technique: 'T1053', subTechniques: ['T1053.005'] }],
-      },
-    ];
     await action?.handler(ctx as never, {
       ruleId: '42',
-      alertTemplate: { title: 'Updated Alert', severity: 'medium', tactics },
+      alertTemplate: {
+        title: 'Updated Alert',
+        severity: 'medium',
+        tactics: [
+          {
+            tactic: 'Persistence',
+            techniques: [{ technique: 'T1053', subTechniques: ['T1053.005'] }],
+          },
+        ],
+      },
     });
     const body = client.patch.mock.calls[0][1] as Record<string, unknown>;
     expect(
       (body.detectionAction as Record<string, unknown>)?.alertTemplate as Record<string, unknown>
-    ).toMatchObject({ tactics });
+    ).toEqual({
+      title: 'Updated Alert',
+      severity: 'medium',
+      tactics: [
+        {
+          tactic: 'Persistence',
+          techniques: [{ technique: 'T1053', subTechniques: ['T1053.005'] }],
+        },
+      ],
+    });
   });
 });
 
