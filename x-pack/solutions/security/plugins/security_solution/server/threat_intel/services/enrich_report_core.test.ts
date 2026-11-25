@@ -9,8 +9,12 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import type { ExtractedIoc } from './extract_iocs';
+import { z } from '@kbn/zod/v4';
 import {
   enrichReportCore,
+  iocAdjudicationOnlySchema,
+  MAX_REPORT_ARTIFACTS,
+  MAX_REPORT_BEHAVIORS,
   reportCoreModelOutputSchema,
   type ReportCoreModelOutput,
 } from './enrich_report_core';
@@ -80,6 +84,51 @@ describe('reportCoreModelOutputSchema', () => {
     ]);
   });
 
+  // `withStructuredOutput` sends `z.toJSONSchema(schema, { io: 'input' })` as the tool schema.
+  // Gemini answers 400 to this schema when its arrays carry `maxItems`, so the caps are
+  // applied after parsing instead.
+  const collectKeys = (node: unknown, found: Set<string> = new Set()): Set<string> => {
+    if (Array.isArray(node)) {
+      node.forEach((child) => collectKeys(child, found));
+    } else if (node && typeof node === 'object') {
+      for (const [key, value] of Object.entries(node)) {
+        found.add(key);
+        collectKeys(value, found);
+      }
+    }
+    return found;
+  };
+
+  it.each([
+    ['reportCoreModelOutputSchema', reportCoreModelOutputSchema],
+    ['iocAdjudicationOnlySchema', iocAdjudicationOnlySchema],
+  ])('sends %s to the model without maxItems or minItems', (_name, schema) => {
+    const keys = collectKeys(z.toJSONSchema(schema, { io: 'input' }));
+
+    expect(keys.has('maxItems')).toBe(false);
+    expect(keys.has('minItems')).toBe(false);
+  });
+
+  it('keeps every approved id the model returns, including repeats', () => {
+    const ids = [...Array.from({ length: 400 }, () => 7), 0];
+
+    expect(
+      reportCoreModelOutputSchema.parse({ ...OUTPUT, approved_ioc_candidate_ids: ids })
+        .approved_ioc_candidate_ids
+    ).toEqual(ids);
+    expect(
+      iocAdjudicationOnlySchema.parse({ approved_ioc_candidate_ids: ids })
+        .approved_ioc_candidate_ids
+    ).toEqual(ids);
+  });
+
+  it('keeps rejecting out-of-range candidate ids', () => {
+    expect(
+      reportCoreModelOutputSchema.safeParse({ ...OUTPUT, approved_ioc_candidate_ids: [5_000] })
+        .success
+    ).toBe(false);
+  });
+
   it('clears malformed ATT&CK technique ids', () => {
     const parsed = reportCoreModelOutputSchema.parse({
       ...OUTPUT,
@@ -117,6 +166,72 @@ describe('enrichReportCore', () => {
       })
     );
     expect(result.context.mode).toBe('full');
+  });
+
+  it('caps behaviors and artifacts in model order and logs a warning when it drops any', async () => {
+    const warnLogger = loggingSystemMock.createLogger();
+    const invoke = jest.fn().mockResolvedValue({
+      raw: { response_metadata: {} },
+      parsed: {
+        ...OUTPUT,
+        behaviors: Array.from({ length: MAX_REPORT_BEHAVIORS + 5 }, (_, index) => ({
+          ...OUTPUT.behaviors[0],
+          description: `behavior ${index}`,
+        })),
+        artifacts: Array.from({ length: MAX_REPORT_ARTIFACTS + 5 }, (_, index) => ({
+          ...OUTPUT.artifacts[0],
+          value: `artifact-${index}`,
+        })),
+      },
+    });
+    const result = await enrichReportCore(buildModel(invoke), warnLogger, {
+      text: `The attacker downloaded ${URL}. Payload hash ${HASH}.`,
+      iocs,
+    });
+
+    expect(result.behaviors).toHaveLength(MAX_REPORT_BEHAVIORS);
+    expect(result.behaviors[0].description).toBe('behavior 0');
+    expect(result.artifacts).toHaveLength(MAX_REPORT_ARTIFACTS);
+    expect(result.artifacts[MAX_REPORT_ARTIFACTS - 1].value).toBe(
+      `artifact-${MAX_REPORT_ARTIFACTS - 1}`
+    );
+    expect(warnLogger.warn).toHaveBeenCalledWith(
+      `enrich_report_core returned ${
+        MAX_REPORT_BEHAVIORS + 5
+      } behaviors; keeping the first ${MAX_REPORT_BEHAVIORS}`
+    );
+    expect(warnLogger.warn).toHaveBeenCalledWith(
+      `enrich_report_core returned ${
+        MAX_REPORT_ARTIFACTS + 5
+      } artifacts; keeping the first ${MAX_REPORT_ARTIFACTS}`
+    );
+  });
+
+  it('does not warn when behaviors and artifacts are within the caps', async () => {
+    const quietLogger = loggingSystemMock.createLogger();
+    const invoke = jest.fn().mockResolvedValue({ raw: { response_metadata: {} }, parsed: OUTPUT });
+    await enrichReportCore(buildModel(invoke), quietLogger, {
+      text: `The attacker downloaded ${URL}. Payload hash ${HASH}.`,
+      iocs,
+    });
+
+    expect(quietLogger.warn).not.toHaveBeenCalled();
+  });
+
+  it('keeps approved ids listed after many repeats and ignores ids outside the batch', async () => {
+    const invoke = jest.fn().mockResolvedValue({
+      raw: { response_metadata: {} },
+      parsed: {
+        ...OUTPUT,
+        approved_ioc_candidate_ids: [...Array.from({ length: 400 }, () => 0), 4_000, 1],
+      },
+    });
+    const result = await enrichReportCore(buildModel(invoke), logger, {
+      text: `The attacker downloaded ${URL}. Payload hash ${HASH}.`,
+      iocs,
+    });
+
+    expect(result.anchor_iocs.map(({ value }) => value)).toEqual([URL, HASH]);
   });
 
   it('downgrades an unapproved hash candidate to reference', async () => {
