@@ -101,18 +101,15 @@ export interface EmbeddableConversationProps {
 
   /**
    * Optional conversation starters shown as cards under the input on the empty "new conversation"
-   * screen. They show only while the default Elastic AI agent is selected, so pass the `agentId` of
-   * that agent to `openChat` if the sidebar should open with them. When provided, they replace the
-   * starters of the solution and the default list; when omitted or empty, those are shown.
+   * screen. They show only while the default Elastic AI agent is selected, so pass its `agentId` to
+   * `openChat` if the sidebar should open with them. They replace the starters of the solution and
+   * the default list; when omitted or empty, those are shown.
    *
-   * At most 3 starters are shown. A label should have up to 30 characters, is shown on the card
-   * and is sent as the message when the card is clicked, with the attachments and browser API
-   * tools of this config. The limits are `MAX_CONVERSATION_STARTERS` and
-   * `CONVERSATION_STARTER_LABEL_MAX_LENGTH` in `@kbn/agent-builder-common`. The labels are rendered
-   * as plain text; embedders are expected to pass already-translated strings.
+   * At most 3 are shown, with labels of up to 30 characters. The labels are rendered as plain text
+   * and sent as the message when clicked, so pass already-translated strings.
    *
-   * Like the rest of this config, the starters are kept until `clearChatConfig` is called, and
-   * `openChat` options replace them, so pass them again there if they are needed.
+   * Like the rest of this config, they are kept until `clearChatConfig` is called, and `openChat`
+   * options replace them.
    *
    * Example: `[{ label: 'Top errors' }, { label: 'Recent alerts' }]`
    */

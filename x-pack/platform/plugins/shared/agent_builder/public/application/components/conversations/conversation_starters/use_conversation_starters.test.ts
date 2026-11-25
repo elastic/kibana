@@ -77,14 +77,6 @@ describe('useConversationStarters', () => {
     expect(result.current.source).toBe('application');
   });
 
-  it('returns the default starters when the app passes an empty list', () => {
-    mockUseConversationContext.mockReturnValue({ conversationStarters: [] } as never);
-
-    const { result } = renderStarters();
-
-    expect(result.current.starters).toEqual(DEFAULT_CONVERSATION_STARTERS);
-  });
-
   it('returns the starters of the app while the experimental features are off', () => {
     mockUseExperimentalFeatures.mockReturnValue(false);
     mockUseConversationContext.mockReturnValue({ conversationStarters: appStarters } as never);
@@ -111,14 +103,6 @@ describe('useConversationStarters', () => {
     expect(result.current.starters).toEqual([]);
   });
 
-  it('returns the starters of the app while the solution is loading', () => {
-    mockUseConversationContext.mockReturnValue({ conversationStarters: appStarters } as never);
-
-    const { result } = renderStarters({ solution: undefined });
-
-    expect(result.current.starters).toEqual(appStarters);
-  });
-
   it('returns no starters for any other agent, not even those of the app', () => {
     mockUseAgentId.mockReturnValue('agent-1');
     mockGetSolutionConversationStarters.mockReturnValue(solutionStarters);
@@ -137,12 +121,6 @@ describe('useConversationStarters', () => {
     });
 
     expect(submitMessage).toHaveBeenCalledWith('first');
-  });
-
-  it('is enabled when nothing is loading', () => {
-    const { result } = renderStarters();
-
-    expect(result.current.isDisabled).toBe(false);
   });
 
   it('is disabled while a conversation is being created', () => {

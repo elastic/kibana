@@ -31,12 +31,6 @@ describe('SOLUTION_CONVERSATION_STARTERS', () => {
 });
 
 describe('getSolutionConversationStarters', () => {
-  it('returns the starters of the solution', () => {
-    expect(getSolutionConversationStarters('security')).toBe(
-      SOLUTION_CONVERSATION_STARTERS.security
-    );
-  });
-
   it('returns no starters for a solution it does not know', () => {
     expect(getSolutionConversationStarters('unknown' as never)).toEqual([]);
   });

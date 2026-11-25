@@ -1363,7 +1363,7 @@ agentBuilder.setChatConfig({
 
 #### `conversationStarters`
 
-Conversation starters are cards under the input on the empty state of a new conversation. One click sends the label of the card as the user's message. Set `conversationStarters` when the page the user comes from has questions that fit it better than the default ones:
+Conversation starters are cards under the input on the empty state of a new conversation. A click sends the label as the user's message:
 
 ```ts
 agentBuilder.setChatConfig({
@@ -1374,19 +1374,16 @@ agentBuilder.setChatConfig({
 });
 ```
 
-- **They replace the other lists:** When you pass starters, the starters of the solution and the default list are not shown, and they do not fill the cards you leave out. If you pass none, or an empty list, those lists are shown.
-- **They show only for the default Elastic AI agent.** Whatever the starters are, they are not shown while another agent is selected, so they can rely on the capabilities that agent has out of the box. Pass that agent's `agentId` if you open the chat yourself.
-- **Limits:** At most 3 are shown (`MAX_CONVERSATION_STARTERS`). A label should have up to 30 characters (`CONVERSATION_STARTER_LABEL_MAX_LENGTH`), both exported from `@kbn/agent-builder-common`. Blank and repeated labels are dropped. A longer label is cut off with an ellipsis on the card.
-- **Translate the labels:** They are rendered as plain text, so pass already-translated strings. The text is also sent as the message, so it should read as something a user would ask.
-- **Lifecycle:** Like the rest of the config, they stay until `clearChatConfig()` is called, so call it when your page goes away. `openChat(options)` replaces the whole config instead of merging it, so pass `conversationStarters` again there if you need them.
-- **Pass a stable array:** Use a module constant or a memoized value, because a new array on every render makes the conversation re-render each time.
-- **Telemetry:** A click is reported as the `click` event with the action `conversation_starter_click`. Its detail is `application:<solution>:<position>`, and the page it came from is in the event context. The text of the starter is not sent.
+- **They replace the other lists:** The starters of the solution and the default list are not shown, and they do not fill the cards you leave out. Pass none, or an empty list, to show those lists.
+- **They show only for the default Elastic AI agent.** Pass its `agentId` if you open the chat yourself.
+- **Limits:** Up to 3, with labels of up to 30 characters. Pass already-translated labels, since they are sent as the message. Blank and repeated labels are dropped.
+- **Lifecycle:** Call `clearChatConfig()` when your page goes away. `openChat(options)` replaces the whole config instead of merging it, so pass the starters again there.
 
 `EmbeddableConversation` accepts the same `conversationStarters` prop.
 
 #### Starters of a solution
 
-When the page passes no starters, the default Elastic AI agent shows the starters of the solution view of the current space, or the default list when the solution has none. The team of a solution adds its set to `SOLUTION_CONVERSATION_STARTERS` in `public/application/components/conversations/conversation_starters/solution_conversation_starters.ts`, by PR, with translated labels of up to 30 characters (3 at most). Every starter must relate to a capability the agent has out of the box. A solution with an empty list shows the default list.
+The team of a solution adds its set to `SOLUTION_CONVERSATION_STARTERS` in `public/application/components/conversations/conversation_starters/solution_conversation_starters.ts`, by PR. The labels are translated, up to 30 characters, 3 at most, and each starter must relate to what the agent can do out of the box. A solution with an empty list shows the default list.
 
 ### `addAttachment(...)`
 

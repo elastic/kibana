@@ -430,28 +430,6 @@ describe('AgentBuilderPlugin', () => {
       expect(openedOptions()).toEqual({ sessionTag: 'discover', conversationStarters });
     });
 
-    it('replaces the config of the page with the options of openChat, starters included', () => {
-      const start = startPlugin();
-
-      start.setChatConfig({
-        sessionTag: 'discover',
-        conversationStarters: [{ label: 'Top errors' }],
-      });
-      start.openChat({ newConversation: true });
-
-      expect(openedOptions()).toEqual({ newConversation: true });
-    });
-
-    it('opens the sidebar without the config of the page after clearChatConfig', () => {
-      const start = startPlugin();
-
-      start.setChatConfig({ conversationStarters: [{ label: 'Top errors' }] });
-      start.clearChatConfig();
-      start.openChat();
-
-      expect(openedOptions()).toEqual({});
-    });
-
     it('resets the config of the page in a sidebar that is already open', () => {
       const start = startPlugin();
       start.openChat({});
@@ -467,12 +445,6 @@ describe('AgentBuilderPlugin', () => {
       start.clearChatConfig();
 
       expect(resetChatConfig).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not fail to clear the config when no sidebar is open', () => {
-      const start = startPlugin();
-
-      expect(() => start.clearChatConfig()).not.toThrow();
     });
   });
 

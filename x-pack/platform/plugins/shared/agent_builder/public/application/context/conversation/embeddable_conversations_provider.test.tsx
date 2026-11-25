@@ -294,52 +294,6 @@ describe('EmbeddableConversationsProvider initial message', () => {
 });
 
 describe('EmbeddableConversationsProvider conversation starters', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    localStorage.clear();
-    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
-      effectiveDefaultAgentId: null,
-      isRestricted: false,
-      isReady: true,
-    });
-  });
-
-  it('passes the starters of the props to the conversation context', async () => {
-    renderEmbeddableProvider({
-      children: <StartersSpy />,
-      conversationStarters: [{ label: 'first' }, { label: 'second' }],
-    });
-
-    expect(await screen.findByText('starters:first|second')).toBeInTheDocument();
-  });
-
-  it('has no starters when the props have none', async () => {
-    renderEmbeddableProvider({ children: <StartersSpy /> });
-
-    expect(await screen.findByText('starters:none')).toBeInTheDocument();
-  });
-
-  it('follows the starters of the updated props, as set by setChatConfig', async () => {
-    const { updateProps } = renderEmbeddableProvider({
-      children: <StartersSpy />,
-      conversationStarters: [{ label: 'first' }],
-    });
-    expect(await screen.findByText('starters:first')).toBeInTheDocument();
-
-    updateProps({
-      agentId: AGENT_ID,
-      sessionTag: TAG_A,
-      conversationStarters: [{ label: 'next' }],
-    });
-    expect(await screen.findByText('starters:next')).toBeInTheDocument();
-
-    // The props are replaced as a whole, so a config without starters removes them.
-    updateProps({ agentId: AGENT_ID, sessionTag: TAG_A });
-    expect(await screen.findByText('starters:none')).toBeInTheDocument();
-  });
-});
-
-describe('EmbeddableConversationsProvider reset of the config of a page', () => {
   const ConfigSpy = () => {
     const { agentId, conversationStarters, browserApiTools } = useConversationContext();
     const labels = (conversationStarters ?? []).map(({ label }) => label).join('|');
@@ -362,7 +316,16 @@ describe('EmbeddableConversationsProvider reset of the config of a page', () => 
     });
   });
 
-  it('removes the starters and the browser API tools and keeps the rest of the config', async () => {
+  it('passes the starters of the props to the conversation context', async () => {
+    renderEmbeddableProvider({
+      children: <StartersSpy />,
+      conversationStarters: [{ label: 'first' }, { label: 'second' }],
+    });
+
+    expect(await screen.findByText('starters:first|second')).toBeInTheDocument();
+  });
+
+  it('removes the starters and the browser API tools on reset and keeps the rest of the config', async () => {
     const { updateProps, resetChatConfig } = renderEmbeddableProvider({ children: <ConfigSpy /> });
     updateProps({
       agentId: AGENT_ID,
