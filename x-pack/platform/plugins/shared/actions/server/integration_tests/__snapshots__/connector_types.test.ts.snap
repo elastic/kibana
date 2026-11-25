@@ -1153,6 +1153,7 @@ Object {
     "tokenType": Object {
       "maxLength": 128,
       "minLength": 1,
+      "pattern": "^[!#$%&'*+\\\\-.^_\`|~0-9A-Za-z]+$",
       "type": "string",
     },
     "url": Object {

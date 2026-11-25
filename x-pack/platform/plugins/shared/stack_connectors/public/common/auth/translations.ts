@@ -345,6 +345,13 @@ export const TOKEN_TYPE_HELP_TEXT = i18n.translate(
   }
 );
 
+export const INVALID_TOKEN_TYPE = i18n.translate(
+  'xpack.stackConnectors.components.auth.invalidTokenTypeErrorMessage',
+  {
+    defaultMessage: "Enter a single authorization scheme without spaces, for example 'Bearer'.",
+  }
+);
+
 export const OPTIONAL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.auth.optionalLabel',
   {

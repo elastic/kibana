@@ -13,6 +13,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { AUTH_SCHEME_REGEX } from '@kbn/connector-schemas/http';
 import { AdditionalFields } from '../components/additional_fields';
 import * as i18n from './translations';
 
@@ -20,6 +21,14 @@ interface OAuth2FieldsProps {
   readOnly: boolean;
   isTokenTypeEnabled?: boolean;
 }
+
+const tokenTypeValidator = ({ value }: { value: unknown }) => {
+  const tokenType = typeof value === 'string' ? value.trim() : '';
+  if (!tokenType || AUTH_SCHEME_REGEX.test(tokenType)) {
+    return undefined;
+  }
+  return { message: i18n.INVALID_TOKEN_TYPE };
+};
 
 export const TokenTypeField: React.FC<{ readOnly: boolean }> = ({ readOnly }) => (
   <UseField
@@ -32,6 +41,7 @@ export const TokenTypeField: React.FC<{ readOnly: boolean }> = ({ readOnly }) =>
           {i18n.OPTIONAL_LABEL}
         </EuiText>
       ),
+      validations: [{ validator: tokenTypeValidator }],
     }}
     component={Field}
     componentProps={{
