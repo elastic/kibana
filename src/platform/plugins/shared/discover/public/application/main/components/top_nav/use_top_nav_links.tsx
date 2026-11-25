@@ -187,6 +187,7 @@ export const useTopNavLinks = ({
         tabId: currentTab.id,
         getState,
         dispatch,
+        solutionNavId,
       });
       items.push(alertsAppMenuItem);
     }
@@ -330,6 +331,7 @@ export const useTopNavLinks = ({
     totalHitsState,
     intl,
     showCreateRuleV2,
+    solutionNavId,
     switchLanguageMode,
     shareAction,
   ]);

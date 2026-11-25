@@ -21,6 +21,8 @@ export const ALERTING_V2_RULES_LOCATOR = 'ALERTING_V2_RULES_LOCATOR';
 export const ALERTING_V2_EPISODES_LOCATOR = 'ALERTING_V2_EPISODES_LOCATOR';
 export const ALERTING_V2_ACTION_POLICIES_LOCATOR = 'ALERTING_V2_ACTION_POLICIES_LOCATOR';
 export const ALERTING_V2_EXECUTION_HISTORY_LOCATOR = 'ALERTING_V2_EXECUTION_HISTORY_LOCATOR';
+/** Classic rules tab of a solution-hosted rules page; registered by the hosting solution. */
+export const ALERTING_V2_CLASSIC_RULES_LOCATOR = 'ALERTING_V2_CLASSIC_RULES_LOCATOR';
 export const ALERTING_V2_ACTION_POLICIES_APP_ID = 'action_policies';
 export const ALERTING_V2_EPISODES_APP_ID = 'alerts';
 /** Episodes list status filter value that selects every status, the one the URL carries. */

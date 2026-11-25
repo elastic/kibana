@@ -22,6 +22,7 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { from, map, switchMap } from 'rxjs';
 import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
+import { classicRulesLocatorDefinition } from './locators/classic_rules_locator';
 import type {
   ObservabilityAlertingPublicSetup,
   ObservabilityAlertingPublicStart,
@@ -39,9 +40,12 @@ export class ObservabilityAlertingPlugin
     >
 {
   public setup(
-    coreSetup: CoreSetup<ObservabilityAlertingStartDependencies, ObservabilityAlertingPublicStart>
+    coreSetup: CoreSetup<ObservabilityAlertingStartDependencies, ObservabilityAlertingPublicStart>,
+    { share }: ObservabilityAlertingSetupDependencies
   ): ObservabilityAlertingPublicSetup {
     const startServices = coreSetup.getStartServices();
+
+    share.url.locators.create(classicRulesLocatorDefinition);
 
     coreSetup.application.register({
       id: OBSERVABILITY_ALERTING_APP_ID,

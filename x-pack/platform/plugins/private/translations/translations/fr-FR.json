@@ -4191,7 +4191,6 @@
     "discover.agentBuilder.saveToDashboardObjectType": "Session Discover",
     "discover.agentBuilder.screenContextDescription": "L'utilisateur consulte un onglet Discover pour accéder à la data view {dataViewTitle} en mode {queryLanguage}.",
     "discover.alerts.createSearchThreshold": "Créer une règle de seuil de recherche",
-    "discover.alerts.manageRulesAndConnectors": "Gérer les règles et les connecteurs",
     "discover.alerts.missedTimeFieldToolTip": "La vue de données ne possède pas de champ temporel.",
     "discover.appHeader.renameSessionAriaLabel": "Modifier le nom de la session Discover",
     "discover.appHeader.renameSessionErrorMessage": "Impossible de renommer la session Discover",

@@ -12,8 +12,15 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  ES_QUERY_ID,
+  STACK_ALERTS_FEATURE_ID,
+  TRIGGERS_ACTIONS_MANAGEMENT_PATH,
+} from '@kbn/rule-data-utils';
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
+import { isAlertingV2AvailableInSolution, isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
+import { ALERTING_V2_CLASSIC_RULES_LOCATOR } from '@kbn/alerting-v2-constants';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -220,12 +227,14 @@ export const getAlertsAppMenuItem = ({
   tabId,
   getState,
   dispatch,
+  solutionNavId,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
   dispatch: InternalStateDispatch;
+  solutionNavId: string | null | undefined;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -237,12 +246,12 @@ export const getAlertsAppMenuItem = ({
     items.push({
       id: AppMenuActionId.manageRulesAndConnectors,
       order: Number.MAX_SAFE_INTEGER,
-      label: i18n.translate('discover.alerts.manageRulesAndConnectors', {
-        defaultMessage: 'Manage rules and connectors',
+      label: i18n.translate('discover.alerts.manageRules', {
+        defaultMessage: 'Manage rules',
       }),
       iconType: 'tableOfContents',
       testId: 'discoverManageAlertsButton',
-      href: getManageRulesUrl(services),
+      href: getManageRulesHref(services, solutionNavId),
     });
 
     if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
@@ -289,15 +298,28 @@ export const getAlertsAppMenuItem = ({
   };
 };
 
+/**
+ * Classic rules tab registered by the hosting solution where Alerting v2 applies;
+ * otherwise the Stack Management rules page.
+ */
+const getManageRulesHref = (
+  { application, core, share }: DiscoverServices,
+  solutionNavId: string | null | undefined
+): string => {
+  const isAlertingV2Active =
+    isAlertingV2AvailableInSolution(solutionNavId) && isAlertingV2Enabled(core);
+  const classicRulesLocator = isAlertingV2Active
+    ? share?.url.locators.get(ALERTING_V2_CLASSIC_RULES_LOCATOR)
+    : undefined;
+
+  if (classicRulesLocator) {
+    return classicRulesLocator.getRedirectUrl({});
+  }
+
+  return application.getUrlForApp('management', { path: TRIGGERS_ACTIONS_MANAGEMENT_PATH });
+};
+
 function getTimeField(dataView: DataView | undefined) {
   const dateFields = dataView?.fields.getByType('date');
   return dataView?.timeFieldName || dateFields?.[0]?.name;
-}
-
-function getManageRulesUrl(services: DiscoverServices) {
-  return services.application.getUrlForApp(
-    services.application.isAppRegistered('rules')
-      ? 'rules'
-      : 'management/insightsAndAlerting/triggersActions/rules'
-  );
 }

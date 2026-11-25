@@ -4222,7 +4222,6 @@
     "discover.agentBuilder.saveToDashboardObjectType": "Sessão do Discover",
     "discover.agentBuilder.screenContextDescription": "O usuário está visualizando uma aba do Discover para a Data view {dataViewTitle} no modo {queryLanguage}.",
     "discover.alerts.createSearchThreshold": "Criar regra de limite de busca",
-    "discover.alerts.manageRulesAndConnectors": "Gerenciar regras e conectores",
     "discover.alerts.missedTimeFieldToolTip": "A visualização de dados não possui um campo de tempo.",
     "discover.appHeader.renameSessionAriaLabel": "Editar nome da sessão do Discover",
     "discover.appHeader.renameSessionErrorMessage": "Não é possível renomear a sessão do Discover",

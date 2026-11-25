@@ -4182,7 +4182,6 @@
     "discover.agentBuilder.saveToDashboardObjectType": "Discover-Sitzung",
     "discover.agentBuilder.screenContextDescription": "Der Nutzer betrachtet einen Discover-Tab für die Datenansicht {dataViewTitle} im {queryLanguage}-Modus.",
     "discover.alerts.createSearchThreshold": "Suchschwellenwertregel erstellen",
-    "discover.alerts.manageRulesAndConnectors": "Regeln und Konnektoren verwalten",
     "discover.alerts.missedTimeFieldToolTip": "Die Datenquelle enthält kein Zeitfeld.",
     "discover.appHeader.renameSessionAriaLabel": "Discover-Sitzungsnamen bearbeiten",
     "discover.appHeader.renameSessionErrorMessage": "Discover-Sitzung kann nicht umbenannt werden",
