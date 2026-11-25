@@ -728,3 +728,86 @@ A bad proposal is skipped, not fatal. Every rejection comes back as a `skipped`
 entry with a reason: `invalid`, `action_not_allowed`, `duplicate`, `conflict`,
 or `limit_exceeded`.
 
+
+## Trace dreaming throughput tuning
+
+These numbers are a model, not measurements. No run was timed against a live connector. The
+latencies and rate limits below are assumptions to be replaced by measured values; the engine
+limits and workflow settings are read from the definitions.
+
+### Formula
+
+`modelTraceDreamingThroughput` (`server/dreaming/throughput_model.ts`) computes it:
+
+```
+batches        = min(ceil(max_tokens / batch_tokens), 100)        parallel fan-out
+waves          = ceil(batches / min(concurrency, 20))             parallel concurrency
+run seconds    = waves x batch latency                            must stay under 0.8 x timeout
+tokens / run   = batches x batch_tokens                           0 when the run times out
+tokens / min   = min(concurrency, 20) x batch_tokens x 60 / latency   compare to the connector rate
+```
+
+A run is all or nothing: the cursor moves only when the run succeeds, so a run that times out
+re-reads its window and processes nothing. The usable timeout therefore has to cover the read, the
+batches and the writes, and the model plans for 80% of it.
+
+### Settings the model reads
+
+| Setting | Value | Where |
+|---|---|---|
+| `concurrency` of the batches `parallel` step | 4, engine ceiling 20 | `dreaming_traces.yaml` |
+| `size`, `max_tokens`, `batch_tokens` | 1000 rounds, 600k, 50k | `dreaming_traces.yaml` |
+| Run `timeout`, batch `timeout` | 30m, 25m (engine default 6h) | `dreaming_traces*.yaml` |
+| Batch retries | 2 attempts, 30s apart | `dreaming_traces_batch.yaml` |
+| `parallel` fan-out / concurrency | 100 / 20 | workflow engine, not overridable |
+| Step output size | 10mb, about 1.2M estimated tokens of transcripts, which are returned twice | workflow engine |
+
+### Estimate: what one run needs (batch_tokens 50k, run timeout 30m)
+
+Seconds the batches take, by batch latency and concurrency, for the default read (600k, 12
+batches) and for 1.2M (24 batches, the most the 10mb step output carries). The last column is the
+input rate the batches send while they run, which must stay under the connector's tokens per minute.
+
+| Batch latency (assumed) | Concurrency | 600k tokens | 1.2M tokens | Input tokens / min |
+|---|---|---|---|---|
+| 60s | 4 | 180s | 360s | 200k |
+| 60s | 8 | 120s | 180s | 400k |
+| 120s | 4 | 360s | 720s | 100k |
+| 120s | 8 | 240s | 360s | 200k |
+| 120s | 20 | 120s | 240s | 500k |
+| 240s | 4 | 720s | 1440s | 50k |
+| 240s | 8 | 480s | 720s | 100k |
+| 240s | 20 | 240s | 480s | 250k |
+
+### What this says
+
+- At the defaults the timeout is not the limit. Even with 240s batches, the 1.2M read fits the 30m
+  timeout at concurrency 8 and at concurrency 4 only just (1440s is the 80% budget).
+- The binding limits at the defaults are the 600k `max_tokens` cap and the 10mb step output, not
+  concurrency or timeout. Raising concurrency alone does not raise tokens per run; it shortens the
+  run and raises the rate the connector sees.
+- Concurrency and timeout start to matter once batches are passed by reference, so a read can hold
+  up to 100 batches (about 5M tokens). With 120s batches that needs concurrency 9 or more within a
+  30m timeout; with 240s batches, 17 or more. Below that, the timeout and the rate decide.
+- A higher concurrency is only safe below the connector rate: tokens per minute is
+  `concurrency x batch_tokens x 60 / latency`.
+
+### Recommended defaults
+
+| Setting | Now | Recommended | Why |
+|---|---|---|---|
+| `concurrency` | 4 | 8 once the connector's rate allows `tokens / min` above | Halves the run time at the same tokens; no effect on tokens per run while the read is capped at 600k. |
+| `max_tokens` | 600k | up to 1.2M, no higher until batches are passed by reference | The 10mb step output limit. |
+| `timeout` | 30m | keep 30m | Covers 1.2M at 240s latency with concurrency 4. A longer timeout only delays noticing a stuck run. |
+| Batches per run | 12 | up to 100 once the read returns references | Needs the concurrency above and a timeout of roughly `batches / concurrency x latency / 0.8`. |
+
+These are not applied to the workflow definitions. Changing them touches the managed workflow
+fingerprints, and they depend on measured latency and the connector's rate limit.
+
+### Still to measure
+
+Per-batch latency by model and `batch_tokens`, the connector's tokens-per-minute and
+requests-per-minute limits and how it fails when they are exceeded, the share of runs that retry a
+batch, and the persisted execution history size per run. Run the same read at concurrency 4, 8, 12
+and 20 against the target connector and compare the measured seconds and tokens per minute with the
+table.
