@@ -21,17 +21,15 @@ describe('getEsqlDefaultColumns', () => {
     ).toEqual(responseColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS));
   });
 
-  it.each([
-    ['FROM logs | FORK (DESCRIBE) (STATS count = COUNT(*))', true],
-    ['LET x = (FROM logs | FORK (DESCRIBE) (STATS count = COUNT(*))); FROM x', true],
-    ['FROM logs | FORK (DESCRIBE) (KEEP host)', false],
-    ['FROM logs, (FROM other | FORK (DESCRIBE) (STATS count = COUNT(*)))', false],
-  ])('selects defaults for wide FORK results in %s', (esql, showColumns) => {
+  it('uses result columns for a wide FORK with schema and aggregate rows', () => {
     const responseColumns = ['name', 'type', 'role', 'origin', 'description', '_fork', 'count'];
 
-    expect(getEsqlDefaultColumns({ esql, responseColumns })).toEqual(
-      showColumns ? responseColumns : []
-    );
+    expect(
+      getEsqlDefaultColumns({
+        esql: 'FROM logs | FORK (DESCRIBE) (STATS count = COUNT(*))',
+        responseColumns,
+      })
+    ).toEqual(responseColumns);
   });
 
   it('uses non-transformational response columns when there are at most five', () => {

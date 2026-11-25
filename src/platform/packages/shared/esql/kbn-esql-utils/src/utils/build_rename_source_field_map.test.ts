@@ -12,11 +12,6 @@ import { buildRenameSourceFieldMap } from './build_rename_source_field_map';
 const resolve = (name: string, query: string) => buildRenameSourceFieldMap(query).get(name) ?? name;
 
 describe('buildRenameSourceFieldMap', () => {
-  it('stops source-field resolution when every FORK branch produces schema rows', () => {
-    const query = 'FROM logs | RENAME service.name AS name | FORK (DESCRIBE) (DESCRIBE)';
-    expect(buildRenameSourceFieldMap(query)).toEqual(new Map());
-  });
-
   describe('when the query has no RENAME', () => {
     it('returns the same name when the query has no RENAME', () => {
       const query = 'FROM logs | LIMIT 10';

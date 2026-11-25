@@ -9,7 +9,6 @@
 
 import { isColumn } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
-import { analyzeResultRows, hasSchemaDerivedRows } from '@kbn/esql-language';
 import type { ESQLCommandSummary, ESQLCommandSummaryContext } from '@kbn/esql-language';
 import {
   createQuerySummaryContext,
@@ -168,16 +167,7 @@ function buildContext(
   };
 }
 
-function resolvePipelineRenames(
-  commands: readonly ESQLAstCommand[],
-  query: string,
-  summaryContext: ESQLCommandSummaryContext
-): Map<string, string> {
-  if (hasSchemaDerivedRows(analyzeResultRows(commands, summaryContext.namedSubqueries))) {
-    return new Map();
-  }
-
-  const context = buildContext(commands, query, summaryContext);
+function renameMapFromContext(context: RenameResolutionContext): Map<string, string> {
   const map = new Map<string, string>();
   for (const name of context.renameOutputNames) {
     const resolved = resolveOneField(name, context);
@@ -194,7 +184,7 @@ export function buildRenameSourceFieldMapFromCommands(
   query: string,
   summaryContext: ESQLCommandSummaryContext
 ): Map<string, string> {
-  const map = resolvePipelineRenames(commands, query, summaryContext);
+  const map = renameMapFromContext(buildContext(commands, query, summaryContext));
   return new Map([...map].filter(([name, source]) => name !== source));
 }
 
@@ -209,7 +199,7 @@ export function buildRenameSourceFieldMap(query: string): Map<string, string> {
   // Keep identity mappings in nested summaries to distinguish source fields from computed columns.
   const summaryContext = createQuerySummaryContext(root, query, (commands, source, context) => ({
     ...getQuerySummaryFromCommands(commands, source, context),
-    renamedColumnsPairs: new Set(resolvePipelineRenames(commands, source, context)),
+    renamedColumnsPairs: new Set(renameMapFromContext(buildContext(commands, source, context))),
   }));
   return buildRenameSourceFieldMapFromCommands(root.commands, query, summaryContext);
 }

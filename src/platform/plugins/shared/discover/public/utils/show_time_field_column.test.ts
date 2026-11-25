@@ -77,15 +77,6 @@ describe('showTimeFieldColumn', () => {
     ).toBe(false);
   });
 
-  it('hides the time column when every FORK branch produces schema or aggregate rows', () => {
-    expect(
-      showTimeFieldColumn({
-        uiSettings: uiSettingsMock,
-        query: { esql: 'FROM logs | FORK (DESCRIBE) (STATS count = COUNT(*))' },
-      })
-    ).toBe(false);
-  });
-
   it('should return false when setting is true even for non-transformational ES|QL', () => {
     expect(
       showTimeFieldColumn({

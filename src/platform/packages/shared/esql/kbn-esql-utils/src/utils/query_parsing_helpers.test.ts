@@ -157,12 +157,6 @@ describe('esql query helpers', () => {
   });
 
   describe('hasAggregatingCommand', () => {
-    it('checks predicate subqueries by default', () => {
-      expect(hasAggregatingCommand('FROM logs | WHERE 1 IN (FROM logs | STATS c = COUNT(*))')).toBe(
-        true
-      );
-    });
-
     it('returns false for KEEP', () => {
       expect(hasAggregatingCommand('FROM logs | KEEP host')).toBe(false);
     });

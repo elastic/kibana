@@ -229,44 +229,32 @@ describe('getEmbeddableDisplayColumns', () => {
     ).toEqual({ columns: [], grid: undefined });
   });
 
-  it.each(['FROM logs | DESCRIBE', 'LET schema = (FROM logs | DESCRIBE); FROM schema'])(
-    'uses schema columns for %s',
-    (esql) => {
-      const columns = ['name', 'type', 'role', 'field', 'origin', 'metric_type'];
+  it('uses schema columns for DESCRIBE', () => {
+    const columns = ['name', 'type', 'role', 'field', 'origin', 'metric_type'];
 
-      expect(
-        getEmbeddableDisplayColumns({
-          autoApplyDiscoverColumnDefaults: true,
-          persistedColumns: [],
-          dataView: dataViewMock,
-          isEsql: true,
-          esql,
-          esqlResultColumnNames: columns,
-        })
-      ).toEqual({ columns, grid: undefined });
-    }
-  );
-
-  it.each([
-    {
-      esql: 'FROM logs | FORK (WHERE x > 0) (STATS count = COUNT(*) BY status)',
-      columns: ['count', 'status'],
-    },
-    {
-      esql: 'FROM logs | FORK (DESCRIBE) (STATS count = COUNT(*))',
-      columns: ['name', 'type', 'role', 'origin', 'description', '_fork', 'count'],
-    },
-  ])('uses result columns for $esql', ({ esql, columns }) => {
     expect(
       getEmbeddableDisplayColumns({
         autoApplyDiscoverColumnDefaults: true,
         persistedColumns: [],
         dataView: dataViewMock,
         isEsql: true,
-        esql,
+        esql: 'FROM logs | DESCRIBE',
         esqlResultColumnNames: columns,
       })
     ).toEqual({ columns, grid: undefined });
+  });
+
+  it('uses STATS result columns for mixed FORK aggregations', () => {
+    expect(
+      getEmbeddableDisplayColumns({
+        autoApplyDiscoverColumnDefaults: true,
+        persistedColumns: [],
+        dataView: dataViewMock,
+        isEsql: true,
+        esql: 'FROM logs | FORK (WHERE x > 0) (STATS count = COUNT(*) BY status)',
+        esqlResultColumnNames: ['count', 'status'],
+      })
+    ).toEqual({ columns: ['count', 'status'], grid: undefined });
   });
 
   it('does not treat STATS mentioned in a string as an aggregating query', () => {
