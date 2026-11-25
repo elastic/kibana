@@ -60,15 +60,15 @@ export interface RefreshIntervalProps {
 const getMinCount = (minIntervalMs: number, unit: AutoRefreshIntervalUnit): number =>
   Math.max(1, Math.ceil(minIntervalMs / autoRefreshIntervalToMs(1, unit)));
 
-/** Whether `count` can be applied as an interval count. */
+/** Whether `count` can be applied as an interval count: a whole number above zero. */
 const isApplicableCount = (count: number | ''): count is number =>
-  typeof count === 'number' && count > 0;
+  typeof count === 'number' && Number.isInteger(count) && count > 0;
 
 /**
  * "Refresh every" form: a switch to turn auto-refresh on and off, an interval count and a unit.
  * Turning auto-refresh on also starts the timer, so a second click on play is not needed.
- * A count that can't be applied (empty, zero or negative) goes back to the current interval once
- * focus leaves the form.
+ * A count that can't be applied (empty, decimal, zero or negative) goes back to the current
+ * interval once focus leaves the form.
  */
 export function RefreshInterval({
   value,
@@ -163,6 +163,7 @@ export function RefreshInterval({
           fullWidth
           value={countInput}
           min={minCount}
+          step={1}
           onChange={handleCountChange}
           disabled={readOnly || !value.isEnabled}
           aria-label={refreshIntervalTexts.intervalCountAriaLabel}
