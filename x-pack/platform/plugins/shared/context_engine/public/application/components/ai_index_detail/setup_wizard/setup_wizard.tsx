@@ -17,13 +17,12 @@ import {
   EuiStepsHorizontal,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import type { EuiStepsHorizontalProps } from '@elastic/eui';
+import type { EuiStepsHorizontalProps, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
@@ -61,6 +60,29 @@ const blankDescriptionError = i18n.translate('xpack.contextEngine.setupWizard.de
 const placeholderText = i18n.translate('xpack.contextEngine.setupWizard.placeholder', {
   defaultMessage: 'This step is not ready yet. Skip it for now.',
 });
+
+const exitLabel = i18n.translate('xpack.contextEngine.setupWizard.exit', {
+  defaultMessage: 'Exit setup',
+});
+
+const skipLabel = i18n.translate('xpack.contextEngine.setupWizard.skip', {
+  defaultMessage: 'Skip',
+});
+
+const skipAndFinishLabel = i18n.translate('xpack.contextEngine.setupWizard.skipAndFinish', {
+  defaultMessage: 'Skip and finish',
+});
+
+const continueLabel = i18n.translate('xpack.contextEngine.setupWizard.continue', {
+  defaultMessage: 'Continue',
+});
+
+const finishLabel = i18n.translate('xpack.contextEngine.setupWizard.finish', {
+  defaultMessage: 'Finish setup',
+});
+
+const wizardStyle = ({ euiTheme }: UseEuiTheme) =>
+  css({ maxWidth: euiTheme.breakpoint.l, marginInline: 'auto', width: '100%' });
 
 type StepStatus = EuiStepsHorizontalProps['steps'][number]['status'];
 
@@ -110,9 +132,7 @@ interface SetupWizardProps {
   done: SetupWizardDoneSteps;
   /** Without memory no agent can save a memory, so Connect agent can't wait for one. */
   isMemoryEnabled: boolean;
-  /** Called when the user moves to a step. */
   onStepChange: (stepId: SetupWizardStepId) => void;
-  /** Called when the user finishes or exits setup. */
   onClose: () => void;
   onSaved: () => Promise<unknown>;
 }
@@ -131,13 +151,24 @@ export const SetupWizard = ({
   const {
     services: { docLinks, notifications },
   } = useKibana();
-  const { euiTheme } = useEuiTheme();
   const { saveDescription, isSaving } = useSaveAiIndexDescription();
   const [description, setDescription] = useState(aiIndex.description ?? '');
   // Covers the save and the refetch after it, so Finish setup can't be clicked twice.
   const [isFinishing, setIsFinishing] = useState(false);
   // While a source saves, the wizard waits: a description saved now would send the old sources.
   const [isSavingSources, setIsSavingSources] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const shownStep = useRef(currentStep);
+
+  // A step change moves focus to the new heading, so it doesn't stay on a button that is gone or
+  // disabled. The first render keeps the page's focus.
+  useEffect(() => {
+    if (shownStep.current === currentStep) {
+      return;
+    }
+    shownStep.current = currentStep;
+    headingRef.current?.focus();
+  }, [currentStep]);
 
   const currentIndex = steps.indexOf(currentStep);
   // Skip and Continue jump over steps that are already done. With none left, they finish setup.
@@ -199,23 +230,57 @@ export const SetupWizard = ({
     setIsFinishing(false);
   };
 
+  const renderStepContent = () => {
+    if (currentStep === 'describe') {
+      return (
+        <AiIndexDescriptionField
+          value={description}
+          onChange={setDescription}
+          error={descriptionError}
+          warning={descriptionValidation.warning}
+          data-test-subj="contextSetupWizardDescription"
+        />
+      );
+    }
+    if (currentStep === 'sources') {
+      // The Sources tab's editor: each change saves right away, then the AI index reloads,
+      // so the step is done (and Continue works) once the first source is in.
+      return (
+        <SourcesPanel
+          isLoading={false}
+          aiIndex={aiIndex}
+          onSaved={onSaved}
+          isManaged={false}
+          showDescription={false}
+          onSavingChange={setIsSavingSources}
+        />
+      );
+    }
+    return (
+      <EuiText size="s" data-test-subj="contextSetupWizardPlaceholder">
+        <p>{placeholderText}</p>
+      </EuiText>
+    );
+  };
+
   const stepsBar: EuiStepsHorizontalProps['steps'] = steps.map((stepId, stepIndex) => ({
     title: SETUP_WIZARD_STEP_TEXTS[stepId].stepTitle,
     status: getStepStatus({ stepId, currentStep, done }),
     ...(isStepSkipped({ stepId, stepIndex, currentIndex, done }) && {
       'aria-label': getSkippedStepLabel(stepIndex + 1, SETUP_WIZARD_STEP_TEXTS[stepId].stepTitle),
     }),
-    onClick: () => onStepChange(stepId),
-    disabled: isBusy,
+    onClick: () => {
+      if (isBusy) {
+        return;
+      }
+      onStepChange(stepId);
+    },
     'data-test-subj': `contextSetupWizardStep-${stepId}`,
     ...getEbtProps({ element: ebtElement, action: ebtAction.GO_TO_STEP, detail: stepId }),
   }));
 
   return (
-    <div
-      css={css({ maxWidth: euiTheme.breakpoint.l, marginInline: 'auto', width: '100%' })}
-      data-test-subj="contextSetupWizard"
-    >
+    <div css={wizardStyle} data-test-subj="contextSetupWizard">
       <EuiStepsHorizontal steps={stepsBar} size="s" />
       <EuiSpacer size="l" />
       <EuiPanel
@@ -223,9 +288,11 @@ export const SetupWizard = ({
         paddingSize="none"
         data-test-subj={`contextSetupWizardPanel-${currentStep}`}
       >
-        <EuiPanel {...innerPanelProps} paddingSize="l" aria-live="polite">
+        <EuiPanel {...innerPanelProps} paddingSize="l">
           <EuiTitle size="s">
-            <h2>{texts.title}</h2>
+            <h2 ref={headingRef} tabIndex={-1}>
+              {texts.title}
+            </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
@@ -246,34 +313,11 @@ export const SetupWizard = ({
             </p>
           </EuiText>
           <EuiSpacer size="l" />
-          {currentStep === 'describe' ? (
-            <AiIndexDescriptionField
-              value={description}
-              onChange={setDescription}
-              error={descriptionError}
-              warning={descriptionValidation.warning}
-              data-test-subj="contextSetupWizardDescription"
-            />
-          ) : currentStep === 'sources' ? (
-            // The Sources tab's editor: each change saves right away, then the AI index reloads,
-            // so the step is done (and Continue works) once the first source is in.
-            <SourcesPanel
-              isLoading={false}
-              aiIndex={aiIndex}
-              onSaved={onSaved}
-              isManaged={false}
-              showDescription={false}
-              onSavingChange={setIsSavingSources}
-            />
-          ) : (
-            <EuiText size="s" data-test-subj="contextSetupWizardPlaceholder">
-              <p>{placeholderText}</p>
-            </EuiText>
-          )}
+          {renderStepContent()}
         </EuiPanel>
         <EuiHorizontalRule margin="none" />
         <EuiPanel {...innerPanelProps} paddingSize="m">
-          <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+          <EuiFlexGroup alignItems="center" responsive={false} wrap gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={() => close(closedToast)}
@@ -285,9 +329,7 @@ export const SetupWizard = ({
                   detail: currentStep,
                 })}
               >
-                {i18n.translate('xpack.contextEngine.setupWizard.exit', {
-                  defaultMessage: 'Exit setup',
-                })}
+                {exitLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem />
@@ -298,17 +340,11 @@ export const SetupWizard = ({
                 data-test-subj="contextSetupWizardSkip"
                 {...getEbtProps({
                   element: ebtElement,
-                  action: ebtAction.SKIP,
+                  action: isLastStep ? ebtAction.SKIP_AND_FINISH : ebtAction.SKIP,
                   detail: currentStep,
                 })}
               >
-                {isLastStep
-                  ? i18n.translate('xpack.contextEngine.setupWizard.skipAndFinish', {
-                      defaultMessage: 'Skip and finish',
-                    })
-                  : i18n.translate('xpack.contextEngine.setupWizard.skip', {
-                      defaultMessage: 'Skip',
-                    })}
+                {isLastStep ? skipAndFinishLabel : skipLabel}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -324,13 +360,7 @@ export const SetupWizard = ({
                   detail: currentStep,
                 })}
               >
-                {isLastStep
-                  ? i18n.translate('xpack.contextEngine.setupWizard.finish', {
-                      defaultMessage: 'Finish setup',
-                    })
-                  : i18n.translate('xpack.contextEngine.setupWizard.continue', {
-                      defaultMessage: 'Continue',
-                    })}
+                {isLastStep ? finishLabel : continueLabel}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

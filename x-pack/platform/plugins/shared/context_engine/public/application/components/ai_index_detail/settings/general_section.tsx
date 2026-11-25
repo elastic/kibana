@@ -10,20 +10,18 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSkeletonText,
   EuiSpacer,
-  EuiTextArea,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import { useSaveAiIndexDescription } from '../../../hooks/use_save_ai_index_description';
-import { getTextInputHardMaxLength, validateTextInput } from '../../../utils/validate_text_input';
+import { validateTextInput } from '../../../utils/validate_text_input';
+import { AiIndexDescriptionField } from '../../ai_index_description_field';
 import { SettingsPanel } from './settings_panel';
 import { SettingsRow } from './settings_row';
 
@@ -84,27 +82,15 @@ export const GeneralSection = ({ isLoading, aiIndex, onSaved }: GeneralSectionPr
         {isLoading ? (
           <EuiSkeletonText data-test-subj="contextAiIndexSettingsGeneralLoading" lines={2} />
         ) : (
-          <EuiFormRow
-            fullWidth
-            isInvalid={validation.error !== undefined}
+          <AiIndexDescriptionField
+            value={description}
+            onChange={setEdited}
             error={validation.error}
-            helpText={validation.warning}
-          >
-            <EuiTextArea
-              fullWidth
-              rows={3}
-              value={description}
-              onChange={(event) => setEdited(event.target.value)}
-              maxLength={getTextInputHardMaxLength(MAX_AI_INDEX_DESCRIPTION_LENGTH)}
-              isInvalid={validation.error !== undefined}
-              disabled={isManaged || isSaving}
-              aria-label={i18n.translate(
-                'xpack.contextEngine.aiIndexDetail.settings.general.descriptionAriaLabel',
-                { defaultMessage: 'AI index description' }
-              )}
-              data-test-subj="contextDescriptionTextArea"
-            />
-          </EuiFormRow>
+            warning={validation.warning}
+            isDisabled={isManaged || isSaving}
+            hasHelpText={false}
+            data-test-subj="contextDescriptionTextArea"
+          />
         )}
         {isDirty && (
           <>

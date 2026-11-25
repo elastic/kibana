@@ -29,6 +29,8 @@ interface UseListKiArgs {
   sort?: KiListSort;
   enabled?: boolean;
   notifyOnError?: boolean;
+  /** Failed request retries. Leave it out for the query client's default. */
+  retry?: number;
 }
 
 export interface KiListSummary {
@@ -58,6 +60,7 @@ export const useListKi = ({
   sort,
   enabled = true,
   notifyOnError = false,
+  retry,
 }: UseListKiArgs): UseListKiResult => {
   const {
     services: { http, notifications },
@@ -93,6 +96,7 @@ export const useListKi = ({
     },
     enabled: enabled && aiIndexId !== undefined,
     keepPreviousData: true,
+    ...(retry !== undefined ? { retry } : {}),
   });
 
   useEffect(() => {

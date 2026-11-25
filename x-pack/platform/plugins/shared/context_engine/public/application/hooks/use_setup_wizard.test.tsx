@@ -33,6 +33,7 @@ const storageKey = { basePath: '', aiIndexId: aiIndex.id };
 type Params = Parameters<typeof useSetupWizard>[0];
 
 const defaultParams: Params = {
+  aiIndexId: aiIndex.id,
   aiIndex,
   dreaming: undefined,
   memoryCount: 0,

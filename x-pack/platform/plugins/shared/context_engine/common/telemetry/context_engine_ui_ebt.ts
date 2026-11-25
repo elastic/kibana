@@ -69,6 +69,7 @@ const ebtAction = {
   setupWizard: {
     CONTINUE: 'setup_wizard_continue',
     SKIP: 'setup_wizard_skip',
+    SKIP_AND_FINISH: 'setup_wizard_skip_and_finish',
     FINISH: 'setup_wizard_finish',
     EXIT: 'setup_wizard_exit',
     GO_TO_STEP: 'setup_wizard_go_to_step',

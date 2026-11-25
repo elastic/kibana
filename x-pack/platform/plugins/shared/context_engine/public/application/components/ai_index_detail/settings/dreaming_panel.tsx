@@ -57,6 +57,7 @@ import {
   DreamingConfigEditor,
   draftBuildsAnything,
   draftOf,
+  isDreamingSetUp,
   typesOfDraft,
   type DreamingConfigDraft,
 } from '../../dreaming_config/dreaming_config_editor';
@@ -415,7 +416,7 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
     onAwaitedObserved: clearStartedExecutionIds,
   });
   const dreaming = savedDreaming ?? DREAMING_DISABLED;
-  const isSetUp = dreaming.enabled || draftBuildsAnything(draftOf(dreaming));
+  const isSetUp = isDreamingSetUp(dreaming);
 
   const renderContent = () => {
     if (isLoading) {

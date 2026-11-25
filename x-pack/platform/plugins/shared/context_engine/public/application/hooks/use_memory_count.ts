@@ -9,6 +9,9 @@ import { KI_NOT_DELETED_STATUSES } from '../../../common/ki_lifecycle_status';
 import { MEMORY_KI_TYPES } from '../../../common/memory';
 import { useListKi } from './use_list_ki';
 
+// The setup wizard waits for these counts, so a failed request shouldn't retry for long.
+const PROGRESS_RETRY = 1;
+
 const [SESSION_MEMORY_TYPE, SESSION_FACT_MEMORY_TYPE] = MEMORY_KI_TYPES;
 
 interface UseMemoryCountResult {
@@ -33,6 +36,7 @@ export const useMemoryCount = (
     type: SESSION_MEMORY_TYPE,
     status: KI_NOT_DELETED_STATUSES,
     enabled,
+    retry: PROGRESS_RETRY,
   });
   const sessionFacts = useListKi({
     aiIndexId,
@@ -40,6 +44,7 @@ export const useMemoryCount = (
     type: SESSION_FACT_MEMORY_TYPE,
     status: KI_NOT_DELETED_STATUSES,
     enabled,
+    retry: PROGRESS_RETRY,
   });
 
   if (!enabled) {

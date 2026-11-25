@@ -12,7 +12,6 @@ import {
   SETUP_WIZARD_STORAGE_KEY,
   getSetupWizardSteps,
   getSetupWizardView,
-  isDreamingSetUp,
   parseSetupWizardStoredValue,
   readSetupWizardStoredValue,
   removeSetupWizardStoredValue,
@@ -64,26 +63,6 @@ describe('parseSetupWizardStoredValue', () => {
     expect(parseSetupWizardStoredValue('step-2')).toBeUndefined();
     expect(parseSetupWizardStoredValue(undefined)).toBeUndefined();
     expect(parseSetupWizardStoredValue(2)).toBeUndefined();
-  });
-});
-
-describe('isDreamingSetUp', () => {
-  it('is false with no dreaming config', () => {
-    expect(isDreamingSetUp(undefined)).toBe(false);
-  });
-
-  it('is false when dreaming is off and builds nothing', () => {
-    expect(isDreamingSetUp({ enabled: false, facts: [] })).toBe(false);
-  });
-
-  it('is true when dreaming is on', () => {
-    expect(isDreamingSetUp({ enabled: true })).toBe(true);
-  });
-
-  it('is true when dreaming has a fact type', () => {
-    expect(
-      isDreamingSetUp({ enabled: false, facts: [{ type: 'preference', description: 'A taste' }] })
-    ).toBe(true);
   });
 });
 

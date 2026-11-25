@@ -27,11 +27,9 @@ interface UseSetupWizardParams {
    * The AI index id from the URL. It is known before `aiIndex` loads, so a closed wizard is
    * recognized right away.
    */
-  aiIndexId?: string;
+  aiIndexId: string;
   aiIndex: GetAiIndexResponse | undefined;
-  /** The AI index's dreaming config. */
   dreaming: AiIndexDreamingConfig | undefined;
-  /** How many memories the AI index has. */
   memoryCount: number;
   isMemoryEnabled: boolean;
   /** False while the memory count or the dreaming config is still loading. */
@@ -57,8 +55,6 @@ export type UseSetupWizardResult =
       close: () => void;
     };
 
-const noop = () => () => {};
-
 /**
  * Whether the Overview shows the setup wizard, and on which step. The step and "closed" live only in
  * local storage, read live. Whether setup still needs the wizard is decided once per visit to the
@@ -81,8 +77,8 @@ export const useSetupWizard = ({
   const aiIndexId = aiIndex?.id ?? urlAiIndexId;
 
   const stored = useSyncExternalStore<SetupWizardStoredValue | undefined>(
-    aiIndexId ? subscribeSetupWizardStorage : noop,
-    () => (aiIndexId ? readSetupWizardStoredValue({ basePath, aiIndexId }) : undefined)
+    subscribeSetupWizardStorage,
+    () => readSetupWizardStoredValue({ basePath, aiIndexId })
   );
 
   const done = useMemo(
@@ -112,17 +108,13 @@ export const useSetupWizard = ({
 
   const goToStep = useCallback(
     (stepId: SetupWizardStepId) => {
-      if (aiIndexId) {
-        writeSetupWizardStoredValue({ basePath, aiIndexId }, stepId);
-      }
+      writeSetupWizardStoredValue({ basePath, aiIndexId }, stepId);
     },
     [aiIndexId, basePath]
   );
 
   const close = useCallback(() => {
-    if (aiIndexId) {
-      writeSetupWizardStoredValue({ basePath, aiIndexId }, 'closed');
-    }
+    writeSetupWizardStoredValue({ basePath, aiIndexId }, 'closed');
   }, [aiIndexId, basePath]);
 
   if (!aiIndex) {

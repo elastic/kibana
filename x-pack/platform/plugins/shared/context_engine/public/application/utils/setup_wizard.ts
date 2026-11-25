@@ -7,7 +7,7 @@
 
 import type { AiIndexDreamingConfig } from '../../../common/dreaming';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
-import { draftBuildsAnything, draftOf } from '../components/dreaming_config/dreaming_config_editor';
+import { isDreamingSetUp } from '../components/dreaming_config/dreaming_config_editor';
 
 export const SETUP_WIZARD_STEP_IDS = ['dreaming', 'connect', 'sources', 'describe'] as const;
 
@@ -53,10 +53,6 @@ export const getSetupWizardSteps = (isMemoryEnabled: boolean): readonly SetupWiz
     ? SETUP_WIZARD_STEP_IDS
     : SETUP_WIZARD_STEP_IDS.filter((stepId) => stepId !== 'dreaming');
 
-/** Whether dreaming is set up: it runs, or it has types to build. Same rule as the Settings tab. */
-export const isDreamingSetUp = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
-  dreaming !== undefined && (dreaming.enabled || draftBuildsAnything(draftOf(dreaming)));
-
 /** Which steps are done, read from the AI index's own data. The wizard saves no progress itself. */
 export const getSetupWizardDoneSteps = ({
   aiIndex,
@@ -68,7 +64,7 @@ export const getSetupWizardDoneSteps = ({
   dreaming: AiIndexDreamingConfig | undefined;
   memoryCount: number;
 }): SetupWizardDoneSteps => ({
-  dreaming: isDreamingSetUp(dreaming),
+  dreaming: dreaming !== undefined && isDreamingSetUp(dreaming),
   connect: memoryCount > 0,
   sources: aiIndex.sources.length > 0,
   describe: (aiIndex.description ?? '').trim().length > 0,
@@ -115,8 +111,8 @@ export const getSetupWizardView = ({
   }
 
   const storedStep = stored !== undefined && steps.includes(stored) ? stored : undefined;
-  // Connect agent counts here even without memory: it still has a prompt to copy, and opening past
-  // it would show it as skipped before the user ever saw it.
+  // Connect agent counts here even without memory: opening past it would show it as skipped before
+  // the user ever saw it.
   const firstNotDone = steps.find((stepId) => !done[stepId]);
 
   return { show: true, steps, initialStep: storedStep ?? firstNotDone ?? steps[0] };
@@ -127,10 +123,8 @@ type SetupWizardEntryKeyParams = Parameters<typeof getSetupWizardEntryKey>[0];
 type SetupWizardRecord = Readonly<Record<string, SetupWizardStoredValue>>;
 
 /*
- * The wizard's only state store: local storage. The React app reads it live (see
- * `subscribeSetupWizardStorage`), so nothing is kept twice. When local storage is missing or blocked
- * (private mode, policies), the object lives in memory instead: the wizard still works, it only
- * forgets the step on refresh.
+ * The wizard's only state store is local storage, read live. When it is blocked, the object lives
+ * in memory: the wizard still works, it only forgets the step on refresh.
  */
 let memoryFallback: SetupWizardRecord | undefined;
 const listeners = new Set<() => void>();

@@ -193,6 +193,7 @@ export const AiIndexDetailPage = () => {
     isError: isDreamingError,
   } = useAiIndexDreaming(aiIndex?.id ?? '', {
     enabled: aiIndex !== undefined && !isManaged && isMemoryEnabled,
+    retry: 1,
   });
   const setupWizard = useSetupWizard({
     aiIndexId: id,

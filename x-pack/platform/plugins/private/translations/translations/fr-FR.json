@@ -25698,7 +25698,6 @@
     "xpack.contentConnectors.whatsNextBox.whatsNextPanelLabel": "Ensuite ?",
     "xpack.contextEngine.aiIndexDescription.ariaLabel": "Description de l’index IA",
     "xpack.contextEngine.aiIndexDescription.helpText": "Important : Cette description structure les workflows d'automatisation générés et aide les agents à déterminer quand l'index est pertinent.",
-    "xpack.contextEngine.aiIndexDescription.placeholder": "Décrivez à quoi sert cet index d’IA et quelles informations contiennent ses indicateurs de connaissances. Incluez des exemples de questions auxquelles ils devraient aider à répondre, ainsi que toute lacune connue dans ces informations.",
     "xpack.contextEngine.aiIndexDetail.automations.actionsAriaLabel": "Actions pour {name}",
     "xpack.contextEngine.aiIndexDetail.automations.addButton": "Ajouter une automatisation",
     "xpack.contextEngine.aiIndexDetail.automations.createButton": "Créer un workflow",

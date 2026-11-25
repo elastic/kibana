@@ -45,6 +45,16 @@ describe('useMemoryCount', () => {
     );
   });
 
+  it('retries a failed count request only once, so the wizard does not wait long', () => {
+    useListKi.mockReturnValue(listResult({ total: 0 }));
+
+    renderHook(() => useMemoryCount('my-ai-index', { enabled: true }));
+
+    expect(useListKi).toHaveBeenCalledTimes(2);
+    expect(useListKi).toHaveBeenNthCalledWith(1, expect.objectContaining({ retry: 1 }));
+    expect(useListKi).toHaveBeenNthCalledWith(2, expect.objectContaining({ retry: 1 }));
+  });
+
   it('is loading while a count still shows the previous AI index', () => {
     useListKi.mockReturnValue(listResult({ total: 4, isPreviousData: true }));
 

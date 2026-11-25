@@ -25728,7 +25728,6 @@
     "xpack.contentConnectors.whatsNextBox.whatsNextPanelLabel": "Wie geht es weiter?",
     "xpack.contextEngine.aiIndexDescription.ariaLabel": "Beschreibung des KI-Index",
     "xpack.contextEngine.aiIndexDescription.helpText": "Wichtig: Diese Beschreibung prägt die generierten Automatisierungs-Workflows und hilft Agenten dabei, zu entscheiden, wann der Index relevant ist.",
-    "xpack.contextEngine.aiIndexDescription.placeholder": "Beschreiben Sie, wofür dieser KI-Index gedacht ist und welche Informationen seine Wissensindikatoren enthalten. Nehmen Sie Beispielfragen auf, bei deren Beantwortung sie helfen sollen, sowie alle bekannten Lücken in diesen Informationen.",
     "xpack.contextEngine.aiIndexDetail.automations.actionsAriaLabel": "Aktionen für {name}",
     "xpack.contextEngine.aiIndexDetail.automations.addButton": "Automatisierung hinzufügen",
     "xpack.contextEngine.aiIndexDetail.automations.createButton": "Workflow erstellen",

@@ -12,6 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import type { SetupWizardDoneSteps, SetupWizardStepId } from '../../../utils/setup_wizard';
 import { SetupWizard } from './setup_wizard';
 
@@ -213,6 +214,11 @@ describe('SetupWizard', () => {
   it('Skip opens the next step and saves nothing', () => {
     const { onStepChange, onClose } = renderWizard();
 
+    expect(screen.getByTestId('contextSetupWizardSkip')).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.setupWizard.SKIP
+    );
+
     fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
 
     expect(screen.getByTestId('contextSetupWizardPanel-connect')).toBeInTheDocument();
@@ -268,11 +274,83 @@ describe('SetupWizard', () => {
     expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
     expect(screen.getByTestId('contextSetupWizardSkip')).toBeDisabled();
     expect(screen.getByTestId('contextSetupWizardExit')).toBeDisabled();
-    expect(screen.getByTestId('contextSetupWizardStep-describe')).toBeDisabled();
 
     act(() => onSavingChange(false));
 
     expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled();
+  });
+
+  it('while busy, the steps bar keeps its status and ignores clicks', () => {
+    const { onStepChange } = renderWizard({
+      initialStep: 'sources',
+      done: { ...noneDone, connect: true, sources: true },
+    });
+    const { onSavingChange } = mockSourcesPanel.mock.calls[0][0] as {
+      onSavingChange: (isSaving: boolean) => void;
+    };
+
+    act(() => onSavingChange(true));
+
+    expect(screen.getByTestId('contextSetupWizardStep-sources')).toHaveAttribute(
+      'data-step-status',
+      'current'
+    );
+    expect(screen.getByTestId('contextSetupWizardStep-connect')).toHaveAttribute(
+      'data-step-status',
+      'complete'
+    );
+    expect(screen.getByTestId('contextSetupWizardStep-describe')).not.toBeDisabled();
+
+    fireEvent.click(screen.getByTestId('contextSetupWizardStep-describe'));
+
+    expect(onStepChange).not.toHaveBeenCalled();
+    expect(screen.getByTestId('contextSetupWizardPanel-sources')).toBeInTheDocument();
+
+    act(() => onSavingChange(false));
+    fireEvent.click(screen.getByTestId('contextSetupWizardStep-describe'));
+
+    expect(onStepChange).toHaveBeenCalledWith('describe');
+  });
+
+  describe('focus', () => {
+    it('does not move focus on the first render', () => {
+      renderWizard({ initialStep: 'connect' });
+
+      expect(screen.getByRole('heading', { name: 'Connect your agent' })).not.toHaveFocus();
+      expect(document.body).toHaveFocus();
+    });
+
+    it('moves focus to the new step heading after Continue', () => {
+      renderWizard({ initialStep: 'sources', done: { ...noneDone, sources: true } });
+
+      fireEvent.click(screen.getByTestId('contextSetupWizardContinue'));
+
+      expect(screen.getByRole('heading', { name: 'Describe this index' })).toHaveFocus();
+    });
+
+    it('moves focus to the new step heading after Skip', () => {
+      renderWizard();
+
+      fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
+
+      expect(screen.getByRole('heading', { name: 'Connect your agent' })).toHaveFocus();
+    });
+
+    it('moves focus to the new step heading after a click on a step', () => {
+      renderWizard();
+
+      fireEvent.click(screen.getByTestId('contextSetupWizardStep-sources'));
+
+      expect(screen.getByRole('heading', { name: 'Add sources' })).toHaveFocus();
+    });
+  });
+
+  it('does not announce changes inside the step body as a live region', () => {
+    renderWizard({ initialStep: 'describe' });
+
+    expect(
+      screen.getByTestId('contextSetupWizardPanel-describe').querySelector('[aria-live]')
+    ).toBeNull();
   });
 
   it('clicking a step opens it', () => {
@@ -391,6 +469,10 @@ describe('SetupWizard', () => {
     it('Skip and finish closes the wizard without saving', () => {
       const { onClose } = renderWizard({ initialStep: 'describe' });
 
+      expect(screen.getByTestId('contextSetupWizardSkip')).toHaveAttribute(
+        'data-ebt-action',
+        CONTEXT_ENGINE_UI_EBT.action.setupWizard.SKIP_AND_FINISH
+      );
       fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
 
       expect(onClose).toHaveBeenCalled();
