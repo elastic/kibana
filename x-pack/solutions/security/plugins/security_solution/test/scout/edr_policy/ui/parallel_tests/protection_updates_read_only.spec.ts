@@ -11,6 +11,8 @@ import { spaceTest, tags } from '../fixtures';
 import { setManifestVersion, setProtectionUpdatesNote } from '../fixtures/protection_updates_data';
 
 const NOTE = 'test note';
+// 0 means the wait has no own timer; it is bounded by the test timeout.
+const NO_OWN_TIMEOUT_MS = 0;
 
 spaceTest.describe(
   'Policy details - protection updates (read only)',
@@ -66,7 +68,7 @@ spaceTest.describe(
           (response) =>
             response.request().method() === 'GET' &&
             response.url().includes(`/api/endpoint/protection_updates_note/${endpointPolicy.id}`),
-          { timeout: 0 }
+          { timeout: NO_OWN_TIMEOUT_MS }
         );
         // Keeps the promise from rejecting unobserved if a step before the await below throws.
         noteLookup.catch(() => {});
