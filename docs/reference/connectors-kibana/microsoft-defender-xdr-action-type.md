@@ -44,7 +44,7 @@ As an alternative to a client secret, authenticate with an X.509 certificate. Up
 
 ## Available actions [microsoft-defender-xdr-available-actions]
 
-The following actions are available for the Microsoft Defender XDR connector.
+The following actions are available for the Microsoft Defender XDR connector. Actions marked _(API only)_ are not available as agent tools and can only be invoked through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 
 ### Actions summary table [microsoft-defender-xdr-actions-table]
 
