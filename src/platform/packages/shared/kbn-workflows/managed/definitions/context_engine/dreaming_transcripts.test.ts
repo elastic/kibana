@@ -8,8 +8,8 @@
  */
 
 import { parse } from 'yaml';
-import type { ContextEngineTraceDreamingWorkflowTemplateValues } from '.';
-import { CONTEXT_ENGINE_DREAMING_WORKFLOW, CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW } from '.';
+import type { ContextEngineTranscriptDreamingWorkflowTemplateValues } from '.';
+import { CONTEXT_ENGINE_DREAMING_WORKFLOW, CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
 import { convertToWorkflowGraph } from '../../../graph';
 
@@ -31,7 +31,7 @@ const findStep = (steps: Step[], name: string): Step => {
   return step;
 };
 
-const values: ContextEngineTraceDreamingWorkflowTemplateValues = {
+const values: ContextEngineTranscriptDreamingWorkflowTemplateValues = {
   aiIndexId: 'support-cases',
   instanceKey: 'support-cases-0123456789abcdef',
   memoriesIndex: 'ai-index-idx-support-cases',
@@ -43,16 +43,18 @@ const values: ContextEngineTraceDreamingWorkflowTemplateValues = {
   relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
 };
 
-const render = () => parse(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW.yamlTemplate(values));
+const render = () => parse(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW.yamlTemplate(values));
 const batches = () => findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
 
-describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
+describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW', () => {
   it('is its own workflow on the dreaming schedule, named and keyed apart from dreaming', () => {
     const workflow = render();
     const dreaming = parse(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values));
 
-    expect(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW.id).not.toBe(CONTEXT_ENGINE_DREAMING_WORKFLOW.id);
-    expect(workflow.name).toBe('Trace dreaming: support-cases');
+    expect(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW.id).not.toBe(
+      CONTEXT_ENGINE_DREAMING_WORKFLOW.id
+    );
+    expect(workflow.name).toBe('Transcript dreaming: support-cases');
     expect(workflow.settings.concurrency).toEqual(dreaming.settings.concurrency);
     expect(workflow.enabled).toBe(false);
     expect(workflow.triggers).toEqual([
@@ -65,7 +67,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     expect(render().consts).toEqual({
       ai_index_id: 'support-cases',
       batch_workflow_id:
-        'system-context-engine-trace-dreaming-batch-support-cases-0123456789abcdef',
+        'system-context-engine-transcript-dreaming-batch-support-cases-0123456789abcdef',
     });
   });
 
@@ -73,7 +75,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     expect(() => convertToWorkflowGraph(render())).not.toThrow();
   });
 
-  it('checks the AI index dreams and has trace sources before reading traces or calling a model', () => {
+  it('checks the AI index dreams before reading session events or calling a model', () => {
     const { steps } = render();
 
     expect(steps.map(({ name }: Step) => name)).toEqual([
@@ -81,7 +83,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
       'paused',
       'last_run',
       'resume',
-      'read_traces',
+      'read_transcripts',
       'active',
       'dream',
       'dry_run_result',
@@ -90,7 +92,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     expect(steps[0]).toEqual(
       expect.objectContaining({
         type: 'context-engine.getDreamingStatus',
-        with: { ai_index_id: '{{ consts.ai_index_id }}', source: 'traces' },
+        with: { ai_index_id: '{{ consts.ai_index_id }}', source: 'transcripts' },
       })
     );
     expect(findStep(steps, 'paused').steps).toEqual([
@@ -98,8 +100,8 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     ]);
   });
 
-  it('reads rounds from where the last run stopped, else since the last run, unless given a time', () => {
-    const read = findStep(render().steps, 'read_traces');
+  it('reads turns from where the last run stopped, else since the last run, unless given a time', () => {
+    const read = findStep(render().steps, 'read_transcripts');
     const engine = createWorkflowLiquidEngine();
     const { since, after } = read.with as { since: string; after: string };
     const lastRun = { output: { since: '2026-11-01T00:00:00.000Z' } };
@@ -109,7 +111,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
       },
     };
 
-    expect(read.type).toBe('context-engine.readTraceTranscripts');
+    expect(read.type).toBe('context-engine.readSessionTranscripts');
     expect(engine.parseAndRenderSync(since, { inputs: {}, steps: { last_run: lastRun } })).toBe(
       '2026-11-01T00:00:00.000Z'
     );
@@ -145,7 +147,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     const engine = createWorkflowLiquidEngine();
     const scope = {
       steps: {
-        read_traces: {
+        read_transcripts: {
           output: { memories: [], resume_from: '2026-11-05T00:00:00Z', resume_after: 'trace-9' },
         },
       },
@@ -167,10 +169,12 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
   it('reads up to a token budget, and runs the batches the read packed, 4 at a time', () => {
     const { steps } = render();
 
-    expect(findStep(steps, 'read_traces').with).toEqual(
+    expect(findStep(steps, 'read_transcripts').with).toEqual(
       expect.objectContaining({ size: 1000, max_tokens: 600000, batch_tokens: 50000 })
     );
-    expect(findStep(steps, 'active').with?.batches).toBe('${{ steps.read_traces.output.batches }}');
+    expect(findStep(steps, 'active').with?.batches).toBe(
+      '${{ steps.read_transcripts.output.batches }}'
+    );
     expect(batches()).toEqual(
       expect.objectContaining({
         type: 'parallel',

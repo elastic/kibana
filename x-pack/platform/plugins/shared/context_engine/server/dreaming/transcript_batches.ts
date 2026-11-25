@@ -6,14 +6,11 @@
  */
 
 import { MAX_DREAMING_STEP_MEMORIES } from '../../common/dreaming';
-import type { TraceTranscriptMemory } from '../../common/step_types/read_trace_transcripts';
+import type { DreamingMemory } from '../../common/step_types/dreaming_memory';
 
 const CHARS_PER_TOKEN = 4;
 
-export const estimateTokens = ({
-  title,
-  content,
-}: Pick<TraceTranscriptMemory, 'title' | 'content'>) =>
+export const estimateTokens = ({ title, content }: Pick<DreamingMemory, 'title' | 'content'>) =>
   Math.ceil((title.length + content.length) / CHARS_PER_TOKEN);
 
 const groupInOrder = <T>(items: T[], keyOf: (item: T) => string): T[][] => {
@@ -32,10 +29,7 @@ const PART_HEADER_CHARS = 64;
  * Splits a round's transcript into parts that each fit `batchTokens` and keep the round's id.
  * Parts after the first open with how the round began.
  */
-export const splitRound = (
-  round: TraceTranscriptMemory,
-  batchTokens: number
-): TraceTranscriptMemory[] => {
+export const splitRound = (round: DreamingMemory, batchTokens: number): DreamingMemory[] => {
   if (estimateTokens(round) <= batchTokens) {
     return [round];
   }
@@ -78,8 +72,8 @@ export const splitRound = (
   }));
 };
 
-const conversationOf = (round: TraceTranscriptMemory): string => {
-  const conversationId = round.attributes?.['trace.conversation_id'];
+const conversationOf = (round: DreamingMemory): string => {
+  const conversationId = round.attributes?.['session.id'];
   return typeof conversationId === 'string' ? conversationId : round.id;
 };
 
@@ -89,12 +83,12 @@ const conversationOf = (round: TraceTranscriptMemory): string => {
  * between rounds or into parts.
  */
 export const batchByConversation = (
-  rounds: TraceTranscriptMemory[],
+  rounds: DreamingMemory[],
   batchTokens: number
-): TraceTranscriptMemory[][] => {
-  const batches: TraceTranscriptMemory[][] = [];
+): DreamingMemory[][] => {
+  const batches: DreamingMemory[][] = [];
   for (const audience of groupInOrder(rounds, ({ permissions }) => JSON.stringify(permissions))) {
-    let batch: TraceTranscriptMemory[] = [];
+    let batch: DreamingMemory[] = [];
     let tokens = 0;
     const flush = () => {
       if (batch.length > 0) {
