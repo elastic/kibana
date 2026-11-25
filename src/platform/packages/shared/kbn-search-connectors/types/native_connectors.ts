@@ -3426,9 +3426,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: TOGGLE,
-        label: translate('searchConnectors.nativeConnectors.networkDrive.skipExtensionFilterLabel', {
-          defaultMessage: 'Attempt extraction for all file types',
-        }),
+        label: translate(
+          'searchConnectors.nativeConnectors.networkDrive.skipExtensionFilterLabel',
+          {
+            defaultMessage: 'Attempt extraction for all file types',
+          }
+        ),
         options: [],
         order: 10,
         required: false,
