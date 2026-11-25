@@ -488,13 +488,15 @@ export function LatencyMap({
       if (!geometry) return;
       const range = clampRange(requested, geometry.bins, geometry.rows);
       const next = resolveRegion(range, { ofSelection });
-      // The same cells about the same spans: nothing to commit. The same cells about every
-      // span where the selection was about failures (or the reverse) is a change.
+      // The same cells about the same spans: nothing to commit, and neither is a move or a
+      // resize that lands where it started, whatever the cells would be read as afresh. A
+      // new region over the same cells about every span where the selection was about
+      // failures (or the reverse) is a change.
       if (
         displaySelection &&
         committedRange &&
         isSameRange(range, committedRange) &&
-        Boolean(next.failedOnly) === Boolean(displaySelection.failedOnly)
+        (ofSelection || Boolean(next.failedOnly) === Boolean(displaySelection.failedOnly))
       ) {
         return;
       }

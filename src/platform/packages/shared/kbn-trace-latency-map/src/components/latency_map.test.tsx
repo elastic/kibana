@@ -1214,6 +1214,25 @@ describe('LatencyMap', () => {
       expect(onSelectionCommit.mock.calls[1][0].failedOnly).toBe(true);
     });
 
+    it('leaves a resize that lands where it started alone, whatever the cells would be read as', async () => {
+      // A restored all-spans selection over the cell where every span failed: pressing and
+      // releasing a handle without moving must not rewrite the query about failures.
+      const selection = geometry.rangeToSelection({ x0: 30, x1: 31, y0: 20, y1: 21 });
+      const { onSelectionCommit } = renderMap({
+        selection,
+        failedOnly: false,
+        onFailedOnlyChange: jest.fn(),
+      });
+      await waitForChart();
+      hover(4, 5);
+      const handle = screen.getByTestId('traceLatencyMapHandle-r');
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      const at = { clientX: edgeOf(31, 20).clientX, clientY: centerOf(30, 20).clientY };
+      fireEvent.pointerDown(handle, { ...at, button: 0, pointerId: 1 });
+      fireEvent.pointerUp(overlay, { ...at, pointerId: 1 });
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
+
     it('keeps the errors switch usable while the filter is on, whatever it left to show', async () => {
       // The host's filter emptied the map: the switch is the way back to the spans.
       renderMap({ failedOnly: true, onFailedOnlyChange: jest.fn() }, gridTable([]));
