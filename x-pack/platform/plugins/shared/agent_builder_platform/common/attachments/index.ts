@@ -25,3 +25,10 @@ export {
   type ConnectorSetupAttachment,
   type ConnectorSetupAttachmentData,
 } from './connector_setup';
+export {
+  CARD_ATTACHMENT_TYPE,
+  cardAttachmentDataSchema,
+  type CardAttachment,
+  type CardAttachmentData,
+  type CardNode,
+} from './card';

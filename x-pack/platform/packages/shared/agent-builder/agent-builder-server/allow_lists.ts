@@ -368,6 +368,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'screen_context',
   'esql',
   'graph',
+  'card',
   'connector',
   'connector_setup',
   'skill',

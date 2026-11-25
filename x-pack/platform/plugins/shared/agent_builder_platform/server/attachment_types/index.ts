@@ -15,6 +15,7 @@ import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType, type DiscoverEsqlLocatorParams } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
 import { createGraphAttachmentType } from './graph';
+import { createCardAttachmentType } from './card';
 import { createConnectorAttachmentType } from './connector';
 import { createConnectorSetupAttachmentType } from './connector_setup';
 import { createSkillAttachmentType } from './skill';
@@ -64,6 +65,7 @@ export const registerAttachmentTypes = ({
         setupDeps.share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR),
     }),
     createGraphAttachmentType(),
+    createCardAttachmentType(),
     createConnectorAttachmentType({ getActionSavedObjectsClient }),
     createConnectorSetupAttachmentType({
       getAgentsStart,
