@@ -99,6 +99,20 @@ describe('applyManagedOtlpDefaults', () => {
     });
   });
 
+  it('only fills the queue size, in bytes, for a queue that counts bytes', () => {
+    expect(
+      applyManagedOtlpDefaults(exporter({ sizer: 'requests' })).sending_queue
+    ).not.toHaveProperty('queue_size');
+    expect(
+      applyManagedOtlpDefaults(exporter({ sizer: 'items', queue_size: null })).sending_queue
+        ?.queue_size
+    ).toBeNull();
+    expect(
+      applyManagedOtlpDefaults(exporter({ sizer: 'items', queue_size: 5000 })).sending_queue
+        ?.queue_size
+    ).toBe(5000);
+  });
+
   it('fills the null settings with the recommended ones', () => {
     expect(
       applyManagedOtlpDefaults(
@@ -152,14 +166,13 @@ describe('applyManagedOtlpDefaults', () => {
     expect(applyManagedOtlpDefaults(exporter({ batch: null })).sending_queue?.batch).toBeNull();
   });
 
-  it('fills the recommended settings whatever the units, leaving the sizes to the validation', () => {
+  it('fills the batch settings whatever the units, leaving the sizes to the validation', () => {
     expect(
       applyManagedOtlpDefaults(exporter({ sizer: 'items', batch: { sizer: 'items' } }))
         .sending_queue
     ).toEqual({
       enabled: true,
       sizer: 'items',
-      queue_size: 50_000_000,
       block_on_overflow: true,
       batch: { flush_timeout: '1s', sizer: 'items', min_size: 1_000_000, max_size: 4_000_000 },
     });

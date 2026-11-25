@@ -165,35 +165,45 @@ const OtlpBatchFields: React.FunctionComponent<{ inputs: OutputFormInputsType }>
 
 const OtlpBatchSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
   inputs,
-}) => (
-  <OtlpSettingsGroup
-    testSubj="otlpBatchGroup"
-    title={
-      <FormattedMessage
-        id="xpack.fleet.settings.editOutputFlyout.otlpBatchGroupTitle"
-        defaultMessage="Batching"
+}) => {
+  const { isManaged } = getOtlpQueueDefaultsOfInputs(inputs);
+  return (
+    <OtlpSettingsGroup
+      testSubj="otlpBatchGroup"
+      title={
+        <FormattedMessage
+          id="xpack.fleet.settings.editOutputFlyout.otlpBatchGroupTitle"
+          defaultMessage="Batching"
+        />
+      }
+    >
+      <OtlpSwitchSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpBatchEnabledLabel"
+            defaultMessage="Batch data before sending"
+          />
+        }
+        helpText={
+          isManaged ? (
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.otlpBatchEnabledManagedHelpText"
+              defaultMessage="Batching is on by default on the managed OTLP endpoint. With the switch on and the settings below empty, the Elastic defaults apply."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.otlpBatchEnabledHelpText"
+              defaultMessage="Batching is off by default. With the switch on and the settings below empty, the collector defaults apply."
+            />
+          )
+        }
+        input={inputs.otlpBatchEnabledInput}
+        testSubj="otlpBatchEnabledInput"
       />
-    }
-  >
-    <OtlpSwitchSetting
-      label={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.otlpBatchEnabledLabel"
-          defaultMessage="Batch data before sending"
-        />
-      }
-      helpText={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.otlpBatchEnabledHelpText"
-          defaultMessage="Batching is off by default. With the switch on and the settings below empty, the collector defaults apply."
-        />
-      }
-      input={inputs.otlpBatchEnabledInput}
-      testSubj="otlpBatchEnabledInput"
-    />
-    {inputs.otlpBatchEnabledInput.value && <OtlpBatchFields inputs={inputs} />}
-  </OtlpSettingsGroup>
-);
+      {inputs.otlpBatchEnabledInput.value && <OtlpBatchFields inputs={inputs} />}
+    </OtlpSettingsGroup>
+  );
+};
 
 export const OtlpSendingQueueSettings: React.FunctionComponent<{
   inputs: OutputFormInputsType;

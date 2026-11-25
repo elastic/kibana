@@ -2026,23 +2026,6 @@ describe('EditOutputFlyout', () => {
       max_interval: '1m',
       max_elapsed_time: '10m',
     };
-    // what the form sends for the queue of a new output that is not on the managed endpoint: the
-    // defaults, with batching on
-    const newQueuePayload = {
-      enabled: true,
-      num_consumers: null,
-      queue_size: null,
-      sizer: 'requests',
-      wait_for_result: false,
-      block_on_overflow: false,
-      batch: {
-        flush_timeout: null,
-        min_size: null,
-        max_size: null,
-        sizer: 'items',
-        partition: null,
-      },
-    };
 
     const otlpOutput: Output = {
       id: 'outputOtlp',
@@ -2254,7 +2237,7 @@ describe('EditOutputFlyout', () => {
             wait_for_ready: false,
             user_agent: null,
             authority: null,
-            sending_queue: newQueuePayload,
+            sending_queue: null,
             retry_on_failure: null,
           },
         });
@@ -2407,17 +2390,20 @@ describe('EditOutputFlyout', () => {
         expect(value(utils, 'otlpQueueSizeInput')).toBe('');
       });
 
-      it('should leave the settings of a new output empty, with batching on', () => {
+      it('should leave the settings of a new output empty, with batching off', () => {
         const { utils } = renderFlyout();
         selectOtlpType(utils);
 
-        QUEUE_TEXT_FIELDS.forEach((testSubj) => expect(value(utils, testSubj)).toBe(''));
+        // the batch settings are hidden while batching is off
+        ['otlpQueueNumConsumersInput', 'otlpQueueSizeInput'].forEach((testSubj) =>
+          expect(value(utils, testSubj)).toBe('')
+        );
         expect(value(utils, 'otlpQueueSizerInput')).toBe('requests');
         expect(utils.getByTestId('settingsOutputsFlyout.otlpQueueEnabledInput')).toBeChecked();
         expect(
           utils.getByTestId('settingsOutputsFlyout.otlpQueueBlockOnOverflowInput')
         ).not.toBeChecked();
-        expect(utils.getByTestId('settingsOutputsFlyout.otlpBatchEnabledInput')).toBeChecked();
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpBatchEnabledInput')).not.toBeChecked();
         RETRY_TEXT_FIELDS.forEach((testSubj) => expect(value(utils, testSubj)).toBe(''));
         expect(utils.getByTestId('settingsOutputsFlyout.otlpRetryEnabledInput')).toBeChecked();
         expect(isExpanded(utils, 'otlpSendingQueueSettings')).toBe(false);
@@ -2433,6 +2419,7 @@ describe('EditOutputFlyout', () => {
           const { utils } = renderFlyout();
           selectOtlpType(utils);
           setValue(utils, 'otlpEndpointInput', 'collector.example.com:4317');
+          click(utils, 'otlpBatchEnabledInput');
 
           const queue = within(queueSettings(utils));
           ['1000', 'requests', 'false', '200ms', '8192'].forEach((defaultValue) =>
@@ -2444,6 +2431,9 @@ describe('EditOutputFlyout', () => {
           mockStartServices(false, MANAGED_URL);
           const { utils } = renderFlyout();
           selectOtlpType(utils);
+          expect(
+            utils.getByTestId('settingsOutputsFlyout.otlpBatchEnabledInput')
+          ).not.toBeChecked();
           setValue(utils, 'otlpEndpointInput', 'managed.example.com:443');
 
           await waitFor(() => {
@@ -2452,6 +2442,8 @@ describe('EditOutputFlyout', () => {
           expect(
             utils.getByTestId('settingsOutputsFlyout.otlpQueueBlockOnOverflowInput')
           ).toBeChecked();
+          // the managed endpoint batches by default
+          expect(utils.getByTestId('settingsOutputsFlyout.otlpBatchEnabledInput')).toBeChecked();
           const queue = within(queueSettings(utils));
           ['50000000', '1s', '1000000', '4000000'].forEach((defaultValue) =>
             expect(queue.getByText(defaultValue)).toBeInTheDocument()
@@ -2460,7 +2452,7 @@ describe('EditOutputFlyout', () => {
           QUEUE_TEXT_FIELDS.forEach((testSubj) => expect(value(utils, testSubj)).toBe(''));
         });
 
-        it('should show the defaults of the managed endpoint whatever the units', async () => {
+        it('should show the Elastic queue size only for a queue of the managed endpoint that counts bytes', async () => {
           mockStartServices(false, MANAGED_URL);
           const { utils } = renderFlyout();
           selectOtlpType(utils);
@@ -2468,10 +2460,11 @@ describe('EditOutputFlyout', () => {
           setValue(utils, 'otlpQueueSizerInput', 'items');
           setValue(utils, 'otlpBatchSizerInput', 'items');
 
+          // the Elastic queue size is in bytes: a queue that counts items keeps the spec default
           await waitFor(() => {
             expect(utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput')).toHaveAttribute(
               'placeholder',
-              '50000000'
+              '1000'
             );
           });
           expect(utils.getByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput')).toHaveAttribute(
@@ -2875,6 +2868,7 @@ describe('EditOutputFlyout', () => {
       it('should require a minimum batch size that fits in the queue when both use the same unit', async () => {
         const { utils } = renderFlyout();
         selectOtlpType(utils);
+        click(utils, 'otlpBatchEnabledInput');
         setValue(utils, 'otlpQueueSizerInput', 'bytes');
         setValue(utils, 'otlpQueueSizeInput', '5000');
         fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput'));
@@ -2946,6 +2940,7 @@ describe('EditOutputFlyout', () => {
       it('should offer the unit of the queue for a new batch', () => {
         const { utils } = renderFlyout();
         selectOtlpType(utils);
+        click(utils, 'otlpBatchEnabledInput');
         setValue(utils, 'otlpQueueSizerInput', 'bytes');
 
         expect(
@@ -2958,6 +2953,7 @@ describe('EditOutputFlyout', () => {
       it('should not let the batch use the requests of the queue as its unit', () => {
         const { utils } = renderFlyout();
         selectOtlpType(utils);
+        click(utils, 'otlpBatchEnabledInput');
         setValue(utils, 'otlpBatchSizerInput', '');
         setValue(utils, 'otlpQueueSizerInput', 'requests');
 
@@ -3381,7 +3377,7 @@ describe('EditOutputFlyout', () => {
               force_attempt_http2: false,
               compression_params: { level: -1 },
               cookies: { enabled: true },
-              sending_queue: newQueuePayload,
+              sending_queue: null,
               retry_on_failure: null,
             },
           });

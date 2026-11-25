@@ -511,6 +511,17 @@ export default function (providerContext: FtrProviderContext) {
         expect((await getQueue(id)).queue_size).to.be(50_000_000);
       });
 
+      it('does not fill the Elastic queue size, in bytes, for a queue that counts requests', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, { sizer: 'requests', batch: null });
+
+        expect(await getQueue(id)).to.eql({
+          enabled: true,
+          sizer: 'requests',
+          block_on_overflow: true,
+          batch: null,
+        });
+      });
+
       it('keeps the stored settings that a partial update leaves out', async () => {
         const id = await createOutput(MANAGED_ENDPOINT, {
           queue_size: 10_000_000,

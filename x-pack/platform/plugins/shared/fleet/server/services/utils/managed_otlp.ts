@@ -36,28 +36,37 @@ export const isManagedOtlpEndpoint = (endpoint: string): boolean =>
  * spec defaults, and `batch: null` turns batching off.
  *
  * Uses lodash mergeWith with an array-replacement customizer (same pattern as otel_collector.ts)
- * so that array values are replaced wholesale rather than concatenated.
+ * so that array values are replaced wholesale rather than concatenated. The Elastic queue size is
+ * only filled in for a queue that counts bytes.
  */
 export const applyManagedOtlpDefaults = (exporter: OtlpExporterConfig): OtlpExporterConfig => {
   if (!isManagedOtlpEndpoint(exporter.endpoint) || exporter.sending_queue === null) {
     return exporter;
   }
-  return {
-    ...exporter,
-    sending_queue: mergeWith(
-      {},
-      MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue,
-      exporter.sending_queue,
-      (dst: unknown, src: unknown) => {
-        if (Array.isArray(src)) {
-          return src;
-        }
-        if (src === null) {
-          return isPlainObject(dst) ? null : dst;
-        }
+  const sendingQueue: OtlpSendingQueue = mergeWith(
+    {},
+    MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue,
+    exporter.sending_queue,
+    (dst: unknown, src: unknown) => {
+      if (Array.isArray(src)) {
+        return src;
       }
-    ),
-  };
+      if (src === null) {
+        return isPlainObject(dst) ? null : dst;
+      }
+    }
+  );
+  // the Elastic queue size is in bytes: a queue that counts requests or items keeps the size it
+  // was given, so the spec default applies when it has none
+  if (sendingQueue.sizer !== MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue.sizer) {
+    const queueSize = exporter.sending_queue?.queue_size;
+    if (queueSize === undefined) {
+      delete sendingQueue.queue_size;
+    } else {
+      sendingQueue.queue_size = queueSize;
+    }
+  }
+  return { ...exporter, sending_queue: sendingQueue };
 };
 
 /**
