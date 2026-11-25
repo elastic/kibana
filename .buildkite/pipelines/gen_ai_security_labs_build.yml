@@ -56,3 +56,9 @@ steps:
           limit: 1
         - exit_status: '*'
           limit: 1
+    # Promotion to the prod bucket is manual, so announce each upload to the dev bucket.
+    notify:
+      - slack:
+          channels: ['#search-ml-ux-alerts']
+          message: ':package: New Security Labs KB artifacts are in the dev bucket, ready to review and promote to prod.'
+        if: step.outcome == "passed"

@@ -17,13 +17,13 @@ jest.mock('@kbn/apm-config-loader', () => {
   };
 });
 
-import { resources } from '@elastic/opentelemetry-node/sdk';
 import {
   ATTR_PROCESS_COMMAND_ARGS,
   ATTR_PROCESS_EXECUTABLE_NAME,
   ATTR_PROCESS_PID,
 } from '@opentelemetry/semantic-conventions/incubating';
 import { buildOtelResources } from './build_otel_resources';
+import { processDetector } from '@opentelemetry/resources';
 
 const PROCESS_ARGS_COUNT = 'process.args_count';
 
@@ -60,7 +60,7 @@ describe('buildOtelResources', () => {
   describe('process command args', () => {
     test('drops process.command_args and records how many arguments were detected', async () => {
       const commandArgs = ['node', '--dev', 'src/cli/dist'];
-      jest.spyOn(resources.processDetector, 'detect').mockReturnValue({
+      jest.spyOn(processDetector, 'detect').mockReturnValue({
         attributes: {
           [ATTR_PROCESS_PID]: 123,
           [ATTR_PROCESS_EXECUTABLE_NAME]: 'node',
@@ -78,7 +78,7 @@ describe('buildOtelResources', () => {
     });
 
     test('records a count of zero when the detected command args are empty', async () => {
-      jest.spyOn(resources.processDetector, 'detect').mockReturnValue({
+      jest.spyOn(processDetector, 'detect').mockReturnValue({
         attributes: {
           [ATTR_PROCESS_COMMAND_ARGS]: [],
         },
@@ -92,7 +92,7 @@ describe('buildOtelResources', () => {
     });
 
     test('does not set process.args_count when command args are absent', async () => {
-      jest.spyOn(resources.processDetector, 'detect').mockReturnValue({
+      jest.spyOn(processDetector, 'detect').mockReturnValue({
         attributes: {
           [ATTR_PROCESS_PID]: 123,
         },
@@ -107,7 +107,7 @@ describe('buildOtelResources', () => {
     });
 
     test('drops non-array command args without recording a count', async () => {
-      jest.spyOn(resources.processDetector, 'detect').mockReturnValue({
+      jest.spyOn(processDetector, 'detect').mockReturnValue({
         attributes: {
           [ATTR_PROCESS_COMMAND_ARGS]: 'node --dev src/cli/dist',
         },

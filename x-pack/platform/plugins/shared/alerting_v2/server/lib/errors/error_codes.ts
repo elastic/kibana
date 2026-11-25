@@ -235,6 +235,19 @@ export const ALERTING_LOG_CODES = {
   HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW:
     'HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   /**
+   * Hydrate alert data step: a single alert's `data` exceeded the hydration
+   * response size cap on its own, so it cannot be split further. The alert is
+   * dispatched without `data`; matchers and payloads that read it see nothing.
+   */
+  HYDRATE_ALERT_DATA_STEP_OVERSIZED_DATA_SKIPPED: 'HYDRATE_ALERT_DATA_STEP_OVERSIZED_DATA_SKIPPED',
+  /**
+   * Hydrate alert data step: the tick's `data` budget was reached, so the
+   * remaining series were deferred to the next tick and the watermark stops
+   * before them. Sustained occurrences mean alert data is too wide for the
+   * dispatcher to drain at the rate it is written.
+   */
+  HYDRATE_ALERT_DATA_STEP_TICK_BUDGET_REACHED: 'HYDRATE_ALERT_DATA_STEP_TICK_BUDGET_REACHED',
+  /**
    * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
    * limit, so rows past it were dropped. Alerts whose ack, snooze or
    * deactivate state was in the dropped rows may be dispatched.

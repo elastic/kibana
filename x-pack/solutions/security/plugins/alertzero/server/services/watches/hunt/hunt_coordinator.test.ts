@@ -3267,6 +3267,8 @@ describe('huntCoordinator', () => {
 
       expect(result.completeness).toBe('incomplete_retryable');
       expect(result.excluded_report_iocs).toEqual({ count: 2 });
+      // The coordinator marks the failure for the narrative; it is not inferred from empty fields.
+      expect(result.narrative).toContain('Hunt Watch could not work out which indices to search.');
     });
 
     it('does not pass exclusions when the caller supplies iocs', async () => {
