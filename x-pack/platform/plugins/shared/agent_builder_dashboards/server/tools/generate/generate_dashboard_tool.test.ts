@@ -217,11 +217,14 @@ describe('generateDashboardTool handler', () => {
     });
   });
 
-  it('returns the stored options in the summary', async () => {
+  it('returns the stored settings in the summary', async () => {
     mockRetrieveLatestVersion.mockReturnValue(undefined);
-    const options = { hide_panel_borders: true, use_margins: true };
+    const settings = {
+      options: { hide_panel_borders: true, use_margins: true },
+      esql_approximation: true,
+    };
     mockExecuteDashboardUpsert.mockResolvedValue({
-      dashboardData: { ...generatedDashboard, options },
+      dashboardData: { ...generatedDashboard, ...settings },
       created: [],
       updated: [],
       removed: [],
@@ -234,7 +237,7 @@ describe('generateDashboardTool handler', () => {
 
     expect(results[0]).toMatchObject({
       type: ToolResultType.dashboard,
-      data: { dashboard: { options } },
+      data: { dashboard: settings },
     });
   });
 
