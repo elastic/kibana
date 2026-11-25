@@ -333,6 +333,18 @@ export const ADDITIONAL_FIELDS_HELP_WEBHOOK_TEXT = i18n.translate(
   }
 );
 
+export const TOKEN_TYPE = i18n.translate('xpack.stackConnectors.components.auth.tokenTypeLabel', {
+  defaultMessage: 'Token type',
+});
+
+export const TOKEN_TYPE_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.auth.tokenTypeHelpText',
+  {
+    defaultMessage:
+      "Authorization scheme to send with the access token, for example 'Bearer'. Leave empty to use the token type returned by the token endpoint.",
+  }
+);
+
 export const OPTIONAL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.auth.optionalLabel',
   {

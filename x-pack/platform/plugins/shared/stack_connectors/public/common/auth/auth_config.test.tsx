@@ -875,7 +875,24 @@ describe('AuthConfig renders', () => {
       expect(await screen.findByTestId('ScopeOAuth2')).toBeInTheDocument();
       expect(await screen.findByTestId('additionalFields')).toBeInTheDocument();
       expect(await screen.findByTestId('additional_fieldsJsonEditor')).toBeInTheDocument();
+      expect(screen.queryByTestId('tokenTypeOAuth2')).not.toBeInTheDocument();
     });
+
+    it.each([AuthType.OAuth2ClientCredentials, AuthType.OAuth2Password])(
+      'renders the token type field for %s when isOAuthTokenTypeEnabled is true',
+      async (authType) => {
+        render(
+          <AuthFormTestProvider
+            defaultValue={{ config: { hasAuth: true, authType } }}
+            onSubmit={onSubmit}
+          >
+            <AuthConfig readOnly={false} isOAuth2Enabled={true} isOAuthTokenTypeEnabled={true} />
+          </AuthFormTestProvider>
+        );
+
+        expect(await screen.findByTestId('tokenTypeOAuth2')).toBeInTheDocument();
+      }
+    );
 
     it('submits additionalFields value when authType is OAuth2', async () => {
       const validJson = JSON.stringify({ custom: 'data', number: 123 });

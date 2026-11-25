@@ -18,7 +18,27 @@ import * as i18n from './translations';
 
 interface OAuth2FieldsProps {
   readOnly: boolean;
+  isTokenTypeEnabled?: boolean;
 }
+
+export const TokenTypeField: React.FC<{ readOnly: boolean }> = ({ readOnly }) => (
+  <UseField
+    path="config.tokenType"
+    config={{
+      label: i18n.TOKEN_TYPE,
+      helpText: i18n.TOKEN_TYPE_HELP_TEXT,
+      labelAppend: (
+        <EuiText size="xs" color="subdued">
+          {i18n.OPTIONAL_LABEL}
+        </EuiText>
+      ),
+    }}
+    component={Field}
+    componentProps={{
+      euiFieldProps: { 'data-test-subj': 'tokenTypeOAuth2', readOnly, maxLength: 128 },
+    }}
+  />
+);
 
 export const jsonValidator = ({ value }: { value: string | null | undefined }) => {
   if (!value) {
@@ -76,7 +96,10 @@ const AdditionalFieldsWrapper: React.FC<AdditionalFieldsWrapperProps> = React.me
   }
 );
 
-export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({ readOnly }) => {
+export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({
+  readOnly,
+  isTokenTypeEnabled = false,
+}) => {
   const { emptyField, urlField } = fieldValidators;
 
   return (
@@ -176,6 +199,12 @@ export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({ readOnly }) => {
           }}
         />
         <EuiSpacer size="s" />
+        {isTokenTypeEnabled && (
+          <>
+            <TokenTypeField readOnly={readOnly} />
+            <EuiSpacer size="s" />
+          </>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

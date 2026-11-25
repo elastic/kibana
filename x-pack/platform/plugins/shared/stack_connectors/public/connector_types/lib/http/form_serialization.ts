@@ -89,6 +89,7 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
     config: {
       ...formData.config,
       headers: isEmpty(configHeaders) ? null : configHeaders,
+      tokenType: formData.config?.tokenType?.trim() || undefined,
       ...(supportsProxy &&
         !hasProxy && {
           proxyUrl: null,
