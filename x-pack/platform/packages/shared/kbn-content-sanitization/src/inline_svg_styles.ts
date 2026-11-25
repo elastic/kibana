@@ -6,6 +6,7 @@
  */
 
 import type { DOMWindow } from 'jsdom';
+import { getFragmentId } from './href';
 
 // Keep the synchronous pre-pass cheap on hostile input; registry icons stay far below each one.
 const MAX_STYLE_TEXT_LENGTH = 16_384;
@@ -71,7 +72,7 @@ const BASIC_SHAPES: ReadonlySet<string> = new Set([
   'polyline',
   'polygon',
 ]);
-// <use> and <image> draw only if sanitization keeps their href, so only these are sure to draw.
+// Elements that draw without an href; <use> and <image> draw only if sanitization keeps theirs.
 const DRAWING_ELEMENTS: ReadonlySet<string> = new Set([...BASIC_SHAPES, 'text']);
 // `overflow` has no effect on a basic shape, so Illustrator's `style="overflow:visible;"` on <use> can be dropped.
 const OVERFLOW_DECLARATION = /^overflow\s*:\s*[a-z]+$/i;
@@ -470,6 +471,14 @@ const getHrefTarget = (
   return href.startsWith('#') ? elementsById.get(href.slice(1)) : undefined;
 };
 
+// Undefined unless the <use> has exactly one href and sanitization could keep it, as it trims the value first.
+const getUseTargetId = (use: Element): string | undefined => {
+  const hrefs = Array.from(use.attributes).filter(
+    ({ localName }) => toAsciiLowerCase(localName) === 'href'
+  );
+  return hrefs.length === 1 ? getFragmentId(hrefs[0].value.trim()) : undefined;
+};
+
 interface Copy {
   readonly elements: readonly Element[];
   readonly target: Element;
@@ -691,7 +700,15 @@ const collectDependencies = (
       }
       scanned.add(element);
       if (hasHref(element) && !resolvedGradients.has(element)) {
-        return undefined;
+        // Sanitization keeps a <use> reference only if what it reaches still exists, which breaksReference checks.
+        const referencedId = kindOf(element) === 'use' ? getUseTargetId(element) : undefined;
+        if (referencedId === undefined) {
+          return undefined;
+        }
+        pending.add(referencedId);
+        if (pending.size > MAX_REFERENCED_IDS) {
+          return undefined;
+        }
       }
       for (const { value } of Array.from(element.attributes)) {
         // CSS escapes can spell url() in a way LOCAL_URL doesn't see, e.g. `u\72l(#id)`.
@@ -781,6 +798,7 @@ const inlineSupportedStyles = (svgContent: string, window: DOMWindow): InlinedSv
 interface SanitizedTree {
   readonly foreignElements: ReadonlySet<Element>;
   readonly subtree: (element: Element) => readonly Element[];
+  readonly elementsById: ReadonlyMap<string, Element>;
 }
 
 // A pattern tile defaults to zero width and height, and a zero-sized tile paints nothing.
@@ -793,11 +811,19 @@ const hasPatternTile = (pattern: Element): boolean =>
 // Descriptive children such as <title> leave a clip path, mask, pattern or filter hiding whatever uses it.
 const isRenderableTarget = (
   target: Element,
-  { foreignElements, subtree }: SanitizedTree
+  { foreignElements, subtree, elementsById }: SanitizedTree
 ): boolean => {
   const isSvg = (element: Element): boolean => !foreignElements.has(element);
-  const draws = (element: Element): boolean =>
+  const drawsItself = (element: Element): boolean =>
     isSvg(element) && DRAWING_ELEMENTS.has(kindOf(element));
+  // Inside a clip path a <use> may only reference a shape or text, so only those count everywhere.
+  const draws = (element: Element): boolean => {
+    if (kindOf(element) !== 'use') {
+      return drawsItself(element);
+    }
+    const shape = getHrefTarget(element, elementsById);
+    return isSvg(element) && shape !== undefined && drawsItself(shape);
+  };
   const kind = kindOf(target);
   const children = Array.from(target.children).filter(isSvg);
   if (GRADIENT_ELEMENTS.has(kind)) {
@@ -848,13 +874,20 @@ const breaksReference = (
       const start = (positions.get(element) ?? 0) + 1;
       return elements.slice(start, start + (descendants.get(element) ?? 0));
     },
+    elementsById,
   };
+  // Sanitization can strip the href of a <use> it keeps, which leaves the element but draws nothing.
+  const keepsUseReferences = (target: Element): boolean =>
+    [target, ...tree.subtree(target)].every(
+      (element) => kindOf(element) !== 'use' || getHrefTarget(element, elementsById) !== undefined
+    );
   const isIntact = (id: string, before: number): boolean => {
     const target = elementsById.get(id);
     return (
       target !== undefined &&
       isRenderableTarget(target, tree) &&
-      (descendants.get(target) ?? 0) === before
+      (descendants.get(target) ?? 0) === before &&
+      keepsUseReferences(target)
     );
   };
   return (
