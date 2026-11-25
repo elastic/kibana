@@ -1259,11 +1259,10 @@ steps:
     type: kibana.request
     if: "${{ steps.resolve_escalation.output.escalate == true and steps.escalation_gate.error == blank }}"
     with:
-      request:
-        method: GET
-        path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.escalation_gate.output.proposalId }}"
-        headers:
-          elastic-api-version: "1"
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.escalation_gate.output.proposalId }}"
+      headers:
+        elastic-api-version: "1"
     on-failure:
       continue: true
 

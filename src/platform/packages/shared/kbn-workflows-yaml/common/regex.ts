@@ -119,6 +119,7 @@ export const LIQUID_TAG_REGEX_GLOBAL = /\{\%\s*([^%]*?)\s*\%\}/g;
 export {
   DYNAMIC_VALUE_REGEX,
   isDynamicValue,
+  isIssueOnTemplateValue,
   VARIABLE_VALUE_REGEX,
   isVariableValue,
   LIQUID_TAG_VALUE_REGEX,

@@ -273,4 +273,99 @@ describe('parseWorkflowYamlToJSON', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe('templates inside a union', () => {
+    const closedByIds = z.object({
+      status: z.literal('closed'),
+      reason: z.enum(['false_positive', 'duplicate']),
+      signal_ids: z.array(z.string()),
+    });
+    const closedByQuery = z.object({
+      status: z.literal('closed'),
+      reason: z.enum(['false_positive', 'duplicate']),
+      query: z.record(z.string(), z.unknown()),
+    });
+    const reopen = z.object({
+      status: z.literal('open'),
+      query: z.record(z.string(), z.unknown()),
+    });
+    const schema = z.object({
+      steps: z.array(
+        z.object({
+          name: z.string(),
+          type: z.string(),
+          // A union nested in a union, like the generated SetAlertsStatus body.
+          with: z.union([z.union([closedByIds, closedByQuery]), reopen]),
+        })
+      ),
+    });
+
+    it('accepts a template in a position that one union branch otherwise satisfies', () => {
+      const yaml = `steps:
+        - name: close
+          type: noop
+          with:
+            status: closed
+            reason: "{{ inputs.reason }}"
+            query:
+              match_all: {}
+      `;
+      expect(parseWorkflowYamlToJSON(yaml, schema).success).toBe(true);
+    });
+
+    it('accepts a dynamic value and a Liquid tag in the same position', () => {
+      const dynamic = `steps:
+        - name: close
+          type: noop
+          with:
+            status: closed
+            reason: $\{\{ inputs.reason \}\}
+            query: {}
+      `;
+      const liquid = `steps:
+        - name: close
+          type: noop
+          with:
+            status: closed
+            reason: "{% if inputs.dup %}duplicate{% else %}false_positive{% endif %}"
+            query: {}
+      `;
+      expect(parseWorkflowYamlToJSON(dynamic, schema).success).toBe(true);
+      expect(parseWorkflowYamlToJSON(liquid, schema).success).toBe(true);
+    });
+
+    it('still rejects a concrete value that no branch accepts', () => {
+      const yaml = `steps:
+        - name: close
+          type: noop
+          with:
+            status: closed
+            reason: not_a_reason
+            query: {}
+      `;
+      expect(parseWorkflowYamlToJSON(yaml, schema).success).toBe(false);
+    });
+
+    it('still rejects a union when the branch that fits the template is missing a field', () => {
+      // `reason` is a template, but each branch also lacks its own required field.
+      const yaml = `steps:
+        - name: close
+          type: noop
+          with:
+            status: closed
+            reason: "{{ inputs.reason }}"
+      `;
+      expect(parseWorkflowYamlToJSON(yaml, schema).success).toBe(false);
+    });
+
+    it('still rejects a template-free value that matches no branch', () => {
+      const yaml = `steps:
+        - name: close
+          type: noop
+          with:
+            status: archived
+      `;
+      expect(parseWorkflowYamlToJSON(yaml, schema).success).toBe(false);
+    });
+  });
 });

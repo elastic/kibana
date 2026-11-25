@@ -727,4 +727,88 @@ steps:
       ]);
     });
   });
+
+  describe('kibana steps', () => {
+    const closeAlertsYaml = (reason: string) => `
+version: '1'
+name: Test
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        reason:
+          type: string
+      required:
+        - reason
+steps:
+  - name: close_alerts
+    type: kibana.SetAlertsStatus
+    with:
+      status: closed
+      reason: ${reason}
+      conflicts: proceed
+      query:
+        bool:
+          filter:
+            - ids:
+                values: ["a"]
+`;
+
+    it('does not report a templated enum inside the SetAlertsStatus union', async () => {
+      const result = await validateWorkflowYaml(closeAlertsYaml('"{{ inputs.reason }}"'), schema);
+
+      expect(result.diagnostics.filter((d) => d.source === 'schema')).toEqual([]);
+    });
+
+    it('still reports a concrete reason that SetAlertsStatus does not accept', async () => {
+      const result = await validateWorkflowYaml(closeAlertsYaml('not_a_reason'), schema);
+
+      expect(
+        result.diagnostics.some((d) => d.source === 'schema' && d.path?.includes('with'))
+      ).toBe(true);
+    });
+
+    it('reports a kibana.request whose request is nested under with.request', async () => {
+      const yaml = `
+version: '1'
+name: Test
+triggers:
+  - type: manual
+steps:
+  - name: read
+    type: kibana.request
+    with:
+      request:
+        method: GET
+        path: /api/status
+`;
+      const result = await validateWorkflowYaml(yaml, schema);
+
+      expect(result.diagnostics).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ source: 'schema', path: ['steps', 0, 'with', 'path'] }),
+        ])
+      );
+    });
+
+    it('accepts a kibana.request with method and path directly under with', async () => {
+      const yaml = `
+version: '1'
+name: Test
+triggers:
+  - type: manual
+steps:
+  - name: read
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/status
+      headers:
+        elastic-api-version: "1"
+`;
+      const result = await validateWorkflowYaml(yaml, schema);
+
+      expect(result.diagnostics.filter((d) => d.source === 'schema')).toEqual([]);
+    });
+  });
 });

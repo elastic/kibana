@@ -72,7 +72,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 26,
+  version: 27,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'attack_discovery_review.yaml');
   },
