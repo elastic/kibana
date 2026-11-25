@@ -281,7 +281,6 @@ export type DashboardApi = CanExpandPanels &
     user?: DashboardUser;
     userActivity$: Subject<UserActivity>;
     isAccessControlEnabled?: boolean;
-
   };
 
 type ActivityType = 'view' | 'refresh';
