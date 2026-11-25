@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiPanel, EuiScreenReaderLive, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiLiveAnnouncer, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PendingConnection } from './canvas_connection_highlight';
 
@@ -23,7 +23,7 @@ const getTipMessage = (
   if (hasShownTarget) {
     return i18n.translate('xpack.streams.canvas.connectionTip.someTargetsDescription', {
       defaultMessage:
-        "Connect to a node that is not faded. Faded nodes share no signal with this one, already receive its data, or can't take this kind of connection.",
+        "Connect to another node that is not faded. Faded nodes share no signal with this one, already receive its data, or can't take this kind of connection.",
     });
   }
   if (targetIds.size > 0) {
@@ -52,7 +52,7 @@ export function CanvasConnectionTip({ connection, shownNodeIds }: CanvasConnecti
   return (
     <>
       {/* The panel is hidden from screen readers, so the live region is the only announcement. */}
-      <EuiScreenReaderLive>{message ?? ''}</EuiScreenReaderLive>
+      <EuiLiveAnnouncer>{message ?? ''}</EuiLiveAnnouncer>
       {message && (
         <EuiPanel
           color="primary"

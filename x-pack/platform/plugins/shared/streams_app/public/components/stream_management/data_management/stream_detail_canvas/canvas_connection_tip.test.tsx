@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { PendingConnection } from './canvas_connection_highlight';
 import { CanvasConnectionTip } from './canvas_connection_tip';
 
 const SOME_TARGETS_TIP =
-  "Connect to a node that is not faded. Faded nodes share no signal with this one, already receive its data, or can't take this kind of connection.";
+  "Connect to another node that is not faded. Faded nodes share no signal with this one, already receive its data, or can't take this kind of connection.";
 const NO_TARGETS_TIP =
   "No node can take this connection. Faded nodes share no signal with this one, already receive its data, or can't take this kind of connection.";
 const TARGETS_HIDDEN_BY_SEARCH_TIP =
@@ -41,13 +41,12 @@ describe('CanvasConnectionTip', () => {
     expect(tip()).toHaveTextContent(NO_TARGETS_TIP);
   });
 
-  it('announces the tip politely and keeps the panel out of the accessibility tree', () => {
+  it('announces the tip politely and keeps the panel out of the accessibility tree', async () => {
     render(<CanvasConnectionTip connection={withTargets} />);
 
-    const announced = screen
-      .getAllByRole('status')
-      .find((region) => region.textContent === SOME_TARGETS_TIP);
-    expect(announced).toHaveAttribute('aria-live', 'polite');
+    const announcer = screen.getByRole('status');
+    await waitFor(() => expect(announcer).toHaveTextContent(SOME_TARGETS_TIP));
+    expect(announcer).toHaveAttribute('aria-live', 'polite');
     expect(tip()).toHaveAttribute('aria-hidden', 'true');
   });
 
