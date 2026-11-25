@@ -286,4 +286,126 @@ describe('createSessionMemoryService', () => {
       }
     );
   });
+
+  describe('readRevised', () => {
+    const revision = (
+      id: string,
+      timestamp: string,
+      overrides: Partial<StoredSessionMemory> = {}
+    ): StoredSessionMemory =>
+      ({
+        ...storedMemory,
+        id,
+        '@timestamp': timestamp,
+        ...overrides,
+      } as StoredSessionMemory);
+    const input = {
+      space: 'default',
+      aiIndexId: 'ops-memory',
+      since: '2026-11-09T00:00:00.000Z',
+      size: 10,
+    };
+
+    it("finds the AI index's revisions across users, oldest first, collapsed to one per memory", async () => {
+      esClient.search
+        .mockResolvedValueOnce(searchResponse([revision('memory-1', '2026-11-09T01:00:00.000Z')]))
+        .mockResolvedValueOnce(searchResponse([revision('memory-1', '2026-11-09T02:00:00.000Z')]));
+
+      const { memories, next } = await service.readRevised(input);
+
+      expect(esClient.search.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          index: SESSION_MEMORY_DATA_STREAM,
+          sort: [{ '@timestamp': 'asc' }, { id: 'asc' }],
+          collapse: { field: 'id' },
+          size: 10,
+          query: {
+            bool: {
+              filter: [
+                { term: { space: 'default' } },
+                { term: { ai_index_id: 'ops-memory' } },
+                {
+                  bool: {
+                    should: [{ range: { '@timestamp': { gt: input.since } } }],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
+      expect(memories).toEqual([
+        expect.objectContaining({ id: 'memory-1', revisedAt: '2026-11-09T02:00:00.000Z' }),
+      ]);
+      expect(next).toBeUndefined();
+    });
+
+    it('continues after the last memory read at the same time', async () => {
+      esClient.search.mockResolvedValueOnce(searchResponse([]));
+
+      await service.readRevised({ ...input, after: 'memory-7' });
+
+      const query = esClient.search.mock.calls[0][0]?.query;
+      expect(JSON.stringify(query)).toContain(
+        JSON.stringify({
+          bool: {
+            filter: [
+              { term: { '@timestamp': input.since } },
+              { range: { id: { gt: 'memory-7' } } },
+            ],
+          },
+        })
+      );
+    });
+
+    it('leaves out a memory whose latest revision is forgotten or no longer lists the AI index', async () => {
+      esClient.search
+        .mockResolvedValueOnce(
+          searchResponse([
+            revision('memory-1', '2026-11-09T01:00:00.000Z'),
+            revision('memory-2', '2026-11-09T01:01:00.000Z'),
+            revision('memory-3', '2026-11-09T01:02:00.000Z'),
+          ])
+        )
+        .mockResolvedValueOnce(
+          searchResponse([
+            revision('memory-1', '2026-11-09T03:00:00.000Z'),
+            { ...forgottenMemory, id: 'memory-2' },
+            revision('memory-3', '2026-11-09T03:00:00.000Z', { ai_index_id: ['other'] }),
+          ])
+        );
+
+      const { memories } = await service.readRevised(input);
+
+      expect(memories.map(({ id }) => id)).toEqual(['memory-1']);
+    });
+
+    it('says where it stopped when it looked at as many revisions as it may', async () => {
+      esClient.search
+        .mockResolvedValueOnce(
+          searchResponse([
+            revision('memory-1', '2026-11-09T01:00:00.000Z'),
+            revision('memory-2', '2026-11-09T01:00:00.000Z'),
+          ])
+        )
+        .mockResolvedValueOnce(searchResponse([]));
+
+      const { memories, next } = await service.readRevised({ ...input, size: 2 });
+
+      expect(memories).toEqual([]);
+      expect(next).toEqual({ revisedAt: '2026-11-09T01:00:00.000Z', id: 'memory-2' });
+    });
+
+    it('reads nothing more when nothing was revised', async () => {
+      esClient.search.mockResolvedValueOnce(searchResponse([]));
+
+      await expect(service.readRevised(input)).resolves.toEqual({ memories: [] });
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('requires a space', async () => {
+      await expect(service.readRevised({ ...input, space: ' ' })).rejects.toThrow('space');
+    });
+  });
 });

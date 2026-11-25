@@ -50,6 +50,7 @@ export type {
 export { getPanelLabel, findPanelById } from './panel_label';
 
 export {
+  getVegaSpecText,
   isAgentEditablePanel,
   isEsqlLensPanel,
   parseVegaSpec,

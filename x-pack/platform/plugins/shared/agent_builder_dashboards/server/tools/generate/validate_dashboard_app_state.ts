@@ -10,7 +10,6 @@ import type { z } from '@kbn/zod';
 import { getDashboardDataSchema } from '@kbn/as-code-dashboard-schema';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import {
   requiresRegisteredSchema,
   type DashboardValidationIssue,
@@ -61,16 +60,12 @@ const toValidationIssues = (issues: z.core.$ZodIssue[]): DashboardValidationIssu
  * Panels of a type without a schema are not validated: Lens, for one, registers no schema while its
  * as-code API is disabled. Panel kinds that set `schemaAlwaysRegistered` (ML, whose embeddables are
  * registered only when anomaly detection is on) are the exception: a missing schema is reported as
- * the type being unavailable. Vega panels are skipped because the attachment stores them in an
- * interim shape that is converted before the dashboard is rendered.
+ * the type being unavailable.
  */
 export const createDashboardAppStateValidator = ({
   getTransforms,
 }: Pick<EmbeddableStart, 'getTransforms'>): DashboardValidator => ({
   validatePanel: ({ type, config }) => {
-    if (type === VEGA_VIS_TYPE) {
-      return [];
-    }
     const transformType = type === LENS_EMBEDDABLE_TYPE ? 'lens-dashboard-app' : type;
     const schema = getTransforms(transformType)?.schema;
     if (!schema) {

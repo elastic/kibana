@@ -20,7 +20,11 @@ import type {
   ServiceGroupNodeData,
   ServiceNodeData,
 } from '../../../../common/service_map';
-import { isServiceGroupNodeData, isServiceNodeData } from '../../../../common/service_map';
+import {
+  isServiceGroupBoxNode,
+  isServiceGroupNodeData,
+  isServiceNodeData,
+} from '../../../../common/service_map';
 import {
   getMlSeverityForServiceMapNode,
   getNormalizedSloStatusForMapFilters,
@@ -112,7 +116,10 @@ export interface ServiceMapFilterOptionCounts {
   totalServiceNodes: number;
 }
 
-/** Count nodes by connection bucket. */
+/**
+ * Count nodes by connection bucket. The box of an open group is a frame, not a service: it has no
+ * edges and its members are counted instead.
+ */
 function getConnectionCounts(
   allNodes: ServiceMapNode[],
   edges: ServiceMapEdge[]
@@ -120,6 +127,9 @@ function getConnectionCounts(
   const connectedIds = buildConnectedNodeIdSet(edges);
   const counts: ConnectionCounts = { orphaned: 0, connected: 0 };
   for (const node of allNodes) {
+    if (isServiceGroupBoxNode(node)) {
+      continue;
+    }
     if (connectedIds.has(node.id)) {
       counts.connected++;
     } else {

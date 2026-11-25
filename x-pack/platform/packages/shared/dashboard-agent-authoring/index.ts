@@ -31,6 +31,7 @@ export {
   getPanelTypeSelection,
   getRequestPanelContentType,
   getRequestPanelEmbeddableType,
+  getVegaSpecText,
   isRequestPanelType,
   parseVegaSpec,
   requiresRegisteredSchema,

@@ -13,7 +13,6 @@ on:
   # One proposal at a time: wait until the previous curator PR is merged or closed.
   skip-if-match: 'is:pr is:open label:flaky-fix-curator'
 
-# Scheduled runs carry no `github.event.repository`, so a fork check on the event never matches.
 if: github.repository == 'elastic/kibana'
 
 permissions:
@@ -40,8 +39,8 @@ imports:
 
 engine:
   id: claude
-  version: '2.1.165'
-  model: claude-opus-5
+  version: '2.1.317'
+  model: claude-opus-5-5
   max-turns: 100
   env:
     ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
@@ -49,9 +48,9 @@ engine:
     ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
     # the gateway reads only `Authorization: Bearer`
     AWF_ANTHROPIC_AUTH_HEADER: Authorization
-    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5-5
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-5-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-5-5
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -176,7 +175,7 @@ The files you may change, and only these:
 - `.agents/skills/flaky-test-investigator/`: the investigation skill the investigator and fixer read.
 - `docs/extend/testing/`: the Scout testing docs the guidelines link to and the fixer reads. Change one when the lesson is about how to write the test, not about how the workflow runs.
 
-Prompt bodies and the guidelines are loaded at run time, so a merged change takes effect on the next run without recompiling the lock files.
+Prompt bodies and the guidelines are loaded at run time, so a merged change takes effect on the next run. Each workflow's lock file still records a hash of its prompt body, and CI fails while that hash is stale. You cannot recompile, so when you edit a workflow prompt, say so in the review notes. The shared guidelines, the skill and the docs have no lock file.
 
 ## Steps
 
@@ -210,7 +209,7 @@ Prompt bodies and the guidelines are loaded at run time, so a merged change take
 
    ### Review notes
 
-   - Prompt bodies load at run time, so no lock file recompile is needed for this change.
+   - <when a workflow prompt changed: "Before merging, run `node scripts/ensure_gh_aw_version.js` to get the repo-pinned compiler, then `gh aw compile <workflow>` for <each edited workflow>, and push the lock files. The lock validation check fails until then." Otherwise: "No lock file recompile is needed: only files without a lock changed.">
    - <any file you considered editing but did not, and why>
    ```
 

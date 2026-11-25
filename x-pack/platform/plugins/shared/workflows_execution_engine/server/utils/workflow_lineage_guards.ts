@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-/** One ancestor in a sub-workflow chain, and how it invoked the next run down. */
-export interface ExecutionChainHop {
-  readonly executionId: string;
-  readonly invocation: 'sync' | 'async';
-  readonly workflowId: string;
-}
+import type { ExecutionChainHop } from '@kbn/workflows';
 
 const isExecutionChainHop = (value: unknown): value is ExecutionChainHop => {
   if (typeof value !== 'object' || value === null) {

@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { apiTest } from '../fixtures';
+import { apiTest, getReassignPolicy } from '../fixtures';
+import { INVALID_TOKEN_MESSAGE, TEST_TIMEOUT_MS, UNINSTALLED_MESSAGE } from '../fixtures/constants';
 import { getUninstallToken, reassignAgent, waitForAgentOnPolicy } from '../fixtures/fleet_agent';
 import { getElasticInstallState, uninstallAgent } from '../fixtures/host_agent_commands';
-
-const TEST_TIMEOUT_MS = 15 * 60 * 1000;
-const INVALID_TOKEN_MESSAGE = 'Invalid uninstall token';
-const UNINSTALLED_MESSAGE = 'Elastic Agent has been uninstalled';
 
 apiTest.describe(
   'Uninstall an agent moved from an unprotected to a tamper protected policy',
   { tag: ['@local-stateful-classic'] },
   () => {
-    let requestHeaders: Record<string, string>;
-
     apiTest.use({
       agentPolicyOptions: {
         namePrefix: 'tamper-disabled-to-enabled',
@@ -29,28 +23,16 @@ apiTest.describe(
       },
     });
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole({
-        elasticsearch: { cluster: [], indices: [] },
-        kibana: [{ base: [], feature: { fleetv2: ['all'] }, spaces: ['default'] }],
-      });
-      requestHeaders = {
-        ...apiKeyHeader,
-        ...PUBLIC_API_HEADERS,
-        'kbn-xsrf': 'scout-edr-real-fleet',
-        'Content-Type': 'application/json',
-      };
-    });
-
     apiTest(
       'rejects an uninstall without a token and accepts the protected policy token',
-      async ({ apiClient, log, agentPolicies, enrolledHost }) => {
+      async ({ apiClient, log, agentPolicies, enrolledHost, requestHeaders }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
-        const { first: unprotectedPolicy, second: protectedPolicy } = agentPolicies;
+        const { first: unprotectedPolicy } = agentPolicies;
+        const protectedPolicy = getReassignPolicy(agentPolicies);
         const { agentId, hostname } = enrolledHost;
 
         await apiTest.step('the agent applies the unprotected policy', async () => {
-          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, unprotectedPolicy);
+          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, unprotectedPolicy, log);
         });
 
         await apiTest.step('reassign the agent to the protected policy', async () => {
@@ -61,7 +43,7 @@ apiTest.describe(
             protectedPolicy.agentPolicyId
           );
           expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
-          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, protectedPolicy);
+          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, protectedPolicy, log);
         });
 
         await apiTest.step('an uninstall without a token is rejected', async () => {
