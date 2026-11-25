@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useRef } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { useEffect, useRef } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import type { SyncIndicatorSlotRenderProps } from '@kbn/agentic-investigations-common';
 import { useSyncEscalation } from '../../../../escalations/hooks/use_escalations_api';
+import { useCanManageEscalations } from '../../../../escalations/hooks/use_escalation_privileges';
 import { ESCALATION_SYNC_TRANSLATIONS } from './escalation_sync_translations';
 
 const T = ESCALATION_SYNC_TRANSLATIONS;
@@ -25,20 +24,24 @@ const errorText = (error: unknown): string | undefined => {
 };
 
 /**
- * Syncs the escalation's attachments with its linked investigations once when the flyout opens.
+ * Syncs the escalation's attachments with its linked investigations once when the flyout opens,
+ * and returns whether the sync is running.
  *
- * Shows a spinner beside the title while the request runs. A toast is shown only when the backend
- * copied attachments; when nothing needed to change the user sees nothing. A request that fails,
- * or one that could not write some attachments, shows an error toast.
+ * Syncing writes to the escalation, so it waits until the user is known to manage escalations. A
+ * toast is shown only when the backend copied attachments; when nothing needed to change the user
+ * sees nothing. A request that fails, or one that could not write some attachments, shows an
+ * error toast.
  */
-const EscalationSyncIndicatorInner = ({ escalationId }: SyncIndicatorSlotRenderProps) => {
+export const useEscalationSync = (escalationId: string): boolean => {
   const {
     services: { notifications },
   } = useKibana<CoreStart>();
+  const canManageEscalations = useCanManageEscalations();
   const { mutate, isLoading } = useSyncEscalation();
   const syncedFor = useRef<string>();
 
   useEffect(() => {
+    if (!canManageEscalations) return;
     // The ref keeps a re-render or a dev-mode double effect from syncing twice per flyout open.
     if (syncedFor.current === escalationId) return;
     syncedFor.current = escalationId;
@@ -65,15 +68,7 @@ const EscalationSyncIndicatorInner = ({ escalationId }: SyncIndicatorSlotRenderP
         },
       }
     );
-  }, [escalationId, mutate, notifications.toasts]);
+  }, [canManageEscalations, escalationId, mutate, notifications.toasts]);
 
-  if (!isLoading) return null;
-
-  return (
-    <EuiLoadingSpinner size="m" aria-label={T.syncing} data-test-subj="escalationSyncSpinner" />
-  );
+  return isLoading;
 };
-
-EscalationSyncIndicatorInner.displayName = 'EscalationSyncIndicator';
-
-export const EscalationSyncIndicator = memo(EscalationSyncIndicatorInner);
