@@ -42,15 +42,18 @@ export const spaceTest = baseSpaceTest.extend<PolicyTestFixtures, SecurityParall
   },
   endpointPolicy: [
     async ({ kbnClient, scoutSpace, log }, use) => {
+      // This fixture has its own timeout slot, which fits KbnClient's default retries.
+      const requestOptions = { retryRequests: true };
       const indexed = await createScoutEndpointPolicy(
         kbnClient,
         log,
         `Scout policy ${scoutSpace.id} ${Date.now()}`,
-        scoutSpace.id
+        scoutSpace.id,
+        requestOptions
       );
       await use(getCreatedPackagePolicy(indexed));
       // Fleet's post-delete callback also removes the policy's protection updates note.
-      await deleteScoutEndpointPolicy(kbnClient, log, indexed, scoutSpace.id);
+      await deleteScoutEndpointPolicy(kbnClient, log, indexed, scoutSpace.id, requestOptions);
     },
     { timeout: ENDPOINT_POLICY_FIXTURE_TIMEOUT_MS },
   ],
