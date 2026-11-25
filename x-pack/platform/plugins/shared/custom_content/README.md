@@ -113,6 +113,8 @@ An element of the template can add a filter to the dashboard when it is clicked.
 - `data-cc-value` is the value, written from the row. For a number field it must be a plain number, in any notation Liquid prints (`12.5`, `1e-7`), and for a boolean field `true` or `false`. The platform's own conversion (`getConvertedValueForField`) types it, so that clicking a value that is already filtered flips that filter.
 - `data-cc-op` is `is` (the default) or `is_not`. Clicking a value that is already filtered flips the filter that is there instead of adding another.
 
+Write every attribute value that holds data in double quotes, as in the example. Escaping cannot protect an unquoted value, which ends at its first space: `data-cc-value={{ x }}` would filter on `New` for `New York`. That is true of `{{ }}` in any attribute, not only of these.
+
 Kibana does the rest: the renderer's click listener (`readInteraction`, in `@kbn/custom-content-renderer`) validates the request, and the plugin (`runInteraction`) builds the filter with `generateFilters`, as Discover does, and applies it through the `ON_APPLY_FILTER` trigger, so it shows as an ordinary filter pill that the viewer can remove. It is an app filter like any other: clicking does not save anything, but if someone with edit rights saves the dashboard while it is there, it is saved with the dashboard.
 
 A request that is not valid is dropped without a message: an unknown action, a column the queries did not return, an empty or oversized value, an unknown operator, or a click that did not come from the user.

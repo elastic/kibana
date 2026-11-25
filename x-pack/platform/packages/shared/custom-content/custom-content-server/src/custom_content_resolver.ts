@@ -86,7 +86,8 @@ LIQUID SYNTAX:
 - Output value:  {{ row["column name"].value }}
 - Bar width:     <div style="width: {{ row["column name"].pct }}%; ..."></div>
 - Filters:       {{ row["column name"].value | round: 2 }}
-- Write values with {{ }}, which HTML-escapes them. The "raw" filter and the "echo" and "cycle" tags are rejected. For alternating rows use CSS (:nth-child).`;
+- Write values with {{ }}, which HTML-escapes them. The "raw" filter and the "echo" and "cycle" tags are rejected. For alternating rows use CSS (:nth-child).
+- Always put an attribute value that comes from data in double quotes, as in data-cc-value="{{ row["host"].value }}". Escaping does not protect an unquoted value: it ends at its first space, so New York would be read as New.`;
 import { sanitizeCellValue } from './sanitize_cell_value';
 
 const SAMPLE_ROW_COUNT = 3;

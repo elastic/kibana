@@ -101,6 +101,18 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(withoutData).not.toContain('CLICK TO FILTER');
   });
 
+  it('tells the model to quote an attribute value that comes from data, and why', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+
+    await resolve({ prompt: 'Restyle', esqlQueries: ['FROM logs'] });
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain(
+      'Always put an attribute value that comes from data in double quotes'
+    );
+    expect(systemArg).toContain('it ends at its first space');
+  });
+
   it('tells the model which ways of writing a value are rejected', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
 
