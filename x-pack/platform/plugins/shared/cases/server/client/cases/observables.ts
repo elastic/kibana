@@ -83,8 +83,9 @@ interface ObservablesWriteOutcome<TResult> {
  * concurrent writer's observables are never overwritten. `compute` returns undefined when there
  * is nothing to write.
  *
- * The case is not re-authorized on a re-read: authorization ran on the first read and the owner
- * of a case cannot change.
+ * Authorization runs once, against the first read. A saved object import can overwrite the case
+ * with a different owner, so a re-read whose owner changed fails with a conflict rather than being
+ * written under the first read's authorization.
  */
 function writeObservablesWithRetry<TResult>(
   args: ObservablesWriteArgs<TResult, ObservablesWrite<TResult>>
@@ -100,9 +101,18 @@ async function writeObservablesWithRetry<TResult>({
 }: ObservablesWriteArgs<TResult, ObservablesWrite<TResult> | undefined>): Promise<
   ObservablesWriteOutcome<TResult> | undefined
 > {
+  let ownerAtFirstRead: string | undefined;
+
   for (let attempt = 1; attempt <= MAX_OBSERVABLES_WRITE_ATTEMPTS; attempt++) {
     const retrievedCase =
       attempt === 1 && prefetchedCase ? prefetchedCase : await caseService.getCase({ id: caseId });
+
+    ownerAtFirstRead ??= retrievedCase.attributes.owner;
+    if (retrievedCase.attributes.owner !== ownerAtFirstRead) {
+      throw Boom.conflict(
+        `The owner of case ${caseId} changed while its observables were being saved. Retry the request.`
+      );
+    }
 
     const write = compute(retrievedCase);
     if (!write) {
@@ -139,6 +149,14 @@ async function writeObservablesWithRetry<TResult>({
 const toObservableWriteError = (message: string, error: unknown): Boom.Boom =>
   Boom.isBoom(error, 409) ? error : Boom.badRequest(`${message}: ${error}`);
 
+type ApplyObservablesResult =
+  | {
+      status: 'added';
+      caseWithPatch: CaseSavedObjectTransformed;
+      newlyAddedObservables: Observable[];
+    }
+  | { status: 'skipped'; reason: 'nothing_new' | 'limit_reached' };
+
 /**
  * License-agnostic core that dedupes, caps, persists, and records a user action
  * for a set of observables on a case. Callers MUST enforce the Platinum license
@@ -146,7 +164,8 @@ const toObservableWriteError = (message: string, error: unknown): Boom.Boom =>
  *
  * Skips both the patchCase write and the user action write when no new
  * observables were added (idempotency — avoids a no-op SO write on every
- * re-extraction of the same alert).
+ * re-extraction of the same alert), and reports whether that was because
+ * every observable was already stored or because the case is full.
  *
  * @param prefetchedCase - Optional already-fetched SO to avoid an extra getCase
  *   round-trip. When provided, `caseId` is ignored for the initial fetch.
@@ -156,15 +175,18 @@ export const applyObservablesToCase = async (
   observables: ObservablePost[],
   clientArgs: CasesClientArgs,
   prefetchedCase?: CaseSavedObjectTransformed
-) => {
+): Promise<ApplyObservablesResult> => {
   const {
     services: { caseService, userActionService },
     user,
   } = clientArgs;
 
   if (observables.length === 0) {
-    return;
+    return { status: 'skipped', reason: 'nothing_new' };
   }
+
+  // Set by the last `compute` run, which is the one that decided there was nothing to write.
+  let skipReason: 'nothing_new' | 'limit_reached' = 'nothing_new';
 
   const written = await writeObservablesWithRetry({
     caseId,
@@ -198,6 +220,7 @@ export const applyObservablesToCase = async (
       // avoid a no-op SO write on every idempotent re-extraction (e.g. the same
       // alert being attached multiple times).
       if (newlyAddedObservables.length === 0) {
+        skipReason = incomingMap.size > 0 ? 'limit_reached' : 'nothing_new';
         return;
       }
 
@@ -209,7 +232,7 @@ export const applyObservablesToCase = async (
   });
 
   if (!written) {
-    return;
+    return { status: 'skipped', reason: skipReason };
   }
 
   const { retrievedCase, patchedCase, result: newlyAddedObservables } = written;
@@ -230,6 +253,7 @@ export const applyObservablesToCase = async (
   // trigger after a successful decode — never emit from inside this function
   // because bulk callers decode *after* calling applyObservablesToCase.
   return {
+    status: 'added',
     caseWithPatch: {
       ...retrievedCase,
       ...patchedCase,
@@ -282,20 +306,16 @@ export const addObservable = async (
 
     validateObservableValue(paramArgs.observable.typeKey, paramArgs.observable.value);
 
-    const currentObservables = retrievedCase.attributes.observables ?? [];
-
-    if (currentObservables.length === MAX_OBSERVABLES_PER_CASE) {
-      throw Boom.forbidden(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`);
-    }
-
     const applied = await applyObservablesToCase(
       caseId,
       [paramArgs.observable],
       clientArgs,
       retrievedCase
     );
-    if (!applied) {
-      throw Boom.badRequest('Invalid duplicated observables in request.');
+    if (applied.status === 'skipped') {
+      throw applied.reason === 'limit_reached'
+        ? Boom.forbidden(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`)
+        : Boom.badRequest('Invalid duplicated observables in request.');
     }
 
     const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
@@ -316,6 +336,11 @@ export const addObservable = async (
   emitObservablesAddedEvent(clientArgs, caseForEmit, observablesForEmit);
   return decodedCase;
 };
+
+const isUnchangedObservable = (stored: Observable, original: Observable | undefined): boolean =>
+  stored.value === original?.value &&
+  stored.description === original?.description &&
+  stored.updatedAt === original?.updatedAt;
 
 export const updateObservable = async (
   caseId: string,
@@ -345,6 +370,10 @@ export const updateObservable = async (
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
+    const originalObservable = retrievedCase.attributes.observables?.find(
+      ({ id }) => id === observableId
+    );
+
     const written = await writeObservablesWithRetry({
       caseId,
       prefetchedCase: retrievedCase,
@@ -359,6 +388,12 @@ export const updateObservable = async (
         if (observableIndex === -1) {
           throw Boom.notFound(
             `Failed to update observable: observable id ${observableId} not found`
+          );
+        }
+
+        if (!isUnchangedObservable(currentObservables[observableIndex], originalObservable)) {
+          throw Boom.conflict(
+            `Observable id ${observableId} was modified by another request. Reload the case and try again.`
           );
         }
 
@@ -522,7 +557,7 @@ export const bulkAddObservables = async (
       clientArgs,
       retrievedCase
     );
-    if (!applied) {
+    if (applied.status === 'skipped') {
       throw Boom.badRequest(`Failed to add observable`);
     }
     const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });

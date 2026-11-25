@@ -162,8 +162,10 @@ export const extractAndAddObservables = async (
     }
 
     const result = await applyObservablesToCase(caseId, observablesWithinBounds, clientArgs);
-    if (!result) {
-      logger.debug(`[extractAndAddObservables] No new observables added to case ${caseId}`);
+    if (result.status === 'skipped') {
+      logger.debug(
+        `[extractAndAddObservables] No new observables added to case ${caseId} (${result.reason})`
+      );
       return;
     }
 

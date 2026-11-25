@@ -24,6 +24,7 @@ import {
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
   MAX_OBSERVABLE_VALUE_LENGTH,
   MAX_OBSERVABLES_PER_CASE,
+  OBSERVABILITY_OWNER,
 } from '../../../common/constants';
 import type { ObservablePost } from '../../../common/types/api';
 import type { Observable } from '../../../common/types/domain';
@@ -949,8 +950,10 @@ describe('applyObservablesToCase', () => {
     );
 
     // Only the new observable id — not the existing one
-    expect(result?.newlyAddedObservables).toHaveLength(1);
-    expect(result?.newlyAddedObservables[0].value).toBe(newObservable.value);
+    expect(result).toMatchObject({
+      status: 'added',
+      newlyAddedObservables: [{ value: newObservable.value }],
+    });
     // applyObservablesToCase no longer emits; callers are responsible for that
     expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
   });
@@ -987,11 +990,13 @@ describe('applyObservablesToCase', () => {
     );
     expect(writtenObservables.some(({ value }) => value === newObservable.value)).toBe(true);
 
-    expect(result?.newlyAddedObservables).toHaveLength(1);
-    expect(result?.newlyAddedObservables[0].value).toBe(newObservable.value);
+    expect(result).toMatchObject({
+      status: 'added',
+      newlyAddedObservables: [{ value: newObservable.value }],
+    });
   });
 
-  it('returns undefined when all observables are duplicates', async () => {
+  it('reports nothing new when all observables are duplicates', async () => {
     mockCaseService.getCase.mockResolvedValue({
       ...caseSO,
       attributes: { ...caseSO.attributes, observables: [mockObservable] },
@@ -1000,17 +1005,17 @@ describe('applyObservablesToCase', () => {
     // All duplicates — applyObservablesToCase returns early before the patch
     const result = await applyObservablesToCase(caseSO.id, [mockObservablePost], mockClientArgs);
 
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ status: 'skipped', reason: 'nothing_new' });
     expect(mockCaseService.patchCase).not.toHaveBeenCalled();
   });
 
-  it('returns undefined when the input is empty', async () => {
+  it('reports nothing new when the input is empty', async () => {
     const result = await applyObservablesToCase(caseSO.id, [], mockClientArgs);
 
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ status: 'skipped', reason: 'nothing_new' });
   });
 
-  it('does not add any observable when the case is already at the cap', async () => {
+  it('reports the limit and adds nothing when the case is already at the cap', async () => {
     const atCapObservables = Array.from({ length: MAX_OBSERVABLES_PER_CASE }, (_, i) => ({
       ...mockObservable,
       id: `obs-${i}`,
@@ -1028,7 +1033,7 @@ describe('applyObservablesToCase', () => {
       mockClientArgs
     );
 
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ status: 'skipped', reason: 'limit_reached' });
     expect(mockCaseService.patchCase).not.toHaveBeenCalled();
     expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
   });
@@ -1307,7 +1312,7 @@ describe('optimistic concurrency on observable writes', () => {
         expect.objectContaining({ value: newObservablePost.value }),
       ]);
       expect(secondWrite.updatedAttributes.total_observables).toBe(3);
-      expect(result?.newlyAddedObservables).toHaveLength(1);
+      expect(result).toMatchObject({ status: 'added', newlyAddedObservables: [expect.anything()] });
     });
 
     it('does not write the user action for the failed attempt', async () => {
@@ -1332,7 +1337,68 @@ describe('optimistic concurrency on observable writes', () => {
 
       const result = await applyObservablesToCase(caseSO.id, [newObservablePost], mockClientArgs);
 
-      expect(result).toBeUndefined();
+      expect(result).toEqual({ status: 'skipped', reason: 'nothing_new' });
+      expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
+      expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+    });
+
+    it('fails with a 409 when the refreshed case has a different owner', async () => {
+      // Failure scenario: a saved object import overwrote the case with another owner between our read and our write.
+      mockCaseService.getCase.mockResolvedValueOnce(versionedCase('v1', [])).mockResolvedValueOnce({
+        ...versionedCase('v2', []),
+        attributes: { ...caseSO.attributes, owner: OBSERVABILITY_OWNER, observables: [] },
+      });
+      mockCaseService.patchCase.mockRejectedValueOnce(conflictError());
+
+      const error = await applyObservablesToCase(
+        caseSO.id,
+        [newObservablePost],
+        mockClientArgs
+      ).catch((e) => e);
+
+      expect(Boom.isBoom(error, 409)).toBe(true);
+      expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
+      expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+    });
+
+    it('addObservable reports the limit when the refreshed case is full', async () => {
+      // Failure scenario: concurrent writers filled the case between our read and our write.
+      const fullCaseObservables = Array.from({ length: MAX_OBSERVABLES_PER_CASE }, (_, i) => ({
+        ...mockObservable,
+        id: `obs-${i}`,
+        value: `10.0.0.${i}`,
+      }));
+      mockCaseService.getCase
+        .mockResolvedValueOnce(versionedCase('v1', fullCaseObservables.slice(1)))
+        .mockResolvedValueOnce(versionedCase('v2', fullCaseObservables));
+      mockCaseService.patchCase.mockRejectedValueOnce(conflictError());
+
+      await expect(
+        addObservable(caseSO.id, { observable: newObservablePost }, mockClientArgs, mockCasesClient)
+      ).rejects.toThrow(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`);
+      expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
+    });
+
+    it('updateObservable fails with a 409 when another request changed the same observable', async () => {
+      // Failure scenario: a concurrent edit to this observable landed between our read and our write.
+      mockCaseService.getCase
+        .mockResolvedValueOnce(versionedCase('v1', [mockObservable]))
+        .mockResolvedValueOnce(
+          versionedCase('v2', [
+            { ...mockObservable, value: '10.9.9.9', updatedAt: '2024-12-08T00:00:00.000Z' },
+          ])
+        );
+      mockCaseService.patchCase.mockRejectedValueOnce(conflictError());
+
+      const error = await updateObservable(
+        caseSO.id,
+        mockObservable.id,
+        { observable: { value: '192.168.0.9', description: null } },
+        mockClientArgs,
+        mockCasesClient
+      ).catch((e) => e);
+
+      expect(Boom.isBoom(error, 409)).toBe(true);
       expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
       expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
     });
