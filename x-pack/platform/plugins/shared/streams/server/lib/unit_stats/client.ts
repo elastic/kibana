@@ -34,6 +34,7 @@ import {
 import { withDeliverySeries } from './mappers/map_delivery_series';
 import { mapProcessorStatsRows, noProcessorStats } from './mappers/map_processor_stats_result';
 import { mapSourceStatsRows, noSourceStats } from './mappers/map_source_stats_result';
+import { mapUnitLivenessRows, NO_UNIT_LIVENESS } from './mappers/map_unit_liveness';
 import { buildDestinationCollectionsQuery } from './query_builders/build_destination_collections_query';
 import {
   buildDestinationRateQuery,
@@ -42,6 +43,7 @@ import {
 import { buildProcessorSumsQuery } from './query_builders/build_processor_stats_queries';
 import { buildSourceRateQuery } from './query_builders/build_source_stats_queries';
 import { buildStreamProbeQuery } from './query_builders/build_stream_probe_query';
+import { buildUnitHeartbeatQuery } from './query_builders/build_unit_heartbeat_query';
 import type { StatsQueryBaseParams } from './query_builders/filters';
 import {
   defaultResults,
@@ -182,11 +184,30 @@ export class UnitStatsClient {
     }
   }
 
-  /** Placeholder until the heartbeat query lands: every unit reports no heartbeat. */
-  async getUnitLiveness(_params: {
+  /**
+   * Whether the unit is up, from its newest heartbeat, read relative to now. A unit that has not
+   * reported yet has no stream and no heartbeat. A failure throws as a `UnitStatsError`.
+   */
+  async getUnitLiveness({
+    unitId,
+    now = new Date(),
+  }: {
     unitId: string;
+    now?: Date;
   }): Promise<StreamsUnit.HealthResponse['liveness']> {
-    return { state: 'no_heartbeat', last_seen: null };
+    const what = 'unit heartbeat';
+
+    try {
+      if (!(await this.doesUnitMetricsStreamExist())) return NO_UNIT_LIVENESS;
+
+      const rows = await this.runQuery(buildUnitHeartbeatQuery({ unitId, now }));
+
+      return mapUnitLivenessRows({ rows, now });
+    } catch (error) {
+      const failure = toSearchError(error, what);
+      this.logFailure(failure, { unitId, what });
+      throw failure;
+    }
   }
 
   /** Every destination, processor and source in the unit, as long as one request can name them all. */
