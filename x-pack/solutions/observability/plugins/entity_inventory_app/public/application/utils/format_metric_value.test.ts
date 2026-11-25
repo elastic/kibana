@@ -5,9 +5,24 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { formatMetricValue } from './format_metric_value';
 
 describe('formatMetricValue', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it.each([
+    ['en', 1234.5, 'count', '1,234.5'],
+    ['de-DE', 1234.5, 'count', '1.234,5'],
+    ['de-DE', 1500, 'bytes', '1,5 kB'],
+    ['fr-FR', 0.951, 'percent', '95,1%'],
+  ] as const)('formats with the active locale %p: %p %p as %p', (locale, value, unit, expected) => {
+    jest.spyOn(i18n, 'getLocale').mockReturnValue(locale);
+    expect(formatMetricValue(value, unit)).toBe(expected);
+  });
+
   it.each([null, undefined, []])('returns null for the empty value %p', (value) => {
     expect(formatMetricValue(value, 'percent')).toBeNull();
   });

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { DynamicMetricUnit, ESQLValue } from '@kbn/entity-inventory-plugin/common';
 
 const formatPlainNumber = (value: number): string =>
-  value.toLocaleString('en', {
+  value.toLocaleString(i18n.getLocale(), {
     maximumFractionDigits: Number.isInteger(value) ? 0 : 3,
   });
 
